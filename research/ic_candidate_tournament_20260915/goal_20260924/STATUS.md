@@ -11,10 +11,29 @@ replay, accepted in PR #1064 at
 passed. The [reusable preparation certificates](prepared-ic-state-v1/README.md)
 independently derive identical ordered base/projection/log mathematics from both
 accepted ordinary-query preparations; this follow-up has no new target or
-native execution. The fresh paired
-incumbent/rho comparison remains outstanding;
+native execution. Preparation and the one-target boundary schema repair are
+accepted in [PR #1081](https://github.com/aburan28/crypto/pull/1081) at
+`9285f2cadbc8f016a68a13e946de6a5654ddfa62`.
+The [target-only adapter follow-up](prepared-target-runtime-v1/README.md)
+implements native F5 log import, independent warm mathematical/clock replay,
+SAT source-bound registration/entrypoint/audit, and the 1,340-point preparation
+exclusion union. Disclosed native/Python correctness controls are separate from
+production source-bound invocations; no new measured registration or fresh
+target has executed. `prepared_f5_runtime_v1.py` now registers a
+prepared-capable build and refuses the consumed v2 worker; no invocation of
+that registrar has been frozen or executed. A separately frozen one-shot
+development control and the fresh paired incumbent/rho protocol remain
+outstanding;
 no new speedup or promotion is established. The historical confirmation sets
 and censored generic registrations below remain closed.
+The [prepared F5 source/runtime follow-up](prepared-f5-runtime-v1/README.md)
+implements the missing retained native input, canonical registrar, isolated
+entrypoint and preexecution-frozen audit transport. The rebuilt macOS worker
+and complete Rust dependencies are retained; its Rust unit fixture now hashes
+only the common mathematics instead of historical certificate evidence.
+Implementation acceptance and separately frozen new F5/SAT executions remain
+pending. Mocked native tests and real frozen import controls execute no IC query
+and cannot supply family qualification or a fresh result.
 
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
@@ -389,8 +408,8 @@ over the exact 63-point geometric PDP input, separate from 62 usable IC points.
 The original v2 gate and first geometric-domain audit rejections are retained.
 Independent source/math/isolated archive replay passes; the exclusive native
 online ledger closes at 10,512,454,542 ns. No speedup, fresh-target qualification
-or promotion is admitted; exact-head CI/review acceptance and the fresh paired
-reference/calibration gate remain outstanding.
+or promotion is admitted. Exact-head CI/review acceptance completed in PR #1064;
+the fresh paired reference/calibration gate remains outstanding.
 The parser control remains separate: its direct Python analysis inventory is
 not complete execution attestation, and its additional DEFAULTS source is
 explicitly retained as postexecution auditor context. The complete IC result

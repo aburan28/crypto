@@ -225,3 +225,56 @@ def test_sparse_checkout_and_tree_eviction(store, repo, tmp_path):
     Worker(store, ["cpu"], rc, "w1", block_seconds=0.2).run_once()
     assert store.get_result(tid2)["status"] == "succeeded"
     assert [p.name for p in (tmp_path / "c" / "trees" / "crypto").iterdir()] == [repo[1]]
+
+
+@pytest.mark.parametrize("mode, run_status, rollup", [
+    ("honest", "verified", "verified"),
+    ("lie", "refuted", "refuted"),
+    ("silent", "no_claim", "no_claim"),
+])
+def test_builtin_certificate_verification(store, repos, repo, tmp_path, mode, run_status, rollup):
+    spec = make_spec(repo[1], ["solve.py", mode], kind="benchmark",
+                     benchmark={"warmups": 1, "repetitions": 2},
+                     verify={"builtin": "certificate"})
+    tid = store.submit(spec)["task_id"]
+    worker(store, repos, tmp_path).run_once()
+    r = store.get_result(tid)
+    assert r["status"] == "succeeded"        # verification never rewrites status
+    assert "verification" not in r["runs"][0]  # warmups are not verified
+    assert [x["verification"]["status"] for x in r["runs"][1:]] == [run_status] * 2
+    assert r["verification"] == {"status": rollup, "counts": {
+        **{"verified": 0, "refuted": 0, "no_claim": 0, "error": 0}, rollup: 2}}
+    if mode == "honest":
+        v = r["runs"][1]["verification"]
+        assert v["detail"]["verifier"] == "taskq.verify/independent-recompute"
+        assert v["certificate_sha256"] in {a["sha256"] for a in r["artifacts"]}
+
+
+def test_custom_verifier_argv(store, repos, repo, tmp_path):
+    import sys
+    spec = make_spec(repo[1], ["solve.py", "honest"],
+                     verify={"argv": [sys.executable, "check.py"]})
+    tid = store.submit(spec)["task_id"]
+    worker(store, repos, tmp_path).run_once()
+    v = store.get_result(tid)["runs"][0]["verification"]
+    assert v["status"] == "verified" and v["detail"] == {"k": 17}
+
+
+def test_no_verify_means_no_verification_field(store, repos, repo, tmp_path):
+    tid = store.submit(make_spec(repo[1], ["solve.py", "honest"]))["task_id"]
+    worker(store, repos, tmp_path).run_once()
+    r = store.get_result(tid)
+    assert r["verification"] is None and "verification" not in r["runs"][0]
+
+
+def test_worker_declines_spec_it_cannot_validate(store, repos, repo, tmp_path):
+    """A spec from a newer taskq must not run on an older worker that would ignore fields."""
+    import json as _json
+    tid = store.submit(make_spec(repo[1], ["ok.py"]))["task_id"]
+    spec = store.get_task(tid)["spec"]
+    spec["from_the_future"] = True
+    store.r.hset(store.k_task(tid), "spec", _json.dumps(spec))
+    assert not worker(store, repos, tmp_path).run_once()
+    t = store.get_task(tid)
+    assert t["state"] == "queued" and t["declines"] == 1 and t["attempt"] == 0
+    assert "unsupported" in t["error"]

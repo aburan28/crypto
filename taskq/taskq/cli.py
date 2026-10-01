@@ -57,6 +57,8 @@ def cmd_submit(args) -> None:
             spec["benchmark"] = {"repetitions": args.repetitions, "warmups": args.warmups}
         if args.idempotency_key:
             spec["idempotency_key"] = args.idempotency_key
+        if args.verify:
+            spec["verify"] = {"builtin": "certificate"}
     _print(store.submit(spec))
 
 
@@ -97,6 +99,8 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--warmups", type=int, default=1)
     s.add_argument("--label", action="append", metavar="K=V")
     s.add_argument("--idempotency-key")
+    s.add_argument("--verify", action="store_true",
+                   help="independently verify each run's certificate.json")
     s.add_argument("argv", nargs=argparse.REMAINDER)
     s.set_defaults(fn=cmd_submit)
 

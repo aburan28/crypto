@@ -4,7 +4,9 @@ Every curve this repository names is named by its **ICV1 slug**
 ([`ICV1.md`](ICV1.md), `AGENTS.md` §11).  Each curve in the registry also
 carries the **EC1 identity** of each exact representation the repository
 records (subgroup and generator included), for comparisons joined across
-repositories ([`../curve-identities.md`](../curve-identities.md)).
+repositories ([`../curve-identities.md`](../curve-identities.md)). Those records use the
+encoding of crypto's existing producer, `examples/koblitz_curve_records.rs`, so a UID in the
+registry equals the one a thread's `curve_ids.json` carries; the builder fails if they ever differ.
 
 | file | what |
 |:--|:--|

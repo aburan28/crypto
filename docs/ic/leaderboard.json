@@ -34,13 +34,17 @@
    "path": "research/ic_descent_20260930/analysis-isolated.json",
    "sha256": "060359c266e779dbe3911a325dcb0a2296e4f95dc100e7e6763fe19076bfe1ff"
   },
+  "koblitz_s23": {
+   "path": "research/ic_single_target_20260930/analysis.json",
+   "sha256": "109326d7c2882b7142972f38771534548f9d667fbda4ca8c11cd7509f8d906a1"
+  },
   "oracles": {
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "ecd982f4b570043c5dd7d352cbf1825136363d59114ec8fa3151dde1b8df4125"
+   "sha256": "90a9f8f02352fd00efde42d4355f78ad88c1f3132e1af080f890abd8be5b4df0"
   }
  },
  "leaders": {
@@ -51,6 +55,7 @@
    "s": 15.617808489239641,
    "recipe": "folded table, walked targets, m = 2",
    "one_target": null,
+   "online_speedup": null,
    "largest": {
     "slug": "icv1-fp24-t1577-77336155",
     "log2_r": 23.38228535388855,
@@ -64,6 +69,7 @@
    "s": 21.30470007604251,
    "recipe": "folded, walked, base at the family optimum, m = 2",
    "one_target": null,
+   "online_speedup": null,
    "largest": {
     "slug": "icv1-f2m27-t12543-569dca8b",
     "log2_r": 24.414902680079198,
@@ -71,12 +77,27 @@
    }
   },
   "koblitz": {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "log2_r": 36.64,
+   "ratio_rho": 4.946769165949517,
+   "s": 4.267748993706104,
+   "recipe": "aimed m = 3 collection, m = 3 descent; one target",
+   "one_target": null,
+   "online_speedup": 9.765321645722155,
+   "largest": {
+    "slug": "icv1-f2m61-t158598901-ab42b6c5",
+    "log2_r": 47.21,
+    "ratio_rho": 31.599405794913018
+   }
+  },
+  "koblitz_batch": {
    "slug": "icv1-f2m41-tm2308219-7f48b14a",
    "log2_r": 39.0,
    "ratio_rho": 3.6156712977275385,
    "s": 0.24079642651229552,
    "recipe": "aimed m = 3 collection, m = 2 descent",
    "one_target": 22.62440892847403,
+   "online_speedup": null,
    "largest": {
     "slug": "icv1-f2m61-t158598901-ab42b6c5",
     "log2_r": 47.21,
@@ -88,7 +109,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp10-t5-192cb216",
-   "ec1": "EC1P10Cfphe87651856f0e",
+   "ec1": "EC1P10Cfphcf15d87ab724",
    "legacy": "bench-10bit",
    "log2_r": 9.684748620421626,
    "cofactor": 1,
@@ -335,7 +356,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp12-t19-d4a315df",
-   "ec1": "EC1P12Cfph419841525e91",
+   "ec1": "EC1P12Cfphe249b36f57ee",
    "legacy": "bench-12bit",
    "log2_r": 11.925183519434208,
    "cofactor": 1,
@@ -582,7 +603,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp14-tm43-158b6914",
-   "ec1": "EC1P14Cfph87f8b85f4de9",
+   "ec1": "EC1P14Cfph4f360f746508",
    "legacy": "bench-14bit",
    "log2_r": 13.986464267334126,
    "cofactor": 1,
@@ -829,7 +850,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp16-t351-d433f24e",
-   "ec1": "EC1P16Cfphb4a38a74618e",
+   "ec1": "EC1P16Cfph25cb80ed53b2",
    "legacy": "bench-16bit",
    "log2_r": 15.988218682078955,
    "cofactor": 1,
@@ -1076,7 +1097,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp18-t175-45770ebc",
-   "ec1": "EC1P18Cfphdb2d175bf1bf",
+   "ec1": "EC1P18Cfphf3346c488da6",
    "legacy": "bench-18bit",
    "log2_r": 17.997405546030816,
    "cofactor": 1,
@@ -1323,7 +1344,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp20-t1293-3c2999ba",
-   "ec1": "EC1P20Cfphfc07762f5155",
+   "ec1": "EC1P20Cfphbc31d4165da7",
    "legacy": "bench-20bit",
    "log2_r": 19.99782863366001,
    "cofactor": 1,
@@ -1570,7 +1591,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp22-tm1267-a5acaf6d",
-   "ec1": "EC1P22Cfpha872b5b4dc3b",
+   "ec1": "EC1P22Cfph3a2d8d148cc5",
    "legacy": "generated-22bit-3290411",
    "log2_r": 21.650392222310906,
    "cofactor": 1,
@@ -1817,7 +1838,7 @@
   {
    "regime": "prime",
    "slug": "icv1-fp24-t1577-77336155",
-   "ec1": "EC1P24Cfph5a08021e5369",
+   "ec1": "EC1P24Cfpha08989ff9bd9",
    "legacy": "generated-24bit-10935329",
    "log2_r": 23.38228535388855,
    "cofactor": 1,
@@ -2064,7 +2085,7 @@
   {
    "regime": "char2",
    "slug": "icv1-f2m15-t131-ed7256f0",
-   "ec1": "EC1N15Crbh1d8fecc71dba",
+   "ec1": "EC1N15Crbhe4e02575ec1c",
    "legacy": "random-binary-n15-b524b",
    "log2_r": 13.994265033718973,
    "cofactor": 2,
@@ -2265,7 +2286,7 @@
   {
    "regime": "char2",
    "slug": "icv1-f2m18-t393-d2c04152",
-   "ec1": "EC1N18Crbh1c64ca4d7742",
+   "ec1": "EC1N18Crbhe731503070c0",
    "legacy": "random-binary-n18-b6507",
    "log2_r": 14.997841035008591,
    "cofactor": 8,
@@ -2466,7 +2487,7 @@
   {
    "regime": "char2",
    "slug": "icv1-f2m21-t2591-de54d72e",
-   "ec1": "EC1N21Crbh5e5b0bcf8129",
+   "ec1": "EC1N21Crbh30df0435638d",
    "legacy": "random-binary-n21-b1b6f3b",
    "log2_r": 19.998217158598404,
    "cofactor": 2,
@@ -2667,7 +2688,7 @@
   {
    "regime": "char2",
    "slug": "icv1-f2m24-tm3047-2d0c0e8c",
-   "ec1": "EC1N24Crbhefde4a6d34e2",
+   "ec1": "EC1N24Crbh1d71c3dc9cbc",
    "legacy": "random-binary-n24-b5fc9da",
    "log2_r": 21.000262077754154,
    "cofactor": 8,
@@ -2868,7 +2889,7 @@
   {
    "regime": "char2",
    "slug": "icv1-f2m27-t12543-569dca8b",
-   "ec1": "EC1N27Crbhc900bb57ec74",
+   "ec1": "EC1N27Crbh9ce93808c7a5",
    "legacy": "random-binary-n27-b845462",
    "log2_r": 24.414902680079198,
    "cofactor": 6,
@@ -3068,8 +3089,518 @@
   },
   {
    "regime": "koblitz",
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "ec1": "EC1N47Ce1h9669b6d5105b",
+   "legacy": "K_1 / GF(2^47)",
+   "log2_r": 36.64,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 0.8627346153692869,
+   "floor_s": 0.12926948294637178,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 3 descent; one target",
+     "m": 3,
+     "descent_summands": 3,
+     "base_points": 5264,
+     "columns": 56,
+     "targets": "one public point per process, 64 per size",
+     "s": 4.267748993706104,
+     "s_online": 0.06731665118067626,
+     "s_setup": 4.200432342525428,
+     "phases_s": {
+      "precomputation": 4.200432342525428,
+      "descent": 0.0663887535347983,
+      "verify": 0.0004836696855466846
+     },
+     "ratio_rho": 4.946769165949517,
+     "ratio_rho_ci": [
+      4.5500424384951605,
+      5.409506746030778
+     ],
+     "online_speedup": 9.765321645722155,
+     "online_speedup_ci": [
+      7.8270173013109074,
+      12.485660110344407
+     ],
+     "online_speedup_canonical_step": 4.34101280853476,
+     "ic_online_over_precomputation_model": 2.420286907320609,
+     "break_even_targets": 7.1187482335527985,
+     "construction_artefact": false,
+     "cold_ratio_without_curve_construction": 6.313789246637844,
+     "ratio_floor": 33.01435804053309,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 3 descent; one target",
+    "m": 3,
+    "descent_summands": 3,
+    "base_points": 5264,
+    "columns": 56,
+    "targets": "one public point per process, 64 per size",
+    "s": 4.267748993706104,
+    "s_online": 0.06731665118067626,
+    "s_setup": 4.200432342525428,
+    "phases_s": {
+     "precomputation": 4.200432342525428,
+     "descent": 0.0663887535347983,
+     "verify": 0.0004836696855466846
+    },
+    "ratio_rho": 4.946769165949517,
+    "ratio_rho_ci": [
+     4.5500424384951605,
+     5.409506746030778
+    ],
+    "online_speedup": 9.765321645722155,
+    "online_speedup_ci": [
+     7.8270173013109074,
+     12.485660110344407
+    ],
+    "online_speedup_canonical_step": 4.34101280853476,
+    "ic_online_over_precomputation_model": 2.420286907320609,
+    "break_even_targets": 7.1187482335527985,
+    "construction_artefact": false,
+    "cold_ratio_without_curve_construction": 6.313789246637844,
+    "ratio_floor": 33.01435804053309,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz",
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "ec1": "EC1N57Ce0hb5884395c7f2",
+   "legacy": "K_0 / GF(2^57)",
+   "log2_r": 38.0,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 4.092172896791046,
+   "floor_s": 0.11738362384644484,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 2 descent; one target",
+     "m": 3,
+     "descent_summands": 2,
+     "base_points": 7296,
+     "columns": 64,
+     "targets": "one public point per process, 64 per size",
+     "s": 8.12117350520502,
+     "s_online": 0.042384311198860214,
+     "s_setup": 8.07878919400616,
+     "phases_s": {
+      "precomputation": 8.07878919400616,
+      "descent": 0.04172198947826942,
+      "verify": 0.00038987330451073184
+     },
+     "ratio_rho": 1.9845626541276857,
+     "ratio_rho_ci": [
+      1.952040034931497,
+      2.0186986182709883
+     ],
+     "online_speedup": 13.537727158347499,
+     "online_speedup_ci": [
+      10.725559173818155,
+      17.346473982010725
+     ],
+     "online_speedup_canonical_step": 5.965561658306264,
+     "ic_online_over_precomputation_model": 3.2853141362363862,
+     "break_even_targets": 15.202756221157943,
+     "construction_artefact": true,
+     "cold_ratio_without_curve_construction": 8.213014968979117,
+     "ratio_floor": 69.18489342115318,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 2 descent; one target",
+    "m": 3,
+    "descent_summands": 2,
+    "base_points": 7296,
+    "columns": 64,
+    "targets": "one public point per process, 64 per size",
+    "s": 8.12117350520502,
+    "s_online": 0.042384311198860214,
+    "s_setup": 8.07878919400616,
+    "phases_s": {
+     "precomputation": 8.07878919400616,
+     "descent": 0.04172198947826942,
+     "verify": 0.00038987330451073184
+    },
+    "ratio_rho": 1.9845626541276857,
+    "ratio_rho_ci": [
+     1.952040034931497,
+     2.0186986182709883
+    ],
+    "online_speedup": 13.537727158347499,
+    "online_speedup_ci": [
+     10.725559173818155,
+     17.346473982010725
+    ],
+    "online_speedup_canonical_step": 5.965561658306264,
+    "ic_online_over_precomputation_model": 3.2853141362363862,
+    "break_even_targets": 15.202756221157943,
+    "construction_artefact": true,
+    "cold_ratio_without_curve_construction": 8.213014968979117,
+    "ratio_floor": 69.18489342115318,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz",
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "ec1": "EC1N41Ce0he09550ab560a",
+   "legacy": "K_0 / GF(2^41)",
+   "log2_r": 39.0,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 0.6937398018563345,
+   "floor_s": 0.13840539283493047,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 2 descent; one target",
+     "m": 3,
+     "descent_summands": 2,
+     "base_points": 6560,
+     "columns": 80,
+     "targets": "one public point per process, 64 per size",
+     "s": 5.580644298617035,
+     "s_online": 0.0665415801474906,
+     "s_setup": 5.514102718469544,
+     "phases_s": {
+      "precomputation": 5.514102718469544,
+      "descent": 0.06744720998006384,
+      "verify": 0.00021872948522589432
+     },
+     "ratio_rho": 8.044290213253069,
+     "ratio_rho_ci": [
+      7.259586172239758,
+      9.010665102563982
+     ],
+     "online_speedup": 9.383847456632276,
+     "online_speedup_ci": [
+      7.4308978775045205,
+      12.126913139715521
+     ],
+     "online_speedup_canonical_step": 4.573391331935683,
+     "ic_online_over_precomputation_model": 2.500894272351845,
+     "break_even_targets": 9.884128309762037,
+     "construction_artefact": false,
+     "cold_ratio_without_curve_construction": 8.891126124173486,
+     "ratio_floor": 40.3210032810846,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 2 descent; one target",
+    "m": 3,
+    "descent_summands": 2,
+    "base_points": 6560,
+    "columns": 80,
+    "targets": "one public point per process, 64 per size",
+    "s": 5.580644298617035,
+    "s_online": 0.0665415801474906,
+    "s_setup": 5.514102718469544,
+    "phases_s": {
+     "precomputation": 5.514102718469544,
+     "descent": 0.06744720998006384,
+     "verify": 0.00021872948522589432
+    },
+    "ratio_rho": 8.044290213253069,
+    "ratio_rho_ci": [
+     7.259586172239758,
+     9.010665102563982
+    ],
+    "online_speedup": 9.383847456632276,
+    "online_speedup_ci": [
+     7.4308978775045205,
+     12.126913139715521
+    ],
+    "online_speedup_canonical_step": 4.573391331935683,
+    "ic_online_over_precomputation_model": 2.500894272351845,
+    "break_even_targets": 9.884128309762037,
+    "construction_artefact": false,
+    "cold_ratio_without_curve_construction": 8.891126124173486,
+    "ratio_floor": 40.3210032810846,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz",
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "ec1": "EC1N53Ce0hb097de99be9a",
+   "legacy": "K_0 / GF(2^53)",
+   "log2_r": 44.26,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 0.5031880712975558,
+   "floor_s": 0.12173263026670363,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 2 descent; one target",
+     "m": 3,
+     "descent_summands": 2,
+     "base_points": 27984,
+     "columns": 264,
+     "targets": "one public point per process, 64 per size",
+     "s": 7.398810637067995,
+     "s_online": 0.027721901714047134,
+     "s_setup": 7.371088735353948,
+     "phases_s": {
+      "precomputation": 7.371088735353948,
+      "descent": 0.02770705704944452,
+      "verify": 3.959129115792239e-05
+     },
+     "ratio_rho": 14.703867319407847,
+     "ratio_rho_ci": [
+      13.062127240120772,
+      16.65893776014309
+     ],
+     "online_speedup": 17.489057559646973,
+     "online_speedup_ci": [
+      13.616440401962318,
+      22.595779770476852
+     ],
+     "online_speedup_canonical_step": 9.367317061316216,
+     "ic_online_over_precomputation_model": 2.0210143621729992,
+     "break_even_targets": 16.125485011850408,
+     "construction_artefact": false,
+     "cold_ratio_without_curve_construction": 15.240965981501452,
+     "ratio_floor": 60.779189777284564,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 2 descent; one target",
+    "m": 3,
+    "descent_summands": 2,
+    "base_points": 27984,
+    "columns": 264,
+    "targets": "one public point per process, 64 per size",
+    "s": 7.398810637067995,
+    "s_online": 0.027721901714047134,
+    "s_setup": 7.371088735353948,
+    "phases_s": {
+     "precomputation": 7.371088735353948,
+     "descent": 0.02770705704944452,
+     "verify": 3.959129115792239e-05
+    },
+    "ratio_rho": 14.703867319407847,
+    "ratio_rho_ci": [
+     13.062127240120772,
+     16.65893776014309
+    ],
+    "online_speedup": 17.489057559646973,
+    "online_speedup_ci": [
+     13.616440401962318,
+     22.595779770476852
+    ],
+    "online_speedup_canonical_step": 9.367317061316216,
+    "ic_online_over_precomputation_model": 2.0210143621729992,
+    "break_even_targets": 16.125485011850408,
+    "construction_artefact": false,
+    "cold_ratio_without_curve_construction": 15.240965981501452,
+    "ratio_floor": 60.779189777284564,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz",
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "ec1": "EC1N59Ce1h20858f64459b",
+   "legacy": "K_1 / GF(2^59)",
+   "log2_r": 44.52,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 0.5765072641633779,
+   "floor_s": 0.11537691830657834,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 2 descent; one target",
+     "m": 3,
+     "descent_summands": 2,
+     "base_points": 30208,
+     "columns": 256,
+     "targets": "one public point per process, 64 per size",
+     "s": 9.032810277716749,
+     "s_online": 0.030761335109632738,
+     "s_setup": 9.002048942607116,
+     "phases_s": {
+      "precomputation": 9.002048942607116,
+      "descent": 0.030375834682904515,
+      "verify": 3.686148199814776e-05
+     },
+     "ratio_rho": 15.668163853624774,
+     "ratio_rho_ci": [
+      13.881155771007709,
+      17.869326132352256
+     ],
+     "online_speedup": 16.87050545272324,
+     "online_speedup_ci": [
+      13.045115489360636,
+      22.091903881494
+     ],
+     "online_speedup_canonical_step": 8.895399369043808,
+     "ic_online_over_precomputation_model": 2.772527754858401,
+     "break_even_targets": 18.439342463174974,
+     "construction_artefact": false,
+     "cold_ratio_without_curve_construction": 17.317058867897916,
+     "ratio_floor": 78.2895782821557,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 2 descent; one target",
+    "m": 3,
+    "descent_summands": 2,
+    "base_points": 30208,
+    "columns": 256,
+    "targets": "one public point per process, 64 per size",
+    "s": 9.032810277716749,
+    "s_online": 0.030761335109632738,
+    "s_setup": 9.002048942607116,
+    "phases_s": {
+     "precomputation": 9.002048942607116,
+     "descent": 0.030375834682904515,
+     "verify": 3.686148199814776e-05
+    },
+    "ratio_rho": 15.668163853624774,
+    "ratio_rho_ci": [
+     13.881155771007709,
+     17.869326132352256
+    ],
+    "online_speedup": 16.87050545272324,
+    "online_speedup_ci": [
+     13.045115489360636,
+     22.091903881494
+    ],
+    "online_speedup_canonical_step": 8.895399369043808,
+    "ic_online_over_precomputation_model": 2.772527754858401,
+    "break_even_targets": 18.439342463174974,
+    "construction_artefact": false,
+    "cold_ratio_without_curve_construction": 17.317058867897916,
+    "ratio_floor": 78.2895782821557,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz",
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "ec1": "EC1N61Ce0hd8c15448081e",
+   "legacy": "K_0 / GF(2^61)",
+   "log2_r": 47.21,
+   "cofactor": null,
+   "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+   "reference_s": 0.4794079592974552,
+   "floor_s": 0.11346973044749432,
+   "targets": 1,
+   "recipes": [
+    {
+     "variant": "koblitz_one_target",
+     "label": "aimed m = 3 collection, m = 2 descent; one target",
+     "m": 3,
+     "descent_summands": 2,
+     "base_points": 39040,
+     "columns": 320,
+     "targets": "one public point per process, 64 per size",
+     "s": 15.14900664715143,
+     "s_online": 0.052704741874363255,
+     "s_setup": 15.096301905277066,
+     "phases_s": {
+      "precomputation": 15.096301905277066,
+      "descent": 0.053149599259515075,
+      "verify": 1.7083163184867053e-05
+     },
+     "ratio_rho": 31.599405794913018,
+     "ratio_rho_ci": [
+      28.18484755042808,
+      35.716280953889076
+     ],
+     "online_speedup": 8.83874129306946,
+     "online_speedup_ci": [
+      6.764085464136691,
+      11.861698973750034
+     ],
+     "online_speedup_canonical_step": 4.684228035877141,
+     "ic_online_over_precomputation_model": 8.042349147151148,
+     "break_even_targets": 36.540505449023996,
+     "construction_artefact": false,
+     "cold_ratio_without_curve_construction": 32.50035798612046,
+     "ratio_floor": 133.50702947303913,
+     "verified": true
+    }
+   ],
+   "best": {
+    "variant": "koblitz_one_target",
+    "label": "aimed m = 3 collection, m = 2 descent; one target",
+    "m": 3,
+    "descent_summands": 2,
+    "base_points": 39040,
+    "columns": 320,
+    "targets": "one public point per process, 64 per size",
+    "s": 15.14900664715143,
+    "s_online": 0.052704741874363255,
+    "s_setup": 15.096301905277066,
+    "phases_s": {
+     "precomputation": 15.096301905277066,
+     "descent": 0.053149599259515075,
+     "verify": 1.7083163184867053e-05
+    },
+    "ratio_rho": 31.599405794913018,
+    "ratio_rho_ci": [
+     28.18484755042808,
+     35.716280953889076
+    ],
+    "online_speedup": 8.83874129306946,
+    "online_speedup_ci": [
+     6.764085464136691,
+     11.861698973750034
+    ],
+    "online_speedup_canonical_step": 4.684228035877141,
+    "ic_online_over_precomputation_model": 8.042349147151148,
+    "break_even_targets": 36.540505449023996,
+    "construction_artefact": false,
+    "cold_ratio_without_curve_construction": 32.50035798612046,
+    "ratio_floor": 133.50702947303913,
+    "verified": true
+   },
+   "source": "research/ic_single_target_20260930/analysis.json",
+   "round": "§23 one unseen point, online and cold (2026-09-30)",
+   "class": "accounting"
+  },
+  {
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m19-tm797-9c54981b",
-   "ec1": "EC1N19Ck1hd1eeaa2090e6",
+   "ec1": "EC1N19Ce1h7e63aa468dcc",
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
@@ -3174,9 +3705,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m23-tm5197-1f85e9e1",
-   "ec1": "EC1N23Ck1h1a95a1af864d",
+   "ec1": "EC1N23Ce1heec6a3619e3f",
    "legacy": "K_1/GF(2^23)",
    "log2_r": 22.0,
    "cofactor": null,
@@ -3281,9 +3812,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m45-tm6236725-40939294",
-   "ec1": "EC1N45Ck1h351988c8ff26",
+   "ec1": "EC1N45Ce1h97bc367649de",
    "legacy": "K_1/GF(2^45)",
    "log2_r": 24.8,
    "cofactor": null,
@@ -3388,9 +3919,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m37-tm534059-32aad96b",
-   "ec1": "EC1N37Ck0hfd668bac26ba",
+   "ec1": "EC1N37Ce0h0c51aa4aa7c3",
    "legacy": "K_0/GF(2^37)",
    "log2_r": 27.78,
    "cofactor": null,
@@ -3495,9 +4026,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m43-tm998717-e2e742b0",
-   "ec1": "EC1N43Ck1h6369f3d70826",
+   "ec1": "EC1N43Ce1h7d34f0f22c70",
    "legacy": "K_1/GF(2^43)",
    "log2_r": 32.11,
    "cofactor": null,
@@ -3602,9 +4133,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m47-t22705043-f4e44623",
-   "ec1": "EC1N47Ck1hcf8258a44c5f",
+   "ec1": "EC1N47Ce1h9669b6d5105b",
    "legacy": "K_1/GF(2^47)",
    "log2_r": 36.64,
    "cofactor": null,
@@ -3709,9 +4240,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m41-tm2308219-7f48b14a",
-   "ec1": "EC1N41Ck0hed1b2beafde8",
+   "ec1": "EC1N41Ce0he09550ab560a",
    "legacy": "K_0/GF(2^41)",
    "log2_r": 39.0,
    "cofactor": null,
@@ -3816,9 +4347,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m53-tm56619371-dac20a85",
-   "ec1": "EC1N53Ck0h15edf9add932",
+   "ec1": "EC1N53Ce0hb097de99be9a",
    "legacy": "K_0/GF(2^53)",
    "log2_r": 44.26,
    "cofactor": null,
@@ -3923,9 +4454,9 @@
    "class": "engineering"
   },
   {
-   "regime": "koblitz",
+   "regime": "koblitz_batch",
    "slug": "icv1-f2m61-t158598901-ab42b6c5",
-   "ec1": "EC1N61Ck0h97db64f4c78e",
+   "ec1": "EC1N61Ce0hd8c15448081e",
    "legacy": "K_0/GF(2^61)",
    "log2_r": 47.21,
    "cofactor": null,
@@ -4565,7 +5096,7 @@
    "order_bits": 7,
    "standard": [],
    "ec1": [
-    "EC1N7Ck0h13d85541ec9b"
+    "EC1N7Ce0hb6d297a2ca08"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4584,7 +5115,7 @@
    "order_bits": 8,
    "standard": [],
    "ec1": [
-    "EC1N7Ck1h4e8001a16a1d"
+    "EC1N7Ce1hec93ae9acdf0"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4603,7 +5134,7 @@
    "order_bits": 9,
    "standard": [],
    "ec1": [
-    "EC1N9Ck0hcfbf66ee4627"
+    "EC1N9Ce0h56c2643982af"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4622,7 +5153,7 @@
    "order_bits": 10,
    "standard": [],
    "ec1": [
-    "EC1N9Ck1had3742ba1fc3"
+    "EC1N9Ce1h57c40465dbe3"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4658,7 +5189,7 @@
    "order_bits": 11,
    "standard": [],
    "ec1": [
-    "EC1N11Ck1h03d0a730ec21"
+    "EC1N11Ce1hdb35b3c53d5e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4677,7 +5208,7 @@
    "order_bits": 13,
    "standard": [],
    "ec1": [
-    "EC1N13Ck0h82a3a9fa2846"
+    "EC1N13Ce0h1dfa32cdf623"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4713,7 +5244,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1N15Ck0hc9074110faca"
+    "EC1N15Ce0hf0a769285cc9"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4732,7 +5263,7 @@
    "order_bits": 15,
    "standard": [],
    "ec1": [
-    "EC1N15Ck1hf68df6533762"
+    "EC1N15Ce1h33cd37a1308e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4768,7 +5299,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1N17Ck1hb6a50e58c5ca"
+    "EC1N17Ce1hdfbf24105ef5"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4787,7 +5318,7 @@
    "order_bits": 19,
    "standard": [],
    "ec1": [
-    "EC1N19Ck0h54d1367f58bd"
+    "EC1N19Ce0h1e2a8f558313"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4806,7 +5337,7 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
-    "EC1N19Ck1hd1eeaa2090e6"
+    "EC1N19Ce1h7e63aa468dcc"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4842,7 +5373,7 @@
    "order_bits": 23,
    "standard": [],
    "ec1": [
-    "EC1N23Ck0h3b0d81b05d42"
+    "EC1N23Ce0h27a979171a13"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4861,7 +5392,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1N23Ck1h1a95a1af864d"
+    "EC1N23Ce1heec6a3619e3f"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4880,7 +5411,7 @@
    "order_bits": 30,
    "standard": [],
    "ec1": [
-    "EC1N29Ck1h4708984a8bc9"
+    "EC1N29Ce1hdb15aefa6764"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4899,7 +5430,7 @@
    "order_bits": 32,
    "standard": [],
    "ec1": [
-    "EC1N31Ck0h8b74d2402321"
+    "EC1N31Ce0h3e9d0f84f702"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4935,7 +5466,7 @@
    "order_bits": 38,
    "standard": [],
    "ec1": [
-    "EC1N37Ck0hfd668bac26ba"
+    "EC1N37Ce0h0c51aa4aa7c3"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4954,7 +5485,7 @@
    "order_bits": 39,
    "standard": [],
    "ec1": [
-    "EC1N39Ck0he38e2b076f6a"
+    "EC1N39Ce0h14be48e4173e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4973,7 +5504,7 @@
    "order_bits": 42,
    "standard": [],
    "ec1": [
-    "EC1N41Ck0hed1b2beafde8"
+    "EC1N41Ce0he09550ab560a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -4992,7 +5523,7 @@
    "order_bits": 44,
    "standard": [],
    "ec1": [
-    "EC1N43Ck1h6369f3d70826"
+    "EC1N43Ce1h7d34f0f22c70"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5011,7 +5542,7 @@
    "order_bits": 46,
    "standard": [],
    "ec1": [
-    "EC1N45Ck1h351988c8ff26"
+    "EC1N45Ce1h97bc367649de"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5030,7 +5561,7 @@
    "order_bits": 47,
    "standard": [],
    "ec1": [
-    "EC1N47Ck1hcf8258a44c5f"
+    "EC1N47Ce1h9669b6d5105b"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5049,7 +5580,7 @@
    "order_bits": 54,
    "standard": [],
    "ec1": [
-    "EC1N53Ck0h15edf9add932"
+    "EC1N53Ce0hb097de99be9a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5067,15 +5598,17 @@
    "coefficients": "a = 0, b = 1",
    "order_bits": 58,
    "standard": [],
-   "ec1": [],
-   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "ec1": [
+    "EC1N57Ce0hb5884395c7f2"
+   ],
+   "ec1_unresolved": null,
    "legacy": [
     "k0n57",
     "K_0 / GF(2^57)",
     "K_0/2^57",
     "K_0/F_2^57"
    ],
-   "on_board": false
+   "on_board": true
   },
   {
    "slug": "icv1-f2m59-tm943548413-98844ecc",
@@ -5085,7 +5618,7 @@
    "order_bits": 60,
    "standard": [],
    "ec1": [
-    "EC1N59Ck1h0af06428d67a"
+    "EC1N59Ce1h20858f64459b"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5094,7 +5627,7 @@
     "K_1/2^59",
     "K_1/F_2^59"
    ],
-   "on_board": false
+   "on_board": true
   },
   {
    "slug": "icv1-f2m61-t158598901-ab42b6c5",
@@ -5104,7 +5637,7 @@
    "order_bits": 61,
    "standard": [],
    "ec1": [
-    "EC1N61Ck0h97db64f4c78e"
+    "EC1N61Ce0hd8c15448081e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5210,7 +5743,7 @@
     "ECC2K-95"
    ],
    "ec1": [
-    "EC1N97Cecc2k95h0270aec87372"
+    "EC1N97Cecc2k95ha8ab2ab9a360"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5250,7 +5783,7 @@
     "sect163k1"
    ],
    "ec1": [
-    "EC1N163Csect163k1hc563be2ad88c"
+    "EC1N163Csect163k1h38cbcc381b09"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5364,7 +5897,7 @@
    "order_bits": 7,
    "standard": [],
    "ec1": [
-    "EC1N6Csfhdaf7451627a7"
+    "EC1N6Csfha880db1fd242"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5380,7 +5913,7 @@
    "order_bits": 10,
    "standard": [],
    "ec1": [
-    "EC1N10Csfh938c28fb910b"
+    "EC1N10Csfh6e9d8ba543f9"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5396,7 +5929,7 @@
    "order_bits": 15,
    "standard": [],
    "ec1": [
-    "EC1N14Csfh01a9e4ff1baa"
+    "EC1N14Csfh6b81ed8d7f99"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5412,7 +5945,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1N18Csfh46bd811c45d6"
+    "EC1N18Csfhdf1531a744a0"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5428,7 +5961,7 @@
    "order_bits": 13,
    "standard": [],
    "ec1": [
-    "EC1N13Crbh4aca5ff9bf98"
+    "EC1N13Crbh9962b3791b22"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5444,7 +5977,7 @@
    "order_bits": 13,
    "standard": [],
    "ec1": [
-    "EC1N13Crbh562b83e95842"
+    "EC1N13Crbh63ef50b99ec2"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5460,7 +5993,7 @@
    "order_bits": 13,
    "standard": [],
    "ec1": [
-    "EC1N13Crbh1f5282058183"
+    "EC1N13Crbh921c74ac540e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5476,7 +6009,7 @@
    "order_bits": 14,
    "standard": [],
    "ec1": [
-    "EC1N13Crbhe4094712c842"
+    "EC1N13Crbh1ba4387eeab8"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5492,7 +6025,7 @@
    "order_bits": 14,
    "standard": [],
    "ec1": [
-    "EC1N13Crbh335ef89063c3"
+    "EC1N13Crbh0c098414e7ed"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5508,7 +6041,7 @@
    "order_bits": 15,
    "standard": [],
    "ec1": [
-    "EC1N15Crbh1d8fecc71dba"
+    "EC1N15Crbhe4e02575ec1c"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5524,7 +6057,7 @@
    "order_bits": 15,
    "standard": [],
    "ec1": [
-    "EC1N15Crbhb41b8bd57919"
+    "EC1N15Crbhe279d04e9cf2"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5540,7 +6073,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1N15Crbh7c6984b02402"
+    "EC1N15Crbh5fd471220f50"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5556,7 +6089,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1N15Crbh20a36ee7bf14"
+    "EC1N15Crbh9daeb60eee3f"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5572,7 +6105,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1N15Crbh8206b17984c0"
+    "EC1N15Crbh4a9c1a57e41a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5588,7 +6121,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1N15Crbh3b7963498479"
+    "EC1N15Crbh0e3d29cd2200"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5604,7 +6137,7 @@
    "order_bits": 17,
    "standard": [],
    "ec1": [
-    "EC1N17Crbhdf7fb56ca1cc"
+    "EC1N17Crbh63476ca30af3"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5620,7 +6153,7 @@
    "order_bits": 17,
    "standard": [],
    "ec1": [
-    "EC1N17Crbh3d4f4a9552bb"
+    "EC1N17Crbh3cdcb8daf23f"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5636,7 +6169,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1N17Crbh25be9288bf7d"
+    "EC1N17Crbhbdb8f3c01154"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5652,7 +6185,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1N18Crbh1c64ca4d7742"
+    "EC1N18Crbhe731503070c0"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5668,7 +6201,7 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
-    "EC1N19Crbh811d9c6aac77"
+    "EC1N19Crbh80613f5e134a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5684,7 +6217,7 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
-    "EC1N19Crbh39ac01173678"
+    "EC1N19Crbh2aaf751f753f"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5700,7 +6233,7 @@
    "order_bits": 21,
    "standard": [],
    "ec1": [
-    "EC1N21Crbh5e5b0bcf8129"
+    "EC1N21Crbh30df0435638d"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5716,7 +6249,7 @@
    "order_bits": 21,
    "standard": [],
    "ec1": [
-    "EC1N21Crbhabbee32ce059"
+    "EC1N21Crbh1b5b9dc27361"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5732,7 +6265,7 @@
    "order_bits": 22,
    "standard": [],
    "ec1": [
-    "EC1N21Crbhcd0fdb9f7398"
+    "EC1N21Crbhf79d600f26b1"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5748,7 +6281,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1N23Crbh6e4abe854bd3"
+    "EC1N23Crbha19c0076d0c6"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5764,7 +6297,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1N23Crbh96246c2fa902"
+    "EC1N23Crbhb45509ab90a4"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5780,7 +6313,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1N24Crbh4b7ebb7fd850"
+    "EC1N24Crbh12ef3d10eaf4"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5796,7 +6329,7 @@
    "order_bits": 25,
    "standard": [],
    "ec1": [
-    "EC1N24Crbhefde4a6d34e2"
+    "EC1N24Crbh1d71c3dc9cbc"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5812,7 +6345,7 @@
    "order_bits": 25,
    "standard": [],
    "ec1": [
-    "EC1N25Crbh9fe62e982091"
+    "EC1N25Crbh9a603bf43b52"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5828,7 +6361,7 @@
    "order_bits": 26,
    "standard": [],
    "ec1": [
-    "EC1N25Crbh498fa35ed355"
+    "EC1N25Crbhad8a17aa0fce"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5844,7 +6377,7 @@
    "order_bits": 27,
    "standard": [],
    "ec1": [
-    "EC1N27Crbhc900bb57ec74"
+    "EC1N27Crbh9ce93808c7a5"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5860,7 +6393,7 @@
    "order_bits": 27,
    "standard": [],
    "ec1": [
-    "EC1N27Crbhb8c28607768b"
+    "EC1N27Crbh4c78d5777581"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5876,7 +6409,7 @@
    "order_bits": 27,
    "standard": [],
    "ec1": [
-    "EC1N27Crbh30cdaa127c79"
+    "EC1N27Crbhf5a1455bae8d"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5892,7 +6425,7 @@
    "order_bits": 28,
    "standard": [],
    "ec1": [
-    "EC1N27Crbh85c8aa9dbecd"
+    "EC1N27Crbhb0097f5ebc1e"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5922,7 +6455,7 @@
    "order_bits": 10,
    "standard": [],
    "ec1": [
-    "EC1P10Cfphe87651856f0e"
+    "EC1P10Cfphcf15d87ab724"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5938,7 +6471,7 @@
    "order_bits": 12,
    "standard": [],
    "ec1": [
-    "EC1P12Cfph3f59b815850f"
+    "EC1P12Cfph1590cdd205e7"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5954,7 +6487,7 @@
    "order_bits": 12,
    "standard": [],
    "ec1": [
-    "EC1P12Cfph419841525e91"
+    "EC1P12Cfphe249b36f57ee"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5970,7 +6503,7 @@
    "order_bits": 14,
    "standard": [],
    "ec1": [
-    "EC1P14Cfph548e9432c0f5"
+    "EC1P14Cfph711fbb93cc89"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -5986,7 +6519,7 @@
    "order_bits": 14,
    "standard": [],
    "ec1": [
-    "EC1P14Cfph87f8b85f4de9"
+    "EC1P14Cfph4f360f746508"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6002,7 +6535,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1P16Cfph36f2c10576d4"
+    "EC1P16Cfph38c70ce62cf6"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6018,7 +6551,7 @@
    "order_bits": 16,
    "standard": [],
    "ec1": [
-    "EC1P16Cfphb4a38a74618e"
+    "EC1P16Cfph25cb80ed53b2"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6034,7 +6567,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1P18Cfph6fc4fcac5ee8"
+    "EC1P18Cfpha51e440d70cd"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6050,7 +6583,7 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
-    "EC1P18Cfphdb2d175bf1bf"
+    "EC1P18Cfphf3346c488da6"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6066,7 +6599,7 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
-    "EC1P20Cfph3ae4f89504f3"
+    "EC1P20Cfphd19e740ea95d"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6082,7 +6615,7 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
-    "EC1P20Cfphfc07762f5155"
+    "EC1P20Cfphbc31d4165da7"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6098,7 +6631,7 @@
    "order_bits": 22,
    "standard": [],
    "ec1": [
-    "EC1P22Cfph961cb465b429"
+    "EC1P22Cfph4c21f5ae2576"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6114,7 +6647,7 @@
    "order_bits": 22,
    "standard": [],
    "ec1": [
-    "EC1P22Cfph365aa216e520"
+    "EC1P22Cfph8ca71c184f09"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6130,7 +6663,7 @@
    "order_bits": 22,
    "standard": [],
    "ec1": [
-    "EC1P22Cfpha872b5b4dc3b"
+    "EC1P22Cfph3a2d8d148cc5"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6146,7 +6679,7 @@
    "order_bits": 22,
    "standard": [],
    "ec1": [
-    "EC1P22Cfph08554baaf9e1"
+    "EC1P22Cfpha6136a7e3f8a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6162,7 +6695,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1P24Cfph5a08021e5369"
+    "EC1P24Cfpha08989ff9bd9"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6178,7 +6711,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1P24Cfpha06219519ac9"
+    "EC1P24Cfph7b37262391b0"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6194,7 +6727,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1P24Cfph838337bb87da"
+    "EC1P24Cfph53010113692b"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6210,7 +6743,7 @@
    "order_bits": 24,
    "standard": [],
    "ec1": [
-    "EC1P24Cfph29bcb2a6b6ea"
+    "EC1P24Cfph77faea3c4974"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6226,7 +6759,7 @@
    "order_bits": 26,
    "standard": [],
    "ec1": [
-    "EC1P26Cfphde7b6ccaf645"
+    "EC1P26Cfph74a5ec8d234a"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6242,7 +6775,7 @@
    "order_bits": 26,
    "standard": [],
    "ec1": [
-    "EC1P26Cfph4e71808591ae"
+    "EC1P26Cfph73708d649015"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6260,7 +6793,7 @@
     "P-256"
    ],
    "ec1": [
-    "EC1P256Cp256h527981ee9f4d"
+    "EC1P256Cp256h0523b774e066"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6278,7 +6811,7 @@
     "secp256k1"
    ],
    "ec1": [
-    "EC1P256Csecp256k1hfaec1eff4bb1"
+    "EC1P256Csecp256k1ha8dc9f115a15"
    ],
    "ec1_unresolved": null,
    "legacy": [
@@ -6288,6 +6821,11 @@
   }
  ],
  "phases": [
+  {
+   "id": "precomputation",
+   "name": "Reusable set-up",
+   "what": "Base, pair table, relations and logs, built once and reusable across targets (one-target Koblitz rows, §23)"
+  },
   {
    "id": "setup",
    "name": "Curve and subgroup",

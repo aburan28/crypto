@@ -24,6 +24,7 @@ import hashlib
 import html
 import json
 import math
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -43,13 +44,16 @@ SOURCES = {
     "koblitz_s20": "research/ic_exponent_20260926/analysis.json",
     "koblitz_s21": "research/ic_constructions_20260926/analysis.json",
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
+    "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
+S23_RUNS = "research/ic_single_target_20260930/runs"
 
 # Phases, in pipeline order, as the page groups them.
 PHASES = [
+    ("precomputation", "Reusable set-up", "Base, pair table, relations and logs, built once and reusable across targets (one-target Koblitz rows, §23)"),
     ("setup", "Curve and subgroup", "Point count, factoring #E, generator, cofactor clearing"),
     ("constructions", "Workflow constructions", "Orbit maps, point index, collectors and solvers built around the work (Koblitz rows)"),
     ("factor_base", "Factor base", "Choose and materialise the base points, or their orbit representatives"),
@@ -72,7 +76,8 @@ VARIANTS = {
     "mitm_m3_negfold_walk": "folded table, walked targets, m = 3",
     "mitm_m2_negfold_walk_balanced": "folded, walked, base at the family optimum, m = 2",
 }
-REGIME_NAME = {"prime": "Prime field", "char2": "Random binary", "koblitz": "Koblitz"}
+REGIME_NAME = {"prime": "Prime field", "char2": "Random binary", "koblitz": "Koblitz",
+               "koblitz_batch": "Koblitz, 32-target batch"}
 
 
 def sha256(rel: str) -> str:
@@ -242,7 +247,7 @@ def koblitz_rows(names: Names) -> list[dict]:
             "ratio_floor": s / floor_s, "verified": bool(x["pins"] and x["control1"]),
         }
         rows.append({
-            "regime": "koblitz", "slug": c["slug"], "ec1": ec1_of(c), "legacy": x["curve"],
+            "regime": "koblitz_batch", "slug": c["slug"], "ec1": ec1_of(c), "legacy": x["curve"],
             "log2_r": x["log2_r"], "cofactor": None,
             "reference": "batch rho, signed Frobenius and negation, the same 32 targets "
                          "(a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
@@ -250,6 +255,58 @@ def koblitz_rows(names: Names) -> list[dict]:
             "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_s22"],
             "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
             "class": "engineering",
+        })
+    return rows
+
+
+def koblitz_one_target_rows(names: Names) -> list[dict]:
+    """Ledger §23: one unseen public point per process, 64 per size.  The
+    primary comparison under AGENTS.md's one-target rule.  S here is cold,
+    the reusable set-up plus the online interval, against one-target rho's
+    set-up plus its walk; the online speedup, the canonical-step reading and
+    the Bernstein–Lange precomputation model ride beside it, never alone."""
+    rows = []
+    for x in load(SOURCES["koblitz_s23"])["sizes"]:
+        c = names(x["curve"])
+        a, n = x["a"], x["n"]
+        par = json.loads((REPO / S23_RUNS / f"k{a}n{n}" / "T01.params.json").read_text())
+        columns = int(re.search(r"-c(\d+)-", par["name"]).group(1))
+        d = x["diagnostics"]
+        sh = d["online_phase_shares"]
+        online, setup = x["s_ic_online_mean"], x["s_setup"]
+        s = setup + online
+        floor_s = math.sqrt(math.pi / (4 * n))
+        artefact = d["s_curve_construction"] > x["s_rho_online_mean"]
+        recipe = {
+            "variant": "koblitz_one_target",
+            "label": f"aimed m = {par['summands']} collection, m = {par['descent_summands']} descent; one target",
+            "m": par["summands"], "descent_summands": par["descent_summands"],
+            "base_points": par["factor_base"]["spec"]["points"], "columns": columns,
+            "targets": "one public point per process, 64 per size",
+            "s": s, "s_online": online, "s_setup": setup,
+            "phases_s": {"precomputation": setup,
+                         "descent": online * (sh["target_query"] + sh["target_pdp"]
+                                              + sh["target_descent"] + sh["target_relation_check"]),
+                         "verify": online * sh["recovery_check"]},
+            "ratio_rho": x["cold_ratio_ic_over_rho"]["value"],
+            "ratio_rho_ci": list(x["cold_ratio_ic_over_rho"]["ci95"]),
+            "online_speedup": x["online_speedup"]["mean_ratio"],
+            "online_speedup_ci": list(x["online_speedup"]["ci95"]),
+            "online_speedup_canonical_step": x["online_speedup_rho_model"]["mean_ratio"],
+            "ic_online_over_precomputation_model": x["precomputation_boundary_model"]["ic_online_over_bl"],
+            "break_even_targets": x["break_even_targets"]["value"],
+            "construction_artefact": artefact,
+            "cold_ratio_without_curve_construction": d["cold_ratio_without_curve_construction"],
+            "ratio_floor": s / floor_s,
+            "verified": bool(x["all_rows_pass_the_check"]),
+        }
+        rows.append({
+            "regime": "koblitz", "slug": c["slug"], "ec1": x.get("curve_id") or ec1_of(c),
+            "legacy": x["curve"], "log2_r": x["log2_r"], "cofactor": None,
+            "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+            "reference_s": x["s_rho_online_mean"] + x["s_rho_setup"], "floor_s": floor_s,
+            "targets": 1, "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_s23"],
+            "round": "§23 one unseen point, online and cold (2026-09-30)", "class": "accounting",
         })
     return rows
 
@@ -335,18 +392,20 @@ def roster(names: Names, measured: set[str]) -> list[dict]:
 
 def build() -> dict:
     names = Names()
-    ladder, kob = ladder_rows(names), koblitz_rows(names)
-    board = ladder + kob
+    ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
+    board = ladder + kob1 + kob
     measured = {r["slug"] for r in board}
     leaders = {}
-    for regime in ("prime", "char2", "koblitz"):
+    for regime in ("prime", "char2", "koblitz", "koblitz_batch"):
         rows = [r for r in board if r["regime"] == regime]
-        best = min(rows, key=lambda r: r["best"]["ratio_rho"])
+        ranked = [r for r in rows if not r["best"].get("construction_artefact")] or rows
+        best = min(ranked, key=lambda r: r["best"]["ratio_rho"])
         top = max(rows, key=lambda r: r["log2_r"])
         leaders[regime] = {"slug": best["slug"], "log2_r": best["log2_r"],
                            "ratio_rho": best["best"]["ratio_rho"], "s": best["best"]["s"],
                            "recipe": best["best"]["label"],
                            "one_target": best["best"].get("one_target_cold_ratio_section20"),
+                           "online_speedup": best["best"].get("online_speedup"),
                            "largest": {"slug": top["slug"], "log2_r": top["log2_r"],
                                        "ratio_rho": top["best"]["ratio_rho"]}}
     return {
@@ -422,7 +481,7 @@ STYLE = """
   --ground: #e7ebef; --surface: #fbfcfd; --sunk: #f0f3f6; --ink: #0e1922; --ink-2: #354855;
   --muted: #576976; --rule: #ccd5dc; --data: #1f6fd0; --data-soft: #d7e4f6; --bound: #b3372a;
   --bound-soft: #f3dcd8;
-  --ph-setup: #9aa7b1; --ph-constructions: #c4a35a; --ph-factor_base: #2f8f83; --ph-table: #6fb7a8;
+  --ph-precomputation: #b9c3cb; --ph-setup: #9aa7b1; --ph-constructions: #c4a35a; --ph-factor_base: #2f8f83; --ph-table: #6fb7a8;
   --ph-relations: #1f6fd0; --ph-linear_algebra: #8b5bc4; --ph-descent: #d0782f; --ph-verify: #4d5b66;
   --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -432,14 +491,14 @@ STYLE = """
   --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
   --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
   --bound-soft: #38221f;
-  --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
   --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
   --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
   --bound-soft: #38221f;
-  --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
   --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
   color-scheme: dark; }
 * { box-sizing: border-box; }
@@ -527,7 +586,7 @@ def page(doc: dict, standalone: bool) -> str:
     board = doc["board"]
     L = doc["leaders"]
     by_regime = {g: sorted((r for r in board if r["regime"] == g), key=lambda r: r["best"]["ratio_rho"])
-                 for g in ("koblitz", "prime", "char2")}
+                 for g in ("koblitz", "prime", "char2", "koblitz_batch")}
     head = ('<title>Index Calculus Leaderboard</title>\n'
             '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
@@ -535,62 +594,95 @@ def page(doc: dict, standalone: bool) -> str:
             '&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">\n'
             f"<style>{STYLE}</style>\n")
     P = []
+    K1 = L["koblitz"]
+    kob_rows = by_regime["koblitz"]
+    online_lo = min(r["best"]["online_speedup"] for r in kob_rows)
+    online_hi = max(r["best"]["online_speedup"] for r in kob_rows)
+    cold = [r["best"]["ratio_rho"] for r in kob_rows if not r["best"]["construction_artefact"]]
+    model = [r["best"]["ic_online_over_precomputation_model"] for r in kob_rows]
     P.append('<div class="wrap"><header>'
-             '<span class="eyebrow">ECDLP · index calculus · whole pipeline, cold · accounting view, no new measurement</span>'
+             '<span class="eyebrow">ECDLP · index calculus · whole pipeline · accounting view, no new measurement</span>'
              '<h1>Index Calculus Leaderboard</h1>'
              '<p class="verdict">Every curve this repository has priced end to end, with the best index-calculus '
-             'recipe measured on it, in one unit, S = operations / √r, against the matched Pollard rho on the same '
-             'curve. <strong>No row is below its reference.</strong> Solving one target, the closest is '
-             f'{times(L["prime"]["ratio_rho"])} on a prime-order curve of 2<sup>{L["prime"]["log2_r"]:.1f}</sup>, where '
-             'rho\'s set-up still dominates. The Koblitz rows solve 32 targets together, a historical diagnostic '
-             'under the one-target rule (AGENTS.md); at their best they read '
-             f'{times(L["koblitz"]["ratio_rho"])} batch rho at 2<sup>{L["koblitz"]["log2_r"]:.0f}</sup>, and one '
-             f'target alone {times(L["koblitz"]["one_target"])} (§20).</p>'
+             'recipe measured on it, in one unit, S = operations / √r, against Pollard rho on the same curve and '
+             'the same point. <strong>Cold, set-up included, no row is below rho.</strong> On one unseen Koblitz '
+             f'point the index calculus\'s online interval is {g3(online_lo)}–{g3(online_hi)}× faster than rho once '
+             'its reusable set-up exists, but the set-up is paid first: cold it is '
+             f'{g3(min(cold))}–{g3(max(cold))}× slower, and a generic walk given the same precomputation would be '
+             f'{g3(min(model))}–{g3(max(model))}× faster online again (a model). Prime and random-binary curves, '
+             f'one target each: {times(L["prime"]["ratio_rho"])} to {times(L["prime"]["largest"]["ratio_rho"])} and '
+             f'{times(L["char2"]["ratio_rho"])} to {times(L["char2"]["largest"]["ratio_rho"])}.</p>'
              '<dl class="facts">')
-    for g in ("koblitz", "prime", "char2"):
+    P.append(f'<div class="fact"><dt>Koblitz · one point, cold</dt><dd>{times(K1["ratio_rho"])}</dd>'
+             f'<p>at log₂ r = {K1["log2_r"]:.1f}, <span class="slug">{esc(K1["slug"])}</span>; online alone '
+             f'{times(K1["online_speedup"])} faster than rho; largest size {times(K1["largest"]["ratio_rho"])} cold</p></div>')
+    for g in ("prime", "char2"):
         ld = L[g]
         big = ld["largest"]
-        label = f'{REGIME_NAME[g]} · 32-target batch' if g == "koblitz" else REGIME_NAME[g]
-        P.append(f'<div class="fact"><dt>Closest · {esc(label)}</dt><dd>{times(ld["ratio_rho"])}</dd>'
+        P.append(f'<div class="fact"><dt>Closest · {esc(REGIME_NAME[g])}</dt><dd>{times(ld["ratio_rho"])}</dd>'
                  f'<p>at log₂ r = {ld["log2_r"]:.1f}, <span class="slug">{esc(ld["slug"])}</span>; '
                  f'at the largest size, log₂ r = {big["log2_r"]:.1f}: {times(big["ratio_rho"])}</p></div>')
-    P.append(f'<div class="fact"><dt>Curves</dt><dd>{len(board)} priced</dd>'
+    P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
 
-    # The board.
-    P.append('<section class="panel" id="board"><h2>The board</h2>'
-             '<p>One row per curve: its best recipe, ranked within its family by the ratio to the reference. '
-             'The prime and random-binary rows solve one target each against the matched negation-map rho '
-             '(ledger §18). The Koblitz rows solve 32 targets together, priced per target against batch rho '
-             'on the same 32 (§19–§22); under the one-target rule in AGENTS.md that is a historical diagnostic, '
-             'so each also shows the one-target cold ratio §20 measured and its §21 figure as the before mark. Floor: the generic bound √(π/2A) in the same unit. The bar splits S '
-             'into the pipeline\'s phases. A walked-target row at three repetitions is resolved to about '
-             'a factor 1.8 either way (ledger §13.7), so neighbouring ranks within that are not an ordering.</p>'
-             f'<div class="scroll">{ratio_chart(board)}</div>'
-             '<div class="legend">' + "".join(
-                 f'<span><i style="background:var(--ph-{pid})"></i>{esc(n)}</span>' for pid, n, _ in PHASES)
-             + '</div><div class="scroll"><table><thead><tr>'
-             '<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
-             '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
-             '<th class="n">S, ref</th><th class="n">× ref</th><th class="n">× floor</th><th>phases</th><th>ok</th>'
-             '</tr></thead><tbody>')
-    for g in ("koblitz", "prime", "char2"):
-        P.append(f'<tr><td colspan="13"><span class="chip">{esc(REGIME_NAME[g])}</span> '
-                 f'<span class="muted">reference: {esc(by_regime[g][0]["reference"])}</span></td></tr>')
+    head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
+                  '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
+                  '<th class="n">S, ref</th><th class="n">× ref</th><th class="n">× floor</th><th>phases</th><th>ok</th>')
+
+    def board_rows(g: str) -> None:
         for i, r in enumerate(by_regime[g], 1):
             b = r["best"]
             ci = (f'<br><span class="muted">[{g3(b["ratio_rho_ci"][0])}, {g3(b["ratio_rho_ci"][1])}]</span>'
                   if "ratio_rho_ci" in b else "")
+            if "online_speedup" in b:
+                ci += (f'<br><span class="muted">online {g3(b["online_speedup"])}× faster '
+                       f'[{g3(b["online_speedup_ci"][0])}, {g3(b["online_speedup_ci"][1])}]; '
+                       f'{g3(b["online_speedup_canonical_step"])}× at the canonical step</span>'
+                       f'<br><span class="muted">model: {g3(b["ic_online_over_precomputation_model"])}× slower online '
+                       f'than a generic walk with the same set-up; break-even {g3(b["break_even_targets"])} targets</span>')
+                if b["construction_artefact"]:
+                    ci += (f'<br><span class="muted">curve construction exceeds rho\'s walk here (§23.9); '
+                           f'without it {times(b["cold_ratio_without_curve_construction"])}</span>')
             if "ratio_rho_section21" in b:
                 ci += (f'<br><span class="muted">was {times(b["ratio_rho_section21"])} (§21)</span>'
-                       f'<br><span class="muted">one target: {times(b["one_target_cold_ratio_section20"])} (§20)</span>')
-            P.append(f'<tr class="{"lead" if i == 1 else ""}"><td class="n">{i}</td>'
+                       f'<br><span class="muted">one target, cold: {times(b["one_target_cold_ratio_section20"])} (§20)</span>')
+            rank = "—" if b.get("construction_artefact") else i
+            P.append(f'<tr class="{"lead" if r["slug"] == L[g]["slug"] else ""}"><td class="n">{rank}</td>'
                      f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
                      f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
                      f'<td class="n">{b["columns"]:,}</td><td class="n">{g3(b["s"])}</td>'
                      f'<td class="n">{g3(r["reference_s"])}</td><td class="n"><span class="ratio">{times(b["ratio_rho"])}</span>{ci}</td>'
                      f'<td class="n">{times(b["ratio_floor"])}</td><td>{phase_bar(b["phases_s"], b["s"])}</td>'
                      f'<td>{"✓" if b["verified"] else "✗"}</td></tr>')
+
+    # The board.
+    P.append('<section class="panel" id="board"><h2>The board</h2>'
+             '<p>One row per curve: its best recipe, ranked within its family by the cold ratio to rho, the whole '
+             'method from set-up to a verified logarithm. Every row solves one target, as AGENTS.md\'s one-target '
+             'rule requires: the prime and random-binary rows against the matched negation-map rho (ledger §18), '
+             'the Koblitz rows on one unseen public point per process against one-target rho on the same point '
+             '(§23, 64 points per size). For the Koblitz rows the online interval, the reading with rho at the '
+             'canonical step and the generic-precomputation model sit beside the cold ratio, as §23 requires. '
+             'Floor: the generic bound √(π/2A) in the same unit. The bar splits S into phases. A walked-target '
+             'row on the ladder is resolved to about a factor 1.8 either way at three repetitions (ledger §13.7).</p>'
+             f'<div class="scroll">{ratio_chart(board)}</div>'
+             '<div class="legend">' + "".join(
+                 f'<span><i style="background:var(--ph-{pid})"></i>{esc(n)}</span>' for pid, n, _ in PHASES)
+             + f'</div><div class="scroll"><table><thead><tr>{head_cells}</tr></thead><tbody>')
+    for g in ("koblitz", "prime", "char2"):
+        P.append(f'<tr><td colspan="13"><span class="chip">{esc(REGIME_NAME[g])}</span> '
+                 f'<span class="muted">reference: {esc(by_regime[g][0]["reference"])}</span></td></tr>')
+        board_rows(g)
+    P.append('</tbody></table></div></section>')
+
+    # The Koblitz batch: a historical diagnostic.
+    P.append('<section class="panel" id="batch"><h2>Koblitz, 32 targets in a batch</h2>'
+             '<p>The collection thread\'s rounds before §23 solved 32 targets together and priced them per target '
+             'against batch rho on the same 32 (§19–§22). Under the one-target rule that is a historical '
+             'diagnostic, not a primary comparison; it is kept here with its §21 figure as the before mark and '
+             'the one-target cold ratio §20 measured. The phase split is the most detailed the thread has.</p>'
+             f'<div class="scroll"><table><thead><tr>{head_cells}</tr></thead><tbody>')
+    board_rows("koblitz_batch")
     P.append('</tbody></table></div></section>')
 
     # Every recipe, every curve (the ladder).
@@ -622,7 +714,8 @@ def page(doc: dict, standalone: bool) -> str:
 
     # Step by step.
     ex = doc["exponents"]
-    head_kob = next(r for r in board if r["slug"] == L["koblitz"]["slug"])["best"]
+    head_kob = next(r for r in board if r["regime"] == "koblitz_batch"
+                    and r["slug"] == L["koblitz_batch"]["slug"])["best"]
     head_pr = next(r for r in board if r["slug"] == L["prime"]["slug"])["best"]
     rows_steps = [
         ("setup", "#E by Schoof / Koblitz recurrence, factor, clear the cofactor", "one-off; Koblitz: 25–171 units a base point at 2^27.8 and up", "—", "—"),
@@ -640,7 +733,7 @@ def page(doc: dict, standalone: bool) -> str:
              'r<sup>1/2</sup>, so a phase with α above ½ loses ground at every size. The share columns are the '
              'phase\'s part of S on each family\'s leading row.</p><div class="scroll"><table><thead><tr>'
              '<th>phase</th><th>what it does</th><th>cost model</th><th class="n">α prime</th><th class="n">α binary</th>'
-             f'<th class="n">share · Koblitz 2^{L["koblitz"]["log2_r"]:.0f} (§22)</th><th class="n">share · prime 2^{L["prime"]["log2_r"]:.1f}</th></tr></thead><tbody>')
+             f'<th class="n">share · Koblitz batch 2^{L["koblitz_batch"]["log2_r"]:.0f} (§22)</th><th class="n">share · prime 2^{L["prime"]["log2_r"]:.1f}</th></tr></thead><tbody>')
     for pid, what, model, _, fitkey in rows_steps:
         name = next(n for i, n, _ in PHASES if i == pid)
         ap = ex["prime"]["phases"].get(fitkey, {}).get("alpha") if fitkey != "—" else None
@@ -659,7 +752,7 @@ def page(doc: dict, standalone: bool) -> str:
              f'<tr><td>Matched rho</td><td>negation-map r-adding walk, distinguished points</td><td>√(πr/2A)</td>'
              f'<td class="n">{g3(ex["prime"]["rho_matched"]["alpha"])}</td><td class="n">{g3(ex["char2"]["rho_matched"]["alpha"])}</td><td class="n">—</td><td class="n">—</td></tr>')
     P.append('</tbody></table></div>'
-             f'<p>At the Koblitz headline the pipeline stored {head_kob["stored_pairs"]:,} pairs, collected '
+             f'<p>At the Koblitz batch headline (§22) the pipeline stored {head_kob["stored_pairs"]:,} pairs, collected '
              f'{head_kob["relations"]:,} relations from {head_kob["summands_scanned"]:,} scanned summands, reduced '
              f'{head_kob["la_rows_in"]} rows to a Wiedemann core of dimension {head_kob["la_core_dimension"]}, and '
              f'spent {g3(head_kob["descent_trials_per_target"])} descent trials per target. Koblitz top-end exponent, '

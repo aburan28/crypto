@@ -20,7 +20,9 @@ mcp = FastMCP("taskq", instructions=(
     "A persistent, Redis-backed queue of CPU/GPU jobs run by worker pods. "
     "Submit a task pinned to a pushed commit, then poll get_task or "
     "wait_for_task and read get_result. Status timeout/cancelled/infra_error "
-    "(outcome_class not_completed) is never evidence about what was measured. "
+    "(outcome_class not_completed) is never evidence about what was measured, and a "
+    "solve claim counts only when result.verification.status is verified; refuted "
+    "means the solver's answer was wrong (an invalid measurement, not a negative result). "
     "Call get_protocol for the full spec and result schemas."))
 
 _store = None
@@ -52,11 +54,15 @@ def submit_command(repo: str, commit: str, argv: list[str], queue: str = "cpu",
                    repetitions: int | None = None, warmups: int = 1,
                    timeout_seconds: float = 3600, cpus: int | None = None,
                    labels: dict[str, str] | None = None,
-                   idempotency_key: str | None = None) -> dict[str, Any]:
+                   idempotency_key: str | None = None,
+                   verify_certificate: bool = False) -> dict[str, Any]:
     """Enqueue one command at a pushed commit (full 40-hex sha) of an allowlisted repo
     (crypto, crypto-autoresearcher, cryptanalysis). Give `repetitions` to make it a
     benchmark (warmups + timed repetitions). The command may write metrics.json and
-    any other outputs into $TASKQ_OUTPUT_DIR; they are hashed and returned."""
+    any other outputs into $TASKQ_OUTPUT_DIR; they are hashed and returned. Set
+    verify_certificate when the command writes certificate.json (a discrete_log claim):
+    each timed run's claim is then re-checked by independent code, and
+    result.verification says verified / refuted / no_claim / error."""
     spec: dict[str, Any] = {
         "schema": protocol.SPEC_SCHEMA_ID, "queue": queue,
         "kind": "benchmark" if repetitions else "command",
@@ -70,6 +76,8 @@ def submit_command(repo: str, commit: str, argv: list[str], queue: str = "cpu",
         spec["benchmark"] = {"repetitions": repetitions, "warmups": warmups}
     if idempotency_key:
         spec["idempotency_key"] = idempotency_key
+    if verify_certificate:
+        spec["verify"] = {"builtin": "certificate"}
     return store().submit(spec)
 
 

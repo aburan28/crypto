@@ -164,6 +164,7 @@
   }
   .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }
   #joint-dimension-length .panel-body { padding: 16px 20px 20px; }
+  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }
   #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }
 
   .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }
@@ -248,6 +249,7 @@
   }
   tbody tr:last-child td { border-bottom: 0; }
 
+  .ref-note { margin: 28px 0 10px; padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--bound); background: var(--surface-sunk); color: var(--ink); font-size: 13px; line-height: 1.5; }
   .chip {
     display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
     letter-spacing: .07em; text-transform: uppercase; padding: 2.5px 7px;
@@ -350,7 +352,18 @@
       workflow&rsquo;s constructions once per base, with every count unchanged. That makes the whole
       pipeline 1.04&ndash;2.25&times; faster and takes the same row to 4.3&times;. On current main, which
       later rounds made 12&ndash;33% cheaper at the top, ledger &sect;22 (2026-09-30) cut the descent&rsquo;s
-      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;. The first two were
+      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;.
+      Under AGENTS.md&rsquo;s IC measurement rules (#1076, 2026-09-30) that figure, like every
+      <code>k</code> = 32 ratio on this page, is a historical multi-target diagnostic. The primary
+      comparison is now one unseen target against rho on the same point, with the reusable
+      set-up reported apart. Ledger &sect;23 (2026-10-01) measured it on 384 public points at the
+      thread&rsquo;s six largest sizes, 2<sup>36.6</sup>&ndash;2<sup>47.2</sup>. Online the descent is
+      8.8&ndash;17.5&times; faster than rho on the same point, or 4.3&ndash;9.4&times; with rho&rsquo;s
+      step at the canonical price. But it needs a reusable set-up that makes the method
+      4.9&ndash;31.6&times; slower cold (2.0&times; at 2<sup>38.0</sup>, where both arms pay a slow
+      curve construction). By Bernstein and Lange&rsquo;s trade-off, a model, the same set-up spent as a
+      generic precomputation would be 2.0&ndash;8.0&times; faster online still (<a
+      href="#koblitz-single-target-20261001">the round</a>). The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
@@ -397,7 +410,7 @@
       (<a href="#ic-triple-counted-20260923">below</a>). So no crossing with a matched rho has been
       measured, and the <code>r<sup>[0.13, 0.19]</sup></code> is a growth against the unmatched
       walk. <strong>That tournament line was stopped on 2026-09-29</strong>
-      (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>).
+      (<a href="#ic-tournament-reference-history">reference history</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>).
       Against a rho in the IC arm&rsquo;s own arithmetic, no collector is below rho in instructions
       at any of twelve cells. Its one lead is 16&ndash;26% in isolated in-process time at
       <code>n</code>&thinsp;&le;&thinsp;19, gone by 23. That is engineering: it comes from more
@@ -452,14 +465,19 @@
       </div>
       <div class="fact">
         <dt>Closest to rho, one target</dt>
-        <dd>13.5&times; at 2<sup>23.4</sup></dd>
-        <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
-          family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
-          the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).
-          Amortised over 32 targets, the Koblitz collection thread is 3.62&times; batch rho at best, every
-          phase priced, on current main with its descent&rsquo;s fixed cost cut (&sect;22). It was
-          4.28&times; in &sect;21, 4.86&times; in &sect;20 and 6.5&times; in &sect;19. One target alone,
-          &sect;20 measured it at 22.6&times; there.</p>
+        <dd>4.9&times; cold at 2<sup>36.6</sup></dd>
+        <p>The Koblitz collection thread on one unseen point, set-up and online together, against rho
+          on the same point (&sect;23). Online alone it is 8.8&ndash;17.5&times; <em>faster</em>, but
+          the set-up that buys that would serve a generic walk as precomputation too. Rho priced at the
+          canonical step makes this 8.6&times;. 2<sup>38.0</sup> reads 2.0&times; only because both
+          arms pay a curve construction longer than rho&rsquo;s walk; without it the six sizes read
+          6.3&ndash;32.5&times;. Before the rule, operation-counted and now legacy diagnostics: meet in
+          the middle, m = 2, prime field, folded table, walked targets and a base at the family optimum
+          (222 signed points against the rule&rsquo;s 512), was 13.5&times; at 2<sup>23.4</sup> against
+          the matched negation-map rho (3.55&times; against the plain walk, 3.63&times; in Round 4).
+          Amortised over 32 targets, the Koblitz thread was 3.62&times; batch rho at best (&sect;22;
+          4.28&times; in &sect;21, 4.86&times; in &sect;20, 6.5&times; in &sect;19), and one target
+          alone &sect;20 measured it at 22.6&times; there.</p>
       </div>
       <div class="fact">
         <dt>Boundary 3 &middot; the family&rsquo;s own floor</dt>
@@ -485,7 +503,9 @@
 
   <aside class="gain-overview" aria-labelledby="gain-title">
     <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
+    <p><a href="#genus-crossover">Hyperelliptic large primes</a>: no gain. Registered to save 4&ndash;6% at genus 2, <code>p</code> = 4001; measured about 1%, and none at genus 3 or 4. 54-row pinned-output check passed; every run verified.</p>
     <p><a href="#genus-crossover">Hyperelliptic sparse solve</a>: the solve&rsquo;s charge is <b>5.1&times; lower</b> (median; 2.0&ndash;18.2&times;) with identical relations, oracle counts and logarithms on all 18 rows and 11 isolated sweeps. Engineering: the arithmetic exponent is unchanged. Pricing it honestly withdraws the genus-3 exponent claim below.</p>
+    <p><span class="chip">accounting</span> <a href="#koblitz-single-target-20261001">Koblitz thread, one unseen point</a>: the first measurement under the single-target rule, 384 public points at six sizes, 408 of 408 claims passing the checker. Online the descent is <b>8.8&ndash;17.5&times; faster</b> than rho on the same point. Cold, with its reusable set-up, it is 4.9&ndash;31.6&times; slower, and online it sits 2.0&ndash;8.0&times; above a generic walk given the same precomputation (a model). No algorithm changed.</p>
     <p><a href="#koblitz-descent-20260930">Koblitz descent, fixed cost</a>: the whole pipeline is <b>1.35&ndash;1.39&times; faster</b> at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>, in paired time from isolated runs, with all 186 pairs identical. From 2<sup>32</sup> up it moves 0.99&ndash;1.06&times;. The no-regression target was missed at 2<sup>47.2</sup> by 1.4%, which is inside that size&rsquo;s A/A band and in code the change does not touch.</p>
     <p><a href="#koblitz-constructions-20260926">Koblitz constructions, built once</a>: the whole pipeline is <b>1.04&ndash;2.25&times; faster</b> at all nine sizes, every phase priced. All 180 of 180 pairs have identical counts and logarithms. Still no crossing with batch rho: 4.28&times; at best.</p>
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
@@ -980,7 +1000,9 @@
         again, and none failed. A first run pinned with <code>taskset</code> alone is kept, but it is not
         evidence. Because the unit moves between binaries (&sect;21.4), the declared speedup puts both arms
         at one unit: the paired ratio of time. Frozen source: <code>research/ic_descent_20260930/</code>
-        (<code>analysis-isolated.json</code> for every figure here).</p>
+        (<code>analysis-isolated.json</code> for every figure here). Its ratios to rho are k = 32
+        figures, historical multi-target diagnostics since #1076; the one-target comparison is
+        <a href="#koblitz-single-target-20261001">&sect;23</a>.</p>
     </div>
     <div class="table-scroll"><table>
       <caption>S per target at k = 32, both columns in the baseline binary&rsquo;s unit. <b>Was</b> is
@@ -1013,6 +1035,53 @@
       <span><b>The unit moved again.</b> The candidate&rsquo;s batched addition runs 0.89&ndash;0.97&times; as fast as the baseline&rsquo;s at eight of nine sizes, with its code untouched; in &sect;21 it ran up to 11% faster. So in each process&rsquo;s own unit the candidate looks up to 12% better than its time says. The declared figure is the time.</span>
       <span><b>The top end, refitted on current main.</b> &sect;20&rsquo;s declared fit over the four largest sizes gives <code>r</code><sup>0.137</sup>, 95% [&minus;0.06, 0.33]. Main&rsquo;s cheaper top end flattened it: &sect;21&rsquo;s interval excluded zero, and this one does not.</span>
       <span><span class="chip">engineering</span> No count moved. S fell 1.35&ndash;1.39&times; at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>; from 2<sup>32</sup> up it moved by 0.99&ndash;1.06&times;. The least ratio is 3.62&times; [3.28, 3.97] at 2<sup>39</sup> <small>was 4.28&times;</small>, most of the fall main&rsquo;s. There is still no crossing. The K_0 rows are E_0, the ECC2K-130 family, and the K_1 rows are not. There is no m&thinsp;=&thinsp;83 run, so nothing here speaks to ECC2K-130 at high fidelity (AGENTS.md &sect;8a).</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-single-target-20261001">
+    <div class="panel-head">
+      <h2>One unseen point, online and cold <span class="chip">accounting</span></h2>
+      <p>Ledger &sect;23. AGENTS.md&rsquo;s IC measurement rules (#1076) make the primary comparison one
+        previously unseen target. The index calculus and rho run on the same point, in one process. Each is
+        timed from its first target-dependent operation to a checked logarithm, and the reusable set-up is
+        reported apart. At the thread&rsquo;s six largest sizes, 64 public hash-to-curve points per size ran
+        one isolated process each. Every row is keyed by its canonical identities, and both answers are
+        replayed outside the process. All 408 claims pass the repository&rsquo;s <code>vs_rho</code>
+        checker. Rho is the tuned signed-Frobenius walk with its walks batched (<code>ParallelRho</code>); its
+        only set-up is its jump table, in G. The round was declared before any run, and &sect;23&rsquo;s
+        earlier k = 32 declaration was withdrawn unrun. Frozen source:
+        <code>research/ic_single_target_20260930/</code> (<code>analysis.json</code> for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>S is units over &radic;r, each row in its own process&rsquo;s unit, the mean over 64 targets
+        per size. <b>Online speedup</b>: mean rho online over mean index-calculus online, with a 95%
+        bootstrap interval over targets. <b>Canonical step</b>: rho&rsquo;s counted operations priced at the
+        canonical step, the conservative reading. <b>Cold</b>: set-up plus online, index calculus over rho.
+        <b>Break-even</b>: the count of targets at which one set-up and their descents cost as much as as
+        many one-target rho runs. <b>BL model</b>: the index calculus&rsquo;s online cost over the online
+        cost of a generic walk given the same set-up as precomputation (Bernstein&ndash;Lange; a model).
+        <b>A/A</b>: four targets&rsquo; second process over their first.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">S, IC online</th>
+        <th scope="col" class="n">S, rho online</th><th scope="col" class="n">online speedup</th>
+        <th scope="col" class="n">canonical step</th><th scope="col" class="n">cold</th>
+        <th scope="col" class="n">S, set-up</th><th scope="col" class="n">break-even</th>
+        <th scope="col" class="n">over BL model</th><th scope="col" class="n">A/A</th></tr></thead>
+      <tbody>
+        <tr><td><code>icv1-f2m47-t22705043-f4e44623</code> &middot; r = 2<sup>36.6</sup></td><td class="n">0.0673</td><td class="n">0.657</td><td class="n"><b>9.77&times;</b><br><small>[7.83, 12.5]</small></td><td class="n">4.34&times;<br><small>[3.47, 5.53]</small></td><td class="n">4.95&times;<br><small>[4.55, 5.41]</small></td><td class="n">4.20</td><td class="n">7</td><td class="n">2.4&times;</td><td class="n">0.88&ndash;1.30</td></tr>
+        <tr><td><code>icv1-f2m57-tm747311035-c1f545af</code> &middot; r = 2<sup>38.0</sup></td><td class="n">0.0424</td><td class="n">0.574</td><td class="n"><b>13.5&times;</b><br><small>[10.7, 17.3]</small></td><td class="n">5.97&times;<br><small>[4.76, 7.61]</small></td><td class="n">1.98&times;<br><small>[1.95, 2.02]</small></td><td class="n">8.08</td><td class="n">15</td><td class="n">3.3&times;</td><td class="n">0.92&ndash;1.29</td></tr>
+        <tr><td><code>icv1-f2m41-tm2308219-7f48b14a</code> &middot; r = 2<sup>39.0</sup></td><td class="n">0.0665</td><td class="n">0.624</td><td class="n"><b>9.38&times;</b><br><small>[7.43, 12.1]</small></td><td class="n">4.57&times;<br><small>[3.64, 5.85]</small></td><td class="n">8.04&times;<br><small>[7.26, 9.01]</small></td><td class="n">5.51</td><td class="n">10</td><td class="n">2.5&times;</td><td class="n">0.81&ndash;1.39</td></tr>
+        <tr><td><code>icv1-f2m53-tm56619371-dac20a85</code> &middot; r = 2<sup>44.3</sup></td><td class="n">0.0277</td><td class="n">0.485</td><td class="n"><b>17.5&times;</b><br><small>[13.6, 22.6]</small></td><td class="n">9.37&times;<br><small>[7.33, 12.2]</small></td><td class="n">14.7&times;<br><small>[13.1, 16.7]</small></td><td class="n">7.37</td><td class="n">16</td><td class="n">2.0&times;</td><td class="n">0.92&ndash;1.13</td></tr>
+        <tr><td><code>icv1-f2m59-tm943548413-98844ecc</code> &middot; r = 2<sup>44.5</sup></td><td class="n">0.0308</td><td class="n">0.519</td><td class="n"><b>16.9&times;</b><br><small>[13.0, 22.1]</small></td><td class="n">8.90&times;<br><small>[6.85, 11.6]</small></td><td class="n">15.7&times;<br><small>[13.9, 17.9]</small></td><td class="n">9.00</td><td class="n">18</td><td class="n">2.8&times;</td><td class="n">0.97&ndash;1.11</td></tr>
+        <tr><td><code>icv1-f2m61-t158598901-ab42b6c5</code> &middot; r = 2<sup>47.2</sup></td><td class="n">0.0527</td><td class="n">0.466</td><td class="n"><b>8.84&times;</b><br><small>[6.76, 11.9]</small></td><td class="n">4.68&times;<br><small>[3.63, 6.28]</small></td><td class="n">31.6&times;<br><small>[28.2, 35.7]</small></td><td class="n">15.10</td><td class="n">37</td><td class="n">8.0&times;</td><td class="n">0.96&ndash;1.26</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>Declared and graded.</b> Correct: met. All 408 rows verified on every repetition and replayed in <code>oracle.py</code>, and the two arms agree on every scalar. Rule-conformant: met, with 408 of 408 passing <code>validate_claim</code>. Online the index calculus is faster at all six sizes, with lower bounds 6.8&ndash;13.6. Cold, rho is faster at all six. Two of 410 processes were contended and were run again, and none failed.</span>
+      <span><b>Cold, beside it.</b> The set-up costs S = 4.2&ndash;15.1, 62&ndash;292 times the online interval. It pays for itself after 7&ndash;37 targets against as many one-target rho runs; against batch rho at k = 32 it never did (&sect;22). At 2<sup>38.0</sup> the curve&rsquo;s construction, which both arms run, takes 48&ndash;58 ms, more than rho&rsquo;s walk. Without it the cold ratio reads 6.3&ndash;32.5&times;, rising with r.</span>
+      <span><b>The precomputation boundary.</b> The online figure leaves the set-up out, and a generic walk could use that set-up too. Bernstein and Lange&rsquo;s trade-off gives the online cost of a walk with the same precomputation. The index calculus is 2.0&ndash;8.0&times; above it. The online advantage belongs to the precomputation, not to the method. This is a model: no such walk ran.</span>
+      <span><b>Rho&rsquo;s step.</b> The batched walk costs 3.99&ndash;4.97 units a step, 1.86&ndash;2.25&times; the canonical step, at 0.95&ndash;1.05 times the floor&rsquo;s step count. The canonical-step column is the reading a walk that cheap would give.</span>
+      <span><b>Where the online time goes.</b> Table lookups take 53&ndash;96% of the interval and the walk&rsquo;s stepping 2&ndash;48%. The relation, its logarithm and the recovery check take 1.3% at most. Across the six sizes the online speedup is flat, r<sup>0.02</sup> [&minus;0.12, 0.16], and the cold ratio grows, r<sup>0.29</sup> [0.09, 0.50].</span>
+      <span><span class="chip">accounting</span> No algorithm changed: the pin reproduces &sect;22&rsquo;s counts. The reference changed because the rule did, and the k = 32 panels above are now historical diagnostics. By AGENTS.md &sect;2 the method is not faster than rho, because its cold S is above rho&rsquo;s at every size. The K_0 rows are E_0, the ECC2K-130 family, and the K_1 rows are not. There is no m&thinsp;=&thinsp;83 run (AGENTS.md &sect;8a).</span>
     </div>
   </div>
 
@@ -1761,48 +1830,6 @@
       <span>n = 10: 230 &rarr; 73 &rarr; 14 &rarr; 7 &rarr; 1 &rarr; <strong>0</strong> at T = 128
         &middot; last survivor <code>a&#8326; = 13</code>, the thread&rsquo;s own caveat curve</span>
       <span>what a lever would have to buy at ECC2K-130: 2^&minus;72 on the oracle</span>
-    </div>
-  </div>
-
-  <!-- ============ NAGAO IMPLEMENTATION STATUS ============ -->
-  <div class="panel" id="nagao-relations">
-    <div class="panel-head">
-      <h2>Nagao relation encodings: correctness before cost</h2>
-      <p>Three-point decomposition on <code>y&sup2;+xy=x&sup3;+1</code>, with distinct
-        nonzero factor abscissas, all different from the target abscissa. The two Riemann&ndash;Roch
-        frontends construct no summation polynomial. The reference is exhaustive group arithmetic
-        on the identical domain. These are engineering candidates; full-attack <code>S</code>,
-        rho ratios and runtime-floor ratios are unmeasured.</p>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <caption>Frozen source: <code>research/nagao_relations/experiments/nagao_relation_comparison_20260913.json</code>.
-          Complete projected x-solution sets, across 86 five-bit and 24 nine-bit target cases.
-          The aggregate artifact is incomplete because 24 incidence cases hit their watchdog.</caption>
-        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">Complete / attempted</th>
-          <th scope="col" class="n">Watchdogs</th><th scope="col">Correctness</th>
-          <th scope="col">S / rho ratio</th><th scope="col">Class</th></tr></thead>
-        <tbody>
-          <tr><td>Chained S3 + verified lifts</td><td class="n">110 / 110</td><td class="n">0</td>
-            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">reference</span></td></tr>
-          <tr><td>RR incidence</td><td class="n">86 / 110</td><td class="n">24</td>
-            <td>Completed sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
-          <tr><td>RR norm</td><td class="n">110 / 110</td><td class="n">0</td>
-            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="panel-head">
-      <p><strong>Function-first support test:</strong> the residual norm <code>H</code> divides
-        the subspace polynomial <code>L_V</code>. Searching function coefficients before extracting
-        roots matched all 43 affine targets in each of two five-bit subspace panels: dimension two
-        yielded zero signed triples; dimension three yielded 72 verified signed triples across
-        33 targets. These signed counts differ from the projected x-tuples above. Sources:
-        <code>research/nagao_relations/experiments/nagao_annihilator_n5_d{2,3}_20260913.json</code> and
-        <code>research/nagao_relations/README.md</code>.</p>
-      <p>The next experiment compiles the support test into a search solver. Exhaustive coefficient
-        enumeration is a correctness instrument. No speedup, exponent improvement or rho crossover
-        has been established; the existing attack-cost ledger is unchanged.</p>
     </div>
   </div>
 
@@ -3640,6 +3667,17 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <code>p<sup>2</sup></code> against rho&rsquo;s <code>p<sup>1.5</sup></code> at genus 3, which is
     why the literature shrinks the factor base at small genus (Th&eacute;riault 2003; Gaudry,
     Thom&eacute;, Th&eacute;riault and Diem 2007).</p>
+    <p><strong>Round eight tested the textbook remedy and it does not pay here.</strong> A
+    reduced factor base with single large primes (Th&eacute;riault) was registered with per-row
+    predictions and measured on 11 instances, including genus 2 up to <code>p</code> = 4001 where the
+    model predicted a 4&ndash;6% saving. Measured: <strong>about 1%</strong> at best, nothing at genus 3 or 4
+    once seed variance is separated (a 0.864 at genus 3 <code>p</code> = 61 reads 1.003 at 60 seeds;
+    the registered H1 and H2 are recorded as falsified). Combined rows are denser than the model
+    assumed, and the charged partial bookkeeping costs 2&ndash;4%. Large primes do beat a reduced base
+    without them by 1.6&ndash;3.8&times;. <span class="chip">no change</span> One new size: genus 3 at
+    <code>N</code> = 3.2&middot;10<sup>7</sup> reads 0.23 raw, 0.46 renormalised &mdash; a single row,
+    not a refit. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_large_prime_r8/manifest.json">round eight</a>.</p>
     <p><strong>Superseded corrections, kept.</strong> Round five fitted against
     <code>log&#8322; p</code> and genus 4 missed at &minus;1.611 against &minus;1.0; restated against
     <code>N</code>, which the harness measures as <code>p<sup>1.91</sup></code>,
@@ -4039,6 +4077,53 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     window.addEventListener('scroll', hide, { passive: true });
   })();
 </script>
+<!-- BEGIN ic-tournament-reference-history -->
+<section class="panel" id="ic-tournament-reference-history">
+<div class="panel-head"><h2>The tournament&rsquo;s rho, as the reference was matched <span class="chip">accounting</span></h2>
+<p>Every complete-IC tournament panel below reports <em>Cost / rho</em>. Through round 0023 that rho was the
+  tournament worker&rsquo;s, which named each Frobenius class by running the abscissa through every image with
+  field squarings &mdash; about 9,100 of its 9,930 instructions a step at <code>n43a1</code>, a cost the IC arm had
+  replaced with a normal-basis rotation in round 0007. The reference was then matched in steps. This table is
+  that sequence, one row per reference, so each round&rsquo;s own <em>Cost / rho</em> column can be read
+  against it. No algorithm got worse at any step: what the ratios were counted against changed.
+  <strong>The line was stopped on 2026-09-29</strong> (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>): rounds
+  0023, 0024 and 0025 produced no win against a matched rho, and nothing in it is an advance.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md">campaign results</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">the control</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND24-pair-inverse.md">round 0024</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND25-lean-rho-switch.md">round 0025</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/sized_cache_rho_20260930/RESULTS.md">sized-cache re-timing</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>IC over rho, complete cold single-target DLP, every answer certified. Instructions are Valgrind Ir;
+  time is native wall. Ranges are per-cell point estimates across the cells named. Panel = the eight cells
+  <code>n13a0</code>&ndash;<code>n31a0</code> (r &le; 4.2&middot;10<sup>6</sup>); crossover = <code>n37a0</code>,
+  <code>n43a1</code>, <code>n59a0</code>, <code>n61a1</code> (r = 2.3&middot;10<sup>8</sup> to 1.2&middot;10<sup>10</sup>).</caption>
+<thead><tr><th>Reference rho</th><th>Where</th><th>IC arm</th><th>IC / rho, instructions</th><th>IC / rho, time</th><th>Class</th></tr></thead><tbody>
+<tr><td>Worker rho: orbit named by squaring</td><td>rounds 0007&ndash;0023</td><td>pair collector (tournament winner)</td>
+  <td>panel 0.6751 [0.6298, 0.7265] (round 0019), 0.6629 (round 0020); crossover 1.396&ndash;2.207 at best base (round 0022)</td>
+  <td>panel 0.8848 (round 0019)</td><td><span class="chip">engineering</span> against an unmatched reference</td></tr>
+<tr><td>Control: worker rho plus the IC arm&rsquo;s normal-basis orbit naming, nothing else</td><td>2026-09-23, 5 cells</td><td>triple collector, counted sizing</td>
+  <td><strong>1.19&ndash;2.88, above rho at every cell</strong> (<code>n23a1</code> 1.501 through <code>n43a1</code> 2.882)</td>
+  <td>not measured</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Matched rho: the control patch in every arm</td><td>round 0024, 12 cells</td><td>pair collector</td>
+  <td>six panel cells <strong>0.61&ndash;0.82</strong>; <code>n23a0</code> 0.971; <code>n23a1</code> <strong>1.126</strong>; crossover 1.88&ndash;9.26; all twelve cells 1.380 [0.847, 2.387]</td>
+  <td>six panel cells 0.87&ndash;0.95; <code>n23a1</code> 1.041</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Lean rho: the matched walk in the IC arm&rsquo;s own single-word arithmetic</td><td>round 0025, 12 cells</td><td>pair collector; pair/triple switch</td>
+  <td><strong>above rho at every cell</strong>: panel 1.36&ndash;2.56; crossover 2.1&ndash;13.7 (pair), 1.35&ndash;5.0 (switch)</td>
+  <td>four smallest cells 0.87&ndash;0.98, unpredicted; rho wins from <code>n23a0</code> on</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Lean rho with its recent-point cache sized to the walk</td><td>re-timing 2026-09-30, 5 cells, wall time only</td><td>pair collector (round-0025 incumbent)</td>
+  <td>unchanged</td><td><strong>0.98&ndash;1.03</strong> at the four small cells; 1.043 [1.015, 1.074] at <code>n23a0</code></td><td><span class="chip">engineering</span> in rho&rsquo;s favour</td></tr>
+</tbody></table></div>
+<div class="panel-body"><p>Read the rows in order. The round-0019 strict win on eight cells does not survive a matched rho: it fails at
+  <code>n23a1</code>. The six small cells that do survive it are lost to a rho running the same walk in the IC
+  arm&rsquo;s own arithmetic. The one lead left, in wall time at <code>n &le; 19</code>, came from the IC arm
+  executing 1.65&ndash;2.03&times; more instructions per second, mostly because rho zero-filled a fixed 160 KB
+  cache per solve, and sizing that cache removes it. The control&rsquo;s two formally unscored cells and its own
+  per-step cost (about 3,000 instructions against an IC probe&rsquo;s 1,100) are in its panel below. Each
+  round&rsquo;s panel keeps its figures as measured, with a note above it pointing here.</p></div>
+</section>
+<!-- END ic-tournament-reference-history -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0002 -->
 <section class="panel" id="ic-tournament-round-0002">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4066,6 +4151,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0002 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0003b -->
 <section class="panel" id="ic-tournament-round-0003b">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4100,6 +4186,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0003b -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0004 -->
 <section class="panel" id="ic-tournament-round-0004">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4133,6 +4220,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0004 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0005-batch16 -->
 <section class="panel" id="ic-tournament-round-0005-batch16">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4164,6 +4252,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0005-batch16 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006-batch16 -->
 <section class="panel" id="ic-tournament-round-0006-batch16">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4199,6 +4288,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006-batch16 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006 -->
 <section class="panel" id="ic-tournament-round-0006">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4232,6 +4322,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0007 -->
 <section class="panel" id="ic-tournament-round-0007">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4263,6 +4354,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0007 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0008 -->
 <section class="panel" id="ic-tournament-round-0008">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4292,6 +4384,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0008 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0009 -->
 <section class="panel" id="ic-tournament-round-0009">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4321,6 +4414,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0009 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0010 -->
 <section class="panel" id="ic-tournament-round-0010">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4351,6 +4445,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0010 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0011 -->
 <section class="panel" id="ic-tournament-round-0011">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4462,6 +4557,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       (<a href="https://modal.com/apps/a-buran28/main/ap-aNsvFhZH5TKB6fETEVUfLP">ap-aNsvFhZH5TKB6fETEVUfLP</a>);
       <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/per-sm/WAVES.md">boundaries and table</a>.</p>
   </section>
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-autolab-20260915 -->
 <section class="panel" id="ic-tournament-round-autolab-20260915">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4534,6 +4630,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
 </section>
 <!-- END ic-autolab-source-development-20260915 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-20260915t205319z -->
 <section class="panel" id="ic-tournament-round-20260915t205319z">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4570,6 +4667,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p><a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/README.md">Research report</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/development-measurements.json">Frozen measurements</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/development-audit.json">Independent audit</a>.</p>
 </section>
 <!-- END ic-autolab-next30-source-development-20260915 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-20260915t224645z -->
 <section class="panel" id="ic-tournament-round-20260915t224645z">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4592,6 +4690,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-20260915t224645z -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006b-single -->
 <section class="panel" id="ic-tournament-round-0006b-single">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4625,6 +4724,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006b-single -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0007-single-policy -->
 <section class="panel" id="ic-tournament-round-0007-single-policy">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
@@ -4670,6 +4770,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0007-single-policy -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0008-single-implementation -->
 <section class="panel" id="ic-tournament-round-0008-single-implementation">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4804,6 +4905,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       interval. Cold setup dominates. Kernel arithmetic is unchanged; no operation-count,
       whole-DLP, RDMA-network or crossover improvement is established.</p></div>
   </div>
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0012 -->
 <section class="panel" id="ic-tournament-round-0012">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4844,6 +4946,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0012 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0013 -->
 <section class="panel" id="ic-tournament-round-0013">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4882,6 +4985,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0013 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0014 -->
 <section class="panel" id="ic-tournament-round-0014">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4920,6 +5024,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0014 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0015 -->
 <section class="panel" id="ic-tournament-round-0015">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5025,6 +5130,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>Classification against the contract's boundaries: engineering where S<sub>sym</sub> / S<sub>x</sub> &lt; 1 (a constant on the solve, paid for in part by the base's halved yield), refuted at n = 31 where the u-base needed 2.6&times; the trials to a solvable matrix; the ratio to rho grows with n (990&times; &rarr; 63500&times;) and no arm approaches the floor, as the counting floor &kappa; &ge; &radic;(2(B+1)/&gamma;) says a symmetry cannot. The oracle-only refutation wins of &sect;8 (&times;300&ndash;6000 at n = 15) do not survive the pipeline: a base that refutes faster also decomposes fewer targets.</p>
 </section>
 <!-- END koblitz-symmetrised-e2e-20260927 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0016 -->
 <section class="panel" id="ic-tournament-round-0016">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5061,6 +5167,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0016 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0017 -->
 <section class="panel" id="ic-tournament-round-0017">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5182,6 +5289,7 @@ No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any 
 factor base, and this prices a decomposition oracle.</p>
 </section>
 <!-- END wdsat-rr-20260920 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0018b -->
 <section class="panel" id="ic-tournament-round-0018b">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5222,6 +5330,7 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0018b -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0019 -->
 <section class="panel" id="ic-tournament-round-0019">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5258,6 +5367,7 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0019 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0020 -->
 <section class="panel" id="ic-tournament-round-0020">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5331,6 +5441,7 @@ SAT. It does not speak to an encoding whose value set stays proper at d = 45, or
 F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 2<sup>131</sup>.</p>
 </section>
 <!-- END solver16-weil-descent-sat-20260920 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-crossover-20260922 -->
 <section class="panel" id="ic-crossover-20260922">
 <div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
@@ -5387,6 +5498,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
   calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-triple-table-20260923 -->
 <section class="panel" id="ic-triple-table-20260923">
 <div class="panel-head"><h2>A triple-sum table moves the crossover <span class="chip">engineering</span></h2>
@@ -5441,8 +5553,8 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
 <div class="table-scroll"><table>
 <caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (128 at <code>n43a1</code>),
   every report of every arm verified by <code>oracle.py</code> with the same logarithm. Geometric
-  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the tournament&rsquo;s
-  matched rho; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming.</caption>
+  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the rho the tournament had used as its
+  matched reference; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming, which shows it was not matched.</caption>
 <thead><tr><th>Cell</th><th>r</th><th>counted / triple</th><th>counted / worker rho</th><th>counted / control</th></tr></thead><tbody>
 <tr><td>n23a1</td><td>4,196,903</td><td>0.968 (identity)</td><td>1.210 [1.121, 1.303]</td><td>1.501 [1.433, 1.574]&dagger;</td></tr>
 <tr><td>n37a0</td><td>230,603,167</td><td>0.991 (identity)</td><td>0.795 [0.679, 0.935]</td><td><strong>1.723</strong> [1.569, 1.892]</td></tr>
@@ -6862,6 +6974,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     per-rung regression. Every figure here is for the code before #697 (<code>31bedbdf</code>).</p>
 </section>
 <!-- END groebner-instructions-20260925 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
@@ -8367,6 +8480,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p>All-line degree-263 transport: <a href="https://github.com/aburan28/crypto/pull/1005">PR #1005</a> derives each kernel generator and complement from a frozen rational twist-torsion basis and verifies the normalized forward/dual identities on public P and Q for all 264 kernel directions, plus six fixed directions on a second independent basis. The producer and fresh-process replay agree on 141,480 nonzero forward/reverse twist-kernel exceptions, 540 off-curve kernel-abscissa rejections, 12 direct bit-polynomial full-coordinate reference lines, 20 other negative controls, and 264 distinct exact first-basis kernel sets. Both horizontal directions return to source b=1; the other 262 descend. All raw reverse maps compose as [-263] and the sign-corrected duals as [263]. The 598.296-second producer uses supplied torsion bases and is a correctness certificate, not a cold factor-base or PDP-cost row. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/dual_all_lines_20260930/DECISION.md">Scoped decision and replay</a>. A different leaf endomorphism order/discriminant does not by itself imply easier native PDP; natural n=131 yield, rank and full DLP cost remain unset.</p>
     <p>Native leaf representation: <a href="https://github.com/aburan28/crypto/pull/973">PR #973</a> passed the generic full-point addition edge on 20 small toy curves and both saved degree-263 leaves: 152,432 valid and invalid circuit evaluations, 19,974 archived rows, 40 actual-leaf controls, and zero reference mismatches (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/native_fullpoint_edge_20260929/DECISION.md">decision</a>). <a href="https://github.com/aburan28/crypto/pull/976">PR #976</a> then bound three implicit native factor domains into a full-point chain. On GF(2<sup>5</sup>), all 27 ordered triples and one wrong-target control per triple passed independent replay; the generic/generic SAT model lifted to the oracle point sum, and an unsupported toy target returned UNSAT with exhaustive oracle confirmation but no external proof trace. For the actual leaves [1,0] and [1,4], the complete chain used 1,312 primary inputs and 650,376/650,391 DAG nodes; exact target-O DIMACS size was 48,285,979/48,287,148 bytes (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/native_m3_chain_20260929/DECISION.md">decision and replay scope</a>). These are correctness and representation-size diagnostics, not PDP-yield or full-cost rows. The first two held attempts, with the initial narrow SAT witness and the second attempt's target-selector defect, remain archived.</p>
     <p>Native m3 counting admission: <a href="https://github.com/aburan28/crypto/pull/991">PR #991</a> used the balanced m10 screen's 79,770 total physical slot choices as a fixed budget. Even allocating them optimally across three ordered slots yields at most 18,799,877,179,000 tuples and a necessary one-coset target-support ceiling of 2.7624e-26; for one million uniformly marginal probes, the probability of any hit is at most 2.7624e-20. A 1% necessary ceiling instead requires at least 5,685,182,383,138 physical slot choices; retaining logs for all nonzero projected factors would leave at least 5,424,792,351 classes even after an optimistic free signed transported-Frobenius quotient. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/native_m3_counting_admission_20260929/DECISION.md">Exact bound and scoped decision</a>. This rules out only the frozen m3 physical-budget/target-cap route, not larger bases or higher-arity solvers. No natural n = 131 factor count, PDP yield, rank or cost was measured.</p>
+    <p><span class="chip">accounting</span> Exact m=83 natural-relation capacity audit: the archived 332- and 498-physical-point full-orbit bases have m=3 one-target support ceilings of 2.54535220e-18 and 8.56483486e-18. Their four-natural-target union bounds are 1.01814088e-17 and 3.42593394e-17; across all eight targets the bound is 4.44407482e-17. The recorded zero hits and rank zero cannot discriminate natural-yield solver or base quality at these fixed sizes. Reaching an illustrative 1% tuple-counting ceiling requires at least 52,544,464 physical points for m=3 or 780 for m=10 at m=83; the analogous n=131 m=10 threshold is 21,837. These are necessary support-count thresholds, not measured yield, rank, solver cost or an ECC2K-130 speedup. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m83_relation_capacity_20260930/RESULT.md">Proof, exact table and independent replay</a>; <a href="https://github.com/aburan28/crypto/pull/1094">PR #1094</a>.</p>
     <p>Exact fixed-leaf m10 support census: the preregistered source/leaf panel scanned all 294,912 Gray masks in 33 slots on the source and certified degree-263 leaves [1,0] and [1,4], with full raw-row replay on hosted Linux and separate macOS arm64 hosts. Source low slots each have 7,977 physical points; fixed-leaf low slots vary from 8,063–8,339 and 8,087–8,323 respectively, so source one-slot Frobenius count transfer fails on each leaf. Balanced raw tuple products are 1.2789× and 1.3166× source, while uncompressed projected sign-class unions are only 1.02495× and 1.02793× source. Unequal products are 1.2629× and 1.3027× source; unions are 1.02225× and 1.02550×. These are representation counts and necessary capacity ratios, not PDP hit rates or attack gains. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/leaf_m10_support_outcome_20260930/DECISION.md">Decision, exact table, raw archive and two-host replay</a>.</p>
     <p>Equal-column m10 leaf bound: if a native policy only thins those measured collision-free, disjoint leaf slots to the source's cheap-Frobenius-normalized 3,988 balanced or 8,062 unequal log columns, the maximum ordered physical tuple counts divided by q are only 1.55032e−10 and 1.75611e−7. Even a counting ceiling of one requires at least 38,213 distinct leaf columns in this disjoint-slot model, 9.582× or 4.740× the two source budgets. This is a conditional no-go for that fixed-domain equal-column policy; redesigned overlapping slots or a verified cheap leaf action need separate support, solver, rank, and full-cost tests. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/leaf_m10_column_budget_20260930/DECISION.md">Proof, exact products and scope</a>.</p>
     <!-- BEGIN ecc2k130-degree7-m3-four-policy-20260930 -->
@@ -8391,6 +8505,9 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
       </tbody></table></div>
     <p>The exact support ranges from 92 to 96 of 421 subgroup points, with 42–52 eligible in each disjoint holdout; every eligible first-witness base-row set has rank eight. All 16 cells independently recovered [360]G = Q, and source/transported and native/pullback witness and rank trajectories agree exactly. Native beats transported on charged field multiplications in only one of four paired cells, while original is cheapest in all four. The 236,057-multiplication kernel search consumes roughly 63–67% of native cold cost. The original one-shot verifier failed before replay because of a metered-curve import hook; its failure is preserved, and a source-locked repair passed all 8,192 archived cases without regenerating targets. This is a degree-21 toy negative for native policy cost advantage, not n=131 PDP yield or a full-method speed claim. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_four_policy_20260930/RESULT.md">Measured decision</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_four_policy_20260930/ANALYSIS.json">all cells and exact support</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_four_policy_20260930/evidence_run_36722040881/MANIFEST.json">raw archive, both receipts and hashes</a>; <a href="https://github.com/aburan28/crypto/pull/1067">PR #1067</a>.</p>
     <!-- END ecc2k130-degree7-m3-four-policy-20260930 -->
+    <!-- BEGIN ecc2k130-degree7-m3-base-selector-20260930 -->
+    <p>Charged degree-7 m3 base selection: the preregistered two-candidate, eight-useful-point selector passed independent replay of all 64 same-Q control/selected four-policy cells and 32,768 target cases. Every candidate's first-witness base rows had rank eight and all cells recovered [260]G = Q. After charging both candidate scans and both exact scores, selected cold field multiplications were lower in only <strong>2/8 source</strong> and <strong>0/8 native-leaf</strong> seed/holdout pairs; source had two hit regressions and three later full-rank solves, and native had two of each. The frozen all-pairs advantage gate fails. The extra second scan plus scores cost 28,338–51,245 source and 31,647–47,784 native-leaf field multiplications per seed. Native-leaf cold cost exceeded the original source policy in all 16 control/selected comparisons. A sparse-checkout preflight failure before any new fixture was generated is preserved separately. This is a verified negative for this selector on GF(2<sup>21</sup>), not a natural n = 131 PDP-yield or rho-crossover measurement. The 27-file source lock was merged in <a href="https://github.com/aburan28/crypto/pull/1089">PR #1089</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_base_selector_20260930/RESULT.md">decision and complete paired table</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_base_selector_20260930/ANALYSIS.json">machine-readable gate</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z/EVIDENCE.json">raw manifest and replay</a> preserve the result.</p>
+    <!-- END ecc2k130-degree7-m3-base-selector-20260930 -->
     <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. The next high-arity exact-target gate is the review-gated m10 representation-capacity attempt <a href="https://github.com/aburan28/crypto/pull/937">PR #937</a>, followed, if admitted, by a separately frozen natural-target solver/yield test with checked positive lifts, explicit proved-UNSAT versus UNKNOWN/resource exits, a physical-support/rank admission bound, charged native leaf action, and equal-useful-size comparison with original, transported and pullback arms. No degree-263 CNF has been solved; n = 131 useful factor count, natural PDP yield, rank, full-DLP cost and rho crossover remain unset. The separate fresh-stream group-law four-sum oracle is complete in <a href="https://github.com/aburan28/crypto/pull/757">PR #757</a>; its support-versus-extractor result appears below with the verified n = 53 full-rank and rho controls and the completed n = 37/41 sparse-base sweep.</p>
   </div>
 </section>
@@ -9339,9 +9456,26 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <tr><td>53 / 1</td><td>220</td><td>13.2293</td><td>&mdash;</td><td>27.4483 [27.1951, 27.6616]</td><td>1/1</td><td>no CPU crossover</td></tr>
 <tr><td>53 / 1,024</td><td>440</td><td>0.7773</td><td>0.7889</td><td>off 1.6442; blocked 1.4727</td><td>1,024/1,024</td><td>no CPU crossover</td></tr>
 </tbody></table></div>
-<p>The blocked filter uses 2.10%/1.49% more guest instructions than off at n41/n53 batch, although the separately eligible same-source/Q native repeat used 14.7%/10.8% less complete CPU. The follow-on cold panel passed hosted and separate macOS replay for all 105 children and 15,450 target logs; every paired A/A and isolation gate passed. At n37/L1,024, off IC uses 0.5165&times; rho Ir but 1.7064&times; its native CPU. Ir is a common all-phase work count, not a cycle or group-addition equivalent. All six tested current-source W64 n/L cells lack a matched-rho cold CPU crossover. Short-arm wall measurements are coarsened by the runner's 0.2-second polling and are ineligible as speed claims. A disjoint-Q confirmation, n83 wider-backend confidence, GF(2<sup>131</sup>) transfer and descendant-native m&ge;3 PDP yield remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md">Complete instruction archive</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md">four-cell cold CPU archive and decision</a>.</p>
+<p>The blocked filter uses 2.10%/1.49% more guest instructions than off at n41/n53 batch, although the separately eligible same-source/Q native repeat used 14.7%/10.8% less complete CPU. The follow-on cold panel passed hosted and separate macOS replay for all 105 children and 15,450 target logs; every paired A/A and isolation gate passed. At n37/L1,024, off IC uses 0.5165&times; rho Ir but 1.7064&times; its native CPU. Ir is a common all-phase work count, not a cycle or group-addition equivalent. All six tested current-source W64 n/L cells lack a matched-rho cold CPU crossover. Short-arm wall measurements are coarsened by the runner's 0.2-second polling and are ineligible as speed claims. The newer disjoint-Q follow-on below is timing-censored; n83 wider-backend confidence, GF(2<sup>131</sup>) transfer and descendant-native m&ge;3 PDP yield remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md">Complete instruction archive</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md">four-cell cold CPU archive and decision</a>.</p>
 </section>
 <!-- END compact-ir-ledger-20260930 -->
+<!-- BEGIN disjoint-cold-outcome-20261001 -->
+<section class="panel" id="disjoint-cold-outcome-20261001">
+<div class="panel-head"><h2>Fresh disjoint-Q compact cold panel: six timing cells censored <span class="chip">inconclusive</span></h2>
+<p>The one-shot n37/n41/n53 W64 panel generated 15,390 new fixed public Q and ran complete compact/rho cold processes on the same Q within each block. Five cells passed the frozen verifier and a separate macOS replay: 30,810 arm-target logarithms and 80 compact full-rank traces. n37/L1,024 executed all 15 children but failed the frozen pin-order assertion; a post-run three-pairing addendum verified its 15,360 outputs and ten ranks without promoting its timing. All five frozen-PASS cells met A/A drift and had zero sampled contention, but the stricter preregistered isolation rule found 81&ndash;82 user threads still allowed on the reserved CPUs. <strong>0/6 cells are timing-eligible.</strong> The ratios below are archived CPU diagnostics only; no disjoint-Q crossover or no-go is claimed.</p></div>
+<div class="table-scroll"><table>
+<caption>Whole-child wait4 user+system CPU, paired within fixed Q and host. Each rho reference is 1.000; descriptive compact intervals are the preregistered log-t arithmetic but fail the isolation gate. No common operation-equivalent S is calibrated.</caption>
+<thead><tr><th>n / L / K</th><th>Arm</th><th>CPU / rho, descriptive 95% interval</th><th>Correctness</th><th>Timing gate</th><th>S</th></tr></thead><tbody>
+<tr><td>37 / 1 / 7</td><td>rho / compact off</td><td>1.000 / 3.424 [3.336, 3.557]</td><td>20 rho logs; 40 compact logs and ranks</td><td>censored</td><td>unset</td></tr>
+<tr><td>37 / 1,024 / 42</td><td>rho / compact off</td><td>no eligible ratio</td><td>frozen FAIL; post-run addendum: 15,360 logs, 10 ranks</td><td>censored</td><td>unset</td></tr>
+<tr><td>41 / 1 / 85</td><td>rho / compact off</td><td>1.000 / 11.244 [8.819, 15.011]</td><td>5 rho logs; 10 compact logs and ranks</td><td>censored</td><td>unset</td></tr>
+<tr><td>41 / 1,024 / 255</td><td>rho / compact blocked</td><td>1.000 / 1.433 [1.415, 1.458]</td><td>5,120 rho and 10,240 compact logs; 10 ranks</td><td>censored</td><td>unset</td></tr>
+<tr><td>53 / 1 / 220</td><td>rho / compact off</td><td>1.000 / 33.165 [16.420, 72.025]</td><td>5 rho logs; 10 compact logs and ranks</td><td>censored</td><td>unset</td></tr>
+<tr><td>53 / 1,024 / 440</td><td>rho / compact blocked</td><td>1.000 / 1.512 [1.475, 1.551]</td><td>5,120 rho and 10,240 compact logs; 10 ranks</td><td>censored</td><td>unset</td></tr>
+</tbody></table></div>
+<p>The six raw cell archives, the original failed receipt, both-host replay, source/input hashes, diagnostic addendum and exact decision are in <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/disjoint_cold_outcome_20261001/RESULT.md">the outcome report</a> and <a href="https://github.com/aburan28/crypto/pull/1097">PR #1097</a>. The next experiment must freeze fresh Q, repair the pin-order checker, and use a prospective observed-contention gate; the present ratios cannot be reclassified after the fact.</p>
+</section>
+<!-- END disjoint-cold-outcome-20261001 -->
 <!-- BEGIN point-sum-cold-outcome-20260930 -->
 <section class="panel" id="point-sum-cold-outcome-20260930">
 <div class="panel-head"><h2>Fresh-Q point-sum cold gate: no timing admitted <span class="chip">inconclusive</span></h2>

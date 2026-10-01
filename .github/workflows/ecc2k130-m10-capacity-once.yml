@@ -17,7 +17,7 @@ jobs:
   preflight:
     if: >-
       github.event.label.name == 'run-ecc2k130-m10-capacity-once' &&
-      github.event.pull_request.number == 935 &&
+      github.event.pull_request.head.ref == 'codex/n131-m10-capacity-attempt-20260929' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 5

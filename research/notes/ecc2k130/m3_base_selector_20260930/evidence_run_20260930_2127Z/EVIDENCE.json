@@ -1,0 +1,14 @@
+{
+  "cases_per_cell": 512,
+  "preflight_without_fixtures": "evidence_run_20260930_2125Z/preflight_failure.json",
+  "producer_command": [
+    "research/notes/ecc2k130/m3_base_selector_20260930/produce.py",
+    "--out",
+    "research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z"
+  ],
+  "raw_cell_files": 64,
+  "result_sha256": "173518b8109d3e44d17ad72216fa081cacf29b63cf46dc2d604f76be83144d33",
+  "schema": "ecc2k130-degree7-m3-base-selector-evidence-v1",
+  "source_head": "991b904720d0b08b6cbc171f195a433930cd4f5e",
+  "source_lock_pr": 1089
+}
