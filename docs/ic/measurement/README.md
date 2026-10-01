@@ -192,7 +192,11 @@ differ by sqrt(2n), 6.8x at n = 23 (audit X01).
 Every record carries the sizes that decide whether two configurations
 solved the same problem. Unknown is `null`, never zero.
 
-- **Factor base**: `usable_points` is the fb count of an IC1 candidate id.
+- **Factor base**: `usable_points` is the fb count of an IC1 candidate id,
+  the subgroup-usable points. `ic bench` does not report it (its
+  `signed_points` includes torsion with a trivial r-component, two extra
+  points on the n = 13 prefix base), so its records carry `null` there and
+  the count under `signed_points`; cryptanalysis reports both.
   The record also carries `signed_points`, `abscissae_with_points`,
   `abscissae_allowed`, `columns`, `orbit_representatives`,
   `points_per_column` and `nominal_dimension`. These are never substituted

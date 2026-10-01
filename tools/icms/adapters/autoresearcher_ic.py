@@ -93,6 +93,10 @@ class AutoresearcherIc:
             p.append(f"unknown decomposition.params {sorted(extra)}")
         if dec["method"] != "mitm" and "table_arity" in (dec.get("params") or {}):
             p.append("table_arity is a mitm parameter")
+        if dec.get("encoding", "none") != "none" or dec.get("splitting", "none") != "none":
+            p.append("the solver has no encoding or splitting choice: decomposition.encoding and splitting must be none")
+        if spec["linear_algebra"].get("filtering"):
+            p.append("the solver does no relation filtering: drop linear_algebra.filtering")
         if spec["relations"]["stop"] != "first_log" or spec["relations"]["collector"] != "random":
             p.append("solve stops at the first relation set that fixes k: relations {collector: random, stop: first_log}")
         la = spec["linear_algebra"]
@@ -160,7 +164,11 @@ class AutoresearcherIc:
         order = int(curve["order"])
         fbi = ic.get("factor_base") or {}
         size = fbi.get("size")
-        s3 = (ic.get("s3_solves") or 0) + (ic.get("table_s3_solves") or 0)
+        # The producer's s3_solves already includes the tail table's solves
+        # (solver.py: stats.s3_solves + table.s3_solves); table_s3_solves is
+        # the same work reported again on its own.
+        s3 = ic.get("s3_solves")
+        table_s3 = ic.get("table_s3_solves") or 0
         sec = {k: ic.get(f"seconds_{k}") for k in ("factor_base", "table", "relations", "linalg", "total")}
 
         def ns(x: float | None) -> float | None:
@@ -168,7 +176,7 @@ class AutoresearcherIc:
 
         units = {
             "count.s3_solves": {"total": s3 if verified else None, "deterministic": True, "host_dependent_because": [],
-                                "note": "s3_solves + table_s3_solves; one modular square root each"},
+                                "note": "the producer's s3_solves, table solves included (one modular square root each)"},
             "count.group_additions": {"total": ic.get("group_ops") if verified else None, "deterministic": True,
                                       "host_dependent_because": [],
                                       "note": "group_ops, target_ops included; S3 solves and LA field operations excluded"},
@@ -181,7 +189,8 @@ class AutoresearcherIc:
             "precompute": {"ops": None, "ops_unit": None, "wall_ns": ns(sec["table"]),
                            "native": {"table_entries": ic.get("table_entries"), "table_s3_solves": ic.get("table_s3_solves")}},
             "pdp": {"ops": None, "ops_unit": None, "wall_ns": ns(sec["relations"]),
-                    "native": {"includes": relation_note, "s3_solves": ic.get("s3_solves"),
+                    "native": {"includes": relation_note,
+                               "s3_solves": None if s3 is None else s3 - table_s3,
                                "membership_tests": ic.get("membership_tests")}},
             "relation_la": {"ops": None, "ops_unit": None, "wall_ns": ns(sec["linalg"]),
                             "native": {"la_ops": ic.get("la_ops"), "la_pivot": ic.get("la_pivot")}},
@@ -224,10 +233,13 @@ class AutoresearcherIc:
             },
             "phases": phases,
             "windows": {
-                "cold_end_to_end": {"conformance": "exact_operations", "ops": ic.get("group_ops") if verified else None,
+                "cold_end_to_end": {"conformance": "derived", "ops": ic.get("group_ops") if verified else None,
                                     "ops_unit": "count.group_additions", "wall_ns": ns(sec["total"]),
                                     "composition": {"factor_base": "seconds_factor_base", "precompute": "seconds_table",
-                                                    "pdp": relation_note, "relation_la": "seconds_linalg"}},
+                                                    "pdp": relation_note, "relation_la": "seconds_linalg"},
+                                    "why_derived": "the producer counts group_ops before its final [k]P = Q check, so the "
+                                                   "recovery check's additions are not in the total, and it has no "
+                                                   "separate recovery_check clock"},
                 "whole_process": {"conformance": "runner", "ops": None, "ops_unit": None, "wall_ns": None},
             },
             "consistency": [],

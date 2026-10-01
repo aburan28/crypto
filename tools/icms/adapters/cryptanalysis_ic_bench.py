@@ -82,12 +82,18 @@ class CryptanalysisIcBench:
             p.append("ic-bench bases are F_2-subspaces: factor_base.family must be binary_subspace")
         if params.get("basis_law") not in LAWS:
             p.append(f"factor_base.params.basis_law must be one of {list(LAWS)}")
-        if sorted(fb.get("quotient") or []) != ["negation"]:
-            p.append("ic-bench folds P and -P into one column (quotient_rule sign) and folds Frobenius orbits only for "
-                     "the invariant law; declare quotient [negation]")
+        want = ["frobenius", "negation"] if params.get("basis_law") == "invariant" else ["negation"]
+        if sorted(fb.get("quotient") or []) != want:
+            p.append("ic-bench folds P and -P into one column, and also Frobenius orbits when the base is "
+                     f"Frobenius-stable (the invariant law): declare quotient {sorted(want)}")
         if fb.get("large_primes", {}).get("mode", "none") != "none" or fb.get("partition"):
             p.append("ic-bench has no large-prime or partitioned base")
         dec = spec["decomposition"]
+        if dec.get("splitting", "none") != "none":
+            p.append("ic-bench has no split decomposition: splitting must be none")
+        la = spec["linear_algebra"]
+        if la.get("pivot") or la.get("filtering"):
+            p.append("ic-bench's elimination takes no pivot rule or filtering: drop linear_algebra.pivot/filtering")
         if dec["method"] != "algebraic" or dec.get("encoding") != "expanded_semaev":
             p.append("ic-bench decomposes by Weil descent of the summation polynomial: "
                      "decomposition must be {method: algebraic, encoding: expanded_semaev}")
@@ -100,6 +106,9 @@ class CryptanalysisIcBench:
                 p.append("decomposition.solver.options.mode must be xl or mxl")
             if opts.get("formulation", "direct") != "direct":
                 p.append("ic-bench cells use the direct formulation")
+            extra = set(opts) - {"mode", "formulation", "d_max", "max_cols", "max_rows"}
+            if extra:
+                p.append(f"the Macaulay scan reads no option {sorted(extra)}")
         if spec["relations"]["stop"] != "full_rank":
             p.append("ic-bench collects to the achievable rank, then descends: relations.stop must be full_rank")
         if spec["relations"]["collector"] != "sample":
@@ -211,6 +220,13 @@ class CryptanalysisIcBench:
                 "why_derived": "ic-bench times the four target subphases on one clock (target_descent), so the five "
                                "exclusive online clocks AGENTS.md asks for are not separable"}
         fb_points, cols = stage.get("fb_points"), stage.get("effective_columns")
+        ppc = (fb_points / cols) if fb_points and cols else None
+        declared = set(spec["factor_base"].get("quotient") or [])
+        consistency = []
+        if ppc is not None and (ppc > 2.5) != ("frobenius" in declared):
+            consistency.append({"field": "factor_base.quotient", "declared": sorted(declared),
+                                "observed_points_per_column": ppc,
+                                "problem": "the Frobenius fold the spec declares is not what the receipt shows"})
         l = stage.get("nominal_dimension")
         pdp = rec["phase_counters"].get("pdp") or {}
         return {
@@ -220,7 +236,9 @@ class CryptanalysisIcBench:
             "units": units,
             "reference": {"id": ref_id,
                           "ops": rho_plain if ref_id == "rho.plain" else rho_frob,
-                          "ratio": rec.get("ratio_to_rho") if ref_id == "rho.plain" else rec.get("ratio_to_floor"),
+                          # a k-target total over a one-target rho is not a one-target ratio
+                          "ratio": None if workload["record"]["targets"] != 1 else
+                                   (rec.get("ratio_to_rho") if ref_id == "rho.plain" else rec.get("ratio_to_floor")),
                           "unit": "cryptanalysis.rps",
                           "rho.plain": {"ops": rho_plain, "ratio": rec.get("ratio_to_rho"), "rule": "sqrt(pi r / 2) x w_ec_add"},
                           "rho.signed_frobenius": {"ops": rho_frob, "ratio": rec.get("ratio_to_floor"),
@@ -230,7 +248,10 @@ class CryptanalysisIcBench:
                 "instance": {"curve_id": rec.get("source_curve_ref"), "r": str(r), "log2_r": math.log2(r),
                              "degree": n},
                 "factor_base": {"family": "binary_subspace", "producer_name": stage.get("family") or rec["cell"]["family"],
-                                "nominal_dimension": l, "usable_points": fb_points, "signed_points": fb_points,
+                                # fb_points is B, the subgroup-usable count; geometric_points is every point
+                                # with x in V, torsion included (the analogue of ic bench's signed_points)
+                                "nominal_dimension": l, "usable_points": fb_points,
+                                "signed_points": stage.get("geometric_points"),
                                 "abscissae_with_points": None, "abscissae_allowed": (2 ** l) if l is not None else None,
                                 "columns": cols, "orbit_representatives": cols,
                                 "points_per_column": (fb_points / cols) if fb_points and cols else None,
@@ -255,7 +276,7 @@ class CryptanalysisIcBench:
             },
             "phases": phases,
             "windows": windows,
-            "consistency": [],
+            "consistency": consistency,
             "producer": {"operation": "ic-bench run_cell", "schema_version": rec.get("schema_version"),
                          "kind": rec.get("kind"), "operation_unit": rec.get("operation_unit"),
                          "provenance": rec.get("provenance"), "resource_envelope": rec.get("resource_envelope"),

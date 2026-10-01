@@ -33,15 +33,14 @@ from ..canonical import sha256_file
 from ..registry import Registry
 from . import Context
 
-METHOD_TO_ORACLE = {"subtract": "subtract", "mitm": "mitm", "pair_table": "mitm",
-                    "mitm_frobenius": "mitm-frobenius", "algebraic": "descent-algebraic",
-                    "symmetrised": "symmetrised"}
+METHOD_TO_ORACLE = {"subtract": "subtract", "mitm": "mitm", "mitm_frobenius": "mitm-frobenius",
+                    "algebraic": "descent-algebraic", "symmetrised": "symmetrised"}
 LINALG = {"incremental_gauss": "incremental-gauss", "structured_gauss": "structured-gauss"}
 # The symmetrised oracle ignores --solver: it builds its own engine from its own
 # parameters (plugins.rs SymmetrisedOracle::prepare), so the spec's solver is
 # translated into those parameters.
 SYMMETRISED_ENGINES = ("inherited-f4", "matrix-f4", "matrix-f5")
-UNITS = ("crypto.S.gae_pinned", "time.wall_ns", "time.cpu_ns")
+UNITS = ("crypto.S.gae_pinned", "time.wall_ns")
 WINDOWS = ("cold_end_to_end", "online_one_target", "whole_process")
 
 
@@ -108,8 +107,15 @@ class CryptoIcBench:
             p.append("the symmetrised oracle needs encoding symmetrized")
         if dec["method"] in ("subtract",) and dec["arity"] != 2:
             p.append("subtract is the m = 2 oracle")
-        if dec.get("splitting", "none") not in ("none", "mitm_table"):
-            p.append("ic bench has no split decomposition")
+        if dec.get("splitting", "none") != "none":
+            p.append("ic bench has no split decomposition (its mitm oracle is the pair table): splitting must be none")
+        if dec["method"] not in ("algebraic", "symmetrised") and dec.get("encoding", "none") != "none":
+            p.append(f"the {dec['method']} oracle has no encoding: decomposition.encoding must be none")
+        if (spec.get("descent") or {}).get("method", "embedded") != "embedded":
+            p.append("ic bench writes the target into every relation: descent.method must be embedded")
+        la = spec["linear_algebra"]
+        if la.get("pivot") or la.get("filtering"):
+            p.append("ic bench's relation solvers take no pivot rule or filtering: drop linear_algebra.pivot/filtering")
         if "max_trials" not in spec["relations"]:
             p.append("ic bench gives up after a trial budget (default 2,000,000): set relations.max_trials")
         if dec["method"] in ("algebraic", "symmetrised") and (dec.get("limits") or {}).get("per_call_seconds") is None:
@@ -250,6 +256,12 @@ class CryptoIcBench:
                                 "problem": "the Frobenius/automorphism fold the spec declares is not what the report shows"})
         dim = (spec["factor_base"].get("params") or {}).get("dimension")
 
+        def per_system(key: str) -> int | None:
+            total, calls = (solver or {}).get("extra", {}).get(key), (solver or {}).get("calls")
+            if total is None or not calls or total % calls:
+                return None
+            return total // calls
+
         def phase(cost: dict[str, Any] | None) -> dict[str, Any] | None:
             if not cost:
                 return None
@@ -299,6 +311,8 @@ class CryptoIcBench:
                     "unpriced_counters": unpriced_counters,
                     "calibration_in_report": cal,
                 },
+                "time.wall_ns": {"total": total(cold_parts, "wall_ns"), "deterministic": False,
+                                 "host_dependent_because": ["the producer's phase clocks on this host (cold window)"]},
             },
             "reference": {"id": "rho.measured_matched", "method": rho.get("method"), "automorphisms": rho.get("automorphisms"),
                           "runs": rho.get("runs"), "mean_s": rho.get("mean_s"), "all_verified": rho.get("all_verified"),
@@ -306,8 +320,11 @@ class CryptoIcBench:
             "metrics": {
                 "instance": {"slug": row.get("instance") or rep.get("instance"), "r": str(r) if r is not None else None,
                              "log2_r": row.get("log2_r"), "group_order": str(row.get("group_order")) if row.get("group_order") is not None else None},
+                # ic bench's signed_points counts every point with x in the base,
+                # torsion with a trivial r-component included, so it is not B
+                # (the subgroup-usable count): usable_points is not reported.
                 "factor_base": {"family": spec["factor_base"]["family"], "producer_name": fb.get("name"),
-                                "nominal_dimension": dim, "usable_points": fb.get("signed_points"),
+                                "nominal_dimension": dim, "usable_points": None,
                                 "signed_points": fb.get("signed_points"), "abscissae_with_points": fb.get("abscissae"),
                                 "abscissae_allowed": None, "columns": fb.get("columns"),
                                 "points_per_column": ppc, "orbit_representatives": fb.get("columns")},
@@ -319,14 +336,21 @@ class CryptoIcBench:
                     "max_degree": max(system.get("degrees") or [0]) or None, "degrees": system.get("degrees"),
                     "semi_regular_degree": system.get("semi_regular_degree"),
                     "anf_monomials": None, "cnf_variables": None, "cnf_aux_variables": None,
-                    "cnf_clauses": (solver or {}).get("extra", {}).get("original_clauses"),
-                    "xor_rows": (solver or {}).get("extra", {}).get("native_xor_rows"), "literals": None,
-                    "note": "cnf_clauses and xor_rows are summed over every solver call (ic_framework SolverTotals)"},
+                    "cnf_clauses": per_system("original_clauses"),
+                    "xor_rows": per_system("native_xor_rows"), "literals": None,
+                    "note": "cnf_clauses and xor_rows are per system: the run totals (ic_framework SolverTotals, "
+                            "summed over every solver call) divided by the call count, null when that is not exact; "
+                            "the totals stay in solver.extra",
+                    "native": {"cnf_clauses_total": (solver or {}).get("extra", {}).get("original_clauses"),
+                               "xor_rows_total": (solver or {}).get("extra", {}).get("native_xor_rows")}},
                 "solver": None if not solver else {
                     "name": solver.get("name"), "calls": solver.get("calls"), "ops": solver.get("ops"),
                     "op_unit": solver.get("op_unit"), "priced_by": solver.get("priced_by"),
                     "wall_ns": solver.get("wall_ns"), "budget_exceeded": solver.get("budget_exceeded"),
-                    "solving_degree_mean": solver.get("solving_degree_mean"), "solving_degree_max": solver.get("solving_degree_max"),
+                    "solving_degree_mean": solver.get("solving_degree_mean"),
+                    # a plain u32 that solvers without a solving degree leave at 0: unknown, not zero
+                    "solving_degree_max": (solver.get("solving_degree_max") or None)
+                                          if solver.get("solving_degree_mean") is None else solver.get("solving_degree_max"),
                     "peak_bytes": solver.get("peak_bytes") or None,
                     "conflicts": solver.get("ops") if solver.get("op_unit") == "conflicts" else None,
                     "decisions": solver.get("extra", {}).get("decisions"), "propagations": solver.get("extra", {}).get("propagations"),

@@ -628,6 +628,89 @@ class OtherAdapterTests(unittest.TestCase):
         self.assertEqual(out["reference"]["id"], "rho.plain")
 
 
+class AdapterReviewRegressionTests(unittest.TestCase):
+    """Adapter mapping defects an adversarial review reproduced; each must stay fixed."""
+
+    def setUp(self):
+        self.reg = Registry.load()
+        self.ctx = adapters.Context(repo_root=REPO, exec_dir="/nonexistent", out_dir="/nonexistent")
+
+    def spec(self, name):
+        return load(os.path.join(SPECS, name), self.reg)
+
+    def test_mitm_table_solves_are_not_counted_twice(self):
+        ad = adapters.get("autoresearcher.index_calculus")
+        sp = self.spec("ar-p16-smallx-m2-mitm.yaml")
+        fx = os.path.join(FIX, "autoresearcher-p14-smallx-m3-mitm.json")
+        out = adapters.normalise(ad.parse(sp["spec"], sp["workloads"][0], self.ctx, fx), sp["spec"], self.reg)
+        ic = json.loads(_read(fx))["index_calculus"]
+        self.assertGreater(ic["table_s3_solves"], 0)
+        self.assertEqual(out["units"]["count.s3_solves"]["total"], ic["s3_solves"])
+        self.assertEqual(out["phases"]["pdp"]["native"]["s3_solves"], ic["s3_solves"] - ic["table_s3_solves"])
+        self.assertEqual(out["windows"]["cold_end_to_end"]["conformance"], "derived")
+
+    def test_crypto_does_not_call_signed_points_usable(self):
+        ad = adapters.get("crypto.ic_bench")
+        sp = self.spec("k23-subspace-d7-mitm2.yaml")
+        out = ad.parse(sp["spec"], sp["workloads"][0], self.ctx, os.path.join(FIX, "ic-bench-k23-mitm2.json"))
+        fb = out["metrics"]["factor_base"]
+        self.assertIsNone(fb["usable_points"])
+        self.assertIsNotNone(fb["signed_points"])
+        self.assertIn("time.wall_ns", out["units"])
+
+    def test_cryptanalysis_usable_and_signed_points_differ(self):
+        ad = adapters.get("cryptanalysis.ic_bench")
+        sp = self.spec("ca-k0n13-prefix-l3-m3.yaml")
+        out = ad.parse(sp["spec"], sp["workloads"][0], self.ctx, os.path.join(FIX, "cryptanalysis-n13-prefix-l3-m3-cell.json"))
+        fb = out["metrics"]["factor_base"]
+        self.assertEqual((fb["usable_points"], fb["signed_points"]), (8, 11))
+        self.assertEqual(out["consistency"], [])
+
+    def test_fields_a_producer_ignores_are_refused(self):
+        cases = {
+            "crypto.ic_bench": ("k23-subspace-d7-mitm2.yaml",
+                                [("decomposition", "splitting", "mitm_table"), ("descent", "method", "pdp"),
+                                 ("decomposition", "encoding", "riemann_roch"), ("linear_algebra", "pivot", "min_index"),
+                                 ("decomposition", "method", "pair_table")]),
+            "autoresearcher.index_calculus": ("ar-p16-smallx-m2-enum.yaml",
+                                              [("decomposition", "splitting", "chained_s3"),
+                                               ("decomposition", "encoding", "riemann_roch")]),
+            "cryptanalysis.ic_bench": ("ca-k0n13-prefix-l3-m3.yaml",
+                                       [("decomposition", "splitting", "chained_s3"), ("linear_algebra", "pivot", "min_fill")]),
+        }
+        for adapter, (name, edits) in cases.items():
+            for section, key, value in edits:
+                s = copy.deepcopy(self.spec(name)["spec"])
+                s[section][key] = value
+                self.assertTrue(adapters.get(adapter).check(s), f"{adapter} accepted {section}.{key}={value}")
+        s = copy.deepcopy(self.spec("ca-k0n13-prefix-l3-m3.yaml")["spec"])
+        s["decomposition"]["solver"]["options"]["foo"] = 1
+        self.assertTrue(adapters.get("cryptanalysis.ic_bench").check(s))
+
+    def test_cryptanalysis_invariant_base_declares_the_frobenius_fold(self):
+        ad = adapters.get("cryptanalysis.ic_bench")
+        s = copy.deepcopy(self.spec("ca-k0n13-prefix-l3-m3.yaml")["spec"])
+        s["factor_base"]["params"]["basis_law"] = "invariant"
+        self.assertTrue(any("frobenius" in x for x in ad.check(s)))
+        s["factor_base"]["quotient"] = ["negation", "frobenius"]
+        self.assertFalse(any("quotient" in x for x in ad.check(s)))
+
+    def test_sat_clause_counts_are_per_system(self):
+        ad = adapters.get("crypto.ic_bench")
+        s = base_spec()
+        s["instance"]["curve"]["degree"] = 17
+        s["factor_base"]["params"]["dimension"] = 6
+        s["decomposition"] = {"arity": 2, "method": "algebraic", "encoding": "expanded_semaev",
+                              "solver": {"name": "sat-cdcl", "options": {"sat_xor_encoding": "native", "sat_conflict_budget": 200000}}}
+        out = ad.parse(validate(s), {"record": {"seed": 1}}, self.ctx, os.path.join(FIX, "ic-bench-k17-sat.json"))
+        row = json.loads(_read(os.path.join(FIX, "ic-bench-k17-sat.json")))["rows"][0]["decomposition"]["solver"]
+        sysm = out["metrics"]["system"]
+        total, calls = row["extra"]["original_clauses"], row["calls"]
+        self.assertEqual(sysm["native"]["cnf_clauses_total"], total)
+        self.assertEqual(sysm["cnf_clauses"], total // calls if total % calls == 0 else None)
+        self.assertIsNone(out["metrics"]["solver"]["solving_degree_max"], "a SAT solver has no solving degree: null, not 0")
+
+
 class CompareTests(unittest.TestCase):
     def test_plan_interleaves_after_warmups(self):
         arms = [{"spec": validate(base_spec())}, {"spec": validate(base_spec())}]
