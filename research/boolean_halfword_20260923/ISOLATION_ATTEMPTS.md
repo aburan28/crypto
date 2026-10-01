@@ -61,3 +61,27 @@ of the preserved combined stdout. The resource scope is explicitly the paired
 fixture, not a claim that each microsecond sample was independently monitored.
 This new packaging requires a fresh qualified run; old attempts are not reclassified
 or pooled. The solver kernels are unchanged from the specialized source.
+
+## Paired worker — pressure refusal before the twentieth fixture
+
+Run 36935271707, attempt 1, source
+`6a36f1e206e7d2e10eb15973b2e369d6905e2345`, completed nineteen fixture pairs.
+The next n24 / seed17 / cross-planted worker was never launched: its preflight
+reported CPU PSI `some avg10 = 18.36`, above the fixed 5.0 limit. The 0.12 other
+CPU seconds in the two-second sample were within the separate 0.20-second budget.
+The 200-member bundle is retained unchanged in `failed_isolation_04`. No samples
+are admitted or pooled. This failure is different from the earlier short-worker
+CPU-tick failures.
+
+The runner previously waited for a quiet host only at campaign startup. It now
+also waits before each fixture, preserving every readiness observation, with the
+same thirty-sample bound and unchanged two-second, CPU and PSI thresholds. The
+locked isolation tool still checks again before starting the actual worker. A
+refusal there, or contention during a worker, still stops the whole campaign.
+These are pre-launch readiness waits, not retries of measured samples. No partial
+solver timings were used to tune the source. Timed Rust sources are unchanged.
+
+Run 36935022647 was cancelled during checkout because its dispatch had selected
+the previous head `2238fa2a4289dae21900f58a3c65574ecab57f1a` while a push was
+still completing. It supplies no benchmark evidence. Subsequent dispatches must
+verify the remote head before launch and the run's recorded head afterward.

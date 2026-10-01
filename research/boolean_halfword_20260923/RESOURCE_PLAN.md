@@ -6,7 +6,8 @@ lock, preserves the actual binaries, and then reserves/pins one physical core
 for each worker. It records the full isolation receipt, CPU identity/features,
 memory, operating system, compiler, source hashes and executable hashes.
 
-An eight-round A/A run precedes A/B for every fixture. Both A/A labels call the
+An A/A run of sixteen repetitions at n12 and eight at larger sizes precedes A/B
+for every fixture. Both A/A labels call the
 same retained dispatcher. A/B retains all 52 frozen reference solvers, five
 original half-word arms, two feature-gated half-word arms and two matched full-word
 three-input-XOR controls. There are 61 A/B arms. Model, logical work and assignment
@@ -17,6 +18,15 @@ eligible timing aggregates and are not silently retried or pooled. A new campaig
 gets a new directory and retains its relation to earlier attempts. The A/A symmetric
 97.5-percentile ratio is an additional noise threshold for each comparison group.
 No observation inside that spread establishes an improvement.
+
+The runner waits for a quiet host both at startup and before each fixture. Each
+wait records at most thirty two-second readiness observations against the same
+10% other-CPU and 5.0 PSI limits. No solver runs during this wait. The locked
+isolation command checks again before launch and still stops the campaign on
+refusal or a contended worker. Readiness observations are retained even when
+rejected; waiting contributes to the campaign duration and its cap, never to an
+individual solver's timer. This addresses the recorded between-fixture pressure
+refusal without weakening resource admission or retrying timed samples.
 
 The local macOS environment can check the arithmetic and feature-gated kernels,
 but the repository's Linux affinity/pressure controller cannot qualify timings

@@ -97,6 +97,9 @@ CPU reservations. It records host identity/features, memory, compiler, exact com
 pressure, context switches, faults and other-process CPU use. Any failed, contended
 or missing-isolation stage is retained and stops that campaign; it is not pooled
 or silently retried. The A/A symmetric noise spread is an additional gate.
+Before startup and every fixture, a bounded readiness wait retains every rejected
+and accepted observation at unchanged CPU/PSI thresholds. The locked worker launch
+checks again. Waiting contributes to campaign duration; no timed solve is retried.
 
 The comparison retains the 52 September 23 solver implementations as a frozen
 reference roster. It does not claim to include every later repository optimization
@@ -164,6 +167,9 @@ dramatic-gain objective is not achieved by this implementation or its tests.
     <p>Sources: <a href="{base}CONCLUSION.md">scope and results</a>, <a href="{base}QUALIFIED_RUNS.json">qualified-run registry</a>,
       <a href="{base}RESOURCE_PLAN.md">resource and calibration plan</a>, <a href="{base}RUN_LEDGER.json">evidence hashes</a>.</p></div>
   {''.join(history_html)}
+  <p>{len(failures)} failed resource attempts are retained in the evidence registry and contribute no accepted samples.
+    Before each new fixture, bounded readiness checks wait for the unchanged CPU and pressure limits;
+    the locked launch checks again. No timed samples are retried.</p>
   <p>Historical n24 milliseconds, explicitly unqualified under current policy. Prior values remain visible.
     New variants are pending; null or pending is never a zero-cost result.</p>
   <div class="table-wrap"><table><thead><tr><th>Method</th><th>Probe 1 planted ms</th><th>Probe 2 planted ms</th><th>Probe 2 cross-planted ms</th><th>Probe 2 unplanted ms</th><th>Qualification</th></tr></thead><tbody>

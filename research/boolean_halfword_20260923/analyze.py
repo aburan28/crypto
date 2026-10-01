@@ -69,6 +69,22 @@ def verify_isolation(root,stage,cpus,cell,mode):
         assert command[command.index(flag)+1]==value
 
 
+def verify_quiet_wait(path,contract):
+    assert contract=={'max_samples':30,'sample_seconds':2.0,'max_other_cpu_fraction':0.10,'max_psi':5.0}
+    records=read(path)
+    assert 1<=len(records)<=contract['max_samples']
+    for index,record in enumerate(records,1):
+        assert record['attempt']==index and record['recorded_utc']
+        assert record['accepted'] is (index==len(records))
+        if not record['accepted']:
+            assert isinstance(record['reason'],str) and record['reason']
+            continue
+        pre=record['preflight']
+        assert pre['settle']['seconds']==2.0 and 0<=pre['settle']['other_cpu_seconds']<=.20
+        for key in ['psi_cpu','psi_memory']:
+            assert 0<=pre['conditions'][key]['some']['avg10']<=5.0
+
+
 def verify_aa(root,stage,source,pairs,order_seed):
     cell=f"n{source['n']}-"  # Full identity is recovered from the recorded AA file name.
     name=stage['conditions_file'].removesuffix('-aa-conditions.jsonl')+'-aa.jsonl'
@@ -163,6 +179,9 @@ def validate(root):
     expected={(n,split,seed,f):f'n{n}-{split}-{seed}-{f}' for n in protocol['variables'] for split in protocol['splits'] for seed in protocol[split+'_seeds'] for f in protocol['families']}
     receipts=read(root/'receipts.json');assert len(receipts)==len(expected)==(24 if phase=='discovery' else 240)
     receipts={r['cell']:r for r in receipts};assert set(receipts)==set(expected.values())
+    if 'quiet_wait' in protocol:
+        verify_quiet_wait(root/'startup_quiet.json',protocol['quiet_wait'])
+        for cell in expected.values():verify_quiet_wait(root/(cell+'-quiet.json'),protocol['quiet_wait'])
     summaries=[];groups=defaultdict(list);noise=defaultdict(list);aa_summaries=[];all_complete=True;count=0
     for (n,split,seed,family),cell in expected.items():
         entry=receipts[cell]

@@ -230,7 +230,7 @@
   "contract": "Projection retains the first 16 equation coordinates exactly. Every projected zero is checked against the complete original system; false hits continue in the same assignment order. All hits/checks/rejections are counted. Caps produce UNKNOWN, never false UNSAT. Scalar-source and native 16/64-point representations share the same identities and compiled four-bit Gray schedule.",
   "selection": "Five fixed treatments: scalar-source and native 16/64-point blocks, plus native dispatch with 16-point blocks through n20 and 64-point blocks above. Scalar source may be auto-vectorized; no instruction-count claim. No coefficient-dependent output crosses systems.",
   "accounting": "Every arm charges a fresh complete cold solve including input validation and encoding, narrowing, schedule construction, scan, original-system hit checks and temporary-workspace release, plus external validation and repeat-signature checks. Returned diagnostic destruction, serialization and common fixture/reference preparation are outside arm clocks and inside worker receipts. No timing subtraction.",
-  "ordering": "Four fixed Fisher-Yates permutations per fixture, each followed by its exact reverse.",
+  "ordering": "Fixed Fisher-Yates permutations, each followed by its exact reverse: eight pairs at n12 and four pairs at larger sizes.",
   "boundary": "The reference is the pointwise fastest of the 52 complete solvers retained before this experiment. New scalar/native variants are separate implementations of the same new representation, not independent older references. Native-vs-scalar attribution is reported separately. No calibrated operation conversion or cryptanalytic floor is measured.",
   "decision": "The complete-solve criterion is a paired 95 percent median-ratio lower bound >2.0 against the fastest retained reference in all 18 n16/n20/n24 x family x regression/holdout groups, with all cells complete and verified. Incremental >1.0 is separate. Any positive result requires unchanged-source confirmation on unused holdouts; no tuning after holdout timing.",
   "bootstrap": {
@@ -279,7 +279,7 @@
   ],
   "hardware_contract": "Runtime SHA3 detection gates AArch64 EOR3 kernels. Both full 32-bit and projected 16-bit controls use the same three-input XOR operation. Unsupported hosts execute the matching portable XOR policy and report that capability; no hardware gain is inferred from fallback timings. No global target-cpu or target-feature override is used.",
   "resource_contract": "One reserved/pinned worker executes A/A then A/B for the same fixture. Its resource record covers the complete paired computation. Solver clocks, per-call work and the 10% other-CPU threshold are unchanged. n12 uses sixteen repetitions; larger sizes retain eight. This lengthens real measured work rather than adding padding. Split A/A and A/B streams are exact byte slices of the retained paired stdout. No contended/uncontended pooling.",
-  "noise_contract": "Eight random/reverse A/A rounds compare two calls to the identical word_dispatch policy before A/B for every fixture. Report both ratios and the symmetric multiplicative spread. A paired performance lower bound must exceed the group A/A 97.5-percentile symmetric ratio in addition to its numeric threshold. No contended/uncontended pooling.",
+  "noise_contract": "Sixteen n12 or eight larger-size random/reverse A/A rounds compare two calls to the identical word_dispatch policy before A/B for every fixture. Report both ratios and the symmetric multiplicative spread. A paired performance lower bound must exceed the group A/A 97.5-percentile symmetric ratio in addition to its numeric threshold. No contended/uncontended pooling.",
   "reference_scope": "The 52 retained September 23 complete-solver implementations, rebuilt in the current same-binary image. This is a frozen reference roster, not a claim to cover every later repository optimization or all known solvers.",
   "retention": "Any refused, contended, timed-out or failed execution is sealed and retained. A later execution uses a new directory and is reported separately; no sample-level retries, seed replacement or pooling with unqualified data.",
   "complete_budget_specialization": "When cap >= 2^n the loop range certifies the full budget. Omit redundant per-block budget checks and derive identical point/batch counts at termination. Smaller caps keep the checked path. Original-equation checks and model order are unchanged.",
@@ -289,5 +289,12 @@
     "20": 8,
     "24": 8
   },
-  "measurement_revision": "Schema 3 addresses short-process resource-resolution failures seen in the retained schema-2 attempts. Algorithms, seeds, solver caps, performance thresholds and the n16/n20/n24 acceptance groups remain unchanged. No holdout has been run."
+  "measurement_revision": "Schema 3 addresses short-process resource-resolution failures seen in the retained schema-2 attempts. Algorithms, seeds, solver caps, performance thresholds and the n16/n20/n24 acceptance groups remain unchanged. No holdout has been run.",
+  "quiet_wait": {
+    "max_samples": 30,
+    "sample_seconds": 2.0,
+    "max_other_cpu_fraction": 0.1,
+    "max_psi": 5.0
+  },
+  "quiet_wait_contract": "Before startup and every fixture, retain at most 30 two-second readiness observations and wait for the unchanged CPU/PSI thresholds. No timed solve occurs during this wait. The locked isolation controller checks again before launching the worker. Any worker refusal, contention or failure still stops the whole campaign; no timed samples are retried. Waits count toward campaign duration and its cap."
 }

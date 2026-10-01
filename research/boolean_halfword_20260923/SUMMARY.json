@@ -176,6 +176,20 @@
         "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
         "worker_wall_seconds": 0.032861717000002955,
         "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574"
+      },
+      {
+        "github_attempt": 1,
+        "github_run_id": 36935271707,
+        "manifest_sha256": "0a26ed7a5971d4a0c7f25424ced7cdc4b986ed5ab629474144ba1c5138ee6520",
+        "maximum_psi_some_avg10": 5.0,
+        "path": "failed_isolation_04",
+        "preflight_other_cpu_seconds": 0.12,
+        "preflight_psi_some_avg10": 18.36,
+        "preflight_settle_seconds": 2.0,
+        "reason": "After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted.",
+        "source_head": "6a36f1e206e7d2e10eb15973b2e369d6905e2345",
+        "worker_launched": false,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36935271707"
       }
     ],
     "full": null,
@@ -229,6 +243,19 @@
         "exception_type": "AssertionError",
         "message": "Isolation refused, contended, or failed: n20-discovery-17-unplanted/aa",
         "recorded_utc": "2026-10-01T22:07:16.695907+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "github_attempt": 1,
+      "github_run_id": 36935271707,
+      "path": "failed_isolation_04",
+      "reason": "After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted.",
+      "status": {
+        "completed_cells": 19,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n24-discovery-17-cross_planted/paired",
+        "recorded_utc": "2026-10-01T22:33:24.506490+00:00",
         "status": "FAILED_OR_UNQUALIFIED"
       }
     }

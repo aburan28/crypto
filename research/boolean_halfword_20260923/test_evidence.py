@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 HERE=Path(__file__).resolve().parent
 def module(name,path):
@@ -105,7 +106,51 @@ class EvidenceTests(unittest.TestCase):
         root=self.temporary();destination=root/'must-not-exist'
         with patch.object(runner.platform,'system',return_value='Darwin'),patch.object(runner.sys,'argv',['isolated_run.py','--phase','discovery','--out',str(destination)]),contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as caught:runner.main()
-        self.assertEqual(caught.exception.code,2);self.assertFalse(destination.exists())
+            self.assertEqual(caught.exception.code,2);self.assertFalse(destination.exists())
+
+    def quiet_stub(self,outcomes):
+        calls=[]
+        def preflight(args,exclude):
+            calls.append((args.settle,args.max_other_cpu,args.max_psi,exclude))
+            value=outcomes[len(calls)-1]
+            if isinstance(value,BaseException):raise value
+            return value
+        tool=SimpleNamespace(preflight=preflight)
+        spec=SimpleNamespace(loader=SimpleNamespace(exec_module=lambda module:None))
+        return calls,patch.object(runner.importlib.util,'spec_from_file_location',return_value=spec),patch.object(runner.importlib.util,'module_from_spec',return_value=tool)
+
+    def test_quiet_wait_retains_refusals_before_first_accepted_observation(self):
+        root=self.temporary();_,_,condition=self.valid_conditions(root)
+        calls,spec,module=self.quiet_stub([SystemExit('pressure too high'),condition['preflight']])
+        path=root/'quiet.json'
+        with spec,module:runner.wait_for_quiet(root/'tool.py',path)
+        records=a.read(path)
+        self.assertEqual([r['accepted'] for r in records],[False,True])
+        self.assertEqual([c[:3] for c in calls],[(2.0,.10,5.0)]*2)
+        contract=a.read(HERE/'protocol_discovery.json')['quiet_wait']
+        a.verify_quiet_wait(path,contract)
+        records[0]['accepted']=True;a.dump(path,records)
+        with self.assertRaises(AssertionError):a.verify_quiet_wait(path,contract)
+
+    def test_quiet_wait_is_bounded_and_failed_wait_cannot_be_admitted(self):
+        root=self.temporary();calls,spec,module=self.quiet_stub([SystemExit('busy')]*30)
+        path=root/'quiet.json'
+        with spec,module,self.assertRaisesRegex(RuntimeError,'no timed worker was launched'):
+            runner.wait_for_quiet(root/'tool.py',path)
+        self.assertEqual(len(calls),30)
+        self.assertEqual(len(a.read(path)),30)
+        with self.assertRaises(AssertionError):a.verify_quiet_wait(path,a.read(HERE/'protocol_discovery.json')['quiet_wait'])
+
+    def test_quiet_wait_cannot_override_pressure_or_cpu_threshold(self):
+        root=self.temporary();_,_,condition=self.valid_conditions(root)
+        contract=a.read(HERE/'protocol_discovery.json')['quiet_wait']
+        for mutation in ['pressure','cpu']:
+            pre=copy.deepcopy(condition['preflight'])
+            if mutation=='pressure':pre['conditions']['psi_cpu']['some']['avg10']=5.01
+            else:pre['settle']['other_cpu_seconds']=.21
+            path=root/'quiet.json'
+            a.dump(path,[{'attempt':1,'recorded_utc':'test','accepted':True,'preflight':pre}])
+            with self.assertRaises(AssertionError):a.verify_quiet_wait(path,contract)
 
     def test_changed_projection_counters_are_rejected(self):
         root=HERE/'probe_01';rows=[json.loads(line) for line in (root/'n12-discovery-17-planted.jsonl').read_text().splitlines()]

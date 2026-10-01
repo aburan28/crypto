@@ -114,6 +114,9 @@ CPU reservations. It records host identity/features, memory, compiler, exact com
 pressure, context switches, faults and other-process CPU use. Any failed, contended
 or missing-isolation stage is retained and stops that campaign; it is not pooled
 or silently retried. The A/A symmetric noise spread is an additional gate.
+Before startup and every fixture, a bounded readiness wait retains every rejected
+and accepted observation at unchanged CPU/PSI thresholds. The locked worker launch
+checks again. Waiting contributes to campaign duration; no timed solve is retried.
 
 The comparison retains the 52 September 23 solver implementations as a frozen
 reference roster. It does not claim to include every later repository optimization
@@ -221,5 +224,6 @@ All values below are n24 discovery milliseconds per cold solve plus validation. 
 - GitHub run 36922805760, attempt 1: Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted. The complete artifact is retained in `failed_isolation_01` and contributes no accepted timing samples.
 - GitHub run 36930298574, attempt 1: Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted. The complete artifact is retained in `failed_isolation_02` and contributes no accepted timing samples.
 - GitHub run 36930298574, attempt 2: Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted. The complete artifact is retained in `failed_isolation_03` and contributes no accepted timing samples.
+- GitHub run 36935271707, attempt 1: After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted. The complete artifact is retained in `failed_isolation_04` and contributes no accepted timing samples.
 
 `ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.

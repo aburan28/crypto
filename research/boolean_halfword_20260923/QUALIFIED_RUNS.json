@@ -38,6 +38,20 @@
       "other_cpu_seconds": 0.01,
       "worker_wall_seconds": 0.032861717000002955,
       "maximum_other_cpu_fraction": 0.1
+    },
+    {
+      "path": "failed_isolation_04",
+      "manifest_sha256": "0a26ed7a5971d4a0c7f25424ced7cdc4b986ed5ab629474144ba1c5138ee6520",
+      "github_run_id": 36935271707,
+      "github_attempt": 1,
+      "source_head": "6a36f1e206e7d2e10eb15973b2e369d6905e2345",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36935271707",
+      "reason": "After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted.",
+      "preflight_other_cpu_seconds": 0.12,
+      "preflight_settle_seconds": 2.0,
+      "preflight_psi_some_avg10": 18.36,
+      "maximum_psi_some_avg10": 5.0,
+      "worker_launched": false
     }
   ],
   "historical_qualified_runs": [

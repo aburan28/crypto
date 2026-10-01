@@ -80,20 +80,20 @@ def qualified_conditions(path,cpus):
     return good,record
 
 
-def startup_quiet(isolation,out):
+def wait_for_quiet(isolation,path,max_samples=30):
     spec=importlib.util.spec_from_file_location('frozen_isolation',isolation)
     tool=importlib.util.module_from_spec(spec);spec.loader.exec_module(tool)
     observations=[]
     args=SimpleNamespace(settle=2.0,max_other_cpu=.10,max_psi=5.0)
-    for attempt in range(30):
+    for attempt in range(max_samples):
         record={'attempt':attempt+1,'recorded_utc':now()}
         try:
             record.update(accepted=True,preflight=tool.preflight(args,{os.getpid()}))
         except SystemExit as error:
             record.update(accepted=False,reason=str(error))
-        observations.append(record);dump(out/'startup_quiet.json',observations)
+        observations.append(record);dump(path,observations)
         if record['accepted']:return
-    raise RuntimeError('Startup did not become quiet in 30 preflight samples; no timed worker was launched')
+    raise RuntimeError(f'Host did not become quiet in {max_samples} preflight samples; no timed worker was launched')
 
 
 def split_paired(path,cell,out,receipt):
@@ -190,12 +190,18 @@ def main():
         capabilities=subprocess.check_output([str(out/'worker'),'--capabilities'],text=True,env=env)
         (out/'capabilities.json').write_text(capabilities);meta['capabilities']=json.loads(capabilities)
         dump(out/'metadata.json',meta)
-        startup_quiet(isolation,out)
-        cells=[(n,split,seed,family) for n in protocol['variables'] for split in protocol['splits'] for seed in protocol[split+'_seeds'] for family in protocol['families']]
         started=time.monotonic()
+        quiet_samples=protocol['quiet_wait']['max_samples']
+        wait_for_quiet(isolation,out/'startup_quiet.json',quiet_samples)
+        cells=[(n,split,seed,family) for n in protocol['variables'] for split in protocol['splits'] for seed in protocol[split+'_seeds'] for family in protocol['families']]
         for index,(n,split,seed,family) in enumerate(cells,1):
             assert time.monotonic()-started<protocol['limits']['campaign_seconds'],'Campaign cap; partial evidence retained'
             cell=f'n{n}-{split}-{seed}-{family}'
+            # PSI is a trailing average: a quiet campaign startup does not
+            # qualify every later fixture. Wait before launching any sample,
+            # retain every observation, then let the locked run check again.
+            wait_for_quiet(isolation,out/(cell+'-quiet.json'),quiet_samples)
+            assert time.monotonic()-started<protocol['limits']['campaign_seconds'],'Campaign cap after quiet wait; partial evidence retained'
             order_seed=(protocol['order_seed']^(n<<48)^(seed<<8)^protocol['families'].index(family))&((1<<64)-1)
             record={'cell':cell,'n':n,'split':split,'seed':seed,'family':family,'order_seed':order_seed,'stages':{}}
             reps=protocol.get('repetitions_by_n',{}).get(str(n),protocol['repetitions'])
