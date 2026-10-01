@@ -1,6 +1,6 @@
 # Frozen n=41 equal-useful-size base-window opportunity screen
 
-**Status: preregistration only.** No new public Q, candidate-window headers, compact processes, rho processes, hindsight minimum or score have been generated under this protocol. A follow-on source-lock PR must merge the point-only input preparer, base generator, runner, analyzer and independent verifier before any scored target or base-window run. An input-freeze PR must then commit new orbit-disjoint Q and exact source/input hashes before timing. Preserve every failed preflight, censored arm and run in the eventual outcome PR.
+**Status: preregistration, with source-only controls.** No new public Q, scored candidate-window header, compact or rho measurement process, hindsight minimum or score has been generated under this protocol. The generator's temporary window-0 toy and n41 parity headers are source controls only; they cannot become scored arms or timing inputs. A follow-on source-lock PR must merge the point-only input preparer, base generator, runner, analyzer and independent verifier before any scored target or base-window run; the generator and its controls may land in a prerequisite PR. An input-freeze PR must then commit new orbit-disjoint Q and exact source/input hashes before timing. Preserve every failed preflight, censored arm and run in the eventual outcome PR.
 
 ## Question and boundary
 
