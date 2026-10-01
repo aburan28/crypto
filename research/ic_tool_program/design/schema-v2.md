@@ -684,6 +684,18 @@ B3–B7 are unchanged from the plan, with these refinements:
     `rho-negation`;
   - `kic` alone;
   - the verification of order certificates.
+
+  It was declared 2026-10-01 in
+  [`../rounds/B2b-subfield-kic-certificates/PROTOCOL.md`](../rounds/B2b-subfield-kic-certificates/PROTOCOL.md).
+  Its cases are C059–C070, in
+  [`../conformance/v2-b2b/`](../conformance/v2-b2b/cases.json). The
+  declaration makes two points of this design exact:
+  - §3.3's certificate for `p` is the key `field.p_certificate`, and
+    `subgroup.order_certificate` certifies `r`. Both have the form and
+    rules the protocol states.
+  - `kic`'s estimate on a curve over a subfield is §20's model with `e`
+    in the place of `n`, labelled as outside the range the model was
+    fitted on.
 - **B3b** lifts `kic` to `n ≤ 126` and runs the index calculus at F1.
   C054 then changes by the `until` rule: at `n = 83` the index
   calculus's estimate exceeds any day-long budget, so `paired` becomes
