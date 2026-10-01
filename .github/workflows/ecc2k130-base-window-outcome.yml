@@ -44,6 +44,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      # The replay checks every file the screen's source lock pins against
+      # the working tree. One of them, tools/isolated_bench.py, has changed
+      # on main since the lock (#1162), so the pinned files are restored from
+      # the lock's merge commit first. The replay then runs on exactly the
+      # sources the screen locked, and verify_inputs.py still checks each
+      # one against its pinned SHA-256.
+      - name: Restore the screen's locked sources from their merge commit
+        run: |
+          set -euo pipefail
+          lock=research/notes/ecc2k130/base_window_screen_20261001/FROZEN.json
+          commit=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["source_lock"]["merge_commit"])' "$lock")
+          python3 -c 'import json, sys; print("\n".join(json.load(open(sys.argv[1]))["source_lock"]["sha256"]))' "$lock" \
+            | xargs git checkout "$commit" --
+          git status --short
       - name: Rehash 419 raw members and independently replay the complete decision
         run: |
           set -euo pipefail

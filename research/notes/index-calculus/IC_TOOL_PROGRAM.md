@@ -308,7 +308,22 @@ plus the probes) and run on `M1`'s 22 rows, three rounds, isolated.
   within 2%, and true hits are one summand in 7,200 to 221,000. So the
   admitted stage is spent almost entirely on false positives, at
   118–159 ns an admitted key at the three largest sizes. A sharper
-  filter is a later lever, if plan §11 leaves the scan open after R02b.
+  filter is the next lever: R05, below.
+
+**R05 tests a sharper presence filter, before R02b (declared
+2026-10-01).** Three bits a key in one 64-bit word, at eight to sixteen
+bits a stored pair, keep the probe at one word read. At the three
+largest sizes they cut the predicted false-positive rate from 0.17–0.21
+to 0.019–0.031 ([protocol](../../ic_tool_program/rounds/R05-presence-filter/PROTOCOL.md)).
+- **An exploration came first, and is disclosed.** On Track B's stack,
+  the prototype ran 1.27× and 1.37× faster in cold time at `2^44.3` and
+  `2^47.2`, with identical outputs
+  ([record](../../ic_tool_program/explorations/R05-filter-20261001/README.md)).
+  It is not a round's measurement.
+- **The order changes.** R05 runs after R03's decision and before R02b
+  (R02b's amendment 1). Both are on the scan, after R02's rejection
+  there, so under §11 a failed R05 sets the scan aside, and R02b does
+  not run.
 
 ## 9. Track B: generality and robustness
 
