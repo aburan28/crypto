@@ -1,8 +1,5 @@
 # Does the Riemann–Roch norm form flatten the degree? An `m = 3` refutation-degree ladder
 
-> **DRAFT, not yet registered.** §2a (the smoke) is pending. The commit that removes this
-> line and fills §2a is the registration commit; no registered cell runs before it.
-
 Registered before any registered cell runs. §2 lists everything that ran before
 registration and what was seen.
 
@@ -78,7 +75,28 @@ registration and what was seen.
 
 ### 2a. Smoke (seed 7, not data)
 
-SMOKE_PENDING
+Everything below used seed 7, never the registered seed, and none of it is pooled with
+the registered run. The design changes it caused are listed at the end; all of them are
+cost changes, none changes what a draw measures.
+
+- **Format checks** at `K₀/2⁹` and `K₁/2⁹`, `ℓ = 3`, `d_max = 7` (`x4`: 9): `rr` resolved at
+  6 on every rootless draw, `x4` at 8, the control at `≥ 8` on four of six draws and 6 on
+  the other two. Seen in full.
+- **`K₁/2¹⁹, ℓ = 6`** (19 unknowns). At `d_max = 8` and again at `d_max = 7`, the cell was
+  killed at its 2,400 CPU-s limit before one `rr` draw had finished; nothing was seen but
+  the kill. (The first attempt was also cut by a container restart.)
+- **`K₁/2¹⁹, ℓ = 5`** (16 unknowns), `d_max = 7`: draw 0, `rr` **resolved at 7**, refuted,
+  in 1,370 s; the cell was killed during that draw's control. One number seen.
+- **`K₁/2¹⁷, ℓ = 4`** (13 unknowns), on the final binary, two rootless draws: `x4`
+  resolved at 9 and 9 (40 s each); `rr` at 6 and 6 (4 s each); the control at 7 (pinned,
+  not refuted) and `≥ 8` (175 s each).
+- **What the smoke already says about the predictions, before registration.** At `ℓ = 4`
+  the `rr − x4` gap reads −3, larger than prediction 2's "1 or 2"; prediction 2 is kept
+  as written. The control reads at or above `rr` everywhere seen, as prediction 3 says.
+  Nothing seen bears on the slope, prediction 1: one `ℓ` per curve.
+- **Design changes made after the smoke, for cost only:** `d_max` 8 → 7 (`x4` 9);
+  `ℓ = 6` scans `rr`/`ctrl` to 6; one output line per arm with provisional lower bounds,
+  `x4` first; three lanes in parallel; 9,000 CPU-s and 4.5 GB per cell.
 
 ## 3. Instrument
 
