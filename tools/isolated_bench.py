@@ -19,7 +19,11 @@ memory bus.  This tool does all three, and records the evidence:
 3. **A reserved core.**  It moves every other thread it is allowed to move off
    the benchmark CPUs (``--cpus``), pins the benchmark there, and restores the
    other threads' affinity afterwards.  On a host with SMT it refuses a CPU
-   whose sibling is not reserved too.
+   whose sibling is not reserved too.  A process started while a run had
+   moved its parent off those CPUs inherits the narrowed mask, and no restore
+   reaches it; so when this process's own mask lacks the CPUs asked for, it
+   widens the mask to them where the system allows, and the record says so
+   (``affinity_widened_from``).
 4. **A record of the conditions.**  Per run: wall time, user and system CPU,
    voluntary and involuntary context switches, page faults, load average and
    PSI before and after, and the CPU time every other process used while the
@@ -84,17 +88,32 @@ def smt_siblings(cpu: int) -> set[int]:
         return {cpu}
 
 
-def check_cpus(cpus: set[int]) -> None:
+def check_cpus(cpus: set[int]) -> list[int] | None:
+    """Refuse a reservation that cannot work.  Return the inherited mask if
+    it lacked some of ``cpus`` and was widened to them, else ``None``.
+
+    An isolated run moves every other thread off its CPUs and restores the
+    threads it moved; a process forked meanwhile inherits the narrowed mask
+    and keeps it.  A harness started that way would be refused here on every
+    later run, so the mask is widened instead, where the system allows it.
+    """
     allowed = os.sched_getaffinity(0)
-    missing = cpus - allowed
-    if missing:
-        raise SystemExit(f'CPUs {sorted(missing)} are outside this process affinity {sorted(allowed)}')
+    inherited = None
+    if cpus - allowed:
+        with contextlib.suppress(OSError):
+            os.sched_setaffinity(0, allowed | cpus)
+        now = os.sched_getaffinity(0)
+        missing = cpus - now
+        if missing:
+            raise SystemExit(f'CPUs {sorted(missing)} are outside this process affinity {sorted(allowed)}')
+        inherited, allowed = sorted(allowed), now
     if cpus == allowed:
         raise SystemExit('reserving every CPU leaves nowhere to move other work; leave at least one free')
     for cpu in cpus:
         stray = smt_siblings(cpu) - cpus
         if stray:
             raise SystemExit(f'CPU {cpu} shares a core with {sorted(stray)}; reserve the siblings too')
+    return inherited
 
 
 def psi(kind: str) -> dict | None:
@@ -348,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
             return subprocess.call(command)
 
     cpus = parse_cpus(args.cpus)
-    check_cpus(cpus)
+    inherited = check_cpus(cpus)
     with locked(args.lock, wait=args.wait):
         # Only this process is exempt.  The shell and agent that launched it
         # are moved off the reserved CPUs and charged as contention like
@@ -360,6 +379,8 @@ def main(argv: list[str] | None = None) -> int:
             record = {'schema': 'isolated-bench/1', 'mode': args.mode, 'label': args.label,
                       'host': host(), 'reserved_cpus': sorted(cpus), 'threads_moved': len(moved),
                       'left_on_reserved': unmovable_on(cpus, mine), 'preflight': pre}
+            if inherited is not None:
+                record['affinity_widened_from'] = inherited
             if args.mode == 'run':
                 stdin = open(args.stdin, 'rb') if args.stdin else None
                 try:
