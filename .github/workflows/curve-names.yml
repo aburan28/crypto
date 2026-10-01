@@ -1,0 +1,52 @@
+name: curve-names
+
+# AGENTS.md §11: every curve is named by its ICV1 slug.  This checks the
+# reference implementation against its vectors, that no Markdown or HTML
+# uses a retired curve name, that every slug written is registered, and
+# that a pull request adds no retired name to prose or code.  It runs no
+# experiment.
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '**/*.html'
+      - '**/*.rs'
+      - '**/*.py'
+      - 'docs/curves/**'
+      - '.github/workflows/curve-names.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - '**/*.html'
+      - 'docs/curves/**'
+      - 'scripts/curve_id.py'
+      - 'scripts/check_curve_names.py'
+      - 'scripts/build_curve_registry.py'
+      - '.github/workflows/curve-names.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  names:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reference implementation matches its vectors
+        run: python3 scripts/curve_id.py selftest
+      - name: No retired curve name in Markdown or HTML, every slug registered
+        run: python3 scripts/check_curve_names.py
+      - name: The pull request adds no retired curve name
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: python3 scripts/check_curve_names.py --diff "$BASE"

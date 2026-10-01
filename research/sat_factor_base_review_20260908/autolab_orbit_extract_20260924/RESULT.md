@@ -125,8 +125,16 @@ L=1,024 tune → K=600. L=4,096 → K=800. L=16,384 tune `800/1000/1200/1400` �
 independently replayed. Same √(L·r/n) caveat: finite constant-factor, not
 asymptotic.
 
-**Next:** n=61 at **L=65,536** (`growing_n_n61_L65536.sh`), with K allowed above
-1,400. No 32-target panels.
+**2026-09-30 L=65,536 restart** (`growing_n_n61_L65536_20260930.sh`; memory-capped
+K=1,400, unisolated shared macOS host, historical v2 comparator):
+
+| n | L | K | Compact wall | Rho wall | Wall ratio (range) | User-CPU ratio | Instructions ratio | Peak footprint compact / rho | All 3 blocks |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 61 | 65,536 | 1,400 | 295 s | 860 s | 0.352 (0.343–1.968) | 0.331 | 0.135 | 11.6 / 3.3 GB | **no** (block 0 lost to swapping) |
+
+196,608/196,608 independently replayed. At fixed K the lead narrows from L=16,384
+(instructions 0.109 → 0.135). Details, deviations and losses:
+[`growing_n_n61_L65536_20260930/RESULT.md`](growing_n_n61_L65536_20260930/RESULT.md).
 
 ## Independent replay
 

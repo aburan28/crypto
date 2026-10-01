@@ -185,3 +185,34 @@ no seed was changed after inspecting results. Source hashes were recorded after
 the run, not independently timestamped before it. Process RSS was not measured.
 Accordingly this is not an admission-ready repository benchmark and supports no
 cryptanalytic claim.
+
+## Executed follow-up: sparse versus packed row representation
+
+2026-09-29 UTC; source/input freeze commit
+`aa56cbb51ff53d8df64d65bdebd8aaefeb594d51`. The prior audit now lives unchanged
+in `boolean_representation_audit/prior/`; all new code, inputs, protocol,
+raw compressed receipts and audit output are checked into the repository.
+See [the complete result](boolean_representation_audit/README.md).
+
+Twelve frozen synthetic systems at 6/8 polynomial variables (not field degrees)
+were evaluated using sparse/packed backends under exhaustive/frontier schedules.
+Certificates and deterministic work counters match between corresponding
+backends. The evidence audit reconciles 504 worker samples and 1,416 verified
+computations, and reproduces all 48 case/backend/schedule outputs.
+
+The numerical all-holdout criterion passes for exhaustive scheduling and fails
+for frontier scheduling. Under frontier scheduling, packed/sparse compute-time
+ratios on the new chain, cycle, sparse-quadratic and dense-quadratic cases are
+0.974, 0.994, 0.291 and 0.203, respectively. These are provisional stage timings:
+A/A controls expose substantial virtualized-host noise, memory binding failed,
+and process isolation was not established. No robust hardware rate, process
+memory improvement or application-level gain is claimed.
+
+The sparse-quadratic holdout grows from at most six input terms to 50 terms in
+an intermediate reduced row. Equation-level interaction widths are 1, 2, 7, 7
+for those four cases. This supports measuring fill-in and variable interactions;
+it does not demonstrate a new sparse solving algorithm. The next bounded
+question is whether a compact support-sharing representation can preserve
+structure on a fresh small synthetic suite. Keep the existing exactness
+verifier and packed baseline. m=83 and challenge-specific evidence remain
+unperformed; end-to-end cryptographic costs and speedup are null.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -14,10 +15,29 @@ DENSE = NOTES / "rotated_s3_o_branch_20260925"
 SPARSE = NOTES / "rotated_s3_sparse_cnf_20260925"
 DENSE_DIR = DENSE / "evidence/producer/n13-m5"
 SPARSE_DIR = SPARSE / "evidence/final/sparse/producer/n13-m5"
+REPO = HERE.parents[3]
 
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def source_ancestry(frozen: dict) -> str:
+    """Require the declared merged evidence commits in this checkout's history."""
+    expected = {"785", "786", "787"}
+    commits = frozen["merged_prerequisites"]
+    assert set(commits) == expected
+    base = frozen["base_main_commit"]
+    assert len(base) == 40 and all(c in "0123456789abcdef" for c in base)
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO,
+                                   text=True).strip()
+    for sha in commits.values():
+        assert len(sha) == 40 and all(c in "0123456789abcdef" for c in sha)
+        subprocess.run(["git", "merge-base", "--is-ancestor", sha, base],
+                       cwd=REPO, check=True)
+    subprocess.run(["git", "merge-base", "--is-ancestor", base, head],
+                   cwd=REPO, check=True)
+    return head
 
 
 def prior():

@@ -66,10 +66,10 @@ and `K₁/2³¹` have none):
 
 | curve | `r` | `log₂ r` | `V` (indices into the factors of `xⁿ − 1`, index 0 = `x + 1`) | `dim V` |
 |:--|--:|--:|:--|--:|
-| `K₁ / F_{2^17}` | 65587 | 16.0 | `0;1` | 9 |
-| `K₀ / F_{2^23}` | 2095853 | 21.0 | `0;1` | 12 |
-| `K₁ / F_{2^23}` | 4196903 | 22.0 | `0;1` | 12 |
-| `K₀ / F_{2^31}` | 1439393 | 20.5 | `0;1;2` | 11 |
+| `icv1-f2m17-tm101-00378d4e` | 65587 | 16.0 | `0;1` | 9 |
+| `icv1-f2m23-t5197-69e76b73` | 2095853 | 21.0 | `0;1` | 12 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 4196903 | 22.0 | `0;1` | 12 |
+| `icv1-f2m31-tm90707-c95f16f5` | 1439393 | 20.5 | `0;1;2` | 11 |
 
 `n = 13, 19, 29, 37` have no proper Frobenius-stable `V ∋ 1` (2 is
 primitive mod `n`); composite `n` is degenerate (subfield points

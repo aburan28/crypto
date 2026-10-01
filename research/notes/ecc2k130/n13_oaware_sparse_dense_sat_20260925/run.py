@@ -26,6 +26,24 @@ EXPORT_ORDER = ("dense", "sparse", "sparse", "dense")
 EXPORT_WALL, EXPORT_RSS = 180.0, 512 * 1024**2
 SOLVER_WALL, SOLVER_RSS = 15.0, 2 * 1024**3
 POLL = 0.02
+AGGREGATE_WALL = 3900.0
+
+
+class PortfolioDeadline(TimeoutError):
+    pass
+
+
+class MonitorUnavailable(RuntimeError):
+    pass
+
+
+def deadline_signal(_signum, _frame):
+    raise PortfolioDeadline("3900-second aggregate parent wall cap")
+
+
+def check_deadline(deadline):
+    if deadline is not None and time.perf_counter() >= deadline:
+        raise PortfolioDeadline("3900-second aggregate parent wall cap")
 
 
 def utc():
@@ -45,17 +63,28 @@ def usage():
     return r.ru_utime, r.ru_stime, r.ru_maxrss
 
 
+def assert_monitor_available():
+    """Fail before timed children if process-tree enumeration is unavailable."""
+    try:
+        psutil.Process().children(recursive=True)
+    except (psutil.Error, PermissionError) as exc:
+        raise MonitorUnavailable("process-tree RSS enumeration unavailable") from exc
+
+
 def tree_rss(proc):
     if proc is None:
         return 0
     try:
         family = [proc] + proc.children(recursive=True)
         return sum(item.memory_info().rss for item in family if item.is_running())
-    except (psutil.Error, ProcessLookupError):
+    except psutil.NoSuchProcess:
         return 0
+    except (psutil.Error, PermissionError) as exc:
+        raise MonitorUnavailable("process-tree RSS sample unavailable") from exc
 
 
 def execute(command, out, err, wall_cap, rss_cap, deadline=None):
+    check_deadline(deadline)
     before = usage()
     started = utc()
     clock = time.perf_counter()
@@ -66,24 +95,32 @@ def execute(command, out, err, wall_cap, rss_cap, deadline=None):
         except psutil.NoSuchProcess:
             proc = None
         peak, stop = 0, None
-        while child.poll() is None:
-            peak = max(peak, tree_rss(proc))
-            elapsed = time.perf_counter() - clock
-            if deadline is not None and time.perf_counter() > deadline:
-                stop = "portfolio_cap"
-            elif peak > rss_cap:
-                stop = "rss_cap"
-            elif elapsed > wall_cap:
-                stop = "wall_cap"
-            if stop:
+        try:
+            while child.poll() is None:
+                peak = max(peak, tree_rss(proc))
+                now = time.perf_counter()
+                if deadline is not None and now >= deadline:
+                    stop = "portfolio_cap"
+                elif peak > rss_cap:
+                    stop = "sampled_rss_cap"
+                elif now - clock > wall_cap:
+                    stop = "wall_cap"
+                if stop:
+                    break
+                time.sleep(POLL)
+        except PortfolioDeadline:
+            stop = "portfolio_cap"
+        except BaseException:
+            stop = "runner_exception"
+            raise
+        finally:
+            if stop is not None and child.poll() is None:
                 try:
                     os.killpg(child.pid, signal.SIGKILL)
                 except ProcessLookupError:
                     pass
-                break
-            time.sleep(POLL)
-        exit_code = child.wait()
-        peak = max(peak, tree_rss(proc))
+            exit_code = child.wait()
+            peak = max(peak, tree_rss(proc))
     after = usage()
     scale = 1 if sys.platform == "darwin" else 1024
     return {"command": command, "start_utc": started, "end_utc": utc(),
@@ -97,6 +134,15 @@ def execute(command, out, err, wall_cap, rss_cap, deadline=None):
             "stdout_sha256": verify.sha(out), "stderr_sha256": verify.sha(err),
             "stdout_bytes": out.stat().st_size, "stderr_bytes": err.stat().st_size}
 
+
+def binary_version(name, binary, expected):
+    result = subprocess.run([str(binary), "--version"], capture_output=True,
+                            text=True, timeout=5, check=True)
+    if name == "cryptominisat5":
+        lines = [line.removeprefix("c ") for line in result.stdout.splitlines()]
+        assert f"CryptoMiniSat version {expected}" in lines
+        return expected
+    return result.stdout.strip()
 
 def solver_command(name, binary, cnf):
     return ([str(binary), "--verb=0", "--threads=1", str(cnf)]
@@ -112,9 +158,20 @@ def preflight():
     assert frozen["export_rss_cap_bytes"] == EXPORT_RSS
     assert frozen["solver_wall_cap_seconds"] == SOLVER_WALL
     assert frozen["solver_rss_cap_bytes"] == SOLVER_RSS
+    assert frozen["aggregate_wall_cap_seconds"] == AGGREGATE_WALL
+    assert frozen["rss_policy"] == "sampled-process-tree-20ms-kill-on-observation"
+    assert frozen["poll_interval_seconds"] == POLL
+    assert frozen["binaries"] == json.loads((verify.OLD / "FROZEN.json").read_text())["binaries"]
     assert platform.python_version() == frozen["python_version"]
     assert str(Path(sys.executable).resolve()) == frozen["python_executable"]
     assert psutil.__version__ == frozen["psutil_version"]
+    assert verify.sha(Path(sys.executable).resolve()) == frozen["python_executable_sha256"]
+    assert str(Path(psutil.__file__).resolve()) == frozen["psutil_module_path"]
+    assert verify.sha(Path(psutil.__file__)) == frozen["psutil_module_sha256"]
+    native = Path(psutil._psplatform.cext.__file__).resolve()
+    assert str(native) == frozen["psutil_native_module_path"]
+    assert verify.sha(native) == frozen["psutil_native_module_sha256"]
+    verify.source_ancestry(frozen)
     pinned = {
         "protocol_sha256": HERE / "PROTOCOL.md",
         "run_sha256": HERE / "run.py",
@@ -122,6 +179,8 @@ def preflight():
         "ci_replay_sha256": HERE / "ci_replay.py",
         "analyze_sha256": HERE / "analyze.py",
         "selftest_sha256": HERE / "selftest.py",
+        "runtime_controls_sha256": HERE / "runtime_controls.py",
+        "workflow_sha256": verify.REPO / ".github/workflows/ecc2k130-oaware-sparse-dense-sat.yml",
         "dense_export_sha256": verify.DENSE / "export.py",
         "sparse_export_sha256": verify.SPARSE / "export.py",
         "dense_base_sha256": verify.DENSE_DIR / "base.cnf",
@@ -131,6 +190,7 @@ def preflight():
         "sparse_verify_sha256": verify.SPARSE / "verify.py",
         "sparse_frozen_sha256": verify.SPARSE / "FROZEN.json",
         "sparse_evidence_receipt_sha256": verify.SPARSE / "evidence/final/receipt.json",
+        "sparse_summary_sha256": verify.SPARSE / "evidence/final/summary.json",
         "prior_verify_sha256": verify.OLD / "verify.py",
         "prior_input_sha256": verify.OLD / "INPUT.json",
         "prior_frozen_sha256": verify.OLD / "FROZEN.json",
@@ -141,6 +201,8 @@ def preflight():
     for name in SOLVERS:
         binary = Path(frozen["binaries"][name]["path"])
         assert binary.is_file() and verify.sha(binary) == frozen["binaries"][name]["sha256"]
+        assert binary_version(name, binary, frozen["binaries"][name]["version"]) == (
+            frozen["binaries"][name]["version"])
         binaries[name] = binary
     schemas, truth, curve, point, old = verify.schemas_and_truth()
     for rep, source in (("dense", verify.DENSE_DIR), ("sparse", verify.SPARSE_DIR)):
@@ -182,6 +244,7 @@ def export_abba(outdir, frozen, deadline):
     work = outdir / "work"
     work.mkdir()
     for index, rep in enumerate(EXPORT_ORDER):
+        check_deadline(deadline)
         stem = f"export{index}-{rep}"
         output = work / stem
         command = [str(Path(sys.executable).resolve()),
@@ -202,17 +265,20 @@ def export_abba(outdir, frozen, deadline):
         rows.append(row)
         if row["exit_code"] != 0 or row["stop_reason"] is not None:
             raise RuntimeError(f"{stem} failed/censored; partial outputs retained")
+        check_deadline(deadline)
     return rows
 
 
 def paired_panel(outdir, frozen, binaries, schemas, truth, curve, point, old, deadline):
     exports = export_abba(outdir, frozen, deadline)
+    check_deadline(deadline)
     clock = time.perf_counter()
     base = {"dense": (verify.DENSE_DIR / "base.cnf").read_bytes(),
             "sparse": (verify.SPARSE_DIR / "base.cnf").read_bytes()}
     base_load_wall = time.perf_counter() - clock
     rows = []
     for ti in range(32):
+        check_deadline(deadline)
         target = schemas["dense"]["targets"][ti]
         prepared = {}
         for rep in ("dense", "sparse"):
@@ -220,6 +286,7 @@ def paired_panel(outdir, frozen, binaries, schemas, truth, curve, point, old, de
             raw = verify.query_bytes(old, base[rep], target, schemas[rep])
             path = outdir / f"query-{rep}.cnf"
             path.write_bytes(raw)
+            check_deadline(deadline)
             prepared[rep] = {"path": path, "sha256": sha_bytes(raw),
                              "bytes": len(raw), "setup_wall_seconds": time.perf_counter() - qclock}
         engines = SOLVERS[ti % 3:] + SOLVERS[:ti % 3]
@@ -251,6 +318,7 @@ def paired_panel(outdir, frozen, binaries, schemas, truth, curve, point, old, de
                             "verdict": verdict, "certificate": certificate, "error": error})
                 save(outdir / f"{stem}.json", row)
                 rows.append(row)
+                check_deadline(deadline)
                 if row["stop_reason"] == "portfolio_cap":
                     raise RuntimeError("3900-second aggregate cap; partial raw panel retained")
         for item in prepared.values():
@@ -261,38 +329,52 @@ def paired_panel(outdir, frozen, binaries, schemas, truth, curve, point, old, de
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("smoke", "panel"))
+    parser.add_argument("mode", choices=("preflight", "smoke", "panel"))
     parser.add_argument("outdir", type=Path)
     parser.add_argument("--smoke-receipt", type=Path)
     args = parser.parse_args()
     assert not args.outdir.exists(), "never overwrite an attempt"
     process_start = time.perf_counter()
-    frozen, binaries, schemas, truth, curve, point, old = preflight()
-    preflight_wall = time.perf_counter() - process_start
-    if args.mode == "panel":
-        assert args.smoke_receipt is not None
-        prior = json.loads(args.smoke_receipt.read_text())
-        assert prior["mode"] == "smoke" and prior["pass"]
-        assert prior["freeze_sha256"] == verify.sha(HERE / "FROZEN.json")
+    deadline = process_start + AGGREGATE_WALL if args.mode == "panel" else None
     args.outdir.mkdir(parents=True)
-    receipt = {"mode": args.mode, "freeze_sha256": verify.sha(HERE / "FROZEN.json"),
-               "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+    freeze_path = HERE / "FROZEN.json"
+    receipt = {"mode": args.mode,
+               "freeze_sha256": verify.sha(freeze_path) if freeze_path.is_file() else None,
+               "source_commit": None,
                "python": sys.version, "psutil": psutil.__version__, "host": platform.platform(),
-               "start_utc": utc(), "preflight_wall_seconds": preflight_wall,
+               "start_utc": utc(), "preflight_wall_seconds": None,
                "decision": "INCOMPLETE"}
     save(args.outdir / "receipt.json", receipt)
+    previous_handler = None
     try:
-        if args.mode == "smoke":
-            result = smoke(args.outdir, frozen, binaries, old)
-            assert result["pass"]
-        else:
+        if args.mode == "panel":
+            previous_handler = signal.signal(signal.SIGALRM, deadline_signal)
+            signal.setitimer(signal.ITIMER_REAL, max(0.001, deadline - time.perf_counter()))
+        frozen, binaries, schemas, truth, curve, point, old = preflight()
+        receipt["preflight_wall_seconds"] = time.perf_counter() - process_start
+        receipt["source_commit"] = verify.source_ancestry(frozen)
+        save(args.outdir / "receipt.json", receipt)
+        check_deadline(deadline)
+        assert_monitor_available()
+        if args.mode == "preflight":
+            result = {"mode": "preflight", "entries": [],
+                      "freeze_sha256": receipt["freeze_sha256"], "pass": True}
+            save(args.outdir / "result.json", result)
+        elif args.mode == "panel":
+            assert args.smoke_receipt is not None
+            prior = json.loads(args.smoke_receipt.read_text())
+            assert prior["mode"] == "smoke" and prior["pass"]
+            assert prior["freeze_sha256"] == receipt["freeze_sha256"]
             exports, entries, base_wall = paired_panel(
-                args.outdir, frozen, binaries, schemas, truth, curve, point, old,
-                process_start + 3900.0)
+                args.outdir, frozen, binaries, schemas, truth, curve, point, old, deadline)
             result = {"mode": "panel", "freeze_sha256": receipt["freeze_sha256"],
                       "exports": exports, "entries": entries,
                       "base_load_wall_seconds": base_wall}
             save(args.outdir / "result.json", result)
+        else:
+            result = smoke(args.outdir, frozen, binaries, old)
+            assert result["pass"]
+        check_deadline(deadline)
         receipt["decision"] = "COMPLETE"
         receipt["end_utc"] = utc()
         receipt["process_wall_seconds"] = time.perf_counter() - process_start
@@ -305,8 +387,14 @@ def main():
         receipt["traceback"] = traceback.format_exc()
         receipt["end_utc"] = utc()
         receipt["process_wall_seconds"] = time.perf_counter() - process_start
+        if receipt["preflight_wall_seconds"] is None:
+            receipt["preflight_wall_seconds"] = receipt["process_wall_seconds"]
         save(args.outdir / "receipt.json", receipt)
         raise
+    finally:
+        if previous_handler is not None:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous_handler)
 
 
 if __name__ == "__main__":

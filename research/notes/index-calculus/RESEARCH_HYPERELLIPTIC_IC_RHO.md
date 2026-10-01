@@ -763,3 +763,591 @@ factor-base build is `O(p)` and the whole pipeline would need rebuilding.
 The prime-order subgroup is required to carry most of the Jacobian, which
 also keeps `l² ∤ #Jac` and so the `l`-Sylow cyclic — the condition that
 makes "`log F_j` mod `l`" well defined at all.
+
+
+---
+
+# Round six: the oracle, and an accounting error that ran through
+# everything before it
+
+Round five named the smoothness oracle as the dominant field cost at
+high genus. Attacking it worked. Checking the result against wall clock
+then showed that the cost model this whole thread has been reporting was
+wrong by more than the optimisation was worth.
+
+Class: **engineering** for the oracle; **accounting** for the rest, and
+the accounting part supersedes the `S_ic` figures in rounds three, four
+and five.
+
+## The oracle is 1.4 – 2.8× cheaper
+
+Two changes, both exact — the oracle's answers are unchanged, and
+exhaustive tests hold it to that.
+
+1. **One oracle call per candidate instead of two.** `decompose`
+   returned an `Option`, so on failure the caller re-ran the whole
+   oracle to learn whether the failure was "not smooth" or "smooth but
+   off a truncated base". At genus 4 more than nine candidates in ten
+   fail, so that probe was about half of all oracle work. It now returns
+   the three outcomes from one call.
+2. **A non-square discriminant proves `u` does not split**, for one
+   resultant on a degree-`≤ g` polynomial and one Euler exponentiation,
+   where the full test needs `x^p mod u`. Frobenius acts on the roots of
+   a squarefree `u` as a permutation whose cycle type is the
+   factorisation type, and `disc(u)` is a square exactly when that
+   permutation is even; splitting completely is the identity, which is
+   even. The odd types are `(2,1)` at degree 3 and `(2,1,1) + (4)` at
+   degree 4 — so this rejects **exactly half** of all candidates before
+   the step that dominates the oracle.
+
+Measured, like-for-like (factor-base walk, same instances, same seeds,
+oracle multiplications as counted at the time):
+
+| genus | oracle before | after | cut | wall before | after |
+|--:|--:|--:|--:|--:|--:|
+| 3, `p = 61` | 82,552 | 32,478 | 2.54× | 61 ms | 32 ms |
+| 3, `p = 211` | 276,160 | 115,835 | 2.38× | 241 ms | 160 ms |
+| 4, `p = 41` | 248,186 | 92,526 | 2.68× | 160 ms | 102 ms |
+| 4, `p = 61` | 304,834 | 112,513 | 2.71× | 159 ms | 73 ms |
+
+Genus 2 gains only 1.4 – 1.6×, from the duplicate call alone: its
+`deg u ≤ 2` closed form never reaches the discriminant filter.
+
+The discriminant carries a sign `(−1)^{n(n−1)/2}`, and whether `−1` is
+itself a square depends on `p mod 4`, so a wrong sign would reject split
+polynomials at one residue class and pass at the other. The exhaustive
+scan-versus-gcd equivalence now covers both classes at degree 3 and, new
+here, at degree 4 — the degree genus 4 actually produces, where the odd
+cycle types are a different set. A third test builds polynomials that
+split by construction and requires every one to survive the filter,
+since this is the only part of the oracle that answers "not smooth"
+without looking for roots at all.
+
+## The cost model was wrong, twice, in opposite directions
+
+Cutting the oracle's **counted** multiplications by 60% cut wall clock
+by 1.5 – 2.2×. If the count were faithful it would have predicted a few
+percent: the oracle was charged at 3 – 6% of `S` while behaving like a
+third of the run. The charge counts coefficient multiplications and
+misses what the implementation does per multiplication — allocation, the
+division loop inside `rem`, clones.
+
+Replacing the charge with the oracle's **measured time**, converted by
+the calibrated seconds-per-group-operation, overshot the other way: that
+calibration repeats one Cantor addition on cache-resident operands, so
+it under-measures what a group operation costs inside a real run, and
+dividing a measured time by too small a number inflates everything
+converted through it. At genus 3, `p = 61` that put `S` at a 1.2×
+disadvantage where the clock said a 1.7× *advantage*.
+
+What the unit now does: the relation search times its own group
+operations, and one operation's in-situ cost is that time divided by the
+operations it counted. The oracle and the solve convert through that.
+`S` and wall clock now agree within 1.6× on every row and within 1.3% –
+33% on most — and that agreement is a test, because it is the only thing
+that caught either error.
+
+**Two previously reported conclusions do not survive this:**
+
+- The sparse solve was reported as "rounds to zero" and as 1 – 29
+  group-op equivalents. Measured, it is 79 – 1350, and at the largest
+  genus-3 instance it is the **single largest term** (1350 of 3033,
+  against the oracle's 999 and the relation stage's 684). "The linear
+  algebra is not the bottleneck" was an artifact of the same
+  under-charge.
+- The headline ratios were optimistic. Rounds four and five reported
+  0.45 (g=2), 0.20 (g=3), 0.08 (g=4) at the largest instance of each
+  genus. Corrected: **1.81, 0.72, 0.16**. The clock in those same runs
+  had already disagreed — 159 ms against 783 ms at genus 4 is 4.9×, not
+  the 12× that `S = 0.08` claimed — and I reported the clock without
+  noticing it contradicted the unit.
+
+## Corrected table
+
+Factor-base walk, DP rho reference, in-situ accounting. `clock` is
+`wall_ic / wall_rho` measured in the same run, as an independent check
+on the unit.
+
+| genus | `p` | `N` | `S_ic/S_rho` | `clock` |
+|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 0.30 | 0.33 |
+| 2 | 101 | 4663 | 0.60 | 0.61 |
+| 2 | 151 | 7949 | 1.24 | 1.10 |
+| 2 | 211 | 11813 | 2.00 | 1.76 |
+| 2 | 251 | 61667 | 1.81 | 1.61 |
+| 3 | 23 | 6299 | 0.57 | 0.44 |
+| 3 | 61 | 124459 | 0.78 | 0.62 |
+| 3 | 101 | 364747 | 0.87 | 0.91 |
+| 3 | 151 | 1180351 | 0.84 | 0.79 |
+| 3 | 211 | 4620611 | 0.72 | 0.56 |
+| 4 | 17 | 5639 | 2.45 | 1.53 |
+| 4 | 23 | 30223 | 1.79 | 1.26 |
+| 4 | 31 | 239753 | 1.22 | 0.89 |
+| 4 | 41 | 333041 | 1.17 | 0.90 |
+| 4 | 61 | 16790591 | **0.16** | **0.15** |
+
+## Reading it
+
+1. **Genus 2 now gets worse with `p`**, 0.30 → 2.00, because the solve's
+   real cost grows faster in `m` than rho's `sqrt(N)` grows in `p`. The
+   old accounting hid this by charging the solve almost nothing.
+2. **Genus 3 is flat at 0.7 – 0.9** rather than falling to 0.20. Index
+   calculus is modestly ahead across five instances spanning `N` from
+   `6·10³` to `4.6·10⁶`, not several times ahead.
+3. **Genus 4 still shows the crossover, and it is still large at the one
+   big instance**: 0.16 by the unit, 0.15 by the clock, 105 ms against
+   rho's 712 ms at `N = 1.7·10⁷`. The four smaller genus-4 rows lose
+   (1.17 – 2.45), so the single winning row carries the claim, and it is
+   one instance.
+4. **The oracle is still the largest or second-largest term** at genus
+   3 and 4 after a 2.5× cut — 746 of 1396 equivalents at genus 4
+   `p = 61`. Closed-form cubic and quartic root finding (Cardano,
+   Ferrari) would replace the remaining Cantor–Zassenhaus
+   exponentiations, and the solve now deserves the same treatment the
+   oracle just got.
+
+## Caveat on the instrumentation
+
+Timing the loop costs something: the instrumented build is slower than
+the uninstrumented one on the same instance, and rho is not instrumented
+the same way, so the measured ratio is biased slightly **against** index
+calculus. That is the conservative direction for a claim about index
+calculus, so it stands as reported rather than being corrected out.
+
+## Round seven: the sparse solve — protocol, written before measuring
+
+Round six priced the solve for the first time and found it the single
+largest term at genus 3 `p = 211` (1350 of 3033 group-op equivalents).
+This round attacks it. Protocol fixed here, before any candidate code
+runs; the baseline binary is built from `main` at `4ccaf6e5`.
+
+**Hypothesis.** The solve's cost is bookkeeping, not arithmetic. Reading
+`sparse_solve_for_k`: every pivot rescans every column's holder list and
+re-tests membership by a linear search of the row; a row is pushed onto
+a holder list again on every update, so those lists grow with
+duplicates; and each row update round-trips through a `HashMap`. None of
+that is a multiplication mod `N`, so none of it was in the counted
+mul-mods, and all of it is in the wall time the unit now charges.
+Replacing it with exact column counts, holder lists that only gain a row
+when it gains the column, and sorted two-pointer row merges should cut
+the solve's charge without touching its arithmetic.
+
+**Held fixed.** The arithmetic stays `BigUint`. Word-sized arithmetic
+mod `N` would be much faster, and every `N` here fits in a word, but
+the group operations it is converted against are `BigUint` Cantor
+arithmetic; making only one side word-sized would move the ratio by
+changing the implementation's arithmetic, not the algorithm. The
+harness, curves, seeds (`20260916` for index calculus, `0xC0FFEE` for
+rho), trial counts (5 and 40), primes, the in-situ unit and the floor
+are unchanged. The command is `examples/hyperelliptic_ic_vs_rho.rs`,
+unmodified.
+
+**Reference and boundary.** Distinguished-point rho in the same run, as
+in round six. The floor is `(m+1)·(1 + g/c) + m²/c`, unchanged.
+
+**Pinned output.** The solver cannot change which relations are
+collected unless it changes whether a solve succeeds, and with `N`
+prime it should not. So on every row the relation-stage operations, the
+oracle mul-mods and the recovered `k` must be **identical** between
+baseline and candidate; only the solve's cost may move. A row that
+differs anywhere else means the candidate is a different algorithm and
+the comparison stops there. The candidate is also cross-checked against
+dense Gaussian elimination on random systems before it is measured.
+
+**Timing discipline.** The solve is charged by measured time, so wall
+noise enters `S`. Every sweep runs through `tools/isolated_bench.py` on
+one reserved core with `RAYON_NUM_THREADS=1`: one A/A pair to measure
+the spread, then five interleaved baseline/candidate rounds, reporting
+the median and minimum per row. A difference inside the A/A spread is
+not a result. Contended sweeps are reported and not pooled.
+
+**Success.** On the fb-walk rows, the median solve charge falls by at
+least 2×, outside the A/A spread, with every row pinned as above.
+
+**Stop.** If the cut is under 1.2×, the hypothesis is wrong: the solve's
+cost is arithmetic, not bookkeeping. That is recorded as the result, and
+the next lever is the arithmetic itself, argued separately.
+
+**Expected class: engineering.** The change touches constants in one
+phase, not how any phase grows with `m`, so it should not move the
+ratio to the floor's shape. If the solve's growth with `m` changes, that
+is reported as what it is.
+
+**Owed from round six.** `docs/index-calculus-scoreboard.html` still
+carries the ratios from before round six's accounting correction (0.21
+at genus 4, 0.38 at genus 3). Round six should have updated it and did
+not. This round updates it from its own frozen file, and the earlier
+fit (`experiments/hyperelliptic_exponent_fit.json`) stays as it is,
+superseded but not rewritten.
+
+## Round seven: measured
+
+Frozen source: `experiments/hyperelliptic_sparse_solve_r7/` (raw sweeps,
+per-run isolation records, manifest with binary hashes, the analysis
+script and its outputs). Eleven sweeps: an A/A pair, then five
+interleaved baseline/candidate rounds, each on one reserved core. None
+was contended.
+
+**Pinned output held.** Across all eleven sweeps, every row's `N`, `m`,
+relation-stage operations, oracle mul-mods, rho operations and verified
+`k` are identical. Only the solve's cost moved. The dense-solve rows,
+which this change does not touch, moved by at most 0.07% in `S` — the
+control behaved as a control.
+
+**The hypothesis holds: the cost was bookkeeping.** Counted solve
+mul-mods changed by −4% to +8% (a deterministic pivot order replacing a
+`HashMap`-ordered one). The solve's charge fell:
+
+| | fb-walk rows | ab-walk rows |
+|--|--:|--:|
+| median cut in solve charge | **5.1×** | 2.5× |
+| range | 2.0 – 18.2× | 1.0 – 5.3× |
+| A/A spread (max over rows) | 1.40× | — |
+| rows where every candidate sweep beats every baseline sweep | 18 of 18 | — |
+
+The success condition (median ≥ 2×, outside the A/A spread) is met.
+
+**Two defects surfaced on the way, both caught before measuring.** The
+first candidate visited a row twice when it cancelled out of a column
+and filled back in, aborting the solve; four DLP tests failed. And the
+cross-check I wrote used dense elimination as its oracle, which was
+wrong: `gaussian_eliminate_mod_n` returns a particular solution on an
+under-determined system instead of `None`, despite its documentation.
+The test now uses an independent rank criterion, and a mutation check
+confirmed it fails without the fix. The dense solver's behaviour is
+outside this round and is filed separately; the DLP driver is protected
+from it by its `[k]D₁ = D₂` check.
+
+### The solve's growth changed, not only its constant
+
+Log-log slope of solve charge against `m`, fb-walk rows:
+
+| genus | charge before | charge after | counted mul-mods (both) |
+|--:|--:|--:|--:|
+| 2 | 2.25 | 1.37 | 1.67 – 1.69 |
+| 3 | 2.68 | 1.70 | 2.14 |
+| 4 | 2.39 | 1.64 | 2.02 – 2.04 |
+
+The old bookkeeping grew faster than the arithmetic it surrounded — the
+per-pivot rescan is `O(m · holders · row length)` and the holder lists
+grew with every update. The candidate's charge now grows no faster than
+its arithmetic. The algorithm's own exponent, the mul-mod column, did
+not move.
+
+### Table
+
+Factor-base walk, DP rho in the same run, in-situ unit. Medians over
+six baseline and five candidate sweeps. `corr` renormalises rho's walk
+to the ideal `√(π/2)` as round five did; `clock` is `wall_ic/wall_rho`.
+
+| g | `p` | `N` | `m` | `S_ic` before | `S_ic` after | `S_ic/S_rho` before → after | `corr` before → after | `clock` after |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 15 | 2.74 | 2.58 | 0.30 → 0.28 | 0.31 → 0.29 | 0.33 |
+| 2 | 61 | 1399 | 22 | 2.79 | 2.56 | 0.32 → 0.29 | 0.32 → 0.29 | 0.33 |
+| 2 | 101 | 4663 | 46 | 3.25 | 2.29 | 0.59 → 0.42 | 0.60 → 0.42 | 0.45 |
+| 2 | 151 | 7949 | 78 | 5.62 | 2.54 | 1.22 → 0.55 | 1.26 → 0.57 | 0.57 |
+| 2 | 211 | 11813 | 112 | 7.88 | 2.67 | 1.99 → 0.67 | 2.03 → 0.69 | 0.64 |
+| 2 | 251 | 61667 | 123 | 4.07 | 1.33 | 1.69 → **0.55** | 1.69 → **0.55** | 0.60 |
+| 3 | 23 | 6299 | 12 | 2.66 | 2.64 | 0.56 → 0.56 | 0.55 → 0.55 | 0.43 |
+| 3 | 31 | 7333 | 16 | 3.48 | 3.40 | 0.80 → 0.78 | 0.76 → 0.75 | 0.62 |
+| 3 | 41 | 6679 | 27 | 4.12 | 3.82 | 0.86 → 0.80 | 0.87 → 0.81 | 0.70 |
+| 3 | 61 | 124459 | 33 | 1.79 | 1.65 | 0.78 → 0.72 | 0.86 → 0.80 | 0.57 |
+| 3 | 101 | 364747 | 53 | 1.66 | 1.28 | 0.88 → 0.68 | 0.95 → 0.73 | 0.57 |
+| 3 | 151 | 1180351 | 77 | 1.71 | 1.09 | 0.86 → 0.55 | 1.12 → 0.72 | 0.45 |
+| 3 | 211 | 4620611 | 104 | 1.38 | 0.81 | 0.70 → **0.41** | 0.99 → **0.58** | 0.31 |
+| 4 | 17 | 5639 | 7 | 12.74 | 12.76 | 2.45 → 2.45 | 2.53 → 2.54 | 1.72 |
+| 4 | 23 | 30223 | 11 | 5.20 | 5.18 | 1.80 → 1.79 | 1.78 → 1.78 | 1.29 |
+| 4 | 31 | 239753 | 16 | 2.31 | 2.29 | 1.21 → 1.20 | 1.25 → 1.24 | 0.85 |
+| 4 | 41 | 333041 | 24 | 2.18 | 2.14 | 1.18 → 1.15 | 1.23 → 1.21 | 0.90 |
+| 4 | 61 | 16790591 | 36 | 0.35 | 0.32 | 0.16 → **0.15** | 0.26 → **0.24** | 0.11 |
+
+Every row returned its verified `k` on every sweep.
+
+**Class: engineering.** `S` fell; the solve's arithmetic exponent did
+not. The genus-2 column moved most because genus 2 has the largest `m`
+per unit of `N`, so it carried the most bookkeeping.
+
+## What the priced solve does to the exponent claim
+
+Round five's law, `S_ic/S_rho ∝ g!·N^{1/g − 1/2}`, prices the relation
+stage only. With the solve priced, the ratio is a sum of two terms, and
+the second one grows. Writing the solve's measured growth as `m^s`, with
+`s ≈ 1.4 – 1.7` from the table above, and `m ∝ N^{1/g}`:
+
+```
+relation stage / rho  ∝  N^{1/g − 1/2}
+solve / rho           ∝  N^{s/g − 1/2}
+```
+
+| g | relation term | solve term (`s` measured) | predicted net | measured slope of `corr` after, 95% CI |
+|--:|--:|--:|--|--:|
+| 2 | 0 | +0.19 | rises | **+0.21** [0.00, 0.41] |
+| 3 | −0.167 | +0.07 | flat, relation term falling, solve term rising | **−0.01** [−0.07, +0.05] |
+| 4 | −0.25 | −0.09 | falls | **−0.29** [−0.42, −0.16] |
+
+(Slopes are against `log₂ N`, as round five's were. Before this round,
+under round six's accounting, the same fits read +0.51, +0.06 [0.00,
+0.13] and −0.28.)
+
+**This withdraws round five's genus-3 exponent claim.** It reported
+−0.154 against a predicted −0.167 and the scoreboard carries it as an
+exponent advance. That fit was made while the solve was charged almost
+nothing. With the solve priced, genus 3 is flat: −1/6 lies outside the
+interval. Genus 4 still falls at a slope consistent with its law, and
+genus 2 was never predicted to cross.
+
+The reason is structural, not a matter of this implementation. A full
+degree-1 factor base has `m ≈ p/2`, and any elimination of an `m × m`
+system costs at least order `m`, realistically `m²`. Against rho's
+`√N ≈ p^{g/2}`, that is `p²` against `p^{1.5}` at genus 3: with a full
+factor base the linear algebra outgrows rho. This is the known reason
+that small-genus index calculus shrinks the factor base and accepts
+large primes to balance the two phases — Thériault (ASIACRYPT 2003) and
+Gaudry, Thomé, Thériault and Diem (Math. Comp. 2007) reach
+`q^{2 − 4/(2g+1)}` and `q^{2 − 2/g}` that way; both are below rho's
+`q^{g/2}` at genus 3. At toy sizes the solve's measured `s` is under 2
+because it is sparse and has fixed overheads; that is a reprieve at
+these sizes, not an exponent.
+
+## Where this leaves the thread
+
+1. **Genus 2 now measures below rho at all six instances**, 0.28 – 0.67
+   on the unit and 0.33 – 0.64 on the clock. Round six's "genus 2 gets
+   worse with `p`" was the bookkeeping. The ratio still rises with `N`
+   (+0.21), as the solve term predicts, so this is a constant-factor
+   lead that shrinks with size, not a crossover.
+2. **Genus 3 is flat at 0.4 – 0.8.** Ahead of rho at every size
+   measured, with no exponent behind it.
+3. **Genus 4 carries the only exponent claim left**: −0.29, consistent
+   with −1/4, best row 0.15 raw and 0.24 renormalised at `N = 1.7·10⁷`.
+   It still rests on five sizes, and the four small ones lose.
+4. **The next lever is the factor-base size**, not the solver. The
+   solve is now charged honestly and grows with `m`; the literature's
+   answer is a reduced factor base with large-prime relations, which
+   trades relation-stage work for linear algebra. That is a change to
+   the algorithm and needs its own pre-registered protocol and floor.
+
+## Scope
+
+`p ≤ 251`, `N ≤ 1.7·10⁷`, one x86-64 cloud container (Arm64 and GPU not
+measured), full degree-1 factor base, `BigUint` arithmetic on both
+sides. Wall time enters `S` through the in-situ unit, so these are
+single-host numbers; the A/A spread bounds their noise at 1.4× per row
+and the medians over five or six sweeps are what is reported.
+
+## Round eight: reduced factor base with single large primes — protocol, written before measuring
+
+Round seven priced the solve honestly and found that with a full
+factor base it grows faster than rho at genus ≤ 3. The literature's
+remedy (Thériault, ASIACRYPT 2003) is a reduced factor base plus
+**large primes**: a smooth candidate with exactly one place outside the
+base is kept as a partial relation, and two partials sharing that place
+combine into a full one. This round builds that and tests it. Protocol
+fixed here before any of the code exists; baseline is `main` at
+`01a64427`.
+
+**The mechanism.** The factor base is the first `F = θ·L` places by
+`x` (`L` = all degree-1 places after ± folding; the existing `fb_size`
+truncation). A candidate that splits with one off-base place `P`,
+coefficient `e`, is stored under `P`. A later partial with the same `P`,
+coefficient `e'`, gives `e'·row₁ − e·row₂`, which eliminates `log P`.
+Each subsequent partial combines with the first one stored under its
+place, so combined rows do not repeat. Rows with two or more off-base
+places are still discarded (the double-large-prime variant is out of
+scope).
+
+**Heuristic balance, for orientation only.** With `F = L^a`, single
+large primes need about `L^{(a+1)/2 − (a−1)(g−1)}` trials, and the solve
+costs about `L^{2a}`. Balancing gives `a = (2g−1)/(2g+1)` and total
+`L^{2 − 4/(2g+1)}`, Thériault's exponent. That is an asymptotic
+statement with the solve at `m²`; it says nothing about where the
+balance sits at these sizes.
+
+**The prediction at these sizes, from round seven's frozen rows.**
+After round seven the solve is only 0 – 13% of index calculus's total
+(`experiments/hyperelliptic_sparse_solve_r7/`). Model: a smooth
+candidate's `g` places land in the base independently with probability
+`θ`; partials fill `(1−θ)·L` buckets and combine at the birthday rate
+`P − B(1 − e^{−P/B})`; relation and oracle cost scale with trials; the
+solve scales as `θ^s` with round seven's `s` (1.37 / 1.70 / 1.64).
+Predicted `S(θ)/S(1)`, large primes on, and the no-large-prime control:
+
+| genus | rows | θ = 0.75 | θ = 0.5 | θ = 0.5, no large primes |
+|--:|--|--:|--:|--:|
+| 2 | `p` = 41 … 251 | 1.04 → 0.97 | 1.25 → 1.05 | 2.7 → 1.9 |
+| 3 | `p` = 23 … 211 | 1.17 → 1.13 | 1.94 → 1.72 | 5.6 → 4.2 |
+| 4 | `p` = 17 … 61 | 1.35 → 1.33 | 3.18 → 2.97 | 12.5 → 9.5 |
+
+(Ranges run from the smallest row to the largest.) So **at genus 3 and
+4 the model predicts the reduced base loses at every size this harness
+can reach.** Extrapolating the same model, with the solve growing as
+`m^s` and the relation stage as `m`, a ≥ 10% saving first appears near
+`m ≈ 2000` (`p ≈ 4000`) at genus 2, `m ≈ 13 000` at genus 3 and
+`m ≈ 150 000` at genus 4. Only the first is reachable, so this round
+extends genus 2 to `p ≈ 4000` to put rows on both sides of a predicted
+crossover. If the solve's `s` rises toward 2 at larger `m`, as an `m²`
+bound suggests it eventually must, the crossovers come earlier; that is
+a stated uncertainty of the model, not a free parameter.
+
+**Known omission.** A combined row carries up to `2g` factor-base
+entries instead of `g`, so the solve should cost more per row than `θ^s`
+says. The model leaves it out; if it matters, it shows up as a
+systematic under-prediction at small θ.
+
+**Instances and configurations.** A new example,
+`examples/hyperelliptic_ic_large_prime.rs`, so round seven's frozen
+command stays unchanged. Curves and instance selection as in the round-
+seven harness. Genus 2 at `p` ∈ {101, 251, 503, 1009, 2003, 4001},
+genus 3 at `p` ∈ {61, 211, 401}, genus 4 at `p` ∈ {31, 61}. Configs:
+θ ∈ {1, 0.85, 0.7, 0.5} with large primes, and θ = 0.5 without (the
+control). Factor-base walk, sparse solve, gcd oracle, seeds `20260916` /
+`0xC0FFEE`, 5 index-calculus and 40 rho runs per row, DP rho reference.
+
+**Accounting.** Unchanged unit. Storing and matching partials is new
+bookkeeping, and round seven showed what uncharged bookkeeping does, so
+it is timed and converted in situ like the oracle and the solve. The
+floor `(m+1)(1+g/c) + m²/c` is evaluated at each configuration's own
+`m`; since that moves the boundary with θ, **the comparison across θ is
+made against rho and against θ = 1, not against the floor.**
+
+**Pinned output.** At θ = 1 there are no off-base places, so the new
+code must reproduce the old one exactly: identical relation-stage
+operations, oracle mul-mods and `k` against `main`'s binary on the
+round-seven harness. Every run on every row returns a verified `k`, and
+a test checks every combined relation as a Jacobian identity.
+
+**Pre-registered hypotheses.** Measured `S(θ)/S(1)` is the median over
+three isolated sweeps.
+
+- **H1 (no win where none is predicted).** At genus 3 and 4, no θ < 1
+  configuration beats θ = 1 by more than 10% on any row. Falsified by
+  one such row.
+- **H2 (genus-2 crossover).** At genus 2, `p ≤ 251`: no θ < 1 config
+  beats θ = 1 by more than 5%. At `p ≥ 2003`: the best θ < 1 beats
+  θ = 1 by at least 5%. Falsified if either half fails.
+- **H3 (model fidelity).** Re-evaluating the model with each row's
+  own θ = 1 measurements (smoothness rate, relation, oracle and solve
+  costs — none of them θ < 1 data), it predicts measured `S(θ)/S(1)`
+  within ±25% on at least 80% of (row, θ < 1) cells.
+- **H4 (the control).** With θ = 0.5, large primes are cheaper than no
+  large primes on every row.
+
+**Stop.** H1 or H2 falsified means the cost model is wrong about where
+the solve and relation stage balance, and the next step is to measure
+why before building further variants.
+
+**Expected class.** At the reachable sizes, mostly "no change"
+(θ = 1 wins). A genus-2 crossover at `p ≈ 4000` would be engineering
+within a genus whose rho-relative exponent is not the target. It would
+still be the first measurement of this lever and a check on the model
+that predicts where it pays at genus 3, which is what matters.
+
+## Round eight: measured
+
+Frozen source: `experiments/hyperelliptic_large_prime_r8/` (raw sweeps
+from both hosts, the interrupted ones kept, isolation records, a
+manifest with binary hashes, the analysis script and its outputs).
+
+**Two hosts, kept apart.** The container was restarted twice during the
+round and came back on different CPUs. Medians are never pooled across
+hosts. The registered result is three uncontended sweeps on one host
+(2.10 GHz Xeon, `L4`–`L6`); two sweeps on the other (2.80 GHz, `L1`,
+`L2`) replicate it. Two sweeps were interrupted (a tool time limit, then
+a container stop); they are kept, marked, and not used.
+
+**Pinned output held.** At θ = 1 the new code reproduces round seven
+exactly: all 54 rows of round seven's command, every configuration,
+match its frozen output on `N`, `m`, relation-stage operations, oracle
+and solve mul-mods, rho operations and `k`. Across sweeps, every
+deterministic count is identical. Every run on every row returned its
+verified `k`. The combined relations are checked as Jacobian identities
+by a test that a sign mutation fails.
+
+### Verdicts on the registered hypotheses
+
+| | registered test | primary host | replication host |
+|--|--|--|--|
+| **H1** no win at genus 3–4 | no θ < 1 beats θ = 1 by > 10% | **falsified** at one row: g3 `p = 61`, θ = 0.85, **0.864** | falsified, same row, 0.874 |
+| **H2** genus-2 crossover | `p ≥ 2003` gains ≥ 5% | **falsified**: best 0.991, 0.987 | falsified: 0.984, 0.978 |
+| **H3** model fidelity | ≥ 80% of cells within ±25% | holds: 44 of 44 | holds: 44 of 44 |
+| **H4** large primes beat no large primes | every row | holds: 1.6 – 3.8× cheaper | holds |
+
+**The H1 violation is seed variance, and the protocol is to blame for
+it.** Sweeps repeat the same five index-calculus seeds, so they
+replicate timing noise but never sample a new seed. A post-hoc rerun of
+that one row with 60 seeds (labelled as such in the manifest) gives
+θ = 0.85 at **1.003×** θ = 1, against the model's 1.05. Five seeds per
+row was too few for a 10% threshold on an instance this small; that was
+my design error. H1 stays recorded as falsified, because that is what
+the registered test returned; the reading of it is that no genus-3 or
+genus-4 row shows a real gain.
+
+### Why the genus-2 crossover did not appear
+
+At `p = 2003` and `4001` the solve is 20% of the total at θ = 1, so
+there is something to save. Two things eat it:
+
+| `p` | θ | solve, measured / model | relation + oracle | partial bookkeeping, share of total |
+|--:|--:|--:|--:|--:|
+| 2003 | 0.85 | 0.90 / 0.80 | 0.99 | 2.0% |
+| 2003 | 0.5 | 0.57 / 0.39 | 1.12 | 4.1% |
+| 4001 | 0.85 | 0.87 / 0.80 | 0.99 | 1.8% |
+| 4001 | 0.5 | 0.51 / 0.39 | 1.11 | 3.5% |
+
+1. **The solve falls less than `θ^s`.** This is the omission registered
+   in advance: a combined row carries up to `2g` entries, so the system
+   shrinks in rows but not in proportion in work. At genus 3 the gap is
+   larger still (0.76 measured against 0.31 at θ = 0.5, `p = 401`); at
+   genus 4 the model is right (0.32 against 0.32), because there the
+   solve is 1% of the total and dominated by fixed costs.
+2. **Partial bookkeeping costs 2 – 4%.** It is charged, as registered.
+   Left uncharged it would have shown roughly half of the predicted
+   gain — the same trap round six fell into, avoided this time by
+   pricing it before measuring.
+
+Net: the predicted 4 – 6% saving at `p ≈ 4000` measures as about 1%.
+The model's θ-dependence of the relation stage is accurate (H3, and
+the relation-plus-oracle column above); its solve term is optimistic.
+
+### The table
+
+Primary host, medians of three sweeps. `S/S₁` is the ratio to θ = 1 in
+the same sweep; `ratio` is `S_ic/S_rho`.
+
+| g | `p` | `N` | `m` | θ = 1: `S_ic`, ratio | best θ < 1: θ, `S/S₁` | θ = 0.5 with / without large primes |
+|--:|--:|--:|--:|--|--|--|
+| 2 | 101 | 4663 | 46 | 2.29, 0.42 | 0.70, 0.976 | 1.36 / 2.48 |
+| 2 | 251 | 61667 | 123 | 1.35, 0.56 | 0.85, 0.993 | 1.14 / 2.06 |
+| 2 | 503 | 65179 | 259 | 2.88, 1.25 | 0.85, 0.956 | 1.04 / 1.70 |
+| 2 | 1009 | 241259 | 478 | 3.71, 1.78 | 0.85, 1.006 | 1.08 / 1.83 |
+| 2 | 2003 | 2001787 | 1000 | 2.00, 1.03 | 0.85, 0.991 | 1.04 / 1.73 |
+| 2 | 4001 | 16050337 | 2005 | 1.65, 0.73 | 0.85, 0.987 | 1.03 / 1.70 |
+| 3 | 61 | 124459 | 33 | 1.65, 0.72 | 0.85, 0.864 (1.003 at 60 seeds) | 1.48 / 3.59 |
+| 3 | 211 | 4620611 | 104 | 0.81, 0.41 | 0.85, 1.081 | 1.68 / 4.02 |
+| 3 | 401 | 31525763 | 196 | 0.60, **0.23** | 0.85, 1.028 | 1.59 / 3.79 |
+| 4 | 31 | 239753 | 16 | 2.32, 1.22 | 0.85, 1.231 | 2.82 / 9.88 |
+| 4 | 61 | 16790591 | 36 | 0.33, **0.15** | 0.85, 1.262 | 2.69 / 10.30 |
+
+**Class: no change at these sizes.** θ = 1 is the right choice on every
+row once seed variance is accounted for; large primes are a large
+improvement over a reduced base *without* them, and no improvement
+over the full base.
+
+**One new reference point, not from the lever.** Genus 3 at `p = 401`
+(`N = 3.2·10⁷`, a size this thread had not measured) reads **0.23**
+against DP rho, 0.46 with the walk renormalised. That extends the
+genus-3 sizes from round seven by one row; it does not change round
+seven's finding that the genus-3 ratio has no exponent behind it, and it
+is a single new size, not a refit.
+
+### What this says about the next lever
+
+The solve is still not the bottleneck at genus 3 and 4 (1 – 4% of the
+total), so no amount of factor-base reduction can pay there at these
+sizes; the relation stage and the oracle are what cost. The calibrated
+model, corrected for the measured solve behaviour, would put the genus-3
+crossover further out than the `m ≈ 13 000` registered. The double
+large prime variation (Gaudry–Thomé–Thériault–Diem) has the same
+problem in sharper form: it trades even more relation-stage work and
+denser rows for a smaller solve. **At reachable sizes the lever is the
+oracle and the per-trial cost of the walk, not the factor base.**

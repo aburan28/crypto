@@ -110,7 +110,9 @@ use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, IrreduciblePoly};
-use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint, FrobeniusCanon};
+use crate::cryptanalysis::curve_id::{self, CurveId};
+use crate::cryptanalysis::ic_measurement as measurement;
+use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, available_subspace_dimensions,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
@@ -217,13 +219,22 @@ pub struct PinOutcome {
 }
 
 /// The pinned ratios for `regime/instance`, or `None` when the table has
-/// no entry for it — a new size or a freshly generated curve.
+/// no entry for it — a new size or a freshly generated curve.  The table
+/// predates ICV1 and is keyed by the names curves had then; an instance
+/// named by its slug finds its row through the curve registry.
 fn pinned_ratios(
     regime: &str,
     instance: &str,
 ) -> Option<serde_json::Map<String, serde_json::Value>> {
     let doc: serde_json::Value = serde_json::from_str(PINNED_CALIBRATION).ok()?;
-    let row = doc.get("instances")?.get(format!("{regime}/{instance}"))?;
+    let table = doc.get("instances")?.as_object()?;
+    let prefix = format!("{regime}/");
+    let row = table.get(&format!("{prefix}{instance}")).or_else(|| {
+        table.iter().find_map(|(key, row)| {
+            let name = key.strip_prefix(&prefix)?;
+            curve_id::same_curve(name, instance).then_some(row)
+        })
+    })?;
     Some(row.as_object()?.clone())
 }
 
@@ -1261,6 +1272,42 @@ impl SignedFrobeniusClasses {
     }
 }
 
+impl SignedFrobeniusClasses {
+    /// [`RhoClasses::canon`] with the multiplier left in parts: the
+    /// representative is `σ·φ^t(p)`, that is `[σλ^t]p`, with `σ = −1`
+    /// when `negated`.
+    #[inline]
+    fn canon_parts(&self, p: FastPoint) -> (FastPoint, u32, bool) {
+        if p.infinity {
+            return (p, 0, false);
+        }
+        let (_, t) = self.canon.canon_with_shift(p.x);
+        let (x, y) = if t == 0 {
+            (p.x, p.y)
+        } else {
+            (self.powers.apply(t, p.x), self.powers.apply(t, p.y))
+        };
+        // −(x, y) = (x, x + y).
+        let negated = x ^ y;
+        if negated < y {
+            (FastPoint::affine(x, negated), t, true)
+        } else {
+            (FastPoint::affine(x, y), t, false)
+        }
+    }
+
+    /// The multiplier `σλ^t` of [`Self::canon_parts`].
+    #[inline]
+    fn multiplier(&self, t: u32, negated: bool) -> u64 {
+        let lambda_t = self.lambda_pow[t as usize];
+        if negated {
+            negmod(lambda_t, self.r)
+        } else {
+            lambda_t
+        }
+    }
+}
+
 impl RhoClasses<BinaryGroup<'_>> for SignedFrobeniusClasses {
     fn automorphisms(&self) -> u32 {
         2 * self.n
@@ -1269,20 +1316,8 @@ impl RhoClasses<BinaryGroup<'_>> for SignedFrobeniusClasses {
         if p.infinity {
             return (p, 1);
         }
-        let (_, t) = self.canon.canon_with_shift(p.x);
-        let (x, y) = if t == 0 {
-            (p.x, p.y)
-        } else {
-            (self.powers.apply(t, p.x), self.powers.apply(t, p.y))
-        };
-        let lambda_t = self.lambda_pow[t as usize];
-        // −(x, y) = (x, x + y).
-        let negated = x ^ y;
-        if negated < y {
-            (FastPoint::affine(x, negated), negmod(lambda_t, self.r))
-        } else {
-            (FastPoint::affine(x, y), lambda_t)
-        }
+        let (rep, t, negated) = self.canon_parts(p);
+        (rep, self.multiplier(t, negated))
     }
     fn method(&self) -> &'static str {
         "signed-Frobenius r-adding walk: normal-basis canonicalisation, look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
@@ -2166,6 +2201,672 @@ pub fn signed_frobenius_rho_batch(
     ))
 }
 
+/// `[k]P`'s charge as [`CountedGroup::mul`] makes it: a doubling for
+/// every bit below the top, an addition for every set bit below it.
+fn charge_mul(ops: &mut GroupOps, k: u64) {
+    ops.scalar_mults += 1;
+    if k == 0 {
+        return;
+    }
+    ops.doubles += u64::from(63 - k.leading_zeros());
+    ops.adds += u64::from(k.count_ones() - 1);
+}
+
+/// `[a]G + [b]Q`'s charge as [`joint_mul`] makes it, with the `G + Q`
+/// it is handed: one addition, then a doubling for every bit below the
+/// top of `a | b` and an addition for every such bit set in either.
+fn charge_joint_mul(ops: &mut GroupOps, a: u64, b: u64) {
+    ops.adds += 1;
+    ops.scalar_mults += 1;
+    let both = a | b;
+    if both == 0 {
+        return;
+    }
+    ops.doubles += u64::from(63 - both.leading_zeros());
+    ops.adds += u64::from(both.count_ones() - 1);
+}
+
+/// Most points a [`Recent`] ring holds: the tuned walk's window.
+const RECENT_MAX: usize = 16;
+
+/// The last `window` points of a walk, in a ring kept inline: their keys
+/// in one array, scanned every step without a branch per key, and their
+/// states beside it, read only when a cycle is found.  An empty slot
+/// holds key `0`, which no affine point packs to.
+struct Recent {
+    keys: [u64; RECENT_MAX],
+    states: [(FastPoint, bool, u32, u64); RECENT_MAX],
+    window: usize,
+    next: usize,
+    len: usize,
+}
+
+impl Recent {
+    fn new(window: usize) -> Self {
+        assert!(
+            (1..=RECENT_MAX).contains(&window),
+            "a window of 1 to {RECENT_MAX}"
+        );
+        Self {
+            keys: [0; RECENT_MAX],
+            states: [(FastPoint::INFINITY, false, 0, 0); RECENT_MAX],
+            window,
+            next: 0,
+            len: 0,
+        }
+    }
+
+    fn clear(&mut self) {
+        self.keys = [0; RECENT_MAX];
+        self.next = 0;
+        self.len = 0;
+    }
+
+    #[inline]
+    fn push(&mut self, key: u64, state: (FastPoint, bool, u32, u64)) {
+        self.keys[self.next] = key;
+        self.states[self.next] = state;
+        self.next = if self.next + 1 == self.window {
+            0
+        } else {
+            self.next + 1
+        };
+        self.len = (self.len + 1).min(self.window);
+    }
+
+    /// The slot of the oldest entry.
+    fn oldest(&self) -> usize {
+        if self.len < self.window {
+            0
+        } else {
+            self.next
+        }
+    }
+
+    /// Where `key` stands among the entries, oldest first.
+    #[inline]
+    fn position(&self, key: u64) -> Option<usize> {
+        // Every slot at once, then the slot only on a hit (rare).
+        let hit = self.keys.iter().fold(false, |any, &k| any | (k == key));
+        if !hit {
+            return None;
+        }
+        let slot = self.keys.iter().position(|&k| k == key)?;
+        Some((slot + self.window - self.oldest()) % self.window)
+    }
+
+    /// The entry `i` places after the oldest.
+    fn entry(&self, i: usize) -> (u64, (FastPoint, bool, u32, u64)) {
+        let slot = (self.oldest() + i) % self.window;
+        (self.keys[slot], self.states[slot])
+    }
+}
+
+/// One walk of a [`ParallelRho`].  Its coefficients are kept in parts:
+/// the point is `[P·acc]G + [P·b0]Q` with `P = (−1)^s·λ^e`, so that a
+/// step costs a table lookup and an addition modulo `r` where the
+/// coefficients themselves would cost two multiplications, and `a`, `b`
+/// are formed only where they are read.
+struct Lane {
+    x: FastPoint,
+    /// `mix` of the point's key: the jump index and the test for a
+    /// distinguished point.
+    h: u64,
+    s: bool,
+    e: u32,
+    acc: u64,
+    b0: u64,
+    len: u64,
+    /// The jump the step began with, and how many it has tried.
+    j0: usize,
+    tried: usize,
+    recent: Recent,
+    last_escape: Option<u64>,
+    active: bool,
+}
+
+/// What became of a lane after its step.
+enum LaneEnd {
+    Walking,
+    Distinguished,
+    Lost,
+}
+
+/// `a + b mod r` for `a, b < r < 2^63`.
+#[inline]
+fn add_below(a: u64, b: u64, r: u64) -> u64 {
+    let s = a + b;
+    if s >= r {
+        s - r
+    } else {
+        s
+    }
+}
+
+/// One target's [`ParallelRho`] run.
+#[derive(Clone, Debug, Serialize)]
+pub struct ParallelRhoResult {
+    pub method: String,
+    pub automorphisms: u32,
+    /// Walks stepped together.
+    pub lanes: usize,
+    /// The reusable set-up: the jump table, `[c_j]G`.
+    pub setup_ops: GroupOps,
+    /// Everything that depends on the target: `G + Q` and the start
+    /// stride, the starts, the walks, the verification.
+    pub target_ops: GroupOps,
+    pub steps: u64,
+    pub walks: u64,
+    pub distinguished_points: u64,
+    /// Rounds of batched steps, and batches of restarts.
+    pub rounds: u64,
+    pub restart_batches: u64,
+    /// `√(πr/2A)`, one target's floor in steps.
+    pub expected_steps: f64,
+    pub recovered: Option<u64>,
+    pub verified: bool,
+    pub wall_ns: u64,
+    pub counters: BTreeMap<String, u64>,
+}
+
+/// **Rho on one target, with its walks stepped together.**
+///
+/// The tuned walk of [`rho_batch_with`] at `k = 1` on the signed-Frobenius
+/// classes — jumps `[c_j]G` in `G` only with full-size `c_j`, the
+/// normal-basis canonicalisation, the look-ahead, the short-cycle escape
+/// by doubling, the cap, starts `[k]T` for one `T = [s]G + [u]Q` — with
+/// `lanes` walks advanced in lockstep, so that one field inversion serves
+/// every addition of a round ([`FastCurve::add_pairwise`]).  A step
+/// replaced by the look-ahead is retried with the next jump in the next
+/// round, so every walk follows exactly the trajectory the sequential
+/// walk follows from the same start; only the order in which walks reach
+/// the table of distinguished points differs.  With one lane it is
+/// [`rho_batch_with`] at `k = 1`, operation for operation.
+///
+/// Three things keep a step near the price of its addition and its
+/// canonicalisation, none of which changes a walk:
+///
+/// - **Coefficients in parts** (see [`Lane`]): a table of
+///   `c_j·(−1)^s·λ^{−e}`, built with the jumps, turns the step's
+///   multiplications modulo `r` into one addition.
+/// - **Batched restarts.**  Walks that finish wait until `restart_batch`
+///   of them can be restarted by one batched addition of the stride's
+///   precomputed multiples to the last start (the points the sequential
+///   walk's chain of additions reaches).
+/// - **Scalar multiplications** (the table, `T`, the verification) run
+///   on the López–Dahab ladder ([`FastCurve::mul_u64`]) and are charged
+///   as the counted double-and-add charges them, so the operation ledger
+///   is [`rho_batch_with`]'s and the time is the ladder's.
+///
+/// The jump table depends on `G` alone: it is built once, by
+/// [`ParallelRho::new`], and is reusable set-up.  Everything
+/// [`ParallelRho::solve`] does depends on the target.
+pub struct ParallelRho<'a> {
+    inst: &'a BinaryInstance,
+    classes: SignedFrobeniusClasses,
+    shape: WalkShape,
+    walk: RhoWalk,
+    jumps: Vec<(FastPoint, u64)>,
+    /// `jumps − 1` when the count is a power of two.
+    jump_mask: Option<u64>,
+    /// `c_j·(−1)^s·λ^{−e} mod r` at `(2j + s)·n + e`.
+    jump_terms: Vec<u64>,
+    /// The seed's stream after the jumps, where a target's draws begin.
+    rng: StdRng,
+    setup: GroupOps,
+    lanes: usize,
+    restart_batch: usize,
+}
+
+impl<'a> ParallelRho<'a> {
+    /// The reusable set-up on a Koblitz instance: `lanes` walks, the
+    /// distinguished-point bits (`None` takes the tuned walk's
+    /// `⌊bits(r)/4⌋`).  `None` for any other curve.
+    pub fn new(
+        inst: &'a BinaryInstance,
+        seed: u64,
+        lanes: usize,
+        dp_bits: Option<u32>,
+    ) -> Option<Self> {
+        let classes = SignedFrobeniusClasses::new(inst)?;
+        let lanes = lanes.max(1);
+        let r = inst.r;
+        let n = inst.n as usize;
+        let walk = RhoWalk {
+            dp_bits,
+            ..RhoWalk::negation()
+        };
+        let shape = WalkShape::of(r, walk);
+        let mut rng = StdRng::seed_from_u64(seed);
+        let mut setup = GroupOps::default();
+        let jumps: Vec<(FastPoint, u64)> = (0..shape.jumps)
+            .map(|_| {
+                let c = rng.gen_range(1..r.max(2));
+                charge_mul(&mut setup, c);
+                (inst.fast.mul_u64(inst.generator, c), c % r)
+            })
+            .collect();
+        // λ^n = 1 on the subgroup, so λ^{−e} = λ^{n−e}.
+        let lambda = &classes.lambda_pow;
+        if n > 1 && mulmod(lambda[n - 1], lambda[1], r) != 1 {
+            return None;
+        }
+        let mut jump_terms = vec![0u64; jumps.len() * 2 * n];
+        for (j, &(_, c)) in jumps.iter().enumerate() {
+            for e in 0..n {
+                let inverse = lambda[(n - e) % n];
+                let term = mulmod(c, inverse, r);
+                jump_terms[2 * j * n + e] = term;
+                jump_terms[(2 * j + 1) * n + e] = negmod(term, r);
+            }
+        }
+        let jump_mask = jumps
+            .len()
+            .is_power_of_two()
+            .then(|| jumps.len() as u64 - 1);
+        Some(Self {
+            inst,
+            classes,
+            shape,
+            walk,
+            jumps,
+            jump_mask,
+            jump_terms,
+            rng,
+            setup,
+            lanes,
+            restart_batch: (lanes / 4).max(1),
+        })
+    }
+
+    /// One target's floor in steps, `√(πr/2A)` with `A = 2n`.
+    pub fn expected_steps(inst: &BinaryInstance) -> f64 {
+        generic_floor_ops(inst.r as f64, 2.0 * f64::from(inst.n))
+    }
+
+    /// The lanes a run on `inst` takes: the largest power of two up to
+    /// `E/1024` for a floor of `E` steps, between 1 and 64.  Enough that
+    /// the shared inversion is a small part of a step, few enough that
+    /// the lanes' partly walked trails are a small part of the run.
+    pub fn default_lanes(inst: &BinaryInstance) -> usize {
+        let per = Self::expected_steps(inst) / 1024.0;
+        if per < 2.0 {
+            return 1;
+        }
+        (1usize << (per.log2().floor() as u32)).min(64)
+    }
+
+    /// The distinguished-point bits for `lanes` lanes:
+    /// `round(½·log₂(E/lanes))`.  A collision is seen only when its walk
+    /// next reaches a distinguished point, while every lane keeps
+    /// stepping, and each distinguished point costs a restart; spacing
+    /// `√(E/lanes)` balances the two.
+    pub fn default_dp_bits(inst: &BinaryInstance, lanes: usize) -> u32 {
+        let per_lane = Self::expected_steps(inst) / lanes.max(1) as f64;
+        (0.5 * per_lane.max(1.0).log2()).round().clamp(0.0, 40.0) as u32
+    }
+
+    /// The jump table's charge.
+    pub fn setup_ops(&self) -> GroupOps {
+        self.setup
+    }
+
+    /// The walk's name in reports.
+    pub fn method(&self) -> String {
+        format!(
+            "{} lanes in lockstep, one inversion a round; jumps in G only; batched restarts ({}): {}",
+            self.lanes,
+            self.restart_batch,
+            RhoClasses::<BinaryGroup<'_>>::method(&self.classes)
+        )
+    }
+
+    #[inline]
+    fn index_of(&self, h: u64) -> usize {
+        let v = h >> 24;
+        match self.jump_mask {
+            Some(mask) => (v & mask) as usize,
+            None => (v % self.jumps.len() as u64) as usize,
+        }
+    }
+
+    /// `(−1)^s·λ^e`.
+    #[inline]
+    fn factor(&self, s: bool, e: u32) -> u64 {
+        self.classes.multiplier(e, s)
+    }
+
+    /// Put a lane at a start and canonicalise it there, as a sequential
+    /// walk does before its first step.
+    fn start_lane(&self, lane: &mut Lane, start: (FastPoint, u64, u64), tally: &mut WalkTally) {
+        let r = self.inst.r;
+        tally.canonicalisations += 1;
+        let (x, t, negated) = self.classes.canon_parts(start.0);
+        let mu = self.classes.multiplier(t, negated);
+        let (a, b) = if mu == 1 {
+            (start.1, start.2)
+        } else {
+            (mulmod(start.1, mu, r), mulmod(start.2, mu, r))
+        };
+        lane.x = x;
+        lane.h = mix(x.pack());
+        lane.s = false;
+        lane.e = 0;
+        lane.acc = a;
+        lane.b0 = b;
+        lane.len = 0;
+        lane.tried = 0;
+        lane.j0 = self.index_of(lane.h);
+        lane.recent.clear();
+        lane.last_escape = None;
+        lane.active = true;
+    }
+
+    /// Everything a sequential walk does after a step is accepted: the
+    /// identity, the short cycles and their escape, the distinguished
+    /// point, the cap, the budget.
+    fn after_step(
+        &self,
+        lane: &mut Lane,
+        ops: &mut GroupOps,
+        tally: &mut WalkTally,
+        budget: u64,
+    ) -> LaneEnd {
+        let fc = &self.inst.fast;
+        let r = self.inst.r;
+        if lane.x.infinity {
+            return LaneEnd::Lost;
+        }
+        if self.walk.cycle_window > 0 {
+            let key = lane.x.pack();
+            if let Some(pos) = lane.recent.position(key) {
+                match lane.recent.len - pos {
+                    2 => tally.cycles_2 += 1,
+                    4 => tally.cycles_4 += 1,
+                    _ => tally.cycles_other += 1,
+                }
+                let (min_key, (mp, ms, me, macc)) = (pos..lane.recent.len)
+                    .map(|i| lane.recent.entry(i))
+                    .min_by_key(|e| e.0)
+                    .expect("a cycle has members");
+                if lane.last_escape == Some(min_key) {
+                    tally.abandoned += 1;
+                    return LaneEnd::Lost;
+                }
+                lane.last_escape = Some(min_key);
+                ops.doubles += 1;
+                let d2 = fc.double(mp);
+                tally.escapes += 1;
+                let factor = self.factor(ms, me);
+                let (ma, mb) = (mulmod(macc, factor, r), mulmod(lane.b0, factor, r));
+                tally.canonicalisations += 1;
+                let (e, t, negated) = self.classes.canon_parts(d2);
+                let mu = self.classes.multiplier(t, negated);
+                let (ea, eb) = (addmod(ma, ma, r), addmod(mb, mb, r));
+                let (ea, eb) = if mu == 1 {
+                    (ea, eb)
+                } else {
+                    (mulmod(ea, mu, r), mulmod(eb, mu, r))
+                };
+                lane.x = e;
+                lane.h = mix(e.pack());
+                lane.s = false;
+                lane.e = 0;
+                lane.acc = ea;
+                lane.b0 = eb;
+                lane.recent.clear();
+                if lane.x.infinity {
+                    return LaneEnd::Lost;
+                }
+            }
+            lane.recent
+                .push(lane.x.pack(), (lane.x, lane.s, lane.e, lane.acc));
+        }
+        if lane.h & self.shape.dp_mask == 0 {
+            return LaneEnd::Distinguished;
+        }
+        if lane.len > self.shape.walk_cap {
+            tally.capped += 1;
+            return LaneEnd::Lost;
+        }
+        if tally.walk_ops() >= budget {
+            return LaneEnd::Lost;
+        }
+        LaneEnd::Walking
+    }
+
+    /// The logarithm of `target`, a point of the subgroup, verified as
+    /// `[d]G = Q` before it is returned.  `max_steps` bounds the walk
+    /// operations.
+    pub fn solve(&self, target: FastPoint, max_steps: u64) -> ParallelRhoResult {
+        let started = Instant::now();
+        let inst = self.inst;
+        let fc = &inst.fast;
+        let r = inst.r;
+        let n = inst.n;
+        let mut rng = self.rng.clone();
+        let mut ops = GroupOps::default();
+        let mut tally = WalkTally::default();
+
+        // T = [ta]G + [tb]Q, and its multiples [i]T for the first lanes'
+        // starts, by batched doubling of the list.
+        let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+        charge_joint_mul(&mut ops, ta, tb);
+        let stride = fc.add(fc.mul_u64(inst.generator, ta), fc.mul_u64(target, tb));
+        let mut scratch = BatchScratch::default();
+        let mut multiples: Vec<(FastPoint, u64, u64)> = vec![(stride, ta % r, tb % r)];
+        let mut sums: Vec<FastPoint> = Vec::with_capacity(self.lanes);
+        let mut points: Vec<FastPoint> = Vec::with_capacity(self.lanes);
+        let mut addends: Vec<FastPoint> = Vec::with_capacity(self.lanes);
+        while multiples.len() < self.lanes {
+            let have = multiples.len();
+            let take = have.min(self.lanes - have);
+            let (last, la, lb) = multiples[have - 1];
+            addends.clear();
+            addends.extend(multiples[..take].iter().map(|m| m.0));
+            sums.clear();
+            fc.add_many(last, &addends, &mut sums, &mut scratch);
+            ops.adds += take as u64;
+            for (i, &p) in sums.iter().enumerate() {
+                let (_, ma, mb) = multiples[i];
+                multiples.push((p, addmod(la, ma, r), addmod(lb, mb, r)));
+            }
+        }
+        let mut start_adds = (self.lanes - 1) as u64;
+        // The last start handed out; the next is it plus [i]T.
+        let mut base = multiples[self.lanes - 1];
+
+        let mut table: FastMap<(u64, u64)> = fast_map(1024);
+        let (mut walks, mut dps, mut useless, mut verification_ops) = (0u64, 0u64, 0u64, 0u64);
+        let (mut rounds, mut restart_batches) = (0u64, 0u64);
+        let mut recovered = None;
+        let window = self.walk.cycle_window.max(1);
+        let mut lanes: Vec<Lane> = (0..self.lanes)
+            .map(|_| Lane {
+                x: FastPoint::INFINITY,
+                h: 0,
+                s: false,
+                e: 0,
+                acc: 0,
+                b0: 0,
+                len: 0,
+                j0: 0,
+                tried: 0,
+                recent: Recent::new(window),
+                last_escape: None,
+                active: false,
+            })
+            .collect();
+        for (lane, start) in lanes.iter_mut().zip(&multiples) {
+            walks += 1;
+            if !start.0.infinity {
+                self.start_lane(lane, *start, &mut tally);
+            }
+        }
+        let jump_count = self.jumps.len();
+        let look_ahead = self.walk.look_ahead;
+        let mut stepped: Vec<(usize, usize)> = Vec::with_capacity(self.lanes);
+        let mut idle: Vec<usize> = Vec::with_capacity(self.lanes);
+        let mut fresh: Vec<FastPoint> = Vec::with_capacity(self.lanes);
+        'run: while tally.walk_ops() < max_steps && walks < max_steps {
+            // Restart the idle lanes once enough of them wait, or when
+            // none is left walking.
+            idle.clear();
+            idle.extend((0..self.lanes).filter(|&i| !lanes[i].active));
+            let walking = self.lanes - idle.len();
+            if !idle.is_empty() && (idle.len() >= self.restart_batch || walking == 0) {
+                restart_batches += 1;
+                addends.clear();
+                addends.extend(multiples[..idle.len()].iter().map(|m| m.0));
+                fresh.clear();
+                fc.add_many(base.0, &addends, &mut fresh, &mut scratch);
+                ops.adds += idle.len() as u64;
+                start_adds += idle.len() as u64;
+                let (_, ba, bb) = base;
+                for (k, (&i, &p)) in idle.iter().zip(&fresh).enumerate() {
+                    let (_, ma, mb) = multiples[k];
+                    let start = (p, addmod(ba, ma, r), addmod(bb, mb, r));
+                    base = start;
+                    walks += 1;
+                    if !p.infinity {
+                        self.start_lane(&mut lanes[i], start, &mut tally);
+                    }
+                }
+                continue;
+            }
+            // One round: every walking lane's addition, one inversion.
+            rounds += 1;
+            points.clear();
+            addends.clear();
+            stepped.clear();
+            for (i, lane) in lanes.iter().enumerate().filter(|(_, l)| l.active) {
+                let j = lane.j0 + lane.tried;
+                let j = if j >= jump_count { j - jump_count } else { j };
+                points.push(lane.x);
+                addends.push(self.jumps[j].0);
+                stepped.push((i, j));
+            }
+            sums.clear();
+            fc.add_pairwise(&points, &addends, &mut sums, &mut scratch);
+            ops.adds += points.len() as u64;
+            for (&(i, j), &sum) in stepped.iter().zip(&sums) {
+                let lane = &mut lanes[i];
+                tally.canonicalisations += 1;
+                let (y, t, negated) = self.classes.canon_parts(sum);
+                let hy = mix(y.pack());
+                lane.tried += 1;
+                if look_ahead
+                    && negated
+                    && self.classes.multiplier(t, negated) == r - 1
+                    && lane.tried < jump_count
+                    && !y.infinity
+                    && self.index_of(hy) == j
+                {
+                    tally.look_ahead_adds += 1;
+                    continue;
+                }
+                // a ← μ(a + c_j), b ← μb, in parts: acc gains
+                // c_j·P⁻¹ and P gains μ.
+                let term =
+                    self.jump_terms[(2 * j + usize::from(lane.s)) * n as usize + lane.e as usize];
+                lane.acc = add_below(lane.acc, term, r);
+                lane.s ^= negated;
+                lane.e += t;
+                if lane.e >= n {
+                    lane.e -= n;
+                }
+                lane.x = y;
+                lane.h = hy;
+                lane.tried = 0;
+                tally.steps += 1;
+                lane.len += 1;
+                match self.after_step(lane, &mut ops, &mut tally, max_steps) {
+                    LaneEnd::Walking => lane.j0 = self.index_of(lane.h),
+                    LaneEnd::Lost => lane.active = false,
+                    LaneEnd::Distinguished => {
+                        lane.active = false;
+                        dps += 1;
+                        let key = lane.x.pack();
+                        let factor = self.factor(lane.s, lane.e);
+                        let (a, b) = (mulmod(lane.acc, factor, r), mulmod(lane.b0, factor, r));
+                        let Some(&(a2, b2)) = table.get(&key) else {
+                            table.insert(key, (a, b));
+                            continue;
+                        };
+                        // a + b d = a2 + b2 d  ⇒  d = (a − a2)/(b2 − b)
+                        let candidate = if b2 != b {
+                            invmod(submod(b2, b, r), r).map(|inv| mulmod(submod(a, a2, r), inv, r))
+                        } else {
+                            None
+                        };
+                        if let Some(d) = candidate {
+                            let before = ops.gae();
+                            charge_mul(&mut ops, d);
+                            verification_ops += (ops.gae() - before) as u64;
+                            let _check = measurement::scope(measurement::Phase::RecoveryCheck);
+                            if fc.mul_u64(inst.generator, d) == target {
+                                recovered = Some(d);
+                                break 'run;
+                            }
+                        }
+                        useless += 1;
+                    }
+                }
+                if tally.walk_ops() >= max_steps {
+                    break 'run;
+                }
+            }
+        }
+        let wall_ns = started.elapsed().as_nanos() as u64;
+        let target_setup = {
+            let mut t = GroupOps::default();
+            charge_joint_mul(&mut t, ta, tb);
+            t
+        };
+        let mut counters = tuned_counters(
+            &self.shape,
+            self.setup,
+            start_adds,
+            &tally,
+            verification_ops,
+            useless,
+        );
+        let entry = std::mem::size_of::<(u64, (u64, u64))>() as u64;
+        for (name, v) in [
+            ("lanes", self.lanes as u64),
+            ("restart_batch", self.restart_batch as u64),
+            ("rounds", rounds),
+            ("restart_batches", restart_batches),
+            ("target_setup_additions", target_setup.adds),
+            ("target_setup_doublings", target_setup.doubles),
+            ("distinguished_points_stored", table.len() as u64),
+            (
+                "distinguished_point_table_bytes",
+                table.capacity() as u64 * entry,
+            ),
+        ] {
+            counters.insert(name.to_string(), v);
+        }
+        ParallelRhoResult {
+            method: self.method(),
+            automorphisms: 2 * inst.n,
+            lanes: self.lanes,
+            setup_ops: self.setup,
+            target_ops: ops,
+            steps: tally.steps,
+            walks,
+            distinguished_points: dps,
+            rounds,
+            restart_batches,
+            expected_steps: Self::expected_steps(inst),
+            verified: recovered.is_some(),
+            recovered,
+            wall_ns,
+            counters,
+        }
+    }
+}
+
 // ── Prime-field curves on one word ─────────────────────────────────
 
 /// A point on `y² = x³ + ax + b` over `F_p`, `p < 2^63`.
@@ -2398,6 +3099,22 @@ impl PrimeInstance {
     pub fn generator_point(&self) -> PrimePoint {
         PrimePoint::affine(self.generator.0, self.generator.1)
     }
+
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`).
+    pub fn curve_id(&self) -> CurveId {
+        prime_curve_id(&self.curve, self.group_order)
+    }
+}
+
+fn prime_curve_id(curve: &PrimeCurve, group_order: u64) -> CurveId {
+    let big = |v: u64| BigUint::from(v);
+    curve_id::prime(
+        &big(curve.p),
+        &big(curve.a),
+        &big(curve.b),
+        &big(group_order),
+    )
+    .expect("a constructed curve is non-singular and inside the Hasse interval")
 }
 
 /// The repository's bench roster (`research_bench::bench_curves`),
@@ -2412,7 +3129,7 @@ pub fn roster_prime_instance(bits: u32) -> Option<PrimeInstance> {
     };
     let n = c.n.to_u64()?;
     Some(PrimeInstance {
-        name: c.name.to_string(),
+        name: prime_curve_id(&curve, n * c.h as u64).slug,
         curve,
         group_order: n * c.h as u64,
         r: n,
@@ -2464,7 +3181,7 @@ pub fn find_prime_order_curve(bits: u32, seed: u64) -> PrimeInstance {
             let mut ops = GroupOps::default();
             debug_assert!(curve.mul(&mut ops, g, order).infinity);
             return PrimeInstance {
-                name: format!("generated-{bits}bit-{p}"),
+                name: prime_curve_id(&curve, order).slug,
                 curve,
                 group_order: order,
                 r: order,
@@ -2594,6 +3311,26 @@ pub struct BinaryInstance {
 }
 
 impl BinaryInstance {
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), from this
+    /// instance's own fields.  A Koblitz instance ([`koblitz_instance`], the
+    /// only one that sets `koblitz`) certifies `End(E) = Z[τ]`, `−7`.
+    ///
+    /// This deliberately does not call into `koblitz_index_calculus`: the
+    /// compact-orbit workflows build this crate with a frozen snapshot of
+    /// that file (`compact_frozen_source_replay_20260929/materialize.py`),
+    /// so live code here may use only what the snapshot already has.
+    pub fn curve_id(&self) -> CurveId {
+        curve_id::binary(
+            self.n,
+            &curve_id::modulus_integer(&self.irreducible),
+            &BigUint::from(self.a),
+            &BigUint::from(self.b),
+            &BigUint::from(self.group_order),
+            self.koblitz.is_some().then_some(-7),
+        )
+        .expect("a constructed curve is non-singular and inside the Hasse interval")
+    }
+
     /// Both points with abscissa `x`, or none.
     pub fn points_with_x(&self, x: u64) -> Vec<FastPoint> {
         let f = &self.fast.field;
@@ -2740,8 +3477,19 @@ pub fn random_binary_instance(n: u32, seed: u64, max_cofactor: u64) -> Option<Bi
             cofactor: BigUint::from(h),
         };
         let fast = FastCurve::new(&curve)?;
+        let Some(id) = curve_id::binary(
+            n,
+            &curve_id::modulus_integer(&irreducible),
+            &BigUint::from(a),
+            &BigUint::from(b),
+            &BigUint::from(order),
+            None,
+        ) else {
+            continue;
+        };
+        let name = id.slug;
         let inst = BinaryInstance {
-            name: format!("random-binary-n{n}-b{b:x}"),
+            name,
             n,
             irreducible: irreducible.clone(),
             fast,
@@ -6387,6 +7135,91 @@ mod tests {
         assert_eq!(one.per_target[0].recovered, Some(planted[0]));
         assert_eq!(one.per_target[0].solved_by, "own");
         assert_batch_closes(&one);
+    }
+
+    /// One lane is the batch walk at `k = 1`, operation for operation:
+    /// the same starts, steps, distinguished points, charges and answer.
+    #[test]
+    fn parallel_rho_with_one_lane_is_the_single_target_batch_walk() {
+        let curves = [
+            koblitz_instance_best(31).expect("a Koblitz curve at n = 31"),
+            koblitz_instance(1, 43).expect("K_1 over GF(2^43)"),
+        ];
+        for inst in &curves {
+            for seed in 0..4u64 {
+                let d = 1 + mix(seed ^ 0xD1CE) % (inst.r - 1);
+                let q = inst.fast.mul_u64(inst.generator, d);
+                let batch =
+                    signed_frobenius_rho_batch(inst, &[q], seed).expect("a Koblitz instance");
+                let one = ParallelRho::new(inst, seed, 1, None).expect("a Koblitz instance");
+                let par = one.solve(q, rho_cap(inst.r, 64.0));
+                let t = &batch.per_target[0];
+                assert_eq!(par.recovered, Some(d), "{} seed {seed}", inst.name);
+                assert_eq!(par.recovered, t.recovered);
+                assert_eq!(
+                    (par.steps, par.walks, par.distinguished_points),
+                    (t.steps, t.walks, t.distinguished_points),
+                    "{} seed {seed}",
+                    inst.name
+                );
+                assert_eq!(par.setup_ops, batch.setup_ops);
+                assert_eq!(par.target_ops, t.group_ops);
+                let mut shared = 0;
+                for (k, v) in &batch.counters {
+                    if let Some(p) = par.counters.get(k) {
+                        assert_eq!(p, v, "{} seed {seed}: {k}", inst.name);
+                        shared += 1;
+                    }
+                }
+                assert!(shared >= 19, "{shared} shared counters");
+                // A run is a function of the set-up and the target.
+                let again = one.solve(q, rho_cap(inst.r, 64.0));
+                assert_eq!((again.steps, again.recovered), (par.steps, par.recovered));
+            }
+        }
+    }
+
+    /// Many lanes recover every target, and the steps they take stay near
+    /// the floor: the lanes change the order in which walks reach the
+    /// table, not the walks.
+    #[test]
+    fn parallel_rho_recovers_every_target_with_many_lanes() {
+        let inst = koblitz_instance(1, 43).expect("K_1 over GF(2^43)");
+        for lanes in [4usize, 32] {
+            let dp = ParallelRho::default_dp_bits(&inst, lanes);
+            let rho = ParallelRho::new(&inst, 77, lanes, Some(dp)).expect("a Koblitz instance");
+            let mut steps = 0.0;
+            let targets = 12u64;
+            for i in 0..targets {
+                let d = 1 + mix(i + 1000) % (inst.r - 1);
+                let q = inst.fast.mul_u64(inst.generator, d);
+                let res = rho.solve(q, rho_cap(inst.r, 64.0));
+                assert_eq!(res.recovered, Some(d), "{lanes} lanes, target {i}");
+                assert!(res.verified);
+                assert_eq!(res.lanes, lanes);
+                assert!(res.restart_batches > 0 && res.rounds > 0);
+                steps += res.steps as f64;
+            }
+            let mean = steps / targets as f64 / ParallelRho::expected_steps(&inst);
+            assert!((0.4..2.5).contains(&mean), "{lanes} lanes: {mean}");
+        }
+    }
+
+    /// The default shape: more lanes and sparser distinguished points as
+    /// the floor grows.
+    #[test]
+    fn parallel_rho_default_shape_follows_the_floor() {
+        let small = koblitz_instance(1, 43).expect("K_1 over GF(2^43)");
+        let large = koblitz_instance(0, 61).expect("K_0 over GF(2^61)");
+        let (ls, ll) = (
+            ParallelRho::default_lanes(&small),
+            ParallelRho::default_lanes(&large),
+        );
+        assert!(ls <= ll && ll == 64, "{ls} {ll}");
+        assert!(ls.is_power_of_two());
+        assert!(
+            ParallelRho::default_dp_bits(&small, ls) < ParallelRho::default_dp_bits(&large, ll)
+        );
     }
 
     /// The batch law on a group where the walk is the only cost: sixteen

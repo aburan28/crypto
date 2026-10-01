@@ -228,6 +228,7 @@ fn main() {
                     search,
                     linear_algebra: la,
                     smoothness: oracle,
+                    large_primes: false,
                 };
                 let row = head_to_head(
                     &curve,
@@ -270,7 +271,8 @@ fn main() {
                 io::stdout().flush().ok();
                 println!(
                     "        c = {}, relation stage {:.0} ops ({:.0} precompute, {:.2} ops/trial) \
-                     + oracle {:.0} mul-mods ({:.0} equiv) + linear algebra {:.0} mul-mods \
+                     + oracle {:.0} mul-mods ({:.0} equiv measured, {:.0} charged) \
+                     + linear algebra {:.0} mul-mods \
                      ({:.0} equiv), conv {:.0}; smoothness {:.3}; IC floor S = {:.2}; \
                      wall {:.0} ms IC vs {:.0} ms rho",
                     c,
@@ -279,6 +281,7 @@ fn main() {
                     row.ic_ops_per_trial,
                     row.ic_oracle_modmuls,
                     row.ic_oracle_group_equiv,
+                    row.ic_oracle_group_equiv_charged,
                     row.ic_la_modmuls,
                     row.ic_la_group_equiv,
                     row.modmuls_per_group_op,

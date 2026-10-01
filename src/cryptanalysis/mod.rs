@@ -119,6 +119,7 @@ pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod crossbred;
 pub mod curve_catalog;
+pub mod curve_id;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
@@ -174,6 +175,9 @@ pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
 pub mod isogeny_degree_search;
 pub mod j0_twists;
+pub mod jv_quartic;
+pub mod jv_quintic;
+pub mod jv_quintic_edwards;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
@@ -184,6 +188,7 @@ pub mod koblitz_isogeny_cost;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_sparse_la;
+pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
@@ -273,8 +278,8 @@ pub use canonical_lift::{
 };
 pub use ec_index_calculus::{
     build_factor_base, ec_index_calculus_dlp, find_one_relation, find_roots_fp,
-    gaussian_eliminate_mod_n, pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4,
-    sqrt_mod_p, FactorBaseEntry, Relation,
+    gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, pollard_rho_ecdlp, semaev_s3,
+    semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p, FactorBaseEntry, ModNSolution, Relation,
 };
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,

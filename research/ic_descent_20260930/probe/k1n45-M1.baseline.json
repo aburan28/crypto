@@ -1,0 +1,76 @@
+{
+  "a": 1,
+  "columns": 8,
+  "logs": "research/ic_descent_20260930/probe/k1n45-M1.logs.json",
+  "n": 45,
+  "one_scalar_multiplication_units": 28.670643067696023,
+  "params": "research/ic_exponent_20260926/runs/k1n45/measure/M1.params.json",
+  "phases": [
+    {
+      "mean_units_per_target": 1438.5447646313667,
+      "median_units_per_target": 1416.0836054572387,
+      "phase": "target_query"
+    },
+    {
+      "mean_units_per_target": 291.4848711882429,
+      "median_units_per_target": 278.8147637719631,
+      "phase": "target_pdp"
+    },
+    {
+      "mean_units_per_target": 345.3633717163821,
+      "median_units_per_target": 341.0430913393488,
+      "phase": "target_descent"
+    },
+    {
+      "mean_units_per_target": 150.72337157214642,
+      "median_units_per_target": 149.3624662844871,
+      "phase": "recovery_check"
+    }
+  ],
+  "points": 720,
+  "recovery_check_general_units": 155.44411784430142,
+  "recovery_check_single_word_units": 79.85787702946645,
+  "rounds": 5,
+  "sixty_three_additions_batched_units": 89.23375651751351,
+  "sixty_three_additions_sequential_units": 1045.3924627637953,
+  "solve_mean_units_per_target": 2449.4473849927035,
+  "solve_median_units_per_target": 2345.8160876638512,
+  "tier": "folded",
+  "trials_per_target": [
+    255,
+    134,
+    295,
+    351,
+    73,
+    87,
+    234,
+    89,
+    104,
+    68,
+    24,
+    17,
+    34,
+    283,
+    41,
+    197,
+    201,
+    120,
+    317,
+    664,
+    2,
+    154,
+    258,
+    213,
+    9,
+    147,
+    70,
+    153,
+    248,
+    29,
+    39,
+    235
+  ],
+  "trials_total": 5145,
+  "unit_ns": 27.6240751953125,
+  "walk_start_units": 1161.993651300473
+}

@@ -1,0 +1,73 @@
+--- a/oracle.py	2026-09-22 00:49:43.810858306 +0000
++++ b/oracle.py	2026-09-28 17:13:25.191724295 +0000
+@@ -8,6 +8,13 @@
+     pass
+ 
+ 
++# Round-0025 amendment: the fewest summands a report may declare below its
++# arm's configured count. Three is the pair-table collector, the shortest
++# relation any arm of this tournament emits. An arm configured at three is
++# therefore checked exactly as before.
++MIN_SUMMANDS = 3
++
++
+ def require(condition, message):
+     if not condition:
+         raise InvalidEvidence(message)
+@@ -155,7 +162,24 @@
+         return {'verified_targets':len(targets), 'verified_relations':0, 'rank':None,
+                 'solutions':[s['recovered'] for s in sorted(solutions,key=lambda s:s['index'])]}
+     require(report.get('rejected_relations') == 0, 'rejected relation in run')
+-    require(report.get('summands') == summands, 'changed summand count')
++    # Round-0025 amendment: a report may declare fewer summands than its arm
++    # is configured with -- a collector that runs the pair table on some
++    # curves and the triple table on others, at `summands: 4` -- but never
++    # more, and never fewer than MIN_SUMMANDS. The declared count, `length`,
++    # binds the whole report: every relation and every non-degenerate descent
++    # has exactly `length` indices, so lengths cannot mix within one report.
++    # Nothing else moves: every relation is still re-added in the group and
++    # checked as a row against the certified column logs, the rank is still
++    # full, and every logarithm is still the consequence of its own descent
++    # relation. The length of a relation is not what makes it sound.
++    # Additive: a report whose declared count equals the configured one is
++    # checked exactly as before (`length` is then the configured value), and
++    # its certificate is identical. A report below the configured count
++    # carries `relation_summands` in its certificate, so a receipt shows it.
++    declared = report.get('summands')
++    require(declared == summands or (type(declared) is int and MIN_SUMMANDS <= declared < summands),
++            'changed summand count')
++    length = summands if declared == summands else declared
+     if 'factor_base_orbits' in report:
+         # Round-0016 format: the worker reports one representative point per
+         # signed Frobenius orbit and this checker regenerates the flat base in
+@@ -218,7 +242,7 @@
+     rows = report.get('relations', [])
+     for rel in rows:
+         ids = rel['points']
+-        require(len(ids) == summands and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad relation indices')
++        require(len(ids) == length and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad relation indices')
+         a = int(rel['a'])
+         require(0 < a < c.r, 'trivial or invalid relation scalar')
+         q = None
+@@ -247,7 +271,7 @@
+         require(isinstance(rel, dict), 'missing descent relation: logarithm not certified as index calculus')
+         a, b, ids = rel.get('a'), rel.get('b'), rel.get('points')
+         require(type(a) is int and type(b) is int and 0 <= a < c.r and 0 < b < c.r, 'invalid descent scalars')
+-        require(isinstance(ids, list) and len(ids) in (0, summands)
++        require(isinstance(ids, list) and len(ids) in (0, length)
+                 and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad descent relation indices')
+         q = targets[s['index']]
+         probe = c.add(c.mul(c.g, a), c.mul(q, b))
+@@ -261,8 +285,11 @@
+         require(total == probe, 'descent relation does not hold in the group')
+         require(scale*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
+         degenerate += not ids
+-    return {'verified_targets':len(targets), 'verified_relations':len(rows), 'fresh_rows':len(seen),
++    proof = {'verified_targets':len(targets), 'verified_relations':len(rows), 'fresh_rows':len(seen),
+             'certified_descents':len(solutions), 'degenerate_descents':degenerate,
+             'rank':achieved_rank, 'signed_base_size':len(base),
+             'factor_base_sha256':hashlib.sha256(json.dumps(sorted(base),separators=(',',':')).encode()).hexdigest(),
+             'solutions':[s['recovered'] for s in sorted(solutions,key=lambda s:s['index'])]}
++    if length != summands:
++        proof['relation_summands'] = length
++    return proof

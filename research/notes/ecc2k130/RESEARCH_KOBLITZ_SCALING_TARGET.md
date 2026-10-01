@@ -239,10 +239,10 @@ a `u64` monomial mask) but it is not what binds. Solve cost saturates at
 
 | instance | vars | eqs | eq/var | class | search | F4 | SAT |
 |:---------|-----:|----:|-------:|:------|-------:|---:|----:|
-| K_0/F_2^9, m=3 | 27 | 18 | 0.67 | found | 0.02 ms | 27 ms | 131 ms |
-| K_0/F_2^9, m=3 | 27 | 18 | 0.67 | refuted (raw `x_R`) | — | 6.2 s* | **361 s** |
-| K_1/F_2^15, m=3 | 27 | 30 | 1.11 | refuted | 3.97 ms | 75 ms | **25.3 s** |
-| K_1/F_2^15, m=2 | 8 | 15 | 1.88 | refuted | 0.21 ms | 0.23 ms | 1.3 ms |
+| icv1-f2m9-t5-81e744be, m=3 | 27 | 18 | 0.67 | found | 0.02 ms | 27 ms | 131 ms |
+| icv1-f2m9-t5-81e744be, m=3 | 27 | 18 | 0.67 | refuted (raw `x_R`) | — | 6.2 s* | **361 s** |
+| icv1-f2m15-t275-b7f03703, m=3 | 27 | 30 | 1.11 | refuted | 3.97 ms | 75 ms | **25.3 s** |
+| icv1-f2m15-t275-b7f03703, m=2 | 8 | 15 | 1.88 | refuted | 0.21 ms | 0.23 ms | 1.3 ms |
 
 `*` node budget exhausted — F4 did not finish, it gave up.
 
@@ -264,8 +264,8 @@ of an arbitrary cap.
 **H2′ (replacement) — refutation is the expensive case, and it is where
 the oracles differ.**
 Finding one root among many is cheap; proving no root exists is not.
-At the same 27 unknowns, `K_0/F_2^9` (all targets decompose) costs F4
-27 ms, while `K_1/F_2^15` (no target decomposes) costs SAT 25 s — a
+At the same 27 unknowns, `icv1-f2m9-t5-81e744be` (all targets decompose) costs F4
+27 ms, while `icv1-f2m15-t275-b7f03703` (no target decomposes) costs SAT 25 s — a
 340× spread between the two regimes on the same variable count, and a
 **340× spread between F4 and SAT on the refutation**.
 *Falsifier:* an instance where refutation is not the dominant cost, or
@@ -325,7 +325,7 @@ was #1; it is now struck out, because the instances it unlocks cannot be
 solved anyway.
 
 0. ~~**Take `n = 31` at dim 16, `m = 2`.**~~ **Done, 2026-09-09.**
-   `MAX_N` was already 63, so no guard needed lifting, and `K_0/F_2^31`
+   `MAX_N` was already 63, so no guard needed lifting, and `icv1-f2m31-tm90707-c95f16f5`
    has `r = 1 439 393` — a large smooth cofactor puts the prime subgroup
    at `2^20.5`, far below the `2^31` the sizing bar was assumed to need.
    Dimension 10 suffices:
@@ -363,10 +363,10 @@ solved anyway.
 
      | instance | class | SAT without | SAT with | |
      |:---------|:------|------------:|---------:|--:|
-     | K_1/F_2^15, m=3 | refuted | 19 216 ms | 6 524 ms | 2.9× |
-     | K_0/F_2^9, m=3 | found | 96 ms | 56 ms | 1.7× |
-     | K_1/F_2^9, m=2 | found | 0.89 ms | 0.89 ms | — |
-     | K_0/F_2^7, m=2 | refuted | 0.12 ms | 0.08 ms | 1.5× |
+     | icv1-f2m15-t275-b7f03703, m=3 | refuted | 19 216 ms | 6 524 ms | 2.9× |
+     | icv1-f2m9-t5-81e744be, m=3 | found | 96 ms | 56 ms | 1.7× |
+     | icv1-f2m9-tm5-4a3ea183, m=2 | found | 0.89 ms | 0.89 ms | — |
+     | icv1-f2m7-t13-616700dd, m=2 | refuted | 0.12 ms | 0.08 ms | 1.5× |
 
      On the raw systems the conflict counts tell it more sharply: at
      `n = 15, m = 3` the rows cut conflicts from 56 352 to 4 695 and

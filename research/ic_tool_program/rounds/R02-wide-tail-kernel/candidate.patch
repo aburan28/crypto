@@ -1,0 +1,248 @@
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index ccd8701e..29765f79 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -957,12 +957,15 @@ pub struct BatchScratch {
+ /// **Reduction without a table.**  The scalar field folds the high half
+ /// through byte-indexed tables; a vector version would need gathers.
+ /// Instead, write the product as `L + z^n·H`: since `z^n ≡ t(z)`, the
+-/// tail of the reduction polynomial, it equals `L + H·t`, and when `t`
+-/// is short (`n + deg t ≤ 65`) `H·t` fits in one word and is a handful
+-/// of shifts and XORs over `t`'s terms.  A second such fold finishes
+-/// when `2·deg t ≤ n + 1`.  Every field the pipeline runs — the
+-/// low-tail polynomials `find_irreducible_sparse` picks — qualifies; a
+-/// field that does not simply never builds a [`Simd512`].
++/// tail of the reduction polynomial, it equals `L + H·t`, a handful of
++/// shifts and XORs over `t`'s terms.  When `n + deg t ≤ 65`, `H·t` fits
++/// in one word.  Past that — `GF(2^59)` and `GF(2^61)` as
++/// `find_irreducible_sparse` picks them, both at 66 — the bits that
++/// shift out above `z^63` are carried into the second fold, whose input
++/// is `H·t` divided by `z^n` and so still has degree at most
++/// `deg t − 2`.  That fold finishes when `2·deg t ≤ n + 1`; a field
++/// that fails it, or has more than eight tail terms, simply never
++/// builds a [`Simd512`].
+ ///
+ /// The results are the same field elements as the scalar path, lane for
+ /// lane (the tests compare them), so nothing downstream can tell which
+@@ -980,6 +983,9 @@ mod simd512 {
+         mask: u64,
+         terms: [u32; 8],
+         nterms: usize,
++        /// `n + deg t > 65`: `H·t` passes `z^63`, and the second fold
++        /// takes the carried bits too.
++        wide: bool,
+     }
+ 
+     impl Simd512 {
+@@ -1003,10 +1009,11 @@ mod simd512 {
+             }
+             let tail = field.irr ^ (1u64 << n);
+             let t_max = 63 - tail.leading_zeros();
+-            // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t,
+-            // which must stay inside one word; the second fold's input has
++            // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t:
++            // one word while that is ≤ 63, two past it, the second carried
++            // into the second fold.  Either way that fold's input has
+             // degree ≤ deg t − 2, and its output must land below z^n.
+-            if n + t_max > 65 || 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
++            if 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
+                 return None;
+             }
+             let mut terms = [0u32; 8];
+@@ -1022,9 +1029,16 @@ mod simd512 {
+                 mask: (1u64 << n) - 1,
+                 terms,
+                 nterms,
++                wide: n + t_max > 65,
+             })
+         }
+ 
++        /// Whether the field's `H·t` passes `z^63` (test hook).
++        #[cfg(test)]
++        pub(super) fn wide(&self) -> bool {
++            self.wide
++        }
++
+         /// [`FastCurve::add_many_lazy`] eight lanes at a time.  Returns
+         /// `false`, having written nothing, when a sum is degenerate
+         /// (`R = O`, or some `x_k = x_R`) — the caller then takes the
+@@ -1061,8 +1075,16 @@ mod simd512 {
+             acc.clear();
+             acc.resize(padded, 0);
+             // SAFETY: a `Simd512` is only built after detecting avx512f
+-            // and vpclmulqdq; every slice holds `padded` words.
+-            unsafe { self.kernel(curve, p, dens, acc, qx, qy) };
++            // and vpclmulqdq; every slice holds `padded` words.  The
++            // carry is chosen once per call, so a field that never needs
++            // it runs the narrow kernel's exact instructions.
++            unsafe {
++                if self.wide {
++                    self.kernel::<true>(curve, p, dens, acc, qx, qy)
++                } else {
++                    self.kernel::<false>(curve, p, dens, acc, qx, qy)
++                }
++            };
+             // `acc` now holds the abscissae and `dens` the slopes.
+             out.reserve(qs.len());
+             lambdas.reserve(qs.len());
+@@ -1075,7 +1097,7 @@ mod simd512 {
+         /// abscissa of every sum.  On return `pre` holds `x₃` and `dens`
+         /// holds `λ`, lane for lane.
+         #[target_feature(enable = "avx512f,vpclmulqdq")]
+-        unsafe fn kernel(
++        unsafe fn kernel<const WIDE: bool>(
+             &self,
+             curve: &FastCurve,
+             p: FastPoint,
+@@ -1089,7 +1111,7 @@ mod simd512 {
+             let mut acc = _mm512_set1_epi64(1);
+             for g in 0..groups {
+                 _mm512_storeu_si512(pre.as_mut_ptr().add(8 * g) as *mut _, acc);
+-                acc = self.mul(acc, ld(dens, g));
++                acc = self.mul::<WIDE>(acc, ld(dens, g));
+             }
+             // The eight lane products are non-zero; invert them together.
+             let mut lanes = [0u64; 8];
+@@ -1101,11 +1123,11 @@ mod simd512 {
+             let px_a = _mm512_set1_epi64((p.x ^ curve.a) as i64);
+             for g in (0..groups).rev() {
+                 let d = ld(dens, g);
+-                let inv = self.mul(inv_acc, ld(pre, g));
+-                inv_acc = self.mul(inv_acc, d);
+-                let lambda = self.mul(_mm512_xor_si512(py, ld(qy, g)), inv);
++                let inv = self.mul::<WIDE>(inv_acc, ld(pre, g));
++                inv_acc = self.mul::<WIDE>(inv_acc, d);
++                let lambda = self.mul::<WIDE>(_mm512_xor_si512(py, ld(qy, g)), inv);
+                 let x3 = _mm512_xor_si512(
+-                    _mm512_xor_si512(self.mul(lambda, lambda), lambda),
++                    _mm512_xor_si512(self.mul::<WIDE>(lambda, lambda), lambda),
+                     _mm512_xor_si512(px_a, ld(qx, g)),
+                 );
+                 _mm512_storeu_si512(pre.as_mut_ptr().add(8 * g) as *mut _, x3);
+@@ -1114,10 +1136,12 @@ mod simd512 {
+         }
+ 
+         /// Eight field multiplications: two `vpclmulqdq` for the 128-bit
+-        /// products, then two shift-and-XOR folds by the tail.
++        /// products, then two shift-and-XOR folds by the tail.  With
++        /// `WIDE`, the first fold's bits above `z^63` join the second's
++        /// input at their place, `z^{64 − n}` up.
+         #[inline]
+         #[target_feature(enable = "avx512f,vpclmulqdq")]
+-        unsafe fn mul(&self, a: __m512i, b: __m512i) -> __m512i {
++        unsafe fn mul<const WIDE: bool>(&self, a: __m512i, b: __m512i) -> __m512i {
+             let even = _mm512_clmulepi64_epi128::<0x00>(a, b);
+             let odd = _mm512_clmulepi64_epi128::<0x11>(a, b);
+             let lo = _mm512_unpacklo_epi64(even, odd);
+@@ -1128,10 +1152,31 @@ mod simd512 {
+             let h = _mm512_or_si512(_mm512_srl_epi64(lo, n), _mm512_sll_epi64(hi, n_rev));
+             let f = self.times_tail(h);
+             let low = _mm512_xor_si512(_mm512_and_si512(lo, mask), _mm512_and_si512(f, mask));
+-            let f2 = self.times_tail(_mm512_srl_epi64(f, n));
++            let mut over = _mm512_srl_epi64(f, n);
++            if WIDE {
++                over = _mm512_or_si512(over, _mm512_sll_epi64(self.times_tail_carry(h), n_rev));
++            }
++            let f2 = self.times_tail(over);
+             _mm512_xor_si512(low, f2)
+         }
+ 
++        /// The bits of `h · t` above `z^63`, as one word per lane:
++        /// `h >> (64 − t)` for each tail term `t ≥ 1`.
++        #[inline]
++        #[target_feature(enable = "avx512f")]
++        unsafe fn times_tail_carry(&self, h: __m512i) -> __m512i {
++            let mut acc = _mm512_setzero_si512();
++            for &t in &self.terms[..self.nterms] {
++                if t > 0 {
++                    acc = _mm512_xor_si512(
++                        acc,
++                        _mm512_srl_epi64(h, _mm_cvtsi64_si128(i64::from(64 - t))),
++                    );
++                }
++            }
++            acc
++        }
++
+         /// `h · t` for the tail `t`, as one word per lane: the caller
+         /// guarantees the product fits.
+         #[inline]
+@@ -1150,10 +1195,15 @@ mod simd512 {
+             let mut out = [0u64; 8];
+             // SAFETY: tests call this only after the CPU check.
+             unsafe {
+-                let r = self.mul(
++                let (a, b) = (
+                     _mm512_loadu_si512(a.as_ptr() as *const _),
+                     _mm512_loadu_si512(b.as_ptr() as *const _),
+                 );
++                let r = if self.wide {
++                    self.mul::<true>(a, b)
++                } else {
++                    self.mul::<false>(a, b)
++                };
+                 _mm512_storeu_si512(out.as_mut_ptr() as *mut _, r);
+             }
+             out
+@@ -1514,7 +1564,8 @@ mod tests {
+         );
+ 
+         let mut curves = 0;
+-        for (a, n) in [(1u8, 19u32), (0, 31), (0, 41), (0, 53)] {
++        // K_1/GF(2^59) and K_0/GF(2^61) have wide tails (n + deg t = 66).
++        for (a, n) in [(1u8, 19u32), (0, 31), (0, 41), (0, 53), (1, 59), (0, 61)] {
+             let Some(kc) = KoblitzCurve::new(a, n) else {
+                 continue;
+             };
+@@ -1549,6 +1600,51 @@ mod tests {
+         assert!(curves >= 2, "only {curves} curves exercised the kernel");
+     }
+ 
++    /// The two suite fields whose `H·t` passes `z^63` build a wide kernel,
++    /// and its products equal the scalar field's on the inputs that carry
++    /// most: all-ones operands, single top bits, and random ones.  Skipped
++    /// on a CPU without AVX-512 and VPCLMULQDQ.
++    #[cfg(target_arch = "x86_64")]
++    #[test]
++    fn avx512_kernel_carries_wide_tails() {
++        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
++            eprintln!("skipped: no AVX-512 + VPCLMULQDQ on this CPU");
++            return;
++        }
++        let mut rng = StdRng::seed_from_u64(0x66);
++        for (a, n) in [(1u8, 59u32), (0, 61)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let field = &fc.field;
++            let tail = field.irr ^ (1u64 << n);
++            assert_eq!(
++                n + (63 - tail.leading_zeros()),
++                66,
++                "K_{a}/GF(2^{n}) is the wide case"
++            );
++            let simd = simd512::Simd512::for_field(field).expect("a wide tail builds a kernel");
++            assert!(simd.wide());
++            assert!(fc.simd.is_some(), "the curve uses the kernel on this CPU");
++            let top = 1u64 << (n - 1);
++            let mut cases = vec![
++                ([field.mask; 8], [field.mask; 8]),
++                ([top; 8], [top; 8]),
++                ([field.mask; 8], [top; 8]),
++            ];
++            for _ in 0..2000 {
++                let x: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask | top);
++                let y: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
++                cases.push((x, y));
++            }
++            for (x, y) in cases {
++                let got = simd.mul8(&x, &y);
++                for l in 0..8 {
++                    assert_eq!(got[l], field.mul(x[l], y[l]), "n = {n}, lane {l}");
++                }
++            }
++        }
++    }
++
+     /// The López–Dahab ladder against affine double-and-add, on both
+     /// Koblitz curves at several degrees, over scalars that reach every
+     /// special case: `0`, `1`, `2`, the subgroup order and its neighbours

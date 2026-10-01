@@ -1,0 +1,87 @@
+{
+  "stage": "native",
+  "reps": [
+    {
+      "rho": {
+        "rc": 0,
+        "wall_s": 1.2042664579998927,
+        "cpu_s": 1.19226,
+        "gates_G1": true,
+        "total_walk_steps": 3827005
+      },
+      "ic": {
+        "rc": 0,
+        "wall_s": 4.527505277000046,
+        "cpu_s": 4.416460000000001,
+        "gates_G1": true,
+        "peak_rss_bytes": 338313216
+      }
+    },
+    {
+      "rho": {
+        "rc": 0,
+        "wall_s": 1.1522045850001632,
+        "cpu_s": 1.1328609999999997,
+        "gates_G1": true,
+        "total_walk_steps": 3827005
+      },
+      "ic": {
+        "rc": 0,
+        "wall_s": 4.200824746999842,
+        "cpu_s": 4.126178,
+        "gates_G1": true,
+        "peak_rss_bytes": 338411520
+      }
+    },
+    {
+      "rho": {
+        "rc": 0,
+        "wall_s": 1.2620141770000828,
+        "cpu_s": 1.2372219999999992,
+        "gates_G1": true,
+        "total_walk_steps": 3827005
+      },
+      "ic": {
+        "rc": 0,
+        "wall_s": 4.351175399999875,
+        "cpu_s": 4.301622,
+        "gates_G1": true,
+        "peak_rss_bytes": 338452480
+      }
+    },
+    {
+      "rho": {
+        "rc": 0,
+        "wall_s": 1.1835674110000127,
+        "cpu_s": 1.1536720000000018,
+        "gates_G1": true,
+        "total_walk_steps": 3827005
+      },
+      "ic": {
+        "rc": 0,
+        "wall_s": 4.333993267000096,
+        "cpu_s": 4.277433999999998,
+        "gates_G1": true,
+        "peak_rss_bytes": 338440192
+      }
+    },
+    {
+      "rho": {
+        "rc": 0,
+        "wall_s": 1.3072638250000637,
+        "cpu_s": 1.2715750000000006,
+        "gates_G1": true,
+        "total_walk_steps": 3827005
+      },
+      "ic": {
+        "rc": 0,
+        "wall_s": 5.1470371259999865,
+        "cpu_s": 5.074706999999999,
+        "gates_G1": true,
+        "peak_rss_bytes": 338382848
+      }
+    }
+  ],
+  "load_before": "20:02:00 up 26 min,  0 user,  load average: 0.70, 0.79, 0.75",
+  "load_after": "20:02:29 up 27 min,  0 user,  load average: 0.82, 0.81, 0.76"
+}

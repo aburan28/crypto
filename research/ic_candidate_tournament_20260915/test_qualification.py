@@ -68,7 +68,10 @@ class ReferenceQualificationTests(unittest.TestCase):
                 data.append(dict(arm=arm['id'],case='n13a0-000',cell='n13a0',repetition=rep,
                     case_sha256='fixed',status='VERIFIED',mode='rho' if is_rho(arm) else 'ic',
                     total_operations=instructions,native_process={'process_wall_seconds':cold/1e9},
-                    certificate={'factor_base_sha256':'fixed'},measurement={'native_timing':{
+                    certificate={'factor_base_sha256':'fixed'},measurement={
+                        'workload_id':'n13a0-000',
+                        'reference_id' if is_rho(arm) else 'candidate_id':arm['id'],
+                        'native_timing':{
                         'cold':{'wall_ns':cold},'online':{'wall_ns':online}}}))
         contract=dict(purpose='reference-qualification',reference_arms=refs,repetitions=3,
                       comparison_kind='fixed-support',bootstrap_draws=20,cells=['n13a0'],

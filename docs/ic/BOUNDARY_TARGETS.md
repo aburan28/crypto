@@ -53,6 +53,22 @@ negation-map fruitless-cycle failure recorded in
 ("The ρ baseline was failing, not losing"), which produced a spurious
 charged crossover at `n = 41` until the walk was fixed.
 
+**A ρ baseline that is slow per step is not a reference either (2026-10-01).**
+Every Koblitz `vs_rho` comparison must measure against a strong ρ: for one target,
+`koblitz_rho_fixture <n> <a> signed_frobenius 1 strong …` (the library
+`koblitz_strong_rho` walk: distinguished points, normal-basis signed-Frobenius
+canonical form, library `Gf2`, lockstep lanes with batched inversion); for batches,
+`koblitz_rho_batch_ks_strong` rung 3 or the normal-basis backend of
+`koblitz_rho_batch_ks_v3`. A different ρ is admissible only with a measured per-step
+cost (instructions or ns per step on the same target) no worse than the strong one.
+`koblitz_rho_fixture`'s `packed` and `reference` backends, `koblitz_rho_batch_ks` and
+`koblitz_rho_batch_ks_matched_arith` are **not** admissible references: the measured
+ones cost 8-60× the strong walk (2026-09-29 and 2026-09-30 errata below), and
+`reference` shares `packed`'s every-step table and O(n) scan (not measured). The weak fixture
+backends now print a note to stderr saying so; they are kept only so archived stage
+runs reproduce. Fix and validation:
+[`RESEARCH_FIXED_REFERENCE_RHO_20261001.md`](../../research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md).
+
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.
 
@@ -140,11 +156,114 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
 | `rank` | Rank-aware `n = 53` collection reaches augmented rank 95 with exactly 95 rows and zero surplus; current final solve is 0.542 ms after 48,531,878 support queries; relation-matrix LA, not GB FFD | Unaffiliated replay of the 95-row transcript and a distribution across public targets | Preserved transcript; matrix dimensions and LA wall logged; terminal rank unchanged; no log labels used by targeting | `stage-89-current-selected-panel-20260912/verification.json` |
 | `end_to_end_dlp` | Selected public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 40,136,342 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Direct is 4.307977 s versus 4.362556 s rho, ratio 0.987489 | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-108-routing-selection-archive-20260913/verification.json` |
-| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding. **Operation-counted, whole process (2026-09-21, `ic boundary`):** the signed-orbit fold at `n = 41` (`r = 2^39`, cofactor 4) is `S = 58.8`, 300× the counted signed-Frobenius ρ (`S = 0.20`) and 425× the floor with factor base, pair table, targets, oracle, elimination and verification all inside the count; `n = 23`: 210× (abscissa-column control 227×); total exponent 0.54 (`R²` 0.71 over 10 rungs; 0.51, `R²` 0.98 over the cofactor ≤ 4 rungs) against ρ's ½. **Round 2 (2026-09-21):** folding the pair table by ⟨σ, −1⟩ takes the `n = 41` table from 6,249,999 entries to 152,439 and the factor-base phase from `S = 16.9` to 0.24; with walked targets, two summands and a base sized to the folded table the best row is `S = 5.12`, **26.2× ρ** (3–49× the first round per instance), fitted `r^0.43` (`R²` 0.82, 4 rungs) — still no crossover. **Round 3 (2026-09-21):** the same rows with a restart costing one group operation give `S = 5.92` at `n = 41`, **30.3× ρ**, which did not move against Round 2 (matched eight-repeat headline: 0.927, 95% interval 0.849–1.012). The derived family optimum here is `S = 4.18`, **30.1× the asymptotic signed-Frobenius ρ**, so the row is within `1.42×` of its family's floor and that floor is itself thirty times the reference; extrapolating the law, `GF(2^163)` would be about `10^7×` and `GF(2^283)` about `10^13×`. **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly `n = 41` now reads `S = 5.11`, **26.1× ρ**, where Round 4 read 5.93 and 30.3×; the round also closes the small-rung losses Round 3 had incurred, `K₁/GF(2^11)` going from 0.597 to **1.001** and `K₀/GF(2^13)` from 0.650 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.4, §3.6 |
+| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding. **Operation-counted, whole process (2026-09-21, `ic boundary`):** the signed-orbit fold at `n = 41` (`r = 2^39`, cofactor 4) is `S = 58.8`, 300× the counted signed-Frobenius ρ (`S = 0.20`) and 425× the floor with factor base, pair table, targets, oracle, elimination and verification all inside the count; `n = 23`: 210× (abscissa-column control 227×); total exponent 0.54 (`R²` 0.71 over 10 rungs; 0.51, `R²` 0.98 over the cofactor ≤ 4 rungs) against ρ's ½. **Round 2 (2026-09-21):** folding the pair table by ⟨σ, −1⟩ takes the `n = 41` table from 6,249,999 entries to 152,439 and the factor-base phase from `S = 16.9` to 0.24; with walked targets, two summands and a base sized to the folded table the best row is `S = 5.12`, **26.2× ρ** (3–49× the first round per instance), fitted `r^0.43` (`R²` 0.82, 4 rungs) — still no crossover. **Round 3 (2026-09-21):** the same rows with a restart costing one group operation give `S = 5.92` at `n = 41`, **30.3× ρ**, which did not move against Round 2 (matched eight-repeat headline: 0.927, 95% interval 0.849–1.012). The derived family optimum here is `S = 4.18`, **30.1× the asymptotic signed-Frobenius ρ**, so the row is within `1.42×` of its family's floor and that floor is itself thirty times the reference; extrapolating the law, `GF(2^163)` would be about `10^7×` and `GF(2^283)` about `10^13×`. **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly `n = 41` now reads `S = 5.11`, **26.1× ρ**, where Round 4 read 5.93 and 30.3×; the round also closes the small-rung losses Round 3 had incurred, `icv1-f2m11-t67-05f5aa36` going from 0.597 to **1.001** and `icv1-f2m13-t181-515ee569` from 0.650 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.4, §3.6 |
 
 **Explicit non-claims for the current `vs_rho` record:** not Semaev-SAT, not
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
 full-cost/core crossover, and not a state-of-the-art result.
+
+### Compact S3 swap quotient, 2026-09-29 — engineering, no rho crossover
+
+The [frozen swap-quotient panel](../../research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md)
+keeps one of each ordered S3 pair/Frobenius mate. Nine balanced cold blocks on
+new point-only n=41 and n=53 L=1,024 corpora completed all 162 baseline,
+quotient and strong-rho processes; the hosted independent verifier replayed
+144 full-rank compact traces and all 165,888 arm-target outputs. A second-machine
+raw replay returned byte-identical PASS receipts for both cells. At the exploratory best tested K, quotient CPU is
+2.119× rho at n=41 and 2.562× at n=53, with paired 95% intervals
+2.062–2.193 and 2.540–2.590. Same-K quotient CPU falls 8–34%, retained states
+roughly halve, and root-table entry counts remain equal. The n=53 K=550
+quotient's median index/target phases are 4.243/3.882 s against rho's
+4.188 s complete wall. The next gate is a frozen joint index/query cost
+experiment: count all S3 calls, no-root returns, exceptional inversions,
+table probes and lifts, then test batch inversion with early-stop waste charged.
+This is a matched-host complete-process timing diagnostic; common calibrated
+operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
+unset. It does not alter the selected-panel `vs_rho` verdict above.
+
+### Compact S3 inversion batching, 2026-09-29 — engineering, no rho crossover
+
+The [frozen v2 full-process panel](../../research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md)
+uses one compiled swap-quotient producer at scalar W=1 and Montgomery W=16/64,
+with two A/A scalar controls at each K and 32-walk normal-basis rho on the
+same 1,024 point-only public Q. Seed 622936 was committed after the lint-only
+source amendment and is disjoint from 5,123 earlier points per n, including
+the excluded seed-622935 pilot. Nine balanced blocks per arm completed 162/162
+children, 144 full-rank compact traces and 165,888 verified arm-target
+outputs. All four A/A noise gates pass. The second-host replay is documented
+in the result and its portability note.
+
+Every batch/scalar paired 95% CPU interval excludes one on the improving side,
+saving 16–26% complete cold CPU at fixed K. Yet the best observed W64 cells
+remain **1.535× rho at n=41 K255** (95% interval 1.518–1.554) and **1.582×
+rho at n=53 K440** (1.559–1.613). The n=53 W64 arm spends median 2.336 s
+building the index, 2.542 s on rank and 5.084 s on targets, versus rho's
+6.335 s complete CPU. It makes 27,632,196 rank-plus-target root-table
+lookups and 42,477,310 slot probes for 1,464 full-point lift attempts. A
+no-false-negative blocked Bloom or xor prefilter is the next bounded
+hypothesis, but its construction, memory and lookup hashes must be charged
+cold against W64 and rho. These host-specific timing diagnostics do not set
+common calibrated S, an n=83 result, GF(2^131) transfer or a descendant-native
+PDP verdict, and they do not alter the selected-panel `vs_rho` row above.
+
+### Compact S3 blocked root prefilter, 2026-09-30 — engineering gain, no rho crossover
+
+The [preregistered prefilter panel](../../research/notes/ecc2k130/compact_s3_prefilter_20260930/RESULT.md)
+tests the W64 binary with a 512-bit blocked Bloom filter over every canonical
+root key, alongside two same-binary off controls and the matched normal-basis
+rho on 1,024 new point-only public Q at n=41/K255 and n=53/K440. The first
+hosted panel and separate macOS raw replay independently verified all 30
+full-rank compact traces and 40,960 target logs. The filter preserved every
+first witness and scalar and skipped 3.154/3.187 million root-table keys at
+n=41 and 27.985/28.244 million at n=53, using 4/16 MiB additional storage.
+The first-run CPU ratios to rho, 1.4567 and 1.5218, are diagnostic because
+n41's off-B/off-A interval excluded one and n53 had two contention samples.
+A single same-source/Q, both-size repeat was committed before inspection.
+Both repeat cells satisfy the A/A and isolation gates and independently
+replay all 30 full-rank traces and 40,960 logs. Filter/off complete CPU ratios
+are **0.8528** (95% interval 0.8390–0.8636) at n41 and **0.8924**
+(0.8805–0.9134) at n53: a fixed-K engineering gain. Filter/rho ratios remain
+**1.3282** (1.2980–1.3556) and **1.4727** (1.4231–1.5292), so no matched-rho
+crossover. Common operation-counted S, n83 and GF(2^131) transfer, and
+descendant-native PDP benefit remain unset.
+The separate degree-263 all-line certificate records the changed descending
+endomorphism order but no native PDP yield. The next high-arity gate is the
+independently reviewed, label-gated m10 capacity PR #937; only if it passes
+should a frozen natural-target solver/yield and equal-useful-size original,
+native, transported and pullback comparison follow.
+
+### Compact whole-process instruction ledger, 2026-09-30 — common work unit, no CPU crossover
+
+The [frozen six-cell Callgrind ledger](../../research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md)
+ran the exact blocked-prefilter source and matched 32-walk normal-basis rho v3
+on the same public Q at n=37/41/53, L=1/1024. All 16 child processes, nine
+compact full-rank traces and 8,200 target logarithms passed hosted and
+separate macOS group-law replay; the n37/L1 instruction-repeat control passed.
+Complete guest-instruction IC/rho ratios for unfiltered compact are 2.5231,
+0.5165, 9.2716, 0.6221, 13.2293 and 0.7773 in that cell order. The n41/n53
+batch blocked arms are 0.6351/0.7889 of rho in Ir but remain 1.3282/1.4727
+of rho in the separately eligible same-source/Q native CPU repeat. The filter
+raises Ir by 2.10%/1.49% over off while lowering native CPU by 14.7%/10.8%.
+This is an all-phase instruction/accounting result and a quantitative no-go
+for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
+is not a group-addition or cycle unit and does not establish a method speedup.
+
+The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
+and n53/L1 used a different rho/source snapshot. The preregistered
+[four-cell current-source cold panel](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)
+now closes those cells: all 105 processes, 70 compact full-rank traces and
+15,450 target logarithms passed hosted and separate macOS replay. Eligible
+off/rho CPU medians [paired 95% intervals] are 3.7362 [3.6901, 3.7803],
+1.7064 [1.6933, 1.7146], 17.0499 [16.0731, 18.1962] and 27.4483
+[27.1951, 27.6616] in that order. Every A/A and isolation gate passed.
+The n37 batch Ir advantage (0.5165 of rho) therefore does not survive native
+CPU either; all six tested current-source W64 n/L cells lack a matched-rho
+cold CPU crossover. Short-arm wall time is coarsened by 0.2-second runner
+polling and is ineligible as a speed claim. The K+L rank/recovery attempt floor
+is exactly met in all compact arms, but no instruction lower bound, calibrated
+generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
+or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
+and review/label-gated m10 capacity PR #937 remain separate prerequisites.
 
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
@@ -207,7 +326,7 @@ should be quoted without its configuration.
 | `relation_yield` | **Operation-counted yield on the frozen prime ladder** (2026-09-21, `ic boundary`): 8 instances, 10–24 bits, relations per trial against `C(F+m−1,m)/#E` for every variant, natural targets; `yield/ceiling` 0.75–1.25 (`m = 2`) and 0.75–1.00 (`m = 3`); trials grow as `r^0.57` (`m = 2`) and `r^0.33` (`m = 3`), `R² ≥ 0.99`. **Round 2 (2026-09-21)** carries the exact class-aware ceiling beside the uniform one (identical on these prime-order curves) and guards against decomposing one group element twice, which moved 22 of the first round's 63 rows by 0.88–1.59× in `S` | Trials-per-relation on a j=0 ζ-orbit base, 10–24 bits, against the orbit-corrected ceiling | ≥4 bitlengths; R² reported; ceiling stated for the orbit-reduced base | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.2 |
 | `rank` | Relation-matrix LA priced per instance on the prime ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned; at 24 bits (`K = 256`): 232 rows × 257 columns, rank 232, 108,300 multiply-subtracts = 1,696 GAE, `S_LA = 0.51` (0.9% of the `m = 3` total); LA grows as `r^0.62` (`R²` 0.96). **Round 2:** the two-summand walk closes on 65 rows over 257 columns through factor-base cycles, `S_LA` 0.004 | Sparse or structured LA at `K ≥ 1,024` columns (≥ 28 bits); dims and cost published | Correct vs dense GE on a subsample; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
 | `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the prime ladder, largest **23.4 bits** (generated prime-order curve), every phase counted in one unit (2026-09-21); **Round 2** adds the negation-folded table and walked targets on the same instances, every logarithm verified and no row pinned by a repeated target; j=0 orbit IC **14-bit** (bench, wall-clock); synthetic known-answer | Generic curve at ≥ 28 bits, or a j=0 ζ-orbit pipeline at ≥ 24 bits, in the same counted harness | `[d]G = Q`; every phase counted; agrees with the counted ρ on the same instance | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2; `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md` |
-| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ (2026-09-21): best variant meet in the middle `m = 3` at 1.17× ρ at 11.9 bits (where ρ's setup dominates) and 14.5× at 23.4 bits (`S = 56.8` vs ρ 3.93, 64× the floor); Semaev `S₃` roots 1,107×; total exponents 0.60 (`m = 3`), 0.66, 0.85, 0.91 against ρ's ½. **Round 2 (2026-09-21):** the negation-folded table with walked targets and two summands reaches `S = 24.2` at 23.4 bits, **6.2× ρ** (1.26–2.35× the first round per instance), fitted `r^0.53` (`R²` 0.98, 8 sizes) against a reference fitting 0.27 — still no crossover. **Round 3 (2026-09-21):** the `⌈bits/3⌉` rule gave 512 signed points where the derived family optimum `F = (c·#E·t/k)^{1/3}` puts it at 222; moving there reaches `S = 14.3` at 23.4 bits, **3.63× ρ**, within `1.28×` of the family optimum `S = 11.2`. Since that optimum is `0.75·r^{1/6}` on a prime-order curve and the reference is flat, the two cross only at `r ≈ 22`: this family has no crossover to find at any size, and the result is a boundary rather than a measurement; ρ health: every run recovered and verified, walk 1.2–3.4× `√(πr/2)`; dense 3-sum non-scaling wall ~**80 bits** (earlier record). **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly the 23.4-bit best row now reads `S = 14.0`, **3.55× ρ**, where Round 4 read 14.3 and 3.63×; the round also closes the small-rung loss Round 3 had incurred, `bench-10bit`'s `m = 3` walk going from 0.656 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Any prime-order instance ≥ 16 bits where charged IC < ρ (same accounting) | Artifact cost model + independent replay; no verifier gaming | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4; `research/ecdlp_autolab/paper.md` |
+| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ (2026-09-21): best variant meet in the middle `m = 3` at 1.17× ρ at 11.9 bits (where ρ's setup dominates) and 14.5× at 23.4 bits (`S = 56.8` vs ρ 3.93, 64× the floor); Semaev `S₃` roots 1,107×; total exponents 0.60 (`m = 3`), 0.66, 0.85, 0.91 against ρ's ½. **Round 2 (2026-09-21):** the negation-folded table with walked targets and two summands reaches `S = 24.2` at 23.4 bits, **6.2× ρ** (1.26–2.35× the first round per instance), fitted `r^0.53` (`R²` 0.98, 8 sizes) against a reference fitting 0.27 — still no crossover. **Round 3 (2026-09-21):** the `⌈bits/3⌉` rule gave 512 signed points where the derived family optimum `F = (c·#E·t/k)^{1/3}` puts it at 222; moving there reaches `S = 14.3` at 23.4 bits, **3.63× ρ**, within `1.28×` of the family optimum `S = 11.2`. Since that optimum is `0.75·r^{1/6}` on a prime-order curve and the reference is flat, the two cross only at `r ≈ 22`: this family has no crossover to find at any size, and the result is a boundary rather than a measurement; ρ health: every run recovered and verified, walk 1.2–3.4× `√(πr/2)`; dense 3-sum non-scaling wall ~**80 bits** (earlier record). **Round 4 (2026-09-21)** pins the unit: non-addition counters now convert at ratios frozen in `docs/ic/calibration.json` rather than at factors measured on the host each run, which had drifted a median of 1.08 and up to 3.70 between runs. Rerun under the pinned unit all 537 rows are identical in every native counter and the correction reaches ±9.5%, concentrated on rows that are almost entirely converted work; the figures above are unchanged to four significant figures **Round 5 (2026-09-22)** draws the walk's sixteen restart offsets on first use instead of at setup; 110 of Round 4's 204 walk rows had bought all sixteen and taken none. The offsets come off their own random stream and are taken in a fixed cycle, so the eager and lazy arms walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, zero rows whose saving differs from the offsets they stopped drawing, and the same on a holdout seed and an eight-repeat headline. The saving matches `(48·log₂r − 48)/√r` to within 1–9%, so it is large below 2^15 (best ratio 0.58) and at most 7% above 2^20. Class engineering. The same round measures what re-seeding alone does: moving the offsets to a private stream changes no cost, yet moved 204 of 537 rows — every walk row and only walk rows — with a median of 1.0000 and a range of 0.54 to 1.83, so a single walk row at three repeats is not resolvable to better than that. Accordingly the 23.4-bit best row now reads `S = 14.0`, **3.55× ρ**, where Round 4 read 14.3 and 3.63×; the round also closes the small-rung loss Round 3 had incurred, `icv1-fp10-t5-192cb216`'s `m = 3` walk going from 0.656 to **1.000** against Round 2. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain | Any prime-order instance ≥ 16 bits where charged IC < ρ (same accounting) | Artifact cost model + independent replay; no verifier gaming | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`; `docs/ic/runs/ic-boundary-round2-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`; `docs/ic/runs/ic-boundary-round3-comparison-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`; `docs/ic/runs/ic-boundary-round4-repricing-2026-09-21.json`; `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`; `docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-pairing-2026-09-22.json`; `docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4; `research/ecdlp_autolab/paper.md` |
 
 **Asymptotic reminder:** 2-decomp IC on prime fields is `O(p^{3/2})` vs ρ's
 `O(p^{1/2})`. A `vs_rho` win requires a genuinely better decomposition regime
@@ -219,23 +338,221 @@ should be quoted without its configuration.
 
 `examples/koblitz_orbit_dlp_fast.rs` is a pair-table-free compact-orbit producer:
 one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
-relations, and K grown with batch size L. Against the frozen Kuhn–Struik batched
-rho (`d=4`) it wins all 15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
+relations, and K grown with batch size L. Against the historical Kuhn–Struik batched
+rho (`d=4`, before the later backend and normal-basis corrections) it wins all
+15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
 all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 / 4,096 /
 16,384 (K=600/800/1,400, wall 0.14–0.63; 64,512/64,512 replayed).
 Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 `PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
 `vs_rho` row from this arm alone.
 
-**Next beat:** a=0 n=61 vs `examples/koblitz_rho_batch_ks_v2_n61.rs` at
-**L=65,536 only**. Do not run 32-target panels. Evidence:
+**2026-09-30 n=61 L=65,536 restart (same historical v2 comparator; multi-target
+batch diagnostic, not isolated).** The panel PR #830 left aborted was rerun with
+resumable stages. K is memory-capped at 1,400: K=1,800 was censored at more than
+twice K=1,400's tune wall while swapping, and K=2,200 was skipped because its
+estimated 27.8 GB did not fit beside another agent's 21 GB job. Three paired
+blocks gave compact/rho wall ratios of **1.968 / 0.343 / 0.352** (median 0.352).
+Block 0 is a compact loss: its 11.6 GB IC index swapped, with 521 s of system
+time. User-CPU ratios were 0.379 / 0.328 / 0.331 and retired-instruction ratios
+0.201 / 0.135 / 0.135. 196,608/196,608 IC logs and the 65,536 block-0 rho logs
+were independently replayed.
+`end_to_end_dlp` claim-check PASS; `vs_rho` claim-check FAIL by design (the
+schema requires one target). At fixed K the lead over v2 narrows from
+L=16,384 (instructions 0.109 → 0.135). The walls are not AGENTS.md §10 evidence,
+because `tools/isolated_bench.py` does not run on macOS. Nothing here touches the
+strong-rho verdict (2.30× at n=61 L=1,024). Evidence:
+[`growing_n_n61_L65536_20260930/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md).
+
+**2026-09-29 point-only full-rank check:** fresh held-out n=37/41/53 L=1 and
+L=1,024 public points, five cold paired blocks per cell, independent rank and
+target replay on Linux and a second machine. With the corrected x86 PCLMUL /
+Itoh–Tsujii rho, median IC/rho CPU ratios are 1.545/0.789 at n37,
+2.727/0.309 at n41 and 2.283/0.252 at n53 (single/batch). The original
+software-rho batch ratios 0.154/0.099/0.086 were accounting artifacts; a
+same-runner backend A/B reproduced the rho acceleration with identical Q,
+scalars, walks and charges. All selected rank stages reached the K-equation
+floor in exactly K attempts, but n53 still averaged ~85,007 rank probes per
+equation at L=1. The n53 batch used ~1.28 GiB peak RSS. This is a wall/CPU
+diagnostic only: common-unit S and full-operation attack-speed ratios remain
+unset; the selected-panel `vs_rho` row is not promoted. Evidence:
+[`compact_orbit_point_panel_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md).
+
+**2026-09-29 stronger-rho follow-up:** a disjoint point-only four-arm panel
+compared compact orbit, corrected rho v2, 32-walk batch-inversion rho, and the
+same batched rho with normal-basis signed-Frobenius canonicalization. All six
+n=37/41/53 × L=1/1,024 cells passed five cold blocks and independent
+second-machine replay. On the same new L=1,024 Q, compact/v2 paired CPU ratios
+were 0.782/0.391/0.344, but compact/normal-rho ratios were **2.081/2.989/3.086**
+(95% intervals 2.073–2.090 / 2.877–3.116 / 3.021–3.131). The earlier batch
+timing lead is a weaker-comparator result. At n41 and n53 the current compact
+S3 index build alone exceeds the full stronger-rho process in every block;
+rank-attempt yield is already at its K-equation counting floor. Common-unit S,
+algorithmic `vs_rho` and n=131 transfer remain unset, so the selected-panel
+row is not promoted. Evidence:
+[`compact_orbit_strong_rho_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md).
+
+**2026-09-29 held-out K/base-size gate:** a new disjoint point-only n41/n53
+L=1,024 corpus tested four frozen K choices per size against the same stronger
+rho. All 40 compact full-rank runs and 10 rho runs solved and independently
+replayed every target. The lowest complete CPU costs in the tested eager-index
+grid were n41 K=192 at **2.443× rho** (95% paired interval 2.422–2.478) and
+n53 K=440 at **2.616× rho** (2.565–2.727). The n41 K=192 choice improves the
+prior K=255's CPU cost by a direct paired ratio of 0.979 (0.974–0.990), but
+this selection is exploratory until tested on another Q corpus. Smaller K
+reduces K²·n index construction and increases rank/target probes; at both
+grid minima the target phase alone exceeds the complete matched rho wall
+median. This is a no-go for the tested eager-index K grid on these Q, not for
+an untested index policy or a descendant oracle. Common-unit S and n=131
+transfer remain unset. Evidence and raw archives:
+[`compact_k_boundary_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md).
+
+**Next beat:** freeze a joint S3 index/query policy that preserves full-rank,
+full-log recovery on held-out Q and measures both construction and probes at
+equal useful workload; build a complete calibrated common operation unit for
+IC and normal-basis batched rho. A swap/Frobenius quotient of ordered S3
+states is an untested candidate and needs a reachability proof and exceptional-
+case tests before performance claims. Precomputed starts alone are deprioritized:
+in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
+most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
+confidence gate as resources permit. The n=61 L=65,536 batch-size probe ran on
+2026-09-30, against the historical v2 rho only (see above). Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
+
+**2026-09-29 ERRATUM to the matched-arithmetic recheck below (PR #955): its
+verdict "the lead survives, IC/rho = 0.2403" is superseded and must not be
+quoted.** That rho was neither hardware-matched (on x86-64 its field multiply
+was a software bit-loop while IC used `pclmulqdq`) nor best-effort (its orbit
+canonicalization was still a Θ(n) polynomial-basis scan with a `u128 %` per
+position and it inverted once per step). Re-measured as a ladder of stronger
+references on the identical n=53, L=1,024, K=440 targets, whole-process retired
+instructions (callgrind), IC = 89,190,346,806: PR #955's rho 371.1 B (IC/rho
+0.240); + library `Gf2` field 281.0 B (0.317); + normal-coordinate
+canonicalization 68.9 B (**1.294**); + 32 lockstep walks with `Gf2::batch_inv`
+46.4 B (**1.923**). Every rung verified 1,024/1,024 targets and replayed
+independently in pure Python; rungs 0–1 walk PR #955's trajectory bit for bit.
+By the pre-registered rule the lead **dies** at this cell (IC/rho ≥ 1.0), in
+agreement with the same-day wall/CPU results above (PRs #940, #943, #944), and
+an independently written strong rho (`koblitz_rho_batch_ks_v3.rs`, PR #943)
+reproduces the strongest rung's walk on all 1,024 targets step for step. The
+arithmetic-asymmetry finding of PR #955 stands; its verdict does not. Class:
+`accounting` for the hardware-matched rung, `engineering` for the two stronger
+rungs. Ladder and evidence:
+[`RESEARCH_STRONG_RHO_LADDER_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_LADDER_20260929.md),
+[`strong_rho_ladder_20260929_run/`](../../research/notes/index-calculus/strong_rho_ladder_20260929_run/).
+
+**2026-09-29 strong-rho size and batch sweep (whole-process retired instructions,
+callgrind; class: measured ratio-to-boundary trend, not an advance).** IC as merged
+against `koblitz_rho_batch_ks_strong` R3, K as chosen in PR #830, every target of
+every cell verified and the rho records replayed independently. IC/rho at L =
+1,024: **0.794 (n = 37), 1.520 (n = 41), 1.923 (n = 53), 2.297 (n = 61)**; at n = 53:
+**1.923, 1.604, 1.500** for L = 1,024 / 4,096 / 16,384 (IC then holds 4.94 GiB against
+rho's 0.58 GiB, at 4.5× rho's wall time). The registered slope test gives
+`log₂(IC/rho)` on `log₂ r` = **+0.078 ± 0.003 (95 % interval 0.067–0.089)**: IC's cost
+grows faster than the reference's, and dropping any single size leaves it at
++0.072…+0.079. **Read this carefully:** the pre-registered rule, applied literally,
+prints "survives as a scaling result" because clause (i) ("some cell < 0.8") is met by
+the single smallest cell, n = 37 at 0.794 (0.6 B-instruction runs dominated by fixed
+costs, inside the ~10 % build-to-build scale, with IC slower in wall time there). That
+clause was badly designed (any one cell could satisfy it) and is recorded as
+written, not corrected; no cell with n ≥ 41 is below 1.5 and clause (ii), the
+actual scaling test, fails in the unfavourable direction. Extrapolation, marked as
+such: were the fitted slope to persist, IC/rho would grow about 7× by r ≈ 2^83 and
+about 89× by r ≈ 2^130. Exploratory (unregistered): IC needs 1.418× as many probes
+as rho needs canonicalizations at n = 53, L = 1,024, but 0.935× and 0.946× at L =
+4,096 and 16,384 — its instruction total still exceeds the reference there because of
+the K² index build. The n = 61, L = 65,536 probe listed below is not expected to
+change this (n = 61 is at 2.30 at L = 1,024). Note, evidence and per-cell
+archives:
+[`RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md),
+[`strong_rho_sweep_20260929_run/`](../../research/notes/index-calculus/strong_rho_sweep_20260929_run/).
+
+**2026-09-30 cachegrind check of the memory-bound hypothesis at n = 41 (class:
+measurement of an explanation; moves no boundary target and does not touch the
+instruction verdict).** PR #955 and the ladder note left "IC's index runs at a lower IPC
+because it is memory-bound" untested. At n = 41, L = 1,024, K = 255, IC runs at IPC 0.89
+against rho R3's 2.06. Pre-registered protocol, simulator (cachegrind, LL 2 / 8 / 32 MiB),
+pointer-chase host calibration, native huge-page contrast. **Registered verdict:
+UNDETERMINED** (the noise gate, max/min ≤ 0.10 over five repetitions, is unreachable on
+this VM: 0.28 over fifteen); a second registered attempt (R2) is **UNRESOLVED (gate)**
+(chase-control speedup 1.24 against the required 1.3). Deterministic facts: IC has 12.15
+D1 misses per 1,000 instructions against rho's 6.63 and 1.21 against 0.147 last-level
+misses per 1,000 at 2 MiB (8.2×; 13.5× at 32 MiB), nearly independent of simulated
+cache size, concentrated in the inlined index build and probe loop. The simulator can
+explain between 0.08 and 1.9 of the per-instruction time gap (no overlap information);
+the antagonist contention test has no power on this VM (positive control did not
+slow); huge pages cut IC's user time by 13-15 % and rho's by 0-3 %, a translation share
+of 0.257 (A2, no interval) and 0.219 (R2, 95 % interval 0.153-0.322, validity gate
+failed): **about a fifth to a quarter of the gap is address translation, and roughly
+three quarters is unexplained.** Not tested at n = 53 (1.36 GiB index). Whatever the
+answer, IC retires 1.52× rho's instructions at this cell, so no cache-level fix makes
+it faster than the reference here; wins must cut probes and index work. Protocol,
+amendments (A1, A2), R2, results and raw outputs:
+[`RESEARCH_CACHEGRIND_N41_20260929.md`](../../research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md),
+[`cachegrind_n41_20260929_run/`](../../research/notes/index-calculus/cachegrind_n41_20260929_run/).
+
+**2026-09-30 ERRATUM to the selected-panel wall crossover at n = 53 (`vs_rho`,
+`end_to_end_dlp`; class `accounting`): the ratios 0.8392 (panel), 0.9056 (stage 106) and
+0.9875 (stage 107) must not be quoted as evidence that the direct arm beats rho.** Their
+rho is `koblitz_rho_fixture … packed`, which is not a distinguished-point rho
+(`distinguished_bits` 0: every step stored in and looked up from a hash map) and canonicalizes by an
+O(n) polynomial-basis scan. Against a strong single-target rho (the strong-ladder R3 run at
+one fixture, 32 walks sharing a distinguished-point table, explicit scalar 476811900269 so
+it attacks the panel's exact target), pre-registered, nine blocks on a 4-vCPU Xeon VM:
+direct 5.80 s wall / 14.82 core-s / 1.03 GB; panel rho 5.67 s / 5.60 core-s; **strong rho
+0.132 s / 0.130 core-s / 21 MB on ONE core**. Wall ratio direct/strong **44.0 (95 % interval
+39.4-45.4)**; CPU 114×; whole-process instructions 27.07 G (direct), 46.91 G (panel rho),
+1.093 G (strong rho), i.e. **25× and 43×**. Over 16 walk seeds the panel rho's median wall is
+7.74 s against the strong rho's 0.130 s (**59.5×, interval 33.5-127.2**); the strong rho's slowest
+walk (0.316 s) is still 18× faster than direct's median. Registered verdict: **the wall win
+DIES**; the panel's rho is a **strawman**. On this host direct is near parity with the panel
+rho (1.02), so the EPYC 9V74 0.839 did not reproduce (the ledger's own stage-107 EPYC 7763
+run was 0.987). Priority #3's "preserve the 0.8392x wall median" is withdrawn; the operative
+reference is the strong rho. The direct arm's completion criteria were met in every run, so
+this concerns the reference, not the relations. Not tested: n = 41 (the same rho family is the
+reference there), n = 61, other targets, other hosts. Protocol, results and raw outputs:
+[`RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md`](../../research/notes/index-calculus/RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md),
+[`single_target_rho_n53_20260930_run/`](../../research/notes/index-calculus/single_target_rho_n53_20260930_run/).
+
+**[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+`vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
+signed-Frobenius canonicalization by real field squaring and inverts by
+Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
+normal-basis rotation / Itoh–Tsujii inversion. A new
+`examples/koblitz_rho_batch_ks_matched_arith.rs` gives rho that exact same
+rotation/inversion machinery (four correctness gates: `Gf2` agrees with the
+raw field arithmetic, rotation reproduces chained squaring, canonicalization
+output is bit-identical to the original, `raw_inverse` is a genuine inverse —
+all passing) and reruns the frozen n=53, L=1,024, K=440, batch_seed=531310,
+dp_bits=4 cell. Wall clock: matched rho is **7.071× faster than the
+unmodified rho** (215.240 s → 30.442 s) and now within 1.1% of IC's 30.772 s
+(0.989×) — near parity, wall-clock only. Operation count (valgrind
+`--tool=callgrind` retired instructions, whole process, both binaries, same
+host): matched rho 371,102,176,689 vs IC 89,164,459,930, i.e. **IC costs
+0.2403× matched rho's instructions** (equivalently matched rho costs 4.162×
+IC's) — decisively the same direction as the original 0.246 wall-clock
+figure, on a real total-operation unit this time. All 1,024 targets verified
+correct on every one of four runs (unmodified-KS corpus, matched-arith
+native, matched-arith under callgrind, IC native and under callgrind);
+`total_walk_steps` is bit-identical (19,103,507) between the unmodified and
+matched-arithmetic KS runs, confirming the rewrite changed cost, not the walk.
+Per the pre-registered rule (IC/rho, this repo's usual challenger/reference
+convention — the task dispatching this check had transcribed the ratio
+direction backwards, corrected in the note below against the original
+wording): 0.2403 < 0.8, so **the lead survives** at this one cell, on the
+operation-count metric. This is one rerun on one host, still
+`PENDING_INDEPENDENT_VALIDATION`, and does not by itself promote the
+selected-panel `vs_rho` row. Full numbers, host manifest, and raw
+JSON/callgrind output are in
+[`RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md`](../../research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md)
+and
+[`matched_rho_orbit_dlp_20260928_run/`](../../research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/).
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=65,536** (L=1,024 / 4,096 / 16,384 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The n = 61, L = 65,536 probe ran on 2026-09-30 against the historical v2 rho only: memory-capped K = 1,400, unisolated host, median wall ratio 0.352 with one loss in three blocks, instruction ratio 0.135. A strong-rho run at that L remains deprioritised.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
-3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
+3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.** **[Constraint withdrawn by the 2026-09-30 erratum above: the 0.8392x wall median is against a rho 44-60x slower than a strong single-target rho; against the strong rho the direct arm is 44x slower in wall on four cores, so the operative gate is the strong rho, not that median.]**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
    at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
    with `solution_validation_ms`, 53% of the direct arm's charged cost.
@@ -259,6 +576,7 @@ Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 ## Related documents
 
 - [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the operation-counted ledger (`ic boundary`): three regimes, one unit, every phase priced against the generic floor and a counted ρ; frozen runs under `docs/ic/runs/`, §10 the Round-2 engineering ledger and the collision correction it records
+- [`docs/ic/LEADERBOARD.md`](LEADERBOARD.md) and [`docs/ic-leaderboard.html`](../ic-leaderboard.html) — every priced curve, its best recipe, phase split and ratio to the matched reference; curves named by ICV1 slug ([`docs/curves/ICV1.md`](../curves/ICV1.md))
 - [`docs/ic/README.md`](README.md) — `ic` runner, fixtures, comparison limits
 - [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
 - [`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians

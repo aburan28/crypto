@@ -55,15 +55,15 @@ Nine curves with a prime subgroup, spanning `2^18`–`2^47.2`.
 
 | curve | `log₂ r` |
 |:--|--:|
-| `K_1/GF(2^19)` | 18.0 |
-| `K_1/GF(2^23)` | 22.0 |
-| `K_1/GF(2^45)` | 24.8 |
-| `K_0/GF(2^37)` | 27.8 |
-| `K_1/GF(2^43)` | 32.1 |
-| `K_1/GF(2^47)` | 36.6 |
-| `K_0/GF(2^41)` | 39.0 |
-| `K_0/GF(2^53)` | 44.3 |
-| `K_0/GF(2^61)` | 47.2 |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 |
 
 The `r` values come from `examples/koblitz_degree_census.rs`. The spacing
 brackets both predictions' features: the law's crossing near `2^23` and
@@ -192,15 +192,15 @@ canonical step's price in the unit, measured in the same process.
 
 | curve | `log₂ r` | law | model | model's `(c, m)` | model's largest phase |
 |:--|--:|--:|--:|:--|:--|
-| `K_1/GF(2^19)` | 18.0 | 0.83 | 4.89 | 2, 2 | descent 53% |
-| `K_1/GF(2^23)` | 22.0 | 1.20 | 3.42 | 5, 2 | selection 37% |
-| `K_1/GF(2^45)` | 24.8 | 1.18 | 3.35 | 5, 2 | selection 39% |
-| `K_0/GF(2^37)` | 27.8 | 1.84 | **2.85** | 10, 2 | descent 30% |
-| `K_1/GF(2^43)` | 32.1 | 2.81 | 2.89 | 23, 2 | collection 34% |
-| `K_1/GF(2^47)` | 36.6 | 4.53 | 3.56 | 55, 2 | collection 48% |
-| `K_0/GF(2^41)` | 39.0 | 6.38 | 4.51 | 104, 2 | collection 56% |
-| `K_0/GF(2^53)` | 44.3 | 10.3 | 6.76 | 263, 2 | collection 62% |
-| `K_0/GF(2^61)` | 47.2 | 13.5 | 8.68 | 448, 2 | collection 64% |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 0.83 | 4.89 | 2, 2 | descent 53% |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.20 | 3.42 | 5, 2 | selection 37% |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.18 | 3.35 | 5, 2 | selection 39% |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 1.84 | **2.85** | 10, 2 | descent 30% |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 2.81 | 2.89 | 23, 2 | collection 34% |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 4.53 | 3.56 | 55, 2 | collection 48% |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 6.38 | 4.51 | 104, 2 | collection 56% |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 10.3 | 6.76 | 263, 2 | collection 62% |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 13.5 | 8.68 | 448, 2 | collection 64% |
 
 - **The law:** `6.38 · (r/2^39)^{1/6} · (n/41)^{−1/2}`. It crosses one
   near `r = 2^23` at `n = 41`, and at `n = 19` it is already below one at
@@ -231,7 +231,7 @@ canonical step's price in the unit, measured in the same process.
      smallest sizes) is *falsified* if each measured ratio's interval
      lies above twice the law's value.
    - The model's minimum is *confirmed* if the least measured ratio falls
-     at `K_0/GF(2^37)` or a neighbour (`K_1/GF(2^45)`, `K_1/GF(2^43)`),
+     at `icv1-f2m37-tm534059-32aad96b` or a neighbour (`icv1-f2m45-tm6236725-40939294`, `icv1-f2m43-tm998717-e2e742b0`),
      within a factor of two of `2.85`.
 5. **Crossing.**
    - A size whose ratio interval lies wholly below one is a crossing of
@@ -297,8 +297,8 @@ Committed with the pricer, before any declared size or seed set ran. It
 comes from two smoke tests of the pricer on curves that are not among
 the declared sizes:
 
-- `K_1/GF(2^17)`, seed 999, 8 columns, `m = 2`;
-- `K_0/GF(2^39)`, seed 998, 24 columns, `m = 3`.
+- `icv1-f2m17-tm101-00378d4e`, seed 999, 8 columns, `m = 2`;
+- `icv1-f2m39-t1481485-829ef1d1`, seed 998, 24 columns, `m = 3`.
 
 Both passed Control 1 against `ic workflow`, run on one thread and on
 four. Four things came out of them.
@@ -326,7 +326,7 @@ four. Four things came out of them.
      column count, for each collector and coverage it creates (two of
      each when extension units run), for the log solver, and for the
      descent solver.
-   - At `K_0/GF(2^39)` with 1,872 points these constructions came to
+   - At `icv1-f2m39-t1481485-829ef1d1` with 1,872 points these constructions came to
      674K of 970K units, 69%. The work the model prices (selection,
      build, collection, linear algebra, descent) came to 296K.
    - The pricer now keeps those constructions on clocks of their own:

@@ -101,7 +101,7 @@ use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
 use crate::cryptanalysis::binary_semaev::{
     binary_semaev_s3_in_x3, solve_artin_schreier, solve_quadratic_f2m,
 };
-use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n;
+use crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n_particular;
 use num_bigint::BigUint;
 #[allow(unused_imports)]
 use num_traits::{One, Zero};
@@ -411,8 +411,11 @@ pub fn petit_quisquater_n2_toy(
         rhs.push(rel.coef_a.clone() % n);
     }
 
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n)?;
-    let k = solution[m].clone();
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let k = solution.values[m].clone();
     // Verify.
     let q_check = scalar_mul(curve, g, &k);
     if q_check == *q {
