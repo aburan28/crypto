@@ -460,3 +460,12 @@ a real solver-budget miss on that particular source-valid case, without changing
 its native outcome, admitting an IC target recovery or estimating natural yield.
 These correctness gates move the full goal forward; fresh paired qualification
 and complete corrected runtime admission remain outstanding.
+
+The [corrected runtime implementation](prepared-f5-runtime-v3/README.md) adds
+native input v2, runtime v3 and frozen transport v2, preserving all old source
+pins and consumed registrations. The new native asset retains 533 root files
+and 3,011 source files across 67 registry packages. Its local full-byte relocation
+and cross-version rejection pass, together with 36 focused old/new runtime and
+transport controls. Actual isolated imports and synthetic transport children
+execute no native solver. A newly frozen native scientific control is still
+required; its complete result and fresh paired qualification are not established.
