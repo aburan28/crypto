@@ -1,0 +1,15 @@
+{
+  "label": "arith4",
+  "minblocks": 4,
+  "returncode": 0,
+  "walk_kernel": {
+    "registers": 64,
+    "stack_frame_bytes": 32,
+    "spill_stores_bytes": 28,
+    "spill_loads_bytes": 28,
+    "shared_bytes": 28032
+  },
+  "decision": "reject before timing; four-block occupancy requires 64 registers and spills",
+  "binary": "build/g7-xonly-15b-arith4",
+  "log": "poly15-arith4-build.log"
+}

@@ -2,6 +2,18 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_PACKED_BLOCK_INVERSE
+#define ECC_PACKED_BLOCK_INVERSE 0
+#endif
+#if ECC_PACKED_BLOCK_INVERSE != 0 && ECC_PACKED_BLOCK_INVERSE != 1
+#error "ECC_PACKED_BLOCK_INVERSE must be 0 or 1"
+#endif
+#if ECC_PACKED_LOGICAL_PAIR_INVERSE && !ECC_PACKED_BLOCK_INVERSE
+#error "LOGICAL_PAIR_INVERSE requires BLOCK_INVERSE"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE
+#include "packedblockinverse131.cuh"
+#endif
 #ifndef ECC_PACKED_COMPACT_STATE
 #define ECC_PACKED_COMPACT_STATE 0
 #endif
@@ -33,6 +45,9 @@ namespace eccPacked131 {
 #endif
 #if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
 #error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE && !ECC_PACKED_POLY_CHAIN
+#error "ECC_PACKED_BLOCK_INVERSE requires polynomial chains"
 #endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_CACHE_DENOM
 #error "ECC_PACKED_POLY_CHAIN requires the denominator cache"
@@ -136,6 +151,50 @@ namespace eccPacked131 {
 #if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
 #endif
+#if ECC_PACKED_FUSED_SIGMA && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "ECC_PACKED_FUSED_SIGMA requires polynomial state and weighted-prefix mode 2"
+#endif
+#ifndef ECC_PACKED_BATCH_SPLIT
+#define ECC_PACKED_BATCH_SPLIT 1
+#endif
+#if ECC_PACKED_BATCH_SPLIT != 1 && ECC_PACKED_BATCH_SPLIT != 2
+#error "ECC_PACKED_BATCH_SPLIT must be 1 or 2"
+#endif
+#if ECC_PACKED_BATCH_SPLIT == 2 && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Split batches require an even batch16..32, threads256, block inversion and weighted-prefix mode2"
+#endif
+#ifndef ECC_PACKED_LAST_SLOT_CACHE
+#define ECC_PACKED_LAST_SLOT_CACHE 0
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
+#error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Last-slot cache requires an even batch16..32, split2, block inversion and weighted-prefix mode2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE
+static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
+#endif
+#ifndef ECC_PACKED_SHARED_X_SLOTS
+#define ECC_PACKED_SHARED_X_SLOTS 0
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS != 0 && ECC_PACKED_SHARED_X_SLOTS != 2 && ECC_PACKED_SHARED_X_SLOTS != 4
+#error "SHARED_X_SLOTS must be 0, 2 or 4"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "SHARED_X_SLOTS requires an even B16..32 split2 compact polynomial block-inverse layout"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS
+static constexpr int firstSharedXLocalSlot131=ECC_BATCH/ECC_PACKED_BATCH_SPLIT-ECC_PACKED_SHARED_X_SLOTS;
+__device__ __forceinline__ P131 loadSharedX131(const uint4*low,const unsigned char*tail,int index) {
+    const uint4 v=low[index];return P131{{v.x,v.y,v.z,v.w,unsigned(tail[index])}};
+}
+__device__ __forceinline__ void storeSharedX131(uint4*low,unsigned char*tail,int index,P131 value) {
+    low[index]=uint4{value.v[0],value.v[1],value.v[2],value.v[3]};
+    tail[index]=static_cast<unsigned char>(value.v[4]);
+}
+#endif
+static constexpr int walkWorkersPerBlock131 = ECC_THREADS / ECC_PACKED_BATCH_SPLIT;
 #if ECC_PACKED_STATE_TILE
 ECC_HD size_t physicalStateThreads(size_t threads) {
     return ((threads + 255) / 256) * 256;
@@ -331,6 +390,13 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
 }
 #endif
 
+#if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
+#error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"
+#endif
+#if !ECC_PACKED_XONLY_23
+#if ECC_PACKED_BATCH_SPLIT != 1 || ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_SHARED_X_SLOTS || ECC_PACKED_LAST_SLOT_CACHE || ECC_PACKED_FUSED_SIGMA
+#error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
+#endif
 #if ECC_TABLE_FUSED
 // The forward-pass work for one point of one slot: the normal-basis weight and
 // distinguished-point test, the table-walk selection with its history update,
@@ -978,6 +1044,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     }
 }
 #endif  // ECC_TABLE_FUSED
+#else
+#include "packedxonly23.cuh"
+#endif  // !ECC_PACKED_XONLY_23
 
 #if ECC_PHASE_PROFILE
 // Host: read and reset the phase counters.  `warpSteps` is the number of

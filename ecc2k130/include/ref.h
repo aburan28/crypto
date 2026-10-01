@@ -14,6 +14,94 @@
 #include "bigmod.h"
 #include "tablewalk.h"
 
+#ifndef ECC_PACKED_XONLY_23
+#define ECC_PACKED_XONLY_23 0
+#endif
+#if ECC_PACKED_XONLY_23 != 0 && ECC_PACKED_XONLY_23 != 1
+#error "ECC_PACKED_XONLY_23 must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE3
+#define ECC_PACKED_XONLY_BRIDGE3 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 != 0 && ECC_PACKED_XONLY_BRIDGE3 != 1
+#error "ECC_PACKED_XONLY_BRIDGE3 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 && !ECC_PACKED_XONLY_23
+#error "ECC_PACKED_XONLY_BRIDGE3 requires ECC_PACKED_XONLY_23"
+#endif
+#ifndef ECC_PACKED_XONLY_DOUBLE_ONLY
+#define ECC_PACKED_XONLY_DOUBLE_ONLY 0
+#endif
+#if ECC_PACKED_XONLY_DOUBLE_ONLY != 0 && ECC_PACKED_XONLY_DOUBLE_ONLY != 1
+#error "ECC_PACKED_XONLY_DOUBLE_ONLY must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE1_COMMON
+#define ECC_PACKED_XONLY_BRIDGE1_COMMON 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON != 0 && ECC_PACKED_XONLY_BRIDGE1_COMMON != 1
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#define ECC_PACKED_XONLY_ARITHMETIC_ONLY 0
+#endif
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY != 0 && ECC_PACKED_XONLY_ARITHMETIC_ONLY != 1
+#error "ECC_PACKED_XONLY_ARITHMETIC_ONLY must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT
+#define ECC_PACKED_XONLY_POLY_SELECT 0
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT != 0 && ECC_PACKED_XONLY_POLY_SELECT != 1
+#error "ECC_PACKED_XONLY_POLY_SELECT must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT_MASK
+#define ECC_PACKED_XONLY_POLY_SELECT_MASK 0xfffu
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT_TARGET
+#define ECC_PACKED_XONLY_POLY_SELECT_TARGET 14u
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON && !ECC_PACKED_XONLY_DOUBLE_ONLY
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires the doubling-specialized core"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON && !ECC_PACKED_XONLY_BRIDGE3 && \
+    !ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires sparse bridge-3 or arithmetic-only"
+#endif
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY && \
+    (!ECC_PACKED_XONLY_BRIDGE1_COMMON || ECC_PACKED_XONLY_BRIDGE3 || \
+     ECC_PACKED_XONLY_POLY_SELECT)
+#error "Arithmetic-only is the always-P+sigma(P) diagnostic"
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT && \
+    (!ECC_PACKED_XONLY_BRIDGE3 || !ECC_PACKED_XONLY_BRIDGE1_COMMON)
+#error "Polynomial-bit selection requires the complete two-bridge map"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_BRIDGE_MOD72 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 != 0 && ECC_PACKED_XONLY_BRIDGE_MOD72 != 1
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 && !ECC_PACKED_XONLY_BRIDGE1_COMMON
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 requires the complete two-bridge map"
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT && ECC_PACKED_XONLY_BRIDGE_MOD72
+#error "Polynomial-bit selection replaces the modulus-72 Hamming selector"
+#endif
+#ifndef ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE
+#define ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE 0
+#endif
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 0 && ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 1
+#error "ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE && !ECC_PACKED_XONLY_BRIDGE3
+#error "ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE requires the sparse bridge queue"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) % 72) == 14)
+#else
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) & 31) == 14)
+#endif
+
 typedef unsigned long long u64;
 
 // Scalar field in the permuted type-II optimal normal basis: an element is the
@@ -406,7 +494,84 @@ struct RefT {
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
-    static Point step(const Point &p, int hw) { return addPt(p, frob(p, jOf(hw))); }
+    // Packed polynomial low word of a GF(2^131) normal-basis coordinate.
+    // Matches packedtransform131.h with FAST_CONVERT=1, which is algebraically
+    // the same map as the slower factorization.
+    static unsigned polynomialLowWord131(const Elem &x) {
+        const uint32_t a0 = (uint32_t)x.v[0];
+        const uint32_t a1 = (uint32_t)(x.v[0] >> 32);
+        const uint32_t a2 = (uint32_t)x.v[1];
+        const uint32_t a3 = (uint32_t)(x.v[1] >> 32);
+        const uint32_t a4 = (uint32_t)x.v[2] & 7u;
+        const uint32_t sign = 0u - ((a4 >> 2) & 1u);
+        uint32_t v0 = (a0 << 1) ^ sign;
+        uint32_t v1 = ((a1 << 1) | (a0 >> 31)) ^ sign;
+        uint32_t v2 = ((a2 << 1) | (a1 >> 31)) ^ sign;
+        uint32_t v3 = ((a3 << 1) | (a2 >> 31)) ^ sign;
+        uint32_t v4 = (((a4 << 1) | (a3 >> 31)) ^ sign) & 7u;
+        v0 ^= ((v0 >> 2) | (v1 << 30)) & 0xaaaaaaaau;
+        v1 ^= ((v1 >> 2) | (v2 << 30)) & 0xaaaaaaaau;
+        v2 ^= ((v2 >> 2) | (v3 << 30)) & 0xaaaaaaaau;
+        v3 ^= ((v3 >> 2) | (v4 << 30)) & 0xaaaaaaaau;
+        v0 ^= ((v0 >> 4) | (v1 << 28)) & 0x66666666u;
+        v1 ^= ((v1 >> 4) | (v2 << 28)) & 0x66666666u;
+        v2 ^= ((v2 >> 4) | (v3 << 28)) & 0x66666666u;
+        v3 ^= ((v3 >> 4) | (v4 << 28)) & 0x66666666u;
+        v0 ^= ((v0 >> 8) | (v1 << 24)) & 0x1e1e1e1eu;
+        v1 ^= ((v1 >> 8) | (v2 << 24)) & 0x1e1e1e1eu;
+        v2 ^= ((v2 >> 8) | (v3 << 24)) & 0x1e1e1e1eu;
+        v3 ^= ((v3 >> 8) | (v4 << 24)) & 0x061e1e1eu;
+        v0 ^= ((v0 >> 16) | (v1 << 16)) & 0x01fe01feu;
+        v1 ^= ((v1 >> 16) | (v2 << 16)) & 0x01fe01feu;
+        v2 ^= ((v2 >> 16) | (v3 << 16)) & 0x01fe01feu;
+        v3 ^= ((v3 >> 16) | (v4 << 16)) & 0x000601feu;
+        v0 ^= v1 & 0x0001fffeu;
+        v1 ^= v2 & 0x0001fffeu;
+        v2 ^= v3 & 0x0001fffeu;
+        v3 ^= v4 & 0x00000006u;
+        v0 ^= v2 & 0xfffffffeu;
+        v1 ^= v3 & 0x00000001u;
+        v2 ^= v4 & 0x00000006u;
+        v0 ^= v4 & 0x00000006u;
+        (void)v1;
+        (void)v2;
+        (void)v3;
+        return v0;
+    }
+    static bool polySelectBridge3(const Elem &x) {
+        const unsigned bits = (M == 131) ? polynomialLowWord131(x)
+                                         : (unsigned)x.v[0];
+        return (bits & ECC_PACKED_XONLY_POLY_SELECT_MASK) ==
+               ECC_PACKED_XONLY_POLY_SELECT_TARGET;
+    }
+    static Point step(const Point &p, int hw) {
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY
+        (void)hw;
+        return addPt(p, frob(p, 1));
+#else
+#if ECC_PACKED_XONLY_BRIDGE3
+        if (
+#if ECC_PACKED_XONLY_POLY_SELECT
+            polySelectBridge3(p.x)
+#else
+            ECC_PACKED_XONLY_IS_BRIDGE3(hw)
+#endif
+        ) return addPt(p, frob(p, 3));
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON
+        return addPt(p, frob(p, 1));
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+        return dbl(p);
+#else
+        const Point twice = dbl(p);
+        return ((hw >> 1) & 1) ? addPt(twice, p) : twice;
+#endif
+#endif
+#else
+        return addPt(p, frob(p, jOf(hw)));
+#endif
+    }
 
     // canonical representative of the orbit under sigma (negation leaves x fixed)
     static Elem canonical(const Elem &x) {
