@@ -370,8 +370,8 @@ These never refuse. AGENTS.md §8b requires them.
 
 | id | arm | admits | gate today | lifted by | imported by |
 |:--|:--|:--|:--|:--|:--|
-| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63` | B3 (`n ≤ 127`), B4 (`n ≤ 191`) | B1 |
-| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | as `kic` | `n ≤ 62` | B3, B4 | B1 |
+| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2 | B3 (`n ≤ 127`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2 (`k > 1`) |
+| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3, B4 | B1 |
 | `rho-negation` | rho with the negation map | any ordinary binary curve; prime fields | binary `n ≤ 62`; prime `p < 2^63` | B3, B5 | B2 |
 | `ic-binary-s4` | index calculus: `ic boundary`'s generic binary pipeline | any ordinary binary curve | `n` in 5..=32 | — | B2 |
 | `ic-prime-s3` | index calculus: `ic boundary`'s prime pipeline (see below) | prime fields | `p < 2^63` | B5 | B2 |
@@ -383,6 +383,11 @@ These never refuse. AGENTS.md §8b requires them.
 - `rho-bignum` makes every valid instance with a small enough subgroup
   runnable, whatever the field's width. It is never the matched
   reference while a faster rho admits the instance (plan §8, A5).
+- The signed-Frobenius classes (`SignedFrobeniusClasses`) exist only
+  for `k = 1`, and so does `ic price`. A curve over a subfield with
+  `k > 1` therefore pairs `kic` with `rho-negation`, from B2. That
+  reference leaves the `q`-power Frobenius unused, and the report says
+  so (plan §8, A5).
 
 ### 5.2 The decision
 
@@ -418,7 +423,8 @@ The gate codes:
 | `field-wider-than-one-word` | binary `n > 62` (lifted by B3, B4) |
 | `prime-wider-than-one-word` | `p ≥ 2^63` (B5) |
 | `scalar-wider-than-63-bits` | `r ≥ 2^63` (B3) |
-| `even-extension-degree` | `kic` needs `e` odd |
+| `even-extension-degree` | `kic` and `rho-koblitz` need `e` odd. Their one-word point lifting solves `z² + z = c` by the half-trace, and the orbit maps assume the distinct factors of `x^n − 1` that an odd `n` gives (`koblitz_index_calculus.rs`). |
+| `subfield-curve-unsupported` | `k > 1` on `kic` before B2, and on `rho-koblitz` always |
 | `subfield-too-large` | `k > 8` |
 | `not-a-subfield-curve` | no `k ≤ 8` with `a, b ∈ GF(2^k)` |
 | `enumeration-bound` | `ic-binary-s4` at `n > 32` |
