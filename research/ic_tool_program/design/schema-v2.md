@@ -365,6 +365,7 @@ These never refuse. AGENTS.md §8b requires them.
 | `koblitz-endomorphism` | `End(E) ⊇ Z[τ]`, ICV1's `end = −7`, and the signed-Frobenius classes of size `2n` that rho and the index calculus use |
 | `method-uses-subfield` | set by the router when the chosen pipeline uses a proper intermediate subfield |
 | `primality-screen` | a prime whose test was a screen, not a proof |
+| `study-pipeline` | set when the route uses a study pipeline, with the reason: `ic-prime-s3`, since no subexponential index calculus is known for prime fields (added at B2's declaration) |
 
 ## 5. Routing
 
@@ -437,7 +438,7 @@ The gate codes:
 | `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
 | `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
-| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. From B3, `solve: rho` runs. Under it, v1's hashed and random targets past one word wait for B4, and so does v1's generator rule. |
+| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. From B3, `solve: rho` runs. Under it, v1's hashed and random targets past one word wait for B4, and so does v1's generator rule. B2 lifts all of B1's list except F1 (B7) and more than one thread (plan §8, A6). |
 
 ### 5.3 Recipes
 
@@ -477,6 +478,13 @@ The router compares these estimates with the budget. They are not
 measurements, and the report keeps them apart from the run's own
 figures.
 
+**The keys** (fixed at B2's declaration, for the cases to read):
+- `estimate.<arm>` is `{pipeline, seconds, model}`.
+- For rho it also carries `steps`, `√(πr/2A)`, and `steps_bits`, its
+  `⌈log₂⌉`.
+- `model` names the step cost or the phase model the seconds come
+  from.
+
 ## 6. The report
 
 Every operation that reads a v2 document adds these keys to its report:
@@ -492,6 +500,7 @@ Every operation that reads a v2 document adds these keys to its report:
 | `estimate` | §5.4, for each arm |
 | `refusal` | when the run is refused: `{code, class, message}`, where `class` is `invalid`, `unsupported` or `over_budget` |
 | `result` | after a run: `{scalar, verified, known_answer}`, the scalar both arms recovered, in decimal |
+| `conversion` | for a converted curve: `{from, to, map}`. `from` is the input's form; `to` is `short_weierstrass` or `binary_weierstrass`; `map` states the substitution, points included (added at B2's declaration) |
 
 The cases (§9) read these keys by path:
 - `route` is `{ic, rho, level, considered}`.
@@ -571,9 +580,12 @@ below have their expected outcomes fixed here.
     `SHA256SUMS`.
   - It checks each file's intended property with its own arithmetic,
     which shares nothing with the Rust.
-- **B2's cases (C032–C051)** have their inputs described below. The
-  same script writes their files when B2 is declared, before any B2
-  code. Their expected outcomes do not change.
+- **B2's cases (C032–C051)** have their inputs described below. Their
+  files were written at B2's declaration (2026-10-01), before any B2
+  code, by `../conformance/v2-b2/make_cases.py`. B1's own generator and
+  files are frozen, so B2's sit beside them. Their expected outcomes do
+  not change, and the declaration made them exact as report keys
+  (`conversion`, `estimate.<arm>`, `study-pipeline`).
 - **Steps.** Each case names the step that must make it pass. A step is
   accepted only when its own cases and every earlier step's cases pass.
 - **`until`.** A case that expects a refusal a later step will lift
@@ -641,7 +653,7 @@ The curves the cases use:
 | step | delivers | accepted when |
 |:--|:--|:--|
 | **B1** | <ul><li>schema v2's parser (§3)</li><li>the checks a binary instance needs (§4.1–§4.2 for binary, §4.3, §4.4, §4.5 methods 1–2)</li><li>the disclosures for binary fields</li><li>`kic`, `rho-koblitz` and `trivial` reading imported instances</li><li>the v1 translation</li><li>`ic check`</li></ul> Estimates, `recipe: auto` and pre-run budget refusals come with B2. Under B1, `fidelity: auto` means F0, and the budget is enforced while the run goes. | <ul><li>C001–C031 pass</li><li>the pin holds on all 90 rows</li><li>every row's v2 translation gives identical outputs</li><li>no size regresses beyond its A/A band</li></ul> |
-| **B2** | <ul><li>prime and extension fields</li><li>the other curve forms and their conversions</li><li>§4.5 methods 3–4</li><li>the importers for `rho-negation`, `ic-binary-s4`, `ic-prime-s3` and `rho-bignum`</li><li>estimates and budgets</li></ul> | <ul><li>C001–C051 pass</li><li>the same pin, translation and timing checks as B1</li><li>the estimate's error reported at the suite's sizes</li></ul> |
+| **B2** | <ul><li>prime and extension fields</li><li>the other curve forms and their conversions</li><li>§4.5 methods 3–4</li><li>the importers for `rho-negation`, `ic-binary-s4`, `ic-prime-s3` and `rho-bignum`</li><li>estimates and budgets</li></ul> Declared 2026-10-01 in [`../rounds/B2-fields-forms-estimates/PROTOCOL.md`](../rounds/B2-fields-forms-estimates/PROTOCOL.md); its cases are in [`../conformance/v2-b2/`](../conformance/v2-b2/cases.json), since B1's files are frozen. | <ul><li>C001–C051 pass</li><li>the same pin, translation and timing checks as B1</li><li>the estimate's error reported at the suite's sizes</li></ul> |
 
 B3–B7 are unchanged from the plan, with these refinements:
 - **B3** (declared 2026-10-01 in
