@@ -5803,6 +5803,202 @@ nothing.
 checks §22's counts. The reference changed because the rule changed it.
 There is no `m = 83` run (AGENTS.md §8a).
 
+### 23.3 What ran
+
+Everything is in `research/ic_single_target_20260930/`.
+
+- **The binary** was `ic` at the declaration commit `0bf67f16`, built
+  from a clean tree with rustc 1.94.1, sha256 `6f58b075…`, and kept
+  outside the tree.
+- **The pin held.** At the four old sizes the batch pricer gave §22's
+  counts and recovered logarithms.
+- **The rows.** 408 processes ran as declared, one target each, every one
+  through `tools/isolated_bench.py`.
+  - Two were marked contended, both at `K_1/GF(2^47)`. Each was kept and
+    run again clean.
+  - None failed, and no size stopped.
+  - The tool refused 38 starts, and each was retried.
+- **The checks.** `claims.py` built every row's identities and claim:
+  - all 408 pass `validate_claim` at `vs_rho`;
+  - both certificates of every row replay in `oracle.py`;
+  - the index calculus and rho recovered the same scalar on every row.
+
+  After the run `claims.py` gained a cache. On the smoke rows its
+  outputs are byte-identical, apart from the output path in the replay
+  pointer.
+
+### 23.4 The table
+
+| curve | log₂ r | S, index calculus online | S, rho online | online speedup [95%] | at the canonical step [95%] | cold ratio [95%] | S, setup | break-even | IC online over the BL model |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| `K_1/GF(2^47)` | 36.6 | 0.0673 | 0.657 | **9.77×** [7.83, 12.5] | 4.34× [3.47, 5.53] | 4.95× [4.55, 5.41] | 4.20 | 7 | 2.4× |
+| `K_0/GF(2^57)` | 38.0 | 0.0424 | 0.574 | **13.5×** [10.7, 17.3] | 5.97× [4.76, 7.61] | 1.98× [1.95, 2.02] | 8.08 | 15 | 3.3× |
+| `K_0/GF(2^41)` | 39.0 | 0.0665 | 0.624 | **9.38×** [7.43, 12.1] | 4.57× [3.64, 5.85] | 8.04× [7.26, 9.01] | 5.51 | 10 | 2.5× |
+| `K_0/GF(2^53)` | 44.3 | 0.0277 | 0.485 | **17.5×** [13.6, 22.6] | 9.37× [7.33, 12.2] | 14.7× [13.1, 16.7] | 7.37 | 16 | 2.0× |
+| `K_1/GF(2^59)` | 44.5 | 0.0308 | 0.519 | **16.9×** [13.0, 22.1] | 8.90× [6.85, 11.6] | 15.7× [13.9, 17.9] | 9.00 | 18 | 2.8× |
+| `K_0/GF(2^61)` | 47.2 | 0.0527 | 0.466 | **8.84×** [6.76, 11.9] | 4.68× [3.63, 6.28] | 31.6× [28.2, 35.7] | 15.10 | 37 | 8.0× |
+
+**How to read it.**
+- **`S`** is units over `√r`, each row in its own process's unit. Per
+  size it is the mean over 64 targets.
+- **The online speedup** is mean rho online over mean index-calculus
+  online, with a bootstrap interval over targets.
+- **At the canonical step** prices rho's counted walk operations at the
+  canonical step instead. It is the conservative reading.
+- **The cold ratio** is setup plus online, the index calculus over rho.
+- **Break-even** is the number of targets at which one setup plus their
+  descents costs as much as as many one-target rho runs.
+- **The last column** is the index calculus's online cost over the
+  online cost a generic walk reaches with the same setup as
+  precomputation. That walk is Bernstein and Lange's, and the column is
+  a model.
+
+### 23.5 What it says
+
+- **Online, the index calculus is faster at every size:** 8.8–17.5×
+  faster than rho on the same point.
+  - Every interval lies above 1. The lowest lower bound is 6.8, at
+    `2^47.2`.
+  - 382 of 384 rows are faster on their own.
+  - At the canonical step it reads 4.3–9.4×.
+- **Cold, it is slower at every size:** 4.9–31.6× at five sizes.
+  - At `2^38.0` it reads 1.98×. Both arms build the curve, and
+    `KoblitzCurve::new` at `n = 57` takes 48–58 ms against about 1 ms
+    elsewhere. That is more than rho's whole walk.
+  - Without the curve's construction the cold ratio reads 6.3, 8.2, 8.9,
+    15.2, 17.3 and 32.5, in order of `r`.
+  - With rho at the canonical step it reads 8.6–58.2× (2.2× at
+    `2^38.0`).
+- **The online figure leaves out the setup.**
+  - The setup costs `S = 4.2–15.1`, 62–292 times the online interval.
+  - It pays for itself after 7–37 targets against as many one-target rho
+    runs.
+  - Against batch rho at `k = 32` it never did (§22).
+- **A generic algorithm could buy the same speedup.** Given the same
+  setup as precomputation, Bernstein and Lange's walk would reach an
+  online cost 2.0–8.0× below the index calculus's (the model). The
+  online advantage belongs to the precomputation, not to the method.
+- **Rho's step.**
+  - The batched walk costs 3.99–4.97 units a step, 1.86–2.25× the
+    canonical step.
+  - It takes 0.95–1.05 times the floor's step count.
+  - A walk as cheap a step as the model would bring the online speedup
+    down to the canonical-step column.
+- **Where the online time goes.**
+  - The table lookups (`target_PDP`) take 53–96% of the interval, and the
+    walk's stepping (`target_query`) 2–48%.
+  - The relation, its logarithm and the recovery check together take
+    1.3% at most.
+- **Against §22's batch.** At the three `m = 2` sizes that §22 ran, the
+  online interval is 1.34–1.45× §22's per-target descent at `k = 32`.
+  - 1.12–1.21× comes from more probes: 64 public points against §22's
+    128 known-answer points, within two standard errors at each size.
+  - 1.15–1.22× comes from a dearer probe: one target after a fresh
+    setup, with the phase marks on, against 32 in a row. How that splits
+    between the two causes is untested.
+- **The A/A.** A target's second process reads its online speedup at
+  0.81–1.39× its first. That is timing noise on intervals of
+  milliseconds. Each size's figure averages 64 targets, and its interval
+  carries the noise.
+
+### 23.6 Growth
+
+Slopes of `ln S` on `ln r` over the six sizes (`t`, 4 degrees of
+freedom):
+
+| quantity | slope [95%] |
+|:--|--:|
+| the index calculus online | −0.07 [−0.22, 0.08] |
+| rho online | −0.04 [−0.07, −0.02] |
+| the setup | +0.12 [0.01, 0.24] |
+| the online speedup | +0.02 [−0.12, 0.16] |
+| the cold ratio | +0.29 [0.09, 0.50] |
+
+- **The online speedup is flat** across `2^36.6`–`2^47.2`.
+- **The setup grows faster than `√r`,** so the cold ratio and the
+  break-even count grow with `r`. The low point at `2^38.0` steepens the
+  cold slope.
+- **Rho's slight fall** is its step getting cheaper in units as `n` grows,
+  from 4.9 to 4.3.
+
+### 23.7 The targets, graded
+
+1. **Correct: met.**
+   - Every row is complete and verified on every repetition.
+   - Every row replays outside the process, with both arms agreeing.
+   - Every declared row exists.
+2. **Rule-conformant: met.** 408 of 408 rows pass.
+3. **Primary:** the index calculus is faster online at all six sizes.
+4. **Cold:** rho is faster cold at all six sizes.
+5. **Secondary:**
+   - at the canonical step, the index calculus is still faster online at
+     all six sizes, with lower bounds 3.5–7.3;
+   - it is slower online than the precomputation model at all six;
+   - break-even comes at 7–37 targets;
+   - the slopes are as in §23.6.
+
+**Against the predictions.** Every figure is within 2× of its prediction
+but one:
+- **The cold ratio at `2^38.0`** reads 1.98 against a predicted 10.8,
+  because the prediction left out the curve's construction.
+- **The online speedups** came in at 0.64–1.51× their predictions. They
+  are lower at the three largest sizes, where the online interval cost
+  more than §22's batch descent (§23.5).
+
+### 23.8 Classification and the verdict
+
+**Class: accounting.** No algorithm changed. The index calculus's counts
+are §22's, and the reference changed because the rule did.
+
+At `2^36.6`–`2^47.2`, the thread's primary comparison now reads:
+- **online, one unseen point:** the index calculus 8.8–17.5× faster than
+  rho on the same point, or 4.3–9.4× at the canonical step;
+- **cold, setup included:** 4.9–31.6× slower. The 2.0× at `2^38.0` is a
+  construction artefact;
+- **against the same setup used as a generic precomputation (a model):**
+  2.0–8.0× slower online.
+
+By AGENTS.md §2 the method is not faster than rho, because its cold `S`
+is above rho's at every size. The online figure is the rule's primary
+comparison and is reported as such. It always appears beside the cold
+figure and the model, never alone.
+
+### 23.9 What does not count
+
+- The online speedup quoted without the cold ratio, or as a speed of the
+  method (AGENTS.md §2).
+- The Bernstein–Lange figure as a measurement: no such walk ran.
+- The `2^38.0` cold ratio as a figure about the method.
+- Any transfer to ECC2K-130 or to `n = 83`: neither ran (AGENTS.md
+  §8a). The `K_1` rows are `E_1`, not the challenge's family.
+- The A/A spread taken as a single row's precision, beyond that row's own
+  repetitions.
+
+### 23.10 Reproducing
+
+```
+cargo build --release --bin ic                         # at 0bf67f16; kept outside the tree
+cd research/ic_single_target_20260930
+IC=<ic> IC_COMMIT=0bf67f16… IC_RUNS=runs python3 run.py all
+IC_RUNS=runs python3 claims.py
+IC_RUNS=runs python3 analyse.py > analysis.json
+python3 render_rows.py                                 # the table above and the page's rows
+```
+
+### 23.11 What stays open
+
+- **A measured precomputation reference.** A Bernstein–Lange table walk
+  would turn §23.5's boundary into a measurement. Under the rule that is
+  a separate, multi-target question.
+- **Rho's step.** If the AVX-512 canonicalisation returned its rotation,
+  the walk's step would approach the canonical step, and the measured
+  speedup would approach the model's.
+- **The curve's construction at `n = 57`:** 48–58 ms, against about 1 ms
+  at the other sizes.
+- **The tool programme** (user direction, 2026-10-01): make `ic` faster
+  and general, round by round against frozen baselines. This round's
+  rows are part of its baseline v0.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

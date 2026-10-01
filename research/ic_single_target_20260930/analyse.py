@@ -182,7 +182,55 @@ def size(a: int, n: int, seed: int) -> dict | None:
         "rho_replay_ns_median": statistics.median(c["units"]["rho_replay_ns"] for c in r1),
         "aa": aa,
         "isolation": isolation(a, n),
+        "diagnostics": diagnostics(a, n, r1, reports, setup, rho_setup),
     }
+
+
+def diagnostics(a: int, n: int, r1: list[dict], reports: list[dict], setup: float, rho_setup: float) -> dict:
+    """Read-outs beside the declared figures, labelled as such: where the
+    online time goes, the curve's construction (in both arms' set-up), the
+    cold ratio without it and with rho at the canonical step, and the online
+    interval against §22's per-target descent at k = 32."""
+    phases = {}
+    for rep in reports:
+        at = rep["median"]["ic_online_repetition"]
+        r = rep["repetitions"][at]
+        for k, v in r["ic_online"]["phases_ns"].items():
+            phases.setdefault(k, []).append((v or 0) / r["unit_ns"])
+    online = mean(r1, "ic_online_units")
+    curve = statistics.median(statistics.median(x["setup_phases_ns"]["setup"] / x["unit_ns"]
+                                                for x in rep["repetitions"]) for rep in reports)
+    rho_online, rho_model = mean(r1, "rho_online_units"), mean(r1, "rho_model_units")
+    out = {
+        "online_phase_shares": {k: statistics.fmean(v) / online for k, v in phases.items()},
+        "curve_construction_units": curve,
+        "s_curve_construction": curve / math.sqrt(reports[0]["r"]),
+        "cold_ratio_without_curve_construction": (setup - curve + online) / rho_online,
+        "cold_ratio_rho_at_canonical_step": (setup + online) / (rho_setup + rho_model),
+        "online_trials_mean": statistics.fmean(rep["repetitions"][0]["ic_online"]["trials"] for rep in reports),
+    }
+    s22 = sorted((HERE.parents[1] / "research" / "ic_descent_20260930" / "runs-isolated" / "main"
+                  / f"k{a}n{n}").glob("M*/r*-candidate.price.json"))
+    trials, per_trial, per_target = [], [], []
+    for path in s22:
+        d = json.loads(path.read_text())
+        if d.get("status") != "complete":
+            continue
+        t = d["counts"]["descent"]["trials_per_target"]
+        descent = (d["median"]["phases_units"]["descent"] + d["median"]["phases_units"]["verify_final"]) / d["targets"]
+        trials.append(statistics.fmean(t))
+        per_trial.append(d["median"]["phases_units"]["descent"] / d["targets"] / statistics.fmean(t))
+        per_target.append(descent)
+    if trials:
+        ours = sum(rep["median"]["ic_online_units"] for rep in reports) / sum(
+            rep["repetitions"][0]["ic_online"]["trials"] for rep in reports)
+        out["against_s22_batch_descent"] = {
+            "s22_files": len(trials),
+            "online_over_s22_per_target_descent": online / statistics.median(per_target),
+            "trials_ratio": out["online_trials_mean"] / statistics.fmean(trials),
+            "units_per_trial_ratio": ours / statistics.median(per_trial),
+        }
+    return out
 
 
 def main() -> None:
