@@ -49,7 +49,7 @@ current reach." Maintained as a table here and machine-checked by
 | P1′ | The growth in P1 is **linear**, not log/constant | `blocked` (reach) | needs `2n' ≳ 14` → sparse F4 |
 | P2 | `D*` is **positively monotone in `γ(G)`** across a basis/subspace sweep (high expansion → high PC degree, Ben-Sasson–Wigderson) | **`killed`** | EXP-E iteration 3 (decisive): at the operating point `2n'=n` (n=8), the **subfield** factor base `F_16` is *easier* (mean D* 2.04 vs random 3.53) yet has *higher* spectral γ (0.882 vs 0.861). The structured low-D* case is **not** the low-γ case → spectral γ does not explain solving-degree ease → the bridge's central conjecture is contradicted. (Generic-basis EXP-C iteration 2 was also weak/negative: ρ_s=−0.322.) |
 | P2″ | `D*` is monotone in the **treewidth** of the constraint primal graph (reformulation after P2 killed; treewidth bounds elimination fill-in) | **`killed`** | Iteration 4: the descended primal graph is the **complete** graph K_{2n'} (density 1.0) for every family — the Frobenius-squared terms saturate it — so treewidth is constant `2n'−1` and cannot discriminate easy (subfield, D*≈2.07) from hard (random, ≈3.53). **No incidence-graph invariant works:** the subfield speedup is *algebraic* (multiplicative closure), invisible to graph structure. |
-| P3 | The **even/odd parity split** in `D*` is explained by a structural feature of the tensor / field (subfield, half-trace) | `open` | parity effect persists (odd cells ~0.5 deg higher) but BOTH parities now show growth; still unexplained |
+| P3 | The **even/odd parity split** in `D*` is explained by a structural feature of the tensor / field (subfield, half-trace) | **`supported` (explained, 2026-10-01)** | **It is the trace.** `Tr(S₃/x₃²) = Tr(X₁) + Tr(X₂) + Tr(√b/x₃)` identically, so a trace-zero base refutes every target with `Tr(√b/x₃) = 1` at degree 2 with the certificate `c = 1/x₃²`. The coordinate window `⟨1,…,z^{l−1}⟩` is trace-zero only at even `n` (`Tr(1) = n mod 2`, Newton's identities for the rest) and the subfield only when `n/l` is even — every even critical cell, no odd one. Conditioned on trace class the parity split is gone and coordinate sits with random; the subfield keeps about one degree (closure). EXP-H, `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SHAPE_SEARCH.md`, `experiments/factor_base_closure_sweep.json`. Earlier EXP-E/G orderings stand as measured; what they measure at the critical point is largely the fraction of wrong-coset targets. |
 | P4 | HKY explicit counterexample systems register as **low-`γ`** | `blocked` | needs `descent_expansion` + the HKY systems coded |
 | P5 | `D*` is **insensitive to the curve** `b` at fixed `(n, n', ρ)` (i.e. `D*` is a field/basis invariant, not a curve invariant) | `supported` | EXP-A: 8 curves at n=8,n'=3, mean-D* spread 0.219 < 0.5 gate — auto-verdict, iteration 1 |
 | P6 | Over-determined `ρ ≫ 1` collapses `D*` to 2 (Nullstellensatz) | `supported` | n=10 sweep: ρ≥2.5 ⇒ mean D* ≤ 2.03 (`15b5b1c`, re-confirmed iteration 1) |
@@ -570,6 +570,14 @@ attack a different prediction.
   (field/basis-keyed, per P5) + basis sweep, then run G-P2. P1′ remains
   blocked on reach (EXP-D / sparse F4).
 - Commit: (this commit)
+
+### 2026-10-01 — iteration 10 (EXP-H: factor-base shape sweep, trace class)
+- Prediction attacked: P3 (parity), and the L1/P3-alg reading of EXP-E/G (subfield vs coordinate vs random).
+- Experiment: EXP-H, `examples/factor_base_closure_sweep.rs` — 14 subspace shapes (progressions with random ratio, Frobenius progressions, mixed, trace-zero variants, modulus/ratio panel) at `(n, l)` from `(7,3)` to `(16,8)`, `D*` split by target trace class `t = Tr(√b/x₃)`.
+- Result: `Tr(S₃/x₃²) = Tr(X₁)+Tr(X₂)+Tr(√b/x₃)` identically; trace-zero bases refute class-1 targets at degree 2 for free; coordinate-vs-random at even critical cells is this artefact, subfield keeps ≈ 1 degree on class 0 (closure, Kneser-bounded at prime `n`); no new shape beats coordinate on class 0. `experiments/factor_base_closure_sweep.json`; note `RESEARCH_FACTOR_BASE_SHAPE_SEARCH.md`.
+- Gate G-P3: supported (single structural covariate: `V ⊂ ker Tr`).
+- Ledger delta: P3 open→supported/explained; P3-alg unchanged (still orders class-0 `D*`); standing rule added: condition `D*` comparisons on trace class.
+- Commit: this PR.
 
 ### (template)
 
