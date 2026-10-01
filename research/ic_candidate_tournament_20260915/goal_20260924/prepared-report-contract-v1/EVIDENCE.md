@@ -27,6 +27,9 @@ with complete preexecution Python/interpreter attestation. Raw timer fields
 remain fixture diagnostics. No online speedup, fresh qualification or promotion
 is established. Registry dependency file hashes are in the build manifest;
 full registry source bytes still need the later versioned retained-input gate.
+The local build predates the required Rust formatting adjustment in this PR;
+its original source bytes and binding remain retained. CI rebuilds and checks
+the final formatted source instead of substituting it into that local record.
 The old native input v1 source pin and runtime v2 are unchanged and cannot admit
 this corrected worker.
 

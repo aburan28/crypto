@@ -680,7 +680,8 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let verified = replay == Some(true);
-    Ok(json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
+    Ok(
+        json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
         "status":if verified {"complete"} else {"incomplete"},
         "preparation_mode":"imported-certified-log-table-v1",
         "reusable_symbolic_template_prepared":true,
@@ -695,7 +696,8 @@ fn run_prepared_target(
         "online_timing_schema":1,"online_wall_ns":online_ns,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
         "scalar_replay_included":replay.is_some(),"scalar_verified":verified,
-        "elapsed_seconds":start.elapsed().as_secs_f64()}))
+        "elapsed_seconds":start.elapsed().as_secs_f64()}),
+    )
 }
 
 fn main() {
