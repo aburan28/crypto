@@ -1736,18 +1736,19 @@
   <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES: EXPERIMENTS E1-E7 ============ -->
   <div class="panel" id="glv-invariant-experiments">
     <div class="panel-head">
-      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E7 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
-      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29),
+      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E9 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29) and <code>&hellip;_e{8,9}.json</code> (2026-10-01),
         tables by <code>scripts/glv_invariant_experiment_tables.py</code>; note
-        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6.
-        The plan&rsquo;s seven experiments run: one relation stream per instance feeds the folded
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6 and &sect;8.
+        The plan&rsquo;s seven experiments and the first two of its successors run: one relation stream per instance feeds the folded
         base and its negation control to <em>full rank</em> (the rank a two-summand stream can
         reach on a cofactor curve, <code>columns + 1 &minus; D</code>, &sect;6.0), four to six
         seeds per size, <code>r</code> from 2<sup>13</sup> to 2<sup>32</sup>, every row&rsquo;s
         answer checked against the planted logarithm. Relations to full rank carry a
         coupon-collector factor on both arms, so the size-matched column is the <em>rank fraction
         after exactly <code>columns</code> relations</em>. No row claims a speed; <code>S</code>
-        stays the pilot panel&rsquo;s.</p>
+        stays the pilot panel&rsquo;s except on E8, where every phase and the matched rho are
+        priced in one unit on E(F<sub>p&sup3;</sub>).</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -1766,6 +1767,8 @@
           <tr><td>E5, <code>j = 0</code> on E(F<sub>p&sup3;</sub>)</td><td><code>&lang;&minus;1, &pi;, &zeta;&rang;</code>: <code>&zeta; &isin; &lang;&pi;&rang;</code> on <code>&lang;G&rang;</code>, every instance</td><td class="n">6.0 (not 18)</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">&mdash; (the line is the subgroup)</td><td><code>r &asymp; p</code>: the new part splits in Z[&omega;]; the descent degenerates</td><td><span class="chip">accounting</span></td></tr>
           <tr><td>E6, matched rho, <code>j = 0</code> / <code>j = 1728</code>, 2<sup>13</sup>&ndash;2<sup>27</sup>, 384 walks</td><td>rho folded by <code>Aut</code> vs the <code>A = 2</code> walk</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">steps ratio 1.72 (expected &radic;3 = 1.73) / 1.51 (expected &radic;2 = 1.41)</td><td class="n">&mdash;</td><td>the reference every &ldquo;vs rho&rdquo; above should have used; all answers verified</td><td><span class="chip">accounting</span></td></tr>
           <tr><td>E7, <code>j = 0</code>, three summands, 2<sup>17</sup>&ndash;2<sup>26</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code> at <code>m = 3</code></td><td class="n">6.0</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">1.4&ndash;5.7</td><td>0 rows fold to <code>0 = 0</code>; orbit duplicates at the birthday count <code>3T&sup2;/r</code></td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E8, generic <code>E/F<sub>p</sub></code> on E(F<sub>p&sup3;</sub>), the Frobenius line, <b>three summands</b>, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>11</sup>, <code>r</code> = 2<sup>12</sup>&ndash;2<sup>22</sup></td><td><code>&lang;&minus;1, &pi;&rang;</code>, order 6, pair-table oracle</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.80&ndash;0.98 / 0.89&ndash;0.96</td><td class="n">4.20 (2.34&ndash;6.73); 0 single-column rows</td><td>three summands restore the fold on the subfield line; every phase priced in F<sub>p</sub> multiplications: <code>S</code> control / fold 3.75 (2.11&ndash;5.58), fold at 54&ndash;6759&times; the matched folded rho; fitted exponents of the total 0.88 (fold), 0.86 (control), 0.37 / 0.39 (rho), against rho&rsquo;s 1/2</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E9, matched rho on F<sub>p&sup2;</sub> and F<sub>p&sup3;</sub>, 960 walks</td><td>rho folded by <code>&lang;&minus;1, &psi;&rang;</code> (A = 4), <code>&lang;&minus;1, &psi;, &zeta;&rang;</code> (A = 12), <code>&lang;&minus;1, &pi;&rang;</code> (A = 6) vs the <code>A = 2</code> walk</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">steps ratio GLS 1.40 (expected 1.41), <code>j = 0</code> twist 2.16 (2.45), subfield 1.74 (1.73); at <code>r &asymp; p</code>: <code>j = 1728</code> twist 1.15, <code>j = 0</code> subfield 1.72</td><td class="n">&mdash;</td><td>the reference for every F<sub>p&sup2;</sub>/F<sub>p&sup3;</sub> &ldquo;vs rho&rdquo; above; in F<sub>p</sub> multiplications the folded walk pays its canonicalisation, 88 / 110 multiplications a group operation (negation / folded) on E(F<sub>p&sup3;</sub>), so rho <code>S</code> negation / folded is 1.24 there (E8)</td><td><span class="chip">accounting</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -1775,10 +1778,15 @@
         automorphism group&rsquo;s roots of unity, the Frobenius&rsquo;s, and their products, and no
         more &mdash; and the matched rho takes the square root of the same number. Nothing moved a
         ratio to a floor. Where the endomorphisms fix a cofactor (E5) the fold buys columns and
-        not relations. Not done: Q-curves of degree 2 and 3 (the second half of E4b), the
-        three-summand line oracle on E(F<sub>p&sup3;</sub>), a matched folded rho on the
-        F<sub>p&sup2;</sub> and F<sub>p&sup3;</sub> groups, and a full-rank <code>S</code>; the
-        pilot panel&rsquo;s <code>S</code> figures stand as measured there.</p>
+        not relations with two summands, and columns and relations with three (E8). The matched
+        folded rho takes &radic;(A/2) fewer steps on every group (E6, E9) and, in field
+        multiplications, pays for each step&rsquo;s canonicalisation. Against the literature
+        (note &sect;8.0): the invariant base is Galbraith&ndash;Granger&ndash;Merz&ndash;Petit&rsquo;s
+        lever measured at framework level; the Faug&egrave;re&ndash;Gaudry&ndash;Huot&ndash;Renault
+        symmetries act on the decomposition system, not the base, and the two multiply. Next
+        (&sect;8.1, pending): the algebraic <code>S&#8324;</code> oracle on the line with Frobenius
+        symmetry breaking (E11), the orbit-representative pair table (E12), the combined
+        base-and-system symmetries (E13), Q-curves (E14), the ECC2K-130 transfer check (E15).</p>
     </div>
   </div>
 
