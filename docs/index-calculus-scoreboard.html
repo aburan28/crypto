@@ -350,7 +350,18 @@
       workflow&rsquo;s constructions once per base, with every count unchanged. That makes the whole
       pipeline 1.04&ndash;2.25&times; faster and takes the same row to 4.3&times;. On current main, which
       later rounds made 12&ndash;33% cheaper at the top, ledger &sect;22 (2026-09-30) cut the descent&rsquo;s
-      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;. The first two were
+      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;.
+      Under AGENTS.md&rsquo;s IC measurement rules (#1076, 2026-09-30) that figure, like every
+      <code>k</code> = 32 ratio on this page, is a historical multi-target diagnostic. The primary
+      comparison is now one unseen target against rho on the same point, with the reusable
+      set-up reported apart. Ledger &sect;23 (2026-10-01) measured it on 384 public points at the
+      thread&rsquo;s six largest sizes, 2<sup>36.6</sup>&ndash;2<sup>47.2</sup>. Online the descent is
+      8.8&ndash;17.5&times; faster than rho on the same point, or 4.3&ndash;9.4&times; with rho&rsquo;s
+      step at the canonical price. But it needs a reusable set-up that makes the method
+      4.9&ndash;31.6&times; slower cold (2.0&times; at 2<sup>38.0</sup>, where both arms pay a slow
+      curve construction). By Bernstein and Lange&rsquo;s trade-off, a model, the same set-up spent as a
+      generic precomputation would be 2.0&ndash;8.0&times; faster online still (<a
+      href="#koblitz-single-target-20261001">the round</a>). The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
@@ -452,14 +463,19 @@
       </div>
       <div class="fact">
         <dt>Closest to rho, one target</dt>
-        <dd>13.5&times; at 2<sup>23.4</sup></dd>
-        <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
-          family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
-          the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).
-          Amortised over 32 targets, the Koblitz collection thread is 3.62&times; batch rho at best, every
-          phase priced, on current main with its descent&rsquo;s fixed cost cut (&sect;22). It was
-          4.28&times; in &sect;21, 4.86&times; in &sect;20 and 6.5&times; in &sect;19. One target alone,
-          &sect;20 measured it at 22.6&times; there.</p>
+        <dd>4.9&times; cold at 2<sup>36.6</sup></dd>
+        <p>The Koblitz collection thread on one unseen point, set-up and online together, against rho
+          on the same point (&sect;23). Online alone it is 8.8&ndash;17.5&times; <em>faster</em>, but
+          the set-up that buys that would serve a generic walk as precomputation too. Rho priced at the
+          canonical step makes this 8.6&times;. 2<sup>38.0</sup> reads 2.0&times; only because both
+          arms pay a curve construction longer than rho&rsquo;s walk; without it the six sizes read
+          6.3&ndash;32.5&times;. Before the rule, operation-counted and now legacy diagnostics: meet in
+          the middle, m = 2, prime field, folded table, walked targets and a base at the family optimum
+          (222 signed points against the rule&rsquo;s 512), was 13.5&times; at 2<sup>23.4</sup> against
+          the matched negation-map rho (3.55&times; against the plain walk, 3.63&times; in Round 4).
+          Amortised over 32 targets, the Koblitz thread was 3.62&times; batch rho at best (&sect;22;
+          4.28&times; in &sect;21, 4.86&times; in &sect;20, 6.5&times; in &sect;19), and one target
+          alone &sect;20 measured it at 22.6&times; there.</p>
       </div>
       <div class="fact">
         <dt>Boundary 3 &middot; the family&rsquo;s own floor</dt>
@@ -483,6 +499,7 @@
     <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
     <p><a href="#genus-crossover">Hyperelliptic large primes</a>: no gain. Registered to save 4&ndash;6% at genus 2, <code>p</code> = 4001; measured about 1%, and none at genus 3 or 4. 54-row pinned-output check passed; every run verified.</p>
     <p><a href="#genus-crossover">Hyperelliptic sparse solve</a>: the solve&rsquo;s charge is <b>5.1&times; lower</b> (median; 2.0&ndash;18.2&times;) with identical relations, oracle counts and logarithms on all 18 rows and 11 isolated sweeps. Engineering: the arithmetic exponent is unchanged. Pricing it honestly withdraws the genus-3 exponent claim below.</p>
+    <p><span class="chip">accounting</span> <a href="#koblitz-single-target-20261001">Koblitz thread, one unseen point</a>: the first measurement under the single-target rule, 384 public points at six sizes, 408 of 408 claims passing the checker. Online the descent is <b>8.8&ndash;17.5&times; faster</b> than rho on the same point. Cold, with its reusable set-up, it is 4.9&ndash;31.6&times; slower, and online it sits 2.0&ndash;8.0&times; above a generic walk given the same precomputation (a model). No algorithm changed.</p>
     <p><a href="#koblitz-descent-20260930">Koblitz descent, fixed cost</a>: the whole pipeline is <b>1.35&ndash;1.39&times; faster</b> at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>, in paired time from isolated runs, with all 186 pairs identical. From 2<sup>32</sup> up it moves 0.99&ndash;1.06&times;. The no-regression target was missed at 2<sup>47.2</sup> by 1.4%, which is inside that size&rsquo;s A/A band and in code the change does not touch.</p>
     <p><a href="#koblitz-constructions-20260926">Koblitz constructions, built once</a>: the whole pipeline is <b>1.04&ndash;2.25&times; faster</b> at all nine sizes, every phase priced. All 180 of 180 pairs have identical counts and logarithms. Still no crossing with batch rho: 4.28&times; at best.</p>
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
@@ -977,7 +994,9 @@
         again, and none failed. A first run pinned with <code>taskset</code> alone is kept, but it is not
         evidence. Because the unit moves between binaries (&sect;21.4), the declared speedup puts both arms
         at one unit: the paired ratio of time. Frozen source: <code>research/ic_descent_20260930/</code>
-        (<code>analysis-isolated.json</code> for every figure here).</p>
+        (<code>analysis-isolated.json</code> for every figure here). Its ratios to rho are k = 32
+        figures, historical multi-target diagnostics since #1076; the one-target comparison is
+        <a href="#koblitz-single-target-20261001">&sect;23</a>.</p>
     </div>
     <div class="table-scroll"><table>
       <caption>S per target at k = 32, both columns in the baseline binary&rsquo;s unit. <b>Was</b> is
@@ -1010,6 +1029,53 @@
       <span><b>The unit moved again.</b> The candidate&rsquo;s batched addition runs 0.89&ndash;0.97&times; as fast as the baseline&rsquo;s at eight of nine sizes, with its code untouched; in &sect;21 it ran up to 11% faster. So in each process&rsquo;s own unit the candidate looks up to 12% better than its time says. The declared figure is the time.</span>
       <span><b>The top end, refitted on current main.</b> &sect;20&rsquo;s declared fit over the four largest sizes gives <code>r</code><sup>0.137</sup>, 95% [&minus;0.06, 0.33]. Main&rsquo;s cheaper top end flattened it: &sect;21&rsquo;s interval excluded zero, and this one does not.</span>
       <span><span class="chip">engineering</span> No count moved. S fell 1.35&ndash;1.39&times; at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>; from 2<sup>32</sup> up it moved by 0.99&ndash;1.06&times;. The least ratio is 3.62&times; [3.28, 3.97] at 2<sup>39</sup> <small>was 4.28&times;</small>, most of the fall main&rsquo;s. There is still no crossing. The K_0 rows are E_0, the ECC2K-130 family, and the K_1 rows are not. There is no m&thinsp;=&thinsp;83 run, so nothing here speaks to ECC2K-130 at high fidelity (AGENTS.md &sect;8a).</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-single-target-20261001">
+    <div class="panel-head">
+      <h2>One unseen point, online and cold <span class="chip">accounting</span></h2>
+      <p>Ledger &sect;23. AGENTS.md&rsquo;s IC measurement rules (#1076) make the primary comparison one
+        previously unseen target. The index calculus and rho run on the same point, in one process. Each is
+        timed from its first target-dependent operation to a checked logarithm, and the reusable set-up is
+        reported apart. At the thread&rsquo;s six largest sizes, 64 public hash-to-curve points per size ran
+        one isolated process each. Every row is keyed by its canonical identities, and both answers are
+        replayed outside the process. All 408 claims pass the repository&rsquo;s <code>vs_rho</code>
+        checker. Rho is the tuned signed-Frobenius walk with its walks batched (<code>ParallelRho</code>); its
+        only set-up is its jump table, in G. The round was declared before any run, and &sect;23&rsquo;s
+        earlier k = 32 declaration was withdrawn unrun. Frozen source:
+        <code>research/ic_single_target_20260930/</code> (<code>analysis.json</code> for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>S is units over &radic;r, each row in its own process&rsquo;s unit, the mean over 64 targets
+        per size. <b>Online speedup</b>: mean rho online over mean index-calculus online, with a 95%
+        bootstrap interval over targets. <b>Canonical step</b>: rho&rsquo;s counted operations priced at the
+        canonical step, the conservative reading. <b>Cold</b>: set-up plus online, index calculus over rho.
+        <b>Break-even</b>: the count of targets at which one set-up and their descents cost as much as as
+        many one-target rho runs. <b>BL model</b>: the index calculus&rsquo;s online cost over the online
+        cost of a generic walk given the same set-up as precomputation (Bernstein&ndash;Lange; a model).
+        <b>A/A</b>: four targets&rsquo; second process over their first.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">S, IC online</th>
+        <th scope="col" class="n">S, rho online</th><th scope="col" class="n">online speedup</th>
+        <th scope="col" class="n">canonical step</th><th scope="col" class="n">cold</th>
+        <th scope="col" class="n">S, set-up</th><th scope="col" class="n">break-even</th>
+        <th scope="col" class="n">over BL model</th><th scope="col" class="n">A/A</th></tr></thead>
+      <tbody>
+        <tr><td><code>K_1/GF(2<sup>47</sup>)</code> &middot; r = 2<sup>36.6</sup></td><td class="n">0.0673</td><td class="n">0.657</td><td class="n"><b>9.77&times;</b><br><small>[7.83, 12.5]</small></td><td class="n">4.34&times;<br><small>[3.47, 5.53]</small></td><td class="n">4.95&times;<br><small>[4.55, 5.41]</small></td><td class="n">4.20</td><td class="n">7</td><td class="n">2.4&times;</td><td class="n">0.88&ndash;1.30</td></tr>
+        <tr><td><code>K_0/GF(2<sup>57</sup>)</code> &middot; r = 2<sup>38.0</sup></td><td class="n">0.0424</td><td class="n">0.574</td><td class="n"><b>13.5&times;</b><br><small>[10.7, 17.3]</small></td><td class="n">5.97&times;<br><small>[4.76, 7.61]</small></td><td class="n">1.98&times;<br><small>[1.95, 2.02]</small></td><td class="n">8.08</td><td class="n">15</td><td class="n">3.3&times;</td><td class="n">0.92&ndash;1.29</td></tr>
+        <tr><td><code>K_0/GF(2<sup>41</sup>)</code> &middot; r = 2<sup>39.0</sup></td><td class="n">0.0665</td><td class="n">0.624</td><td class="n"><b>9.38&times;</b><br><small>[7.43, 12.1]</small></td><td class="n">4.57&times;<br><small>[3.64, 5.85]</small></td><td class="n">8.04&times;<br><small>[7.26, 9.01]</small></td><td class="n">5.51</td><td class="n">10</td><td class="n">2.5&times;</td><td class="n">0.81&ndash;1.39</td></tr>
+        <tr><td><code>K_0/GF(2<sup>53</sup>)</code> &middot; r = 2<sup>44.3</sup></td><td class="n">0.0277</td><td class="n">0.485</td><td class="n"><b>17.5&times;</b><br><small>[13.6, 22.6]</small></td><td class="n">9.37&times;<br><small>[7.33, 12.2]</small></td><td class="n">14.7&times;<br><small>[13.1, 16.7]</small></td><td class="n">7.37</td><td class="n">16</td><td class="n">2.0&times;</td><td class="n">0.92&ndash;1.13</td></tr>
+        <tr><td><code>K_1/GF(2<sup>59</sup>)</code> &middot; r = 2<sup>44.5</sup></td><td class="n">0.0308</td><td class="n">0.519</td><td class="n"><b>16.9&times;</b><br><small>[13.0, 22.1]</small></td><td class="n">8.90&times;<br><small>[6.85, 11.6]</small></td><td class="n">15.7&times;<br><small>[13.9, 17.9]</small></td><td class="n">9.00</td><td class="n">18</td><td class="n">2.8&times;</td><td class="n">0.97&ndash;1.11</td></tr>
+        <tr><td><code>K_0/GF(2<sup>61</sup>)</code> &middot; r = 2<sup>47.2</sup></td><td class="n">0.0527</td><td class="n">0.466</td><td class="n"><b>8.84&times;</b><br><small>[6.76, 11.9]</small></td><td class="n">4.68&times;<br><small>[3.63, 6.28]</small></td><td class="n">31.6&times;<br><small>[28.2, 35.7]</small></td><td class="n">15.10</td><td class="n">37</td><td class="n">8.0&times;</td><td class="n">0.96&ndash;1.26</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>Declared and graded.</b> Correct: met. All 408 rows verified on every repetition and replayed in <code>oracle.py</code>, and the two arms agree on every scalar. Rule-conformant: met, with 408 of 408 passing <code>validate_claim</code>. Online the index calculus is faster at all six sizes, with lower bounds 6.8&ndash;13.6. Cold, rho is faster at all six. Two of 410 processes were contended and were run again, and none failed.</span>
+      <span><b>Cold, beside it.</b> The set-up costs S = 4.2&ndash;15.1, 62&ndash;292 times the online interval. It pays for itself after 7&ndash;37 targets against as many one-target rho runs; against batch rho at k = 32 it never did (&sect;22). At 2<sup>38.0</sup> the curve&rsquo;s construction, which both arms run, takes 48&ndash;58 ms, more than rho&rsquo;s walk. Without it the cold ratio reads 6.3&ndash;32.5&times;, rising with r.</span>
+      <span><b>The precomputation boundary.</b> The online figure leaves the set-up out, and a generic walk could use that set-up too. Bernstein and Lange&rsquo;s trade-off gives the online cost of a walk with the same precomputation. The index calculus is 2.0&ndash;8.0&times; above it. The online advantage belongs to the precomputation, not to the method. This is a model: no such walk ran.</span>
+      <span><b>Rho&rsquo;s step.</b> The batched walk costs 3.99&ndash;4.97 units a step, 1.86&ndash;2.25&times; the canonical step, at 0.95&ndash;1.05 times the floor&rsquo;s step count. The canonical-step column is the reading a walk that cheap would give.</span>
+      <span><b>Where the online time goes.</b> Table lookups take 53&ndash;96% of the interval and the walk&rsquo;s stepping 2&ndash;48%. The relation, its logarithm and the recovery check take 1.3% at most. Across the six sizes the online speedup is flat, r<sup>0.02</sup> [&minus;0.12, 0.16], and the cold ratio grows, r<sup>0.29</sup> [0.09, 0.50].</span>
+      <span><span class="chip">accounting</span> No algorithm changed: the pin reproduces &sect;22&rsquo;s counts. The reference changed because the rule did, and the k = 32 panels above are now historical diagnostics. By AGENTS.md &sect;2 the method is not faster than rho, because its cold S is above rho&rsquo;s at every size. The K_0 rows are E_0, the ECC2K-130 family, and the K_1 rows are not. There is no m&thinsp;=&thinsp;83 run (AGENTS.md &sect;8a).</span>
     </div>
   </div>
 
