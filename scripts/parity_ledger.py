@@ -472,21 +472,31 @@ def main():
             for p, x in cv["sizes"].items():
                 print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |")
         if cv["dlp"]:
-            print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory):\n")
-            print("| p | seed | ℓ | columns | residuals | relations | rate (vs 1/720) | residuals / floor | c_add E | C_cov as paid | LA ops (·u²) | S | rho S | S / rho | relation + LA | predicted | solved / correct | mismatches |")
-            print("|---:|--:|:--|--:|--:|--:|:--|--:|--:|--:|:--|--:|--:|--:|:--|--:|:--|--:|")
+            print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:\n")
+            print("| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |")
+            print("|---:|--:|:--|--:|--:|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|--:|")
             rows = sorted(cv["dlp"], key=lambda r: (r["p"], r["seed"]))
+            walks = [w["s"] for r in rows for w in r["rho"]]
+            rho_pool = mean(walks) if walks else 1.3
             for r in rows:
                 star = "*" if not r["rho"] else ""
-                print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['residuals']:,} | {r['relations']} | {r['decomposition_rate']:.5f} ({r['decomposition_rate']*720:.2f}/720) | {r['residual_ratio']:.2f} | {r['c_add_e']:.0f} | {r['c_cov']:.3e} | {r['la_ops']:,} ({r['wiedemann_constant']:.1f}) | {r['s']:.3e} | {r['rho_s_mean']:.3f}{star} | {r['s_over_rho']:.3f} | {r['relation_over_rho']:.3f} + {r['r']:.4f} | {r['predicted_s_over_rho']:.3f} | {r['solved']} / {r['correct']} | {r['mismatches']} |")
+                ex = 16.0 * math.comb(r["base"], 6) / r["l"]
+                need = (r["base"] + 1) / ex
+                sqrt_l = math.sqrt(r["l"])
+                s_pool = r["total_muls"] / (rho_pool * sqrt_l * r["c_add_e"]) if "total_muls" in r else r["s_over_rho"]
+                pred = need * r["c_cov"] / (rho_pool * sqrt_l * r["c_add_e"]) + r["r"] * r["rho_s_mean"] / rho_pool
+                print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['residuals']:,} | {r['relations']} | {r['decomposition_rate']:.5f} | {ex:.5f} | {r['residuals']/need:.2f} | {r['c_add_e']:.0f} | {r['c_cov']:.3e} | {r['la_ops']:,} ({r['wiedemann_constant']:.1f}) | {r['s']:.3e} | {s_pool:.3f} | {r['rho_s_mean']:.3f}{star} / {r['s_over_rho']:.3f} | {r['relation_over_rho']:.3f} + {r['r']:.4f} | {pred:.3f} | {r['solved']} / {r['correct']} | {r['mismatches']} |")
+            print(f"\nPooled rho S over {len(walks)} walks: {rho_pool:.3f} ± {statistics.stdev(walks) / math.sqrt(len(walks)):.3f}." if len(walks) > 1 else "")
             tot_res = sum(r["residuals"] for r in rows)
             tot_rel = sum(r["relations"] for r in rows)
             exp = tot_res / 720.0
-            print(f"\nPooled decomposition rate: {tot_rel} relations in {tot_res:,} residuals = {tot_rel/tot_res*720:.3f}/720 (expected {exp:.0f} ± {math.sqrt(exp):.0f}; registered P1: within ±20 %).")
+            exact = sum(r["residuals"] * 16.0 * math.comb(r["base"], 6) / r["l"] for r in rows)
+            print(f"\nPooled decomposition rate: {tot_rel} relations in {tot_res:,} residuals = {tot_rel/tot_res*720:.3f}/720 (1/720 predicts {exp:.0f} ± {math.sqrt(exp):.0f}); the exact count 16·C(|F|,6)/ℓ predicts {exact:.1f} ± {math.sqrt(exact):.1f}.")
             g = by_size([r for r in rows if r["solved"]], lambda r: r["p"])
             if len(g) >= 3:
                 ps = list(g)
                 ys = [mean([r["s_over_rho"] for r in v]) for v in g.values()]
+                ys = [mean([r["total_muls"] / (rho_pool * math.sqrt(r["l"]) * r["c_add_e"]) for r in v]) for v in g.values()]
                 slope, se = fit(ps, ys)
                 print(f"Fitted exponent of S/rho in p over {len(ps)} sizes: {slope:.3f} ± {se:.3f} (registered P4: −2 ± 0.2; derivation: −2).")
         if cv["sizes"]:
