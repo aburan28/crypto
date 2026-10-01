@@ -177,6 +177,7 @@ dramatic-gain objective is not achieved by this implementation or its tests.
               "Host/compiler details and exact per-group confidence intervals remain in the sealed artifact.")
         report+=f'\n## Current qualified {phase}\n\n'+text+'\n\n'
         report+='The gate uses the pointwise fastest of all 52 frozen reference methods and requires the lower 95% bound to exceed the A/A floor as well as the numeric threshold.\n\n'
+        report+='Predecessor and current campaigns used separate hosted VMs. Their absolute before/after times do not isolate the effect of budget specialization; only within-campaign comparisons to the frozen reference roster are admitted here.\n\n'
         report+='| Candidate | Groups above 2x | Groups above 1x | Primary dramatic verdict |\n|---|---:|---:|---|\n'+md(gates)+'\n\n'
         caption=(f"All methods below use n24 {split} milliseconds per complete solve plus validation. "
                  "The displayed ratio divides pooled planted dispatcher medians; it is descriptive, not the primary fastest-reference gate.")

@@ -1,7 +1,110 @@
 {
   "calibrated_operation_ratio": null,
   "classification": "engineering",
-  "current_qualified_readbacks": [],
+  "current_qualified_readbacks": [
+    {
+      "aa_noise_floor_range": [
+        1.003727381332726,
+        1.449972885032538
+      ],
+      "aa_observations": 480,
+      "ab_observations": 14640,
+      "campaign_seconds": 351.24793960299996,
+      "capabilities": {
+        "architecture": "aarch64",
+        "eor3_available": true
+      },
+      "cells": 24,
+      "cpus": [
+        3
+      ],
+      "decisions": {
+        "eor3_word16": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "eor3_word64": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 2,
+          "incremental_pass": false
+        },
+        "half16_eor3": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half16_native": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half16_scalar": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half64_eor3": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 4,
+          "incremental_pass": false
+        },
+        "half64_native": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 4,
+          "incremental_pass": false
+        },
+        "half64_scalar": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half_dispatch": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 1,
+          "incremental_pass": false
+        }
+      },
+      "host": {
+        "cpu_info": {
+          "CPU architecture": "8",
+          "CPU implementer": "0x41",
+          "CPU part": "0xd49",
+          "CPU revision": "0",
+          "CPU variant": "0x0",
+          "Features": "fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm uscat ilrcpc flagm sb paca pacg dcpodp sve2 sveaes svebitperm svesha3 svesm4 flagm2 frint svei8mm svebf16 i8mm bf16"
+        },
+        "logical_cpus": 4,
+        "machine": "aarch64",
+        "memory_total_kib": 16330088,
+        "platform": "Linux-6.17.0-1022-azure-aarch64-with-glibc2.39",
+        "system": "Linux"
+      },
+      "manifest_sha256": "cbdf9e331e00963abd619e1952c44894b28b9b6122663811c4958439473f452c",
+      "peak_worker_rss_bytes": 14295040,
+      "phase": "discovery",
+      "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
+      "verdict": "Discovery only; no promotion."
+    }
+  ],
   "full_ic_cost": null,
   "historical_cells": 48,
   "historical_observations": 21888,
@@ -138,9 +241,84 @@
     }
   ],
   "production_solver_cost": null,
-  "qualified_decisions": null,
+  "qualified_decisions": {
+    "eor3_word16": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "eor3_word64": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 2,
+      "incremental_pass": false
+    },
+    "half16_eor3": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half16_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half16_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half64_eor3": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 4,
+      "incremental_pass": false
+    },
+    "half64_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 4,
+      "incremental_pass": false
+    },
+    "half64_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half_dispatch": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 1,
+      "incremental_pass": false
+    }
+  },
   "qualified_runs": {
-    "discovery": null,
+    "discovery": {
+      "artifact_archive_sha256": "591cf4add205cce6022a9b82be7ee47c190c7a05847fca9154e199eaac4efb90",
+      "artifact_id": 11200021835,
+      "artifact_name": "halfword-discovery-36938560536-2",
+      "github_attempt": 2,
+      "github_run_id": 36938560536,
+      "manifest_sha256": "cbdf9e331e00963abd619e1952c44894b28b9b6122663811c4958439473f452c",
+      "path": "qualified_probe_02",
+      "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
+      "status": "Qualified discovery; all 24 fixtures complete and locally replayed exactly. No dramatic group passed.",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36938560536"
+    },
     "failed_attempts": [
       {
         "github_attempt": 1,
@@ -203,6 +381,20 @@
         "repaired_analysis_path": "analysis_replay_01",
         "source_head": "62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0",
         "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36936730092"
+      },
+      {
+        "completed_cells": 8,
+        "failure_kind": "resource",
+        "github_attempt": 1,
+        "github_run_id": 36938560536,
+        "manifest_sha256": "ef02a612d0f2a133a76026d68e77cd737898dd665175228c5d4d5152ca463762",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.17,
+        "path": "failed_isolation_05",
+        "reason": "After eight fixture pairs, the n16/seed17/unplanted paired worker completed normally but provisioning-service CPU use raised total other-process CPU to 0.17 seconds in 1.129265813 seconds, above the unchanged 10% threshold. No performance samples admitted.",
+        "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
+        "worker_wall_seconds": 1.1292658130000746,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36938560536"
       }
     ],
     "full": null,
@@ -291,9 +483,23 @@
         "recorded_utc": "2026-10-01T22:33:24.506490+00:00",
         "status": "FAILED_OR_UNQUALIFIED"
       }
+    },
+    {
+      "failure_kind": "resource",
+      "github_attempt": 1,
+      "github_run_id": 36938560536,
+      "path": "failed_isolation_05",
+      "reason": "After eight fixture pairs, the n16/seed17/unplanted paired worker completed normally but provisioning-service CPU use raised total other-process CPU to 0.17 seconds in 1.129265813 seconds, above the unchanged 10% threshold. No performance samples admitted.",
+      "status": {
+        "completed_cells": 8,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n16-discovery-17-unplanted/paired",
+        "recorded_utc": "2026-10-01T23:05:36.631551+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
     }
   ],
   "rho_ratio": null,
   "schema_version": 1,
-  "status": "16-bit predecessor reaches about 1.55x on n24; specialization pending"
+  "status": "16-bit specialization discovery complete; full comparison pending"
 }
