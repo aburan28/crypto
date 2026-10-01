@@ -1,8 +1,8 @@
 """Target-only IC adapter cores for the accepted public-synthetic n17 state.
 
 These APIs do not sample targets, dispatch a campaign or certify a speedup.
-The native job still needs a new source/build-bound registration; SAT's query
-callback must be the isolated source-bound query runner in that registration.
+prepared_f5_runtime_v1 registers the native job against a new build. SAT's
+query callback must be the isolated source-bound query runner in its registration.
 Historical complete-solve invocations remain consumed and unchanged.
 """
 from collections import Counter

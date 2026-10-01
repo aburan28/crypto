@@ -64,7 +64,18 @@ known-log sign/Frobenius orbit before generating the first fresh target.
 for the disclosed development control. It seals the certificate as invocation
 data, separately from the mathematical method identity, and preserves native
 watchdog/source checks through the existing isolated runtime. No registration
-has been consumed here. The native F5 frontend and independent mathematical
-auditor are implemented; new native source/build/registration transport remains
-the next gate. Python callback tests and native unit tests do not supply either
-production execution receipt or fresh paired qualification.
+has been consumed here.
+
+`prepared_f5_runtime_v1.py` is the corresponding F5 transport. It refuses the
+consumed v2 worker hash `94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a`
+and source manifest `c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7`,
+because that binary predates `fn run_prepared_target`. A later one-shot control
+must package a new `generic_build.py` receipt for the executing platform, with
+the worker source containing that entrypoint, then call `register` once and
+`execute` once. Asset-archive seals stay in the invocation. Method identity
+binds the mathematical preparation `edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107`,
+the Python/interpreter binding, and the worker/source/build hashes. This file
+does not authorize that execution. Python registration tests use synthetic
+build receipts and the retained v2 report; they are not a native dispatch.
+Python callback tests and native unit tests do not supply either production
+execution receipt or fresh paired qualification.

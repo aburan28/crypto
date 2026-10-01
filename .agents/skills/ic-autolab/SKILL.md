@@ -113,8 +113,9 @@ add an optional native F5 preparation import and a SAT adapter core plus
 `prepared_sat_runtime_v1.py` registrar/entrypoint/auditor. They independently
 replay preparation before online start and retain all failed target attempts.
 Only disclosed development controls are admitted; no new production registration
-or fresh comparison has executed. Native F5 source/build/registration transport
-and fresh campaign gates remain pending. Run the four strict native unit controls
+or fresh comparison has executed. `prepared_f5_runtime_v1.py` registers that F5 path for a new build only. It
+rejects the consumed v2 worker and source manifest. No prepared F5 registration
+has been frozen or executed. Fresh campaign gates remain pending. Run the four strict native unit controls
 in an isolated `RAYON_NUM_THREADS=1` process with `--ignored --test-threads=1`;
 the ordinary parallel runner intentionally skips them and CI explicitly runs
 them. Callback/oracle tests are not native SAT yield evidence. The committed
