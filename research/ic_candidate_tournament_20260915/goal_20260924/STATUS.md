@@ -19,8 +19,10 @@ implements native F5 log import, independent warm mathematical/clock replay,
 SAT source-bound registration/entrypoint/audit, and the 1,340-point preparation
 exclusion union. Disclosed native/Python correctness controls are separate from
 production source-bound invocations; no new measured registration or fresh
-target has executed. The native F5 build/registration transport, separately
-frozen new adapter controls and fresh paired incumbent/rho protocol remain
+target has executed. `prepared_f5_runtime_v1.py` now registers a
+prepared-capable build and refuses the consumed v2 worker; no invocation of
+that registrar has been frozen or executed. A separately frozen one-shot
+development control and the fresh paired incumbent/rho protocol remain
 outstanding;
 no new speedup or promotion is established. The historical confirmation sets
 and censored generic registrations below remain closed.

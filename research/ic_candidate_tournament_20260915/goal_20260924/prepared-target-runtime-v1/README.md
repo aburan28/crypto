@@ -90,11 +90,25 @@ Tests reconstruct every query and every signed Frobenius orbit and compare the
 complete committed corpus. This is **only the preparation corpus**, not the
 complete historical exposure census or authorization to sample.
 
-The active goal remains incomplete. Before fresh comparison, finish the new
-native F5 source/build/registration transport, consume and audit separately
-frozen development controls for both new adapters, reconcile all current target
-exposures and reference registrations, rebuild/validate on the chosen matched
-host, calibrate the observer/reference, and freeze resources/arm order/input law
-before sampling. All three old confirmations and both censored generic studies
-remain closed. Incumbent/rho comparison, fresh-target qualification, operation
-totals, S/floor ratios, speedups and promotion remain **not run/unknown**.
+`prepared_f5_runtime_v1.py` is the F5 registration, entrypoint and independent
+auditor. It admits only a build other than the consumed v2 macOS worker, and
+only when `examples/ic_tournament_worker.rs` contains `fn run_prepared_target`.
+The disclosed point, at most eight target attempts, and the degree-3/node-8192
+F5 config match the existing native control. `package_assets` seals those build
+bytes without compiling or running them. Asset seals and the certificate file
+hash stay in the run. No `register`/`execute` invocation has been frozen or
+run. Synthetic receipt tests and the retained v2 report check identity
+separation, rejection and scalar replay only.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3.12 -m unittest discover \
+  -s research/ic_candidate_tournament_20260915 -p 'test_prepared_f5_runtime_v1.py' -v
+```
+
+The active goal remains incomplete. The next gate is one separately frozen
+development execution of this registrar on a matched host, then reconciliation
+of every current target exposure and reference registration, observer/reference
+calibration, and a frozen resource/arm-order/input law before any fresh sample.
+All three old confirmations and both censored generic studies remain closed.
+Incumbent/rho comparison, fresh-target qualification, operation totals, S/floor
+ratios, speedups and promotion remain **not run/unknown**.
