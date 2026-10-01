@@ -125,3 +125,38 @@ said it runs after all four.
 - R03, B0 and B1 lose nothing by waiting. None of them reads R04, and
   each measures against the newest accepted baseline, which a stage
   diagnostic does not change.
+
+## Amendment 2 (2026-10-01, after R02's decision, before any R04 run): the base after R02's rejection
+
+**R02's analysis rejects it.** Its figures land with R02's results
+pull request, which follows this one.
+- Its suite rows met the bar at both wide sizes.
+- Its holdout at `icv1-f2m59-tm943548413-98844ecc` read 1.161
+  [1.089, 1.239]. The lower end is not above 1.10.
+
+By amendment 1, R04's base is therefore v0.
+
+**The commit is v0′, `c1a2e5f8`, for the reason R02's amendment 3
+gives.**
+- `main` merged AGENTS.md §11 after v0 (`46ae2014`). Its slug naming is
+  what this round's runner reads.
+- From v0 to v0′, `src/` changed only in naming, labels and the text of
+  one error message. No pipeline step changed.
+- R02's pin showed that v0′'s outputs equal v0's on all 90 rows, and
+  that the names agree.
+- R02 also times v0 against v0′. That figure gates nothing here, because
+  R04's two arms are built from one commit and compared with each other.
+
+**The arms.** Both are built from `9a48b389`, which is v0′ plus R04's
+change:
+- `Cargo.toml` gains the feature;
+- `price.rs` adds the totals to the report;
+- `koblitz_index_calculus.rs` gains the probes.
+
+Each part sits behind `scan-probes`. Without the feature, the report
+function is the identity.
+- default: SHA-256 `ff5753791ffc3ee4b66eef9c6c30e33ae34cacd7bccd4aa68b38d28b18eb3c34`;
+- probes, `--features scan-probes`: SHA-256 `2405dc50f0676407048e04aee88d0ef0524921813217b39e68f833e25f68cb14`.
+
+Nothing else changes: the rows, the rounds, the measurements, the A/A
+source (R01's if the host matches) and the inadmissible readings.
