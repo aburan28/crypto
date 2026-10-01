@@ -69,6 +69,10 @@ mathematical execution tests are explicitly mocked; their returned admission
 objects are test controls, not new execution receipts. A real fresh isolated
 import control loads both new F5 and SAT adapters from the frozen source surface
 and passes before/after module gates without executing either solver.
+After preserving the accepted version-one registrar and making its wrong-host
+test portable, all 42 combined prepared-adapter controls pass. The initial
+local failure and exact-head CI boundary are retained in
+[the reconciliation record](CONCURRENT-RECONCILIATION.md).
 
 Run controls from the repository:
 
