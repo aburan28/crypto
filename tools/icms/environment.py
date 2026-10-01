@@ -296,14 +296,25 @@ def toolchain(extra: dict[str, list[str]] | None = None) -> dict[str, Any]:
     return out
 
 
+def _git(*args: str) -> str | None:
+    """stdout of a git command that succeeded, else None (never its error text)."""
+    try:
+        out = subprocess.run(["git", *args], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip() if out.returncode == 0 else None
+
+
 def git_state(path: str) -> dict[str, Any] | None:
-    top = _run(["git", "-C", path, "rev-parse", "--show-toplevel"])
+    top = _git("-C", path, "rev-parse", "--show-toplevel")
     if not top:
         return None
-    head = _run(["git", "-C", top, "rev-parse", "HEAD"])
-    status = _run(["git", "-C", top, "status", "--porcelain", "--untracked-files=no"]) or ""
+    head = _git("-C", top, "rev-parse", "HEAD")
+    status = _git("-C", top, "status", "--porcelain", "--untracked-files=no")
+    if head is None or status is None:
+        return None
     diff = subprocess.run(["git", "-C", top, "diff", "HEAD"], capture_output=True).stdout if status else b""
-    remote = _run(["git", "-C", top, "config", "--get", "remote.origin.url"])
+    remote = _git("-C", top, "config", "--get", "remote.origin.url")
     return {"toplevel": top, "commit": head, "dirty": bool(status.strip()),
             "dirty_paths": status.splitlines()[:50], "diff_sha256": sha256_bytes(diff) if diff else None,
             "remote": remote}

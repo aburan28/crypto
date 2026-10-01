@@ -21,7 +21,7 @@
     "implementation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["repo", "registry_sha256", "isolated_bench_sha256", "isolation_mode", "icms_sources"],
+      "required": ["repo", "registry_sha256", "isolated_bench_sha256", "isolation_mode", "icms_sources", "schemas_sha256"],
       "properties": {
         "repo": {
           "type": ["object", "null"],
@@ -37,7 +37,9 @@
         "registry_sha256": {"$ref": "#/$defs/sha256"},
         "isolated_bench_sha256": {"$ref": "#/$defs/sha256"},
         "isolation_mode": {"type": "string"},
-        "icms_sources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}}
+        "icms_sources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "schemas_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"},
+                           "description": "the schema files the session was written under; the audit re-derives a session only under the same build"}
       }
     },
     "spec_files": {

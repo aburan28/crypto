@@ -68,7 +68,56 @@ def find_sessions(path: str) -> list[str]:
                   if os.path.isfile(os.path.join(path, d, "session.json")))
 
 
-def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Validator] | None = None) -> list[str]:
+def audit_integrity(path: str) -> list[str]:
+    """The checks that do not depend on the ICMS build: every hash and id a
+    session binds, recomputed from its files.  Used alone for a session
+    written under an earlier build, whose schemas and derivation may differ
+    from this tree's."""
+    problems: list[str] = []
+    name = os.path.basename(os.path.normpath(path))
+
+    def bad(msg: str) -> None:
+        problems.append(f"{name}: {msg}")
+
+    session = _load_json(os.path.join(path, "session.json"))
+    if sha256_file(os.path.join(path, "capsule.json")) != session.get("capsule_sha256"):
+        bad("capsule.json does not hash to session.capsule_sha256")
+    rec_path = os.path.join(path, "records.jsonl")
+    if sha256_file(rec_path) != session.get("records_sha256"):
+        bad("records.jsonl does not hash to session.records_sha256")
+    for spec_name, digest in (session.get("spec_files") or {}).items():
+        if sha256_file(os.path.join(path, "specs", spec_name)) != digest:
+            bad(f"specs/{spec_name} does not hash to session.spec_files")
+    with open(rec_path) as fh:
+        lines = [x for x in fh if x.strip()]
+    for n, line in enumerate(lines):
+        try:
+            rec = json.loads(line)
+            if record_id({k: v for k, v in rec.items() if k != "record_id"}) != rec.get("record_id"):
+                bad(f"record {n}: content does not hash to its record_id")
+            if rec.get("session_id") != session.get("session_id") or rec.get("execution_index") != n:
+                bad(f"record {n}: session id or execution index is wrong")
+            outputs = (rec.get("execution") or {}).get("outputs") or {}
+            exec_dir = os.path.join(path, "exec", f"{n:04d}")
+            want = {k: v for k, v in outputs.items() if k in ("stdout", "stderr")}
+            want.update(outputs.get("files") or {})
+            for f, o in want.items():
+                fp = os.path.join(exec_dir, o.get("path", f) if f in ("stdout", "stderr") else f)
+                if sha256_file(fp) != o.get("sha256"):
+                    bad(f"record {n}: exec/{n:04d}/{f} is missing or does not hash to the record")
+        except (ValueError, TypeError, AttributeError) as exc:
+            bad(f"record {n}: unreadable: {exc}")
+    cmp_dir = os.path.join(path, "comparisons")
+    if os.path.isdir(cmp_dir):
+        for f in sorted(os.listdir(cmp_dir)):
+            c = _load_json(os.path.join(cmp_dir, f))
+            if c.get("records_sha256") != session.get("records_sha256"):
+                bad(f"comparisons/{f} is not bound to this session's records")
+    return problems
+
+
+def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Validator] | None = None,
+                  notes: list[str] | None = None) -> list[str]:
     reg = reg or Registry.load()
     vals = vals or validators()
     problems: list[str] = []
@@ -82,6 +131,19 @@ def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Valida
     if problems:
         return problems
     session = _load_json(os.path.join(path, "session.json"))
+    from .session import current_build
+    impl = session.get("implementation") or {}
+    now = current_build(reg)
+    changed = sorted(k for k in now if impl.get(k) != now[k])
+    if changed:
+        # Written under another ICMS build: its schemas and derivation are not
+        # this tree's, and evidence is never rewritten to match new code.
+        # Check everything that does not depend on the build, and say so.
+        if notes is not None:
+            notes.append(f"{os.path.basename(os.path.normpath(path))}: recorded under another ICMS build "
+                         f"({', '.join(changed)} differ); integrity checked, re-derivation needs commit "
+                         f"{((impl.get('repo') or {}).get('commit') or 'unknown')[:12]}")
+        return audit_integrity(path)
     for e in vals[SESSION_SCHEMA].errors(session):
         bad(f"session.json {e}")
     if problems:
@@ -280,15 +342,18 @@ def check_gate(rec: dict[str, Any], session: dict[str, Any], cap: dict[str, Any]
         bad(f"{where}: isolation differs from the gate recomputed from its observations in {keys}")
 
 
-def audit(paths: list[str]) -> tuple[int, list[str]]:
+def audit(paths: list[str], notes: list[str] | None = None) -> tuple[int, list[str]]:
     reg, vals = Registry.load(), validators()
     sessions: list[str] = []
     for p in paths:
         sessions += find_sessions(p)
     problems: list[str] = []
+    for p in paths:
+        if not os.path.exists(p):
+            problems.append(f"{p}: no such path")
     for s in sessions:
         try:
-            problems += audit_session(s, reg, vals)
+            problems += audit_session(s, reg, vals, notes)
         except Exception as exc:  # one malformed session must not hide the others' results
             problems.append(f"{os.path.basename(os.path.normpath(s))}: audit stopped: {type(exc).__name__}: {exc}")
     return len(sessions), problems

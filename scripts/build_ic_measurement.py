@@ -78,8 +78,12 @@ def load_sessions() -> list[dict]:
 def arm_rows(s: dict) -> list[dict]:
     rows = []
     for arm in s["session"]["arms"]:
-        rs = [r for r in s["records"] if r["arm"] == arm["index"] and not r["warmup"]]
+        measured = [r for r in s["records"] if r["arm"] == arm["index"] and not r["warmup"]]
+        # Figures come from completed, verified runs only, as in a comparison.
+        rs = [r for r in measured if r["outcome"]["status"] == "complete" and r["outcome"].get("verified")]
         if not rs:
+            rows.append({"arm": arm["index"], "label": arm.get("label"), "spec_id": arm["spec_id"],
+                         "workload_id": arm["workload_id"], "runs": len(measured), "complete": 0, "empty": True})
             continue
         first = rs[0]
         m = first.get("metrics") or {}
@@ -92,8 +96,8 @@ def arm_rows(s: dict) -> list[dict]:
         win = [w / 1e6 for w in win if w is not None]
         rows.append({
             "arm": arm["index"], "label": arm.get("label"), "spec_id": arm["spec_id"], "workload_id": arm["workload_id"],
-            "runs": len(rs), "complete": sum(1 for r in rs if r["outcome"]["status"] == "complete" and r["outcome"].get("verified")),
-            "levels": sorted({r["isolation"]["earned_level"] for r in rs}),
+            "runs": len(measured), "complete": len(rs), "empty": False,
+            "levels": sorted({r["isolation"]["earned_level"] for r in measured}),
             "unit": unit, "window": first["window"],
             "deterministic": all(((r.get("units") or {}).get(unit) or {}).get("deterministic") for r in rs),
             "ops_median": statistics.median(totals) if totals else None,
@@ -103,6 +107,7 @@ def arm_rows(s: dict) -> list[dict]:
             "window_wall_ms_median": statistics.median(win) if win else None,
             "window_wall_ms_min": min(win) if win else None,
             "process_wall_ms_median": statistics.median(walls), "process_wall_ms_min": min(walls),
+            "solver_conflicts": sol.get("conflicts"),
             "usable_points": fb.get("usable_points"), "abscissae": fb.get("abscissae_with_points"),
             "columns": fb.get("columns"), "points_per_column": fb.get("points_per_column"),
             "n_vars": sysm.get("n_vars"), "n_equations": sysm.get("n_equations"),
@@ -276,6 +281,7 @@ def page(doc: dict) -> str:
     n_high = sum(1 for f in audit if f["severity"] == "high")
     measured = sum(s["measured"] for s in sessions)
     best = sorted({lvl for s in sessions for lvl in s["gates"]["levels"]})
+    all_exact = all(a.get("deterministic", True) for s in sessions for a in s["arms"] if not a.get("empty"))
     P = ['<div class="wrap"><header>',
          '<span class="eyebrow">ECDLP · index calculus · measurement standard v1 · no speedup claimed</span>',
          '<h1>Index Calculus Measurement Standard</h1>',
@@ -285,8 +291,11 @@ def page(doc: dict) -> str:
          f'differs. The audit behind it found <strong>{len(audit)} ways the existing figures were not '
          f'apples to apples</strong>, {n_high} of them severe. The demonstrations below run on this repository\'s '
          'cloud container, a virtual machine that can be pinned and is sometimes quiet (L2) but is never isolated (L3). '
-         'Operation counts there are exact; wall time is admitted only when every run of both arms earned its declared '
-         'level, and is otherwise shown as descriptive only.</p>',
+         + ('Every operation count there is exact. ' if all_exact else
+            'Operation counts there are exact except in rows marked host-dependent, where a solver was priced from '
+            'host wall time. ')
+         + 'Wall time is admitted only when every run of both arms earned its declared level, and is otherwise shown '
+         'as descriptive only.</p>',
          '<dl class="facts">',
          f'<div class="fact"><dt>Audit findings</dt><dd>{len(audit)}</dd><p>{n_high} high severity; each with its evidence path</p></div>',
          f'<div class="fact"><dt>Runs recorded</dt><dd>{measured}</dd><p>in {len(sessions)} frozen session(s), warm-ups kept separately</p></div>',
@@ -393,6 +402,10 @@ def page(doc: dict) -> str:
                  '<th class="n">ops (unit)</th><th class="n">S</th>'
                  '<th class="n">window ms med / min</th></tr></thead><tbody>')
         for a in s["arms"]:
+            if a.get("empty"):
+                P.append(f'<tr><td class="n">{a["arm"]}</td><td class="cfg">{esc(a["label"])}</td><td class="n">0/{a["runs"]}</td>'
+                         '<td colspan="9">no run completed and verified: no figure</td></tr>')
+                continue
             ops = f'{g3(a["ops_median"])}{"" if a["ops_distinct"] <= 1 else " (varies)"}'
             det = ("" if a["deterministic"] else '<br><span class="muted">host-dependent</span>') + \
                   ('<br><span class="muted">lower bound: unpriced counters</span>' if a["lower_bound"] else "")
@@ -490,12 +503,27 @@ def page(doc: dict) -> str:
     return head + "\n".join(P) + "\n</main>\n</body>\n</html>\n"
 
 
+def retired_names(text: str) -> list[str]:
+    """Retired curve names in the page (AGENTS.md section 11), found by the
+    repository's own checker, so a bad label fails here, not later in CI."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_curve_names", REPO / "scripts" / "check_curve_names.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return [found for _s, _e, found, _r in mod.find_retired(text, rel(OUT_HTML), mod.Resolver())]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args()
     doc = build()
     outs = {OUT_JSON: json.dumps(doc, indent=1, sort_keys=True) + "\n", OUT_HTML: page(doc)}
+    retired = retired_names(outs[OUT_HTML])
+    if retired:
+        print(f"the page would carry retired curve names {sorted(set(retired))}; name curves by ICV1 slug "
+              "in spec and session labels", file=sys.stderr)
+        return 1
     if args.check:
         stale = [p for p, text in outs.items() if not p.exists() or p.read_text() != text]
         for p in stale:

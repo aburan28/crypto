@@ -144,10 +144,16 @@ def cmd_compare(args) -> int:
 
 def cmd_audit_sessions(args) -> int:
     from icms.audit import audit
-    n, problems = audit(args.paths)
+    notes: list[str] = []
+    n, problems = audit(args.paths, notes)
+    for x in notes:
+        print(f"NOTE {x}")
     for p in problems:
         print(f"FAIL {p}")
     print(f"{n} session(s) audited, {len(problems)} problem(s)")
+    if n == 0 and not args.allow_none:
+        print("no session found: nothing was audited", file=sys.stderr)
+        return 1
     return 1 if problems else 0
 
 
@@ -191,7 +197,8 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(fn=cmd_compare)
     p = sub.add_parser("summarize"); p.add_argument("session"); p.set_defaults(fn=cmd_summarize)
     p = sub.add_parser("audit-sessions", help="re-derive every hash, id, gate and comparison of committed sessions")
-    p.add_argument("paths", nargs="+", help="session directories, or directories of sessions (a missing one holds none)")
+    p.add_argument("paths", nargs="+", help="session directories, or directories of sessions")
+    p.add_argument("--allow-none", action="store_true", help="succeed when the paths hold no session")
     p.set_defaults(fn=cmd_audit_sessions)
     args = ap.parse_args(argv)
     return args.fn(args)

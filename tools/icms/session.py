@@ -62,6 +62,18 @@ def _sources(top: str) -> dict[str, str]:
     return out
 
 
+def schema_hashes() -> dict[str, str]:
+    d = os.path.join(REPO, "docs", "ic", "measurement", "schema")
+    return {f: sha256_file(os.path.join(d, f)) for f in sorted(os.listdir(d)) if f.endswith(".json")}
+
+
+def current_build(reg: Registry) -> dict[str, Any]:
+    """What a session's implementation block must equal for the audit to
+    re-derive it with this tree's code, schemas and registry."""
+    return {"icms_sources": _sources(os.path.dirname(os.path.abspath(__file__))), "registry_sha256": reg.sha256,
+            "schemas_sha256": schema_hashes()}
+
+
 class SessionError(RuntimeError):
     pass
 
@@ -173,7 +185,8 @@ def run_session(spec_paths: list[str], out_dir: str, cpus: set[int], *, lock: st
                           "isolated_bench_sha256": sha256_file(os.path.join(REPO, "tools", "isolated_bench.py")),
                           "isolation_mode": "reserve-equivalent: the isolated_bench lock, preflight, CPU checks and "
                                             "eviction, imported from tools/isolated_bench.py; ICMS pins its own children",
-                          "icms_sources": _sources(os.path.dirname(os.path.abspath(__file__)))}
+                          "icms_sources": _sources(os.path.dirname(os.path.abspath(__file__))),
+                          "schemas_sha256": schema_hashes()}
         order = plan(arms, int(session_id[-8:], 16))
         session: dict[str, Any] = {
             "schema": SESSION_SCHEMA, "standard": STANDARD, "session_id": session_id, "label": session_label,

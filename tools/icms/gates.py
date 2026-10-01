@@ -90,9 +90,10 @@ def evaluate(execution: dict[str, Any], session: dict[str, Any], capsule_stable:
     checks.append(_c("reservation", "L1",
                      _bool_status(bool(reservation.get("evicted")) and not left_user if reservation else None),
                      {k: reservation.get(k) for k in ("evicted", "threads_moved", "left_on_reserved")} if reservation else None,
-                     "other movable threads evicted, and no user thread left confined to the reserved CPUs",
-                     "isolated_bench.evict over the whole session; a user thread pinned inside the reservation "
-                     "cannot be moved and fails this check"))
+                     "other threads evicted, and no user thread left on the reserved CPUs that the session could not move",
+                     "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the "
+                     "session lacks permission to move (another user's, when not run as root), fails this check, so "
+                     "a session not run as root earns at most L0"))
     sched = execution.get("schedstat") or {}
     wall = execution.get("wall_ns") or 0
     ru = execution.get("rusage") or {}

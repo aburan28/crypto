@@ -257,7 +257,7 @@ checks, passed (`tools/icms/gates.py`):
 | level | requires |
 |---|---|
 | **L0 recorded** | the run executed under a saved capsule. Enough for operation counts, which do not depend on contention. |
-| **L1 pinned** | child CPU mask read back equal to the reservation, and every task of the measured tree, on every sample, with a mask inside it that last ran on one of its CPUs (a producer that re-pins itself fails); CPU 0 excluded; other threads evicted (`isolated_bench.evict`) and no user thread left confined to the reserved CPUs; the tree's CPU time / wall ≤ declared threads, taking the larger of sampled schedstat and the reaped rusage |
+| **L1 pinned** | child CPU mask read back equal to the reservation, and every task of the measured tree, on every sample, with a mask inside it that last ran on one of its CPUs (a producer that re-pins itself fails); CPU 0 excluded; other threads evicted (`isolated_bench.evict`) and no user thread left on the reserved CPUs that the session could not move (a session not run as root cannot move other users' threads, so it earns at most L0); the tree's CPU time / wall ≤ declared threads, taking the larger of sampled schedstat and the reaped rusage |
 | **L2 quiet** | L1, and during the window: run-queue delay of the child ≤ 0.5 % (from `/proc/<pid>/task/*/schedstat`; unknown when the 50 ms samples saw under 90 % of the tree's CPU time), zero hypervisor steal on the pinned CPUs, no foreign runnable task on them in any sample, no memory stall, ≤ 50 preemptions per second, and a quiet `isolated_bench` preflight |
 | **L3 isolated** | L2, and the host configured for measurement: pinned CPUs in `isolcpus` or `nohz_full`, performance governor with turbo off, SMT off or siblings reserved, bare metal |
 

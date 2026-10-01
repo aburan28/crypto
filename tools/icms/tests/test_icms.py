@@ -958,6 +958,20 @@ class SessionAuditTests(unittest.TestCase):
         g["relations"].update(stop="count", count=1000)
         self.assertTrue(spec_differences(validate(f), validate(g), ["relations.count"])["forbidden"])
 
+    def test_a_session_from_another_build_gets_integrity_checks_and_a_note(self):
+        from unittest import mock
+        import icms.session as sess
+        real = sess.current_build
+        other = lambda reg: {**real(reg), "registry_sha256": "0" * 64}  # noqa: E731
+        with mock.patch.object(sess, "current_build", other):
+            notes = []
+            self.assertEqual(audit_session(self.session_dir, vals=self.vals, notes=notes), [])
+            self.assertTrue(notes and "another ICMS build" in notes[0])
+            d = self.forged()
+            with open(os.path.join(d, "exec", "0002", "stdout"), "a") as fh:
+                fh.write("x")
+            self.assertTrue(audit_session(d, vals=self.vals, notes=[]), "integrity checks still run")
+
     def test_edited_comparison_is_refused(self):
         d = self.forged()
         cp = os.path.join(d, "comparisons", "toy9-vs-toy8.json")
