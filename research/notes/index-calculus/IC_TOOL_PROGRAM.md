@@ -272,7 +272,7 @@ Paths below are to `src/cryptanalysis/koblitz_index_calculus.rs`
 | **A1** | **the pair-table build** | 9–28% of the set-up | §19.4's two passes per stored pair survive only in the compact tier (KIC:3822-3828). The folded tier, which every suite size uses, builds in one pass up to 2 GiB of scratch (KIC:4027-4030). So the lever is the one pass's own cost, which needs v0's profile to locate. |
 | **A9** | **the curve's construction** | 41% of the set-up at `2^38.0`. `factorise_u64` (KIC:540) tests primality at every trial divisor. | it is shared by both arms, so it moves cold time, not the ratio |
 | **A10** | **relation verification and the log system** | each check builds a fresh `FastCurve` inside `kc.mul` (KIC:9791, 828-838). `LogSystem::push` makes a dense big-integer row per relation (KIC:6301-6322). Each extra solve attempt refilters from scratch. | 1–7% of the set-up on the suite, so the gain is mostly at small sizes |
-| **A11** | **the scan's canonical key** (`PairSumTable::keys_of`) | 46% of the set-up's instructions at `icv1-f2m61-t158598901-ab42b6c5`, about 565 a scanned summand, and no cache misses (R01's callgrind, added 2026-10-01). Valgrind hides AVX-512, so that is the portable key's cost. The timed runs use the AVX-512 key, about 70 instructions a key by its code (R01's correction). Natively, outside the scan, it costs 5.6–10.2 ns a key, mostly the rotation loop, and the 8-lane batched subtraction 8.3–8.4 ns a summand at `n = 53`: together about half of a scanned summand's ~40 ns ([exploration, 2026-10-01](../../ic_tool_program/explorations/A11-run-kernel-20261001/README.md)). | a vectorised run-based kernel gave the same keys but was slower at `n = 41` and 53 and equal at 61, so it was rejected before declaration (same exploration). Next: price the scan's other half (the filter probe, the admitted candidates, the bookkeeping) inside the scan, with probes compiled into a separate binary |
+| **A11** | **the scan's canonical key** (`PairSumTable::keys_of`) | 46% of the set-up's instructions at `icv1-f2m61-t158598901-ab42b6c5`, about 565 a scanned summand, and no cache misses (R01's callgrind, added 2026-10-01). Valgrind hides AVX-512, so that is the portable key's cost. The timed runs use the AVX-512 key, about 70 instructions a key by its code (R01's correction). Natively, outside the scan, it costs 5.6–10.2 ns a key, mostly the rotation loop, and the 8-lane batched subtraction 8.3–8.4 ns a summand at `n = 53`: together about half of a scanned summand's ~40 ns ([exploration, 2026-10-01](../../ic_tool_program/explorations/A11-run-kernel-20261001/README.md)). | a vectorised run-based kernel gave the same keys but was slower at `n = 41` and 53 and equal at 61, so it was rejected before declaration (same exploration). R04 then priced the scan's other half inside the scan, with probes compiled into a separate binary (below) |
 | **A12** | **re-optimising the recipe for one target** | §20 chose its recipes for `K = 32` targets sharing one set-up; the programme's metric is one target, cold. §20's own frozen model (`predict.py`), re-run at `K = 1` (2026-10-01), predicts 1.00–1.09× at the top six sizes, where descent is under 2% of one target's cost and set-up is collection against build, balanced whatever `K` is. It predicts 2.3–4.7× at `r < 2^25`, where selection dominates. | it changes every output, so it is an algorithm change and is declared as one; it moves only the small sizes, so it waits behind the scan |
 | **A3** | online lookups | `target_PDP` is 53–96% of the online interval (§23) | the online interval is under 2% of cold, so this moves the rule's online ratio, not the cold one |
 | **A4** | linear algebra: block Wiedemann over `u64` residues (`koblitz_sparse_la.rs`) | under 1% of the set-up at these sizes | it grows faster than the other phases (AGENTS.md §5); price it at every baseline |
@@ -280,6 +280,35 @@ Paths below are to `src/cryptanalysis/koblitz_index_calculus.rs`
 | **A6** | multi-core set-up | four cores here | it must not regress one thread |
 | **A7** | field kernels per hardware class | the portable path is unmeasured | each class is reported separately |
 | **A8** | an external reference audit | needed before any outside comparison (§1) | published figures are usually stage-only and on other hardware |
+
+**R04 priced the scan's stages (2026-10-01).** It is a stage
+diagnostic, class accounting: no code on the timed path changed, and
+nothing here is a speedup
+([results](../../ic_tool_program/rounds/R04-scan-probes/README.md)).
+Time-stamp-counter probes, compiled in only by a `scan-probes` feature,
+split the scan into the batched subtraction, the key, the presence
+filter and the admitted keys. Both arms were built from `9a48b389` (v0′
+plus the probes) and run on `M1`'s 22 rows, three rounds, isolated.
+- **The subtraction leads at the top.** It holds 37–41% of the scan at
+  three of the four largest sizes. At `2^44.3` the admitted keys lead
+  instead, with 42%.
+- **The two wide-tail sizes pay for a scalar subtraction:** 32.5 and
+  33.3 ns a summand, against 13.1 at `2^44.3`, where the 8-lane kernel
+  runs. That is R02's kernel's target, and R02b (#1157) re-tests it.
+- **The key and the filter are steady:** 9–16 ns and 4–9 ns a summand
+  at the top six sizes. The filter admits 12–21% of keys there.
+- **The shares are reported, not trusted.** The protocol trusts a size
+  where the probes' overhead interval lies inside R01's A/A band. That
+  held at no size: with six pairs a size, each interval is as wide as
+  its band. Ten of eleven intervals contain 1, and the ranking rests on
+  gaps of 7–18 points of share.
+- **A check after the run, not declared:** the filter is one bit per
+  stored pair under one hash, at 4–8 bits a pair. From `2^36.6` up, its
+  predicted pass rate for absent keys matches the admitted fraction to
+  within 2%, and true hits are one summand in 7,200 to 221,000. So the
+  admitted stage is spent almost entirely on false positives, at
+  118–159 ns an admitted key at the three largest sizes. A sharper
+  filter is a later lever, if plan §11 leaves the scan open after R02b.
 
 ## 9. Track B: generality and robustness
 
