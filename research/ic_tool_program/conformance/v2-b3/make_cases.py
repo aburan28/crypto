@@ -169,11 +169,12 @@ def texts() -> dict[str, str]:
         "rules": [
             "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still "
             "../v2/params/. ../run.py runs these after v1's and v2's.",
-            "The until rule: a case whose `until` step is at or before the step run through is not run; "
-            "its successor carries the new expectation. B1's files are frozen, so the dated note for "
-            "C027 is here: from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",
-            "Steps, in order: B0, B1, B2, B3, B3b, B4, B5, B6, B7. B3b is the index calculus on "
-            "two-word fields, declared separately.",
+            "The until rule: a case whose `until` step is among the steps run is not run; its successor "
+            "carries the new expectation. B1's files are frozen, so the dated note for C027 is here: "
+            "from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",
+            "The runner takes the set of steps accepted so far and the one judged, since steps are not "
+            "accepted in their numbering's order: B3 is judged with B0, B1 and B3. B3b is the index "
+            "calculus on two-word fields, declared separately.",
         ],
         "generator": {"path": "research/ic_tool_program/conformance/v2-b3/make_cases.py",
                       "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()},

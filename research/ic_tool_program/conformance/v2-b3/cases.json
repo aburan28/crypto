@@ -4,12 +4,12 @@
  "includes": "../v1/cases.json (step B0) and ../v2/cases.json (B1), run first, with the until rule",
  "rules": [
   "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still ../v2/params/. ../run.py runs these after v1's and v2's.",
-  "The until rule: a case whose `until` step is at or before the step run through is not run; its successor carries the new expectation. B1's files are frozen, so the dated note for C027 is here: from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",
-  "Steps, in order: B0, B1, B2, B3, B3b, B4, B5, B6, B7. B3b is the index calculus on two-word fields, declared separately."
+  "The until rule: a case whose `until` step is among the steps run is not run; its successor carries the new expectation. B1's files are frozen, so the dated note for C027 is here: from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",
+  "The runner takes the set of steps accepted so far and the one judged, since steps are not accepted in their numbering's order: B3 is judged with B0, B1 and B3. B3b is the index calculus on two-word fields, declared separately."
  ],
  "generator": {
   "path": "research/ic_tool_program/conformance/v2-b3/make_cases.py",
-  "sha256": "d78f4efbfa742e2c0bfbfc64e6fc05eb4af059d1839bd6b58998e383f29c02af"
+  "sha256": "ded1ffadafecbb84d321f044817d979a9871212512bec9ba1b37b0c0dbb43213"
  },
  "cases": [
   {

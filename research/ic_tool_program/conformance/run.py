@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""The programme's conformance runner, from B3 on: every step's cases, in
-order, with the design's `until` rule applied
+"""The programme's conformance runner, from B3 on: the cases of the steps
+named, with the design's `until` rule applied
 (`research/ic_tool_program/design/schema-v2.md` §9).
 
-    python3 run.py --ic target/release/ic --through B3 [--build-commit SHA] [--out report.json]
+    python3 run.py --ic target/release/ic --steps B0,B1,B3 [--build-commit SHA] [--out report.json]
+
+`--steps` names the steps accepted so far and the one being judged.  The
+steps are not accepted in their numbering's order (B3 before B2, say),
+so the runner takes the set, not a range.
 
 The case sets, each frozen by its own step's `SHA256SUMS`:
 - `v1/cases.json`, conformance suite v1: step B0's cases;
@@ -14,8 +18,8 @@ The case sets, each frozen by its own step's `SHA256SUMS`:
 In a case, `{here}` is its own set's `params/`; `{cases}` is still
 `v2/params/`, B1's frozen documents, which later cases copy and edit.
 
-A case whose `until` step is at or before `--through` is not run; its
-successor carries the new expectation.  Everything else — materialising
+A case whose `until` step is among `--steps` is not run; its successor
+carries the new expectation.  Everything else — materialising
 files, running, the expectations — is `v2/run.py`'s, unchanged.  This
 runner's rules change only by a step's declaration.
 """
@@ -43,11 +47,9 @@ def case_sets() -> list[tuple[Path, list[dict]]]:
     return sets
 
 
-def cases_through(step: str) -> list[dict]:
-    last = STEPS.index(step)
-
+def cases_for(steps: set[str]) -> list[dict]:
     def live(c: dict) -> bool:
-        return STEPS.index(c["step"]) <= last and ("until" not in c or STEPS.index(c["until"]) > last)
+        return c["step"] in steps and c.get("until") not in steps
 
     out = []
     for d, cases in case_sets():
@@ -60,12 +62,17 @@ def cases_through(step: str) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ic", required=True, type=Path)
-    ap.add_argument("--through", required=True, choices=STEPS)
+    ap.add_argument("--steps", required=True,
+                    help="comma-separated: the steps accepted so far and the one judged, e.g. B0,B1,B3")
     ap.add_argument("--build-commit")
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
-    results = [v2.run_case(c, args.ic.resolve(), args.build_commit) for c in cases_through(args.through)]
-    report = {"binary": str(args.ic), "through": args.through, "cases": len(results),
+    steps = {s.strip() for s in args.steps.split(",") if s.strip()}
+    unknown = steps - set(STEPS)
+    if unknown:
+        ap.error(f"unknown steps: {sorted(unknown)}; the steps are {', '.join(STEPS)}")
+    results = [v2.run_case(c, args.ic.resolve(), args.build_commit) for c in cases_for(steps)]
+    report = {"binary": str(args.ic), "steps": sorted(steps, key=STEPS.index), "cases": len(results),
               "passed": sum(r["pass"] for r in results), "results": results}
     text = json.dumps(report, indent=1)
     if args.out:

@@ -102,7 +102,7 @@ speedup. The gate's rho at F0 is a measurement of the reference at
 
 1. **Tests.** `cargo test --release --lib -- gf2_wide koblitz_wide` and
    `cargo test --release --bin ic`.
-2. **Conformance.** `conformance/run.py --through B3` on B3, which
+2. **Conformance.** `conformance/run.py --steps B0,B1,B3` on B3, which
    runs:
    - v1's cases;
    - v2's cases with the `until` rule applied, which retires C027;
@@ -138,7 +138,7 @@ speedup. The gate's rho at F0 is a measurement of the reference at
 
 B3 is **accepted** when all of the following hold:
 - every test passes;
-- every case `conformance/run.py --through B3` selects passes;
+- every case `conformance/run.py --steps B0,B1,B3` selects passes;
 - the pin holds on every row;
 - no size regresses beyond its A/A band, judged as in B1;
 - the gate's rho recovers the logarithm, checked in the walk and
