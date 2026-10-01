@@ -22,14 +22,14 @@ use std::env;
 use std::fs;
 use std::time::Instant;
 
-use crypto_lib::cryptanalysis::ext_curve::{Fp2, Fp3};
+use crypto_lib::cryptanalysis::ext_curve::{take_field_counters, Fp2, Fp3};
 use crypto_lib::cryptanalysis::gls_fp2::{
     generate_gls_instance_of, gls_line_base_by, GlsFamily, GlsFold, GlsInstance,
 };
 use crypto_lib::cryptanalysis::glv_invariant_base::{
     automorphism_generators, eigenvalue_order, endomorphism_overlap, generate_cm_instance,
     glv_orbit_base, rho_reference_folded, velu_degree2_endomorphisms, velu_degree3_endomorphisms,
-    verify_endomorphism, AutomorphismGroup, CmFamily, Endomorphism,
+    verify_endomorphism, AutomorphismGroup, CmFamily, Endomorphism, Negation,
 };
 use crypto_lib::cryptanalysis::glv_invariant_experiments::{
     classes_for, e1_stream, full_rank_stream, StreamReport,
@@ -54,6 +54,9 @@ struct Opts {
     bits: Vec<u32>,
     seeds: u64,
     rho_runs: usize,
+    /// Steps a single rho reference may spend before it is reported as
+    /// capped (`verified: false`); a cap is never evidence.
+    rho_max_steps: u64,
     max_trials: u64,
     json: Option<String>,
 }
@@ -947,6 +950,386 @@ fn e7(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E8: three summands on the Frobenius line, every phase priced ───
+
+/// The measured conversion that prices an `F_p` inversion in `F_p`
+/// multiplications on this host (AGENTS.md §2: foreign units convert
+/// by a measured factor, recorded): the median of three wall-time
+/// ratios of `inv_mod` to `mulm` over `2·10⁵` operands each.
+fn inversion_in_multiplications(p: u64) -> f64 {
+    use crypto_lib::cryptanalysis::glv_invariant_base::mulm;
+    use crypto_lib::cryptanalysis::residual_walk::inv_mod;
+    let n = 200_000u64;
+    let mut ratios = Vec::new();
+    for _ in 0..3 {
+        let mut acc = 1u64;
+        let t0 = Instant::now();
+        for k in 1..=n {
+            acc = mulm(acc, k % (p - 1) + 1, p);
+        }
+        let t_mul = t0.elapsed().as_secs_f64();
+        std::hint::black_box(acc);
+        let mut acc = 0u64;
+        let t1 = Instant::now();
+        for k in 1..=n {
+            acc ^= inv_mod(k % (p - 1) + 1, p);
+        }
+        let t_inv = t1.elapsed().as_secs_f64();
+        std::hint::black_box(acc);
+        ratios.push(t_inv / t_mul.max(1e-12));
+    }
+    ratios.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    ratios[1]
+}
+
+/// E8: the three-summand pair-table oracle on the Frobenius line of a
+/// generic subfield curve, both arms on one stream, with every phase
+/// counted in `F_p` multiplications and inversions (the base build,
+/// the pair table, the stream, the linear algebra's row operations)
+/// and the matched rho — negation walk and Frobenius-folded walk —
+/// counted the same way on the same instance.
+fn e8(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    for &p_bits in &o.bits {
+        for seed in 1..=o.seeds {
+            let inst = match generate_subfield_instance(p_bits, seed, false, 8) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("e8 {p_bits} seed {seed}: {e}");
+                    continue;
+                }
+            };
+            let started = Instant::now();
+            let k_inv = inversion_in_multiplications(inst.p);
+            take_field_counters();
+            let (folded, frep) = subfield_line_base(&inst, SubfieldFold::Frobenius).unwrap();
+            let (build_muls_f, build_invs_f) = take_field_counters();
+            let (control, _) = subfield_line_base(&inst, SubfieldFold::Negation).unwrap();
+            let (build_muls_c, build_invs_c) = take_field_counters();
+            let neg = Negation { r: inst.r };
+            let refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &inst.frobenius];
+            let classes = classes_for(&inst.curve, inst.generator, inst.r, &refs).unwrap();
+            let planted = planted_for(seed, inst.r);
+            let mut ops = GroupOps::default();
+            let target = inst.curve.mul(&mut ops, inst.generator, planted);
+            let ctx = InstanceCtx {
+                group: &inst.curve,
+                generator: inst.generator,
+                target,
+                r: inst.r,
+                cofactor: inst.cofactor,
+                group_order: inst.group_order,
+                name: inst.name.clone(),
+                field_degree: Some(3),
+            };
+            take_field_counters();
+            // One pair table over the shared points serves both arms;
+            // a pipeline would build it once per arm at the same cost,
+            // so it is charged to each arm in full.
+            let mut oracle = MitmOracle::new(3);
+            let mut params = Params::default();
+            params.set("negation_folded", "1");
+            let mut table_ops = GroupOps::default();
+            oracle
+                .prepare(&ctx, &folded, &params, &mut table_ops)
+                .unwrap();
+            let (table_muls, table_invs) = take_field_counters();
+            let rep = full_rank_stream(
+                &inst.curve,
+                inst.generator,
+                target,
+                inst.r,
+                inst.cofactor,
+                planted,
+                &folded,
+                &control,
+                seed,
+                o.max_trials,
+                3,
+                Some(&classes),
+                |ops, ctr, pt| oracle.decompose(&ctx, &folded, ops, ctr, pt),
+            )
+            .unwrap();
+            let (stream_muls, stream_invs) = take_field_counters();
+            let mut walks = Vec::new();
+            let (mut st_neg, mut st_fold, mut all_ok) = (0u64, 0u64, true);
+            for k in 0..o.rho_runs as u64 {
+                let ws = seed ^ (k * 0x9E37);
+                take_field_counters();
+                let n = rho_reference_negation(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                );
+                let (nm, ni) = take_field_counters();
+                let f = rho_reference_folded(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                    &refs,
+                )
+                .unwrap();
+                let (fm, fi) = take_field_counters();
+                all_ok &= n.verified && f.verified;
+                st_neg += n.steps;
+                st_fold += f.steps;
+                walks.push(json!({
+                    "walk_seed": ws,
+                    "negation": n,
+                    "negation_fp_muls": nm,
+                    "negation_fp_invs": ni,
+                    "folded": f,
+                    "folded_fp_muls": fm,
+                    "folded_fp_invs": fi,
+                }));
+            }
+            eprintln!(
+                "e8 p=2^{p_bits} r=2^{:.1} h/N1={}: cols {}/{} square {:?}/{:?} ratio {:?} rank@cols {:?}/{:?} single {}/{} dups {} of {} stream muls {} table muls {} rho steps ratio {:.2} ok {}/{}/{} [{:.1}s]",
+                (inst.r as f64).log2(),
+                inst.cofactor / inst.base_order,
+                rep.folded.columns,
+                rep.control.columns,
+                rep.folded.square_relations,
+                rep.control.square_relations,
+                rep.square_ratio,
+                rep.folded.rank_fraction_at_columns,
+                rep.control.rank_fraction_at_columns,
+                rep.folded.single_column_rows,
+                rep.control.single_column_rows,
+                rep.orbit_duplicates,
+                rep.trials,
+                stream_muls,
+                table_muls,
+                st_neg as f64 / st_fold.max(1) as f64,
+                rep.folded.verified,
+                rep.control.verified,
+                all_ok,
+                started.elapsed().as_secs_f64()
+            );
+            rows.push(json!({
+                "experiment": "e8",
+                "family": "subfield",
+                "p_bits": p_bits,
+                "seed": seed,
+                "instance": inst.name,
+                "log2_r": (inst.r as f64).log2(),
+                "r": inst.r,
+                "base_order": inst.base_order,
+                "group_order": inst.group_order,
+                "cofactor": inst.cofactor,
+                "summands": 3,
+                "oracle": "mitm",
+                "group_order_of_fold": classes.group_order,
+                "points_per_column_folded": frep.points_per_orbit,
+                "unit": "F_p multiplications; an inversion is priced at inversion_in_multiplications, measured on this host; a row operation of the linear algebra is one Z/rZ multiplication, priced as one",
+                "inversion_in_multiplications": k_inv,
+                "base_build": {
+                    "folded": {"fp_muls": build_muls_f, "fp_invs": build_invs_f},
+                    "control": {"fp_muls": build_muls_c, "fp_invs": build_invs_c},
+                },
+                "pair_table": {"group_ops": table_ops, "fp_muls": table_muls, "fp_invs": table_invs},
+                "stream_cost": {"fp_muls": stream_muls, "fp_invs": stream_invs},
+                "stream": stream_json(&rep),
+                "rho_runs": o.rho_runs,
+                "rho_steps_ratio": st_neg as f64 / st_fold.max(1) as f64,
+                "rho_expected_ratio": ((classes.group_order as f64) / 2.0).sqrt(),
+                "rho_all_verified": all_ok,
+                "walks": walks,
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
+// ── E9: the matched folded rho on the F_{p²} and F_{p³} groups ─────
+
+fn e9(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    // Runs the two walks on one instance and returns the row's shared part.
+    fn walks_on<G: CountedGroup>(
+        g: &G,
+        generator: G::Elt,
+        target: G::Elt,
+        r: u64,
+        seed: u64,
+        runs: usize,
+        max_steps: u64,
+        refs: &[&dyn Endomorphism<G>],
+    ) -> (Vec<Value>, f64, f64, f64, bool) {
+        let mut walks = Vec::new();
+        let (mut s_neg, mut s_fold, mut st_neg, mut st_fold, mut ok) = (0.0, 0.0, 0u64, 0u64, true);
+        for k in 0..runs as u64 {
+            let ws = seed ^ (k * 0x9E37);
+            let n = rho_reference_negation(g, generator, target, r, ws, max_steps);
+            let f = rho_reference_folded(g, generator, target, r, ws, max_steps, refs).unwrap();
+            ok &= n.verified && f.verified;
+            s_neg += n.s;
+            s_fold += f.s;
+            st_neg += n.steps;
+            st_fold += f.steps;
+            walks.push(json!({"walk_seed": ws, "negation": n, "folded": f}));
+        }
+        let runs = runs.max(1) as f64;
+        (
+            walks,
+            s_neg / runs,
+            s_fold / runs,
+            st_neg as f64 / st_fold.max(1) as f64,
+            ok,
+        )
+    }
+    for family in [GlsFamily::Generic, GlsFamily::J0, GlsFamily::J1728] {
+        for &p_bits in &o.bits {
+            for seed in 1..=o.seeds {
+                let max_cofactor = if family == GlsFamily::J1728 {
+                    16u64 << p_bits
+                } else {
+                    64
+                };
+                let inst = match generate_gls_instance_of(family, p_bits, seed, max_cofactor) {
+                    Ok(i) => i,
+                    Err(e) => {
+                        eprintln!("e9 gls {family:?} {p_bits} seed {seed}: {e}");
+                        continue;
+                    }
+                };
+                let started = Instant::now();
+                let neg = Negation { r: inst.r };
+                let mut refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &inst.psi];
+                if let Some(a) = &inst.automorphism {
+                    refs.push(a);
+                }
+                let classes = classes_for(&inst.curve, inst.generator, inst.r, &refs).unwrap();
+                let planted = planted_for(seed, inst.r);
+                let mut ops = GroupOps::default();
+                let target = inst.curve.mul(&mut ops, inst.generator, planted);
+                let (walks, s_neg, s_fold, steps_ratio, ok) = walks_on(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    seed,
+                    o.rho_runs,
+                    o.rho_max_steps,
+                    &refs,
+                );
+                let expected = (classes.group_order as f64 / 2.0).sqrt();
+                eprintln!(
+                    "e9 gls {} p=2^{p_bits} r=2^{:.1}: A={} S neg {:.3} folded {:.3} ratio {:.2} (steps ratio {:.2}, expected {:.2}) ok {} [{:.1}s]",
+                    inst.family,
+                    (inst.r as f64).log2(),
+                    classes.group_order,
+                    s_neg,
+                    s_fold,
+                    s_neg / s_fold,
+                    steps_ratio,
+                    expected,
+                    ok,
+                    started.elapsed().as_secs_f64()
+                );
+                rows.push(json!({
+                    "experiment": "e9",
+                    "family": format!("gls-{}", inst.family),
+                    "p_bits": p_bits,
+                    "seed": seed,
+                    "instance": inst.name,
+                    "log2_r": (inst.r as f64).log2(),
+                    "r": inst.r,
+                    "cofactor": inst.cofactor,
+                    "generators": refs.iter().map(|e| e.name()).collect::<Vec<_>>(),
+                    "group_order_of_fold": classes.group_order,
+                    "rho_runs": o.rho_runs,
+                    "negation_s_mean": s_neg,
+                    "folded_s_mean": s_fold,
+                    "s_ratio": s_neg / s_fold,
+                    "steps_ratio": steps_ratio,
+                    "expected_ratio": expected,
+                    "all_verified": ok,
+                    "walks": walks,
+                    "wall_seconds": started.elapsed().as_secs_f64(),
+                }));
+            }
+        }
+    }
+    for j0 in [false, true] {
+        for &p_bits in &o.bits {
+            for seed in 1..=o.seeds {
+                let ratio = if j0 { 16u64 << p_bits } else { 8 };
+                let inst = match generate_subfield_instance(p_bits, seed, j0, ratio) {
+                    Ok(i) => i,
+                    Err(e) => {
+                        eprintln!("e9 subfield j0={j0} {p_bits} seed {seed}: {e}");
+                        continue;
+                    }
+                };
+                let started = Instant::now();
+                let neg = Negation { r: inst.r };
+                let mut refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &inst.frobenius];
+                if let Some(z) = &inst.zeta {
+                    refs.push(z);
+                }
+                let classes = classes_for(&inst.curve, inst.generator, inst.r, &refs).unwrap();
+                let planted = planted_for(seed, inst.r);
+                let mut ops = GroupOps::default();
+                let target = inst.curve.mul(&mut ops, inst.generator, planted);
+                let (walks, s_neg, s_fold, steps_ratio, ok) = walks_on(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    seed,
+                    o.rho_runs,
+                    o.rho_max_steps,
+                    &refs,
+                );
+                let expected = (classes.group_order as f64 / 2.0).sqrt();
+                eprintln!(
+                    "e9 subfield{} p=2^{p_bits} r=2^{:.1}: A={} S neg {:.3} folded {:.3} ratio {:.2} (steps ratio {:.2}, expected {:.2}) ok {} [{:.1}s]",
+                    if j0 { "-j0" } else { "" },
+                    (inst.r as f64).log2(),
+                    classes.group_order,
+                    s_neg,
+                    s_fold,
+                    s_neg / s_fold,
+                    steps_ratio,
+                    expected,
+                    ok,
+                    started.elapsed().as_secs_f64()
+                );
+                rows.push(json!({
+                    "experiment": "e9",
+                    "family": if j0 { "subfield-j0" } else { "subfield" },
+                    "p_bits": p_bits,
+                    "seed": seed,
+                    "instance": inst.name,
+                    "log2_r": (inst.r as f64).log2(),
+                    "r": inst.r,
+                    "cofactor": inst.cofactor,
+                    "generators": refs.iter().map(|e| e.name()).collect::<Vec<_>>(),
+                    "group_order_of_fold": classes.group_order,
+                    "rho_runs": o.rho_runs,
+                    "negation_s_mean": s_neg,
+                    "folded_s_mean": s_fold,
+                    "s_ratio": s_neg / s_fold,
+                    "steps_ratio": steps_ratio,
+                    "expected_ratio": expected,
+                    "all_verified": ok,
+                    "walks": walks,
+                    "wall_seconds": started.elapsed().as_secs_f64(),
+                }));
+            }
+        }
+    }
+    rows
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut o = Opts {
@@ -954,6 +1337,7 @@ fn main() {
         bits: vec![16, 20],
         seeds: 2,
         rho_runs: 8,
+        rho_max_steps: 1 << 28,
         max_trials: 50_000_000,
         json: None,
     };
@@ -973,6 +1357,7 @@ fn main() {
             }
             "--seeds" => o.seeds = next(&mut i).parse().unwrap(),
             "--rho-runs" => o.rho_runs = next(&mut i).parse().unwrap(),
+            "--rho-max-steps" => o.rho_max_steps = next(&mut i).parse().unwrap(),
             "--max-trials" => o.max_trials = next(&mut i).parse().unwrap(),
             "--json" => o.json = Some(next(&mut i)),
             other => panic!("unknown argument {other}"),
@@ -988,7 +1373,9 @@ fn main() {
         "e5" => e5(&o),
         "e6" => e6(&o),
         "e7" => e7(&o),
-        other => panic!("unknown experiment {other}; try e1..e7"),
+        "e8" => e8(&o),
+        "e9" => e9(&o),
+        other => panic!("unknown experiment {other}; try e1..e9"),
     };
     let out = json!({
         "what_this_is": format!("Experiment {} of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.", o.exp),

@@ -1,11 +1,11 @@
-# Endomorphism-invariant factor bases across curve families: plan, pilot, and experiments E1–E7
+# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E9, and the road to the state of the art
 
 **Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
 **Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
 **Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
-**Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5) and `python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e*.json` (§6); every number in §5 and §6 is printed by them from the frozen files
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9}.{json,log}` (2026-10-01); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5) and `python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e*.json` (§6, §8); every number in §5, §6 and §8 is printed by them from the frozen files
 
 > **Status.**  Implementation, pilot, and the seven experiments of §4
 > run and read (§6).  The fold is one function over the framework's
@@ -24,7 +24,14 @@
 > points in the base at eigenvalue orders of `10²`–`10⁸`; and the rho
 > folded by the same group takes `√(w/2)` fewer steps, verified.
 > Class, where anything moved: **engineering** (§6.8); nothing moved a
-> ratio to a floor, and no scoreboard row claims a speed.
+> ratio to a floor, and no scoreboard row claims a speed.  §8 places
+> this against the literature (Galbraith–Granger–Merz–Petit's invariant
+> bases, Faugère–Gaudry–Huot–Renault's system symmetries), ranks what
+> is next, and runs the first three: three summands on the Frobenius
+> line (E8: the fold's relation count falls with the columns once the
+> two-summand degeneracy of §6.5 is gone, and every phase is priced in
+> one unit beside the matched rho), the folded rho on the `F_{p²}` and
+> `F_{p³}` groups (E9), and the fitted exponents (E10).
 
 ## 1. What is new, against what exists
 
@@ -621,28 +628,232 @@ products.
   the fold is measured; a `j = 0` subfield curve with `r` larger than
   `p` would need `E(F_{p^n})` for `n` prime to `3` or a different
   eigenline, neither of which the driver builds.
-- **No three-summand oracle on the subfield line.**  §6.5 shows the
-  two-summand decomposition on `E(F_{p³})` confined to one orbit by the
-  `π`-fixed cofactor `E(F_p)`; the test of the fold's relation count on
-  a subfield curve is the three-summand line oracle (Semaev `S₄` on the
-  line, Weil-descended), which is not written.
-- **`S` and `S / rho` are not re-measured at full rank.**  E1–E7 count
-  relations, rank, trials, oracle cost and rho steps; the end-to-end
-  `S` columns of §5.1 stay the pilot's, and no row of §6 claims a speed.
-  Under the pair-table oracle both arms build the same table (§5.2), so
-  a full-rank `S` would move as §5.1 says, but that is an extrapolation.
+- **No algebraic three-summand oracle on the subfield line.**  E8
+  (§8.2) runs three summands over the pair table, which settles the
+  fold's relation count but prices the oracle at `|F|` additions a
+  target; the Weil-descended, `S₃`-symmetrised `S₄` solver on the line
+  — the oracle that makes the relation phase `p^{1+o(1)}` — is E11 and
+  is not written.
+- **`S` at full rank is measured for E8 only.**  §8.2 prices every
+  phase of the three-summand pair-table pipeline and the matched rho in
+  one unit on the subfield curves; E1–E7 count relations, rank, trials,
+  oracle cost and rho steps, and their end-to-end `S` columns stay the
+  pilot's (§5.1).  No row anywhere claims a speed.
 - **The line oracle is a library and example component only.**  It is
   not a framework plugin and `ic bench` cannot select it; the `subtract`
   and `mitm` oracles remain what the CLI offers on the line bases.
-- **No matched folded rho on the GLS or subfield groups.**  E6 covers
-  the prime-field automorphism groups; the `F_{p²}` and `F_{p³}` "vs
-  rho" figures of §5 are still the `A = 2` walk and are marked so.
+- **The `F_{p²}` and `F_{p³}` "vs rho" figures of §5 are against the
+  `A = 2` walk**; E9 (§8.3) measures the matched folded walk on those
+  groups, so the reader can rescale them, but the §5 rows are not
+  re-run.
 - The pilot's base build prices no square roots or Legendre symbols
   (no pinned ratio for generated curves); at these sizes the build is
   under `3 %` of `S` on every row, but a larger sweep should pin them
   as `ic bench` does for the roster.
-- The scoreboard carries the pilot and E1–E7 as two panels with their
+- The scoreboard carries the pilot and E1–E9 as two panels with their
   column, rank and relation ratios; no scoreboard row claims a speed,
   and the exponent panel is untouched.
 - Nothing here bears on any deployed curve: `r ≤ 2^32`, certified toy
   instances, and a fold that rho already takes as `√(w/2)`.
+- E11–E15 of §8.1 are proposed, not run.
+
+## 8. Toward the state of the art: what the literature does, what is next, and E8–E9
+
+### 8.0 Where E1–E7 stand against the literature
+
+Three published lines of work bear on an endomorphism-invariant factor base, and
+§6 reproduces two of them at framework level and adds two things they do not
+report.
+
+- **Galbraith, Granger, Merz, Petit, "On Index Calculus Algorithms for Subfield
+  Curves"** (SAC 2020; ePrint 2020/1315).  Factor bases invariant under the
+  `q`-power Frobenius on subfield (Koblitz) curves: the number of decomposition
+  systems to solve falls by `1/n`, the linear algebra by `n²`, and the Frobenius
+  is used for *symmetry breaking* in the polynomial systems.  E2 (Koblitz orbit,
+  GLS line) and E5 (the `F_{p³}` line) are the odd-characteristic, counted
+  reproduction of the first two claims; §6.8's closed form — the fold is the
+  order of the eigenvalue subgroup of `(Z/rZ)^*`, so `⟨π, ζ⟩` folds `3` and not
+  `9` — and §6.5's block degeneracy of two-summand relations under a
+  `π`-fixed cofactor are not in that paper.  Its third lever, symmetry breaking
+  inside the decomposition system, is **not** implemented here (E11 below).
+- **Faugère, Gaudry, Huot, Renault, "Using Symmetries in the Index Calculus for
+  Elliptic Curves Discrete Logarithm"** (ePrint 2012/199; J. Cryptology 2014),
+  and the follow-up on symmetrised summation polynomials from small-order
+  torsion.  These act on the *decomposition system*: the symmetric group `S_m`
+  on the summands and, from a rational `2`-torsion point, `(Z/2)^{m−1}`, give an
+  invariant-ring presentation whose Gröbner cost falls by an exponential factor
+  in `m`; on binary Koblitz curves the Frobenius is added.  An endomorphism `φ`
+  of `⟨G⟩` is **not** a symmetry of that system: `R = ΣP_i` does not give
+  `R = Σ φ^{a_i} P_i` unless every `a_i` is equal, in which case the target
+  moves.  So the fold of this note and the FGHR symmetries are different levers
+  on different objects — the base and the system — and multiply (E13).
+- **Chi-Domínguez, Rodríguez-Henríquez, Smith, "Extending the GLS endomorphism
+  to speed up GHS Weil descent using Magma"** (2021; `F_{2^{155}}` solved).  The
+  GLS endomorphism induces an endomorphism of the GHS Jacobian and gives a
+  factor `n` there; it is the same `ord_r(λ)` lever on a different group, and
+  reads as further evidence that the lever is a constant.
+- In this repository, `RESEARCH_GLV_INDEX_CALCULUS.md` §3 measured the `⟨ψ⟩`
+  quotient on `E(F_{p³})` with the algebraic `S₄` oracle: `S ÷ 3.0` with the
+  count on its floor — the same reading as §6 with the other oracle.
+
+The honest position: no published or measured use of an endomorphism moves the
+exponent.  The state of the art is the **combination** — an invariant base (GGMP,
+this note) under an FGHR-symmetrised decomposition system with Frobenius symmetry
+breaking — and nothing here or in the literature has measured that combination
+on an odd-characteristic subfield curve at full rank with every phase priced.
+That is the ordering below.
+
+### 8.1 Ranked next steps
+
+| id | question | prediction | falsification target (in advance) | class if it holds | status |
+|:--|:--|:--|:--|:--|:--|
+| **E8** | Three summands on the `π`-line of a subfield curve: does the fold's relation count fall with the columns once the §6.5 block degeneracy is gone? | relations to full rank `÷ 3` (times the coupon factor), `0` single-column rows, both arms at one rank fraction after `columns` relations | full-rank ratio `< 2.0` on a majority of instances, or single-column rows `> 1 %`, falsifies | engineering | **done** (§8.2) |
+| **E9** | The matched folded rho on the `F_{p²}` and `F_{p³}` groups, so every "vs rho" on those groups has its reference | steps ratio `√(A/2)`: `√2` (GLS), `√6` (`j = 0` twist), `√3` (subfield) | a mean steps ratio below `0.8·√(A/2)` or any unverified walk falsifies | accounting (reference) | **done** (§8.3) |
+| **E10** | One `S` column in one unit (`F_p` multiplications; inversions by a measured factor; linear-algebra row operations as one each) for both arms and both walks on one instance, five sizes, exponent fitted | the fold moves `S` by its column ratio where the relation phase dominates and by its square where the linear algebra does; the exponent of neither arm falls below rho's `1/2` with the pair-table oracle | an arm whose fitted exponent is below the control's by more than the fit's scatter would be an advance; expected: none | engineering | **done**, inside E8 (§8.2) |
+| **E11** | The algebraic three-summand oracle on the line: `S₄(s t₁, s t₂, s t₃, x_R)` Weil-descended, `S₃`-symmetrised in the elementary symmetric functions of `t_i`, solved as `gaudry_cubic::solve_s4_subspace` solves the `x_i ∈ F_p` base; then GGMP's Frobenius symmetry breaking — only canonical `⟨−1, π⟩`-orbit representatives admitted as solutions | oracle cost `O(1)` in `p` (the Macaulay solve at degree `10`–`13`); the fold ratio unchanged at `3`; symmetry breaking removes the `3`-fold redundancy among a system's solutions, not systems | the fold's `S` ratio below `2.7` at any size with this oracle, or an oracle cost growing with `p`, falsifies | engineering | pending: port of `SymmetrisedS4` to a line `s·F_p` (the `x_i ∈ F_p` base is `E(F_p)` on a subfield curve and useless, §6.5) |
+| **E12** | The pair table over orbit representatives: `P + φ^c P'` for representatives `P, P'` and `c < w/2` | table `w/2` smaller and `w/2` cheaper to build, one probe per target unchanged; `S` moves only by the table's share | a probe cost above `1.2×` the full table's falsifies "unchanged" | engineering (memory) | pending |
+| **E13** | FGHR's `2`-torsion symmetry **and** the fold together: close the line base under translation by `T ∈ E(F_p)[2]` and under `π`, fold by `⟨−1, π⟩`, symmetrise the system by `(Z/2)^{m−1} ⋊ S_m` | the two levers multiply — columns `÷ 3`, system degree `÷ 2^{m−1}` — because one acts on the base and the other on the system | a combined `S` ratio below the product of the separate ratios by more than `20 %` falsifies "multiply" | engineering | pending; needs E11's oracle and a `+T`-closed base |
+| **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | pending; Smith's construction not in the repository |
+| **E15** | Transfer to the binary Koblitz program (ECC2K-130, AGENTS.md §8a–8b): is the §6.5 degeneracy present there? | no: `E(F_2) ⊂ E(F_{2^n})` has order `2` or `4`, so at most two component classes and no block structure; the fold there is the known `2n` | a measured deficiency `D > 2` on a prime-order-times-`4` Koblitz subgroup with two summands falsifies | accounting | pending; one `m = 31` stream with the deficiency column suffices |
+
+What is **not** on the list, and why: a larger fold on a fixed prime-order
+subgroup.  §6.8's closed form bounds it by the roots of unity the curve's
+endomorphisms realise modulo `r` — `lcm(|Aut E|, ord λ_π)` at most — and every
+family with `|Aut E| > 2` in odd characteristic is `j = 0` or `j = 1728`; there
+is no fourth lever on the base.
+
+### 8.2 E8 — three summands on the Frobenius line, every phase priced
+
+**Relations, every instance**
+
+| p | log2 r | h / #E(F_p) | cols π | cols negation | full-rank rel π | full-rank rel negation | ratio | rank fraction at k = cols, π / negation | single-column rows π / negation | orbit duplicates | targets | hit rate | correct |
+|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|--:|--:|:--|
+| 2^7 | 10.7 | 4 | 11 | 33 | — | — | — | 0.75 / 0.74 | 0 / 0 | 1410 | 10180 | 0.0094 | yes |
+| 2^8 | 11.8 | 7 | 26 | 78 | 50 | 181 | 3.62 | 0.85 / 0.90 | 0 / 0 | 598 | 1325 | 0.1366 | yes |
+| 2^7 | 11.9 | 4 | 19 | 57 | — | — | — | 0.75 / 0.72 | 0 / 0 | 3110 | 31286 | 0.0084 | yes |
+| 2^7 | 12.1 | 1 | 14 | 42 | 19 | 94 | 4.95 | 0.80 / 0.91 | 0 / 0 | 59 | 353 | 0.2663 | yes |
+| 2^8 | 12.4 | 7 | 33 | 99 | 42 | 226 | 5.38 | 0.88 / 0.90 | 0 / 0 | 647 | 1637 | 0.1381 | yes |
+| 2^7 | 13.4 | 1 | 18 | 54 | 46 | 116 | 2.52 | 0.95 / 0.89 | 0 / 0 | 110 | 755 | 0.1536 | yes |
+| 2^9 | 14.8 | 7 | 87 | 261 | 100 | 672 | 6.72 | 0.98 / 0.91 | 0 / 0 | 658 | 3218 | 0.2088 | yes |
+| 2^9 | 15.1 | 4 | 62 | 186 | 99 | 506 | 5.11 | 0.95 / 0.91 | 0 / 0 | 604 | 3204 | 0.1579 | yes |
+| 2^8 | 15.5 | 1 | 44 | 132 | 76 | 321 | 4.22 | 0.89 / 0.90 | 0 / 0 | 117 | 1522 | 0.2109 | yes |
+| 2^8 | 15.5 | 1 | 48 | 144 | 110 | 383 | 3.48 | 0.90 / 0.95 | 0 / 0 | 116 | 1579 | 0.2426 | yes |
+| 2^9 | 15.7 | 4 | 81 | 243 | 225 | 527 | 2.34 | 0.88 / 0.91 | 0 / 0 | 332 | 2760 | 0.1909 | yes |
+| 2^10 | 16.2 | 4 | 84 | 252 | 152 | 508 | 3.34 | 0.93 / 0.92 | 0 / 0 | 630 | 4691 | 0.1083 | yes |
+| 2^10 | 16.5 | 4 | 104 | 312 | 134 | 629 | 4.69 | 0.96 / 0.93 | 0 / 0 | 369 | 3965 | 0.1586 | yes |
+| 2^9 | 17.1 | 1 | 58 | 174 | 67 | 451 | 6.73 | 0.97 / 0.95 | 0 / 0 | 193 | 3319 | 0.1359 | yes |
+| 2^10 | 17.2 | 4 | 133 | 399 | 276 | 676 | 2.45 | 0.93 / 0.92 | 0 / 0 | 242 | 3889 | 0.1738 | yes |
+| 2^11 | 17.9 | 7 | 222 | 666 | 462 | 1430 | 3.10 | 0.91 / 0.94 | 0 / 0 | 782 | 8956 | 0.1597 | yes |
+| 2^11 | 19.0 | 4 | 264 | 792 | 612 | 2197 | 3.59 | 0.92 / 0.94 | 0 / 0 | 642 | 11860 | 0.1852 | yes |
+| 2^10 | 19.2 | 1 | 141 | 423 | 196 | 1091 | 5.57 | 0.95 / 0.96 | 0 / 0 | 146 | 5818 | 0.1875 | yes |
+| 2^11 | 21.3 | 1 | 264 | 792 | 545 | 2569 | 4.71 | 0.95 / 0.93 | 0 / 0 | 314 | 17765 | 0.1446 | yes |
+| 2^11 | 21.7 | 1 | 307 | 921 | 776 | 2370 | 3.05 | 0.94 / 0.93 | 0 / 0 | 122 | 14351 | 0.1651 | yes |
+
+**Every phase priced (rows at full rank on both arms)**
+
+| p | log2 r | inv / mul (measured) | muls per addition | base build π / neg | pair table | stream π / neg | LA π / neg | total π | total negation | S π | S negation | S neg / S π | rho S negation | rho S folded | rho muls per group op, negation / folded | rho steps ratio (expected) | S π / rho S folded | all verified |
+|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|:--|
+| 2^7 | 10.7 | — | — | not full rank on both arms: the stream exhausted the group's targets | | | | | | | | | | | | | | |
+| 2^8 | 11.8 | 2.4 | 83.9 | 3.37e+05 / 3.36e+05 | 5.09e+05 | 4.09e+06 / 1.66e+07 | 1.63e+03 / 3.42e+03 | 4.94e+06 | 1.75e+07 | 83240.0 | 294518.5 | 3.54 | 221.1 | 202.4 | 89 / 104 | 1.58 (1.73) | 411 | yes |
+| 2^7 | 11.9 | — | — | not full rank on both arms: the stream exhausted the group's targets | | | | | | | | | | | | | | |
+| 2^7 | 12.1 | 2.4 | 85.7 | 1.21e+05 / 1.2e+05 | 1.48e+05 | 4.58e+05 / 3e+06 | 786 / 1.52e+03 | 7.28e+05 | 3.27e+06 | 10945.5 | 49116.3 | 4.49 | 189.6 | 202.5 | 90 / 106 | 1.20 (1.73) | 54 | yes |
+| 2^8 | 12.4 | 2.6 | 83.5 | 4.52e+05 / 4.51e+05 | 8.21e+05 | 3.51e+06 / 2.54e+07 | 2.07e+03 / 6.54e+03 | 4.78e+06 | 2.67e+07 | 65028.0 | 362761.0 | 5.58 | 200.4 | 168.5 | 89 / 107 | 1.87 (1.73) | 386 | yes |
+| 2^7 | 13.4 | 2.8 | 84.9 | 1.86e+05 / 1.86e+05 | 2.45e+05 | 3.77e+06 / 8.44e+06 | 1.31e+03 / 1.87e+03 | 4.2e+06 | 8.87e+06 | 39768.1 | 84004.3 | 2.11 | 202.6 | 161.4 | 88 / 110 | 1.77 (1.73) | 246 | yes |
+| 2^9 | 14.8 | 3.1 | 82.2 | 1.29e+06 / 1.29e+06 | 5.73e+06 | 1.7e+07 / 1.24e+08 | 7.79e+03 / 4.03e+04 | 2.41e+07 | 1.31e+08 | 140331.9 | 762621.8 | 5.43 | 145.9 | 104.1 | 88 / 109 | 2.26 (1.73) | 1348 | yes |
+| 2^9 | 15.1 | 3.6 | 82.6 | 9.32e+05 / 9.3e+05 | 2.93e+06 | 1.82e+07 / 9.62e+07 | 5.14e+03 / 1.45e+04 | 2.2e+07 | 1e+08 | 118711.7 | 539163.0 | 4.54 | 173.3 | 145.0 | 90 / 106 | 1.93 (1.73) | 819 | yes |
+| 2^8 | 15.5 | 2.6 | 83.3 | 5.5e+05 / 5.49e+05 | 1.46e+06 | 8.59e+06 / 3.37e+07 | 3.14e+03 / 8.58e+03 | 1.06e+07 | 3.57e+07 | 49135.3 | 165494.7 | 3.37 | 203.2 | 151.3 | 87 / 107 | 2.24 (1.73) | 325 | yes |
+| 2^8 | 15.5 | 2.6 | 83.1 | 6.26e+05 / 6.24e+05 | 1.74e+06 | 9.82e+06 / 3.7e+07 | 3.62e+03 / 1.56e+04 | 1.22e+07 | 3.94e+07 | 56054.2 | 181145.9 | 3.23 | 167.7 | 153.2 | 88 / 107 | 1.63 (1.73) | 366 | yes |
+| 2^9 | 15.7 | 3.4 | 82.3 | 1.2e+06 / 1.2e+06 | 4.99e+06 | 4.41e+07 / 1.06e+08 | 7.15e+03 / 2.79e+04 | 5.03e+07 | 1.12e+08 | 221091.8 | 494196.1 | 2.24 | 175.5 | 136.4 | 88 / 108 | 2.15 (1.73) | 1621 | yes |
+| 2^10 | 16.2 | 3.5 | 82.2 | 1.29e+06 / 1.28e+06 | 5.37e+06 | 6.1e+07 / 1.99e+08 | 6.06e+03 / 4.51e+04 | 6.76e+07 | 2.05e+08 | 243220.5 | 738352.7 | 3.04 | 152.4 | 143.8 | 88 / 110 | 1.50 (1.73) | 1691 | yes |
+| 2^10 | 16.5 | 3.6 | 82.1 | 1.65e+06 / 1.65e+06 | 8.24e+06 | 4.15e+07 / 1.97e+08 | 9e+03 / 4.99e+04 | 5.14e+07 | 2.07e+08 | 167825.5 | 673631.6 | 4.01 | 157.9 | 137.8 | 88 / 111 | 1.67 (1.73) | 1218 | yes |
+| 2^9 | 17.1 | 3.0 | 82.8 | 7.77e+05 / 7.75e+05 | 2.55e+06 | 1.64e+07 / 1.01e+08 | 5.15e+03 / 1.75e+04 | 1.97e+07 | 1.05e+08 | 52125.2 | 276570.0 | 5.31 | 150.3 | 95.9 | 87 / 109 | 2.67 (1.73) | 544 | yes |
+| 2^10 | 17.2 | 3.6 | 81.9 | 2.19e+06 / 2.19e+06 | 1.35e+07 | 9.7e+07 / 2.43e+08 | 9.9e+03 / 1.54e+05 | 1.13e+08 | 2.59e+08 | 290849.5 | 667415.4 | 2.29 | 112.8 | 116.7 | 89 / 111 | 1.29 (1.73) | 2492 | yes |
+| 2^11 | 17.9 | 4.4 | 81.6 | 3.58e+06 / 3.57e+06 | 3.79e+07 | 2.93e+08 / 9.16e+08 | 3.6e+04 / 7.48e+05 | 3.35e+08 | 9.58e+08 | 688620.5 | 1970035.7 | 2.86 | 139.1 | 122.1 | 88 / 114 | 1.59 (1.73) | 5641 | yes |
+| 2^11 | 19.0 | 4.0 | 81.5 | 5.07e+06 / 5.06e+06 | 5.33e+07 | 3.86e+08 / 1.42e+09 | 5.92e+04 / 8.85e+05 | 4.45e+08 | 1.48e+09 | 615720.3 | 2044461.1 | 3.32 | 107.5 | 91.1 | 87 / 115 | 1.69 (1.73) | 6759 | yes |
+| 2^10 | 19.2 | 3.7 | 81.9 | 2.11e+06 / 2.1e+06 | 1.52e+07 | 6.61e+07 / 3.85e+08 | 1.9e+04 / 1.7e+05 | 8.34e+07 | 4.03e+08 | 107666.4 | 519523.6 | 4.83 | 124.4 | 59.5 | 87 / 112 | 3.57 (1.73) | 1809 | yes |
+| 2^11 | 21.3 | 4.9 | 81.6 | 4.42e+06 / 4.41e+06 | 5.39e+07 | 4.48e+08 / 2.25e+09 | 5.98e+04 / 8.87e+05 | 5.06e+08 | 2.31e+09 | 318217.3 | 1451200.0 | 4.56 | 106.8 | 85.4 | 87 / 118 | 1.73 (1.73) | 3727 | yes |
+| 2^11 | 21.7 | 5.2 | 81.5 | 5.09e+06 / 5.08e+06 | 7.31e+07 | 6.79e+08 / 2.07e+09 | 7.37e+04 / 9.61e+05 | 7.57e+08 | 2.15e+09 | 412185.9 | 1171277.2 | 2.84 | 110.0 | 97.4 | 87 / 119 | 1.53 (1.73) | 4232 | yes |
+
+**Summary**
+
+| arms | instances (of run) | log2 r | column ratio | full-rank ratio mean (min–max) | rank fraction at k = cols, π / negation | S neg / S π mean (min–max) | S π / rho S folded, min–max | rho steps ratio mean (expected) | rho muls per group op, negation / folded | rho S negation / rho S folded, mean | fitted exponent of total: π, negation, rho folded, rho negation (rho: 0.50) | all verified |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| π-line fold vs negation, m = 3, pair table | 18 (20) | 11.8–21.7 | 3.0 | 4.20 (2.34–6.73) | 0.92 / 0.92 | 3.75 (2.11–5.58) | 54–6759 | 1.88 (1.73) | 88 / 110 | 1.24 | 0.88, 0.86, 0.37, 0.39 | yes |
+
+
+Reading.  With three summands the §6.5 degeneracy is gone: **zero** single-column
+rows on either arm at every size, the fold's relation count falls by `4.20`
+(`2.34`–`6.73`) against a column ratio of `3` — the coupon-collector
+factor on top of `3`, as in E1 — and both arms sit at the same rank fraction after
+`columns` relations (`0.92` against `0.92`).  The prediction of E8
+holds; the two `2^7` instances with `r < 2^12` exhausted the group's targets before
+full rank and carry no ratio.  The cost column is the first end-to-end `S` of this
+note on a group where index calculus is asymptotically competitive (`n = 3`): with
+the pair-table oracle every phase is counted in `F_p` multiplications — the base
+build (square roots on the line), the pair table (`|F|²/4` additions, shared), the
+stream (`|F|` additions a target), the linear algebra (row operations, one `Z/rZ`
+multiplication each) — and the matched rho, negation and `π`-folded, is counted in
+the same unit on the same instance, with inversions priced by the measured
+`2.2`–`5.5` multiplications each.  The fold divides `S` by `3.75`
+(`2.11`–`5.58`): the stream is `63`–`90 %`
+of the folded arm's total and falls with the relations, the pair table
+(`6`–`24 %`) does not fold (E12), and the linear
+algebra is below `1 %` on both arms at these sizes.  The folded arm costs
+`54`–`6759×` the `π`-folded rho.  Fitted exponents of the total
+against `r` over the `18` instances at full rank: fold `0.88`, control
+`0.86`, folded rho `0.37`, negation rho `0.39` — the
+pair-table arms grow faster than rho's `1/2`, as the pair table (`p² ∝ r^{2/3}`) and
+the stream (`p` targets at `p` additions) say they must; the algebraic oracle (E11)
+is what would bring the relation phase to `p^{1+o(1)}`.  One number the unit
+exposes that the step count hides: the `π`-folded walk takes `1.88×` fewer
+steps (expected `√3 = 1.73`) but canonicalises on every step — the `⟨−1, π⟩`-orbit
+by breadth-first search, three Frobenius maps and their keys — and that costs
+`22` multiplications a group operation on top of the addition's
+`88` (`110` against `88`), so in `F_p` multiplications the
+negation rho costs `1.24×` the folded one on `E(F_{p³})`, not `1.73×`.  A first
+version of the map that multiplied by the unit twist constants paid `230` a step
+and made the folded walk the dearer of the two in this unit; that is why the
+canonicalisation's price is reported beside the step ratio, and why the same
+accounting applies to a folded base's canonicalisations in a relation search.
+**Class: engineering** on the fold; the `S`
+column is a stage-complete measurement of a method that is not faster than rho
+here, and claims nothing else.
+
+### 8.3 E9 — the matched folded rho on `F_{p²}` and `F_{p³}`
+
+**Summary by family (per-instance table: the script, 60 rows)**
+
+| family | A | instances | log2 r | walks | S ratio mean (min–max) | steps ratio mean | expected | all verified |
+|:--|--:|--:|:--|--:|--:|--:|--:|:--|
+| gls-generic | 4 | 12 | 9.3–22.9 | 192 | 1.28 (0.90–1.87) | 1.40 | 1.41 | True |
+| gls-j0 | 12 | 12 | 11.0–23.0 | 192 | 1.71 (1.21–2.17) | 2.16 | 2.45 | True |
+| gls-j1728 | 4 | 12 | 6.2–11.0 | 192 | 1.06 (0.93–1.28) | 1.15 | 1.41 | True |
+| subfield | 6 | 12 | 11.8–23.8 | 192 | 1.48 (1.16–2.70) | 1.74 | 1.73 | True |
+| subfield-j0 | 6 | 12 | 6.2–11.9 | 192 | 1.23 (0.96–1.64) | 1.72 | 1.73 | True |
+
+
+Reading.  Every one of the `960` walks verifies its answer.  The steps ratios
+track `√(A/2)` with the spread eight walks per instance give: `1.40` on the GLS
+twist (`A = 4`, expected `1.41`), `1.74` on the subfield curve (`A = 6`,
+expected `1.73`), and `2.16` on the `j = 0` GLS twist (`A = 12`, expected
+`2.45`) — the four-dimensional GLV–GLS curves of Longa–Sica, the largest fold any
+ordinary curve over `F_{p²}` admits, where the walks at `r ≤ 2^23` are too short
+(`2^5`–`2^11` steps) to reach their asymptote.  The `j = 1728` twist and the `j = 0`
+subfield curve are measured at `r ≈ p` (§6.3, §6.5) and show `1.15` and
+`1.72` at `r ≤ 2^12`, where a walk is a few hundred steps and its set-up
+dominates.  Every "vs rho" figure on these groups in §5 and §6 can now be read
+against the matched walk instead of the `A = 2` one, with E8's caveat that the
+matched walk's cost in field multiplications depends on what a canonicalisation
+costs.  **Class: accounting** (reference).
+
+### 8.4 Verdict after E8–E9
+
+| lever | measured | class |
+|:--|:--|:--|
+| three summands on the `π`-line (E8) | columns `÷ 3`, relations `÷ 4.2`, `0` single-column rows; `S ÷ 3.8` end to end in one unit | engineering |
+| the matched folded rho on `F_{p²}`, `F_{p³}` (E9) | steps `÷ 1.40, 1.74, 2.16` at `A = 4, 6, 12` (expected `1.41, 1.73, 2.45`), verified; in `F_p` multiplications the folded walk on `E(F_{p³})` pays `110` a step against `88` (E8) | accounting (reference) |
+| exponents (E10) | fold `0.88`, control `0.86`, rho `0.37` / `0.39` over `18` instances; no arm's exponent below rho's `1/2` | accounting |
+
+The next lever that could change a number of substance is E11 — the algebraic
+oracle on the line, which is also the prerequisite of the FGHR combination
+(E13); nothing on the base side remains.
