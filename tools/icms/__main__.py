@@ -120,8 +120,10 @@ def cmd_compare(args) -> int:
     for r in res["refusals"]:
         print(f"REFUSED: {r['reason']}: {r.get('fields') or r.get('record_ids') or ''}")
     if ops.get("admitted"):
+        ratio = "undefined (A median is 0)" if ops["ratio_b_over_a"] is None else f"{ops['ratio_b_over_a']:.4g}"
         print(f"ops  {ops['unit']} over {ops['window']}: A {ops['a_median']:.6g}  B {ops['b_median']:.6g}  "
-              f"B/A {ops['ratio_b_over_a']:.4g}{'' if ops['deterministic'] else '  [host-dependent]'}")
+              f"B/A {ratio}{'' if ops['deterministic'] else '  [host-dependent]'}"
+              f"{'  [lower bound]' if ops.get('lower_bound') else ''}")
     elif "unit" in ops:
         print(f"ops  not admitted: {ops.get('reason')}")
     est = wall.get("estimate") or {}

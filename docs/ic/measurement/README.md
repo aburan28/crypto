@@ -370,15 +370,31 @@ committed session from its files and refuses any mismatch:
   and workload ids its arms carry;
 - every record follows the plan, carries the session id and hashes to its
   own `record_id`;
+- each execution directory holds exactly the files its record hashes (both
+  streams always, plus any producer file such as a metrics file), and every
+  one hashes to the record;
+- **every measured section of every record (outcome, units, reference,
+  metrics, phases, windows, consistency, producer) is re-derived** by
+  re-parsing the raw producer output in `exec/` with the record's adapter
+  and the same derivation the session used, and must match exactly;
 - **the isolation level of every record is recomputed** from the record's own
   raw observations (schedstat, steal jiffies, sampler ticks, PSI, rusage), the
   session's preflight and reservation, and the capsule;
 - **every frozen comparison is recomputed** from the records and its
   request, and must match exactly.
 
-A record cannot be made to claim a quieter run than it observed without also
-editing the observations, and those are bound to the record hash, the
-session's `records_sha256` and the raw output files. CI runs the audit over
+What this does and does not protect, stated plainly. A record cannot carry
+numbers that disagree with its own producer output, a level its own
+observations do not earn, or a comparison its records do not give, and
+deleting or editing raw output is caught. The runner's observations (the
+schedstat, steal and sampler readings) have no independent witness: someone
+who rewrites those observations and reseals every hash can forge a quieter
+run. That is why sessions are committed through git, never edited after
+they land, and why CI re-runs a session of its own. A change to an adapter's
+parsing that changes committed records fails this audit, by design: it
+changes what the evidence says, so it ships with new sessions.
+
+CI runs the audit over
 every committed session (`.github/workflows/ic-measurement.yml`), and its
 smoke job builds `ic`, runs a three-arm session on the hosted runner and
 audits that too.

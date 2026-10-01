@@ -326,8 +326,10 @@ def _empty_execution(argv: list[str], cwd: str | None, cpus: set[int], interval:
 
 
 def _outputs(stdout_path: str, stderr_path: str) -> dict[str, Any]:
-    return {name: {"path": os.path.basename(p), "sha256": sha256_file(p), "bytes": os.path.getsize(p)}
-            for name, p in (("stdout", stdout_path), ("stderr", stderr_path))}
+    out: dict[str, Any] = {name: {"path": os.path.basename(p), "sha256": sha256_file(p), "bytes": os.path.getsize(p)}
+                           for name, p in (("stdout", stdout_path), ("stderr", stderr_path))}
+    out["files"] = {}  # the session lists the producer's other files here
+    return out
 
 
 def run_measured(argv: list[str], cpus: set[int], env: dict[str, str], cwd: str | None,

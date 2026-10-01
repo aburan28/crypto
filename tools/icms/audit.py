@@ -134,15 +134,26 @@ def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Valida
     rec_path = os.path.join(path, "records.jsonl")
     if sha256_file(rec_path) != session["records_sha256"]:
         bad("records.jsonl does not hash to session.records_sha256")
+    records = []
     with open(rec_path) as fh:
-        records = [json.loads(line) for line in fh if line.strip()]
+        for i, line in enumerate(fh):
+            if not line.strip():
+                continue
+            try:
+                records.append(json.loads(line))
+            except ValueError as exc:
+                bad(f"records.jsonl line {i + 1} is not JSON: {exc}")
+                records.append(None)
     if len(records) != len(session["plan"]):
         bad(f"{len(records)} records for a plan of {len(session['plan'])} executions")
     units = {u["id"] for u in reg.doc["units"]["list"]}
     windows = {w["name"] for w in reg.doc["windows"]["list"]}
     phases = set(reg.phases)
+    capsule_ok = not vals[CAPSULE_SCHEMA].errors(cap)
     for n, rec in enumerate(records):
         where = f"record {n}"
+        if rec is None:
+            continue
         errs = vals[RECORD_SCHEMA].errors(rec)
         for e in errs:
             bad(f"{where} {e}")
@@ -170,17 +181,26 @@ def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Valida
         if not set(rec["execution"]["pinned_cpus"]) <= set(session["reservation"]["cpus"]):
             bad(f"{where}: pinned outside the session's reservation")
         exec_dir = os.path.join(path, "exec", f"{n:04d}")
+        outputs = rec["execution"]["outputs"]
+        # The runner always writes both streams, so neither may be missing,
+        # and the directory holds exactly the files the record hashes.
+        want = {"stdout": outputs["stdout"], "stderr": outputs["stderr"], **(outputs.get("files") or {})}
+        have = set()
+        for root, _dirs, files in os.walk(exec_dir):
+            have |= {os.path.relpath(os.path.join(root, f), exec_dir) for f in files}
         for stream in ("stdout", "stderr"):
-            out = rec["execution"]["outputs"][stream]
-            fp = os.path.join(exec_dir, out["path"])
-            if os.path.exists(fp):
-                if sha256_file(fp) != out["sha256"]:
-                    bad(f"{where}: exec/{n:04d}/{out['path']} does not hash to the record")
-            elif out["bytes"]:
-                bad(f"{where}: exec/{n:04d}/{out['path']} is missing ({out['bytes']} bytes recorded)")
+            if outputs[stream]["path"] != stream:
+                bad(f"{where}: outputs.{stream}.path must be {stream!r}")
+        for name in sorted(have ^ set(want)):
+            bad(f"{where}: exec/{n:04d}/{name} is " + ("not in the record" if name in have else "missing"))
+        for name in sorted(have & set(want)):
+            if sha256_file(os.path.join(exec_dir, name)) != want[name]["sha256"]:
+                bad(f"{where}: exec/{n:04d}/{name} does not hash to the record")
         sp = loaded.get(os.path.basename(arm["spec_path"]))
-        if sp is not None:
+        if sp is not None and capsule_ok:
             check_gate(rec, session, cap, sp["spec"], bad, where)
+        if sp is not None and not (have ^ set(want)):
+            check_derivation(rec, sp, path, exec_dir, reg, bad, where)
         if rec["unit"] not in units:
             bad(f"{where}: unit {rec['unit']} is not in the registry")
         if rec["window"] not in windows:
@@ -201,7 +221,9 @@ def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Valida
 
     # ---- comparisons -----------------------------------------------------------
     cmp_dir = os.path.join(path, "comparisons")
-    if os.path.isdir(cmp_dir):
+    if os.path.isdir(cmp_dir) and problems:
+        bad("comparisons not recomputed: the records they would be recomputed from have problems")
+    elif os.path.isdir(cmp_dir):
         from .compare import compare
         for name in sorted(os.listdir(cmp_dir)):
             if not name.endswith(".json"):
@@ -214,11 +236,36 @@ def audit_session(path: str, reg: Registry | None = None, vals: dict[str, Valida
             if errs:
                 continue
             req = frozen["request"]
+            if not {req["a"], req["b"]} <= set(arms):
+                bad(f"comparisons/{name}: request names an arm the session does not have")
+                continue
             again = _normalise(compare(path, req["a"], req["b"], req["declared"]))
             if again != frozen:
                 diff = sorted(k for k in set(again) | set(frozen) if again.get(k) != frozen.get(k))
                 bad(f"comparisons/{name}: recomputing from the records gives a different result in {diff}")
     return problems
+
+
+def check_derivation(rec: dict[str, Any], sp: dict[str, Any], path: str, exec_dir: str, reg: Registry,
+                     bad, where: str) -> None:
+    """Re-parse the producer's raw output with the record's adapter and the
+    same derivation the session used; every measured section must match.  A
+    resealed record whose numbers disagree with its own raw output fails here."""
+    from . import adapters
+    from .session import DERIVED, derive
+    wl = next((w for w in sp["workloads"] if w["workload_id"] == rec["workload_id"]), None)
+    if wl is None:
+        return
+    ctx = adapters.Context(repo_root=REPO, exec_dir=exec_dir, out_dir=path)
+    try:
+        again = _normalise(derive(adapters.get(rec["adapter"]), sp["spec"], wl, ctx, rec["execution"], reg))
+    except Exception as exc:  # an adapter that cannot read the output is itself a finding
+        bad(f"{where}: re-deriving from exec/ raised {type(exc).__name__}: {exc}")
+        return
+    again["consistency"] = again.get("consistency") or []
+    diff = [k for k in DERIVED if again.get(k) != rec.get(k)]
+    if diff:
+        bad(f"{where}: re-deriving from the raw producer output gives different {diff}")
 
 
 def check_gate(rec: dict[str, Any], session: dict[str, Any], cap: dict[str, Any], spec: dict[str, Any],
@@ -240,5 +287,8 @@ def audit(paths: list[str]) -> tuple[int, list[str]]:
         sessions += find_sessions(p)
     problems: list[str] = []
     for s in sessions:
-        problems += audit_session(s, reg, vals)
+        try:
+            problems += audit_session(s, reg, vals)
+        except Exception as exc:  # one malformed session must not hide the others' results
+            problems.append(f"{os.path.basename(os.path.normpath(s))}: audit stopped: {type(exc).__name__}: {exc}")
     return len(sessions), problems

@@ -24,29 +24,38 @@ import statistics
 from typing import Any
 
 from . import COMPARISON_SCHEMA
-from .spec import identity_view, load_document
+from .spec import SpecError, identity_view, load as load_spec
 
 # Identity paths that define the measured problem; never a declared variable.
 FORBIDDEN_PREFIXES = ("instance.", "measurement.window", "accounting.", "reference.", "relations.stop",
-                      "execution.threads", "execution.cpus")
+                      "relations.count", "execution.threads", "execution.cpus")
 
 
 def load_session(path: str) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
+    """The session, its records, and each spec copy loaded and normalised the
+    way its spec id was computed (None for a copy that no longer loads)."""
     with open(os.path.join(path, "session.json")) as fh:
         session = json.load(fh)
     with open(os.path.join(path, "records.jsonl")) as fh:
         records = [json.loads(line) for line in fh if line.strip()]
-    specs = {}
+    specs: dict[str, Any] = {}
     for name in session["spec_files"]:
-        specs[name] = load_document(os.path.join(path, "specs", name))
+        try:
+            specs[name] = load_spec(os.path.join(path, "specs", name))
+        except (SpecError, OSError, ValueError):
+            specs[name] = None
     return session, records, specs
 
 
 def _flatten(d: Any, prefix: str = "") -> dict[str, Any]:
+    """Leaf paths of a nested mapping.  An empty mapping is a leaf, and a key
+    that itself contains a dot is bracketed, so two different documents never
+    flatten to the same map."""
     out: dict[str, Any] = {}
-    if isinstance(d, dict):
+    if isinstance(d, dict) and d:
         for k, v in d.items():
-            out.update(_flatten(v, f"{prefix}.{k}" if prefix else k))
+            part = f'["{k}"]' if "." in k else k
+            out.update(_flatten(v, (f"{prefix}{part}" if part.startswith("[") else f"{prefix}.{part}") if prefix else part))
     else:
         out[prefix] = d
     return out
@@ -107,11 +116,17 @@ def compare(session_dir: str, arm_a: int, arm_b: int, declared: list[str]) -> di
     session, records, specs = load_session(session_dir)
     arms = {a["index"]: a for a in session["arms"]}
     A, B = arms[arm_a], arms[arm_b]
-    spec_a = specs[os.path.basename(A["spec_path"])]
-    spec_b = specs[os.path.basename(B["spec_path"])]
-    diffs = spec_differences(spec_a, spec_b, declared)
-    ra, rb = _arm_records(records, arm_a), _arm_records(records, arm_b)
+    la, lb = specs.get(os.path.basename(A["spec_path"])), specs.get(os.path.basename(B["spec_path"]))
     refusals = []
+    for arm, loaded in ((A, la), (B, lb)):
+        if loaded is None or loaded["spec_id"] != arm["spec_id"]:
+            refusals.append({"reason": f"arm {arm['index']}'s spec copy does not load to its spec id {arm['spec_id']}"})
+    spec_a = (la or {}).get("spec") or {}
+    spec_b = (lb or {}).get("spec") or {}
+    diffs = spec_differences(spec_a, spec_b, declared) if la and lb else {"declared": [], "confound": [], "forbidden": []}
+    if la and lb and A["spec_id"] != B["spec_id"] and not any(diffs.values()):
+        refusals.append({"reason": "the spec ids differ but no field difference was found; refusing rather than guessing"})
+    ra, rb = _arm_records(records, arm_a), _arm_records(records, arm_b)
     if diffs["forbidden"]:
         refusals.append({"reason": "the arms measure different problems", "fields": [d["field"] for d in diffs["forbidden"]]})
     if diffs["confound"]:
@@ -163,7 +178,10 @@ def compare(session_dir: str, arm_a: int, arm_b: int, declared: list[str]) -> di
     va, vb = [ops_of(r) for r in ok_a], [ops_of(r) for r in ok_b]
     deterministic = all(det(r) for r in ok_a + ok_b)
     zero_priced = sorted({c for r in ok_a + ok_b for c in unpriced(r)})
-    ops: dict[str, Any] = {"unit": unit, "window": window, "admitted": bool(ok_a and ok_b) and None not in va + vb,
+    # Every measured run must complete and verify: a median over the survivors
+    # of a budget or timeout is biased toward the cheap runs.
+    all_done = bool(ra and rb) and len(ok_a) == len(ra) and len(ok_b) == len(rb)
+    ops: dict[str, Any] = {"unit": unit, "window": window, "admitted": all_done and None not in va + vb,
                            "deterministic": deterministic, "lower_bound": bool(zero_priced),
                            "completed": {"a": f"{len(ok_a)}/{len(ra)}", "b": f"{len(ok_b)}/{len(rb)}"}}
     if zero_priced:
@@ -177,7 +195,8 @@ def compare(session_dir: str, arm_a: int, arm_b: int, declared: list[str]) -> di
             ops["label"] = ("host-dependent: some cost in this unit was priced from wall time on this host "
                             "(see units.<unit>.host_dependent_because); valid on this env_class only")
     else:
-        ops["reason"] = "a run did not complete and verify, or the unit/window was not reported; total is unknown, not zero"
+        ops["reason"] = ("not every measured run completed and verified, or the unit/window was not reported; "
+                         "the total is unknown, not zero, and a median of the survivors would be biased")
     out["ops"] = ops
 
     wall_refusals = []

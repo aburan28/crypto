@@ -50,6 +50,18 @@ def _isolated_bench():
     return mod
 
 
+def _sources(top: str) -> dict[str, str]:
+    """sha256 of every ICMS source file, adapters included, by path under tools/icms."""
+    out = {}
+    for root, dirs, files in os.walk(top):
+        dirs[:] = sorted(d for d in dirs if d not in ("__pycache__", "tests"))
+        for f in sorted(files):
+            if f.endswith(".py"):
+                full = os.path.join(root, f)
+                out[os.path.relpath(full, top)] = sha256_file(full)
+    return out
+
+
 class SessionError(RuntimeError):
     pass
 
@@ -161,8 +173,7 @@ def run_session(spec_paths: list[str], out_dir: str, cpus: set[int], *, lock: st
                           "isolated_bench_sha256": sha256_file(os.path.join(REPO, "tools", "isolated_bench.py")),
                           "isolation_mode": "reserve-equivalent: the isolated_bench lock, preflight, CPU checks and "
                                             "eviction, imported from tools/isolated_bench.py; ICMS pins its own children",
-                          "icms_sources": {f: sha256_file(os.path.join(os.path.dirname(__file__), f))
-                                           for f in sorted(os.listdir(os.path.dirname(__file__))) if f.endswith(".py")}}
+                          "icms_sources": _sources(os.path.dirname(os.path.abspath(__file__)))}
         order = plan(arms, int(session_id[-8:], 16))
         session: dict[str, Any] = {
             "schema": SESSION_SCHEMA, "standard": STANDARD, "session_id": session_id, "label": session_label,
@@ -203,6 +214,52 @@ def run_session(spec_paths: list[str], out_dir: str, cpus: set[int], *, lock: st
     return session
 
 
+def producer_files(exec_dir: str) -> dict[str, Any]:
+    """Every file the producer or adapter left in the execution directory
+    besides stdout and stderr (a metrics file, a trace), hashed, so the audit
+    can re-derive the record from exactly the bytes it was derived from."""
+    out = {}
+    for root, _dirs, files in os.walk(exec_dir):
+        for f in sorted(files):
+            full = os.path.join(root, f)
+            rel = os.path.relpath(full, exec_dir)
+            if rel in ("stdout", "stderr"):
+                continue
+            out[rel] = {"sha256": sha256_file(full), "bytes": os.path.getsize(full)}
+    return dict(sorted(out.items()))
+
+
+def derive(ad, spec: dict[str, Any], wl: dict[str, Any], ctx: adapters.Context, execution: dict[str, Any],
+           reg: Registry) -> dict[str, Any]:
+    """The record's measured sections, from the producer's raw output and the
+    execution's exit facts alone.  The session writes them and the audit
+    recomputes them with this same function."""
+    ex = execution["exit"]
+    if ex.get("timed_out"):
+        parsed = {"outcome": {"status": "timeout", "verified": False}}
+    elif "launch_error" in execution:
+        parsed = {"outcome": {"status": "error", "verified": False, "reason": f"did not start: {execution['launch_error']}"}}
+    else:
+        parsed = ad.parse(spec, wl, ctx, os.path.join(ctx["exec_dir"], "stdout"))
+    parsed = adapters.normalise(parsed, spec, reg)
+    if parsed["outcome"].get("status") == "complete":
+        # A run that did not exit cleanly is not a result, whatever it wrote first.
+        if ex.get("signal") is not None or ex.get("returncode") != 0:
+            parsed["outcome"].update(status="error", verified=False,
+                                     reason=(f"killed by signal {ex['signal']}" if ex.get("signal") is not None
+                                             else f"exit code {ex.get('returncode')}"))
+        elif execution.get("descendants_killed"):
+            parsed["outcome"].update(status="error", verified=False,
+                                     reason=(f"left {execution['descendants_killed']} process(es) running after it "
+                                             "exited; they were killed, but they shared the measured CPUs"))
+    if parsed.get("windows") and "whole_process" in parsed["windows"]:
+        parsed["windows"]["whole_process"]["wall_ns"] = execution["wall_ns"]
+    return parsed
+
+
+DERIVED = ("outcome", "units", "reference", "metrics", "phases", "windows", "consistency", "producer")
+
+
 def _execute_one(n: int, arm_index: int, arm: dict[str, Any], rnd: int, warm: bool, out_dir: str, cpus: set[int],
                  cap: dict[str, Any], session: dict[str, Any], implementation: dict[str, Any],
                  reg: Registry) -> dict[str, Any]:
@@ -226,22 +283,8 @@ def _execute_one(n: int, arm_index: int, arm: dict[str, Any], rnd: int, warm: bo
     execution["argv"] = [os.path.relpath(a, REPO) if isinstance(a, str) and a.startswith(REPO + os.sep) else a
                          for a in execution["argv"]]
     execution["cwd"] = os.path.relpath(execution["cwd"], REPO) if execution.get("cwd") else None
-    parsed = ad.parse(spec, wl, ctx, os.path.join(exec_dir, "stdout")) if not execution["exit"]["timed_out"] else \
-        {"outcome": {"status": "timeout", "verified": False}}
-    parsed = adapters.normalise(parsed, spec, reg)
-    ex = execution["exit"]
-    if parsed.get("outcome", {}).get("status") == "complete":
-        # A run that did not exit cleanly is not a result, whatever it wrote first.
-        if ex.get("signal") is not None or ex.get("returncode") != 0:
-            parsed["outcome"]["status"] = "error"
-            parsed["outcome"]["verified"] = False
-            parsed["outcome"]["reason"] = (f"killed by signal {ex['signal']}" if ex.get("signal") is not None
-                                           else f"exit code {ex.get('returncode')}")
-        elif execution.get("descendants_killed"):
-            parsed["outcome"]["status"] = "error"
-            parsed["outcome"]["verified"] = False
-            parsed["outcome"]["reason"] = (f"left {execution['descendants_killed']} process(es) running after it exited; "
-                                           "they were killed, but they shared the measured CPUs")
+    execution["outputs"]["files"] = producer_files(exec_dir)
+    parsed = derive(ad, spec, wl, ctx, execution, reg)
     gate = evaluate(execution, session, cap["stable"], spec["execution"]["threads"],
                     spec["measurement"].get("thresholds"))
     required = spec["measurement"]["isolation_required"]
@@ -267,16 +310,8 @@ def _execute_one(n: int, arm_index: int, arm: dict[str, Any], rnd: int, warm: bo
         "environment": {"env_class_id": cap["env_class_id"], "capsule_sha256": session["capsule_sha256"]},
         "execution": execution,
         "isolation": {**gate, "required": required, "wall_admissible": level_at_least(gate["earned_level"], required)},
-        "outcome": parsed.get("outcome"),
-        "units": parsed.get("units"),
-        "reference": parsed.get("reference"),
-        "metrics": parsed.get("metrics"),
-        "phases": parsed.get("phases"),
-        "windows": parsed.get("windows"),
-        "consistency": parsed.get("consistency") or [],
-        "producer": parsed.get("producer"),
+        **{k: parsed.get(k) for k in DERIVED},
     }
-    if rec.get("windows") and "whole_process" in rec["windows"]:
-        rec["windows"]["whole_process"]["wall_ns"] = execution["wall_ns"]
+    rec["consistency"] = rec["consistency"] or []
     rec["record_id"] = record_id(rec)
     return rec

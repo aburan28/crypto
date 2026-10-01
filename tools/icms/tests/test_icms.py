@@ -658,11 +658,12 @@ class CompareTests(unittest.TestCase):
             os.makedirs(os.path.join(d, "specs"))
             for name, s in (("a.json", sa), ("b.json", sb)):
                 _dump(s, os.path.join(d, "specs", name))
+            ida, idb = (spec_id(identity_view(validate(x))) for x in (sa, sb))
             session = {"session_id": "S", "env_class_id": "ENV1hx", "spec_files": {"a.json": "", "b.json": ""},
                        "records_sha256": "0" * 64,
-                       "arms": [{"index": 0, "spec_path": "a.json", "spec_id": "A", "workload_id": "W", "label": "a"},
-                                {"index": 1, "spec_path": "b.json", "spec_id": "B", "workload_id": "W", "label": "b"},
-                                {"index": 2, "spec_path": "a.json", "spec_id": "A", "workload_id": "W", "label": "a"}]}
+                       "arms": [{"index": 0, "spec_path": "a.json", "spec_id": ida, "workload_id": "W", "label": "a"},
+                                {"index": 1, "spec_path": "b.json", "spec_id": idb, "workload_id": "W", "label": "b"},
+                                {"index": 2, "spec_path": "a.json", "spec_id": ida, "workload_id": "W", "label": "a"}]}
             _dump(session, os.path.join(d, "session.json"))
             with open(os.path.join(d, "records.jsonl"), "w") as fh:
                 for rnd in range(5):
@@ -808,13 +809,71 @@ class SessionAuditTests(unittest.TestCase):
         self.rewrite(d, recs, reseal=True)
         problems = audit_session(d, vals=self.vals)
         self.assertTrue(problems)
-        self.assertTrue(all("isolation differs from the gate" in p or "comparisons/" in p for p in problems), problems)
+        self.assertTrue(all("isolation differs from the gate" in p or "comparisons" in p for p in problems), problems)
 
     def test_resealed_forged_observation_is_caught_by_the_raw_output_hash(self):
         d = self.forged()
         with open(os.path.join(d, "exec", "0003", "stdout"), "a") as fh:
             fh.write("tampered\n")
         self.assertIn("does not hash to the record", " ".join(audit_session(d, vals=self.vals)))
+
+    def test_resealed_forged_metrics_are_caught_by_rederivation(self):
+        d = self.forged()
+        recs = self.records(d)
+        for r in recs:
+            if r["arm"] == 1:
+                r["units"]["count.group_additions"]["total"] = 1.0
+                r["windows"]["cold_end_to_end"]["ops"] = 1.0
+        self.rewrite(d, recs, reseal=True)
+        problems = " ".join(audit_session(d, vals=self.vals))
+        self.assertIn("re-deriving from the raw producer output gives different", problems)
+
+    def test_deleted_raw_output_is_caught_even_if_the_record_says_empty(self):
+        d = self.forged()
+        recs = self.records(d)
+        os.remove(os.path.join(d, "exec", "0004", "stdout"))
+        recs[4]["execution"]["outputs"]["stdout"]["bytes"] = 0
+        self.rewrite(d, recs, reseal=True)
+        self.assertIn("exec/0004/stdout is missing", " ".join(audit_session(d, vals=self.vals)))
+
+    def test_edited_producer_metrics_file_is_caught(self):
+        d = self.forged()
+        with open(os.path.join(d, "exec", "0005", "metrics.json"), "a") as fh:
+            fh.write(" ")
+        self.assertIn("exec/0005/metrics.json does not hash", " ".join(audit_session(d, vals=self.vals)))
+
+    def test_malformed_session_is_reported_not_raised(self):
+        d = self.forged()
+        with open(os.path.join(d, "records.jsonl"), "a") as fh:
+            fh.write("not json\n")
+        from icms.audit import audit
+        n, problems = audit([d])
+        self.assertEqual(n, 1)
+        self.assertTrue(problems)
+
+    def test_partial_completion_is_not_admitted(self):
+        d = self.forged()
+        recs = self.records(d)
+        for r in recs:
+            if r["arm"] == 0 and r["round"] in (0, 1):
+                r["outcome"] = {"status": "timeout", "verified": False}
+        self.rewrite(d, recs, reseal=True)
+        res = compare(d, 0, 1, self.declared)
+        self.assertFalse(res["ops"]["admitted"])
+        self.assertEqual(res["ops"]["completed"]["a"], "3/5")
+
+    def test_flatten_sees_empty_objects_and_dotted_keys(self):
+        a, b = base_spec(), base_spec()
+        b["extensions"] = {"crypto.trace_cache": {}}
+        self.assertTrue(spec_differences(validate(a), validate(b), [])["confound"])
+        c, e = base_spec(), base_spec()
+        c["extensions"] = {"crypto.cache": {"size": 4}}
+        e["extensions"] = {"crypto.cache.size": 4}
+        self.assertTrue(spec_differences(validate(c), validate(e), [])["confound"])
+        f, g = base_spec(), base_spec()
+        f["relations"].update(stop="count", count=10)
+        g["relations"].update(stop="count", count=1000)
+        self.assertTrue(spec_differences(validate(f), validate(g), ["relations.count"])["forbidden"])
 
     def test_edited_comparison_is_refused(self):
         d = self.forged()

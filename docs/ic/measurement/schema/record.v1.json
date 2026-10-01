@@ -192,10 +192,18 @@
         "outputs": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["stdout", "stderr"],
+          "required": ["stdout", "stderr", "files"],
           "properties": {
             "stdout": {"$ref": "#/$defs/output"},
-            "stderr": {"$ref": "#/$defs/output"}
+            "stderr": {"$ref": "#/$defs/output"},
+            "files": {
+              "type": "object",
+              "description": "every other file in the execution directory (a producer's metrics file, a trace), by path relative to it",
+              "additionalProperties": {
+                "type": "object", "additionalProperties": false, "required": ["sha256", "bytes"],
+                "properties": {"sha256": {"$ref": "#/$defs/sha256"}, "bytes": {"type": "integer", "minimum": 0}}
+              }
+            }
           }
         }
       }
