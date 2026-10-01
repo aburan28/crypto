@@ -72,6 +72,45 @@ def isolation_ok(isolation: dict | None, cpu: int, cfg: dict) -> bool:
     )
 
 
+def isolation_command_ok(isolation: dict | None, run_dir: Path, cpu: int,
+                         build: dict, relocated: bool) -> bool:
+    """Bind the reserve receipt to this run and these exact built binaries."""
+    if not isolation:
+        return False
+    command = isolation.get("command")
+    if not isinstance(command, list) or len(command) != 18:
+        return False
+    if Path(command[0]).name not in ("python", "python3"):
+        return False
+    script = Path(command[1])
+    if script.name != "run_screen.py":
+        return False
+    if not relocated and script.resolve() != HERE / "run_screen.py":
+        return False
+    arguments = dict(zip(command[2::2], command[3::2]))
+    if len(arguments) != 8 or set(arguments) != {
+        "--source-root", "--generator", "--compact", "--rho",
+        "--materialization", "--build-receipt", "--out", "--cpu",
+    }:
+        return False
+    generator = Path(build["binaries"]["koblitz_base_window"]["path"])
+    build_dir = generator.parents[3]
+    expected = {
+        "--source-root": build_dir / "source",
+        "--generator": generator,
+        "--compact": Path(build["binaries"]["koblitz_orbit_dlp_s3_batch"]["path"]),
+        "--rho": Path(build["binaries"]["koblitz_rho_batch_ks_v3"]["path"]),
+        "--materialization": build_dir / "materialization.json",
+        "--build-receipt": build_dir / "BUILD_RECEIPT.json",
+    }
+    if any(arguments[key] != str(path) for key, path in expected.items()):
+        return False
+    if arguments["--cpu"] != str(cpu):
+        return False
+    output = Path(arguments["--out"])
+    return output.name == run_dir.name if relocated else output == run_dir
+
+
 def checked_files(run_dir: Path, child: dict) -> dict[str, Path]:
     assert child["command"][:2] == ["taskset", "-c"]
     assert all(".fixture.jsonl" not in word for word in child["command"])
@@ -404,7 +443,14 @@ def verify(run_dir: Path, relocated: bool = False) -> dict:
     isolation_rows = rows(isolation_path) if isolation_path.is_file() else []
     assert len(isolation_rows) <= 1
     isolation = isolation_rows[0] if isolation_rows else None
-    uncontended = isolation_ok(isolation, cpu, cfg)
+    uncontended = isolation_ok(isolation, cpu, cfg) and isolation_command_ok(
+        isolation, run_dir, cpu, build, relocated
+    )
+    if isolation:
+        uncontended = uncontended and isolation.get("host", {}).get("machine") == "x86_64"
+        uncontended = uncontended and isolation.get("host", {}).get("cpu_model") == (
+            report["host"]["cpu_model"]
+        )
     aa = {}
     fixed = {}
     for window in range(4):

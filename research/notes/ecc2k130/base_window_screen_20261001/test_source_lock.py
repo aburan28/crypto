@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 import statistics
 import unittest
 
 from analyze_screen import analyze
 from prepare_inputs import candidate, canon_bytes, sha_bytes
 from run_screen import config, schedule
-from verify_screen import paired
+from verify_screen import HERE, isolation_command_ok, paired
 
 
 def child(total: float) -> dict:
@@ -140,6 +141,32 @@ class SourceLockTests(unittest.TestCase):
         report["runs"][0]["children"]["generator"]["child_user_cpu_seconds"] = math.nan
         with self.assertRaises(AssertionError):
             analyze(report, replay)
+
+    def test_isolation_receipt_must_name_this_run_and_binaries(self) -> None:
+        build_dir, run_dir = Path("/tmp/window-build"), Path("/tmp/window-run")
+        binary_dir = build_dir / "target/release/examples"
+        build = {"binaries": {
+            name: {"path": str(binary_dir / name)} for name in (
+                "koblitz_base_window", "koblitz_orbit_dlp_s3_batch",
+                "koblitz_rho_batch_ks_v3",
+            )
+        }}
+        command = [
+            "python3", str(HERE / "run_screen.py"),
+            "--source-root", str(build_dir / "source"),
+            "--generator", build["binaries"]["koblitz_base_window"]["path"],
+            "--compact", build["binaries"]["koblitz_orbit_dlp_s3_batch"]["path"],
+            "--rho", build["binaries"]["koblitz_rho_batch_ks_v3"]["path"],
+            "--materialization", str(build_dir / "materialization.json"),
+            "--build-receipt", str(build_dir / "BUILD_RECEIPT.json"),
+            "--out", str(run_dir), "--cpu", "3",
+        ]
+        self.assertTrue(isolation_command_ok({"command": command}, run_dir, 3, build, False))
+        command[-1] = "4"
+        self.assertFalse(isolation_command_ok({"command": command}, run_dir, 3, build, False))
+        command[-1] = "3"
+        command[command.index("--compact") + 1] = str(binary_dir / "unreviewed")
+        self.assertFalse(isolation_command_ok({"command": command}, run_dir, 3, build, False))
 
 
 if __name__ == "__main__":
