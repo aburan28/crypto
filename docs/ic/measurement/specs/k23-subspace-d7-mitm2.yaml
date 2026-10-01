@@ -1,0 +1,28 @@
+icms: icms.spec/v1
+label: "K_1/GF(2^23): binary subspace dim 7, mitm m=2"
+description: >
+  Demonstration arm.  One planted target on the degree-23 Koblitz curve, the
+  linear Gaudry/Diem base of dimension 7, a pair-sum table (mitm, m = 2),
+  incremental Gauss, matched counted rho.  Dimension is the declared
+  variable between this spec and its sibling.
+role: candidate
+instance:
+  curve: {regime: koblitz, degree: 23, koblitz_a: 1}
+  workload: {targets: 1, law: known_answer, seeds: [123212651130]}
+factor_base:
+  family: binary_subspace
+  params: {dimension: 7, basis_law: prefix}
+  quotient: [negation]
+decomposition: {arity: 2, method: mitm}
+relations: {collector: walk, stop: first_log}
+linear_algebra: {method: incremental_gauss}
+reference: {rho: rho.measured_matched, floor: floor.generic, rho_runs: 8}
+accounting: {unit: crypto.S.gae_pinned}
+measurement:
+  window: cold_end_to_end
+  repetitions: 5
+  warmup: 1
+  interleave: abab
+  isolation_required: L2
+  timeout_seconds: 120
+execution: {adapter: crypto.ic_bench, threads: 1, cpus: 1}

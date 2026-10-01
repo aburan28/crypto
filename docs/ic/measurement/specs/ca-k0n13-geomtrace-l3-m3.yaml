@@ -1,0 +1,41 @@
+icms: icms.spec/v1
+label: "K_0/GF(2^13): geomtrace subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)"
+description: >
+  Demonstration arm for the cryptanalysis producer.  One planted target on
+  K_0: y^2 + xy = x^3 + 1 over GF(2^13), an l = 3 F_2-subspace base drawn by
+  the geomtrace law, Weil descent of the summation polynomial solved by the
+  Macaulay (XL-closure) scan, relations to full rank, a PDP descent of the
+  target, priced in rps under the frozen calibration.  The basis law is the
+  declared variable between this spec and its sibling.
+role: candidate
+instance:
+  curve: {regime: koblitz, degree: 13, koblitz_a: 0}
+  workload: {targets: 1, law: known_answer, seeds: [1]}
+factor_base:
+  family: binary_subspace
+  params: {dimension: 3, basis_law: geomtrace, basis_seed: 1}
+  quotient: [negation]
+decomposition:
+  arity: 3
+  method: algebraic
+  encoding: expanded_semaev
+  solver:
+    name: macaulay-xl
+    options: {mode: mxl, formulation: direct, d_max: 10, max_cols: 40000, max_rows: 200000}
+relations: {collector: sample, stop: full_rank, max_trials: 200000}
+linear_algebra: {method: gauss}
+descent: {method: pdp}
+reference: {rho: rho.signed_frobenius}
+accounting: {unit: cryptanalysis.rps}
+measurement:
+  window: cold_end_to_end
+  repetitions: 5
+  warmup: 1
+  interleave: abab
+  isolation_required: L2
+  timeout_seconds: 300
+execution:
+  adapter: cryptanalysis.ic_bench
+  threads: 1
+  cpus: 1
+  args: {root: ../cryptanalysis}

@@ -1,0 +1,144 @@
+{
+  "schema": "icms.registry/v1",
+  "what": "Controlled vocabularies for ICMS v1. A spec, record or comparison may use only names defined here; adding a name is a change to this file, reviewed like code. Nothing here is a measurement.",
+  "phases": {
+    "version": "icms.phases/v1",
+    "why": "One exclusive phase list for every producer. The fourteen names of src/cryptanalysis/ic_measurement.rs plus isogeny, which cryptanalysis AGENTS.md T_cold charges and ic_measurement.rs lacks. Sum of the cold phases is T_cold; sum of the five online phases is T_online,1.",
+    "list": [
+      {"name": "setup", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_setup", "ic_measurement": "Setup"},
+      {"name": "isogeny", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_isogeny", "ic_measurement": null},
+      {"name": "factor_base", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_factor_base", "ic_measurement": "FactorBase"},
+      {"name": "precompute", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_precompute", "ic_measurement": "Precompute"},
+      {"name": "queries", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_queries", "ic_measurement": "Queries"},
+      {"name": "pdp", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_PDP", "ic_measurement": "Pdp"},
+      {"name": "relation_check", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_relation_check", "ic_measurement": "RelationCheck"},
+      {"name": "matrix_build", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_matrix_build", "ic_measurement": "MatrixBuild"},
+      {"name": "relation_la", "target_dependent": false, "cold": true, "online": false, "cryptanalysis": "T_relation_LA", "ic_measurement": "RelationLa"},
+      {"name": "target_query", "target_dependent": true, "cold": true, "online": true, "cryptanalysis": "T_target_query", "ic_measurement": "TargetQuery"},
+      {"name": "target_pdp", "target_dependent": true, "cold": true, "online": true, "cryptanalysis": "T_target_PDP", "ic_measurement": "TargetPdp"},
+      {"name": "target_relation_check", "target_dependent": true, "cold": true, "online": true, "cryptanalysis": "T_target_relation_check", "ic_measurement": "TargetRelationCheck"},
+      {"name": "target_descent", "target_dependent": true, "cold": true, "online": true, "cryptanalysis": "T_target_descent", "ic_measurement": "TargetDescent"},
+      {"name": "recovery_check", "target_dependent": true, "cold": true, "online": true, "cryptanalysis": "T_recovery_check", "ic_measurement": "RecoveryCheck"},
+      {"name": "rho_solve", "target_dependent": true, "cold": false, "online": false, "cryptanalysis": null, "ic_measurement": "RhoSolve", "note": "the reference arm's online interval, never part of an IC total"}
+    ]
+  },
+  "windows": {
+    "version": "icms.windows/v1",
+    "list": [
+      {"name": "online_one_target", "primary": true,
+       "definition": "AGENTS.md 'Primary comparison uses one target' and cryptanalysis AGENTS.md: start when target-dependent computation begins, after reusable target-independent setup is ready; stop after scalar recovery and independent verification. Exactly one target. Process launch, input loading and known-answer target construction are outside.",
+       "phases": ["target_query", "target_pdp", "target_relation_check", "target_descent", "recovery_check"],
+       "conformance": {"exact": "the producer timed the five phases on exclusive clocks that sum to the online total (ic price --single-target, ic_measurement)",
+                       "derived": "the adapter assembled the interval from a producer's coarser phases; usable for operation counts, refused as a primary wall-clock speedup"}},
+      {"name": "cold_end_to_end", "primary": false,
+       "definition": "AGENTS.md section 2: the whole method, cold, from setup to the recovered and verified logarithm, every phase charged. The unit S is defined over this window.",
+       "phases": ["setup", "isogeny", "factor_base", "precompute", "queries", "pdp", "relation_check", "matrix_build", "relation_la", "target_query", "target_pdp", "target_relation_check", "target_descent", "recovery_check"]},
+      {"name": "whole_process", "primary": false,
+       "definition": "The measured child process from exec to exit, timed by the ICMS runner itself. Always available; includes start-up, input loading and report emission. A practicality figure, never a speedup.",
+       "phases": null},
+      {"name": "stage_only", "primary": false,
+       "definition": "One named phase or solver stage. A stage diagnostic (AGENTS.md section 2): never compared with a whole-pipeline window and never called a speedup.",
+       "phases": null}
+    ]
+  },
+  "units": {
+    "version": "icms.units/v1",
+    "why": "AGENTS.md calls several different quantities 'S'. Each is a separate unit here, so a comparison across them is refused rather than silently made.",
+    "list": [
+      {"id": "crypto.S.gae_pinned", "of": "operations", "definition": "ic bench / ic boundary: total group-addition equivalents / sqrt(r); native counters priced with docs/ic/calibration.json ratios.", "deterministic": "only when every native unit and every solver is priced by count (calibration_pins.measured empty and solver priced_by != measured)", "binds": ["calibration_sha256", "measured_units"], "source": "src/cryptanalysis/ic_boundary.rs price_phase; src/cryptanalysis/ic_framework/mod.rs"},
+      {"id": "crypto.S.price_batched_add", "of": "operations", "definition": "ic price: phase wall ns / ns of one batched add_many over 1,024 subgroup points, measured before and after each repetition; / sqrt(r).", "deterministic": "no: a host-timed unit", "binds": ["env_class_id"], "source": "src/bin/ic/price.rs"},
+      {"id": "crypto.S.callgrind_ir", "of": "instructions", "definition": "callgrind instructions retired / (targets * sqrt(r)), RAYON_NUM_THREADS=1.", "deterministic": "yes for a fixed binary, valgrind version and CPU feature dispatch", "binds": ["binary_sha256", "valgrind_version", "cpu_features"], "source": "scripts/ic_e2e_instructions.py"},
+      {"id": "cryptanalysis.rps", "of": "priced operations", "definition": "experiments/ic-bench: exact counters weighted by frozen per-class batch-throughput weights (reference picoseconds). Runs under different calibration_id are never paired.", "deterministic": "yes", "binds": ["calibration_id"], "source": "cryptanalysis experiments/ic-bench/calibration.json"},
+      {"id": "count.group_additions", "of": "operations", "definition": "group additions and doublings, counted exactly; no conversion.", "deterministic": "yes", "binds": [], "source": "any adapter that counts them"},
+      {"id": "count.s3_solves", "of": "operations", "definition": "crypto-autoresearcher index_calculus: S3 root solves (one modular square root each).", "deterministic": "yes", "binds": [], "source": "crypto-autoresearcher src/crypto_autoresearcher/index_calculus"},
+      {"id": "count.solver_conflicts", "of": "solver events", "definition": "CDCL conflicts. Comparable only for the same solver, version and search options (WDSat XG on/off changes conflicts by two orders of magnitude).", "deterministic": "yes for fixed solver, options and seed", "binds": ["solver_name", "solver_version", "solver_options_sha256"], "source": "regression suite wdsat_conflicts_v1; ic_framework sat-cdcl"},
+      {"id": "time.wall_ns", "of": "time", "definition": "monotonic wall-clock nanoseconds of the declared window.", "deterministic": "no", "binds": ["env_class_id", "isolation_level", "pinned_cpu_count"], "source": "ICMS runner or the producer's exclusive clocks"},
+      {"id": "time.cpu_ns", "of": "time", "definition": "user+system CPU of the measured tree from wait4 rusage.", "deterministic": "no", "binds": ["env_class_id"], "source": "ICMS runner"}
+    ]
+  },
+  "references": {
+    "version": "icms.references/v1",
+    "why": "The rho reference moved three times between 2026-09-21 and 2026-10-01 (docs/ic/FRAMEWORK.md, BOUNDARY_TARGETS.md). A record names the reference it used; a comparison refuses two different names.",
+    "rho": [
+      {"id": "rho.plain", "A": 1, "expected_ops": "sqrt(pi*r/2)", "status": "before-mark only; never a reference since ledger section 18"},
+      {"id": "rho.negation", "A": 2, "expected_ops": "sqrt(pi*r/4)", "status": "reference for prime-field and random binary curves"},
+      {"id": "rho.signed_frobenius", "A": "2n", "expected_ops": "sqrt(pi*r/(4n))", "status": "Koblitz; the strong single-target walk is the admissibility minimum since 2026-10-01"},
+      {"id": "rho.automorphism", "A": "|Aut(E)|", "expected_ops": "sqrt(pi*r/(2*|Aut|))", "status": "j = 0 (A = 6) and j = 1728 (A = 4) prime-field curves"},
+      {"id": "rho.batch_kuhn_struik", "A": "per target", "expected_ops": "about sqrt(2*pi*r*k)/k per target for k targets", "status": "historical diagnostic for k-target figures only; never the one-target reference"},
+      {"id": "rho.measured_matched", "A": "as run", "expected_ops": "measured", "status": "the producer's counted rho on the same subgroup and planted targets; the record carries its method string and automorphism count"}
+    ],
+    "floor": [
+      {"id": "floor.generic", "formula": "sqrt(pi/(2A)) in S units", "source": "src/cryptanalysis/ic_boundary.rs generic_floor_s"},
+      {"id": "floor.batch", "formula": "L(k) * sqrt(pi/(4n)) per target", "source": "scripts/build_ic_leaderboard.py koblitz batch rows"}
+    ]
+  },
+  "factor_base_size_fields": {
+    "why": "The same names mean different things in different producers (docs/ic audit). ICMS records each separately and never lets one stand for another.",
+    "fields": {
+      "usable_points": "B in cryptanalysis AGENTS.md: distinct, nonidentity, subgroup-usable points before sign or Frobenius folding. This is the fb<B> of an IC1 candidate id.",
+      "signed_points": "points with P and -P both counted (ic bench signed_points).",
+      "abscissae_with_points": "distinct x carrying a point of the base (ic bench abscissae).",
+      "abscissae_allowed": "every x the construction admits, including those with no rational point (Koblitz pipeline abscissae).",
+      "columns": "unknowns in the relation matrix after folding (ic bench columns).",
+      "orbit_representatives": "sign/Frobenius/automorphism orbit count (ic run signed_orbits).",
+      "nominal_dimension": "the requested F_q-dimension of a subspace base; never a point count."
+    }
+  },
+  "factor_base_families": {
+    "why": "Canonical family names, and how each producer spells them. An adapter refuses a family it has no spelling for.",
+    "list": [
+      {"family": "binary_subspace", "means": "points whose abscissa lies in an F_2-subspace V (Gaudry/Diem linear base)", "params": ["dimension", "basis_law"], "param_values": {"basis_law": ["prefix", "geometric", "geomtrace", "geomtraceu", "random", "normal", "kertrace", "invariant"]}, "param_notes": {"basis_law": "which l-dimensional V, as cryptanalysis pdp-degree-heuristics/factor_base.py defines them; prefix is span{1, z, ..., z^(l-1)}, the literature's choice and crypto ic bench's only basis"}, "optional_params": {"basis_seed": "seed of the basis sampler for the randomised laws (cryptanalysis cell seed)"}, "crypto.ic_bench": "binary-subspace", "crypto.workflow": "standard_subspace", "cryptanalysis.ic_bench": "factor_base.py family = basis_law"},
+      {"family": "frobenius_stable_subspace", "means": "V a divisor submodule of T^n - 1 (KN-FIND-b9a41d); columns are signed Frobenius orbits", "params": ["divisor"], "crypto.ic_bench": "koblitz-orbit", "crypto.workflow": "divisor"},
+      {"family": "frobenius_symmetrised", "means": "F_u = {P : 1/(x+1) in V}, T = (0,1) included, for the symmetrised oracle", "params": ["divisor"], "crypto.ic_bench": "koblitz-symmetrised"},
+      {"family": "frobenius_union", "means": "union of Frobenius orbits of chosen seeds (not a subspace)", "params": ["seed_masks"], "crypto.workflow": "frobenius_union"},
+      {"family": "cofactor_projected", "means": "a parent base mapped into the prime-order subgroup by the cofactor", "params": ["parent"], "crypto.workflow": "cofactor_projected"},
+      {"family": "pruned", "means": "a parent base keeping only the listed abscissa orbits", "params": ["parent", "retained_abscissa_orbits"], "crypto.workflow": "pruned"},
+      {"family": "two_torsion_saturated", "means": "a parent base closed under translation by rational 2-torsion", "params": ["parent"], "crypto.workflow": "two_torsion_saturated"},
+      {"family": "subgroup_orbits", "means": "orbits of sampled subgroup points", "params": ["seed", "points"], "crypto.workflow": "subgroup_orbits"},
+      {"family": "factor_index", "means": "the legacy degree-ord_n(2) factor family, candidate by index", "params": ["index"], "crypto.workflow": "factor", "crypto.ic_run": "factor-index"},
+      {"family": "prime_small_abscissa", "means": "the smallest on-curve abscissae of a prime-field curve", "params": ["size"], "crypto.ic_bench": "prime-abscissa", "autoresearcher.index_calculus": "small_x"},
+      {"family": "prime_random_abscissa", "means": "uniformly random on-curve abscissae", "params": ["size"], "autoresearcher.index_calculus": "random"},
+      {"family": "prime_subgroup_power", "means": "abscissae x with x^d = g^d (multiplicative subgroup of F_p^*)", "params": ["size"], "autoresearcher.index_calculus": "subgroup"},
+      {"family": "glv_orbit", "means": "seed abscissae closed under the automorphism group of a CM curve", "params": ["size", "group"], "crypto.ic_bench": "glv-orbit"},
+      {"family": "gls_line", "means": "the GLS line base", "params": [], "crypto.ic_bench": "gls-line"},
+      {"family": "explicit", "means": "a frozen point list with its digest", "params": ["recipe"]}
+    ]
+  },
+  "variants": {
+    "large_primes": ["none", "single", "double"],
+    "quotient": ["negation", "frobenius", "automorphism", "two_torsion", "gls"],
+    "partition_schemes": ["disjoint_subspaces", "nested_subspaces", "per_summand", "orbit_classes"],
+    "splitting": ["none", "chained_s3", "balanced_resultant", "mitm_table"],
+    "encodings": ["none", "expanded_semaev", "symmetrized", "chained_s3", "riemann_roch", "orbit_coordinates"]
+  },
+  "pdp_metrics": {
+    "why": "The structural size of each point-decomposition system, so two solvers are compared on the same system. Unknown is null, never zero.",
+    "fields": {
+      "n_vars": "Boolean (or field) unknowns of the system as handed to the solver (SystemShape.n_vars)",
+      "n_equations": "equations (SystemShape.n_equations)",
+      "degrees": "maximum monomial degree per equation",
+      "max_degree": "largest entry of degrees",
+      "semi_regular_degree": "first non-positive coefficient of (1+t)^v / prod(1+t^d_i) (Bardet-Faugere-Salvy)",
+      "solving_degree": "highest degree a Groebner/Macaulay engine reached",
+      "anf_monomials": "distinct monomials of the descended ANF",
+      "cnf_variables": "CNF variables including Tseitin auxiliaries",
+      "cnf_aux_variables": "Tseitin auxiliaries alone",
+      "cnf_clauses": "clauses after encoding (ic corpus EncodingStats.clauses; ic_framework extra.original_clauses)",
+      "xor_rows": "native XOR constraints (EncodingStats.xor_rows; extra.native_xor_rows)",
+      "literals": "total literal occurrences",
+      "conflicts": "CDCL conflicts", "decisions": "CDCL decisions", "propagations": "unit propagations", "restarts": "restarts",
+      "matrix_rows_max": "largest Macaulay/F4 matrix rows", "matrix_cols_max": "largest Macaulay/F4 matrix columns"
+    }
+  },
+  "solver_options_that_change_search": {
+    "why": "Options that change a solver's counters by large factors. A spec must pin each one the solver has; a record that omits one is not comparable on that solver's counters.",
+    "list": {
+      "sat-cdcl": ["sat_xor_encoding", "sat_conflict_budget"],
+      "wdsat": ["xg", "branching_order", "timeout_ms"],
+      "matrix-f4": ["max_degree", "split", "node_budget"],
+      "matrix-f5": ["max_degree", "split", "node_budget"],
+      "inherited-f4": ["max_degree", "split", "node_budget"],
+      "crossbred-f2": ["D", "k", "max_rows", "max_kernel_dim"], "macaulay-xl": ["mode", "formulation", "d_max", "max_cols", "max_rows"], "sat": ["encoding", "trace_constraint", "conflict_budget"], "msolve": ["msolve_version"]
+    }
+  }
+}
