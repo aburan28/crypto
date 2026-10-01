@@ -1,0 +1,916 @@
+{
+ "suite": "ic tool programme conformance suite v2",
+ "design": "research/ic_tool_program/design/schema-v2.md §9",
+ "includes": "../v1/cases.json, run first and unchanged; its cases are step B0's",
+ "rules": [
+  "A case passes only if the process exits within its timeout, never panics (exit status 101), and meets every expectation.",
+  "{tmp} is the case's own temporary directory; {suite} is research/ic_tool_program/suite/v1; {cases} is this directory's params/.",
+  "exit is a number, or zero / nonzero. json_paths compares values at dotted paths. json_contains asks, for each listed object, that some element of the list at the path contains it. same_outputs_as runs a second command and compares the listed paths.",
+  "Cases are added, never removed or loosened. A case with `until` expects a refusal that step lifts; that step changes the expectation with a dated note here, and adds the new run as its own case."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2/make_cases.py",
+  "sha256": "16f93dbe74e1a41c6cdc4f74f51432c5226f0ef97cf2f40052d30ef9b1f57bc3"
+ },
+ "cases": [
+  {
+   "id": "C009-v2-translation-same-outputs",
+   "step": "B1",
+   "checks": "design §8: the v2 translation of a v1 row runs to identical outputs",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json"
+    },
+    "v1.json": {
+     "copy": "{suite}/params/smoke/k0n31/M1-T01.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete"
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/v1.json",
+      "--json",
+      "--out",
+      "{tmp}/v1-report.json",
+      "--single-target",
+      "--rho-seed",
+      "2293761",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/v1-report.json",
+     "paths": [
+      "status",
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.rho.scalar",
+      "rho_counts",
+      "all_verified",
+      "ic_and_rho_agree"
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C010-curve-a-other-generator",
+   "step": "B1",
+   "checks": "B1's importer: an explicit generator under the repository's modulus",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.scalar": "673310",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C011-another-modulus-is-another-model",
+   "step": "B1",
+   "checks": "B1's importer: a modulus the repository's rule would not pick, named as its own model",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C011-curve-a-prime-other-modulus.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.scalar": "466056",
+     "result.verified": true,
+     "curve_id.icv1": "ICV1:f2m-31-85db1f23:-90707:2147574356:0x1:-7:unk:r:311a85832d68"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C012-unknown-key",
+   "step": "B1",
+   "checks": "a key outside the schema, inside subgroup",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C012-unknown-key.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "unknown-key",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C013-schema-version",
+   "step": "B1",
+   "checks": "schema_version 3",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C013-schema-version.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "schema-version",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C014-two-targets",
+   "step": "B1",
+   "checks": "two target forms in one file",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C014-two-targets.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "target-count",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C015-coordinates-without-modulus",
+   "step": "B1",
+   "checks": "a generator's coordinates, and no modulus",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C015-coordinates-without-modulus.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "modulus-required",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C016-integer-syntax",
+   "step": "B1",
+   "checks": "an order written with a sign",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C016-integer-syntax.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "integer-syntax",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C017-reducible-modulus",
+   "step": "B1",
+   "checks": "the modulus z^31 + 1, which is reducible",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C017-reducible-modulus.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "modulus-reducible",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C018-singular-curve",
+   "step": "B1",
+   "checks": "b = 0",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C018-singular-curve.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "curve-singular",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C019-generator-off-curve",
+   "step": "B1",
+   "checks": "a generator off the curve",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C019-generator-off-curve.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "generator-off-curve",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C020-generator-order",
+   "step": "B1",
+   "checks": "a generator on the curve, outside the order-r subgroup",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C020-generator-order.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "generator-order",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C021-composite-order",
+   "step": "B1",
+   "checks": "order 3r, a composite",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C021-composite-order.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "order-composite",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C022-cofactor-mismatch",
+   "step": "B1",
+   "checks": "cofactor 1491, where #E = 1492 r",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C022-cofactor-mismatch.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "cofactor-mismatch",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C023-target-outside-subgroup",
+   "step": "B1",
+   "checks": "a target on the curve, outside the order-r subgroup",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C023-target-outside-subgroup.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "target-outside-subgroup",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C024-target-off-curve",
+   "step": "B1",
+   "checks": "a target off the curve",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C024-target-off-curve.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "target-off-curve",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C025-known-log-range",
+   "step": "B1",
+   "checks": "known_log = r",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C025-known-log-range.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 2,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "known-log-range",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C026-identity-target",
+   "step": "B1",
+   "checks": "design §4.4: the identity is a valid target with logarithm 0, by the trivial route",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C026-identity-target.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.scalar": "0",
+     "result.verified": true,
+     "route.ic.pipeline": "trivial"
+    }
+   },
+   "timeout_s": 60
+  },
+  {
+   "id": "C027-gate-curve-has-no-route-yet",
+   "step": "B1",
+   "checks": "design §5: the gate curve is valid and no pipeline admits it before B3",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "until": "B3"
+  },
+  {
+   "id": "C028-gate-curve-checks",
+   "step": "B1",
+   "checks": "design §4: every check passes on the gate file, r's primality exactly",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "order-composite",
+       "status": "pass",
+       "exact": true
+      },
+      {
+       "code": "cofactor-mismatch",
+       "status": "pass",
+       "exact": true
+      },
+      {
+       "code": "generator-order",
+       "status": "pass"
+      },
+      {
+       "code": "target-outside-subgroup",
+       "status": "pass"
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "frobenius-module",
+       "value": {
+        "ord_n_2": 82,
+        "blocks": 1
+       }
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C029-composite-degree-disclosed",
+   "step": "B1",
+   "checks": "AGENTS.md §8b: a composite degree runs, with its intermediate subfields disclosed",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C029-composite-degree-45.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.scalar": "19406767",
+     "result.verified": true
+    },
+    "json_contains": {
+     "disclosures": [
+      {
+       "code": "intermediate-subfields",
+       "value": [
+        3,
+        5,
+        9,
+        15
+       ]
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C030-even-degree-has-no-ic-route",
+   "step": "B1",
+   "checks": "design §5.2: kic needs an odd extension degree",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C030-even-degree-32.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "even-extension-degree"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C031-challenge-checks",
+   "step": "B1",
+   "checks": "design §4: the challenge file is valid; r's primality is a screen",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "order-composite",
+       "status": "pass",
+       "exact": false
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "primality-screen"
+      }
+     ],
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "until": "B4"
+  }
+ ]
+}

@@ -323,6 +323,16 @@ Paths below are to `src/cryptanalysis/koblitz_index_calculus.rs`
 | **B6** | **Fuzzing and differential checks.** A seeded generator of parameter files, valid and corrupted, runs in CI with a time budget. Answers are checked against `oracle.py` for `n ≤ 61`. Larger fields are checked against a slow reference implementation; `ic fixed`'s Python is a candidate if an audit shows it shares no arithmetic with the Rust. | no panic and no wrong answer within the budget |
 | **B7** | **The F1 sampled mode** | `n = 83` and `131` reported as labelled extrapolations, with their samples |
 
+**The design for B1 and B2** (2026-10-01) is
+[`research/ic_tool_program/design/schema-v2.md`](../../ic_tool_program/design/schema-v2.md).
+It sets out:
+- one schema for every field kind;
+- checks with stable codes, each exact or marked as a screen;
+- routing to the pipelines that exist, naming the gate that refuses
+  each instance and the step that lifts it;
+- the conformance cases, of which B1's are frozen in
+  `research/ic_tool_program/conformance/v2/`.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an

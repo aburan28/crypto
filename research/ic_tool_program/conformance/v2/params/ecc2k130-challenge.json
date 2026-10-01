@@ -1,0 +1,38 @@
+{
+ "schema_version": 2,
+ "name": "ECC2K-130: the challenge's generator and target, in the polynomial basis (docs/ic/params/ecc2k130-fixed.json)",
+ "field": {
+  "kind": "binary",
+  "degree": 131,
+  "modulus": "0x800000000000000000000000000002007"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "680564733841876926932320129493409985129",
+  "cofactor": "4",
+  "generator": {
+   "x": "0x51c99bfa6f18de467c80c23b98c7994aa",
+   "y": "0x42ea2d112ecec71fcf7e000d7efc978bd"
+  }
+ },
+ "target": {
+  "point": {
+   "x": "0x6c997f3e7f2c66a4a5d2fda13756a37b1",
+   "y": "0x4a38d11829d32d347bd0c0f584d546e9a"
+  }
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "kic",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "rho-koblitz",
+   "seed": 2293761
+  }
+ }
+}

@@ -1,0 +1,38 @@
+{
+ "schema_version": 2,
+ "name": "the m = 83 confidence gate (AGENTS.md \u00a78a): frozen generator, public target T001",
+ "field": {
+  "kind": "binary",
+  "degree": 83,
+  "modulus": "0x800000000200000000007"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "2417851639230796216685689",
+  "cofactor": "4",
+  "generator": {
+   "x": "0x477f77103dfad59850800",
+   "y": "0x2fa5e737d542c4e4fd5c3"
+  }
+ },
+ "target": {
+  "point": {
+   "x": "0x355fb5df7a905f16921eb",
+   "y": "0x5900a390f42d290f1bbe"
+  }
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "kic",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "rho-koblitz",
+   "seed": 2293761
+  }
+ }
+}
