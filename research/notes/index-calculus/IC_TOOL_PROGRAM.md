@@ -344,6 +344,15 @@ B3's declaration is
 [`research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md`](../../ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md).
 The row above still states the done-when for both halves together.
 
+**B7 is split in two** (2026-10-01), by its design,
+[`research/ic_tool_program/design/f1-sampled.md`](../../ic_tool_program/design/f1-sampled.md).
+- **B7a** builds the F1 sampled level where F0 also runs, at one-word
+  sizes. It measures F1's error there against F0, size by size, with a
+  falsification target declared in the design. It also measures the
+  yield constant B7b has to carry.
+- **B7b** runs F1 at `n = 83` and `131`, after B3b and B4 give `kic`'s
+  kernels two and three words.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an
