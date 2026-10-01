@@ -193,6 +193,7 @@ pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
+pub mod line_s4_oracle;
 pub mod matrix_f5_f2;
 pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;

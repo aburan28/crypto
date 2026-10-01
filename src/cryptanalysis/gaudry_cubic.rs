@@ -121,6 +121,24 @@ impl Fp3 {
         }
     }
 
+    /// The field `F_p[t]/(t³ − c)` for a given non-cube `c`, so that an
+    /// element written over another presentation of the same field
+    /// with the same `c` (`ext_curve::Fp3`, whose `s³ = ν`) carries over
+    /// coefficient by coefficient.
+    pub fn with_cube_nonresidue(p: u64, c: u64) -> Result<Fp3, String> {
+        if p % 3 != 1 {
+            return Err(format!("p = {p} is not 1 mod 3"));
+        }
+        if c.is_multiple_of(p) || pow_mod(c % p, (p - 1) / 3, p) == 1 {
+            return Err(format!("c = {c} is a cube modulo {p}"));
+        }
+        Ok(Fp3 {
+            p,
+            c: c % p,
+            muls: Cell::new(0),
+        })
+    }
+
     pub fn muls(&self) -> u64 {
         self.muls.get()
     }
@@ -1233,6 +1251,34 @@ impl SymmetrisedS4 {
             }
         }
         terms.retain(|_, c| *c != Fp3::ZERO);
+        SymmetrisedS4 {
+            terms,
+            plan: std::sync::OnceLock::new(),
+        }
+    }
+
+    /// The same polynomial on the line `x = s·t`, `t ∈ F_p`: with
+    /// `x_i = s t_i` the elementary symmetric functions scale as
+    /// `e_k = s^k σ_k(t)`, so the term `e₁^a e₂^b e₃^c x₄^d` picks up
+    /// `s^{a + 2b + 3c}` and the unknowns become `(σ₁, σ₂, σ₃)`, in
+    /// `F_p` exactly as before.  [`solve_s4_subspace`] on the result
+    /// returns the `t_i`; the monomial structure the Macaulay degrees
+    /// were tuned on is unchanged.
+    pub fn on_line(&self, f: &Fp3, s: &E3) -> SymmetrisedS4 {
+        let mut pow = vec![Fp3::ONE];
+        for _ in 0..(4 + 8 + 12) {
+            let last = *pow.last().unwrap();
+            pow.push(f.mul(&last, s));
+        }
+        let terms = self
+            .terms
+            .iter()
+            .map(|(&e, &c)| {
+                let k = e[0] as usize + 2 * e[1] as usize + 3 * e[2] as usize;
+                (e, f.mul(&c, &pow[k]))
+            })
+            .filter(|(_, c)| *c != Fp3::ZERO)
+            .collect();
         SymmetrisedS4 {
             terms,
             plan: std::sync::OnceLock::new(),

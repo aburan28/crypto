@@ -44,6 +44,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base_from_divisor,
 };
 use crypto_lib::cryptanalysis::line_oracle::LineOracle;
+use crypto_lib::cryptanalysis::line_s4_oracle::LineS4Oracle;
 use crypto_lib::cryptanalysis::subfield_fp3::{
     generate_subfield_instance, subfield_line_base, SubfieldFold,
 };
@@ -1330,6 +1331,249 @@ fn e9(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E11: the algebraic S₄ oracle on the Frobenius line ─────────────
+
+/// The S₄ line oracle against the pair table, target by target
+/// (AGENTS.md §6): both asked whether `[k]G` decomposes over the base.
+fn s4_agreement(
+    inst: &crypto_lib::cryptanalysis::subfield_fp3::SubfieldInstance,
+    fb: &crypto_lib::cryptanalysis::ic_boundary::FactorBase<
+        crypto_lib::cryptanalysis::subfield_fp3::Fp3Point,
+    >,
+    targets: u64,
+    seed: u64,
+) -> Value {
+    let mut ops = GroupOps::default();
+    let target = inst.curve.mul(&mut ops, inst.generator, 3);
+    let ctx = InstanceCtx {
+        group: &inst.curve,
+        generator: inst.generator,
+        target,
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: inst.name.clone(),
+        field_degree: Some(3),
+    };
+    let mut s4 = LineS4Oracle::new(inst.curve.f, inst.line, seed);
+    s4.prepare(&ctx, fb, &Params::default(), &mut ops).unwrap();
+    let mut mitm = MitmOracle::new(3);
+    let mut params = Params::default();
+    params.set("negation_folded", "1");
+    mitm.prepare(&ctx, fb, &params, &mut ops).unwrap();
+    let (mut ca, mut cb) = (OracleCounters::default(), OracleCounters::default());
+    let (mut agree, mut s4_only, mut mitm_only, mut hits) = (0u64, 0u64, 0u64, 0u64);
+    for k in 1..=targets {
+        let pt = inst.curve.mul(&mut ops, inst.generator, k);
+        let a = s4.decompose(&ctx, fb, &mut ops, &mut ca, pt);
+        let b = mitm.decompose(&ctx, fb, &mut ops, &mut cb, pt);
+        if let Some(idx) = &a {
+            let sum = idx.iter().fold(inst.curve.identity(), |acc, &i| {
+                inst.curve.add(&mut ops, acc, fb.points[i])
+            });
+            assert_eq!(sum, pt, "an S₄ decomposition did not sum to its target");
+            hits += 1;
+        }
+        match (a.is_some(), b.is_some()) {
+            (true, true) | (false, false) => agree += 1,
+            (true, false) => s4_only += 1,
+            (false, true) => mitm_only += 1,
+        }
+    }
+    json!({
+        "targets": targets,
+        "agree": agree,
+        "disagree": s4_only + mitm_only,
+        "s4_only": s4_only,
+        "mitm_only": mitm_only,
+        "hits": hits,
+        "unsolved": s4.stats.unsolved,
+        "border_unreachable": s4.stats.border_unreachable,
+    })
+}
+
+/// E11: E8's stream with the algebraic oracle in place of the pair table.
+fn e11(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    for &p_bits in &o.bits {
+        for seed in 1..=o.seeds {
+            let inst = match generate_subfield_instance(p_bits, seed, false, 8) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("e11 {p_bits} seed {seed}: {e}");
+                    continue;
+                }
+            };
+            let started = Instant::now();
+            let k_inv = inversion_in_multiplications(inst.p);
+            take_field_counters();
+            let (folded, frep) = subfield_line_base(&inst, SubfieldFold::Frobenius).unwrap();
+            let (build_muls_f, build_invs_f) = take_field_counters();
+            let (control, _) = subfield_line_base(&inst, SubfieldFold::Negation).unwrap();
+            let (build_muls_c, build_invs_c) = take_field_counters();
+            let neg = Negation { r: inst.r };
+            let refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &inst.frobenius];
+            let classes = classes_for(&inst.curve, inst.generator, inst.r, &refs).unwrap();
+            let planted = planted_for(seed, inst.r);
+            let mut ops = GroupOps::default();
+            let target = inst.curve.mul(&mut ops, inst.generator, planted);
+            let ctx = InstanceCtx {
+                group: &inst.curve,
+                generator: inst.generator,
+                target,
+                r: inst.r,
+                cofactor: inst.cofactor,
+                group_order: inst.group_order,
+                name: inst.name.clone(),
+                field_degree: Some(3),
+            };
+            let prep_started = Instant::now();
+            let mut oracle = LineS4Oracle::new(inst.curve.f, inst.line, seed);
+            let mut prep_ops = GroupOps::default();
+            oracle
+                .prepare(&ctx, &folded, &Params::default(), &mut prep_ops)
+                .unwrap();
+            let prep_wall = prep_started.elapsed().as_secs_f64();
+            take_field_counters();
+            let rep = full_rank_stream(
+                &inst.curve,
+                inst.generator,
+                target,
+                inst.r,
+                inst.cofactor,
+                planted,
+                &folded,
+                &control,
+                seed,
+                o.max_trials,
+                3,
+                Some(&classes),
+                |ops, ctr, pt| oracle.decompose(&ctx, &folded, ops, ctr, pt),
+            )
+            .unwrap();
+            let (stream_muls, stream_invs) = take_field_counters();
+            let st = &oracle.stats;
+            let totals = oracle.solver_totals().unwrap();
+            let agreement = if p_bits <= 9 {
+                Some(s4_agreement(&inst, &folded, 300, seed))
+            } else {
+                None
+            };
+            let mut walks = Vec::new();
+            let (mut st_neg, mut st_fold, mut all_ok) = (0u64, 0u64, true);
+            for k in 0..o.rho_runs as u64 {
+                let ws = seed ^ (k * 0x9E37);
+                take_field_counters();
+                let n = rho_reference_negation(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                );
+                let (nm, ni) = take_field_counters();
+                let f = rho_reference_folded(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                    &refs,
+                )
+                .unwrap();
+                let (fm, fi) = take_field_counters();
+                all_ok &= n.verified && f.verified;
+                st_neg += n.steps;
+                st_fold += f.steps;
+                walks.push(json!({
+                    "walk_seed": ws,
+                    "negation": n,
+                    "negation_fp_muls": nm,
+                    "negation_fp_invs": ni,
+                    "folded": f,
+                    "folded_fp_muls": fm,
+                    "folded_fp_invs": fi,
+                }));
+            }
+            eprintln!(
+                "e11 p=2^{p_bits} r=2^{:.1} h/N1={}: cols {}/{} square {:?}/{:?} ratio {:?} rank@cols {:?}/{:?} trials {} solves {} unsolved {} muls/solve {:.0} stream muls {} agreement {} ok {}/{}/{} [{:.1}s]",
+                (inst.r as f64).log2(),
+                inst.cofactor / inst.base_order,
+                rep.folded.columns,
+                rep.control.columns,
+                rep.folded.square_relations,
+                rep.control.square_relations,
+                rep.square_ratio,
+                rep.folded.rank_fraction_at_columns,
+                rep.control.rank_fraction_at_columns,
+                rep.trials,
+                st.solves,
+                st.unsolved,
+                st.fp_muls as f64 / st.solves.max(1) as f64,
+                stream_muls,
+                agreement
+                    .as_ref()
+                    .map(|a| format!("{}/{}", a["agree"], a["targets"]))
+                    .unwrap_or_else(|| "—".into()),
+                rep.folded.verified,
+                rep.control.verified,
+                all_ok,
+                started.elapsed().as_secs_f64()
+            );
+            rows.push(json!({
+                "experiment": "e11",
+                "family": "subfield",
+                "p_bits": p_bits,
+                "seed": seed,
+                "instance": inst.name,
+                "log2_r": (inst.r as f64).log2(),
+                "r": inst.r,
+                "base_order": inst.base_order,
+                "group_order": inst.group_order,
+                "cofactor": inst.cofactor,
+                "summands": 3,
+                "oracle": "line-s4-macaulay",
+                "group_order_of_fold": classes.group_order,
+                "points_per_column_folded": frep.points_per_orbit,
+                "unit": "F_p multiplications; an inversion is priced at inversion_in_multiplications, measured on this host; the solver counts its own multiplications; a row operation of the linear algebra is one Z/rZ multiplication, priced as one",
+                "inversion_in_multiplications": k_inv,
+                "base_build": {
+                    "folded": {"fp_muls": build_muls_f, "fp_invs": build_invs_f},
+                    "control": {"fp_muls": build_muls_c, "fp_invs": build_invs_c},
+                },
+                "oracle_setup": {"wall_seconds": prep_wall},
+                "solver": {
+                    "calls": st.solves,
+                    "fp_muls": st.fp_muls,
+                    "macaulay_muls": st.macaulay_muls,
+                    "unsolved": st.unsolved,
+                    "border_unreachable": st.border_unreachable,
+                    "retried_at_degree_11": st.retried_at_degree_11,
+                    "retried_at_degree_12": st.retried_at_degree_12,
+                    "retried_at_degree_13": st.retried_at_degree_13,
+                    "e_solutions": st.e_solutions,
+                    "split_cubics": st.split_cubics,
+                    "root_triples": oracle.solutions,
+                    "unliftable_systems": oracle.unliftable,
+                    "wall_ns": totals.wall_ns,
+                },
+                "stream_cost": {"fp_muls": stream_muls, "fp_invs": stream_invs},
+                "stream": stream_json(&rep),
+                "agreement_with_mitm": agreement,
+                "rho_runs": o.rho_runs,
+                "rho_steps_ratio": st_neg as f64 / st_fold.max(1) as f64,
+                "rho_expected_ratio": ((classes.group_order as f64) / 2.0).sqrt(),
+                "rho_all_verified": all_ok,
+                "walks": walks,
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut o = Opts {
@@ -1375,7 +1619,8 @@ fn main() {
         "e7" => e7(&o),
         "e8" => e8(&o),
         "e9" => e9(&o),
-        other => panic!("unknown experiment {other}; try e1..e9"),
+        "e11" => e11(&o),
+        other => panic!("unknown experiment {other}; try e1..e9, e11"),
     };
     let out = json!({
         "what_this_is": format!("Experiment {} of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.", o.exp),
