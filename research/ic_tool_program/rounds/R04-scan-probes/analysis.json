@@ -1,0 +1,609 @@
+{
+ "what_this_is": "R04, the scan's stages priced inside the scan: a stage diagnostic, never a speedup",
+ "host": {
+  "repository_commit": "f0ee5da67a9cb45ddf4761a6feac509ebf8d240c",
+  "tree_status": "",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "cargo_lock_sha256": null,
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+   "pclmulqdq",
+   "popcnt",
+   "avx2",
+   "bmi2",
+   "avx512f",
+   "avx512dq",
+   "avx512ifma",
+   "avx512cd",
+   "avx512bw",
+   "avx512vl",
+   "avx512_bf16",
+   "avx512vbmi",
+   "avx512_vbmi2",
+   "gfni",
+   "vpclmulqdq",
+   "avx512_vnni",
+   "avx512_bitalg",
+   "avx512_vpopcntdq",
+   "avx512_fp16"
+  ],
+  "logical_cores": 4,
+  "memory": "MemTotal:       16480972 kB",
+  "transparent_hugepage": {
+   "enabled": "always [madvise] never",
+   "defrag": "always defer defer+madvise [madvise] never"
+  },
+  "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "glibc": "glibc 2.39",
+  "binaries": {
+   "default": {
+    "path_basename": "ic-r04-default-on-c1a2e5f8-9a48b389",
+    "sha256": "ff5753791ffc3ee4b66eef9c6c30e33ae34cacd7bccd4aa68b38d28b18eb3c34",
+    "built_from": "9a48b389d181cfa0541e1a2273962136b767fe65",
+    "features": []
+   },
+   "probes": {
+    "path_basename": "ic-r04-probes-on-c1a2e5f8-9a48b389",
+    "sha256": "2405dc50f0676407048e04aee88d0ef0524921813217b39e68f833e25f68cb14",
+    "built_from": "9a48b389d181cfa0541e1a2273962136b767fe65",
+    "features": [
+     "scan-probes"
+    ]
+   }
+  },
+  "isolation_tool": {
+   "path": "tools/isolated_bench.py",
+   "sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+  },
+  "pinning": "tools/isolated_bench.py run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+  "smt_siblings": {
+   "0": "0",
+   "1": "1",
+   "2": "2",
+   "3": "3"
+  },
+  "uptime": "14:36:43 up 13:12,  0 user,  load average: 0.88, 0.97, 1.01",
+  "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+ },
+ "aa_source": {
+  "host_matches_r01": true,
+  "aa": "R01's"
+ },
+ "accounting": {
+  "compare": {
+   "processes": 138,
+   "contended": 6,
+   "failed": 0
+  }
+ },
+ "pin": {
+  "held": true,
+  "probes_reported": true,
+  "default_silent": true,
+  "rows": 22
+ },
+ "sizes": [
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "a": 1,
+   "n": 19,
+   "log2_r": 18.002,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.976086379228088,
+    "min": 0.8034549964450958,
+    "max": 1.082955467180655,
+    "lo": 0.8743674871730186,
+    "hi": 1.0896386630236987,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.1423267620948902,
+     "ns_per_summand": 74.3058965760361
+    },
+    "key": {
+     "share": 0.08874264447742945,
+     "ns_per_summand": 46.49754940230581
+    },
+    "filter": {
+     "share": 0.024189748005352396,
+     "ns_per_summand": 12.2419785493145
+    },
+    "admitted": {
+     "share": 0.7363753207804744,
+     "ns_per_summand": 375.3795473596176
+    },
+    "trial": {
+     "share": 0.15865349980043866,
+     "ns_per_summand": 78.7208248220499
+    },
+    "scan_ns_per_summand": 507.82507711075186,
+    "admitted_per_summand": 0.33125,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0195642272162666,
+    "lo": 0.929590673267977,
+    "hi": 1.1182461736246774
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "a": 1,
+   "n": 23,
+   "log2_r": 22.001,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.9598291665661322,
+    "min": 0.869702420105069,
+    "max": 1.0680687086669782,
+    "lo": 0.8820959153035935,
+    "hi": 1.0444125327050846,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.29503759965638093,
+     "ns_per_summand": 58.14170792972986
+    },
+    "key": {
+     "share": 0.1811891430381009,
+     "ns_per_summand": 36.04943990735126
+    },
+    "filter": {
+     "share": 0.0448243366709138,
+     "ns_per_summand": 9.133379355615766
+    },
+    "admitted": {
+     "share": 0.47159423832925873,
+     "ns_per_summand": 93.9486629155621
+    },
+    "trial": {
+     "share": 0.1945657406208894,
+     "ns_per_summand": 39.69348200351101
+    },
+    "scan_ns_per_summand": 198.30989536703183,
+    "admitted_per_summand": 0.1684027777777778,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.020826709020529,
+    "lo": 0.9843464455002814,
+    "hi": 1.058658945347292
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "a": 1,
+   "n": 45,
+   "log2_r": 24.803,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 1.0395460912131738,
+    "min": 0.9460350259903656,
+    "max": 1.1839954738818896,
+    "lo": 0.9616151334920128,
+    "hi": 1.123792708869181,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.32947832380315667,
+     "ns_per_summand": 51.62518590659833
+    },
+    "key": {
+     "share": 0.13641746287422396,
+     "ns_per_summand": 22.661912412516344
+    },
+    "filter": {
+     "share": 0.04654575089661239,
+     "ns_per_summand": 7.171166035295489
+    },
+    "admitted": {
+     "share": 0.4811575086142993,
+     "ns_per_summand": 75.10774028131561
+    },
+    "trial": {
+     "share": 0.26244171556015927,
+     "ns_per_summand": 41.12134413977418
+    },
+    "scan_ns_per_summand": 156.68899289746255,
+    "admitted_per_summand": 0.13920454545454544,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 0.9853685029296184,
+    "lo": 0.9156136574042906,
+    "hi": 1.0604375313910728
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "a": 0,
+   "n": 37,
+   "log2_r": 27.781,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.9742137261243418,
+    "min": 0.8617161215122461,
+    "max": 1.170249975409427,
+    "lo": 0.8719904808958625,
+    "hi": 1.0884205790801738,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.6016798364244772,
+     "ns_per_summand": 45.97785065956568
+    },
+    "key": {
+     "share": 0.16754774033008135,
+     "ns_per_summand": 12.826136512435234
+    },
+    "filter": {
+     "share": 0.08170444860530561,
+     "ns_per_summand": 6.469903874913469
+    },
+    "admitted": {
+     "share": 0.14459015924448737,
+     "ns_per_summand": 11.265074113195508
+    },
+    "trial": {
+     "share": 0.31393302897155584,
+     "ns_per_summand": 24.079475589254095
+    },
+    "scan_ns_per_summand": 76.46931079937985,
+    "admitted_per_summand": 0.13474658869395711,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 0.9763933191308949,
+    "lo": 0.9033336331330709,
+    "hi": 1.0553619157707235
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "a": 1,
+   "n": 43,
+   "log2_r": 32.113,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.960888535958523,
+    "min": 0.932773414986676,
+    "max": 0.9877148625733491,
+    "lo": 0.9354968062079417,
+    "hi": 0.9869694609425331,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.48202978846594224,
+     "ns_per_summand": 27.816476829339397
+    },
+    "key": {
+     "share": 0.2698094633071032,
+     "ns_per_summand": 15.84669610127515
+    },
+    "filter": {
+     "share": 0.10092712245567102,
+     "ns_per_summand": 5.733173380591534
+    },
+    "admitted": {
+     "share": 0.14580254381344154,
+     "ns_per_summand": 8.533142127490446
+    },
+    "trial": {
+     "share": 0.22799750918361428,
+     "ns_per_summand": 13.039837389369085
+    },
+    "scan_ns_per_summand": 58.03522192984494,
+    "admitted_per_summand": 0.1530497756017952,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0276460285269957,
+    "lo": 0.9355882953126542,
+    "hi": 1.1287618338517103
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "a": 1,
+   "n": 47,
+   "log2_r": 36.636,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.9619253771361644,
+    "min": 0.8760834413746134,
+    "max": 1.0773279994339542,
+    "lo": 0.8914985222624406,
+    "hi": 1.0379158328051168,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.3876973850181284,
+     "ns_per_summand": 15.11098389871687
+    },
+    "key": {
+     "share": 0.27491339818196275,
+     "ns_per_summand": 10.820372527540139
+    },
+    "filter": {
+     "share": 0.13015173909366992,
+     "ns_per_summand": 5.123678255944807
+    },
+    "admitted": {
+     "share": 0.20930326327129112,
+     "ns_per_summand": 8.158768268546655
+    },
+    "trial": {
+     "share": 0.1112545483049156,
+     "ns_per_summand": 4.341725415985742
+    },
+    "scan_ns_per_summand": 39.21380295074847,
+    "admitted_per_summand": 0.13061669641086654,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0193020880715002,
+    "lo": 0.9220079569296019,
+    "hi": 1.126863102360677
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "a": 0,
+   "n": 57,
+   "log2_r": 38.002,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 1.0489736883671728,
+    "min": 0.8010477684827151,
+    "max": 1.2854270794818121,
+    "lo": 0.8811699107528028,
+    "hi": 1.2487328328614633,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.3110423041756927,
+     "ns_per_summand": 13.467677434077299
+    },
+    "key": {
+     "share": 0.2800319716412646,
+     "ns_per_summand": 12.5477891760323
+    },
+    "filter": {
+     "share": 0.1290416348737797,
+     "ns_per_summand": 5.67746912482618
+    },
+    "admitted": {
+     "share": 0.2777451191719579,
+     "ns_per_summand": 12.327957942181264
+    },
+    "trial": {
+     "share": 0.07900522167674102,
+     "ns_per_summand": 3.469633231210316
+    },
+    "scan_ns_per_summand": 44.10068610209424,
+    "admitted_per_summand": 0.19942235884370227,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0115815580774636,
+    "lo": 0.9348277314054093,
+    "hi": 1.0946372409214002
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "a": 0,
+   "n": 41,
+   "log2_r": 39.0,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.9753101296417932,
+    "min": 0.7851515949414098,
+    "max": 1.3679840473772351,
+    "lo": 0.7838473475209805,
+    "hi": 1.2135396668627887,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.36816700237494715,
+     "ns_per_summand": 11.627795550318346
+    },
+    "key": {
+     "share": 0.29674334242389633,
+     "ns_per_summand": 9.205918330718085
+    },
+    "filter": {
+     "share": 0.13592042882222363,
+     "ns_per_summand": 4.294096016546572
+    },
+    "admitted": {
+     "share": 0.20008869816021094,
+     "ns_per_summand": 6.329536306929974
+    },
+    "trial": {
+     "share": 0.08336855144624954,
+     "ns_per_summand": 2.767336985753979
+    },
+    "scan_ns_per_summand": 31.457346204512973,
+    "admitted_per_summand": 0.11759222596594375,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0748862353891129,
+    "lo": 1.0053849419127445,
+    "hi": 1.149192086397145
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 1.034298046595686,
+    "min": 0.9594043109394718,
+    "max": 1.193059097716798,
+    "lo": 0.9520211773697846,
+    "hi": 1.1236855593351263,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.23968257220451172,
+     "ns_per_summand": 13.146452659569071
+    },
+    "key": {
+     "share": 0.19960777640891814,
+     "ns_per_summand": 10.836747721256845
+    },
+    "filter": {
+     "share": 0.13879801063401112,
+     "ns_per_summand": 7.537354852976358
+    },
+    "admitted": {
+     "share": 0.42178745641804544,
+     "ns_per_summand": 23.291944407618956
+    },
+    "trial": {
+     "share": 0.02357730569867684,
+     "ns_per_summand": 1.302679873606833
+    },
+    "scan_ns_per_summand": 54.87476762953919,
+    "admitted_per_summand": 0.19756058887704545,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 1.0172034299629564,
+    "lo": 0.9511652508723645,
+    "hi": 1.0878265548277988
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 1.0252743873717542,
+    "min": 0.9824644987627502,
+    "max": 1.1149277817351295,
+    "lo": 0.9669232949331024,
+    "hi": 1.0871468035872003,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.4094332294793166,
+     "ns_per_summand": 32.48113035486051
+    },
+    "key": {
+     "share": 0.15455007307432822,
+     "ns_per_summand": 12.280314775167241
+    },
+    "filter": {
+     "share": 0.10206807682350316,
+     "ns_per_summand": 8.007545510025594
+    },
+    "admitted": {
+     "share": 0.3342067708475923,
+     "ns_per_summand": 26.26018714807904
+    },
+    "trial": {
+     "share": 0.018809578472312686,
+     "ns_per_summand": 1.490603777676782
+    },
+    "scan_ns_per_summand": 78.58038130846514,
+    "admitted_per_summand": 0.20559703004806718,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 0.9896040020239275,
+    "lo": 0.9339036265210796,
+    "hi": 1.048626488870015
+   },
+   "overhead_inside_aa": false
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "overhead_default_over_probes": {
+    "n": 6,
+    "geomean": 0.9691646510351571,
+    "min": 0.8942250136644376,
+    "max": 1.0201765374563545,
+    "lo": 0.9183551900592867,
+    "hi": 1.0227852262210881,
+    "missing_pairs": 0
+   },
+   "stages": {
+    "subtract": {
+     "share": 0.40433394046839866,
+     "ns_per_summand": 33.265521335353476
+    },
+    "key": {
+     "share": 0.160416126603106,
+     "ns_per_summand": 13.176800798161509
+    },
+    "filter": {
+     "share": 0.10980225175809183,
+     "ns_per_summand": 8.99587745656757
+    },
+    "admitted": {
+     "share": 0.3247362879455238,
+     "ns_per_summand": 26.954069530418206
+    },
+    "trial": {
+     "share": 0.01572415699192266,
+     "ns_per_summand": 1.2740265645526803
+    },
+    "scan_ns_per_summand": 82.75869713412385,
+    "admitted_per_summand": 0.1697086287775343,
+    "processes": 6
+   },
+   "aa_cold": {
+    "geomean": 0.9860161880040714,
+    "lo": 0.9264742140065119,
+    "hi": 1.0493847624767751
+   },
+   "overhead_inside_aa": false
+  }
+ ],
+ "decision": {
+  "leading_stage_by_top_size": {
+   "icv1-f2m41-tm2308219-7f48b14a": "subtract",
+   "icv1-f2m53-tm56619371-dac20a85": "admitted",
+   "icv1-f2m59-tm943548413-98844ecc": "subtract",
+   "icv1-f2m61-t158598901-ab42b6c5": "subtract"
+  },
+  "leading_stage": "subtract",
+  "trusted_at_top_sizes": {
+   "icv1-f2m41-tm2308219-7f48b14a": false,
+   "icv1-f2m53-tm56619371-dac20a85": false,
+   "icv1-f2m59-tm943548413-98844ecc": false,
+   "icv1-f2m61-t158598901-ab42b6c5": false
+  }
+ }
+}

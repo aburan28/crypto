@@ -1134,9 +1134,15 @@
           <code>n + deg t = 66</code>. Collection ran 1.29&ndash;1.31&times; faster there and cold time
           1.18&ndash;1.27&times;, with identical outputs. Its declared rule asked for a lower end above 1.10 on
           the suite and on the holdouts separately, and the ten-pair holdout at 2<sup>44.5</sup> missed it.</li>
+        <li><b>Round 4 (a stage diagnostic, run before round 3)</b> timed each stage of the collection scan, with
+          probes compiled into a separate build. At three of the four largest sizes the batched subtraction holds
+          the most scan time, 37&ndash;41%; at 2<sup>44.3</sup> the admitted keys hold 42%. The probes&rsquo;
+          overhead interval fell inside R01&rsquo;s A/A band at no size, so these shares are reported, not
+          trusted.</li>
       </ul>
-      <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>
-        and <code>rounds/R02-wide-tail-kernel/analysis.json</code> for every figure here).</p>
+      <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>,
+        <code>rounds/R02-wide-tail-kernel/analysis.json</code>, and <code>rounds/R04-scan-probes/analysis.json</code>
+        with <code>filter_check.json</code> for every figure here).</p>
     </div>
     <div class="table-scroll"><table>
       <caption>One row per baseline, and one per rejected round below them. S is cold, set-up plus online, in
@@ -1163,7 +1169,8 @@
       <span><b>Huge pages are not a lever</b> through glibc&rsquo;s tunable. Cold time reads 0.96&ndash;1.00&times; at the three largest sizes. Collection gains 5&ndash;12%, but the build loses up to 1.5&times; and system time rises 3&ndash;5&times;. This host&rsquo;s memory costs 44&ndash;70&nbsp;ns per random access from 2 to 32&nbsp;MiB and 221&nbsp;ns at 256&nbsp;MiB.</span>
       <span><b>Round 2, graded.</b> The control held: switching the AVX-512 scan kernels off made collection 1.89&times; slower per summand at 2<sup>44.3</sup>. Every output of both arms equals v0&rsquo;s on all 90 rows. At 2<sup>44.5</sup> the suite reads 1.182 [1.151, 1.213] and the holdouts 1.161 [1.089, 1.239]; at 2<sup>47.2</sup>, 1.267 [1.242, 1.292] and 1.262 [1.216, 1.310]. The predictions were 1.31&times; and 1.37&times;: a wide field&rsquo;s summand costs 1.90&ndash;1.95 units with the kernel, not the 1.6 assumed, and the build did not move. The nine other sizes read 0.973&ndash;1.027&times;, inside their A/A bands. The callgrind control failed too: under valgrind both arms take the portable paths, and the candidate&rsquo;s ran 0.1% fewer instructions, all in the compiler&rsquo;s code for two scan functions it does not change.</span>
       <span><b>Runs hours apart differ.</b> v0 against v0&prime;, interleaved in R02&rsquo;s session, reads 0.97&ndash;1.07&times; in cold time: the renaming between them moved nothing. Yet v0&prime;&rsquo;s S in R02&rsquo;s runs sits 4&ndash;16% above v0&rsquo;s in R01&rsquo;s at the six sizes above, on the same host. Only the paired ratio compares across rounds; S between runs carries the host&rsquo;s drift.</span>
-      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, so v0 stays the newest baseline, and the kernel is kept on record as <code>candidate.patch</code>.</span>
+      <span><b>Round 4, the scan&rsquo;s stages.</b> At 2<sup>44.5</sup> and 2<sup>47.2</sup> the subtraction costs 32.5 and 33.3&nbsp;ns a summand, against 13.1 at 2<sup>44.3</sup>, where the 8-lane kernel runs. That is round 2&rsquo;s target, and R02b re-tests it. A check made after the run, not declared: the presence filter is one bit per stored pair under one hash, and from 2<sup>36.6</sup> up its predicted pass rate matches the admitted fraction to within 2%. Nearly every admitted key is a false positive, at 118&ndash;159&nbsp;ns each at the three largest sizes.</span>
+      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, so v0 stays the newest baseline, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup.</span>
     </div>
   </div>
 
