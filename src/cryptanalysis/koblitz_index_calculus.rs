@@ -540,8 +540,14 @@ fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
 
 fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
+    // Whether what is left is prime changes only when a division changes
+    // it, so the test runs then and not at every trial divisor: a
+    // Miller–Rabin test per divisor was most of building a curve whose
+    // order has a composite cofactor (`n = 57`).  Even divisors past 2
+    // are skipped, since the 2s are gone by then.
+    let mut prime = is_prime_u64(v);
     let mut d = 2u64;
-    while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+    while v > 1 && !prime && d.saturating_mul(d) <= v {
         let mut e = 0;
         while v.is_multiple_of(d) {
             v /= d;
@@ -549,8 +555,9 @@ fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
         }
         if e > 0 {
             out.push((d, e));
+            prime = is_prime_u64(v);
         }
-        d += 1;
+        d += if d == 2 { 1 } else { 2 };
     }
     if v > 1 {
         out.push((v, 1));
@@ -13627,7 +13634,29 @@ mod tests {
                 values.push(koblitz_point_count(a, n).to_u64().unwrap());
             }
         }
+        // The version before the primality test moved out of the loop,
+        // kept verbatim: the change must not alter a single factor.
+        fn factorise_u64_per_divisor(mut v: u64) -> Vec<(u64, u32)> {
+            let mut out = Vec::new();
+            let mut d = 2u64;
+            while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+                let mut e = 0;
+                while v.is_multiple_of(d) {
+                    v /= d;
+                    e += 1;
+                }
+                if e > 0 {
+                    out.push((d, e));
+                }
+                d += 1;
+            }
+            if v > 1 {
+                out.push((v, 1));
+            }
+            out
+        }
         for v in values {
+            assert_eq!(factorise_u64(v), factorise_u64_per_divisor(v), "{v}");
             let fast: Vec<(BigUint, u32)> = factorise_u64(v)
                 .into_iter()
                 .map(|(p, e)| (BigUint::from(p), e))
