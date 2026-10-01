@@ -46,7 +46,8 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
 | `plan` | Ledger priorities, target-count gate, and primary-speedup eligibility |
 | `preflight` | Ledger schema v2, cargo/rustc, producer sources, host pin |
 | `launch --beat …` | Lock → run dir → build producers → measure → claim draft + schema check |
-| `launch-panel --beat … [--targets L] [--blocks B] [--k K \| --k-candidates …] [--cpu N]` | Multi-target batch panel beats only (see below); `launch` rejects them |
+| `launch-panel --beat … [--targets L] [--blocks B] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | Multi-target batch panel beats only (see below); `launch` rejects them |
+| `launch-single --beat … [--workloads W] [--tune-workloads T] [--k K \| --k-candidates …] [--cpu N] [--resume RUN_ID]` | One-target online panel beats only (see below) |
 | `status [--run-id]` | Print `runs/<id>/state.json` (default: `runs/current.json`) |
 | `verify [--run-id]` | Rehash review manifest |
 | `claim-check --report PATH --stage STAGE` | Fail-closed measurement-schema validation |
@@ -135,6 +136,61 @@ filled in. A panel can reach `PENDING_INDEPENDENT_VALIDATION` under
 pinned with `taskset`; wrap the whole command in
 `tools/isolated_bench.py reserve` (Linux) for AGENTS.md section-10 timings, as
 `.github/workflows/compact-orbit-n61-isolated.yml` does.
+
+`--resume RUN_ID` continues an interrupted panel in place. It requires the
+same git head, rebuilds the producers and requires identical binary hashes,
+and regenerates both corpora byte-for-byte. Finished K rows and blocks are
+kept. A partially written tune or block log is renamed to `*.abortedN` and
+rerun.
+
+The memory skip uses `ic_rss_model` (`compact_orbit_rss`): 24 B per touched
+state (K²·n) plus a 16 B-slot root table sized to `next_pow2(4·K²·n)`, plus
+fixed bytes and a headroom margin. It matches the measured peaks within
++0.3% to +4% for K=400..1,200. The old flat 94 B per state under-predicted
+above K=800 (7.7 GiB estimated vs 10.0 GiB measured at K=1,200), and it
+missed the table doubling at K≈1,482.
+
+### One-target online panel beats
+
+Beats with `"launch_mode": "single_target_panel"` (currently
+`koblitz.compact_orbit.n61_single_target`) run through `launch-single`
+(`single_target_panel.py`). Every workload is one previously unseen public
+target with no known scalar, solved by a fresh process in each arm:
+
+- IC: `examples/koblitz_orbit_dlp_fast_online.rs`, a versioned copy of the
+  frozen compact-orbit producer. It builds the base, ranks, indexes and solves
+  the linear algebra outside the online interval. It then times the target
+  query, PDP probing, relation checks, descent and recovery check as exclusive
+  phases that sum to `online_ms`.
+- Rho: `examples/koblitz_rho_batch_ks_strong_online.rs`, a versioned copy of
+  strong rho, run at rung 3. Its online timer starts after Q is built
+  (`KIC_RHO_TARGET_POINT`). It reports walk + collision and the `[d]G = Q`
+  check separately.
+
+The frozen originals are untouched, so older evidence keeps verifying.
+
+One run:
+
+1. derives disjoint tune and eval targets by hash-to-curve
+   (`target_law.domain`);
+2. tunes K on the tune workloads (lowest median whole-process wall);
+3. checks that each online producer's untimed output equals its frozen
+   original;
+4. runs the eval workloads in alternating order, recording resources;
+5. writes a replay certificate per arm and workload: an out-of-process Python
+   recomputation of the digest, the target, the subgroup membership and
+   `[d]G = Q`, plus for IC the relation points and their sum;
+6. writes one `vs_rho` claim and claim-check per workload under
+   `artifacts/claims/`, `claim_draft.json` / `claim_check.json` for the first
+   eval workload, and `single_target_summary.json` with medians and bootstrap
+   intervals.
+
+The online speedup is `rho_online_wall_ms / ic_online_wall_ms`. The cold
+ratio, process start to verified recovery and including IC setup, is reported
+next to it. Both arms share one resource envelope (one worker, one thread, no
+memory cap). `independent_validation` comes from the same-host Python replay,
+as in `research/ic_single_target_20260930`. An independent-host replay is
+still needed before any ledger change.
 
 ### Historical target mode
 

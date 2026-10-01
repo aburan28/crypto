@@ -1,0 +1,492 @@
+{
+  "chosen_K": 700,
+  "k_source": "tuned",
+  "rows": [
+    {
+      "K": 400,
+      "available_memory_bytes": 15765757952,
+      "estimated_ic_rss_bytes": 917440000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "488267d8852e07fa5d0e34c0605c332c225322a5d0524c7d2200cd3e521c628e",
+        "base_scanned_x": 853,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 48800,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 400,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 1317904384,
+        "rank": 400,
+        "rank_attempts": 400,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 159978.355,
+        "rank_relations": 400,
+        "rank_rows_without_gain": 0,
+        "regular_states": 9760000,
+        "root_table_entries": 9758776,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 22.890467,
+          "index_build": 5905.0404610000005,
+          "linear_algebra": 0.48517200000000005,
+          "normal_basis_and_selftest": 3.350528,
+          "process_total": 71088.285107,
+          "rank_stage": 19618.061645,
+          "setup_total": 5931.281795,
+          "target_median": 28.209607000000002,
+          "targets_total": 45538.354453
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:400",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:17:10.225157+00:00",
+          "available_memory_bytes": 15768174592,
+          "loadavg": [
+            1.630859375,
+            1.56298828125,
+            0.71337890625
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:15:59.092204+00:00",
+          "available_memory_bytes": 15765757952,
+          "loadavg": [
+            3.0380859375,
+            1.71533203125,
+            0.68603515625
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 473,
+        "max_rss_bytes": 1317851136,
+        "pinned_cpu": 3,
+        "sys_s": 0.208532,
+        "user_s": 70.885506,
+        "voluntary_context_switches": 14,
+        "wall_s": 71.13281587399996
+      },
+      "state": "ok"
+    },
+    {
+      "K": 500,
+      "available_memory_bytes": 15768174592,
+      "estimated_ic_rss_bytes": 1433500000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "a20a41f49f2cfbf59f7b420415e1666cf86ac80a052f4fc75c4b851d67750e7a",
+        "base_scanned_x": 1058,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 61000,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 500,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 1452281856,
+        "rank": 500,
+        "rank_attempts": 500,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 91385.26,
+        "rank_relations": 500,
+        "rank_rows_without_gain": 0,
+        "regular_states": 15250000,
+        "root_table_entries": 15248425,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 28.963584,
+          "index_build": 9226.027148,
+          "linear_algebra": 0.766504,
+          "normal_basis_and_selftest": 3.380348,
+          "process_total": 52827.60397,
+          "rank_stage": 14363.622165,
+          "setup_total": 9258.371710000001,
+          "target_median": 18.308318,
+          "targets_total": 29204.754928
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:500",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:18:03.068019+00:00",
+          "available_memory_bytes": 15768604672,
+          "loadavg": [
+            1.2724609375,
+            1.47412109375,
+            0.73193359375
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:17:10.225859+00:00",
+          "available_memory_bytes": 15768174592,
+          "loadavg": [
+            1.630859375,
+            1.56298828125,
+            0.71337890625
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 341,
+        "max_rss_bytes": 1452224512,
+        "pinned_cpu": 3,
+        "sys_s": 0.214811,
+        "user_s": 52.620756,
+        "voluntary_context_switches": 7,
+        "wall_s": 52.842035017
+      },
+      "state": "ok"
+    },
+    {
+      "K": 600,
+      "available_memory_bytes": 15768604672,
+      "estimated_ic_rss_bytes": 2064240000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "e94f7ffb099d82c8bb6e3c6e2f9857950c55b1ff238e3d6107fdd1f184b3b1e7",
+        "base_scanned_x": 1291,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 73200,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 600,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 2689044480,
+        "rank": 600,
+        "rank_attempts": 600,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 63992.71333333333,
+        "rank_relations": 600,
+        "rank_rows_without_gain": 0,
+        "regular_states": 21960000,
+        "root_table_entries": 21958053,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 33.911253,
+          "index_build": 13336.51177,
+          "linear_algebra": 1.077408,
+          "normal_basis_and_selftest": 3.3720529999999997,
+          "process_total": 45233.303723,
+          "rank_stage": 11991.376454,
+          "setup_total": 13373.796119999999,
+          "target_median": 13.330266,
+          "targets_total": 19866.973806
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:600",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:18:48.320410+00:00",
+          "available_memory_bytes": 15760760832,
+          "loadavg": [
+            1.12744140625,
+            1.4052734375,
+            0.7451171875
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:18:03.068999+00:00",
+          "available_memory_bytes": 15768604672,
+          "loadavg": [
+            1.2724609375,
+            1.47412109375,
+            0.73193359375
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 302,
+        "max_rss_bytes": 2688876544,
+        "pinned_cpu": 3,
+        "sys_s": 0.392987,
+        "user_s": 44.852475,
+        "voluntary_context_switches": 6,
+        "wall_s": 45.25128341499999
+      },
+      "state": "ok"
+    },
+    {
+      "K": 700,
+      "available_memory_bytes": 15760760832,
+      "estimated_ic_rss_bytes": 2809660000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "ea937fd33073c3c855cd171817ca016684dec9d175df3e52891faaffdcd7c626",
+        "base_scanned_x": 1513,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 85400,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 700,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 2881179648,
+        "rank": 700,
+        "rank_attempts": 700,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 46292.96571428572,
+        "rank_relations": 700,
+        "rank_rows_without_gain": 0,
+        "regular_states": 29890000,
+        "root_table_entries": 29887612,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 38.671512,
+          "index_build": 18173.216126,
+          "linear_algebra": 1.4699039999999999,
+          "normal_basis_and_selftest": 3.381498,
+          "process_total": 43062.207658,
+          "rank_stage": 10403.810283,
+          "setup_total": 18215.269980999998,
+          "target_median": 9.253354,
+          "targets_total": 14441.555155
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:700",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:19:31.402056+00:00",
+          "available_memory_bytes": 15764537344,
+          "loadavg": [
+            1.05859375,
+            1.3466796875,
+            0.75830078125
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:18:48.321510+00:00",
+          "available_memory_bytes": 15760760832,
+          "loadavg": [
+            1.12744140625,
+            1.4052734375,
+            0.7451171875
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 291,
+        "max_rss_bytes": 2881163264,
+        "pinned_cpu": 3,
+        "sys_s": 0.395317,
+        "user_s": 42.678871,
+        "voluntary_context_switches": 8,
+        "wall_s": 43.08041851999997
+      },
+      "state": "ok"
+    },
+    {
+      "K": 800,
+      "available_memory_bytes": 15764537344,
+      "estimated_ic_rss_bytes": 3669760000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "72f378f925fa1b7e053e4718098355676738c16b1def8478b8504866495862d2",
+        "base_scanned_x": 1718,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 97600,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 800,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 5250904064,
+        "rank": 800,
+        "rank_attempts": 800,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 35627.14,
+        "rank_relations": 800,
+        "rank_rows_without_gain": 0,
+        "regular_states": 39040000,
+        "root_table_entries": 39037075,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 42.543904,
+          "index_build": 24071.310750999997,
+          "linear_algebra": 1.920323,
+          "normal_basis_and_selftest": 3.3408819999999997,
+          "process_total": 44944.44937,
+          "rank_stage": 9244.241176,
+          "setup_total": 24117.196273,
+          "target_median": 7.8772340000000005,
+          "targets_total": 11581.013077
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:800",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:20:16.374226+00:00",
+          "available_memory_bytes": 15763050496,
+          "loadavg": [
+            1.02587890625,
+            1.29638671875,
+            0.771484375
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:19:31.403167+00:00",
+          "available_memory_bytes": 15764537344,
+          "loadavg": [
+            1.05859375,
+            1.3466796875,
+            0.75830078125
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 316,
+        "max_rss_bytes": 5250789376,
+        "pinned_cpu": 3,
+        "sys_s": 0.736092,
+        "user_s": 44.228643,
+        "voluntary_context_switches": 7,
+        "wall_s": 44.97093255200002
+      },
+      "state": "ok"
+    },
+    {
+      "K": 1000,
+      "available_memory_bytes": 15763050496,
+      "estimated_ic_rss_bytes": 5734000000,
+      "ic_summary": {
+        "a": 0,
+        "base_hash": "0e68233f43f894c9c16971703120e1983dc30d38337b4996d119bce0bab40ec0",
+        "base_scanned_x": 2135,
+        "base_source": "constructed_in_process_x_scan",
+        "edge_selectors": 0,
+        "factor_base_points": 122000,
+        "kind": "compact_orbit_dlp_summary",
+        "n": 61,
+        "orbit_columns": 1000,
+        "pair_table_entries": 0,
+        "peak_rss_bytes": 5785014272,
+        "rank": 1000,
+        "rank_attempts": 1000,
+        "rank_failures": 0,
+        "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+        "rank_probes_mean": 21368.48,
+        "rank_relations": 1000,
+        "rank_rows_without_gain": 0,
+        "regular_states": 61000000,
+        "root_table_entries": 60995686,
+        "schema_version": "1.0",
+        "scope": "public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
+        "targets": 1024,
+        "targets_failed": 0,
+        "targets_solved": 1024,
+        "threads": 1,
+        "timing_ms": {
+          "base_load": 53.606532,
+          "index_build": 37479.742048,
+          "linear_algebra": 2.983664,
+          "normal_basis_and_selftest": 3.3607799999999997,
+          "process_total": 52420.650061,
+          "rank_stage": 7386.366574000001,
+          "setup_total": 37536.710017,
+          "target_median": 5.098121,
+          "targets_total": 7494.482698
+        }
+      },
+      "run": {
+        "command": [
+          "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast",
+          "construct:61:0:1000",
+          "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-36912327205-1/inputs/scalars_n61-ks-growing-tune-1024-v1.txt",
+          "7",
+          "/dev/null"
+        ],
+        "conditions_after": {
+          "at": "2026-10-01T19:21:08.825835+00:00",
+          "available_memory_bytes": 15764439040,
+          "loadavg": [
+            1.0087890625,
+            1.244140625,
+            0.78759765625
+          ]
+        },
+        "conditions_before": {
+          "at": "2026-10-01T19:20:16.375445+00:00",
+          "available_memory_bytes": 15763050496,
+          "loadavg": [
+            1.02587890625,
+            1.29638671875,
+            0.771484375
+          ]
+        },
+        "exit_code": 0,
+        "involuntary_context_switches": 372,
+        "max_rss_bytes": 5784887296,
+        "pinned_cpu": 3,
+        "sys_s": 0.800971,
+        "user_s": 51.642081,
+        "voluntary_context_switches": 6,
+        "wall_s": 52.450256612999965
+      },
+      "state": "ok"
+    }
+  ],
+  "selection": "lowest wall_s",
+  "tune_corpus": {
+    "name": "n61-ks-growing-tune-1024-v1",
+    "scalars_sha256": "8ec0c0438ba46a1b6e598dec2732c8103af07ce585a2f65ea78f102181c77abf",
+    "targets": 1024
+  }
+}

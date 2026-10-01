@@ -37,13 +37,20 @@ jobs:
             docs/ic/boundary_targets.json
             src
             examples/koblitz_orbit_dlp_fast.rs
+            examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_strong.rs
+            examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
+            research/ic_candidate_tournament_20260915/identity.py
+            research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_single_target_20260930/curve_ids.json
+            tools/curve_identity.py
             tools/isolated_bench.py
             .github/workflows/compact-orbit-n61-isolated.yml
       - name: Harness tests and panel guards
@@ -71,13 +78,20 @@ jobs:
             docs/ic/boundary_targets.json
             src
             examples/koblitz_orbit_dlp_fast.rs
+            examples/koblitz_orbit_dlp_fast_online.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_strong.rs
+            examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
+            research/ic_candidate_tournament_20260915/identity.py
+            research/ic_candidate_tournament_20260915/oracle.py
+            research/ic_single_target_20260930/curve_ids.json
+            tools/curve_identity.py
             tools/isolated_bench.py
             .github/workflows/compact-orbit-n61-isolated.yml
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock

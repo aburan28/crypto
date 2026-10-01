@@ -943,6 +943,10 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     require(beat_id in protocol["beats"], f"unknown beat id: {beat_id}")
     beat = protocol["beats"][beat_id]
     require(
+        beat.get("launch_mode") != "single_target_panel",
+        f"{beat_id} is a single-target panel; use launch-single",
+    )
+    require(
         beat.get("launch_mode", "single_target") == "single_target",
         f"{beat_id} is a multi-target batch panel; use launch-panel",
     )
@@ -1268,10 +1272,30 @@ def panel_corpus_name(template: str, targets: int) -> str:
     return template.format(L=targets)
 
 
+def estimate_ic_rss_bytes(beat: dict[str, Any], k: int) -> int:
+    """Peak RSS of the compact-orbit IC at K orbit columns.
+
+    `compact_orbit_rss` follows the producer's allocations: K^2*n regular states
+    of `state_bytes` each (the vector's touched part) plus a root table of
+    `table_slot_bytes` per slot, sized to the next power of two of
+    `table_slots_per_state` * K^2*n and fully initialised. The table doubles at
+    power-of-two boundaries, which a flat bytes-per-state constant misses.
+    """
+    states = int(beat["n"]) * k * k
+    model = beat.get("ic_rss_model")
+    if model is None:
+        return int(beat["ic_bytes_per_regular_state"]) * states
+    require(model["kind"] == "compact_orbit_rss", f"unknown IC RSS model {model['kind']}")
+    slots = 1 << max(4, (int(model["table_slots_per_state"]) * states - 1).bit_length())
+    return (int(model["state_bytes"]) * states + int(model["table_slot_bytes"]) * slots
+            + int(model["fixed_bytes"]))
+
+
 def k_fits(beat: dict[str, Any], k: int) -> tuple[bool, int, int | None]:
-    need = int(beat["ic_bytes_per_regular_state"]) * int(beat["n"]) * k * k
+    need = estimate_ic_rss_bytes(beat, k)
+    headroom = int((beat.get("ic_rss_model") or {}).get("headroom_bytes", 0))
     available = host_conditions().get("available_memory_bytes")
-    return (available is None or need < available), need, available
+    return (available is None or need + headroom < available), need, available
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -1426,17 +1450,28 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
     require(beat_id in protocol["beats"], f"unknown beat id: {beat_id}")
     beat = protocol["beats"][beat_id]
     require(beat.get("launch_mode") == "batch_panel", f"{beat_id} is not a batch panel beat")
-    targets = arguments.targets or int(beat["targets_default"])
+    resume = getattr(arguments, "resume", None)
+    if resume:
+        run = RUNS_DIR / resume
+        require((run / "state.json").is_file(), f"no run to resume: {run}")
+        state: dict[str, Any] = read_json(run / "state.json")
+        require(state.get("beat_id") == beat_id, "resume beat differs from the run's beat")
+        require(state.get("phase") != "done", "run already finished")
+        targets, blocks = int(state["targets"]), int(state["blocks"])
+        candidates = [int(k) for k in state["k_candidates"]]
+        state.setdefault("resumed_at", []).append(now())
+    else:
+        targets = arguments.targets or int(beat["targets_default"])
+        blocks = arguments.blocks or int(beat["blocks_default"])
+        if arguments.k is not None:
+            candidates = [arguments.k]
+        elif arguments.k_candidates:
+            candidates = [int(v) for v in arguments.k_candidates.split(",") if v.strip()]
+        else:
+            candidates = [int(v) for v in beat["k_candidates"].get(str(targets), [])]
     minimum = int(beat["targets_minimum"])
     require(targets >= minimum, f"panel targets must be >= {minimum} (no small-L panels)")
-    blocks = arguments.blocks or int(beat["blocks_default"])
     require(blocks >= 1, "blocks must be positive")
-    if arguments.k is not None:
-        candidates = [arguments.k]
-    elif arguments.k_candidates:
-        candidates = [int(v) for v in arguments.k_candidates.split(",") if v.strip()]
-    else:
-        candidates = [int(v) for v in beat["k_candidates"].get(str(targets), [])]
     require(bool(candidates) and all(k > 0 for k in candidates), "no K candidates for this L")
     n, a = int(beat["n"]), int(beat["a"])
     producers = beat["panel_producers"]
@@ -1452,26 +1487,34 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             c["ok"] for c in preflight_receipt["checks"] if c["name"] != "cryptominisat5_optional"
         )
         require(preflight_receipt["ok"], "preflight failed")
-        run_id = arguments.run_id or make_run_id(beat_id)
-        run = RUNS_DIR / run_id
-        require(not run.exists(), f"run already exists: {run}")
+        git_head = next(c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head")
+        if resume:
+            run_id = resume
+            require(state.get("git_head") in (None, git_head),
+                    f"resume needs the run's commit {state.get('git_head')}, not {git_head}")
+            write_json(run / f"artifacts/preflight_resume{len(state['resumed_at'])}.json", preflight_receipt)
+        else:
+            run_id = arguments.run_id or make_run_id(beat_id)
+            run = RUNS_DIR / run_id
+            require(not run.exists(), f"run already exists: {run}")
         for name in ("artifacts", "inputs", "logs", "receipts"):
             (run / name).mkdir(parents=True, exist_ok=True)
         write_json(CURRENT_PATH, {"run_id": run_id, "beat_id": beat_id, "updated_at": now()})
-        write_json(run / "artifacts/preflight.json", preflight_receipt)
-        write_json(run / "inputs/protocol.json", protocol)
-        write_json(run / "inputs/boundary_targets.json", ledger)
-        write_json(
-            run / "inputs/ledger_pin.json",
-            {"path": protocol["ledger"]["path"], "sha256": sha256(ledger_path(protocol)),
-             "schema_version": ledger["schema_version"]},
-        )
-        state: dict[str, Any] = {
-            "schema_version": "1.0", "task_id": TASK_ID, "run_id": run_id, "beat_id": beat_id,
-            "launch_mode": "batch_panel", "status": "ACTIVE", "phase": "build",
-            "targets": targets, "blocks": blocks, "k_candidates": candidates,
-            "pinned_cpu": arguments.cpu, "created_at": now(), "updated_at": now(),
-        }
+        if not resume:
+            write_json(run / "artifacts/preflight.json", preflight_receipt)
+            write_json(run / "inputs/protocol.json", protocol)
+            write_json(run / "inputs/boundary_targets.json", ledger)
+            write_json(
+                run / "inputs/ledger_pin.json",
+                {"path": protocol["ledger"]["path"], "sha256": sha256(ledger_path(protocol)),
+                 "schema_version": ledger["schema_version"]},
+            )
+            state = {
+                "schema_version": "1.0", "task_id": TASK_ID, "run_id": run_id, "beat_id": beat_id,
+                "launch_mode": "batch_panel", "status": "ACTIVE", "phase": "build",
+                "targets": targets, "blocks": blocks, "k_candidates": candidates,
+                "pinned_cpu": arguments.cpu, "git_head": git_head, "created_at": now(), "updated_at": now(),
+            }
 
         def advance(phase: str, **extra: Any) -> None:
             state.update(phase=phase, updated_at=now(), **extra)
@@ -1492,12 +1535,14 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
         } | {
             f"{Path(p['source']).name}_sha256": sha256(REPO / p["source"]) for p in producers.values()
         }
-        executables["git_head"] = next(
-            c["detail"] for c in preflight_receipt["checks"] if c["name"] == "git_head"
-        )
+        executables["git_head"] = git_head
         executables["rustc"] = subprocess.run(
             ["rustc", "--version"], capture_output=True, text=True
         ).stdout.strip()
+        if resume and (run / "artifacts/binaries.json").is_file():
+            previous = read_json(run / "artifacts/binaries.json")["hashes"]
+            require(all(previous.get(k) == v for k, v in executables.items() if k.endswith("_sha256")),
+                    "resume rebuilt different binaries or sources")
         write_json(run / "artifacts/binaries.json", {"paths": binaries, "hashes": executables})
 
         env = os.environ.copy()
@@ -1522,7 +1567,10 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             ]
             require(len(scalars) == targets, f"corpus {name} has {len(scalars)} != {targets} targets")
             path = run / f"inputs/scalars_{name}.txt"
-            path.write_text("".join(f"{s}\n" for s in scalars))
+            text = "".join(f"{s}\n" for s in scalars)
+            if path.is_file():
+                require(path.read_text() == text, f"regenerated corpus {name} differs from the run's copy")
+            path.write_text(text)
             corpora[role] = {"name": name, "scalars_sha256": sha256(path), "targets": len(scalars)}
             corpus_values[role] = scalars
         corpora["disjoint"] = not (set(corpus_values["tune"]) & set(corpus_values["eval"]))
@@ -1535,8 +1583,12 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
                     str(beat["ic_rank_seed"]), out_path]
 
         advance("k_tune")
-        tune_rows = []
+        tune_file = run / "artifacts/k_tune.json"
+        tune_rows = read_json(tune_file)["rows"] if resume and tune_file.is_file() else []
+        finished_k = {int(row["K"]) for row in tune_rows}
         for k in candidates:
+            if k in finished_k:
+                continue
             fits, need, available = k_fits(beat, k)
             row: dict[str, Any] = {"K": k, "estimated_ic_rss_bytes": need, "available_memory_bytes": available}
             if not fits:
@@ -1548,6 +1600,9 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
                 row["state"] = "fixed"
                 tune_rows.append(row)
                 break
+            if resume:
+                for partial in (run / "logs").glob(f"tune_K{k}.*"):
+                    partial.rename(partial.with_name(f"{partial.name}.aborted{len(state['resumed_at'])}"))
             measured = run_panel_process(
                 ic_command(k, tune_path, os.devnull), env=env,
                 stdout_path=run / f"logs/tune_K{k}.summary.json",
@@ -1577,9 +1632,19 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
 
         advance("blocks", chosen_K=k_choice)
         base_path = run / f"logs/base_n{n}_K{k_choice}.jsonl"
-        block_rows: list[dict[str, Any]] = []
-        exit_codes: list[int] = []
+        blocks_file = run / "artifacts/blocks.json"
+        block_rows: list[dict[str, Any]] = read_json(blocks_file) if resume and blocks_file.is_file() else []
+        exit_codes: list[int] = [row[arm]["exit_code"] for row in block_rows for arm in ("ic", "rho")]
         for b in range(blocks):
+            if any(row["block"] == b for row in block_rows):
+                continue
+            if resume:
+                # A block interrupted between its two arms is rerun whole; its
+                # partial logs are kept beside the new ones, never overwritten.
+                attempt = len(state["resumed_at"])
+                for partial in list((run / "logs").glob(f"*_n{n}_b{b}.*")) + list(
+                        (run / "receipts").glob(f"*_b{b}.resource.json")):
+                    partial.rename(partial.with_name(f"{partial.name}.aborted{attempt}"))
             order = ("ic", "rho") if b % 2 == 0 else ("rho", "ic")
             row = {"block": b, "order": "_then_".join(order)}
             for arm in order:
@@ -1830,6 +1895,21 @@ def parser() -> argparse.ArgumentParser:
     panel.add_argument("--k", type=int, help="Use this K and skip the tune")
     panel.add_argument("--k-candidates", help="Comma-separated K tune candidates (default: beat list for this L)")
     panel.add_argument("--cpu", type=int, help="Pin every producer to this CPU with taskset (Linux)")
+    panel.add_argument("--resume", metavar="RUN_ID",
+                       help="Continue an interrupted panel run; finished K rows and blocks are kept")
+
+    single = sub.add_parser(
+        "launch-single",
+        help="Run W one-target workloads (fresh processes per arm) for a single-target panel beat",
+    )
+    single.add_argument("--beat", required=True, help="Single-target panel beat id from protocol.json")
+    single.add_argument("--run-id")
+    single.add_argument("--workloads", type=int, help="One-target eval workloads (default: beat workloads_default)")
+    single.add_argument("--tune-workloads", type=int, help="Disjoint one-target tune workloads per K")
+    single.add_argument("--k", type=int, help="Use this K and skip the tune")
+    single.add_argument("--k-candidates", help="Comma-separated K tune candidates (default: beat list)")
+    single.add_argument("--cpu", type=int, help="Pin every producer to this CPU with taskset (Linux)")
+    single.add_argument("--resume", metavar="RUN_ID", help="Continue an interrupted single-target run")
 
     for name in ("status", "verify"):
         command = sub.add_parser(name)
@@ -1865,6 +1945,12 @@ def main() -> int:
             return 0 if state.get("status") != "PRODUCER_FAILURE" else 3
         if arguments.command == "launch-panel":
             state = launch_panel(arguments)
+            print(json.dumps(state, indent=2, sort_keys=True))
+            return 0 if state.get("status") == "PENDING_INDEPENDENT_VALIDATION" else 3
+        if arguments.command == "launch-single":
+            import single_target_panel
+
+            state = single_target_panel.launch_single(arguments, sys.modules[__name__])
             print(json.dumps(state, indent=2, sort_keys=True))
             return 0 if state.get("status") == "PENDING_INDEPENDENT_VALIDATION" else 3
         if arguments.command == "status":
