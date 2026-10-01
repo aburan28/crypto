@@ -680,7 +680,7 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let verified = replay == Some(true);
-    Ok(json!({"schema_version":1,"mode":"ic",
+    Ok(json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
         "status":if verified {"complete"} else {"incomplete"},
         "preparation_mode":"imported-certified-log-table-v1",
         "reusable_symbolic_template_prepared":true,
@@ -761,6 +761,7 @@ mod prepared_target_tests {
     #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn prepared_f5_recovers_disclosed_target_without_ordinary_collection() {
         let report = run(&prepared_job(8)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
         assert_eq!(report["status"], "complete");
         assert_eq!(report["solutions"][0]["recovered"], "24886");
         assert_eq!(report["solutions"][0]["trials"], 3);
@@ -787,6 +788,7 @@ mod prepared_target_tests {
     #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn prepared_failed_attempt_is_retained_without_a_scalar() {
         let report = run(&prepared_job(1)).unwrap();
+        assert_eq!(report["query_schema_version"], 1);
         assert_eq!(report["status"], "incomplete");
         assert!(report["solutions"][0]["recovered"].is_null());
         assert_eq!(report["solutions"][0]["trials"], 1);
