@@ -490,6 +490,86 @@ measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
 - An F1 extrapolation quoted as a measurement.
 - "Fastest worldwide" without a matched external comparison.
 
+## 10a. Native tooling (AGENTS.md, 2026-10-01)
+
+**The rule.** AGENTS.md's implementation-language rule (#1180, merged
+2026-10-01 at 22:00 UTC) excludes Python from the programme's tooling:
+- the harnesses and benchmark drivers;
+- correctness tests, certificate verifiers and replay tools;
+- the generation of results.
+
+**What changes.** Every script under `research/ic_tool_program/` that
+the programme still runs is replaced by native code before its next
+use. The scripts stay where they are, as the record of what earlier
+rounds ran. No frozen input, run or analysis changes.
+
+**How a port is checked.** A native piece replaces a script only when it
+reproduces that script's frozen outputs from the same frozen inputs:
+- byte for byte, where the output is a file;
+- otherwise, value for value.
+
+The first check: `icprog analyse r03` reproduces R03's `analysis.json`
+from R03's `runs.tar.xz`, byte for byte.
+
+**The native tools.** Both are binaries of the root crate, separate from
+`ic`, so the harness never changes the code it measures.
+- **`icprog`** (`src/bin/icprog.rs`) is the programme's harness. It
+  starts with `analyse` for R03 and R05.
+- **`isolated_bench`** (`src/bin/isolated_bench.rs`) is
+  `tools/isolated_bench.py`, native.
+  - It keeps the same modes, options, lock and record
+    (`isolated-bench/1`), and adds a `tool` field, so the two
+    interoperate while both exist.
+  - It runs on Linux only, as the Python tool did in effect: it reads
+    `/proc` and PSI.
+
+**The order.** Each piece lands before the step that first needs it.
+
+| piece | replaces | first needed by | state |
+|:--|:--|:--|:--|
+| statistics, run-tree access, round analysis | `harness/stats.py`, the rounds' `analyse.py` | R05's results | N1: R03 reproduced byte for byte |
+| isolation | `tools/isolated_bench.py` | every timed run from N1 on | N1: modes, refusals, the widened mask and the record's keys checked against the Python tool |
+| the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped; the pin and the manifest for a fresh round come with R02b's steps (N2) |
+| the callgrind phase split | `harness/callgrind_phases.py` | R02b's control | N2 |
+| the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3 |
+| the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
+| Track B's chain | `harness/bround.py` | Track B's measurements | N5 |
+| the fuzz generator and its replays | `fuzz/fuzz_v2.py` | B6, whose replays in "independent Python arithmetic" become independent native arithmetic by an amendment | N6 |
+| each step's harness | `rounds/B*/run.py`, `analyse.py`, `instances.py`, `sweep.py` | that step's measurement | with each step |
+
+**What is not ported.** Suite v1's construction
+(`suite/v1/make_suite.py`) stays as it is. Suite v1 and every holdout set
+drawn so far are frozen files, checked by their SHA-256. A new suite or
+holdout set gets a native generator in the round that draws it.
+
+**R05 under the rule.**
+- **Its runner.** R05's declared runs began at 18:51 UTC under its
+  declared runner: `run.py`, `harness/bench.py` and
+  `tools/isolated_bench.py`. That was three hours before the rule merged.
+- **The suite rows** all finished on that runner, before 22:00.
+- **The holdouts, until the rebuild.** They ran on the same runner until
+  the container was rebuilt at about 22:47 UTC, which killed it.
+  - By then rounds 1 and 2 were complete, and round 3 had 22 of its 24
+    pairs. One pair had only its base arm.
+  - The rebuilt host matches the old one in CPU model, flags, cores,
+    memory and THP. Its kernel build differs: `6.18.44-fc-v51` against
+    `-v50`.
+- **The holdouts, after the rebuild.** From 23:00 UTC the declared
+  holdout steps ran on the native runner and isolation tool, from the
+  same run tree.
+  - The rest of round 3 and rounds 4–5 ran: 99 processes, in the
+    declared order.
+  - The rebuilt host's manifest is `host-resumed.json`, beside the
+    round's `host.json`.
+  - Each process's record names its tool.
+  - The split pair is paired as the declared runner pairs it: a base
+    arm from before the rebuild, a candidate arm from after. The results
+    say so.
+- **Its timed values** are the `ic` binaries' own in-process timers
+  throughout.
+- **Its analysis** is native (`icprog analyse r05`).
+- **Its rule comparison**, owed at a new baseline, runs on N3.
+
 ## 11. Stopping and reporting
 
 - **A phase is set aside** after two consecutive declared rounds on it
