@@ -1,0 +1,2974 @@
+{
+ "audit": {
+  "findings": [
+   {
+    "dimension": "unit",
+    "evidence": [
+     {
+      "path": "scripts/build_ic_leaderboard.py",
+      "repo": "crypto",
+      "where": "ladder_rows vs koblitz_one_target_rows"
+     },
+     {
+      "path": "src/bin/ic/price.rs",
+      "repo": "crypto",
+      "where": "UnitBench, s_per_target"
+     },
+     {
+      "path": "scripts/ic_e2e_instructions.py",
+      "repo": "crypto"
+     }
+    ],
+    "finding": "Several different quantities are all called S: ic bench/boundary count group-addition equivalents with ratios pinned in docs/ic/calibration.json; ic price divides phase wall time by a batched add_many measured on the host; the CI gate divides callgrind instructions by targets\u00b7\u221ar. The leaderboard heads every row 'S = total operations / sqrt(r)' and records no conversion.",
+    "icms": "each is its own unit id (crypto.S.gae_pinned, crypto.S.price_batched_add, crypto.S.callgrind_ir); a comparison across unit ids is refused",
+    "id": "A01",
+    "severity": "high"
+   },
+   {
+    "dimension": "unit",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_framework/mod.rs",
+      "repo": "crypto",
+      "where": "lines 337-366"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/solvers.rs",
+      "repo": "crypto",
+      "where": "op_unit strings"
+     }
+    ],
+    "finding": "Every shipped polynomial solver in the IC framework is priced from host wall time: run_pipeline prices by count only when op_unit is exactly 'word XORs', and no registered engine emits that unit. An algebraic row's S therefore moves with the machine, its load and its thread count, while the report's calibration_pins.measured is empty.",
+    "icms": "the crypto.ic_bench adapter marks such a total deterministic=false with the reason; a host-dependent ratio is labelled and admitted only within one env_class",
+    "id": "A02",
+    "severity": "high"
+   },
+   {
+    "dimension": "unit",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "price_phase, calibrate_binary"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/solvers.rs",
+      "repo": "crypto",
+      "where": "peak_bytes: 0"
+     }
+    ],
+    "finding": "Native counters with no pinned price are charged zero: table lookups on random binary curves have no ns_per_lookup, so pair-table rows cost only their group operations; GroupOps counts a doubling as one addition although ns_per_double is pinned; every solver reports peak_bytes 0 for an unmeasured value.",
+    "icms": "the adapter lists counters charged zero in host_dependent_because and records an unmeasured peak_bytes as null",
+    "id": "A03",
+    "severity": "medium"
+   },
+   {
+    "dimension": "measurement_window",
+    "evidence": [
+     {
+      "path": "docs/ic/BOUNDARY_TARGETS.md",
+      "repo": "crypto",
+      "where": "'The two n = 41 results are not reconciled'"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "pinned(d_col) stop"
+     },
+     {
+      "path": "src/bin/ic/workflow.rs",
+      "repo": "crypto",
+      "where": "vs_rho timing_class"
+     }
+    ],
+    "finding": "There is no shared window. ic bench runs cold from factor base to verification and stops when the target column is pinned; ic workflow stops when every column is certified; ic price keeps target construction off every clock; the one-target online interval excludes launch and input; ic compare times the whole child process. One n = 41 thread reports 0.286 online, 5.03 amortised and 110.79 whole-process for one pipeline.",
+    "icms": "every figure names a registry window (online_one_target, cold_end_to_end, whole_process, stage_only) and its conformance (exact or derived); comparisons across windows are refused",
+    "id": "A04",
+    "severity": "high"
+   },
+   {
+    "dimension": "measurement_window",
+    "evidence": [
+     {
+      "path": "docs/ic/boundary_targets.json",
+      "repo": "crypto",
+      "where": "measurement_schema.vs_rho.timing_class_enum and records"
+     },
+     {
+      "path": "docs/ic/BOUNDARY_TARGETS.md",
+      "repo": "crypto",
+      "where": "measurement-schema table"
+     }
+    ],
+    "finding": "The boundary ledger's machine-readable schema allows timing_class 'single_target_online_wall' only, while its records use operation_counted_whole_process (12), operation_counted (8) and algorithmic_charged (2); the Markdown twin lists three other values.",
+    "icms": "windows are a closed registry list validated on every spec",
+    "id": "A05",
+    "severity": "medium"
+   },
+   {
+    "dimension": "rho_reference",
+    "evidence": [
+     {
+      "path": "docs/ic/LEADERBOARD.md",
+      "repo": "crypto",
+      "where": "footnote, line 36"
+     },
+     {
+      "path": "docs/ic/FRAMEWORK.md",
+      "repo": "crypto",
+      "where": "'The rho reference'"
+     }
+    ],
+    "finding": "One leaderboard mixes references: prime and random-binary rows use the matched negation walk on one target; Koblitz rows use the one-target rho with set-up; '32-target batch' rows use batch rho, which AGENTS.md calls a historical diagnostic. The page footnote still says Koblitz rows use batch rho on 32 targets. The reference itself changed three times between 2026-09-21 and 2026-10-01.",
+    "icms": "a record names its reference by registry id; a comparison refuses two different ids",
+    "id": "A06",
+    "severity": "high"
+   },
+   {
+    "dimension": "factor_base_definition",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_framework/mod.rs",
+      "repo": "crypto",
+      "where": "FactorBaseReport"
+     },
+     {
+      "path": "src/bin/ic/experiment.rs",
+      "repo": "crypto",
+      "where": "factor_base_json"
+     }
+    ],
+    "finding": "Factor-base size fields share names and differ in meaning: in the framework 'abscissae' counts x with a point of the base and 'signed_points' counts \u00b1P; in the Koblitz reports 'abscissae' counts every admitted root, 'dimension' equals n for a nonlinear union, and 'columns' counts cofactor-projected orbits. The scoreboard's 'base' column is signed points.",
+    "icms": "seven distinct size fields (usable_points, signed_points, abscissae_with_points, abscissae_allowed, columns, orbit_representatives, nominal_dimension), never substituted for one another",
+    "id": "A07",
+    "severity": "medium"
+   },
+   {
+    "dimension": "solver_counter_definition",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_framework/solvers.rs",
+      "repo": "crypto",
+      "where": "sat-cdcl, lines 817-900"
+     },
+     {
+      "path": "docs/ic/FRAMEWORK.md",
+      "repo": "crypto",
+      "where": "section 4 table"
+     }
+    ],
+    "finding": "'SAT' is two encodings: the framework's sat-cdcl expands parity into CNF by default (native XOR is opt-in) with a 200,000-conflict budget, while the Koblitz path's SAT uses native XOR, implied Macaulay rows and an unlimited budget. FRAMEWORK.md says the framework uses native parity. No report gives CNF variables, auxiliaries or literals in one schema.",
+    "icms": "the registry lists the options each solver must pin (sat_xor_encoding, conflict budget, WDSat XG); a spec missing one is refused; records carry clauses, XOR rows and conflicts as separate fields",
+    "id": "A08",
+    "severity": "high"
+   },
+   {
+    "dimension": "host_or_resources",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/pq_f4_f2.rs",
+      "repo": "crypto",
+      "where": "rayon::current_num_threads() > 1"
+     },
+     {
+      "path": "src/bin/ic/experiment.rs",
+      "repo": "crypto",
+      "where": "--batch 0"
+     }
+    ],
+    "finding": "Thread count is neither fixed nor recorded by ic bench, and F4-family solvers parallelise above one Rayon thread, so wall-priced solver cost shrinks with cores. ic run defaults to --batch 0 (one batch per CPU), which also changes counted trials. In this container four Rayon threads pinned to one CPU spent 75 percent of their runnable time waiting.",
+    "icms": "the runner builds the child's environment with RAYON_NUM_THREADS=1 unless the spec declares otherwise, and the gate checks CPU time over wall and run-queue delay",
+    "id": "A09",
+    "severity": "high"
+   },
+   {
+    "dimension": "host_or_resources",
+    "evidence": [
+     {
+      "path": "tools/isolated_bench.py",
+      "repo": "crypto",
+      "where": "host()"
+     },
+     {
+      "path": "docs/ic/ci/README.md",
+      "repo": "crypto",
+      "where": "v1 vs v2"
+     }
+    ],
+    "finding": "The host record is too thin to explain host effects. tools/isolated_bench.py, mandatory for wall time, records cpu_model, logical_cpus, kernel, machine and python only. Nothing records microcode, governor, turbo, SMT, sysctls, the kernel command line, THP or steal. Whole-process ratios were 17-20 percent lower on the GitHub runner than on the dev host for identical counters, and about twenty host-capture functions use different field names.",
+    "icms": "the capsule records all of these, null where the kernel hides them, and hashes the stable subset into env_class_id",
+    "id": "A10",
+    "severity": "high"
+   },
+   {
+    "dimension": "host_or_resources",
+    "evidence": [
+     {
+      "path": "tools/isolated_bench.py",
+      "repo": "crypto",
+      "where": "run_pinned, conditions"
+     }
+    ],
+    "finding": "isolated_bench marks a run contended only by other processes' CPU ticks. Steal time, pressure during the run, and the run's own threads competing for its CPU are not counted; avg10 PSI before and after does not measure a two-second run.",
+    "icms": "the gate reads per-task schedstat run-queue delay, steal jiffies on the pinned CPUs, PSI totals and foreign runnable tasks every 50 ms",
+    "id": "A11",
+    "severity": "medium"
+   },
+   {
+    "dimension": "versioning",
+    "evidence": [
+     {
+      "path": "src/bin/ic.rs",
+      "repo": "crypto",
+      "where": "git_commit()"
+     },
+     {
+      "path": ".gitignore",
+      "repo": "crypto",
+      "where": "Cargo.lock"
+     },
+     {
+      "path": "research/ic_descent_20260930/runs-isolated/main/k0n37/M1/r1-baseline.price.json",
+      "repo": "crypto"
+     }
+    ],
+    "finding": "The commit in an ic report is `git rev-parse HEAD` of the working directory at start-up, not the commit the binary was built from; a baseline and a candidate built from different commits reported the same commit. The repository has no rust-toolchain file, Cargo.lock is gitignored, and 85 workflow files install a floating stable toolchain.",
+    "icms": "records identify code by binary sha256, compiled-in calibration hash, the build tree's Cargo.lock hash, rustc -Vv and the session's commit, dirty flag and diff hash; the gaps are stated on the page",
+    "id": "A12",
+    "severity": "high"
+   },
+   {
+    "dimension": "solver_counter_definition",
+    "evidence": [
+     {
+      "path": "src/bin/ic/bench.rs",
+      "repo": "crypto",
+      "where": "--solver-budget-seconds"
+     }
+    ],
+    "finding": "A wall-clock solver budget (default 120 s per call in ic bench; 5 s for WDSat in the Koblitz path) can turn a solve into BudgetExceeded under contention, which changes hit rate, trials and relations: counts that should be exact depend on load.",
+    "icms": "the budget is part of the spec's identity and every record carries budget_exceeded; a comparison of arms with budget hits is visible as such",
+    "id": "A13",
+    "severity": "medium"
+   },
+   {
+    "dimension": "accounting_scope",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_framework/plugins.rs",
+      "repo": "crypto",
+      "where": "lines 723-728 vs 1087-1099"
+     }
+    ],
+    "finding": "System construction is charged inconsistently: the descent-algebraic oracle builds each Weil-descended system outside the solver's clock and with no counter, while the symmetrised oracle times construction inside its solve.",
+    "icms": "recorded as a known accounting difference of the producer; the encoding is part of the spec, so the two are never compared without declaring it",
+    "id": "A14",
+    "severity": "medium"
+   },
+   {
+    "dimension": "accounting_scope",
+    "evidence": [
+     {
+      "path": "docs/ic/BOUNDARY_TARGETS.md",
+      "repo": "crypto",
+      "where": "'Autolab remeasurement, 2026-09-12'"
+     }
+    ],
+    "finding": "Batch accounting artefacts: a producer re-added the shared set-up to every target's charged total (34.08 vs 20.27 ms per target at n = 37), and solution validation was charged to one arm and not the other, which would have turned a 1.15x loss into a 1.65x 'win'.",
+    "icms": "phases come from one registry list with explicit cold and online membership; both arms of a comparison are charged over the same named window",
+    "id": "A15",
+    "severity": "high"
+   },
+   {
+    "dimension": "workload_or_targets",
+    "evidence": [
+     {
+      "path": "docs/ic/BOUNDARY_TARGETS.md",
+      "repo": "crypto",
+      "where": "Round 5 vs_rho rows"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/regression/README.md",
+      "repo": "crypto"
+     }
+    ],
+    "finding": "Re-seeding alone moved 204 of 537 walk rows by ratios from 0.54 to 1.83, and the regression suite's three repetitions re-run one input, so they measure repeatability, not variation across targets. For random binary and CM prime curves the bench seed also selects the curve.",
+    "icms": "each seed is its own workload id; repetitions and independent targets are different axes; a curve drawn from the seed must be declared (selected_by_seed) and lands in the workload identity",
+    "id": "A16",
+    "severity": "medium"
+   },
+   {
+    "dimension": "host_or_resources",
+    "evidence": [
+     {
+      "path": "research/notes/index-calculus/IC_TOOL_PROGRAM.md",
+      "repo": "crypto",
+      "where": "section 5"
+     },
+     {
+      "path": "research/ic_tool_program/harness/bround.py",
+      "repo": "crypto",
+      "where": "manifest()"
+     }
+    ],
+    "finding": "A/A practice disagrees with its rule: the IC tool programme requires an A/A every round because the container is rebuilt, while round R03 reused R01's A/A on a six-field host match that omits kernel build, command line, steal, microcode and frequency.",
+    "icms": "an A/A arm is part of the session (list a spec twice) and its interval is printed beside every A/B ratio of that session",
+    "id": "A17",
+    "severity": "medium"
+   },
+   {
+    "dimension": "rho_reference",
+    "effect": "In expectation, plain over A=2n is sqrt(2n) (5.10, 6.16, 6.78 at n=13, 19, 23). In crypto's frozen n=23 and n=31 Koblitz runs, matched = negation, S = 1.095 and 1.055, against sqrt(pi/2) = 1.253. So cryptanalysis ratio_to_rho is about 1.14x and 1.19x lower (more favourable to IC).",
+    "evidence": [
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "workload() lines 132-135 rho_reference/rho_floor; lines 276-277 and 323-327 rho, ratio_to_rho, ratio_to_floor; SUITES lines 73-81 (n = 13, 19, 23)"
+     },
+     {
+      "path": "src/bin/ic/bench.rs",
+      "repo": "crypto",
+      "where": "origin/main matched_rho() lines 437-498; line 897 rho_s = mean_s"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/mod.rs",
+      "repo": "crypto",
+      "where": "origin/main line 423 s_over_rho = s / rho"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "RhoResult.s 'Everything: setup, walk, verification' lines 575-590"
+     },
+     {
+      "path": "research/koblitz_symmetrised_e2e_20260927/results/k0_23__x.json",
+      "repo": "crypto",
+      "where": "rho_reference (negation, A=2, mean_s 1.0949), rho_reference_candidates (signed-Frobenius A=46, 1.1111)"
+     },
+     {
+      "path": "research/koblitz_symmetrised_e2e_20260927/results/k0_31__x.json",
+      "repo": "crypto",
+      "where": "rho_reference negation mean_s 1.0547; candidate A=62 mean_s 1.1514"
+     }
+    ],
+    "finding": "For Koblitz curves the two repositories divide by different rho references. cryptanalysis ic-bench uses the analytic plain walk sqrt(pi r/2) (A=1, no setup) for ratio_to_rho, and keeps sqrt(pi r/(4n)) only as rho_floor/ratio_to_floor. crypto ic bench (origin/main) uses s_over_rho = S / mean_s of the cheaper measured walk, setup included, choosing between signed-Frobenius (A=2n) and negation (A=2). At K_0 at n = 23 and GF(2^31) crypto picked the negation walk, so the realised gap there is about 1.14-1.19x, not sqrt(2n).",
+    "icms": "every reference is a registry id; the cryptanalysis adapter reports rho.plain and rho.signed_frobenius side by side and refuses rho.measured_matched, and a comparison refuses two arms with different references",
+    "id": "X01",
+    "severity": "high",
+    "verification": {
+     "corrected": "The two ratios do not share a name (ratio_to_rho against s_over_rho). The sqrt(2n) figures (5.10x/6.16x/6.78x) apply only when crypto picks the A=2n walk. In crypto's frozen n=23 and n=31 Koblitz runs it picked the negation walk, and its S includes setup, so the realised gap at those sizes is about 1.14-1.19x, below even sqrt(2).",
+     "verdict": "corrected"
+    }
+   },
+   {
+    "dimension": "rho_reference",
+    "effect": "Without the negation map the rho reference is sqrt(2) = 1.414x too large in expectation: 'm = 3 mitm costs 34x rho's walk at 32 bits' becomes about 48x against a negation rho. Excluding setup biases the other way; the net effect depends on size and is not recorded.",
+    "evidence": [
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/rho.py",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 1-18 docstring, R_ADDING = 20, pollard_rho lines 52-97 (X = E.add(X, M); walk_ops += 1; no negation)"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/README.md",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 80-83 Rho unit; 332-334 'different units'; 372 '34x at 32 bits'"
+     },
+     {
+      "path": "src/bin/ic/bench.rs",
+      "repo": "crypto",
+      "where": "origin/main matched_rho Instance::Prime lines 446-457; RhoRun s/s_walk lines 342-352"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "RhoResult.s includes setup, lines 585-588; rho_reference_negation lines 2050-2068"
+     }
+    ],
+    "finding": "The autoresearcher prime-field rho baseline is a Teske 20-adding walk with distinguished points and no negation map (A=1). IC/rho ratios divide by the median walk_ops (walk additions only, setup_ops reported separately), in a different unit from IC's S3 solves. crypto prime rows divide by the measured negation walk (A=2), whose S counts setup, walk and verification; s_walk is kept separately.",
+    "icms": "the autoresearcher adapter labels its walk rho.plain (A = 1, one run) and refuses any other reference id; crypto's matched negation walk is a different id and is never paired with it",
+    "id": "X02",
+    "severity": "high",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "rho_reference",
+    "effect": "Under the mislabel, matched rho is understated by a factor sqrt(2), i.e. 0.5 bit; it is not halved. The corrected net movement is sqrt(k), not sqrt(k/2).",
+    "evidence": [
+     {
+      "path": "ledger/corrections/CORR-20260922-81aeab.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "prior_value, corrected_value, reason"
+     },
+     {
+      "path": "ledger/proposals/IDEA-20260922-6cf862.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "line 488 '0.886 sqrt(r) / sqrt(2k)'"
+     },
+     {
+      "path": "ledger/proposals/IDEA-20260915-8fe0ef.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 59-65 (sqrt(2n) label, net sqrt(n/2)), line 77 (227/55)"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "generic_floor_ops lines 310-314"
+     }
+    ],
+    "finding": "IDEA-20260922-6cf862 priced matched Koblitz rho as 0.886 sqrt(r)/sqrt(2k). That uses the negation map twice, because 0.886 = sqrt(pi/4) already includes it. CORR-20260922-81aeab corrects it to sqrt(pi r/(4k)), anchored by 227/55 = 4.127 against sqrt(17) = 4.123, and marks the derived 'no exponent moves' conclusion UNESTABLISHED. IDEA-20260915-8fe0ef has the right formula but labels it 'sqrt(2n) below the negation-only row' and derives a net sqrt(n/2) from that label. crypto's generic_floor_ops with A=2k matches the corrected convention.",
+    "icms": "a reference is named by id with its A in registry.json (rho.negation A = 2, rho.signed_frobenius A = 2n), so the automorphism count is never re-derived by hand in a record",
+    "id": "X03",
+    "severity": "medium",
+    "verification": {
+     "corrected": "'Understates matched rho by half' is wrong: the understatement is a factor of sqrt(2), i.e. half a bit, not a factor of 2.",
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "factor_base_definition",
+    "effect": "The shift is 1.333/1.000/0.800/0.667/0.571/0.444 bits at m = 2/3/4/5/6/8. log2 sqrt(pi r/524) = 60.80904. Reading D1 as a per-attempt budget misstates it by 10.12 bits against D2 and 15.42 bits against D3. The m=3 subgroup floor stays 6.776 bits above rho.",
+    "evidence": [
+     {
+      "path": "ledger/corrections/CORR-20260928-4cb669.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "prior_value, corrected_value"
+     },
+     {
+      "path": "knowledge/findings/KN-FIND-aa2efc.md",
+      "repo": "crypto-autoresearcher",
+      "where": "title line 4, line 30, line 111 (2^-4.41 headroom)"
+     }
+    ],
+    "finding": "KN-FIND-aa2efc and EV-ICPERF-10c5fc compute the ECC2K-130 free-oracle floor table with N = 2^131 = #E = 4r, the full curve group, but compare it with matched rho and targets in the order-r subgroup. CORR-20260928-4cb669 scopes the ambient: subgroup floors are exactly 4/(m+1) bits lower (m=2: 87.9183, m=3: 67.5850, m=4: 55.6049). Matched rho is 2^60.8090. It also pins three distinct m=4 headroom quantities: D1 = 2^-4.41 total-cost gap, D2 = 2^+5.71 per-target budget, D3 = 2^+11.01 per-attempt budget. No verdict changes.",
+    "icms": "recorded, not enforced: ICMS computes no free-oracle floors. Every record carries the subgroup order r and names its floor by registry id (floor.generic is sqrt(pi/(2A)) over r), so a floor taken over #E is visible as a different quantity rather than silently compared",
+    "id": "X04",
+    "severity": "medium",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "unit",
+    "effect": "At n=19 one LA operation costs 0.4057 ec_add in cryptanalysis and 0.01135 GAE in crypto, about 35.7x heavier. Only the LA component of S moves by this factor. The two denominators also differ: batched scalar-mult throughput in one repo, a lone add in the other.",
+    "evidence": [
+     {
+      "path": "experiments/ic-bench/calibration.json",
+      "repo": "cryptanalysis",
+      "where": "measured_ns['19'] modr_mul 47.575, ec_add 117.255; weights_by_field_degree['19']"
+     },
+     {
+      "path": "experiments/ic-bench/calibrate.py",
+      "repo": "cryptanalysis",
+      "where": "lines 98-117 ec_add via smul_batch / (len*smul_cost), modr_mul Python loop"
+     },
+     {
+      "path": "experiments/pdp-degree-heuristics/monitor.py",
+      "repo": "cryptanalysis",
+      "where": "lines 65-87, 385-448 modr_mul charges in matrix_build/relation_la"
+     },
+     {
+      "path": "docs/ic/calibration.json",
+      "repo": "crypto",
+      "where": "instances['koblitz/K_1 at n = 19'].ns_per_row_op = 0.011352; unit"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "price_phase lines 5132-5151 (conv row_ops); Calibration::pin 249-297; calibrate_group 5065-5084"
+     }
+    ],
+    "finding": "The two repos weight the linear algebra very differently against a group addition. cryptanalysis prices one mod-r multiply-subtract (modr_mul, charged by monitor.RankTracker in matrix_build/relation_la) at a CPython loop speed of 47.575 ns, against ec_add = 117.255 ns from batched smul_batch throughput, a ratio of 0.406. crypto's price_phase converts row_ops at the pinned native-Rust ratio ns_per_row_op/ns_per_add. For koblitz/K_1 at n = 19 that ratio is 0.011352, measured against calibrate_group's lone counted addition.",
+    "icms": "cryptanalysis.rps and crypto.S.gae_pinned are separate unit ids and a comparison across unit ids is refused; count.group_additions is the one unit both adapters report, and it carries no conversion",
+    "id": "X05",
+    "severity": "high",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "unit",
+    "effect": "Not computable. The README calls each unit 'about one modular exponentiation or inversion' but records no conversion. The 32-bit gap of about 10^4 (8.1e8 S3 solves against 7.6e4 walk steps) leaves out the LA and group-op columns.",
+    "evidence": [
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/README.md",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 62-80, 156-160"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/__main__.py",
+      "repo": "crypto-autoresearcher",
+      "where": "sweep_report lines 218-243 (primary = walk_ops vs s3_solves)"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/mod.rs",
+      "repo": "crypto",
+      "where": "line 374"
+     },
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "PHASES line 53 (11 phases); total line 274"
+     }
+    ],
+    "finding": "The autoresearcher's IC-versus-rho comparison mixes units and never sums phases. IC's primary unit is one S_3 root solve; MITM table entries are charged as an S_3 solve although they need no square root. Membership tests, group operations and LA multiply-adds sit in separate columns, which the README says are never summed. Rho is counted in walk group additions, and the sweep report puts s3_solves beside walk_ops. crypto (ic_framework total_gae) and cryptanalysis (bench.py line 274, a sum over 11 PHASES) both sum every phase into one priced total.",
+    "icms": "the autoresearcher adapter records count.s3_solves, count.group_additions and time.wall_ns as three units and never sums them; a comparison uses exactly the spec's unit",
+    "id": "X07",
+    "severity": "high",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "unit",
+    "effect": "With the floor at N=#E (the report itself says N=r is correct) at 2.50x/146x/461x of rho's steps, IC would need 3.0x to 209x fewer instructions per group op than rho. The report also notes a ~9x disagreement at n=23: 7.47x GAE against 0.831x instructions.",
+    "evidence": [
+     {
+      "path": "coordination/review/icperf-aa2efc-20260926/reviews/TASK-20260926-44629c/validation-report.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 324-384 (same_unit_boundary_ledger unit line 326; tournament_cells 356-377)"
+     },
+     {
+      "path": "research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md",
+      "repo": "crypto",
+      "where": "Round 0021/0022 tables lines 641, 737-739"
+     },
+     {
+      "path": "research/ic_candidate_tournament_20260915/campaign_20260916/round22_crossover.py",
+      "repo": "crypto",
+      "where": "instructions() line 112, doc line 15"
+     }
+    ],
+    "finding": "crypto's tournament IC/rho cells for rounds 0021/0022 (n23a1 0.831, n37a0 1.396, n43a1 2.207) are ratios of whole-process callgrind instructions, parsed from 'Collected:'. The free-oracle floor and the boundary ledger are in group-addition equivalents. The autoresearcher validation report marked these cells inconclusive for that reason: neither arm records an instructions-per-group-op conversion.",
+    "icms": "crypto.S.callgrind_ir is its own unit id and the floors are in operations; a comparison or ratio across the two is refused",
+    "id": "X08",
+    "severity": "medium",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "measurement_window",
+    "effect": "From autoresearcher's own figures: about 2x fewer relations at m=2 (0.5|F| vs |F|) and about 1.09x at m=3 (1/0.92). Only cryptanalysis also pays a per-target descent. The cost effect beyond the relation counts is not recorded.",
+    "evidence": [
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "origin/main lines 4989-5002, if let Some(d) = matrix.pinned(d_col) {...; break;}"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/README.md",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 561-566, 'Linear algebra stops early'"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/linalg.py",
+      "repo": "crypto-autoresearcher",
+      "where": "module docstring lines 1-13"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/solver.py",
+      "repo": "crypto-autoresearcher",
+      "where": "module docstring step 3"
+     },
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "lines 191-192 relation_collection.stop; lines 204-210 target_descent TDpdp"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+      "repo": "crypto",
+      "where": "invariants: 'Full-rank recovery and final scalar verification are required for full-ECDLP claims.'"
+     }
+    ],
+    "finding": "The IC stop event differs across repos. crypto ic bench (ic_boundary.rs ~4989) breaks once matrix.pinned(d_col) fixes the target logarithm and verifies it. autoresearcher's solver/linalg also stop at the first relation that pins k (README: ~0.5|F| relations at m=2, 0.92|F| at m=3, vs ~|F| for full rank). cryptanalysis collects to the achievable rank (m=2) or effective column count (m>=3), then runs TDpdp descent per workload target. crypto's parent contract requires full-rank recovery for full-ECDLP claims, so crypto ic bench departs from its own contract. Overlaps A04 within crypto.",
+    "icms": "relations.stop (first_log | full_rank | count) is part of spec identity and a forbidden difference in a comparison; each adapter refuses the stop rule its producer does not implement",
+    "id": "X09",
+    "severity": "high",
+    "verification": {
+     "corrected": "The cryptanalysis stop rule is at bench.py lines 191-192, not 181-182. Everything else checks out. A04 already records the stop-event mismatch inside crypto; X09 extends it across the three repos.",
+     "verdict": "corrected"
+    }
+   },
+   {
+    "dimension": "workload_or_targets",
+    "effect": "Against a matched reference (three one-target rho solves, or batch rho on 3 targets) the rho side is under-counted by up to about 3x (about sqrt(3)x for batch rho). This inflates IC's ratio and partly offsets the sqrt(2n) generosity of a plain rho without classes. The descent share is not computed, so the net effect is unknown.",
+    "evidence": [
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "line 67 cells(...targets=3); lines 72-80 SUITES; line 132 rho_reference; lines 274, 276, 327, 329; lines 330-333 warm block"
+     },
+     {
+      "path": "AGENTS.md",
+      "repo": "crypto",
+      "where": "origin/main lines 543-575, 'Primary comparison uses one target'"
+     },
+     {
+      "path": "docs/ic/boundary_targets.json",
+      "repo": "crypto",
+      "where": "measurement_schema.vs_rho required[target_count], timing_class_enum"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+      "repo": "crypto",
+      "where": "invariants, 'Fixed setup is charged once; warm amortization always names the target count.'"
+     }
+    ],
+    "finding": "In cryptanalysis ic-bench, every suite cell defaults to targets=3. total sums every phase, including target_descent for all three descents (line 274). ratio_to_rho divides that 3-target cold total by a one-target rho, rho_reference = round(sqrt(pi r/2))\u00b7w_ec_add (lines 132, 276, 327). S_rps divides the same total by sqrt(r), a one-target normalisation (line 329). Per-target figures exist only under 'warm'. crypto's primary comparison is single-target: AGENTS.md has a one-target rule, and the vs_rho schema allows only single_target_online_wall and requires target_count.",
+    "icms": "workload.targets is part of the workload id and the primary window requires exactly one target; the cryptanalysis demonstration specs use one target, and a k-target total is a different workload",
+    "id": "X10",
+    "severity": "medium",
+    "verification": {
+     "corrected": "total is at bench.py line 274, not 275. S_rps divides by sqrt(r), not by a rho figure: it is a one-target normalisation and not literally a division by one-target rho. The core mismatch holds.",
+     "verdict": "corrected"
+    }
+   },
+   {
+    "dimension": "measurement_window",
+    "effect": null,
+    "evidence": [
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "line 175 summation_polynomials 'not charged'; instrument note around line 321; _warm_process lines 226-232"
+     },
+     {
+      "path": "src/bin/ic/price.rs",
+      "repo": "crypto",
+      "where": "line 23, 'Target construction is outside every clock'"
+     },
+     {
+      "path": "src/cryptanalysis/ic_boundary.rs",
+      "repo": "crypto",
+      "where": "origin/main 5557-5559, target = curve.mul(&mut ops, g, d), ops never charged; 4868-4874, per-trial [a]G+[b]Q charged to rel.group_ops"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/plugins.rs",
+      "repo": "crypto",
+      "where": "DescentAlgebraicOracle::decompose ~711-735 vs SymmetrisedOracle::decompose ~1074-1115"
+     },
+     {
+      "path": "AGENTS.md",
+      "repo": "crypto",
+      "where": "line 140 (\u00a72), line 287 (\u00a78 'target generation'), lines 552-558 (exclude known-answer target)"
+     }
+    ],
+    "finding": "Uncharged work differs between pipelines. cryptanalysis does not charge summation-polynomial loading (bench.py line 175) or 'instrument' diagnostics and S=0 enumerations. In crypto, DescentAlgebraicOracle builds each Weil-descended system outside the solver's clock and adds no counter, while SymmetrisedOracle times construction inside its solve (same as A14). Building the known-answer Q is uncharged in both ic bench (curve.mul into a discarded ops) and ic price. AGENTS.md conflicts here: \u00a78 charges 'target generation', while the one-target rule excludes known-answer target construction.",
+    "icms": "every window lists its composition and conformance (exact, exact_operations, derived, runner); what a producer leaves off its clocks is written in the record rather than assumed",
+    "id": "X11",
+    "severity": "medium",
+    "verification": {
+     "corrected": "The contrast 'ic bench charges target drawing; ic price puts target construction on no clock' compares two different things. ic bench also leaves Q's construction uncharged. What it charges is per-trial query points [a]G+[b]Q, and ic price's descent query is charged as target_query. So the stated effect ('two scalar mults per trial ... zero in ic price') is wrong. 'Target generation included' comes from AGENTS.md \u00a78, not from FRAMEWORK \u00a72 or AGENTS \u00a72. The DescentAlgebraic vs Symmetrised part duplicates A14.",
+     "verdict": "corrected"
+    }
+   },
+   {
+    "dimension": "factor_base_definition",
+    "effect": "There is a factor of about 2 between autoresearcher |F| and crypto signed_points or cryptanalysis B for the same base (2-torsion points excepted). Columns are a further 2-fold (negation) or about 2n-fold (signed Frobenius) smaller.",
+    "evidence": [
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/factor_base.py",
+      "repo": "crypto-autoresearcher",
+      "where": "default_fb_size 29-35; _from_xs/small_x 112-130"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/mod.rs",
+      "repo": "crypto",
+      "where": "FactorBaseReport 130-142 (origin/main)"
+     },
+     {
+      "path": "src/bin/ic/experiment.rs",
+      "repo": "crypto",
+      "where": "line 924 abscissae: fb.subspace.len(), points: fb.points.len()"
+     },
+     {
+      "path": "docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json",
+      "repo": "crypto",
+      "where": "markdown: prime-abscissa[size=64] base 128"
+     },
+     {
+      "path": "experiments/pdp-degree-heuristics/factor_base.py",
+      "repo": "cryptanalysis",
+      "where": "__post_init__ 311-320 (xs concatenated with negatives); usable_points/effective_columns 378-388"
+     },
+     {
+      "path": "AGENTS.md",
+      "repo": "cryptanalysis",
+      "where": "lines 69-75 fb<B> definition"
+     }
+    ],
+    "finding": "'Factor-base size' counts different objects in each repo. autoresearcher |F| is unsigned: FactorBase._from_xs, small_x and random keep one lifted P per abscissa, and default_fb_size assumes a signed support of 2|F|. crypto's FactorBaseReport.signed_points counts P and -P, and the bench 'base' column is signed (size=64 gives base 128). cryptanalysis fb<B> counts signed, subgroup-usable points before folding. crypto's experiment.rs reports 'abscissae' = fb.subspace.len(), which includes roots with no point, next to 'points'.",
+    "icms": "the record carries usable_points, signed_points, abscissae_with_points, abscissae_allowed, columns and orbit_representatives separately; the autoresearcher adapter doubles |F| into signed points and keeps |F| as abscissae_with_points",
+    "id": "X12",
+    "severity": "medium",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "solver_counter_definition",
+    "effect": "5747/83 = 69.2 and 148234/675 = 219.6 on the same baseline system. No fixed ratio links conflicts across solvers or modes.",
+    "evidence": [
+     {
+      "path": "ledger/evidence/EV-FROB-b6e1e9.yaml",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 97 (CaDiCaL), 113-114 (XG 69x/220x)"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/regression/contract.json",
+      "repo": "crypto",
+      "where": "variants, solver_counter_unit"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/regression/README.md",
+      "repo": "crypto",
+      "where": "line 7 'Gaussian elimination disabled in both'"
+     },
+     {
+      "path": "research/index_calculus_baseline_20260914/regression/run.py",
+      "repo": "crypto",
+      "where": "line 143 cmd built from contract args only"
+     },
+     {
+      "path": "src/cryptanalysis/ic_framework/solvers.rs",
+      "repo": "crypto",
+      "where": "line 898 op_unit 'conflicts'"
+     },
+     {
+      "path": "experiments/EXP-ICPERF-e21835/runs/RUN-ICPERF-a4a24b/summary_regression/frozen_control/results.jsonl",
+      "repo": "crypto-autoresearcher",
+      "where": "rows with argv ... '-x', config gauss_elim"
+     }
+    ],
+    "finding": "The counter name 'conflicts' covers incomparable quantities across solvers and modes. In EV-FROB-b6e1e9, WDSat's XG mode (-x) cuts conflicts 69x (n=19) and 220x (n=23) on the same system, and CaDiCaL 1.5.3 conflicts are reported alongside. crypto's sat-cdcl also reports op_unit 'conflicts'. crypto's frozen WDSat regression does pin XG off: its full argv carries no -x and the README says Gaussian elimination is disabled in both arms. autoresearcher's frozen control runs WDSat with -x (config gauss_elim) under the same name 'conflicts'.",
+    "icms": "count.solver_conflicts binds solver name, version and options; the registry makes WDSat's xg, branching order and timeout mandatory spec fields, so a spec that omits one is refused",
+    "id": "X13",
+    "severity": "high",
+    "verification": {
+     "corrected": "The original said crypto's frozen WDSat regression records only '-b' and not the XG mode. The variant args are the complete solver argv, with no -x, and the README states that Gaussian elimination is disabled in both arms, so the XG mode is fixed (off) and documented. Only the unit name does not encode it.",
+     "verdict": "corrected"
+    }
+   },
+   {
+    "dimension": "host_or_resources",
+    "effect": "Wall times cannot be reconciled across hosts. crypto itself documents 17-20% host-to-host whole-process differences (docs/ic/ci) and expects \u00b15-10% residual cloud noise (AGENTS.md). cryptanalysis counts are portable, but its rps unit is tied to an unidentified CPU.",
+    "evidence": [
+     {
+      "path": "docs/ic/calibration.json",
+      "repo": "crypto",
+      "where": "host, method keys"
+     },
+     {
+      "path": "tools/isolated_bench.py",
+      "repo": "crypto",
+      "where": "sched_setaffinity lines 104/219/229, PSI gate 283-285"
+     },
+     {
+      "path": "AGENTS.md",
+      "repo": "crypto",
+      "where": "lines 441-444 \u00b15\u201310% residual wall noise"
+     },
+     {
+      "path": "docs/ic/ci/README.md",
+      "repo": "crypto",
+      "where": "line 132 17\u201320% lower on runner"
+     },
+     {
+      "path": "experiments/ic-bench/calibration.json",
+      "repo": "cryptanalysis",
+      "where": "host block"
+     },
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "line 490 --jobs default os.cpu_count(); 362 host_id=platform.node(); 464 ProcessPoolExecutor"
+     },
+     {
+      "path": "harness/runner.py",
+      "repo": "crypto-autoresearcher",
+      "where": "environment() lines 173-180"
+     },
+     {
+      "path": "src/crypto_autoresearcher/index_calculus/README.md",
+      "repo": "crypto-autoresearcher",
+      "where": "lines 97-98 and 311 host prose"
+     }
+    ],
+    "finding": "The calibrations that set each unit come from different, thinly described hosts. crypto's docs/ic/calibration.json names only 'Intel(R) Xeon(R) Processor @ 2.10GHz' (median of 3 frozen runs). cryptanalysis calibration.json records node 'cursor', python/numpy and -march=native CFLAGS, but no CPU model. The autoresearcher runner environment() records OS, architecture, python, sympy and pyyaml, with no CPU or numpy. The CPU appears only in README prose, which names two hosts (2.1 GHz and 2.8 GHz). cryptanalysis bench runs os.cpu_count() unpinned ProcessPool workers by default, while crypto requires isolated_bench affinity and PSI gating.",
+    "icms": "the host capsule records CPU model, microcode, flags, kernel, sysctls, frequency policy, SMT, virtualisation and toolchain for every session; wall time is compared only within one env_class_id at the declared isolation level",
+    "id": "X16",
+    "severity": "medium",
+    "verification": {
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "dimension": "versioning",
+    "effect": "Not computable. Counts are unaffected, but wall time and binaries cannot be reproduced from the records. crypto's binary_blake3 identifies the binary but not how to rebuild it.",
+    "evidence": [
+     {
+      "path": ".gitignore",
+      "repo": "crypto",
+      "where": "line 2 'Cargo.lock'; no rust-toolchain* in tree"
+     },
+     {
+      "path": "src/bin/ic.rs",
+      "repo": "crypto",
+      "where": "lines 509-512 software block; 176-182 git_commit via rev-parse HEAD"
+     },
+     {
+      "path": "src/bin/ic/price.rs",
+      "repo": "crypto",
+      "where": "lines 1070, 1317 'commit': git_commit()"
+     },
+     {
+      "path": "experiments/pdp-degree-heuristics/kernel.py",
+      "repo": "cryptanalysis",
+      "where": "line 24 CFLAGS with -march=native; line 78 CC env"
+     },
+     {
+      "path": "experiments/ic-bench/bench.py",
+      "repo": "cryptanalysis",
+      "where": "lines 104-105 implementation_sha256; 211-218 candidate digest includes kernel_cflags"
+     },
+     {
+      "path": "harness/runner.py",
+      "repo": "crypto-autoresearcher",
+      "where": "line 179 dependencies {sympy, pyyaml}"
+     }
+    ],
+    "finding": "Toolchain and dependency pinning differ across the repositories. crypto gitignores Cargo.lock and has no rust-toolchain file, and nothing records the rustc version. ic bench reports carry software{version, os, arch, binary_blake3}; price and boundary reports also carry the working-tree git commit. cryptanalysis's implementation hash and candidate ID cover the CFLAGS string, but -march=native makes the compiled kernel depend on the host, and no compiler version or target CPU is hashed. The autoresearcher manifest records sympy and pyyaml, not numpy or msolve. The crypto toolchain part overlaps A12.",
+    "icms": "each record carries the binary sha256, the Cargo.lock and calibration hashes present at the run, and the producer repository's commit and dirty flag; the capsule carries rustc -Vv, cc --version, numpy and the build flags in the environment",
+    "id": "X17",
+    "severity": "medium",
+    "verification": {
+     "corrected": "The claim that crypto reports record 'only' the software block is overstated: price and boundary reports also record a git commit, and binary_blake3 does identify the binary. The autoresearcher dependencies line is 179, not 178.",
+     "verdict": "corrected"
+    }
+   }
+  ],
+  "schema": "icms.audit/v1",
+  "what": "Ways in which index-calculus figures in crypto, cryptanalysis and crypto-autoresearcher were not measured apples to apples, found by reading the code and the frozen evidence on 2026-10-01 (crypto b7d3f9ca, cryptanalysis 46ad7a8, crypto-autoresearcher d7194a40). A01-A17 are inside crypto. X-findings compare the three repositories; each was re-checked by an independent verifier told to refute it, and its verdict (confirmed, or corrected with what did not survive) is recorded. Cross-repository findings that restated a crypto finding were merged into it: X06 = A01, X14 = A08, X15 = A02, X18 = A06, X19 = A03. Each finding names where it was verified and what ICMS does about it. Nothing here is a measurement."
+ },
+ "example_spec": {
+  "path": "docs/ic/measurement/specs/k17-subspace-d6-sat-native.yaml",
+  "text": "icms: icms.spec/v1\nlabel: \"icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl native parity\"\ndescription: >\n  Demonstration arm for a SAT point-decomposition oracle.  One planted\n  target on the degree-17 Koblitz curve, the dimension-6 prefix subspace\n  base, Weil descent of the expanded summation polynomial, solved by the\n  in-house CDCL solver with parity constraints encoded as native.  The XOR\n  encoding is the declared variable between this spec and its sibling; the\n  record carries the clause and XOR-row counts of every system.  The solver\n  is priced from host wall time (ic bench priced_by: measured), so the\n  total is host-dependent and says so.\nrole: candidate\ninstance:\n  curve: {regime: koblitz, degree: 17, koblitz_a: 1}\n  workload: {targets: 1, law: known_answer, seeds: [123212651130]}\nfactor_base:\n  family: binary_subspace\n  params: {dimension: 6, basis_law: prefix}\n  quotient: [negation]\ndecomposition:\n  arity: 2\n  method: algebraic\n  encoding: expanded_semaev\n  solver:\n    name: sat-cdcl\n    options: {sat_xor_encoding: native, sat_conflict_budget: 200000}\n  limits: {per_call_seconds: 120}\nrelations: {collector: walk, stop: first_log, max_trials: 2000000}\nlinear_algebra: {method: incremental_gauss}\nreference: {rho: rho.measured_matched, floor: floor.generic, rho_runs: 8}\naccounting: {unit: crypto.S.gae_pinned}\nmeasurement:\n  window: cold_end_to_end\n  repetitions: 5\n  warmup: 1\n  interleave: abab\n  isolation_required: L2\n  timeout_seconds: 300\nexecution: {adapter: crypto.ic_bench, threads: 1, cpus: 1}\n"
+ },
+ "generated_by": "scripts/build_ic_measurement.py",
+ "registry": {
+  "families": [
+   {
+    "cryptanalysis.ic_bench": "factor_base.py family = basis_law",
+    "crypto.ic_bench": "binary-subspace",
+    "crypto.workflow": "standard_subspace",
+    "family": "binary_subspace",
+    "means": "points whose abscissa lies in an F_2-subspace V (Gaudry/Diem linear base)",
+    "optional_params": {
+     "basis_seed": "seed of the basis sampler for the randomised laws (cryptanalysis cell seed)"
+    },
+    "param_notes": {
+     "basis_law": "which l-dimensional V, as cryptanalysis pdp-degree-heuristics/factor_base.py defines them; prefix is span{1, z, ..., z^(l-1)}, the literature's choice and crypto ic bench's only basis"
+    },
+    "param_values": {
+     "basis_law": [
+      "prefix",
+      "geometric",
+      "geomtrace",
+      "geomtraceu",
+      "random",
+      "normal",
+      "kertrace",
+      "invariant"
+     ]
+    },
+    "params": [
+     "dimension",
+     "basis_law"
+    ]
+   },
+   {
+    "crypto.ic_bench": "koblitz-orbit",
+    "crypto.workflow": "divisor",
+    "family": "frobenius_stable_subspace",
+    "means": "V a divisor submodule of T^n - 1 (KN-FIND-b9a41d); columns are signed Frobenius orbits",
+    "params": [
+     "divisor"
+    ]
+   },
+   {
+    "crypto.ic_bench": "koblitz-symmetrised",
+    "family": "frobenius_symmetrised",
+    "means": "F_u = {P : 1/(x+1) in V}, T = (0,1) included, for the symmetrised oracle",
+    "params": [
+     "divisor"
+    ]
+   },
+   {
+    "crypto.workflow": "frobenius_union",
+    "family": "frobenius_union",
+    "means": "union of Frobenius orbits of chosen seeds (not a subspace)",
+    "params": [
+     "seed_masks"
+    ]
+   },
+   {
+    "crypto.workflow": "cofactor_projected",
+    "family": "cofactor_projected",
+    "means": "a parent base mapped into the prime-order subgroup by the cofactor",
+    "params": [
+     "parent"
+    ]
+   },
+   {
+    "crypto.workflow": "pruned",
+    "family": "pruned",
+    "means": "a parent base keeping only the listed abscissa orbits",
+    "params": [
+     "parent",
+     "retained_abscissa_orbits"
+    ]
+   },
+   {
+    "crypto.workflow": "two_torsion_saturated",
+    "family": "two_torsion_saturated",
+    "means": "a parent base closed under translation by rational 2-torsion",
+    "params": [
+     "parent"
+    ]
+   },
+   {
+    "crypto.workflow": "subgroup_orbits",
+    "family": "subgroup_orbits",
+    "means": "orbits of sampled subgroup points",
+    "params": [
+     "seed",
+     "points"
+    ]
+   },
+   {
+    "crypto.ic_run": "factor-index",
+    "crypto.workflow": "factor",
+    "family": "factor_index",
+    "means": "the legacy degree-ord_n(2) factor family, candidate by index",
+    "params": [
+     "index"
+    ]
+   },
+   {
+    "autoresearcher.index_calculus": "small_x",
+    "crypto.ic_bench": "prime-abscissa",
+    "family": "prime_small_abscissa",
+    "means": "the smallest on-curve abscissae of a prime-field curve",
+    "params": [
+     "size"
+    ]
+   },
+   {
+    "autoresearcher.index_calculus": "random",
+    "family": "prime_random_abscissa",
+    "means": "uniformly random on-curve abscissae",
+    "params": [
+     "size"
+    ]
+   },
+   {
+    "autoresearcher.index_calculus": "subgroup",
+    "family": "prime_subgroup_power",
+    "means": "abscissae x with x^d = g^d (multiplicative subgroup of F_p^*)",
+    "params": [
+     "size"
+    ]
+   },
+   {
+    "crypto.ic_bench": "glv-orbit",
+    "family": "glv_orbit",
+    "means": "seed abscissae closed under the automorphism group of a CM curve",
+    "params": [
+     "size",
+     "group"
+    ]
+   },
+   {
+    "crypto.ic_bench": "gls-line",
+    "family": "gls_line",
+    "means": "the GLS line base",
+    "params": []
+   },
+   {
+    "family": "explicit",
+    "means": "a frozen point list with its digest",
+    "params": [
+     "recipe"
+    ]
+   }
+  ],
+  "pdp_metrics": {
+   "anf_monomials": "distinct monomials of the descended ANF",
+   "cnf_aux_variables": "Tseitin auxiliaries alone",
+   "cnf_clauses": "clauses after encoding (ic corpus EncodingStats.clauses; ic_framework extra.original_clauses)",
+   "cnf_variables": "CNF variables including Tseitin auxiliaries",
+   "conflicts": "CDCL conflicts",
+   "decisions": "CDCL decisions",
+   "degrees": "maximum monomial degree per equation",
+   "literals": "total literal occurrences",
+   "matrix_cols_max": "largest Macaulay/F4 matrix columns",
+   "matrix_rows_max": "largest Macaulay/F4 matrix rows",
+   "max_degree": "largest entry of degrees",
+   "n_equations": "equations (SystemShape.n_equations)",
+   "n_vars": "Boolean (or field) unknowns of the system as handed to the solver (SystemShape.n_vars)",
+   "propagations": "unit propagations",
+   "restarts": "restarts",
+   "semi_regular_degree": "first non-positive coefficient of (1+t)^v / prod(1+t^d_i) (Bardet-Faugere-Salvy)",
+   "solving_degree": "highest degree a Groebner/Macaulay engine reached",
+   "xor_rows": "native XOR constraints (EncodingStats.xor_rows; extra.native_xor_rows)"
+  },
+  "rho": [
+   {
+    "A": 1,
+    "expected_ops": "sqrt(pi*r/2)",
+    "id": "rho.plain",
+    "status": "before-mark only; never a reference since ledger section 18"
+   },
+   {
+    "A": 2,
+    "expected_ops": "sqrt(pi*r/4)",
+    "id": "rho.negation",
+    "status": "reference for prime-field and random binary curves"
+   },
+   {
+    "A": "2n",
+    "expected_ops": "sqrt(pi*r/(4n))",
+    "id": "rho.signed_frobenius",
+    "status": "Koblitz; the strong single-target walk is the admissibility minimum since 2026-10-01"
+   },
+   {
+    "A": "|Aut(E)|",
+    "expected_ops": "sqrt(pi*r/(2*|Aut|))",
+    "id": "rho.automorphism",
+    "status": "j = 0 (A = 6) and j = 1728 (A = 4) prime-field curves"
+   },
+   {
+    "A": "per target",
+    "expected_ops": "about sqrt(2*pi*r*k)/k per target for k targets",
+    "id": "rho.batch_kuhn_struik",
+    "status": "historical diagnostic for k-target figures only; never the one-target reference"
+   },
+   {
+    "A": "as run",
+    "expected_ops": "measured",
+    "id": "rho.measured_matched",
+    "status": "the producer's counted rho on the same subgroup and planted targets; the record carries its method string and automorphism count"
+   }
+  ],
+  "size_fields": {
+   "abscissae_allowed": "every x the construction admits, including those with no rational point (Koblitz pipeline abscissae).",
+   "abscissae_with_points": "distinct x carrying a point of the base (ic bench abscissae).",
+   "columns": "unknowns in the relation matrix after folding (ic bench columns).",
+   "nominal_dimension": "the requested F_q-dimension of a subspace base; never a point count.",
+   "orbit_representatives": "sign/Frobenius/automorphism orbit count (ic run signed_orbits).",
+   "signed_points": "points with P and -P both counted (ic bench signed_points).",
+   "usable_points": "B in cryptanalysis AGENTS.md: distinct, nonidentity, subgroup-usable points before sign or Frobenius folding. This is the fb<B> of an IC1 candidate id."
+  },
+  "solver_options": {
+   "crossbred-f2": [
+    "D",
+    "k",
+    "max_rows",
+    "max_kernel_dim"
+   ],
+   "inherited-f4": [
+    "max_degree",
+    "split",
+    "node_budget"
+   ],
+   "macaulay-xl": [
+    "mode",
+    "formulation",
+    "d_max",
+    "max_cols",
+    "max_rows"
+   ],
+   "matrix-f4": [
+    "max_degree",
+    "split",
+    "node_budget"
+   ],
+   "matrix-f5": [
+    "max_degree",
+    "split",
+    "node_budget"
+   ],
+   "msolve": [
+    "msolve_version"
+   ],
+   "sat": [
+    "encoding",
+    "trace_constraint",
+    "conflict_budget"
+   ],
+   "sat-cdcl": [
+    "sat_xor_encoding",
+    "sat_conflict_budget"
+   ],
+   "wdsat": [
+    "xg",
+    "branching_order",
+    "timeout_ms"
+   ]
+  },
+  "units": [
+   {
+    "binds": [
+     "calibration_sha256",
+     "measured_units"
+    ],
+    "definition": "ic bench / ic boundary: total group-addition equivalents / sqrt(r); native counters priced with docs/ic/calibration.json ratios.",
+    "deterministic": "only when every native unit and every solver is priced by count (calibration_pins.measured empty and solver priced_by != measured)",
+    "id": "crypto.S.gae_pinned",
+    "of": "operations",
+    "source": "src/cryptanalysis/ic_boundary.rs price_phase; src/cryptanalysis/ic_framework/mod.rs"
+   },
+   {
+    "binds": [
+     "env_class_id"
+    ],
+    "definition": "ic price: phase wall ns / ns of one batched add_many over 1,024 subgroup points, measured before and after each repetition; / sqrt(r).",
+    "deterministic": "no: a host-timed unit",
+    "id": "crypto.S.price_batched_add",
+    "of": "operations",
+    "source": "src/bin/ic/price.rs"
+   },
+   {
+    "binds": [
+     "binary_sha256",
+     "valgrind_version",
+     "cpu_features"
+    ],
+    "definition": "callgrind instructions retired / (targets * sqrt(r)), RAYON_NUM_THREADS=1.",
+    "deterministic": "yes for a fixed binary, valgrind version and CPU feature dispatch",
+    "id": "crypto.S.callgrind_ir",
+    "of": "instructions",
+    "source": "scripts/ic_e2e_instructions.py"
+   },
+   {
+    "binds": [
+     "calibration_id"
+    ],
+    "definition": "experiments/ic-bench: exact counters weighted by frozen per-class batch-throughput weights (reference picoseconds). Runs under different calibration_id are never paired.",
+    "deterministic": "yes",
+    "id": "cryptanalysis.rps",
+    "of": "priced operations",
+    "source": "cryptanalysis experiments/ic-bench/calibration.json"
+   },
+   {
+    "binds": [],
+    "definition": "group additions and doublings, counted exactly; no conversion.",
+    "deterministic": "yes",
+    "id": "count.group_additions",
+    "of": "operations",
+    "source": "any adapter that counts them"
+   },
+   {
+    "binds": [],
+    "definition": "crypto-autoresearcher index_calculus: S3 root solves (one modular square root each).",
+    "deterministic": "yes",
+    "id": "count.s3_solves",
+    "of": "operations",
+    "source": "crypto-autoresearcher src/crypto_autoresearcher/index_calculus"
+   },
+   {
+    "binds": [
+     "solver_name",
+     "solver_version",
+     "solver_options_sha256"
+    ],
+    "definition": "CDCL conflicts. Comparable only for the same solver, version and search options (WDSat XG on/off changes conflicts by two orders of magnitude).",
+    "deterministic": "yes for fixed solver, options and seed",
+    "id": "count.solver_conflicts",
+    "of": "solver events",
+    "source": "regression suite wdsat_conflicts_v1; ic_framework sat-cdcl"
+   },
+   {
+    "binds": [
+     "env_class_id",
+     "isolation_level",
+     "pinned_cpu_count"
+    ],
+    "definition": "monotonic wall-clock nanoseconds of the declared window.",
+    "deterministic": "no",
+    "id": "time.wall_ns",
+    "of": "time",
+    "source": "ICMS runner or the producer's exclusive clocks"
+   },
+   {
+    "binds": [
+     "env_class_id"
+    ],
+    "definition": "user+system CPU of the measured tree from wait4 rusage.",
+    "deterministic": "no",
+    "id": "time.cpu_ns",
+    "of": "time",
+    "source": "ICMS runner"
+   }
+  ],
+  "variants": {
+   "encodings": [
+    "none",
+    "expanded_semaev",
+    "symmetrized",
+    "chained_s3",
+    "riemann_roch",
+    "orbit_coordinates"
+   ],
+   "large_primes": [
+    "none",
+    "single",
+    "double"
+   ],
+   "partition_schemes": [
+    "disjoint_subspaces",
+    "nested_subspaces",
+    "per_summand",
+    "orbit_classes"
+   ],
+   "quotient": [
+    "negation",
+    "frobenius",
+    "automorphism",
+    "two_torsion",
+    "gls"
+   ],
+   "splitting": [
+    "none",
+    "chained_s3",
+    "balanced_resultant",
+    "mitm_table"
+   ]
+  },
+  "windows": [
+   {
+    "conformance": {
+     "derived": "the adapter assembled the interval from a producer's coarser phases; usable for operation counts, refused as a primary wall-clock speedup",
+     "exact": "the producer timed the five phases on exclusive clocks that sum to the online total (ic price --single-target, ic_measurement)"
+    },
+    "definition": "AGENTS.md 'Primary comparison uses one target' and cryptanalysis AGENTS.md: start when target-dependent computation begins, after reusable target-independent setup is ready; stop after scalar recovery and independent verification. Exactly one target. Process launch, input loading and known-answer target construction are outside.",
+    "name": "online_one_target",
+    "phases": [
+     "target_query",
+     "target_pdp",
+     "target_relation_check",
+     "target_descent",
+     "recovery_check"
+    ],
+    "primary": true
+   },
+   {
+    "definition": "AGENTS.md section 2: the whole method, cold, from setup to the recovered and verified logarithm, every phase charged. The unit S is defined over this window.",
+    "name": "cold_end_to_end",
+    "phases": [
+     "setup",
+     "isogeny",
+     "factor_base",
+     "precompute",
+     "queries",
+     "pdp",
+     "relation_check",
+     "matrix_build",
+     "relation_la",
+     "target_query",
+     "target_pdp",
+     "target_relation_check",
+     "target_descent",
+     "recovery_check"
+    ],
+    "primary": false
+   },
+   {
+    "definition": "The measured child process from exec to exit, timed by the ICMS runner itself. Always available; includes start-up, input loading and report emission. A practicality figure, never a speedup.",
+    "name": "whole_process",
+    "phases": null,
+    "primary": false
+   },
+   {
+    "definition": "One named phase or solver stage. A stage diagnostic (AGENTS.md section 2): never compared with a whole-pipeline window and never called a speedup.",
+    "name": "stage_only",
+    "phases": null,
+    "primary": false
+   }
+  ]
+ },
+ "schema": "icms.page/v1",
+ "sessions": [
+  {
+   "arms": [
+    {
+     "S_median": null,
+     "abscissae": 116,
+     "arm": 0,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 116,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 16-bit prime curve: 116 smallest abscissae, enumerate m=2 (autoresearcher)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 4882,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 165.106714,
+     "process_wall_ms_min": 140.492045,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1h2af445a54511",
+     "unit": "count.s3_solves",
+     "usable_points": 232,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 26.55993000007584,
+     "window_wall_ms_min": 20.644181000534445,
+     "workload_id": "W74fbf17035cb",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": null,
+     "abscissae": 116,
+     "arm": 1,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 116,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 16-bit prime curve: 116 smallest abscissae, mitm m=2 (autoresearcher)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 4882,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 167.195535,
+     "process_wall_ms_min": 140.535021,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1h0af7919f457d",
+     "unit": "count.s3_solves",
+     "usable_points": 232,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 26.399241999570222,
+     "window_wall_ms_min": 20.95381399976759,
+     "workload_id": "W74fbf17035cb",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": null,
+     "abscissae": 116,
+     "arm": 2,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 116,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 16-bit prime curve: 116 smallest abscissae, enumerate m=2 (autoresearcher)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 4882,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 159.330321,
+     "process_wall_ms_min": 140.836784,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1h2af445a54511",
+     "unit": "count.s3_solves",
+     "usable_points": 232,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 26.391347999378922,
+     "window_wall_ms_min": 20.421275999979116,
+     "workload_id": "W74fbf17035cb",
+     "xor_rows": null,
+     "xor_rows_total": null
+    }
+   ],
+   "capsule": [
+    [
+     "env_class_id",
+     "ENV1h7292c40d7f20"
+    ],
+    [
+     "CPU",
+     "Intel(R) Xeon(R) Processor @ 2.10GHz \u00b7 family 6 model 207 stepping 2 \u00b7 microcode 0x1 \u00b7 4 logical"
+    ],
+    [
+     "features",
+     "popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor"
+    ],
+    [
+     "kernel",
+     "6.18.44-fc-v50 \u00b7 clocksource tsc"
+    ],
+    [
+     "isolation flags",
+     "isolcpus='' nohz_full=None \u00b7 cmdline {\"mitigations\": \"auto,no_guest_host,no_guest_guest\", \"psi\": \"1\"}"
+    ],
+    [
+     "frequency",
+     "governors ['None'] \u00b7 no_turbo None \u00b7 boost None"
+    ],
+    [
+     "SMT",
+     "control notsupported \u00b7 active 0"
+    ],
+    [
+     "virtualisation",
+     "docker \u00b7 vm kvm \u00b7 container docker \u00b7 hypervisor flag True"
+    ],
+    [
+     "memory / THP",
+     "16480972 kB \u00b7 THP always [madvise] never"
+    ],
+    [
+     "sysctls",
+     "nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0"
+    ],
+    [
+     "toolchain",
+     "Python 3.11.15 \u00b7 rustc 1.94.1 (e408947bf 2026-03-25) \u00b7 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    [
+     "OS",
+     "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
+    ]
+   ],
+   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "comparisons": [
+    {
+     "a": {
+      "arm": 0,
+      "label": "random 16-bit prime curve: 116 smallest abscissae, enumerate m=2 (autoresearcher)",
+      "spec_id": "ICS1h2af445a54511"
+     },
+     "aa": false,
+     "aa_noise": [
+      {
+       "arms": [
+        0,
+        2
+       ],
+       "estimate": {
+        "ci95": [
+         0.7489977188173442,
+         1.2783916203164316
+        ],
+        "excludes_1": false,
+        "max_ratio": 1.2783916203164316,
+        "median_ratio": 1.0143942952508285,
+        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+        "min_ratio": 0.7489977188173442,
+        "n_pairs": 5
+       },
+       "spec_id": "ICS1h2af445a54511"
+      }
+     ],
+     "b": {
+      "arm": 1,
+      "label": "random 16-bit prime curve: 116 smallest abscissae, mitm m=2 (autoresearcher)",
+      "spec_id": "ICS1h0af7919f457d"
+     },
+     "declared_variables": [
+      {
+       "a": "enumerate",
+       "b": "mitm",
+       "field": "decomposition.method"
+      }
+     ],
+     "name": "mitm-vs-enumerate",
+     "ops": {
+      "a_median": 4882.0,
+      "a_spread": [
+       4882.0,
+       4882.0
+      ],
+      "admitted": true,
+      "b_median": 4882.0,
+      "b_spread": [
+       4882.0,
+       4882.0
+      ],
+      "completed": {
+       "a": "5/5",
+       "b": "5/5"
+      },
+      "deterministic": true,
+      "lower_bound": false,
+      "ratio_b_over_a": 1.0,
+      "speedup_a_over_b": 1.0,
+      "unit": "count.s3_solves",
+      "window": "cold_end_to_end"
+     },
+     "refusals": [],
+     "wall": {
+      "admitted": false,
+      "contended_runs": 3,
+      "estimate": {
+       "ci95": [
+        0.7003187624984129,
+        1.2797629995093192
+       ],
+       "excludes_1": false,
+       "max_ratio": 1.2797629995093192,
+       "median_ratio": 1.0983068102833062,
+       "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+       "min_ratio": 0.7003187624984129,
+       "n_pairs": 5
+      },
+      "pairs": 5,
+      "refusals": [
+       {
+        "blocking": [
+         "bare_metal",
+         "fixed_frequency",
+         "foreign_runnable",
+         "kernel_isolation",
+         "steal"
+        ],
+        "count": 3,
+        "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+       }
+      ],
+      "window": "cold_end_to_end"
+     }
+    }
+   ],
+   "dirty": false,
+   "env_class_id": "ENV1h7292c40d7f20",
+   "gates": {
+    "checks": {
+     "affinity_observed": {
+      "fail": 0,
+      "level": "L1",
+      "note": "child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them",
+      "pass": 15,
+      "unknown": 0
+     },
+     "bare_metal": {
+      "fail": 15,
+      "level": "L3",
+      "note": "a virtual CPU can be descheduled by its host without a trace inside the guest",
+      "pass": 0,
+      "unknown": 0
+     },
+     "excludes_cpu0": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU 0 takes most housekeeping interrupts",
+      "pass": 15,
+      "unknown": 0
+     },
+     "fixed_frequency": {
+      "fail": 0,
+      "level": "L3",
+      "note": "frequency scaling moves wall time between runs",
+      "pass": 0,
+      "unknown": 15
+     },
+     "foreign_runnable": {
+      "fail": 2,
+      "level": "L2",
+      "note": "sampler ticks with another runnable task on a pinned CPU (4 ticks)",
+      "pass": 13,
+      "unknown": 0
+     },
+     "involuntary_switches": {
+      "fail": 0,
+      "level": "L2",
+      "note": "preemptions of the child per second",
+      "pass": 15,
+      "unknown": 0
+     },
+     "kernel_isolation": {
+      "fail": 15,
+      "level": "L3",
+      "note": "pinned CPUs must be in isolcpus or nohz_full",
+      "pass": 0,
+      "unknown": 0
+     },
+     "memory_stall": {
+      "fail": 0,
+      "level": "L2",
+      "note": "memory PSI 'full' stall during the window",
+      "pass": 15,
+      "unknown": 0
+     },
+     "parallelism": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing",
+      "pass": 15,
+      "unknown": 0
+     },
+     "preflight_quiet": {
+      "fail": 0,
+      "level": "L2",
+      "note": "the machine was quiet before the session started, by a preflight no looser than the default",
+      "pass": 15,
+      "unknown": 0
+     },
+     "reservation": {
+      "fail": 0,
+      "level": "L1",
+      "note": "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user's, when not run as root), fails this check, so a session not run as root earns at most L0",
+      "pass": 15,
+      "unknown": 0
+     },
+     "run_delay": {
+      "fail": 0,
+      "level": "L2",
+      "note": "share of the child's runnable time spent waiting for a CPU",
+      "pass": 15,
+      "unknown": 0
+     },
+     "smt": {
+      "fail": 0,
+      "level": "L3",
+      "note": "an SMT sibling shares the core's execution units",
+      "pass": 15,
+      "unknown": 0
+     },
+     "steal": {
+      "fail": 2,
+      "level": "L2",
+      "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
+      "pass": 13,
+      "unknown": 0
+     }
+    },
+    "levels": {
+     "L1": 4,
+     "L2": 11
+    }
+   },
+   "label": "autoresearcher random 16-bit prime curve: enumerate vs mitm, A/A on enumerate",
+   "measured": 15,
+   "name": "2026-10-01-ar-p16-engine",
+   "preflight_quiet": true,
+   "records": 18,
+   "reservation": {
+    "cpus": [
+     2
+    ],
+    "evicted": true,
+    "left_on_reserved": {
+     "kernel_threads": 26,
+     "user_threads": []
+    },
+    "threads_moved": 55
+   },
+   "session_id": "ICSESS1h877de3c21e18"
+  },
+  {
+   "arms": [
+    {
+     "S_median": 814002231.1311067,
+     "abscissae": null,
+     "arm": 0,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 4,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 36430578687,
+     "points_per_column": 2.0,
+     "priced_by": "pinned",
+     "process_wall_ms_median": 499.575142,
+     "process_wall_ms_min": 410.57582,
+     "runs": 5,
+     "solver": "macaulay-xl",
+     "solver_conflicts": null,
+     "solver_op_unit": "mac_op (Macaulay word operations)",
+     "solver_ops": 55600379,
+     "spec_id": "ICS1h35585e581598",
+     "unit": "cryptanalysis.rps",
+     "usable_points": 8,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 275.079612,
+     "window_wall_ms_min": 214.829156,
+     "workload_id": "Wea67e76bfd9f",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": 753862679.8506343,
+     "abscissae": null,
+     "arm": 1,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 4,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): geomtrace subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 33739039805,
+     "points_per_column": 2.0,
+     "priced_by": "pinned",
+     "process_wall_ms_median": 478.922263,
+     "process_wall_ms_min": 401.279878,
+     "runs": 5,
+     "solver": "macaulay-xl",
+     "solver_conflicts": null,
+     "solver_op_unit": "mac_op (Macaulay word operations)",
+     "solver_ops": 54853330,
+     "spec_id": "ICS1h2a42530bb4bd",
+     "unit": "cryptanalysis.rps",
+     "usable_points": 8,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 217.936331,
+     "window_wall_ms_min": 188.590565,
+     "workload_id": "Wea67e76bfd9f",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": 814002231.1311067,
+     "abscissae": null,
+     "arm": 2,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 4,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 36430578687,
+     "points_per_column": 2.0,
+     "priced_by": "pinned",
+     "process_wall_ms_median": 503.224378,
+     "process_wall_ms_min": 399.748937,
+     "runs": 5,
+     "solver": "macaulay-xl",
+     "solver_conflicts": null,
+     "solver_op_unit": "mac_op (Macaulay word operations)",
+     "solver_ops": 55600379,
+     "spec_id": "ICS1h35585e581598",
+     "unit": "cryptanalysis.rps",
+     "usable_points": 8,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 276.459345,
+     "window_wall_ms_min": 210.676571,
+     "workload_id": "Wea67e76bfd9f",
+     "xor_rows": null,
+     "xor_rows_total": null
+    }
+   ],
+   "capsule": [
+    [
+     "env_class_id",
+     "ENV1h7292c40d7f20"
+    ],
+    [
+     "CPU",
+     "Intel(R) Xeon(R) Processor @ 2.10GHz \u00b7 family 6 model 207 stepping 2 \u00b7 microcode 0x1 \u00b7 4 logical"
+    ],
+    [
+     "features",
+     "popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor"
+    ],
+    [
+     "kernel",
+     "6.18.44-fc-v50 \u00b7 clocksource tsc"
+    ],
+    [
+     "isolation flags",
+     "isolcpus='' nohz_full=None \u00b7 cmdline {\"mitigations\": \"auto,no_guest_host,no_guest_guest\", \"psi\": \"1\"}"
+    ],
+    [
+     "frequency",
+     "governors ['None'] \u00b7 no_turbo None \u00b7 boost None"
+    ],
+    [
+     "SMT",
+     "control notsupported \u00b7 active 0"
+    ],
+    [
+     "virtualisation",
+     "docker \u00b7 vm kvm \u00b7 container docker \u00b7 hypervisor flag True"
+    ],
+    [
+     "memory / THP",
+     "16480972 kB \u00b7 THP always [madvise] never"
+    ],
+    [
+     "sysctls",
+     "nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0"
+    ],
+    [
+     "toolchain",
+     "Python 3.11.15 \u00b7 rustc 1.94.1 (e408947bf 2026-03-25) \u00b7 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    [
+     "OS",
+     "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
+    ]
+   ],
+   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "comparisons": [
+    {
+     "a": {
+      "arm": 0,
+      "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+      "spec_id": "ICS1h35585e581598"
+     },
+     "aa": false,
+     "aa_noise": [
+      {
+       "arms": [
+        0,
+        2
+       ],
+       "estimate": {
+        "ci95": [
+         0.7963003430561406,
+         1.2941558454011708
+        ],
+        "excludes_1": false,
+        "max_ratio": 1.2941558454011708,
+        "median_ratio": 1.0050157588560216,
+        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+        "min_ratio": 0.7963003430561406,
+        "n_pairs": 5
+       },
+       "spec_id": "ICS1h35585e581598"
+      }
+     ],
+     "b": {
+      "arm": 1,
+      "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): geomtrace subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+      "spec_id": "ICS1h2a42530bb4bd"
+     },
+     "declared_variables": [
+      {
+       "a": "prefix",
+       "b": "geomtrace",
+       "field": "factor_base.params.basis_law"
+      }
+     ],
+     "name": "geomtrace-vs-prefix",
+     "ops": {
+      "a_median": 36430578687.0,
+      "a_spread": [
+       36430578687.0,
+       36430578687.0
+      ],
+      "admitted": true,
+      "b_median": 33739039805.0,
+      "b_spread": [
+       33739039805.0,
+       33739039805.0
+      ],
+      "completed": {
+       "a": "5/5",
+       "b": "5/5"
+      },
+      "deterministic": true,
+      "lower_bound": false,
+      "ratio_b_over_a": 0.9261186898752048,
+      "speedup_a_over_b": 1.0797752069281215,
+      "unit": "cryptanalysis.rps",
+      "window": "cold_end_to_end"
+     },
+     "refusals": [],
+     "wall": {
+      "admitted": false,
+      "contended_runs": 6,
+      "estimate": {
+       "ci95": [
+        0.6855853970013598,
+        1.2214763949452
+       ],
+       "excludes_1": false,
+       "max_ratio": 1.2214763949452,
+       "median_ratio": 0.7765308314742487,
+       "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+       "min_ratio": 0.6855853970013598,
+       "n_pairs": 5
+      },
+      "pairs": 5,
+      "refusals": [
+       {
+        "blocking": [
+         "bare_metal",
+         "fixed_frequency",
+         "involuntary_switches",
+         "kernel_isolation",
+         "steal"
+        ],
+        "count": 6,
+        "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+       }
+      ],
+      "window": "cold_end_to_end"
+     }
+    }
+   ],
+   "dirty": false,
+   "env_class_id": "ENV1h7292c40d7f20",
+   "gates": {
+    "checks": {
+     "affinity_observed": {
+      "fail": 0,
+      "level": "L1",
+      "note": "child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them",
+      "pass": 15,
+      "unknown": 0
+     },
+     "bare_metal": {
+      "fail": 15,
+      "level": "L3",
+      "note": "a virtual CPU can be descheduled by its host without a trace inside the guest",
+      "pass": 0,
+      "unknown": 0
+     },
+     "excludes_cpu0": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU 0 takes most housekeeping interrupts",
+      "pass": 15,
+      "unknown": 0
+     },
+     "fixed_frequency": {
+      "fail": 0,
+      "level": "L3",
+      "note": "frequency scaling moves wall time between runs",
+      "pass": 0,
+      "unknown": 15
+     },
+     "foreign_runnable": {
+      "fail": 0,
+      "level": "L2",
+      "note": "sampler ticks with another runnable task on a pinned CPU (10 ticks)",
+      "pass": 15,
+      "unknown": 0
+     },
+     "involuntary_switches": {
+      "fail": 1,
+      "level": "L2",
+      "note": "preemptions of the child per second",
+      "pass": 14,
+      "unknown": 0
+     },
+     "kernel_isolation": {
+      "fail": 15,
+      "level": "L3",
+      "note": "pinned CPUs must be in isolcpus or nohz_full",
+      "pass": 0,
+      "unknown": 0
+     },
+     "memory_stall": {
+      "fail": 0,
+      "level": "L2",
+      "note": "memory PSI 'full' stall during the window",
+      "pass": 15,
+      "unknown": 0
+     },
+     "parallelism": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing",
+      "pass": 15,
+      "unknown": 0
+     },
+     "preflight_quiet": {
+      "fail": 0,
+      "level": "L2",
+      "note": "the machine was quiet before the session started, by a preflight no looser than the default",
+      "pass": 15,
+      "unknown": 0
+     },
+     "reservation": {
+      "fail": 0,
+      "level": "L1",
+      "note": "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user's, when not run as root), fails this check, so a session not run as root earns at most L0",
+      "pass": 15,
+      "unknown": 0
+     },
+     "run_delay": {
+      "fail": 0,
+      "level": "L2",
+      "note": "share of the child's runnable time spent waiting for a CPU",
+      "pass": 15,
+      "unknown": 0
+     },
+     "smt": {
+      "fail": 0,
+      "level": "L3",
+      "note": "an SMT sibling shares the core's execution units",
+      "pass": 15,
+      "unknown": 0
+     },
+     "steal": {
+      "fail": 8,
+      "level": "L2",
+      "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
+      "pass": 7,
+      "unknown": 0
+     }
+    },
+    "levels": {
+     "L1": 8,
+     "L2": 7
+    }
+   },
+   "label": "icv1-f2m13-t181-515ee569 (cryptanalysis): prefix vs geomtrace basis, A/A on prefix",
+   "measured": 15,
+   "name": "2026-10-01-ca-k0n13-basis-law",
+   "preflight_quiet": true,
+   "records": 18,
+   "reservation": {
+    "cpus": [
+     2
+    ],
+    "evicted": true,
+    "left_on_reserved": {
+     "kernel_threads": 26,
+     "user_threads": []
+    },
+    "threads_moved": 55
+   },
+   "session_id": "ICSESS1h15335a0ef66b"
+  },
+  {
+   "arms": [
+    {
+     "S_median": 1031.5517165605984,
+     "abscissae": 31,
+     "arm": 0,
+     "cnf_clauses": 108,
+     "cnf_clauses_total": 128628,
+     "columns": 31,
+     "complete": 5,
+     "deterministic": false,
+     "empty": false,
+     "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl native parity",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": 17,
+     "n_vars": 12,
+     "ops_distinct": 5,
+     "ops_median": 264179.9716786549,
+     "points_per_column": 2.0,
+     "priced_by": "measured",
+     "process_wall_ms_median": 189.762617,
+     "process_wall_ms_min": 176.299487,
+     "runs": 5,
+     "solver": "sat-cdcl",
+     "solver_conflicts": 2299,
+     "solver_op_unit": "conflicts",
+     "solver_ops": 2299,
+     "spec_id": "ICS1h24cd9a6da726",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 76.278558,
+     "window_wall_ms_min": 71.008593,
+     "workload_id": "W6ae0480b51c6",
+     "xor_rows": null,
+     "xor_rows_total": 20243
+    },
+    {
+     "S_median": 555852.0042600067,
+     "abscissae": 31,
+     "arm": 1,
+     "cnf_clauses": null,
+     "cnf_clauses_total": 2520389,
+     "columns": 31,
+     "complete": 5,
+     "deterministic": false,
+     "empty": false,
+     "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl cnf parity",
+     "levels": [
+      "L1"
+     ],
+     "lower_bound": false,
+     "n_equations": 17,
+     "n_vars": 12,
+     "ops_distinct": 5,
+     "ops_median": 142353470.39365402,
+     "points_per_column": 2.0,
+     "priced_by": "measured",
+     "process_wall_ms_median": 27019.363573,
+     "process_wall_ms_min": 25927.838612,
+     "runs": 5,
+     "solver": "sat-cdcl",
+     "solver_conflicts": 1328807,
+     "solver_op_unit": "conflicts",
+     "solver_ops": 1328807,
+     "spec_id": "ICS1hb99fc3ab702d",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 26918.331804,
+     "window_wall_ms_min": 25822.817718,
+     "workload_id": "W6ae0480b51c6",
+     "xor_rows": 0,
+     "xor_rows_total": 0
+    },
+    {
+     "S_median": 1032.2712824269618,
+     "abscissae": 31,
+     "arm": 2,
+     "cnf_clauses": 108,
+     "cnf_clauses_total": 128628,
+     "columns": 31,
+     "complete": 5,
+     "deterministic": false,
+     "empty": false,
+     "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl native parity",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": 17,
+     "n_vars": 12,
+     "ops_distinct": 5,
+     "ops_median": 264364.2522020111,
+     "points_per_column": 2.0,
+     "priced_by": "measured",
+     "process_wall_ms_median": 178.891024,
+     "process_wall_ms_min": 176.969185,
+     "runs": 5,
+     "solver": "sat-cdcl",
+     "solver_conflicts": 2299,
+     "solver_op_unit": "conflicts",
+     "solver_ops": 2299,
+     "spec_id": "ICS1h24cd9a6da726",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 75.851069,
+     "window_wall_ms_min": 72.772718,
+     "workload_id": "W6ae0480b51c6",
+     "xor_rows": null,
+     "xor_rows_total": 20243
+    }
+   ],
+   "capsule": [
+    [
+     "env_class_id",
+     "ENV1h7292c40d7f20"
+    ],
+    [
+     "CPU",
+     "Intel(R) Xeon(R) Processor @ 2.10GHz \u00b7 family 6 model 207 stepping 2 \u00b7 microcode 0x1 \u00b7 4 logical"
+    ],
+    [
+     "features",
+     "popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor"
+    ],
+    [
+     "kernel",
+     "6.18.44-fc-v50 \u00b7 clocksource tsc"
+    ],
+    [
+     "isolation flags",
+     "isolcpus='' nohz_full=None \u00b7 cmdline {\"mitigations\": \"auto,no_guest_host,no_guest_guest\", \"psi\": \"1\"}"
+    ],
+    [
+     "frequency",
+     "governors ['None'] \u00b7 no_turbo None \u00b7 boost None"
+    ],
+    [
+     "SMT",
+     "control notsupported \u00b7 active 0"
+    ],
+    [
+     "virtualisation",
+     "docker \u00b7 vm kvm \u00b7 container docker \u00b7 hypervisor flag True"
+    ],
+    [
+     "memory / THP",
+     "16480972 kB \u00b7 THP always [madvise] never"
+    ],
+    [
+     "sysctls",
+     "nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0"
+    ],
+    [
+     "toolchain",
+     "Python 3.11.15 \u00b7 rustc 1.94.1 (e408947bf 2026-03-25) \u00b7 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    [
+     "OS",
+     "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
+    ]
+   ],
+   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "comparisons": [
+    {
+     "a": {
+      "arm": 0,
+      "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl native parity",
+      "spec_id": "ICS1h24cd9a6da726"
+     },
+     "aa": false,
+     "aa_noise": [
+      {
+       "arms": [
+        0,
+        2
+       ],
+       "estimate": {
+        "ci95": [
+         0.9511950925923289,
+         1.0862759850281603
+        ],
+        "excludes_1": false,
+        "max_ratio": 1.0862759850281603,
+        "median_ratio": 0.9943956858754461,
+        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+        "min_ratio": 0.9511950925923289,
+        "n_pairs": 5
+       },
+       "spec_id": "ICS1h24cd9a6da726"
+      }
+     ],
+     "b": {
+      "arm": 1,
+      "label": "icv1-f2m17-tm101-00378d4e (K_1, n = 17): binary subspace dim 6, algebraic m=2, sat-cdcl cnf parity",
+      "spec_id": "ICS1hb99fc3ab702d"
+     },
+     "declared_variables": [
+      {
+       "a": "native",
+       "b": "cnf",
+       "field": "decomposition.solver.options.sat_xor_encoding"
+      }
+     ],
+     "name": "cnf-vs-native",
+     "ops": {
+      "a_median": 264179.9716786549,
+      "a_spread": [
+       258066.31167753154,
+       360655.6925827622
+      ],
+      "admitted": true,
+      "b_median": 142353470.39365402,
+      "b_spread": [
+       130178801.61295423,
+       153269658.57792887
+      ],
+      "completed": {
+       "a": "5/5",
+       "b": "5/5"
+      },
+      "deterministic": false,
+      "label": "host-dependent: some cost in this unit was priced from wall time on this host (see units.<unit>.host_dependent_because); valid on this env_class only",
+      "lower_bound": false,
+      "ratio_b_over_a": 538.8503507253416,
+      "speedup_a_over_b": 0.0018558028191944366,
+      "unit": "crypto.S.gae_pinned",
+      "window": "cold_end_to_end"
+     },
+     "refusals": [],
+     "wall": {
+      "admitted": false,
+      "contended_runs": 7,
+      "estimate": {
+       "ci95": [
+        259.2423092279874,
+        363.6576451810558
+       ],
+       "excludes_1": true,
+       "max_ratio": 363.6576451810558,
+       "median_ratio": 351.58922285011926,
+       "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+       "min_ratio": 259.2423092279874,
+       "n_pairs": 5
+      },
+      "pairs": 5,
+      "refusals": [
+       {
+        "blocking": [
+         "bare_metal",
+         "fixed_frequency",
+         "foreign_runnable",
+         "kernel_isolation",
+         "steal"
+        ],
+        "count": 7,
+        "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+       }
+      ],
+      "window": "cold_end_to_end"
+     }
+    }
+   ],
+   "dirty": false,
+   "env_class_id": "ENV1h7292c40d7f20",
+   "gates": {
+    "checks": {
+     "affinity_observed": {
+      "fail": 0,
+      "level": "L1",
+      "note": "child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them",
+      "pass": 15,
+      "unknown": 0
+     },
+     "bare_metal": {
+      "fail": 15,
+      "level": "L3",
+      "note": "a virtual CPU can be descheduled by its host without a trace inside the guest",
+      "pass": 0,
+      "unknown": 0
+     },
+     "excludes_cpu0": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU 0 takes most housekeeping interrupts",
+      "pass": 15,
+      "unknown": 0
+     },
+     "fixed_frequency": {
+      "fail": 0,
+      "level": "L3",
+      "note": "frequency scaling moves wall time between runs",
+      "pass": 0,
+      "unknown": 15
+     },
+     "foreign_runnable": {
+      "fail": 3,
+      "level": "L2",
+      "note": "sampler ticks with another runnable task on a pinned CPU (4 ticks)",
+      "pass": 12,
+      "unknown": 0
+     },
+     "involuntary_switches": {
+      "fail": 0,
+      "level": "L2",
+      "note": "preemptions of the child per second",
+      "pass": 15,
+      "unknown": 0
+     },
+     "kernel_isolation": {
+      "fail": 15,
+      "level": "L3",
+      "note": "pinned CPUs must be in isolcpus or nohz_full",
+      "pass": 0,
+      "unknown": 0
+     },
+     "memory_stall": {
+      "fail": 0,
+      "level": "L2",
+      "note": "memory PSI 'full' stall during the window",
+      "pass": 15,
+      "unknown": 0
+     },
+     "parallelism": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing",
+      "pass": 15,
+      "unknown": 0
+     },
+     "preflight_quiet": {
+      "fail": 0,
+      "level": "L2",
+      "note": "the machine was quiet before the session started, by a preflight no looser than the default",
+      "pass": 15,
+      "unknown": 0
+     },
+     "reservation": {
+      "fail": 0,
+      "level": "L1",
+      "note": "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user's, when not run as root), fails this check, so a session not run as root earns at most L0",
+      "pass": 15,
+      "unknown": 0
+     },
+     "run_delay": {
+      "fail": 0,
+      "level": "L2",
+      "note": "share of the child's runnable time spent waiting for a CPU",
+      "pass": 15,
+      "unknown": 0
+     },
+     "smt": {
+      "fail": 0,
+      "level": "L3",
+      "note": "an SMT sibling shares the core's execution units",
+      "pass": 15,
+      "unknown": 0
+     },
+     "steal": {
+      "fail": 9,
+      "level": "L2",
+      "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
+      "pass": 6,
+      "unknown": 0
+     }
+    },
+    "levels": {
+     "L1": 9,
+     "L2": 6
+    }
+   },
+   "label": "icv1-f2m17-tm101-00378d4e SAT: native XOR rows vs CNF parity, A/A on native",
+   "measured": 15,
+   "name": "2026-10-01-k17-sat-xor-encoding",
+   "preflight_quiet": true,
+   "records": 18,
+   "reservation": {
+    "cpus": [
+     2
+    ],
+    "evicted": true,
+    "left_on_reserved": {
+     "kernel_threads": 26,
+     "user_threads": []
+    },
+    "threads_moved": 51
+   },
+   "session_id": "ICSESS1h841388daf858"
+  },
+  {
+   "arms": [
+    {
+     "S_median": 16.43763548406973,
+     "abscissae": 53,
+     "arm": 0,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 53,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 7, mitm m=2",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 33674.705889000004,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 178.124312,
+     "process_wall_ms_min": 168.645506,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1hed02326d5f07",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 8.969465,
+     "window_wall_ms_min": 8.778373,
+     "workload_id": "We613e07c6011",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": 21.271743322810654,
+     "abscissae": 118,
+     "arm": 1,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 118,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 8, mitm m=2",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 43578.025613000005,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 183.120916,
+     "process_wall_ms_min": 143.973267,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1ha72661fe5986",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 10.916458,
+     "window_wall_ms_min": 8.558485,
+     "workload_id": "We613e07c6011",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": 16.43763548406973,
+     "abscissae": 53,
+     "arm": 2,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 53,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 7, mitm m=2",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 33674.705889000004,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 176.724592,
+     "process_wall_ms_min": 160.969715,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1hed02326d5f07",
+     "unit": "crypto.S.gae_pinned",
+     "usable_points": null,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 8.905228,
+     "window_wall_ms_min": 8.788755,
+     "workload_id": "We613e07c6011",
+     "xor_rows": null,
+     "xor_rows_total": null
+    }
+   ],
+   "capsule": [
+    [
+     "env_class_id",
+     "ENV1h7292c40d7f20"
+    ],
+    [
+     "CPU",
+     "Intel(R) Xeon(R) Processor @ 2.10GHz \u00b7 family 6 model 207 stepping 2 \u00b7 microcode 0x1 \u00b7 4 logical"
+    ],
+    [
+     "features",
+     "popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor"
+    ],
+    [
+     "kernel",
+     "6.18.44-fc-v50 \u00b7 clocksource tsc"
+    ],
+    [
+     "isolation flags",
+     "isolcpus='' nohz_full=None \u00b7 cmdline {\"mitigations\": \"auto,no_guest_host,no_guest_guest\", \"psi\": \"1\"}"
+    ],
+    [
+     "frequency",
+     "governors ['None'] \u00b7 no_turbo None \u00b7 boost None"
+    ],
+    [
+     "SMT",
+     "control notsupported \u00b7 active 0"
+    ],
+    [
+     "virtualisation",
+     "docker \u00b7 vm kvm \u00b7 container docker \u00b7 hypervisor flag True"
+    ],
+    [
+     "memory / THP",
+     "16480972 kB \u00b7 THP always [madvise] never"
+    ],
+    [
+     "sysctls",
+     "nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0"
+    ],
+    [
+     "toolchain",
+     "Python 3.11.15 \u00b7 rustc 1.94.1 (e408947bf 2026-03-25) \u00b7 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    [
+     "OS",
+     "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
+    ]
+   ],
+   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "comparisons": [
+    {
+     "a": {
+      "arm": 0,
+      "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 7, mitm m=2",
+      "spec_id": "ICS1hed02326d5f07"
+     },
+     "aa": false,
+     "aa_noise": [
+      {
+       "arms": [
+        0,
+        2
+       ],
+       "estimate": {
+        "ci95": [
+         0.938070339682114,
+         1.3595573769488865
+        ],
+        "excludes_1": false,
+        "max_ratio": 1.3595573769488865,
+        "median_ratio": 1.001182679296038,
+        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+        "min_ratio": 0.938070339682114,
+        "n_pairs": 5
+       },
+       "spec_id": "ICS1hed02326d5f07"
+      }
+     ],
+     "b": {
+      "arm": 1,
+      "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 8, mitm m=2",
+      "spec_id": "ICS1ha72661fe5986"
+     },
+     "declared_variables": [
+      {
+       "a": 7,
+       "b": 8,
+       "field": "factor_base.params.dimension"
+      }
+     ],
+     "name": "d8-vs-d7",
+     "ops": {
+      "a_median": 33674.705889000004,
+      "a_spread": [
+       33674.705889000004,
+       33674.705889000004
+      ],
+      "admitted": true,
+      "b_median": 43578.025613000005,
+      "b_spread": [
+       43578.025613000005,
+       43578.025613000005
+      ],
+      "completed": {
+       "a": "5/5",
+       "b": "5/5"
+      },
+      "deterministic": true,
+      "lower_bound": false,
+      "ratio_b_over_a": 1.2940877867395113,
+      "speedup_a_over_b": 0.7727451029574482,
+      "unit": "crypto.S.gae_pinned",
+      "window": "cold_end_to_end"
+     },
+     "refusals": [],
+     "wall": {
+      "admitted": false,
+      "contended_runs": 4,
+      "estimate": {
+       "ci95": [
+        0.9608777195772512,
+        1.245911514582486
+       ],
+       "excludes_1": false,
+       "max_ratio": 1.245911514582486,
+       "median_ratio": 1.191608195137614,
+       "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+       "min_ratio": 0.9608777195772512,
+       "n_pairs": 5
+      },
+      "pairs": 5,
+      "refusals": [
+       {
+        "blocking": [
+         "bare_metal",
+         "fixed_frequency",
+         "foreign_runnable",
+         "kernel_isolation",
+         "steal"
+        ],
+        "count": 4,
+        "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+       }
+      ],
+      "window": "cold_end_to_end"
+     }
+    }
+   ],
+   "dirty": false,
+   "env_class_id": "ENV1h7292c40d7f20",
+   "gates": {
+    "checks": {
+     "affinity_observed": {
+      "fail": 0,
+      "level": "L1",
+      "note": "child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them",
+      "pass": 15,
+      "unknown": 0
+     },
+     "bare_metal": {
+      "fail": 15,
+      "level": "L3",
+      "note": "a virtual CPU can be descheduled by its host without a trace inside the guest",
+      "pass": 0,
+      "unknown": 0
+     },
+     "excludes_cpu0": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU 0 takes most housekeeping interrupts",
+      "pass": 15,
+      "unknown": 0
+     },
+     "fixed_frequency": {
+      "fail": 0,
+      "level": "L3",
+      "note": "frequency scaling moves wall time between runs",
+      "pass": 0,
+      "unknown": 15
+     },
+     "foreign_runnable": {
+      "fail": 1,
+      "level": "L2",
+      "note": "sampler ticks with another runnable task on a pinned CPU (4 ticks)",
+      "pass": 14,
+      "unknown": 0
+     },
+     "involuntary_switches": {
+      "fail": 0,
+      "level": "L2",
+      "note": "preemptions of the child per second",
+      "pass": 15,
+      "unknown": 0
+     },
+     "kernel_isolation": {
+      "fail": 15,
+      "level": "L3",
+      "note": "pinned CPUs must be in isolcpus or nohz_full",
+      "pass": 0,
+      "unknown": 0
+     },
+     "memory_stall": {
+      "fail": 0,
+      "level": "L2",
+      "note": "memory PSI 'full' stall during the window",
+      "pass": 15,
+      "unknown": 0
+     },
+     "parallelism": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing",
+      "pass": 15,
+      "unknown": 0
+     },
+     "preflight_quiet": {
+      "fail": 0,
+      "level": "L2",
+      "note": "the machine was quiet before the session started, by a preflight no looser than the default",
+      "pass": 15,
+      "unknown": 0
+     },
+     "reservation": {
+      "fail": 0,
+      "level": "L1",
+      "note": "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user's, when not run as root), fails this check, so a session not run as root earns at most L0",
+      "pass": 15,
+      "unknown": 0
+     },
+     "run_delay": {
+      "fail": 0,
+      "level": "L2",
+      "note": "share of the child's runnable time spent waiting for a CPU",
+      "pass": 15,
+      "unknown": 0
+     },
+     "smt": {
+      "fail": 0,
+      "level": "L3",
+      "note": "an SMT sibling shares the core's execution units",
+      "pass": 15,
+      "unknown": 0
+     },
+     "steal": {
+      "fail": 5,
+      "level": "L2",
+      "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
+      "pass": 10,
+      "unknown": 0
+     }
+    },
+    "levels": {
+     "L1": 6,
+     "L2": 9
+    }
+   },
+   "label": "icv1-f2m23-tm5197-1f85e9e1: subspace dimension 7 vs 8, A/A on 7",
+   "measured": 15,
+   "name": "2026-10-01-k23-subspace-dimension",
+   "preflight_quiet": true,
+   "records": 18,
+   "reservation": {
+    "cpus": [
+     2
+    ],
+    "evicted": true,
+    "left_on_reserved": {
+     "kernel_threads": 26,
+     "user_threads": []
+    },
+    "threads_moved": 55
+   },
+   "session_id": "ICSESS1ha5372416ce40"
+  }
+ ],
+ "sources": {
+  "2026-10-01-ar-p16-engine/capsule.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/capsule.json",
+   "sha256": "a60b0b1addcb3bf37c136932f406bddec51b0099c6f04deee103d866bc623d9a"
+  },
+  "2026-10-01-ar-p16-engine/comparisons/mitm-vs-enumerate.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/comparisons/mitm-vs-enumerate.json",
+   "sha256": "fc41c4044191ebdb6565c0d12b80b49b3fea0804285d60aad0cfb658d3b183e5"
+  },
+  "2026-10-01-ar-p16-engine/records.jsonl": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/records.jsonl",
+   "sha256": "8154257d29f77aa3507dd273451a2dc05984a60d5a0f3df83bc4f03311e30fe9"
+  },
+  "2026-10-01-ar-p16-engine/session.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/session.json",
+   "sha256": "9af4d77a69cf063f9e6e8d92be424bf58a2f3b09817db6094a5df931827ccdc7"
+  },
+  "2026-10-01-ca-k0n13-basis-law/capsule.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/capsule.json",
+   "sha256": "a5c33d63e0972fdc486d3d576354a6071b53e548b57cbf26ad2769b3ab5698af"
+  },
+  "2026-10-01-ca-k0n13-basis-law/comparisons/geomtrace-vs-prefix.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/comparisons/geomtrace-vs-prefix.json",
+   "sha256": "3d5f16c8be7f423ce7c76bba9f655b77ba819213eabc9b3729a30b6f6d616272"
+  },
+  "2026-10-01-ca-k0n13-basis-law/records.jsonl": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/records.jsonl",
+   "sha256": "cf762f0a9a05f54c896cac821ab0ff8e81f4e44265a687084ac9ae04ffe06681"
+  },
+  "2026-10-01-ca-k0n13-basis-law/session.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/session.json",
+   "sha256": "2e75f814a5951f6ac757adc1625922cbee2b061bfd4c975064f5cf715cde4aaa"
+  },
+  "2026-10-01-k17-sat-xor-encoding/capsule.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/capsule.json",
+   "sha256": "2cfcf82c0b8cbfc8733c13e0ad32d1a4dbcb361c0c9bbca882a76df4bb5b80f5"
+  },
+  "2026-10-01-k17-sat-xor-encoding/comparisons/cnf-vs-native.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/comparisons/cnf-vs-native.json",
+   "sha256": "f260a66dafea8c09d53c41abb59a362968fec2c3092cfa7a7973ae11eba659ab"
+  },
+  "2026-10-01-k17-sat-xor-encoding/records.jsonl": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/records.jsonl",
+   "sha256": "45bb5b995817c91313021f94a131731042029dd23bcbeb315f860cdc877ee40c"
+  },
+  "2026-10-01-k17-sat-xor-encoding/session.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/session.json",
+   "sha256": "8c1360aebfb8efd1bb88f8ba307b4853d257f7f829d6e65bfa254becc6b19132"
+  },
+  "2026-10-01-k23-subspace-dimension/capsule.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/capsule.json",
+   "sha256": "ef25734e36782bc300ba6f61d4fddc9674cff86b7431b46e0aaf2151206d81b4"
+  },
+  "2026-10-01-k23-subspace-dimension/comparisons/d8-vs-d7.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/comparisons/d8-vs-d7.json",
+   "sha256": "116054b932114d22342b32f016183cae018e0f8d91f32f66720f5bc7bff572c1"
+  },
+  "2026-10-01-k23-subspace-dimension/records.jsonl": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/records.jsonl",
+   "sha256": "12039036d430d1ed883394cdb344c66d45128239357bccab8ffd0567cd9293c7"
+  },
+  "2026-10-01-k23-subspace-dimension/session.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/session.json",
+   "sha256": "9218a59f10ca58f679f272fa0128dc50d1be380cc6080d0263da27e453ef18a0"
+  },
+  "audit": {
+   "path": "docs/ic/measurement/audit.json",
+   "sha256": "617de8b19fb0706c091cc29a07d58f2eeb1c6a1deeb1a1a1614e00c236177b57"
+  },
+  "example spec": {
+   "path": "docs/ic/measurement/specs/k17-subspace-d6-sat-native.yaml",
+   "sha256": "ad6c2dc4175583405bb875f4d397f70d728162fa750886fbe22d79be2f17abd7"
+  },
+  "registry": {
+   "path": "docs/ic/measurement/registry.json",
+   "sha256": "d3e6254d3d2f992856705fcff8e5304fe8d8b183da68c8c10c4fecdf1e6c459a"
+  }
+ },
+ "what_this_is": "the ICMS v1 standard and its frozen demonstration sessions",
+ "what_this_is_not": [
+  "a speedup claim",
+  "a measurement of any curve beyond the toy instances named"
+ ]
+}

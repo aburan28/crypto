@@ -112,6 +112,8 @@ def arm_rows(s: dict) -> list[dict]:
             "columns": fb.get("columns"), "points_per_column": fb.get("points_per_column"),
             "n_vars": sysm.get("n_vars"), "n_equations": sysm.get("n_equations"),
             "cnf_clauses": sysm.get("cnf_clauses"), "xor_rows": sysm.get("xor_rows"),
+            "cnf_clauses_total": (sysm.get("native") or {}).get("cnf_clauses_total"),
+            "xor_rows_total": (sysm.get("native") or {}).get("xor_rows_total"),
             "solver": sol.get("name"), "solver_ops": sol.get("ops"), "solver_op_unit": sol.get("op_unit"),
             "priced_by": sol.get("priced_by"),
             "lower_bound": any(((r.get("units") or {}).get(unit) or {}).get("unpriced_counters") for r in rs),
@@ -251,6 +253,8 @@ code, .mono { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere
 .ratio { font-family: var(--mono); font-weight: 600; }
 .muted { color: var(--muted); }
 td.cfg { min-width: 240px; }
+td.fid { min-width: 160px; }
+td.fid code { overflow-wrap: normal; }
 .panel > pre { margin-inline: 20px; padding-inline: 14px; }
 pre { margin: 0; background: var(--sunk); border: 1px solid var(--rule); border-radius: 3px; padding: 12px 14px;
   overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.5; }
@@ -260,6 +264,14 @@ details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; co
 footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
 footer p { margin: 0; max-width: 90ch; overflow-wrap: anywhere; }
 """
+
+
+def per_sys(a: dict, key: str) -> str:
+    """The per-system count, or the run total marked as such when systems differ in size."""
+    if a.get(key) is not None:
+        return g3(a[key])
+    total = a.get(f"{key}_total")
+    return f'Σ {g3(total)}<br><span class="muted">run total</span>' if total is not None else "—"
 
 
 def chip(status: str) -> str:
@@ -370,8 +382,11 @@ def page(doc: dict) -> str:
                              + (f" ({e['where']})" if e.get("where") else ""), e["repo"])
                         if e["repo"] in REPO_URLS else esc(f"{e['repo']}: {e['path']}")) for e in f["evidence"])
         effect = f'<br><span class="muted">effect: {esc(f["effect"])}</span>' if f.get("effect") else ""
-        P.append(f'<tr><td><code>{esc(f["id"])}</code><br><code class="muted">{esc(f["dimension"])}</code></td>'
-                 f'<td>{esc(f["finding"])}{effect}<br><span class="muted">{ev}</span></td>'
+        v = f.get("verification") or {}
+        verdict = (f'<br><span class="muted">independent re-check: {esc(v["verdict"])}'
+                   + (f'; corrected: {esc(v["corrected"])}' if v.get("corrected") else "") + '</span>') if v else ""
+        P.append(f'<tr><td class="fid"><code>{esc(f["id"])}</code><br><code class="muted">{esc(f["dimension"])}</code></td>'
+                 f'<td>{esc(f["finding"])}{effect}{verdict}<br><span class="muted">{ev}</span></td>'
                  f'<td>{chip(f["severity"])}</td><td>{esc(f["icms"])}</td></tr>')
     P.append('</tbody></table></div></section>')
 
@@ -398,7 +413,7 @@ def page(doc: dict) -> str:
                  f'{s["measured"]} measured runs plus warm-ups, every one kept.</p>')
         P.append('<h3>Arms</h3><div class="scroll"><table><thead><tr><th class="n">arm</th><th>configuration</th>'
                  '<th class="n">runs ok</th><th>levels</th><th class="n">usable pts</th><th class="n">columns</th>'
-                 '<th class="n">vars / eqs</th><th class="n">clauses / XOR</th><th class="n">solver effort</th>'
+                 '<th class="n">vars / eqs</th><th class="n">clauses / XOR per system</th><th class="n">solver effort</th>'
                  '<th class="n">ops (unit)</th><th class="n">S</th>'
                  '<th class="n">window ms med / min</th></tr></thead><tbody>')
         for a in s["arms"]:
@@ -415,7 +430,7 @@ def page(doc: dict) -> str:
                      f'{esc(a["workload_id"])}</code>{("<br><span class=muted>solver " + esc(a["solver"]) + ", " + esc(a["priced_by"]) + "</span>") if a["solver"] else ""}</td>'
                      f'<td class="n">{a["complete"]}/{a["runs"]}</td><td>{" ".join(level_chip(lv) for lv in a["levels"])}</td>'
                      f'<td class="n">{g3(a["usable_points"])}</td><td class="n">{g3(a["columns"])}</td>'
-                     f'<td class="n">{g3(a["n_vars"])} / {g3(a["n_equations"])}</td><td class="n">{g3(a["cnf_clauses"])} / {g3(a["xor_rows"])}</td><td class="n">{effort}</td>'
+                     f'<td class="n">{g3(a["n_vars"])} / {g3(a["n_equations"])}</td><td class="n">{per_sys(a, "cnf_clauses")} / {per_sys(a, "xor_rows")}</td><td class="n">{effort}</td>'
                      f'<td class="n">{ops}<br><span class="muted">{esc(a["unit"])}</span>{det}</td><td class="n">{g3(a["S_median"])}</td>'
                      f'<td class="n">{g3(a["window_wall_ms_median"])} / {g3(a["window_wall_ms_min"])}</td></tr>')
         P.append('</tbody></table></div>')
