@@ -301,3 +301,28 @@ pinned file, changes.
    build on 2026-10-01. All 40 runs completed and replayed, and it found
    nothing. That was a development check, not B2b's measurement:
    measurement 6 runs on B2b's build.
+
+## Amendment 2 (2026-10-01, before any measurement)
+
+**Measurement 5, the timing check, runs in the chain of Track B steps.**
+- **What it was:** the base against B2b on `M1`'s 22 rows, five rounds
+  ABAB, 220 processes, for this step alone.
+- **What it is now:** one interleave over the newest accepted baseline
+  and every Track B step's arm, in the queue's order: the baseline, B0,
+  B1, B3, B2, B2b, B7a and B3b (`bround.py chain`). It runs on `M1`'s 22
+  rows, five rounds, isolated, and the order reverses every other
+  round.
+- **B2b's figure** is the paired cold-time ratio of the arm before it
+  in the chain over B2b's own, per size. It is read against R01's A/A
+  bands, as before.
+- **Why the chain is a valid base.** Each step's arm is built on the one
+  before, so the arm before B2b in the chain is its base. The two run
+  back to back in every round, with ten pairs a size, as in its own
+  ABAB.
+- **What it saves.** The seven steps' checks take 880 processes
+  together, against 1,540 one by one.
+- **If an earlier step is rejected,** the steps after it wait. The chain
+  runs again from that step, once it is fixed or removed, since the
+  later arms carry its change.
+- **Nothing else changes:** the acceptance rule, the A/A bands and the
+  other measurements.
