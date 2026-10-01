@@ -148,7 +148,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, dense exact-LCM Gebauer–Möller selection on bounded domains, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
             .into()
     }
 
