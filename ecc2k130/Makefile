@@ -39,6 +39,7 @@
 #                        (default 0; requires TABLE_PIPE_SELECT)
 #   TABLE_BATCH_HINTS  reconverge split-forward v3 cycle probes across slots
 #                      before building the prefix (default 0)
+#   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
 #                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)

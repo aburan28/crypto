@@ -344,6 +344,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
         printf("packed table split forward: %d\n", ECC_TABLE_SPLIT_FORWARD);
         printf("packed table batch hints: %d\n", ECC_TABLE_BATCH_HINTS);
+        printf("packed cycle fast2: %d\n", ECC_CYCLE_FAST2);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif
