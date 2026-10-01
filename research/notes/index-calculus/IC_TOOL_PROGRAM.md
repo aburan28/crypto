@@ -305,6 +305,11 @@ Paths below are to `src/cryptanalysis/koblitz_index_calculus.rs`
 - `ic search`'s validation child loses `--subfield`, `--curve-b` and
   `--wdsat-binary` (`experiment.rs:1201-1231`), so a subfield search
   fails its own curve check.
+- A report's `commit` is `git rev-parse HEAD`, run in the working
+  directory when the report is written (`src/bin/ic.rs:176-188`). A
+  binary run from another checkout therefore reports that checkout's
+  commit. The harness records the build commit beside it, as §23's host
+  manifest did, until B0 embeds it at build time.
 
 | id | step | done when |
 |:--|:--|:--|
