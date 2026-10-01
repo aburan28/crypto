@@ -1130,14 +1130,21 @@
         <li><b>Round 1 (v0)</b> pinned main against &sect;23, profiled every phase on the suite and measured
           the noise floor, all in isolated runs. The pin held on all 12 shared rows, so &sect;23&rsquo;s
           single-target figures are v0&rsquo;s.</li>
+        <li><b>Round 2 (rejected)</b> gave the AVX-512 batched addition the two fields whose polynomial has
+          <code>n + deg t = 66</code>. Collection ran 1.29&ndash;1.31&times; faster there and cold time
+          1.18&ndash;1.27&times;, with identical outputs. Its declared rule asked for a lower end above 1.10 on
+          the suite and on the holdouts separately, and the ten-pair holdout at 2<sup>44.5</sup> missed it.</li>
       </ul>
       <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>
-        for every figure here).</p>
+        and <code>rounds/R02-wide-tail-kernel/analysis.json</code> for every figure here).</p>
     </div>
     <div class="table-scroll"><table>
-      <caption>One row per baseline. S is cold, set-up plus online, in v0&rsquo;s unit, as a median over each
-        size&rsquo;s eight suite rows. The ratio to rho is &sect;23&rsquo;s cold ratio, index calculus over
-        rho on the same point.</caption>
+      <caption>One row per baseline, and one per rejected round below them. S is cold, set-up plus online, in
+        v0&rsquo;s unit, as a median over each size&rsquo;s eight suite rows. A rejected round&rsquo;s S is from
+        its own runs, with its base arm&rsquo;s S from the same runs beneath it: runs hours apart on this host
+        differ by several per cent, so its S is read against that, not against the row above. Its ratio over
+        the previous is the paired cold-time ratio, base over candidate. The ratio to rho is &sect;23&rsquo;s
+        cold ratio, index calculus over rho on the same point.</caption>
       <thead><tr><th scope="col">Baseline</th><th scope="col" class="n">2<sup>36.6</sup></th>
         <th scope="col" class="n">2<sup>38.0</sup></th><th scope="col" class="n">2<sup>39.0</sup></th>
         <th scope="col" class="n">2<sup>44.3</sup></th><th scope="col" class="n">2<sup>44.5</sup></th>
@@ -1147,13 +1154,16 @@
         <tr><td>v0 &middot; <code>46ae2014</code></td><td class="n">4.43</td><td class="n">7.65</td><td class="n">5.42</td>
           <td class="n">7.53</td><td class="n">8.77</td><td class="n">14.49</td><td class="n">&mdash;</td>
           <td class="n">4.9&ndash;31.6&times;</td></tr>
+        <tr><td>R02 candidate &middot; <code>a1645ac6</code><br><small>rejected, not a baseline</small> <span class="chip">engineering</span></td><td class="n">4.75<br><small>v0&prime; 4.61</small></td><td class="n">8.40<br><small>v0&prime; 8.08</small></td><td class="n">6.12<br><small>v0&prime; 5.97</small></td><td class="n">8.86<br><small>v0&prime; 8.77</small></td><td class="n">8.53<br><small>v0&prime; 9.91</small></td><td class="n">12.91<br><small>v0&prime; 16.07</small></td><td class="n">1.182&times; at 2<sup>44.5</sup>, 1.267&times; at 2<sup>47.2</sup><br><small>0.973&ndash;1.027&times; elsewhere</small></td><td class="n">&mdash;</td></tr>
       </tbody>
     </table></div>
     <div class="legend" style="padding-top:0">
       <span><b>Where the set-up goes.</b> The cold cost is the set-up, and the online interval is 0.1&ndash;2% of it. From 2<sup>32</sup> up, collection is the largest phase, at 41&ndash;89% of the set-up. The exception is 2<sup>38.0</sup>, where the curve&rsquo;s construction takes 45%. A scanned summand costs 1.36&ndash;1.49 units from 2<sup>36.6</sup> up, but 2.17&ndash;2.18 at the two sizes whose field polynomial has <code>n + deg t = 66</code>. The AVX-512 batched addition refuses those two fields, and round 2 tests whether that is the cause.</span>
       <span><b>The noise floor.</b> v0 against a byte-identical copy reads within &plusmn;4&ndash;11% in cold time at ten pairs per size. One interval excludes 1: 1.075 [1.005, 1.149] at 2<sup>39.0</sup>. A ratio inside the band is not a gain.</span>
       <span><b>Huge pages are not a lever</b> through glibc&rsquo;s tunable. Cold time reads 0.96&ndash;1.00&times; at the three largest sizes. Collection gains 5&ndash;12%, but the build loses up to 1.5&times; and system time rises 3&ndash;5&times;. This host&rsquo;s memory costs 44&ndash;70&nbsp;ns per random access from 2 to 32&nbsp;MiB and 221&nbsp;ns at 256&nbsp;MiB.</span>
-      <span><span class="chip">accounting</span> A baseline, not a change, so no candidate and no speedup. Round 2, the AVX-512 kernel for those two fields, is declared, with predictions of 1.37&times; at 2<sup>47.2</sup> and 1.31&times; at 2<sup>44.5</sup>.</span>
+      <span><b>Round 2, graded.</b> The control held: switching the AVX-512 scan kernels off made collection 1.89&times; slower per summand at 2<sup>44.3</sup>. Every output of both arms equals v0&rsquo;s on all 90 rows. At 2<sup>44.5</sup> the suite reads 1.182 [1.151, 1.213] and the holdouts 1.161 [1.089, 1.239]; at 2<sup>47.2</sup>, 1.267 [1.242, 1.292] and 1.262 [1.216, 1.310]. The predictions were 1.31&times; and 1.37&times;: a wide field&rsquo;s summand costs 1.90&ndash;1.95 units with the kernel, not the 1.6 assumed, and the build did not move. The nine other sizes read 0.973&ndash;1.027&times;, inside their A/A bands. The callgrind control failed too: under valgrind both arms take the portable paths, and the candidate&rsquo;s ran 0.1% fewer instructions, all in the compiler&rsquo;s code for two scan functions it does not change.</span>
+      <span><b>Runs hours apart differ.</b> v0 against v0&prime;, interleaved in R02&rsquo;s session, reads 0.97&ndash;1.07&times; in cold time: the renaming between them moved nothing. Yet v0&prime;&rsquo;s S in R02&rsquo;s runs sits 4&ndash;16% above v0&rsquo;s in R01&rsquo;s at the six sizes above, on the same host. Only the paired ratio compares across rounds; S between runs carries the host&rsquo;s drift.</span>
+      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, so v0 stays the newest baseline, and the kernel is kept on record as <code>candidate.patch</code>.</span>
     </div>
   </div>
 
