@@ -458,6 +458,29 @@ amendments (A1, A2), R2, results and raw outputs:
 [`RESEARCH_CACHEGRIND_N41_20260929.md`](../../research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md),
 [`cachegrind_n41_20260929_run/`](../../research/notes/index-calculus/cachegrind_n41_20260929_run/).
 
+**2026-09-30 ERRATUM to the selected-panel wall crossover at n = 53 (`vs_rho`,
+`end_to_end_dlp`; class `accounting`): the ratios 0.8392 (panel), 0.9056 (stage 106) and
+0.9875 (stage 107) must not be quoted as evidence that the direct arm beats rho.** Their
+rho is `koblitz_rho_fixture … packed`, which is not a distinguished-point rho
+(`distinguished_bits` 0: every step stored in and looked up from a hash map) and canonicalizes by an
+O(n) polynomial-basis scan. Against a strong single-target rho (the strong-ladder R3 run at
+one fixture, 32 walks sharing a distinguished-point table, explicit scalar 476811900269 so
+it attacks the panel's exact target), pre-registered, nine blocks on a 4-vCPU Xeon VM:
+direct 5.80 s wall / 14.82 core-s / 1.03 GB; panel rho 5.67 s / 5.60 core-s; **strong rho
+0.132 s / 0.130 core-s / 21 MB on ONE core**. Wall ratio direct/strong **44.0 (95 % interval
+39.4-45.4)**; CPU 114×; whole-process instructions 27.07 G (direct), 46.91 G (panel rho),
+1.093 G (strong rho), i.e. **25× and 43×**. Over 16 walk seeds the panel rho's median wall is
+7.74 s against the strong rho's 0.130 s (**59.5×, interval 33.5-127.2**); the strong rho's slowest
+walk (0.316 s) is still 18× faster than direct's median. Registered verdict: **the wall win
+DIES**; the panel's rho is a **strawman**. On this host direct is near parity with the panel
+rho (1.02), so the EPYC 9V74 0.839 did not reproduce (the ledger's own stage-107 EPYC 7763
+run was 0.987). Priority #3's "preserve the 0.8392x wall median" is withdrawn; the operative
+reference is the strong rho. The direct arm's completion criteria were met in every run, so
+this concerns the reference, not the relations. Not tested: n = 41 (the same rho family is the
+reference there), n = 61, other targets, other hosts. Protocol, results and raw outputs:
+[`RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md`](../../research/notes/index-calculus/RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md),
+[`single_target_rho_n53_20260930_run/`](../../research/notes/index-calculus/single_target_rho_n53_20260930_run/).
+
 **[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
 `vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
 signed-Frobenius canonicalization by real field squaring and inverts by
@@ -496,7 +519,7 @@ and
 
 1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The pending n = 61, L = 65,536 probe is deprioritised.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
-3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
+3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.** **[Constraint withdrawn by the 2026-09-30 erratum above: the 0.8392x wall median is against a rho 44-60x slower than a strong single-target rho; against the strong rho the direct arm is 44x slower in wall on four cores, so the operative gate is the strong rho, not that median.]**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
    at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
    with `solution_validation_ms`, 53% of the direct arm's charged cost.
