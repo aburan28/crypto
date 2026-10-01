@@ -193,3 +193,30 @@ six sizes, with 64 targets, on the candidate (384 processes).
 R02b runs after R03's decision and before B0. B0's base is then the
 newest accepted baseline after R02b. B0 touches neither `koblitz_fast.rs`
 nor `factorise_u64`, so it merges with both without interaction.
+
+## Amendment 1 (2026-10-01, before any R02b build or run): R05 runs first
+
+- **The order.** R02b runs after R05's decision, not after R03's. R05,
+  declared in the same pull request
+  ([`../R05-presence-filter/PROTOCOL.md`](../R05-presence-filter/PROTOCOL.md)),
+  tests a sharper presence filter on the same scan.
+- **Why.** R04's check after its run found the filter lever: the admitted
+  stage, 32–42% of the scan at the three largest sizes, is spent almost
+  entirely on false positives. An exploration measured the lever at
+  1.27–1.37× in cold time, against R02's 1.16–1.27× for this kernel.
+  Plan §11 sets the scan aside after two consecutive failed rounds on
+  it, so whichever of the two runs second would not run if the first
+  failed. The larger lever goes first.
+- **If R05 is rejected,** the scan has failed twice running (R02, R05). It
+  is set aside, and R02b does not run. This declaration stays on record,
+  unrun, and the kernel stays as R02 left it.
+- **If R05 is accepted,** R02b runs as declared, with R05's candidate as
+  its base. A rejection then retires the kernel, as declared, but is not
+  a second consecutive failure, so the scan stays open.
+- **The base and the patch do not interact.** R05's patch touches the
+  filter's code in `koblitz_index_calculus.rs`, `gpu/ecc2k/` and
+  `examples/load_fold_table.rs`. R02's touches only `koblitz_fast.rs`.
+- **Unchanged:** the hypothesis, the rows and holdouts, the callgrind
+  control, the prediction, the rule and the cost. On R05's base the
+  subtraction is a larger share of cold time, which if anything raises
+  the ratio R02b measures. The prediction stays as declared.
