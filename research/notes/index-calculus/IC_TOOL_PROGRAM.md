@@ -213,11 +213,16 @@ A Track B round may change no speed at all. It must then show:
 
 ## 7. The baseline ledger
 
-Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01).
+Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01),
+and R03 v1 (2026-10-01). A baseline's `S` comes from the round that made
+it, beside its base's `S` in the same runs: runs hours apart on this host
+differ by several per cent, so only a paired ratio compares across
+rounds.
 
 | baseline | commit | class | `S` cold at the six top sizes (v0 unit) | cold-time ratio over the previous [95%] | online / rho | cold / rho | C suite | largest `n` at F0 | PR |
 |:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
+| v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, R03 results |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
@@ -309,6 +314,22 @@ plus the probes) and run on `M1`'s 22 rows, three rounds, isolated.
   admitted stage is spent almost entirely on false positives, at
   118–159 ns an admitted key at the three largest sizes. A sharper
   filter is the next lever: R05, below.
+
+**R03 made v1 (2026-10-01).** `factorise_u64` now tests primality only
+when a division changes what is left, and skips even divisors after 2
+([results](../../ic_tool_program/rounds/R03-curve-construction/README.md)).
+- **At `2^38.0` the construction fell from 56.0 ms to 1.28 ms**, and the
+  cold time is 1.771 [1.694, 1.851] times faster on the suite and 1.922
+  [1.756, 2.104] on the holdouts. Every pinned output is v0's.
+- **At `2^24.8`, the other composite size, nothing moved** (1.007
+  [0.985, 1.030]). Its order's cofactor ends at 211, so the old loop
+  tested primality only about two hundred times; the prediction of 1.3×
+  had assumed `n = 57`'s profile.
+- **The prime sizes read 0.970–1.049,** every interval overlapping its
+  A/A band.
+- **The class is engineering:** the factors are identical, so the ratio
+  to the floor is flat. The construction's median is now 2.2 ms or less
+  at every suite size.
 
 **R05 tests a sharper presence filter, before R02b (declared
 2026-10-01).** Three bits a key in one 64-bit word, at eight to sixteen
