@@ -29,3 +29,17 @@ jobs:
             --out /tmp/ecc2k130-pdp-difficulty-input-check.json
           cmp /tmp/ecc2k130-pdp-difficulty-input-check.json \
             research/notes/ecc2k130/pdp_difficulty_features_20261001/INPUT_CHECK.json
+  outcome:
+    if: hashFiles('research/notes/ecc2k130/pdp_difficulty_features_20261001/OUTCOME.json') != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recompute the scored diagnostic without importing the producer
+        run: |
+          python3 research/notes/ecc2k130/pdp_difficulty_features_20261001/check_score.py \
+            --choice research/notes/ecc2k130/pdp_difficulty_features_20261001/TRAIN_CHOICE.json \
+            --outcome research/notes/ecc2k130/pdp_difficulty_features_20261001/OUTCOME.json
