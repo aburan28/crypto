@@ -1,0 +1,379 @@
+{
+ "suite": "ic tool programme conformance suite v2, B3's cases",
+ "design": "research/ic_tool_program/design/schema-v2.md §9-§10; research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md",
+ "includes": "../v1/cases.json (step B0) and ../v2/cases.json (B1), run first, with the until rule",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {b3} is this directory's params/; {cases} is still ../v2/params/.",
+  "The until rule: a case whose `until` step is at or before the step run through is not run; its successor carries the new expectation. B1's files are frozen, so the dated note for C027 is here: from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",
+  "Steps, in order: B0, B1, B2, B3, B3b, B4, B5, B6, B7. B3b is the index calculus on two-word fields, declared separately."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b3/make_cases.py",
+  "sha256": "af02712dd0cea2ad3744bb2ba6ac06131a6d118f0a477b729d4665b75eda5746"
+ },
+ "cases": [
+  {
+   "id": "C052-rho-alone-curve-a",
+   "step": "B3",
+   "checks": "B3's solve: rho on curve A, with C010's generator and known answer",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C010-curve-a-other-generator.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 7
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "operation": "rho_single_target",
+     "fidelity": "F0",
+     "result.scalar": "673310",
+     "result.verified": true,
+     "result.known_answer": true,
+     "rho.pipeline": "rho-koblitz"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C053-gate-rho-capped",
+   "step": "B3",
+   "checks": "B3's routing at n = 83: rho alone runs on the gate curve; a run stopped by its step cap reports no logarithm and exits 1",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761,
+        "max_iterations": 200000
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 1,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "not_recovered",
+     "result.verified": false,
+     "rho.step_cap": 200000,
+     "rho.counters.walk_operations": 200000,
+     "rho.pipeline": "rho-koblitz"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C054-gate-paired-has-no-ic-route",
+   "step": "B3",
+   "checks": "C027's successor from B3 (the until rule): rho-koblitz admits the gate curve, kic does not, so paired is refused for want of an index-calculus route",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "until": "B3b"
+  },
+  {
+   "id": "C055-challenge-past-two-words",
+   "step": "B3",
+   "checks": "B3's rho gate at n = 131: field-wider-than-two-words",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "field-wider-than-two-words"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "until": "B4"
+  },
+  {
+   "id": "C056-gate-rho-hashed-target",
+   "step": "B3",
+   "checks": "rho alone past one word takes a point or a known logarithm; v1's hashed target there waits for B4",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "target": {
+       "public_hash_seed": 1
+      },
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761,
+        "max_iterations": 1000
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "not-yet-supported",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 120,
+   "until": "B4"
+  },
+  {
+   "id": "C057-smoke-rho-alone-is-the-paired-rho",
+   "step": "B3",
+   "checks": "rho alone (the two-word walk) and the paired price's rho arm (ParallelRho) on the smoke row's translation: the same counts, operations, logarithm and certificate",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761
+       }
+      }
+     }
+    },
+    "paired.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/paired.json",
+      "--json",
+      "--out",
+      "{tmp}/paired-report.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/paired-report.json",
+     "paths": [
+      "rho_counts",
+      "certificates.rho.scalar",
+      "certificates.rho.target",
+      "certificates.rho.curve"
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C058-n61-rho-alone-is-the-paired-rho",
+   "step": "B3",
+   "checks": "C057 at n = 61, against the v1 row's single-target price",
+   "files": {
+    "params.json": {
+     "copy": "{b3}/C058-n61-rho-alone.json"
+    },
+    "v1.json": {
+     "copy": "{suite}/params/S/k0n61/M1-T01.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/v1.json",
+      "--json",
+      "--out",
+      "{tmp}/v1-report.json",
+      "--single-target",
+      "--rho-seed",
+      "2293761",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/v1-report.json",
+     "paths": [
+      "rho_counts",
+      "certificates.rho.scalar",
+      "certificates.rho.target",
+      "certificates.rho.curve"
+     ]
+    }
+   },
+   "timeout_s": 900
+  }
+ ]
+}
