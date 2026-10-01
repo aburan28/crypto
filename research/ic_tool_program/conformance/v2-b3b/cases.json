@@ -1,0 +1,446 @@
+{
+ "suite": "ic tool programme conformance suite v2, B3b's cases",
+ "design": "research/ic_tool_program/design/two-word-kic.md; research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md",
+ "includes": "../v1/cases.json (step B0), ../v2/cases.json (B1) and the later steps' sets, run first, with the until rule",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still ../v2/params/. ../run.py runs these after the earlier steps' cases.",
+  "The until rule: B3 marked C054 `until: B3b`. From B3b (declared DATE) C054 is retired and C083 succeeds it.",
+  "`--kic-wide` is B3b's test switch: it runs the two-word pipeline where the one-word pipeline would run. C084 and C085 compare the two through `same_outputs_as`.",
+  "params/C078-T001-n67.json to params/C082-T001-n83.json are no case's: they are B3b's measurement 5's public targets, frozen here with the cases' documents."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b3b/make_cases.py",
+  "sha256": "26dcb18e1d28bf97a2dcc311dc7ac725683d54b24af0bec121fd438c6c8e86aa"
+ },
+ "cases": [
+  {
+   "id": "C078-kic-two-word-n67",
+   "step": "B3b",
+   "checks": "B3b's kic at F0 on a two-word field: the smallest two-word instance",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C078-kic-two-word-n67.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "5869641",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-67-e7132a5d:-19346764963:147573952609023177892:0x1:-7:unk:r:82c84cca3f09",
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C079-kic-two-word-n67",
+   "step": "B3b",
+   "checks": "B3b's kic at F0 on a two-word field: a 36-bit subgroup at n = 67",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C079-kic-two-word-n67.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "58006821219",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-67-e7132a5d:19346764963:147573952570329647966:0x1:-7:unk:r:e760df38f47f",
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C080-kic-two-word-n79",
+   "step": "B3b",
+   "checks": "B3b's kic at F0 on a two-word field: n = 79, a 41-bit cofactor",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C080-kic-two-word-n79.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "12054342888",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-79-8ed8bb90:-420247971347:604462909807734835324436:0x1:-7:unk:r:2a24b8929cd7",
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C081-kic-two-word-n71",
+   "step": "B3b",
+   "checks": "B3b's kic at F0 on a two-word field: a 49-bit subgroup at n = 71",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C081-kic-two-word-n71.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "241152475375238",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-71-1a1d8f78:-48653080717:2361183241483475687566:0x1:-7:unk:r:f25c46384e84",
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C082-kic-two-word-n83",
+   "step": "B3b",
+   "checks": "B3b's kic at F0 on a two-word field: the gate's field under the gate's modulus, with K_1's 53-bit subgroup: not the gate's curve",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C082-kic-two-word-n83.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "3083473691507418",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-83-a1d5abfa:6151469093347:9671406556910881928556062:0x1:-7:unk:r:cdcc5432fa2b",
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C083-gate-paired-over-budget",
+   "step": "B3b",
+   "checks": "C054's successor from B3b: kic and rho-koblitz both admit the gate curve by width; F0's estimate exceeds the budget, so the paired price is refused as over budget",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 4,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "over-budget",
+     "refusal.class": "over_budget"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C084-smoke-two-word-is-one-word",
+   "step": "B3b",
+   "checks": "the two-word pipeline on the smoke row's translation gives the one-word pipeline's counts, logarithm and certificates",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1",
+    "--kic-wide"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "ic.words": 2,
+     "all_verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/params.json",
+      "--json",
+      "--out",
+      "{tmp}/one-word.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/one-word.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.rho.scalar",
+      "rho_counts",
+      "all_verified",
+      "ic_and_rho_agree"
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C085-n61-two-word-is-one-word",
+   "step": "B3b",
+   "checks": "C084 at n = 61, the suite's largest size, on its v1 row's translation",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C085-n61-paired.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1",
+    "--kic-wide"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "ic.words": 2,
+     "all_verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/params.json",
+      "--json",
+      "--out",
+      "{tmp}/one-word.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/one-word.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.rho.scalar",
+      "rho_counts",
+      "all_verified",
+      "ic_and_rho_agree"
+     ]
+    }
+   },
+   "timeout_s": 900
+  }
+ ]
+}

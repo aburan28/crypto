@@ -338,7 +338,10 @@ It sets out:
 - **B3** lifts the rho reference to two-word fields (`n ≤ 126`) and
   adds `solve: rho`. Its measurement is the gate's rho at F0 at
   `n = 83`.
-- **B3b** lifts the index calculus and runs it at F1.
+- **B3b** lifts the index calculus to two-word fields, at F0 where the
+  subgroup is small enough to afford, declared 2026-10-01
+  ([`research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md`](../../ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)).
+  F1 at `n = 83` moves to B7b, which needs its kernels.
 
 B3's declaration is
 [`research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md`](../../ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md).
