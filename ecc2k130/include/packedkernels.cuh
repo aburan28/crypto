@@ -279,6 +279,15 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_TABLE_SPLIT_FORWARD && !ECC_TABLE_PIPE_SELECT
 #error "ECC_TABLE_SPLIT_FORWARD requires ECC_TABLE_PIPE_SELECT"
 #endif
+#ifndef ECC_TABLE_BATCH_HINTS
+#define ECC_TABLE_BATCH_HINTS 0
+#endif
+#if ECC_TABLE_BATCH_HINTS != 0 && ECC_TABLE_BATCH_HINTS != 1
+#error "ECC_TABLE_BATCH_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_BATCH_HINTS && (!ECC_TABLE_SPLIT_FORWARD || ECC_BATCH > 64)
+#error "ECC_TABLE_BATCH_HINTS requires split-forward and at most 64 slots"
+#endif
 // ECC_PACKED_CHAINS=2: every thread runs two independent Montgomery chains
 // of ECC_BATCH/2 slots each (slots [0, B/2) and [B/2, B)) instead of one
 // chain of ECC_BATCH.  The chains are interleaved slot by slot in both
@@ -349,6 +358,7 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
 #if ECC_TABLE_SPLIT_FORWARD
+#if !ECC_TABLE_BATCH_HINTS
 __device__ __forceinline__ void tableSelectTagSlot(const WalkParams<unsigned> &p, int slot, int tid,
                                                    unsigned long long now, bool guard,
                                                    const uint32_t *twSel, const uint32_t *twTab) {
@@ -385,6 +395,62 @@ __device__ __forceinline__ void tableSelectTagSlot(const WalkParams<unsigned> &p
     }
     (void)twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
 }
+#else
+// Record the raw tag immediately, but defer a hinted v3 point probe.  A later
+// warp-reconverged loop resolves one pending slot per lane at a time, so hints
+// found at different batch slots execute the same cold call concurrently.
+__device__ __forceinline__ bool tableSelectRawTagSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                      unsigned long long now, bool guard,
+                                                      const uint32_t *twSel) {
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 x = fromPolynomial131(xp);
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    const unsigned long long old = p.hist[id];
+    const unsigned raw = twRawTag(x, yp, hw, twSel);
+    const bool hinted = eccTagFruitless(raw, old, 131);
+    p.hist[id] = eccHistPush(old, raw);
+    return hinted;
+}
+
+__device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                      const uint32_t *twSel, const uint32_t *twTab) {
+    const size_t id = size_t(slot) * p.threads + tid;
+    unsigned long long hist = p.hist[id];
+    const unsigned raw = unsigned(hist & 0xffffull);
+    const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+    p.hist[id] = (hist & ~0xffffull) | tag;
+}
+#endif
 
 __device__ __forceinline__ void tableAddendFromHist(const WalkParams<unsigned> &p, int slot, int tid,
                                                     const uint32_t *twTab, P131 *dp, P131 *ep) {
@@ -693,9 +759,33 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         ECC_PHASE_MARK(ph0);
 #if ECC_TABLE_PIPE_SELECT
 #if ECC_TABLE_SPLIT_FORWARD
+#if ECC_TABLE_BATCH_HINTS
+        unsigned long long pendingHints = 0;
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot)
+            if (tableSelectRawTagSlot(p, slot, tid, now, guard, twSel))
+                pendingHints |= 1ull << slot;
+#ifdef __CUDA_ARCH__
+        const unsigned warpMask = __activemask();
+        while (__any_sync(warpMask, pendingHints != 0)) {
+            if (pendingHints) {
+                const int slot = __ffsll((long long)pendingHints) - 1;
+                tableResolveHintSlot(p, slot, tid, twSel, twTab);
+                pendingHints &= pendingHints - 1;
+            }
+        }
+#else
+        while (pendingHints) {
+            const int slot = __builtin_ctzll(pendingHints);
+            tableResolveHintSlot(p, slot, tid, twSel, twTab);
+            pendingHints &= pendingHints - 1;
+        }
+#endif
+#else
 #pragma unroll 1
         for (int slot = 0; slot < ECC_BATCH; ++slot)
             tableSelectTagSlot(p, slot, tid, now, guard, twSel, twTab);
+#endif
 #endif
         {
             P131 dpN, epN;
