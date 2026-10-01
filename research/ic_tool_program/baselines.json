@@ -168,6 +168,208 @@
      "cold_ms_median": 5717.6017
     }
    ]
+  },
+  {
+   "baseline": "v1",
+   "round": "R03",
+   "class": "engineering",
+   "commit": "30f6c153",
+   "built_from": "30f6c153c41c1601926e291d7e6ee59dfb39ad9f",
+   "base": "v0′ c1a2e5f8 (v0 renamed; R02 rejected)",
+   "src_tree": "31d2b6cbd0fefe09d6cb9c50f377987480418b55",
+   "binary_sha256": "23c83a4744a4d3e206a6923db48eb631042ba45c231e088f15824b55fb6ff432",
+   "host": {
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory": "MemTotal:       16480972 kB",
+    "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "transparent_hugepage": {
+     "enabled": "always [madvise] never",
+     "defrag": "always defer defer+madvise [madvise] never"
+    }
+   },
+   "source": "research/ic_tool_program/rounds/R03-curve-construction/analysis.json",
+   "what_changed": "factorise_u64 tests primality only when a division changes what is left, and skips even divisors after 2; the factors are identical",
+   "measured": "R03's comparison: M1's two rows at the nine prime sizes and all eight at the two composite sizes, five rounds each, paired with v0′ in the same runs; s_cold is the candidate's median in v0's unit",
+   "sizes": [
+    {
+     "curve_alias": "icv1-f2m19-tm797-9c54981b",
+     "ec1": "EC1N19Ce1h7e63aa468dcc",
+     "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
+     "log2_r": 18.002,
+     "unit_ns": 21.993,
+     "rows_measured": 2,
+     "s_cold": 132.326,
+     "s_cold_base_same_runs": 132.01,
+     "cold_ratio_over_base": {
+      "geomean": 0.9954,
+      "lo": 0.9604,
+      "hi": 1.0316,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m23-tm5197-1f85e9e1",
+     "ec1": "EC1N23Ce1heec6a3619e3f",
+     "curve_uid": "urn:ec-record:1:sha256:eec6a3619e3fdf05035e0ef5d3ec8cf3af507268cf760c77d47518d62141b00f",
+     "log2_r": 22.001,
+     "unit_ns": 22.281,
+     "rows_measured": 2,
+     "s_cold": 35.132,
+     "s_cold_base_same_runs": 34.258,
+     "cold_ratio_over_base": {
+      "geomean": 0.9764,
+      "lo": 0.9384,
+      "hi": 1.0161,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m45-tm6236725-40939294",
+     "ec1": "EC1N45Ce1h97bc367649de",
+     "curve_uid": "urn:ec-record:1:sha256:97bc367649ded9e1309ece1e66c630f558ee953b017378c53b2c3cf2896747df",
+     "log2_r": 24.803,
+     "unit_ns": 26.903,
+     "rows_measured": 8,
+     "s_cold": 22.086,
+     "s_cold_base_same_runs": 22.097,
+     "cold_ratio_over_base": {
+      "geomean": 1.0072,
+      "lo": 0.9849,
+      "hi": 1.03,
+      "n": 40
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m37-tm534059-32aad96b",
+     "ec1": "EC1N37Ce0h0c51aa4aa7c3",
+     "curve_uid": "urn:ec-record:1:sha256:0c51aa4aa7c3c76c45885e230d717aedcbefad98e2604d1664ac38b57299f180",
+     "log2_r": 27.781,
+     "unit_ns": 24.29,
+     "rows_measured": 2,
+     "s_cold": 10.531,
+     "s_cold_base_same_runs": 10.826,
+     "cold_ratio_over_base": {
+      "geomean": 1.0487,
+      "lo": 1.0141,
+      "hi": 1.0844,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m43-tm998717-e2e742b0",
+     "ec1": "EC1N43Ce1h7d34f0f22c70",
+     "curve_uid": "urn:ec-record:1:sha256:7d34f0f22c707e3756957364281079ea2835960013fd13a1e648b7ff5e5fea8c",
+     "log2_r": 32.113,
+     "unit_ns": 26.96,
+     "rows_measured": 2,
+     "s_cold": 6.69,
+     "s_cold_base_same_runs": 6.727,
+     "cold_ratio_over_base": {
+      "geomean": 1.0091,
+      "lo": 0.9852,
+      "hi": 1.0335,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m47-t22705043-f4e44623",
+     "ec1": "EC1N47Ce1h9669b6d5105b",
+     "curve_uid": "urn:ec-record:1:sha256:9669b6d5105b035b2ff286a4e32c52725841e8546ab03de8a8077c5114e98b0c",
+     "log2_r": 36.636,
+     "unit_ns": 27.702,
+     "rows_measured": 2,
+     "s_cold": 4.389,
+     "s_cold_base_same_runs": 4.451,
+     "cold_ratio_over_base": {
+      "geomean": 0.9709,
+      "lo": 0.8733,
+      "hi": 1.0794,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m57-tm747311035-c1f545af",
+     "ec1": "EC1N57Ce0hb5884395c7f2",
+     "curve_uid": "urn:ec-record:1:sha256:b5884395c7f28d0d22eb1acc451c34ff979b0a40f93629e44b30107592b76695",
+     "log2_r": 38.002,
+     "unit_ns": 29.418,
+     "rows_measured": 8,
+     "s_cold": 4.453,
+     "s_cold_base_same_runs": 8.001,
+     "cold_ratio_over_base": {
+      "geomean": 1.7708,
+      "lo": 1.6938,
+      "hi": 1.8512,
+      "n": 40
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m41-tm2308219-7f48b14a",
+     "ec1": "EC1N41Ce0he09550ab560a",
+     "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+     "log2_r": 39.0,
+     "unit_ns": 24.447,
+     "rows_measured": 2,
+     "s_cold": 5.826,
+     "s_cold_base_same_runs": 5.902,
+     "cold_ratio_over_base": {
+      "geomean": 1.0341,
+      "lo": 0.9443,
+      "hi": 1.1325,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m53-tm56619371-dac20a85",
+     "ec1": "EC1N53Ce0hb097de99be9a",
+     "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+     "log2_r": 44.259,
+     "unit_ns": 29.911,
+     "rows_measured": 2,
+     "s_cold": 8.161,
+     "s_cold_base_same_runs": 8.039,
+     "cold_ratio_over_base": {
+      "geomean": 0.9698,
+      "lo": 0.9138,
+      "hi": 1.0292,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m59-tm943548413-98844ecc",
+     "ec1": "EC1N59Ce1h20858f64459b",
+     "curve_uid": "urn:ec-record:1:sha256:20858f64459bbef8a18a8b75dbe579ce4cb0901d5c1b70d236ac154427d86980",
+     "log2_r": 44.517,
+     "unit_ns": 30.682,
+     "rows_measured": 2,
+     "s_cold": 9.427,
+     "s_cold_base_same_runs": 9.169,
+     "cold_ratio_over_base": {
+      "geomean": 0.9895,
+      "lo": 0.95,
+      "hi": 1.0306,
+      "n": 10
+     }
+    },
+    {
+     "curve_alias": "icv1-f2m61-t158598901-ab42b6c5",
+     "ec1": "EC1N61Ce0hd8c15448081e",
+     "curve_uid": "urn:ec-record:1:sha256:d8c15448081eb349784c3d5d9d3144eaa4a5252d115f9049e10bbadf373db689",
+     "log2_r": 47.211,
+     "unit_ns": 30.922,
+     "rows_measured": 2,
+     "s_cold": 15.607,
+     "s_cold_base_same_runs": 15.821,
+     "cold_ratio_over_base": {
+      "geomean": 1.0096,
+      "lo": 0.9874,
+      "hi": 1.0322,
+      "n": 10
+     }
+    }
+   ]
   }
  ]
 }

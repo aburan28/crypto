@@ -1119,7 +1119,7 @@
 
   <div class="panel" id="ic-tool-programme-20261001">
     <div class="panel-head">
-      <h2>The <code>ic</code> tool programme, baseline by baseline <span class="chip">accounting</span></h2>
+      <h2>The <code>ic</code> tool programme, baseline by baseline <span class="chip">engineering</span></h2>
       <p>The programme makes the <code>ic</code> tool faster, round after round, against frozen baselines
         (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/IC_TOOL_PROGRAM.md">plan</a>,
         #1103). &ldquo;Faster&rdquo; means faster than its previous baseline, end to end and cold, with identical
@@ -1139,16 +1139,23 @@
           the most scan time, 37&ndash;41%; at 2<sup>44.3</sup> the admitted keys hold 42%. The probes&rsquo;
           overhead interval fell inside R01&rsquo;s A/A band at no size, so these shares are reported, not
           trusted.</li>
+        <li><b>Round 3 (baseline v1)</b> made the curve&rsquo;s construction test primality only when a
+          division changes what is left. At 2<sup>38.0</sup>, a composite degree, the construction fell from
+          56.0 to 1.28&nbsp;ms and cold time ran 1.771&times; [1.694, 1.851] faster on the suite and
+          1.922&times; [1.756, 2.104] on the holdouts, with every pinned output v0&rsquo;s. It is the first
+          baseline after v0.</li>
       </ul>
       <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>,
-        <code>rounds/R02-wide-tail-kernel/analysis.json</code>, and <code>rounds/R04-scan-probes/analysis.json</code>
+        <code>rounds/R02-wide-tail-kernel/analysis.json</code>, <code>rounds/R03-curve-construction/analysis.json</code>,
+        and <code>rounds/R04-scan-probes/analysis.json</code>
         with <code>filter_check.json</code> for every figure here).</p>
     </div>
     <div class="table-scroll"><table>
       <caption>One row per baseline, and one per rejected round below them. S is cold, set-up plus online, in
-        v0&rsquo;s unit, as a median over each size&rsquo;s eight suite rows. A rejected round&rsquo;s S is from
-        its own runs, with its base arm&rsquo;s S from the same runs beneath it: runs hours apart on this host
-        differ by several per cent, so its S is read against that, not against the row above. Its ratio over
+        v0&rsquo;s unit, as a median over each size&rsquo;s eight suite rows. A later baseline&rsquo;s S, and a
+        rejected round&rsquo;s, is from its own round&rsquo;s runs, with its base arm&rsquo;s S from the same runs
+        beneath it: runs hours apart on this host differ by several per cent, so its S is read against that, not
+        against the row above. Its ratio over
         the previous is the paired cold-time ratio, base over candidate. The ratio to rho is &sect;23&rsquo;s
         cold ratio, index calculus over rho on the same point.</caption>
       <thead><tr><th scope="col">Baseline</th><th scope="col" class="n">2<sup>36.6</sup></th>
@@ -1160,6 +1167,7 @@
         <tr><td>v0 &middot; <code>46ae2014</code></td><td class="n">4.43</td><td class="n">7.65</td><td class="n">5.42</td>
           <td class="n">7.53</td><td class="n">8.77</td><td class="n">14.49</td><td class="n">&mdash;</td>
           <td class="n">4.9&ndash;31.6&times;</td></tr>
+        <tr><td>v1 &middot; <code>30f6c153</code><br><small>round 3</small> <span class="chip">engineering</span></td><td class="n">4.39<br><small>v0&prime; 4.45</small></td><td class="n"><b>4.45</b><br><small>v0&prime; 8.00</small></td><td class="n">5.83<br><small>v0&prime; 5.90</small></td><td class="n">8.16<br><small>v0&prime; 8.04</small></td><td class="n">9.43<br><small>v0&prime; 9.17</small></td><td class="n">15.61<br><small>v0&prime; 15.82</small></td><td class="n">1.771&times; at 2<sup>38.0</sup><br><small>0.970&ndash;1.049&times; at the prime sizes</small></td><td class="n">&mdash;</td></tr>
         <tr><td>R02 candidate &middot; <code>a1645ac6</code><br><small>rejected, not a baseline</small> <span class="chip">engineering</span></td><td class="n">4.75<br><small>v0&prime; 4.61</small></td><td class="n">8.40<br><small>v0&prime; 8.08</small></td><td class="n">6.12<br><small>v0&prime; 5.97</small></td><td class="n">8.86<br><small>v0&prime; 8.77</small></td><td class="n">8.53<br><small>v0&prime; 9.91</small></td><td class="n">12.91<br><small>v0&prime; 16.07</small></td><td class="n">1.182&times; at 2<sup>44.5</sup>, 1.267&times; at 2<sup>47.2</sup><br><small>0.973&ndash;1.027&times; elsewhere</small></td><td class="n">&mdash;</td></tr>
       </tbody>
     </table></div>
@@ -1170,7 +1178,8 @@
       <span><b>Round 2, graded.</b> The control held: switching the AVX-512 scan kernels off made collection 1.89&times; slower per summand at 2<sup>44.3</sup>. Every output of both arms equals v0&rsquo;s on all 90 rows. At 2<sup>44.5</sup> the suite reads 1.182 [1.151, 1.213] and the holdouts 1.161 [1.089, 1.239]; at 2<sup>47.2</sup>, 1.267 [1.242, 1.292] and 1.262 [1.216, 1.310]. The predictions were 1.31&times; and 1.37&times;: a wide field&rsquo;s summand costs 1.90&ndash;1.95 units with the kernel, not the 1.6 assumed, and the build did not move. The nine other sizes read 0.973&ndash;1.027&times;, inside their A/A bands. The callgrind control failed too: under valgrind both arms take the portable paths, and the candidate&rsquo;s ran 0.1% fewer instructions, all in the compiler&rsquo;s code for two scan functions it does not change.</span>
       <span><b>Runs hours apart differ.</b> v0 against v0&prime;, interleaved in R02&rsquo;s session, reads 0.97&ndash;1.07&times; in cold time: the renaming between them moved nothing. Yet v0&prime;&rsquo;s S in R02&rsquo;s runs sits 4&ndash;16% above v0&rsquo;s in R01&rsquo;s at the six sizes above, on the same host. Only the paired ratio compares across rounds; S between runs carries the host&rsquo;s drift.</span>
       <span><b>Round 4, the scan&rsquo;s stages.</b> At 2<sup>44.5</sup> and 2<sup>47.2</sup> the subtraction costs 32.5 and 33.3&nbsp;ns a summand, against 13.1 at 2<sup>44.3</sup>, where the 8-lane kernel runs. That is round 2&rsquo;s target, and R02b re-tests it. A check made after the run, not declared: the presence filter is one bit per stored pair under one hash, and from 2<sup>36.6</sup> up its predicted pass rate matches the admitted fraction to within 2%. Nearly every admitted key is a false positive, at 118&ndash;159&nbsp;ns each at the three largest sizes. Round 5, declared to run before R02b, tests a filter of three bits a key in one word; it has no measurement yet.</span>
-      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, so v0 stays the newest baseline, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup.</span>
+      <span><b>Round 3, graded.</b> Every pinned output equals v0&rsquo;s on all 90 rows. At 2<sup>38.0</sup> the suite reads 1.771 [1.694, 1.851] and the holdouts 1.922 [1.756, 2.104], against a predicted 1.75&times;. At 2<sup>24.8</sup>, the other composite degree, it reads 1.007 [0.985, 1.030] against a predicted 1.3&times;: that order&rsquo;s cofactor ends at 211, so the old loop was short there. The nine prime sizes read 0.970&ndash;1.049&times;, every interval overlapping its A/A band. The construction stage is under 2.2&nbsp;ms everywhere, but at the prime sizes it was already a few milliseconds of a set-up of seconds.</span>
+      <span><span class="chip">accounting</span> v0 is a baseline, not a change. Round 2 would have been <span class="chip">engineering</span>; it is rejected, and the kernel is kept on record as <code>candidate.patch</code>. Round 4 is <span class="chip">accounting</span>, a stage diagnostic: it changed no timed code, and nothing in it is a speedup. Round 3 is <span class="chip">engineering</span>: the factors are identical, so the ratio to the floor is flat, and v1 is the newest baseline.</span>
     </div>
   </div>
 
