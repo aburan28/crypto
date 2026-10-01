@@ -1807,4 +1807,84 @@ mod tests {
         let curve = BinaryCurve::sect113r1();
         assert!(FastCurve::new(&curve).is_none());
     }
+
+    /// The folded copies of the batched routines and the ladder at the
+    /// widths the pipeline and perfbench run (53 above all), against the
+    /// portable-and-table bodies and, for the ladder, against the generic
+    /// `binary_ecc` scalar multiplication.  Edge scalars (0, 1, 2, the
+    /// full word) and empty batches included.
+    #[test]
+    fn folded_fields_agree_at_the_pipeline_widths() {
+        for (a, n) in [(0u8, 53u32), (1, 53), (0, 23), (1, 29), (0, 61), (1, 13)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fast = FastCurve::new(&kc.curve).unwrap();
+            let mut slow = fast.clone();
+            slow.field = Gf2::portable(&kc.curve.irreducible);
+            #[cfg(target_arch = "x86_64")]
+            {
+                slow.simd = None;
+                if std::arch::is_x86_feature_detected!("pclmulqdq") {
+                    assert!(fast.field.folds(), "n = {n}: the pipeline's modulus folds");
+                }
+            }
+            let bp: Vec<BinaryPoint> = random_points(&kc, 16, 11 * u64::from(n) + u64::from(a));
+            let points: Vec<FastPoint> = bp.iter().map(|p| fast.lift(p)).collect();
+            let mut scratch = BatchScratch::default();
+            let (mut want, mut got) = (vec![FastPoint::INFINITY], Vec::new());
+            slow.add_many(points[0], &[], &mut want, &mut scratch);
+            fast.add_many(points[0], &[], &mut got, &mut scratch);
+            assert_eq!(got.len(), 0);
+            assert_eq!(want.len(), 1);
+            let mut qs = points.clone();
+            qs.extend([
+                points[1],
+                fast.neg(points[1]),
+                FastPoint::INFINITY,
+                points[1],
+            ]);
+            for (i, &p) in points.iter().enumerate() {
+                let (mut want, mut got) = (Vec::new(), Vec::new());
+                slow.add_many(p, &qs, &mut want, &mut scratch);
+                fast.add_many(p, &qs, &mut got, &mut scratch);
+                assert_eq!(got, want, "add_many, a = {a}, n = {n}");
+                let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                let (mut got, mut got_l) = (Vec::new(), Vec::new());
+                slow.add_many_lazy_scalar(p, &qs, &mut want, &mut want_l, &mut scratch);
+                fast.add_many_lazy_scalar(p, &qs, &mut got, &mut got_l, &mut scratch);
+                assert_eq!(
+                    (got, got_l),
+                    (want, want_l),
+                    "add_many_lazy, a = {a}, n = {n}"
+                );
+                for k in [0u64, 1, 2, 3, u64::MAX, 0x8000_0000_0000_0001] {
+                    assert_eq!(
+                        fast.mul_u64(p, k),
+                        slow.mul_u64(p, k),
+                        "mul_u64 {k}, n = {n}"
+                    );
+                }
+                let k = BigUint::from(0xC0FF_EE00_D15E_A5E5u64) * BigUint::from(i as u64 + 3);
+                let got = fast.mul(p, &k);
+                assert_eq!(got, slow.mul(p, &k), "mul, a = {a}, n = {n}");
+                let reference = scalar_mul(&kc.curve, &bp[i], &k);
+                assert_eq!(
+                    fast.lower(got),
+                    reference,
+                    "mul vs binary_ecc, a = {a}, n = {n}"
+                );
+                assert_eq!(fast.double(p), slow.double(p), "double, a = {a}, n = {n}");
+            }
+            let ps: Vec<FastPoint> = qs.iter().rev().copied().collect();
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&ps, &qs, &mut want, &mut scratch);
+            fast.add_pairwise(&ps, &qs, &mut got, &mut scratch);
+            assert_eq!(got, want, "add_pairwise, a = {a}, n = {n}");
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&[], &[], &mut want, &mut scratch);
+            fast.add_pairwise(&[], &[], &mut got, &mut scratch);
+            assert!(got.is_empty() && want.is_empty());
+        }
+    }
 }

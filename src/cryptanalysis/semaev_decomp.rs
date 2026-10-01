@@ -1909,4 +1909,286 @@ mod tests {
             }
         }
     }
+
+    /// `Gf2` exactly as it was at b072fcf5, before products were reduced
+    /// by folding: the table reduction on every field, `mul` and `sqr`
+    /// through `clmul` then `reduce`, and the old `sqr_k`, `inv` and
+    /// `batch_inv` bodies.  Only the name is changed.
+    mod gf2_b072fcf5 {
+        use crate::binary_ecc::IrreduciblePoly;
+
+        pub struct OldGf2 {
+            pub n: u32,
+            pub irr: u64,
+            pub mask: u64,
+            red: Box<[[u64; 256]; 8]>,
+            positions: usize,
+            has_clmul: bool,
+        }
+
+        fn spread32(x: u64) -> u64 {
+            let mut x = x & 0xFFFF_FFFF;
+            x = (x | (x << 16)) & 0x0000_FFFF_0000_FFFF;
+            x = (x | (x << 8)) & 0x00FF_00FF_00FF_00FF;
+            x = (x | (x << 4)) & 0x0F0F_0F0F_0F0F_0F0F;
+            x = (x | (x << 2)) & 0x3333_3333_3333_3333;
+            x = (x | (x << 1)) & 0x5555_5555_5555_5555;
+            x
+        }
+
+        #[cfg(target_arch = "x86_64")]
+        #[target_feature(enable = "pclmulqdq")]
+        unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
+            use std::arch::x86_64::*;
+            let x = _mm_set_epi64x(0, a as i64);
+            let y = _mm_set_epi64x(0, b as i64);
+            let z = _mm_clmulepi64_si128::<0x00>(x, y);
+            let lo = _mm_cvtsi128_si64(z) as u64;
+            let hi = _mm_cvtsi128_si64(_mm_srli_si128::<8>(z)) as u64;
+            ((hi as u128) << 64) | (lo as u128)
+        }
+
+        impl OldGf2 {
+            pub fn new(irr: &IrreduciblePoly, has_clmul: bool) -> Self {
+                assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
+                let n = irr.degree;
+                let bits = irr
+                    .low_terms
+                    .iter()
+                    .fold(1u64 << n, |acc, &t| acc | (1u64 << t));
+                let positions = (n as usize - 1).div_ceil(8);
+                let positions = positions.max(1);
+                let mut pow = vec![0u64; positions * 8];
+                let mut cur = bits ^ (1u64 << n);
+                for slot in pow.iter_mut() {
+                    *slot = cur;
+                    cur <<= 1;
+                    if (cur >> n) & 1 != 0 {
+                        cur ^= bits;
+                    }
+                }
+                let mut red = Box::new([[0u64; 256]; 8]);
+                for j in 0..positions {
+                    for v in 1usize..256 {
+                        red[j][v] = red[j][v & (v - 1)] ^ pow[j * 8 + v.trailing_zeros() as usize];
+                    }
+                }
+                Self {
+                    n,
+                    irr: bits,
+                    mask: (1u64 << n) - 1,
+                    red,
+                    positions,
+                    has_clmul,
+                }
+            }
+
+            pub fn reduce(&self, w: u128) -> u64 {
+                let mut acc = (w as u64) & self.mask;
+                let mut h = (w >> self.n) as u64;
+                for row in &self.red[..self.positions] {
+                    acc ^= row[usize::from(h as u8)];
+                    h >>= 8;
+                }
+                acc
+            }
+
+            fn clmul(&self, a: u64, b: u64) -> u128 {
+                #[cfg(target_arch = "x86_64")]
+                if self.has_clmul {
+                    return unsafe { clmul_u64(a, b) };
+                }
+                let mut w = 0u128;
+                let mut aa = a as u128;
+                let mut bb = b;
+                while bb != 0 {
+                    if bb & 1 != 0 {
+                        w ^= aa;
+                    }
+                    aa <<= 1;
+                    bb >>= 1;
+                }
+                w
+            }
+
+            pub fn mul(&self, a: u64, b: u64) -> u64 {
+                self.reduce(self.clmul(a, b))
+            }
+
+            pub fn sqr(&self, a: u64) -> u64 {
+                #[cfg(target_arch = "x86_64")]
+                if self.has_clmul {
+                    return self.reduce(unsafe { clmul_u64(a, a) });
+                }
+                let w = (spread32(a) as u128) | ((spread32(a >> 32) as u128) << 64);
+                self.reduce(w)
+            }
+
+            pub fn sqr_k(&self, mut a: u64, k: u32) -> u64 {
+                for _ in 0..k {
+                    a = self.sqr(a);
+                }
+                a
+            }
+
+            pub fn inv(&self, a: u64) -> u64 {
+                if a == 0 || self.n <= 1 {
+                    return a;
+                }
+                let e = self.n - 1;
+                let mut beta = a;
+                let mut len = 1u32;
+                for bit in (0..(31 - e.leading_zeros())).rev() {
+                    beta = self.mul(self.sqr_k(beta, len), beta);
+                    len *= 2;
+                    if (e >> bit) & 1 == 1 {
+                        beta = self.mul(self.sqr(beta), a);
+                        len += 1;
+                    }
+                }
+                self.sqr(beta)
+            }
+
+            pub fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+                const LANES: usize = 4;
+                scratch.clear();
+                scratch.resize(xs.len(), 0);
+                let mut acc = [1u64; LANES];
+                for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
+                    for ((&x, prefix), a) in xc.iter().zip(pc.iter_mut()).zip(acc.iter_mut()) {
+                        *prefix = *a;
+                        if x != 0 {
+                            *a = self.mul(*a, x);
+                        }
+                    }
+                }
+                let p01 = self.mul(acc[0], acc[1]);
+                let p23 = self.mul(acc[2], acc[3]);
+                let inv_all = self.inv(self.mul(p01, p23));
+                let i01 = self.mul(inv_all, p23);
+                let i23 = self.mul(inv_all, p01);
+                let mut inv_acc = [
+                    self.mul(i01, acc[1]),
+                    self.mul(i01, acc[0]),
+                    self.mul(i23, acc[3]),
+                    self.mul(i23, acc[2]),
+                ];
+                for (xc, pc) in xs.chunks_mut(LANES).zip(scratch.chunks(LANES)).rev() {
+                    for ((x, &prefix), ia) in xc.iter_mut().zip(pc.iter()).zip(inv_acc.iter_mut()) {
+                        if *x != 0 {
+                            let xi = *x;
+                            *x = self.mul(*ia, prefix);
+                            *ia = self.mul(*ia, xi);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Every public operation of the new `Gf2` — folded or not — returns
+    /// exactly what b072fcf5's `Gf2` returned, at every width 1..=63 and
+    /// on moduli on both sides of the fold's tail bound: the sparse ones
+    /// the pipeline uses, `find_irreducible`'s, and random tails of every
+    /// degree (reducible ones too, since reduction never uses
+    /// irreducibility).  Edge operands (0, 1, all ones, the top bit) are
+    /// included, and `batch_inv` is checked on lengths that are not
+    /// multiples of the lane count, with zeros, and on its scratch.
+    #[test]
+    fn gf2_matches_b072fcf5_code_on_every_operation() {
+        use self::gf2_b072fcf5::OldGf2;
+        use crate::cryptanalysis::koblitz_index_calculus::{
+            find_irreducible, find_irreducible_sparse,
+        };
+        let mut s = 0x0DDB_A11C_0FFE_E123u64;
+        let mut folded_seen = 0usize;
+        let mut table_seen = 0usize;
+        for n in 1u32..=63 {
+            let mut moduli: Vec<IrreduciblePoly> = Vec::new();
+            moduli.extend(find_irreducible_sparse(n));
+            moduli.extend(find_irreducible(n));
+            // Random tails of every degree d < n: bit d, bit 0, and
+            // random bits in between.
+            for d in 0..n {
+                for _ in 0..2 {
+                    let mid = if d > 1 {
+                        xorshift(&mut s) & ((1u64 << d) - 1)
+                    } else {
+                        0
+                    };
+                    let tail = (1u64 << d) | 1 | mid;
+                    let low_terms: Vec<u32> = (0..n).filter(|&i| (tail >> i) & 1 == 1).collect();
+                    moduli.push(IrreduciblePoly {
+                        degree: n,
+                        low_terms,
+                    });
+                }
+            }
+            for irr in &moduli {
+                let new = Gf2::new(irr);
+                let old = OldGf2::new(irr, new.has_clmul);
+                let old_portable = OldGf2::new(irr, false);
+                assert_eq!(new.irr, old.irr);
+                assert_eq!(new.mask, old.mask);
+                if new.folds() {
+                    folded_seen += 1;
+                } else {
+                    table_seen += 1;
+                }
+                let mask = new.mask;
+                let mut vals: Vec<u64> =
+                    vec![0, 1, mask, mask >> 1, 1u64 << (n - 1), mask ^ 1, 2 & mask];
+                for _ in 0..200 {
+                    vals.push(xorshift(&mut s) & mask);
+                }
+                for (i, &a) in vals.iter().enumerate() {
+                    for &b in vals.iter().skip(i % 7).step_by(7) {
+                        let want = old.mul(a, b);
+                        assert_eq!(want, old_portable.mul(a, b));
+                        assert_eq!(new.mul(a, b), want, "mul n = {n} irr = {:#x}", new.irr);
+                    }
+                    let want = old.sqr(a);
+                    assert_eq!(new.sqr(a), want, "sqr n = {n} irr = {:#x}", new.irr);
+                    assert_eq!(new.inv(a), old.inv(a), "inv n = {n} irr = {:#x}", new.irr);
+                }
+                for &a in vals.iter().take(20) {
+                    for k in [0, 1, 2, 3, 7, n - 1, n, n + 1, 2 * n + 3] {
+                        assert_eq!(new.sqr_k(a, k), old.sqr_k(a, k), "sqr_k n = {n} k = {k}");
+                    }
+                }
+                // `reduce` on any word below 2^{2n−1}, including the top.
+                let wide = (1u128 << (2 * n - 1)) - 1;
+                for w in [0u128, 1, wide, wide >> 1, 1u128 << (2 * n - 2)] {
+                    assert_eq!(new.reduce(w), old.reduce(w), "reduce n = {n} w = {w:#x}");
+                }
+                for _ in 0..100 {
+                    let w = (((xorshift(&mut s) as u128) << 64) | xorshift(&mut s) as u128) & wide;
+                    assert_eq!(new.reduce(w), old.reduce(w), "reduce n = {n} w = {w:#x}");
+                }
+                for len in [0usize, 1, 2, 3, 4, 5, 7, 8, 9, 13, 67] {
+                    let mut xs: Vec<u64> = (0..len).map(|_| xorshift(&mut s) & mask).collect();
+                    if len > 2 {
+                        xs[len / 2] = 0;
+                        xs[len - 1] = 0;
+                    }
+                    let (mut got, mut want) = (xs.clone(), xs.clone());
+                    let (mut gs, mut ws) = (vec![7u64; 3], vec![9u64; 11]);
+                    new.batch_inv(&mut got, &mut gs);
+                    old.batch_inv(&mut want, &mut ws);
+                    assert_eq!(got, want, "batch_inv n = {n} len = {len}");
+                    assert_eq!(gs, ws, "batch_inv scratch n = {n} len = {len}");
+                }
+                let mut zeros = vec![0u64; 6];
+                new.batch_inv(&mut zeros, &mut Vec::new());
+                assert_eq!(zeros, vec![0u64; 6]);
+            }
+        }
+        #[cfg(target_arch = "x86_64")]
+        if std::arch::is_x86_feature_detected!("pclmulqdq") {
+            assert!(
+                folded_seen > 100 && table_seen > 100,
+                "{folded_seen} folded, {table_seen} table"
+            );
+        }
+    }
 }
