@@ -112,4 +112,4 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 - `research/ic_descent_20260930/analysis-isolated.json` — sha256 `060359c266e779db…`
 - `research/ic_single_target_20260930/analysis.json` — sha256 `109326d7c2882b71…`
 - `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json` — sha256 `2271c4aa5236e2bd…`
-- `docs/curves/registry.json` — sha256 `1c702c1a2c621d23…`
+- `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`

@@ -44,7 +44,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "1c702c1a2c621d23d783dd7ba5844a968ed9d0952aac9c5dcd85028a0e889c41"
+   "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
   }
  },
  "families": {
@@ -5942,6 +5942,23 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m127-t24589614856193402413-a00e5890",
+   "family": "koblitz",
+   "field": "GF(2^127)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 127,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n127",
+    "K_0 / GF(2^127)",
+    "K_0/2^127",
+    "K_0/F_2^127"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
    "family": "koblitz",
    "field": "GF(2^131)",
@@ -5957,6 +5974,57 @@
     "k0n131",
     "K_0 / GF(2^131)",
     "K_0/2^131"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m137-t574016314927011818501-11ceb4d6",
+   "family": "koblitz",
+   "field": "GF(2^137)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 137,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n137",
+    "K_0 / GF(2^137)",
+    "K_0/2^137",
+    "K_0/F_2^137"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m151-tm97937651335354183120307-ee31df7e",
+   "family": "koblitz",
+   "field": "GF(2^151)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 152,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n151",
+    "K_0 / GF(2^151)",
+    "K_0/2^151",
+    "K_0/F_2^151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m157-t158060339213695215877259-816eafb2",
+   "family": "koblitz",
+   "field": "GF(2^157)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 157,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n157",
+    "K_1 / GF(2^157)",
+    "K_1/2^157",
+    "K_1/F_2^157"
    ],
    "on_board": false
   },
@@ -5978,6 +6046,40 @@
     "K_1 / GF(2^163)",
     "K_1/2^163",
     "K_1/F_2^163"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m173-tm67870783603944754053042229-ddf2de63",
+   "family": "koblitz",
+   "field": "GF(2^173)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 174,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n173",
+    "K_1 / GF(2^173)",
+    "K_1/2^173",
+    "K_1/F_2^173"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m179-t1681527843948629186391379613-d1b73c24",
+   "family": "koblitz",
+   "field": "GF(2^179)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 179,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n179",
+    "K_0 / GF(2^179)",
+    "K_0/2^179",
+    "K_0/F_2^179"
    ],
    "on_board": false
   },
@@ -6073,6 +6175,23 @@
     "K_0 / GF(2^571)",
     "K_0/2^571",
     "K_0/F_2^571"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562",
+   "family": "koblitz",
+   "field": "GF(2^577)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 578,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n577",
+    "K_0 / GF(2^577)",
+    "K_0/2^577",
+    "K_0/F_2^577"
    ],
    "on_board": false
   },
