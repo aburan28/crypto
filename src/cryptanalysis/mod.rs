@@ -176,6 +176,7 @@ pub mod isogeny_degree_search;
 pub mod j0_twists;
 pub mod jv_quartic;
 pub mod jv_quintic;
+pub mod jv_cover;
 pub mod jv_quintic_edwards;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
