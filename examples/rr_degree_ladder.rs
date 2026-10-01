@@ -17,7 +17,8 @@
 //! `rr`'s roots are the ordered triples of factor-base points summing to `R`; `x4`'s are
 //! the `x`-triples at which `S₄` vanishes in the field.  Only a system with no root is
 //! measured, by `solving_degree` up to `--d-max` (`--d-max-x4` for the cheaper `x4`).  Output: one JSON line per draw and
-//! arm, in the order `rr`, `x4`, `ctrl`, written as soon as it exists.
+//! arm, in the order `x4`, `rr`, `ctrl`, written as soon as it exists, plus a provisional
+//! `at_least` line after every unresolved degree; the last line per (draw, arm) counts.
 //!
 //!     rr_degree_ladder --a 1 --n 17 --ell 4 --unsat 4 --max-draws 256 --d-max 8 \
 //!         --seed 20260930 --out cell.jsonl
@@ -27,7 +28,7 @@
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::koblitz_bench::{random_control_system, random_subspace_basis};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    solving_degree, system_degree, FieldStructure, SymElement,
+    solving_profile_sparse, system_degree, FieldStructure, SymElement,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::koblitz_symmetrised::{build_direct_x_system, plain_terms};
@@ -304,12 +305,31 @@ struct Measured {
     secs: f64,
 }
 
-fn measure(polys: &[F2BoolPoly], n_vars: usize, d_max: u32) -> Measured {
+/// `solving_degree`'s scan, one degree at a time, calling `partial(d, secs)` after every
+/// unresolved degree below `d_max` so that a lower bound survives a kill.
+fn measure(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_max: u32,
+    mut partial: impl FnMut(u32, f64),
+) -> Measured {
     let started = Instant::now();
-    let (d, profs) = solving_degree(polys, n_vars, d_max);
-    let built = profs.last().map(|p| p.degree);
-    let refuted = profs.last().map(|p| p.refuted).unwrap_or(false);
-    let outcome = match d {
+    let (mut solved, mut built, mut refuted) = (None, None, false);
+    for d in system_degree(polys).max(1)..=d_max {
+        let Some(prof) = solving_profile_sparse(polys, n_vars, d) else {
+            break;
+        };
+        built = Some(d);
+        refuted = prof.refuted;
+        if prof.resolves() {
+            solved = Some(d);
+            break;
+        }
+        if d < d_max {
+            partial(d, started.elapsed().as_secs_f64());
+        }
+    }
+    let outcome = match solved {
         Some(degree) => format!(r#"{{"kind":"resolved","degree":{degree},"refuted":{refuted}}}"#),
         None if built == Some(d_max) => format!(r#"{{"kind":"at_least","degree":{}}}"#, d_max + 1),
         None => format!(
@@ -320,6 +340,16 @@ fn measure(polys: &[F2BoolPoly], n_vars: usize, d_max: u32) -> Measured {
     Measured {
         outcome,
         secs: started.elapsed().as_secs_f64(),
+    }
+}
+
+fn put(out: &mut Option<std::fs::File>, line: &str) {
+    match out.as_mut() {
+        Some(f) => {
+            writeln!(f, "{line}").expect("write");
+            f.flush().expect("flush");
+        }
+        None => println!("{line}"),
     }
 }
 
@@ -406,34 +436,40 @@ fn main() {
             word(x_r),
             base.len(),
         );
-        // One line per arm, written as soon as it exists, in the order rr, x4, ctrl:
-        // a cell killed by its limit keeps every arm it finished.
-        let mut emit =
-            |arm: &str, polys: &[F2BoolPoly], n_vars: usize, roots: Option<u64>, d_max: u32| {
-                let shape = format!(
-                    r#""arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{}"#,
-                    polys.len(),
-                    system_degree(polys),
-                    terms_per_eq(polys)
-                );
-                let roots_field = roots.map_or(String::new(), |r| format!(r#","roots":{r}"#));
-                let body = if roots == Some(0) || roots.is_none() {
-                    let m = measure(polys, n_vars, d_max);
-                    format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs)
-                } else {
-                    r#","outcome":{"kind":"satisfiable"}"#.to_string()
-                };
-                let line = format!("{{{head},{shape}{roots_field}{body}}}");
-                match out.as_mut() {
-                    Some(f) => {
-                        writeln!(f, "{line}").expect("write");
-                        f.flush().expect("flush");
-                    }
-                    None => println!("{line}"),
-                }
+        // One line per arm, written as soon as it exists, in the order x4, rr, ctrl, and
+        // after every unresolved degree a provisional `at_least` line (`"partial":true`):
+        // the last line per (draw, arm) is the result, so a cell killed by its limit keeps
+        // every arm it finished and a lower bound for the one it was on.
+        let mut emit = |arm: &str,
+                        polys: &[F2BoolPoly],
+                        n_vars: usize,
+                        roots: Option<u64>,
+                        d_max: u32| {
+            let shape = format!(
+                r#""arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{}"#,
+                polys.len(),
+                system_degree(polys),
+                terms_per_eq(polys)
+            );
+            let roots_field = roots.map_or(String::new(), |r| format!(r#","roots":{r}"#));
+            let body = if roots == Some(0) || roots.is_none() {
+                let m = measure(polys, n_vars, d_max, |d, secs| {
+                    put(
+                        &mut out,
+                        &format!(
+                            r#"{{{head},{shape}{roots_field},"outcome":{{"kind":"at_least","degree":{},"partial":true}},"secs":{secs:.3}}}"#,
+                            d + 1
+                        ),
+                    );
+                });
+                format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs)
+            } else {
+                r#","outcome":{"kind":"satisfiable"}"#.to_string()
             };
-        emit("rr", &rr, rr_vars, Some(rr_roots), d_max);
+            put(&mut out, &format!("{{{head},{shape}{roots_field}{body}}}"));
+        };
         emit("x4", &x4, x4_vars, Some(x4_roots), d_max_x4);
+        emit("rr", &rr, rr_vars, Some(rr_roots), d_max);
         if rr_roots == 0 {
             let ctrl = random_control_system(
                 rr_vars,
