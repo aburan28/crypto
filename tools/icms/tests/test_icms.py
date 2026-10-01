@@ -246,6 +246,12 @@ class EnvironmentTests(unittest.TestCase):
         self.assertRegex(a["env_class_id"], r"^ENV1h[0-9a-f]{12}$")
         self.assertIn("vm/swappiness", a["stable"]["kernel"]["sysctl"])
 
+    def test_kernel_null_cpu_list_is_empty(self):
+        # /sys/devices/system/cpu/nohz_full on a kernel without nohz_full (GitHub's runners)
+        self.assertEqual(parse_cpu_list("(null)\n"), [])
+        gate = evaluate({"pinned_cpus": [3]}, {}, {"topology": {"isolated": "", "nohz_full": "(null)"}}, 1)
+        self.assertEqual({c["id"]: c["status"] for c in gate["checks"]}["kernel_isolation"], "fail")
+
     def test_cpu_list_parsing(self):
         self.assertEqual(parse_cpu_list("0-2,5"), [0, 1, 2, 5])
         self.assertEqual(parse_cpu_list(""), [])
@@ -807,6 +813,7 @@ class SessionAuditTests(unittest.TestCase):
         except SessionError as exc:
             raise unittest.SkipTest(f"no reservable core: {exc}")
         cls.tmp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.tmp.cleanup)  # also when the rest of setUpClass fails
         d = cls.tmp.name
         for size in (8, 9):
             _dump(toy_spec(size), os.path.join(d, f"toy{size}.json"))
@@ -820,10 +827,6 @@ class SessionAuditTests(unittest.TestCase):
         with open(os.path.join(cls.session_dir, "comparisons", "toy9-vs-toy8.json"), "w") as fh:
             fh.write(json.dumps(res, indent=1, sort_keys=True) + "\n")
         cls.vals = validators()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.tmp.cleanup()
 
     def forged(self) -> str:
         dst = tempfile.mkdtemp(dir=self.tmp.name)

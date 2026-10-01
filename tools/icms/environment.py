@@ -105,12 +105,15 @@ def _run(argv: list[str], timeout: float = 15.0, cwd: str | None = None) -> str 
 
 
 def parse_cpu_list(spec: str | None) -> list[int]:
+    """A kernel CPU list ("0-3,8"), empty for "" or None.  The kernel writes
+    "(null)" to /sys/devices/system/cpu/nohz_full when nohz_full is not
+    configured, which is also an empty list."""
     out: list[int] = []
-    if not spec:
+    if not spec or spec.strip() == "(null)":
         return out
     for part in spec.replace("\n", ",").split(","):
         part = part.strip()
-        if not part:
+        if not part or part == "(null)":
             continue
         if "-" in part:
             a, b = part.split("-", 1)
