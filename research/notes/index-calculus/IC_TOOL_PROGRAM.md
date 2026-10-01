@@ -515,7 +515,7 @@ from R03's `runs.tar.xz`, byte for byte.
 `ic`, so the harness never changes the code it measures.
 - **`icprog`** (`src/bin/icprog.rs`) is the programme's harness. It
   starts with `analyse` for R03 and R05.
-- **`isolated-bench`** (`src/bin/isolated_bench.rs`) is
+- **`isolated_bench`** (`src/bin/isolated_bench.rs`) is
   `tools/isolated_bench.py`, native.
   - It keeps the same modes, options, lock and record
     (`isolated-bench/1`), and adds a `tool` field, so the two

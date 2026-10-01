@@ -13,7 +13,7 @@
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
 //!   tree only.  `r05` is the native analysis of R05; `r03` reproduces
 //!   R03's frozen `analysis.json` from its frozen runs.
-// Shared with `isolated-bench`, which uses parts this binary does not.
+// Shared with `isolated_bench`, which uses parts this binary does not.
 #[path = "icprog/json.rs"]
 #[allow(dead_code)]
 mod json;

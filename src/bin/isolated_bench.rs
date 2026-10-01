@@ -1,4 +1,4 @@
-//! `isolated-bench`: run a benchmark on a reserved, pinned CPU and record
+//! `isolated_bench`: run a benchmark on a reserved, pinned CPU and record
 //! what else was running (AGENTS.md §10).
 //!
 //! The native form of `tools/isolated_bench.py`, with the same modes,
@@ -15,7 +15,7 @@
 //!
 //! 1. **One benchmark at a time.**  It takes an exclusive `flock` on
 //!    `--lock` (default `/tmp/crypto-bench.lock`).  Heavy work that is not
-//!    a benchmark runs through `isolated-bench busy -- CMD`, which takes the
+//!    a benchmark runs through `isolated_bench busy -- CMD`, which takes the
 //!    same lock, so a build cannot start in the middle of a timed stage.
 //! 2. **A quiet machine before starting.**  It samples every other
 //!    process's CPU use for `--settle` seconds and refuses to start if they
@@ -39,9 +39,9 @@
 //! cannot fix the CPU frequency; an A/A run measures that residual noise.
 //!
 //! ```text
-//! isolated-bench run --cpus 3 --out rec.jsonl -- ./worker
-//! isolated-bench reserve --cpus 3 --out cond.json -- ./harness --cpu 3
-//! isolated-bench busy -- cargo build --release
+//! isolated_bench run --cpus 3 --out rec.jsonl -- ./worker
+//! isolated_bench reserve --cpus 3 --out cond.json -- ./harness --cpu 3
+//! isolated_bench busy -- cargo build --release
 //! ```
 //!
 //! `run` pins the command itself.  `reserve` is for a harness that pins its
@@ -683,7 +683,7 @@ mod linux {
                 (
                     "tool".into(),
                     J::Obj(vec![
-                        ("name".into(), J::Str("isolated-bench".into())),
+                        ("name".into(), J::Str("isolated_bench".into())),
                         ("implementation".into(), J::Str("native".into())),
                         ("version".into(), J::Str(env!("CARGO_PKG_VERSION").into())),
                     ]),
@@ -823,7 +823,7 @@ fn main() -> std::process::ExitCode {
 
     #[derive(Parser)]
     #[command(
-        name = "isolated-bench",
+        name = "isolated_bench",
         version,
         about = "Run a benchmark on a reserved, pinned CPU and record what else was running"
     )]
@@ -870,6 +870,6 @@ fn main() -> std::process::ExitCode {
 
 #[cfg(not(target_os = "linux"))]
 fn main() -> std::process::ExitCode {
-    eprintln!("isolated-bench runs on Linux only: it reads /proc and PSI and sets other threads' CPU affinity");
+    eprintln!("isolated_bench runs on Linux only: it reads /proc and PSI and sets other threads' CPU affinity");
     std::process::ExitCode::FAILURE
 }

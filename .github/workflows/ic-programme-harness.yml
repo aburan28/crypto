@@ -1,7 +1,7 @@
 name: ic programme harness
 
 # The ic tool programme's native harness (IC_TOOL_PROGRAM.md §10a): the
-# `icprog` and `isolated-bench` binaries.  Each port is held to the frozen
+# `icprog` and `isolated_bench` binaries.  Each port is held to the frozen
 # outputs of the script it replaces; `tests/icprog.rs` reproduces R03's
 # analysis.json from R03's runs, byte for byte.  It runs no experiment.
 
@@ -40,11 +40,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Build the harness
-        run: cargo build --release --bin icprog --bin isolated-bench
+        run: cargo build --release --bin icprog --bin isolated_bench
       - name: Unit tests, and R03's frozen analysis reproduced byte for byte
-        run: cargo test --release --bin icprog --bin isolated-bench --test icprog
+        run: cargo test --release --bin icprog --bin isolated_bench --test icprog
       - name: The isolation tool's busy mode passes the command's status through
         run: |
           set +e
-          target/release/isolated-bench busy --lock "$RUNNER_TEMP/bench.lock" -- sh -c 'exit 3'
+          target/release/isolated_bench busy --lock "$RUNNER_TEMP/bench.lock" -- sh -c 'exit 3'
           test $? -eq 3
