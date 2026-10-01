@@ -24,6 +24,9 @@ GEOMETRY = {
     "b32": {"batch": 32, "blockThreads": 256, "runtimeThreads": 48128},
     "b64": {"batch": 64, "blockThreads": 128, "runtimeThreads": 24064},
 }
+LIVE_SLOTS = 1_540_096
+STEPS = 1024
+LAUNCHES = {"warmup": 16, "screen": 32, "confirm": 64}
 
 
 def parse_verify(path, arm):
@@ -55,10 +58,56 @@ def read_samples(path):
             row["pair"] = int(row["pair"])
             row["order"] = int(row["order"])
             row["rateMps"] = float(row["rateMps"])
-            if row["variant"] not in ARMS or not math.isfinite(row["rateMps"]) or row["rateMps"] <= 0:
+            if row["phase"] not in LAUNCHES or row["variant"] not in ARMS or not math.isfinite(row["rateMps"]) or row["rateMps"] <= 0:
                 raise ValueError(f"invalid timing row {row}")
+            if not re.fullmatch(r"[0-9a-f]{64}", row["logSha256"]):
+                raise ValueError(f"invalid timing-log digest in {row}")
             rows.append(row)
     return rows
+
+
+def validate_sample_logs(results, rows):
+    errors = []
+    for row in rows:
+        arm = row["variant"]
+        name = f"{row['phase']}-{row['pair']}-{row['order']}-{arm}.log"
+        path = pathlib.Path(results) / name
+        try:
+            data = path.read_bytes()
+        except OSError as exc:
+            errors.append(str(exc))
+            continue
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != row["logSha256"]:
+            errors.append(f"{name}: sha256 {digest}, TSV has {row['logSha256']}")
+        text = data.decode(errors="replace")
+        expected = GEOMETRY[arm]
+        backend = re.findall(
+            r"^backend cuda-packed131: (\d+) threads x (\d+) slots x 1 lanes = (\d+) walks,",
+            text,
+            re.MULTILINE,
+        )
+        wanted = [(str(expected["runtimeThreads"]), str(expected["batch"]), str(LIVE_SLOTS))]
+        if backend != wanted:
+            errors.append(f"{name}: backend geometry markers {backend!r}, expected {wanted!r}")
+        finished = re.findall(
+            r"finished: ([0-9.]+) M it/s, (\d+) distinguished points "
+            r"\((\d+) verified against the reference, (\d+) dropped\)",
+            text,
+        )
+        if len(finished) != 1:
+            errors.append(f"{name}: finished marker count {len(finished)}")
+        else:
+            rate, _, _, dropped = finished[0]
+            if float(rate) != row["rateMps"]:
+                errors.append(f"{name}: final rate {rate}, TSV has {row['rateMps']}")
+            if dropped != "0":
+                errors.append(f"{name}: timed row dropped {dropped} reports")
+        updates = [int(value) for value in re.findall(r"\s(\d+) iterations\s", text)]
+        expected_work = LIVE_SLOTS * STEPS * LAUNCHES[row["phase"]]
+        if not updates or updates[-1] != expected_work:
+            errors.append(f"{name}: final work {updates[-1] if updates else None}, expected {expected_work}")
+    return errors
 
 
 def decide_samples(rows):
@@ -68,6 +117,8 @@ def decide_samples(rows):
     confirm = [r for r in rows if r["phase"] == "confirm"]
     if [r["variant"] for r in warmup] != list(ARMS):
         errors.append("warmups must be exactly b16,b32,b64")
+    if [(r["pair"], r["order"]) for r in warmup] != [(0, 1), (0, 2), (0, 3)]:
+        errors.append("warmup pair/order keys differ")
     expected_screen = ["b16", "b32", "b64", "b64", "b32", "b16"]
     if [r["variant"] for r in screen] != expected_screen:
         errors.append(f"screen order differs: {[r['variant'] for r in screen]}")
@@ -152,7 +203,11 @@ def summarize(results, include_timing=True):
         errors.append(str(exc))
     if include_timing:
         try:
-            out["timing"] = decide_samples(read_samples(root / "samples.tsv"))
+            samples = read_samples(root / "samples.tsv")
+            out["timing"] = decide_samples(samples)
+            out["timing"]["logErrors"] = validate_sample_logs(root, samples)
+            if out["timing"]["logErrors"]:
+                errors.extend(out["timing"]["logErrors"])
             if not out["timing"]["valid"]:
                 errors.extend(out["timing"]["errors"])
         except (OSError, ValueError) as exc:
@@ -161,6 +216,8 @@ def summarize(results, include_timing=True):
         path = root / name
         if path.exists():
             out[name] = path.read_text(errors="replace").strip()
+        else:
+            errors.append(f"missing evidence manifest: {path}")
     out["valid"] = not errors
     out["errors"] = errors
     out["decision"] = "invalid" if errors else (out["timing"]["decision"] if include_timing else "preflight_pass")
