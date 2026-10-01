@@ -395,6 +395,20 @@ The row above still states the done-when for both halves together.
 - **B7b** runs F1 at `n = 83` and `131`, after B3b and B4 give `kic`'s
   kernels two and three words.
 
+**Track B's code is on record before its measurements** (2026-10-01).
+- B0 to B3b are implemented, each on the one before, and none is
+  measured yet. Each step's code reaches `src/` only through its
+  results pull request, in the queue's order.
+- Until then the stack is kept as a verified git bundle in
+  [`research/ic_tool_program/track-b/`](../../ic_tool_program/track-b/README.md),
+  so that no local branch is its only record.
+- B3b's amendments 1–2, made before any measurement, fix three defects
+  in its declaration that the implementation found:
+  - the `r ≤ h` refusal is lifted past one word;
+  - C031 and C053, whose `kic` width gate B3b moves, are superseded by
+    C086 and C087 under a new `supersedes` rule;
+  - C082's document name is shortened to the schema's limit.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an

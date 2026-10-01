@@ -19,7 +19,9 @@ In a case, `{here}` is its own set's `params/`; `{cases}` is still
 `v2/params/`, B1's frozen documents, which later cases copy and edit.
 
 A case whose `until` step is among `--steps` is not run; its successor
-carries the new expectation.  Everything else — materialising
+carries the new expectation.  A case that a run case `supersedes` is not
+run either: the converse rule, for an expectation a step moves without
+being the case's `until` step (B3b's amendment 2).  Everything else — materialising
 files, running, the expectations — is `v2/run.py`'s, unchanged.  This
 runner's rules change only by a step's declaration.
 """
@@ -51,10 +53,12 @@ def cases_for(steps: set[str]) -> list[dict]:
     def live(c: dict) -> bool:
         return c["step"] in steps and c.get("until") not in steps
 
+    sets = case_sets()
+    superseded = {c["supersedes"] for _, cases in sets for c in cases if live(c) and "supersedes" in c}
     out = []
-    for d, cases in case_sets():
+    for d, cases in sets:
         for c in cases:
-            if live(c):
+            if live(c) and c["id"] not in superseded:
                 out.append(json.loads(json.dumps(c).replace("{here}", str(d / "params"))))
     return out
 
