@@ -331,6 +331,22 @@ Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 `PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
 `vs_rho` row from this arm alone.
 
+**2026-09-30 n=61 L=65,536 restart (same historical v2 comparator; multi-target
+batch diagnostic, not isolated).** The panel PR #830 left aborted was rerun with
+resumable stages. K is memory-capped at 1,400: K=1,800 was censored at more than
+twice K=1,400's tune wall while swapping, and K=2,200 was skipped because its
+estimated 27.8 GB did not fit beside another agent's 21 GB job. Three paired
+blocks gave compact/rho wall ratios of **1.968 / 0.343 / 0.352** (median 0.352).
+Block 0 is a compact loss: its 11.6 GB IC index swapped, with 521 s of system
+time. User-CPU ratios were 0.379 / 0.328 / 0.331 and retired-instruction ratios
+0.201 / 0.135 / 0.135. 196,608/196,608 logs were independently replayed.
+`end_to_end_dlp` claim-check PASS; `vs_rho` claim-check FAIL by design (the
+schema requires one target). At fixed K the lead over v2 narrows from
+L=16,384 (instructions 0.109 → 0.135). The walls are not AGENTS.md §10 evidence,
+because `tools/isolated_bench.py` does not run on macOS. Nothing here touches the
+strong-rho verdict (2.30× at n=61 L=1,024). Evidence:
+[`growing_n_n61_L65536_20260930/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md).
+
 **2026-09-29 point-only full-rank check:** fresh held-out n=37/41/53 L=1 and
 L=1,024 public points, five cold paired blocks per cell, independent rank and
 target replay on Linux and a second machine. With the corrected x86 PCLMUL /
@@ -382,8 +398,8 @@ states is an untested candidate and needs a reachability proof and exceptional-
 case tests before performance claims. Precomputed starts alone are deprioritized:
 in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
 most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
-confidence gate and the pending n=61 L=65,536 batch-size probe as resources
-permit. Do not use 32-target panels as a substitute. Historical evidence:
+confidence gate as resources permit. The n=61 L=65,536 batch-size probe ran on
+2026-09-30, against the historical v2 rho only (see above). Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
 **2026-09-29 ERRATUM to the matched-arithmetic recheck below (PR #955): its
@@ -517,7 +533,7 @@ and
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The pending n = 61, L = 65,536 probe is deprioritised.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The n = 61, L = 65,536 probe ran on 2026-09-30 against the historical v2 rho only: memory-capped K = 1,400, unisolated host, median wall ratio 0.352 with one loss in three blocks, instruction ratio 0.135. A strong-rho run at that L remains deprioritised.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.** **[Constraint withdrawn by the 2026-09-30 erratum above: the 0.8392x wall median is against a rho 44-60x slower than a strong single-target rho; against the strong rho the direct arm is 44x slower in wall on four cores, so the operative gate is the strong rho, not that median.]**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`

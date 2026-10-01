@@ -12025,6 +12025,14 @@
             "question": "Both n=41 results in this record are live and point opposite ways. The current record reports an online charged crossover at ic_over_rho_online = 0.286 on a two_torsion_saturated base over 5 targets; the autolab remeasurement above reports per-target relation collection at 821.7 ms against rho's 247.5 ms on a signed_expanded base, 3.3x the other way.",
             "not_yet_a_contradiction": "Different factor-base families, different target counts, and different cost boundaries. The current record's own amortised ratio is 5.026 and its full available wall is 110.79x rho, so the 0.286 figure excludes base construction rather than disagreeing about it.",
             "to_settle_it": "Run both base families through one harness at one target count with one charged definition, and state which costs are inside the boundary. Until then neither n=41 number should be quoted without its configuration."
+          },
+          "n61_compact_L65536_batch_diagnostic_20260930": {
+            "status": "measured_observation_not_a_record",
+            "summary": "a=0 n=61 compact-orbit shared-log DLP (koblitz_orbit_dlp_fast, memory-capped K=1400) vs the historical KS v2 batched rho (koblitz_rho_batch_ks_v2_n61, d=4) at L=65536, three paired blocks on corpus n61-ks-growing-65536-v1. Compact/rho wall ratios 1.968/0.343/0.352 (median 0.352; block 0 is a compact loss under swapping), user-CPU 0.379/0.328/0.331, retired instructions 0.201/0.135/0.135. 196608/196608 independently replayed; end_to_end_dlp claim-check PASS, vs_rho claim-check FAIL by design (multi-target batch, no single-target online fields).",
+            "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+            "claim_boundary": "Public synthetic known-answer fixtures; multi-target batch diagnostic against a comparator superseded by the 2026-09-29 strong-rho ladder (IC/rho 2.297 at n=61 L=1024); walls unisolated on a shared macOS host (tools/isolated_bench.py unsupported), not AGENTS.md section-10 evidence; no key recovery, no asymptotic claim; does not promote this record.",
+            "independent_validation": "PENDING_INDEPENDENT_VALIDATION",
+            "evidence": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md"
           }
         }
       }
