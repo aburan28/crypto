@@ -1063,6 +1063,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_engine":"repository_current_block_tables_f4",
             "solver_internal_mask_maps":"repository FxMap/FxSet with exact u64 key equality",
             "solver_pair_selector":"all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+            "solver_new_pair_selector":if std::env::var("F4_F2_DENSE_PAIR_SELECT").as_deref() == Ok("1") { "reused dense exact LCM groups and submask cover lookup through 20 variables" } else { "current quadratic Becker-Weispfenning UPDATE scan" },
+            "solver_new_pair_selector_control":"F4_F2_DENSE_PAIR_SELECT=1",
             "solver_pair_installer":"order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
             "solver_symbolic_reducer_selector":"shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
             "solver_symbolic_monomial_sets":if std::env::var("F4_F2_BITMAP_SEEN").as_deref() == Ok("0") { "hash sets" } else { "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables" },

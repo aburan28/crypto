@@ -172,6 +172,18 @@ impl SystemSolver for F4F2 {
             ("field_pairs_reduced", st.field_pairs_reduced),
             ("pairs_product_skipped", st.pairs_product_skipped),
             ("pairs_chain_skipped", st.pairs_chain_skipped),
+            ("pair_dense_select_calls", st.pair_dense_select_calls),
+            (
+                "pair_quadratic_select_calls",
+                st.pair_quadratic_select_calls,
+            ),
+            ("pair_candidate_visits", st.pair_candidate_visits),
+            ("pair_lcm_groups", st.pair_lcm_groups),
+            ("pair_cover_lookups", st.pair_cover_lookups),
+            (
+                "pair_dense_scratch_bytes_max",
+                st.pair_dense_scratch_bytes_max,
+            ),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
@@ -202,7 +214,10 @@ impl SystemSolver for F4F2 {
             // their individually observed maxima is a conservative
             // per-call upper bound and avoids silently omitting the table
             // storage from charged memory.
-            peak_bytes: st.peak_matrix_bytes.saturating_add(st.peak_table_bytes),
+            peak_bytes: st
+                .peak_matrix_bytes
+                .saturating_add(st.peak_table_bytes)
+                .saturating_add(st.pair_dense_scratch_bytes_max),
             degree_reached: Some(st.degree_reached),
             solving_degree: Some(st.solving_degree),
             timed_out: st.timed_out,

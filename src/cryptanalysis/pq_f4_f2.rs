@@ -134,6 +134,13 @@ pub struct F4Stats {
     pub pairs_product_skipped: u64,
     /// Pairs the Gebauer–Möller chain criterion dropped.
     pub pairs_chain_skipped: u64,
+    /// New-pair selector use and exact dense-domain work.
+    pub pair_dense_select_calls: u64,
+    pub pair_quadratic_select_calls: u64,
+    pub pair_candidate_visits: u64,
+    pub pair_lcm_groups: u64,
+    pub pair_cover_lookups: u64,
+    pub pair_dense_scratch_bytes_max: u64,
     /// Rows symbolic preprocessing added as reducers.
     pub reducer_rows: u64,
     /// Largest matrix built, and the sum of rows over every matrix.
@@ -1191,6 +1198,178 @@ struct State {
     lm: Vec<u64>,
     active: Vec<bool>,
     pairs: Vec<Pair>,
+    pair_select_scratch: PairSelectScratch,
+}
+
+#[derive(Default)]
+struct PairSelectScratch {
+    dense: Option<DensePairSelectScratch>,
+}
+
+struct DensePairSelectScratch {
+    epoch: u32,
+    stamp: Vec<u32>,
+    first_noncoprime: Vec<u32>,
+    noncoprime_count: Vec<u32>,
+    has_coprime: Vec<u8>,
+    survivor: Vec<u32>,
+    touched: Vec<u32>,
+}
+
+impl DensePairSelectScratch {
+    fn new(size: usize) -> Self {
+        Self {
+            epoch: 0,
+            stamp: vec![0; size],
+            first_noncoprime: vec![NONE; size],
+            noncoprime_count: vec![0; size],
+            has_coprime: vec![0; size],
+            survivor: vec![NONE; size],
+            touched: Vec::new(),
+        }
+    }
+
+    fn begin(&mut self) {
+        self.epoch = self.epoch.wrapping_add(1);
+        if self.epoch == 0 {
+            self.stamp.fill(0);
+            self.epoch = 1;
+        }
+        self.touched.clear();
+    }
+
+    fn bytes(&self) -> u64 {
+        (self.stamp.capacity() * std::mem::size_of::<u32>()
+            + self.first_noncoprime.capacity() * std::mem::size_of::<u32>()
+            + self.noncoprime_count.capacity() * std::mem::size_of::<u32>()
+            + self.has_coprime.capacity() * std::mem::size_of::<u8>()
+            + self.survivor.capacity() * std::mem::size_of::<u32>()
+            + self.touched.capacity() * std::mem::size_of::<u32>()) as u64
+    }
+}
+
+fn dense_pair_select_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("F4_F2_DENSE_PAIR_SELECT").as_deref() == Ok("1"))
+}
+
+/// The current direct Becker–Weispfenning UPDATE selection.
+fn select_new_pairs_quadratic(
+    lh: u64,
+    lm: &[u64],
+    active: &[usize],
+    st: &mut F4Stats,
+) -> Vec<(usize, u64)> {
+    st.pair_quadratic_select_calls += 1;
+    st.pair_candidate_visits += active.len() as u64;
+    let mut candidates: Vec<(usize, u64)> = active.iter().map(|&g| (g, lh | lm[g])).collect();
+    let mut kept = Vec::with_capacity(candidates.len());
+    while let Some((g1, l1)) = candidates.pop() {
+        let coprime = lh & lm[g1] == 0;
+        let covered = candidates
+            .iter()
+            .chain(kept.iter())
+            .any(|&(_, l2)| l2 & !l1 == 0);
+        if coprime || !covered {
+            kept.push((g1, l1));
+        } else {
+            st.pairs_chain_skipped += 1;
+        }
+    }
+    kept.into_iter()
+        .filter(|&(g, _)| {
+            let keep = lh & lm[g] != 0;
+            st.pairs_product_skipped += u64::from(!keep);
+            keep
+        })
+        .collect()
+}
+
+/// Exact dense-domain equivalent of [`select_new_pairs_quadratic`].
+fn select_new_pairs_dense(
+    n_vars: usize,
+    lh: u64,
+    lm: &[u64],
+    active: &[usize],
+    scratch: &mut PairSelectScratch,
+    st: &mut F4Stats,
+) -> Vec<(usize, u64)> {
+    debug_assert!(n_vars <= 20);
+    st.pair_dense_select_calls += 1;
+    st.pair_candidate_visits += active.len() as u64;
+    if active.is_empty() {
+        return Vec::new();
+    }
+    let size = 1usize << n_vars;
+    if scratch.dense.as_ref().map(|dense| dense.stamp.len()) != Some(size) {
+        scratch.dense = Some(DensePairSelectScratch::new(size));
+    }
+    let dense = scratch.dense.as_mut().unwrap();
+    dense.begin();
+    dense.touched.reserve(active.len());
+    for &g in active {
+        debug_assert!(g < u32::MAX as usize);
+        let lcm = (lh | lm[g]) as usize;
+        debug_assert!(lcm < size);
+        if dense.stamp[lcm] != dense.epoch {
+            dense.stamp[lcm] = dense.epoch;
+            dense.first_noncoprime[lcm] = NONE;
+            dense.noncoprime_count[lcm] = 0;
+            dense.has_coprime[lcm] = 0;
+            dense.survivor[lcm] = NONE;
+            dense.touched.push(lcm as u32);
+        }
+        if lh & lm[g] == 0 {
+            dense.has_coprime[lcm] = 1;
+        } else {
+            dense.noncoprime_count[lcm] += 1;
+            let first = dense.first_noncoprime[lcm];
+            if first == NONE || g < first as usize {
+                dense.first_noncoprime[lcm] = g as u32;
+            }
+        }
+    }
+    st.pair_lcm_groups += dense.touched.len() as u64;
+    st.pair_dense_scratch_bytes_max = st.pair_dense_scratch_bytes_max.max(dense.bytes());
+    for &lcm_u32 in &dense.touched {
+        let lcm = lcm_u32 as usize;
+        let remainder = lcm & !(lh as usize);
+        let mut proper_cover = false;
+        if remainder != 0 {
+            let mut submask = (remainder - 1) & remainder;
+            loop {
+                st.pair_cover_lookups += 1;
+                if dense.stamp[(lh as usize) | submask] == dense.epoch {
+                    proper_cover = true;
+                    break;
+                }
+                if submask == 0 {
+                    break;
+                }
+                submask = (submask - 1) & remainder;
+            }
+        }
+        let count = dense.noncoprime_count[lcm] as u64;
+        if proper_cover || dense.has_coprime[lcm] != 0 {
+            st.pairs_chain_skipped += count;
+        } else {
+            let first = dense.first_noncoprime[lcm];
+            if first != NONE {
+                dense.survivor[lcm] = first;
+                st.pairs_chain_skipped += count.saturating_sub(1);
+            }
+        }
+    }
+    let mut selected = Vec::new();
+    for &g in active.iter().rev() {
+        let lcm = (lh | lm[g]) as usize;
+        if lh & lm[g] == 0 {
+            st.pairs_product_skipped += 1;
+        } else if dense.survivor[lcm] == g as u32 {
+            selected.push((g, lcm as u64));
+        }
+    }
+    selected
 }
 
 impl State {
@@ -1251,35 +1430,29 @@ impl State {
         }
 
         // New pairs (h, g): keep one per minimal lcm (chain criterion).
-        let mut c: Vec<(usize, u64)> = (0..h)
-            .filter(|&g| self.active[g])
-            .map(|g| (g, lh | self.lm[g]))
-            .collect();
-        let mut d: Vec<(usize, u64)> = Vec::with_capacity(c.len());
-        while let Some((g1, l1)) = c.pop() {
-            let coprime = lh & self.lm[g1] == 0;
-            let covered = c.iter().chain(d.iter()).any(|&(_, l2)| l2 & !l1 == 0);
-            if coprime || !covered {
-                d.push((g1, l1));
-            } else {
-                st.pairs_chain_skipped += 1;
-            }
-        }
+        let active: Vec<usize> = (0..h).filter(|&g| self.active[g]).collect();
+        let selected = if dense_pair_select_enabled() && self.n_vars <= 20 {
+            select_new_pairs_dense(
+                self.n_vars,
+                lh,
+                &self.lm,
+                &active,
+                &mut self.pair_select_scratch,
+                st,
+            )
+        } else {
+            select_new_pairs_quadratic(lh, &self.lm, &active, st)
+        };
         // Old pairs whose lcm `h` divides strictly on both sides.
         if immediate_filter {
             self.filter_pairs_since(h, st);
         }
-        // Product criterion on what survived.
-        for (g, l) in d {
-            if lh & self.lm[g] == 0 {
-                st.pairs_product_skipped += 1;
-            } else {
-                self.pairs.push(Pair {
-                    kind: PairKind::Critical(g, h),
-                    lcm: l,
-                    deg: l.count_ones(),
-                });
-            }
+        for (g, l) in selected {
+            self.pairs.push(Pair {
+                kind: PairKind::Critical(g, h),
+                lcm: l,
+                deg: l.count_ones(),
+            });
         }
         for g in 0..h {
             if self.active[g] && lh & !self.lm[g] == 0 {
@@ -1362,6 +1535,7 @@ pub fn groebner_basis_f4(
         lm: Vec::new(),
         active: Vec::new(),
         pairs: Vec::new(),
+        pair_select_scratch: PairSelectScratch::default(),
     };
     if batch_inserts {
         s.insert_batch(start, &mut st);
@@ -1994,6 +2168,50 @@ mod tests {
     }
 
     #[test]
+    fn dense_pair_selection_matches_quadratic_update() {
+        let mut rng = StdRng::seed_from_u64(0xd3e5_e1ec_7102_6101);
+        for n_vars in 3usize..=12 {
+            let cap = (1u64 << n_vars) - 1;
+            let mut scratch = PairSelectScratch::default();
+            for round in 0..256 {
+                let count = rng.gen_range(0..96usize);
+                let lm: Vec<u64> = (0..count)
+                    .map(|index| {
+                        if index > 0 && index % 7 == 0 {
+                            // Duplicate LCM groups and leaders are deliberate.
+                            rng.gen::<u64>() & cap
+                        } else {
+                            (rng.gen::<u64>() & cap).max(1)
+                        }
+                    })
+                    .collect();
+                let active: Vec<usize> = (0..count).filter(|_| rng.gen_ratio(3, 4)).collect();
+                let lh = (rng.gen::<u64>() & cap).max(1);
+                let mut quadratic_stats = F4Stats::default();
+                let mut dense_stats = F4Stats::default();
+                let quadratic = select_new_pairs_quadratic(lh, &lm, &active, &mut quadratic_stats);
+                let dense = select_new_pairs_dense(
+                    n_vars,
+                    lh,
+                    &lm,
+                    &active,
+                    &mut scratch,
+                    &mut dense_stats,
+                );
+                assert_eq!(dense, quadratic, "n={n_vars} round={round}");
+                assert_eq!(
+                    dense_stats.pairs_chain_skipped, quadratic_stats.pairs_chain_skipped,
+                    "chain count n={n_vars} round={round}"
+                );
+                assert_eq!(
+                    dense_stats.pairs_product_skipped, quadratic_stats.pairs_product_skipped,
+                    "product count n={n_vars} round={round}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn batched_insert_keeps_pairs_and_skip_counts() {
         let empty = || State {
             n_vars: 10,
@@ -2001,6 +2219,7 @@ mod tests {
             lm: Vec::new(),
             active: Vec::new(),
             pairs: Vec::new(),
+            pair_select_scratch: PairSelectScratch::default(),
         };
         let (mut serial, mut batched) = (empty(), empty());
         let (mut serial_st, mut batched_st) = (F4Stats::default(), F4Stats::default());
