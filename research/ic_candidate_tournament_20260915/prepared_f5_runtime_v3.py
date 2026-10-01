@@ -26,7 +26,7 @@ from identity import candidate_manifest, run_id, sha256, workload_manifest, writ
 from oracle import require  # noqa: E402
 from prepared_f5_inputs_v2 import native_admission  # noqa: E402
 from prepared_target_v1 import audit_native_target, native_job  # noqa: E402
-from prepared_runtime_transport_v2 import frozen_audit, transport  # noqa: E402
+from prepared_runtime_transport_v2 import auditor_name, frozen_audit, transport  # noqa: E402
 from sat_runtime_execution_v3 import (audit_execution, digest, execute,  # noqa: E402
     read, register as register_runtime)
 from static_sat_assets_v3 import check_extracted_assets, verified_assets  # noqa: E402
@@ -61,6 +61,8 @@ def mathematical_registration(panel, spec, files, document, certificate_sha256):
     require(spec['entrypoint'] == dict(module='prepared_f5_runtime_v3',callable='run')
             and spec['runtime_watchdog_seconds'] == resources['total_wall_limit_seconds'],
             'prepared F5 entrypoint or controller watchdog differs')
+    # Reject before candidate identity or execution claim, not only at audit.
+    auditor_name(spec)
     job = native_job(document, certificate_sha256, point=panel['target_input']['point'],
         algorithm_seed=panel['algorithm_seed'], max_attempts=panel['max_attempts'])
     fixture = copy.deepcopy(document['certificate']['inputs']['fixture'])

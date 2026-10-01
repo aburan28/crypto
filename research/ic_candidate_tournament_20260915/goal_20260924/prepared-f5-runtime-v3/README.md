@@ -31,7 +31,9 @@ The new executable is not substituted into any historical result or runtime.
 
 `prepared_f5_inputs_v2.py` changes only the accepted worker-source pin and its
 version description relative to input v1. Runtime v3 uses that input and its own
-registered entrypoint. Its audit CLI delegates to transport v2, which requires
+registered entrypoint. Registration rejects missing frozen-helper coverage before
+deriving candidate identity or consuming an execution claim. Its audit CLI
+delegates to transport v2, which requires
 its helper to have been frozen before execution, runs the registered auditor
 under `-I -S -B`, verifies the interpreter and loaded sources before/after, and
 checks the complete/incomplete claim boundary. Transport v1 remains unchanged
@@ -52,6 +54,15 @@ rejection, artifact/claim tampering, timeout and mandatory preexecution helper
 coverage. They execute no native solver or fresh mathematical target. Require
 the linked PR's exact-head applicable checks before treating this implementation
 as accepted; local controls are not full native scientific execution evidence.
+
+The original implementation is accepted in [PR #1138](https://github.com/aburan28/crypto/pull/1138)
+at merge `6dc9a7c661f28ae4bc38de8be6e4920a56c7a56b`; its four applicable
+workflows passed on head `2ffbf6cbf518be91feb29fa0a62db9b6ce1b0500`, including
+459 harness and 16 boundary tests. The subsequent early registration-helper
+guard has [37 focused local controls](controls/registration-guard-tests.log),
+including a specific rejection before native-job or candidate construction.
+Its acceptance still requires its own exact-head CI; the original native assets,
+source pins, archived tests and scientific-execution status are unchanged.
 
 For a future disclosed control, first publish a new frozen protocol, derive its
 candidate/workload/run from the accepted full runtime and these assets, and retain
