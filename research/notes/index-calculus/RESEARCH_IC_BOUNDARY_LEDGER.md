@@ -5997,7 +5997,8 @@ python3 render_rows.py                                 # the table above and the
   at the other sizes.
 - **The tool programme** (user direction, 2026-10-01): make `ic` faster
   and general, round by round against frozen baselines. This round's
-  rows are part of its baseline v0.
+  rows are part of its baseline v0. Its plan is
+  [`IC_TOOL_PROGRAM.md`](IC_TOOL_PROGRAM.md).
 
 ## Appendix A. The conversion factors, as measured
 
