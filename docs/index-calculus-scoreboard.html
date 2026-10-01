@@ -481,6 +481,7 @@
 
   <aside class="gain-overview" aria-labelledby="gain-title">
     <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
+    <p><a href="#genus-crossover">Hyperelliptic large primes</a>: no gain. Registered to save 4&ndash;6% at genus 2, <code>p</code> = 4001; measured about 1%, and none at genus 3 or 4. 54-row pinned-output check passed; every run verified.</p>
     <p><a href="#genus-crossover">Hyperelliptic sparse solve</a>: the solve&rsquo;s charge is <b>5.1&times; lower</b> (median; 2.0&ndash;18.2&times;) with identical relations, oracle counts and logarithms on all 18 rows and 11 isolated sweeps. Engineering: the arithmetic exponent is unchanged. Pricing it honestly withdraws the genus-3 exponent claim below.</p>
     <p><a href="#koblitz-descent-20260930">Koblitz descent, fixed cost</a>: the whole pipeline is <b>1.35&ndash;1.39&times; faster</b> at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>, in paired time from isolated runs, with all 186 pairs identical. From 2<sup>32</sup> up it moves 0.99&ndash;1.06&times;. The no-regression target was missed at 2<sup>47.2</sup> by 1.4%, which is inside that size&rsquo;s A/A band and in code the change does not touch.</p>
     <p><a href="#koblitz-constructions-20260926">Koblitz constructions, built once</a>: the whole pipeline is <b>1.04&ndash;2.25&times; faster</b> at all nine sizes, every phase priced. All 180 of 180 pairs have identical counts and logarithms. Still no crossing with batch rho: 4.28&times; at best.</p>
@@ -3594,6 +3595,17 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <code>p<sup>2</sup></code> against rho&rsquo;s <code>p<sup>1.5</sup></code> at genus 3, which is
     why the literature shrinks the factor base at small genus (Th&eacute;riault 2003; Gaudry,
     Thom&eacute;, Th&eacute;riault and Diem 2007).</p>
+    <p><strong>Round eight tested the textbook remedy and it does not pay here.</strong> A
+    reduced factor base with single large primes (Th&eacute;riault) was registered with per-row
+    predictions and measured on 11 instances, including genus 2 up to <code>p</code> = 4001 where the
+    model predicted a 4&ndash;6% saving. Measured: <strong>about 1%</strong> at best, nothing at genus 3 or 4
+    once seed variance is separated (a 0.864 at genus 3 <code>p</code> = 61 reads 1.003 at 60 seeds;
+    the registered H1 and H2 are recorded as falsified). Combined rows are denser than the model
+    assumed, and the charged partial bookkeeping costs 2&ndash;4%. Large primes do beat a reduced base
+    without them by 1.6&ndash;3.8&times;. <span class="chip">no change</span> One new size: genus 3 at
+    <code>N</code> = 3.2&middot;10<sup>7</sup> reads 0.23 raw, 0.46 renormalised &mdash; a single row,
+    not a refit. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_large_prime_r8/manifest.json">round eight</a>.</p>
     <p><strong>Superseded corrections, kept.</strong> Round five fitted against
     <code>log&#8322; p</code> and genus 4 missed at &minus;1.611 against &minus;1.0; restated against
     <code>N</code>, which the harness measures as <code>p<sup>1.91</sup></code>,

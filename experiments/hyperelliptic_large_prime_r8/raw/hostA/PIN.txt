@@ -1,0 +1,134 @@
+Genus 2: C : y^2 = x^5 + 3x^3 + 2x^2 + x + c.  Genus 3: y^2 = x^7 + x^3 + cx + 1;
+c the first value yielding a prime-order subgroup above 1000,
+chosen before either algorithm runs; the order comes from BSGS over
+the Hasse-Weil interval, not from a genus-2 L-polynomial.
+Unit: S = total group operations / sqrt(N), N = prime order of D1.
+Index calculus carries its linear algebra, converted at the measured
+mul-mods-per-group-op factor shown in the last column.
+
+Each row averages 5 index-calculus runs and 40 rho runs on the same instance.
+
+    p    search        N      m     IC ops    rho ops      S_ic     S_rho S_ic/S_rho   S_walk  IC/flr  IC/H1
+
+--- genus 2 ---
+   41  baseline     1321     15       1672        331     46.01      9.09     5.06     1.39  103.86  52.07
+        c = 4, relation stage 1661 ops (0 precompute, 24.00 ops/trial) + oracle 4834 mul-mods (11 equiv measured, 2 charged) + linear algebra 6144 mul-mods (1 equiv), conv 2540; smoothness 0.349; IC floor S = 0.44; wall 87 ms IC vs 19 ms rho
+   41   ab-walk     1321     15        416        331     11.46      9.09     1.26     1.39   25.91  12.98
+        c = 4, relation stage 350 ops (281 precompute, 0.99 ops/trial) + oracle 979 mul-mods (64 equiv measured, 0 charged) + linear algebra 130 mul-mods (2 equiv), conv 3592; smoothness 0.354; IC floor S = 0.44; wall 20 ms IC vs 20 ms rho
+   41   fb-walk     1321     15         94        331      2.60      9.09     0.29     1.39    5.87   2.94
+        c = 4, relation stage 74 ops (1 precompute, 0.98 ops/trial) + oracle 1048 mul-mods (18 equiv measured, 0 charged) + linear algebra 874 mul-mods (3 equiv), conv 2668; smoothness 0.425; IC floor S = 0.44; wall 6 ms IC vs 20 ms rho
+   61  baseline     1399     22       2181        328     58.31      8.76     6.66     1.27   94.14  47.23
+        c = 12, relation stage 2165 ops (0 precompute, 24.00 ops/trial) + oracle 8926 mul-mods (15 equiv measured, 3 charged) + linear algebra 16399 mul-mods (1 equiv), conv 3152; smoothness 0.346; IC floor S = 0.62; wall 113 ms IC vs 18 ms rho
+   61   ab-walk     1399     22        416        328     11.13      8.76     1.27     1.27   17.96   9.01
+        c = 12, relation stage 367 ops (281 precompute, 0.99 ops/trial) + oracle 1220 mul-mods (47 equiv measured, 0 charged) + linear algebra 148 mul-mods (2 equiv), conv 3044; smoothness 0.364; IC floor S = 0.62; wall 22 ms IC vs 19 ms rho
+   61   fb-walk     1399     22         96        328      2.58      8.76     0.29     1.27    4.16   2.09
+        c = 12, relation stage 79 ops (1 precompute, 0.99 ops/trial) + oracle 1089 mul-mods (15 equiv measured, 0 charged) + linear algebra 1273 mul-mods (3 equiv), conv 3098; smoothness 0.405; IC floor S = 0.62; wall 7 ms IC vs 21 ms rho
+  101  baseline     4663     46       3256        372     47.69      5.45     8.76     1.29   68.32  34.39
+        c = 2, relation stage 3226 ops (0 precompute, 28.00 ops/trial) + oracle 18109 mul-mods (28 equiv measured, 5 charged) + linear algebra 121495 mul-mods (2 equiv), conv 3325; smoothness 0.484; IC floor S = 0.70; wall 189 ms IC vs 21 ms rho
+  101   ab-walk     4663     46        468        372      6.86      5.45     1.26     1.29    9.82   4.94
+        c = 2, relation stage 401 ops (285 precompute, 0.99 ops/trial) + oracle 1836 mul-mods (64 equiv measured, 1 charged) + linear algebra 294 mul-mods (3 equiv), conv 3155; smoothness 0.469; IC floor S = 0.70; wall 25 ms IC vs 23 ms rho
+  101   fb-walk     4663     46        156        372      2.29      5.45     0.42     1.29    3.27   1.65
+        c = 2, relation stage 122 ops (1 precompute, 0.99 ops/trial) + oracle 1874 mul-mods (24 equiv measured, 1 charged) + linear algebra 4655 mul-mods (10 equiv), conv 3119; smoothness 0.455; IC floor S = 0.70; wall 10 ms IC vs 23 ms rho
+  151  baseline     7949     78       4986        411     55.92      4.61    12.14     1.42   61.56  31.15
+        c = 1, relation stage 4934 ops (0 precompute, 28.00 ops/trial) + oracle 39281 mul-mods (47 equiv measured, 13 charged) + linear algebra 542967 mul-mods (6 equiv), conv 3133; smoothness 0.496; IC floor S = 0.91; wall 287 ms IC vs 25 ms rho
+  151   ab-walk     7949     78        496        411      5.56      4.61     1.21     1.42    6.12   3.10
+        c = 1, relation stage 450 ops (286 precompute, 0.99 ops/trial) + oracle 2957 mul-mods (41 equiv measured, 1 charged) + linear algebra 564 mul-mods (5 equiv), conv 3144; smoothness 0.531; IC floor S = 0.91; wall 27 ms IC vs 23 ms rho
+  151   fb-walk     7949     78        226        411      2.54      4.61     0.55     1.42    2.79   1.41
+        c = 1, relation stage 183 ops (1 precompute, 0.99 ops/trial) + oracle 3257 mul-mods (21 equiv measured, 1 charged) + linear algebra 13062 mul-mods (22 equiv), conv 3208; smoothness 0.478; IC floor S = 0.91; wall 14 ms IC vs 24 ms rho
+  211  baseline    11813    112       6739        431     62.00      3.96    15.64     1.33   57.42  29.25
+        c = 4, relation stage 6654 ops (0 precompute, 30.00 ops/trial) + oracle 68468 mul-mods (77 equiv measured, 23 charged) + linear algebra 1545049 mul-mods (9 equiv), conv 2931; smoothness 0.546; IC floor S = 1.08; wall 401 ms IC vs 28 ms rho
+  211   ab-walk    11813    112        560        431      5.16      3.96     1.30     1.33    4.80   2.44
+        c = 4, relation stage 504 ops (289 precompute, 1.00 ops/trial) + oracle 3859 mul-mods (49 equiv measured, 1 charged) + linear algebra 646 mul-mods (7 equiv), conv 3352; smoothness 0.563; IC floor S = 1.07; wall 33 ms IC vs 27 ms rho
+  211   fb-walk    11813    112        287        431      2.64      3.96     0.67     1.33    2.46   1.25
+        c = 4, relation stage 225 ops (1 precompute, 1.00 ops/trial) + oracle 4042 mul-mods (26 equiv measured, 1 charged) + linear algebra 23443 mul-mods (36 equiv), conv 3199; smoothness 0.540; IC floor S = 1.08; wall 17 ms IC vs 27 ms rho
+  251  baseline    61667    123       9249        599     37.25      2.41    15.43     1.25   71.48  36.49
+        c = 11, relation stage 9146 ops (0 precompute, 34.00 ops/trial) + oracle 100757 mul-mods (94 equiv measured, 35 charged) + linear algebra 2029632 mul-mods (10 equiv), conv 2851; smoothness 0.493; IC floor S = 0.52; wall 552 ms IC vs 32 ms rho
+  251   ab-walk    61667    123        622        599      2.50      2.41     1.04     1.25    4.80   2.45
+        c = 11, relation stage 564 ops (294 precompute, 1.00 ops/trial) + oracle 4831 mul-mods (53 equiv measured, 2 charged) + linear algebra 896 mul-mods (5 equiv), conv 2814; smoothness 0.489; IC floor S = 0.52; wall 33 ms IC vs 34 ms rho
+  251   fb-walk    61667    123        327        599      1.32      2.41     0.55     1.25    2.52   1.29
+        c = 11, relation stage 256 ops (1 precompute, 1.00 ops/trial) + oracle 4595 mul-mods (31 equiv measured, 2 charged) + linear algebra 26094 mul-mods (40 equiv), conv 2782; smoothness 0.520; IC floor S = 0.52; wall 20 ms IC vs 35 ms rho
+
+--- genus 3 ---
+   23  baseline     6299     12       2821        376     35.54      4.74     7.50     1.16  216.10  36.11
+        c = 1, relation stage 2806 ops (0 precompute, 28.00 ops/trial) + oracle 6062 mul-mods (15 equiv measured, 2 charged) + linear algebra 3549 mul-mods (1 equiv), conv 3386; smoothness 0.229; IC floor S = 0.16; wall 222 ms IC vs 29 ms rho
+   23   ab-walk     6299     12        672        376      8.47      4.74     1.79     1.16   51.48   8.60
+        c = 1, relation stage 387 ops (285 precompute, 0.99 ops/trial) + oracle 11168 mul-mods (283 equiv measured, 3 charged) + linear algebra 229 mul-mods (2 equiv), conv 3236; smoothness 0.207; IC floor S = 0.16; wall 38 ms IC vs 29 ms rho
+   23   fb-walk     6299     12        212        376      2.67      4.74     0.56     1.16   16.21   2.71
+        c = 1, relation stage 95 ops (1 precompute, 0.99 ops/trial) + oracle 10186 mul-mods (115 equiv measured, 3 charged) + linear algebra 815 mul-mods (2 equiv), conv 3297; smoothness 0.235; IC floor S = 0.16; wall 14 ms IC vs 29 ms rho
+   31  baseline     7333     16       4110        374     48.00      4.36    11.00     1.05  240.78  40.24
+        c = 17, relation stage 4088 ops (0 precompute, 28.00 ops/trial) + oracle 12075 mul-mods (21 equiv measured, 3 charged) + linear algebra 7225 mul-mods (1 equiv), conv 4437; smoothness 0.177; IC floor S = 0.20; wall 330 ms IC vs 33 ms rho
+   31   ab-walk     7333     16        771        374      9.00      4.36     2.06     1.05   44.98   7.54
+        c = 17, relation stage 428 ops (286 precompute, 0.99 ops/trial) + oracle 16953 mul-mods (341 equiv measured, 7 charged) + linear algebra 233 mul-mods (2 equiv), conv 2282; smoothness 0.176; IC floor S = 0.20; wall 44 ms IC vs 32 ms rho
+   31   fb-walk     7333     16        291        374      3.40      4.36     0.78     1.05   16.97   2.85
+        c = 17, relation stage 127 ops (1 precompute, 0.99 ops/trial) + oracle 15693 mul-mods (161 equiv measured, 9 charged) + linear algebra 1431 mul-mods (3 equiv), conv 1814; smoothness 0.206; IC floor S = 0.20; wall 19 ms IC vs 30 ms rho
+   41  baseline     6679     27       3651        391     44.67      4.79     9.33     1.31  129.54  21.70
+        c = 1, relation stage 3629 ops (0 precompute, 28.00 ops/trial) + oracle 13149 mul-mods (21 equiv measured, 3 charged) + linear algebra 28224 mul-mods (1 equiv), conv 4461; smoothness 0.281; IC floor S = 0.34; wall 312 ms IC vs 32 ms rho
+   41   ab-walk     6679     27        796        391      9.73      4.79     2.03     1.31   28.23   4.73
+        c = 1, relation stage 426 ops (286 precompute, 0.99 ops/trial) + oracle 17389 mul-mods (367 equiv measured, 4 charged) + linear algebra 446 mul-mods (2 equiv), conv 4560; smoothness 0.266; IC floor S = 0.34; wall 47 ms IC vs 33 ms rho
+   41   fb-walk     6679     27        324        391      3.97      4.79     0.83     1.31   11.52   1.93
+        c = 1, relation stage 138 ops (1 precompute, 0.99 ops/trial) + oracle 17072 mul-mods (181 equiv measured, 3 charged) + linear algebra 3836 mul-mods (5 equiv), conv 5820; smoothness 0.268; IC floor S = 0.34; wall 24 ms IC vs 32 ms rho
+   61  baseline   124459     33       7461        813     21.15      2.30     9.18     1.48  217.27  36.49
+        c = 5, relation stage 7423 ops (0 precompute, 36.00 ops/trial) + oracle 30732 mul-mods (37 equiv measured, 9 charged) + linear algebra 48552 mul-mods (1 equiv), conv 3500; smoothness 0.209; IC floor S = 0.10; wall 642 ms IC vs 65 ms rho
+   61   ab-walk   124459     33        958        813      2.72      2.30     1.18     1.48   27.92   4.69
+        c = 5, relation stage 503 ops (295 precompute, 1.00 ops/trial) + oracle 29460 mul-mods (452 equiv measured, 8 charged) + linear algebra 598 mul-mods (2 equiv), conv 3820; smoothness 0.202; IC floor S = 0.10; wall 63 ms IC vs 65 ms rho
+   61   fb-walk   124459     33        585        813      1.66      2.30     0.72     1.48   17.00   2.86
+        c = 5, relation stage 253 ops (1 precompute, 1.00 ops/trial) + oracle 32478 mul-mods (322 equiv measured, 11 charged) + linear algebra 6889 mul-mods (10 equiv), conv 3034; smoothness 0.168; IC floor S = 0.10; wall 38 ms IC vs 63 ms rho
+  101  baseline   364747     53      13015       1146     21.55      1.90    11.36     1.41  238.09  40.07
+        c = 8, relation stage 12952 ops (0 precompute, 40.00 ops/trial) + oracle 85161 mul-mods (61 equiv measured, 19 charged) + linear algebra 180792 mul-mods (2 equiv), conv 4466; smoothness 0.193; IC floor S = 0.09; wall 1139 ms IC vs 94 ms rho
+  101   ab-walk   364747     53       1230       1146      2.04      1.90     1.07     1.41   22.51   3.79
+        c = 8, relation stage 639 ops (301 precompute, 1.00 ops/trial) + oracle 46535 mul-mods (588 equiv measured, 10 charged) + linear algebra 996 mul-mods (3 equiv), conv 4603; smoothness 0.184; IC floor S = 0.09; wall 85 ms IC vs 96 ms rho
+  101   fb-walk   364747     53        786       1146      1.30      1.90     0.69     1.41   14.40   2.42
+        c = 8, relation stage 341 ops (1 precompute, 1.00 ops/trial) + oracle 47855 mul-mods (424 equiv measured, 10 charged) + linear algebra 18878 mul-mods (21 equiv), conv 4937; smoothness 0.183; IC floor S = 0.09; wall 56 ms IC vs 93 ms rho
+  151  baseline  1180351     77      20303       2153     18.69      1.98     9.43     1.71  245.43  42.87
+        c = 5, relation stage 20196 ops (0 precompute, 44.00 ops/trial) + oracle 172698 mul-mods (104 equiv measured, 132 charged) + linear algebra 523224 mul-mods (3 equiv), conv 1305; smoothness 0.188; IC floor S = 0.08; wall 1836 ms IC vs 176 ms rho
+  151   ab-walk  1180351     77       1592       2153      1.47      1.98     0.74     1.71   20.04   3.39
+        c = 5, relation stage 808 ops (307 precompute, 1.00 ops/trial) + oracle 83062 mul-mods (780 equiv measured, 19 charged) + linear algebra 1589 mul-mods (4 equiv), conv 4323; smoothness 0.172; IC floor S = 0.07; wall 126 ms IC vs 180 ms rho
+  151   fb-walk  1180351     77       1202       2153      1.11      1.98     0.56     1.71   15.14   2.56
+        c = 5, relation stage 500 ops (1 precompute, 1.00 ops/trial) + oracle 82771 mul-mods (656 equiv measured, 18 charged) + linear algebra 48172 mul-mods (45 equiv), conv 4490; smoothness 0.173; IC floor S = 0.07; wall 80 ms IC vs 176 ms rho
+  211  baseline  4620611    104      31938       4216     14.86      1.96     7.58     1.82  294.23  50.37
+        c = 12, relation stage 31738 ops (0 precompute, 48.00 ops/trial) + oracle 347380 mul-mods (194 equiv measured, 111 charged) + linear algebra 1245825 mul-mods (6 equiv), conv 3136; smoothness 0.172; IC floor S = 0.05; wall 2704 ms IC vs 346 ms rho
+  211   ab-walk  4620611    104       2022       4216      0.94      1.96     0.48     1.82   18.62   3.19
+        c = 12, relation stage 1018 ops (314 precompute, 1.00 ops/trial) + oracle 117039 mul-mods (998 equiv measured, 37 charged) + linear algebra 2193 mul-mods (5 equiv), conv 3126; smoothness 0.161; IC floor S = 0.05; wall 150 ms IC vs 326 ms rho
+  211   fb-walk  4620611    104       1750       4216      0.81      1.96     0.42     1.82   16.12   2.76
+        c = 12, relation stage 684 ops (1 precompute, 1.00 ops/trial) + oracle 115835 mul-mods (1001 equiv measured, 37 charged) + linear algebra 72615 mul-mods (65 equiv), conv 3118; smoothness 0.166; IC floor S = 0.05; wall 109 ms IC vs 343 ms rho
+
+--- genus 4 ---
+   17  baseline     5639      7      16368        391    217.97      5.20    41.88     1.42 2043.03  85.20
+        c = 7, relation stage 16313 ops (0 precompute, 28.00 ops/trial) + oracle 38260 mul-mods (55 equiv measured, 6 charged) + linear algebra 1024 mul-mods (0 equiv), conv 6914; smoothness 0.028; IC floor S = 0.11; wall 1665 ms IC vs 46 ms rho
+   17   ab-walk     5639      7       1137        391     15.14      5.20     2.91     1.42  141.85   5.92
+        c = 7, relation stage 670 ops (290 precompute, 1.00 ops/trial) + oracle 41323 mul-mods (467 equiv measured, 7 charged) + linear algebra 137 mul-mods (1 equiv), conv 5619; smoothness 0.053; IC floor S = 0.11; wall 92 ms IC vs 41 ms rho
+   17   fb-walk     5639      7        978        391     13.02      5.20     2.50     1.42  122.04   5.09
+        c = 7, relation stage 503 ops (1 precompute, 1.00 ops/trial) + oracle 55608 mul-mods (474 equiv measured, 10 charged) + linear algebra 519 mul-mods (1 equiv), conv 5811; smoothness 0.034; IC floor S = 0.11; wall 75 ms IC vs 41 ms rho
+   23  baseline    30223     11      12176        502     70.04      2.89    24.24     1.23 1012.31  42.25
+        c = 2, relation stage 12134 ops (0 precompute, 32.00 ops/trial) + oracle 32742 mul-mods (41 equiv measured, 5 charged) + linear algebra 2880 mul-mods (0 equiv), conv 6147; smoothness 0.054; IC floor S = 0.07; wall 1285 ms IC vs 53 ms rho
+   23   ab-walk    30223     11       1268        502      7.30      2.89     2.53     1.23  105.45   4.40
+        c = 2, relation stage 728 ops (294 precompute, 1.00 ops/trial) + oracle 60918 mul-mods (539 equiv measured, 10 charged) + linear algebra 274 mul-mods (1 equiv), conv 5828; smoothness 0.049; IC floor S = 0.07; wall 102 ms IC vs 51 ms rho
+   23   fb-walk    30223     11        925        502      5.32      2.89     1.84     1.23   76.87   3.21
+        c = 2, relation stage 458 ops (1 precompute, 1.00 ops/trial) + oracle 62929 mul-mods (465 equiv measured, 11 charged) + linear algebra 1116 mul-mods (2 equiv), conv 5530; smoothness 0.045; IC floor S = 0.07; wall 70 ms IC vs 52 ms rho
+   31  baseline   239753     16      17278        932     35.29      1.90    18.54     1.30 1010.91  42.29
+        c = 16, relation stage 17222 ops (0 precompute, 38.00 ops/trial) + oracle 51836 mul-mods (56 equiv measured, 15 charged) + linear algebra 7225 mul-mods (1 equiv), conv 3523; smoothness 0.056; IC floor S = 0.03; wall 1722 ms IC vs 92 ms rho
+   31   ab-walk   239753     16       1400        932      2.86      1.90     1.50     1.30   81.94   3.43
+        c = 16, relation stage 783 ops (301 precompute, 1.00 ops/trial) + oracle 77433 mul-mods (616 equiv measured, 21 charged) + linear algebra 415 mul-mods (1 equiv), conv 3625; smoothness 0.053; IC floor S = 0.03; wall 110 ms IC vs 94 ms rho
+   31   fb-walk   239753     16       1150        932      2.35      1.90     1.23     1.30   67.26   2.81
+        c = 16, relation stage 519 ops (1 precompute, 1.00 ops/trial) + oracle 85157 mul-mods (627 equiv measured, 24 charged) + linear algebra 2563 mul-mods (4 equiv), conv 3528; smoothness 0.049; IC floor S = 0.03; wall 75 ms IC vs 92 ms rho
+   41  baseline   333041     24      19596       1071     33.96      1.86    18.29     1.34  779.98  32.63
+        c = 5, relation stage 19528 ops (0 precompute, 40.00 ops/trial) + oracle 70438 mul-mods (67 equiv measured, 13 charged) + linear algebra 20625 mul-mods (1 equiv), conv 5493; smoothness 0.069; IC floor S = 0.04; wall 2072 ms IC vs 105 ms rho
+   41   ab-walk   333041     24       1417       1071      2.46      1.86     1.32     1.34   56.42   2.36
+        c = 5, relation stage 787 ops (303 precompute, 1.00 ops/trial) + oracle 74363 mul-mods (628 equiv measured, 13 charged) + linear algebra 755 mul-mods (2 equiv), conv 5834; smoothness 0.068; IC floor S = 0.04; wall 117 ms IC vs 112 ms rho
+   41   fb-walk   333041     24       1266       1071      2.19      1.86     1.18     1.34   50.38   2.11
+        c = 5, relation stage 609 ops (1 precompute, 1.00 ops/trial) + oracle 92526 mul-mods (650 equiv measured, 17 charged) + linear algebra 5926 mul-mods (6 equiv), conv 5584; smoothness 0.056; IC floor S = 0.04; wall 96 ms IC vs 102 ms rho
+   61  baseline 16790591     36      31159       8912      7.60      2.17     3.50     2.10  836.82  35.06
+        c = 2, relation stage 31054 ops (0 precompute, 52.00 ops/trial) + oracle 128795 mul-mods (104 equiv measured, 21 charged) + linear algebra 61605 mul-mods (1 equiv), conv 6129; smoothness 0.076; IC floor S = 0.01; wall 3201 ms IC vs 798 ms rho
+   61   ab-walk 16790591     36       1838       8912      0.45      2.17     0.21     2.10   49.05   2.07
+        c = 2, relation stage 993 ops (318 precompute, 1.00 ops/trial) + oracle 130832 mul-mods (842 equiv measured, 43 charged) + linear algebra 1202 mul-mods (2 equiv), conv 3057; smoothness 0.067; IC floor S = 0.01; wall 153 ms IC vs 811 ms rho
+   61   fb-walk 16790591     36       1355       8912      0.33      2.17     0.15     2.10   36.15   1.52
+        c = 2, relation stage 570 ops (1 precompute, 1.00 ops/trial) + oracle 112513 mul-mods (769 equiv measured, 37 charged) + linear algebra 14196 mul-mods (16 equiv), conv 3061; smoothness 0.081; IC floor S = 0.01; wall 93 ms IC vs 810 ms rho
+
+S_walk is rho's walk alone (S_rho also carries the 16-branch
+precomputation, a fixed cost that does not scale with sqrt(N) and so
+inflates S_rho at these toy sizes). The collision itself arrives after
+about sqrt(pi*N/2) = 1.25*sqrt(N) distinct points, but Floyd's cycle
+finding spends 3 group operations per iteration, so S_walk ~ 3 is this
+reference at its own optimum. A distinguished-point rho would cut that
+by roughly 3x -- which widens the gap below, it does not close it.
+S_ic/S_rho below 1 would mean index calculus won that instance.
