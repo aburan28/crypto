@@ -945,24 +945,80 @@ impl KernelOutcome {
     }
 }
 
+/// Decide `E[ℓ]`'s rank at each vertex in parallel and record it; a rank-2
+/// vertex also gets its kernel generators stored.  One RNG per
+/// `(vertex, ℓ)`, so a vertex's basis — and the kernel indices the
+/// checkpoint is keyed by — never depends on what a resumed walk skipped.
+#[allow(clippy::too_many_arguments)]
+fn classify(
+    ckpt: &mut Checkpoint,
+    a2: u8,
+    vertices: &[u64],
+    ell: u64,
+    ext: &Ext,
+    order_m: &BigUint,
+    attempts: usize,
+    seed: u64,
+) {
+    let results: Vec<(u64, u8, Option<Vec<El>>)> = vertices
+        .par_iter()
+        .map(|&a6| {
+            let curve = ExtCurve::new(ext, a2 as u64, a6);
+            let mut rng = StdRng::seed_from_u64(
+                seed ^ a6.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ ell.rotate_left(32),
+            );
+            match torsion_basis(&curve, order_m, ell, attempts, &mut rng) {
+                Torsion::Rank2(p1, p2) => (a6, 2, Some(kernel_generators(&curve, &p1, &p2, ell))),
+                Torsion::Rank1 => (a6, 1, None),
+                Torsion::None => (a6, 0, None),
+                Torsion::Undecided => (a6, 3, None),
+            }
+        })
+        .collect();
+    for (a6, r, gens) in results {
+        if let Some(g) = gens {
+            ckpt.store_generators(a6, ell, &g);
+        }
+        ckpt.record_rank(a6, ell, r);
+    }
+}
+
 /// Append-only record of finished kernels, keyed by `(a₆, ℓ, index)`.
 /// The walk is deterministic in its seed — same BFS order, same bases, same
 /// kernel indices — so a resumed walk reads back exactly what it would have
 /// recomputed.  A torn last line is ignored.
 struct Checkpoint {
     done: BTreeMap<(u64, u64, usize), KernelOutcome>,
+    /// `(a₆, ℓ) ↦` rank of `E[ℓ]`: 0 none, 1, 2, 3 undecided.
+    rank: BTreeMap<(u64, u64), u8>,
+    /// Generators held in memory when there is no checkpoint directory.
+    gens: BTreeMap<(u64, u64), Vec<El>>,
     file: Option<std::fs::File>,
+    path: Option<std::path::PathBuf>,
 }
 
 impl Checkpoint {
     fn open(path: Option<&Path>) -> Self {
         let mut done = BTreeMap::new();
+        let mut rank = BTreeMap::new();
         let Some(path) = path else {
-            return Checkpoint { done, file: None };
+            return Checkpoint {
+                done,
+                rank,
+                gens: BTreeMap::new(),
+                file: None,
+                path: None,
+            };
         };
         if let Ok(text) = std::fs::read_to_string(path) {
             for line in text.lines() {
                 let f: Vec<&str> = line.split_whitespace().collect();
+                if f.first() == Some(&"T") && f.len() == 4 {
+                    if let (Ok(a6), Ok(ell), Ok(r)) = (f[1].parse(), f[2].parse(), f[3].parse()) {
+                        rank.insert((a6, ell), r);
+                    }
+                    continue;
+                }
                 if f.len() < 4 {
                     continue;
                 }
@@ -979,7 +1035,62 @@ impl Checkpoint {
             .append(true)
             .open(path)
             .ok();
-        Checkpoint { done, file }
+        Checkpoint {
+            done,
+            rank,
+            gens: BTreeMap::new(),
+            file,
+            path: Some(path.to_path_buf()),
+        }
+    }
+
+    /// Kernel generators of a rank-2 vertex are the expensive setup — a
+    /// torsion basis and `ℓ` additions in `F_{q^m}`, minutes at `ℓ = 7193` —
+    /// so they are stored beside the checkpoint and a resumed walk starts
+    /// computing kernels at once.  Written to a temporary name and renamed,
+    /// so a file that exists is complete.
+    fn generators_path(&self, a6: u64, ell: u64) -> Option<std::path::PathBuf> {
+        let p = self.path.as_ref()?;
+        Some(p.with_extension(format!("gens_{a6}_{ell}")))
+    }
+
+    fn record_rank(&mut self, a6: u64, ell: u64, r: u8) {
+        // A rank-2 record is only trusted once its generators are on disk,
+        // so it is written after them.
+        if let Some(f) = self.file.as_mut() {
+            let _ = writeln!(f, "T {a6} {ell} {r}");
+        }
+        self.rank.insert((a6, ell), r);
+    }
+
+    fn load_generators(&self, a6: u64, ell: u64, m: usize) -> Option<Vec<El>> {
+        if let Some(g) = self.gens.get(&(a6, ell)) {
+            return Some(g.clone());
+        }
+        let bytes = std::fs::read(self.generators_path(a6, ell)?).ok()?;
+        let words: Vec<u64> = bytes
+            .chunks_exact(8)
+            .map(|c| u64::from_le_bytes(c.try_into().unwrap()))
+            .collect();
+        if words.len() != (ell as usize + 1) * m {
+            return None;
+        }
+        Some(words.chunks(m).map(|c| c.to_vec()).collect())
+    }
+
+    fn store_generators(&mut self, a6: u64, ell: u64, gens: &[El]) {
+        let Some(p) = self.generators_path(a6, ell) else {
+            self.gens.insert((a6, ell), gens.to_vec());
+            return;
+        };
+        let bytes: Vec<u8> = gens
+            .iter()
+            .flat_map(|g| g.iter().flat_map(|w| w.to_le_bytes()))
+            .collect();
+        let tmp = p.with_extension("tmp");
+        if std::fs::write(&tmp, bytes).is_ok() {
+            let _ = std::fs::rename(tmp, p);
+        }
     }
 
     fn record(&mut self, a6: u64, ell: u64, i: usize, o: KernelOutcome) {
@@ -1083,7 +1194,6 @@ pub fn walk_class(
         fields.push((ell, ext, order_m));
     }
 
-    let mut rng = StdRng::seed_from_u64(seed);
     let mut queue: VecDeque<(u64, u64, u64, u32)> = VecDeque::new();
     report.reached.insert(1, 0);
     queue.push_back((1, xp0, xq0, 0));
@@ -1092,12 +1202,52 @@ pub fn walk_class(
         if report.reached.len() >= max_vertices {
             break;
         }
+        // Classify every queued vertex at once, in parallel: at a large
+        // class nearly all of them are the floor, where proving rank 1 is the
+        // whole cost and no edge depends on another vertex's result.
+        if !queue.is_empty() {
+            for (ell, ext, order_m) in &fields {
+                let pending: Vec<u64> = std::iter::once(a6)
+                    .chain(queue.iter().map(|v| v.0))
+                    .filter(|v| {
+                        !ckpt.rank.contains_key(&(*v, *ell))
+                            && ckpt.load_generators(*v, *ell, ext.m).is_none()
+                    })
+                    .collect();
+                for (c, chunk) in pending.chunks(KERNEL_CHUNK).enumerate() {
+                    classify(&mut ckpt, a2, chunk, *ell, ext, order_m, attempts, seed);
+                    if *ell >= LARGE_ELL {
+                        eprintln!(
+                            "     … ℓ={ell}: classified {} of {} queued vertices, {:.0}s",
+                            (c * KERNEL_CHUNK + chunk.len()),
+                            pending.len(),
+                            started.elapsed().as_secs_f64()
+                        );
+                    }
+                }
+            }
+        }
         for (ell, ext, order_m) in &fields {
             let curve = ExtCurve::new(ext, a2 as u64, a6);
-            match torsion_basis(&curve, order_m, *ell, attempts, &mut rng) {
-                Torsion::Rank2(p1, p2) => {
+            if !ckpt.rank.contains_key(&(a6, *ell))
+                && ckpt.load_generators(a6, *ell, ext.m).is_some()
+            {
+                ckpt.record_rank(a6, *ell, 2);
+            }
+            if !ckpt.rank.contains_key(&(a6, *ell)) {
+                classify(&mut ckpt, a2, &[a6], *ell, ext, order_m, attempts, seed);
+            }
+            let gens = match ckpt.rank[&(a6, *ell)] {
+                2 => Ok(ckpt
+                    .load_generators(a6, *ell, ext.m)
+                    .expect("a rank-2 vertex has stored generators")),
+                1 => Err(Torsion::Rank1),
+                0 => Err(Torsion::None),
+                _ => Err(Torsion::Undecided),
+            };
+            match gens {
+                Ok(gens) => {
                     *report.rank2.entry(*ell).or_insert(0) += 1;
-                    let gens = kernel_generators(&curve, &p1, &p2, *ell);
                     let mut outcomes = Vec::with_capacity(gens.len());
                     for (c, chunk) in gens.chunks(KERNEL_CHUNK).enumerate() {
                         let first = c * KERNEL_CHUNK;
@@ -1171,13 +1321,13 @@ pub fn walk_class(
                         queue.push_back((a6p, xpp, xqq, depth + 1));
                     }
                 }
-                Torsion::Rank1 => {
+                Err(Torsion::Rank1) => {
                     *report.rank1.entry(*ell).or_insert(0) += 1;
                 }
-                Torsion::Undecided => {
+                Err(Torsion::Undecided) => {
                     *report.undecided.entry(*ell).or_insert(0) += 1;
                 }
-                Torsion::None => {}
+                Err(_) => {}
             }
         }
         report.seconds = started.elapsed().as_secs_f64();
