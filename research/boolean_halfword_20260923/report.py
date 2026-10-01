@@ -104,12 +104,19 @@ or every known solver. Nine new treatments include matched 32-bit EOR3 controls 
 the hardware operation is not attributed solely to narrowing. Runtime capability
 records distinguish an actual feature path from a portable fallback.
 
-The intended discovery grid has 61 A/B arms and 24 fixtures: 11,712 comparison
-observations plus 384 A/A calibration observations. The full grid has 240 fixtures,
-117,120 comparison observations and 3,840 calibration observations. It retains all
+The current paired-worker discovery grid has 61 A/B arms and 24 fixtures: 14,640
+comparison observations plus 480 A/A calibration observations. It uses sixteen
+repetitions at n12 and eight at larger sizes. The full grid has 240 fixtures,
+146,400 comparison observations and 4,800 calibration observations. It retains all
 216 earlier inputs and adds 24 unused holdouts. The full run must bind unchanged
 timed source from qualified discovery. A positive primary comparison still requires
 confirmation on further unused holdouts. No source tuning follows holdout timing.
+
+Schema 3 runs A/A followed by A/B for one fixture inside one reserved worker.
+The resource receipt covers that real paired computation, while each cold solve
+retains its own timer. The combined stdout and exact phase slices are preserved.
+No padding or resource-threshold relaxation is used. This packaging change follows
+the retained short-worker resource failures and needs a fresh qualified run.
 
 Native timing currently requires Linux affinity and pressure interfaces, so the
 local macOS correctness checks do not supply new qualified timings. The Linux ARM64

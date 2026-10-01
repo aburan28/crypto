@@ -26,6 +26,18 @@
       "other_cpu_seconds": 0.01,
       "worker_wall_seconds": 0.0018080019999615615,
       "maximum_other_cpu_fraction": 0.1
+    },
+    {
+      "path": "failed_isolation_03",
+      "manifest_sha256": "593ee9f372d4362a6b0e1f789167c4c352aa28a44529f3f38b835eb2248ecf56",
+      "github_run_id": 36930298574,
+      "github_attempt": 2,
+      "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574",
+      "reason": "Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted.",
+      "other_cpu_seconds": 0.01,
+      "worker_wall_seconds": 0.032861717000002955,
+      "maximum_other_cpu_fraction": 0.1
     }
   ],
   "historical_qualified_runs": [

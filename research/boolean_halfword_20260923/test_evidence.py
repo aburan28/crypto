@@ -203,5 +203,25 @@ class EvidenceTests(unittest.TestCase):
             result=a.validate(root);self.assertEqual(result,a.read(root/'results.json'))
             self.assertTrue(result['qualified'] and result['all_complete'])
 
+    def test_paired_stream_split_is_lossless_and_rejects_offset_drift(self):
+        root=self.temporary();cell='n12-discovery-17-planted'
+        rows=[{'type':'fixture','mode':'aa'},{'type':'sample','value':1},
+              {'type':'fixture','mode':'ab'},{'type':'sample','value':2}]
+        path=root/(cell+'-paired.jsonl');path.write_text(''.join(json.dumps(r)+'\n' for r in rows))
+        path.with_suffix('.stderr').write_text('')
+        receipt={'stdout_sha256':a.sha(path),'stderr_sha256':a.sha(path.with_suffix('.stderr')),
+                 'worker_command':['worker','12','17','planted','16','200000','1','paired'],
+                 'conditions_file':cell+'-paired-conditions.jsonl','conditions_sha256':'unit-test-placeholder'}
+        stages=runner.split_paired(path,cell,root,receipt)
+        entry={'paired':receipt,'stages':stages};a.verify_paired_stream(root,entry,cell)
+        self.assertEqual((root/(cell+'-aa.jsonl')).read_bytes()+(root/(cell+'.jsonl')).read_bytes(),path.read_bytes())
+        stages['ab']['derived_from']['byte_start']+=1
+        with self.assertRaises(AssertionError):a.verify_paired_stream(root,entry,cell)
+
+    def test_paired_stream_requires_aa_before_ab(self):
+        root=self.temporary();path=root/'bad.jsonl'
+        path.write_text(json.dumps({'type':'fixture','mode':'ab'})+'\n'+json.dumps({'type':'fixture','mode':'aa'})+'\n')
+        with self.assertRaises(AssertionError):runner.split_paired(path,'bad',root,{})
+
 
 if __name__=='__main__':unittest.main()

@@ -39,3 +39,5 @@ including the retained 216 fixtures and 24 unused holdouts. A positive full resu
 still needs unchanged-source confirmation on further unused holdouts. Full-IC,
 calibrated-operation and rho costs remain unmeasured throughout this standalone
 Boolean experiment.
+
+Schema 3 executes A/A and A/B for one fixture in a single reserved worker and retains the combined stdout plus exact phase slices. n12 uses sixteen repetitions; other sizes use eight. The resource record covers the paired fixture. This adds real calibration/comparison work without padding or changing the 10% resource threshold; see `ISOLATION_ATTEMPTS.md`. The current discovery therefore has 14,640 comparison and 480 A/A observations; the full grid has 146,400 comparison and 4,800 A/A observations. Earlier counts describe their frozen predecessor protocols.

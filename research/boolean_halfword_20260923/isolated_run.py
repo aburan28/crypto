@@ -96,6 +96,25 @@ def startup_quiet(isolation,out):
     raise RuntimeError('Startup did not become quiet in 30 preflight samples; no timed worker was launched')
 
 
+def split_paired(path,cell,out,receipt):
+    data=path.read_bytes();lines=data.splitlines(keepends=True)
+    markers=[];offset=0
+    for line in lines:
+        row=json.loads(line)
+        if row['type']=='fixture':markers.append((offset,row['mode']))
+        offset+=len(line)
+    assert len(markers)==2 and markers[0]==(0,'aa') and markers[1][1]=='ab'
+    boundary=markers[1][0];stages={}
+    for mode,start,end in [('aa',0,boundary),('ab',boundary,len(data))]:
+        suffix='-aa' if mode=='aa' else ''
+        target=out/(cell+suffix+'.jsonl');target.write_bytes(data[start:end])
+        error=out/(cell+suffix+'.stderr');error.write_bytes(b'')
+        stages[mode]={**receipt,'stdout_sha256':sha(target),'stderr_sha256':sha(error),'resource_mode':'paired',
+            'derived_from':{'file':path.name,'sha256':sha(path),'byte_start':start,'byte_count':end-start}}
+    assert (out/(cell+'-aa.jsonl')).read_bytes()+(out/(cell+'.jsonl')).read_bytes()==data
+    return stages
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase',choices=['discovery','full'],required=True)
@@ -113,7 +132,7 @@ def main():
         else:cpus.append(int(part))
     cpus=sorted(set(cpus))
     protocol_path=HERE/('protocol_'+args.phase+'.json')
-    protocol=json.loads(protocol_path.read_text());assert protocol['schema_version']==2
+    protocol=json.loads(protocol_path.read_text());assert protocol['schema_version'] in [2,3]
     discovery_binding=None
     if args.phase=='full':
         assert args.discovery is not None,'Full comparison requires sealed qualified discovery'
@@ -135,7 +154,7 @@ def main():
     shutil.copyfile(REPO/'tools/isolated_bench.py',out/'isolated_bench.py');names.append('isolated_bench.py')
     env=dict(os.environ,RAYON_NUM_THREADS='1',OMP_NUM_THREADS='1')
     rustc=shutil.which('rustc');assert rustc
-    meta={'schema_version':2,'phase':args.phase,'complete':False,'qualified':False,'started_utc':now(),
+    meta={'schema_version':protocol['schema_version'],'phase':args.phase,'complete':False,'qualified':False,'started_utc':now(),
         'source_hashes':{name:sha(out/name) for name in names},'cpus':cpus,'threads':1,
         'rustc':subprocess.check_output([rustc,'--version','--verbose'],text=True),
         'git_base':subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip(),
@@ -179,12 +198,14 @@ def main():
             cell=f'n{n}-{split}-{seed}-{family}'
             order_seed=(protocol['order_seed']^(n<<48)^(seed<<8)^protocol['families'].index(family))&((1<<64)-1)
             record={'cell':cell,'n':n,'split':split,'seed':seed,'family':family,'order_seed':order_seed,'stages':{}}
-            for mode in ['aa','ab']:
+            reps=protocol.get('repetitions_by_n',{}).get(str(n),protocol['repetitions'])
+            modes=['paired'] if protocol['schema_version']>=3 else ['aa','ab']
+            for mode in modes:
                 condition=out/f'{cell}-{mode}-conditions.jsonl'
-                worker=[str(out/'worker'),str(n),str(seed),family,'8',str(protocol['limits']['nodes']),str(order_seed),mode]
+                worker=[str(out/'worker'),str(n),str(seed),family,str(reps),str(protocol['limits']['nodes']),str(order_seed),mode]
                 cmd=[sys.executable,str(isolation),'run','--cpus',cpus_text,'--out',str(condition),'--label',cell+'/'+mode,
                      '--settle','2','--max-other-cpu','0.10','--max-psi','5.0','--',*worker]
-                suffix='-aa' if mode=='aa' else ''
+                suffix='-'+mode if mode in ['aa','paired'] else ''
                 receipt=command_receipt(cmd,out/(cell+suffix+'.jsonl'),out/(cell+suffix+'.stderr'),protocol['limits']['worker_seconds'],env)
                 good,conditions=qualified_conditions(condition,cpus)
                 receipt.update(worker_command=worker,conditions_file=condition.name,
@@ -194,6 +215,10 @@ def main():
                 if conditions is not None:receipt['worker_peak_rss_bytes']=conditions.get('run',{}).get('max_rss_kib',0)*1024
                 dump(out/'receipts.json',receipts+[record])
                 assert receipt['qualified'],'Isolation refused, contended, or failed: '+cell+'/'+mode
+                if mode=='paired':
+                    assert (out/(cell+suffix+'.stderr')).read_bytes()==b''
+                    record['paired']=receipt
+                    record['stages']=split_paired(out/(cell+suffix+'.jsonl'),cell,out,receipt)
             receipts.append(record);dump(out/'receipts.json',receipts)
             print('completed',cell,index,'of',len(cells),flush=True)
         meta.update(complete=True,qualified=True,ended_utc=now(),campaign_seconds=time.monotonic()-started)

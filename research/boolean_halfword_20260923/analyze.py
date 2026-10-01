@@ -40,7 +40,9 @@ def check_half(sample,reference,n,arm):
 
 
 def verify_isolation(root,stage,cpus,cell,mode):
-    name=f'{cell}-{mode}-conditions.jsonl'
+    resource_mode=stage.get('resource_mode',mode)
+    assert resource_mode in [mode,'paired']
+    name=f'{cell}-{resource_mode}-conditions.jsonl'
     assert stage['conditions_file']==name and sha(root/name)==stage['conditions_sha256']
     assert stage['qualified'] and stage['exit_code']==0 and not stage['timed_out']
     records=[json.loads(line) for line in (root/name).read_text().splitlines()]
@@ -78,11 +80,13 @@ def verify_aa(root,stage,source,pairs,order_seed):
     rows=[json.loads(line) for line in path.read_text().splitlines()]
     fixture,samples=rows[0],rows[1:]
     assert fixture=={**source,'mode':'aa'}
-    assert len(samples)==16
-    assert stage['worker_command'][1:]==[str(source['n']),str(source['seed']),source['family'],'8','200000',str(order_seed),'aa']
-    aa={(s['rep'],s['variant']):s for s in samples};assert len(aa)==16
+    reps=int(stage['worker_command'][4]);assert reps in [8,16]
+    mode='paired' if stage.get('resource_mode')=='paired' else 'aa'
+    assert len(samples)==2*reps
+    assert stage['worker_command'][1:]==[str(source['n']),str(source['seed']),source['family'],str(reps),'200000',str(order_seed),mode]
+    aa={(s['rep'],s['variant']):s for s in samples};assert len(aa)==len(samples)
     ratios=[]
-    for rep in range(8):
+    for rep in range(reps):
         chunk=samples[2*rep:2*rep+2]
         assert [s['variant'] for s in chunk]==[['aa_a','aa_b'][j] for j in ref.paired_order(2,order_seed,rep)]
         assert [s['order'] for s in chunk]==[0,1]
@@ -97,13 +101,34 @@ def verify_aa(root,stage,source,pairs,order_seed):
         'median':statistics.median(ratios),'minimum':min(ratios),'maximum':max(ratios)}
 
 
+def verify_paired_stream(root,entry,cell):
+    receipt=entry['paired'];path=root/(cell+'-paired.jsonl')
+    assert sha(path)==receipt['stdout_sha256']
+    assert sha(path.with_suffix('.stderr'))==receipt['stderr_sha256']
+    assert path.with_suffix('.stderr').read_bytes()==b''
+    data=path.read_bytes();parts=[];offset=0
+    for mode in ['aa','ab']:
+        stage=entry['stages'][mode];origin=stage['derived_from']
+        assert stage['resource_mode']=='paired' and origin['file']==path.name
+        assert origin['sha256']==receipt['stdout_sha256'] and origin['byte_start']==offset
+        part=data[offset:offset+origin['byte_count']]
+        expected=root/(cell+('-aa' if mode=='aa' else '')+'.jsonl')
+        assert expected.read_bytes()==part and sha(expected)==stage['stdout_sha256']
+        assert stage['worker_command']==receipt['worker_command']
+        assert stage['conditions_file']==receipt['conditions_file']
+        assert stage['conditions_sha256']==receipt['conditions_sha256']
+        parts.append(part);offset+=origin['byte_count']
+    assert offset==len(data) and b''.join(parts)==data
+
+
 def validate(root):
     protocol,meta=read(root/'protocol.json'),read(root/'metadata.json')
     assert meta['complete']
     for name,digest in meta['source_hashes'].items():assert sha(root/name)==digest,name
     prior=read(root/'REFERENCE_PROTOCOL.json')
     assert protocol['retained_arms']==protocol['reference_arms']==prior['variants']
-    isolated=protocol.get('schema_version',1)==2
+    isolated=protocol.get('schema_version',1)>=2
+    paired=protocol.get('schema_version',1)>=3
     half=HALF if isolated else LEGACY_HALF
     candidates=half+WORD_EOR3 if isolated else half
     assert protocol['new_candidates']==candidates and protocol['variants']==prior['variants']+candidates
@@ -112,6 +137,7 @@ def validate(root):
         assert meta['host']['system']=='Linux' and meta['host']['cpu_info'] and meta['host']['memory_total_kib']>0
         for binary in ['baseline','worker','tests']:assert sha(root/binary)==meta[binary+'_sha256']
     assert protocol['variables']==[12,16,20,24] and protocol['repetitions']==8
+    if paired:assert protocol['repetitions_by_n']=={'12':16,'16':8,'20':8,'24':8}
     assert protocol['families']==['planted','cross_planted','unplanted'] and protocol['discovery_seeds']==[17,937]
     phase=protocol['phase'];assert phase in ['discovery','full']
     if phase=='discovery':assert protocol['splits']==['discovery']
@@ -141,6 +167,8 @@ def validate(root):
     for (n,split,seed,family),cell in expected.items():
         entry=receipts[cell]
         assert (entry['n'],entry['split'],entry['seed'],entry['family'])==(n,split,seed,family)
+        reps=protocol.get('repetitions_by_n',{}).get(str(n),protocol['repetitions'])
+        if paired:verify_paired_stream(root,entry,cell)
         if isolated:
             assert set(entry['stages'])=={'aa','ab'}
             for mode in ['aa','ab']:verify_isolation(root,entry['stages'][mode],meta['cpus'],cell,mode)
@@ -151,7 +179,7 @@ def validate(root):
         assert (root/(cell+'.stderr')).read_bytes()==b''
         order_seed=(protocol['order_seed']^(n<<48)^(seed<<8)^protocol['families'].index(family))&((1<<64)-1)
         assert receipt['order_seed']==order_seed
-        assert receipt['command'][1:]==[str(n),str(seed),family,'8','200000',str(order_seed)]+(['ab'] if isolated else [])
+        assert receipt['command'][1:]==[str(n),str(seed),family,str(reps),'200000',str(order_seed)]+(['paired' if paired else 'ab'] if isolated else [])
         rows=[json.loads(line) for line in (root/(cell+'.jsonl')).read_text().splitlines()]
         source,samples=rows[0],rows[1:]
         assert source['type']=='fixture' and (source['n'],source['seed'],source['family'])==(n,seed,family)
@@ -163,10 +191,10 @@ def validate(root):
             assert source['mode']=='ab' and type(source['eor3_available']) is bool
             assert source['architecture']==meta['capabilities']['architecture']
             assert source['eor3_available']==meta['capabilities']['eor3_available']
-        names=protocol['variants'];assert len(samples)==8*len(names)
+        names=protocol['variants'];assert len(samples)==reps*len(names)
         pairs={(s['rep'],s['variant']):s for s in samples};assert len(pairs)==len(samples)
         stable={}
-        for rep in range(8):
+        for rep in range(reps):
             chunk=samples[rep*len(names):(rep+1)*len(names)]
             assert [s['variant'] for s in chunk]==[names[i] for i in ref.paired_order(len(names),order_seed,rep)]
             assert [s['order'] for s in chunk]==list(range(len(names)))
@@ -212,7 +240,7 @@ def validate(root):
         count+=len(samples)
         summaries.append({'cell':cell,'n':n,'split':split,'seed':seed,'family':family,'status':source['search_reference'],
             'complete':all(s['outcome']!='UNKNOWN' for s in samples),
-            'medians_ns':{a:statistics.median(pairs[rep,a]['total_ns'] for rep in range(8)) for a in names},
+            'medians_ns':{a:statistics.median(pairs[rep,a]['total_ns'] for rep in range(reps)) for a in names},
             'half_work':{a:pairs[0,a]['half_work'] for a in half}})
     gates=[];native_attribution=[]
     splits=['discovery'] if phase=='discovery' else ['regression','holdout']
@@ -240,7 +268,7 @@ def validate(root):
         'groups':len(splits)*9,'dramatic_pass':phase=='full' and all(g['dramatic_group'] for g in gates if g['candidate']==arm),
         'incremental_pass':phase=='full' and all(g['incremental_group'] for g in gates if g['candidate']==arm)} for arm in candidates}
     table_split='discovery' if phase=='discovery' else 'holdout'
-    result={'schema_version':2 if isolated else 1,'phase':phase,'qualified':isolated,'aa_summaries':aa_summaries,'cells':len(summaries),'observations':count,'all_complete':all_complete,'summaries':summaries,
+    result={'schema_version':protocol.get('schema_version',1),'phase':phase,'qualified':isolated,'aa_summaries':aa_summaries,'cells':len(summaries),'observations':count,'all_complete':all_complete,'summaries':summaries,
         'gates':gates,'native_attribution':native_attribution,'decisions':decisions,
         'n24_ms':[{'variant':arm,**{f:statistics.median(groups[table_split,24,f,arm])/1e6 for f in protocol['families']}} for arm in names],
         'campaign_seconds':meta['campaign_seconds'],'peak_worker_rss_bytes':max(stage['worker_peak_rss_bytes'] for r in receipts.values() for stage in r['stages'].values()) if isolated else max(r['peak_rss_bytes'] for r in receipts.values()),

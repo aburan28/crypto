@@ -97,3 +97,5 @@ all pairs of three-variable quadratics, unsupported omitted rows, and the retain
 solver suite. Original-equation verification is never inferred from a projected hit.
 
 See `RESOURCE_PLAN.md` for resource refusal, A/A noise, retained binaries and the Linux ARM64 CI route. The legacy `run.py` refuses current protocols. `QUALIFIED_RUNS.json` records accepted qualified evidence; null entries remain unmeasured.
+
+Schema 3 executes A/A and A/B for one fixture in a single reserved worker and retains the combined stdout plus exact phase slices. n12 uses sixteen repetitions; other sizes use eight. The resource record covers the paired fixture. This adds real calibration/comparison work without padding or changing the 10% resource threshold; see `ISOLATION_ATTEMPTS.md`. The current discovery therefore has 14,640 comparison and 480 A/A observations; the full grid has 146,400 comparison and 4,800 A/A observations. Earlier counts describe their frozen predecessor protocols.

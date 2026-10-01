@@ -39,3 +39,25 @@ preserved in `failed_isolation_02`, with no samples admitted.
 
 A complete same-source retry is requested on a fresh hosted VM. No input, threshold,
 algorithm, or acceptance criterion changes, and no samples are pooled across attempts.
+
+The second attempt reached fourteen complete fixture pairs, then the n20 / seed17 /
+unplanted A/A worker was rejected. The worker completed normally in
+0.032861717000002955 seconds; the sampler charged the clock service 0.01 CPU seconds.
+That exceeds the unchanged 10% threshold. The 152-member attempt is retained in
+`failed_isolation_03` and contributes no admitted samples.
+
+## Measurement packaging revision, before further timing
+
+The repeated failures expose the short A/A workers' sensitivity to the process-CPU
+sampler's tick granularity. Schema 3 therefore executes A/A followed by A/B for the
+same fixture inside one pinned/reserved worker, with one resource receipt covering
+the complete paired computation. It uses sixteen repetitions at n12 and retains
+eight at n16/n20/n24. Every repetition remains a fresh complete solve; there is no
+padding, per-solve cost division or removal of setup/verification work.
+
+The 10% threshold, seeds, solver caps, algorithms and n16/n20/n24 acceptance groups
+are unchanged. A/A and A/B retain separate per-call timers and are exact byte slices
+of the preserved combined stdout. The resource scope is explicitly the paired
+fixture, not a claim that each microsecond sample was independently monitored.
+This new packaging requires a fresh qualified run; old attempts are not reclassified
+or pooled. The solver kernels are unchanged from the specialized source.
