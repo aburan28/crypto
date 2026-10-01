@@ -15,6 +15,7 @@ Layout, and why each path is where it is:
     /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
     /scoreboard/ic-leaderboard.html  docs/ic-leaderboard.html, curve by curve
     /scoreboard/ic-current-state.html  docs/ic-current-state.html, where things stand
+    /scoreboard/ic-measurement.html  docs/ic-measurement.html, the IC measurement standard
     /status/              the ECC2K-130 distinguished-point dashboard
     /status/walk-forest.svg  the walk-forest figure the dashboard shows
     /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
@@ -75,6 +76,7 @@ PAGES = (
     # Beside the scoreboard, whose relative link to it then resolves both in
     # the working tree (docs/) and when published (/scoreboard/).
     ("docs/ic-leaderboard.html", "scoreboard/ic-leaderboard.html"),
+    ("docs/ic-measurement.html", "scoreboard/ic-measurement.html"),
     ("docs/ic-current-state.html", "scoreboard/ic-current-state.html"),
     ("docs/ecc2k130-status/index.html", "status/index.html"),
     ("docs/ecc2k130-status/style.css", "status/style.css"),
@@ -99,7 +101,7 @@ DATA = (
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.
-SITEMAP = ("/", "/scoreboard/", "/scoreboard/ic-leaderboard.html", "/scoreboard/ic-current-state.html", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html")
+SITEMAP = ("/", "/scoreboard/", "/scoreboard/ic-leaderboard.html", "/scoreboard/ic-measurement.html", "/scoreboard/ic-current-state.html", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html")
 
 
 def copy(src_rel: str, dest_rel: str, out_dir: str, root: str = ROOT) -> str:
