@@ -5,10 +5,12 @@
 bench.py itself runs only whole suites, through an unpinned process pool, and
 derives run numbers from its history file; ``--record`` rewrites its
 baseline.  This runner calls the same ``run_cell(cell, calibration)`` in this
-one process (which ICMS has already pinned), with the frozen calibration,
-and writes nothing into the cryptanalysis checkout except the C kernel that
-``kernel.py`` builds on first use.  It refuses to run if bench.py's solver
-limits are not the ones the spec pinned.
+one process (which ICMS has already pinned), with the frozen calibration.
+It writes nothing the checkout tracks; on first use the harness itself still
+writes two git-ignored caches, the C kernel under
+``pdp-degree-heuristics/build/`` and ``pdp-scaling/sumpoly_cache.pkl``.
+It refuses to run if bench.py's solver limits are not the ones the spec
+pinned.
 """
 from __future__ import annotations
 

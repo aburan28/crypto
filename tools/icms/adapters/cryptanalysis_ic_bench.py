@@ -190,6 +190,11 @@ class CryptanalysisIcBench:
         n = spec["instance"]["curve"]["degree"]
         rho_plain, rho_frob = rec.get("rho_operations"), rec.get("rho_floor_operations")
         ref_id = (spec.get("reference") or {}).get("rho")
+        # A k-target cold total over a one-target rho is not a one-target ratio:
+        # with k != 1 no ratio is reported at all, headline or per reference.
+        one = workload["record"]["targets"] == 1
+        ratio_plain = rec.get("ratio_to_rho") if one else None
+        ratio_frob = rec.get("ratio_to_floor") if one else None
         total = rec.get("total_operations")
         units = {
             "cryptanalysis.rps": {"total": total, "S": rec.get("S_rps"), "sqrt_r": math.sqrt(r), "deterministic": True,
@@ -236,12 +241,10 @@ class CryptanalysisIcBench:
             "units": units,
             "reference": {"id": ref_id,
                           "ops": rho_plain if ref_id == "rho.plain" else rho_frob,
-                          # a k-target total over a one-target rho is not a one-target ratio
-                          "ratio": None if workload["record"]["targets"] != 1 else
-                                   (rec.get("ratio_to_rho") if ref_id == "rho.plain" else rec.get("ratio_to_floor")),
+                          "ratio": ratio_plain if ref_id == "rho.plain" else ratio_frob,
                           "unit": "cryptanalysis.rps",
-                          "rho.plain": {"ops": rho_plain, "ratio": rec.get("ratio_to_rho"), "rule": "sqrt(pi r / 2) x w_ec_add"},
-                          "rho.signed_frobenius": {"ops": rho_frob, "ratio": rec.get("ratio_to_floor"),
+                          "rho.plain": {"ops": rho_plain, "ratio": ratio_plain, "rule": "sqrt(pi r / 2) x w_ec_add"},
+                          "rho.signed_frobenius": {"ops": rho_frob, "ratio": ratio_frob,
                                                    "rule": f"sqrt(pi r / (4n)) x w_ec_add, n = {n}"},
                           "method": "analytic expected count, not a run"},
             "metrics": {

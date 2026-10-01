@@ -701,6 +701,15 @@ class AdapterReviewRegressionTests(unittest.TestCase):
         s["decomposition"]["solver"]["options"]["foo"] = 1
         self.assertTrue(adapters.get("cryptanalysis.ic_bench").check(s))
 
+    def test_cryptanalysis_k_target_total_gets_no_reference_ratio(self):
+        ad = adapters.get("cryptanalysis.ic_bench")
+        sp = self.spec("ca-k0n13-prefix-l3-m3.yaml")
+        wl = copy.deepcopy(sp["workloads"][0])
+        wl["record"]["targets"] = 3
+        out = ad.parse(sp["spec"], wl, self.ctx, os.path.join(FIX, "cryptanalysis-n13-prefix-l3-m3-cell.json"))
+        ref = out["reference"]
+        self.assertEqual((ref["ratio"], ref["rho.plain"]["ratio"], ref["rho.signed_frobenius"]["ratio"]), (None, None, None))
+
     def test_cryptanalysis_invariant_base_declares_the_frobenius_fold(self):
         ad = adapters.get("cryptanalysis.ic_bench")
         s = copy.deepcopy(self.spec("ca-k0n13-prefix-l3-m3.yaml")["spec"])
