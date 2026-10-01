@@ -45,6 +45,22 @@ def parse_verify(path, expected_fast2):
     return row
 
 
+def validate_fast2_timing_markers(results, rows):
+    errors = []
+    for row in rows:
+        name = f"{row['phase']}-{row['pair']}-{row['order']}-{row['variant']}.log"
+        try:
+            text = (pathlib.Path(results) / name).read_text(errors="replace")
+        except OSError as exc:
+            errors.append(str(exc))
+            continue
+        markers = re.findall(r"^packed cycle fast2: ([01])$", text, re.MULTILINE)
+        expected = "1" if row["variant"] == "candidate" else "0"
+        if markers != [expected]:
+            errors.append(f"{name}: fast2 markers {markers!r}, expected {[expected]!r}")
+    return errors
+
+
 def summarize(results, include_timing=True):
     root = pathlib.Path(results)
     errors = []
@@ -94,9 +110,14 @@ def summarize(results, include_timing=True):
         errors.append(str(exc))
     if include_timing:
         try:
-            output["timing"] = BASE.decide_samples(
-                BASE.read_samples(root / "samples.tsv")
+            samples = BASE.read_samples(root / "samples.tsv")
+            output["timing"] = BASE.decide_samples(samples)
+            output["timing"]["logErrors"] = (
+                BASE.validate_sample_logs(root, samples)
+                + validate_fast2_timing_markers(root, samples)
             )
+            if output["timing"]["logErrors"]:
+                errors.extend(output["timing"]["logErrors"])
             if not output["timing"]["valid"]:
                 errors.extend(output["timing"]["errors"])
         except (OSError, ValueError) as exc:
@@ -111,6 +132,8 @@ def summarize(results, include_timing=True):
         if path.exists():
             output[name] = path.read_text(errors="replace").strip()
             output[name + "Sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+        else:
+            errors.append(f"missing evidence manifest: {path}")
     output["valid"] = not errors
     output["errors"] = errors
     if errors:

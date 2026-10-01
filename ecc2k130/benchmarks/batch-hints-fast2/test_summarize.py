@@ -86,6 +86,8 @@ ptxas info : Compile time = 1.0 ms
                 (root / f"build-{name}.log").write_text(build)
                 (root / f"verify-{name}.log").write_text(self.verify_text(fast2))
                 (root / f"dp-{name}.bin").write_bytes(header + record)
+            for name in ("host.txt", "source-files.sha256", "binary-sha256.txt", "dp-identity.txt"):
+                (root / name).write_text("fixture\n")
             result = SUMMARY.summarize(root, include_timing=False)
             self.assertTrue(result["valid"])
             self.assertTrue(result["corpusIdentity"])
