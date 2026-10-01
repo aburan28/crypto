@@ -97,20 +97,48 @@
     "execution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["argv", "cwd", "env", "pinned_cpus", "child_affinity_observed", "exit", "wall_ns", "rusage",
-                   "schedstat", "max_threads_observed", "contention", "outputs"],
+      "required": ["argv", "argv0", "cwd", "env", "pinned_cpus", "child_affinity_observed", "tree_affinity",
+                   "descendants_killed", "exit", "wall_ns", "rusage", "schedstat", "max_threads_observed", "contention",
+                   "outputs"],
       "properties": {
         "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "argv0": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "resolved", "sha256"],
+          "description": "argv[0] as the child's PATH resolves it, and the hash of that file",
+          "properties": {
+            "name": {"type": "string"},
+            "resolved": {"type": ["string", "null"]},
+            "sha256": {"$ref": "#/$defs/sha256_or_null"}
+          }
+        },
+        "launch_error": {"type": "string", "description": "present only when the command could not be started"},
+        "tree_affinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tasks_outside", "cpus_seen", "examples"],
+          "description": "every task of the measured tree on every sample: how many were seen with a CPU mask beyond the pinned CPUs or last running outside them",
+          "properties": {
+            "tasks_outside": {"type": "integer", "minimum": 0},
+            "cpus_seen": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+            "examples": {"type": "array"}
+          }
+        },
+        "descendants_killed": {"type": "integer", "minimum": 0,
+                               "description": "processes the child left running after it exited, killed before its output was hashed"},
+        "subreaper": {"type": "boolean", "description": "the runner was a child subreaper, so a setsid'd descendant could not escape"},
         "cwd": {"type": ["string", "null"]},
         "env": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["declared", "defaults", "dropped_engine_knobs", "passthrough"],
+          "required": ["declared", "defaults", "dropped_engine_knobs", "passthrough", "passthrough_sha256"],
           "properties": {
             "declared": {"type": "object", "additionalProperties": {"type": "string"}},
             "defaults": {"type": "object", "additionalProperties": {"type": "string"}},
             "dropped_engine_knobs": {"type": "array", "items": {"type": "string"}},
-            "passthrough": {"type": "array", "items": {"type": "string"}}
+            "passthrough": {"type": "array", "items": {"type": "string"}},
+            "passthrough_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}}
           }
         },
         "pinned_cpus": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},

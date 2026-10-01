@@ -72,8 +72,12 @@ class CryptanalysisIcBench:
             p.append("cryptanalysis ic-bench runs K_0 only: instance.curve must be {regime: koblitz, koblitz_a: 0, degree: n}")
         if wl["law"] != "known_answer":
             p.append("ic-bench plants its targets from the workload seed: workload.law must be known_answer")
+        if "ref" in curve or "explicit" in curve:
+            p.append("ic-bench builds K_0 from the degree; it does not resolve instance.curve.ref or explicit")
         fb = spec["factor_base"]
         params = fb.get("params") or {}
+        if "basis_seed" not in params:
+            p.append("the basis sampler's seed defaults to 1 in bench.py: set factor_base.params.basis_seed")
         if fb["family"] != "binary_subspace":
             p.append("ic-bench bases are F_2-subspaces: factor_base.family must be binary_subspace")
         if params.get("basis_law") not in LAWS:
@@ -125,7 +129,7 @@ class CryptanalysisIcBench:
     def cell(self, spec: dict[str, Any], workload: dict[str, Any]) -> dict[str, Any]:
         fbp = spec["factor_base"]["params"]
         return {"n": spec["instance"]["curve"]["degree"], "m": spec["decomposition"]["arity"],
-                "l": int(fbp["dimension"]), "family": fbp["basis_law"], "seed": int(fbp.get("basis_seed", 1)),
+                "l": int(fbp["dimension"]), "family": fbp["basis_law"], "seed": int(fbp["basis_seed"]),
                 "mode": spec["decomposition"]["solver"]["options"]["mode"],
                 "workload_seed": workload["record"]["seed"], "targets": workload["record"]["targets"],
                 "max_attempts": spec["relations"]["max_trials"], "run": 1}

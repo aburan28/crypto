@@ -353,6 +353,185 @@ class CryptoIcBenchAdapterTests(unittest.TestCase):
         self.assertTrue(out["consistency"])
 
 
+class ReviewRegressionTests(unittest.TestCase):
+    """Defects an adversarial review reproduced; each must stay fixed."""
+
+    def toy(self, **edit):
+        s = toy_spec(8)
+        for path, value in edit.items():
+            cur = s
+            keys = path.split("__")
+            for k in keys[:-1]:
+                cur = cur.setdefault(k, {})
+            cur[keys[-1]] = value
+        return s
+
+    def test_koblitz_curve_must_name_a(self):
+        s = self.toy()
+        del s["instance"]["curve"]["koblitz_a"]
+        s["instance"]["curve"]["ref"] = "icv1-f2m11-x"
+        with self.assertRaises(SpecError):
+            validate(s)
+
+    def test_boolean_is_not_an_integer_enum_value(self):
+        with self.assertRaises(SpecError):
+            validate(self.toy(instance__curve__koblitz_a=True))
+        self.assertTrue(Validator({"enum": [0, 1]}).errors(False))
+        self.assertEqual(Validator({"enum": [1]}).errors(1.0), [], "1 and 1.0 are one JSON number")
+
+    def test_thresholds_checked_before_anything_runs(self):
+        for th in ({"max_steal_fraction": 0.5}, {"max_steal_fractoin": 0.0}, {"max_steal_fraction": "0"}):
+            with self.assertRaises(SpecError, msg=th):
+                validate(self.toy(measurement__thresholds=th))
+
+    def test_written_out_defaults_share_an_id(self):
+        same = [(self.toy(factor_base__large_primes={"mode": "double"}),
+                 self.toy(factor_base__large_primes={"mode": "double", "max_large_primes": 2})),
+                (self.toy(), self.toy(measurement__thresholds={"max_steal_fraction": 0.0})),
+                (self.toy(measurement__thresholds={"max_involuntary_switches_per_s": 40}),
+                 self.toy(measurement__thresholds={"max_involuntary_switches_per_s": 40.0})),
+                (self.toy(), self.toy(reference={}))]
+        for a, b in same:
+            self.assertEqual(spec_id(identity_view(validate(a))), spec_id(identity_view(validate(b))))
+
+    def test_fixed_file_law_needs_its_file(self):
+        with self.assertRaises(SpecError):
+            validate(self.toy(instance__workload__law="fixed_file"))
+        with self.assertRaises(SpecError):
+            validate(self.toy(instance__workload__file={"path": "t.dat", "sha256": "0" * 64}))
+
+    def test_null_family_parameter_is_missing(self):
+        s = self.toy(factor_base={"family": "binary_subspace", "params": {"dimension": 8, "basis_law": None}})
+        with self.assertRaises(SpecError):
+            validate(s)
+
+    def test_symmetrised_solver_becomes_oracle_parameters(self):
+        ad = adapters.get("crypto.ic_bench")
+        s = base_spec()
+        s["factor_base"] = {"family": "frobenius_symmetrised", "params": {"divisor": [1]}, "quotient": ["negation", "frobenius"]}
+        s["decomposition"] = {"arity": 2, "method": "symmetrised", "encoding": "symmetrized", "limits": {"per_call_seconds": 120},
+                              "solver": {"name": "matrix-f4", "options": {"max_degree": 5, "split": "auto", "node_budget": 100}}}
+        s["relations"]["max_trials"] = 1000
+        norm = validate(s)
+        self.assertEqual(ad.check(norm), [])
+        argv = ad.command(norm, {"record": {"seed": 1}}, adapters.Context(repo_root=REPO))["argv"]
+        self.assertNotIn("--solver", argv, "ic bench ignores --solver for the symmetrised oracle")
+        self.assertIn("symmetrised:engine=matrix-f4,m=2,max_degree=5,node_budget=100", argv)
+        norm["decomposition"]["solver"]["options"]["split"] = "mom"
+        self.assertTrue(any("split" in x for x in ad.check(norm)))
+
+    def test_adapters_refuse_curves_they_do_not_resolve(self):
+        for name, spec_file in (("crypto.ic_bench", "k23-subspace-d7-mitm2.yaml"),
+                                ("cryptanalysis.ic_bench", "ca-k0n13-prefix-l3-m3.yaml"),
+                                ("autoresearcher.index_calculus", "ar-p16-smallx-m2-enum.yaml")):
+            s = copy.deepcopy(load(os.path.join(SPECS, spec_file))["spec"])
+            s["instance"]["curve"]["ref"] = "icv1-anything"
+            self.assertTrue(any("ref" in x for x in adapters.get(name).check(s)), name)
+
+    def test_validator_keyword_semantics(self):
+        v = Validator({"type": "object", "properties": {"a.b": {"type": "integer"}},
+                       "patternProperties": {"^a\\.": {"minimum": 10}}})
+        self.assertTrue(v.errors({"a.b": 1}), "patternProperties also applies to a key in properties")
+        with self.assertRaises(ValueError):
+            Validator({"type": "array", "items": [{"type": "string"}]})
+        self.assertTrue(Validator({"type": "array", "uniqueItems": True}).errors([{"a": 1, "b": 2}, {"b": 2, "a": 1}]))
+
+
+class RunnerRegressionTests(unittest.TestCase):
+    """Execution defects an adversarial review reproduced; each must stay fixed."""
+
+    def setUp(self):
+        try:
+            self.cpu = min(auto_cpus())
+        except SessionError as exc:
+            self.skipTest(str(exc))
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def run_cmd(self, argv, timeout=20):
+        d = self.tmp.name
+        env, _ = build_env({})
+        return run_measured(argv, {self.cpu}, env, d, os.path.join(d, "out"), os.path.join(d, "err"), timeout_s=timeout)
+
+    def test_a_producer_that_repins_itself_fails_affinity(self):
+        code = ("import os,time; os.sched_setaffinity(0, set(range(os.cpu_count()))); t=time.time()\n"
+                "while time.time()-t<0.3: pass")
+        ex = self.run_cmd([sys.executable, "-c", code])
+        self.assertGreater(ex["tree_affinity"]["tasks_outside"], 0)
+        gate = evaluate(ex, {}, {"topology": {}}, 1)
+        self.assertEqual([c["status"] for c in gate["checks"] if c["id"] == "affinity_observed"], ["fail"])
+
+    def test_nothing_the_child_starts_outlives_the_record(self):
+        for script in ("sleep 30 & echo started", "setsid sleep 30 & echo started"):
+            ex = self.run_cmd(["sh", "-c", script])
+            self.assertGreaterEqual(ex["descendants_killed"], 1, script)
+            out = subprocess.run(["pgrep", "-f", "^sleep 30$"], capture_output=True, text=True).stdout.split()
+            self.assertEqual(out, [], f"{script}: a sleep survived")
+
+    def test_launch_failure_has_the_full_record_shape(self):
+        ex = self.run_cmd(["/nonexistent/producer"])
+        ex["env"], ex["argv0"] = build_env({})[1], {"name": "/nonexistent/producer", "resolved": None, "sha256": None}
+        schema = json.loads(_read(os.path.join(REPO, "docs", "ic", "measurement", "schema", "record.v1.json")))
+        self.assertEqual(Validator(schema).errors(ex, schema["$defs"]["execution"]), [])
+        self.assertIn("launch_error", ex)
+
+    def test_own_children_are_not_foreign(self):
+        pids = os.path.join(self.tmp.name, "pids")
+        script = f"for i in $(seq 60); do sh -c 'echo $$ >> {pids}; i=0; while [ $i -lt 2000 ]; do i=$((i+1)); done'; done"
+        ex = self.run_cmd(["sh", "-c", script])
+        ours = set(_read(pids).split())
+        self.assertFalse([e for e in ex["contention"]["foreign_examples"] if str(e["pid"]) in ours])
+
+    def test_undersampled_schedstat_cannot_pass_parallelism_or_run_delay(self):
+        ex = {"pinned_cpus": [3], "child_affinity_observed": [3], "wall_ns": 351_000_000,
+              "schedstat": {"run_ns": 19_400_000, "wait_ns": 0, "threads_seen": 3},
+              "rusage": {"user_s": 0.40, "sys_s": 0.055, "nivcsw": 0}, "contention": {}}
+        checks = {c["id"]: c for c in evaluate(ex, {}, {"topology": {}}, 1)["checks"]}
+        self.assertEqual(checks["parallelism"]["status"], "fail")
+        self.assertEqual(checks["run_delay"]["status"], "unknown")
+
+    def test_a_user_thread_left_on_the_reservation_fails_l1(self):
+        session = {"reservation": {"evicted": True, "threads_moved": 3,
+                                   "left_on_reserved": {"user_threads": ["python3[2739]"], "kernel_threads": 2}}}
+        checks = {c["id"]: c for c in evaluate({"pinned_cpus": [3]}, session, {"topology": {}}, 1)["checks"]}
+        self.assertEqual(checks["reservation"]["status"], "fail")
+
+    def test_a_signal_is_not_a_completed_run(self):
+        spec = toy_spec(8)
+        spec["execution"]["args"]["argv"] = [
+            "python3", "-c", "import os,runpy,sys; sys.argv=['p', sys.argv[1], '8']; "
+            "runpy.run_path(os.environ['TOY']); os.kill(os.getpid(), 9)", "{seed}"]
+        spec["execution"]["env"] = {"TOY": os.path.join(FIX, "toy_producer.py")}
+        spec["measurement"].update({"repetitions": 1, "warmup": 0})
+        sp = os.path.join(self.tmp.name, "killed.json")
+        _dump(spec, sp)
+        out = os.path.join(self.tmp.name, "s")
+        run_session([sp], out, auto_cpus(), lock=os.path.join(self.tmp.name, "lock"), settle=0.1, allow_busy=True,
+                    log=lambda *_: None)
+        rec = json.loads(_read(os.path.join(out, "records.jsonl")).splitlines()[0])
+        self.assertEqual(rec["execution"]["exit"]["signal"], 9)
+        self.assertEqual(rec["outcome"]["status"], "error")
+        self.assertFalse(rec["outcome"]["verified"])
+
+    def test_refusals_leave_no_directory(self):
+        a, b = os.path.join(self.tmp.name, "a"), os.path.join(self.tmp.name, "b")
+        os.makedirs(a), os.makedirs(b)
+        for d, size in ((a, 8), (b, 9)):
+            _dump(toy_spec(size), os.path.join(d, "spec.json"))
+        out = os.path.join(self.tmp.name, "s")
+        with self.assertRaises(SessionError):
+            run_session([os.path.join(a, "spec.json"), os.path.join(b, "spec.json")], out, auto_cpus(),
+                        lock=os.path.join(self.tmp.name, "lock"), allow_busy=True, log=lambda *_: None)
+        self.assertFalse(os.path.exists(out))
+        import fcntl
+        with open(os.path.join(self.tmp.name, "lock"), "a+") as held:
+            fcntl.flock(held, fcntl.LOCK_EX)
+            with self.assertRaises(SessionError):
+                run_session([os.path.join(a, "spec.json")], out, auto_cpus(), lock=os.path.join(self.tmp.name, "lock"),
+                            allow_busy=True, log=lambda *_: None)
+        self.assertFalse(os.path.exists(out))
+
+
 class OtherAdapterTests(unittest.TestCase):
     """The cryptanalysis and autoresearcher adapters against frozen producer output."""
 

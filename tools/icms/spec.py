@@ -19,7 +19,8 @@ import os
 from typing import Any
 
 from . import SPEC_SCHEMA
-from .canonical import spec_id as _spec_id, workload_id as _workload_id
+from .canonical import CanonicalError, spec_id as _spec_id, workload_id as _workload_id
+from .gates import DEFAULT_THRESHOLDS, effective_thresholds
 from .registry import Registry
 from .schemacheck import Validator
 
@@ -37,8 +38,12 @@ DEFAULTS = {
     "measurement": {"warmup": 1, "interleave": "abab", "isolation_required": "L2", "sample_interval_ms": 50,
                     "thresholds": {}},
     "execution": {"env": {}, "args": {}},
+    "reference": {},
     "extensions": {},
 }
+# The number of large primes each named mode allows, written out so that
+# {mode: double} and {mode: double, max_large_primes: 2} are one spec.
+LARGE_PRIME_COUNT = {"single": 1, "double": 2}
 
 
 class SpecError(ValueError):
@@ -67,20 +72,28 @@ def _merge_defaults(spec: dict[str, Any]) -> dict[str, Any]:
     out = copy.deepcopy(spec)
     for section, defaults in DEFAULTS.items():
         if section not in out:
-            if section in ("descent", "extensions"):
+            if section in ("descent", "extensions", "reference"):
                 out[section] = copy.deepcopy(defaults)
             continue
         if isinstance(defaults, dict):
             for k, v in defaults.items():
                 out[section].setdefault(k, copy.deepcopy(v))
     out["execution"].setdefault("cpus", out["execution"]["threads"])
+    lp = out["factor_base"]["large_primes"]
+    if lp["mode"] in LARGE_PRIME_COUNT:
+        lp.setdefault("max_large_primes", LARGE_PRIME_COUNT[lp["mode"]])
+    # A threshold equal to its default is the default: drop it, so that an
+    # omitted threshold and an explicit default one give one spec id.
+    th = out["measurement"]["thresholds"]
+    out["measurement"]["thresholds"] = {k: v for k, v in th.items() if DEFAULT_THRESHOLDS.get(k) != v}
     return out
 
 
 def _exact(obj: Any) -> Any:
-    """Floats become their shortest round-trip decimal string, so identity never hashes a float."""
+    """Floats become their shortest round-trip decimal string, so identity never hashes a float.
+    An integral float is the integer it equals (5.0 and 5 are one value)."""
     if isinstance(obj, float):
-        return repr(obj)
+        return int(obj) if obj.is_integer() else repr(obj)
     if isinstance(obj, dict):
         return {k: _exact(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -103,13 +116,13 @@ def _policy(spec: dict[str, Any], reg: Registry) -> list[str]:
     if fam is None:
         p.append(f"factor_base.family {fb['family']!r} is not in the registry")
     else:
-        missing = [k for k in fam.get("params", []) if k not in fb.get("params", {})]
+        params = fb.get("params") or {}
+        missing = [k for k in fam.get("params", []) if params.get(k) is None]
         if missing:
-            p.append(f"factor_base.params is missing {missing} for family {fb['family']}")
+            p.append(f"factor_base.params is missing {missing} for family {fb['family']} (null is missing)")
         for k, allowed in (fam.get("param_values") or {}).items():
-            v = (fb.get("params") or {}).get(k)
-            if v is not None and v not in allowed:
-                p.append(f"factor_base.params.{k} {v!r} is not one of {allowed}")
+            if k in params and params[k] not in allowed:
+                p.append(f"factor_base.params.{k} {params[k]!r} is not one of {allowed}")
     if not reg.has_unit(spec["accounting"]["unit"]):
         p.append(f"accounting.unit {spec['accounting']['unit']!r} is not in the registry")
     window = reg.window(meas["window"])
@@ -134,6 +147,20 @@ def _policy(spec: dict[str, Any], reg: Registry) -> list[str]:
         p.append(f"execution.cpus ({ex['cpus']}) is fewer than execution.threads ({ex['threads']})")
     if spec["relations"]["stop"] == "count" and "count" not in spec["relations"]:
         p.append("relations.stop = count needs relations.count")
+    wl = spec["instance"]["workload"]
+    if wl["law"] != "fixed_file" and "file" in wl:
+        p.append("instance.workload.file belongs to the fixed_file law only")
+    if ref.get("rho") == "rho.measured_matched" and "rho_runs" not in ref:
+        p.append("a measured rho reference must say how many runs it averages: set reference.rho_runs")
+    th = meas.get("thresholds") or {}
+    bad = sorted(k for k, v in th.items() if isinstance(v, bool) or not isinstance(v, (int, float)))
+    if bad:
+        p.append(f"measurement.thresholds {bad} must be numbers")
+    else:
+        try:
+            effective_thresholds(th)
+        except (ValueError, KeyError) as exc:
+            p.append(f"measurement.thresholds: {exc}")
     return p
 
 
@@ -170,6 +197,7 @@ def workloads(norm: dict[str, Any]) -> list[dict[str, Any]]:
             "cold_target_count": inst["workload"]["targets"],
             "file": inst["workload"].get("file"),
         }
+        rec = _exact(rec)  # a float in an explicit curve hashes as its exact decimal
         out.append({"workload_id": _workload_id(rec), "record": rec})
     return out
 
@@ -179,5 +207,9 @@ def load(path: str, reg: Registry | None = None) -> dict[str, Any]:
     if raw.get("icms") != SPEC_SCHEMA:
         raise SpecError([f"{path}: icms must be {SPEC_SCHEMA!r}"])
     norm = validate(raw, reg)
+    try:
+        sid, wls = spec_id(norm), workloads(norm)
+    except CanonicalError as exc:
+        raise SpecError([f"{path}: {exc}"]) from exc
     return {"path": os.path.relpath(path, REPO) if os.path.abspath(path).startswith(REPO) else path,
-            "spec": norm, "spec_id": spec_id(norm), "workloads": workloads(norm)}
+            "spec": norm, "spec_id": sid, "workloads": wls}

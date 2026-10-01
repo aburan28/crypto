@@ -69,6 +69,8 @@ class AutoresearcherIc:
         curve, wl = spec["instance"]["curve"], spec["instance"]["workload"]
         if curve["regime"] != "prime" or "bits" not in curve:
             p.append("the autoresearcher solver draws prime-field curves by size: instance.curve {regime: prime, bits}")
+        if "ref" in curve or "explicit" in curve:
+            p.append("the solver draws its curve from bits and the seed; it does not resolve instance.curve.ref or explicit")
         if not curve.get("selected_by_seed"):
             p.append("the curve is drawn from the workload seed: set instance.curve.selected_by_seed = true")
         if wl["targets"] != 1 or wl["law"] != "known_answer":

@@ -65,7 +65,7 @@
           "allOf": [
             {"if": {"properties": {"regime": {"enum": ["char2", "koblitz", "subfield", "gls", "extension"]}}}, "then": {"anyOf": [{"required": ["degree"]}, {"required": ["ref"]}, {"required": ["explicit"]}]}},
             {"if": {"properties": {"regime": {"const": "prime"}}}, "then": {"anyOf": [{"required": ["bits"]}, {"required": ["ref"]}, {"required": ["explicit"]}]}},
-            {"if": {"properties": {"regime": {"const": "koblitz"}}}, "then": {"anyOf": [{"required": ["koblitz_a"]}, {"required": ["ref"]}, {"required": ["explicit"]}]}}
+            {"if": {"properties": {"regime": {"const": "koblitz"}}}, "then": {"required": ["koblitz_a"]}}
           ]
         },
         "workload": {
@@ -78,8 +78,10 @@
             "seeds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0},
                       "description": "One workload per seed. Repetitions re-run the same seed; independent targets come from more seeds."},
             "holdout": {"type": "boolean"},
-            "file": {"type": "object", "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}, "required": ["path", "sha256"], "additionalProperties": false}
-          }
+            "file": {"type": "object", "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}, "required": ["path", "sha256"], "additionalProperties": false,
+                     "description": "The target file of a fixed_file workload; required for that law and refused for the others."}
+          },
+          "if": {"properties": {"law": {"const": "fixed_file"}}}, "then": {"required": ["file"]}
         }
       }
     },
@@ -143,7 +145,7 @@
         "limits": {
           "type": "object", "additionalProperties": false,
           "properties": {
-            "per_call_seconds": {"type": "number", "minimum": 0, "description": "0 means no wall-clock budget. A wall budget makes counts load-dependent; the record flags any call that hit it."},
+            "per_call_seconds": {"type": "integer", "minimum": 0, "description": "0 means no wall-clock budget. A wall budget makes counts load-dependent; the record flags any call that hit it."},
             "per_call_conflicts": {"type": "integer", "minimum": 1}
           }
         }

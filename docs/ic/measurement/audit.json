@@ -1,90 +1,855 @@
 {
-  "schema": "icms.audit/v1",
-  "what": "Ways in which index-calculus figures in crypto, cryptanalysis and crypto-autoresearcher were not measured apples to apples, found by reading the code and the frozen evidence on 2026-10-01 (crypto b7d3f9ca, cryptanalysis 46ad7a8, crypto-autoresearcher d7194a40). Each finding names where it was verified and what ICMS does about it. Nothing here is a measurement.",
-  "findings": [
-    {"id": "A01", "dimension": "unit", "severity": "high",
-     "finding": "Several different quantities are all called S: ic bench/boundary count group-addition equivalents with ratios pinned in docs/ic/calibration.json; ic price divides phase wall time by a batched add_many measured on the host; the CI gate divides callgrind instructions by targets·√r. The leaderboard heads every row 'S = total operations / sqrt(r)' and records no conversion.",
-     "evidence": [{"repo": "crypto", "path": "scripts/build_ic_leaderboard.py", "where": "ladder_rows vs koblitz_one_target_rows"},
-                  {"repo": "crypto", "path": "src/bin/ic/price.rs", "where": "UnitBench, s_per_target"},
-                  {"repo": "crypto", "path": "scripts/ic_e2e_instructions.py"}],
-     "icms": "each is its own unit id (crypto.S.gae_pinned, crypto.S.price_batched_add, crypto.S.callgrind_ir); a comparison across unit ids is refused"},
-    {"id": "A02", "dimension": "unit", "severity": "high",
-     "finding": "Every shipped polynomial solver in the IC framework is priced from host wall time: run_pipeline prices by count only when op_unit is exactly 'word XORs', and no registered engine emits that unit. An algebraic row's S therefore moves with the machine, its load and its thread count, while the report's calibration_pins.measured is empty.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/ic_framework/mod.rs", "where": "lines 337-366"},
-                  {"repo": "crypto", "path": "src/cryptanalysis/ic_framework/solvers.rs", "where": "op_unit strings"}],
-     "icms": "the crypto.ic_bench adapter marks such a total deterministic=false with the reason; a host-dependent ratio is labelled and admitted only within one env_class"},
-    {"id": "A03", "dimension": "unit", "severity": "medium",
-     "finding": "Native counters with no pinned price are charged zero: table lookups on random binary curves have no ns_per_lookup, so pair-table rows cost only their group operations; GroupOps counts a doubling as one addition although ns_per_double is pinned; every solver reports peak_bytes 0 for an unmeasured value.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/ic_boundary.rs", "where": "price_phase, calibrate_binary"},
-                  {"repo": "crypto", "path": "src/cryptanalysis/ic_framework/solvers.rs", "where": "peak_bytes: 0"}],
-     "icms": "the adapter lists counters charged zero in host_dependent_because and records an unmeasured peak_bytes as null"},
-    {"id": "A04", "dimension": "measurement_window", "severity": "high",
-     "finding": "There is no shared window. ic bench runs cold from factor base to verification and stops when the target column is pinned; ic workflow stops when every column is certified; ic price keeps target construction off every clock; the one-target online interval excludes launch and input; ic compare times the whole child process. One n = 41 thread reports 0.286 online, 5.03 amortised and 110.79 whole-process for one pipeline.",
-     "evidence": [{"repo": "crypto", "path": "docs/ic/BOUNDARY_TARGETS.md", "where": "'The two n = 41 results are not reconciled'"},
-                  {"repo": "crypto", "path": "src/cryptanalysis/ic_boundary.rs", "where": "pinned(d_col) stop"},
-                  {"repo": "crypto", "path": "src/bin/ic/workflow.rs", "where": "vs_rho timing_class"}],
-     "icms": "every figure names a registry window (online_one_target, cold_end_to_end, whole_process, stage_only) and its conformance (exact or derived); comparisons across windows are refused"},
-    {"id": "A05", "dimension": "measurement_window", "severity": "medium",
-     "finding": "The boundary ledger's machine-readable schema allows timing_class 'single_target_online_wall' only, while its records use operation_counted_whole_process (12), operation_counted (8) and algorithmic_charged (2); the Markdown twin lists three other values.",
-     "evidence": [{"repo": "crypto", "path": "docs/ic/boundary_targets.json", "where": "measurement_schema.vs_rho.timing_class_enum and records"},
-                  {"repo": "crypto", "path": "docs/ic/BOUNDARY_TARGETS.md", "where": "measurement-schema table"}],
-     "icms": "windows are a closed registry list validated on every spec"},
-    {"id": "A06", "dimension": "rho_reference", "severity": "high",
-     "finding": "One leaderboard mixes references: prime and random-binary rows use the matched negation walk on one target; Koblitz rows use the one-target rho with set-up; '32-target batch' rows use batch rho, which AGENTS.md calls a historical diagnostic. The page footnote still says Koblitz rows use batch rho on 32 targets. The reference itself changed three times between 2026-09-21 and 2026-10-01.",
-     "evidence": [{"repo": "crypto", "path": "docs/ic/LEADERBOARD.md", "where": "footnote, line 36"},
-                  {"repo": "crypto", "path": "docs/ic/FRAMEWORK.md", "where": "'The rho reference'"}],
-     "icms": "a record names its reference by registry id; a comparison refuses two different ids"},
-    {"id": "A07", "dimension": "factor_base_definition", "severity": "medium",
-     "finding": "Factor-base size fields share names and differ in meaning: in the framework 'abscissae' counts x with a point of the base and 'signed_points' counts ±P; in the Koblitz reports 'abscissae' counts every admitted root, 'dimension' equals n for a nonlinear union, and 'columns' counts cofactor-projected orbits. The scoreboard's 'base' column is signed points.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/ic_framework/mod.rs", "where": "FactorBaseReport"},
-                  {"repo": "crypto", "path": "src/bin/ic/experiment.rs", "where": "factor_base_json"}],
-     "icms": "seven distinct size fields (usable_points, signed_points, abscissae_with_points, abscissae_allowed, columns, orbit_representatives, nominal_dimension), never substituted for one another"},
-    {"id": "A08", "dimension": "solver_counter_definition", "severity": "high",
-     "finding": "'SAT' is two encodings: the framework's sat-cdcl expands parity into CNF by default (native XOR is opt-in) with a 200,000-conflict budget, while the Koblitz path's SAT uses native XOR, implied Macaulay rows and an unlimited budget. FRAMEWORK.md says the framework uses native parity. No report gives CNF variables, auxiliaries or literals in one schema.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/ic_framework/solvers.rs", "where": "sat-cdcl, lines 817-900"},
-                  {"repo": "crypto", "path": "docs/ic/FRAMEWORK.md", "where": "section 4 table"}],
-     "icms": "the registry lists the options each solver must pin (sat_xor_encoding, conflict budget, WDSat XG); a spec missing one is refused; records carry clauses, XOR rows and conflicts as separate fields"},
-    {"id": "A09", "dimension": "host_or_resources", "severity": "high",
-     "finding": "Thread count is neither fixed nor recorded by ic bench, and F4-family solvers parallelise above one Rayon thread, so wall-priced solver cost shrinks with cores. ic run defaults to --batch 0 (one batch per CPU), which also changes counted trials. In this container four Rayon threads pinned to one CPU spent 75 percent of their runnable time waiting.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/pq_f4_f2.rs", "where": "rayon::current_num_threads() > 1"},
-                  {"repo": "crypto", "path": "src/bin/ic/experiment.rs", "where": "--batch 0"}],
-     "icms": "the runner builds the child's environment with RAYON_NUM_THREADS=1 unless the spec declares otherwise, and the gate checks CPU time over wall and run-queue delay"},
-    {"id": "A10", "dimension": "host_or_resources", "severity": "high",
-     "finding": "The host record is too thin to explain host effects. tools/isolated_bench.py, mandatory for wall time, records cpu_model, logical_cpus, kernel, machine and python only. Nothing records microcode, governor, turbo, SMT, sysctls, the kernel command line, THP or steal. Whole-process ratios were 17-20 percent lower on the GitHub runner than on the dev host for identical counters, and about twenty host-capture functions use different field names.",
-     "evidence": [{"repo": "crypto", "path": "tools/isolated_bench.py", "where": "host()"},
-                  {"repo": "crypto", "path": "docs/ic/ci/README.md", "where": "v1 vs v2"}],
-     "icms": "the capsule records all of these, null where the kernel hides them, and hashes the stable subset into env_class_id"},
-    {"id": "A11", "dimension": "host_or_resources", "severity": "medium",
-     "finding": "isolated_bench marks a run contended only by other processes' CPU ticks. Steal time, pressure during the run, and the run's own threads competing for its CPU are not counted; avg10 PSI before and after does not measure a two-second run.",
-     "evidence": [{"repo": "crypto", "path": "tools/isolated_bench.py", "where": "run_pinned, conditions"}],
-     "icms": "the gate reads per-task schedstat run-queue delay, steal jiffies on the pinned CPUs, PSI totals and foreign runnable tasks every 50 ms"},
-    {"id": "A12", "dimension": "versioning", "severity": "high",
-     "finding": "The commit in an ic report is `git rev-parse HEAD` of the working directory at start-up, not the commit the binary was built from; a baseline and a candidate built from different commits reported the same commit. The repository has no rust-toolchain file, Cargo.lock is gitignored, and 85 workflow files install a floating stable toolchain.",
-     "evidence": [{"repo": "crypto", "path": "src/bin/ic.rs", "where": "git_commit()"},
-                  {"repo": "crypto", "path": ".gitignore", "where": "Cargo.lock"},
-                  {"repo": "crypto", "path": "research/ic_descent_20260930/runs-isolated/main/k0n37/M1/r1-baseline.price.json"}],
-     "icms": "records identify code by binary sha256, compiled-in calibration hash, the build tree's Cargo.lock hash, rustc -Vv and the session's commit, dirty flag and diff hash; the gaps are stated on the page"},
-    {"id": "A13", "dimension": "solver_counter_definition", "severity": "medium",
-     "finding": "A wall-clock solver budget (default 120 s per call in ic bench; 5 s for WDSat in the Koblitz path) can turn a solve into BudgetExceeded under contention, which changes hit rate, trials and relations: counts that should be exact depend on load.",
-     "evidence": [{"repo": "crypto", "path": "src/bin/ic/bench.rs", "where": "--solver-budget-seconds"}],
-     "icms": "the budget is part of the spec's identity and every record carries budget_exceeded; a comparison of arms with budget hits is visible as such"},
-    {"id": "A14", "dimension": "accounting_scope", "severity": "medium",
-     "finding": "System construction is charged inconsistently: the descent-algebraic oracle builds each Weil-descended system outside the solver's clock and with no counter, while the symmetrised oracle times construction inside its solve.",
-     "evidence": [{"repo": "crypto", "path": "src/cryptanalysis/ic_framework/plugins.rs", "where": "lines 723-728 vs 1087-1099"}],
-     "icms": "recorded as a known accounting difference of the producer; the encoding is part of the spec, so the two are never compared without declaring it"},
-    {"id": "A15", "dimension": "accounting_scope", "severity": "high",
-     "finding": "Batch accounting artefacts: a producer re-added the shared set-up to every target's charged total (34.08 vs 20.27 ms per target at n = 37), and solution validation was charged to one arm and not the other, which would have turned a 1.15x loss into a 1.65x 'win'.",
-     "evidence": [{"repo": "crypto", "path": "docs/ic/BOUNDARY_TARGETS.md", "where": "'Autolab remeasurement, 2026-09-12'"}],
-     "icms": "phases come from one registry list with explicit cold and online membership; both arms of a comparison are charged over the same named window"},
-    {"id": "A16", "dimension": "workload_or_targets", "severity": "medium",
-     "finding": "Re-seeding alone moved 204 of 537 walk rows by ratios from 0.54 to 1.83, and the regression suite's three repetitions re-run one input, so they measure repeatability, not variation across targets. For random binary and CM prime curves the bench seed also selects the curve.",
-     "evidence": [{"repo": "crypto", "path": "docs/ic/BOUNDARY_TARGETS.md", "where": "Round 5 vs_rho rows"},
-                  {"repo": "crypto", "path": "research/index_calculus_baseline_20260914/regression/README.md"}],
-     "icms": "each seed is its own workload id; repetitions and independent targets are different axes; a curve drawn from the seed must be declared (selected_by_seed) and lands in the workload identity"},
-    {"id": "A17", "dimension": "host_or_resources", "severity": "medium",
-     "finding": "A/A practice disagrees with its rule: the IC tool programme requires an A/A every round because the container is rebuilt, while round R03 reused R01's A/A on a six-field host match that omits kernel build, command line, steal, microcode and frequency.",
-     "evidence": [{"repo": "crypto", "path": "research/notes/index-calculus/IC_TOOL_PROGRAM.md", "where": "section 5"},
-                  {"repo": "crypto", "path": "research/ic_tool_program/harness/bround.py", "where": "manifest()"}],
-     "icms": "an A/A arm is part of the session (list a spec twice) and its interval is printed beside every A/B ratio of that session"}
-  ]
+ "schema": "icms.audit/v1",
+ "what": "Ways in which index-calculus figures in crypto, cryptanalysis and crypto-autoresearcher were not measured apples to apples, found by reading the code and the frozen evidence on 2026-10-01 (crypto b7d3f9ca, cryptanalysis 46ad7a8, crypto-autoresearcher d7194a40). A01-A17 are inside crypto. X-findings compare the three repositories; each was re-checked by an independent verifier told to refute it, and its verdict (confirmed, or corrected with what did not survive) is recorded. Cross-repository findings that restated a crypto finding were merged into it: X06 = A01, X14 = A08, X15 = A02, X18 = A06, X19 = A03. Each finding names where it was verified and what ICMS does about it. Nothing here is a measurement.",
+ "findings": [
+  {
+   "id": "A01",
+   "dimension": "unit",
+   "severity": "high",
+   "finding": "Several different quantities are all called S: ic bench/boundary count group-addition equivalents with ratios pinned in docs/ic/calibration.json; ic price divides phase wall time by a batched add_many measured on the host; the CI gate divides callgrind instructions by targets·√r. The leaderboard heads every row 'S = total operations / sqrt(r)' and records no conversion.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "scripts/build_ic_leaderboard.py",
+     "where": "ladder_rows vs koblitz_one_target_rows"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/price.rs",
+     "where": "UnitBench, s_per_target"
+    },
+    {
+     "repo": "crypto",
+     "path": "scripts/ic_e2e_instructions.py"
+    }
+   ],
+   "icms": "each is its own unit id (crypto.S.gae_pinned, crypto.S.price_batched_add, crypto.S.callgrind_ir); a comparison across unit ids is refused"
+  },
+  {
+   "id": "A02",
+   "dimension": "unit",
+   "severity": "high",
+   "finding": "Every shipped polynomial solver in the IC framework is priced from host wall time: run_pipeline prices by count only when op_unit is exactly 'word XORs', and no registered engine emits that unit. An algebraic row's S therefore moves with the machine, its load and its thread count, while the report's calibration_pins.measured is empty.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/mod.rs",
+     "where": "lines 337-366"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/solvers.rs",
+     "where": "op_unit strings"
+    }
+   ],
+   "icms": "the crypto.ic_bench adapter marks such a total deterministic=false with the reason; a host-dependent ratio is labelled and admitted only within one env_class"
+  },
+  {
+   "id": "A03",
+   "dimension": "unit",
+   "severity": "medium",
+   "finding": "Native counters with no pinned price are charged zero: table lookups on random binary curves have no ns_per_lookup, so pair-table rows cost only their group operations; GroupOps counts a doubling as one addition although ns_per_double is pinned; every solver reports peak_bytes 0 for an unmeasured value.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "price_phase, calibrate_binary"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/solvers.rs",
+     "where": "peak_bytes: 0"
+    }
+   ],
+   "icms": "the adapter lists counters charged zero in host_dependent_because and records an unmeasured peak_bytes as null"
+  },
+  {
+   "id": "A04",
+   "dimension": "measurement_window",
+   "severity": "high",
+   "finding": "There is no shared window. ic bench runs cold from factor base to verification and stops when the target column is pinned; ic workflow stops when every column is certified; ic price keeps target construction off every clock; the one-target online interval excludes launch and input; ic compare times the whole child process. One n = 41 thread reports 0.286 online, 5.03 amortised and 110.79 whole-process for one pipeline.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/BOUNDARY_TARGETS.md",
+     "where": "'The two n = 41 results are not reconciled'"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "pinned(d_col) stop"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/workflow.rs",
+     "where": "vs_rho timing_class"
+    }
+   ],
+   "icms": "every figure names a registry window (online_one_target, cold_end_to_end, whole_process, stage_only) and its conformance (exact or derived); comparisons across windows are refused"
+  },
+  {
+   "id": "A05",
+   "dimension": "measurement_window",
+   "severity": "medium",
+   "finding": "The boundary ledger's machine-readable schema allows timing_class 'single_target_online_wall' only, while its records use operation_counted_whole_process (12), operation_counted (8) and algorithmic_charged (2); the Markdown twin lists three other values.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/boundary_targets.json",
+     "where": "measurement_schema.vs_rho.timing_class_enum and records"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/BOUNDARY_TARGETS.md",
+     "where": "measurement-schema table"
+    }
+   ],
+   "icms": "windows are a closed registry list validated on every spec"
+  },
+  {
+   "id": "A06",
+   "dimension": "rho_reference",
+   "severity": "high",
+   "finding": "One leaderboard mixes references: prime and random-binary rows use the matched negation walk on one target; Koblitz rows use the one-target rho with set-up; '32-target batch' rows use batch rho, which AGENTS.md calls a historical diagnostic. The page footnote still says Koblitz rows use batch rho on 32 targets. The reference itself changed three times between 2026-09-21 and 2026-10-01.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/LEADERBOARD.md",
+     "where": "footnote, line 36"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/FRAMEWORK.md",
+     "where": "'The rho reference'"
+    }
+   ],
+   "icms": "a record names its reference by registry id; a comparison refuses two different ids"
+  },
+  {
+   "id": "A07",
+   "dimension": "factor_base_definition",
+   "severity": "medium",
+   "finding": "Factor-base size fields share names and differ in meaning: in the framework 'abscissae' counts x with a point of the base and 'signed_points' counts ±P; in the Koblitz reports 'abscissae' counts every admitted root, 'dimension' equals n for a nonlinear union, and 'columns' counts cofactor-projected orbits. The scoreboard's 'base' column is signed points.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/mod.rs",
+     "where": "FactorBaseReport"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/experiment.rs",
+     "where": "factor_base_json"
+    }
+   ],
+   "icms": "seven distinct size fields (usable_points, signed_points, abscissae_with_points, abscissae_allowed, columns, orbit_representatives, nominal_dimension), never substituted for one another"
+  },
+  {
+   "id": "A08",
+   "dimension": "solver_counter_definition",
+   "severity": "high",
+   "finding": "'SAT' is two encodings: the framework's sat-cdcl expands parity into CNF by default (native XOR is opt-in) with a 200,000-conflict budget, while the Koblitz path's SAT uses native XOR, implied Macaulay rows and an unlimited budget. FRAMEWORK.md says the framework uses native parity. No report gives CNF variables, auxiliaries or literals in one schema.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/solvers.rs",
+     "where": "sat-cdcl, lines 817-900"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/FRAMEWORK.md",
+     "where": "section 4 table"
+    }
+   ],
+   "icms": "the registry lists the options each solver must pin (sat_xor_encoding, conflict budget, WDSat XG); a spec missing one is refused; records carry clauses, XOR rows and conflicts as separate fields"
+  },
+  {
+   "id": "A09",
+   "dimension": "host_or_resources",
+   "severity": "high",
+   "finding": "Thread count is neither fixed nor recorded by ic bench, and F4-family solvers parallelise above one Rayon thread, so wall-priced solver cost shrinks with cores. ic run defaults to --batch 0 (one batch per CPU), which also changes counted trials. In this container four Rayon threads pinned to one CPU spent 75 percent of their runnable time waiting.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/pq_f4_f2.rs",
+     "where": "rayon::current_num_threads() > 1"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/experiment.rs",
+     "where": "--batch 0"
+    }
+   ],
+   "icms": "the runner builds the child's environment with RAYON_NUM_THREADS=1 unless the spec declares otherwise, and the gate checks CPU time over wall and run-queue delay"
+  },
+  {
+   "id": "A10",
+   "dimension": "host_or_resources",
+   "severity": "high",
+   "finding": "The host record is too thin to explain host effects. tools/isolated_bench.py, mandatory for wall time, records cpu_model, logical_cpus, kernel, machine and python only. Nothing records microcode, governor, turbo, SMT, sysctls, the kernel command line, THP or steal. Whole-process ratios were 17-20 percent lower on the GitHub runner than on the dev host for identical counters, and about twenty host-capture functions use different field names.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "tools/isolated_bench.py",
+     "where": "host()"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/ci/README.md",
+     "where": "v1 vs v2"
+    }
+   ],
+   "icms": "the capsule records all of these, null where the kernel hides them, and hashes the stable subset into env_class_id"
+  },
+  {
+   "id": "A11",
+   "dimension": "host_or_resources",
+   "severity": "medium",
+   "finding": "isolated_bench marks a run contended only by other processes' CPU ticks. Steal time, pressure during the run, and the run's own threads competing for its CPU are not counted; avg10 PSI before and after does not measure a two-second run.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "tools/isolated_bench.py",
+     "where": "run_pinned, conditions"
+    }
+   ],
+   "icms": "the gate reads per-task schedstat run-queue delay, steal jiffies on the pinned CPUs, PSI totals and foreign runnable tasks every 50 ms"
+  },
+  {
+   "id": "A12",
+   "dimension": "versioning",
+   "severity": "high",
+   "finding": "The commit in an ic report is `git rev-parse HEAD` of the working directory at start-up, not the commit the binary was built from; a baseline and a candidate built from different commits reported the same commit. The repository has no rust-toolchain file, Cargo.lock is gitignored, and 85 workflow files install a floating stable toolchain.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic.rs",
+     "where": "git_commit()"
+    },
+    {
+     "repo": "crypto",
+     "path": ".gitignore",
+     "where": "Cargo.lock"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/ic_descent_20260930/runs-isolated/main/k0n37/M1/r1-baseline.price.json"
+    }
+   ],
+   "icms": "records identify code by binary sha256, compiled-in calibration hash, the build tree's Cargo.lock hash, rustc -Vv and the session's commit, dirty flag and diff hash; the gaps are stated on the page"
+  },
+  {
+   "id": "A13",
+   "dimension": "solver_counter_definition",
+   "severity": "medium",
+   "finding": "A wall-clock solver budget (default 120 s per call in ic bench; 5 s for WDSat in the Koblitz path) can turn a solve into BudgetExceeded under contention, which changes hit rate, trials and relations: counts that should be exact depend on load.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/bench.rs",
+     "where": "--solver-budget-seconds"
+    }
+   ],
+   "icms": "the budget is part of the spec's identity and every record carries budget_exceeded; a comparison of arms with budget hits is visible as such"
+  },
+  {
+   "id": "A14",
+   "dimension": "accounting_scope",
+   "severity": "medium",
+   "finding": "System construction is charged inconsistently: the descent-algebraic oracle builds each Weil-descended system outside the solver's clock and with no counter, while the symmetrised oracle times construction inside its solve.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/plugins.rs",
+     "where": "lines 723-728 vs 1087-1099"
+    }
+   ],
+   "icms": "recorded as a known accounting difference of the producer; the encoding is part of the spec, so the two are never compared without declaring it"
+  },
+  {
+   "id": "A15",
+   "dimension": "accounting_scope",
+   "severity": "high",
+   "finding": "Batch accounting artefacts: a producer re-added the shared set-up to every target's charged total (34.08 vs 20.27 ms per target at n = 37), and solution validation was charged to one arm and not the other, which would have turned a 1.15x loss into a 1.65x 'win'.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/BOUNDARY_TARGETS.md",
+     "where": "'Autolab remeasurement, 2026-09-12'"
+    }
+   ],
+   "icms": "phases come from one registry list with explicit cold and online membership; both arms of a comparison are charged over the same named window"
+  },
+  {
+   "id": "A16",
+   "dimension": "workload_or_targets",
+   "severity": "medium",
+   "finding": "Re-seeding alone moved 204 of 537 walk rows by ratios from 0.54 to 1.83, and the regression suite's three repetitions re-run one input, so they measure repeatability, not variation across targets. For random binary and CM prime curves the bench seed also selects the curve.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/BOUNDARY_TARGETS.md",
+     "where": "Round 5 vs_rho rows"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/regression/README.md"
+    }
+   ],
+   "icms": "each seed is its own workload id; repetitions and independent targets are different axes; a curve drawn from the seed must be declared (selected_by_seed) and lands in the workload identity"
+  },
+  {
+   "id": "A17",
+   "dimension": "host_or_resources",
+   "severity": "medium",
+   "finding": "A/A practice disagrees with its rule: the IC tool programme requires an A/A every round because the container is rebuilt, while round R03 reused R01's A/A on a six-field host match that omits kernel build, command line, steal, microcode and frequency.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "research/notes/index-calculus/IC_TOOL_PROGRAM.md",
+     "where": "section 5"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/ic_tool_program/harness/bround.py",
+     "where": "manifest()"
+    }
+   ],
+   "icms": "an A/A arm is part of the session (list a spec twice) and its interval is printed beside every A/B ratio of that session"
+  },
+  {
+   "id": "X01",
+   "dimension": "rho_reference",
+   "severity": "high",
+   "finding": "For Koblitz curves the two repositories divide by different rho references. cryptanalysis ic-bench uses the analytic plain walk sqrt(pi r/2) (A=1, no setup) for ratio_to_rho, and keeps sqrt(pi r/(4n)) only as rho_floor/ratio_to_floor. crypto ic bench (origin/main) uses s_over_rho = S / mean_s of the cheaper measured walk, setup included, choosing between signed-Frobenius (A=2n) and negation (A=2). At K_0 at n = 23 and GF(2^31) crypto picked the negation walk, so the realised gap there is about 1.14-1.19x, not sqrt(2n).",
+   "effect": "In expectation, plain over A=2n is sqrt(2n) (5.10, 6.16, 6.78 at n=13, 19, 23). In crypto's frozen n=23 and n=31 Koblitz runs, matched = negation, S = 1.095 and 1.055, against sqrt(pi/2) = 1.253. So cryptanalysis ratio_to_rho is about 1.14x and 1.19x lower (more favourable to IC).",
+   "evidence": [
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "workload() lines 132-135 rho_reference/rho_floor; lines 276-277 and 323-327 rho, ratio_to_rho, ratio_to_floor; SUITES lines 73-81 (n = 13, 19, 23)"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/bench.rs",
+     "where": "origin/main matched_rho() lines 437-498; line 897 rho_s = mean_s"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/mod.rs",
+     "where": "origin/main line 423 s_over_rho = s / rho"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "RhoResult.s 'Everything: setup, walk, verification' lines 575-590"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/koblitz_symmetrised_e2e_20260927/results/k0_23__x.json",
+     "where": "rho_reference (negation, A=2, mean_s 1.0949), rho_reference_candidates (signed-Frobenius A=46, 1.1111)"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/koblitz_symmetrised_e2e_20260927/results/k0_31__x.json",
+     "where": "rho_reference negation mean_s 1.0547; candidate A=62 mean_s 1.1514"
+    }
+   ],
+   "icms": "every reference is a registry id; the cryptanalysis adapter reports rho.plain and rho.signed_frobenius side by side and refuses rho.measured_matched, and a comparison refuses two arms with different references",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "The two ratios do not share a name (ratio_to_rho against s_over_rho). The sqrt(2n) figures (5.10x/6.16x/6.78x) apply only when crypto picks the A=2n walk. In crypto's frozen n=23 and n=31 Koblitz runs it picked the negation walk, and its S includes setup, so the realised gap at those sizes is about 1.14-1.19x, below even sqrt(2)."
+   }
+  },
+  {
+   "id": "X02",
+   "dimension": "rho_reference",
+   "severity": "high",
+   "finding": "The autoresearcher prime-field rho baseline is a Teske 20-adding walk with distinguished points and no negation map (A=1). IC/rho ratios divide by the median walk_ops (walk additions only, setup_ops reported separately), in a different unit from IC's S3 solves. crypto prime rows divide by the measured negation walk (A=2), whose S counts setup, walk and verification; s_walk is kept separately.",
+   "effect": "Without the negation map the rho reference is sqrt(2) = 1.414x too large in expectation: 'm = 3 mitm costs 34x rho's walk at 32 bits' becomes about 48x against a negation rho. Excluding setup biases the other way; the net effect depends on size and is not recorded.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/rho.py",
+     "where": "lines 1-18 docstring, R_ADDING = 20, pollard_rho lines 52-97 (X = E.add(X, M); walk_ops += 1; no negation)"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/README.md",
+     "where": "lines 80-83 Rho unit; 332-334 'different units'; 372 '34x at 32 bits'"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/bench.rs",
+     "where": "origin/main matched_rho Instance::Prime lines 446-457; RhoRun s/s_walk lines 342-352"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "RhoResult.s includes setup, lines 585-588; rho_reference_negation lines 2050-2068"
+    }
+   ],
+   "icms": "the autoresearcher adapter labels its walk rho.plain (A = 1, one run) and refuses any other reference id; crypto's matched negation walk is a different id and is never paired with it",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X03",
+   "dimension": "rho_reference",
+   "severity": "medium",
+   "finding": "IDEA-20260922-6cf862 priced matched Koblitz rho as 0.886 sqrt(r)/sqrt(2k). That uses the negation map twice, because 0.886 = sqrt(pi/4) already includes it. CORR-20260922-81aeab corrects it to sqrt(pi r/(4k)), anchored by 227/55 = 4.127 against sqrt(17) = 4.123, and marks the derived 'no exponent moves' conclusion UNESTABLISHED. IDEA-20260915-8fe0ef has the right formula but labels it 'sqrt(2n) below the negation-only row' and derives a net sqrt(n/2) from that label. crypto's generic_floor_ops with A=2k matches the corrected convention.",
+   "effect": "Under the mislabel, matched rho is understated by a factor sqrt(2), i.e. 0.5 bit; it is not halved. The corrected net movement is sqrt(k), not sqrt(k/2).",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "ledger/corrections/CORR-20260922-81aeab.yaml",
+     "where": "prior_value, corrected_value, reason"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "ledger/proposals/IDEA-20260922-6cf862.yaml",
+     "where": "line 488 '0.886 sqrt(r) / sqrt(2k)'"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "ledger/proposals/IDEA-20260915-8fe0ef.yaml",
+     "where": "lines 59-65 (sqrt(2n) label, net sqrt(n/2)), line 77 (227/55)"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "generic_floor_ops lines 310-314"
+    }
+   ],
+   "icms": "a reference is named by id with its A in registry.json (rho.negation A = 2, rho.signed_frobenius A = 2n), so the automorphism count is never re-derived by hand in a record",
+   "verification": {
+    "verdict": "confirmed",
+    "corrected": "'Understates matched rho by half' is wrong: the understatement is a factor of sqrt(2), i.e. half a bit, not a factor of 2."
+   }
+  },
+  {
+   "id": "X04",
+   "dimension": "factor_base_definition",
+   "severity": "medium",
+   "finding": "KN-FIND-aa2efc and EV-ICPERF-10c5fc compute the ECC2K-130 free-oracle floor table with N = 2^131 = #E = 4r, the full curve group, but compare it with matched rho and targets in the order-r subgroup. CORR-20260928-4cb669 scopes the ambient: subgroup floors are exactly 4/(m+1) bits lower (m=2: 87.9183, m=3: 67.5850, m=4: 55.6049). Matched rho is 2^60.8090. It also pins three distinct m=4 headroom quantities: D1 = 2^-4.41 total-cost gap, D2 = 2^+5.71 per-target budget, D3 = 2^+11.01 per-attempt budget. No verdict changes.",
+   "effect": "The shift is 1.333/1.000/0.800/0.667/0.571/0.444 bits at m = 2/3/4/5/6/8. log2 sqrt(pi r/524) = 60.80904. Reading D1 as a per-attempt budget misstates it by 10.12 bits against D2 and 15.42 bits against D3. The m=3 subgroup floor stays 6.776 bits above rho.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "ledger/corrections/CORR-20260928-4cb669.yaml",
+     "where": "prior_value, corrected_value"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "knowledge/findings/KN-FIND-aa2efc.md",
+     "where": "title line 4, line 30, line 111 (2^-4.41 headroom)"
+    }
+   ],
+   "icms": "recorded, not enforced: ICMS computes no free-oracle floors. Every record carries the subgroup order r and names its floor by registry id (floor.generic is sqrt(pi/(2A)) over r), so a floor taken over #E is visible as a different quantity rather than silently compared",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X05",
+   "dimension": "unit",
+   "severity": "high",
+   "finding": "The two repos weight the linear algebra very differently against a group addition. cryptanalysis prices one mod-r multiply-subtract (modr_mul, charged by monitor.RankTracker in matrix_build/relation_la) at a CPython loop speed of 47.575 ns, against ec_add = 117.255 ns from batched smul_batch throughput, a ratio of 0.406. crypto's price_phase converts row_ops at the pinned native-Rust ratio ns_per_row_op/ns_per_add. For koblitz/K_1 at n = 19 that ratio is 0.011352, measured against calibrate_group's lone counted addition.",
+   "effect": "At n=19 one LA operation costs 0.4057 ec_add in cryptanalysis and 0.01135 GAE in crypto, about 35.7x heavier. Only the LA component of S moves by this factor. The two denominators also differ: batched scalar-mult throughput in one repo, a lone add in the other.",
+   "evidence": [
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/calibration.json",
+     "where": "measured_ns['19'] modr_mul 47.575, ec_add 117.255; weights_by_field_degree['19']"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/calibrate.py",
+     "where": "lines 98-117 ec_add via smul_batch / (len*smul_cost), modr_mul Python loop"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/pdp-degree-heuristics/monitor.py",
+     "where": "lines 65-87, 385-448 modr_mul charges in matrix_build/relation_la"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/calibration.json",
+     "where": "instances['koblitz/K_1 at n = 19'].ns_per_row_op = 0.011352; unit"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "price_phase lines 5132-5151 (conv row_ops); Calibration::pin 249-297; calibrate_group 5065-5084"
+    }
+   ],
+   "icms": "cryptanalysis.rps and crypto.S.gae_pinned are separate unit ids and a comparison across unit ids is refused; count.group_additions is the one unit both adapters report, and it carries no conversion",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X07",
+   "dimension": "unit",
+   "severity": "high",
+   "finding": "The autoresearcher's IC-versus-rho comparison mixes units and never sums phases. IC's primary unit is one S_3 root solve; MITM table entries are charged as an S_3 solve although they need no square root. Membership tests, group operations and LA multiply-adds sit in separate columns, which the README says are never summed. Rho is counted in walk group additions, and the sweep report puts s3_solves beside walk_ops. crypto (ic_framework total_gae) and cryptanalysis (bench.py line 274, a sum over 11 PHASES) both sum every phase into one priced total.",
+   "effect": "Not computable. The README calls each unit 'about one modular exponentiation or inversion' but records no conversion. The 32-bit gap of about 10^4 (8.1e8 S3 solves against 7.6e4 walk steps) leaves out the LA and group-op columns.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/README.md",
+     "where": "lines 62-80, 156-160"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/__main__.py",
+     "where": "sweep_report lines 218-243 (primary = walk_ops vs s3_solves)"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/mod.rs",
+     "where": "line 374"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "PHASES line 53 (11 phases); total line 274"
+    }
+   ],
+   "icms": "the autoresearcher adapter records count.s3_solves, count.group_additions and time.wall_ns as three units and never sums them; a comparison uses exactly the spec's unit",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X08",
+   "dimension": "unit",
+   "severity": "medium",
+   "finding": "crypto's tournament IC/rho cells for rounds 0021/0022 (n23a1 0.831, n37a0 1.396, n43a1 2.207) are ratios of whole-process callgrind instructions, parsed from 'Collected:'. The free-oracle floor and the boundary ledger are in group-addition equivalents. The autoresearcher validation report marked these cells inconclusive for that reason: neither arm records an instructions-per-group-op conversion.",
+   "effect": "With the floor at N=#E (the report itself says N=r is correct) at 2.50x/146x/461x of rho's steps, IC would need 3.0x to 209x fewer instructions per group op than rho. The report also notes a ~9x disagreement at n=23: 7.47x GAE against 0.831x instructions.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "coordination/review/icperf-aa2efc-20260926/reviews/TASK-20260926-44629c/validation-report.yaml",
+     "where": "lines 324-384 (same_unit_boundary_ledger unit line 326; tournament_cells 356-377)"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md",
+     "where": "Round 0021/0022 tables lines 641, 737-739"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/ic_candidate_tournament_20260915/campaign_20260916/round22_crossover.py",
+     "where": "instructions() line 112, doc line 15"
+    }
+   ],
+   "icms": "crypto.S.callgrind_ir is its own unit id and the floors are in operations; a comparison or ratio across the two is refused",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X09",
+   "dimension": "measurement_window",
+   "severity": "high",
+   "finding": "The IC stop event differs across repos. crypto ic bench (ic_boundary.rs ~4989) breaks once matrix.pinned(d_col) fixes the target logarithm and verifies it. autoresearcher's solver/linalg also stop at the first relation that pins k (README: ~0.5|F| relations at m=2, 0.92|F| at m=3, vs ~|F| for full rank). cryptanalysis collects to the achievable rank (m=2) or effective column count (m>=3), then runs TDpdp descent per workload target. crypto's parent contract requires full-rank recovery for full-ECDLP claims, so crypto ic bench departs from its own contract. Overlaps A04 within crypto.",
+   "effect": "From autoresearcher's own figures: about 2x fewer relations at m=2 (0.5|F| vs |F|) and about 1.09x at m=3 (1/0.92). Only cryptanalysis also pays a per-target descent. The cost effect beyond the relation counts is not recorded.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "origin/main lines 4989-5002, if let Some(d) = matrix.pinned(d_col) {...; break;}"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/README.md",
+     "where": "lines 561-566, 'Linear algebra stops early'"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/linalg.py",
+     "where": "module docstring lines 1-13"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/solver.py",
+     "where": "module docstring step 3"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "lines 191-192 relation_collection.stop; lines 204-210 target_descent TDpdp"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+     "where": "invariants: 'Full-rank recovery and final scalar verification are required for full-ECDLP claims.'"
+    }
+   ],
+   "icms": "relations.stop (first_log | full_rank | count) is part of spec identity and a forbidden difference in a comparison; each adapter refuses the stop rule its producer does not implement",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "The cryptanalysis stop rule is at bench.py lines 191-192, not 181-182. Everything else checks out. A04 already records the stop-event mismatch inside crypto; X09 extends it across the three repos."
+   }
+  },
+  {
+   "id": "X10",
+   "dimension": "workload_or_targets",
+   "severity": "medium",
+   "finding": "In cryptanalysis ic-bench, every suite cell defaults to targets=3. total sums every phase, including target_descent for all three descents (line 274). ratio_to_rho divides that 3-target cold total by a one-target rho, rho_reference = round(sqrt(pi r/2))·w_ec_add (lines 132, 276, 327). S_rps divides the same total by sqrt(r), a one-target normalisation (line 329). Per-target figures exist only under 'warm'. crypto's primary comparison is single-target: AGENTS.md has a one-target rule, and the vs_rho schema allows only single_target_online_wall and requires target_count.",
+   "effect": "Against a matched reference (three one-target rho solves, or batch rho on 3 targets) the rho side is under-counted by up to about 3x (about sqrt(3)x for batch rho). This inflates IC's ratio and partly offsets the sqrt(2n) generosity of a plain rho without classes. The descent share is not computed, so the net effect is unknown.",
+   "evidence": [
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "line 67 cells(...targets=3); lines 72-80 SUITES; line 132 rho_reference; lines 274, 276, 327, 329; lines 330-333 warm block"
+    },
+    {
+     "repo": "crypto",
+     "path": "AGENTS.md",
+     "where": "origin/main lines 543-575, 'Primary comparison uses one target'"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/boundary_targets.json",
+     "where": "measurement_schema.vs_rho required[target_count], timing_class_enum"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+     "where": "invariants, 'Fixed setup is charged once; warm amortization always names the target count.'"
+    }
+   ],
+   "icms": "workload.targets is part of the workload id and the primary window requires exactly one target; the cryptanalysis demonstration specs use one target, and a k-target total is a different workload",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "total is at bench.py line 274, not 275. S_rps divides by sqrt(r), not by a rho figure: it is a one-target normalisation and not literally a division by one-target rho. The core mismatch holds."
+   }
+  },
+  {
+   "id": "X11",
+   "dimension": "measurement_window",
+   "severity": "medium",
+   "finding": "Uncharged work differs between pipelines. cryptanalysis does not charge summation-polynomial loading (bench.py line 175) or 'instrument' diagnostics and S=0 enumerations. In crypto, DescentAlgebraicOracle builds each Weil-descended system outside the solver's clock and adds no counter, while SymmetrisedOracle times construction inside its solve (same as A14). Building the known-answer Q is uncharged in both ic bench (curve.mul into a discarded ops) and ic price. AGENTS.md conflicts here: §8 charges 'target generation', while the one-target rule excludes known-answer target construction.",
+   "effect": null,
+   "evidence": [
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "line 175 summation_polynomials 'not charged'; instrument note around line 321; _warm_process lines 226-232"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/price.rs",
+     "where": "line 23, 'Target construction is outside every clock'"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_boundary.rs",
+     "where": "origin/main 5557-5559, target = curve.mul(&mut ops, g, d), ops never charged; 4868-4874, per-trial [a]G+[b]Q charged to rel.group_ops"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/plugins.rs",
+     "where": "DescentAlgebraicOracle::decompose ~711-735 vs SymmetrisedOracle::decompose ~1074-1115"
+    },
+    {
+     "repo": "crypto",
+     "path": "AGENTS.md",
+     "where": "line 140 (§2), line 287 (§8 'target generation'), lines 552-558 (exclude known-answer target)"
+    }
+   ],
+   "icms": "every window lists its composition and conformance (exact, exact_operations, derived, runner); what a producer leaves off its clocks is written in the record rather than assumed",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "The contrast 'ic bench charges target drawing; ic price puts target construction on no clock' compares two different things. ic bench also leaves Q's construction uncharged. What it charges is per-trial query points [a]G+[b]Q, and ic price's descent query is charged as target_query. So the stated effect ('two scalar mults per trial ... zero in ic price') is wrong. 'Target generation included' comes from AGENTS.md §8, not from FRAMEWORK §2 or AGENTS §2. The DescentAlgebraic vs Symmetrised part duplicates A14."
+   }
+  },
+  {
+   "id": "X12",
+   "dimension": "factor_base_definition",
+   "severity": "medium",
+   "finding": "'Factor-base size' counts different objects in each repo. autoresearcher |F| is unsigned: FactorBase._from_xs, small_x and random keep one lifted P per abscissa, and default_fb_size assumes a signed support of 2|F|. crypto's FactorBaseReport.signed_points counts P and -P, and the bench 'base' column is signed (size=64 gives base 128). cryptanalysis fb<B> counts signed, subgroup-usable points before folding. crypto's experiment.rs reports 'abscissae' = fb.subspace.len(), which includes roots with no point, next to 'points'.",
+   "effect": "There is a factor of about 2 between autoresearcher |F| and crypto signed_points or cryptanalysis B for the same base (2-torsion points excepted). Columns are a further 2-fold (negation) or about 2n-fold (signed Frobenius) smaller.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/factor_base.py",
+     "where": "default_fb_size 29-35; _from_xs/small_x 112-130"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/mod.rs",
+     "where": "FactorBaseReport 130-142 (origin/main)"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/experiment.rs",
+     "where": "line 924 abscissae: fb.subspace.len(), points: fb.points.len()"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json",
+     "where": "markdown: prime-abscissa[size=64] base 128"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/pdp-degree-heuristics/factor_base.py",
+     "where": "__post_init__ 311-320 (xs concatenated with negatives); usable_points/effective_columns 378-388"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "AGENTS.md",
+     "where": "lines 69-75 fb<B> definition"
+    }
+   ],
+   "icms": "the record carries usable_points, signed_points, abscissae_with_points, abscissae_allowed, columns and orbit_representatives separately; the autoresearcher adapter doubles |F| into signed points and keeps |F| as abscissae_with_points",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X13",
+   "dimension": "solver_counter_definition",
+   "severity": "high",
+   "finding": "The counter name 'conflicts' covers incomparable quantities across solvers and modes. In EV-FROB-b6e1e9, WDSat's XG mode (-x) cuts conflicts 69x (n=19) and 220x (n=23) on the same system, and CaDiCaL 1.5.3 conflicts are reported alongside. crypto's sat-cdcl also reports op_unit 'conflicts'. crypto's frozen WDSat regression does pin XG off: its full argv carries no -x and the README says Gaussian elimination is disabled in both arms. autoresearcher's frozen control runs WDSat with -x (config gauss_elim) under the same name 'conflicts'.",
+   "effect": "5747/83 = 69.2 and 148234/675 = 219.6 on the same baseline system. No fixed ratio links conflicts across solvers or modes.",
+   "evidence": [
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "ledger/evidence/EV-FROB-b6e1e9.yaml",
+     "where": "lines 97 (CaDiCaL), 113-114 (XG 69x/220x)"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/regression/contract.json",
+     "where": "variants, solver_counter_unit"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/regression/README.md",
+     "where": "line 7 'Gaussian elimination disabled in both'"
+    },
+    {
+     "repo": "crypto",
+     "path": "research/index_calculus_baseline_20260914/regression/run.py",
+     "where": "line 143 cmd built from contract args only"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/cryptanalysis/ic_framework/solvers.rs",
+     "where": "line 898 op_unit 'conflicts'"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "experiments/EXP-ICPERF-e21835/runs/RUN-ICPERF-a4a24b/summary_regression/frozen_control/results.jsonl",
+     "where": "rows with argv ... '-x', config gauss_elim"
+    }
+   ],
+   "icms": "count.solver_conflicts binds solver name, version and options; the registry makes WDSat's xg, branching order and timeout mandatory spec fields, so a spec that omits one is refused",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "The original said crypto's frozen WDSat regression records only '-b' and not the XG mode. The variant args are the complete solver argv, with no -x, and the README states that Gaussian elimination is disabled in both arms, so the XG mode is fixed (off) and documented. Only the unit name does not encode it."
+   }
+  },
+  {
+   "id": "X16",
+   "dimension": "host_or_resources",
+   "severity": "medium",
+   "finding": "The calibrations that set each unit come from different, thinly described hosts. crypto's docs/ic/calibration.json names only 'Intel(R) Xeon(R) Processor @ 2.10GHz' (median of 3 frozen runs). cryptanalysis calibration.json records node 'cursor', python/numpy and -march=native CFLAGS, but no CPU model. The autoresearcher runner environment() records OS, architecture, python, sympy and pyyaml, with no CPU or numpy. The CPU appears only in README prose, which names two hosts (2.1 GHz and 2.8 GHz). cryptanalysis bench runs os.cpu_count() unpinned ProcessPool workers by default, while crypto requires isolated_bench affinity and PSI gating.",
+   "effect": "Wall times cannot be reconciled across hosts. crypto itself documents 17-20% host-to-host whole-process differences (docs/ic/ci) and expects ±5-10% residual cloud noise (AGENTS.md). cryptanalysis counts are portable, but its rps unit is tied to an unidentified CPU.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": "docs/ic/calibration.json",
+     "where": "host, method keys"
+    },
+    {
+     "repo": "crypto",
+     "path": "tools/isolated_bench.py",
+     "where": "sched_setaffinity lines 104/219/229, PSI gate 283-285"
+    },
+    {
+     "repo": "crypto",
+     "path": "AGENTS.md",
+     "where": "lines 441-444 ±5–10% residual wall noise"
+    },
+    {
+     "repo": "crypto",
+     "path": "docs/ic/ci/README.md",
+     "where": "line 132 17–20% lower on runner"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/calibration.json",
+     "where": "host block"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "line 490 --jobs default os.cpu_count(); 362 host_id=platform.node(); 464 ProcessPoolExecutor"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "harness/runner.py",
+     "where": "environment() lines 173-180"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "src/crypto_autoresearcher/index_calculus/README.md",
+     "where": "lines 97-98 and 311 host prose"
+    }
+   ],
+   "icms": "the host capsule records CPU model, microcode, flags, kernel, sysctls, frequency policy, SMT, virtualisation and toolchain for every session; wall time is compared only within one env_class_id at the declared isolation level",
+   "verification": {
+    "verdict": "confirmed"
+   }
+  },
+  {
+   "id": "X17",
+   "dimension": "versioning",
+   "severity": "medium",
+   "finding": "Toolchain and dependency pinning differ across the repositories. crypto gitignores Cargo.lock and has no rust-toolchain file, and nothing records the rustc version. ic bench reports carry software{version, os, arch, binary_blake3}; price and boundary reports also carry the working-tree git commit. cryptanalysis's implementation hash and candidate ID cover the CFLAGS string, but -march=native makes the compiled kernel depend on the host, and no compiler version or target CPU is hashed. The autoresearcher manifest records sympy and pyyaml, not numpy or msolve. The crypto toolchain part overlaps A12.",
+   "effect": "Not computable. Counts are unaffected, but wall time and binaries cannot be reproduced from the records. crypto's binary_blake3 identifies the binary but not how to rebuild it.",
+   "evidence": [
+    {
+     "repo": "crypto",
+     "path": ".gitignore",
+     "where": "line 2 'Cargo.lock'; no rust-toolchain* in tree"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic.rs",
+     "where": "lines 509-512 software block; 176-182 git_commit via rev-parse HEAD"
+    },
+    {
+     "repo": "crypto",
+     "path": "src/bin/ic/price.rs",
+     "where": "lines 1070, 1317 'commit': git_commit()"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/pdp-degree-heuristics/kernel.py",
+     "where": "line 24 CFLAGS with -march=native; line 78 CC env"
+    },
+    {
+     "repo": "cryptanalysis",
+     "path": "experiments/ic-bench/bench.py",
+     "where": "lines 104-105 implementation_sha256; 211-218 candidate digest includes kernel_cflags"
+    },
+    {
+     "repo": "crypto-autoresearcher",
+     "path": "harness/runner.py",
+     "where": "line 179 dependencies {sympy, pyyaml}"
+    }
+   ],
+   "icms": "each record carries the binary sha256, the Cargo.lock and calibration hashes present at the run, and the producer repository's commit and dirty flag; the capsule carries rustc -Vv, cc --version, numpy and the build flags in the environment",
+   "verification": {
+    "verdict": "corrected",
+    "corrected": "The claim that crypto reports record 'only' the software block is overstated: price and boundary reports also record a git commit, and binary_blake3 does identify the binary. The autoresearcher dependencies line is 179, not 178."
+   }
+  }
+ ]
 }

@@ -110,7 +110,12 @@ must agree.**
   changes conflict counts by two orders of magnitude, so the registry lists
   the options each solver must pin. A spec that leaves one out is refused.
 - **Defaults are written out before hashing**, so an omitted default and an
-  explicit one give the same `spec_id`.
+  explicit one give the same `spec_id`: a threshold equal to its default, a
+  `double` large-prime mode with or without `max_large_primes: 2`, and `5`
+  against `5.0` are each one spec. A default that belongs to a producer (a
+  trial budget, a solver's wall-clock budget, a basis seed, a prime curve's
+  family) is not filled in: the adapter refuses the spec until it says the
+  value, because a different producer would fill in a different one.
 - **One target, one workload.** The primary window takes exactly one target.
   Each seed in `seeds` is a separate workload; more seeds give independent
   targets, and repetitions re-run the same seed.
@@ -248,8 +253,8 @@ checks, passed (`tools/icms/gates.py`):
 | level | requires |
 |---|---|
 | **L0 recorded** | the run executed under a saved capsule. Enough for operation counts, which do not depend on contention. |
-| **L1 pinned** | child CPU mask read back equal to the reservation; CPU 0 excluded; other threads evicted (`isolated_bench.evict`); the tree's CPU time / wall ≤ declared threads |
-| **L2 quiet** | L1, and during the window: run-queue delay of the child ≤ 0.5 % (from `/proc/<pid>/task/*/schedstat`), zero hypervisor steal on the pinned CPUs, no foreign runnable task on them in any sample, no memory stall, ≤ 50 preemptions per second, and a quiet `isolated_bench` preflight |
+| **L1 pinned** | child CPU mask read back equal to the reservation, and every task of the measured tree, on every sample, with a mask inside it that last ran on one of its CPUs (a producer that re-pins itself fails); CPU 0 excluded; other threads evicted (`isolated_bench.evict`) and no user thread left confined to the reserved CPUs; the tree's CPU time / wall ≤ declared threads, taking the larger of sampled schedstat and the reaped rusage |
+| **L2 quiet** | L1, and during the window: run-queue delay of the child ≤ 0.5 % (from `/proc/<pid>/task/*/schedstat`; unknown when the 50 ms samples saw under 90 % of the tree's CPU time), zero hypervisor steal on the pinned CPUs, no foreign runnable task on them in any sample, no memory stall, ≤ 50 preemptions per second, and a quiet `isolated_bench` preflight |
 | **L3 isolated** | L2, and the host configured for measurement: pinned CPUs in `isolcpus` or `nohz_full`, performance governor with turbo off, SMT off or siblings reserved, bare metal |
 
 A spec can tighten a threshold but never loosen one. A wall-clock figure is
@@ -276,10 +281,11 @@ CPU 0's core and never every CPU):
    its adapter, and any refusal stops the session.
 2. **Never overwrite.** The output directory must not exist. The specs are
    byte-copied in, and the capsule is captured.
-3. **Lock, check and preflight.** The `isolated_bench` lock is taken, the CPU
-   set checked (SMT siblings, never every CPU), and the machine must be
-   quiet. `--allow-busy` records a refused preflight and continues, and every
-   run then stays below L2.
+3. **Lock, check and preflight, before anything is written.** The
+   `isolated_bench` lock is taken, the CPU set checked (SMT siblings, never
+   every CPU), and the machine must be quiet; a refusal leaves no output
+   directory behind. `--allow-busy` records a refused preflight and continues,
+   and every run then stays below L2.
 4. **Evict.** Other movable threads leave the reserved CPUs for the whole
    session and are restored afterwards.
 5. **Interleave.** Each arm runs its warm-ups, then the rounds: every arm
@@ -287,7 +293,9 @@ CPU 0's core and never every CPU):
    adds an A/A arm, the session's noise floor.
 6. **Run each execution measured:**
    - pinned between fork and exec, with a built environment;
-   - only `PATH`, `HOME`, the locale and toolchain roots pass through;
+   - only `PATH`, `HOME`, the locale and toolchain roots pass through, each
+     recorded by the hash of its value, with `argv[0]` resolved through that
+     `PATH` and hashed;
    - `RAYON_NUM_THREADS`, `OMP_NUM_THREADS`, `PYTHONHASHSEED` and `LC_ALL`
      are pinned, plus whatever the spec declares;
    - engine knobs found in the operator's shell (`KIC_*`, `IC_*`, `GAUDRY_*`)
@@ -295,7 +303,14 @@ CPU 0's core and never every CPU):
    - sampled every 50 ms for schedstat, threads and foreign runnable tasks,
      with steal and PSI totals read around it;
    - left unreaped at exit long enough to read its own schedstat;
-   - killed as a process group at the timeout.
+   - killed as a process group at the timeout;
+   - never outlived: the runner is a child subreaper, so a descendant that
+     backgrounds itself or calls `setsid` is reparented to it, and every
+     descendant still alive when the root exits (or the runner is
+     interrupted) is killed and reaped before the output is hashed. The record
+     counts them, and a run that left any behind is an error, not a result.
+   - A run that exits non-zero or by a signal is an error, whatever it wrote
+     before dying. A command that cannot start still gets a full record.
 7. **Write a record per execution**, failures, timeouts and warm-ups
    included.
 

@@ -75,21 +75,38 @@ def evaluate(execution: dict[str, Any], session: dict[str, Any], capsule_stable:
 
     # ---- L1 ------------------------------------------------------------------
     aff = execution.get("child_affinity_observed")
-    checks.append(_c("affinity_observed", "L1", _bool_status(None if aff is None else (bool(pinned) and set(aff) == pinned)),
-                     aff, sorted(pinned), "child CPU mask read back after exec"))
+    tree = execution.get("tree_affinity") or {}
+    outside = tree.get("tasks_outside")
+    aff_ok = None if aff is None else (bool(pinned) and set(aff) == pinned and not outside)
+    checks.append(_c("affinity_observed", "L1", _bool_status(aff_ok),
+                     {"root_after_exec": aff, "tree_tasks_outside": outside, "tree_cpus_seen": tree.get("cpus_seen")},
+                     sorted(pinned),
+                     "child CPU mask read back after exec, and every task of the tree on every sample: mask within "
+                     "the pinned CPUs and last ran on one of them"))
     checks.append(_c("excludes_cpu0", "L1", _bool_status(bool(pinned) and 0 not in pinned), sorted(pinned), "no CPU 0",
                      "CPU 0 takes most housekeeping interrupts"))
     reservation = session.get("reservation") or {}
-    checks.append(_c("reservation", "L1", _bool_status(reservation.get("evicted") if reservation else None),
+    left_user = ((reservation.get("left_on_reserved") or {}).get("user_threads") if reservation else None) or []
+    checks.append(_c("reservation", "L1",
+                     _bool_status(bool(reservation.get("evicted")) and not left_user if reservation else None),
                      {k: reservation.get(k) for k in ("evicted", "threads_moved", "left_on_reserved")} if reservation else None,
-                     "other movable threads evicted from the reserved CPUs",
-                     "isolated_bench.evict over the whole session; refused if it could not run"))
+                     "other movable threads evicted, and no user thread left confined to the reserved CPUs",
+                     "isolated_bench.evict over the whole session; a user thread pinned inside the reservation "
+                     "cannot be moved and fails this check"))
     sched = execution.get("schedstat") or {}
     wall = execution.get("wall_ns") or 0
-    if not sched.get("threads_seen") or wall <= 0:
-        checks.append(_c("parallelism", "L1", "unknown", None, declared_threads, "no schedstat for the measured tree"))
+    ru = execution.get("rusage") or {}
+    ru_cpu_ns = None if ru.get("user_s") is None else (ru["user_s"] + (ru.get("sys_s") or 0)) * 1e9
+    # schedstat is sampled, so a process that lived between two samples is
+    # missed; rusage of the reaped root includes every waited-for descendant.
+    # Parallelism takes the larger, and run delay is unknown when the samples
+    # saw too little of the tree's CPU time to speak for it.
+    covered = sched.get("run_ns") or 0
+    coverage_ok = ru_cpu_ns is None or ru_cpu_ns < 20e6 or covered >= 0.9 * ru_cpu_ns
+    if (not sched.get("threads_seen") and ru_cpu_ns is None) or wall <= 0:
+        checks.append(_c("parallelism", "L1", "unknown", None, declared_threads, "no schedstat or rusage for the measured tree"))
     else:
-        par = sched["run_ns"] / wall
+        par = max(covered, ru_cpu_ns or 0) / wall
         ok = par <= declared_threads + th["parallelism_slack"] and declared_threads <= max(len(pinned), 1)
         checks.append(_c("parallelism", "L1", _bool_status(ok), round(par, 4),
                          {"declared_threads": declared_threads, "pinned_cpus": len(pinned), "slack": th["parallelism_slack"]},
@@ -100,6 +117,11 @@ def evaluate(execution: dict[str, Any], session: dict[str, Any], capsule_stable:
     run_ns, wait_ns = sched.get("run_ns"), sched.get("wait_ns")
     if not sched.get("threads_seen") or (run_ns or 0) + (wait_ns or 0) == 0:
         checks.append(_c("run_delay", "L2", "unknown", None, th["max_run_delay_fraction"], "no schedstat"))
+    elif not coverage_ok:
+        checks.append(_c("run_delay", "L2", "unknown", {"schedstat_run_ns": run_ns, "rusage_cpu_ns": round(ru_cpu_ns)},
+                         th["max_run_delay_fraction"],
+                         "the 50 ms samples saw under 90 % of the tree's CPU time (short-lived processes), so its run "
+                         "delay is not known"))
     else:
         frac = wait_ns / (run_ns + wait_ns)
         checks.append(_c("run_delay", "L2", _bool_status(frac <= th["max_run_delay_fraction"]), round(frac, 6),
@@ -168,7 +190,9 @@ def evaluate(execution: dict[str, Any], session: dict[str, Any], capsule_stable:
     # KVM guest), so the hypervisor is read with --vm and from the CPU flag.
     vz = capsule_stable.get("virtualization") or {}
     vm = vz.get("detect_vm", vz.get("detect_virt"))
-    hyper = ((capsule_stable.get("cpu") or {}).get("features") or {}).get("hypervisor")
+    cpu = capsule_stable.get("cpu") or {}
+    # Only x86 /proc/cpuinfo has a hypervisor flag; elsewhere its absence says nothing.
+    hyper = (cpu.get("features") or {}).get("hypervisor") if cpu.get("vendor_id") else None
     if vm is None and hyper is None:
         metal = None
     else:

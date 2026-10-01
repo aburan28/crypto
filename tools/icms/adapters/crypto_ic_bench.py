@@ -37,6 +37,10 @@ METHOD_TO_ORACLE = {"subtract": "subtract", "mitm": "mitm", "pair_table": "mitm"
                     "mitm_frobenius": "mitm-frobenius", "algebraic": "descent-algebraic",
                     "symmetrised": "symmetrised"}
 LINALG = {"incremental_gauss": "incremental-gauss", "structured_gauss": "structured-gauss"}
+# The symmetrised oracle ignores --solver: it builds its own engine from its own
+# parameters (plugins.rs SymmetrisedOracle::prepare), so the spec's solver is
+# translated into those parameters.
+SYMMETRISED_ENGINES = ("inherited-f4", "matrix-f4", "matrix-f5")
 UNITS = ("crypto.S.gae_pinned", "time.wall_ns", "time.cpu_ns")
 WINDOWS = ("cold_end_to_end", "online_one_target", "whole_process")
 
@@ -69,6 +73,11 @@ class CryptoIcBench:
             p.append(f"ic bench has no {curve['regime']} instances")
         if curve["regime"] == "prime" and "bits" not in curve:
             p.append("ic bench draws prime-field curves by subgroup size: set instance.curve.bits")
+        if curve["regime"] == "prime" and "family" not in curve:
+            p.append("ic bench defaults a prime curve's family to generic: set instance.curve.family explicitly")
+        if "ref" in curve or "explicit" in curve:
+            p.append("ic bench builds its curve from regime and degree or bits; it does not resolve instance.curve.ref "
+                     "or explicit, so a spec naming one would run a different curve than it says")
         if curve["regime"] in ("char2", "koblitz") and "degree" not in curve:
             p.append("ic bench needs instance.curve.degree")
         if curve["regime"] == "char2" and not curve.get("selected_by_seed"):
@@ -101,6 +110,21 @@ class CryptoIcBench:
             p.append("subtract is the m = 2 oracle")
         if dec.get("splitting", "none") not in ("none", "mitm_table"):
             p.append("ic bench has no split decomposition")
+        if "max_trials" not in spec["relations"]:
+            p.append("ic bench gives up after a trial budget (default 2,000,000): set relations.max_trials")
+        if dec["method"] in ("algebraic", "symmetrised") and (dec.get("limits") or {}).get("per_call_seconds") is None:
+            p.append("ic bench gives each solver call a wall-clock budget (default 120 s): set "
+                     "decomposition.limits.per_call_seconds (0 for none)")
+        if dec["method"] == "symmetrised" and dec.get("solver"):
+            sv = dec["solver"]
+            if sv["name"] not in SYMMETRISED_ENGINES:
+                p.append(f"the symmetrised oracle runs its own engine: solver.name must be one of {list(SYMMETRISED_ENGINES)}")
+            opts = sv.get("options") or {}
+            if opts.get("split", "auto") != "auto":
+                p.append("the symmetrised oracle always uses the default split rule: solver.options.split must be auto")
+            extra = set(opts) - {"max_degree", "node_budget", "split"}
+            if extra:
+                p.append(f"the symmetrised oracle reads only max_degree and node_budget, not {sorted(extra)}")
         if spec["relations"]["stop"] != "first_log":
             p.append("ic bench stops when the target column is pinned: relations.stop must be first_log")
         if spec["relations"]["collector"] not in ("walk", "random"):
@@ -127,15 +151,13 @@ class CryptoIcBench:
         curve, fb, dec = spec["instance"]["curve"], spec["factor_base"], spec["decomposition"]
         argv = [self.binary(spec, ctx), "bench"]
         if curve["regime"] == "prime":
-            argv += ["--bits", str(curve["bits"]), "--family", curve.get("family", "generic")]
+            argv += ["--bits", str(curve["bits"]), "--family", curve["family"]]
         elif curve["regime"] == "char2":
             argv += ["--char2-degree", str(curve["degree"])]
             if "max_cofactor" in curve:
                 argv += ["--max-cofactor", str(curve["max_cofactor"])]
         else:
-            argv += ["--koblitz-degree", str(curve["degree"])]
-            if "koblitz_a" in curve:
-                argv += ["--koblitz-a", str(curve["koblitz_a"])]
+            argv += ["--koblitz-degree", str(curve["degree"]), "--koblitz-a", str(curve["koblitz_a"])]
         fam = self.reg.family(fb["family"])
         fb_params = dict(fb.get("params") or {})
         fb_params.pop("basis_law", None)  # checked to be prefix, ic bench's only basis
@@ -147,9 +169,15 @@ class CryptoIcBench:
         oparams = dict(dec.get("params") or {})
         if dec["method"] != "subtract":
             oparams.setdefault("m", dec["arity"])
+        solver = dec.get("solver")
+        if dec["method"] == "symmetrised" and solver:
+            opts = solver.get("options") or {}
+            oparams["engine"] = solver["name"]
+            oparams.update({k: opts[k] for k in ("max_degree", "node_budget") if k in opts})
+            solver = None
         argv += ["--oracle", _plugin(METHOD_TO_ORACLE[dec["method"]], oparams)]
-        if dec.get("solver"):
-            argv += ["--solver", _plugin(dec["solver"]["name"], dec["solver"].get("options") or {})]
+        if solver:
+            argv += ["--solver", _plugin(solver["name"], solver.get("options") or {})]
         argv += ["--targets", spec["relations"]["collector"],
                  "--linalg", LINALG[spec["linear_algebra"]["method"]],
                  "--seed", str(workload["record"]["seed"]),

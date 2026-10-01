@@ -23,6 +23,24 @@ _TYPES = {
 }
 
 
+def _canon(value):
+    """A JSON-faithful key: booleans stay apart from numbers (True is not 1),
+    1 and 1.0 are one number, and object key order does not matter."""
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, (int, float)):
+        return ("num", float(value)) if isinstance(value, float) and not value.is_integer() else ("num", int(value))
+    if isinstance(value, dict):
+        return ("obj", tuple(sorted((k, _canon(v)) for k, v in value.items())))
+    if isinstance(value, list):
+        return ("arr", tuple(_canon(v) for v in value))
+    return (type(value).__name__, value)
+
+
+def json_equal(a, b) -> bool:
+    return _canon(a) == _canon(b)
+
+
 def _is_type(value, name: str) -> bool:
     if name == "integer":
         return isinstance(value, int) and not isinstance(value, bool)
@@ -43,6 +61,8 @@ def audit_schema(schema, path: str = "#") -> list[str]:
                     bad += audit_schema(sub, f"{path}/{k}/{name}")
             elif k in ("items", "additionalProperties", "if", "then", "else") and isinstance(v, dict):
                 bad += audit_schema(v, f"{path}/{k}")
+            elif k == "items":
+                bad.append(f"{path}: only the single-schema form of items is supported")
             elif k in ("oneOf", "anyOf", "allOf"):
                 for i, sub in enumerate(v):
                     bad += audit_schema(sub, f"{path}/{k}/{i}")
@@ -70,9 +90,9 @@ class Validator:
             types = s["type"] if isinstance(s["type"], list) else [s["type"]]
             if not any(_is_type(value, t) for t in types):
                 return [f"{path}: expected {'/'.join(types)}, got {type(value).__name__}"]
-        if "const" in s and value != s["const"]:
+        if "const" in s and not json_equal(value, s["const"]):
             out.append(f"{path}: must equal {s['const']!r}")
-        if "enum" in s and value not in s["enum"]:
+        if "enum" in s and not any(json_equal(value, e) for e in s["enum"]):
             out.append(f"{path}: {value!r} not in {s['enum']}")
         if isinstance(value, str):
             if "minLength" in s and len(value) < s["minLength"]:
@@ -92,7 +112,7 @@ class Validator:
             if "maxItems" in s and len(value) > s["maxItems"]:
                 out.append(f"{path}: more than {s['maxItems']} items")
             if s.get("uniqueItems"):
-                seen = [repr(v) for v in value]
+                seen = [_canon(v) for v in value]
                 if len(seen) != len(set(seen)):
                     out.append(f"{path}: items are not unique")
             if isinstance(s.get("items"), dict):
@@ -105,10 +125,11 @@ class Validator:
             props = s.get("properties", {})
             pats = s.get("patternProperties", {})
             for k, v in value.items():
-                if k in props:
+                # properties and every matching patternProperties both apply;
+                # additionalProperties applies only when neither did.
+                matched = k in props
+                if matched:
                     out += self.errors(v, props[k], f"{path}.{k}")
-                    continue
-                matched = False
                 for pat, sub in pats.items():
                     if re.search(pat, k):
                         matched = True

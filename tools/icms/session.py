@@ -36,7 +36,7 @@ from typing import Any
 from . import RECORD_SCHEMA, SESSION_SCHEMA, STANDARD, adapters
 from .canonical import record_id, sha256_file, sha256_hex
 from .environment import capsule as make_capsule, git_state, volatile_snapshot
-from .execute import build_env, run_measured
+from .execute import build_env, resolve_argv0, run_measured
 from .gates import evaluate, level_at_least
 from .registry import Registry
 from .spec import REPO, load as load_spec
@@ -104,53 +104,27 @@ def run_session(spec_paths: list[str], out_dir: str, cpus: set[int], *, lock: st
         for wl in sp["workloads"]:
             arms.append({"spec_path": sp_path, "spec": sp["spec"], "spec_id": sp["spec_id"], "workload": wl,
                          "adapter": ad})
+    names: dict[str, str] = {}
+    for p in dict.fromkeys(spec_paths):
+        prior = names.setdefault(os.path.basename(p), p)
+        if prior != p:
+            problems.append(f"{prior} and {p} share the file name {os.path.basename(p)!r}; the session keeps one "
+                            "copy per name, so rename one")
     if problems:
         raise SessionError("refused before any run:\n  " + "\n  ".join(problems))
-
-    started = time.time()
-    session_id = "ICSESS1h" + sha256_hex({"specs": [a["spec_id"] for a in arms],
-                                          "workloads": [a["workload"]["workload_id"] for a in arms],
-                                          "started": repr(started), "label": session_label}, strict=False)[:12]
-    os.makedirs(os.path.join(out_dir, "specs"))
-    os.makedirs(os.path.join(out_dir, "exec"))
-    spec_files = {}
-    for p in dict.fromkeys(spec_paths):
-        dst = os.path.join(out_dir, "specs", os.path.basename(p))
-        shutil.copyfile(p, dst)
-        spec_files[os.path.basename(p)] = sha256_file(dst)
-
-    log(f"capturing host capsule")
-    cap = make_capsule()
-    with open(os.path.join(out_dir, "capsule.json"), "w") as fh:
-        json.dump(cap, fh, indent=1, sort_keys=True)
-    capsule_sha = sha256_file(os.path.join(out_dir, "capsule.json"))
-    implementation = {"repo": git_state(REPO), "registry_sha256": reg.sha256,
-                      "isolated_bench_sha256": sha256_file(os.path.join(REPO, "tools", "isolated_bench.py")),
-                      "isolation_mode": "reserve-equivalent: the isolated_bench lock, preflight, CPU checks and "
-                                        "eviction, imported from tools/isolated_bench.py; ICMS pins its own children",
-                      "icms_sources": {f: sha256_file(os.path.join(os.path.dirname(__file__), f))
-                                       for f in sorted(os.listdir(os.path.dirname(__file__))) if f.endswith(".py")}}
 
     ib = _isolated_bench()
     try:
         inherited = ib.check_cpus(cpus)
     except SystemExit as exc:
-        shutil.rmtree(out_dir)
         raise SessionError(f"reservation refused: {exc}") from exc
-    order = plan(arms, int(session_id[-8:], 16))
-    session: dict[str, Any] = {
-        "schema": SESSION_SCHEMA, "standard": STANDARD, "session_id": session_id, "label": session_label,
-        "started_unix": started, "capsule_sha256": capsule_sha, "env_class_id": cap["env_class_id"],
-        "implementation": implementation, "spec_files": spec_files,
-        "arms": [{"index": i, "spec_path": a["spec_path"], "spec_id": a["spec_id"], "label": a["spec"].get("label"),
-                  "role": a["spec"].get("role"), "workload_id": a["workload"]["workload_id"],
-                  "adapter": a["adapter"].name} for i, a in enumerate(arms)],
-        "plan": [{"arm": i, "round": r, "warmup": w} for i, r, w in order],
-        "affinity_widened_from": inherited,
-    }
-    records_path = os.path.join(out_dir, "records.jsonl")
-    lock_ctx = ib.locked(lock, wait)
-    with lock_ctx:
+    with contextlib.ExitStack() as stack:
+        # The lock and the preflight come before the output directory exists,
+        # so a refusal leaves nothing behind and the same --out can be retried.
+        try:
+            stack.enter_context(ib.locked(lock, wait))
+        except SystemExit as exc:
+            raise SessionError(f"lock refused: {exc}") from exc
         mine = {os.getpid()}
         args = type("A", (), {"settle": settle, "max_other_cpu": max_other_cpu, "max_psi": max_psi})()
         quiet, pre = True, None
@@ -165,10 +139,46 @@ def run_session(spec_paths: list[str], out_dir: str, cpus: set[int], *, lock: st
         if pre and "conditions" in pre:
             vals = [p["some"]["avg10"] for p in (pre["conditions"].get("psi_cpu"), pre["conditions"].get("psi_memory")) if p]
             worst = max(vals) if vals else None
-        session["preflight"] = {"quiet": quiet, "detail": pre,
-                                "other_cpu_seconds": (pre or {}).get("settle", {}).get("other_cpu_seconds"),
-                                "psi_some_avg10_max": worst,
-                                "limits": {"settle_s": settle, "max_other_cpu": max_other_cpu, "max_psi": max_psi}}
+
+        started = time.time()
+        session_id = "ICSESS1h" + sha256_hex({"specs": [a["spec_id"] for a in arms],
+                                              "workloads": [a["workload"]["workload_id"] for a in arms],
+                                              "started": repr(started), "label": session_label}, strict=False)[:12]
+        os.makedirs(os.path.join(out_dir, "specs"))
+        os.makedirs(os.path.join(out_dir, "exec"))
+        spec_files = {}
+        for p in dict.fromkeys(spec_paths):
+            dst = os.path.join(out_dir, "specs", os.path.basename(p))
+            shutil.copyfile(p, dst)
+            spec_files[os.path.basename(p)] = sha256_file(dst)
+
+        log("capturing host capsule")
+        cap = make_capsule()
+        with open(os.path.join(out_dir, "capsule.json"), "w") as fh:
+            json.dump(cap, fh, indent=1, sort_keys=True)
+        capsule_sha = sha256_file(os.path.join(out_dir, "capsule.json"))
+        implementation = {"repo": git_state(REPO), "registry_sha256": reg.sha256,
+                          "isolated_bench_sha256": sha256_file(os.path.join(REPO, "tools", "isolated_bench.py")),
+                          "isolation_mode": "reserve-equivalent: the isolated_bench lock, preflight, CPU checks and "
+                                            "eviction, imported from tools/isolated_bench.py; ICMS pins its own children",
+                          "icms_sources": {f: sha256_file(os.path.join(os.path.dirname(__file__), f))
+                                           for f in sorted(os.listdir(os.path.dirname(__file__))) if f.endswith(".py")}}
+        order = plan(arms, int(session_id[-8:], 16))
+        session: dict[str, Any] = {
+            "schema": SESSION_SCHEMA, "standard": STANDARD, "session_id": session_id, "label": session_label,
+            "started_unix": started, "capsule_sha256": capsule_sha, "env_class_id": cap["env_class_id"],
+            "implementation": implementation, "spec_files": spec_files,
+            "arms": [{"index": i, "spec_path": a["spec_path"], "spec_id": a["spec_id"], "label": a["spec"].get("label"),
+                      "role": a["spec"].get("role"), "workload_id": a["workload"]["workload_id"],
+                      "adapter": a["adapter"].name} for i, a in enumerate(arms)],
+            "plan": [{"arm": i, "round": r, "warmup": w} for i, r, w in order],
+            "affinity_widened_from": inherited,
+            "preflight": {"quiet": quiet, "detail": pre,
+                          "other_cpu_seconds": (pre or {}).get("settle", {}).get("other_cpu_seconds"),
+                          "psi_some_avg10_max": worst,
+                          "limits": {"settle_s": settle, "max_other_cpu": max_other_cpu, "max_psi": max_psi}},
+        }
+        records_path = os.path.join(out_dir, "records.jsonl")
         moved = ib.evict(cpus, mine)
         session["reservation"] = {"cpus": sorted(cpus), "evicted": True, "threads_moved": len(moved),
                                   "left_on_reserved": ib.unmovable_on(cpus, mine)}
@@ -210,15 +220,28 @@ def _execute_one(n: int, arm_index: int, arm: dict[str, Any], rnd: int, warm: bo
                              memory_limit_mib=spec["measurement"].get("memory_limit_mib"),
                              interval=spec["measurement"]["sample_interval_ms"] / 1000.0)
     execution["env"] = env_record
+    execution["argv0"] = resolve_argv0(cmd["argv"], env, cmd["cwd"])
+    if execution["argv0"]["resolved"] and execution["argv0"]["resolved"].startswith(REPO + os.sep):
+        execution["argv0"]["resolved"] = os.path.relpath(execution["argv0"]["resolved"], REPO)
     execution["argv"] = [os.path.relpath(a, REPO) if isinstance(a, str) and a.startswith(REPO + os.sep) else a
                          for a in execution["argv"]]
     execution["cwd"] = os.path.relpath(execution["cwd"], REPO) if execution.get("cwd") else None
     parsed = ad.parse(spec, wl, ctx, os.path.join(exec_dir, "stdout")) if not execution["exit"]["timed_out"] else \
         {"outcome": {"status": "timeout", "verified": False}}
     parsed = adapters.normalise(parsed, spec, reg)
-    if execution["exit"]["returncode"] not in (0, None) and parsed.get("outcome", {}).get("status") == "complete":
-        parsed["outcome"]["status"] = "error"
-        parsed["outcome"]["reason"] = f"exit code {execution['exit']['returncode']}"
+    ex = execution["exit"]
+    if parsed.get("outcome", {}).get("status") == "complete":
+        # A run that did not exit cleanly is not a result, whatever it wrote first.
+        if ex.get("signal") is not None or ex.get("returncode") != 0:
+            parsed["outcome"]["status"] = "error"
+            parsed["outcome"]["verified"] = False
+            parsed["outcome"]["reason"] = (f"killed by signal {ex['signal']}" if ex.get("signal") is not None
+                                           else f"exit code {ex.get('returncode')}")
+        elif execution.get("descendants_killed"):
+            parsed["outcome"]["status"] = "error"
+            parsed["outcome"]["verified"] = False
+            parsed["outcome"]["reason"] = (f"left {execution['descendants_killed']} process(es) running after it exited; "
+                                           "they were killed, but they shared the measured CPUs")
     gate = evaluate(execution, session, cap["stable"], spec["execution"]["threads"],
                     spec["measurement"].get("thresholds"))
     required = spec["measurement"]["isolation_required"]
