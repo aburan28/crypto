@@ -92,7 +92,39 @@ on another allocation and does not estimate an additional code-change gain.
 The active 26 B/s single-GPU target remains unachieved, and
 [THROUGHPUT-30B.md](THROUGHPUT-30B.md) prices what it would take.
 
-## Table-walk comparison (iteration function, off by default)
+## Current table-v3 schedule
+
+Cycle escape v3 invalidated the older table-walk timing because a history hint
+now calls a bounded exact point probe. On current main, a five-repetition
+seven-arm run measured a 1.040338 B/s reference; its best exploratory arm was
+1.050842 B/s. Every arm replayed 300/300 reports with zero drops, and all seven
+sorted 1,480,278-record v3 corpora were identical. The run also showed that the
+old static roofline branch model fails its CLMAD self-check on v3, so its
+predicted per-pipe ratios are not current evidence.
+
+The selected repair uses the historical B16/T512 one-block geometry and two
+same-walk scheduling options:
+
+- `TABLE_SPLIT_FORWARD=1` completes reporting and selection before the prefix
+  product is live, removing the control kernel's reported spill traffic.
+- `TABLE_BATCH_HINTS=1` records hinted slots and resolves one per lane after the
+  warp reconverges, instead of serializing a different sparse cold call at each
+  batch position.
+
+The first option alone measured about +1.0% in three long pairs. Adding
+reconvergence measured **2.449169 B/s** versus **1.052232 B/s** control, a
+median paired ratio of **2.327850**. Both modes replayed 300/300 reports, dropped
+none and produced the same sorted v3 corpus. A fixed-population geometry sweep
+retained B16: B32 was 0.7% slower in every 64-launch pair, while B64 was much
+slower in the screen. The global knobs remain default-off; the RTX table preset
+selects both. This repairs a correctness-current path but remains below the
+sigma preset and far below 26 B/s.
+
+Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
+[`benchmarks/batch-hints/independent-audit.json`](benchmarks/batch-hints/independent-audit.json),
+and [`benchmarks/hint-geometry/result.json`](benchmarks/hint-geometry/result.json).
+
+## Historical table-walk comparison (superseded cycle rule)
 
 [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6 and
 [`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json)

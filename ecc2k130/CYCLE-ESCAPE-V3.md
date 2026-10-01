@@ -41,9 +41,26 @@ on the existing 4096-step boundaries. Campaign users should size the limit for
 their DP distribution; it is not part of the iteration's algebra.
 
 The cold path performs extra additions/inversions and possibly canonicalization.
-Its GPU register, occupancy, throughput, and end-to-end cost have **not** been
-measured. Existing v2 throughput and walk-constant figures do not transfer to v3.
-This repair makes no speedup claim and does not change the default sigma walk.
+Existing v2 throughput and walk-constant figures do not transfer to v3. A
+current-main measurement found that calling the point probe independently at
+each slot reduced the 64-launch benchmark to 1.040338 B/s. The call raised the
+kernel from the historical 116-register/no-frame shape to 128 registers, a
+448-byte frame and 36/84 bytes of reported spill stores/loads.
+
+`TABLE_SPLIT_FORWARD=1` selects every slot before the prefix product becomes
+live, eliminating those reported spills. `TABLE_BATCH_HINTS=1` then pushes all
+raw tags first and resolves one pending slot per lane per warp round. Because
+the point probe is independent of incoming history, replacing the newest raw
+tag with its resolved tag produces the same final history as immediate
+resolution. Both options default off globally and are selected by the RTX PRO
+6000 table preset.
+
+The matched B16/T512 comparison measured 2.449169 B/s versus 1.052232 B/s
+control, with paired ratios 2.325576–2.330535. Both arms replayed 300/300
+reports, dropped none and produced identical 1,480,278-record v3 corpora. A
+B16/B32/B64 constant-population follow-up retained B16 after B32 lost all three
+long pairs and B64 lost the screen. These are same-walk scheduling results,
+not a 26 B/s result or a full-solve speedup. The default sigma walk is unchanged.
 The hashed controls in `walkconstant.cpp` explicitly retain v2; native rows use
 v3 and identify it in their output. Their old merge-loss model is not a v3 model.
 

@@ -677,10 +677,10 @@ bench-rtx-pro6000:
 # knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
 # for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
 PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
-# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
-# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
-# from the step tag, the products inlined, the forward pass software-pipelined.
-# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+# The knob set that measured 20 B/s under the historical v2 table rule, now
+# carrying the exact v3 schedule selected by the current matched comparison:
+# split selection from the prefix product and reconverge hinted slots before
+# the cold full-point probe.  See CYCLE-ESCAPE-V3.md and benchmarks/batch-hints.
 # ALU squaring is on in this preset.  The value is expanded into the child
 # make, so a command-line PACKED_ALU_SQUARE reaches the build.
 # The knob set itself, so the recipe below and gpu-preset cannot drift apart.
@@ -690,7 +690,7 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
 	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
-	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
