@@ -61,10 +61,13 @@ def replay() -> dict:
     digest = hashlib.sha256(json.dumps(canonical, sort_keys=True,
                                        separators=(",", ":")).encode()).hexdigest()
     assert digest == PRIOR_DIGEST == frozen["prior_inventory_digest"]
+    # The prior corpus was fixed at preregistration. Later experiments add
+    # point files, so the current index is not the provenance boundary.
     tracked = [path for path in subprocess.check_output(
-        ["git", "ls-files", "research/notes/ecc2k130/**/*.points.jsonl"],
-        cwd=ROOT, text=True).splitlines()
-        if not path.startswith(str(HERE.relative_to(ROOT)) + "/")]
+        ["git", "ls-tree", "-r", "--name-only", PREREG_COMMIT, "--",
+         "research/notes/ecc2k130"], cwd=ROOT, text=True).splitlines()
+        if path.endswith(".points.jsonl") and
+        not path.startswith(str(HERE.relative_to(ROOT)) + "/")]
     assert [item["path"] for item in canonical] == tracked
 
     old = json.loads(OLD_INPUT_FREEZE.read_text())
