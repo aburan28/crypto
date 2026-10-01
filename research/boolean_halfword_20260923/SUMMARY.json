@@ -1,0 +1,56 @@
+{
+  "calibrated_operation_ratio": null,
+  "classification": "engineering",
+  "full_ic_cost": null,
+  "historical_cells": 48,
+  "historical_observations": 21888,
+  "historical_probe_02_decisions": {
+    "half16_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half16_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half64_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 5,
+      "incremental_pass": false
+    },
+    "half64_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half_dispatch": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 3,
+      "incremental_pass": false
+    }
+  },
+  "historical_qualification": "unisolated; not eligible under current policy",
+  "production_solver_cost": null,
+  "qualified_decisions": null,
+  "qualified_runs": {
+    "discovery": null,
+    "failed_attempts": [],
+    "full": null,
+    "schema_version": 1
+  },
+  "rho_ratio": null,
+  "schema_version": 1,
+  "status": "16-bit syndrome implementation verified; qualified comparison pending"
+}
