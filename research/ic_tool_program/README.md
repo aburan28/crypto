@@ -9,6 +9,7 @@ It adds each part with the round that creates it:
 |:--|:--|:--|
 | `suite/v1/` | the frozen suite: parameter files, `SUITE.json` with every file's SHA-256, and the script that wrote them | R01 |
 | `harness/` | the shared runner (ABAB order, isolation, resumable, never overwrites) and the analysis | R01 |
+| `fuzz/` | B6's generator of v2 documents, pinned by `SHA256SUMS` | B6 |
 | `harness/bround.py` | Track B's steps for every B round: conformance on both arms, the 90-row pin, the v1 to v2 translation check, and the ABAB timing check against R01's A/A bands | Track B, before B0 runs |
 | `rounds/R<k>-<slug>/` | one round: `PROTOCOL.md` committed before its candidate code, then its runs (as `runs.tar.xz` with its SHA-256), analysis, decision and README | each round |
 | `baselines.json` | the ledger's rows as data: baseline, commit, binary hash, host and per-size figures | R01, then every accepted round |
@@ -34,3 +35,4 @@ It adds each part with the round that creates it:
 | R04 | where a scanned summand's time goes: per-stage counters inside the scan, in a probe build (a stage diagnostic) | declared ([`rounds/R04-scan-probes/PROTOCOL.md`](rounds/R04-scan-probes/PROTOCOL.md)); runs after B1 | #1128 (declaration) |
 | B3 | two-word binary fields (`n ≤ 126`), `rho-koblitz` on them, `solve: rho`, and the gate's rho at F0 at `n = 83` | declared ([`rounds/B3-two-word-rho/PROTOCOL.md`](rounds/B3-two-word-rho/PROTOCOL.md); cases [`conformance/v2-b3/`](conformance/v2-b3/cases.json)); runs after B1 | #1139 (declaration) |
 | B3b | the index calculus on two-word fields, at F1 | to be declared | — |
+| B6 | fuzzing and differential checks: a seeded generator of valid and corrupted documents, every answer replayed in independent Python arithmetic, in CI and as a 20,000-document campaign | declared ([`rounds/B6-fuzzing/PROTOCOL.md`](rounds/B6-fuzzing/PROTOCOL.md); generator [`fuzz/fuzz_v2.py`](fuzz/fuzz_v2.py)); runs after B2 | this PR (declaration) |
