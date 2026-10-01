@@ -409,6 +409,14 @@ The row above still states the done-when for both halves together.
     C086 and C087 under a new `supersedes` rule;
   - C082's document name is shortened to the schema's limit.
 
+**The steps' timing checks run as one chain** (an amendment to each B
+protocol, 2026-10-01, before any B measurement).
+- One interleave covers the newest baseline and each step's arm, in the
+  queue's order, on `M1`'s 22 rows, five rounds (`bround.py chain`).
+- Each step is read against the arm before it, which is its base, with
+  ten pairs a size as before.
+- The seven checks take 880 processes, not 1,540.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an
