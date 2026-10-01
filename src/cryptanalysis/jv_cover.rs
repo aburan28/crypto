@@ -1355,120 +1355,153 @@ pub fn solve_zero_dim(
         }
         mats.push(mi);
     }
-    // a random linear form and its matrix
-    let coef: Vec<u64> = (0..n).map(|_| rng.gen_range(1..p)).collect();
-    let mut m = vec![vec![0u64; delta]; delta];
-    for i in 0..n {
-        for a in 0..delta {
-            for b in 0..delta {
-                m[a][b] = am(m[a][b], mm(coef[i], mats[i][a][b], p), p);
+    // A random linear form `ℓ = Σ c_i x_i` and the characteristic polynomial of
+    // its matrix (exact, by Hessenberg reduction: a Krylov minimal polynomial
+    // of one random vector misses a root with probability `1/p` per root).  If
+    // some root's eigenspace is not a line, `ℓ` does not separate the points
+    // and a new form is drawn.
+    let ring = PolyRing::new(p);
+    let mut sols: Vec<Vec<u64>> = Vec::new();
+    for _attempt in 0..16 {
+        let coef: Vec<u64> = (0..n).map(|_| rng.gen_range(1..p)).collect();
+        let mut m = vec![vec![0u64; delta]; delta];
+        for i in 0..n {
+            for a in 0..delta {
+                for b in 0..delta {
+                    m[a][b] = am(m[a][b], mm(coef[i], mats[i][a][b], p), p);
+                }
             }
         }
-    }
-    cnt += (n * delta * delta) as u64;
-    // minimal polynomial of the Krylov sequence of a random vector
-    let mut vk: Vec<u64> = (0..delta).map(|_| rng.gen_range(0..p)).collect();
-    let mut stored: Vec<(Vec<u64>, Vec<u64>, usize)> = Vec::new(); // (vector, combo, pivot)
-    let mut minpoly: Option<Vec<u64>> = None;
-    for k in 0..=delta {
-        let mut vec_k = vk.clone();
-        let mut combo = vec![0u64; k + 1];
-        combo[k] = 1;
-        for (sv, sc, piv) in &stored {
-            let c = vec_k[*piv];
-            if c != 0 {
-                for t in 0..delta {
-                    vec_k[t] = sm(vec_k[t], mm(c, sv[t], p), p);
-                }
-                for (t, x) in sc.iter().enumerate() {
-                    combo[t] = sm(combo[t], mm(c, *x, p), p);
-                }
-                cnt += (delta + sc.len()) as u64;
-            }
-        }
-        match vec_k.iter().position(|&x| x != 0) {
-            None => {
-                minpoly = Some(combo);
+        cnt += (n * delta * delta) as u64;
+        let cp = charpoly_mod_p(&m, p, &mut cnt);
+        let roots = ring.roots(&UPoly(cp), rng);
+        let mut round: Vec<Vec<u64>> = Vec::new();
+        let mut clean = true;
+        for rt in roots {
+            // null space of Mᵀ − rt·I
+            let mut a: Vec<Vec<u64>> = (0..delta)
+                .map(|i| {
+                    (0..delta)
+                        .map(|j| if i == j { sm(m[j][i], rt, p) } else { m[j][i] })
+                        .collect()
+                })
+                .collect();
+            let mut mc = 0u64;
+            let piv = rref_mod_p_local(&mut a, p, &mut mc);
+            cnt += mc;
+            if piv.len() + 1 != delta {
+                clean = false;
                 break;
             }
-            Some(piv) => {
-                let inv = inv_mod(vec_k[piv], p);
-                for x in vec_k.iter_mut() {
-                    *x = mm(*x, inv, p);
+            let free = (0..delta).find(|c| !piv.contains(c)).unwrap();
+            let mut w = vec![0u64; delta];
+            w[free] = 1;
+            for (ri, &pc) in piv.iter().enumerate() {
+                w[pc] = (p - a[ri][free]) % p;
+            }
+            let Some(kk) = w.iter().position(|&x| x != 0) else {
+                continue;
+            };
+            let wi = inv_mod(w[kk], p);
+            let mut sol = vec![0u64; n];
+            for i in 0..n {
+                // (M_iᵀ w)_kk = Σ_a M_i[a][kk] w_a
+                let mut acc = 0u64;
+                for aa in 0..delta {
+                    acc = am(acc, mm(mats[i][aa][kk], w[aa], p), p);
                 }
-                for x in combo.iter_mut() {
-                    *x = mm(*x, inv, p);
-                }
-                cnt += (delta + k + 1) as u64;
-                stored.push((vec_k, combo, piv));
+                sol[i] = mm(acc, wi, p);
+            }
+            cnt += (n * (delta + 1)) as u64;
+            // a genuine solution of the input
+            if input.iter().all(|f| f4_fp::eval(f, &sol, p) == 0) {
+                round.push(sol);
             }
         }
-        // v_{k+1} = M v_k
-        let mut nv = vec![0u64; delta];
-        for a in 0..delta {
-            let mut acc = 0u64;
-            for b in 0..delta {
-                acc = am(acc, mm(m[a][b], vk[b], p), p);
-            }
-            nv[a] = acc;
+        if clean {
+            sols = round;
+            break;
         }
-        cnt += (delta * delta) as u64;
-        vk = nv;
+        st.nonseparating += 1;
+        if _attempt == 15 {
+            st.incomplete = true;
+        }
     }
-    let Some(mp) = minpoly else {
-        st.incomplete = true;
-        return (Vec::new(), st);
-    };
-    let ring = PolyRing::new(p);
-    let roots = ring.roots(&UPoly(mp.clone()), rng);
     cnt += ring.muls.get();
-    let mut sols: Vec<Vec<u64>> = Vec::new();
-    for rt in roots {
-        // null space of Mᵀ − rt·I
-        let mut a: Vec<Vec<u64>> = (0..delta)
-            .map(|i| {
-                (0..delta)
-                    .map(|j| if i == j { sm(m[j][i], rt, p) } else { m[j][i] })
-                    .collect()
-            })
-            .collect();
-        let mut mc = 0u64;
-        let piv = rref_mod_p_local(&mut a, p, &mut mc);
-        cnt += mc;
-        if piv.len() + 1 != delta {
-            st.nonseparating += 1;
-            continue;
-        }
-        let free = (0..delta).find(|c| !piv.contains(c)).unwrap();
-        let mut w = vec![0u64; delta];
-        w[free] = 1;
-        for (ri, &pc) in piv.iter().enumerate() {
-            w[pc] = (p - a[ri][free]) % p;
-        }
-        let Some(kk) = w.iter().position(|&x| x != 0) else {
-            continue;
-        };
-        let wi = inv_mod(w[kk], p);
-        let mut sol = vec![0u64; n];
-        for i in 0..n {
-            // (M_iᵀ w)_kk = Σ_a M_i[a][kk] w_a
-            let mut acc = 0u64;
-            for aa in 0..delta {
-                acc = am(acc, mm(mats[i][aa][kk], w[aa], p), p);
-            }
-            sol[i] = mm(acc, wi, p);
-        }
-        cnt += (n * (delta + 1)) as u64;
-        // a genuine solution of the input
-        if input.iter().all(|f| f4_fp::eval(f, &sol, p) == 0) {
-            sols.push(sol);
-        }
-    }
     sols.sort();
     sols.dedup();
     st.lin_muls = cnt;
     st.lin_ms = t_lin.elapsed().as_secs_f64() * 1e3;
     (sols, st)
+}
+
+/// Characteristic polynomial (monic, coefficients low to high) of a square
+/// matrix over `F_p` by reduction to upper Hessenberg form and the standard
+/// recurrence; multiplications counted into `cnt`.
+pub fn charpoly_mod_p(m: &[Vec<u64>], p: u64, cnt: &mut u64) -> Vec<u64> {
+    let n = m.len();
+    let mut h: Vec<Vec<u64>> = m.to_vec();
+    for mm_ in 1..n.saturating_sub(1) {
+        // zero out h[i][mm_-1] for i > mm_ by similarity with the pivot h[mm_][mm_-1]
+        if h[mm_][mm_ - 1] == 0 {
+            let Some(i) = ((mm_ + 1)..n).find(|&i| h[i][mm_ - 1] != 0) else {
+                continue;
+            };
+            h.swap(i, mm_);
+            for row in h.iter_mut() {
+                row.swap(i, mm_);
+            }
+        }
+        let t = h[mm_][mm_ - 1];
+        let tinv = inv_mod(t, p);
+        for i in (mm_ + 1)..n {
+            let u = mm(h[i][mm_ - 1], tinv, p);
+            *cnt += 1;
+            if u == 0 {
+                continue;
+            }
+            for j in (mm_ - 1)..n {
+                let v = mm(u, h[mm_][j], p);
+                h[i][j] = sm(h[i][j], v, p);
+            }
+            *cnt += (n - mm_ + 1) as u64;
+            for row in h.iter_mut() {
+                let v = mm(u, row[i], p);
+                row[mm_] = am(row[mm_], v, p);
+            }
+            *cnt += n as u64;
+        }
+    }
+    // A_0 = 1; A_k = (X − h_kk) A_{k−1} − Σ_{i=1}^{k−1} h_{k−i,k} (Π_{j=k−i+1}^{k} h_{j,j−1}) A_{k−i−1}
+    let mut a: Vec<Vec<u64>> = vec![vec![1]];
+    for k in 1..=n {
+        let hk = h[k - 1][k - 1];
+        let prev = &a[k - 1];
+        let mut cur = vec![0u64; k + 1];
+        for (d, &c) in prev.iter().enumerate() {
+            cur[d + 1] = am(cur[d + 1], c, p);
+            cur[d] = sm(cur[d], mm(hk, c, p), p);
+        }
+        *cnt += prev.len() as u64;
+        // product of sub-diagonal entries h_{j,j-1}, j = k−i+1..k (1-indexed)
+        let mut sub = 1u64;
+        for i in 1..k {
+            // the new sub-diagonal factor h_{k−i+1, k−i} (1-indexed)
+            sub = mm(sub, h[k - i][k - i - 1], p);
+            *cnt += 1;
+            let coef = mm(h[k - i - 1][k - 1], sub, p);
+            *cnt += 1;
+            if coef != 0 {
+                let ap = &a[k - i - 1];
+                for (d, &c) in ap.iter().enumerate() {
+                    cur[d] = sm(cur[d], mm(coef, c, p), p);
+                }
+                *cnt += ap.len() as u64;
+            }
+        }
+        a.push(cur);
+    }
+    a.pop().unwrap()
 }
 
 fn rref_mod_p_local(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
@@ -2675,5 +2708,68 @@ mod tests {
             eprintln!("trial {trial}: {cost:?}");
         }
         assert_eq!(found_planted, 6);
+    }
+
+    #[test]
+    fn charpoly_satisfies_cayley_hamilton_and_has_the_right_roots() {
+        let mut rng = StdRng::seed_from_u64(31);
+        for &p in &[53u64, 1009] {
+            for n in [1usize, 2, 5, 12, 20] {
+                let m: Vec<Vec<u64>> = (0..n)
+                    .map(|_| (0..n).map(|_| rng.gen_range(0..p)).collect())
+                    .collect();
+                let mut cnt = 0;
+                let cp = charpoly_mod_p(&m, p, &mut cnt);
+                assert_eq!(cp.len(), n + 1);
+                assert_eq!(cp[n], 1);
+                // cp(M) = 0: Horner on matrices
+                let mut acc = vec![vec![0u64; n]; n];
+                for c in cp.iter().rev() {
+                    let mut next = vec![vec![0u64; n]; n];
+                    for i in 0..n {
+                        for j in 0..n {
+                            let mut v = 0u64;
+                            for k in 0..n {
+                                v = am(v, mm(acc[i][k], m[k][j], p), p);
+                            }
+                            next[i][j] = v;
+                        }
+                        next[i][i] = am(next[i][i], *c, p);
+                    }
+                    acc = next;
+                }
+                assert!(acc.iter().all(|r| r.iter().all(|&x| x == 0)), "p={p} n={n}");
+            }
+        }
+        // a diagonal matrix: the eigenvalues are the roots
+        let p = 53;
+        let d = [3u64, 3, 17, 40];
+        let m: Vec<Vec<u64>> = (0..4)
+            .map(|i| (0..4).map(|j| if i == j { d[i] } else { 0 }).collect())
+            .collect();
+        let mut cnt = 0;
+        let cp = charpoly_mod_p(&m, p, &mut cnt);
+        for &r in &d {
+            let v = cp.iter().rev().fold(0u64, |a, &c| am(mm(a, r, p), c, p));
+            assert_eq!(v, 0);
+        }
+    }
+
+    #[test]
+    fn the_solver_loses_no_rational_solution_at_small_p() {
+        // p = 53: a Krylov minimal polynomial of one vector loses a root with
+        // probability 1/p, a non-separating form likewise.  Plant many sums.
+        let (_, ctx, base, by_x, mut rng) = small_ctx(53, 6);
+        let jac = ctx.jac();
+        let opts = jv_options(24, 120.0);
+        for trial in 0..120 {
+            let (r, want) = planted(&jac, &base, &mut rng);
+            let (found, cost) = nagao_decompose(&ctx, &base, &by_x, &r, &opts, &mut rng);
+            assert!(!cost.incomplete, "trial {trial}");
+            assert!(
+                found.contains(&want),
+                "trial {trial}: missed {want:?}, {cost:?}"
+            );
+        }
     }
 }
