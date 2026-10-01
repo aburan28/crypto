@@ -48,6 +48,7 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/ic-current-state.html",
             "scoreboard/algorithm-lab.html",
             "scoreboard/algorithm-lab/core.js",
             "scoreboard/algorithm-lab/ui.js",
