@@ -169,3 +169,30 @@ Its collection phase read about 1.32× faster than v0's R01 profile row
 at both sizes. That figure was seen before this amendment was written.
 It is not evidence, it is not used, and the amendment's argument does
 not depend on it.
+
+## Amendment 2 (2026-10-01, before any R02 run): what callgrind measures
+
+**What R01 found.** R01's callgrind of `ic price --repeats 1` showed that
+most of the process is the pricer's own calibration, not the index
+calculus. At `K_0/GF(2^41)`:
+- `UnitBench`'s timing loop is 1.56 × 10⁹ instructions;
+- the pass up to its first online boundary is 0.12 × 10⁹.
+
+A cross-check on that process would therefore mostly count calibration
+code. Some of it runs through the very kernel R02 changes.
+
+**The amendment.** R02's instruction cross-check runs callgrind on the
+pipeline alone.
+- **The command:** `ic workflow --params <row> --dir <fresh dir>`, with
+  `RAYON_NUM_THREADS=1` and no rho baseline in the file.
+- **The arms and rows:** both arms, at `K_0/GF(2^61)`, `K_1/GF(2^59)`
+  and `K_0/GF(2^41)` `M1-T01`.
+- **The options:** the same callgrind options as R01.
+- **The figures:**
+  - the total instruction ratio, v0 over the candidate, per row;
+  - the per-function instructions of the batched addition (scalar and
+    vector paths), the scan and the build.
+
+A workflow run must also recover the same logarithm in both arms. This
+replaces the `ic price` callgrind runs in "Timed comparison". The timed
+comparison itself is unchanged.
