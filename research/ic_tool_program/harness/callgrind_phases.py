@@ -15,6 +15,8 @@ This sums the parts by label.
 - The `Program termination` part is what follows the last boundary.
 
 The first set-up part is also annotated by function, exclusive costs.
+A run with no parts (`ic workflow` dumps none) is read from its base
+file as one part, and annotated whole.
 
     python3 callgrind_phases.py <dir> <stem> [--top 30] > phases.json
 
@@ -98,6 +100,12 @@ def main() -> None:
     args = ap.parse_args()
     parts = sorted((p for p in args.dir.glob(args.stem + ".*") if p.name.rsplit(".", 1)[-1].isdigit()),
                    key=part_number)
+    whole = None
+    if not parts and (args.dir / args.stem).exists():
+        # A command without phase dumps (`ic workflow`): the base file is
+        # the whole run, as one part.
+        whole = args.dir / args.stem
+        parts = [whole]
     by_label: dict[str, dict] = {}
     first_setup = None
     for p in parts:
@@ -119,6 +127,8 @@ def main() -> None:
         "first_setup_part_counts": read_part(first_setup)[1] if first_setup else None,
         "first_setup_part_top_functions": annotate(first_setup, args.top) if first_setup else [],
     }
+    if whole is not None:
+        doc["whole_run_top_functions"] = annotate(whole, args.top)
     print(json.dumps(doc, indent=1))
 
 
