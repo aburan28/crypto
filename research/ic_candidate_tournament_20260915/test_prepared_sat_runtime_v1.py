@@ -10,6 +10,7 @@ from identity import sha256
 from oracle import InvalidEvidence
 from prepared_ic_state_v1 import accepted_files
 from prepared_sat_runtime_v1 import audit, mathematical_registration, run
+from prepared_runtime_transport_v1 import HELPER_ROLE, validate_admission
 from prepared_target_v1 import CERTIFICATE_SEALS
 from sat_runtime_execution_v3 import binding
 from static_sat_assets_v3 import verified_assets
@@ -123,6 +124,8 @@ class PreparedSatRuntimeTests(unittest.TestCase):
                  patch('prepared_sat_runtime_v1.verify_query',return_value=(True,witness,'VALID_POINT_WITNESS')), \
                  patch('prepared_sat_runtime_v1.audit_meter',return_value=preflight):
                 admitted = audit(root,spec)
+                validate_admission(admitted, dict(spec, runtime_manifest={
+                    'components': [{'role': HELPER_ROLE}]}))
                 self.assertEqual(admitted['status'],'ADMITTED_COMPLETE_PREPARED_SAT_CONTROL')
                 self.assertEqual(admitted['recovered_scalar'],24886)
                 self.assertFalse(admitted['headline_online_admissible'] or admitted['promotion_eligible'])

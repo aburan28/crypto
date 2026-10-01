@@ -18,6 +18,7 @@ from prepared_f5_inputs_v1 import (MATHEMATICS, MATHEMATICS_SHA256, WORKER,
 from prepared_f5_runtime_v2 import (audit, mathematical_registration, register,
     run, transport)
 from prepared_target_v1 import CERTIFICATE_SEALS
+from prepared_runtime_transport_v1 import HELPER_ROLE, validate_admission
 from sat_runtime_execution_v3 import audit_execution, binding, execute, register as register_runtime
 from static_sat_assets_v3 import verified_assets
 import test_prepared_target_v1 as controls
@@ -172,6 +173,8 @@ class PreparedF5RuntimeV2Tests(unittest.TestCase):
             arguments,spec,report,process,result = self.control_execution(root)
             self.assertEqual(result['status'],'COMPLETE')
             audited = self.audit_control(root,spec,process)
+            validate_admission(audited, dict(spec, runtime_manifest={
+                'components': [{'role': HELPER_ROLE}]}))
             self.assertEqual(audited['recovered_scalar'],24886)
             self.assertEqual(audited['target_attempt_count'],3)
             self.assertEqual(audited['ordinary_queries_executed'],0)
@@ -191,6 +194,8 @@ class PreparedF5RuntimeV2Tests(unittest.TestCase):
             _,spec,_,process,result = self.control_execution(root,timeout=True)
             self.assertEqual(result['status'],'NATIVE_TIMEOUT')
             audited = self.audit_control(root,spec,process)
+            validate_admission(audited, dict(spec, runtime_manifest={
+                'components': [{'role': HELPER_ROLE}]}))
             self.assertFalse(audited['scalar_verified'])
             self.assertIsNone(audited['online_wall_ns'])
             self.assertIsNone(audited['target_attempt_count'])

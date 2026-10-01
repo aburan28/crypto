@@ -1,0 +1,47 @@
+{
+  "classification": "accounting and reproducibility",
+  "fresh_targets_generated": 0,
+  "host": {
+    "machine": "arm64",
+    "python": "3.12.13 (main, Mar 25 2026, 03:16:06) [Clang 22.1.1 ]",
+    "system": "Darwin"
+  },
+  "initial_failure": {
+    "cause": "synthetic fixture had an empty producer package; file-only source archive did not retain its directory",
+    "correction": "retain producer/control.py; package source gate unchanged",
+    "failures": 6,
+    "scope": "test fixture error before synthetic transport; no native solver",
+    "tests": 17
+  },
+  "native_solvers_executed": 0,
+  "online_speedup": null,
+  "production_registration_created": false,
+  "promotion_eligible": false,
+  "schema_version": 1,
+  "tests": [
+    {
+      "bytes": 9468,
+      "path": "local-prepared-tests.log",
+      "scope": "overlapping correctness suites; no solver cost",
+      "sha256": "e7e3bdacb83803382ab8c203686a50b1c549ad5170164f0e11063710bf0fc4eb",
+      "status": "PASS",
+      "tests": 47
+    },
+    {
+      "bytes": 4242,
+      "path": "final-transport-tests.log",
+      "scope": "overlapping correctness suites; no solver cost",
+      "sha256": "60c284964b63e9dfcef9f8624258f4cc51bcd2379ce1219164fbc3e3f34ff23e",
+      "status": "PASS",
+      "tests": 20
+    },
+    {
+      "bytes": 3044,
+      "path": "final-claim-tests.log",
+      "scope": "overlapping correctness suites; no solver cost",
+      "sha256": "faf7e6c0c4781d7078383713711c48a5eff39659075deb15c966468bdcb40593",
+      "status": "PASS",
+      "tests": 15
+    }
+  ]
+}

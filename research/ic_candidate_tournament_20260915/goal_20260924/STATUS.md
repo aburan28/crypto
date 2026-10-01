@@ -31,9 +31,15 @@ implements the missing retained native input, canonical registrar, isolated
 entrypoint and preexecution-frozen audit transport. The rebuilt macOS worker
 and complete Rust dependencies are retained; its Rust unit fixture now hashes
 only the common mathematics instead of historical certificate evidence.
-Implementation acceptance and separately frozen new F5/SAT executions remain
-pending. Mocked native tests and real frozen import controls execute no IC query
+Implementation is accepted in [PR #1098](https://github.com/aburan28/crypto/pull/1098)
+at `3918ee200ad1e363db63314539ef8cf43076b41c`. Separately frozen new F5/SAT
+executions remain pending. Mocked native tests and real frozen import controls execute no IC query
 and cannot supply family qualification or a fresh result.
+The [prepared audit/claim follow-up](prepared-runtime-transport-v1/PROTOCOL.md)
+adds a shared frozen SAT/F5 audit path and consumes each new runtime registration
+with an atomic claim before launch. This follow-up is not yet accepted or used
+for a production invocation. Portable synthetic transports establish the source
+transport contract only; they do not establish native execution or mathematics.
 
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
