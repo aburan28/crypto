@@ -9,6 +9,7 @@ It adds each part with the round that creates it:
 |:--|:--|:--|
 | `suite/v1/` | the frozen suite: parameter files, `SUITE.json` with every file's SHA-256, and the script that wrote them | R01 |
 | `harness/` | the shared runner (ABAB order, isolation, resumable, never overwrites) and the analysis | R01 |
+| `harness/bround.py` | Track B's steps for every B round: conformance on both arms, the 90-row pin, the v1 to v2 translation check, and the ABAB timing check against R01's A/A bands | Track B, before B0 runs |
 | `rounds/R<k>-<slug>/` | one round: `PROTOCOL.md` committed before its candidate code, then its runs (as `runs.tar.xz` with its SHA-256), analysis, decision and README | each round |
 | `baselines.json` | the ledger's rows as data: baseline, commit, binary hash, host and per-size figures | R01, then every accepted round |
 | `conformance/v1/` | the conformance (C) suite: one case per defect or refusal, and its runner | B0 |
