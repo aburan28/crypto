@@ -1190,7 +1190,7 @@ const PAR_BATCH_WORDS: usize = 1 << 10;
 fn inner_build_parallel_enabled() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *ENABLED
-        .get_or_init(|| std::env::var("F4_F2_DISABLE_INNER_BUILD_PARALLEL").as_deref() != Ok("1"))
+        .get_or_init(|| std::env::var("F4_F2_DISABLE_INNER_BUILD_PARALLEL").as_deref() == Ok("0"))
 }
 
 fn is_one(p: &F2BoolPoly) -> bool {
