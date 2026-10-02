@@ -17,7 +17,7 @@ The audited inputs were:
 - producer result SHA-256:
   `b9e8d2aa388b15c63ee04b2677d91a384f5707c7bf68b2d1f89854ae4e9ac9b9`;
 - audit source SHA-256:
-  `59b938279294fbc278ae9d481c92aac90599ce84f45810e3704b367e94d8c75a`;
+  `ff0d4b7ee8ab99642ba5734de28f2ba83f9936d0f118632f922b82f86cc33db0`;
 - audit output SHA-256:
   `35f5d10d6333fdbaf23b75cae02b34564f22430be81e14563c15bf97bf1b7b87`.
 

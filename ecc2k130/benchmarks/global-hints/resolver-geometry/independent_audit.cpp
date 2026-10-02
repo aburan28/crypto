@@ -655,7 +655,7 @@ void selfTest() {
     need(median({5,1,4,2,3})==3,"median self-test");
     need(strictInteger("201863462912","integer self-test")==kUpdatesPerSample &&
          strictDecimal("1.25","decimal self-test")==1.25,"strict parse self-test");
-    for (const std::string &bad : {"12x","1.25x"}) {
+    for (const std::string bad : {"12x","1.25x"}) {
         bool rejected=false;
         try {
             if (bad.find('.')==std::string::npos) (void)strictInteger(bad,"bad integer");
