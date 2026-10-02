@@ -292,7 +292,14 @@ def cover():
     S/rho in p, and the crossover the measured constants give."""
     ccov = (load("30_jv_cover_ccov_oracle.json") or []) + (load("30_jv_cover_ccov.json") or [])
     dlp = []
-    for name in ("30_jv_cover_dlp.json", "30_jv_cover_dlp_251.json", "30_jv_cover_dlp_503.json", "30_jv_cover_dlp_1009.json"):
+    # every end-to-end file of record; the files of defective or superseded runs
+    # stay in the repository under their own names and are not read
+    names = sorted(
+        n for n in os.listdir(EXP)
+        if n.startswith("30_jv_cover_dlp") and n.endswith(".json")
+        and "superseded" not in n and "defective" not in n
+    )
+    for name in names:
         dlp += load(name) or []
     if not ccov and not dlp:
         return None
