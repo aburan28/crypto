@@ -807,6 +807,24 @@ ECC_HD P131 squarePolynomialTable131(P131 a, const uint32_t *tab) {
     }
     return P131{{r[0], r[1], r[2], r[3], r[4]}};
 }
+#ifndef ECC_SIGMA_SQUARE_TABLE
+#define ECC_SIGMA_SQUARE_TABLE 0
+#endif
+#if ECC_SIGMA_SQUARE_TABLE != 0 && ECC_SIGMA_SQUARE_TABLE != 1
+#error "ECC_SIGMA_SQUARE_TABLE must be 0 or 1"
+#endif
+// The sigma-fused kernel's one lambda square per completed update.  Keeping
+// this compile-time wrapper beside the two exact implementations lets the
+// native replay compile both arms from the same call site as the CUDA kernel.
+// The kernel header owns the flag-combination guards and table residency.
+ECC_HD P131 sigmaLambdaSquare131(P131 a, const uint32_t *tab) {
+#if ECC_SIGMA_SQUARE_TABLE
+    return squarePolynomialTable131(a, tab);
+#else
+    (void)tab;
+    return squarePolynomial131(a);
+#endif
+}
 ECC_HD P131 sqr131(const P131 &a){
  P131 rev=reverse131(a),r;
 #if ECC_PACKED_ALU_SQR

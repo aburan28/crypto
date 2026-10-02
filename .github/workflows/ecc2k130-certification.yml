@@ -77,6 +77,8 @@ jobs:
       # days after modal_app.py's image grew CPU_THREADS and CPU_BINARIES.
       - run: make -C ecc2k130 check-cli
       - run: make -C ecc2k130 certify-local
+      - name: Sigma-fused square-table native replay
+        run: make -C ecc2k130 test-sigma-square-table-native
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -104,3 +106,73 @@ jobs:
       - name: Compile packed table client
         run: |
           nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 -DECC_TABLE_TAG_DENOM=1 -c ecc2k130/src/main.cu -o /tmp/table-client.o
+      - name: Compile sigma-fused square-table client
+        run: |
+          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 \
+            -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_WITNESS=0 \
+            -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 \
+            -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 \
+            -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 \
+            -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_INLINE_POLY=3 -DECC_PACKED_CLMAD=1 \
+            -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_COMPACT_STATE=1 \
+            -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_STATE_TILE=256 \
+            -DECC_SIGMA_FUSED=1 -DECC_SIGMA_SQUARE_TABLE=1 -DECC_PACKED_ALU_SQUARE=0 \
+            -DECC_PACKED_SQUARE_TABLE=0 -DECC_WALK_TABLE=0 \
+            -c ecc2k130/src/main.cu -o /tmp/sigma-square-table-client.o
+
+  sigma-square-sm120-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    container:
+      image: nvidia/cuda:13.3.1-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native host compiler
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends build-essential binutils
+      - name: Compile exact sm_120 control and candidate without a GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=ecc2k130/benchmarks/sigma-square-table/compile-artifact
+          mkdir -p "$out"
+          nvcc --version | tee "$out/nvcc-version.txt"
+          grep -q 'V13\.3\.73' "$out/nvcc-version.txt"
+          common=(
+            -O3 -std=c++17 -gencode arch=compute_120,code=sm_120 -lineinfo -Xptxas -v
+            -Xcompiler -O3 -Xcompiler -fopenmp
+            -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_WITNESS=0
+            -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1
+            -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1
+            -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1
+            -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_INLINE_POLY=3 -DECC_PACKED_CLMAD=1
+            -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=2
+            -DECC_PACKED_COMPACT_STATE=1 -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_TOP_CLMAD=0
+            -DECC_PACKED_STATE_TILE=256 -DECC_PACKED_ADD_COMBINE=0 -DECC_PACKED_PAIR_ILP=0
+            -DECC_UNROLL_SLOTS=1 -DECC_PACKED_SLOT_PREFETCH=0 -DECC_PACKED_SLOT_PIPELINE=0
+            -DECC_SIGMA_FUSED=1 -DECC_SIGMA_FUSED_LATE_Y=0 -DECC_PACKED_L2_PERSIST=0
+            -DECC_PACKED_TOP_HOIST=0 -DECC_PACKED_ONB_INV=0 -DECC_PACKED_FROM_REDUCED=0
+            -DECC_PACKED_CLMUL_FLAT=0 -DECC_PACKED_PAIR_CLMUL=0 -DECC_PACKED_ALU_SQR=0
+            -DECC_PACKED_ALU_SQUARE=0 -DECC_PACKED_SQUARE_TABLE=0 -DECC_PACKED_INV_POLY=0
+            -DECC_PACKED_CHAINS=1 -DECC_WALK_TABLE=0 -DECC_PHASE_PROFILE=0
+          )
+          printf '%q ' nvcc "${common[@]}" > "$out/common-command.txt"
+          printf '\n' >> "$out/common-command.txt"
+          nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE=0 ecc2k130/src/main.cu \
+            -o "$out/control" -lgomp > "$out/control-build.log" 2>&1
+          nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE=1 ecc2k130/src/main.cu \
+            -o "$out/candidate" -lgomp > "$out/candidate-build.log" 2>&1
+          cuobjdump --dump-resource-usage "$out/control" > "$out/control-resources.txt"
+          cuobjdump --dump-resource-usage "$out/candidate" > "$out/candidate-resources.txt"
+          cuobjdump --dump-sass "$out/control" > "$out/control.sass"
+          cuobjdump --dump-sass "$out/candidate" > "$out/candidate.sass"
+          sha256sum "$out/control" "$out/candidate" "$out"/*.log "$out"/*.txt "$out"/*.sass \
+            > "$out/files.sha256"
+          grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/control-build.log"
+          grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/candidate-build.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sigma-square-table-sm120-compile
+          path: ecc2k130/benchmarks/sigma-square-table/compile-artifact/
