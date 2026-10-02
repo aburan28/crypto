@@ -100,6 +100,7 @@ pub mod auto_attack;
 pub mod avalanche;
 pub mod b_seed_profile;
 pub mod binary_field_basis;
+pub mod native_signed_mitm;
 pub mod binary_isogeny;
 pub mod binary_semaev;
 pub mod binary_semaev_s4;
