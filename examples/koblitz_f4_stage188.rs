@@ -695,7 +695,7 @@ fn verify_result(result_path: &Path) -> AnyResult<Verification> {
     }
     checks += 1;
     match assess(&result.phase, &result.runs) {
-        Ok(assessment) if assessment == result.assessment => {}
+        Ok(assessment) if assessments_match(&assessment, &result.assessment) => {}
         Ok(_) => failures.push("paired assessment replay".into()),
         Err(error) => failures.push(format!("paired assessment: {error}")),
     }
@@ -946,6 +946,37 @@ fn median_optional(values: impl Iterator<Item = Option<f64>>) -> Option<f64> {
     values.and_then(|values| median(values.into_iter()).ok())
 }
 
+fn assessments_match(left: &Assessment, right: &Assessment) -> bool {
+    left.all_correct == right.all_correct
+        && left.passed_performance_gate == right.passed_performance_gate
+        && left.status == right.status
+        && ratios_match(&left.median_paired_ratios, &right.median_paired_ratios)
+        && left.pair_ratios.len() == right.pair_ratios.len()
+        && left
+            .pair_ratios
+            .iter()
+            .zip(&right.pair_ratios)
+            .all(|(a, b)| {
+                a.repeat == b.repeat && ratios_match(&a.indexed_over_linear, &b.indexed_over_linear)
+            })
+}
+
+fn ratios_match(left: &Ratios, right: &Ratios) -> bool {
+    close(left.wall, right.wall)
+        && close(left.core, right.core)
+        && match (left.rss, right.rss) {
+            (Some(a), Some(b)) => close(a, b),
+            (None, None) => true,
+            _ => false,
+        }
+}
+
+fn close(left: f64, right: f64) -> bool {
+    left.is_finite()
+        && right.is_finite()
+        && (left - right).abs() <= 1e-12 * left.abs().max(right.abs()).max(1.0)
+}
+
 fn check(checks: &mut usize, failures: &mut Vec<String>, condition: bool, label: &str) {
     *checks += 1;
     if !condition {
@@ -1077,6 +1108,34 @@ mod tests {
         ];
         assert!(assess("screen", &screen).unwrap().passed_performance_gate);
         assert!(!assess("confirm", &screen).unwrap().passed_performance_gate);
+    }
+
+    #[test]
+    fn assessment_replay_allows_only_serialisation_scale_float_roundoff() {
+        let base = Assessment {
+            all_correct: true,
+            pair_ratios: vec![PairRatio {
+                repeat: 1,
+                indexed_over_linear: Ratios {
+                    wall: 0.8,
+                    core: 0.9,
+                    rss: Some(1.0),
+                },
+            }],
+            median_paired_ratios: Ratios {
+                wall: 0.8,
+                core: 0.9,
+                rss: Some(1.0),
+            },
+            passed_performance_gate: true,
+            status: "CONTINUE_TO_CONFIRMATION".into(),
+        };
+        let mut rounded = base.clone();
+        rounded.median_paired_ratios.wall += 1e-15;
+        rounded.pair_ratios[0].indexed_over_linear.core -= 1e-15;
+        assert!(assessments_match(&base, &rounded));
+        rounded.median_paired_ratios.wall += 1e-6;
+        assert!(!assessments_match(&base, &rounded));
     }
 
     #[test]
