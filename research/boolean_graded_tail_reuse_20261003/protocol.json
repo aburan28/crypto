@@ -5,6 +5,8 @@
   "variables": [8, 12, 16, 20, 24],
   "batches": [1, 2, 8, 32, 64],
   "families": ["independent_affine", "walk_affine", "repeat", "support_escape"],
+  "support_escape_period": 4,
+  "support_escape_rule": "independent_affine_remove_smallest_quadratic_from_generator_zero",
   "discovery_seeds": [20261004, 3659031],
   "holdout_seeds": [20261011, 6931207],
   "repetitions": 10,

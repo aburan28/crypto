@@ -59,9 +59,10 @@ escapes are retained as guardrails, with no timing selected from them.
 Fresh controls in the same executable are: packed direct with dense lookup
 where its `2^n` table fits the declared 64 MiB context cap; combinatorial
 ranked lookup with dense intermediate rows; combinatorial ranked lookup with
-sparse intermediate rows; and exact completed-matrix cache for the repeat
-guardrail. Every control pays cold setup, construction, elimination, output
-validation and destruction. At each primary cell, the denominator is the
+sparse intermediate rows; and exact completed-matrix cache in every family
+(with `repeat` as its expected positive guardrail). Every control pays cold
+setup, construction, elimination, output validation and destruction. At each
+primary cell, the denominator is the
 pointwise fastest applicable correct control for each paired repetition.
 No historical absolute time enters a new ratio. The dense lookup is
 inapplicable if its context exceeds the cap; that condition is recorded, not
@@ -78,9 +79,12 @@ generator from successive low bits of SplitMix64 outputs. In
 `walk_affine`, each later system toggles one affine slot per generator,
 selected by `next()%(n+1)`; slot 0 is the constant and slots 1..n are the
 linear variables. Neither family changes any quadratic coefficient.
-`repeat` keeps the first system unchanged. In `support_escape`, every fourth
-later system toggles one selected quadratic monomial in generator zero; the
-candidate must take a measured full-build fallback and match the oracle.
+`repeat` keeps the first system unchanged. `support_escape` uses the same
+affine draws as `independent_affine`, but for every fourth later system
+(`i%4==3`) it removes the numerically smallest quadratic monomial from
+generator zero's otherwise fixed core. That one system must take a measured
+full-build fallback and match the oracle; subsequent systems return to the
+original core.
 
 Discovery correctness requires exact outputs on every cell, exact fallback
 and hit counts, unchanged source/protocol hashes, zero censored results, and
