@@ -1,6 +1,17 @@
 {
   "schema_version": 1,
-  "discovery": null,
+  "discovery": {
+    "path": "qualified_probe_02",
+    "manifest_sha256": "cbdf9e331e00963abd619e1952c44894b28b9b6122663811c4958439473f452c",
+    "github_run_id": 36938560536,
+    "github_attempt": 2,
+    "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
+    "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36938560536",
+    "artifact_id": 11200021835,
+    "artifact_name": "halfword-discovery-36938560536-2",
+    "artifact_archive_sha256": "591cf4add205cce6022a9b82be7ee47c190c7a05847fca9154e199eaac4efb90",
+    "status": "Qualified discovery; all 24 fixtures complete and locally replayed exactly. No dramatic group passed."
+  },
   "full": null,
   "failed_attempts": [
     {
@@ -64,6 +75,36 @@
       "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
       "completed_cells": 24,
       "repaired_analysis_path": "analysis_replay_01"
+    },
+    {
+      "path": "failed_isolation_05",
+      "manifest_sha256": "ef02a612d0f2a133a76026d68e77cd737898dd665175228c5d4d5152ca463762",
+      "github_run_id": 36938560536,
+      "github_attempt": 1,
+      "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36938560536",
+      "failure_kind": "resource",
+      "reason": "After eight fixture pairs, the n16/seed17/unplanted paired worker completed normally but provisioning-service CPU use raised total other-process CPU to 0.17 seconds in 1.129265813 seconds, above the unchanged 10% threshold. No performance samples admitted.",
+      "completed_cells": 8,
+      "other_cpu_seconds": 0.17,
+      "worker_wall_seconds": 1.1292658130000746,
+      "maximum_other_cpu_fraction": 0.1
+    },
+    {
+      "path": "failed_full_01",
+      "manifest_sha256": "b70ffe5eeadb8f8f8b1c67db0903062c430747aa6c54aec73d7c320a4698db9e",
+      "github_run_id": 36943520046,
+      "github_attempt": 1,
+      "source_head": "c54c5ba32f75b6c879d7977398b4bfb1f62e57ae",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36943520046",
+      "failure_kind": "resource",
+      "phase": "full",
+      "reason": "Full run stopped after 44 of 240 fixture pairs before holdouts: n12/regression/seed20261022/unplanted worker exited normally in 0.075414677 seconds, but 0.01 seconds of other-process CPU exceeded the unchanged 10% limit. No full performance sample is admitted or pooled.",
+      "completed_cells": 44,
+      "worker_wall_seconds": 0.07541467700002613,
+      "other_cpu_seconds": 0.01,
+      "maximum_other_cpu_fraction": 0.1,
+      "holdout_fixtures_executed": 0
     }
   ],
   "historical_qualified_runs": [
