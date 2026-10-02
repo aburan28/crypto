@@ -198,9 +198,7 @@ fn validate_receipt(directory: &Path, receipt: &MeterReceipt) -> Vec<String> {
     }
     if receipt.process.meter != "fresh child process wait4/getrusage; all child threads included"
         || !receipt.process.environment.is_empty()
-        || receipt.process.returncode != 0
-        || receipt.process.timed_out
-        || receipt.process.watchdog_seconds != 360
+        || receipt.process.watchdog_seconds == 0
         || receipt.process.single_core_seconds.is_some()
         || receipt.process.total_core_seconds.is_none()
         || receipt.process.peak_rss_bytes.is_none()
@@ -234,6 +232,9 @@ fn validate_receipt(directory: &Path, receipt: &MeterReceipt) -> Vec<String> {
 
 fn validate_command(process: &ProcessMetrics) -> Vec<String> {
     let mut failures = Vec::new();
+    if process.returncode != 0 || process.timed_out || process.watchdog_seconds != 360 {
+        failures.push("default replay process terminal".into());
+    }
     let required = [
         "RAYON_NUM_THREADS=12",
         "PQ_F4_X1_BATCH=512",
