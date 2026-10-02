@@ -10524,5 +10524,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage200-parallel-m4ri -->
+<!-- BEGIN current-f4-stage201-exact-ends -->
+<div class="panel" id="current-f4-stage201-exact-ends">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 201: exact M4RI combination ends save 0.187% work <span class="chip">rejected</span></h2>
+        <p>One block-wide/exact-end pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate omits known-zero table and row suffixes while preserving
+          downstream row-end metadata, pivots, schedules and logical work.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/control wall and total-core ratios both strictly below 0.98 plus a strict performed-XOR reduction.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Performed XORs</th><th>Candidate / control wall / core / RSS / XOR</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">117,369 group additions</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Selected block-wide combination end</td><td class="n">25.383130</td><td class="n">163.804192</td><td class="n">null</td><td class="n">3,250.96 MB</td><td class="n">102,707,985,015</td><td class="n">1.000000 / 1.000000 / 1.000000 / 1.000000</td><td class="n">55.806813 / 534.580194 / 79.163375</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Exact combination ends</strong></td><td class="n"><strong>26.508356</strong></td><td class="n"><strong>161.673973</strong></td><td class="n">null</td><td class="n">3,296.85 MB</td><td class="n"><strong>102,515,969,703</strong></td><td class="n"><strong>1.044330 / 0.986995 / 1.014116 / 0.998130</strong></td><td class="n">58.280711 / 527.628156 / 80.280870</td><td><span class="chip">rejected</span> wall and CPU gates fail</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">mechanism</span> 5,057,385 table entries and 106,080,228 row lookups trim 7,706,619 + 184,308,693 words; the 192,015,312-word sum exactly matches the performed-work delta</span>
+        <span><span class="chip">decision</span> work falls 0.187% and CPU falls 1.30%, but wall rises 4.43% and RSS rises 1.41%; confirmation is prohibited and the candidate is reverted</span>
+        <span><span class="chip">correctness</span> both arms retain 481 matrices / 351,164 blocks, identical pivots and logical work, all 242 systems and exhaustive UNSAT</span>
+        <span><span class="chip">accounting</span> Stage 201 lower bound: 16 components, 1,016.740619 wall-seconds, 2,349.721545 core-seconds, 4.560 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 738 components, 27,633.005297 wall-seconds, 75,426.736953 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-201-m4ri-table-end-screen-20261002/result.json</code>; rejected one-target implementation only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage201-exact-ends -->
 </body>
 </html>

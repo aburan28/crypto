@@ -1,0 +1,71 @@
+{
+  "schema": "koblitz_stage201_final.v1",
+  "candidate_commit": "7d12862ece7c7002f39a23d3eb1776e7bba4635c",
+  "revert_commit": "66aaee49ffd5364bb666212da1c7478108f73b8d",
+  "finalizer_commit": "dc2cd3e5161868ae2dae66f287b0be19251c4589",
+  "decision_status": "REJECTED_SCREEN",
+  "candidate_selected": false,
+  "runtime_default": "Stage 199 selected hybrid: full-matrix block-8 M4RI with fixed block-wide combination ends on eligible matrices from 4096 rows; five-column BlockTables elsewhere",
+  "claim_boundary": "One opened n=59 F4 table-end screen. Direct MITM and full automorphism-aware rho remain unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "single_core_seconds": null,
+  "screen": {
+    "all_correct": true,
+    "candidate_over_control": {
+      "wall": 1.0443296750604665,
+      "total_core": 0.9869953328178562,
+      "peak_rss": 1.0141163070813364
+    },
+    "performed_xor_ratio": 0.998130473380702,
+    "threshold": 0.98,
+    "passed_performance_gate": false,
+    "status": "REJECTED_SCREEN"
+  },
+  "measured_stage_charge": {
+    "components": 16,
+    "wall_seconds_sum": 1016.7406194580001,
+    "total_core_seconds_sum": 2349.7215450000003,
+    "peak_rss_bytes_max": 4559831040,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 738,
+    "wall_seconds_sum": 27633.005297369004,
+    "total_core_seconds_sum": 75426.73695300001,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "final result write and final verification after the charged composition control"
+  ],
+  "artifacts": {
+    "candidate_patch": {
+      "path": "candidate-exact-end-m4ri.patch",
+      "bytes": 15872,
+      "sha256": "bc1cd7d4b54ba751a4a3b5201037be6caeca923ba8c1f144a61ca26b69dbdd3f"
+    },
+    "implementation_note": {
+      "path": "IMPLEMENTATION_NOTE.md",
+      "bytes": 1003,
+      "sha256": "fac7482b0a03890f1957ab0f2898ec51308ff0638fa8ceab990d710e56b69dbc"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 6424,
+      "sha256": "9ff92dbd53d06016304202f2b4c0b7b004aea43741ffc92044740db67c3f9799"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 26900,
+      "sha256": "ca45513746b735d3f0e83b6f7ba449b6cd53456759624250f24a5c6b5614aa24"
+    },
+    "screen_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 191,
+      "sha256": "c5f342df241aaeca05c926d5a67fd230f9b105fe5389103755b26ec7cdf3489e"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}
