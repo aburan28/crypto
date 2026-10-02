@@ -393,35 +393,37 @@ fn construct_ranked_sparse(system: &System, basis: &Basis) -> Vec<Row> {
 
 struct DenseSlots {
     n: u8,
-    table: Vec<u16>,
+    table: Vec<u32>,
 }
 
 impl DenseSlots {
     fn new(basis: &Basis, n: u8) -> Option<Self> {
         let entries = 1usize << n;
-        let table_bytes = entries.checked_mul(size_of::<u16>())?;
+        let table_bytes = entries.checked_mul(size_of::<u32>())?;
         let basis_bytes = (basis.high.len() + basis.low.len()) * size_of::<u32>();
         if table_bytes + basis_bytes > 64 * 1024 * 1024 {
             return None;
         }
-        assert!(basis.high.len() < 0x8000 && basis.low.len() < 0x8000);
-        let mut table = vec![u16::MAX; entries];
+        let mut table = vec![u32::MAX; entries];
         for (slot, &monomial) in basis.high.iter().enumerate() {
-            table[monomial as usize] = (slot as u16) | 0x8000;
+            table[monomial as usize] = (slot as u32) | (1u32 << 31);
         }
         for (slot, &monomial) in basis.low.iter().enumerate() {
-            table[monomial as usize] = slot as u16;
+            table[monomial as usize] = slot as u32;
         }
         Some(Self { n, table })
     }
     fn slot(&self, monomial: u32) -> (bool, usize) {
         assert!(monomial < (1u32 << self.n));
         let encoded = self.table[monomial as usize];
-        assert_ne!(encoded, u16::MAX);
-        (encoded & 0x8000 != 0, (encoded & 0x7fff) as usize)
+        assert_ne!(encoded, u32::MAX);
+        (
+            encoded & (1u32 << 31) != 0,
+            (encoded & 0x7fff_ffff) as usize,
+        )
     }
     fn retained_bytes(&self) -> usize {
-        size_of::<Self>() + self.table.capacity() * size_of::<u16>()
+        size_of::<Self>() + self.table.capacity() * size_of::<u32>()
     }
 }
 
@@ -1209,7 +1211,11 @@ mod tests {
         for n in [8, 12, 16, 20, 24] {
             let basis = Basis::new(n);
             let dense = DenseSlots::new(&basis, n);
-            assert!(dense.as_ref().unwrap().retained_bytes() < 64 * 1024 * 1024);
+            if n == 24 {
+                assert!(dense.is_none());
+            } else {
+                assert!(dense.as_ref().unwrap().retained_bytes() < 64 * 1024 * 1024);
+            }
             for (slot, &monomial) in basis.high.iter().enumerate() {
                 assert_eq!(ranked_slot(&basis, monomial), (true, slot));
                 if let Some(dense) = &dense {
@@ -1284,6 +1290,10 @@ mod tests {
             };
             for arm in Arm::ALL {
                 let got = sample(arm, arm.name(), 0, 0, &context);
+                if n == 24 && arm == Arm::PackedDense {
+                    assert!(got.is_none());
+                    continue;
+                }
                 let got = got.unwrap();
                 assert_eq!(
                     got.fallbacks,

@@ -39,3 +39,37 @@ regression test checks exact bitwise JSON round trips for both affected
 medians. The launcher now retains a second sealed failure record if any future
 post-seal replay fails. A fresh discovery using the same frozen workload and
 updated source is required. Neither holdout seed has been run.
+
+## Discovery 02: complete replay, incomplete strongest-control roster
+
+The corrected Linux ARM64 workflow [36982536433](https://github.com/aburan28/crypto/actions/runs/36982536433)
+passed correctness, the reserved campaign, first verification and post-seal
+replay at source `bee44bf317d6294a2b99db240f04ed644c551539`. The
+downloaded 27-file artifact is preserved byte-for-byte in
+`comparator_incomplete_discovery_01`. All 26 member hashes match manifest
+SHA-256 `5a4594b1022270d49af8e6303b78a59b8f9f2cd4822261e0d04639eeda603afa`;
+raw SHA-256 is `b400af9978144c8ab9ad1ca07b13b300d6429e4b82adcd5fcf8a5b9b2ee923d3`;
+result SHA-256 is `bb8bd89bc582daee8fbd95e4cee19810cfcb4458a5fcd10800952bb0dbd18916`.
+Artifact ID `11216762190` has archive digest
+`sha256:b75fb2f0627247baeaf7e2efba8173aeb90740541ecb974e1e3c4312b95add8a`.
+An untimed replay with the same source on another host also passed.
+
+It verified 200 fixtures, 13,600 measured arm batches and 291,040 outputs.
+The one-core receipt was uncontended: worker wall 242.548990231 seconds,
+other-process CPU 2.36 seconds, and preflight PSI some avg10 3.64. Its stored
+eight-group gate was false, with only the two n=24 groups above the 1.5x
+discovery lower bound. No holdout was launched.
+
+**Comparator correction:** the dense packed reference in that source stored
+one 32-bit entry for each n-bit monomial mask. At n=24 its table alone used
+`2^24 * 4 = 67,108,864` bytes, exactly the frozen 64 MiB context cap;
+the basis pushed the retained context above the cap, so the worker marked it
+inapplicable. Every ambient column index fits in 15
+bits; a 16-bit entry with one high/low flag uses only `2^24 * 2 = 33,554,432`
+bytes plus the basis and fits the same cap. Thus the original n=24 ratios
+near 2.9x were against a weaker reference than the protocol's *fastest
+applicable correct control*. They cannot be promoted as strongest-control
+gains, despite successful resource and mathematical replay. No frozen file,
+raw sample, limit or gate is rewritten. The source now uses exact 16-bit slots
+and tests every ambient coordinate, including n=24; a third fresh discovery
+must measure it in the same binary. The holdouts are still unused.

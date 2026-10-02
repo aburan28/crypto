@@ -2,7 +2,7 @@
   "schema_version": 1,
   "discovery": null,
   "full": null,
-  "failed_attempts": [
+  "excluded_attempts": [
     {
       "path": "failed_discovery_01",
       "workflow_run_id": 36960153463,
@@ -15,9 +15,25 @@
       "status": "post_seal_float_readback_failure",
       "performance_admitted": false,
       "holdout_executed": false
+    },
+    {
+      "path": "comparator_incomplete_discovery_01",
+      "workflow_run_id": 36982536433,
+      "workflow_attempt": 1,
+      "artifact_id": 11216762190,
+      "artifact_archive_sha256": "b75fb2f0627247baeaf7e2efba8173aeb90740541ecb974e1e3c4312b95add8a",
+      "source_head": "bee44bf317d6294a2b99db240f04ed644c551539",
+      "manifest_sha256": "5a4594b1022270d49af8e6303b78a59b8f9f2cd4822261e0d04639eeda603afa",
+      "raw_sha256": "b400af9978144c8ab9ad1ca07b13b300d6429e4b82adcd5fcf8a5b9b2ee923d3",
+      "result_sha256": "bb8bd89bc582daee8fbd95e4cee19810cfcb4458a5fcd10800952bb0dbd18916",
+      "status": "complete_but_dense_reference_incorrectly_inapplicable_at_n24",
+      "resource_qualified": true,
+      "native_replay_passed": true,
+      "performance_admitted": false,
+      "holdout_executed": false
     }
   ],
-  "decision": "awaiting_fresh_discovery",
+  "decision": "awaiting_corrected_dense_reference_discovery",
   "full_solver_cost": null,
   "rho_ratio": null
 }

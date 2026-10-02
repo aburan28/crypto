@@ -268,6 +268,9 @@ fn compute_run(phase: &str, raw: &Path, conditions: &Path) -> Value {
                         let mut best_reference = u64::MAX;
                         for order in 0..Arm::ALL.len() {
                             let arm = Arm::ALL[(repetition + order) % Arm::ALL.len()];
+                            if arm == Arm::PackedDense && n == 24 {
+                                continue;
+                            }
                             let cost = verify_sample(
                                 take(),
                                 repetition,
