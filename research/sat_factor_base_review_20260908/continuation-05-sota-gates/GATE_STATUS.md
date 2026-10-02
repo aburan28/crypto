@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 191, 2026-10-02.
+Current through Stage 192, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -123,6 +123,21 @@ maximum RSS. Complete cost remains `null`. Final native verification passes
 24/24 with result SHA-256
 `7708914c8e1ac5a0dfec6bd5b4bdb3fed32669aa17b1e189769c10dad8ba781d`.
 This strengthens the negative decomposition boundary; no SOTA gate changes.
+
+Stage 192 brackets the selected twelve-worker F4 path with two fresh same-
+binary direct-MITM controls. Their arithmetic-mean reference is 0.454839 wall-
+seconds, 0.306417 total/single-core seconds and 41,066,496 bytes RSS. Selected
+parallel F4 takes 16.765098 wall-seconds, 181.297986 total core-seconds and
+4,366,270,464 bytes RSS; its single-core field is correctly `null`. The ratios
+are 36.859390 wall, 591.671747 CPU and 106.321963 RSS. Stage 192 adds a measured
+lower bound of 10 components, 196.127459 wall-seconds and 961.170802 core-
+seconds. The cumulative lower bound becomes 582 components, 23,910.746621
+wall-seconds and 61,559.696526 core-seconds at the unchanged 6,310,576,128-byte
+maximum RSS. Complete cost remains `null`. Final native verification passes
+24/24 with result SHA-256
+`e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48`.
+This strengthens the negative parallel decomposition boundary; no SOTA gate
+changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the

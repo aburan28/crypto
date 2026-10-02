@@ -10112,5 +10112,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage191-single-core-boundary -->
+<!-- BEGIN current-f4-stage192-parallel-boundary -->
+<div class="panel" id="current-f4-stage192-parallel-boundary">
+      <div class="panel-head">
+        <h2>Selected parallel F4, Stage 192: 36.86&times; direct by wall and 591.67&times; by CPU <span class="chip">negative boundary</span></h2>
+        <p>Fresh direct MITM, selected twelve-worker F4, then fresh direct MITM on the identical public
+          <code>n=59, ell=9, m=3</code> true-negative. Both direct controls remain in the arithmetic-mean
+          reference. This is decomposition only; full index calculus versus rho remains a separate gate.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Fresh process metrics. Direct controls are sequential; selected F4 uses twelve outer workers and reports no single-core value.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Work</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM before</td><td class="n">0.584046</td><td class="n">0.302350</td><td class="n">0.302350</td><td class="n">41.22 MB</td><td>483 points; 116,635 pairs; 117,369 additions</td><td><span class="chip">control</span></td></tr>
+            <tr><td>Direct MITM after</td><td class="n">0.325632</td><td class="n">0.310483</td><td class="n">0.310483</td><td class="n">40.91 MB</td><td>identical counted search</td><td><span class="chip">control</span></td></tr>
+            <tr><td><strong>Direct arithmetic mean</strong></td><td class="n"><strong>0.454839</strong></td><td class="n"><strong>0.306417</strong></td><td class="n"><strong>0.306417</strong></td><td class="n">41.07 MB</td><td>both fresh controls retained</td><td><span class="chip">reference</span></td></tr>
+            <tr><td><strong>Selected parallel F4</strong></td><td class="n"><strong>16.765098</strong></td><td class="n"><strong>181.297986</strong></td><td class="n">null</td><td class="n">4,366.27 MB</td><td>242 systems; selected build-serial + parallel elimination</td><td><span class="chip">36.86&times; wall / 591.67&times; CPU / 106.32&times; RSS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">parallel tradeoff</span> selected F4 cuts latency relative to strict single core but increases total CPU and memory; it remains far behind direct MITM</span>
+        <span><span class="chip">correctness</span> both methods use the algebraic factor base without subgroup enumeration or known logs and return exhaustive UNSAT</span>
+        <span><span class="chip">accounting</span> Stage 192 lower bound: 10 components, 196.127459 wall-seconds, 961.170802 core-seconds, 5.649 GB peak RSS; complete cost remains <code>null</code></span>
+        <span><span class="chip">claim boundary</span> decomposition only; natural yield, relations, linear algebra, recovery, full rho, external reproduction, novelty and SOTA remain open</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-192-selected-parallel-boundary-20261002/result.json</code></span>
+      </div>
+    </div>
+<!-- END current-f4-stage192-parallel-boundary -->
 </body>
 </html>
