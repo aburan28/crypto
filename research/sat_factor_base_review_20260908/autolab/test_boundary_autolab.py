@@ -543,6 +543,19 @@ class BatchPanelTests(unittest.TestCase):
         for targets in grids["1024"]:
             self.assertNotEqual(tune, lab.panel_corpus_name(self.beat["corpora"]["eval"], int(targets)))
 
+    def test_panel_manifest_never_lists_itself(self) -> None:
+        with tempfile.TemporaryDirectory(dir=lab.RUNS_DIR) as tmp:
+            run = Path(tmp)
+            (run / "artifacts").mkdir()
+            (run / "artifacts/k_tune.json").write_text("{}\n")
+            lab.write_panel_manifest(run)
+            (run / "artifacts/blocks.json").write_text("[]\n")
+            lab.write_panel_manifest(run)
+            files = lab.read_json(run / "artifacts/review_manifest.json")["files"]
+            self.assertEqual(sorted(files), ["artifacts/blocks.json", "artifacts/k_tune.json"])
+            result = lab.verify(lab.parser().parse_args(["verify", "--run-id", run.name]))
+            self.assertEqual(result["status"], "PASS", result)
+
     def test_panel_resume_needs_an_existing_run(self) -> None:
         args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--resume", "no-such-run"])
         with self.assertRaisesRegex(lab.AutolabError, "no run to resume"):

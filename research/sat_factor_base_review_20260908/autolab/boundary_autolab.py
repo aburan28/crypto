@@ -1655,12 +1655,12 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
                  "tune_eval_disjoint": corpora["disjoint"], "created_at": now(),
                  "note": "K tune only; no panel blocks. Resume without --tune-only to run the panel."},
             )
-            files = {
-                str(path.relative_to(run)): sha256(path) for path in sorted(run.rglob("*")) if path.is_file()
-            }
-            write_json(run / "artifacts/review_manifest.json",
-                       {"schema_version": "1.0", "task_id": TASK_ID, "files": files})
+            write_panel_manifest(run)
             return state
+
+        tune_manifest = run / "artifacts/review_manifest.json"
+        if resume and tune_manifest.is_file():
+            tune_manifest.rename(run / "artifacts/review_manifest_tune_only.json")
 
         advance("blocks", chosen_K=k_choice)
         base_path = run / f"logs/base_n{n}_K{k_choice}.jsonl"
@@ -1837,12 +1837,17 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
              "ledger_sha256": sha256(ledger_path(protocol)), "created_at": now(),
              "note": "Multi-target batch diagnostic; never a vs_rho ledger promotion."},
         )
-        files = {
-            str(path.relative_to(run)): sha256(path) for path in sorted(run.rglob("*")) if path.is_file()
-        }
-        write_json(run / "artifacts/review_manifest.json",
-                   {"schema_version": "1.0", "task_id": TASK_ID, "files": files})
+        write_panel_manifest(run)
         return state
+
+
+def write_panel_manifest(run: Path) -> None:
+    manifest = run / "artifacts/review_manifest.json"
+    files = {
+        str(path.relative_to(run)): sha256(path)
+        for path in sorted(run.rglob("*")) if path.is_file() and path != manifest
+    }
+    write_json(manifest, {"schema_version": "1.0", "task_id": TASK_ID, "files": files})
 
 
 def status(arguments: argparse.Namespace) -> None:
