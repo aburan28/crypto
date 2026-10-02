@@ -1131,6 +1131,10 @@ pub struct WalkReport {
     pub rank1: BTreeMap<u64, usize>,
     /// Vertices where neither rank could be proved within the budget.
     pub undecided: BTreeMap<u64, usize>,
+    /// Vertices whose rank was not decided because the classification
+    /// budget was spent — membership is unaffected (they were reached by an
+    /// edge); only the volcano-shape check is sampled.
+    pub unclassified: BTreeMap<u64, usize>,
     /// Kernels whose `t` or transported `X` left `F_q` — each one is a
     /// failure of the construction and is counted, never dropped.
     pub irrational_kernels: usize,
@@ -1164,6 +1168,7 @@ pub fn walk_class(
     max_vertices: usize,
     seed: u64,
     checkpoint: Option<&Path>,
+    classify_limit: Option<usize>,
     mut progress: impl FnMut(&WalkReport),
 ) -> WalkReport {
     let started = Instant::now();
@@ -1213,6 +1218,11 @@ pub fn walk_class(
                         !ckpt.rank.contains_key(&(*v, *ell))
                             && ckpt.load_generators(*v, *ell, ext.m).is_none()
                     })
+                    .take(
+                        classify_limit
+                            .map(|l| l.saturating_sub(ckpt.rank.len()))
+                            .unwrap_or(usize::MAX),
+                    )
                     .collect();
                 for (c, chunk) in pending.chunks(KERNEL_CHUNK).enumerate() {
                     classify(&mut ckpt, a2, chunk, *ell, ext, order_m, attempts, seed);
@@ -1233,6 +1243,12 @@ pub fn walk_class(
                 && ckpt.load_generators(a6, *ell, ext.m).is_some()
             {
                 ckpt.record_rank(a6, *ell, 2);
+            }
+            if !ckpt.rank.contains_key(&(a6, *ell))
+                && classify_limit.is_some_and(|l| ckpt.rank.len() >= l)
+            {
+                *report.unclassified.entry(*ell).or_insert(0) += 1;
+                continue;
             }
             if !ckpt.rank.contains_key(&(a6, *ell)) {
                 classify(&mut ckpt, a2, &[a6], *ell, ext, order_m, attempts, seed);

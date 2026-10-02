@@ -166,13 +166,24 @@ fn main() {
         );
 
         println!("\n── Part 3: index calculus on every member (ℓ = {l}, m = 2, a₂ = {a2}) ──");
+        // Budget overrides for classes past the scan budget, where a full
+        // yield phase on every member is days: `KOBLITZ_SWEEP_YIELD_PROBES`,
+        // `KOBLITZ_SWEEP_MAX_TRIALS`.  Defaults reproduce the committed runs.
+        let env_usize = |k: &str, d: usize| -> usize {
+            std::env::var(k)
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(d)
+        };
+        let defaults = IcCostOptions::default();
         let opts = IcCostOptions {
             l,
             m: 2,
             ffd_targets: 12,
             ffd_d_max: 6,
-            max_trials: 60_000,
-            ..Default::default()
+            max_trials: env_usize("KOBLITZ_SWEEP_MAX_TRIALS", 60_000),
+            yield_probes: env_usize("KOBLITZ_SWEEP_YIELD_PROBES", defaults.yield_probes),
+            ..defaults
         };
         let t1 = Instant::now();
         let (rows, summary) = sweep_class(n, &irr, a2, &census.members, &opts);
