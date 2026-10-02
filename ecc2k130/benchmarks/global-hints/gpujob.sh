@@ -11,13 +11,13 @@ CAP=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | tr -d '. ')
 [ "$GPU_NAME" = 'NVIDIA RTX PRO 6000 Blackwell Server Edition' ] && [ "$CAP" = 120 ]
 [[ ${SOURCE_REV:-} =~ ^[0-9a-f]{40}$ ]]
 if [ -f SOURCE_REV ]; then [ "$(cat SOURCE_REV)" = "$SOURCE_REV" ]; fi
-if [ -d .git ]; then
+if [ -e .git ]; then
     [ "$(git rev-parse HEAD)" = "$SOURCE_REV" ]
     [ -z "$(git status --porcelain -- .)" ]
 fi
 nvcc --version | grep -q 'release 13\.3, V13\.3\.73'
 ARCH='PRO6000_ARCH=-gencode arch=compute_120,code=sm_120'
-COMMON='BATCH=16 THREADS=512 MINBLOCKS=1 WITNESS=0 TABLE_FUSED=0 TABLE_GLOBAL=0 TABLE_ADDEND_GLOBAL=0 CYCLE_PROFILE=0 PHASE_PROFILE=0 PACKED_CHAINS=1'
+COMMON='BATCH=16 THREADS=512 MINBLOCKS=1 WITNESS=0 TABLE_FUSED=0 TABLE_GLOBAL=0 TABLE_ADDEND_GLOBAL=0 TABLE_PHASE_POPC=0 CYCLE_PROFILE=0 PHASE_PROFILE=0 PACKED_CHAINS=1 PACKED_TOP_HOIST=0 PACKED_ONB_INV=0 PACKED_SLOT_PREFETCH=0 PACKED_SLOT_PIPELINE=0 PACKED_CLMAD_SQUARE=0 PACKED_KARAT3=0 PACKED_TOP_CLMAD=0 PACKED_ADD_COMBINE=0 PACKED_ALU_SQR=0 SIGMA_FUSED=0 SIGMA_FUSED_LATE_Y=0'
 VERIFY_THREADS=96256
 BENCH_THREADS=385024
 {
@@ -74,7 +74,10 @@ markers() {
         'pair ilp: 1' 'pair clmul: 0' 'clmul flat: 0' 'from reduced: 1' 'slot unroll: 1' 'chains: 1' \
         'L2 persist: 1' 'direct reduction: 1' 'generated product: 1' 'native carryless multiply: 1' \
         'weighted prefix: 2' 'compact state: 1' 'shared sigma: 1' 'state tile: 256' 'alu square: 1' \
-        'table global: 0' 'table addend global: 0'; do
+        'table global: 0' 'table addend global: 0' 'top hoist: 0' 'onb inv: 0' 'slot prefetch: 0' \
+        'slot pipeline: 0' 'native carryless square: 0' 'three-limb Karatsuba: 0' 'top clmad: 0' \
+        'add combine: 0' 'alu onb square: 0' 'table phase popc: 0' 'sigma fused: 0' \
+        'sigma fused late y: 0' 'profile ranges: 0'; do
         grep -qx "packed $feature" "$log" || return 1
     done
     grep -qx 'packed table pivot bytes: 1, table shared bytes 57052' "$log" || return 1
