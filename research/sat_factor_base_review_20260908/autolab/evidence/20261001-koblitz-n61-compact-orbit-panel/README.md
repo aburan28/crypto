@@ -14,6 +14,7 @@ directories are promoted under `autolab_runs/<run-id>/`.
 |---|---:|---:|---|---:|---:|---|---|
 | `20261001T155442Z-9990f40315` | 1,024 | 700 | 0.282 (0.276–0.306) | 0.289 | 0.132 | PASS | FAIL (closed) |
 | `20261001T160852Z-1f8383bd42` | 4,096 | 1,000 | 0.262 (0.247–0.269) | 0.256 | 0.117 | PASS | FAIL (closed) |
+| `20261001T212647Z-c0875d45ed` | 65,536 | 1,480 | 0.332 (0.139–0.492) | 0.291 | 0.132 | PASS | FAIL (closed) |
 
 All ratios are compact / rho on the same block pair.
 
@@ -200,3 +201,87 @@ The isolated hosted ratio (0.229) sits below the contended macOS ratio
 (0.282). It is still a multi-target batch against KS v2, so it is a diagnostic
 and not the one-target primary comparison. For that comparison, see
 `../20261001-koblitz-n61-single-target/`.
+
+## L=65,536 through the autolab (`20261001T212647Z-c0875d45ed`)
+
+This reruns PR #1134's L=65,536 point as a proper autolab run:
+`launch-panel --beat koblitz.compact_orbit.n61_panel --targets 65536` at
+`777e767d4` (3 blocks).
+
+- K comes from a tune on the disjoint corpus `n61-ks-growing-tune-65536-v1`.
+  The eval corpus is `n61-ks-growing-65536-v1`.
+- The memory skip uses the new `ic_rss_model`, and the grid is
+  [1000, 1200, 1400, 1480].
+- K=1,480 is the last K before the IC root table doubles (K ≈ 1,482). Above
+  it, peak memory jumps to about 19 GiB, which this shared host cannot hold
+  next to other agents' jobs.
+- The comparator is still the frozen KS v2 batched rho. It is not
+  `rho_reference_minimum`, and this is a multi-target diagnostic.
+
+Host: the same M4 Pro, unpinned. The 1-minute load before and after each timed
+process was 12–213, and system swap was 4.7–11.3 GiB used by other jobs. Every timed
+process reported **0 swaps**.
+
+| K | Wall s | User s | Sys s | Instructions | Est. / measured peak footprint GiB | Load at start |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,000 | 653.9 | 444.0 | 19.2 | 3,340.9 G | 5.43 / 5.39 | 199 |
+| 1,200 | 1,420.2 | 399.2 | 291.2 | 3,148.7 G | 10.03 / 10.00 | 124 |
+| 1,400 | 891.3 | 331.2 | 194.7 | 2,550.9 G | 10.73 / 10.72 | 213 |
+| **1,480** | **281.1** | **255.1** | 17.3 | **2,041.5 G** | 11.05 / 11.03 | 72 |
+
+The registered wall rule picks **K=1,480**, which is also the lowest user CPU
+and the lowest instruction count.
+
+- At K=1,200 and K=1,400 the large sys times are memory-pressure page work.
+  The macOS instruction counter includes kernel instructions, so those two
+  counts are inflated too. User CPU is the cleanest column, and it falls
+  monotonically to the grid edge.
+- The optimum therefore sits at the memory cap, not at an interior K.
+- The RSS model predicts the measured peak footprint within 0.1–0.8% at all
+  four K. macOS `max_rss` reads lower under memory compression.
+
+Paired blocks, with the same eval targets in both arms (wall s, user s in
+parentheses):
+
+| Block | Order | IC | Rho (KS v2) | Wall | User | Instr. | Peak footprint IC / rho GiB |
+|---:|---|---:|---:|---:|---:|---:|---|
+| 0 | IC→rho | 277.6 (238.3) | 835.2 (819.6) | 0.332 | 0.291 | 0.132 | 11.08 / 2.97 |
+| 1 | rho→IC | 503.2 (265.4) | 1,023.8 (843.7) | 0.492 | 0.315 | 0.149 | 11.08 / 2.68 |
+| 2 | IC→rho | 289.0 (240.2) | 2,072.2 (1,555.4) | 0.139 | 0.154 | 0.132 | 11.08 / 2.30 |
+
+- The wall ratio median is **0.332** (range 0.139–0.492). The user-CPU ratio
+  median is 0.291, and the instruction ratio median is **0.132**.
+- Contention dominates the walls. Block 1's IC wall is 238 s above its user
+  CPU. Block 2's rho used 1,555 s of user CPU against 820–844 s in blocks
+  0–1, which is consistent with efficiency-core scheduling under load ~200.
+- The instruction ratio is the stable reading. Blocks 0 and 2 agree to
+  0.0003. Block 1 is higher because of kernel page work.
+- IC setup (index and rank) took 62–113 s per block, and the targets took
+  209–385 s. The IC uses 3.7–4.8× rho's peak memory.
+
+PR #1134 measured the same point outside the autolab at K=1,400, with a wall
+ratio median of 0.352. This run's instruction ratio is in line with the
+L=1,024 (0.132) and L=4,096 (0.117) runs above. The wall ratio is not
+comparable, because of the load.
+
+Verification: in every block, both arms solved all 65,536 targets.
+
+- IC `recovered_matches_published` and `group_verified` hold everywhere.
+- Rho's recovered scalar equals the published one.
+- Both arms walk the same points, and the scalars match the eval corpus.
+- Records with timers removed hash equal across blocks in each arm.
+
+The pure-Python replays pass **196,608 / 196,608** for IC
+(`independent_replay.py` against the dumped base) and **65,536 / 65,536** in
+each rho block (3 × 65,536). They are same-host and same-campaign, and the IC
+replay alone took about 4 h of CPU.
+
+Claim-check:
+
+- `end_to_end_dlp`: **PASS**.
+- `vs_rho`: **FAIL** (closed by design; this is a batch run).
+- `verify`: PASS, 54 manifest files with 0 mismatches (`artifacts/verify.json`).
+
+The run is archived under `autolab_runs/20261001T212647Z-c0875d45ed/`. Left
+out, as above: `logs/` (per-target records and the base dump)
+and `inputs/boundary_targets.json`. The two 1 MB scalar corpora are kept.
