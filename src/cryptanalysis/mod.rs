@@ -213,6 +213,7 @@ pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod orbit_pair_table;
+pub mod q_curve;
 pub mod p256_attacks;
 pub mod p256_isogeny_cover;
 pub mod p256_structural;

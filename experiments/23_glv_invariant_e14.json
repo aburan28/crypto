@@ -1,0 +1,1936 @@
+{
+  "command": "glv_invariant_experiments --exp e14 --bits 8,9,10,11,12 --seeds 4 --json experiments/23_glv_invariant_e14.json",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux",
+    "threads": 4
+  },
+  "rows": [
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 118,
+      "bits": 8,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 17188,
+      "instance": "qcurve-d2-p8bit-p131-1000005005f",
+      "j": [
+        95,
+        5
+      ],
+      "log2_r": 12.069114061773938,
+      "maps": [
+        {
+          "degree": 262,
+          "eigenvalue_squared": 4295,
+          "name": "q-curve-psi[d=2,lambda=3570]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.00686525482895043,
+            "degree": 262,
+            "eigenvalue": 3570,
+            "eigenvalue_order": 2148,
+            "fraction": 0.01694915254237288,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=3570]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 131,
+      "r": 4297,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 135,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 1,
+      "twisted": true,
+      "wall_seconds": 0.007068322
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 206,
+      "bits": 8,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 38866,
+      "instance": "qcurve-d2-p8bit-p197-3b001b",
+      "j": [
+        27,
+        59
+      ],
+      "log2_r": 14.246221015986242,
+      "maps": [
+        {
+          "degree": 394,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=7459]",
+          "overlap": {
+            "base_points": 206,
+            "chance_fraction": 0.005300262440179077,
+            "degree": 394,
+            "eigenvalue": 7459,
+            "eigenvalue_order": 9716,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=7459]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 197,
+      "r": 19433,
+      "search": {
+        "curves_counted": 13,
+        "j_scanned": 2607,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 7,
+        "rejected_order": 12
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 0.082687697
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 186,
+      "bits": 8,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 39782,
+      "instance": "qcurve-d2-p8bit-p199-4f00ae",
+      "j": [
+        174,
+        79
+      ],
+      "log2_r": 14.279828187585121,
+      "maps": [
+        {
+          "degree": 398,
+          "eigenvalue_squared": 19889,
+          "name": "q-curve-psi[d=2,lambda=7032]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.0046754813734854956,
+            "degree": 398,
+            "eigenvalue": 7032,
+            "eigenvalue_order": 9945,
+            "fraction": 0.010752688172043012,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=7032]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 199,
+      "r": 19891,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 277,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 0.013845845
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 212,
+      "bits": 8,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 52322,
+      "instance": "qcurve-d2-p8bit-p229-100000800d9",
+      "j": [
+        217,
+        8
+      ],
+      "log2_r": 14.675130068224403,
+      "maps": [
+        {
+          "degree": 458,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=6142]",
+          "overlap": {
+            "base_points": 212,
+            "chance_fraction": 0.004051832881006078,
+            "degree": 458,
+            "eigenvalue": 6142,
+            "eigenvalue_order": 8720,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=6142]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 229,
+      "r": 26161,
+      "search": {
+        "curves_counted": 6,
+        "j_scanned": 1148,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 5
+      },
+      "seed": 4,
+      "twisted": true,
+      "wall_seconds": 0.053754472
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 400,
+      "bits": 9,
+      "cofactor": 14,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 158354,
+      "instance": "qcurve-d2-p9bit-p397-10000520098",
+      "j": [
+        152,
+        82
+      ],
+      "log2_r": 13.465438862481518,
+      "maps": [
+        {
+          "degree": 794,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=6707]",
+          "overlap": {
+            "base_points": 400,
+            "chance_fraction": 0.0025259860818166893,
+            "degree": 794,
+            "eigenvalue": 6707,
+            "eigenvalue_order": 11310,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=6707]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 397,
+      "r": 11311,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 1270,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 1,
+      "twisted": true,
+      "wall_seconds": 0.060806674
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 294,
+      "bits": 9,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 94286,
+      "instance": "qcurve-d2-p9bit-p307-100009300b3",
+      "j": [
+        179,
+        147
+      ],
+      "log2_r": 15.52475594864683,
+      "maps": [
+        {
+          "degree": 614,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=44388]",
+          "overlap": {
+            "base_points": 294,
+            "chance_fraction": 0.003118172369174639,
+            "degree": 614,
+            "eigenvalue": 44388,
+            "eigenvalue_order": 23571,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=44388]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 307,
+      "r": 47143,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 147,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 2,
+      "twisted": true,
+      "wall_seconds": 0.047927912
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 360,
+      "bits": 9,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 128406,
+      "instance": "qcurve-d2-p9bit-p359-57006d",
+      "j": [
+        109,
+        87
+      ],
+      "log2_r": 14.385390590256906,
+      "maps": [
+        {
+          "degree": 718,
+          "eigenvalue_squared": 21399,
+          "name": "q-curve-psi[d=2,lambda=1913]",
+          "overlap": {
+            "base_points": 360,
+            "chance_fraction": 0.0028036073080697165,
+            "degree": 718,
+            "eigenvalue": 1913,
+            "eigenvalue_order": 4280,
+            "fraction": 0.005555555555555556,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=1913]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 359,
+      "r": 21401,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 445,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 0.127583626
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 284,
+      "bits": 9,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 79012,
+      "instance": "qcurve-d2-p9bit-p281-100005500e6",
+      "j": [
+        230,
+        85
+      ],
+      "log2_r": 14.269784159747577,
+      "maps": [
+        {
+          "degree": 562,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=7425]",
+          "overlap": {
+            "base_points": 284,
+            "chance_fraction": 0.0035943907254594237,
+            "degree": 562,
+            "eigenvalue": 7425,
+            "eigenvalue_order": 6584,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=7425]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 281,
+      "r": 19753,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 925,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 4,
+      "twisted": true,
+      "wall_seconds": 0.040056695
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 600,
+      "bits": 10,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 432966,
+      "instance": "qcurve-d2-p10bit-p659-10000230040",
+      "j": [
+        64,
+        35
+      ],
+      "log2_r": 16.138931711006443,
+      "maps": [
+        {
+          "degree": 1318,
+          "eigenvalue_squared": 72159,
+          "name": "q-curve-psi[d=2,lambda=71503]",
+          "overlap": {
+            "base_points": 600,
+            "chance_fraction": 0.0013857901082302074,
+            "degree": 1318,
+            "eigenvalue": 71503,
+            "eigenvalue_order": 72160,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=71503]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 659,
+      "r": 72161,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 1351,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 1,
+      "twisted": true,
+      "wall_seconds": 0.195425613
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 670,
+      "bits": 10,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 435698,
+      "instance": "qcurve-d2-p10bit-p661-4100fa",
+      "j": [
+        250,
+        65
+      ],
+      "log2_r": 17.73296896525082,
+      "maps": [
+        {
+          "degree": 1322,
+          "eigenvalue_squared": 217847,
+          "name": "q-curve-psi[d=2,lambda=186822]",
+          "overlap": {
+            "base_points": 670,
+            "chance_fraction": 0.0015377623950534544,
+            "degree": 1322,
+            "eigenvalue": 186822,
+            "eigenvalue_order": 108924,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=186822]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 661,
+      "r": 217849,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 1385,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 0.107107061
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 674,
+      "bits": 10,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 478064,
+      "instance": "qcurve-d2-p10bit-p691-1570206",
+      "j": [
+        518,
+        343
+      ],
+      "log2_r": 14.86684424390207,
+      "maps": [
+        {
+          "degree": 1382,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=17962]",
+          "overlap": {
+            "base_points": 674,
+            "chance_fraction": 0.001409853074065397,
+            "degree": 1382,
+            "eigenvalue": 17962,
+            "eigenvalue_order": 29878,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=17962]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 691,
+      "r": 29879,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 1723,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 0.403615707
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 604,
+      "bits": 10,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 380356,
+      "instance": "qcurve-d2-p10bit-p617-12400b0",
+      "j": [
+        176,
+        292
+      ],
+      "log2_r": 16.536990837740195,
+      "maps": [
+        {
+          "degree": 1234,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=88319]",
+          "overlap": {
+            "base_points": 604,
+            "chance_fraction": 0.0015879859920705866,
+            "degree": 1234,
+            "eigenvalue": 88319,
+            "eigenvalue_order": 95088,
+            "fraction": 0.0033112582781456954,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=88319]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 617,
+      "r": 95089,
+      "search": {
+        "curves_counted": 9,
+        "j_scanned": 6452,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 5,
+        "rejected_order": 8
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 0.528529127
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1238,
+      "bits": 11,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 1582566,
+      "instance": "qcurve-d2-p11bit-p1259-d01ce",
+      "j": [
+        462,
+        13
+      ],
+      "log2_r": 18.008871736273804,
+      "maps": [
+        {
+          "degree": 2518,
+          "eigenvalue_squared": 263759,
+          "name": "q-curve-psi[d=2,lambda=262503]",
+          "overlap": {
+            "base_points": 1238,
+            "chance_fraction": 0.0007822738514539046,
+            "degree": 2518,
+            "eigenvalue": 262503,
+            "eigenvalue_order": 263760,
+            "fraction": 0.0016155088852988692,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=262503]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 1259,
+      "r": 263761,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 7561,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 1,
+      "twisted": false,
+      "wall_seconds": 0.505464365
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1356,
+      "bits": 11,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 1906396,
+      "instance": "qcurve-d2-p11bit-p1381-100012500db",
+      "j": [
+        219,
+        293
+      ],
+      "log2_r": 18.862416398905502,
+      "maps": [
+        {
+          "degree": 2762,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=226919]",
+          "overlap": {
+            "base_points": 1356,
+            "chance_fraction": 0.0007112897844938827,
+            "degree": 2762,
+            "eigenvalue": 226919,
+            "eigenvalue_order": 238299,
+            "fraction": 0.0014749262536873156,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=226919]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 1381,
+      "r": 476599,
+      "search": {
+        "curves_counted": 18,
+        "j_scanned": 8573,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 9,
+        "rejected_order": 17
+      },
+      "seed": 2,
+      "twisted": true,
+      "wall_seconds": 5.577085712
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1390,
+      "bits": 11,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 1982562,
+      "instance": "qcurve-d2-p11bit-p1409-1e2041f",
+      "j": [
+        1055,
+        482
+      ],
+      "log2_r": 18.333972052158447,
+      "maps": [
+        {
+          "degree": 2818,
+          "eigenvalue_squared": 330425,
+          "name": "q-curve-psi[d=2,lambda=283022]",
+          "overlap": {
+            "base_points": 1390,
+            "chance_fraction": 0.0007011130042843553,
+            "degree": 2818,
+            "eigenvalue": 283022,
+            "eigenvalue_order": 36714,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=283022]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 1409,
+      "r": 330427,
+      "search": {
+        "curves_counted": 15,
+        "j_scanned": 8930,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 8,
+        "rejected_order": 14
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 4.727521515
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1620,
+      "bits": 11,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 2626082,
+      "instance": "qcurve-d2-p11bit-p1621-2f1004c",
+      "j": [
+        76,
+        753
+      ],
+      "log2_r": 20.324480534734846,
+      "maps": [
+        {
+          "degree": 3242,
+          "eigenvalue_squared": 1313039,
+          "name": "q-curve-psi[d=2,lambda=679215]",
+          "overlap": {
+            "base_points": 1620,
+            "chance_fraction": 0.0006168885815446738,
+            "degree": 3242,
+            "eigenvalue": 679215,
+            "eigenvalue_order": 437680,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=679215]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 1621,
+      "r": 1313041,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 753,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 0.679646677
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2238,
+      "bits": 12,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 5033764,
+      "instance": "qcurve-d2-p12bit-p2243-10002980717",
+      "j": [
+        1815,
+        664
+      ],
+      "log2_r": 20.26320614895162,
+      "maps": [
+        {
+          "degree": 4486,
+          "eigenvalue_squared": 1258439,
+          "name": "q-curve-psi[d=2,lambda=461391]",
+          "overlap": {
+            "base_points": 2238,
+            "chance_fraction": 0.00044459772051292035,
+            "degree": 4486,
+            "eigenvalue": 461391,
+            "eigenvalue_order": 314610,
+            "fraction": 0.0008936550491510277,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=461391]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 2243,
+      "r": 1258441,
+      "search": {
+        "curves_counted": 4,
+        "j_scanned": 664,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 2,
+        "rejected_order": 3
+      },
+      "seed": 1,
+      "twisted": true,
+      "wall_seconds": 3.706164103
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2844,
+      "bits": 12,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 8184772,
+      "instance": "qcurve-d2-p12bit-p2861-10000e40537",
+      "j": [
+        1335,
+        228
+      ],
+      "log2_r": 20.96451079799052,
+      "maps": [
+        {
+          "degree": 5722,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=657756]",
+          "overlap": {
+            "base_points": 2844,
+            "chance_fraction": 0.00034747455396436214,
+            "degree": 5722,
+            "eigenvalue": 657756,
+            "eigenvalue_order": 2046192,
+            "fraction": 0.0007032348804500703,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=2,lambda=657756]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 2861,
+      "r": 2046193,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 3088,
+        "kernels_other_codomain": 2,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 2,
+      "twisted": true,
+      "wall_seconds": 3.48061428
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2238,
+      "bits": 12,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 5144066,
+      "instance": "qcurve-d2-p12bit-p2269-1b007e1",
+      "j": [
+        2017,
+        432
+      ],
+      "log2_r": 21.294477722344205,
+      "maps": [
+        {
+          "degree": 4538,
+          "eigenvalue_squared": 2572031,
+          "name": "q-curve-psi[d=2,lambda=2338418]",
+          "overlap": {
+            "base_points": 2238,
+            "chance_fraction": 0.00043506440236186706,
+            "degree": 4538,
+            "eigenvalue": 2338418,
+            "eigenvalue_order": 2572032,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=2338418]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 2269,
+      "r": 2572033,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 2700,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 1.281437427
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 3132,
+      "bits": 12,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e14",
+      "family": "q-curve-d2",
+      "group_order": 10046978,
+      "instance": "qcurve-d2-p12bit-p3169-10004c3039c",
+      "j": [
+        924,
+        1219
+      ],
+      "log2_r": 22.260258287005094,
+      "maps": [
+        {
+          "degree": 6338,
+          "eigenvalue_squared": 2,
+          "name": "q-curve-psi[d=2,lambda=3727207]",
+          "overlap": {
+            "base_points": 3132,
+            "chance_fraction": 0.00031173552883265,
+            "degree": 6338,
+            "eigenvalue": 3727207,
+            "eigenvalue_order": 78492,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=2,lambda=3727207]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 3169,
+      "r": 5023489,
+      "search": {
+        "curves_counted": 12,
+        "j_scanned": 23395,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 6,
+        "rejected_order": 11
+      },
+      "seed": 4,
+      "twisted": true,
+      "wall_seconds": 20.393442994
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 200,
+      "bits": 8,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 38524,
+      "instance": "qcurve-d3-p8bit-p197-10037",
+      "j": [
+        55,
+        1
+      ],
+      "log2_r": 13.233469887522077,
+      "maps": [
+        {
+          "degree": 591,
+          "eigenvalue_squared": 9628,
+          "name": "q-curve-psi[d=3,lambda=3243]",
+          "overlap": {
+            "base_points": 200,
+            "chance_fraction": 0.0051915688921191985,
+            "degree": 591,
+            "eigenvalue": 3243,
+            "eigenvalue_order": 9630,
+            "fraction": 0.01,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=3,lambda=3243]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 197,
+      "r": 9631,
+      "search": {
+        "curves_counted": 17,
+        "j_scanned": 3529,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 9,
+        "rejected_order": 16
+      },
+      "seed": 1,
+      "twisted": false,
+      "wall_seconds": 0.099408066
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 252,
+      "bits": 8,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 58372,
+      "instance": "qcurve-d3-p8bit-p241-6f00a3",
+      "j": [
+        163,
+        111
+      ],
+      "log2_r": 13.832988879680688,
+      "maps": [
+        {
+          "degree": 723,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=3618]",
+          "overlap": {
+            "base_points": 252,
+            "chance_fraction": 0.004317138354005345,
+            "degree": 723,
+            "eigenvalue": 3618,
+            "eigenvalue_order": 7296,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=3618]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 241,
+      "r": 14593,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 591,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 0.018403806
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 238,
+      "bits": 8,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 57237,
+      "instance": "qcurve-d3-p8bit-p239-100002c004c",
+      "j": [
+        76,
+        44
+      ],
+      "log2_r": 14.219697935963698,
+      "maps": [
+        {
+          "degree": 717,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=12163]",
+          "overlap": {
+            "base_points": 238,
+            "chance_fraction": 0.0041581494487831295,
+            "degree": 717,
+            "eigenvalue": 12163,
+            "eigenvalue_order": 19078,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=12163]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 239,
+      "r": 19079,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 520,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 3,
+      "twisted": true,
+      "wall_seconds": 0.02779322
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 144,
+      "bits": 8,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 22741,
+      "instance": "qcurve-d3-p8bit-p151-250041",
+      "j": [
+        65,
+        37
+      ],
+      "log2_r": 14.473008075438374,
+      "maps": [
+        {
+          "degree": 453,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=10323]",
+          "overlap": {
+            "base_points": 144,
+            "chance_fraction": 0.006332175366078888,
+            "degree": 453,
+            "eigenvalue": 10323,
+            "eigenvalue_order": 22740,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=10323]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 151,
+      "r": 22741,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 487,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 0.006921514
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 400,
+      "bits": 9,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 158161,
+      "instance": "qcurve-d3-p9bit-p397-100002a0149",
+      "j": [
+        329,
+        42
+      ],
+      "log2_r": 17.271034372331794,
+      "maps": [
+        {
+          "degree": 1191,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=87823]",
+          "overlap": {
+            "base_points": 400,
+            "chance_fraction": 0.0025290684808517904,
+            "degree": 1191,
+            "eigenvalue": 87823,
+            "eigenvalue_order": 79080,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=87823]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 397,
+      "r": 158161,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 834,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 1,
+      "twisted": true,
+      "wall_seconds": 0.073170717
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 460,
+      "bits": 9,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 213441,
+      "instance": "qcurve-d3-p9bit-p461-a8018a",
+      "j": [
+        394,
+        168
+      ],
+      "log2_r": 16.118515304588335,
+      "maps": [
+        {
+          "degree": 1383,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=70685]",
+          "overlap": {
+            "base_points": 460,
+            "chance_fraction": 0.002155162316518382,
+            "degree": 1383,
+            "eigenvalue": 70685,
+            "eigenvalue_order": 35573,
+            "fraction": 0.004347826086956522,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=3,lambda=70685]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 461,
+      "r": 71147,
+      "search": {
+        "curves_counted": 13,
+        "j_scanned": 4308,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 7,
+        "rejected_order": 12
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 0.470033907
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 340,
+      "bits": 9,
+      "cofactor": 8,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 113272,
+      "instance": "qcurve-d3-p9bit-p337-10000870127",
+      "j": [
+        295,
+        135
+      ],
+      "log2_r": 13.789431756129547,
+      "maps": [
+        {
+          "degree": 1011,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=1592]",
+          "overlap": {
+            "base_points": 340,
+            "chance_fraction": 0.0030016244085034256,
+            "degree": 1011,
+            "eigenvalue": 1592,
+            "eigenvalue_order": 7079,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=1592]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 337,
+      "r": 14159,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 2487,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 3,
+      "twisted": true,
+      "wall_seconds": 0.063554052
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 442,
+      "bits": 9,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 193573,
+      "instance": "qcurve-d3-p9bit-p439-8301ac",
+      "j": [
+        428,
+        131
+      ],
+      "log2_r": 17.562518210713638,
+      "maps": [
+        {
+          "degree": 1317,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=128902]",
+          "overlap": {
+            "base_points": 442,
+            "chance_fraction": 0.0022833762973141917,
+            "degree": 1317,
+            "eigenvalue": 128902,
+            "eigenvalue_order": 193572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=128902]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 439,
+      "r": 193573,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 1445,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 0.162294767
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 652,
+      "bits": 10,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 419901,
+      "instance": "qcurve-d3-p10bit-p647-ea00d2",
+      "j": [
+        210,
+        234
+      ],
+      "log2_r": 17.094727197690737,
+      "maps": [
+        {
+          "degree": 1941,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=139319]",
+          "overlap": {
+            "base_points": 652,
+            "chance_fraction": 0.0015527469570208216,
+            "degree": 1941,
+            "eigenvalue": 139319,
+            "eigenvalue_order": 139966,
+            "fraction": 0.006134969325153374,
+            "images_in_base": 4,
+            "name": "q-curve-psi[d=3,lambda=139319]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 647,
+      "r": 139967,
+      "search": {
+        "curves_counted": 85,
+        "j_scanned": 26074,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 43,
+        "rejected_order": 84
+      },
+      "seed": 1,
+      "twisted": false,
+      "wall_seconds": 5.287949298
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 530,
+      "bits": 10,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 326212,
+      "instance": "qcurve-d3-p10bit-p571-7600a0",
+      "j": [
+        160,
+        118
+      ],
+      "log2_r": 16.315450328289373,
+      "maps": [
+        {
+          "degree": 1713,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=36214]",
+          "overlap": {
+            "base_points": 530,
+            "chance_fraction": 0.0016247103110860423,
+            "degree": 1713,
+            "eigenvalue": 36214,
+            "eigenvalue_order": 81552,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=36214]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 571,
+      "r": 81553,
+      "search": {
+        "curves_counted": 17,
+        "j_scanned": 12658,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 9,
+        "rejected_order": 16
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 0.850142269
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 758,
+      "bits": 10,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 655737,
+      "instance": "qcurve-d3-p10bit-p809-100015d0005",
+      "j": [
+        5,
+        349
+      ],
+      "log2_r": 17.73779527502949,
+      "maps": [
+        {
+          "degree": 2427,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=178911]",
+          "overlap": {
+            "base_points": 758,
+            "chance_fraction": 0.001155951242647586,
+            "degree": 2427,
+            "eigenvalue": 178911,
+            "eigenvalue_order": 109289,
+            "fraction": 0.002638522427440633,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=3,lambda=178911]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 809,
+      "r": 218579,
+      "search": {
+        "curves_counted": 12,
+        "j_scanned": 3581,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 6,
+        "rejected_order": 11
+      },
+      "seed": 3,
+      "twisted": true,
+      "wall_seconds": 1.226374339
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 664,
+      "bits": 10,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 412017,
+      "instance": "qcurve-d3-p10bit-p641-23008f",
+      "j": [
+        143,
+        35
+      ],
+      "log2_r": 17.067381838574914,
+      "maps": [
+        {
+          "degree": 1923,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=39148]",
+          "overlap": {
+            "base_points": 664,
+            "chance_fraction": 0.0016115839880393285,
+            "degree": 1923,
+            "eigenvalue": 39148,
+            "eigenvalue_order": 68669,
+            "fraction": 0.0030120481927710845,
+            "images_in_base": 2,
+            "name": "q-curve-psi[d=3,lambda=39148]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 641,
+      "r": 137339,
+      "search": {
+        "curves_counted": 1,
+        "j_scanned": 35,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 0
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 0.109722797
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1692,
+      "bits": 11,
+      "cofactor": 12,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 2921748,
+      "instance": "qcurve-d3-p11bit-p1709-25c0270",
+      "j": [
+        624,
+        604
+      ],
+      "log2_r": 17.893437820040702,
+      "maps": [
+        {
+          "degree": 5127,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=191366]",
+          "overlap": {
+            "base_points": 1692,
+            "chance_fraction": 0.0005791053848586531,
+            "degree": 5127,
+            "eigenvalue": 191366,
+            "eigenvalue_order": 1817,
+            "fraction": 0.002364066193853428,
+            "images_in_base": 4,
+            "name": "q-curve-psi[d=3,lambda=191366]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 1709,
+      "r": 243479,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 7436,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 1,
+      "twisted": false,
+      "wall_seconds": 2.592717169
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1670,
+      "bits": 11,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 2621812,
+      "instance": "qcurve-d3-p11bit-p1619-10000e903ef",
+      "j": [
+        1007,
+        233
+      ],
+      "log2_r": 19.322132808510172,
+      "maps": [
+        {
+          "degree": 4857,
+          "eigenvalue_squared": 655450,
+          "name": "q-curve-psi[d=3,lambda=36459]",
+          "overlap": {
+            "base_points": 1670,
+            "chance_fraction": 0.0006369640538680882,
+            "degree": 4857,
+            "eigenvalue": 36459,
+            "eigenvalue_order": 109242,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=36459]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 1619,
+      "r": 655453,
+      "search": {
+        "curves_counted": 2,
+        "j_scanned": 1851,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 1,
+        "rejected_order": 1
+      },
+      "seed": 2,
+      "twisted": true,
+      "wall_seconds": 1.178413342
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1632,
+      "bits": 11,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 2553601,
+      "instance": "qcurve-d3-p11bit-p1597-18b028f",
+      "j": [
+        655,
+        395
+      ],
+      "log2_r": 21.284101690962125,
+      "maps": [
+        {
+          "degree": 4791,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=1598]",
+          "overlap": {
+            "base_points": 1632,
+            "chance_fraction": 0.0006390974940877608,
+            "degree": 4791,
+            "eigenvalue": 1598,
+            "eigenvalue_order": 6080,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=1598]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 1597,
+      "r": 2553601,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 3587,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 3,
+      "twisted": false,
+      "wall_seconds": 2.265382091
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 1786,
+      "bits": 11,
+      "cofactor": 9,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 3091887,
+      "instance": "qcurve-d3-p11bit-p1759-c402f7",
+      "j": [
+        759,
+        196
+      ],
+      "log2_r": 18.390131161556447,
+      "maps": [
+        {
+          "degree": 5277,
+          "eigenvalue_squared": 343540,
+          "name": "q-curve-psi[d=3,lambda=196394]",
+          "overlap": {
+            "base_points": 1786,
+            "chance_fraction": 0.0005776407740645114,
+            "degree": 5277,
+            "eigenvalue": 196394,
+            "eigenvalue_order": 171771,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=196394]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 1759,
+      "r": 343543,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 8986,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 2.844755548
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2284,
+      "bits": 12,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 5150713,
+      "instance": "qcurve-d3-p12bit-p2269-21d0566",
+      "j": [
+        1382,
+        541
+      ],
+      "log2_r": 22.296340724020954,
+      "maps": [
+        {
+          "degree": 6807,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=2480057]",
+          "overlap": {
+            "base_points": 2284,
+            "chance_fraction": 0.0004434337537346771,
+            "degree": 6807,
+            "eigenvalue": 2480057,
+            "eigenvalue_order": 37324,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=2480057]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 2269,
+      "r": 5150713,
+      "search": {
+        "curves_counted": 13,
+        "j_scanned": 9613,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 7,
+        "rejected_order": 12
+      },
+      "seed": 1,
+      "twisted": false,
+      "wall_seconds": 10.85782195
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 3436,
+      "bits": 12,
+      "cofactor": 8,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 11950264,
+      "instance": "qcurve-d3-p12bit-p3457-4750a78",
+      "j": [
+        2680,
+        1141
+      ],
+      "log2_r": 20.510539154156785,
+      "maps": [
+        {
+          "degree": 10371,
+          "eigenvalue_squared": 3,
+          "name": "q-curve-psi[d=3,lambda=717085]",
+          "overlap": {
+            "base_points": 3436,
+            "chance_fraction": 0.00028752502873576687,
+            "degree": 10371,
+            "eigenvalue": 717085,
+            "eigenvalue_order": 746891,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=717085]"
+          },
+          "square_is_plus_d": true,
+          "verified": true
+        }
+      ],
+      "p": 3457,
+      "r": 1493783,
+      "search": {
+        "curves_counted": 5,
+        "j_scanned": 4597,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 4
+      },
+      "seed": 2,
+      "twisted": false,
+      "wall_seconds": 11.414359035
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2332,
+      "bits": 12,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 5167276,
+      "instance": "qcurve-d3-p12bit-p2273-10001b7035f",
+      "j": [
+        863,
+        439
+      ],
+      "log2_r": 20.300972513895346,
+      "maps": [
+        {
+          "degree": 6819,
+          "eigenvalue_squared": 1291816,
+          "name": "q-curve-psi[d=3,lambda=615206]",
+          "overlap": {
+            "base_points": 2332,
+            "chance_fraction": 0.00045130161423543084,
+            "degree": 6819,
+            "eigenvalue": 615206,
+            "eigenvalue_order": 1291818,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=615206]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 2273,
+      "r": 1291819,
+      "search": {
+        "curves_counted": 6,
+        "j_scanned": 2711,
+        "kernels_other_codomain": 3,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 3,
+        "rejected_order": 5
+      },
+      "seed": 3,
+      "twisted": true,
+      "wall_seconds": 5.4446788139999995
+    },
+    {
+      "base": "the F_p-line x ∈ F_p, folded by negation",
+      "base_points": 2734,
+      "bits": 12,
+      "cofactor": 16,
+      "degree": 3,
+      "experiment": "e14",
+      "family": "q-curve-d3",
+      "group_order": 7090576,
+      "instance": "qcurve-d3-p12bit-p2663-7605c9",
+      "j": [
+        1481,
+        118
+      ],
+      "log2_r": 18.757471398282615,
+      "maps": [
+        {
+          "degree": 7989,
+          "eigenvalue_squared": 443158,
+          "name": "q-curve-psi[d=3,lambda=349934]",
+          "overlap": {
+            "base_points": 2734,
+            "chance_fraction": 0.00038558221504148606,
+            "degree": 7989,
+            "eigenvalue": 349934,
+            "eigenvalue_order": 12310,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "q-curve-psi[d=3,lambda=349934]"
+          },
+          "square_is_plus_d": false,
+          "verified": true
+        }
+      ],
+      "p": 2663,
+      "r": 443161,
+      "search": {
+        "curves_counted": 21,
+        "j_scanned": 29400,
+        "kernels_other_codomain": 0,
+        "kernels_twist_only": 0,
+        "q_curve_j_found": 11,
+        "rejected_order": 20
+      },
+      "seed": 4,
+      "twisted": false,
+      "wall_seconds": 24.164872142
+    }
+  ],
+  "wall_seconds": 111.180409914,
+  "what_this_is": "Experiment e14 of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.",
+  "what_this_is_not": [
+    "not a speed claim: relation counts and S are reported against their floors and a counted rho; the fold is an engineering lever unless a ratio to the floor falls",
+    "not a claim about any deployed curve: toy instances with certified orders"
+  ]
+}
