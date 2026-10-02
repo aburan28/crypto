@@ -224,7 +224,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     // Tables above the 48 KB static limit need the opt-in before any query.
     static void prepareKernel() {
-        if (dynamicSharedBytes() > 48 * 1024)
+        // A static block-hint queue reduces the default dynamic allowance even
+        // though the table alone is just under 48 KiB. Opt in to the table's
+        // full dynamic size whenever that queue is compiled into the kernel.
+        if (dynamicSharedBytes() > 48 * 1024 || ECC_TABLE_BLOCK_HINTS)
             CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::walk,
                 cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
     }
@@ -378,6 +381,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
         printf("packed table split forward: %d\n", ECC_TABLE_SPLIT_FORWARD);
         printf("packed table batch hints: %d\n", ECC_TABLE_BATCH_HINTS);
+        printf("packed table block hints: %d, queue %d\n", ECC_TABLE_BLOCK_HINTS, ECC_TABLE_HINT_QUEUE);
         printf("packed cycle fast2: %d\n", ECC_CYCLE_FAST2);
         printf("packed cycle profile: %d\n", ECC_CYCLE_PROFILE);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);

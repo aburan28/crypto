@@ -288,6 +288,18 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_TABLE_BATCH_HINTS && (!ECC_TABLE_SPLIT_FORWARD || ECC_BATCH > 64)
 #error "ECC_TABLE_BATCH_HINTS requires split-forward and at most 64 slots"
 #endif
+#ifndef ECC_TABLE_BLOCK_HINTS
+#define ECC_TABLE_BLOCK_HINTS 0
+#endif
+#ifndef ECC_TABLE_HINT_QUEUE
+#define ECC_TABLE_HINT_QUEUE 512
+#endif
+#if ECC_TABLE_BLOCK_HINTS != 0 && ECC_TABLE_BLOCK_HINTS != 1
+#error "ECC_TABLE_BLOCK_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_BLOCK_HINTS && (!ECC_TABLE_BATCH_HINTS || ECC_TABLE_HINT_QUEUE < 1 || ECC_TABLE_HINT_QUEUE > 65536 || ECC_BATCH * ECC_THREADS > 65536)
+#error "ECC_TABLE_BLOCK_HINTS requires batch hints, a queue in [1,65536], and a 16-bit (slot,thread) index"
+#endif
 // ECC_PACKED_CHAINS=2: every thread runs two independent Montgomery chains
 // of ECC_BATCH/2 slots each (slots [0, B/2) and [B/2, B)) instead of one
 // chain of ECC_BATCH.  The chains are interleaved slot by slot in both
@@ -752,7 +764,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+    __shared__ unsigned tableHintCount;
+    __shared__ unsigned short tableHintQueue[ECC_TABLE_HINT_QUEUE];
+    const bool tableBlockActive = tid < p.threads;
+#else
     if (tid >= p.threads) return;
+#endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_POLY_STATE
     unsigned *polyDenominators=denominators+size_t(p.threads)*ECC_BATCH*5;
 #endif
@@ -774,10 +792,52 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_TABLE_SPLIT_FORWARD
 #if ECC_TABLE_BATCH_HINTS
         unsigned long long pendingHints = 0;
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+        if (threadIdx.x == 0) tableHintCount = 0;
+        __syncthreads();
+        if (tableBlockActive) {
+#endif
 #pragma unroll 1
         for (int slot = 0; slot < ECC_BATCH; ++slot)
             if (tableSelectRawTagSlot(p, slot, tid, now, guard, twSel))
                 pendingHints |= 1ull << slot;
+#if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)
+        }
+        const unsigned pendingCount = __popcll(pendingHints);
+        unsigned queueBase = 0;
+        if (pendingCount) queueBase = atomicAdd(&tableHintCount, pendingCount);
+        unsigned long long queueBits = pendingHints;
+        unsigned queueOffset = 0;
+        while (queueBits) {
+            const int slot = __ffsll((long long)queueBits) - 1;
+            const unsigned q = queueBase + queueOffset++;
+            if (q < ECC_TABLE_HINT_QUEUE)
+                tableHintQueue[q] = (unsigned short)(slot * ECC_THREADS + threadIdx.x);
+            queueBits &= queueBits - 1;
+        }
+        __syncthreads();
+        const unsigned queued = tableHintCount;
+        if (queued <= ECC_TABLE_HINT_QUEUE) {
+            for (unsigned q = threadIdx.x; q < queued; q += ECC_THREADS) {
+                const unsigned entry = tableHintQueue[q];
+                const int ownerThread = int(entry % ECC_THREADS);
+                const int ownerSlot = int(entry / ECC_THREADS);
+                const int ownerTid = int(blockIdx.x) * ECC_THREADS + ownerThread;
+                tableResolveHintSlot(p, ownerSlot, ownerTid, twSel, twTab);
+            }
+        } else {
+            const unsigned warpMask = __activemask();
+            while (__any_sync(warpMask, pendingHints != 0)) {
+                if (pendingHints) {
+                    const int slot = __ffsll((long long)pendingHints) - 1;
+                    tableResolveHintSlot(p, slot, tid, twSel, twTab);
+                    pendingHints &= pendingHints - 1;
+                }
+            }
+        }
+        __syncthreads();
+        if (!tableBlockActive) continue;
+#else
 #ifdef __CUDA_ARCH__
         const unsigned warpMask = __activemask();
         while (__any_sync(warpMask, pendingHints != 0)) {
@@ -793,6 +853,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             tableResolveHintSlot(p, slot, tid, twSel, twTab);
             pendingHints &= pendingHints - 1;
         }
+#endif
 #endif
 #else
 #pragma unroll 1

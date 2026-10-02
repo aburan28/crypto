@@ -1,0 +1,18 @@
+{
+  "schema": "ecc2k130_block_both2_confirm5.v1",
+  "valid": true,
+  "claimClass": "same-walk kernel engineering",
+  "abRatios": [1.0051954938717793,1.0066647979088323,1.0066249686020445,1.0075351934307173,1.0065687095942861],
+  "abPairedMedian": 1.0066249686020445,
+  "aaRatios": [1.0000523082650414,1.0015709055570314,0.99995202017758866,1.0000465897672288,0.99897157491447541],
+  "aaPairedMedian": 1.0000465897672288,
+  "gates": {
+    "abAllAtLeast1_005": true,
+    "abMedianAtLeast1_005": true,
+    "aaAllWithin0_5Percent": true,
+    "aaMedianWithin0_2Percent": true,
+    "olderRooflineRatioCondition1_040": false
+  },
+  "recommendation": "PROMOTE_BLOCK_V3_BOTH2_ENGINEERING",
+  "claimBoundary": "bounded one-GPU same-walk benchmark; no ECDLP break or end-to-end speedup"
+}
