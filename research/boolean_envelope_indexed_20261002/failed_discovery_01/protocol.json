@@ -37,11 +37,6 @@
     "settle_seconds": 2,
     "maximum_other_cpu_fraction": 0.1,
     "maximum_psi_some_avg10": 5.0,
-    "startup_quiet": {
-      "max_samples": 30,
-      "sample_seconds": 2,
-      "max_psi": 5.0
-    },
     "partial_samples_admitted": false
   },
   "noise": {

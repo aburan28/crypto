@@ -4,18 +4,6 @@ use std::hint::black_box;
 use std::mem::size_of;
 use std::time::Instant;
 
-mod verify;
-
-const ARM_NAMES: [&str; 7] = [
-    "direct",
-    "layout",
-    "schedule",
-    "matrix_cache",
-    "envelope",
-    "envelope_degree",
-    "envelope_indexed",
-];
-
 type Poly = Vec<u16>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Input {
@@ -447,252 +435,12 @@ impl Envelope {
     }
 }
 
-// The legacy Envelope above is unchanged. The first treatment only replaces
-// its scan over ineligible product plans. Precomputed indices retain the
-// original numeric multiplier order for every possible degree cutoff.
-struct DegreeEnvelope {
-    base: Envelope,
-    eligible: Vec<Vec<Vec<usize>>>,
-}
-
-fn envelope_bits(support: &Input, input: &Input) -> Result<Option<Vec<u32>>, Error> {
-    input.validate()?;
-    if input.n != support.n
-        || input.degree != support.degree
-        || input.active != support.active
-        || input.polys.len() != support.polys.len()
-    {
-        return Ok(None);
-    }
-    let mut coefficients = Vec::with_capacity(input.polys.len());
-    for (poly, allowed) in input.polys.iter().zip(&support.polys) {
-        let mut bits = 0u32;
-        for term in poly {
-            let Ok(slot) = allowed.binary_search(term) else {
-                return Ok(None);
-            };
-            bits |= 1u32 << slot;
-        }
-        coefficients.push(bits);
-    }
-    Ok(Some(coefficients))
-}
-
-impl DegreeEnvelope {
-    fn compile(support: &Input, caps: PlanCaps) -> Result<Self, Error> {
-        let base = Envelope::compile(support, caps)?;
-        let eligible = base
-            .plans
-            .iter()
-            .map(|plans| {
-                (0..=support.degree)
-                    .map(|gap| {
-                        plans
-                            .iter()
-                            .enumerate()
-                            .filter_map(|(index, plan)| {
-                                (plan.multiplier_degree <= gap).then_some(index)
-                            })
-                            .collect()
-                    })
-                    .collect()
-            })
-            .collect();
-        let result = Self { base, eligible };
-        if result.retained() > caps.retained_bytes {
-            return Err(Error::PlanCap);
-        }
-        Ok(result)
-    }
-
-    fn apply(&self, input: &Input, caps: Caps) -> (Built, bool) {
-        let coefficients = match envelope_bits(&self.base.support, input) {
-            Ok(Some(bits)) => bits,
-            Ok(None) => return (direct(input, caps), false),
-            Err(error) => return (Err(error), false),
-        };
-        let mut rows = Vec::new();
-        for (j, (poly, &bits)) in input.polys.iter().zip(&coefficients).enumerate() {
-            let Some(degree) = poly.iter().map(|m| m.count_ones()).max() else {
-                continue;
-            };
-            if degree > u32::from(input.degree) {
-                continue;
-            }
-            let gap = (u32::from(input.degree) - degree) as usize;
-            for &index in &self.eligible[j][gap] {
-                let row: Vec<_> = self.base.plans[j][index]
-                    .groups
-                    .iter()
-                    .filter(|g| (g.coefficients & bits).count_ones() % 2 == 1)
-                    .map(|g| g.monomial)
-                    .collect();
-                if !row.is_empty() {
-                    if rows.len() == caps.rows {
-                        return (Err(Error::RowCap), true);
-                    }
-                    rows.push(row);
-                }
-            }
-        }
-        (columns(&rows, caps).map(|cols| pack(&rows, &cols)), true)
-    }
-
-    fn retained(&self) -> usize {
-        size_of::<Self>() - size_of::<Envelope>()
-            + self.base.retained()
-            + self.eligible.capacity() * size_of::<Vec<Vec<usize>>>()
-            + self
-                .eligible
-                .iter()
-                .map(|cutoffs| {
-                    cutoffs.capacity() * size_of::<Vec<usize>>()
-                        + cutoffs
-                            .iter()
-                            .map(|indices| indices.capacity() * size_of::<usize>())
-                            .sum::<usize>()
-                })
-                .sum::<usize>()
-    }
-}
-
-// The second treatment compacts only the columns actually occupied by odd
-// product coefficients. Global indices never escape into the returned matrix.
-struct IndexedEnvelope {
-    degree: DegreeEnvelope,
-    universe: Vec<u16>,
-    routing: Vec<Vec<Vec<u16>>>,
-}
-
-impl IndexedEnvelope {
-    fn compile(support: &Input, caps: PlanCaps) -> Result<Self, Error> {
-        let degree = DegreeEnvelope::compile(support, caps)?;
-        let mut universe: Vec<_> = degree
-            .base
-            .plans
-            .iter()
-            .flat_map(|plans| plans.iter())
-            .flat_map(|plan| plan.groups.iter().map(|group| group.monomial))
-            .collect();
-        universe.sort_unstable();
-        universe.dedup();
-        universe.shrink_to_fit();
-        let routing = degree
-            .base
-            .plans
-            .iter()
-            .map(|plans| {
-                plans
-                    .iter()
-                    .map(|plan| {
-                        plan.groups
-                            .iter()
-                            .map(|group| universe.binary_search(&group.monomial).unwrap() as u16)
-                            .collect()
-                    })
-                    .collect()
-            })
-            .collect();
-        let result = Self {
-            degree,
-            universe,
-            routing,
-        };
-        if result.retained() > caps.retained_bytes {
-            return Err(Error::PlanCap);
-        }
-        Ok(result)
-    }
-
-    fn apply(&self, input: &Input, caps: Caps) -> (Built, bool) {
-        let coefficients = match envelope_bits(&self.degree.base.support, input) {
-            Ok(Some(bits)) => bits,
-            Ok(None) => return (direct(input, caps), false),
-            Err(error) => return (Err(error), false),
-        };
-        let mut occupied = vec![0u64; self.universe.len().div_ceil(64)];
-        let mut indexed_rows: Vec<Vec<u16>> = Vec::new();
-        for (j, (poly, &bits)) in input.polys.iter().zip(&coefficients).enumerate() {
-            let Some(degree) = poly.iter().map(|m| m.count_ones()).max() else {
-                continue;
-            };
-            if degree > u32::from(input.degree) {
-                continue;
-            }
-            let gap = (u32::from(input.degree) - degree) as usize;
-            for &index in &self.degree.eligible[j][gap] {
-                let mut row = Vec::new();
-                for (group, &column) in self.degree.base.plans[j][index]
-                    .groups
-                    .iter()
-                    .zip(&self.routing[j][index])
-                {
-                    if (group.coefficients & bits).count_ones() % 2 == 1 {
-                        row.push(column);
-                        occupied[usize::from(column) / 64] |= 1 << (usize::from(column) % 64);
-                    }
-                }
-                if !row.is_empty() {
-                    if indexed_rows.len() == caps.rows {
-                        return (Err(Error::RowCap), true);
-                    }
-                    indexed_rows.push(row);
-                }
-            }
-        }
-        let mut columns = Vec::new();
-        let mut dense = vec![0usize; self.universe.len()];
-        for (global, &monomial) in self.universe.iter().enumerate() {
-            if occupied[global / 64] & (1 << (global % 64)) != 0 {
-                dense[global] = columns.len();
-                columns.push(monomial);
-            }
-        }
-        if let Err(error) = check_shape(indexed_rows.len(), columns.len(), caps) {
-            return (Err(error), true);
-        }
-        let words = columns.len().div_ceil(64);
-        let rows = indexed_rows
-            .iter()
-            .map(|source| {
-                let mut packed = vec![0u64; words];
-                for &global in source {
-                    let index = dense[usize::from(global)];
-                    packed[index / 64] |= 1 << (index % 64);
-                }
-                packed
-            })
-            .collect();
-        (Ok(Matrix { columns, rows }), true)
-    }
-
-    fn retained(&self) -> usize {
-        size_of::<Self>() - size_of::<DegreeEnvelope>()
-            + self.degree.retained()
-            + self.universe.capacity() * size_of::<u16>()
-            + self.routing.capacity() * size_of::<Vec<Vec<u16>>>()
-            + self
-                .routing
-                .iter()
-                .map(|plans| {
-                    plans.capacity() * size_of::<Vec<u16>>()
-                        + plans
-                            .iter()
-                            .map(|indices| indices.capacity() * size_of::<u16>())
-                            .sum::<usize>()
-                })
-                .sum::<usize>()
-    }
-}
-
 enum Cache {
     Direct,
     Layout(Vec<u16>),
     Schedule(Schedule),
     Matrix(Input, Matrix),
     Envelope(Envelope),
-    Degree(DegreeEnvelope),
-    Indexed(IndexedEnvelope),
 }
 impl Cache {
     fn compile(variant: usize, input: &Input, envelope: &Input) -> Self {
@@ -702,8 +450,6 @@ impl Cache {
             2 => Self::Schedule(Schedule::compile(input, CAPS).unwrap()),
             3 => Self::Matrix(input.clone(), direct(input, CAPS).unwrap()),
             4 => Self::Envelope(Envelope::compile(envelope, PLAN_CAPS).unwrap()),
-            5 => Self::Degree(DegreeEnvelope::compile(envelope, PLAN_CAPS).unwrap()),
-            6 => Self::Indexed(IndexedEnvelope::compile(envelope, PLAN_CAPS).unwrap()),
             _ => unreachable!(),
         }
     }
@@ -712,8 +458,6 @@ impl Cache {
             Self::Direct => (direct(input, caps), false),
             Self::Schedule(schedule) => schedule.apply(input, caps),
             Self::Envelope(schedule) => schedule.apply(input, caps),
-            Self::Degree(schedule) => schedule.apply(input, caps),
-            Self::Indexed(schedule) => schedule.apply(input, caps),
             Self::Matrix(signature, matrix) => {
                 if input != signature {
                     (direct(input, caps), false)
@@ -753,8 +497,6 @@ impl Cache {
             Self::Schedule(s) => s.retained(),
             Self::Matrix(input, matrix) => input.retained() + matrix.retained(),
             Self::Envelope(s) => s.retained(),
-            Self::Degree(s) => s.retained(),
-            Self::Indexed(s) => s.retained(),
         }
     }
 }
@@ -869,71 +611,16 @@ fn newly_required(base: &Input, input: &Input) -> usize {
         .sum()
 }
 
-fn digest_matrix(hasher: &mut blake3::Hasher, matrix: &Matrix) {
-    hasher.update(&(matrix.columns.len() as u64).to_le_bytes());
-    for column in &matrix.columns {
-        hasher.update(&column.to_le_bytes());
-    }
-    hasher.update(&(matrix.rows.len() as u64).to_le_bytes());
-    for row in &matrix.rows {
-        hasher.update(&(row.len() as u64).to_le_bytes());
-        for word in row {
-            hasher.update(&word.to_le_bytes());
-        }
-    }
-}
-
-fn sample(
-    variant: usize,
-    name: &str,
-    cell: &str,
-    rep: usize,
-    order: usize,
-    base: &Input,
-    envelope: &Input,
-    inputs: &[Input],
-    expected: &[Matrix],
-) {
-    let start = Instant::now();
-    let cache = Cache::compile(variant, black_box(base), black_box(envelope));
-    let setup_ns = start.elapsed().as_nanos();
-    let retained_bytes = cache.retained();
-    let (mut hits, mut fallbacks, mut changed_hits) = (0, 0, 0);
-    let (mut apply_ns, mut validation_ns, mut output_bytes) = (0u128, 0u128, 0usize);
-    let mut hasher = blake3::Hasher::new();
-    hasher.update(b"boolean-matrix-v1");
-    for (input, reference) in inputs.iter().zip(expected) {
-        let tick = Instant::now();
-        let (got, hit) = cache.apply(black_box(input), CAPS);
-        let got = got.unwrap();
-        apply_ns += tick.elapsed().as_nanos();
-        hits += usize::from(hit);
-        fallbacks += usize::from(variant != 0 && !hit);
-        changed_hits += usize::from(hit && input != base);
-        let tick = Instant::now();
-        assert_eq!(black_box(&got), reference);
-        output_bytes += got.payload();
-        digest_matrix(&mut hasher, &got);
-        validation_ns += tick.elapsed().as_nanos();
-    }
-    drop(cache);
-    let total_ns = start.elapsed().as_nanos();
-    let digest = hasher.finalize().to_hex();
-    println!("{{\"type\":\"sample\",\"cell\":\"{cell}\",\"rep\":{rep},\"order\":{order},\"variant\":\"{name}\",\"setup_ns\":{setup_ns},\"apply_ns\":{apply_ns},\"validation_ns\":{validation_ns},\"total_ns\":{total_ns},\"retained_bytes\":{retained_bytes},\"output_bytes\":{output_bytes},\"output_digest\":\"{digest}\",\"hits\":{hits},\"fallbacks\":{fallbacks},\"changed_hits\":{changed_hits},\"verified_outputs\":{}}}", inputs.len());
-}
-
-fn run_cell(
-    n: u8,
-    seed: u64,
-    batch: usize,
-    family: &str,
-    repetitions: usize,
-    split: &str,
-    aa: bool,
-) {
+fn main() {
+    let args: Vec<_> = std::env::args().collect();
+    assert_eq!(args.len(), 6, "worker N SEED BATCH FAMILY REPETITIONS");
+    let n = args[1].parse::<u8>().unwrap();
+    let seed = args[2].parse::<u64>().unwrap();
+    let batch = args[3].parse::<usize>().unwrap();
+    let family = &args[4];
+    let repetitions = args[5].parse::<usize>().unwrap();
     assert!([6, 8, 10, 12].contains(&n));
     assert!((1..=64).contains(&batch) && (1..=32).contains(&repetitions));
-    assert!(["repeat", "coefficients", "degree_cycle", "escape"].contains(&family));
     let base = fixture(n, seed);
     let envelope = declared_envelope(&base);
     let inputs = assignments(&base, &envelope, seed, batch, family);
@@ -944,179 +631,35 @@ fn run_cell(
     let expected: Vec<_> = inputs.iter().map(|x| oracle(x, CAPS).unwrap()).collect();
     let new_multipliers: usize = inputs.iter().map(|x| newly_required(&base, x)).sum();
     let polys: Vec<_> = inputs.iter().map(|x| &x.polys).collect();
-    let cell = format!("n{n}-{split}-{seed}-{family}-b{batch}");
-    println!("{{\"type\":\"fixture\",\"cell\":\"{cell}\",\"n\":{n},\"seed\":{seed},\"batch\":{batch},\"family\":\"{family}\",\"degree\":3,\"active\":{},\"base\":{:?},\"envelope\":{:?},\"inputs\":{:?},\"newly_required_multipliers\":{new_multipliers}}}", base.active, base.polys, envelope.polys, polys);
+    println!("{{\"type\":\"fixture\",\"n\":{n},\"seed\":{seed},\"batch\":{batch},\"family\":\"{family}\",\"degree\":3,\"active\":{},\"base\":{:?},\"envelope\":{:?},\"inputs\":{:?},\"newly_required_multipliers\":{new_multipliers}}}", base.active, base.polys, envelope.polys, polys);
+    let names = ["direct", "layout", "schedule", "matrix_cache", "envelope"];
     for rep in 0..repetitions {
-        if aa {
-            for order in 0..2 {
-                sample(
-                    3,
-                    if order == 0 { "aa_a" } else { "aa_b" },
-                    &cell,
-                    rep,
-                    order,
-                    &base,
-                    &envelope,
-                    &inputs,
-                    &expected,
-                );
+        for order in 0..names.len() {
+            let variant = (rep + order) % names.len();
+            let start = Instant::now();
+            let cache = Cache::compile(variant, black_box(&base), black_box(&envelope));
+            let setup_ns = start.elapsed().as_nanos();
+            let retained_bytes = cache.retained();
+            let (mut hits, mut fallbacks, mut changed_hits) = (0, 0, 0);
+            let (mut apply_ns, mut validation_ns, mut output_bytes) = (0u128, 0u128, 0usize);
+            for (input, expected) in inputs.iter().zip(&expected) {
+                let tick = Instant::now();
+                let (got, hit) = cache.apply(black_box(input), CAPS);
+                let got = got.unwrap();
+                apply_ns += tick.elapsed().as_nanos();
+                hits += usize::from(hit);
+                fallbacks += usize::from(variant != 0 && !hit);
+                changed_hits += usize::from(hit && input != &base);
+                let tick = Instant::now();
+                assert_eq!(black_box(&got), expected);
+                output_bytes += got.payload();
+                validation_ns += tick.elapsed().as_nanos();
             }
-        }
-        for order in 0..ARM_NAMES.len() {
-            let variant = (rep + order) % ARM_NAMES.len();
-            sample(
-                variant,
-                ARM_NAMES[variant],
-                &cell,
-                rep,
-                order,
-                &base,
-                &envelope,
-                &inputs,
-                &expected,
-            );
+            drop(cache);
+            let total_ns = start.elapsed().as_nanos();
+            println!("{{\"type\":\"sample\",\"rep\":{rep},\"order\":{order},\"variant\":\"{}\",\"setup_ns\":{setup_ns},\"apply_ns\":{apply_ns},\"validation_ns\":{validation_ns},\"total_ns\":{total_ns},\"retained_bytes\":{retained_bytes},\"output_bytes\":{output_bytes},\"hits\":{hits},\"fallbacks\":{fallbacks},\"changed_hits\":{changed_hits},\"verified_outputs\":{batch}}}", names[variant]);
         }
     }
-}
-
-#[derive(serde::Deserialize)]
-struct StudyProtocol {
-    variables: Vec<u8>,
-    families: Vec<String>,
-    batches: Vec<usize>,
-    repetitions: usize,
-    discovery_seeds: Vec<u64>,
-    holdout_seeds: Vec<u64>,
-    reference_arms: Vec<String>,
-    candidate_arms: Vec<String>,
-    bootstrap: BootstrapConfig,
-    dramatic_gate: DramaticGate,
-    noise: NoiseConfig,
-    limits: StudyLimits,
-    resource: ResourceConfig,
-}
-#[derive(serde::Deserialize)]
-struct BootstrapConfig {
-    resamples: usize,
-    seed: u64,
-}
-#[derive(serde::Deserialize)]
-struct DramaticGate {
-    groups: usize,
-    lower_bound_greater_than: f64,
-}
-#[derive(serde::Deserialize)]
-struct NoiseConfig {
-    floor_quantile: f64,
-}
-#[derive(serde::Deserialize)]
-struct StudyLimits {
-    worker_seconds: u64,
-    campaign_seconds: u64,
-}
-#[derive(serde::Deserialize)]
-struct ResourceConfig {
-    maximum_other_cpu_fraction: f64,
-    maximum_psi_some_avg10: f64,
-    startup_quiet: QuietConfig,
-}
-#[derive(serde::Deserialize)]
-struct QuietConfig {
-    max_samples: usize,
-    sample_seconds: u64,
-    max_psi: f64,
-}
-
-fn campaign(phase: &str, path: &str) {
-    let bytes = std::fs::read(path).unwrap();
-    assert_eq!(bytes, include_bytes!("protocol.json"));
-    let protocol: StudyProtocol = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(protocol.variables, [6, 8, 10, 12]);
-    assert_eq!(
-        protocol.families,
-        ["repeat", "coefficients", "degree_cycle", "escape"]
-    );
-    assert_eq!(protocol.batches, [1, 4, 16, 64]);
-    assert_eq!(protocol.repetitions, 10);
-    assert_eq!(protocol.bootstrap.resamples, 4000);
-    assert_eq!(protocol.dramatic_gate.groups, 32);
-    assert_eq!(protocol.dramatic_gate.lower_bound_greater_than, 2.0);
-    assert_eq!(protocol.noise.floor_quantile, 0.975);
-    assert_eq!(protocol.limits.worker_seconds, 900);
-    assert_eq!(protocol.limits.campaign_seconds, 1200);
-    assert_eq!(protocol.resource.maximum_other_cpu_fraction, 0.1);
-    assert_eq!(protocol.resource.maximum_psi_some_avg10, 5.0);
-    assert_eq!(protocol.resource.startup_quiet.max_samples, 30);
-    assert_eq!(protocol.resource.startup_quiet.sample_seconds, 2);
-    assert_eq!(protocol.resource.startup_quiet.max_psi, 5.0);
-    let names: Vec<_> = protocol
-        .reference_arms
-        .iter()
-        .chain(&protocol.candidate_arms)
-        .map(String::as_str)
-        .collect();
-    assert_eq!(names, ARM_NAMES);
-    let (split, seeds) = match phase {
-        "discovery" => ("discovery", protocol.discovery_seeds),
-        "full" => ("holdout", protocol.holdout_seeds),
-        _ => panic!("expected discovery or full phase"),
-    };
-    let protocol_digest = blake3::hash(&bytes).to_hex();
-    let started = Instant::now();
-    println!(
-        "{{\"type\":\"campaign\",\"phase\":\"{phase}\",\"protocol_digest\":\"{protocol_digest}\"}}"
-    );
-    for n in protocol.variables {
-        for &seed in &seeds {
-            for family in &protocol.families {
-                for &batch in &protocol.batches {
-                    run_cell(n, seed, batch, family, protocol.repetitions, split, true);
-                    assert!(
-                        started.elapsed().as_secs() <= protocol.limits.worker_seconds,
-                        "worker cap; incomplete campaign is retained"
-                    );
-                }
-            }
-        }
-    }
-}
-
-fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    if args.len() == 3 && args[1] == "--seal" {
-        verify::seal(&args[2]);
-        return;
-    }
-    if args.len() == 3 && args[1] == "--wait-quiet" {
-        verify::wait_quiet(&args[2]);
-        return;
-    }
-    if args.len() == 4 && args[1] == "--failure" {
-        verify::failure(&args[2], &args[3]);
-        return;
-    }
-    if args.len() == 5 && args[1] == "--check-discovery" {
-        verify::check_discovery(&args[2], &args[3], &args[4]);
-        return;
-    }
-    if args.len() == 7 && args[1] == "--verify" {
-        verify::run(&args[2], &args[3], &args[4], &args[5], &args[6]);
-        return;
-    }
-    if args.len() == 4 && args[1] == "--campaign" {
-        campaign(&args[2], &args[3]);
-        return;
-    }
-    assert_eq!(args.len(), 6, "worker N SEED BATCH FAMILY REPETITIONS");
-    run_cell(
-        args[1].parse().unwrap(),
-        args[2].parse().unwrap(),
-        args[3].parse().unwrap(),
-        &args[4],
-        args[5].parse().unwrap(),
-        "manual",
-        false,
-    );
 }
 
 #[cfg(test)]
@@ -1131,37 +674,6 @@ mod tests {
         }
     }
     #[test]
-    fn legacy_envelope_implementation_is_exactly_ported() {
-        use sha2::Digest;
-        let old = include_str!("baseline_worker.rs");
-        let current = include_str!("worker.rs");
-        assert_eq!(
-            format!("{:x}", sha2::Sha256::digest(old.as_bytes())),
-            "93866fab0eb27ecf2917c3d2ffde9807bd11afd45e6badb7a2d9d420aab7eedb"
-        );
-        fn envelope_block(source: &str) -> &str {
-            let source = &source[source.find("impl Envelope {").unwrap()..];
-            &source[..source.find("\n}\n").unwrap() + 2]
-        }
-        assert_eq!(envelope_block(old), envelope_block(current));
-    }
-    #[test]
-    fn degree_cutoffs_reduce_quadratic_plan_visits_without_losing_rows() {
-        let support = declared_envelope(&fixture(12, 17));
-        let plan = DegreeEnvelope::compile(&support, PLAN_CAPS).unwrap();
-        let indexed = IndexedEnvelope::compile(&support, PLAN_CAPS).unwrap();
-        assert_eq!(plan.base.plans.len(), 12);
-        for (generator, eligible) in plan.base.plans.iter().zip(&plan.eligible) {
-            assert_eq!(generator.len(), 299); // Every Boolean monomial of degree <= 3.
-            assert_eq!(eligible[1].len(), 13); // Degree-two generators need 0 or 1 variable.
-            assert_eq!(eligible[3].len(), 299); // A constant needs the complete range.
-            assert!(eligible[1].windows(2).all(|pair| pair[0] < pair[1]));
-        }
-        assert!(indexed.universe.len() <= 299);
-        assert!(plan.retained() <= PLAN_CAPS.retained_bytes);
-        assert!(indexed.retained() <= PLAN_CAPS.retained_bytes);
-    }
-    #[test]
     fn exhaustive_coefficients_degrees_and_active_masks() {
         // Compile once per context, then reuse on all 256 assignments. Includes
         // zero, constants, degree drops, and all Boolean product cancellations.
@@ -1172,8 +684,6 @@ mod tests {
                     ..small(vec![(0..8).collect()], degree)
                 };
                 let plan = Envelope::compile(&support, PLAN_CAPS).unwrap();
-                let degree_plan = DegreeEnvelope::compile(&support, PLAN_CAPS).unwrap();
-                let indexed_plan = IndexedEnvelope::compile(&support, PLAN_CAPS).unwrap();
                 for coefficients in 0..256u16 {
                     let input = Input {
                         polys: vec![(0..8).filter(|m| coefficients & (1 << m) != 0).collect()],
@@ -1181,9 +691,7 @@ mod tests {
                     };
                     let expected = oracle(&input, CAPS);
                     assert_eq!(direct(&input, CAPS), expected);
-                    assert_eq!(plan.apply(&input, CAPS), (expected.clone(), true));
-                    assert_eq!(degree_plan.apply(&input, CAPS), (expected.clone(), true));
-                    assert_eq!(indexed_plan.apply(&input, CAPS), (expected, true));
+                    assert_eq!(plan.apply(&input, CAPS), (expected, true));
                 }
             }
         }
@@ -1192,8 +700,6 @@ mod tests {
     fn cancellations_degree_drops_and_zero_rows() {
         let support = small(vec![vec![0, 1, 2, 3]], 3);
         let plan = Envelope::compile(&support, PLAN_CAPS).unwrap();
-        let degree_plan = DegreeEnvelope::compile(&support, PLAN_CAPS).unwrap();
-        let indexed_plan = IndexedEnvelope::compile(&support, PLAN_CAPS).unwrap();
         let quadratic = small(vec![vec![1, 3]], 3);
         let linear = small(vec![vec![0, 1]], 3);
         let constant = small(vec![vec![0]], 3);
@@ -1203,8 +709,6 @@ mod tests {
         assert!(products(&linear, CAPS).unwrap().len() < eligible(&linear, &linear.polys[0]).len());
         for input in [&quadratic, &linear, &constant, &zero] {
             assert_eq!(plan.apply(input, CAPS), (oracle(input, CAPS), true));
-            assert_eq!(degree_plan.apply(input, CAPS), (oracle(input, CAPS), true));
-            assert_eq!(indexed_plan.apply(input, CAPS), (oracle(input, CAPS), true));
         }
         assert_eq!(
             plan.apply(&zero, CAPS).0.unwrap(),
@@ -1218,8 +722,6 @@ mod tests {
     fn support_escape_and_context_changes_use_direct_fallback() {
         let support = small(vec![vec![0, 1, 3], vec![2]], 3);
         let plan = Envelope::compile(&support, PLAN_CAPS).unwrap();
-        let degree_plan = DegreeEnvelope::compile(&support, PLAN_CAPS).unwrap();
-        let indexed_plan = IndexedEnvelope::compile(&support, PLAN_CAPS).unwrap();
         let changes = [
             small(vec![vec![7], vec![2]], 3),
             small(vec![vec![2], vec![0, 1, 3]], 3),
@@ -1239,35 +741,11 @@ mod tests {
         ];
         for input in changes {
             assert_eq!(plan.apply(&input, CAPS), (oracle(&input, CAPS), false));
-            assert_eq!(
-                degree_plan.apply(&input, CAPS),
-                (oracle(&input, CAPS), false)
-            );
-            assert_eq!(
-                indexed_plan.apply(&input, CAPS),
-                (oracle(&input, CAPS), false)
-            );
         }
         assert_eq!(plan.apply(&support, CAPS), (oracle(&support, CAPS), true));
-        assert_eq!(
-            degree_plan.apply(&support, CAPS),
-            (oracle(&support, CAPS), true)
-        );
-        assert_eq!(
-            indexed_plan.apply(&support, CAPS),
-            (oracle(&support, CAPS), true)
-        );
         let invalid = small(vec![vec![1, 1]], 3);
         assert_eq!(
             plan.apply(&invalid, CAPS),
-            (Err(Error::InvalidInput), false)
-        );
-        assert_eq!(
-            degree_plan.apply(&invalid, CAPS),
-            (Err(Error::InvalidInput), false)
-        );
-        assert_eq!(
-            indexed_plan.apply(&invalid, CAPS),
             (Err(Error::InvalidInput), false)
         );
     }
@@ -1276,7 +754,7 @@ mod tests {
         let support = small(vec![(0..8).collect()], 3);
         let empty = small(vec![vec![]], 3);
         let constant = small(vec![vec![0]], 3);
-        for variant in 0..7 {
+        for variant in 0..5 {
             let cache = Cache::compile(variant, &support, &support);
             for input in [&support, &empty, &constant] {
                 for caps in [
@@ -1320,14 +798,6 @@ mod tests {
                 Envelope::compile(&support, caps),
                 Err(Error::PlanCap)
             ));
-            assert!(matches!(
-                DegreeEnvelope::compile(&support, caps),
-                Err(Error::PlanCap)
-            ));
-            assert!(matches!(
-                IndexedEnvelope::compile(&support, caps),
-                Err(Error::PlanCap)
-            ));
         }
     }
     #[test]
@@ -1339,22 +809,12 @@ mod tests {
             polys: vec![(0..32).collect(), vec![], vec![31]],
         };
         let plan = Envelope::compile(&support, PLAN_CAPS).unwrap();
-        let degree_plan = DegreeEnvelope::compile(&support, PLAN_CAPS).unwrap();
-        let indexed_plan = IndexedEnvelope::compile(&support, PLAN_CAPS).unwrap();
         for poly in [vec![31], vec![0, 31], vec![0], vec![]] {
             let input = Input {
                 polys: vec![poly, vec![], vec![31]],
                 ..support.clone()
             };
             assert_eq!(plan.apply(&input, CAPS), (oracle(&input, CAPS), true));
-            assert_eq!(
-                degree_plan.apply(&input, CAPS),
-                (oracle(&input, CAPS), true)
-            );
-            assert_eq!(
-                indexed_plan.apply(&input, CAPS),
-                (oracle(&input, CAPS), true)
-            );
         }
     }
     #[test]
@@ -1363,12 +823,12 @@ mod tests {
         let envelope = declared_envelope(&base);
         for family in ["repeat", "coefficients", "degree_cycle", "escape"] {
             let inputs = assignments(&base, &envelope, 17, 8, family);
-            for variant in 0..7 {
+            for variant in 0..5 {
                 let cache = Cache::compile(variant, &base, &envelope);
                 for (i, input) in inputs.iter().enumerate() {
                     let (got, hit) = cache.apply(input, CAPS);
                     assert_eq!(got, oracle(input, CAPS));
-                    if variant >= 4 {
+                    if variant == 4 {
                         assert_eq!(hit, family != "escape" || i % 4 != 3);
                     }
                     if [2, 3].contains(&variant) {

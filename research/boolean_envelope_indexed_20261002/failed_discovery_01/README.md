@@ -18,21 +18,13 @@ set-parity oracle. The generator and caps remain bounded at n<=12.
 The constructor currently passes the inherited exhaustive 8,192 coefficient,
 degree and active-mask cases, focused fallback/cancellation/cap tests, an
 exact legacy-source port, a deterministic plan-count check, and native replay
-mutations (13 Rust tests). At n=12, a quadratic generator visits 13
+mutations (12 Rust tests).
+At n=12, a quadratic generator visits 13
 eligible multipliers instead of scanning all 299 envelope plans; the same
 compiled support still admits all 299 when a generator becomes constant. This
 is an operation-count fact, not a wall-time speedup. The native campaign and
-replay paths compile and pass unit checks. The first Linux discovery attempt
-was refused before timing because startup CPU PSI exceeded the unchanged limit.
-The second attempt is qualified: 128 complete cells, 8,960 comparison and
-2,560 A/A observations, and 244,800 verified outputs. The indexed arm passed
-16 of 32 incremental discovery groups; neither candidate passed a 2x group.
-The failed and admitted artifacts are separated in [`ATTEMPTS.md`](ATTEMPTS.md)
-and [`RUNS.json`](RUNS.json). [`CONCLUSION.md`](CONCLUSION.md) gives the negative
-discovery decision. [`BOUNDARY_CORRECTION.md`](BOUNDARY_CORRECTION.md) records
-the already merged packed-direct comparator omitted from this frozen roster.
-Fresh holdouts were not run, so the primary full gate is unknown. No production
-solver or IC/rho result is claimed.
+replay paths compile and pass unit checks; resource-qualified timing, fresh holdouts and
+the dramatic gate are pending. No production solver or IC/rho result is claimed.
 
 The old `research/boolean_support_envelope_20260922/run_01` files are immutable
 historical evidence. New performance work will use a native Rust producer and

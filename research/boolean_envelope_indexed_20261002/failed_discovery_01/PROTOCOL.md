@@ -90,13 +90,6 @@ its own timer, output digest and A/A pair. The receipt's 10% other-CPU and 5.0
 PSI limits are unchanged; its scope is the entire campaign, so a short cell
 does not receive an individual resource-certification claim. The campaign
 retains every fixture and never pads, divides or retries timed samples.
-After builds and before the reserved worker, a native readiness check takes
-at most 30 two-second CPU and memory PSI samples at the unchanged 5.0 limit.
-It retains every accepted and rejected observation. The locked isolation
-controller independently checks CPU use and PSI again before launch. No
-solve executes during readiness; it is outside arm clocks and outside the
-worker-plus-replay campaign cap. A failed readiness or controller check seals
-the whole run without admitting any timing.
 The host, CPU feature set, compiler, binary/source hashes, A/A noise, wall
 time, peak RSS, failures and exact commands accompany the result. Separate
 fresh discovery and full campaigns use the same timed Rust source hashes.
