@@ -66,6 +66,12 @@ run. The scientific manifest verifies 79 immutable files; a post-run manifest
 also binds the manifest itself and the wrapper's final job.log and exit-code
 (82 files). All 24 recorded source hashes match the measured checkout.
 
+The frozen `results/launch.json` is the explicit-fetch receipt used by the
+independent audit. The original collector later received the same completed
+archive and wrote a supplementary `collector-completion-receipt.json` with a
+different completion timestamp. Both identify the same function call, token,
+clean source and exit code; the earlier audited receipt remains unchanged.
+
 The later source-manifest glob correction only prevents future attempts from
 trying to hash the newly added results directory. It changes no measured
 source, binary, sample or decision input. The default mode remains off.
