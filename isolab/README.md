@@ -25,6 +25,31 @@ normalised and hashed, results are written once under a fence, a run that
 did not finish is never evidence, and a solver's claim counts only when
 independent code agrees.
 
+## Quick start
+
+On the server (Linux, root), install a hub and a worker as systemd services:
+
+```sh
+git clone https://github.com/aburan28/crypto && cd crypto/isolab
+sudo deploy/install.sh --hub --worker --cpus 2-7 --pool default
+sudo isolab images build base          # the default container image
+sudo grep ISOLAB_TOKEN /etc/isolab/hub.env   # the hub token clients need
+```
+
+On the machine running Claude Code, register the MCP endpoint:
+
+```sh
+claude mcp add isolab -e ISOLAB_URL=nats://TOKEN@SERVER:4222 -- \
+  uvx --from 'git+https://github.com/aburan28/crypto#subdirectory=isolab' --with mcp isolab mcp
+```
+
+Then ask Claude to call `isolab_overview` (is the lab up?), `isolab_run`
+(command, image, inputs, cpus, repeats, policy), `isolab_wait` and
+`isolab_result`. The same from a shell:
+`isolab run --cpus 2 --repeats 3 -- ./bench` then `isolab result JOB`.
+Untrusted binaries go under gVisor with `oci_runtime: runsc`. The rest of
+this page is the detail.
+
 ## Shape
 
 ```
