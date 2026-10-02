@@ -34,6 +34,7 @@ make -B compile-sigma-fused-shared-scratch-cuda \
     PRO6000_ARCH='-gencode arch=compute_120,code=sm_120' \
     > "$OUT/device-build.log" 2>&1
 cp build/test-sigma-fused-shared-scratch-cuda-2 \
+   build/test-sigma-fused-shared-scratch-cuda-0 \
    build/test-sigma-fused-shared-scratch-cuda-3 \
    build/test-sigma-fused-shared-scratch-cuda-4 "$OUT/"
 

@@ -79,3 +79,37 @@ device-helper result, replay, checkpoint, corpus or throughput sample.  The
 additive repair changes only that native compile command and adds a source-audit
 assertion for the compatibility flag.  A replacement allocation requires root
 coordination under the frozen one-panel authorization.
+
+## GPU attempt 2: explicit-worker marker failure
+
+The coordinated replacement used clean source
+`5618e8e422b65f4cb6785aa11b01c6593515a169`.  It passed the repaired native
+preflight, compiled all four production clients and three candidate device
+helpers, and ran the actual resource/helper controls on the RTX PRO 6000:
+
+| arm | registers | local bytes | function static shared | driver reserve | active blocks/SM | helper result |
+|---|---:|---:|---:|---:|---:|---|
+| cache2 | 126 | 0 | 22,272 | 1,024 | 2 | 73,856 records PASS |
+| cache3 | 126 | 0 | 32,512 | 1,024 | 2 | 73,856 records PASS |
+| cache4 | 126 | 0 | 42,752 | 1,024 | 2 | 73,856 records PASS |
+
+The control then completed exactly 1,024,163,840 updates, replayed 300 reports
+with zero drops, and wrote 1,711,714 complete records.  The producer stopped
+immediately afterward because the generic runtime-marker function required the
+informational `device:` line emitted only by automatic worker selection.  All
+frozen runs pass explicit `--threads`, so omission of that line is legitimate.
+
+- Modal app: `ap-VwOFFsvFhJZxi9FX2tmNn6`
+- function call: `fc-01M3Z349F4K6TA17B26DADWBBW`
+- recovery token: `c146e89c62094962bc1a850b87366ac1`
+- GPU UUID: `GPU-86d23d2f-7611-b530-f6a7-69c82ec8a303`
+- archive SHA-256: `9613ee4c74364081be497763ff85e98c672425788f7f69ca8a02d9c286b435de`
+- exit code: `1`
+
+No candidate production walk or timing row ran.  The additive repair removes
+the invalid per-log auto-worker assertion and extends the production device
+helper to control/cache0, so actual resources and exactly two active blocks are
+bound for all four arms before correctness.  Exact per-worker backend markers,
+work counts, verification, drops, corpora and checkpoints remain mandatory.
+The preserved receipt is
+[`results/gpu-attempt2-5618/`](results/gpu-attempt2-5618/).

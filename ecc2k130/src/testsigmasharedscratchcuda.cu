@@ -16,7 +16,8 @@
 #if !ECC_SIGMA_FUSED || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_SHARED_SIGMA
 #error "shared-scratch device test requires the fused compact shared-sigma path"
 #endif
-#if ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && \
+#if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
+    ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && \
     ECC_SIGMA_FUSED_SHARED_SLOTS != 4
 #error "shared-scratch device test requires a registered cache arm"
 #endif

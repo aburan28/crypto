@@ -1044,19 +1044,22 @@ test-sigma-fused-shared-scratch-native: build/test-sigma-fused-shared-scratch-na
 	./build/sigma-fused-shared-scratch-compile-audit --self-test
 	./build/sigma-fused-shared-scratch-log-check --self-test
 
+build/test-sigma-fused-shared-scratch-cuda-0: SIGMA_FUSED_SHARED_SLOTS = 0
 build/test-sigma-fused-shared-scratch-cuda-2: SIGMA_FUSED_SHARED_SLOTS = 2
 build/test-sigma-fused-shared-scratch-cuda-3: SIGMA_FUSED_SHARED_SLOTS = 3
 build/test-sigma-fused-shared-scratch-cuda-4: SIGMA_FUSED_SHARED_SLOTS = 4
-build/test-sigma-fused-shared-scratch-cuda-2 build/test-sigma-fused-shared-scratch-cuda-3 build/test-sigma-fused-shared-scratch-cuda-4: src/testsigmasharedscratchcuda.cu $(HDRS) $(GEN)
+build/test-sigma-fused-shared-scratch-cuda-0 build/test-sigma-fused-shared-scratch-cuda-2 build/test-sigma-fused-shared-scratch-cuda-3 build/test-sigma-fused-shared-scratch-cuda-4: src/testsigmasharedscratchcuda.cu $(HDRS) $(GEN)
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo $< -o $@
 
 compile-sigma-fused-shared-scratch-cuda:
+	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-0 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
 	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-2 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
 	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-3 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
 	$(MAKE) -B build/test-sigma-fused-shared-scratch-cuda-4 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
 
 test-sigma-fused-shared-scratch-cuda: compile-sigma-fused-shared-scratch-cuda
+	./build/test-sigma-fused-shared-scratch-cuda-0
 	./build/test-sigma-fused-shared-scratch-cuda-2
 	./build/test-sigma-fused-shared-scratch-cuda-3
 	./build/test-sigma-fused-shared-scratch-cuda-4

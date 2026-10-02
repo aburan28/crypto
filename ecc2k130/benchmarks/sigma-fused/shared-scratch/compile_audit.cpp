@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
         need(std::regex_match(source, std::regex("[0-9a-f]{40}\\n")),
              "source revision is not exact clean SHA");
         const std::string deviceBuild = read(artifact / "device-build.log");
-        for (int slots : {2, 3, 4}) {
+        for (int slots : {0, 2, 3, 4}) {
             contains(deviceBuild,
                      "-DECC_SIGMA_FUSED_SHARED_SLOTS=" + std::to_string(slots),
                      "device build");
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
                << "  \"claimBoundary\":\"compile/resource feasibility only; actual occupancy and throughput unmeasured\"\n"
                << "}\n";
         need(bool(output), "compile audit output write failed");
-        std::cout << "PASS: four exact sm_120 production arms and three device helpers; zero stack/local/spills and static two-block bound\n";
+        std::cout << "PASS: four exact sm_120 production arms and four device helpers; zero stack/local/spills and static two-block bound\n";
         return 0;
     } catch (const std::exception &error) {
         std::cerr << "COMPILE AUDIT FAIL: " << error.what() << '\n';

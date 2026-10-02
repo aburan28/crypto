@@ -163,6 +163,9 @@ int main(int argc, char **argv) {
                  "native helper GCC pragma compatibility");
         contains(job, "sample screen 5 4 cache4", "frozen timing schedule");
         contains(job, "SIGMA_FUSED_SHARED_SLOTS=", "one-knob builds");
+        contains(job, "for cached in 0 2 3 4", "four-arm device resources");
+        absent(job, "2 block\\(s\\) of 256 packed threads resident per SM",
+               "no auto-worker line assumption");
         contains(job, "$((VERIFY_THREADS * 16 * 95 * 7)) 300 -1",
                  "full correctness exact work");
         contains(job, "$((513 * 16 * 95 * 4)) 300 -1",
@@ -176,7 +179,7 @@ int main(int argc, char **argv) {
         contains(summary, "logical field traffic is not DRAM traffic",
                  "result claim boundary");
         contains(summary,
-                 "63cec6388cebd1f0e41426d6bb50d215aee58f80fe6d7f63f377181a7ed9e6d2",
+                 "c64efd7982f139de6f5ec9c5d0f4e1137a24747537c50377dfc4bab8973e9a58",
                  "preflight binding");
         contains(compile, "release 13\\.3, V13\\.3\\.73", "compiler binding");
         contains(compile, "cuobjdump --dump-resource-usage", "resource receipt");

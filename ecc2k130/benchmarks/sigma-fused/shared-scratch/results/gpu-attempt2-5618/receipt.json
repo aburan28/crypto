@@ -1,0 +1,38 @@
+{
+  "schema": "ecc2k130-sigma-fused-shared-scratch-failed-attempt-v1",
+  "sourceCommit": "5618e8e422b65f4cb6785aa11b01c6593515a169",
+  "provider": "modal",
+  "appId": "ap-VwOFFsvFhJZxi9FX2tmNn6",
+  "functionCallId": "fc-01M3Z349F4K6TA17B26DADWBBW",
+  "recoveryToken": "c146e89c62094962bc1a850b87366ac1",
+  "gpuUuid": "GPU-86d23d2f-7611-b530-f6a7-69c82ec8a303",
+  "archiveBytes": 50380256,
+  "archiveSha256": "9613ee4c74364081be497763ff85e98c672425788f7f69ca8a02d9c286b435de",
+  "launchSha256": "c19d9a829e06433bddff2c355bbb49f2b7680fb8c0ab2a1049a8061776679b0e",
+  "producerExitCode": 1,
+  "passedGates": {
+    "nativeControls": true,
+    "cudaBuilds": 7,
+    "candidateDeviceHelpers": 3,
+    "candidateDeviceRecordsEach": 73856,
+    "candidateActualBlocksPerSm": 2,
+    "controlIterations": 1024163840,
+    "controlVerified": 300,
+    "controlDropped": 0,
+    "controlCorpusBytes": 54774848,
+    "controlCorpusSha256": "3774f6489132a93c7174a39f2b1d9722d0ec7e0af2912f9d88cc36da3199cb75"
+  },
+  "failure": {
+    "stage": "control runtime marker validation",
+    "reason": "explicit-worker log correctly omitted auto-worker device line",
+    "candidateWalksRun": 0,
+    "timingRows": 0
+  },
+  "claimBoundary": {
+    "terminalPanel": false,
+    "performanceEvidence": false,
+    "searchRun": false,
+    "solverRun": false,
+    "collisionRecoveryRun": false
+  }
+}

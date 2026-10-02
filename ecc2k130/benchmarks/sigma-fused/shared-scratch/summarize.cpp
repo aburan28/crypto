@@ -18,11 +18,11 @@ namespace {
 
 constexpr std::uint64_t kUpdates = 201863462912ull;
 constexpr const char *kPreflight =
-    "PASS native model/helper, exact sm120 resources, three device scratch controls, "
+    "PASS native model/helper, exact sm120 resources, four device scratch controls, "
     "arithmetic/storage/shared-sigma gates, 300/300 replay, six boundary lengths, "
     "partial cross-arm checkpoints and sorted corpus identity\n";
 constexpr const char *kPreflightSha =
-    "63cec6388cebd1f0e41426d6bb50d215aee58f80fe6d7f63f377181a7ed9e6d2";
+    "c64efd7982f139de6f5ec9c5d0f4e1137a24747537c50377dfc4bab8973e9a58";
 const std::array<std::string, 4> kArms{{"control", "cache2", "cache3", "cache4"}};
 
 struct Row {

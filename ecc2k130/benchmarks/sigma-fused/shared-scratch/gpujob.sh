@@ -126,7 +126,7 @@ for target in test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda; 
     make -B "$target" ARCH="$ARCH" "${COMMON[@]}" SIGMA_FUSED_SHARED_SLOTS=0 \
         > "$R/gate-$target.log" 2>&1
 done
-for cached in 2 3 4; do
+for cached in 0 2 3 4; do
     make -B "build/test-sigma-fused-shared-scratch-cuda-$cached" \
         ARCH="$ARCH" "${COMMON[@]}" > "$R/device-build-$cached.log" 2>&1
     "./build/test-sigma-fused-shared-scratch-cuda-$cached" \
@@ -149,7 +149,6 @@ markers() {
     grep -qx 'packed shared sigma: 1' "$log" || return 1
     grep -qx 'packed compact state: 1' "$log" || return 1
     grep -qx 'packed launch bounds: 256 threads, 2 min blocks' "$log" || return 1
-    grep -Eq '^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block\(s\) of 256 packed threads resident per SM$' "$log" || return 1
     grep -Eq "^packed kernel: ([1-9][0-9]?|1[01][0-9]|12[0-8]) registers/thread, 0 local bytes/thread, $expectedShared shared bytes/block, single-product multiplier$" "$log" || return 1
     grep -qx "backend cuda-packed131: $workers threads x 16 slots x 1 lanes = $((workers * 16)) walks, dp weight $dp, $steps steps per launch" "$log" || return 1
     if grep -Eq 'MISMATCH|OVERFLOW|unusable|collision found|solved|stopping:' "$log"; then
@@ -230,7 +229,7 @@ continuations=()
 for prefix in $ARMS; do for arm in $ARMS; do continuations+=("$R/$prefix-to-$arm.bin"); done; done
 /tmp/corpus-identity "${continuations[@]}" > "$R/continuation-identity.txt"
 
-echo 'PASS native model/helper, exact sm120 resources, three device scratch controls, arithmetic/storage/shared-sigma gates, 300/300 replay, six boundary lengths, partial cross-arm checkpoints and sorted corpus identity' \
+echo 'PASS native model/helper, exact sm120 resources, four device scratch controls, arithmetic/storage/shared-sigma gates, 300/300 replay, six boundary lengths, partial cross-arm checkpoints and sorted corpus identity' \
     > "$R/preflight.txt"
 
 printf 'phase\tpair\torder\tvariant\trateMps\titerations\tdropped\tlogSha256\tgpuState\n' \
