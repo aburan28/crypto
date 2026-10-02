@@ -294,6 +294,27 @@ class PodmanBackend(Backend):
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
         self.path = self.which(self.exe)
+        self._controllers: set[str] | None = None
+
+    def controllers(self) -> set[str]:
+        """cgroup controllers the container engine can delegate to a container.
+
+        Rootless podman usually has cpu, memory and pids but no cpuset, so a
+        ``--cpuset-cpus`` would be refused by the OCI runtime; the flags are
+        only passed for controllers that exist and the result says which.
+        """
+        if self._controllers is None:
+            if self.exe == "podman":
+                rc, text = self.run([self.path, "info", "--format", "{{json .Host.CgroupControllers}}"], 30)
+                try:
+                    self._controllers = set(json.loads(text.strip()) or []) if rc == 0 else set()
+                except ValueError:
+                    self._controllers = set()
+                if rc == 0 and not self._controllers and self.privileged:
+                    self._controllers = {"cpuset", "cpu", "memory", "pids"}
+            else:
+                self._controllers = {"cpuset", "cpu", "memory", "pids"} if self.privileged else {"cpu", "memory", "pids"}
+        return self._controllers
 
     def available(self) -> bool:
         if not self.path:
@@ -337,9 +358,8 @@ class PodmanBackend(Backend):
             raise BackendError("the in-container launcher is missing; build it with `isolab launcher-build`")
         name = self.container_name(ctx)
         self.run([*self._base(), "rm", "-f", "-t", "1", name], 60)
-        argv = [*self._base(), "run", "-d", "--name", name, "--init=false",
-                "--cpuset-cpus", ",".join(map(str, ctx.cpus)),
-                "--pids-limit", str(ctx.pids), "--network", ctx.network,
+        ctl = self.controllers()
+        argv = [*self._base(), "run", "-d", "--name", name, "--init=false", "--network", ctx.network,
                 "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--read-only",
                 "--tmpfs", "/tmp:rw,exec,nosuid,size=2g",
                 "-v", f"{ctx.launcher}:{CONTAINER_LAUNCH}:ro",
@@ -347,9 +367,14 @@ class PodmanBackend(Backend):
                 "-v", f"{ctx.dirs.out}:{CONTAINER_OUT}:rw",
                 "-w", CONTAINER_WORK,
                 "-e", f"ISOLAB_WORK={CONTAINER_WORK}", "-e", f"ISOLAB_SCRATCH={CONTAINER_SCRATCH}"]
-        if ctx.mems:
-            argv += ["--cpuset-mems", ",".join(map(str, ctx.mems))]
-        if ctx.memory_mb:
+        applied = {"cpuset": "cpuset" in ctl, "memory": "memory" in ctl, "pids": "pids" in ctl}
+        if applied["cpuset"]:
+            argv += ["--cpuset-cpus", ",".join(map(str, ctx.cpus))]
+            if ctx.mems:
+                argv += ["--cpuset-mems", ",".join(map(str, ctx.mems))]
+        if applied["pids"]:
+            argv += ["--pids-limit", str(ctx.pids)]
+        if ctx.memory_mb and applied["memory"]:
             argv += ["--memory", f"{ctx.memory_mb}m", "--memory-swap", f"{ctx.memory_mb}m"]
         if ctx.scratch_mb:
             argv += ["--tmpfs", f"{CONTAINER_SCRATCH}:rw,exec,nosuid,size={ctx.scratch_mb}m"]
@@ -375,7 +400,7 @@ class PodmanBackend(Backend):
                              "{{.Id}}|{{.ImageName}}|{{.Image}}|{{.HostConfig.Runtime}}|{{.HostConfig.CgroupParent}}", name], 60)
         fields = (info.strip().split("|") + [None] * 5)[:5] if rc == 0 else [cid, ctx.image, None, None, None]
         return {"container": name, "id": fields[0], "image_name": fields[1], "image_id": fields[2],
-                "runtime": fields[3], "cgroup_parent": fields[4], "run_argv": argv}
+                "runtime": fields[3], "cgroup_parent": fields[4], "cgroup_controls": applied, "run_argv": argv}
 
     def _cgroup_parent_is_path(self) -> bool:
         return True

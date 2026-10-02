@@ -16,6 +16,7 @@ run on 2026-10-01; nothing is extrapolated. Three environments were used.
 | unit: protocol, synthetic-sysfs topology (2 sockets × 4 cores × 2 threads, 2 nodes), planner, matcher, perf CSV, ELF sniffing, blob cache, tiers, post-checks, result compaction | macOS and VM | 34 passed, 1 Linux-only skip on macOS; all pass on the VM |
 | fabric against a real JetStream server: submit, idempotency, claim, heartbeat, complete-once, cancel queued and running, decline with reasons and redelivery, requeue counting attempts to `dead`, lost-worker takeover with the old worker fenced on heartbeat, complete and requeue, blobs, artifacts, roster TTL, wait | macOS (local nats-server) and VM | 10 passed in both |
 | end-to-end, in-process worker, direct backend, best-effort policy: repeats with warm-up, metrics and artifacts with hashes, blob inputs, failure, timeout, failed build step, cancel of a running job, unplaceable job waiting with recorded decline reasons, in-container verifier, every MCP tool, calibration | macOS | 9 passed, 2 platform skips |
+| the podman path **rootless** (as an unprivileged user; the engine delegates cpu, memory and pids but no cpuset, so the container runs unpinned and the result records it, tier D) | VM as `ubuntu`, CI runner | 1 passed |
 | the same plus **privileged** (root: cgroup partition, eviction, cgroup statistics) and **podman** (rootful, `--cgroup-parent` inside the job cgroup, then the same job under `runsc`) | VM, as root | **56 passed** |
 
 ## The deployed lab, driven from the Mac

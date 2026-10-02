@@ -393,6 +393,11 @@ def execute(spec: dict[str, Any], job_id: str, attempt: int, ctx: WorkerContext,
                     raise InfraError(str(err)) from err
             res_block["container"] = {k: v for k, v in start_info.items() if k != "run_argv"}
             res_block["run_argv"] = start_info.get("run_argv")
+            controls = start_info.get("cgroup_controls")
+            if controls is not None and not controls.get("cpuset"):
+                notes.append("container engine has no cpuset controller here (rootless?): the container was not pinned "
+                             "to the reserved cpus by cgroup; only the host-side reservation applies")
+                body["fidelity"]["tier"] = "D"
             try:
                 # ---- build (untimed, measured, reported separately)
                 with ph.phase("build"):
