@@ -13,16 +13,12 @@ the next word. Any failed guard uses a charged fresh-F5 fallback. The first
 all-quadratic assignment often lacks complete column support and uses that
 fallback itself, while still supplying a valid fixed high-prefix transform.
 
-The [qualified discovery](DISCOVERY.md) is complete and **rejected the 2×
-batch gate in all four n=24 primary groups**. Its paired medians were
-1.78–1.84× on the retained Linux runner; all eight n=16/20 nonregression
-groups passed. The fresh holdout was not run, as the frozen protocol requires.
-
 Development tests compare the **ordered returned polynomials byte for byte**
 against the inherited F5 Echelon path at n=12/16/20/24 and independently
 recompute the cached prefix. An ignored n=24 batch-32 test provides local
 profiling on public development seeds only. Its timings are unisolated and do
-not qualify the registered performance gate.
+not qualify the registered performance gate. The discovery and holdout seeds
+in `protocol.json` remain for the frozen Linux x86-64 campaign.
 The producer directly compares both outputs once per unique fixture before
 timing and checks every timed return against its ordered-output SHA-256 digest;
 the verifier independently repeats the direct comparisons. Validation work
@@ -33,9 +29,8 @@ On a clean committed Linux x86-64 AVX2 checkout, run
 The script uses the repository's existing CPU-isolation controller, retains
 source, binary, protocol, resource and output receipts, runs native replay,
 and seals successful or failed attempts without overwriting them. A holdout
-requires a sealed discovery bundle whose complete-F5-batch gate passed; this
-study's rejected discovery does not permit its holdout. The GitHub Actions
-workflow preserves every successful or failed execution.
+requires a sealed discovery bundle whose complete-F5-batch gate passed. The
+GitHub Actions workflow can dispatch either phase and preserve its bundle.
 
 This is an exact Boolean matrix-F5 batch engineering experiment on generated
 public systems. It contains no curve or key interface. A positive stage gate
