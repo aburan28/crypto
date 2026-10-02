@@ -1048,7 +1048,7 @@ unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16]
 
 /// Invert an `n × n` matrix over `F_2` given as its columns, returning
 /// the rows of the inverse; `None` when the columns are dependent.
-pub(crate) fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
     // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
     let mut a: Vec<u64> = (0..n)
         .map(|i| (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k)))

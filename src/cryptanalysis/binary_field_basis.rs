@@ -5,7 +5,7 @@
 
 use crate::binary_ecc::{F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::find_roots_in_f2m;
-use crate::cryptanalysis::koblitz_fast::{invert_f2, FastCurve, FastPoint};
+use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// An isomorphism from a source polynomial basis to a target polynomial
@@ -186,6 +186,32 @@ fn apply_columns(mut value: u64, columns: &[u64]) -> u64 {
         value &= value - 1;
     }
     result
+}
+
+/// Return the rows of the inverse of a binary matrix stored as columns.
+/// Keep this local: frozen benchmark workflows overlay their older
+/// `koblitz_fast` implementation, where its equivalent helper is private.
+fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+    let mut matrix: Vec<u64> = (0..n)
+        .map(|row| {
+            (0..n).fold(0u64, |bits, col| {
+                bits | (((columns[col as usize] >> row) & 1) << col)
+            })
+        })
+        .collect();
+    let mut inverse: Vec<u64> = (0..n).map(|row| 1u64 << row).collect();
+    for col in 0..n as usize {
+        let pivot = (col..n as usize).find(|&row| (matrix[row] >> col) & 1 == 1)?;
+        matrix.swap(col, pivot);
+        inverse.swap(col, pivot);
+        for row in 0..n as usize {
+            if row != col && (matrix[row] >> col) & 1 == 1 {
+                matrix[row] ^= matrix[col];
+                inverse[row] ^= inverse[col];
+            }
+        }
+    }
+    Some(inverse)
 }
 
 #[cfg(test)]
