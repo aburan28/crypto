@@ -1,0 +1,50 @@
+{
+  "schema": "ecc2k130-sparse-alu-synthesis-audit-v1",
+  "auditStatus": "PASS",
+  "scope": "Separate native rebuild, sanitizer replay, manifest verification and arithmetic recomputation. No CUDA or GPU was used.",
+  "sourceParent": "b3d0095f6fb74c180c71780ead8ab692b4831cc1",
+  "compiler": "Apple clang 17.0.0",
+  "integrity": {
+    "protocolSha256": "031d964b2ad1e5caec627bec6228d4ee0ea6b58df5c92b3f1d3c2b9f7d7ea10d",
+    "resultsSha256": "668b3e03374031b9b63c82d0d372bcc571895aef3e7b0250320f52e2cf864cd4",
+    "checkerSha256": "e10111a85f312903ec1a4a89e574291ca8fbb18f48a26e8106b39c8f6cde9324",
+    "resultSha256": "8b480ebd46144cb73ac69cee2812c49e368761e2590eb76a9b380a920abfae60",
+    "manifestEntriesVerified": 5,
+    "freshOptimizedBuildByteIdentical": true,
+    "secondDriverBuildByteIdentical": true,
+    "undefinedBehaviorSanitizerByteIdentical": true
+  },
+  "exactChecksReopened": {
+    "basisVectors": 131,
+    "denseVectors": 4096,
+    "denseLjComparisons": 32768,
+    "compositionIdentities": 59,
+    "conversionRanks": [131, 131, 131],
+    "ljRanks": [130, 130, 130, 130, 130, 130, 130, 130]
+  },
+  "recomputedNecessaryCondition": {
+    "sparseToNormalFreeShiftTerms": 754,
+    "twoOracleL3FreeShiftTerms": 978,
+    "amortizedBasisConversions": 94.125,
+    "oracleMapTotal": 1826.125,
+    "target26AluBudget": 1124.529230769231,
+    "oracleMapOverTargetBudget": 1.623905285827,
+    "necessaryConditionPass": false
+  },
+  "recomputedComparableSubledger": {
+    "reference": 2276.25,
+    "oracleCandidateMaps": 1826.125,
+    "sparseReducers": 476.625,
+    "aluSquareSpread": 75.0,
+    "oracleCandidateTotal": 2377.75,
+    "candidateOverReference": 1.044590884130,
+    "comparisonPass": false
+  },
+  "limitations": [
+    "Source word operations are not Blackwell SASS or measured throughput.",
+    "The greedy XOR construction is a deterministic candidate circuit, not a universal XOR lower bound.",
+    "The dynamic selector distribution is a uniform-field model; the decision uses the stronger free-selection oracle and does not depend on it.",
+    "The conclusion covers the enumerated diagonal, all-output, fixed-branch, greedy-CSE and Frobenius-composition families, not every possible GF(2) circuit."
+  ],
+  "conclusion": "No bounded concrete circuit survives. The impossible free-shift/free-selection oracle already exceeds the entire 26 B/s ALU budget, and its complete comparable source subledger is worse than the fused beta reference."
+}

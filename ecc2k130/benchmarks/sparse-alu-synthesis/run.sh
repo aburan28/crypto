@@ -21,7 +21,8 @@ export TMPDIR="$build/tmp"
   benchmarks/sparse-alu-synthesis/RESULTS.md \
   benchmarks/sparse-alu-synthesis/check.cpp \
   benchmarks/sparse-alu-synthesis/run.sh \
-  benchmarks/sparse-alu-synthesis/result.json) > "$here/MANIFEST.sha256"
+  benchmarks/sparse-alu-synthesis/result.json \
+  benchmarks/sparse-alu-synthesis/independent-audit.json) > "$here/MANIFEST.sha256"
 
 cat "$here/result.json"
 echo "PASS: native sparse ALU synthesis screen"
