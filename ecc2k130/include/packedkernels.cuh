@@ -137,7 +137,9 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
                         !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
                         ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
-                        ECC_PACKED_SLOT_PIPELINE || ECC_PACKED_SLOT_PREFETCH)
+                        ECC_TABLE_TAG_DENOM || ECC_PACKED_SLOT_PIPELINE || \
+                        ECC_PACKED_SLOT_PREFETCH || ECC_PHASE_PROFILE || \
+                        ECC_PACKED_CHAIN_FIRST)
 #error "ECC_SIGMA_FUSED requires the one-chain polynomial sigma walk in weighted-prefix mode 2"
 #endif
 #ifndef ECC_PACKED_STATE_TILE
