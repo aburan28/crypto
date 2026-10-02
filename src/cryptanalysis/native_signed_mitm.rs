@@ -180,7 +180,7 @@ impl<'a> NativeSignedMitm<'a> {
                     let index = index as usize;
                     sum = self.curve.add(sum, self.signed[index]);
                     counts.witness_adds += 1;
-                    coefficients[index / 2] += if index % 2 == 0 { 1 } else { -1 };
+                    coefficients[index / 2] += if index.is_multiple_of(2) { 1 } else { -1 };
                 }
                 if sum != target {
                     return Err("point-sum witness failed full group-law replay".into());
