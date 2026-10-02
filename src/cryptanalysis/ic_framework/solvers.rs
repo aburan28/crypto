@@ -202,6 +202,15 @@ impl SystemSolver for F4F2 {
             ("full_m4ri_matrices", st.full_m4ri_matrices),
             ("full_m4ri_blocks", st.full_m4ri_blocks),
             ("full_m4ri_table_word_xors", st.full_m4ri_table_word_xors),
+            ("full_m4ri_parallel_blocks", st.full_m4ri_parallel_blocks),
+            (
+                "full_m4ri_parallel_target_rows",
+                st.full_m4ri_parallel_target_rows,
+            ),
+            (
+                "full_m4ri_parallel_target_row_words",
+                st.full_m4ri_parallel_target_row_words,
+            ),
             ("build_ns", st.build_ns),
             ("eliminate_ns", st.eliminate_ns),
             ("f4_wall_ns", st.wall_ns),

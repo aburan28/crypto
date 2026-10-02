@@ -186,11 +186,17 @@ pub struct F4Stats {
     pub peak_matrix_bytes: u64,
     /// Largest live lookup-table allocation, in bytes of packed words.
     pub peak_table_bytes: u64,
-    /// Matrices and pivot blocks routed through the opt-in full-matrix M4RI
+    /// Matrices and pivot blocks routed through the full-matrix M4RI
     /// schedule, plus its actual table-preparation XORs.
     pub full_m4ri_matrices: u64,
     pub full_m4ri_blocks: u64,
     pub full_m4ri_table_word_xors: u64,
+    /// Pivot blocks whose independent target rows were shared across the
+    /// existing Rayon pool, together with those rows and their scheduled
+    /// row-word rectangles. These counters describe scheduling only.
+    pub full_m4ri_parallel_blocks: u64,
+    pub full_m4ri_parallel_target_rows: u64,
+    pub full_m4ri_parallel_target_row_words: u64,
     /// Wall time spent building matrices (products, columns, packing)
     /// and eliminating them.
     pub build_ns: u64,
@@ -432,6 +438,11 @@ const PAR_WORDS: usize = 1 << 16;
 
 const FULL_M4RI_BLOCK: usize = 8;
 
+/// Target-row words below which one full-M4RI pivot block keeps its row
+/// clearing serial. The outer fixed-X1 schedule already occupies the same
+/// Rayon pool, so only a large row-word rectangle may add nested work.
+const FULL_M4RI_PARALLEL_WORDS: usize = 1 << 20;
+
 #[derive(Default)]
 struct FullM4riScratch {
     pivot_columns: Vec<usize>,
@@ -482,6 +493,11 @@ fn full_m4ri_shape_for(n_rows: usize, n_cols: usize, min_rows: usize) -> bool {
     n_rows >= min_rows && n_cols >= 256 && n_cols <= n_rows.saturating_mul(4)
 }
 
+fn full_m4ri_parallel_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("F4_F2_FULL_M4RI_PARALLEL").as_deref() == Ok("1"))
+}
+
 /// Full-matrix Method of Four Russians elimination.
 ///
 /// Each block first finds up to eight pivots and triangularises those pivot
@@ -494,6 +510,19 @@ fn echelon_full_m4ri(
     n_cols: usize,
     st: &mut F4Stats,
     deadline: Option<Instant>,
+) -> Option<Vec<(usize, Row)>> {
+    let parallel_min_words = full_m4ri_parallel_enabled().then_some(FULL_M4RI_PARALLEL_WORDS);
+    echelon_full_m4ri_with_parallel_words(rows, n_cols, st, deadline, parallel_min_words)
+}
+
+/// [`echelon_full_m4ri`] with the target-row parallel threshold supplied by
+/// the caller, so differential tests can force both schedules on one process.
+fn echelon_full_m4ri_with_parallel_words(
+    rows: Vec<Row>,
+    n_cols: usize,
+    st: &mut F4Stats,
+    deadline: Option<Instant>,
+    parallel_min_words: Option<usize>,
 ) -> Option<Vec<(usize, Row)>> {
     let n_rows = rows.len();
     let words = n_cols.div_ceil(64).max(1);
@@ -648,26 +677,28 @@ fn echelon_full_m4ri(
             let consecutive = pivot_columns[..block_rows]
                 .windows(2)
                 .all(|pair| pair[1] == pair[0] + 1);
-            for row in block_start + block_rows..n_rows {
-                if row > block_start + block_rows
-                    && (row - block_start - block_rows).is_multiple_of(128)
-                    && deadline.is_some_and(|limit| Instant::now() >= limit)
-                {
-                    return None;
-                }
+            let target_start = block_start + block_rows;
+            let target_rows = n_rows - target_start;
+            let target_row_words = target_rows.saturating_mul(suffix_words);
+            let use_parallel = parallel_min_words.is_some_and(|minimum| {
+                target_rows > 0 && target_row_words >= minimum && rayon::current_num_threads() > 1
+            });
+            let expired = std::sync::atomic::AtomicBool::new(false);
+            let table_view: &[u64] = table;
+            let clear = |row: &mut Vec<u64>, row_end: &mut usize| {
                 let pattern = if consecutive {
                     let first_column = pivot_columns[0];
                     let (word, offset) = (first_column / 64, first_column % 64);
-                    let mut packed = matrix[row][word] >> offset;
+                    let mut packed = row[word] >> offset;
                     if offset + block_rows > 64 {
-                        packed |= matrix[row][word + 1] << (64 - offset);
+                        packed |= row[word + 1] << (64 - offset);
                     }
                     packed as usize & ((1usize << block_rows) - 1)
                 } else {
                     pivot_columns[..block_rows].iter().enumerate().fold(
                         0usize,
                         |pattern, (index, &pivot_column)| {
-                            if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                            if row[pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
                                 pattern | 1usize << index
                             } else {
                                 pattern
@@ -677,17 +708,66 @@ fn echelon_full_m4ri(
                 };
                 if pattern != 0 {
                     let offset = pattern * suffix_words;
-                    for (target, &source) in matrix[row][first_word..block_end]
+                    for (target, &source) in row[first_word..block_end]
                         .iter_mut()
-                        .zip(&table[offset..offset + suffix_words])
+                        .zip(&table_view[offset..offset + suffix_words])
                     {
                         *target ^= source;
                     }
-                    logical_xors += table_counts[pattern];
-                    performed_xors += suffix_words as u64;
-                    row_ends[row] = row_ends[row].max(block_end);
+                    *row_end = (*row_end).max(block_end);
+                    (table_counts[pattern], suffix_words as u64)
+                } else {
+                    (0, 0)
                 }
+            };
+            let matrix_tail = &mut matrix[target_start..];
+            let row_ends_tail = &mut row_ends[target_start..];
+            let (block_logical, block_performed) = if use_parallel {
+                st.full_m4ri_parallel_blocks += 1;
+                st.full_m4ri_parallel_target_rows += target_rows as u64;
+                st.full_m4ri_parallel_target_row_words += target_row_words as u64;
+                matrix_tail
+                    .par_iter_mut()
+                    .zip(row_ends_tail.par_iter_mut())
+                    .enumerate()
+                    .map(|(index, (row, row_end))| {
+                        if index > 0
+                            && index.is_multiple_of(128)
+                            && deadline.is_some_and(|limit| Instant::now() >= limit)
+                        {
+                            expired.store(true, std::sync::atomic::Ordering::Relaxed);
+                            return (0u64, 0u64);
+                        }
+                        if expired.load(std::sync::atomic::Ordering::Relaxed) {
+                            return (0, 0);
+                        }
+                        clear(row, row_end)
+                    })
+                    .reduce(|| (0, 0), |a, b| (a.0 + b.0, a.1 + b.1))
+            } else {
+                let mut totals = (0, 0);
+                for (index, (row, row_end)) in matrix_tail
+                    .iter_mut()
+                    .zip(row_ends_tail.iter_mut())
+                    .enumerate()
+                {
+                    if index > 0
+                        && index.is_multiple_of(128)
+                        && deadline.is_some_and(|limit| Instant::now() >= limit)
+                    {
+                        return None;
+                    }
+                    let row_cost = clear(row, row_end);
+                    totals.0 += row_cost.0;
+                    totals.1 += row_cost.1;
+                }
+                totals
+            };
+            if expired.load(std::sync::atomic::Ordering::Relaxed) {
+                return None;
             }
+            logical_xors += block_logical;
+            performed_xors += block_performed;
             all_pivots.extend_from_slice(&pivot_columns[..block_rows]);
             pivot_row += block_rows;
         }
@@ -2225,6 +2305,109 @@ mod tests {
             assert!(stats.word_xors > 0);
             assert!(stats.word_xors_performed > 0);
         }
+    }
+
+    #[test]
+    fn full_m4ri_parallel_row_clearing_matches_serial_exactly() {
+        let mut rng = StdRng::seed_from_u64(0x200_4d52_5041_52);
+        let (n_rows, n_cols) = (193usize, 385usize);
+        let words = n_cols.div_ceil(64);
+        let mut raw = Vec::with_capacity(n_rows);
+        for row_index in 0..n_rows {
+            let cap = n_cols - (row_index % 5) * 13;
+            let mut bits = vec![0u64; words];
+            for column in 0..cap {
+                if column % 17 != 0 && rng.gen_ratio(1, 4) {
+                    bits[column / 64] |= 1u64 << (column % 64);
+                }
+            }
+            raw.push(bits);
+        }
+        let make_rows = || {
+            raw.iter()
+                .cloned()
+                .map(|bits| {
+                    let start = bits.iter().position(|word| *word != 0).unwrap_or(0);
+                    let end = bits
+                        .iter()
+                        .rposition(|word| *word != 0)
+                        .map_or(0, |index| index + 1);
+                    Row { bits, start, end }
+                })
+                .collect::<Vec<_>>()
+        };
+
+        let mut serial_stats = F4Stats::default();
+        let serial = echelon_full_m4ri_with_parallel_words(
+            make_rows(),
+            n_cols,
+            &mut serial_stats,
+            None,
+            None,
+        )
+        .unwrap();
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(4)
+            .build()
+            .unwrap();
+        let mut parallel_stats = F4Stats::default();
+        let parallel = pool
+            .install(|| {
+                echelon_full_m4ri_with_parallel_words(
+                    make_rows(),
+                    n_cols,
+                    &mut parallel_stats,
+                    None,
+                    Some(0),
+                )
+            })
+            .unwrap();
+
+        assert_eq!(serial.len(), parallel.len());
+        for ((serial_lead, serial_row), (parallel_lead, parallel_row)) in
+            serial.iter().zip(&parallel)
+        {
+            assert_eq!(serial_lead, parallel_lead);
+            assert_eq!(serial_row.bits, parallel_row.bits);
+            assert_eq!(serial_row.start, parallel_row.start);
+            assert_eq!(serial_row.end, parallel_row.end);
+        }
+        let expected_space = canonical_rref(raw, n_cols);
+        assert_eq!(
+            canonical_rref(
+                serial.iter().map(|(_, row)| row.bits.clone()).collect(),
+                n_cols,
+            ),
+            expected_space
+        );
+        assert_eq!(
+            canonical_rref(
+                parallel.iter().map(|(_, row)| row.bits.clone()).collect(),
+                n_cols,
+            ),
+            expected_space
+        );
+        assert_eq!(serial_stats.word_xors, parallel_stats.word_xors);
+        assert_eq!(
+            serial_stats.word_xors_performed,
+            parallel_stats.word_xors_performed
+        );
+        assert_eq!(
+            serial_stats.full_m4ri_table_word_xors,
+            parallel_stats.full_m4ri_table_word_xors
+        );
+        assert_eq!(
+            serial_stats.full_m4ri_blocks,
+            parallel_stats.full_m4ri_blocks
+        );
+        assert_eq!(serial_stats.full_m4ri_matrices, 1);
+        assert_eq!(parallel_stats.full_m4ri_matrices, 1);
+        assert_eq!(serial_stats.full_m4ri_parallel_blocks, 0);
+        assert_eq!(serial_stats.full_m4ri_parallel_target_rows, 0);
+        assert_eq!(serial_stats.full_m4ri_parallel_target_row_words, 0);
+        assert!(parallel_stats.full_m4ri_parallel_blocks > 0);
+        assert!(parallel_stats.full_m4ri_parallel_target_rows > 0);
+        assert!(parallel_stats.full_m4ri_parallel_target_row_words > 0);
     }
 
     /// Large enough for the leading block's tables, with blocks of every
