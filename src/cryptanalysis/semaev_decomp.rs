@@ -2199,4 +2199,105 @@ mod tests {
             );
         }
     }
+
+    /// Every operand pair, every tail, at the widths where that is cheap:
+    /// `Gf2` against b072fcf5's code for each of the `2^{n−1}` polynomials
+    /// `zⁿ + t` with a constant term, `n ≤ 8`.  Reduction never uses
+    /// irreducibility, so reducible moduli are as good a probe as field
+    /// ones, and every tail degree on either side of the fold's bound
+    /// (`2·deg t ≤ n + 1`) is included.  `sqr`, `inv` and `sqr_k` ride
+    /// along, and `batch_inv` runs on the whole element list.
+    #[test]
+    fn gf2_matches_b072fcf5_code_exhaustively_at_small_widths() {
+        use self::gf2_b072fcf5::OldGf2;
+        for n in 1u32..=8 {
+            let all = 1u64 << n;
+            for tail in (1..all).step_by(2) {
+                let low_terms: Vec<u32> = (0..n).filter(|&i| (tail >> i) & 1 == 1).collect();
+                let irr = IrreduciblePoly {
+                    degree: n,
+                    low_terms,
+                };
+                let new = Gf2::new(&irr);
+                let old = OldGf2::new(&irr, new.has_clmul);
+                #[cfg(target_arch = "x86_64")]
+                {
+                    let d = 63 - tail.leading_zeros();
+                    assert_eq!(new.folds(), new.has_clmul && 2 * d <= n + 1, "n = {n}");
+                }
+                for a in 0..all {
+                    assert_eq!(new.sqr(a), old.sqr(a), "sqr n = {n} tail = {tail:#x}");
+                    assert_eq!(new.inv(a), old.inv(a), "inv n = {n} tail = {tail:#x}");
+                    for k in [0, 1, 2, n, n + 3] {
+                        assert_eq!(new.sqr_k(a, k), old.sqr_k(a, k), "sqr_k n = {n} k = {k}");
+                    }
+                    for b in 0..all {
+                        assert_eq!(
+                            new.mul(a, b),
+                            old.mul(a, b),
+                            "mul n = {n} tail = {tail:#x} a = {a:#x} b = {b:#x}"
+                        );
+                    }
+                }
+                let xs: Vec<u64> = (0..all).collect();
+                let (mut got, mut want) = (xs.clone(), xs);
+                new.batch_inv(&mut got, &mut Vec::new());
+                old.batch_inv(&mut want, &mut Vec::new());
+                assert_eq!(got, want, "batch_inv n = {n} tail = {tail:#x}");
+            }
+        }
+    }
+
+    /// The worst case for the second fold at every width: the all-ones
+    /// tail of each degree `d` the fold accepts (`2d ≤ n + 1`, and `d` is
+    /// then the largest the bound allows or less), against all-ones and
+    /// top-bit operands, which give `H` its full `n − 1` bits and the
+    /// first fold's overflow its full `d − 1`.  b072fcf5's code is the
+    /// reference.
+    #[test]
+    fn folds_agree_with_b072fcf5_on_all_ones_tails_at_every_width() {
+        use self::gf2_b072fcf5::OldGf2;
+        let mut s = 0x7A11_0E5B_1A57_F01Du64;
+        for n in 2u32..=63 {
+            let mask = (1u64 << n) - 1;
+            let edge = [
+                mask,
+                mask ^ 1,
+                mask >> 1,
+                1u64 << (n - 1),
+                (1u64 << (n - 1)) | 1,
+                1,
+                0,
+            ];
+            for d in 0..n {
+                for tail in [(1u64 << (d + 1)) - 1, (1u64 << d) | 1] {
+                    let low_terms: Vec<u32> = (0..n).filter(|&i| (tail >> i) & 1 == 1).collect();
+                    let irr = IrreduciblePoly {
+                        degree: n,
+                        low_terms,
+                    };
+                    let new = Gf2::new(&irr);
+                    let old = OldGf2::new(&irr, new.has_clmul);
+                    #[cfg(target_arch = "x86_64")]
+                    assert_eq!(
+                        new.folds(),
+                        new.has_clmul && 2 * d <= n + 1,
+                        "n = {n} d = {d}"
+                    );
+                    let mut vals = edge.to_vec();
+                    vals.extend((0..8).map(|_| xorshift(&mut s) & mask));
+                    for &a in &vals {
+                        assert_eq!(new.sqr(a), old.sqr(a), "sqr n = {n} d = {d} a = {a:#x}");
+                        for &b in &vals {
+                            assert_eq!(
+                                new.mul(a, b),
+                                old.mul(a, b),
+                                "mul n = {n} d = {d} a = {a:#x} b = {b:#x}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
