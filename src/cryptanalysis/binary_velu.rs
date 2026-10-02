@@ -314,6 +314,15 @@ impl Curve {
         let gf = Gf2::new(irr);
         let ash = ArtinSchreier::new(&gf);
         let order = binary_point_count(&gf, &ash, a2 as u64, a6);
+        Self::with_order(n, irr, a2, a6, order)
+    }
+
+    /// The curve with `order` taken as given — no `O(2ⁿ)` point count.  The
+    /// caller is responsible for certifying it (see the class walk, which
+    /// does so from a point of large prime order).
+    pub fn with_order(n: u32, irr: &IrreduciblePoly, a2: u8, a6: u64, order: u64) -> Option<Self> {
+        let gf = Gf2::new(irr);
+        let ash = ArtinSchreier::new(&gf);
         let curve = BinaryCurve {
             m: n,
             irreducible: irr.clone(),

@@ -1297,16 +1297,30 @@ pub fn walk_class(
                         if !(rp && rq) {
                             report.irrational_images += 1;
                         }
-                        let codomain = Curve::new(n, irr, a2, a6p).expect("codomain");
-                        let order_preserved = codomain.order == base.order;
+                        // `#E' = #E` is certified without counting when r
+                        // exceeds the Hasse width 4√q: a point of order r on
+                        // E' puts r | #E', and #E is the only multiple of r
+                        // in the interval.  Otherwise count, as before.
+                        let certify_by_r = (r as f64) > 4.0 * (q as f64).sqrt() + 2.0;
+                        let codomain = if certify_by_r {
+                            Curve::with_order(n, irr, a2, a6p, base.order)
+                        } else {
+                            Curve::new(n, irr, a2, a6p)
+                        }
+                        .expect("codomain");
                         let (mut image_order_ok, mut transported) = (false, false);
                         if let Some(&pp) = codomain.points_with_x(xpp).first() {
                             let g = codomain.group();
                             let mut ops = GroupOps::default();
-                            image_order_ok = g.mul(&mut ops, pp, r).infinity;
+                            image_order_ok = !pp.infinity && g.mul(&mut ops, pp, r).infinity;
                             let dp: FastPoint = g.mul(&mut ops, pp, dlog % r);
                             transported = !dp.infinity && dp.x == xqq;
                         }
+                        let order_preserved = if certify_by_r {
+                            image_order_ok
+                        } else {
+                            codomain.order == base.order
+                        };
                         report.edges.push(Edge {
                             ell: *ell,
                             from: a6,
