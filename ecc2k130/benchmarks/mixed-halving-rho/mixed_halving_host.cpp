@@ -319,7 +319,8 @@ int main(int argc, char **argv) {
         std::perror(outPath);
         return 1;
     }
-    out << "{\"kind\":\"meta\",\"degree\":23,\"subgroup_order\":" << ell
+    out << "{\"kind\":\"meta\",\"curve_name\":\"icv1-f2m23-t5197-69e76b73\","
+        << "\"degree\":23,\"subgroup_order\":" << ell
         << ",\"quotient_states\":" << representatives.size()
         << ",\"covariance_checks\":" << covarianceChecks
         << ",\"covariance_failures\":" << covarianceFailures << "}\n";

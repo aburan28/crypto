@@ -38,7 +38,8 @@ dispatch, distinguished-point and guard costs and are not results.
 
 ## Exact experiment
 
-For the generated degree-23 prime subgroup (`ell=2,095,853`), enumerate all
+For `icv1-f2m23-t5197-69e76b73`, the generated degree-23 prime subgroup
+(`ell=2,095,853`), enumerate all
 nonidentity points and all 45,562 classes under Frobenius and negation. For 16
 frozen target/table seeds and every selector/threshold pair:
 
@@ -73,4 +74,3 @@ Passing admits only a representation and dispatch cost study. A CUDA walk must
 then preserve coefficient replay, point canonicalization, finite guards and
 distinguished-point reporting, and must beat 26 B/s end to end before the goal
 is met.
-

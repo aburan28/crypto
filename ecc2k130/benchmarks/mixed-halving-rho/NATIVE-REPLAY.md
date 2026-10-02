@@ -6,7 +6,8 @@ script, contrary to the current repository rule that research result
 generation must be native. That unmerged execution path was superseded before
 publication and is disclosed here rather than silently treated as evidence.
 
-`summarize.cpp` independently parses all 209 immutable JSONL rows, requires the
+`summarize.cpp` independently parses all 209 immutable JSONL rows for
+`icv1-f2m23-t5197-69e76b73`, requires the
 complete 16-seed random control and twelve 16-seed candidate groups, recomputes
 every frozen gate and writes `summary-native.json`. Its decision and every
 aggregate numeric field agree with the superseded local derivation to 12

@@ -15,10 +15,10 @@ recovery.
 
 ## Controls and exact checks
 
-The generated subgroup has order 2,095,853 and 45,562 classes under
-Frobenius and negation. Both selectors passed 8,383,408 covariance checks with
-zero failures. Sixteen deterministic random functional graphs of the same
-quotient size had:
+The generated `icv1-f2m23-t5197-69e76b73` subgroup has order 2,095,853 and
+45,562 classes under Frobenius and negation. Both selectors passed 8,383,408
+covariance checks with zero failures. Sixteen deterministic random functional
+graphs of the same quotient size had:
 
 | statistic | random control |
 |---|---:|
