@@ -10083,5 +10083,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage190-build-serial -->
+<!-- BEGIN current-f4-stage191-single-core-boundary -->
+<div class="panel" id="current-f4-stage191-single-core-boundary">
+      <div class="panel-head">
+        <h2>Selected Boolean F4, Stage 191: strict single core remains 354.41&times; direct MITM by CPU <span class="chip">negative boundary</span></h2>
+        <p>Fresh same-binary direct MITM, strict one-thread selected F4, then fresh direct MITM on the identical
+          public <code>n=59, ell=9, m=3</code> true-negative. The direct reference is the arithmetic mean of both
+          bracketing controls. This prices only decomposition and does not substitute for full IC versus rho.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Fresh process metrics. Single-core seconds equal measured user plus system time under explicit one-thread contracts.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Work</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM before</td><td class="n">0.746381</td><td class="n">0.308969</td><td class="n">0.308969</td><td class="n">41.22 MB</td><td>483 points; 116,635 pairs; 117,369 additions</td><td><span class="chip">control</span></td></tr>
+            <tr><td>Direct MITM after</td><td class="n">0.324357</td><td class="n">0.306830</td><td class="n">0.306830</td><td class="n">41.52 MB</td><td>identical counted search</td><td><span class="chip">control</span></td></tr>
+            <tr><td><strong>Direct arithmetic mean</strong></td><td class="n"><strong>0.535369</strong></td><td class="n"><strong>0.307900</strong></td><td class="n"><strong>0.307900</strong></td><td class="n">41.37 MB</td><td>both fresh controls retained</td><td><span class="chip">reference</span></td></tr>
+            <tr><td><strong>Selected F4, strict single core</strong></td><td class="n"><strong>109.175286</strong></td><td class="n"><strong>109.121473</strong></td><td class="n"><strong>109.121473</strong></td><td class="n">480.53 MB</td><td>242 systems; 147.79 billion performed XORs</td><td><span class="chip">203.93&times; wall / 354.41&times; CPU / 11.62&times; RSS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">correctness</span> both methods authenticate the algebraic factor base and source, use no target-subgroup enumeration or known logs, and return exhaustive UNSAT</span>
+        <span><span class="chip">wall noise</span> the two direct wall times differ, but direct CPU is stable; the protocol keeps their arithmetic mean rather than choosing a favourable control</span>
+        <span><span class="chip">accounting</span> Stage 191 lower bound: 8 components, 237.736168 wall-seconds, 655.247344 core-seconds, 5.626 GB peak RSS; complete cost remains <code>null</code></span>
+        <span><span class="chip">claim boundary</span> decomposition only; relation yield, relation collection, linear algebra, recovery, full rho, external reproduction, novelty and SOTA remain open</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-191-selected-boundary-replay-20261002/result.json</code></span>
+      </div>
+    </div>
+<!-- END current-f4-stage191-single-core-boundary -->
 </body>
 </html>
