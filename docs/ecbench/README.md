@@ -224,6 +224,15 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
+**Calibration.** The unit has been checked against theory in
+[`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
+Over 2 384 verified runs, preregistered and replayed, every generic
+method's mean `S` reaches its analysed constant within its 95 % interval
+at `r ≈ 2^25.4` (prime) and `r = 2^39` (Koblitz): plain rho
+`√(π/2)`, negation rho `√(π/4)`, signed-Frobenius rho `√(π/4m)` (at 1.006
+of it), BSGS 1.5, 4/3 and 1, kangaroo 2. Round 1 missed two
+preregistered bands for sample-size reasons, and that record is kept.
+
 Two consequences to read every table with:
 
 - **BSGS's `S` omits its memory.** BSGS stores about `√r` points and
