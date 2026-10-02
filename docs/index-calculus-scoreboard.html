@@ -10243,5 +10243,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-sat-stage193-comparators -->
+<!-- BEGIN current-f4-stage194-table-build -->
+<div class="panel" id="current-f4-stage194-table-build">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 194: adaptive table-build scheduling saves RSS but regresses CPU <span class="chip">rejected</span></h2>
+        <p>One exact current/adaptive pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate serializes a <code>BlockTables::add</code> call unless it has at
+          least two runs and 65,536 scheduled words. All algebraic work and row operations are unchanged.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/current wall and total-core ratios both strictly below 0.98. Direct ratios inherit the completed Stage 192 arithmetic-mean reference.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Candidate / current wall / core / RSS</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current unconditional Rayon table adds</td><td class="n">16.869204</td><td class="n">180.921311</td><td class="n">null</td><td class="n">3,939.21 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">37.088275 / 590.442457 / 95.922601</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Adaptive two-run / 65,536-word threshold</strong></td><td class="n"><strong>16.840656</strong></td><td class="n"><strong>183.553080</strong></td><td class="n">null</td><td class="n">3,835.71 MB</td><td class="n"><strong>0.998308 / 1.014546 / 0.973726</strong></td><td class="n">37.025510 / 599.031318 / 93.402354</td><td><span class="chip">rejected</span> misses both useful-effect gates</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">mechanism</span> 1,647 of 5,500 table-add calls become serial; 728,503 runs, 1,700,553,592 scheduled table words and 147,794,583,858 performed XORs are identical</span>
+        <span><span class="chip">decision</span> wall changes by only 0.17% and CPU worsens 1.45%; the 2.63% RSS saving cannot pass a joint wall-and-CPU gate, so confirmation is prohibited</span>
+        <span><span class="chip">accounting</span> Stage 194 lower bound: 16 components, 216.945372 wall-seconds, 1,203.588335 core-seconds, 5.264 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative measured lower bound: 630 components, 24,380.108566 wall-seconds, 63,014.492177 core-seconds, 6.31 GB maximum RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/result.json</code>; one-target scheduling only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage194-table-build -->
 </body>
 </html>
