@@ -1,8 +1,12 @@
 # n=61 compact orbit vs strong rho, one target per workload (2026-10-01)
 
-Status **`PENDING_INDEPENDENT_VALIDATION`**. No ledger row changes. The replay
-ran on the same host, the walls come from a shared, heavily loaded macOS host
-(not AGENTS.md §10 evidence), and there is no independent-host validation.
+Status **`PENDING_INDEPENDENT_VALIDATION`**. No ledger row changes.
+
+- The primary run's walls come from a shared, heavily loaded macOS host.
+- The hosted isolated rerun (`gha-36933523033-1`, below) is the AGENTS.md §10
+  reading.
+- Both replays are same-campaign, and there is no independent-host
+  validation yet.
 
 This implements option A of
 [`../20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md`](../20261001-koblitz-n61-compact-orbit-panel/VS_RHO_SINGLE_TARGET_OPTIONS.md)
@@ -132,9 +136,68 @@ The 1-minute load before each eval workload was 13–337 (median 35), with swap
 4.7–5.1 GiB used. Every timed process reported 0 swaps. IC process wall
 exceeds user + sys by a median of 10.1 s, rho by 0.06 s, so the IC walls carry
 heavy contention. The online intervals are short, but they are wall time on
-the same host. Read them as diagnostics until the hosted isolated run
-(`.github/workflows/compact-orbit-n61-single-target-isolated.yml`, dispatch
-after merge) reproduces them.
+the same host. Read them as diagnostics. The hosted isolated run below is the
+§10 reading.
+
+## Isolated hosted run `gha-36933523033-1`
+
+[Actions run 36933523033](https://github.com/aburan28/crypto/actions/runs/36933523033)
+ran `.github/workflows/compact-orbit-n61-single-target-isolated.yml` at main
+`0837e41bf` (W=64, 4 tune workloads per K, the same target law and seeds).
+
+- Host: AMD EPYC 7763, 4 vCPUs, Linux 6.17 (Azure).
+- `isolated_bench.py reserve` on CPUs {2, 3}. Every producer is pinned to
+  CPU 3, and the claims' envelope records `cpus_allowed_list: "3"`.
+- `isolation.jsonl` shows **0 contended samples out of 646**, exit status 0.
+- `verify` re-hashes all 1,000 manifest files with 0 mismatches.
+- Process wall exceeds user + sys by a median of 5 ms (IC) and 0.5 ms (rho).
+
+The archive is in `autolab_runs/gha-36933523033-1/`, with the artifact's
+`isolation.jsonl`, `verify.json`, `preflight_1.log` and `lscpu.txt` in
+`hosted/`.
+
+The tune has an interior optimum at **K=500**:
+
+| K | Median process wall s | Median user s | Median online ms | Est. / measured RSS GiB |
+|---:|---:|---:|---:|---:|
+| 300 | 49.3 | 49.2 | 119.0 | 0.69 / 0.63 |
+| 400 | 37.1 | 36.9 | 52.2 | 1.28 / 1.23 |
+| **500** | **34.5** | 34.3 | 35.3 | 1.40 / 1.35 |
+| 600 | 36.7 | 36.3 | 8.0 | 2.55 / 2.50 |
+| 700 | 41.3 | 40.9 | 11.5 | 2.73 / 2.68 |
+| 800 | 47.3 | 46.6 | 21.9 | 4.94 / 4.89 |
+
+Results on 64 workloads at K=500:
+
+| Statistic | IC online ms | Rho online ms | Speedup (rho / IC) |
+|---|---:|---:|---:|
+| Median (95% bootstrap CI) | 29.9 (15.4–38.1) | 338.2 (285.6–399.7) | **12.68 (8.79–18.14)** per workload |
+| Mean | 38.1 | 367.5 | 9.65 (ratio of means) |
+| Ratio of medians | | | 11.29 |
+| Min / max | 0.29 / 187.7 | 26.9 / 960.7 | 0.89 / 570 |
+
+- IC is faster on 63 of 64 workloads.
+- Median IC phases: PDP 29.88 ms, recovery check 0.049 ms, relation check
+  0.019 ms, descent 0.001 ms.
+- Cold, the IC process takes a median 33.6 s (setup 33.5 s) against rho's
+  0.345 s. The cold ratio IC / rho has median **98×** (95% CI 84–115×).
+- Using the means, the setup is amortized after about 33.5 / (0.368 − 0.038)
+  ≈ 102 targets on this host.
+- Producer identity holds at K=500.
+- Rho's walk lengths are step-for-step identical to the macOS run (same points
+  and seeds; median 1.19 M steps).
+- Every workload passes verification and both replays. Claim-check `vs_rho`
+  passes **64 / 64**.
+
+The isolated run agrees with the contended macOS run on the direction and
+size of both effects:
+
+- IC wins the online interval by about an order of magnitude.
+- IC loses the cold one-target comparison by about two orders of magnitude.
+
+Its online ratios are higher, because the macOS IC online tail was
+contention-inflated (max 2,221 ms vs 188 ms here). Both runs are
+same-campaign. Independent-host replay is still outstanding.
 
 ## What this is not
 
