@@ -339,7 +339,10 @@ fn verify(path: &Path) -> AnyResult<Verification> {
     let bytes = fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let result: ResultRecord =
         serde_json::from_slice(&bytes).map_err(|e| format!("result JSON: {e}"))?;
-    let stage = find_stage_root(path)?;
+    let stage_root = find_stage_root(path)?;
+    let stage = stage_root
+        .canonicalize()
+        .map_err(|e| format!("{}: {e}", stage_root.display()))?;
     let mut checks = 0usize;
     let mut failures = Vec::new();
     check(
