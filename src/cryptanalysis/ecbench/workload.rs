@@ -510,6 +510,29 @@ mod tests {
     }
 
     #[test]
+    fn planted_scalars_are_uniform() {
+        // Kolmogorov–Smirnov against U(0, 1) for k / r over 20 000 indices,
+        // and the mean distance |k − r/2| / r against its 0.25.  The draw
+        // is deterministic, so this is a fixed check of the derivation,
+        // not a flaky statistical test.
+        let (w, _) = Workload::build(&CurveSpec::Koblitz { a: 0, n: 13 }, 0, 0).unwrap();
+        let n = 20_000u64;
+        let mut xs: Vec<f64> = (0..n)
+            .map(|i| planted_scalar(&w.curve, 20261002, i) as f64 / w.curve.r as f64)
+            .collect();
+        xs.sort_by(f64::total_cmp);
+        let d = xs
+            .iter()
+            .enumerate()
+            .map(|(i, x)| ((i + 1) as f64 / n as f64 - x).max(x - i as f64 / n as f64))
+            .fold(0.0, f64::max);
+        // 1.63 / √n is the 1 % critical value.
+        assert!(d < 1.63 / (n as f64).sqrt(), "KS D = {d}");
+        let gap = xs.iter().map(|x| (x - 0.5).abs()).sum::<f64>() / n as f64;
+        assert!((gap - 0.25).abs() < 0.005, "mean gap {gap}");
+    }
+
+    #[test]
     fn unusable_koblitz_curve_is_refused() {
         assert!(CurveSpec::Koblitz { a: 0, n: 17 }.build().is_err());
     }
