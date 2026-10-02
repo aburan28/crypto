@@ -119,3 +119,9 @@ jobs:
           g++ -O2 -std=c++17 -Wall -Wextra -Werror \
             ecc2k130/benchmarks/global-hints/test_queue.cpp -o /tmp/table-global-hints-model
           /tmp/table-global-hints-model
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/summarize.cpp -o /tmp/table-global-hints-summary
+          /tmp/table-global-hints-summary --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/independent_audit.cpp -o /tmp/table-global-hints-audit
+          /tmp/table-global-hints-audit --self-test
