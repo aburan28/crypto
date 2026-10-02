@@ -56,6 +56,12 @@ The verified input SHA-256 values are:
 | Degree-73 archive | `eb4773d556886672e8b80735fc486c16b73765fd5069ff81133100bfc3eafa90` |
 | Published scalar fixture, replay only | `124c13b3daba0477b471466f95c4a9e6f9ce9fe01d5ea67b6582469cfb9d5697` |
 
+The measured build used the repository-root `Cargo.lock` with SHA-256
+`b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365`
+(29,115 bytes). Because the root lockfile is ignored by this repository,
+the exact bytes are preserved as [`Cargo.lock`](Cargo.lock) in this evidence
+directory. Copy it to the repository root before using `--locked`.
+
 This was **one diagnostic process**, not a matched performance campaign.
 [`TIMING.txt`](TIMING.txt) records 4.07 s process wall, 2.66 s user and
 0.05 s system for the combined five-sum control **and** six-sum candidate.
@@ -80,9 +86,11 @@ included in wall time but not converted to group-addition equivalents.
 and speedup remain unset.** The earlier source-policy cold CPU/rho ratio
 3.031 is not this arm's comparator.
 
-Reproduce from the source commit with the committed lock file:
+Reproduce from this PR head, whose measured implementation was commit
+`b675df8560f1b98cf1d85299291fdc3c10e11e84`:
 
 ```sh
+cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
 cargo test --locked --lib native_signed_mitm
 cargo build --release --locked --example n37_native_m6_mitm --example n37_native_m6_replay
 gzip -dc research/notes/ecc2k130/n37_native_m6_mitm_20261002/RAW.json.gz > /tmp/n37-native-frozen-raw.json
