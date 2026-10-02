@@ -1,0 +1,43 @@
+{
+  "status": "PASS_LOCAL_CHROME_DASHBOARD",
+  "network": "external HTTP(S) blocked",
+  "baseline": {
+    "libraryOpen": false,
+    "reportCount": 12,
+    "width": 1425,
+    "viewport": 1440,
+    "charts": 2
+  },
+  "search": {
+    "count": "43 reports · showing 12; narrow your search",
+    "links": [
+      "#boundary-ledger",
+      "#koblitz-references-20260923",
+      "#koblitz-constructions-20260926",
+      "#koblitz-single-target-20261001",
+      "#hamming-ideal-pdp",
+      "#ecc2k130-route3-gate-20260923",
+      "#koblitz-select-packed-20260922",
+      "#learned-fixed-ic-selector",
+      "#weil-factor-composition-20260914",
+      "#ic-tournament-reference-history",
+      "#auxiliary-inputs-20260918",
+      "#koblitz-symmetrised-e2e-20260927"
+    ]
+  },
+  "empty": {
+    "links": 0,
+    "text": "No matching reports. Try a broader term, or open the full ledger."
+  },
+  "deepLink": "#boundary-ledger",
+  "checks": [
+    "landing ledger collapsed",
+    "two evidence-bound charts",
+    "desktop and mobile no overflow",
+    "search matching and empty states",
+    "selected-report and direct deep links open ledger",
+    "light/dark screenshots",
+    "no JavaScript exceptions"
+  ],
+  "nativeSolversExecuted": 0
+}
