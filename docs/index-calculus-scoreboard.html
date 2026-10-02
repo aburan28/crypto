@@ -262,6 +262,9 @@
   .is-collapsed { padding-bottom: 14px; }
   .is-collapsed.panel > .panel-head { padding-bottom: 0; }
   .ic-hid[hidden] { display: none; }
+  .panel-summary { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); max-width: 78ch; }
+  .panel-head .panel-summary { margin-top: 0; }
+  .is-collapsed .panel-summary { margin-bottom: 0; }
   .ref-note { margin: 28px 0 10px; padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--bound); background: var(--surface-sunk); color: var(--ink); font-size: 13px; line-height: 1.5; }
   .chip {
     display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
@@ -364,7 +367,7 @@
         corrections and superseded figures stay on it by rule, with the old value kept as
         &ldquo;was&rdquo; beside the new one, so that an improvement in the code is never mistaken for
         an improvement in the attack. The sections below are in the order the work was done.
-        Historical panels are collapsed to their titles: click a title to open one, follow a link into
+        Historical panels are collapsed to their titles, each with a one-line summary beneath it: click a title to open one, follow a link into
         it, or use <em>expand all</em> below. The panels the current verdict rests on stay open.</p>
     </div>
     <p><span class="chip">accounting</span> Volcano metadata correction:
@@ -566,7 +569,7 @@
     <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p>
     <p><span class="chip">accounting</span> <a href="#ic-bounded-round-1-20260925">Bounded IC autolab, round one</a>: incumbent retained after 3,243 verified toy-panel pairs. The selected challenger&rsquo;s single-target online time was 6.5% higher on confirmation; neither complete cold metric met the 20% improvement gate.</p>
     <p><span class="chip">accounting</span> <a href="#ic-bounded-round-2-20260925">Bounded IC autolab, round two</a>: incumbent retained after 3,480 verified toy-panel pairs. Selected <code>stop5_word</code> confirmation ratios were 1.093655 online, 0.922725 cold Ir and 0.987022 cold native; neither cold gate reached 0.8.</p>
-    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-3-20260925">Bounded IC autolab, round three</a>: incumbent retained after 3,480/3,480 verified pairs. Selected <code>stop7_word</code> reached 0.990182 cold Ir, 0.985697 cold native and 0.973335 online against their qualified IC references on confirmation; the required cold ratio was at most 0.8. All three registered attempts are complete without a promoted challenger.</p> <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/BOUNDED-GOAL-RESULT.md">Campaign closeout</a>.</p>
+    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-3-20260925">Bounded IC autolab, round three</a>: incumbent retained after 3,480/3,480 verified pairs. Selected <code>stop7_word</code> reached 0.990182 cold Ir, 0.985697 cold native and 0.973335 online against their qualified IC references on confirmation; the required cold ratio was at most 0.8. All three registered attempts are complete without a promoted challenger. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/BOUNDED-GOAL-RESULT.md">Campaign closeout</a>.</p>
     <p><span class="chip">accounting</span> The first <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md">generic backend qualification</a> dispatch (seed 2026092901) was canceled at the six-hour job cap; artifact upload then failed. Trial counts, natural yield, full costs and paired rho ratios are unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md">second registration</a> (seed 2026092902) also produced no auditable bundle: the 300-minute measure step timed out, packing failed on a live tree, and zero campaign artifacts were uploaded. No F4/F5 or SAT family qualification was established by either censored run.</p></div>
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
@@ -5834,6 +5837,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     At dimension 2k in the degree-five toy extension n=10, the ranks are 10,
     6 and 6, with 86, 187 and 204 covered targets respectively; the base point
     counts are 15, 23 and 23. No end-to-end speedup or Oakley-size result follows.</p>
+</section>
 <!-- BEGIN degree-reporting-correction-20260922 -->
 <section class="panel" id="degree-reporting-correction-20260922">
   <div class="panel-head"><h2>Degree sweep interpretation <span class="chip">accounting</span></h2></div>
@@ -5873,6 +5877,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     are exactly {0, 1, 130, 131}. This rules out a small intermediate-dimensional
     stable linear subspace; it does not rule out all nonlinear invariant sets
     or all index-calculus algorithms.</p>
+</section>
 
 <section class="panel" id="toy-ic-e2e-candidates-20260922">
 <h2>Fixed toy IC pipeline: 360 verified runs; rho still leads</h2>
@@ -10607,13 +10612,19 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       var h = el.querySelector('h2, h3');
       var keyId = el.id || (h && h.id) || (el.getAttribute('aria-labelledby') || '');
       var openByDefault = !!OPEN[keyId] || el.getAttribute('data-collapse') === 'open';
-      // Everything off the path from the panel to its heading is hidden when collapsed.
+      // Everything off the path from the panel to its heading is hidden when
+      // collapsed, except the one-line summary, which stays under the title,
+      // and any child that itself holds another panel: an unclosed tag must
+      // never swallow the panels after it (the structure test in
+      // scripts/site/test_build.py guards the markup; this guards the reader).
       var spine = [];
       for (var n = h; n && n !== el; n = n.parentElement) spine.push(n);
       var hid = [];
       spine.concat([el]).forEach(function (node) {
         Array.prototype.forEach.call(node.children, function (c) {
-          if (spine.indexOf(c) === -1 && c !== h) { c.classList.add('ic-hid'); hid.push(c); }
+          if (spine.indexOf(c) !== -1 || c === h) return;
+          if (c.classList.contains('panel-summary') || c.querySelector(SEL)) return;
+          c.classList.add('ic-hid'); hid.push(c);
         });
       });
       var note = el.previousElementSibling;
