@@ -29,7 +29,10 @@ BENCH_THREADS=385024
 } | tee "$R/host.txt"
 sha256sum Makefile include/packed*.h include/packed*.cuh include/tablewalk.h include/cycleanchor_body.h \
     include/ref.h include/tablev3replay.h src/main.cu src/tablev3replay.cpp \
-    benchmarks/global-hints/* benchmarks/block-both2-confirm5/corpus_identity.cpp > "$R/source-files.sha256"
+    benchmarks/global-hints/PROTOCOL.md benchmarks/global-hints/gpujob.sh \
+    benchmarks/global-hints/test_queue.cpp benchmarks/global-hints/test_device.cu \
+    benchmarks/global-hints/summarize.cpp benchmarks/global-hints/attempt-0-dispatch-failure.json \
+    benchmarks/block-both2-confirm5/corpus_identity.cpp > "$R/source-files.sha256"
 g++ -O2 -std=c++17 -Wall -Wextra -Werror benchmarks/global-hints/test_queue.cpp -o /tmp/test-queue
 g++ -O2 -std=c++17 -Wall -Wextra -Werror benchmarks/global-hints/summarize.cpp -o /tmp/global-summarize
 g++ -O2 -std=c++17 -Wall -Wextra -Werror benchmarks/block-both2-confirm5/corpus_identity.cpp -o /tmp/corpus-identity

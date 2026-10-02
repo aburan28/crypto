@@ -1,0 +1,227 @@
+PASS: 149940 ownership/phase cases; empty/full/sparse, partial-block owners, production population and 32-bit stride boundary
+PASS: schedule, positive panel, invalid rate and missing-row rejection
+PASS corpus_identity self-test
+mkdir -p build
+g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-base
+g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-single
+./build/test-packed-base
+packed arithmetic direct reduction: 0
+PASS: 2526 host polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 20134 table squares bit-identical to the spread-then-reduce square
+PASS: 2133 polynomial-basis inverses bit-identical to toPolynomial131(inv131(fromPolynomial131(a)))
+PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference; paired mul131x2/inv131x2/sigma131x2 bit-identical to the single routines
+./build/test-packed-single
+packed arithmetic direct reduction: 0
+PASS: 2526 host polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 20134 table squares bit-identical to the spread-then-reduce square
+PASS: 2133 polynomial-basis inverses bit-identical to toPolynomial131(inv131(fromPolynomial131(a)))
+PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference; paired mul131x2/inv131x2/sigma131x2 bit-identical to the single routines
+mkdir -p build
+g++ -O2 -std=c++17 -DECC_NO_CUDA -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1 -Wall -Wextra \
+    -Wno-unused-function -Wno-unknown-pragmas src/tablev3replay.cpp -o build/table-v3-replay
+In file included from src/../include/curveparams.h:19,
+                 from src/../include/tablev3replay.h:22,
+                 from src/tablev3replay.cpp:10:
+src/../include/../generated/eccP13.h:85:20: warning: ‘eccP13::INSTANCE_K’ defined but not used [-Wunused-variable]
+   85 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP13.h:17:20: warning: ‘eccP13::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "89";
+      |                    ^~~~~
+src/../include/../generated/eccP13.h:16:20: warning: ‘eccP13::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "2003";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:18:
+src/../include/../generated/eccP19.h:91:20: warning: ‘eccP19::INSTANCE_K’ defined but not used [-Wunused-variable]
+   91 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP19.h:17:20: warning: ‘eccP19::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "41811";
+      |                    ^~~~~
+src/../include/../generated/eccP19.h:16:20: warning: ‘eccP19::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "130873";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:17:
+src/../include/../generated/eccP41.h:113:20: warning: ‘eccP41::INSTANCE_K’ defined but not used [-Wunused-variable]
+  113 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP41.h:17:20: warning: ‘eccP41::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "256851699273";
+      |                    ^~~~~
+src/../include/../generated/eccP41.h:16:20: warning: ‘eccP41::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "549756390943";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:16:
+src/../include/../generated/eccP97.h:133:21: warning: ‘eccP97::INSTANCE_K’ defined but not used [-Wunused-variable]
+  133 | static const char **INSTANCE_K = 0;
+      |                     ^~~~~~~~~~
+src/../include/../generated/eccP97.h:132:35: warning: ‘eccP97::INSTANCE_QY’ defined but not used [-Wunused-variable]
+  132 | static const unsigned long long (*INSTANCE_QY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:131:35: warning: ‘eccP97::INSTANCE_QX’ defined but not used [-Wunused-variable]
+  131 | static const unsigned long long (*INSTANCE_QX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:130:35: warning: ‘eccP97::INSTANCE_PY’ defined but not used [-Wunused-variable]
+  130 | static const unsigned long long (*INSTANCE_PY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:129:35: warning: ‘eccP97::INSTANCE_PX’ defined but not used [-Wunused-variable]
+  129 | static const unsigned long long (*INSTANCE_PX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:17:20: warning: ‘eccP97::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "23986389105595106179003010550";
+      |                    ^~~~~
+src/../include/../generated/eccP97.h:16:20: warning: ‘eccP97::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "39614081257132074233778707191";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:15:
+src/../include/../generated/eccF23.h:156:20: warning: ‘eccF23::INSTANCE_K’ defined but not used [-Wunused-variable]
+  156 | static const char *INSTANCE_K[16] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF23.h:15:20: warning: ‘eccF23::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "93194";
+      |                    ^~~~~
+src/../include/../generated/eccF23.h:14:20: warning: ‘eccF23::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "2095853";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:14:
+src/../include/../generated/eccF41.h:193:20: warning: ‘eccF41::INSTANCE_K’ defined but not used [-Wunused-variable]
+  193 | static const char *INSTANCE_K[16] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF41.h:15:20: warning: ‘eccF41::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "256851699273";
+      |                    ^~~~~
+src/../include/../generated/eccF41.h:14:20: warning: ‘eccF41::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "549756390943";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:13:
+src/../include/../generated/eccF83.h:224:20: warning: ‘eccF83::INSTANCE_K’ defined but not used [-Wunused-variable]
+  224 | static const char *INSTANCE_K[2] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF83.h:15:20: warning: ‘eccF83::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "254512724090651164922414";
+      |                    ^~~~~
+src/../include/../generated/eccF83.h:14:20: warning: ‘eccF83::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "2417851639230796216685689";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:12:
+src/../include/../generated/eccF131.h:311:21: warning: ‘eccF131::INSTANCE_K’ defined but not used [-Wunused-variable]
+  311 | static const char **INSTANCE_K = 0;
+      |                     ^~~~~~~~~~
+src/../include/../generated/eccF131.h:310:35: warning: ‘eccF131::INSTANCE_QY’ defined but not used [-Wunused-variable]
+  310 | static const unsigned long long (*INSTANCE_QY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:309:35: warning: ‘eccF131::INSTANCE_QX’ defined but not used [-Wunused-variable]
+  309 | static const unsigned long long (*INSTANCE_QX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:308:35: warning: ‘eccF131::INSTANCE_PY’ defined but not used [-Wunused-variable]
+  308 | static const unsigned long long (*INSTANCE_PY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:307:35: warning: ‘eccF131::INSTANCE_PX’ defined but not used [-Wunused-variable]
+  307 | static const unsigned long long (*INSTANCE_PX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+mkdir -p build
+g++ -O2 -std=c++17 -DECC_NO_CUDA -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1 -Wall -Wextra \
+    -Wno-unused-function -Wno-unknown-pragmas src/testtablev3replay.cpp -o build/test-table-v3-replay
+In file included from src/../include/curveparams.h:19,
+                 from src/../include/tablev3replay.h:22,
+                 from src/testtablev3replay.cpp:9:
+src/../include/../generated/eccP13.h:85:20: warning: ‘eccP13::INSTANCE_K’ defined but not used [-Wunused-variable]
+   85 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP13.h:17:20: warning: ‘eccP13::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "89";
+      |                    ^~~~~
+src/../include/../generated/eccP13.h:16:20: warning: ‘eccP13::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "2003";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:18:
+src/../include/../generated/eccP19.h:91:20: warning: ‘eccP19::INSTANCE_K’ defined but not used [-Wunused-variable]
+   91 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP19.h:17:20: warning: ‘eccP19::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "41811";
+      |                    ^~~~~
+src/../include/../generated/eccP19.h:16:20: warning: ‘eccP19::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "130873";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:17:
+src/../include/../generated/eccP41.h:113:20: warning: ‘eccP41::INSTANCE_K’ defined but not used [-Wunused-variable]
+  113 | static const char *INSTANCE_K[8] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccP41.h:17:20: warning: ‘eccP41::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "256851699273";
+      |                    ^~~~~
+src/../include/../generated/eccP41.h:16:20: warning: ‘eccP41::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "549756390943";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:16:
+src/../include/../generated/eccP97.h:133:21: warning: ‘eccP97::INSTANCE_K’ defined but not used [-Wunused-variable]
+  133 | static const char **INSTANCE_K = 0;
+      |                     ^~~~~~~~~~
+src/../include/../generated/eccP97.h:132:35: warning: ‘eccP97::INSTANCE_QY’ defined but not used [-Wunused-variable]
+  132 | static const unsigned long long (*INSTANCE_QY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:131:35: warning: ‘eccP97::INSTANCE_QX’ defined but not used [-Wunused-variable]
+  131 | static const unsigned long long (*INSTANCE_QX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:130:35: warning: ‘eccP97::INSTANCE_PY’ defined but not used [-Wunused-variable]
+  130 | static const unsigned long long (*INSTANCE_PY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:129:35: warning: ‘eccP97::INSTANCE_PX’ defined but not used [-Wunused-variable]
+  129 | static const unsigned long long (*INSTANCE_PX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccP97.h:17:20: warning: ‘eccP97::S_DEC’ defined but not used [-Wunused-variable]
+   17 | static const char *S_DEC = "23986389105595106179003010550";
+      |                    ^~~~~
+src/../include/../generated/eccP97.h:16:20: warning: ‘eccP97::ELL_DEC’ defined but not used [-Wunused-variable]
+   16 | static const char *ELL_DEC = "39614081257132074233778707191";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:15:
+src/../include/../generated/eccF23.h:156:20: warning: ‘eccF23::INSTANCE_K’ defined but not used [-Wunused-variable]
+  156 | static const char *INSTANCE_K[16] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF23.h:15:20: warning: ‘eccF23::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "93194";
+      |                    ^~~~~
+src/../include/../generated/eccF23.h:14:20: warning: ‘eccF23::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "2095853";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:14:
+src/../include/../generated/eccF41.h:193:20: warning: ‘eccF41::INSTANCE_K’ defined but not used [-Wunused-variable]
+  193 | static const char *INSTANCE_K[16] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF41.h:15:20: warning: ‘eccF41::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "256851699273";
+      |                    ^~~~~
+src/../include/../generated/eccF41.h:14:20: warning: ‘eccF41::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "549756390943";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:13:
+src/../include/../generated/eccF83.h:224:20: warning: ‘eccF83::INSTANCE_K’ defined but not used [-Wunused-variable]
+  224 | static const char *INSTANCE_K[2] = {
+      |                    ^~~~~~~~~~
+src/../include/../generated/eccF83.h:15:20: warning: ‘eccF83::S_DEC’ defined but not used [-Wunused-variable]
+   15 | static const char *S_DEC = "254512724090651164922414";
+      |                    ^~~~~
+src/../include/../generated/eccF83.h:14:20: warning: ‘eccF83::ELL_DEC’ defined but not used [-Wunused-variable]
+   14 | static const char *ELL_DEC = "2417851639230796216685689";
+      |                    ^~~~~~~
+In file included from src/../include/curveparams.h:12:
+src/../include/../generated/eccF131.h:311:21: warning: ‘eccF131::INSTANCE_K’ defined but not used [-Wunused-variable]
+  311 | static const char **INSTANCE_K = 0;
+      |                     ^~~~~~~~~~
+src/../include/../generated/eccF131.h:310:35: warning: ‘eccF131::INSTANCE_QY’ defined but not used [-Wunused-variable]
+  310 | static const unsigned long long (*INSTANCE_QY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:309:35: warning: ‘eccF131::INSTANCE_QX’ defined but not used [-Wunused-variable]
+  309 | static const unsigned long long (*INSTANCE_QX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:308:35: warning: ‘eccF131::INSTANCE_PY’ defined but not used [-Wunused-variable]
+  308 | static const unsigned long long (*INSTANCE_PY)[3] = 0;
+      |                                   ^~~~~~~~~~~
+src/../include/../generated/eccF131.h:307:35: warning: ‘eccF131::INSTANCE_PX’ defined but not used [-Wunused-variable]
+  307 | static const unsigned long long (*INSTANCE_PX)[3] = 0;
+      |                                   ^~~~~~~~~~~
+./build/test-table-v3-replay
+PASS: strict table-v3 framing, spread selection, run-id binding, orbit replay and nonzero coverage
+./build/table-v3-replay --help >/dev/null
