@@ -34,7 +34,7 @@ One C++17 program performs the complete screen.  Python and Python-generated
 research artifacts are excluded.  For each candidate modulus the program:
 
 1. proves the prime-degree Rabin irreducibility conditions;
-2. constructs a deterministic order-263 root in the quadratic extension,
+2. constructs a deterministic order-263 root in the sparse base field,
    derives a root of the repository beta-basis modulus, and builds both
    directions of the exact field isomorphism;
 3. checks both 131-by-131 conversion matrices have rank 131 and round-trip all
@@ -96,3 +96,13 @@ storage estimate requires more than 255 registers/thread, and every optimistic
 pipe ceiling exceeds the 15.436677 B/s reference by at least 5%.  Failure is a
 static no-go for this compound route.  It does not rule out a different linear
 circuit or a new measured shared-memory primitive.
+
+## Pre-result correction
+
+The first implementation attempt exposed an error in item 2 before it emitted
+a result: `2^131 mod 263` is `1`, not `-1`.  The 263rd roots therefore lie in
+the base field and are obtained with exponent `(2^131 - 1) / 263`; a quadratic
+extension is neither required nor correct for this construction.  This
+correction was committed before the admitted native run.  It changes no
+candidate modulus, circuit family, counts, throughput reference, or decision
+gate above.
