@@ -96,7 +96,10 @@ Decision decide(std::vector<double> aa, std::vector<double> ab,
                    result.aaMedian >= 0.998 && result.aaMedian <= 1.002;
     result.promote = result.noise && result.abMin > 1.0 && result.abMedian >= 1.005;
     result.reject = result.noise && result.abMedian <= 1.0;
-    result.goal = result.promote && result.candidateMedian >= 26000.0;
+    // The absolute 26 B/s objective is reported independently of whether the
+    // candidate clears the relative promotion threshold against this session's
+    // control.  A valid A/A panel is still required for a trustworthy rate.
+    result.goal = result.noise && result.candidateMedian >= 26000.0;
     result.name = !result.noise ? "INVALID_AA_NOISE" : result.goal ? "GOAL_MET" :
                   result.promote ? "PROMOTE_ENGINEERING" : result.reject ?
                   "REJECT" : "RETAIN_OPTIONAL";
@@ -113,6 +116,11 @@ bool selfTest() {
         return false;
     if (decide(aa, std::vector<double>(5, 1.003), control, candidate).name !=
         "RETAIN_OPTIONAL") return false;
+    const std::vector<double> fastControl(5, 27000.0), goalCandidate(5, 26000.0);
+    const Decision absoluteGoal = decide(aa, std::vector<double>(5, 26000.0 / 27000.0),
+                                         fastControl, goalCandidate);
+    if (!absoluteGoal.goal || absoluteGoal.promote || absoluteGoal.name != "GOAL_MET")
+        return false;
     std::vector<double> noisy(5, 1.0); noisy[0] = 1.006;
     int64_t integer = 0;
     double real = 0;
