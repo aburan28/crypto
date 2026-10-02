@@ -70,13 +70,11 @@
 //! `Φ₃` roots, as a permutation, with every codomain order equal to `#E`.
 //! [`velu_matches_the_modular_polynomial_at_ell_3`] pins that.
 //!
-//! ## Scope
-//!
-//! Only the abscissa map is computed.  That is enough to transport a DLP
-//! instance — `φ(P)` is determined up to sign by `x(φ(P))`, and a sign on
-//! `φ(Q)` flips the recovered logarithm to `−d`, which
-//! [`transport_instance`] reports rather than hides.  A full `(X, Y)` map
-//! would need Vélu's `y`-formula and is not needed here.
+//! [`velu_point_map`] also computes the ordinate.  This matters when the
+//! target logarithm is unknown: choosing unrelated signs for `φ(P)` and
+//! `φ(Q)` from their abscissae does not transport a signed relation.
+//! [`transport_instance`] retains its original abscissa-only report for
+//! historical callers.
 
 use std::collections::{BTreeSet, HashMap};
 
@@ -276,6 +274,86 @@ pub fn velu_x_map(
         a = a.add(&F2mElement::one(n));
     }
     Some(x.add(&a).add(&a.mul(&a, irr)))
+}
+
+/// Map a point across the normalized odd-degree isogeny, including its sign.
+///
+/// For kernel abscissae `u_i`, put `L = h'(x)/h(x)` and
+/// `E_j = h^[j](x)/h(x)`, where `h^[j]` is the j-th Hasse derivative.
+/// Newton's identities in characteristic two give
+/// `Σ_i 1/(x+u_i)^3 = L^3 + L E_2 + E_3`.  Substituting these sums into
+/// Vélu's pairwise ordinate formula avoids splitting the kernel polynomial
+/// over an extension field.  The result is the same short Weierstrass model
+/// as [`velu_codomain`]. The caller supplies a valid odd-degree kernel and
+/// a point on its domain curve. `None` rejects inconsistent field parameters,
+/// out-of-field coordinates, or a failed inversion; kernel points map to
+/// `Some(INFINITY)`.
+pub fn velu_point_map(
+    point: FastPoint,
+    kernel: &F2mPoly,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> Option<FastPoint> {
+    if n == 0 || n > FastCurve::MAX_DEGREE || kernel.m != n || irr.degree != n {
+        return None;
+    }
+    if point.infinity {
+        return Some(FastPoint::INFINITY);
+    }
+    let field_mask = (1u64 << n) - 1;
+    if (point.x | point.y) & !field_mask != 0 {
+        return None;
+    }
+    let x = elt(point.x, n);
+    let y = elt(point.y, n);
+    let h = kernel.eval(&x, irr);
+    if h.is_zero() {
+        return Some(FastPoint::INFINITY);
+    }
+    let h_inv = h.flt_inverse(irr)?;
+    let l = derivative(kernel, n).eval(&x, irr).mul(&h_inv, irr);
+    let l2 = l.mul(&l, irr);
+    let e2 = hasse_eval(kernel, 2, &x, irr).mul(&h_inv, irr);
+    let e3 = hasse_eval(kernel, 3, &x, irr).mul(&h_inv, irr);
+    let p3 = l2.mul(&l, irr).add(&l.mul(&e2, irr)).add(&e3);
+    let x2 = x.mul(&x, irr);
+    let x3 = x2.mul(&x, irr);
+    let parity = if kernel.degree().unwrap_or(0) % 2 == 1 {
+        F2mElement::one(n)
+    } else {
+        F2mElement::zero(n)
+    };
+    let a = parity.add(&x.mul(&l, irr));
+    let a2 = a.mul(&a, irr);
+    let image_x = x.add(&a).add(&a2);
+    let y_coefficient = F2mElement::one(n).add(&l).add(&x.mul(&l2, irr));
+    let z3_sum = parity
+        .add(&x.mul(&l, irr))
+        .add(&x2.mul(&l2, irr))
+        .add(&x3.mul(&p3, irr));
+    let image_y = y_coefficient
+        .mul(&y, irr)
+        .add(&x.mul(&a2.add(&a), irr))
+        .add(&a)
+        .add(&z3_sum);
+    Some(FastPoint::affine(to_u64(&image_x), to_u64(&image_y)))
+}
+
+/// Evaluate a Hasse derivative without constructing a polynomial.  Lucas's
+/// theorem makes the coefficient of `x^(i-j)` equal to `c_i` precisely when
+/// the set bits of `j` are also set in `i`.
+fn hasse_eval(p: &F2mPoly, j: usize, x: &F2mElement, irr: &IrreduciblePoly) -> F2mElement {
+    let mut acc = F2mElement::zero(p.m);
+    let Some(degree) = p.degree() else {
+        return acc;
+    };
+    for i in (j..=degree).rev() {
+        acc = acc.mul(x, irr);
+        if (i & j) == j {
+            acc = acc.add(&p.coeff(i));
+        }
+    }
+    acc
 }
 
 /// Formal derivative in char 2: only odd-index coefficients survive.
@@ -567,6 +645,8 @@ mod tests {
     use super::*;
     use crate::cryptanalysis::binary_isogeny::{find_roots_in_f2m, phi_l_mod2_in_x};
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+    use flate2::read::GzDecoder;
+    use std::io::Read;
 
     fn field(n: u32) -> IrreduciblePoly {
         find_irreducible_sparse(n).expect("a sparse irreducible exists")
@@ -688,5 +768,214 @@ mod tests {
             mapped += 1;
         }
         assert!(mapped > 0, "something must have been mapped");
+    }
+
+    #[test]
+    fn full_point_map_preserves_sign_and_addition_on_small_curve() {
+        let n = 8;
+        let irr = field(n);
+        let domain = Curve::new(n, &irr, 0, 1).expect("curve");
+        let psi3 = division_polynomial(&elt(1, n), 3, n, &irr);
+        for root in find_roots_in_f2m(&psi3, n, &irr) {
+            let kernel_x = to_u64(&root);
+            let kernel_point = domain.points_with_x(kernel_x)[0];
+            let h = F2mPoly::from_coeffs(vec![root, F2mElement::one(n)], n);
+            let iso = isogeny_from_kernel(&domain, h, 3);
+            let codomain = Curve::new(n, &irr, 0, iso.a6_codomain).expect("codomain");
+            let map = |p| velu_point_map(p, &iso.kernel, n, &irr).expect("defined map");
+            assert_eq!(map(FastPoint::INFINITY), FastPoint::INFINITY);
+            let points: Vec<_> = (0..(1u64 << n))
+                .flat_map(|x| domain.points_with_x(x))
+                .collect();
+            for &p in &points {
+                let image = map(p);
+                assert!(codomain.fast.is_on_curve(image), "image of {p:?} off curve");
+                assert_eq!(image, codomain.fast.neg(map(domain.fast.neg(p))));
+                if !image.infinity {
+                    assert_eq!(
+                        Some(image.x),
+                        velu_x_map(&elt(p.x, n), &iso.kernel, n, &irr).map(|x| to_u64(&x))
+                    );
+                    // Independent direct Vélu sum: for a degree-3 kernel,
+                    // normalized Y = y(P) + y(P+Q) + y(P-Q).
+                    let plus = domain.fast.add(p, kernel_point);
+                    let minus = domain.fast.add(p, domain.fast.neg(kernel_point));
+                    assert!(!plus.infinity && !minus.infinity);
+                    assert_eq!(image.y, p.y ^ plus.y ^ minus.y);
+                }
+            }
+            for &p in points.iter().step_by(17) {
+                for &q in points.iter().step_by(19) {
+                    assert_eq!(
+                        map(domain.fast.add(p, q)),
+                        codomain.fast.add(map(p), map(q)),
+                        "homomorphism failed at {p:?} + {q:?}"
+                    );
+                }
+            }
+        }
+    }
+
+    fn archive_field_element(expression: &str) -> u64 {
+        let mut value = 0u64;
+        for monomial in expression.trim_matches(['(', ')']).split(" + ") {
+            let bit = match monomial {
+                "1" => 0,
+                "a" => 1,
+                power => power
+                    .strip_prefix("a^")
+                    .expect("archived field monomial")
+                    .parse::<u32>()
+                    .expect("archived field exponent"),
+            };
+            assert!(bit < 37, "archived coefficient exceeds field degree");
+            value ^= 1u64 << bit;
+        }
+        value
+    }
+
+    fn archive_kernel(expression: &str) -> F2mPoly {
+        let mut terms = Vec::new();
+        let mut start = 0;
+        let mut depth = 0;
+        for (index, symbol) in expression.char_indices() {
+            match symbol {
+                '(' => depth += 1,
+                ')' => depth -= 1,
+                '+' if depth == 0 => {
+                    terms.push(expression[start..index].trim());
+                    start = index + 1;
+                }
+                _ => {}
+            }
+        }
+        assert_eq!(depth, 0, "balanced archived polynomial");
+        terms.push(expression[start..].trim());
+        let mut coeffs = vec![F2mElement::zero(37); 37];
+        for term in terms {
+            let (coefficient, degree) = if let Some((coefficient, suffix)) = term.rsplit_once("*x")
+            {
+                (archive_field_element(coefficient), archive_x_degree(suffix))
+            } else if let Some(suffix) = term.strip_prefix('x') {
+                (1, archive_x_degree(suffix))
+            } else {
+                (archive_field_element(term), 0)
+            };
+            assert!(degree <= 36, "degree-36 archived kernel");
+            if degree == 0 {
+                // Sage prints the constant coefficient without parentheses.
+                coeffs[0] = elt(to_u64(&coeffs[0]) ^ coefficient, 37);
+            } else {
+                assert!(coeffs[degree].is_zero(), "duplicate kernel term");
+                coeffs[degree] = elt(coefficient, 37);
+            }
+        }
+        F2mPoly::from_coeffs(coeffs, 37)
+    }
+
+    fn archive_x_degree(suffix: &str) -> usize {
+        if suffix.is_empty() {
+            1
+        } else {
+            suffix
+                .strip_prefix('^')
+                .expect("archived x power")
+                .parse()
+                .expect("archived x exponent")
+        }
+    }
+
+    #[test]
+    fn archived_degree_73_descent_has_oriented_native_point_map() {
+        let bytes = include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz"
+        ));
+        let mut raw = String::new();
+        GzDecoder::new(&bytes[..])
+            .read_to_string(&mut raw)
+            .expect("frozen descent archive is gzip JSON");
+        let record: serde_json::Value = serde_json::from_str(&raw).expect("frozen descent JSON");
+        let certificate = &record["isogeny_certificate"];
+        assert_eq!(certificate["degree"], 73);
+        assert_eq!(
+            certificate["field_modulus"],
+            "x^37 + x^5 + x^4 + x^3 + x^2 + x + 1"
+        );
+        let irr = IrreduciblePoly {
+            degree: 37,
+            low_terms: vec![0, 1, 2, 3, 4, 5],
+        };
+        let order = 137_439_487_532u64;
+        let subgroup_order = 230_603_167u64;
+        assert_eq!(order % subgroup_order, 0);
+        let domain = Curve::with_order(37, &irr, 0, 1, order).expect("source curve");
+        let kernel = archive_kernel(
+            certificate["kernel_polynomial"]
+                .as_str()
+                .expect("archived kernel"),
+        );
+        assert_eq!(kernel.degree(), Some(36));
+        assert_eq!(to_u64(&kernel.lead()), 1);
+        let iso = isogeny_from_kernel(&domain, kernel, 73);
+        let expected_a6 = archive_field_element(
+            certificate["target_normalized_coefficients"]["a6"]
+                .as_str()
+                .expect("archived normalized a6"),
+        );
+        assert_eq!(iso.a6_codomain, expected_a6);
+        assert_eq!(
+            iso.t,
+            archive_field_element(
+                certificate["target_normalized_coefficients"]["y_shift"]
+                    .as_str()
+                    .expect("archived y shift")
+            )
+        );
+        let codomain = Curve::with_order(37, &irr, 0, expected_a6, order).expect("leaf curve");
+        let map = |p| velu_point_map(p, &iso.kernel, 37, &irr).expect("defined isogeny map");
+        assert_eq!(map(FastPoint::INFINITY), FastPoint::INFINITY);
+
+        let mut points = Vec::new();
+        for x in 1..128 {
+            let Some(p) = domain.points_with_x(x).into_iter().next() else {
+                continue;
+            };
+            let p = domain.fast.mul_u64(p, order / subgroup_order);
+            if p.infinity || points.contains(&p) {
+                continue;
+            }
+            assert!(domain.fast.mul_u64(p, subgroup_order).infinity);
+            let image = map(p);
+            assert!(!image.infinity);
+            assert!(codomain.fast.is_on_curve(image));
+            assert!(codomain.fast.mul_u64(image, subgroup_order).infinity);
+            assert_eq!(map(domain.fast.neg(p)), codomain.fast.neg(image));
+            assert_eq!(
+                Some(image.x),
+                velu_x_map(&elt(p.x, 37), &iso.kernel, 37, &irr).map(|x| to_u64(&x))
+            );
+            points.push(p);
+            if points.len() == 8 {
+                break;
+            }
+        }
+        assert_eq!(points.len(), 8, "deterministic subgroup sample");
+        for pair in points.windows(2) {
+            let p = pair[0];
+            let q = pair[1];
+            assert_eq!(
+                map(domain.fast.add(p, q)),
+                codomain.fast.add(map(p), map(q)),
+                "archived degree-73 map must be a homomorphism"
+            );
+        }
+        let p = points[0];
+        let d = 12_345_678u64;
+        assert_eq!(
+            map(domain.fast.mul_u64(p, d)),
+            codomain.fast.mul_u64(map(p), d),
+            "transported target must retain its signed logarithm"
+        );
     }
 }
