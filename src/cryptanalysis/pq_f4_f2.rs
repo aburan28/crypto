@@ -156,12 +156,6 @@ pub struct F4Stats {
     /// Divisibility tests made by symbolic preprocessing, one word
     /// operation each; reported, not in `word_xors`.
     pub divisor_tests: u64,
-    /// Exact leading-monomial map probes and direct active-basis tests;
-    /// their sum is [`Self::divisor_tests`].
-    pub divisor_submask_lookups: u64,
-    pub divisor_linear_tests: u64,
-    /// Largest reusable dense reducer-index allocation.
-    pub reducer_index_bytes_max: u64,
     /// Elements added to the basis after the initial echelon.
     pub new_elements: u64,
     /// Highest step degree processed.
@@ -1468,131 +1462,22 @@ impl State {
         self.active[h] = true;
     }
 
-    /// Return the same shortest active divisor as the linear reference.
-    ///
-    /// When an exact leading-monomial index is supplied and `m` has no more
-    /// nonzero submasks than there are active elements, enumerate those
-    /// submasks instead.  A map entry keeps the shortest polynomial for one
-    /// leading monomial, with the lowest basis index on a tie; comparing the
-    /// same tuple across every divisor therefore preserves the linear scan's
-    /// answer exactly.
-    fn reducer_for(
-        &self,
-        m: u64,
-        active: &[usize],
-        active_by_lm: Option<&DenseReducerIndex>,
-        deadline: Option<Instant>,
-    ) -> Result<ReducerLookup, ()> {
+    /// Active basis elements whose leading monomial divides `m`, the
+    /// shortest first.
+    /// The active element with the fewest terms whose leading monomial
+    /// divides `m` (the first such on a tie).  Tests every active element,
+    /// which the caller counts as `active.len()` divisor tests.
+    fn reducer_among(&self, m: u64, active: &[usize]) -> Option<usize> {
         let mut best: Option<usize> = None;
-        let mut submask_lookups = 0u64;
-        let mut linear_tests = 0u64;
-        let submask_count = 1usize
-            .checked_shl(m.count_ones())
-            .map_or(usize::MAX, |count| count - 1);
-        if let Some(index) = active_by_lm.filter(|_| submask_count <= active.len()) {
-            let mut divisor = m;
-            let mut visited = 0usize;
-            while divisor != 0 {
-                if visited != 0
-                    && visited.is_multiple_of(1024)
-                    && deadline.is_some_and(|limit| Instant::now() >= limit)
-                {
-                    return Err(());
-                }
-                submask_lookups += 1;
-                if let Some(g) = index.get(divisor) {
-                    let candidate = (self.polys[g].terms.len(), g);
-                    if best.is_none_or(|b| candidate < (self.polys[b].terms.len(), b)) {
-                        best = Some(g);
-                    }
-                }
-                divisor = (divisor - 1) & m;
-                visited += 1;
-            }
-        } else {
-            for (visited, &g) in active.iter().enumerate() {
-                if visited != 0
-                    && visited.is_multiple_of(1024)
-                    && deadline.is_some_and(|limit| Instant::now() >= limit)
-                {
-                    return Err(());
-                }
-                linear_tests += 1;
-                if self.lm[g] & !m == 0
-                    && best.is_none_or(|b| {
-                        (self.polys[g].terms.len(), g) < (self.polys[b].terms.len(), b)
-                    })
-                {
-                    best = Some(g);
-                }
-            }
-        }
-        Ok(ReducerLookup {
-            reducer: best,
-            submask_lookups,
-            linear_tests,
-        })
-    }
-}
-
-/// Largest Boolean domain for which a direct leading-monomial array is kept.
-const DENSE_REDUCER_INDEX_VARS: usize = 20;
-
-/// The best active basis element at each exact leading-monomial mask.
-///
-/// The array is allocated once per F4 call. Rebuilding it clears only masks
-/// touched by the preceding step, avoiding a full-domain fill and a fresh hash
-/// allocation at every symbolic-preprocessing matrix.
-struct DenseReducerIndex {
-    best: Vec<u32>,
-    touched: Vec<u32>,
-}
-
-impl DenseReducerIndex {
-    fn new(n_vars: usize) -> Self {
-        assert!(n_vars <= DENSE_REDUCER_INDEX_VARS);
-        Self {
-            best: vec![NONE; 1usize << n_vars],
-            touched: Vec::new(),
-        }
-    }
-
-    fn rebuild(&mut self, state: &State, active: &[usize]) {
-        for mask in self.touched.drain(..) {
-            self.best[mask as usize] = NONE;
-        }
-        self.touched.reserve(active.len());
         for &g in active {
-            debug_assert!(g < u32::MAX as usize);
-            let mask = state.lm[g] as usize;
-            let current = self.best[mask];
-            if current == NONE {
-                self.best[mask] = g as u32;
-                self.touched.push(mask as u32);
-            } else {
-                let current = current as usize;
-                if (state.polys[g].terms.len(), g) < (state.polys[current].terms.len(), current) {
-                    self.best[mask] = g as u32;
-                }
+            if self.lm[g] & !m == 0
+                && best.is_none_or(|b| self.polys[g].terms.len() < self.polys[b].terms.len())
+            {
+                best = Some(g);
             }
         }
+        best
     }
-
-    #[inline]
-    fn get(&self, mask: u64) -> Option<usize> {
-        let value = self.best[mask as usize];
-        (value != NONE).then_some(value as usize)
-    }
-
-    fn bytes(&self) -> u64 {
-        ((self.best.capacity() + self.touched.capacity()) * std::mem::size_of::<u32>()) as u64
-    }
-}
-
-struct ReducerLookup {
-    reducer: Option<usize>,
-    submask_lookups: u64,
-    linear_tests: u64,
 }
 
 /// **Compute the reduced Gröbner basis** of the ideal `initial` generates
@@ -1606,25 +1491,13 @@ pub fn groebner_basis_f4(
     budget: Option<Duration>,
 ) -> (Vec<F2BoolPoly>, F4Stats) {
     static BATCH_INSERTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    static INDEXED_REDUCERS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let batch_inserts =
         *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
-    let indexed_reducers = *INDEXED_REDUCERS
-        .get_or_init(|| std::env::var("F4_F2_INDEXED_REDUCERS").as_deref() == Ok("1"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
-    let mut reducer_index = (indexed_reducers && n_vars <= DENSE_REDUCER_INDEX_VARS)
-        .then(|| DenseReducerIndex::new(n_vars));
-    if let Some(index) = &reducer_index {
-        st.reducer_index_bytes_max = index.bytes();
-    }
     let one = || vec![F2BoolPoly::one(n_vars)];
     let finish = |basis: Vec<F2BoolPoly>, mut st: F4Stats| {
-        debug_assert_eq!(
-            st.divisor_tests,
-            st.divisor_submask_lookups + st.divisor_linear_tests
-        );
         st.basis_len = basis.len() as u64;
         st.wall_ns = started.elapsed().as_nanos() as u64;
         (basis, st)
@@ -1732,10 +1605,6 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        if let Some(index) = &mut reducer_index {
-            index.rebuild(&s, &active);
-            st.reducer_index_bytes_max = st.reducer_index_bytes_max.max(index.bytes());
-        }
         let mut no_divisor = MonomialSeen::new(n_vars);
         // The first level: every monomial of the S-rows but the lcms.
         let s_terms: usize = half_rows
@@ -1784,6 +1653,10 @@ pub fn groebner_basis_f4(
         // order of examination — a monomial's reducer depends only on the
         // monomial — and a large level's lookups, products and membership
         // tests are independent of one another, so they run in parallel.
+        let reducer_row = |m: u64| {
+            s.reducer_among(m, &active)
+                .map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
+        };
         // the terms a reducer row carries, on average, to price a level
         let mean_terms = active
             .iter()
@@ -1791,48 +1664,16 @@ pub fn groebner_basis_f4(
             .sum::<usize>()
             / active.len().max(1);
         let mut frontier = queue;
-        'levels: while !frontier.is_empty() {
-            if deadline.is_some_and(|limit| Instant::now() >= limit) {
-                st.timed_out = true;
-                break;
-            }
+        while !frontier.is_empty() {
+            st.divisor_tests += (active.len() * frontier.len()) as u64;
             // (sizes first: asking rayon its thread count starts its pool)
             let parallel = frontier.len() >= PAR_REDUCERS
                 && frontier.len() * mean_terms >= PAR_PRODUCT_TERMS
                 && rayon::current_num_threads() > 1;
-            let lookup = |&m: &u64| s.reducer_for(m, &active, reducer_index.as_ref(), deadline);
-            let lookups: Vec<Result<ReducerLookup, ()>> = if parallel {
-                frontier.par_iter().map(lookup).collect()
-            } else {
-                frontier.iter().map(lookup).collect()
-            };
-            let mut found = Vec::with_capacity(frontier.len());
-            for lookup in lookups {
-                let Ok(lookup) = lookup else {
-                    st.timed_out = true;
-                    break 'levels;
-                };
-                st.divisor_submask_lookups += lookup.submask_lookups;
-                st.divisor_linear_tests += lookup.linear_tests;
-                st.divisor_tests += lookup.submask_lookups + lookup.linear_tests;
-                found.push(lookup.reducer);
-            }
             let rows: Vec<Option<F2BoolPoly>> = if parallel {
-                frontier
-                    .par_iter()
-                    .zip(&found)
-                    .map(|(&m, &g)| {
-                        g.map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
-                    })
-                    .collect()
+                frontier.par_iter().map(|&m| reducer_row(m)).collect()
             } else {
-                frontier
-                    .iter()
-                    .zip(&found)
-                    .map(|(&m, &g)| {
-                        g.map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
-                    })
-                    .collect()
+                frontier.iter().map(|&m| reducer_row(m)).collect()
             };
             // a reducer leads with its monomial, already examined
             let unseen = |r: &F2BoolPoly| -> Vec<u64> {
@@ -1871,11 +1712,6 @@ pub fn groebner_basis_f4(
                 }
             }
             frontier = next;
-        }
-        if st.timed_out {
-            st.build_ns += t.elapsed().as_nanos() as u64;
-            s.pairs.extend(selected);
-            break;
         }
         st.reducer_rows += reducers.len() as u64;
 
@@ -2371,60 +2207,6 @@ mod tests {
                     dense_stats.pairs_product_skipped, quadratic_stats.pairs_product_skipped,
                     "product count n={n_vars} round={round}"
                 );
-            }
-        }
-    }
-
-    #[test]
-    fn indexed_reducer_lookup_matches_the_linear_reference_exhaustively() {
-        let n = 10usize;
-        let mut rng = StdRng::seed_from_u64(0x1d3e_1770_2026);
-        for round in 0..16 {
-            let count = rng.gen_range(8..80);
-            let mut polys = Vec::with_capacity(count);
-            let mut lm = Vec::with_capacity(count);
-            let mut active_flags = Vec::with_capacity(count);
-            for index in 0..count {
-                // Repeated leaders and repeated term counts exercise both tie
-                // breakers.  `State::reducer_for` only relies on the stored
-                // leader and the canonical polynomial's exact term count.
-                let leader = rng.gen_range(1..(1u64 << n));
-                let mut masks = vec![leader];
-                for _ in 0..(index + round) % 9 {
-                    masks.push(rng.gen_range(0..(1u64 << n)));
-                }
-                polys.push(poly(&masks, n));
-                lm.push(leader);
-                active_flags.push(rng.gen_ratio(3, 4));
-            }
-            if !active_flags.iter().any(|&value| value) {
-                active_flags[0] = true;
-            }
-            let state = State {
-                n_vars: n,
-                polys,
-                lm,
-                active: active_flags,
-                pairs: Vec::new(),
-                pair_select_scratch: PairSelectScratch::default(),
-            };
-            let active: Vec<usize> = (0..count).filter(|&g| state.active[g]).collect();
-            let mut index = DenseReducerIndex::new(n);
-            index.rebuild(&state, &active);
-            for m in 0..(1u64 << n) {
-                let linear = state.reducer_for(m, &active, None, None).unwrap();
-                let indexed = state.reducer_for(m, &active, Some(&index), None).unwrap();
-                assert_eq!(indexed.reducer, linear.reducer, "round={round} m={m}");
-                assert_eq!(linear.submask_lookups, 0);
-                assert_eq!(linear.linear_tests, active.len() as u64);
-                let submasks = (1usize << m.count_ones()) - 1;
-                if submasks <= active.len() {
-                    assert_eq!(indexed.submask_lookups, submasks as u64);
-                    assert_eq!(indexed.linear_tests, 0);
-                } else {
-                    assert_eq!(indexed.submask_lookups, 0);
-                    assert_eq!(indexed.linear_tests, active.len() as u64);
-                }
             }
         }
     }
