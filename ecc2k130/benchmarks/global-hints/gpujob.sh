@@ -17,7 +17,7 @@ if [ -e .git ]; then
 fi
 nvcc --version | grep -q 'release 13\.3, V13\.3\.73'
 ARCH='PRO6000_ARCH=-gencode arch=compute_120,code=sm_120'
-COMMON='BATCH=16 THREADS=512 MINBLOCKS=1 WITNESS=0 GLOBAL_CG=0 TABLE_FUSED=0 TABLE_GLOBAL=0 TABLE_ADDEND_GLOBAL=0 TABLE_PHASE_POPC=0 CYCLE_PROFILE=0 PHASE_PROFILE=0 PACKED_CHAINS=1 PACKED_TOP_HOIST=0 PACKED_ONB_INV=0 PACKED_SLOT_PREFETCH=0 PACKED_SLOT_PIPELINE=0 PACKED_CLMAD_SQUARE=0 PACKED_KARAT3=0 PACKED_TOP_CLMAD=0 PACKED_ADD_COMBINE=0 PACKED_ALU_SQR=0 SIGMA_FUSED=0 SIGMA_FUSED_LATE_Y=0'
+COMMON='BATCH=16 THREADS=512 MINBLOCKS=1 WITNESS=0 GLOBAL_CG=0 TABLE_FUSED=0 TABLE_GLOBAL=0 TABLE_ADDEND_GLOBAL=0 TABLE_PHASE_POPC=0 CYCLE_PROFILE=0 PHASE_PROFILE=0 PACKED_CHAINS=1 PACKED_TOP_HOIST=0 PACKED_ONB_INV=0 PACKED_SLOT_PREFETCH=0 PACKED_SLOT_PIPELINE=0 PACKED_CLMAD_SQUARE=0 PACKED_KARAT3=0 PACKED_TOP_CLMAD=0 PACKED_ADD_COMBINE=0 PACKED_ALU_SQR=0 SIGMA_FUSED=0 SIGMA_FUSED_LATE_Y=0 TABLE_GLOBAL_HINT_THREADS=128'
 VERIFY_THREADS=96256
 BENCH_THREADS=385024
 {
@@ -87,6 +87,8 @@ markers() {
     grep -Eq '^packed kernel: [0-9]+ registers/thread, [0-9]+ local bytes/thread, [0-9]+ shared bytes/block, single-product multiplier$' "$log" || return 1
     if [ "$global" = 1 ]; then
         grep -qx "packed GPU-wide hint queue: $((workers*16)) entries, 188 resolver blocks of 128 threads" "$log" || return 1
+        grep -qx "packed GPU-wide hint memory: $((workers*16*4)) queue bytes, 4 counter bytes" "$log" || return 1
+        grep -qx 'packed GPU-wide resolver geometry: 188 blocks, 128 threads/block, 4 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 128 x 1' "$log" || return 1
         grep -Eq '^packed hint select kernel: [0-9]+ registers/thread,' "$log" || return 1
         grep -Eq '^packed hint resolve kernel: [0-9]+ registers/thread,' "$log" || return 1
     fi
