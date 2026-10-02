@@ -24,7 +24,6 @@ isolation="$repo_root/tools/isolated_bench.py"
 cp "$study_dir"/{worker.rs,verify.rs,Cargo.toml,Cargo.lock,protocol.json,PROTOCOL.md,README.md,run.sh} "$out/"
 cp /proc/cpuinfo "$out/cpuinfo.txt"
 cp /proc/meminfo "$out/meminfo.txt"
-cat /sys/devices/system/cpu/cpu2/topology/thread_siblings_list > "$out/cpu-siblings.txt"
 rustc --version --verbose > "$out/rustc.txt"
 git -C "$repo_root" rev-parse HEAD > "$out/git-head.txt"
 : > "$out/raw.jsonl"
@@ -67,7 +66,7 @@ if [[ $readiness_status -ne 0 ]]; then
 fi
 
 set +e
-python3 "$isolation" run --cpus "$(cat "$out/cpu-siblings.txt")" --out "$out/conditions.jsonl" --label "f5-ceiling/$phase" \
+python3 "$isolation" run --cpus 1 --out "$out/conditions.jsonl" --label "f5-ceiling/$phase" \
   --settle 2 --max-other-cpu 0.10 --max-psi 5.0 -- \
   "$worker" --campaign "$phase" "$out/protocol.json" > "$out/raw.jsonl" 2> "$out/worker.stderr"
 worker_status=$?

@@ -69,11 +69,9 @@ and both seeds: **four groups**. Each group has its own paired A/A timing
 noise, source and binary hash, CPU feature record, peak RSS, phase times,
 F5 report counters, row-space fingerprint and cap status.
 
-Use one reserved Linux x86-64 AVX2 **physical core**, with every SMT sibling
-of logical CPU 2 taken from the host's sysfs topology and passed to the
-existing isolation controller. Record that exact sibling list and every
-thread left there. Use one worker thread, other-process CPU fraction at most
-10%, and CPU PSI some avg10 at
+Use a reserved Linux x86-64 AVX2 CPU through the existing isolation
+controller, with one worker thread, every thread left on the reserved CPU
+recorded, other-process CPU fraction at most 10%, and CPU PSI some avg10 at
 most 5.0. Retain every refused preparation. A 900-second worker cap, 64 MiB raw
 evidence cap and exact source/protocol hashes apply. A timeout, OOM, false
 route flag, incorrect result, incomplete cell or contended receipt is

@@ -21,3 +21,18 @@ digest validation and destruction are charged inside outer time `T`, while
 immutable input construction and the independent small F4 cross-check are
 common supplied-reference work outside the call clock. This clarifies the
 implemented metric without changing the ceiling formula or selecting data.
+
+## Preflight-only SMT reservation correction
+
+The first GitHub Linux x86 discovery attempt at source
+`d386b1069320e6f21ccc3646cc94cdd785a661bb` refused to launch a worker:
+the isolation controller reported that logical CPU 1 shares a physical core
+with CPU 0 and requires both siblings reserved. Its `raw.jsonl` is empty,
+`failure.json` says `performance_admitted=false`, and all artifact bytes are
+retained separately. No registered timing or F5 phase sample was taken.
+
+The launcher now reads logical CPU 2's full `thread_siblings_list` from
+sysfs and reserves that entire physical core, while `RAYON_NUM_THREADS=1`
+keeps one worker thread. The verifier checks that the receipt's reserved
+logical CPUs equal the recorded sysfs list. This corrects resource admission
+only; the fixed route, formula, seeds, caps and stop rule are unchanged.

@@ -61,22 +61,6 @@ fn bootstrap_upper(values: &[f64], seed: u64, resamples: usize) -> f64 {
     quantile(&medians, 0.975)
 }
 
-fn parse_cpu_list(text: &str) -> Vec<u64> {
-    let mut out = std::collections::BTreeSet::new();
-    for part in text.trim().split(',') {
-        if let Some((start, end)) = part.split_once('-') {
-            let start: u64 = start.parse().expect("CPU range start");
-            let end: u64 = end.parse().expect("CPU range end");
-            assert!(start <= end);
-            out.extend(start..=end);
-        } else {
-            out.insert(part.parse().expect("CPU number"));
-        }
-    }
-    assert!(!out.is_empty());
-    out.into_iter().collect()
-}
-
 fn resource(path: &Path, phase: &str, worker_seconds: u64) -> Value {
     let lines = raw_lines(path);
     assert_eq!(lines.len(), 1);
@@ -84,16 +68,7 @@ fn resource(path: &Path, phase: &str, worker_seconds: u64) -> Value {
     assert_eq!(receipt["schema"], "isolated-bench/1");
     assert_eq!(receipt["mode"], "run");
     assert_eq!(receipt["label"], format!("f5-ceiling/{phase}"));
-    let expected_cpus = parse_cpu_list(
-        &fs::read_to_string(path.with_file_name("cpu-siblings.txt")).expect("CPU sibling record"),
-    );
-    let reserved_cpus = receipt["reserved_cpus"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|value| value.as_u64().unwrap())
-        .collect::<Vec<_>>();
-    assert_eq!(reserved_cpus, expected_cpus);
+    assert_eq!(receipt["reserved_cpus"].as_array().unwrap().len(), 1);
     assert_eq!(receipt["run"]["contended"], false);
     assert_eq!(receipt["run"]["exit_status"], 0);
     assert_eq!(receipt["host"]["machine"], "x86_64");
@@ -508,12 +483,6 @@ mod tests {
     }
 
     #[test]
-    fn cpu_list_parser_covers_smt_ranges() {
-        assert_eq!(parse_cpu_list("2-3\n"), vec![2, 3]);
-        assert_eq!(parse_cpu_list("0,2-3"), vec![0, 2, 3]);
-    }
-
-    #[test]
     fn reported_ceiling_survives_json_roundtrip() {
         for value in [1.9999999999999998_f64, 2.0000000000000004_f64] {
             let text = serde_json::to_string(&value).unwrap();
@@ -524,15 +493,11 @@ mod tests {
 
     #[test]
     fn resource_gate_rejects_contended_receipt() {
-        let root = std::env::temp_dir().join(format!("f5-ceiling-resource-{}", std::process::id()));
-        assert!(!root.exists());
-        fs::create_dir(&root).unwrap();
-        let path = root.join("conditions.jsonl");
-        let siblings = root.join("cpu-siblings.txt");
-        fs::write(&siblings, b"0-1\n").unwrap();
+        let path = std::env::temp_dir().join(format!("f5-ceiling-resource-{}", std::process::id()));
+        assert!(!path.exists());
         let mut record = json!({
             "schema":"isolated-bench/1","mode":"run","label":"f5-ceiling/discovery",
-            "host":{"machine":"x86_64"},"reserved_cpus":[0,1],
+            "host":{"machine":"x86_64"},"reserved_cpus":[1],
             "preflight":{"settle":{"seconds":2.0,"other_cpu_seconds":0.02},
                 "conditions":{"psi_cpu":{"some":{"avg10":1.0}}}},
             "run":{"contended":false,"exit_status":0,"wall_seconds":10.0,
@@ -543,7 +508,7 @@ mod tests {
         record["run"]["contended"] = json!(true);
         fs::write(&path, format!("{record}\n")).unwrap();
         assert!(std::panic::catch_unwind(|| resource(&path, "discovery", 900)).is_err());
-        fs::remove_dir_all(root).unwrap();
+        fs::remove_file(path).unwrap();
     }
 
     #[test]

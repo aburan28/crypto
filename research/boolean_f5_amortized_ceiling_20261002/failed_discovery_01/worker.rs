@@ -19,7 +19,7 @@ const PROTOCOL_BYTES: &[u8] = include_bytes!("protocol.json");
 const SOURCE_BYTES: &[u8] = include_bytes!("worker.rs");
 const VERIFY_BYTES: &[u8] = include_bytes!("verify.rs");
 const FROZEN_PROTOCOL_SHA256: &str =
-    "9dcb35c904c96b662dca6385edd9b55e61b1d989ef85ccf9df98531aa3c1f583";
+    "689519294a8a087fa6bad737fa15b77aa741c3930f1982df73b6937225a3e5a9";
 
 mod verify;
 
@@ -45,7 +45,6 @@ struct Protocol {
     upper_bound_greater_than: f64,
     worker_seconds: u64,
     evidence_cap_bytes: usize,
-    reservation: String,
 }
 
 #[derive(Clone)]
@@ -205,7 +204,6 @@ fn route() -> (BTreeMap<String, String>, Protocol) {
     assert_eq!(protocol.primary_batch, 32);
     assert_eq!(protocol.primary_groups, 4);
     assert_eq!(protocol.upper_bound_greater_than, 2.0);
-    assert_eq!(protocol.reservation, "all_smt_siblings_of_logical_cpu_2");
     (protocol.env.clone(), protocol)
 }
 
@@ -480,14 +478,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn frozen_route_and_full_core_reservation_parse() {
-        let (env, protocol) = route();
-        assert_eq!(env["KIC_F5_DIRECT_PACK"], "1");
-        assert_eq!(env["KIC_F5_UNPACK_DIRECT"], "1");
-        assert_eq!(protocol.reservation, "all_smt_siblings_of_logical_cpu_2");
-    }
 
     #[test]
     fn fixture_and_affine_walk_keep_quadratic_core() {

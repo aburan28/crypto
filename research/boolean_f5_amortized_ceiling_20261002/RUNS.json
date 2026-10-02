@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "discovery": null,
+  "holdout": null,
+  "failed_attempts": [
+    {
+      "path": "failed_discovery_01",
+      "workflow_run_id": 37003720117,
+      "workflow_attempt": 1,
+      "artifact_id": 11225258830,
+      "artifact_archive_sha256": "61959d87cd424b044cb7b80c5657acd9efbc3e36284ae7d8fbf91ecc38b7b1ce",
+      "source_head": "d386b1069320e6f21ccc3646cc94cdd785a661bb",
+      "manifest_sha256": "c9a39ec563eccfb6f93649ea57a8c6d43d10820488abce09f504ac8db0890ac6",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reason": "one_logical_cpu_shared_smt_core",
+      "worker_launched": false,
+      "performance_admitted": false,
+      "holdout_executed": false
+    }
+  ],
+  "decision": "awaiting_full_core_reserved_discovery",
+  "complete_f5_speedup": null,
+  "full_ic_cost": null,
+  "rho_ratio": null
+}
