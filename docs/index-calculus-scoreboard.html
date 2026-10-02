@@ -6799,6 +6799,42 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-pivot-screen-20261003">
+  <div class="panel-head">
+    <h2>Sibling Boolean pivot replay: full trace rejected <span class="chip">accounting</span></h2>
+    <p>The frozen native discovery verified 80 generated public quadratic branch pairs. All
+      80 shared a labelled row skeleton, but zero retained the same pivot-column sequence;
+      the preregistered low-rank and full-trace screen passed 0/64 eligible pairs at
+      n&ge;12. The fresh holdouts remain unused. There is no timed candidate or
+      complete-solver result.</p>
+    <p>For quadratic input and degree-3 Macaulay products, the difference between the
+      two branch matrices lies in the degree-at-most-two tail: each row is a linear
+      multiplier times an affine Boolean derivative. The exact capacity is
+      1+(n-1)+C(n-1,2). Measured difference ranks nearly fill that space. The cubic
+      columns are invariant, which leaves a separately testable graded-block idea;
+      it is not a measured speedup here.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_pivot_screen_20261003/CONCLUSION.md">decision and mathematical bound</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_pivot_screen_20261003/discovery_01/result.json">exact structural records</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_pivot_screen_20261003/discovery_01/manifest.json">sealed discovery bundle</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_pivot_screen_20261003/RUNS.json">run registry</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Discovery structural counts only; each row contains 16 paired restrictions.
+      Difference/capacity is a rank ratio against the exact degree-at-most-two upper
+      bound, not a time or full-method ratio.</caption>
+    <thead><tr><th>Original n</th><th>Difference rank</th><th>Tail capacity</th><th>Difference / capacity</th><th>Same pivot columns</th><th>Same full trace</th></tr></thead>
+    <tbody>
+      <tr><td>8</td><td>25–28</td><td>29</td><td>0.862–0.966</td><td>0/16</td><td>0/16</td></tr>
+      <tr><td>12</td><td>65–66</td><td>67</td><td>0.970–0.985</td><td>0/16</td><td>0/16</td></tr>
+      <tr><td>16</td><td>119–120</td><td>121</td><td>0.983–0.992</td><td>0/16</td><td>0/16</td></tr>
+      <tr><td>20</td><td>187–190</td><td>191</td><td>0.979–0.995</td><td>0/16</td><td>0/16</td></tr>
+      <tr><td>24</td><td>275–276</td><td>277</td><td>0.993–0.996</td><td>0/16</td><td>0/16</td></tr>
+    </tbody>
+  </table></div>
+  <p>Full solving, relation yield, calibrated operations and rho comparison remain null.
+    No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-envelope-indexed-20261002">
   <div class="panel-head">
     <h2>Indexed support envelope: exact reuse, no 2&times; discovery group <span class="chip">engineering</span></h2>
