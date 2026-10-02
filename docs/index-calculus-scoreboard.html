@@ -249,6 +249,19 @@
   }
   tbody tr:last-child td { border-bottom: 0; }
 
+
+  /* ---------- collapsed panels (progressive enhancement; see the script at the end of the page) ---------- */
+  .ic-collapse-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0; font-size: 13px; color: var(--muted); }
+  .ic-collapse-bar button { font: inherit; font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 4px 9px; cursor: pointer; }
+  .ic-collapse-bar button:hover, .ic-collapse-bar button:focus-visible { border-color: var(--data); color: var(--data); outline: none; }
+  .ic-toggle { cursor: pointer; }
+  .ic-toggle::before { content: "\25BE"; display: inline-block; width: 1em; margin-left: -1em; color: var(--muted); font-size: .8em; transform: translateY(-.1em); }
+  .is-collapsed .ic-toggle::before { content: "\25B8"; }
+  .is-collapsed .ic-toggle { color: var(--ink-2); }
+  .ic-toggle:focus-visible { outline: 2px solid var(--data); outline-offset: 3px; }
+  .is-collapsed { padding-bottom: 14px; }
+  .is-collapsed.panel > .panel-head { padding-bottom: 0; }
+  .ic-hid[hidden] { display: none; }
   .ref-note { margin: 28px 0 10px; padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--bound); background: var(--surface-sunk); color: var(--ink); font-size: 13px; line-height: 1.5; }
   .chip {
     display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
@@ -350,7 +363,9 @@
       <p><strong>Why the page is so long.</strong> It is a ledger, not a summary. Negative results,
         corrections and superseded figures stay on it by rule, with the old value kept as
         &ldquo;was&rdquo; beside the new one, so that an improvement in the code is never mistaken for
-        an improvement in the attack. The sections below are in the order the work was done.</p>
+        an improvement in the attack. The sections below are in the order the work was done.
+        Historical panels are collapsed to their titles: click a title to open one, follow a link into
+        it, or use <em>expand all</em> below. The panels the current verdict rests on stay open.</p>
     </div>
     <p><span class="chip">accounting</span> Volcano metadata correction:
       Frobenius-order conductors are now distinct from certified endomorphism
@@ -555,6 +570,12 @@
     <p><span class="chip">accounting</span> The first <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md">generic backend qualification</a> dispatch (seed 2026092901) was canceled at the six-hour job cap; artifact upload then failed. Trial counts, natural yield, full costs and paired rho ratios are unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md">second registration</a> (seed 2026092902) also produced no auditable bundle: the 300-minute measure step timed out, packing failed on a live tree, and zero campaign artifacts were uploaded. No F4/F5 or SAT family qualification was established by either censored run.</p></div>
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
+
+  <p class="ic-collapse-bar" id="ic-collapse-bar" hidden>
+    <button type="button" data-ic="expand">expand all</button>
+    <button type="button" data-ic="collapse">collapse all</button>
+    <span id="ic-collapse-count"></span>
+  </p>
 
   <div class="panel" id="ic-f5-v1-schema-failure-20260930">
     <div class="panel-head">
@@ -10560,5 +10581,105 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage201-exact-ends -->
+<script>
+  // Collapse historical panels to their titles. Progressive enhancement: with
+  // scripting off every panel is visible, as before. A panel stays open by
+  // default when its id is in OPEN below or it carries data-collapse="open";
+  // a link into a collapsed panel (hash navigation or find-in-page) opens it.
+  (function () {
+    var OPEN = {
+      'boundary-ledger': 1,
+      'koblitz-single-target-20261001': 1,
+      'ic-tool-programme-20261001': 1,
+      'genus-crossover': 1
+    };
+    var SEL = '.panel, section[id], section[aria-labelledby]';
+    var STORE = 'ic-scoreboard:expand-all';
+    var all = Array.prototype.slice.call(document.querySelectorAll(SEL)).filter(function (el) {
+      if (el.parentElement && el.parentElement.closest(SEL)) return false;   // nested: its outer panel toggles it
+      if (el.closest('header, aside, .notes')) return false;
+      return !!el.querySelector('h2, h3');
+    });
+    if (!all.length) return;
+
+    var panels = [];
+    all.forEach(function (el) {
+      var h = el.querySelector('h2, h3');
+      var keyId = el.id || (h && h.id) || (el.getAttribute('aria-labelledby') || '');
+      var openByDefault = !!OPEN[keyId] || el.getAttribute('data-collapse') === 'open';
+      // Everything off the path from the panel to its heading is hidden when collapsed.
+      var spine = [];
+      for (var n = h; n && n !== el; n = n.parentElement) spine.push(n);
+      var hid = [];
+      spine.concat([el]).forEach(function (node) {
+        Array.prototype.forEach.call(node.children, function (c) {
+          if (spine.indexOf(c) === -1 && c !== h) { c.classList.add('ic-hid'); hid.push(c); }
+        });
+      });
+      var note = el.previousElementSibling;
+      if (note && note.classList.contains('ref-note')) { note.classList.add('ic-hid'); hid.push(note); }
+      h.classList.add('ic-toggle');
+      h.setAttribute('tabindex', '0');
+      h.setAttribute('role', 'button');
+      var p = { el: el, h: h, hid: hid, open: openByDefault, def: openByDefault };
+      panels.push(p);
+      h.addEventListener('click', function (e) { if (e.target.closest('a')) return; set(p, !p.open); });
+      h.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(p, !p.open); }
+      });
+      hid.forEach(function (c) { c.addEventListener('beforematch', function () { set(p, true); }); });
+    });
+
+    function set(p, open) {
+      p.open = open;
+      p.el.classList.toggle('is-collapsed', !open);
+      p.h.setAttribute('aria-expanded', open ? 'true' : 'false');
+      p.hid.forEach(function (c) {
+        if (open) c.removeAttribute('hidden'); else c.setAttribute('hidden', 'until-found');
+      });
+      count();
+    }
+    function count() {
+      var n = panels.filter(function (p) { return p.open; }).length;
+      var c = document.getElementById('ic-collapse-count');
+      if (c) c.textContent = n + ' of ' + panels.length + ' panels open';
+    }
+    function setAll(open) { panels.forEach(function (p) { set(p, open); }); }
+    function panelOf(node) {
+      for (var i = 0; i < panels.length; i++) if (panels[i].el === node || panels[i].el.contains(node)) return panels[i];
+      return null;
+    }
+    function openHash() {
+      var id = decodeURIComponent((location.hash || '').slice(1));
+      if (!id) return;
+      var t = document.getElementById(id);
+      if (!t) return;
+      var p = panelOf(t);
+      if (p && !p.open) { set(p, true); t.scrollIntoView(); }
+    }
+
+    var remembered = null;
+    try { remembered = localStorage.getItem(STORE); } catch (e) {}
+    if (remembered === '1') setAll(true); else panels.forEach(function (p) { set(p, p.def); });
+    openHash();
+    window.addEventListener('hashchange', openHash);
+
+    var bar = document.getElementById('ic-collapse-bar');
+    if (bar) {
+      bar.removeAttribute('hidden');
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-ic]');
+        if (!b) return;
+        var open = b.getAttribute('data-ic') === 'expand';
+        setAll(open);
+        try { if (open) localStorage.setItem(STORE, '1'); else localStorage.removeItem(STORE); } catch (err) {}
+      });
+    }
+    // Print everything, then restore the reader's view.
+    var saved = null;
+    window.addEventListener('beforeprint', function () { saved = panels.map(function (p) { return p.open; }); setAll(true); });
+    window.addEventListener('afterprint', function () { if (saved) panels.forEach(function (p, i) { set(p, saved[i]); }); saved = null; });
+  })();
+</script>
 </body>
 </html>
