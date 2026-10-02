@@ -13,6 +13,7 @@ const RESULT_SCHEMA: &str = "koblitz_stage190_phase_result.v1";
 const VERIFICATION_SCHEMA: &str = "koblitz_stage190_phase_verification.v1";
 const FINAL_SCHEMA: &str = "koblitz_stage190_final.v1";
 const FINAL_VERIFICATION_SCHEMA: &str = "koblitz_stage190_final_verification.v1";
+const DEFAULT_REPLAY_SCHEMA: &str = "koblitz_stage190_default_replay.v1";
 const METER_SCHEMA: &str = "koblitz_native_process_meter.v1";
 const RECEIPT_SCHEMA: &str = "koblitz_native_meter_receipt.v1";
 const SOURCE_INSTANCE_ID: &str = "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7";
@@ -153,6 +154,16 @@ struct FinalResult {
     koblitz_index_calculus_sota: bool,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct DefaultReplay {
+    schema: String,
+    reference_result_sha256: String,
+    correct: bool,
+    errors: Vec<String>,
+    receipt: MeterReceipt,
+    report: Value,
+}
+
 fn main() {
     if let Err(error) = real_main() {
         eprintln!("{error}");
@@ -213,7 +224,27 @@ fn real_main() -> AnyResult<()> {
                 Err("final verification failed".into())
             }
         }
-        _ => Err("usage: koblitz_f4_stage190 screen|confirm RUN_DIR RESULT VERIFICATION\n       koblitz_f4_stage190 verify RESULT VERIFICATION\n       koblitz_f4_stage190 finalize STAGE RESULT CANDIDATE_COMMIT FINALIZER_COMMIT\n       koblitz_f4_stage190 verify-final RESULT VERIFICATION".into()),
+        Some("default-replay") if args.len() == 5 => {
+            let result = compose_default_replay(Path::new(&args[1]), Path::new(&args[2]))?;
+            write_json(Path::new(&args[3]), &result)?;
+            let verification = verify_default_replay(Path::new(&args[3]), Path::new(&args[2]))?;
+            write_json(Path::new(&args[4]), &verification)?;
+            if verification.failed.is_empty() {
+                Ok(())
+            } else {
+                Err("default replay verification failed".into())
+            }
+        }
+        Some("verify-default") if args.len() == 4 => {
+            let verification = verify_default_replay(Path::new(&args[1]), Path::new(&args[2]))?;
+            write_json(Path::new(&args[3]), &verification)?;
+            if verification.failed.is_empty() {
+                Ok(())
+            } else {
+                Err("default replay verification failed".into())
+            }
+        }
+        _ => Err("usage: koblitz_f4_stage190 screen|confirm RUN_DIR RESULT VERIFICATION\n       koblitz_f4_stage190 verify RESULT VERIFICATION\n       koblitz_f4_stage190 default-replay RUN_DIR CONFIRMATION_RESULT RESULT VERIFICATION\n       koblitz_f4_stage190 verify-default RESULT CONFIRMATION_RESULT VERIFICATION\n       koblitz_f4_stage190 finalize STAGE RESULT CANDIDATE_COMMIT FINALIZER_COMMIT\n       koblitz_f4_stage190 verify-final RESULT VERIFICATION".into()),
     }
 }
 
@@ -545,6 +576,142 @@ fn verify_result(path: &Path) -> AnyResult<Verification> {
         passed: checks.saturating_sub(failures.len()),
         failed: failures,
     })
+}
+
+fn compose_default_replay(run_dir: &Path, reference_path: &Path) -> AnyResult<DefaultReplay> {
+    let receipt: MeterReceipt = read_json(&run_dir.join("receipt.json"))?;
+    let mut errors = validate_receipt(run_dir, &receipt);
+    if receipt
+        .process
+        .command
+        .iter()
+        .any(|arg| arg.starts_with("F4_F2_DISABLE_INNER_BUILD_PARALLEL="))
+    {
+        errors.push("default replay command contains a scheduling override".into());
+    }
+    let report: Value = read_json(&run_dir.join(&receipt.stdout.path))?;
+    errors.extend(validate_report(&report, Arm::BuildSerial));
+    let reference_bytes =
+        fs::read(reference_path).map_err(|e| format!("{}: {e}", reference_path.display()))?;
+    let reference: PhaseResult = serde_json::from_slice(&reference_bytes)
+        .map_err(|e| format!("{}: {e}", reference_path.display()))?;
+    let selected = reference
+        .runs
+        .iter()
+        .find(|run| run.arm == Arm::BuildSerial)
+        .ok_or_else(|| "confirmation has no build-serial arm".to_string())?;
+    for pointer in default_replay_pointers() {
+        if report.pointer(pointer) != selected.report.pointer(pointer) {
+            errors.push(format!("default/reference mismatch at {pointer}"));
+        }
+    }
+    Ok(DefaultReplay {
+        schema: DEFAULT_REPLAY_SCHEMA.into(),
+        reference_result_sha256: hex::encode(sha256(&reference_bytes)),
+        correct: errors.is_empty(),
+        errors,
+        receipt,
+        report,
+    })
+}
+
+fn verify_default_replay(path: &Path, reference_path: &Path) -> AnyResult<Verification> {
+    let bytes = fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let result: DefaultReplay =
+        serde_json::from_slice(&bytes).map_err(|e| format!("default replay: {e}"))?;
+    let run_dir = path
+        .parent()
+        .ok_or_else(|| "default replay has no run directory".to_string())?;
+    let mut checks = 0usize;
+    let mut failures = Vec::new();
+    check(
+        &mut checks,
+        &mut failures,
+        result.schema == DEFAULT_REPLAY_SCHEMA,
+        "default replay schema",
+    );
+    let receipt_errors = validate_receipt(run_dir, &result.receipt);
+    check(
+        &mut checks,
+        &mut failures,
+        receipt_errors.is_empty(),
+        "meter receipt replay",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        !result
+            .receipt
+            .process
+            .command
+            .iter()
+            .any(|arg| arg.starts_with("F4_F2_DISABLE_INNER_BUILD_PARALLEL=")),
+        "unset scheduling route",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        validate_report(&result.report, Arm::BuildSerial).is_empty(),
+        "default terminal record",
+    );
+    let reference_bytes =
+        fs::read(reference_path).map_err(|e| format!("{}: {e}", reference_path.display()))?;
+    let reference: PhaseResult = serde_json::from_slice(&reference_bytes)
+        .map_err(|e| format!("{}: {e}", reference_path.display()))?;
+    check(
+        &mut checks,
+        &mut failures,
+        result.reference_result_sha256 == hex::encode(sha256(&reference_bytes)),
+        "reference identity",
+    );
+    let selected = reference
+        .runs
+        .iter()
+        .find(|run| run.arm == Arm::BuildSerial)
+        .ok_or_else(|| "confirmation has no build-serial arm".to_string())?;
+    check(
+        &mut checks,
+        &mut failures,
+        default_replay_pointers()
+            .iter()
+            .all(|pointer| result.report.pointer(pointer) == selected.report.pointer(pointer)),
+        "default/reference structure",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.correct == result.errors.is_empty() && result.correct,
+        "stored default decision",
+    );
+    Ok(Verification {
+        schema: VERIFICATION_SCHEMA.into(),
+        result_sha256: hex::encode(sha256(&bytes)),
+        checks,
+        passed: checks.saturating_sub(failures.len()),
+        failed: failures,
+    })
+}
+
+fn default_replay_pointers() -> &'static [&'static str] {
+    &[
+        "/status",
+        "/exhaustive",
+        "/source_instance_id",
+        "/solver_equations_blake3",
+        "/solver_equations_total",
+        "/solver_terms_total",
+        "/fixed_x1_masks_visited",
+        "/fixed_x1_systems_constructed",
+        "/fixed_x1_systems_completed",
+        "/cost/ops",
+        "/cost/degree_reached",
+        "/cost/solving_degree",
+        "/cost/extra/inner_build_parallel_disabled_calls",
+        "/cost/extra/pair_candidate_visits",
+        "/cost/extra/pair_dense_select_calls",
+        "/cost/extra/matrix_rows_sum",
+        "/cost/extra/word_xors_performed",
+    ]
 }
 
 fn finalize_stage(
