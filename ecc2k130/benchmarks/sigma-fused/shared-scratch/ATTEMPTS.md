@@ -43,3 +43,17 @@ function static, compiled reserve and compiled extent separately.  This
 attempt is positive compile evidence but remains superseded because the audit
 process exited nonzero and the subsequent source adds the explicit
 square-table incompatibility guard.  No GPU or timing operation ran.
+
+## Exact-head compile gate
+
+GitHub Actions run `37053839217`, job `110993636426`, passed at exact source
+`fc3941078db32d1a81f2732fd3622c13866208e6`.  The independent audit rebuilt
+locally and reproduced `result.json` byte for byte.  Its result SHA-256 is
+`6a304c442fc749864acf4cae9fce26c63b61829bd6a1c1788d5094b13d2ae6de`.
+The retained compile receipt and resource logs are in
+[`results/compile-fc394107/`](results/compile-fc394107/).
+
+This gate compiled native `sm_120` code without a GPU.  The two-block result is
+a static capacity calculation from registers and compiled shared extent;
+actual driver-reserved bytes, occupancy and helper correctness must still be
+read from the target RTX PRO 6000 before timing.

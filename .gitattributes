@@ -56,3 +56,6 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hy
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/PROTOCOL.md whitespace=-blank-at-eof
 # Preserve sealed Rust test stdout in the Boolean half-word comparison.
 research/boolean_halfword_20260923/*/test.stdout whitespace=-blank-at-eof
+
+# Preserve hash-bound CUDA compiler and cuobjdump receipts byte for byte.
+ecc2k130/benchmarks/sigma-fused/shared-scratch/results/** -whitespace

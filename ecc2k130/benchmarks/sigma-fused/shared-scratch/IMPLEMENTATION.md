@@ -1,6 +1,7 @@
 # Fused-sigma shared scratch: implementation status
 
-Status: **draft implementation; compile and GPU gates pending.**  This branch
+Status: **draft implementation; compile gate passed, actual-device gates
+pending.**  This branch
 starts from `main` merge `bc217d318dde444014cde4e81dea02c70b126995`, which
 contains the frozen [proposal](PROPOSAL.md) and [protocol](PROTOCOL.md).  No GPU
 has been allocated for this implementation.
@@ -59,8 +60,18 @@ PASS: 144 native compact/shared cases, 83232 field records,
 ```
 
 Strict compilation, UBSAN, the existing fused-star native suite and default
-CPU compilation pass.  Exact CUDA 13.3 `sm_120` resources are pending the
-hosted compile workflow.  GPU correctness, runtime occupancy and timing remain
-unmeasured.  The branch stops before GPU dispatch until the compile artifact
-and source/producer review pass and the root coordinator releases the single
-frozen allocation.
+CPU compilation pass.  Exact-head hosted run
+[`37053839217`](https://github.com/aburan28/crypto/actions/runs/37053839217)
+compiled source `fc3941078db32d1a81f2732fd3622c13866208e6` with CUDA
+13.3.73 for native `sm_120`.  All four arms report 126 registers/thread, zero
+walk stack/local/spills, the registered ptxas static shared bytes, an exact
+1,024-byte compiled reserve, and the registered compiled extents.  The static
+capacity calculation remains two blocks/SM for every arm.  The retained
+receipt is [`results/compile-fc394107/`](results/compile-fc394107/).
+
+An independent read-only source and producer review passes the same-thread
+routing, full tag, array bounds, partial-block barrier, launch boundary,
+checkpoint and exact-work contracts at that source.  GPU helper execution,
+runtime occupancy, replay/corpus/checkpoint equivalence and timing remain
+unmeasured.  The branch stops before GPU dispatch until the root coordinator
+releases the single frozen allocation.
