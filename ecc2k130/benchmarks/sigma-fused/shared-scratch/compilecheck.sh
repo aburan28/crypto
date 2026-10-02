@@ -56,6 +56,7 @@ sha256sum Makefile include/packed131.h include/packedcompactstate.cuh \
     benchmarks/sigma-fused/shared-scratch/compile_audit.cpp \
     benchmarks/sigma-fused/shared-scratch/source_audit.cpp \
     benchmarks/sigma-fused/shared-scratch/summarize.cpp \
+    benchmarks/sigma-fused/shared-scratch/log_check.cpp \
     benchmarks/sigma-fused/shared-scratch/gpujob.sh \
     benchmarks/sigma-fused/shared-scratch/compilecheck.sh \
     > "$OUT/source-files.sha256"

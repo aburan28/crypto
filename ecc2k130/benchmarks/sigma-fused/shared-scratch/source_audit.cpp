@@ -94,6 +94,8 @@ int main(int argc, char **argv) {
             root / "benchmarks/sigma-fused/shared-scratch/gpujob.sh");
         const std::string summary = read(
             root / "benchmarks/sigma-fused/shared-scratch/summarize.cpp");
+        const std::string logCheck = read(
+            root / "benchmarks/sigma-fused/shared-scratch/log_check.cpp");
         const std::string compile = read(
             root / "benchmarks/sigma-fused/shared-scratch/compilecheck.sh");
 
@@ -159,6 +161,15 @@ int main(int argc, char **argv) {
         absent(job, "python", "native-only GPU producer");
         contains(job, "sample screen 5 4 cache4", "frozen timing schedule");
         contains(job, "SIGMA_FUSED_SHARED_SLOTS=", "one-knob builds");
+        contains(job, "$((VERIFY_THREADS * 16 * 95 * 7)) 300 -1",
+                 "full correctness exact work");
+        contains(job, "$((513 * 16 * 95 * 4)) 300 -1",
+                 "prefix exact work");
+        contains(job, "$((513 * 16 * 95 * 3)) 0 380",
+                 "continuation exact work/resume");
+        contains(logCheck, "truncated work", "correctness-log negative controls");
+        contains(logCheck, "duplicate finish", "correctness-log negative controls");
+        contains(logCheck, "resume drift", "correctness-log negative controls");
         contains(summary, "geometricMeans[arm] >= 1.01", "decision threshold");
         contains(summary, "logical field traffic is not DRAM traffic",
                  "result claim boundary");

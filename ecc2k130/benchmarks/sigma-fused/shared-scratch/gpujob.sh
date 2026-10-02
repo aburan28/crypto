@@ -76,11 +76,14 @@ g++ -O2 -std=c++17 -Wall -Wextra -Werror \
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
     benchmarks/sigma-fused/shared-scratch/summarize.cpp -o /tmp/scratch-summarize
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+    benchmarks/sigma-fused/shared-scratch/log_check.cpp -o /tmp/scratch-log-check
+g++ -O2 -std=c++17 -Wall -Wextra -Werror \
     benchmarks/sigma-fused/corpus_identity.cpp -o /tmp/corpus-identity
 {
     /tmp/scratch-model --self-test
     /tmp/scratch-native
     /tmp/scratch-summarize --self-test
+    /tmp/scratch-log-check --self-test
 } > "$R/native-controls.log" 2>&1
 
 {
@@ -95,7 +98,8 @@ g++ -O2 -std=c++17 -Wall -Wextra -Werror \
         benchmarks/sigma-fused/shared-scratch/compile_audit.cpp \
         benchmarks/sigma-fused/shared-scratch/compilecheck.sh \
         benchmarks/sigma-fused/shared-scratch/gpujob.sh \
-        benchmarks/sigma-fused/shared-scratch/summarize.cpp
+        benchmarks/sigma-fused/shared-scratch/summarize.cpp \
+        benchmarks/sigma-fused/shared-scratch/log_check.cpp
 } | LC_ALL=C sort -u | xargs sha256sum > "$R/source-files.sha256"
 
 build() {
@@ -163,7 +167,7 @@ verify() {
         --verify 300 --run-id "$RUN_ID" --dp-file "$R/dp-$arm.bin" \
         > "$log" 2>&1
     markers "$log" "$arm" "$VERIFY_THREADS" 48 95
-    grep -Eq '\(300 verified against the reference, 0 dropped\)$' "$log"
+    /tmp/scratch-log-check "$log" $((VERIFY_THREADS * 16 * 95 * 7)) 300 -1
 }
 for arm in $ARMS; do verify "$arm"; done
 for arm in $ARMS; do grep '^packed kernel:' "$R/verify-$arm.log" > "$R/resource-$arm.txt"; done
@@ -182,7 +186,7 @@ for boundary in 1 2 3 7 16 95; do
             --checkpoint "$R/boundary-$boundary-$arm.ckpt" --checkpoint-every 3600 \
             > "$log" 2>&1
         markers "$log" "$arm" 513 0 "$boundary"
-        grep -q " $expected iterations " "$log"
+        /tmp/scratch-log-check "$log" "$expected" 0 -1
     done
     for arm in cache2 cache3 cache4; do
         cmp "$R/boundary-$boundary-control.ckpt" "$R/boundary-$boundary-$arm.ckpt"
@@ -196,6 +200,7 @@ for arm in $ARMS; do
         --checkpoint "$R/prefix-$arm.ckpt" --dp-file "$R/prefix-$arm.bin" \
         > "$R/prefix-$arm.log" 2>&1
     markers "$R/prefix-$arm.log" "$arm" 513 48 95
+    /tmp/scratch-log-check "$R/prefix-$arm.log" $((513 * 16 * 95 * 4)) 300 -1
 done
 for arm in cache2 cache3 cache4; do
     cmp "$R/prefix-control.ckpt" "$R/prefix-$arm.ckpt"
@@ -211,7 +216,7 @@ for prefix in $ARMS; do
             --checkpoint "$R/$label.ckpt" --dp-file "$R/$label.bin" \
             > "$R/$label.log" 2>&1
         markers "$R/$label.log" "$arm" 513 48 95
-        grep -q ' at iteration 380$' "$R/$label.log"
+        /tmp/scratch-log-check "$R/$label.log" $((513 * 16 * 95 * 3)) 0 380
     done
 done
 for prefix in $ARMS; do
