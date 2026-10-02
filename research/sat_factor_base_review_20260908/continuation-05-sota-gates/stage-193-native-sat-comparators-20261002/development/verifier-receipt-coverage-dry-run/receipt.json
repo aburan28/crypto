@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "bytes": 857,
+    "path": "metrics.json",
+    "sha256": "570aa31b3d2f11e545ebfbaa4e73c6a865e74e23d518839f9fae913e9a6f04f4"
+  },
+  "process": {
+    "command": [
+      "target/release/examples/koblitz_stage193_sat_comparators",
+      "verify",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/composition-receipt-coverage-after-charge.json",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/verification-receipt-coverage-draft.json"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 6815744,
+    "pid": 89960,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.005941,
+    "timed_out": false,
+    "total_core_seconds": 0.019701,
+    "user_seconds": 0.01376,
+    "wall_seconds": 0.027320041,
+    "watchdog_seconds": 60
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
