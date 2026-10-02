@@ -9974,5 +9974,35 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage188-dense-reducer -->
+<!-- BEGIN current-f4-stage189-outer-only -->
+<div class="panel" id="current-f4-stage189-outer-only">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 189: outer-only scheduling saves CPU and RSS, wall regresses 0.38% <span class="chip">rejected</span></h2>
+        <p>The selected path already runs all 242 rational fixed-X1 systems in one twelve-worker outer batch.
+          Stage 189 serializes products, symbolic preprocessing, packing, table construction and row reduction
+          within each F4 call, testing whether nested Rayon work costs more than it saves. Equations, pair rules,
+          reducers, matrices and verification are unchanged. This is a one-target solver-stage diagnostic.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>One exact current/outer-only screen pair on the same public n=59 target. The frozen screen required wall and total core ratios below 1.00.</caption>
+          <thead><tr><th>Variant</th><th>Wall s</th><th>Total core s</th><th>Peak RSS</th><th>Ratio wall / core / RSS</th><th>Correctness</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Current nested scheduling</td><td class="n">19.204775</td><td class="n">192.819726</td><td class="n">4.124 GB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td>exhaustive UNSAT; 242/242 systems</td><td><span class="chip">baseline</span></td></tr>
+            <tr><td><strong>Outer-only F4 scheduling</strong></td><td class="n"><strong>19.278470</strong></td><td class="n">183.832989</td><td class="n">3.904 GB</td><td class="n"><strong>1.003837</strong> / 0.953393 / 0.946659</td><td>all structural counters identical; 242 internally serial calls</td><td><span class="chip">rejected</span> wall gate fails</td></tr>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">null in this screen</td><td class="n">null in this screen</td><td class="n">null in this screen</td><td>unchanged decomposition boundary</td><td>exact inherited replay</td><td><span class="chip">reference</span> remains decisively faster</td></tr>
+            <tr><td>Automorphism-aware rho, full method</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>not a solver-scheduling unit</td><td>gate 6 remains false</td><td><span class="chip">full-cost boundary</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">tradeoff</span> outer-only lowers total CPU 4.66% and peak RSS 5.33%, but a CPU-only move is not accepted when wall regresses</span>
+        <span><span class="chip">selected runtime</span> adaptive inner Rayon sections plus the parallel fixed-X1 outer batch; the rejected scheduling knob is preserved as a patch and reverted</span>
+        <span><span class="chip">accounting</span> Stage 189 lower bound: 11 components, 283.337375 wall-seconds, 1,258.115755 core-seconds, 5.223 GB peak RSS; complete cost remains <code>null</code></span>
+        <span><span class="chip">claim boundary</span> no relation-yield, unknown-scalar, full-DLP, rho-crossover, independent-reproduction, novelty or SOTA evidence is added</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-189-outer-only-f4-20261002/result.json</code></span>
+      </div>
+    </div>
+<!-- END current-f4-stage189-outer-only -->
 </body>
 </html>
