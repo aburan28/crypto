@@ -10400,5 +10400,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage197-hybrid-screen -->
+<!-- BEGIN current-f4-stage198-hybrid-confirmation -->
+<div class="panel" id="current-f4-stage198-hybrid-confirmation">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 198: 4,096-row hybrid cuts median CPU 12.07% <span class="chip">confirmed</span></h2>
+        <p>Three interleaved current/hybrid pairs on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The hybrid sends exactly 481 matrices with at least 4,096 rows through full M4RI
+          and keeps five-column <code>BlockTables</code> elsewhere. Unset behavior is not changed yet.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Absolute rows are medians by arm. Selection uses the median of paired candidate/control ratios, preserving the frozen interleaving.</caption>
+          <thead><tr><th>Arm</th><th>Median wall s</th><th>Median total core s</th><th>Single-core s</th><th>Median peak RSS</th><th>Paired wall / core / RSS ratio</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current five-column BlockTables</td><td class="n">28.771602</td><td class="n">189.722829</td><td class="n">null</td><td class="n">5,089.72 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">63.256636 / 619.166491 / 123.938560</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Full M4RI at &ge;4096 rows</strong></td><td class="n"><strong>21.707852</strong></td><td class="n"><strong>163.730880</strong></td><td class="n">null</td><td class="n">3,181.54 MB</td><td class="n"><strong>0.908433 / 0.879279 / 0.630062</strong></td><td class="n">47.726424 / 534.340938 / 77.472970</td><td><span class="chip">confirmed</span> default-change replay required</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">paired evidence</span> wall ratios 0.754489, 0.956306, 0.908433; CPU ratios 0.884893, 0.859775, 0.879279; all six runs pass correctness</span>
+        <span><span class="chip">work</span> every control performs 147,794,583,858 XORs and routes zero full matrices; every hybrid performs 102,707,985,015 and routes 481</span>
+        <span><span class="chip">decision</span> confirmed for a separate default-change commit and unset replay; this stage itself leaves the default unchanged</span>
+        <span><span class="chip">accounting</span> Stage 198 lower bound: 12 components, 249.727289 wall-seconds, 1,362.341551 core-seconds, 5.192 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 682 components, 25,322.254375 wall-seconds, 67,684.185543 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/result.json</code>; confirmed one-target engineering only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage198-hybrid-confirmation -->
 </body>
 </html>
