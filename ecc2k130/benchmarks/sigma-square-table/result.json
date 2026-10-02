@@ -1,7 +1,8 @@
 {
   "schema": "ecc2k130-sigma-square-table-native-v1",
   "valid": true,
-  "sourceParent": "18ee85c1075010ce83be60a4a02636e9aa4ac83a",
+  "protocolSourceParent": "18ee85c1075010ce83be60a4a02636e9aa4ac83a",
+  "integrationBase": "6eb3d660a95fc22145154ff53479a7df467cb375",
   "history": {"previousSigmaFusedTableMeasurement": false, "tableWalkCombinedMeasurementExists": true},
   "replay": {"casesPerArm": 20134, "streamBytesPerArm": 402680, "byteIdentical": true, "canonicalOutputs": true},
   "table": {"windows": 13, "windowBits": 5, "entriesPerWindow": 32, "outputWords": 5, "words": 2080, "bytes": 8320, "bankIndexEqualsEntry": true, "allEntriesRecomputed": true},

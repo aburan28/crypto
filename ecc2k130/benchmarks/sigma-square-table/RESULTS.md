@@ -3,6 +3,12 @@
 Status: **native pass; exact sm_120 CUDA compile and resource audit pending.**
 No GPU was launched and there is no throughput result.
 
+The protocol was frozen at `18ee85c1075010ce83be60a4a02636e9aa4ac83a`.
+Before compile review, the implementation was merged onto current main
+`6eb3d660a95fc22145154ff53479a7df467cb375`, including the selected GPU-wide
+hint work.  That merge did not change the frozen sigma baseline or candidate
+delta; all native evidence below was regenerated afterward.
+
 ## Novelty decision
 
 This exact arm has not been measured before.  The existing
