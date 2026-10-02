@@ -92,3 +92,28 @@ again.
 - The campaign: 20,000 processes. Most take well under 0.1 s and none
   more than 3 s, so it takes under an hour.
 - CI: about five minutes a pull request.
+
+## Amendment 1 (2026-10-01, before the campaign): the generator's method mutation
+
+- **The defect.** A development run of the generator, on B4's build with
+  seeds 101–110 rather than the campaign's, crashed the generator itself
+  at seed 106.
+  - A heavy mutation's "junk" pass had made a seed document's
+    `method.index_calculus` a non-object.
+  - A later "method" pass then wrote into it, and Python raised a
+    `TypeError`.
+  - The tool was not at fault, and the run found nothing in it: 6,300
+    documents on the other nine seeds, with no panic, no undocumented
+    exit, no missing report and no wrong answer.
+- **The fix.** The "method" mutation now replaces a non-object
+  `method.index_calculus` with an object before writing into it.
+  - It draws nothing more from the generator's random stream, so every
+    document the old generator made is made again.
+  - On seeds 101 and 104, 300 documents each, the old and the new
+    generator gave identical outcome histograms.
+  - Seed 106 now runs its 1,000 documents, and none is bad.
+  - No seed document has a non-object `method`, so that is the only path
+    to the crash.
+- **`SHA256SUMS`** pins the amended generator (`f150f910…`).
+- **Unchanged:** the campaign's seeds and counts, the checks, the
+  acceptance and the inadmissible list. The campaign has not run.

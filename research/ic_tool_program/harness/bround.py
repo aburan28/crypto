@@ -19,6 +19,12 @@ The steps:
   rounds ABAB, isolated (the programme's runner).
 - `v2timing` (B1's measurement 6): the candidate on `M1`'s 22 rows, the
   v1 file against its v2 translation, five rounds ABAB.
+- `chain` (the B steps' amendment of 2026-10-01): the timing check of
+  every step at once. One interleave over the newest baseline and each
+  step's arm in the queue's order (`IC_CHAIN`, a JSON object of arm name
+  to binary, and `IC_CHAIN_COMMITS`, of arm name to commit), on `M1`'s 22
+  rows, five rounds, the order reversed every other round. Each step's
+  figure is its paired ratio against the arm before it in the chain.
 - `analyse`: the verdicts, as JSON on stdout.
 
 Every output stays on disk; every step resumes where it stopped.
@@ -43,6 +49,7 @@ PROGRAMME = HERE.parent
 ROOT = bench.ROOT
 R01_DIR = PROGRAMME / "rounds" / "R01-baseline-v0"
 ROUNDS = 5
+CHAIN_ORDER = ("base", "B0", "B1", "B3", "B2", "B2b", "B7a", "B3b")
 
 
 def arm(name: str) -> Path:
@@ -201,6 +208,30 @@ def timing(_steps: str) -> dict:
     return {"done": True}
 
 
+def chain_arms() -> dict[str, Path]:
+    """The chain's arms in the queue's order: the baseline, then each step
+    present.  A rejected step is left out, and the step after it is then
+    measured against the arm before it."""
+    given = json.loads(os.environ.get("IC_CHAIN") or "{}")
+    if "base" not in given or set(given) - set(CHAIN_ORDER):
+        raise SystemExit(f"set IC_CHAIN to a JSON object of arm to binary, with base, from {CHAIN_ORDER}")
+    arms = {name: Path(given[name]) for name in CHAIN_ORDER if name in given}
+    for name, path in arms.items():
+        if not path.exists():
+            raise SystemExit(f"IC_CHAIN's {name} binary does not exist: {path}")
+    return arms
+
+
+def chain(_steps: str) -> dict:
+    arms = chain_arms()
+    commits = json.loads(os.environ.get("IC_CHAIN_COMMITS") or "{}")
+    bench.host_manifest(runs() / "host.json", {
+        name: {"path_basename": path.name, "sha256": bench.sha256(path), "built_from": commits.get(name)}
+        for name, path in arms.items()})
+    bench.interleave(arms, m1(), ROUNDS, runs() / "chain")
+    return {"done": True, "arms": list(arms)}
+
+
 def v2timing(_steps: str) -> dict:
     """The candidate on each M1 row, v1 file against its translation."""
     d = runs() / "v2timing"
@@ -293,6 +324,16 @@ def analyse(steps: str) -> dict:
         out["timing"] = {"what": "paired cold-time ratio, base over candidate, per size; above 1 is faster",
                          "accounting": accounting(runs() / "timing"), "sizes": rows,
                          "any_regression": any(r.get("regresses_beyond_aa") for r in rows)}
+    if (runs() / "chain").exists():
+        names = [n for n in CHAIN_ORDER if (runs() / "chain" / n).exists()]
+        steps_out = {}
+        for prev, cur in zip(names, names[1:]):
+            rows = sizes(runs() / "chain", (prev, cur))
+            steps_out[cur] = {"against": prev, "sizes": rows,
+                              "any_regression": any(r.get("regresses_beyond_aa") for r in rows)}
+        out["chain"] = {"what": "per step, the paired cold-time ratio of the arm before it over the step's "
+                                "arm, per size; above 1 is faster",
+                        "arms": names, "accounting": accounting(runs() / "chain"), "steps": steps_out}
     if (runs() / "v2timing").exists():
         rows = sizes(runs() / "v2timing", ("v1", "v2"))
         out["v2timing"] = {"what": "paired cold-time ratio, v1 file over v2 translation, per size",
@@ -302,7 +343,7 @@ def analyse(steps: str) -> dict:
 
 
 STEPS = {"manifest": manifest, "conformance": conformance, "pin": pin, "translate": translate,
-         "timing": timing, "v2timing": v2timing, "analyse": analyse}
+         "timing": timing, "v2timing": v2timing, "chain": chain, "analyse": analyse}
 
 
 def main() -> None:

@@ -142,3 +142,102 @@ gives a wrong answer or none within the budget.
 - The timing check: 220 processes, about 40 minutes.
 - Measurement 5: ten processes, minutes each at the largest.
 - Measurement 6: 36 runs, about 20 minutes.
+
+## Amendment 1 (2026-10-01, before any measurement)
+
+**The `r ≤ h` refusal is lifted past one word, for `kic` and
+`rho-koblitz`.**
+- **What it was.** The route refused both pipelines with
+  `subgroup-smaller-than-cofactor` when `r ≤ h` (schema v2's refusal
+  table). That is `KoblitzCurve::new`'s convention: it takes the largest
+  prime factor of the order as `r`. Neither method needs it. Both walk
+  in the subgroup of order `r`, which is unique because `r ∤ h`.
+- **Why now.** Two of the five instances frozen with this declaration
+  have `r < h`: C078 (`r ≈ 2^26.2`, `h ≈ 2^40.8`) and C080
+  (`r ≈ 2^33.7`, `h ≈ 2^45.3`). Their cases expect both pipelines
+  admitted and a complete, verified run. The declaration did not mention
+  the gate, and those cases cannot pass under it.
+- **What changes.** Past one word (`n > 63`), the route no longer applies
+  the refusal, and the two-word importer, new in B3b, does not require
+  `r > h`. At one word the refusal stands for both pipelines, so no
+  one-word routing changes.
+- **How it was found.** A development run of C078's case, before any
+  declared measurement, was refused by the gate. That run is not a
+  measurement and enters no figure.
+- **Nothing else changes:** no case, instance, target or acceptance rule.
+
+## Amendment 2 (2026-10-01, before any measurement)
+
+**Two earlier cases read `kic`'s width gate past one word, and B3b moves
+it.** The declaration retired C054 by the until rule, and missed these:
+- **C031** (B1, `until: B4`): ECC2K-130's challenge file under `check`,
+  at `n = 131`. It expects `kic`'s gate to read
+  `field-wider-than-one-word`. From B3b `kic` has two-word kernels, so
+  past `n = 126` it reads `field-wider-than-two-words`, as `rho-koblitz`
+  has since B3.
+- **C053** (B3, no `until`): `rho` alone on the gate curve, stopped by
+  its step cap. It also expects `kic` refused there by width. From B3b
+  `kic` admits `n = 83` by width.
+
+**The until rule cannot retire them.** It retires a case when the step
+named in its `until` is run. C031 names B4, and C053 names none.
+
+**So B3b supersedes them, and the runner gains the converse rule.**
+- A case may name an earlier step's case that it `supersedes`. While the
+  superseding case is run, the superseded one is not.
+- **C086** supersedes C031: the same check, with `kic`'s gate
+  `field-wider-than-two-words`, `until: B4`.
+- **C087** supersedes C053: the same run, with `kic` admitted by width.
+- Everything else in both cases' expectations is kept.
+- B1's and B3's files stay frozen. The dated note is in B3b's
+  `cases.json`, as B3's note for C027 is in B3's.
+
+**C082's document is fixed too.** Its name ran to 133 characters, over
+schema v2's limit of 120, so `ic` refused the document as invalid
+(`name-syntax`) before routing it. The purpose text in the name is
+shortened, to 115 characters in all. Its curve, subgroup, generator,
+target and method are unchanged, and so is its case's expectation.
+
+**What else changes.**
+- B3b's `cases.json`, `SHA256SUMS` and C082's document are regenerated
+  by its `make_cases.py`. C078–C081 and C083–C085, and every other
+  parameter file, are unchanged byte for byte.
+- The regenerated note also fills in the date the declaration left as
+  a placeholder (`declared DATE`).
+- Schema v2's design notes the gate on `kic` from B3b and the
+  supersedes rule.
+
+**How it was found, before any declared measurement.**
+- `ic`'s unit test of the gate curve's routing failed against the B3b
+  build, which pointed to C053.
+- A scan of every step's cases for `kic`'s width gate found C031.
+- A development run of every step's conformance cases with the B3b
+  build then passed all but C082, whose refusal named the name's
+  length.
+
+None of these is a measurement.
+
+## Amendment 3 (2026-10-01, before any measurement)
+
+**Measurement 4, the timing check, runs in the chain of Track B steps.**
+- **What it was:** the base against B3b on `M1`'s 22 rows, five rounds
+  ABAB, 220 processes, for this step alone.
+- **What it is now:** one interleave over the newest accepted baseline
+  and every Track B step's arm, in the queue's order: the baseline, B0,
+  B1, B3, B2, B2b, B7a and B3b (`bround.py chain`). It runs on `M1`'s 22
+  rows, five rounds, isolated, and the order reverses every other
+  round.
+- **B3b's figure** is the paired cold-time ratio of the arm before it
+  in the chain over B3b's own, per size. It is read against R01's A/A
+  bands, as before.
+- **Why the chain is a valid base.** Each step's arm is built on the one
+  before, so the arm before B3b in the chain is its base. The two run
+  back to back in every round, with ten pairs a size, as in its own
+  ABAB.
+- **What it saves.** The seven steps' checks take 880 processes
+  together, against 1,540 one by one.
+- **If an earlier step is rejected,** the steps after it wait. The chain
+  runs again from that step, once it is fixed or removed, since the
+  later arms carry its change.
+- **Nothing else changes:** the acceptance rule, the A/A bands and the
+  other measurements.

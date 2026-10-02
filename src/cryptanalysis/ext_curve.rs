@@ -15,11 +15,49 @@
 //!
 //! Companion to `research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md`.
 
+use std::cell::Cell;
+
 use serde::Serialize;
 
-use crate::cryptanalysis::glv_invariant_base::{addm, mulm, subm};
+use crate::cryptanalysis::glv_invariant_base::{addm, mulm as mulm_raw, subm};
 use crate::cryptanalysis::ic_boundary::{CountedGroup, GroupOps};
-use crate::cryptanalysis::residual_walk::{inv_mod, is_prime_u64, pow_mod, sqrt_mod};
+use crate::cryptanalysis::residual_walk::{
+    inv_mod as inv_mod_raw, is_prime_u64, pow_mod, sqrt_mod,
+};
+
+thread_local! {
+    /// `F_p` multiplications and inversions performed by this module's
+    /// field arithmetic on the current thread: the unit every phase of
+    /// an end-to-end `S` on an extension-field group is priced in
+    /// (note §8, E8).  Square roots taken through [`sqrt_mod`] and
+    /// [`pow_mod`] are not counted; the generic Tonelli–Shanks of
+    /// [`ExtField::sqrt`] is, since it runs on the field's own `mul`.
+    static FIELD_COUNTERS: Cell<(u64, u64)> = const { Cell::new((0, 0)) };
+}
+
+/// Return and reset the thread's `(multiplications, inversions)` in
+/// `F_p` performed by [`ExtField`] arithmetic since the last call.
+pub fn take_field_counters() -> (u64, u64) {
+    FIELD_COUNTERS.with(|c| c.replace((0, 0)))
+}
+
+#[inline]
+fn mulm(a: u64, b: u64, p: u64) -> u64 {
+    FIELD_COUNTERS.with(|c| {
+        let (m, i) = c.get();
+        c.set((m + 1, i));
+    });
+    mulm_raw(a, b, p)
+}
+
+#[inline]
+fn inv_mod(a: u64, p: u64) -> u64 {
+    FIELD_COUNTERS.with(|c| {
+        let (m, i) = c.get();
+        c.set((m, i + 1));
+    });
+    inv_mod_raw(a, p)
+}
 
 /// Jacobi symbol `(a / n)` for odd `n`.
 pub fn jacobi(mut a: u64, mut n: u64) -> i32 {
@@ -574,7 +612,20 @@ impl<F: ExtField> crate::cryptanalysis::glv_invariant_base::Endomorphism<ExtCurv
         if p.infinity {
             return p;
         }
-        ExtPoint::affine(g.f.mul(self.cx, p.x), g.f.mul(self.cy, p.y))
+        let f = &g.f;
+        ExtPoint::affine(scale_by(f, self.cx, p.x), scale_by(f, self.cy, p.y))
+    }
+}
+
+/// `c·a`, free when `c = 1`: the plain Frobenius and the `y`-coordinate
+/// of `ζ` carry a unit constant, and a walk canonicalises on every
+/// step, so the multiplication by one is not paid.
+#[inline]
+fn scale_by<F: ExtField>(f: &F, c: F::El, a: F::El) -> F::El {
+    if c == f.one() {
+        a
+    } else {
+        f.mul(c, a)
     }
 }
 
@@ -606,7 +657,10 @@ impl<F: ExtField> crate::cryptanalysis::glv_invariant_base::Endomorphism<ExtCurv
             return pt;
         }
         let f = &g.f;
-        ExtPoint::affine(f.mul(self.cx, f.frob(pt.x)), f.mul(self.cy, f.frob(pt.y)))
+        ExtPoint::affine(
+            scale_by(f, self.cx, f.frob(pt.x)),
+            scale_by(f, self.cy, f.frob(pt.y)),
+        )
     }
 }
 

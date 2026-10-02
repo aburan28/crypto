@@ -1,0 +1,44 @@
+name: Koblitz Stage 167 current gate audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/index-calculus-scoreboard.html"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-166-current-gate-audit-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-current-gate-audit-20260923/**"
+      - "scripts/compose_koblitz_stage166_gate_audit.py"
+      - "scripts/compose_koblitz_stage167_gate_audit.py"
+      - "scripts/verify_koblitz_stage167_parallel_x1.py"
+      - ".github/workflows/koblitz-stage167-current-gate-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical Stage 166 and current Stage 167
+        run: |
+          python3 -m py_compile \
+            scripts/compose_koblitz_stage166_gate_audit.py \
+            scripts/compose_koblitz_stage167_gate_audit.py \
+            scripts/verify_koblitz_stage167_parallel_x1.py
+          python3 scripts/compose_koblitz_stage166_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-166-current-gate-audit-20260923 \
+            > "$RUNNER_TEMP/stage166-historical-audit.json"
+          python3 scripts/verify_koblitz_stage167_parallel_x1.py \
+            > "$RUNNER_TEMP/stage167-result-verification.json"
+          cmp "$RUNNER_TEMP/stage167-result-verification.json" \
+            research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-verification.json
+          python3 scripts/compose_koblitz_stage167_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-current-gate-audit-20260923 \
+            > "$RUNNER_TEMP/stage167-current-audit.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"

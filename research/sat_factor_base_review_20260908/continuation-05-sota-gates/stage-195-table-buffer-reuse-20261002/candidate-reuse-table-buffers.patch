@@ -1,0 +1,279 @@
+diff --git a/examples/koblitz_pdp_backend.rs b/examples/koblitz_pdp_backend.rs
+index 21399f85c..c8a406a9e 100644
+--- a/examples/koblitz_pdp_backend.rs
++++ b/examples/koblitz_pdp_backend.rs
+@@ -1077,6 +1077,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+             "solver_full_m4ri_control":"F4_F2_FULL_M4RI=1",
+             "solver_block_table_columns":if cfg!(feature = "f4-wide-tables") { 6 } else if cfg!(feature = "f4-four-tables") { 4 } else { 5 },
+             "solver_block_table_build":"automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
++            "solver_block_table_buffer_policy":if std::env::var("F4_F2_REUSE_TABLE_BUFFERS").as_deref() == Ok("1") { "reuse adequate retired word-buffer capacity within the same BlockTables extend call" } else { "allocate a fresh word buffer for every BlockTable run" },
++            "solver_block_table_buffer_control":"F4_F2_REUSE_TABLE_BUFFERS=1 selects same-add reuse; unset or 0 preserves fresh allocation",
+             "single_thread_requested":x1_batch_size == 1 && rayon_threads_requested.unwrap_or(1) == 1,
+             "budget_seconds":budget_seconds,
+             "source_variables":instance.n_vars,
+diff --git a/src/cryptanalysis/ic_framework/solvers.rs b/src/cryptanalysis/ic_framework/solvers.rs
+index 84e53560d..e75aa68a5 100644
+--- a/src/cryptanalysis/ic_framework/solvers.rs
++++ b/src/cryptanalysis/ic_framework/solvers.rs
+@@ -188,6 +188,18 @@ impl SystemSolver for F4F2 {
+                 "inner_build_parallel_disabled_calls",
+                 st.inner_build_parallel_disabled_calls,
+             ),
++            ("block_table_add_calls", st.block_table_add_calls),
++            ("block_table_runs", st.block_table_runs),
++            (
++                "block_table_words_scheduled",
++                st.block_table_words_scheduled,
++            ),
++            (
++                "block_table_buffer_allocations",
++                st.block_table_buffer_allocations,
++            ),
++            ("block_table_buffer_reuses", st.block_table_buffer_reuses),
++            ("block_table_reused_words", st.block_table_reused_words),
+             ("reducer_rows", st.reducer_rows),
+             ("matrix_rows_max", st.matrix_rows_max),
+             ("matrix_cols_max", st.matrix_cols_max),
+diff --git a/src/cryptanalysis/pq_f4_f2.rs b/src/cryptanalysis/pq_f4_f2.rs
+index 69fa996fd..c79bf238f 100644
+--- a/src/cryptanalysis/pq_f4_f2.rs
++++ b/src/cryptanalysis/pq_f4_f2.rs
+@@ -144,6 +144,15 @@ pub struct F4Stats {
+     /// One when this F4 call serializes only product, symbolic and packing
+     /// work while retaining the selected parallel elimination path.
+     pub inner_build_parallel_disabled_calls: u64,
++    /// Block-table allocation diagnostics. Calls, runs and scheduled words
++    /// are invariant; allocation and reuse counts distinguish Stage 195's
++    /// same-add retired-buffer reuse candidate.
++    pub block_table_add_calls: u64,
++    pub block_table_runs: u64,
++    pub block_table_words_scheduled: u64,
++    pub block_table_buffer_allocations: u64,
++    pub block_table_buffer_reuses: u64,
++    pub block_table_reused_words: u64,
+     /// Rows symbolic preprocessing added as reducers.
+     pub reducer_rows: u64,
+     /// Largest matrix built, and the sum of rows over every matrix.
+@@ -720,7 +729,7 @@ fn echelon_block_tables(
+         .then(|| BlockTables::build(&pivot_of, &pivots, budget))
+         .flatten();
+     if let Some(t) = &tables {
+-        st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
++        st.peak_table_bytes = st.peak_table_bytes.max((t.peak_allocated_words * 8) as u64);
+     }
+     let mut xors = 0u64;
+     let mut performed = 0u64;
+@@ -883,10 +892,18 @@ fn echelon_block_tables(
+                     &pivots[made..],
+                     matrix_words * TABLE_EXTENDED_BUDGET_MULT,
+                 );
+-                st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
++                st.peak_table_bytes = st.peak_table_bytes.max((t.peak_allocated_words * 8) as u64);
+             }
+         }
+     }
++    if let Some(tables) = &tables {
++        st.block_table_add_calls += tables.add_calls;
++        st.block_table_runs += tables.runs_built;
++        st.block_table_words_scheduled += tables.words_scheduled;
++        st.block_table_buffer_allocations += tables.buffer_allocations;
++        st.block_table_buffer_reuses += tables.buffer_reuses;
++        st.block_table_reused_words += tables.reused_words;
++    }
+     st.word_xors += xors;
+     st.word_xors_performed += performed;
+     Some(pivots)
+@@ -969,6 +986,14 @@ struct BlockTables {
+     built_words: u64,
+     /// Words the live tables hold.
+     held_words: usize,
++    allocated_live_words: usize,
++    peak_allocated_words: usize,
++    add_calls: u64,
++    runs_built: u64,
++    words_scheduled: u64,
++    buffer_allocations: u64,
++    buffer_reuses: u64,
++    reused_words: u64,
+ }
+ 
+ impl BlockTables {
+@@ -1007,8 +1032,17 @@ impl BlockTables {
+             tables: Vec::new(),
+             built_words: 0,
+             held_words: 0,
++            allocated_live_words: 0,
++            peak_allocated_words: 0,
++            add_calls: 0,
++            runs_built: 0,
++            words_scheduled: 0,
++            buffer_allocations: 0,
++            buffer_reuses: 0,
++            reused_words: 0,
+         };
+-        tables.built_words = tables.add(&runs, pivot_of, pivots);
++        let mut spares = Vec::new();
++        tables.built_words = tables.add(&runs, pivot_of, pivots, &mut spares);
+         Some(tables)
+     }
+ 
+@@ -1049,14 +1083,21 @@ impl BlockTables {
+         groups.sort_unstable();
+         groups.dedup();
+         let mut runs: Vec<(usize, usize)> = Vec::new();
++        let mut spares = Vec::new();
+         for (start, end) in groups {
+             // retire the group's old tables
+             for c in start..end {
+                 let t = std::mem::replace(&mut self.of_column[c], NONE);
+                 if t != NONE {
+                     let old = &mut self.tables[t as usize];
+-                    self.held_words -= old.words.len();
+-                    old.words = Vec::new();
++                    if !old.words.is_empty() {
++                        self.held_words -= old.words.len();
++                        self.allocated_live_words -= old.words.capacity();
++                        let words = std::mem::take(&mut old.words);
++                        if table_buffer_reuse_enabled() {
++                            spares.push(words);
++                        }
++                    }
+                 }
+             }
+             let mut c = start;
+@@ -1084,20 +1125,57 @@ impl BlockTables {
+                 within.push(r);
+             }
+         }
+-        self.add(&within, pivot_of, pivots)
++        self.add(&within, pivot_of, pivots, &mut spares)
+     }
+ 
+     /// Table `runs` and index them.  Returns the words written.
+-    fn add(&mut self, runs: &[(usize, usize)], pivot_of: &[u32], pivots: &[(usize, Row)]) -> u64 {
++    fn add(
++        &mut self,
++        runs: &[(usize, usize)],
++        pivot_of: &[u32],
++        pivots: &[(usize, Row)],
++        spares: &mut Vec<Vec<u64>>,
++    ) -> u64 {
+         let pivot = |c: usize| &pivots[pivot_of[c] as usize].1;
++        let requirements = runs
++            .iter()
++            .map(|r| Self::width(r, pivot_of, pivots) << r.1)
++            .collect::<Vec<_>>();
++        let scheduled_words = requirements.iter().sum::<usize>();
++        self.add_calls += 1;
++        self.runs_built += runs.len() as u64;
++        self.words_scheduled = self.words_scheduled.saturating_add(scheduled_words as u64);
++
++        let (buffers, reused, reused_words) = if table_buffer_reuse_enabled() {
++            take_reusable_table_buffers(&requirements, spares)
++        } else {
++            spares.clear();
++            ((0..runs.len()).map(|_| None).collect::<Vec<_>>(), 0, 0)
++        };
++        self.buffer_reuses += reused as u64;
++        self.reused_words = self.reused_words.saturating_add(reused_words);
++        self.buffer_allocations += (runs.len() - reused) as u64;
++        let building_capacity = buffers
++            .iter()
++            .zip(&requirements)
++            .map(|(buffer, &required)| buffer.as_ref().map_or(required, |words| words.capacity()))
++            .sum::<usize>();
++        self.peak_allocated_words = self
++            .peak_allocated_words
++            .max(self.allocated_live_words + building_capacity);
++
+         let built: Vec<BlockTable> = runs
+             .par_iter()
+-            .map(|r| {
++            .zip(buffers.into_par_iter())
++            .map(|(r, buffer)| {
+                 let (first, k) = *r;
+                 let (base, shift) = (first / 64, first % 64);
+                 let width = Self::width(r, pivot_of, pivots);
+                 let size = 1usize << k;
+-                let mut words = vec![0u64; size * width];
++                let required = size * width;
++                let mut words = buffer.unwrap_or_default();
++                words.resize(required, 0);
++                words.fill(0);
+                 let mut ends = [base; 1 << TABLE_BLOCK];
+                 let mut counts = [0u64; 1 << TABLE_BLOCK];
+                 for j in (0..k).rev() {
+@@ -1141,8 +1219,10 @@ impl BlockTables {
+                 .map(|b| (table.ends[b] - table.first / 64) as u64)
+                 .sum::<u64>();
+             self.held_words += table.words.len();
++            self.allocated_live_words += table.words.capacity();
+             self.tables.push(table);
+         }
++        self.peak_allocated_words = self.peak_allocated_words.max(self.allocated_live_words);
+         written
+     }
+ 
+@@ -1168,6 +1248,36 @@ impl BlockTables {
+     }
+ }
+ 
++fn table_buffer_reuse_enabled() -> bool {
++    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    *ENABLED.get_or_init(|| std::env::var("F4_F2_REUSE_TABLE_BUFFERS").as_deref() == Ok("1"))
++}
++
++fn take_reusable_table_buffers(
++    requirements: &[usize],
++    spares: &mut Vec<Vec<u64>>,
++) -> (Vec<Option<Vec<u64>>>, usize, u64) {
++    let mut buffers = (0..requirements.len()).map(|_| None).collect::<Vec<_>>();
++    spares.sort_unstable_by_key(Vec::capacity);
++    let mut order = (0..requirements.len()).collect::<Vec<_>>();
++    order.sort_unstable_by_key(|&index| std::cmp::Reverse(requirements[index]));
++    let mut reused = 0usize;
++    let mut reused_words = 0u64;
++    for index in order {
++        let required = requirements[index];
++        if spares
++            .last()
++            .is_some_and(|words| words.capacity() >= required)
++        {
++            buffers[index] = spares.pop();
++            reused += 1;
++            reused_words = reused_words.saturating_add(required as u64);
++        }
++    }
++    spares.clear();
++    (buffers, reused, reused_words)
++}
++
+ /// Monomials on a symbolic-preprocessing level from which
+ /// [`groebner_basis_f4`] looks their reducers up in parallel.
+ const PAR_REDUCERS: usize = 512;
+@@ -2463,6 +2573,25 @@ mod tests {
+         assert!(consistent > 3);
+     }
+ 
++    #[test]
++    fn retired_table_buffers_match_largest_requirements_first() {
++        let mut spares = vec![
++            Vec::<u64>::with_capacity(64),
++            Vec::<u64>::with_capacity(128),
++            Vec::<u64>::with_capacity(256),
++        ];
++        let requirements = [200usize, 100, 300, 32];
++        let (buffers, reused, reused_words) =
++            take_reusable_table_buffers(&requirements, &mut spares);
++        assert_eq!(reused, 3);
++        assert_eq!(reused_words, 332);
++        assert!(buffers[0].as_ref().is_some_and(|row| row.capacity() >= 200));
++        assert!(buffers[1].as_ref().is_some_and(|row| row.capacity() >= 100));
++        assert!(buffers[2].is_none());
++        assert!(buffers[3].as_ref().is_some_and(|row| row.capacity() >= 32));
++        assert!(spares.is_empty());
++    }
++
+     /// A budget is honoured and reported, not silently turned into a
+     /// wrong basis.
+     #[test]

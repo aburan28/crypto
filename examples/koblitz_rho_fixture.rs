@@ -34,6 +34,10 @@ use std::collections::{BTreeSet, HashMap};
 use std::time::Instant;
 
 const TASK_ID: &str = "TASK-KIC-SAT-RHO-CROSSOVER-20260909";
+/// The exact toy rungs.  47, 57 and 61 are ledger §23's sizes the others miss,
+/// so that the rule's comparison can check its rho against the strong walk at
+/// every size it runs (`docs/ic/BOUNDARY_TARGETS.md`, 2026-10-01).
+const RUNGS: [u32; 13] = [7, 11, 13, 17, 19, 23, 37, 41, 47, 53, 57, 59, 61];
 const JUMPS: usize = 32;
 const MAX_RESTARTS: u64 = 128;
 /// Fruitless-collision restart budget for larger fields (n≥41).
@@ -1160,7 +1164,10 @@ fn main() {
              erratum). Use `strong`."
         );
     }
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 59));
+    assert!(
+        RUNGS.contains(&n),
+        "n = {n} is not one of the exact rungs {RUNGS:?}"
+    );
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     let modulus = curve.subgroup_order.to_u64_digits()[0];
@@ -1251,6 +1258,23 @@ mod packed_tests {
             }
         }
         assert!(ran >= 4, "strong backend exercised only {ran} rungs");
+    }
+
+    /// Ledger §23's sizes are rungs, and a public target at one the earlier
+    /// rungs missed is the point `ic workflow` hashed from the same seed:
+    /// §23's `T01` at `icv1-f2m47-t22705043-f4e44623`.
+    #[test]
+    fn the_rule_comparisons_sizes_are_rungs_with_its_targets() {
+        for n in [41, 47, 53, 57, 59, 61] {
+            assert!(RUNGS.contains(&n), "n = {n}");
+        }
+        let curve = KoblitzCurve::new(1, 47).expect("§23's curve at n = 47 constructs");
+        let (target, counter) = public_hash_target(&curve, 23_001);
+        assert_eq!(
+            point_key(&target),
+            (1, 59_876_159_786_985, 136_992_923_299_992)
+        );
+        assert_eq!(counter, 0);
     }
 
     #[test]

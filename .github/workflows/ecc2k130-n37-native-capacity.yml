@@ -1,0 +1,37 @@
+name: ECC2K-130 n37 native-column capacity replay
+
+on:
+  pull_request:
+    paths:
+      - "research/notes/ecc2k130/n37_native_column_capacity_20261001/**"
+      - "research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json"
+      - "research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz"
+      - "research/koblitz_isogeny_descent_37_20260925/contract.json"
+      - ".github/workflows/ecc2k130-n37-native-capacity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-count-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            research/notes/ecc2k130/n37_native_column_capacity_20261001
+            research/notes/ecc2k130/disjoint_cold_v2_20261001
+            research/koblitz_isogeny_descent_37_results_20260925
+            research/koblitz_isogeny_descent_37_20260925
+      - name: Recompute closed form and independent dynamic-programming count
+        run: |
+          python3 research/notes/ecc2k130/n37_native_column_capacity_20261001/bound.py \
+            --out "$RUNNER_TEMP/n37-native-bound.json"
+          cmp "$RUNNER_TEMP/n37-native-bound.json" \
+            research/notes/ecc2k130/n37_native_column_capacity_20261001/BOUND.json
+          python3 research/notes/ecc2k130/n37_native_column_capacity_20261001/verify.py \
+            --out "$RUNNER_TEMP/n37-native-verify.json"
+          cmp "$RUNNER_TEMP/n37-native-verify.json" \
+            research/notes/ecc2k130/n37_native_column_capacity_20261001/VERIFY.json

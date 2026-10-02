@@ -46,16 +46,20 @@ INSTANCES = [
     ("C080", 0, 79, None, 14377452373, 42042421294532, "n = 79, a 41-bit cofactor"),
     ("C081", 1, 71, None, 588353361747061, 4013206, "a 49-bit subgroup at n = 71"),
     ("C082", 1, 83, GATE_MODULUS, 8569786107849059, 1128547018,
-     "the gate's field under the gate's modulus, with K_1's 53-bit subgroup: not the gate's curve"),
+     # Amendment 2: shortened, since the name it makes must stay within
+     # schema v2's 120 characters.
+     "the gate's field and modulus; K_1's 53-bit subgroup, not the gate's curve"),
 ]
 
 
 def case(cid: str, purpose: str, files: dict, argv: list[str], expect: dict, timeout: int = TIMEOUT,
-         until: str | None = None) -> dict:
+         until: str | None = None, supersedes: str | None = None) -> dict:
     out = {"id": cid, "step": STEP, "checks": purpose, "files": files, "argv": argv,
            "env": {"RAYON_NUM_THREADS": "1"}, "expect": expect, "timeout_s": timeout}
     if until:
         out["until"] = until
+    if supersedes:
+        out["supersedes"] = supersedes
     return out
 
 
@@ -151,6 +155,35 @@ def build() -> tuple[dict[str, dict], list[dict]]:
          "same_outputs_as": {"argv": price("{tmp}/params.json", "{tmp}/one-word.json"),
                              "json_file": "{tmp}/one-word.json", "paths": compared}},
         timeout=900))
+
+    # C086, C087 (amendment 2, 2026-10-01): two earlier cases read kic's
+    # width gate past one word, which B3b moves. C031's `until` names B4
+    # and C053 has none, so the until rule cannot retire them; each is
+    # superseded from B3b instead, with the rest of its expectation kept.
+    cases.append(case(
+        "C086-challenge-kic-past-two-words", "C031's successor from B3b: the challenge file is valid, and kic, "
+        "with two-word kernels, refuses n = 131 as wider than two words, as rho-koblitz has since B3",
+        {"params.json": {"copy": "{cases}/ecc2k130-challenge.json"}},
+        ["check", "--params", "{tmp}/params.json", "--json", "--out", "{tmp}/report.json"],
+        {"exit": 0, "json_file": "{tmp}/report.json", "json_paths": {"status": "checks_passed"},
+         "json_contains": {"checks": [{"code": "order-composite", "status": "pass", "exact": False}],
+                           "disclosures": [{"code": "primality-screen"}],
+                           "route.considered": [{"pipeline": "kic", "admitted": False,
+                                                 "gate": "field-wider-than-two-words"}]}},
+        timeout=120, until="B4", supersedes="C031-challenge-checks"))
+    cases.append(case(
+        "C087-gate-rho-capped-kic-admitted", "C053's successor from B3b: rho alone on the gate curve, stopped by "
+        "its step cap, reports no logarithm and exits 1; kic now admits the gate's field by width",
+        {"params.json": {"copy": GATE, "set": {"method": {
+            "solve": "rho", "fidelity": "F0",
+            "rho": {"pipeline": "auto", "seed": RHO_SEED, "max_iterations": 200000}}}}},
+        ["price", "--params", "{tmp}/params.json", "--json", "--out", "{tmp}/report.json"],
+        {"exit": 1, "json_file": "{tmp}/report.json",
+         "json_paths": {"status": "not_recovered", "result.verified": False, "rho.step_cap": 200000,
+                        "rho.counters.walk_operations": 200000, "rho.pipeline": "rho-koblitz"},
+         "json_contains": {"route.considered": [{"pipeline": "kic", "admitted": True},
+                                                {"pipeline": "rho-koblitz", "admitted": True}]}},
+        timeout=120, supersedes="C053-gate-rho-capped"))
     return files, cases
 
 
@@ -166,8 +199,12 @@ def texts() -> dict[str, str]:
         "rules": [
             "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still "
             "../v2/params/. ../run.py runs these after the earlier steps' cases.",
-            "The until rule: B3 marked C054 `until: B3b`. From B3b (declared DATE) C054 is retired and "
-            "C083 succeeds it.",
+            "The until rule: B3 marked C054 `until: B3b`. From B3b (declared 2026-10-01) C054 is retired and "
+            "C083 succeeds it. (Amendment 2 filled in this date, which the declaration left as a placeholder.)",
+            "The supersedes rule (amendment 2, 2026-10-01): a case may name an earlier step's case that it "
+            "supersedes; while the superseding case is run, the superseded one is not. B3b moves kic's width "
+            "gate past one word, which C031 (until B4) and C053 (no until) read, so C086 supersedes C031 and "
+            "C087 supersedes C053. B1's and B3's files stay frozen, so the note is here.",
             "`--kic-wide` is B3b's test switch: it runs the two-word pipeline where the one-word pipeline "
             "would run. C084 and C085 compare the two through `same_outputs_as`.",
             "params/C078-T001-n67.json to params/C082-T001-n83.json are no case's: they are B3b's "

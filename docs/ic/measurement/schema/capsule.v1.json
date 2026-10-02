@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icms.capsule/v1",
+  "title": "ICMS host capsule, version 1",
+  "description": "Everything about the host that can move a measurement, captured once per session: CPU model, microcode and feature flags; per-CPU governor, frequency limits, energy preference and SMT siblings; isolcpus/nohz_full; turbo/boost; cpuidle; NUMA and caches; kernel release, command line, clocksource, twenty scheduler/VM sysctls, THP and CPU-vulnerability mitigations; virtualization; cgroup limits; memory; OS and libc; Python, Rust, C toolchains. env_class is the subset two wall-clock measurements must share; env_class_id is its hash. The hostname is stored only as a hash.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "env_class_id",
+    "env_class",
+    "stable"
+  ],
+  "properties": {
+    "schema": {
+      "const": "icms.capsule/v1"
+    },
+    "env_class_id": {
+      "type": "string",
+      "pattern": "^ENV1h[0-9a-f]{12}$"
+    },
+    "env_class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu",
+        "frequency",
+        "smt",
+        "cpus",
+        "kernel",
+        "virtualization",
+        "memory_total",
+        "os",
+        "toolchain"
+      ],
+      "properties": {
+        "cpu": {},
+        "frequency": {},
+        "smt": {},
+        "cpus": {},
+        "kernel": {},
+        "virtualization": {},
+        "memory_total": {},
+        "os": {},
+        "toolchain": {}
+      }
+    },
+    "stable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "captured_unix",
+        "hostname_sha256",
+        "cpu",
+        "topology",
+        "kernel",
+        "virtualization",
+        "cgroup",
+        "memory",
+        "os",
+        "toolchain"
+      ],
+      "properties": {
+        "schema": {
+          "const": "icms.capsule/v1"
+        },
+        "captured_unix": {
+          "type": "number"
+        },
+        "hostname_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cpu": {
+          "type": "object",
+          "required": [
+            "model_name",
+            "flags_sha256",
+            "features",
+            "logical_cpus"
+          ]
+        },
+        "topology": {
+          "type": "object",
+          "required": [
+            "cpus",
+            "online",
+            "isolated",
+            "nohz_full",
+            "smt_control",
+            "smt_active"
+          ]
+        },
+        "kernel": {
+          "type": "object",
+          "required": [
+            "release",
+            "version",
+            "cmdline",
+            "cmdline_flags",
+            "clocksource",
+            "sysctl",
+            "thp_enabled",
+            "thp_defrag",
+            "psi_available",
+            "vulnerabilities"
+          ]
+        },
+        "virtualization": {
+          "type": "object",
+          "required": [
+            "detect_virt"
+          ]
+        },
+        "cgroup": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "memory": {
+          "type": "object"
+        },
+        "os": {
+          "type": "object"
+        },
+        "toolchain": {
+          "type": "object",
+          "required": [
+            "python"
+          ]
+        }
+      }
+    }
+  }
+}

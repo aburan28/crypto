@@ -406,5 +406,197 @@ class TimingTests(unittest.TestCase):
         self.assertEqual(observed["timed_repeats"], 1)
 
 
+class BatchPanelTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_panel"
+
+    def setUp(self) -> None:
+        self.protocol = lab.load_protocol()
+        self.ledger = lab.load_ledger(self.protocol)
+        self.beat = self.protocol["beats"][self.BEAT]
+
+    def test_panel_beat_is_registered_as_diagnostic_only(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "batch_panel")
+        self.assertEqual(self.beat["stage"], "end_to_end_dlp")
+        self.assertFalse(self.beat["primary_speedup_eligible"])
+        self.assertGreaterEqual(self.beat["targets_minimum"], 1024)
+        for targets in self.beat["k_candidates"]:
+            self.assertGreaterEqual(int(targets), self.beat["targets_minimum"])
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+
+    def test_single_target_launch_rejects_the_panel_beat(self) -> None:
+        args = lab.parser().parse_args(["launch", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "launch-panel"):
+            lab.launch(args)
+
+    def test_panel_rejects_small_batches_and_single_target_beats(self) -> None:
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--targets", "32"])
+        with self.assertRaisesRegex(lab.AutolabError, ">= 1024"):
+            lab.launch_panel(args)
+        args = lab.parser().parse_args(["launch-panel", "--beat", "koblitz.vs_rho.n37_wall"])
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(args)
+
+    def test_parse_time_l_ignores_producer_lines(self) -> None:
+        text = textwrap.dedent(
+            """\
+            note: producer line 12
+                  295.04 real       273.93 user        16.72 sys
+               11502862336  maximum resident set size
+                  2274502049018  instructions retired
+                       12  swaps
+            """
+        )
+        parsed = lab.parse_time_l(text)
+        self.assertEqual(parsed["max_rss_bytes"], 11502862336)
+        self.assertEqual(parsed["instructions_retired"], 2274502049018)
+        self.assertEqual(parsed["swaps"], 12)
+        self.assertNotIn("page_faults", parsed)
+
+    def block_records(self, scalars):
+        ic = [
+            {"kind": "compact_orbit_dlp_target", "fixture_index": i, "published_fixture_scalar": s,
+             "target": [s, s + 1], "recovered_matches_published": True, "group_verified": True,
+             "probes": 3, "target_ms": 0.5}
+            for i, s in enumerate(scalars)
+        ]
+        rho = [
+            {"kind": "rho_ks_batch_fixture", "fixture_index": i, "published_fixture_scalar": s,
+             "recovered_fixture_scalar": s, "published_q": [s, s + 1], "verified": True}
+            for i, s in enumerate(scalars)
+        ] + [{"kind": "rho_ks_batch_summary"}]
+        return ic, rho
+
+    def test_block_check_requires_same_verified_targets(self) -> None:
+        ic, rho = self.block_records([5, 9])
+        checks = lab.check_panel_block(ic, rho, [5, 9])
+        for key in ("ic_all_verified", "rho_all_verified", "ic_matches_corpus",
+                    "rho_matches_corpus", "same_target_points"):
+            self.assertTrue(checks[key], key)
+        rho[1]["published_q"] = [9, 11]
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["same_target_points"])
+        ic[0]["group_verified"] = False
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["ic_all_verified"])
+        self.assertFalse(lab.check_panel_block([], rho, [5, 9])["ic_all_verified"])
+
+    def test_untimed_digest_ignores_timers(self) -> None:
+        ic, _ = self.block_records([5])
+        slower = [dict(ic[0], target_ms=99.0)]
+        self.assertEqual(lab.untimed_digest(ic), lab.untimed_digest(slower))
+
+    def test_panel_claims_pass_end_to_end_and_fail_vs_rho_closed(self) -> None:
+        with tempfile.TemporaryDirectory(dir=lab.RUNS_DIR.parent) as tmp:
+            run = Path(tmp)
+            (run / "artifacts").mkdir()
+            (run / "artifacts/replay_ic.json").write_text("{}\n")
+            summary = {
+                "targets": 1024, "K": 600, "subgroup_order_bits": 47.21,
+                "corpora": {"eval": {"name": "e"}, "tune": {"name": "t"}, "disjoint": True},
+                "executables": {"git_head": "0" * 40},
+                "host": {"node": "test"},
+                "isolation": "none",
+                "wall_ratio": {"median": 0.3}, "user_ratio": None, "instructions_ratio": None,
+                "verification": {"ic_all_verified": True, "rho_all_verified": True},
+                "blocks": [{"block": 0, "ic_timing_ms": {"process_total": 1.0}}],
+            }
+            end_to_end, vs_rho = lab.draft_panel_claims(
+                beat_id=self.BEAT, beat=self.beat, run=run, summary=summary
+            )
+        e2e = lab.validate_claim(end_to_end, stage="end_to_end_dlp", ledger=self.ledger)
+        self.assertEqual(e2e["status"], "PASS", e2e)
+        check = lab.validate_claim(vs_rho, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(check["status"], "FAIL")
+        self.assertIn("target_count must equal 1", check["validation_errors"])
+        for absent in ("ic_online_wall_ms", "rho_online_wall_ms", "ic_online_phase_ms", "online_interval"):
+            self.assertNotIn(absent, vs_rho)
+
+    def test_rss_model_covers_measured_peaks_and_the_table_doubling(self) -> None:
+        # Measured n=61 IC peaks (GiB) from the 1,024/4,096-target tunes, 2026-10-01.
+        measured = {400: 1.23, 500: 1.35, 600: 2.51, 700: 2.68, 800: 4.89, 1000: 5.39, 1200: 10.00}
+        for k, gib in measured.items():
+            ratio = lab.estimate_ic_rss_bytes(self.beat, k) / 2**30 / gib
+            self.assertTrue(1.0 <= ratio <= 1.05, (k, ratio))
+        self.assertLess(lab.estimate_ic_rss_bytes(self.beat, 1480), 12 * 2**30)
+        self.assertGreater(lab.estimate_ic_rss_bytes(self.beat, 1500), 19 * 2**30)
+        legacy = {key: value for key, value in self.beat.items() if key != "ic_rss_model"}
+        legacy["ic_bytes_per_regular_state"] = 94
+        self.assertEqual(lab.estimate_ic_rss_bytes(legacy, 1000), 94 * 61 * 1000 * 1000)
+
+    def test_panel_resume_needs_an_existing_run(self) -> None:
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--resume", "no-such-run"])
+        with self.assertRaisesRegex(lab.AutolabError, "no run to resume"):
+            lab.launch_panel(args)
+
+
+class SingleTargetPanelTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_single_target"
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        import single_target_panel
+
+        cls.stp = single_target_panel
+        cls.protocol = lab.load_protocol()
+        cls.ledger = lab.load_ledger(cls.protocol)
+        cls.beat = cls.protocol["beats"][cls.BEAT]
+        cls.curve = single_target_panel.cached_curve(cls.beat["curve_fixture"])
+
+    def test_beat_is_one_target_against_strong_rho(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "single_target_panel")
+        self.assertEqual(self.beat["stage"], "vs_rho")
+        self.assertEqual(self.beat["panel_producers"]["rho"]["env"]["KIC_RHO_RUNG"], "3")
+        for producer in list(self.beat["panel_producers"].values()) + list(self.beat["frozen_originals"].values()):
+            self.assertTrue((lab.REPO / producer["source"]).is_file(), producer["source"])
+        self.assertNotEqual(self.beat["panel_producers"]["ic"]["source"], self.beat["frozen_originals"]["ic"]["source"])
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+
+    def test_other_launchers_reject_the_beat(self) -> None:
+        with self.assertRaisesRegex(lab.AutolabError, "launch-single"):
+            lab.launch(lab.parser().parse_args(["launch", "--beat", self.BEAT]))
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(lab.parser().parse_args(["launch-panel", "--beat", self.BEAT]))
+        args = lab.parser().parse_args(["launch-single", "--beat", self.BEAT, "--workloads", "4"])
+        with self.assertRaisesRegex(lab.AutolabError, ">= 16"):
+            self.stp.launch_single(args, lab)
+
+    def test_public_points_are_deterministic_subgroup_points(self) -> None:
+        domain = self.beat["target_law"]["domain"]
+        first = self.stp.public_point(self.curve, domain, "eval", 0)
+        self.assertEqual(first, self.stp.public_point(self.curve, domain, "eval", 0))
+        self.assertNotEqual(first, self.stp.public_point(self.curve, domain, "tune", 0))
+        self.assertIsNone(self.curve.mul(first, self.curve.r))
+        self.assertEqual(self.curve.decode(list(first)), first)
+
+    def test_replay_checks_digest_scalar_and_relation(self) -> None:
+        scalar = 987654321
+        target = list(self.curve.mul(self.curve.g, scalar))
+        fixture = dict(self.beat["curve_fixture"], targets=[[str(v) for v in target]])
+        generator = [int(v) for v in fixture["generator"]]
+        cert = {"arm": "rho", "curve_id": "c", "generator": generator, "target": target, "scalar": scalar}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cert.json"
+            path.write_bytes(self.stp.identity.canonical(cert) + b"\n")
+            digest = self.stp.identity.sha256(cert)
+            self.assertTrue(self.stp.replay_certificate(path, digest, fixture, None)["statement_holds"])
+            self.assertFalse(self.stp.replay_certificate(path, "0" * 64, fixture, None)["statement_holds"])
+            points = [self.curve.mul(self.curve.g, s) for s in (11, 22, 33)]
+            last = self.curve.add(self.curve.neg(self.curve.add(self.curve.add(points[0], points[1]), points[2])),
+                                  tuple(target))
+            base = points + [last]
+            ic = {"arm": "ic", "curve_id": "c", "generator": generator, "target": target, "scalar": scalar,
+                  "relation": {"base_hash": "b", "point_indices": [0, 1, 2, 3], "x_codes": [p[0] for p in base]}}
+            path.write_bytes(self.stp.identity.canonical(ic) + b"\n")
+            replay = self.stp.replay_certificate(path, self.stp.identity.sha256(ic), fixture, base)
+            self.assertTrue(replay["statement_holds"], replay)
+            replay = self.stp.replay_certificate(path, self.stp.identity.sha256(ic), fixture, base[:3] + [points[0]])
+            self.assertFalse(replay["checks"]["relation_sums_to_target"])
+
+    def test_untimed_view_drops_timers_only(self) -> None:
+        record = {"kind": "k", "probes": 3, "online_ms": 1.0, "target_generation_ms_excluded": 0.1,
+                  "online_start_ns": 5, "online_stop_event": "e", "relation_checks": 1}
+        self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
+
+
 if __name__ == "__main__":
     unittest.main()

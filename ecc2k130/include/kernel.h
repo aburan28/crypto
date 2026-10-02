@@ -25,6 +25,16 @@
 #define ECC_GUARD_PERIOD 4096
 #endif
 
+#ifndef ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE 0
+#endif
+#if ECC_CYCLE_PROFILE && (!defined(ECC_WALK_TABLE) || !ECC_WALK_TABLE)
+#error "ECC_CYCLE_PROFILE requires ECC_WALK_TABLE"
+#endif
+#if ECC_CYCLE_PROFILE
+struct EccCycleProfile;
+#endif
+
 // aws/campaign.json "maxIters".  The guard is checked only every
 // ECC_GUARD_PERIOD steps, so a walk can report a trail up to
 // ECC_GUARD_PERIOD - 1 steps longer; a tool replaying campaign trails has to
@@ -62,6 +72,9 @@ struct WalkParams {
     // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
     unsigned long long *hist;
     const unsigned *twConsts;
+#if ECC_CYCLE_PROFILE
+    EccCycleProfile *cycleProfile;
+#endif
 };
 
 ECC_HD unsigned eccAtomicInc(unsigned *p) {

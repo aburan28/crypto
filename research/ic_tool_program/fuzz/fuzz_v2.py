@@ -191,7 +191,11 @@ def mutate(doc: dict, light: bool) -> dict:
                 m["rho"] = {"pipeline": rng.choice(["auto", "rho-koblitz", "rho-negation", "rho-bignum"]),
                             "seed": rng.randrange(2**20)}
             if rng.random() < 0.3:
-                m.setdefault("index_calculus", {})["pipeline"] = rng.choice(["auto", "kic", "ic-binary-s4", "ic-prime-s3"])
+                # An earlier "junk" pass may have left a non-object here
+                # (B6's amendment 1): replace it, drawing nothing more.
+                if not isinstance(m.get("index_calculus"), dict):
+                    m["index_calculus"] = {}
+                m["index_calculus"]["pipeline"] = rng.choice(["auto", "kic", "ic-binary-s4", "ic-prime-s3"])
         elif what == "target":
             doc["target"] = rng.choice([{"known_log": num(rng.randrange(1, 10**7))}, {"random_seed": rng.randrange(1000)},
                                         {"public_hash_seed": rng.randrange(1000)}, {"point": "identity"}])

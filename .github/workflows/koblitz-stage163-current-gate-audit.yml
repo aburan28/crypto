@@ -1,0 +1,44 @@
+name: Koblitz Stage 163 current gate audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/index-calculus-scoreboard.html"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-162-current-gate-audit-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-m4ri-echelons-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-m4ri-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-current-gate-audit-20260923/**"
+      - "scripts/compose_koblitz_stage162_gate_audit.py"
+      - "scripts/compose_koblitz_stage163_gate_audit.py"
+      - "scripts/verify_koblitz_stage163_m4ri.py"
+      - ".github/workflows/koblitz-stage163-current-gate-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical Stage 162 and current Stage 163
+        run: |
+          python3 -m py_compile \
+            scripts/compose_koblitz_stage162_gate_audit.py \
+            scripts/compose_koblitz_stage163_gate_audit.py \
+            scripts/verify_koblitz_stage163_m4ri.py
+          python3 scripts/compose_koblitz_stage162_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-162-current-gate-audit-20260923 \
+            > "$RUNNER_TEMP/stage162-historical-audit.json"
+          python3 scripts/verify_koblitz_stage163_m4ri.py \
+            > "$RUNNER_TEMP/stage163-result-verification.json"
+          cmp "$RUNNER_TEMP/stage163-result-verification.json" \
+            research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-m4ri-verification.json
+          python3 scripts/compose_koblitz_stage163_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-current-gate-audit-20260923 \
+            > "$RUNNER_TEMP/stage163-current-audit.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"

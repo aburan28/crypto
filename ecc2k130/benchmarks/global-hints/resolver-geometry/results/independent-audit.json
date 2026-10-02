@@ -1,0 +1,23 @@
+{
+  "schema":"ecc2k130-resolver-geometry-independent-audit-v1",
+  "auditStatus":"PASS",
+  "sourceCommit":"5c91ec05166342bea08251a4ce6351f926f9fc6c",
+  "archiveSha256":"02edcd5e654ee16a2077bc4f3dd69518644fde2f9752fc1f970afe7d3580060d",
+  "archiveBytes":167011872,
+  "launchSha256":"e5b7690f299138610dbe6aeb0c5e380dcfc11ebeace66331d8ac4f842c3c7b11",
+  "resultSha256":"b9e8d2aa388b15c63ee04b2677d91a384f5707c7bf68b2d1f89854ae4e9ac9b9",
+  "samplesSha256":"89494d2510814049f4e880a1c51ae8d8dce02e2c5a5a2db35131731763f0101f",
+  "preflightSha256":"d369275cfad47372386b8f18bde1984522786ca37808707f3352150f78f869a8",
+  "manifests":{"sourceEntries":27,"sourceSha256":"4a122abc43f679def6a91a2fa4807b783d807aa2330cf9c31e50366eb83b4848","binaryEntries":11,"binarySha256":"2502c8db77b5655a2d68c4778930ec933b6e8492b406955088a92c96574f9d7e","artifactEntries":178,"artifactSha256":"884b14d4c686fba0566661860ae4fc2ac3aedbfde4689d77d8fc3c989d7ed9b0"},
+  "controls":{"nativeOwnershipCases":449820,"deviceCasesPerWidth":49,"deviceWidths":[128,256,512],"runtimeLogs":66,"correctnessLogs":32,"timingLogs":34,"spreadCorpora":4},
+  "corpora":[
+    {"label":"full","recordsPerArm":1710384,"duplicatesPerArm":0,"sortedPayloadSha256":"5cd48f49da20a092a2883cf9c5099ee774712a8bc225d2c91214c72afe79736e"},
+    {"label":"partial-511","recordsPerArm":9148,"duplicatesPerArm":0,"sortedPayloadSha256":"7d53f9666ac1809ce24e48494146beb4b83a5c88b2ee92bf8abe98dc52719a58"},
+    {"label":"partial-513","recordsPerArm":9182,"duplicatesPerArm":0,"sortedPayloadSha256":"f87932ebe57bfc24a96e865c415f6511f1c6479d07eb20ac7b5bc8c63df52a10"},
+    {"label":"prefix","recordsPerArm":5242,"duplicatesPerArm":0,"sortedPayloadSha256":"b92500750dbd87840dcff01570c5d88c6bdc43a366a2683240fe85633766a198"},
+    {"label":"all-continuations","recordsPerArm":3940,"duplicatesPerArm":0,"sortedPayloadSha256":"76640717c663ab1a1dd23f9963b523f2ec310a302899aa96835dc9cbe7b7cc6f"}
+  ],
+  "resources":{"control":["packed kernel: 128 registers/thread, 400 local bytes/thread, 1040 shared bytes/block, single-product multiplier"],"r128":["packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier","packed GPU-wide resolver geometry: 188 blocks, 128 threads/block, 4 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 128 x 1","packed hint select kernel: 56 registers/thread, 0 local bytes/thread, 0 static shared bytes","packed hint resolve kernel: 124 registers/thread, 400 local bytes/thread, 0 static shared bytes"],"r256":["packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier","packed GPU-wide resolver geometry: 188 blocks, 256 threads/block, 8 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 256 x 1","packed hint select kernel: 56 registers/thread, 0 local bytes/thread, 0 static shared bytes","packed hint resolve kernel: 124 registers/thread, 400 local bytes/thread, 0 static shared bytes"],"r512":["packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier","packed GPU-wide resolver geometry: 188 blocks, 512 threads/block, 16 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 512 x 1","packed hint select kernel: 56 registers/thread, 0 local bytes/thread, 0 static shared bytes","packed hint resolve kernel: 123 registers/thread, 400 local bytes/thread, 0 static shared bytes"]},
+  "benchmark":{"updatesPerSample":201863462912,"armMediansMps":{"control":7023.6379999999999,"r128":5721.5919999999996,"r256":5980.0259999999998,"r512":5605.567},"aaMaximumSymmetricDrift":0.00043644017747232494,"r128ControlGeometricMean":0.81456915787117112,"r256R128PairedMedian":1.0451681979421112,"r512R128PairedMedian":0.97970162849780285,"geometryCandidate":"","parentMapGate":false,"rateGoalGate":false,"decision":"DO_NOT_PROMOTE"},
+  "claimBoundary":{"benchmarkOnly":true,"searchRun":false,"solverRun":false,"collisionRecoveryRun":false}
+}

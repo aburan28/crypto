@@ -41,9 +41,60 @@ on the existing 4096-step boundaries. Campaign users should size the limit for
 their DP distribution; it is not part of the iteration's algebra.
 
 The cold path performs extra additions/inversions and possibly canonicalization.
-Its GPU register, occupancy, throughput, and end-to-end cost have **not** been
-measured. Existing v2 throughput and walk-constant figures do not transfer to v3.
-This repair makes no speedup claim and does not change the default sigma walk.
+Existing v2 throughput and walk-constant figures do not transfer to v3. A
+current-main measurement found that calling the point probe independently at
+each slot reduced the 64-launch benchmark to 1.040338 B/s. The call raised the
+kernel from the historical 116-register/no-frame shape to 128 registers, a
+448-byte frame and 36/84 bytes of reported spill stores/loads.
+
+`TABLE_SPLIT_FORWARD=1` selects every slot before the prefix product becomes
+live, eliminating those reported spills. `TABLE_BATCH_HINTS=1` then pushes all
+raw tags first and resolves one pending slot per lane per warp round. Because
+the point probe is independent of incoming history, replacing the newest raw
+tag with its resolved tag produces the same final history as immediate
+resolution. Both options default off globally and are selected by the RTX PRO
+6000 table preset.
+
+The matched B16/T512 comparison measured 2.449169 B/s versus 1.052232 B/s
+control, with paired ratios 2.325576–2.330535. Both arms replayed 300/300
+reports, dropped none and produced identical 1,480,278-record v3 corpora. A
+B16/B32/B64 constant-population follow-up retained B16 after B32 lost all three
+long pairs and B64 lost the screen. These are same-walk scheduling results,
+not a 26 B/s result or a full-solve speedup.
+
+`CYCLE_FAST2=1` additionally proves a raw two-cycle after its first ordinary
+step when the successor tag selects the exact opposite addend and the closing
+denominator is nonzero. Associativity makes the second inversion and point
+comparison redundant. The shortcut applies the same DP stop, cyclic
+eligibility tests and strict anchor ordering; every other hint resumes the
+unchanged bounded probe. On top of reconvergence it measured 3.592794 B/s
+versus 2.450018 B/s control, with paired ratios 1.466220–1.466757 and the same
+300/300, zero-drop, identical-corpus gate. The RTX table preset selects it;
+the general option defaults off.
+
+`TABLE_BLOCK_HINTS=1` next assigns hinted `(thread,slot)` owners to a
+512-entry per-block shared queue. Queue entries are resolved by consecutive
+threads and every owner waits before the original prefix pass; overflow retains
+the per-lane exact fallback. It measured 5.019275 B/s versus 3.559925 B/s
+control, with paired ratios 1.408683–1.410538 and the same replay/corpus gate.
+The candidate adds 1,040 static shared bytes and keeps 128 registers, a
+400-byte frame and zero spills. The RTX table preset selects queue 512; the
+general option defaults off.
+
+The selected schedule was then retested with the roofline note's two arithmetic
+knobs: a shared polynomial-square table and the out-of-line polynomial-basis
+inversion (`PACKED_SQUARE_TABLE=1 PACKED_INV_POLY=2`). Five alternating
+64-launch pairs measured candidate rates from 5.095344 to 5.107611 B/s,
+including **5.097573** and **5.100950 B/s**, against controls from 5.064024 to
+5.069412 B/s. Every paired ratio was at least 1.005 and the median was
+**1.006625**. A matched five-pair control/control panel had median 1.000047
+and stayed inside the preregistered noise bounds. The same replay and complete
+v3 corpus gates passed. This selects the arithmetic knobs as a bounded 0.66%
+same-walk engineering improvement; it remains `Partial` against the older
+roofline experiment's 1.040 threshold and says nothing about full-solve cost.
+See [`benchmarks/block-both2-confirm5/`](benchmarks/block-both2-confirm5/).
+
+The default sigma walk is unchanged.
 The hashed controls in `walkconstant.cpp` explicitly retain v2; native rows use
 v3 and identify it in their output. Their old merge-loss model is not a v3 model.
 

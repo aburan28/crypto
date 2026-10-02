@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "bytes": 518,
+    "path": "metrics.json",
+    "sha256": "bdfef894cbdc874591b7e55e8ed425baaee9d8f700d5c4b2898b28f4b2322298"
+  },
+  "process": {
+    "command": [
+      "/bin/mkdir",
+      "-p",
+      "/Volumes/SSD990/kic-stage201-finalizer-dc2cd3e51"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1228800,
+    "pid": 24472,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001622,
+    "timed_out": false,
+    "total_core_seconds": 0.002326,
+    "user_seconds": 0.000704,
+    "wall_seconds": 0.027635792,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

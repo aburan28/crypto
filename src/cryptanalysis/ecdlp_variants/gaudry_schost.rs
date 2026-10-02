@@ -47,7 +47,7 @@ use num_traits::Zero;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
-use super::{key, sub_mod, xkey, DlpSolution, EcGroup};
+use super::{add_mod, key, masked_is_zero, neg_mod, sub_mod, xkey, DlpSolution, EcGroup};
 use crate::ecc::point::Point;
 use crate::utils::mod_inverse;
 
@@ -113,29 +113,33 @@ impl Jumps {
     }
 }
 
-/// Branch selector `h(R) ∈ [0, R)` from the x-coordinate's low byte.
+/// Branch selector `h(R) ∈ [0, R)` from the x-coordinate's low byte,
+/// read off its low word rather than a byte buffer.
 fn branch(p: &Point, r: usize) -> usize {
     match p {
         Point::Affine { x, .. } => {
-            let b = x.value.to_bytes_le();
-            (*b.first().unwrap_or(&0) as usize) % r
+            let lo = x.value.iter_u64_digits().next().unwrap_or(0);
+            (lo as u8 as usize) % r
         }
         Point::Infinity => 0,
     }
 }
 
-/// Distinguished-point test: low `dp_bits` of the x-coordinate zero.
+/// Distinguished-point test: low `dp_bits` of the x-coordinate zero,
+/// i.e. `x & dp_mask = 0`, tested word by word without building the
+/// conjunction.
 fn is_dp(p: &Point, dp_mask: &BigUint) -> bool {
     match p {
-        Point::Affine { x, .. } => (&x.value & dp_mask).is_zero(),
+        Point::Affine { x, .. } => masked_is_zero(&x.value, dp_mask),
         Point::Infinity => false,
     }
 }
 
-/// Keep the `±` representative with `y ≤ (p−1)/2`.
-fn needs_flip(p: &Point, field_p: &BigUint) -> bool {
+/// Keep the `±` representative with `y ≤ (p−1)/2`: flip when `2y > p`,
+/// which is `y > ⌊p/2⌋` (see [`EcGroup::half_field_prime`]).
+fn needs_flip(p: &Point, half_p: &BigUint) -> bool {
     match p {
-        Point::Affine { y, .. } => &(&y.value * 2u32) > field_p,
+        Point::Affine { y, .. } => y.value > *half_p,
         Point::Infinity => false,
     }
 }
@@ -153,23 +157,20 @@ fn step(
     let n = group.order();
     let idx = branch(p, jumps.len());
     let np = group.add(p, &jumps.pts[idx]);
-    let nu = (u + &jumps.scal[idx]) % n;
-    if negate && needs_flip(&np, &group.field_prime()) {
+    let nu = add_mod(u, &jumps.scal[idx], n);
+    if negate && needs_flip(&np, group.half_field_prime()) {
         let neg = group.neg(&np);
-        (
-            neg,
-            sub_mod(&BigUint::zero(), &nu, n),
-            sub_mod(&BigUint::zero(), v, n),
-        )
+        (neg, neg_mod(&nu, n), neg_mod(v, n))
     } else {
         (np, nu, v.clone())
     }
 }
 
 impl EcGroup {
-    /// Field prime `p` (needed for the negation representative test).
-    fn field_prime(&self) -> BigUint {
-        self.p.clone()
+    /// `⌊p/2⌋`, the bound of the negation map's representative test,
+    /// computed once with the group.
+    fn half_field_prime(&self) -> &BigUint {
+        &self.half_p
     }
 }
 
@@ -182,12 +183,8 @@ fn fold(
     negate: bool,
 ) -> (Point, BigUint, BigUint) {
     let n = group.order();
-    if negate && needs_flip(&p, &group.field_prime()) {
-        (
-            group.neg(&p),
-            sub_mod(&BigUint::zero(), &u, n),
-            sub_mod(&BigUint::zero(), &v, n),
-        )
+    if negate && needs_flip(&p, group.half_field_prime()) {
+        (group.neg(&p), neg_mod(&u, n), neg_mod(&v, n))
     } else {
         (p, u, v)
     }
@@ -283,10 +280,12 @@ fn gaudry_schost_core(
                 BigUint::from(1u32),
             )
         };
-        if negate && needs_flip(&p, &group.field_prime()) {
+        // `neg_mod` wants its argument at most `n`: `u < n`, and the wild
+        // start's `v = 1` meets `n` only when `n = 1`.
+        if negate && needs_flip(&p, group.half_field_prime()) {
             p = group.neg(&p);
-            u = sub_mod(&BigUint::zero(), &u, n);
-            v = sub_mod(&BigUint::zero(), &v, n);
+            u = neg_mod(&u, n);
+            v = neg_mod(&v, n);
         }
 
         let mut steps = 0u64;
@@ -320,13 +319,11 @@ fn gaudry_schost_core(
                 let n = group.order();
                 let dbl = group.dbl(&p);
                 let (fp, fu, fv) = fold(group, dbl, (&u + &u) % n, (&v + &v) % n, true);
-                last = Some(p.clone());
-                p = fp;
+                last = Some(std::mem::replace(&mut p, fp));
                 u = fu;
                 v = fv;
             } else {
-                last = Some(p.clone());
-                p = np;
+                last = Some(std::mem::replace(&mut p, np));
                 u = nu;
                 v = nv;
             }
@@ -575,5 +572,66 @@ mod tests {
             gaudry_schost_negation(&g, &q, &opts).unwrap().x,
             BigUint::from(73_313u32)
         );
+    }
+
+    /// A point with the given coordinates, as the step helpers see it.
+    fn pt(x: &BigUint, y: &BigUint, p: &BigUint) -> Point {
+        let fe = |v: &BigUint| crate::ecc::field::FieldElement {
+            value: v.clone(),
+            modulus: p.clone(),
+        };
+        Point::Affine { x: fe(x), y: fe(y) }
+    }
+
+    /// The step helpers return exactly what the expressions they replaced
+    /// did, on one-word values and on multi-word ones (their `BigUint`
+    /// fallbacks): `add_mod` and `neg_mod` against `%` and
+    /// `sub_mod(0, ·)`, `branch` against the first byte of `to_bytes_le`,
+    /// `is_dp` against `x & mask`, `needs_flip` against `2y > p`.
+    #[test]
+    fn step_helpers_match_the_expressions_they_replace() {
+        let mut rng = StdRng::seed_from_u64(0x57e9);
+        let zero = BigUint::zero();
+        let moduli = [
+            BigUint::from(2u32),
+            BigUint::from(7u32),
+            BigUint::from(10_039u32),
+            BigUint::from(u64::MAX - 58),
+            BigUint::from(1u32) << 64,
+            BigUint::from(3u32).pow(90),
+        ];
+        for n in &moduli {
+            let mut vals = vec![zero.clone(), BigUint::from(1u32) % n, n - 1u32];
+            vals.extend((0..40).map(|_| rng.gen_biguint_below(n)));
+            let half = n >> 1;
+            for u in &vals {
+                assert_eq!(neg_mod(u, n), sub_mod(&zero, u, n), "n={n} u={u}");
+                assert_eq!(
+                    needs_flip(&pt(u, u, n), &half),
+                    u * 2u32 > *n,
+                    "n={n} y={u}"
+                );
+                for s in vals.iter().step_by(7) {
+                    assert_eq!(add_mod(u, s, n), (u + s) % n, "n={n} {u}+{s}");
+                }
+            }
+            let wide = BigUint::from(u64::MAX);
+            assert_eq!(add_mod(&wide, &wide, n), (&wide + &wide) % n);
+            // `u = n`, the walk's `v = 1` start when `n = 1`.
+            assert_eq!(neg_mod(n, n), sub_mod(&zero, n, n), "n={n} u=n");
+        }
+        for bits in [0u8, 1, 8, 63, 64, 65, 130] {
+            let mask = dp_mask(bits);
+            let big = BigUint::from(3u32).pow(90);
+            for i in 0..60u32 {
+                let x = (rng.gen_biguint_below(&big) >> (i % 70)) << (i % 70);
+                let p = pt(&x, &zero, &big);
+                assert_eq!(is_dp(&p, &mask), (&x & &mask).is_zero(), "{bits} {x}");
+                for r in [1usize, 7, 32, 256, 1000] {
+                    let byte = *x.to_bytes_le().first().unwrap_or(&0) as usize;
+                    assert_eq!(branch(&p, r), byte % r);
+                }
+            }
+        }
     }
 }
