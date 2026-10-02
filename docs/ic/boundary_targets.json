@@ -142,7 +142,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=63 \u2014 the last u64-packing rung (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, frozen median 53.13x, four Python-replayed runs, zero pair-table entries) is the rung to beat. Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung."
+      "beat": "Beyond-63 multi-word field arithmetic rung: extend the packing to u128 and land n=71, a=0 (prime degree; r=5513228015079457 ~ 2^52.3, cofactor 428276) on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, four Python-replayed runs) is the rung to beat; it is the u64-packing ceiling for this family \u2014 the n=63 attempt is closed as mathematically non-viable (n=62/63 admit no usable subgroup on either K_a; documented in experiments/koblitz-single-target-n63-20261002/). The extension must keep every n<=63 fixture byte-identical."
     },
     {
       "rank": 2,
@@ -933,7 +933,7 @@
             "primary_single_target_status": "achieved_n41_n53_n61_20261002"
           },
           "next_target": {
-            "summary": "Extend the verified single-target online ladder to n=63 \u2014 the last rung on the u64 packing guard (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung.",
+            "summary": "The u64-packing ceiling for this curve family is n=61 (the landed record): n=62 and n=63 admit no usable prime-order subgroup on either K_a (largest primes ~2^18-2^20 << cofactor; documented under experiments/koblitz-single-target-n63-20261002/). The next rung is beyond-63 multi-word field arithmetic \u2014 the natural target is n=71, a=0 (prime degree; r=5513228015079457 ~ 2^52.3, cofactor 428276) on the same frozen public point contract with the compact-orbit domain, requiring u128 packing.",
             "acceptance_gates": [
               "exactly one previously unseen online target",
               "IC and rho use identical frozen public point and matching resource envelope",
@@ -945,11 +945,14 @@
               "record exclusive online phases, memory peak, and independent scalar replay for both arms",
               "report rho_online_ms / IC_online_ms; a win requires at least 1.20 and a verified answer",
               "multi-target or amortized rows remain secondary and cannot satisfy this gate",
-              "n=63 must be admitted by the MAX_N guard; beyond-63 work is a new implementation rung (multi-word packing)"
+              "n=71 (a=0) must be admitted by the extended multi-word packing guard with r=5513228015079457 and cofactor 428276; the extension must keep every n<=63 result byte-identical (existing fixtures must not change)",
+              "the n=63 rung is closed as mathematically non-viable on this family (fail-closed receipts retained)"
             ],
-            "historical_secondary_note": "The n=61 record landed from the experiments evidence dir (claim-check PASS; autolab per-beat producer wiring for koblitz_orbit_dlp_fast + KIC_RHO_FIXED_TARGET_SCALAR pinning is the control-plane follow-up). The n=53 explicit-pair-table rung and the n=41 first rung are history."
+            "historical_secondary_note": "n=61 is the u64-packing ceiling for this curve family: n=62/n=63 orders factor into small cyclotomic pieces on both K_a (evidence: experiments/koblitz-single-target-n63-20261002/curve_orders.json). The n=61 compact-orbit record landed 2026-10-02 from the experiments evidence dir with claim-check PASS; autolab per-beat producer wiring for koblitz_orbit_dlp_fast + KIC_RHO_FIXED_TARGET_SCALAR pinning is the control-plane follow-up."
           },
           "evidence": [
+            "experiments/koblitz-single-target-n63-20261002/curve_orders.json",
+            "experiments/koblitz-single-target-n63-20261002/README.md",
             "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json",
             "experiments/koblitz-single-target-n61-20260925/summary.json",
             "experiments/koblitz-single-target-n61-20260925/independent-replay.json",

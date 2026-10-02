@@ -324,7 +324,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=63 \u2014 the last u64-packing rung (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, frozen median 53.13x, four Python-replayed runs, zero pair-table entries; landed from experiments/koblitz-single-target-n61-20260925 with claim-check PASS) is the rung to beat. Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung."
+      "beat": "Beyond-63 multi-word field arithmetic rung: extend the packing to u128 and land n=71, a=0 (prime degree; r=5513228015079457 ~ 2^52.3, cofactor 428276) on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, four Python-replayed runs, zero pair-table entries) is the rung to beat; it is the u64-packing ceiling for this family \u2014 the n=63 attempt is closed as mathematically non-viable (n=62/63 admit no usable subgroup on either K_a; documented in experiments/koblitz-single-target-n63-20261002/). The extension must keep every n<=63 fixture byte-identical."
     },
     {
       "rank": 2,
