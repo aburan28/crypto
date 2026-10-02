@@ -506,7 +506,7 @@ test-packed-network:
 	./build/test-packed-network-add
 
 test-sigma-square-table-native:
-	/bin/sh benchmarks/sigma-square-table/run-native.sh
+	CXX="$(CXX)" /bin/sh benchmarks/sigma-square-table/run-native.sh
 
 test-generated-product:
 	python3 codegen/genpackedproduct.py --check

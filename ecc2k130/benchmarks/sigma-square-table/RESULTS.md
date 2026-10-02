@@ -144,6 +144,15 @@ checked 22-log SHA-256 manifest before the summarizer can issue a decision.
 Synthetic promote/reject/optional/noise ledgers, truncated-log rejection, and
 strict parser tests pass under optimized and UBSAN builds.
 
+The first authorized device allocation stopped before either client build and
+before any device kernel.  All three native harness self-tests passed, but the
+focused field replay's strict GCC build promoted unused generated curve
+constants to errors.  `attempt-3-gpu-prebuild-failure.json` binds the Modal
+app, function call, recoverable volume token, archive, source manifest, and
+failure log.  The repair suppresses only `unused-variable` in the focused
+replay/audit translation units and explicitly passes Make's selected `CXX`
+into the script so Linux GCC is covered before a retry.
+
 ## Next gate
 
 The repaired compile artifact requires an independent read-only audit, followed by the

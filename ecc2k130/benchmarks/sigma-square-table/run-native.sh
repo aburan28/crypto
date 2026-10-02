@@ -7,7 +7,7 @@ build="$here/.build"
 cxx=${CXX:-clang++}
 
 mkdir -p "$build"
-flags='-O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_ALU_SQUARE=0'
+flags='-O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas -Wno-unused-variable -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_ALU_SQUARE=0'
 
 # shellcheck disable=SC2086
 "$cxx" $flags -DECC_SIGMA_SQUARE_TABLE=0 "$here/replay.cpp" -o "$build/replay-control"
@@ -55,7 +55,7 @@ grep -q 'keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off' "$build/guard-table
 "$build/summarize" --self-test > "$build/summarize-self-test.txt"
 "$build/postrun-audit" --self-test > "$build/postrun-audit-self-test.txt"
 
-"$cxx" -O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas \
+"$cxx" -O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas -Wno-unused-variable \
   -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 \
   "$here/audit.cpp" -o "$build/audit"
 "$build/audit" "$build/control.bin" "$build/candidate.bin" "$root" > "$here/result.json"
@@ -80,6 +80,7 @@ grep -q 'keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off' "$build/guard-table
   benchmarks/sigma-square-table/run-native.sh \
   benchmarks/sigma-square-table/attempt-1-compile-failure.json \
   benchmarks/sigma-square-table/attempt-2-native-portability-failure.json \
+  benchmarks/sigma-square-table/attempt-3-gpu-prebuild-failure.json \
   benchmarks/sigma-square-table/compile-artifact.json \
   benchmarks/sigma-square-table/compile-artifact-core.json \
   benchmarks/sigma-square-table/compile-files.sha256 \
