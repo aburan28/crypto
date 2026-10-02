@@ -324,7 +324,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=61 on the same frozen public point and matched resources under the 16 GiB gate. n=61 requires the compact-orbit (representative-plus-Frobenius) precompute domain without the explicit pair table; the factor_base priority folds into this rung. The n=53 single-target record (51.0x-55.7x online across two paired runs, standalone Python GF(2^53) scalar replay PASS) is the rung to beat. Exclude process launch, fixture generation, and reusable IC preparation from both online intervals."
+      "beat": "Extend the verified single-target online ladder to n=63 \u2014 the last u64-packing rung (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, frozen median 53.13x, four Python-replayed runs, zero pair-table entries; landed from experiments/koblitz-single-target-n61-20260925 with claim-check PASS) is the rung to beat. Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung."
     },
     {
       "rank": 2,

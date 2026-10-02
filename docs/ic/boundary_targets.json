@@ -142,7 +142,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=61 on the same frozen public point and matched resources under the 16 GiB gate. n=61 requires the compact-orbit (representative-plus-Frobenius) precompute domain without the explicit pair table \u2014 the factor_base priority folds into this rung. The n=53 single-target record (51.0x-55.7x online across two paired runs, standalone Python GF(2^53) scalar replay PASS) is the rung to beat. Exclude process launch, fixture generation, and reusable IC setup from both online intervals."
+      "beat": "Extend the verified single-target online ladder to n=63 \u2014 the last u64-packing rung (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, frozen median 53.13x, four Python-replayed runs, zero pair-table entries) is the rung to beat. Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung."
     },
     {
       "rank": 2,
@@ -788,126 +788,270 @@
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "Second primary single-target online rung: n=53 IC beats automorphism-discounted rho on the identical frozen public point (one unseen target, online intervals after reusable guided shared-log preparation); 51.0x-55.7x across two paired runs on the same frozen point, both arms verified, standalone Python GF(2^53) scalar replay PASS on both runs; first rung n=41 (17.7x-18.8x) moves to history",
+            "summary": "Third primary single-target online rung: n=61 compact-orbit IC (koblitz_orbit_dlp_fast, 600 signed-Frobenius orbit columns, 73,200 base points, zero pair-table entries, 2.73 GB peak RSS) beats automorphism-discounted rho on the identical frozen public point; fresh reproduction R4 on the byte-identical committed source/binary 124.85x online (IC 58.99 ms vs rho 7,365.18 ms); frozen R1-R3 median 53.13x (range 27.62x-98.52x); all four runs Python-replayed PASS; no explicit pair table at any stage",
             "metrics": {
-              "n": 53,
+              "n": 61,
               "target_count": 1,
               "timing_class": "single_target_online",
-              "subgroup_order": 21044858204113,
-              "subgroup_log2_order": 44.258533022667656,
+              "subgroup_order": 162888033982417,
+              "subgroup_log2_order": 47.5407,
+              "curve": {
+                "a": 0,
+                "b": 1,
+                "field_modulus": "x^61 + x^5 + x^2 + x + 1",
+                "cofactor": 14156,
+                "weierstrass_model": "y^2 + x*y = x^3 + 1"
+              },
               "paired_same_public_point": true,
               "public_generator": [
-                198217578752339,
-                7929897206038174
+                417741213578625342,
+                1665657146971463353
               ],
               "public_target_q": [
-                4910906853150104,
-                968484661590993
+                1191898001997870864,
+                2105024931777585135
               ],
-              "fixture_scalar": 4572131355890,
-              "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
-              "factor_base_points": 23320,
-              "matrix_columns": 221,
-              "automorphism_discount": "sqrt(2n) with A=2*n=106; rho producer uses signed_frobenius quotient",
+              "fixture_scalar": 77777777777777,
+              "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+              "base_point_set_digest": "e94f7ffb099d82c8bb6e3c6e2f9857950c55b1ff238e3d6107fdd1f184b3b1e7",
+              "factor_base_points": 73200,
+              "orbit_columns": 600,
+              "matrix_columns": 600,
+              "domain": {
+                "kind": "compact_orbit",
+                "pair_table_entries": 0,
+                "edge_selectors": 0,
+                "root_table_entries": 21958053,
+                "regular_states": 21960000,
+                "rank": 600,
+                "rank_attempts": 600,
+                "rank_failures": 0,
+                "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j"
+              },
+              "automorphism_discount": "sqrt(2n) with A=2*n=122; rho producer uses signed_frobenius quotient",
               "paired_runs": [
                 {
-                  "run_id": "20261002T214339Z-56e7fbb9d7",
-                  "ic_online_ms": 18.006,
-                  "rho_online_ms": 918.836,
-                  "online_speedup": 51.03
+                  "run": "R1 (frozen 2026-09-25)",
+                  "ic_online_ms": 75.088833,
+                  "rho_online_ms": 3989.175416,
+                  "online_speedup": 53.13
                 },
                 {
-                  "run_id": "20261002T214636Z-0fbed42339",
-                  "ic_online_ms": 15.531,
-                  "rho_online_ms": 865.179,
-                  "online_speedup": 55.71
+                  "run": "R2 (frozen 2026-09-25)",
+                  "ic_online_ms": 99.561,
+                  "rho_online_ms": 2750.126167,
+                  "online_speedup": 27.62
+                },
+                {
+                  "run": "R3 (frozen 2026-09-25)",
+                  "ic_online_ms": 89.650083,
+                  "rho_online_ms": 8832.519541,
+                  "online_speedup": 98.52
+                },
+                {
+                  "run": "R4 (fresh 2026-10-02, committed source)",
+                  "ic_online_ms": 58.994333,
+                  "rho_online_ms": 7365.181667,
+                  "online_speedup": 124.85
                 }
               ],
-              "ic_online_ms_median": 16.768,
-              "rho_online_ms_median": 892.008,
-              "online_speedup_median": 53.37,
-              "online_speedup_min": 51.03,
-              "online_speedup_max": 55.71,
+              "fresh_reproduction_online_speedup": 124.85,
+              "frozen_median_online_speedup": 53.13,
+              "online_speedup_range_all_runs": [
+                27.62,
+                124.85
+              ],
               "ic_online_phase_ms": {
-                "target_pdp": 12.599,
+                "target_descent": 0.000875,
+                "target_pdp_and_relation_check": 58.948292,
                 "target_query": 0.0,
-                "target_recovery_check": 1.756,
-                "target_relation_check": 3.651,
-                "target_descent": 0.0
+                "target_recovery_check": 0.044875
               },
               "rho_online_phase_ms": {
-                "target_walk": 915.195,
-                "scalar_recovery_check": 3.641
+                "target_specific_jump_setup": 5.624917,
+                "walk": 7351.676959,
+                "verification": 7.879791
               },
-              "ic_online_interval": "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded",
-              "rho_online_interval": "first target-dependent walk step through recovered scalar and verification; excludes launch, walk setup, and fixture point generation",
-              "ic_precomputation_ms_excluded_from_online": 61839.6,
-              "ic_precomputation_note": "guided eta 1/10 signed_expanded pair_pair_guided_256; explicit pair table this rung, peak child RSS 9.34 GB under the 16 GiB common cap, logged; compact-orbit replacement without the pair table is the follow-up factor_base rung",
-              "online_target_admitted_relations": 1,
-              "uses_retained_factor_logs": true,
+              "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+              "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification through the verified returned scalar",
+              "ic_precomputation_ms_excluded_from_online": 13097.772625,
               "ic_verified_all_runs": true,
               "rho_verified_all_runs": true,
               "ic_and_rho_scalar_identical": true,
               "independent_scalar_replay": {
-                "method": "standalone Python polynomial-basis GF(2^53) arithmetic and binary Weierstrass group law; separate from Rust producers",
+                "method": "standalone Python GF(2^61) polynomial/affine-curve arithmetic independent of the Rust producers",
                 "validated_runs": [
-                  "20261002T214339Z-56e7fbb9d7",
-                  "20261002T214636Z-0fbed42339"
+                  "R1",
+                  "R2",
+                  "R3",
+                  "R4"
                 ],
-                "field_modulus": "x^53 + x^6 + x^2 + x + 1",
                 "checks_all_true": [
-                  "field_irreducible",
                   "generator_on_curve",
                   "target_on_curve",
-                  "subgroup_order_annihilates_generator",
-                  "ic_scalar_replays_target",
-                  "rho_scalar_replays_target",
-                  "ic_and_rho_target_identical",
-                  "ic_and_rho_scalar_identical"
+                  "target_is_scalar_times_g",
+                  "target_matches_published_q",
+                  "generator_has_order_r",
+                  "all_x_codes_in_base",
+                  "x_codes_have_base_points",
+                  "group_relation_sums_to_target",
+                  "pinned_intermediates_match",
+                  "base_points_have_order_r",
+                  "recovered_log_times_g_is_target",
+                  "recovered_log_matches_published",
+                  "rho_same_public_point",
+                  "rho_scalar_matches_sidecar",
+                  "rho_verified"
                 ],
                 "status": "PASS"
               },
-              "resource_caps": {
-                "common_cap_bytes": 17179869184
+              "reproducibility": {
+                "ic_source_sha256": "bb69bd4409fcb5898558533393dce02200e14571ded033b966cf2dcd9b3e9687",
+                "ic_binary_sha256": "edf9ed313009a56e5d00acabefe92add93272761bbb8e264c9cc20dcc6fc243e",
+                "byte_identical_to_frozen_protocol": true,
+                "deterministic_relation": {
+                  "probes": 227437,
+                  "point_indices": [
+                    21852,
+                    25480,
+                    26108,
+                    45574
+                  ]
+                }
               },
+              "resource_caps": {
+                "common_cap_bytes": 17179869184,
+                "ic_peak_rss_bytes": 2730524672,
+                "rho_peak_rss_bytes": 350502912
+              },
+              "operation_count_boundary": "total operation-count comparison absent; S unknown (rho full charge accounting retained in runs/R4/rho.jsonl)",
               "asymptotic_sub_rho": false,
               "single_target_crossover": true
             },
-            "verdict": "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
-            "claim_boundary": "Public synthetic Koblitz, exactly one previously unseen target solved online by IC and rho on the identical frozen public point under the same 16 GiB resource cap. Online clocks start after reusable guided shared-log IC preparation (factor base, support index, logs; 61.8 s and the explicit pair table's 9.34 GB peak are excluded setup, logged) and at rho's first target-dependent walk step. Constant-factor win only: not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target, batch throughput, and amortized-table results remain secondary.",
-            "primary_single_target_status": "achieved_n41_20261002_n53_20261002"
+            "verdict": "N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+            "claim_boundary": "Public synthetic Koblitz n=61 (a=0, b=1 over GF(2^61), 48-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point under the same 16 GiB cap; constant-factor win only. Total operation-count boundary not comparable, S unknown. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target amortized results remain secondary.",
+            "primary_single_target_status": "achieved_n41_n53_n61_20261002"
           },
           "next_target": {
-            "summary": "Extend the verified single-target online ladder to n=61 on the same frozen public point contract under the 16 GiB gate. n=61 requires the representative-plus-Frobenius (compact-orbit) precompute domain without the explicit pair table (the factor_base priority folds into this rung): guided shared-log table at one unseen online target, identical-point rho pairing after reusable logs.",
+            "summary": "Extend the verified single-target online ladder to n=63 \u2014 the last rung on the u64 packing guard (MAX_N=63) \u2014 on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). Beyond n=63 requires multi-word field arithmetic and is a separate implementation rung.",
             "acceptance_gates": [
               "exactly one previously unseen online target",
               "IC and rho use identical frozen public point and matching resource envelope",
               "IC online clock starts after factor base, support index, and reusable logs are ready",
               "rho online clock starts at first target-dependent walk computation",
               "exclude process launch, input loading, and target fixture generation from both online intervals",
-              "compact-orbit / representative-plus-Frobenius domain: no explicit pair table; peak RSS under the common cap",
+              "compact-orbit domain: no explicit pair table; peak RSS under the common cap",
               "guided rank accumulation establishes the reusable factor-log table in the precompute fixture",
               "record exclusive online phases, memory peak, and independent scalar replay for both arms",
               "report rho_online_ms / IC_online_ms; a win requires at least 1.20 and a verified answer",
-              "multi-target or amortized rows remain secondary and cannot satisfy this gate"
+              "multi-target or amortized rows remain secondary and cannot satisfy this gate",
+              "n=63 must be admitted by the MAX_N guard; beyond-63 work is a new implementation rung (multi-word packing)"
             ],
-            "historical_secondary_note": "The n=53 record used the explicit pair table (9.34 GB peak, logged) under the cap; n=61 and any future rung must drop it. The n=41 record is history; multi-target shared-log results remain secondary."
+            "historical_secondary_note": "The n=61 record landed from the experiments evidence dir (claim-check PASS; autolab per-beat producer wiring for koblitz_orbit_dlp_fast + KIC_RHO_FIXED_TARGET_SCALAR pinning is the control-plane follow-up). The n=53 explicit-pair-table rung and the n=41 first rung are history."
           },
           "evidence": [
+            "experiments/koblitz-single-target-n61-20260925/claim_report_vs_rho.json",
+            "experiments/koblitz-single-target-n61-20260925/summary.json",
+            "experiments/koblitz-single-target-n61-20260925/independent-replay.json",
+            "experiments/koblitz-single-target-n61-20260925/independent-replay-r4.json",
+            "experiments/koblitz-single-target-n61-20260925/README.md",
+            "experiments/koblitz-single-target-n61-20260925/runs/R4/ic.jsonl",
+            "experiments/koblitz-single-target-n61-20260925/runs/R4/rho.jsonl",
             "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/results.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/README.md",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n53/20261002T214339Z-56e7fbb9d7_claim_draft.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n53/20261002T214339Z-56e7fbb9d7_validation.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n53/20261002T214636Z-0fbed42339_claim_draft.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n53/20261002T214636Z-0fbed42339_validation.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n41/20261002T213001Z-3e68b28a95_claim_draft.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n41/20261002T213001Z-3e68b28a95_validation.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n41/20261001T151557Z-d271c124eb_claim_draft.json",
-            "research/sat_factor_base_review_20260908/autolab/runs_manual/single_target_online_n41_n53_20261002/n41/rejected_pairing_audit_20261001T020900Z-d7138bdf44.json",
             "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
             "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/results.json"
           ],
           "history": [
+            {
+              "summary": "Second primary single-target online rung at n=53 (guided shared-log precompute with the explicit pair table, 9.34 GB peak RSS under the cap, excluded setup)",
+              "claim_boundary": "Public synthetic Koblitz, exactly one previously unseen target solved online by IC and rho on the identical frozen public point under the same 16 GiB resource cap. Online clocks start after reusable guided shared-log IC preparation (factor base, support index, logs; 61.8 s and the explicit pair table's 9.34 GB peak are excluded setup, logged) and at rho's first target-dependent walk step. Constant-factor win only: not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target, batch throughput, and amortized-table results remain secondary.",
+              "metrics": {
+                "n": 53,
+                "target_count": 1,
+                "timing_class": "single_target_online",
+                "subgroup_order": 21044858204113,
+                "subgroup_log2_order": 44.258533022667656,
+                "paired_same_public_point": true,
+                "public_generator": [
+                  198217578752339,
+                  7929897206038174
+                ],
+                "public_target_q": [
+                  4910906853150104,
+                  968484661590993
+                ],
+                "fixture_scalar": 4572131355890,
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "factor_base_points": 23320,
+                "matrix_columns": 221,
+                "automorphism_discount": "sqrt(2n) with A=2*n=106; rho producer uses signed_frobenius quotient",
+                "paired_runs": [
+                  {
+                    "run_id": "20261002T214339Z-56e7fbb9d7",
+                    "ic_online_ms": 18.006,
+                    "rho_online_ms": 918.836,
+                    "online_speedup": 51.03
+                  },
+                  {
+                    "run_id": "20261002T214636Z-0fbed42339",
+                    "ic_online_ms": 15.531,
+                    "rho_online_ms": 865.179,
+                    "online_speedup": 55.71
+                  }
+                ],
+                "ic_online_ms_median": 16.768,
+                "rho_online_ms_median": 892.008,
+                "online_speedup_median": 53.37,
+                "online_speedup_min": 51.03,
+                "online_speedup_max": 55.71,
+                "ic_online_phase_ms": {
+                  "target_pdp": 12.599,
+                  "target_query": 0.0,
+                  "target_recovery_check": 1.756,
+                  "target_relation_check": 3.651,
+                  "target_descent": 0.0
+                },
+                "rho_online_phase_ms": {
+                  "target_walk": 915.195,
+                  "scalar_recovery_check": 3.641
+                },
+                "ic_online_interval": "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded",
+                "rho_online_interval": "first target-dependent walk step through recovered scalar and verification; excludes launch, walk setup, and fixture point generation",
+                "ic_precomputation_ms_excluded_from_online": 61839.6,
+                "ic_precomputation_note": "guided eta 1/10 signed_expanded pair_pair_guided_256; explicit pair table this rung, peak child RSS 9.34 GB under the 16 GiB common cap, logged; compact-orbit replacement without the pair table is the follow-up factor_base rung",
+                "online_target_admitted_relations": 1,
+                "uses_retained_factor_logs": true,
+                "ic_verified_all_runs": true,
+                "rho_verified_all_runs": true,
+                "ic_and_rho_scalar_identical": true,
+                "independent_scalar_replay": {
+                  "method": "standalone Python polynomial-basis GF(2^53) arithmetic and binary Weierstrass group law; separate from Rust producers",
+                  "validated_runs": [
+                    "20261002T214339Z-56e7fbb9d7",
+                    "20261002T214636Z-0fbed42339"
+                  ],
+                  "field_modulus": "x^53 + x^6 + x^2 + x + 1",
+                  "checks_all_true": [
+                    "field_irreducible",
+                    "generator_on_curve",
+                    "target_on_curve",
+                    "subgroup_order_annihilates_generator",
+                    "ic_scalar_replays_target",
+                    "rho_scalar_replays_target",
+                    "ic_and_rho_target_identical",
+                    "ic_and_rho_scalar_identical"
+                  ],
+                  "status": "PASS"
+                },
+                "resource_caps": {
+                  "common_cap_bytes": 17179869184
+                },
+                "asymptotic_sub_rho": false,
+                "single_target_crossover": true
+              },
+              "recorded": "2026-10-02-second-single-target-rung",
+              "verdict": "N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+            },
             {
               "summary": "Historical secondary (multi-target only): n=53 shared-log 1,024-target process-wall crossover plus fixed-32 growing-n panel; compact-orbit shared-log DLP (koblitz_orbit_dlp_fast, 0 pair edges) beat frozen Kuhn-Struik batched rho at n=53 in all 15 paired blocks (L=32..16,384, wall 0.24-0.74) and at n=41 L=1,024 (0.34), 86,112/86,112 independently replayed; no single-target crossover at that time",
               "claim_boundary": "Public synthetic Koblitz, exactly one previously unseen target solved online by IC and rho on the identical frozen public point under the same 16 GiB resource cap. Online clocks start after reusable IC preparation (factor base, support index, logs) and exclude process launch, input loading, and fixture generation. Constant-factor win only: not an asymptotic sub-rho claim, not key recovery, not external/private targets, not deployed-curve security impact. Multi-target, batch throughput, and amortized-table results remain secondary.",

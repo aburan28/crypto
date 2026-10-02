@@ -1,0 +1,161 @@
+{
+  "schema_version": "2.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "kind": "single_target_online_vs_rho_claim_report",
+  "stage": "vs_rho",
+  "regime": "koblitz",
+  "n": 61,
+  "n_or_bits": 61,
+  "timing_class": "single_target_online",
+  "target_count": 1,
+  "subgroup_order": 162888033982417,
+  "subgroup_log2_order": 47.5407,
+  "paired_target": {
+    "ic_public_q": [
+      1191898001997870864,
+      2105024931777585135
+    ],
+    "rho_public_q": [
+      1191898001997870864,
+      2105024931777585135
+    ],
+    "same_public_point": true,
+    "same_fixture_scalar": true,
+    "ic_fixture_scalar": 77777777777777,
+    "rho_fixture_scalar": 77777777777777,
+    "fixture_scalar_sidecar_note": "scalar is a validation-only sidecar; never supplied to either solver input",
+    "point_generation_excluded_from_online": true
+  },
+  "public_generator": [
+    417741213578625342,
+    1665657146971463353
+  ],
+  "ic_verified": true,
+  "rho_verified": true,
+  "ic_online_ms": 58.994333000000005,
+  "rho_online_ms": 7365.181667,
+  "ic_cost": 58.994333000000005,
+  "rho_cost": 7365.181667,
+  "online_speedup": 124.84557909994506,
+  "ic_online_phase_ms": {
+    "target_descent": 0.000875,
+    "target_pdp_and_relation_check": 58.948292,
+    "target_query": 0.0,
+    "target_recovery_check": 0.044875
+  },
+  "rho_online_phase_ms": {
+    "target_specific_jump_setup": 5.624917,
+    "walk": 7351.676958999999,
+    "verification": 7.879791000000001
+  },
+  "ic_online_interval": "after reusable target-independent base/index/log preparation (base load, S3 root index build, guided rank-600 log table) through target relation extraction, group-lift check, log recovery, and [d]G=Q check; one public Q supplied as solver input",
+  "rho_online_interval": "after Q construction: per-target jump setup, walk, and in-process verification through the verified returned scalar",
+  "ic_precomputation_ms_excluded_from_online": 13097.772625,
+  "ic_precompute_detail": {
+    "base_load_ms": 653.457708,
+    "index_build_ms": 12441.255959,
+    "rank_stage_ms": 11052.765166,
+    "linear_algebra_ms": 0.780625,
+    "orbit_columns": 600,
+    "factor_base_points": 73200,
+    "rank": 600,
+    "rank_attempts": 600,
+    "rank_failures": 0,
+    "rank_policy": "guided: decompose [a]G - R_j for the first pivotless column j",
+    "pair_table_entries": 0,
+    "edge_selectors": 0,
+    "root_table_entries": 21958053,
+    "regular_states": 21960000
+  },
+  "automorphism_discount": {
+    "formula": "sqrt(2n)",
+    "A": 122,
+    "n": 61,
+    "description": "signed Frobenius automorphism discount family used by the Koblitz rho control (quotient_mode signed_frobenius, automorphism_size 122)"
+  },
+  "all_stages_charged_same_series": true,
+  "verdict": "N61_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER",
+  "claim_boundary": "Public synthetic Koblitz n=61 (a=0, b=1 over GF(2^61), modulus x^61+x^5+x^2+x+1), 48-bit subgroup; exactly one previously unseen public target point; compact-orbit IC arm (koblitz_orbit_dlp_fast, 600 signed-Frobenius orbit columns, 73,200 base points, zero pair-table entries, zero edge selectors) vs automorphism-discounted rho arm (koblitz_rho_fixture signed_frobenius packed) on the identical frozen public point under one process per arm on the same host. Constant-factor win only.",
+  "claim_boundary_non_claims": [
+    "not ECC2K-130 evidence (n=131 is a different curve and field degree)",
+    "not an asymptotic sub-rho claim (both arms remain sqrt-class; total operation-count boundary not comparable, S unknown)",
+    "not key recovery, not external/private targets, not deployed-curve security impact",
+    "not a multi-target or amortized claim; batch throughput stays secondary"
+  ],
+  "independent_replay_pointer": "experiments/koblitz-single-target-n61-20260925/independent-replay-r4.json",
+  "frozen_prior_observations": {
+    "summary_pointer": "experiments/koblitz-single-target-n61-20260925/summary.json",
+    "runs": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "ic_online_ms_observations": [
+      75.088833,
+      99.56099999999999,
+      89.65008300000001
+    ],
+    "rho_online_ms_observations": [
+      3989.175416,
+      2750.126167,
+      8832.519541
+    ],
+    "paired_speedup_median": 53.12608089141564,
+    "paired_speedup_range": [
+      27.622524552786736,
+      98.52215687296128
+    ],
+    "all_independent_replay_pass": true
+  },
+  "fresh_reproduction": {
+    "run": "R4",
+    "date": "2026-10-02",
+    "source_matches_frozen_protocol": true,
+    "binary_matches_frozen_protocol": true,
+    "relation_deterministic": {
+      "probes": 227437,
+      "point_indices": [
+        21852,
+        25480,
+        26108,
+        45574
+      ]
+    }
+  },
+  "fixture_hash": {
+    "base_point_set_digest": "e94f7ffb099d82c8bb6e3c6e2f9857950c55b1ff238e3d6107fdd1f184b3b1e7",
+    "workload_id": "2c0fdc4f8660",
+    "curve_id": "EC1N61Ckb1hd0e02e3be112"
+  },
+  "executable_or_source_hash": {
+    "ic_source": "bb69bd4409fcb5898558533393dce02200e14571ded033b966cf2dcd9b3e9687",
+    "ic_binary": "edf9ed313009a56e5d00acabefe92add93272761bbb8e264c9cc20dcc6fc243e",
+    "rho_source": "f1d4d8eeb428fe0c70f69057b61fdaa5fb2a0e5944a764a48be1cb9c634f82a1",
+    "rho_binary": "dd5e052d0c2cfb67de71eddd146d2333a8a7804535dbf7271a31cdcd547a87ac"
+  },
+  "host_id": {
+    "machine": "arm64",
+    "cpu_count": 14,
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit"
+  },
+  "resource_caps": {
+    "common_cap_bytes": 17179869184,
+    "ic_peak_rss_bytes": 2730524672,
+    "rho_peak_rss_bytes": 350502912
+  },
+  "seeds": {
+    "ic_rank_seed": 7,
+    "rho_walk_seed_R4": 20261002,
+    "rho_walk_seeds_frozen": [
+      20260925,
+      20260926,
+      20260927
+    ]
+  },
+  "rho_walk_accounting_R4": {
+    "walk_steps": 2259575,
+    "ideal_steps": 1448186.8976906298,
+    "full_charge_row": "runs/R4/rho.jsonl"
+  }
+}
