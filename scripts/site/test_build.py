@@ -101,6 +101,57 @@ class BuildTests(unittest.TestCase):
         source = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"), "rb")
         self.assertEqual(read(os.path.join(self.out, "scoreboard", "index.html"), "rb"), source)
 
+    def test_scoreboard_panels_close_and_sit_at_the_top_level(self):
+        # An unclosed <section> once swallowed every later panel into one
+        # collapsed panel. Every tag must close in order, and no panel may
+        # sit inside another: the collapse script only toggles top-level ones.
+        from html.parser import HTMLParser
+
+        void = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+                "link", "meta", "param", "source", "track", "wbr"}
+
+        class Walker(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.stack = []
+                self.errors = []
+                self.nested = []
+                self.panels = 0
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                classes = (attrs.get("class") or "").split()
+                panel = "panel" in classes or (
+                    tag == "section" and bool(attrs.get("id") or attrs.get("aria-labelledby")))
+                if panel and not any(t in ("header", "aside") or "notes" in c
+                                     for t, c, _ in self.stack):
+                    self.panels += 1
+                    outer = [i for t, c, i in self.stack if i is not None]
+                    if outer:
+                        self.nested.append((attrs.get("id"), outer))
+                if tag not in void:
+                    self.stack.append((tag, classes, attrs.get("id") if panel else None))
+
+            def handle_endtag(self, tag):
+                if tag in void:
+                    return
+                if self.stack and self.stack[-1][0] == tag:
+                    self.stack.pop()
+                    return
+                self.errors.append("line %d: </%s> closes %r" % (
+                    self.getpos()[0], tag, [t for t, _, _ in self.stack[-3:]]))
+                for i in range(len(self.stack) - 1, -1, -1):
+                    if self.stack[i][0] == tag:
+                        del self.stack[i:]
+                        return
+
+        walker = Walker()
+        walker.feed(read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html")))
+        self.assertEqual(walker.errors, [])
+        self.assertEqual([t for t, _, _ in walker.stack], [])
+        self.assertEqual(walker.nested, [])
+        self.assertGreater(walker.panels, 200)
+
     def test_measurement_standard_page_is_a_copy_of_the_generated_file(self):
         # scripts/build_ic_measurement.py writes the canonical file; the site
         # republishes it byte for byte, like the scoreboard.
