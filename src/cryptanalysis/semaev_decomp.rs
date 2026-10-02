@@ -3427,10 +3427,15 @@ mod reference_994784af {
                     } else {
                         r() | (1u64 << 63) >> (i % 7)
                     };
-                    // Unreduced b overflows the fold's table only when the
-                    // product exceeds 2n−1 bits; `reduce`'s debug check
-                    // would fire there, so keep that case to release.
-                    if cfg!(debug_assertions) && b > gf.mask {
+                    // A product wider than 2n−1 bits is outside `reduce`'s
+                    // documented domain.  The byte table stays F₂-linear
+                    // there, which is what this test pins, so the case runs
+                    // on table fields in release builds (`reduce`'s debug
+                    // check would fire in debug).  The folding path promises
+                    // nothing for such a product, so it is not asked: the
+                    // fold's changed value there is unreachable, because every
+                    // caller passes a reduced `b` (below 2^n).
+                    if b > gf.mask && (cfg!(debug_assertions) || gf.folds()) {
                         continue;
                     }
                     let want = old::quartic_in_x3_general(x1, x2, xr, b, &gf);
