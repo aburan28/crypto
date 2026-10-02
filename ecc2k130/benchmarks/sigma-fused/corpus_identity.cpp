@@ -40,14 +40,26 @@ bool read(const std::string &path, std::vector<std::string> *records) {
 }
 
 int main(int argc, char **argv) {
-    if (argc < 3) {
-        std::fprintf(stderr, "usage: corpus_identity CORPUS CORPUS [CORPUS...]\n");
+    int first = 1;
+    std::string canonicalOut;
+    if (argc >= 3 && std::string(argv[1]) == "--canonical-out") {
+        canonicalOut = argv[2];
+        first = 3;
+    }
+    if (argc - first < 2) {
+        std::fprintf(stderr, "usage: corpus_identity [--canonical-out FILE] CORPUS CORPUS [CORPUS...]\n");
         return 2;
     }
     std::vector<std::string> reference;
-    if (!read(argv[1], &reference)) return 1;
-    std::printf("%s: %zu sorted records (reference)\n", argv[1], reference.size());
-    for (int i = 2; i < argc; ++i) {
+    if (!read(argv[first], &reference)) return 1;
+    std::printf("%s: %zu sorted records (reference)\n", argv[first], reference.size());
+    if (!canonicalOut.empty()) {
+        std::ofstream out(canonicalOut, std::ios::binary);
+        if (!out) return 1;
+        for (const std::string &record : reference) out.write(record.data(), record.size());
+        if (!out) return 1;
+    }
+    for (int i = first + 1; i < argc; ++i) {
         std::vector<std::string> candidate;
         if (!read(argv[i], &candidate)) return 1;
         const bool equal = candidate == reference;

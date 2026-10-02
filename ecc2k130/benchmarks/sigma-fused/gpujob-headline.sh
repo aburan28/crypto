@@ -97,7 +97,7 @@ if [ "$fail" != 0 ]; then
   echo "correctness preflight failed; timing suppressed" | tee "$R/preflight.txt"
   exit "$fail"
 fi
-echo "PASS: replay and sorted v2 corpus identity" | tee "$R/preflight.txt"
+echo "PASS: replay and sorted corpus identity" | tee "$R/preflight.txt"
 
 printf 'phase\tpair\torder\tvariant\trateMps\tlogSha256\tgpuState\n' > "$R/samples.tsv"
 sample() {
