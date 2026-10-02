@@ -1,5 +1,5 @@
 {
-  "schema": "ecc2k130-sigma-square-table-compile-audit-v1",
+  "schema": "ecc2k130-sigma-square-table-compile-audit-v2",
   "valid": true,
   "producerSourceHead": "e70406038b50466a713a28d335908a8677fc73f6",
   "compiler": "CUDA 13.3.73",
@@ -16,7 +16,7 @@
     "controlBarriers": 1, "candidateBarriers": 2, "barrierDelta": 1,
     "controlLdsAfterInitBarrier": 56, "candidateLdsAfterSecondInitBarrier": 121
   },
-  "binaryBinding": {"bothNonempty": true, "binariesDiffer": true, "tableClmadDeltaMatchesSource": true, "tableLdsDeltaMatchesSource": true},
-  "decision": "COMPILE_RESOURCE_PASS_DEVICE_OCCUPANCY_AND_RUNTIME_PENDING",
+  "binaryBinding": {"bothNonempty": true, "binariesDiffer": true, "tableClmadDeltaMatchesSource": true, "tableLdsDeltaMatchesSource": true, "sixCudaProbeObjectsPresent": false, "sixCudaProbeObjectsRequired": false},
+  "decision": "CORE_COMPILE_PASS_PROBE_COMPILE_PENDING",
   "scope": "No-GPU binary, resource and static-SASS audit; dynamic execution counts and throughput are unmeasured."
 }

@@ -1,6 +1,6 @@
 {
   "schema": "ecc2k130-sigma-square-table-compile-artifact-v1",
-  "status": "PASS",
+  "status": "CORE_COMPILE_PASS_PROTOCOL_PROBE_GATE_PENDING",
   "producerSourceHead": "e70406038b50466a713a28d335908a8677fc73f6",
   "github": {
     "runId": 37044967938,
@@ -27,5 +27,5 @@
     "controlSassSha256": "f82c0ffe9b3fbda6b4b9ab0153c882cc448ec96ba5f99b990235fb781ee3fc50",
     "candidateSassSha256": "9c40e5ebd33cf80daf64fc4b3c91039070e3cf95ee610db22fe6e3d4a3e09cd3"
   },
-  "claimBoundary": "No-GPU compile artifact only; device occupancy, runtime correctness, dynamic instruction counts and throughput remain pending."
+  "claimBoundary": "No-GPU core-client compile artifact only. This artifact lacks the six protocol-gate CUDA probe objects; GPU dispatch is blocked. Device occupancy, runtime correctness, dynamic instruction counts and throughput remain pending."
 }

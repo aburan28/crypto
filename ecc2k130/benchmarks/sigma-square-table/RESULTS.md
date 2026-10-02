@@ -106,7 +106,10 @@ The producer is GitHub run `37044967938`, job `110964020023`, artifact
 `8d4044f1aef862396374c7961009584b3ad95451fdbf95bcbf9844dfd53669d3`.
 [`compile-artifact.json`](compile-artifact.json),
 [`compile-files.sha256`](compile-files.sha256), and
-[`compile-result.json`](compile-result.json) retain the bindings and audit.
+[`compile-result-core.json`](compile-result-core.json) retain the bindings and
+core-client audit.  Independent review correctly blocked GPU dispatch because
+that artifact did not contain the six preregistered CUDA probe objects; the
+next exact compile artifact must add and bind them before dispatch.
 
 Two fail-closed harness attempts remain recorded.  The first omitted a
 Makefile-supplied macro and incorrectly used CUDA-13.3 CLMAD in the generic

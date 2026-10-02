@@ -45,6 +45,13 @@ if "$cxx" -E -x c++ $guard_flags -DECC_SIGMA_FUSED=1 -DECC_WALK_TABLE=0 \
 fi
 grep -q 'keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off' "$build/guard-table.err"
 
+"$cxx" -O3 -std=c++17 -Wall -Wextra -Werror "$here/log_check.cpp" \
+  -o "$build/log-check"
+"$cxx" -O3 -std=c++17 -Wall -Wextra -Werror "$here/summarize.cpp" \
+  -o "$build/summarize"
+"$build/log-check" --self-test > "$build/log-check-self-test.txt"
+"$build/summarize" --self-test > "$build/summarize-self-test.txt"
+
 "$cxx" -O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas \
   -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 \
   "$here/audit.cpp" -o "$build/audit"
@@ -62,13 +69,17 @@ grep -q 'keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off' "$build/guard-table
   benchmarks/sigma-square-table/replay.cpp \
   benchmarks/sigma-square-table/audit.cpp \
   benchmarks/sigma-square-table/compile_audit.cpp \
+  benchmarks/sigma-square-table/log_check.cpp \
+  benchmarks/sigma-square-table/summarize.cpp \
+  benchmarks/sigma-square-table/gpujob.sh \
   benchmarks/sigma-square-table/guard-probe.cu \
   benchmarks/sigma-square-table/run-native.sh \
   benchmarks/sigma-square-table/attempt-1-compile-failure.json \
   benchmarks/sigma-square-table/attempt-2-native-portability-failure.json \
   benchmarks/sigma-square-table/compile-artifact.json \
   benchmarks/sigma-square-table/compile-files.sha256 \
-  benchmarks/sigma-square-table/compile-result.json \
+  benchmarks/sigma-square-table/compile-result-core.json \
+  benchmarks/sigma-square-table/independent-compile-review.json \
   benchmarks/sigma-square-table/result.json \
   benchmarks/sigma-square-table/streams.sha256) > "$here/MANIFEST.sha256"
 

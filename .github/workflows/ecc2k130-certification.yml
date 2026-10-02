@@ -187,11 +187,24 @@ jobs:
             -o "$out/control" -lgomp > "$out/control-build.log" 2>&1
           nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE=1 ecc2k130/src/main.cu \
             -o "$out/candidate" -lgomp > "$out/candidate-build.log" 2>&1
+          for arm in control candidate; do
+            table=0
+            [ "$arm" = candidate ] && table=1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testpackedcuda.cu -o "$out/probe-$arm-packed.o" \
+              > "$out/probe-$arm-packed.log" 2>&1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testpackedstatecuda.cu -o "$out/probe-$arm-storage.o" \
+              > "$out/probe-$arm-storage.log" 2>&1
+            nvcc "${common[@]}" -DECC_SIGMA_SQUARE_TABLE="$table" \
+              -c ecc2k130/src/testsharedsigmacuda.cu -o "$out/probe-$arm-shared-sigma.o" \
+              > "$out/probe-$arm-shared-sigma.log" 2>&1
+          done
           cuobjdump --dump-resource-usage "$out/control" > "$out/control-resources.txt"
           cuobjdump --dump-resource-usage "$out/candidate" > "$out/candidate-resources.txt"
           cuobjdump --dump-sass "$out/control" > "$out/control.sass"
           cuobjdump --dump-sass "$out/candidate" > "$out/candidate.sass"
-          sha256sum "$out/control" "$out/candidate" "$out"/*.log "$out"/*.txt "$out"/*.sass \
+          sha256sum "$out/control" "$out/candidate" "$out"/*.o "$out"/*.log "$out"/*.txt "$out"/*.sass \
             > "$out/files.sha256"
           grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/control-build.log"
           grep -q '0 bytes spill stores, 0 bytes spill loads' "$out/candidate-build.log"

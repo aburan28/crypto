@@ -118,11 +118,16 @@ static bool contains(const std::string &text, const char *needle) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        std::fprintf(stderr, "usage: compile_audit ARTIFACT_DIR\n");
+    if (argc < 2 || argc > 4) {
+        std::fprintf(stderr,
+            "usage: compile_audit ARTIFACT_DIR [SOURCE_HEAD] [require-probes]\n");
         return 2;
     }
     const std::string dir = argv[1];
+    const std::string sourceHead = argc >= 3 ? argv[2] :
+        "e70406038b50466a713a28d335908a8677fc73f6";
+    const bool requireProbes = argc == 4 && std::string(argv[3]) == "require-probes";
+    if (sourceHead.size() != 40 || (argc == 4 && !requireProbes)) return 2;
     const std::string version = readText((dir + "/nvcc-version.txt").c_str());
     const std::string command = readText((dir + "/common-command.txt").c_str());
     const BuildResource controlBuild = parseBuild(readText((dir + "/control-build.log").c_str()));
@@ -133,12 +138,20 @@ int main(int argc, char **argv) {
     const SassCounts candidateSass = parseWalkSass(readText((dir + "/candidate.sass").c_str()));
     const std::vector<uint8_t> controlBytes = readBinary((dir + "/control").c_str());
     const std::vector<uint8_t> candidateBytes = readBinary((dir + "/candidate").c_str());
+    bool probesPresent = true;
+    for (const char *name : {
+             "probe-control-packed.o", "probe-control-storage.o",
+             "probe-control-shared-sigma.o", "probe-candidate-packed.o",
+             "probe-candidate-storage.o", "probe-candidate-shared-sigma.o"}) {
+        std::ifstream probe(dir + "/" + name, std::ios::binary | std::ios::ate);
+        if (!probe || probe.tellg() <= 0) probesPresent = false;
+    }
 
     constexpr int dynamicTableBytes = 8320;
     const int controlAfterBarrierLds = countAfterBarrier(controlSass, 1, "LDS");
     const int candidateAfterSecondBarrierLds = countAfterBarrier(candidateSass, 2, "LDS");
     const bool valid = contains(version, "release 13.3, V13.3.73") &&
-        contains(command, "arch=compute_120\\,code=sm_120") &&
+        contains(command, "arch=compute_120") && contains(command, "code=sm_120") &&
         controlBuild.registers == 126 && candidateBuild.registers == 126 &&
         controlBuild.stack == 0 && candidateBuild.stack == 0 &&
         controlBuild.spillStores == 0 && candidateBuild.spillStores == 0 &&
@@ -153,7 +166,8 @@ int main(int argc, char **argv) {
         count(candidateSass, "LDS") - count(controlSass, "LDS") == 65 &&
         count(candidateSass, "BAR.SYNC.DEFER_BLOCKING") -
             count(controlSass, "BAR.SYNC.DEFER_BLOCKING") == 1 &&
-        controlAfterBarrierLds == 56 && candidateAfterSecondBarrierLds == 121;
+        controlAfterBarrierLds == 56 && candidateAfterSecondBarrierLds == 121 &&
+        (!requireProbes || probesPresent);
     if (!valid) {
         std::fprintf(stderr, "compile artifact audit failed\n");
         return 1;
@@ -161,9 +175,9 @@ int main(int argc, char **argv) {
 
     std::printf(
         "{\n"
-        "  \"schema\": \"ecc2k130-sigma-square-table-compile-audit-v1\",\n"
+        "  \"schema\": \"ecc2k130-sigma-square-table-compile-audit-v2\",\n"
         "  \"valid\": true,\n"
-        "  \"producerSourceHead\": \"e70406038b50466a713a28d335908a8677fc73f6\",\n"
+        "  \"producerSourceHead\": \"%s\",\n"
         "  \"compiler\": \"CUDA 13.3.73\",\n"
         "  \"architecture\": \"sm_120\",\n"
         "  \"walkResources\": {\n"
@@ -188,11 +202,12 @@ int main(int argc, char **argv) {
         "\"candidateLdsAfterSecondInitBarrier\": %d\n"
         "  },\n"
         "  \"binaryBinding\": {\"bothNonempty\": true, \"binariesDiffer\": true, "
-        "\"tableClmadDeltaMatchesSource\": true, \"tableLdsDeltaMatchesSource\": true},\n"
-        "  \"decision\": \"COMPILE_RESOURCE_PASS_DEVICE_OCCUPANCY_AND_RUNTIME_PENDING\",\n"
+        "\"tableClmadDeltaMatchesSource\": true, \"tableLdsDeltaMatchesSource\": true, "
+        "\"sixCudaProbeObjectsPresent\": %s, \"sixCudaProbeObjectsRequired\": %s},\n"
+        "  \"decision\": \"%s\",\n"
         "  \"scope\": \"No-GPU binary, resource and static-SASS audit; dynamic execution counts and throughput are unmeasured.\"\n"
         "}\n",
-        controlBuild.registers, controlBuild.stack, controlBuild.spillStores,
+        sourceHead.c_str(), controlBuild.registers, controlBuild.stack, controlBuild.spillStores,
         controlBuild.spillLoads, controlBuild.ptxasStaticShared, controlBinary.shared,
         controlBinary.local, candidateBuild.registers, candidateBuild.stack,
         candidateBuild.spillStores, candidateBuild.spillLoads,
@@ -208,6 +223,9 @@ int main(int argc, char **argv) {
         count(candidateSass, "BAR.SYNC.DEFER_BLOCKING"),
         count(candidateSass, "BAR.SYNC.DEFER_BLOCKING") -
             count(controlSass, "BAR.SYNC.DEFER_BLOCKING"),
-        controlAfterBarrierLds, candidateAfterSecondBarrierLds);
+        controlAfterBarrierLds, candidateAfterSecondBarrierLds,
+        probesPresent ? "true" : "false", requireProbes ? "true" : "false",
+        probesPresent ? "COMPILE_RESOURCE_PASS_DEVICE_OCCUPANCY_AND_RUNTIME_PENDING" :
+                        "CORE_COMPILE_PASS_PROBE_COMPILE_PENDING");
     return 0;
 }
