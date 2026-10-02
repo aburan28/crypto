@@ -353,6 +353,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed top hoist: %d\n", ECC_PACKED_TOP_HOIST);
         printf("packed onb inv: %d\n", ECC_PACKED_ONB_INV);
         printf("packed from reduced: %d\n", ECC_PACKED_FROM_REDUCED);
+        printf("packed inline polynomial: %d\n", ECC_PACKED_INLINE_POLY);
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
         printf("packed chains: %d\n", ECC_PACKED_CHAINS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
