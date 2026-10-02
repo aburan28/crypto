@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "isolab.result/v1",
+  "title": "isolab result v1",
+  "type": "object",
+  "required": ["schema", "job_id", "spec_sha256", "attempt", "fence", "status",
+               "outcome_class", "worker", "host", "placement", "runtime", "fidelity",
+               "timing", "build", "runs", "summary", "artifacts", "labels"],
+  "properties": {
+    "schema": {"const": "isolab.result/v1"},
+    "job_id": {"type": "string"},
+    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "attempt": {"type": "integer", "minimum": 1},
+    "fence": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["succeeded", "failed", "timeout", "cancelled", "infra_error"]},
+    "outcome_class": {"enum": ["completed", "not_completed"]},
+    "error": {"type": ["string", "null"]},
+    "worker": {"type": "object", "required": ["id", "hostname"]},
+    "host": {"type": "object"},
+    "placement": {"type": "object"},
+    "runtime": {"type": "object"},
+    "fidelity": {
+      "type": "object",
+      "required": ["policy", "grade", "contended", "checks", "violations"],
+      "properties": {
+        "policy": {"enum": ["strict", "standard", "best_effort"]},
+        "grade": {"enum": ["A", "B", "C", "D", "none"]},
+        "contended": {"type": "boolean"},
+        "checks": {"type": "array", "items": {
+          "type": "object", "required": ["name", "phase", "status"],
+          "properties": {
+            "name": {"type": "string"},
+            "phase": {"enum": ["pre", "run", "post"]},
+            "status": {"enum": ["pass", "fail", "unavailable", "info"]}
+          }}},
+        "violations": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "timing": {"type": "object", "required": ["queued_at", "started_at", "finished_at"]},
+    "build": {"type": "array"},
+    "runs": {"type": "array", "items": {
+      "type": "object", "required": ["index", "warmup", "exit_code", "signal", "timed_out", "wall_s"]}},
+    "summary": {"type": ["object", "null"]},
+    "artifacts": {"type": "array", "items": {
+      "type": "object", "required": ["path", "sha256", "bytes"]}},
+    "verification": {"type": ["object", "null"]},
+    "labels": {"type": "object"}
+  }
+}
