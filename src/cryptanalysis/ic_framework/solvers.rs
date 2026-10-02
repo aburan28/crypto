@@ -210,6 +210,36 @@ impl SystemSolver for F4F2 {
         ] {
             extra.insert(k.to_string(), v);
         }
+        for (index, label) in [
+            "lt256",
+            "r256_511",
+            "r512_1023",
+            "r1024_2047",
+            "r2048_4095",
+            "ge4096",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            for (metric, value) in [
+                ("count", st.matrix_profile_counts[index]),
+                ("rows_sum", st.matrix_profile_rows_sum[index]),
+                ("cols_sum", st.matrix_profile_cols_sum[index]),
+                ("eliminate_ns", st.matrix_profile_eliminate_ns[index]),
+                ("logical_xors", st.matrix_profile_logical_xors[index]),
+                ("performed_xors", st.matrix_profile_performed_xors[index]),
+                ("full_m4ri_count", st.matrix_profile_full_m4ri_counts[index]),
+            ] {
+                extra.insert(format!("matrix_profile_{label}_{metric}"), value);
+            }
+        }
+        for (metric, value) in [
+            ("eliminate_ns", st.matrix_profile_unbinned_eliminate_ns),
+            ("logical_xors", st.matrix_profile_unbinned_logical_xors),
+            ("performed_xors", st.matrix_profile_unbinned_performed_xors),
+        ] {
+            extra.insert(format!("matrix_profile_unbinned_{metric}"), value);
+        }
         let mut cost = SolverCost {
             ops: st.word_xors,
             op_unit: "word XORs (elimination only)".into(),

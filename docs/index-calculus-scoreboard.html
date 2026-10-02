@@ -1746,10 +1746,10 @@
   <div class="panel" id="glv-invariant-experiments">
     <div class="panel-head">
       <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E15 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
-      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29), <code>&hellip;_e{8,9,11,11_12,11_13,11_14}.json</code> (2026-10-01) and <code>&hellip;_e{12,12p,13,13_13,15}.json</code> (2026-10-02),
+      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29), <code>&hellip;_e{8,9,11,11_12,11_13,11_14}.json</code> (2026-10-01) and <code>&hellip;_e{12,12p,13,13_13,14,15}.json</code> (2026-10-02),
         tables by <code>examples/glv_invariant_experiment_tables.rs</code>; note
         <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6 and &sect;8.
-        The plan&rsquo;s seven experiments and seven of its successors (E8&ndash;E13 and E15; E10 inside E8) run: one relation stream per instance feeds the folded
+        The plan&rsquo;s seven experiments and all eight of its successors (E8&ndash;E15; E10 inside E8) run: one relation stream per instance feeds the folded
         base and its negation control to <em>full rank</em> (the rank a two-summand stream can
         reach on a cofactor curve, <code>columns + 1 &minus; D</code>, &sect;6.0), four to six
         seeds per size, <code>r</code> from 2<sup>13</sup> to 2<sup>32</sup>, every row&rsquo;s
@@ -1784,6 +1784,7 @@
           <tr><td>E12, the same table on F<sub>p</sub>, two summands, <code>j = 0</code> / <code>j = 1728</code>, 2<sup>16</sup>&ndash;2<sup>28</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code> (6), key <code>x&sup3;</code> / <code>&lang;&iota;&rang;</code> (4), key <code>x&sup2;</code></td><td class="n">6.0 / 4.0</td><td class="n">3.00 / 2.00</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>table &divide; 2.97 / 1.98 (<code>w/2</code>), build &divide; 2.77 / 1.91, probe 1.005&times; / 1.002&times;; <code>S</code> &divide; 1.18 / 1.03, the table&rsquo;s share; 0 key collisions in 9.77e+07 probes, 74,400 of 74,400 targets agree with the full table; 50&ndash;7058&times; the matched rho, as before</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>E13, FGHR&rsquo;s 2-torsion symmetry of the <b>system</b>: the <code>Y</code>-line of a subfield curve with rational <code>T</code>, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>13</sup>, <code>r</code> = 2<sup>10</sup>&ndash;2<sup>25</sup></td><td><code>D&#8323; = (Z/2)&sup2; &#8906; S&#8323;</code> on <code>(Y&#8321;, Y&#8322;, Y&#8323;)</code>, <code>Y(P + T) = &minus;Y(P)</code>; three conics, Macaulay resultant</td><td class="n">12.0</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">the same stream as <code>S&#8323;</code> on 11 of 12 instances</td><td><code>R(q&#8323;)</code> of degree 16 = 64/4 on 866,919 calls, 0 unsolved; 1.25e+04&ndash;2.04e+04 F<sub>p</sub> multiplications a call against 5.2e+05&ndash;6.0e+05 for <code>S&#8323;</code> (&divide; 33&ndash;41) and E11&rsquo;s 9.42e+05; <code>S</code> &divide; 27.0 (23.8&ndash;30.1); agrees with the pair table on 2,400 of 2,400 targets</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>E13, the same <code>T</code> on the <b>base</b>: <code>&lang;&minus;1, &pi;, &tau;<sub>T</sub>&rang;</code> against <code>&lang;&minus;1, &pi;&rang;</code>, both under <code>D&#8323;</code></td><td><code>&tau;<sub>T</sub></code> has eigenvalue 1 on <code>&lang;G&rang;</code> (<code>T</code> is cofactor), order 12</td><td class="n">12.0 / 6.0</td><td class="n">2.00 (fold 6 / fold 12; negation not priced)</td><td class="n">&mdash;</td><td class="n">1.26&ndash;4.53</td><td><code>S</code> &divide; 2.52 (1.26&ndash;4.96); combined with the system lever, <code>S(6, S&#8323;) / S(12, D&#8323;)</code> = 101 (55&ndash;141) against a product of 34&ndash;132, never below 0.82 of it: &ldquo;multiply&rdquo; survives. Best arm 267&ndash;5741&times; the matched folded rho (E11: 3344&ndash;101441&times;); solver 71&ndash;77 % of the total; total <code>p<sup>1.23</sup></code>. The negation arm stalls below full rank on the <code>Y</code>-line (not derived) and is not priced</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E14, Q-curves of degree 2 and 3 over F<sub>p&sup2;</sub> (Smith&rsquo;s construction), <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup>, <code>r</code> = 2<sup>12</sup>&ndash;2<sup>22</sup>, 40 instances</td><td>type C: <code>&psi; = &pi; &compfn; &iota; &compfn; &phi;</code>, degree <code>dp</code>, <code>&lambda;&sup2; &equiv; &plusmn;d</code> on every instance, <code>ord<sub>r</sub>(&lambda;)</code> 1817&ndash;2.6&middot;10<sup>6</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">32 of 43,310 base points kept in the base, against 39.3 at chance</td><td class="n">&mdash;</td><td>as E4&rsquo;s CM maps on F<sub>p</sub>: a fast endomorphism of degree <code>d &gt; 1</code> is a GLV shortcut, not a factor-base symmetry; every map verified on random points, each kernel checked by V&eacute;lu&rsquo;s codomain</td><td><span class="chip">accounting</span></td></tr>
           <tr><td>E15, the ECC2K-130 family: <code>E_0: y&sup2; + xy = x&sup3; + 1</code>, two summands, <code>icv1-f2m23-t5197-69e76b73</code> (<code>h = 4</code>, the challenge&rsquo;s <code>4&middot;prime</code> shape) and <code>icv1-f2m31-tm90707-c95f16f5</code> (<code>h = 4&middot;373</code>)</td><td><code>&lang;&minus;1, &tau;&rang;</code>, order <code>2m</code>, on a <code>&tau;</code>-invariant subspace</td><td class="n">&mdash;</td><td class="n">22.5 / 29.5</td><td class="n">0.80&ndash;0.91 / 0.83&ndash;0.84 (m = 23)</td><td class="n">18.5&ndash;60.7 (m = 23); 23&ndash;68 against 1833&ndash;2023 (m = 31)</td><td>at <code>m = 23</code>: <code>D</code> = 1 / 1 and 4 % single-column rows (1.8&times; chance), so a Frobenius-fixed cofactor of order 4 does not confine two-summand relations and the prediction holds; at <code>m = 31</code>, whose <code>E_0</code> cannot be <code>4&middot;prime</code>: <code>D</code> = 12 / 342 and 73 % single-column rows (14.7&times; chance), the &sect;6.5 confinement, from the 373 cofactor. <code>m = 31</code> is not a faithful proxy for two-summand relation structure; the &sect;8a <code>m = 83</code> gate was not run (no improvement is claimed)</td><td><span class="chip">accounting</span></td></tr>
         </tbody>
       </table>
@@ -1811,7 +1812,7 @@
         translation with eigenvalue 1 it folds the base 12 a column (<code>S</code> &divide; 2.5
         more). The best arm on this panel is then 267&times; the matched rho, the solver three
         quarters of its cost; nothing moves an exponent, and nothing here is faster than rho.
-        On the ECC2K-130 family (E15) the fold is unconfined at the challenge&rsquo;s <code>4&middot;prime</code> shape (<code>m = 23</code>, <code>D = 1</code>), while <code>m = 31</code> &mdash; the program&rsquo;s primary exploratory size, which cannot have that shape &mdash; is confined by its 373 cofactor (73 % single-column rows). Next (&sect;8.1, pending): Q-curves (E14).</p>
+        On the ECC2K-130 family (E15) the fold is unconfined at the challenge&rsquo;s <code>4&middot;prime</code> shape (<code>m = 23</code>, <code>D = 1</code>), while <code>m = 31</code> &mdash; the program&rsquo;s primary exploratory size, which cannot have that shape &mdash; is confined by its 373 cofactor (73 % single-column rows). Q-curves of degree 2 and 3 over F<sub>p&sup2;</sub> (E14) keep base points only at chance, as E4&rsquo;s CM maps did, so the folds on these families are the automorphisms, the Frobenius-type maps and the 2-torsion translation; every experiment of &sect;8.1 has run.</p>
     </div>
   </div>
 
@@ -6800,6 +6801,44 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-f5-call-only-ceiling-20261002">
+  <div class="panel-head">
+    <h2>Boolean F5 call-only ceiling: feasibility confirmed, cache unmeasured <span class="chip">accounting</span></h2>
+    <p>A fresh native Linux x86-64 AVX2 screen completed 48 discovery and 48 disjoint
+      holdout cells, with 9,408 timed F5 calls in each split. It times the complete
+      F5 API call and returned-object destruction, while exact output digest
+      verification is recorded outside those intervals. All four n=24 upper-bound
+      feasibility groups pass in each split. This is <strong>not</strong> an actual
+      graded-cache speedup.</p>
+    <p>The conditional ceiling sets build and reduction cost to zero while keeping
+      criterion, unpacking and the unchanged polynomial-output API. Build plus reduction
+      account for 78.78% of timed discovery cost and 77.39% on fresh holdouts at n=24.
+      Digest validation remains substantial whole-process work and is not an F5 API
+      call cost under this new frozen boundary. The earlier validation-inclusive
+      ~1.61&times; ceiling below is retained as a different metric, not overwritten.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_call_only_ceiling_20261002/CONCLUSION.md">confirmed ceiling and scope</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_call_only_ceiling_20261002/qualified_discovery_01/results.json">discovery upper bounds</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_call_only_ceiling_20261002/qualified_holdout_01/results.json">fresh holdout upper bounds</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_call_only_ceiling_20261002/RUNS.json">sealed run registry</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Optimistic n=24 call-plus-destruction ceiling, median [95% bootstrap upper
+      bound] over fourteen fixed observations per group. A value above 2 merely permits
+      an actual cache experiment; it does not measure a candidate/reference ratio.</caption>
+    <thead><tr><th>Split</th><th>Seed</th><th>Independent affine</th><th>Walk affine</th><th>&gt;2 upper groups</th></tr></thead>
+    <tbody>
+      <tr><td>Discovery</td><td>20261011</td><td>4.692 [4.714]</td><td>4.656 [4.657]</td><td>2/2</td></tr>
+      <tr><td>Discovery</td><td>3141667</td><td>4.728 [4.742]</td><td>4.774 [4.777]</td><td>2/2</td></tr>
+      <tr><td>Fresh holdout</td><td>20261018</td><td>4.398 [4.435]</td><td>4.462 [4.473]</td><td>2/2</td></tr>
+      <tr><td>Fresh holdout</td><td>4242509</td><td>4.452 [4.459]</td><td>4.399 [4.416]</td><td>2/2</td></tr>
+    </tbody>
+  </table></div>
+  <p>An actual same-binary graded F5 batch cache must still charge criterion recomputation,
+    fixed high-block setup, changing low work, fallbacks, output unpacking and memory.
+    Natural relation yield, full index-calculus cost and rho ratio remain unmeasured.
+    No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-f5-amortized-ceiling-20261002">
   <div class="panel-head">
     <h2>Boolean F5 phase ceiling: registered validated metric fails 2&times; <span class="chip">accounting</span></h2>
@@ -10300,5 +10339,95 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage195-buffer-reuse -->
+<!-- BEGIN current-f4-stage196-shape-profile -->
+<div class="panel" id="current-f4-stage196-shape-profile">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 196: 4,096-row matrices identify a hybrid-M4RI screen <span class="chip">profile</span></h2>
+        <p>The exact public <code>n=59, ell=9, m=3</code> true-negative is profiled once with selected
+          five-column <code>BlockTables</code> and once with the existing full-M4RI control. Profiled timing
+          is diagnostic; this stage recommends a threshold but does not select a runtime.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Aggregate elimination inside F4 calls, binned by matrix rows. The frozen rule chooses the largest qualifying suffix with time and performed-XOR ratios below 0.90 and at least 5% of current elimination time.</caption>
+          <thead><tr><th>Rows</th><th>Matrices</th><th>Current s</th><th>Full-control s</th><th>Time ratio</th><th>Current performed XORs</th><th>Full performed XORs</th><th>XOR ratio</th><th>Full-routed</th></tr></thead>
+          <tbody>
+            <tr><td>&lt;256</td><td class="n">242</td><td class="n">0.004175</td><td class="n">0.004061</td><td class="n">0.972851</td><td class="n">5,645,858</td><td class="n">5,645,858</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>256&ndash;511</td><td class="n">241</td><td class="n">0.032891</td><td class="n">0.025950</td><td class="n">0.788966</td><td class="n">76,352,850</td><td class="n">76,352,850</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>512&ndash;1023</td><td class="n">240</td><td class="n">0.181640</td><td class="n">0.263765</td><td class="n">1.452133</td><td class="n">413,182,019</td><td class="n">413,182,019</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>1024&ndash;2047</td><td class="n">1</td><td class="n">0.002699</td><td class="n">0.004745</td><td class="n">1.758364</td><td class="n">3,518,764</td><td class="n">2,957,063</td><td class="n">0.840370</td><td class="n">1</td></tr>
+            <tr><td>2048&ndash;4095</td><td class="n">241</td><td class="n">7.551798</td><td class="n">4.420244</td><td class="n">0.585323</td><td class="n">7,773,752,624</td><td class="n">4,266,448,249</td><td class="n">0.548827</td><td class="n">241</td></tr>
+            <tr><td><strong>&ge;4096</strong></td><td class="n"><strong>481</strong></td><td class="n"><strong>167.625839</strong></td><td class="n"><strong>103.292935</strong></td><td class="n"><strong>0.616211</strong></td><td class="n"><strong>139,522,131,743</strong></td><td class="n"><strong>94,428,351,487</strong></td><td class="n"><strong>0.676798</strong></td><td class="n"><strong>481</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">decision</span> all suffixes qualify; the largest-threshold rule recommends <code>min_rows=4096</code> for a separately preregistered unprofiled hybrid screen</span>
+        <span><span class="chip">dominance</span> the &ge;4096 bin represents 95.5683% of current profiled elimination time; full/current ratios are 0.616211 time and 0.676798 performed XORs</span>
+        <span><span class="chip">process diagnostics</span> current profile: 23.954849 wall / 182.059640 core / 4.812 GB RSS; full profile: 17.589464 wall / 158.782003 core / 3.311 GB RSS; no selected speedup is claimed</span>
+        <span><span class="chip">accounting</span> Stage 196 lower bound: 12 components, 207.508688 wall-seconds, 1,001.106379 core-seconds, 5.161 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 658 components, 24,806.692585 wall-seconds, 65,220.279737 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-196-elimination-shape-profile-20261002/result.json</code>; one-target profiling only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage196-shape-profile -->
+<!-- BEGIN current-f4-stage197-hybrid-screen -->
+<div class="panel" id="current-f4-stage197-hybrid-screen">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 197: 4,096-row hybrid clears the one-pair screen <span class="chip">continue</span></h2>
+        <p>One unprofiled current/hybrid pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate routes only matrices with at least 4,096 rows through existing
+          full M4RI and keeps selected five-column <code>BlockTables</code> everywhere else.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/current wall and total-core ratios both strictly below 0.97. Confirmation remains mandatory before any default change.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Candidate / current wall / core / RSS</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current five-column BlockTables</td><td class="n">38.813683</td><td class="n">190.758951</td><td class="n">null</td><td class="n">4,065.13 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">85.334943 / 622.547908 / 98.989029</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Full M4RI at &ge;4096 rows</strong></td><td class="n"><strong>29.680804</strong></td><td class="n"><strong>168.655318</strong></td><td class="n">null</td><td class="n">3,379.00 MB</td><td class="n"><strong>0.764699 / 0.884128 / 0.831216</strong></td><td class="n">65.255587 / 550.411998 / 82.281269</td><td><span class="chip">continue</span> passes screen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">work</span> candidate routes exactly 481 matrices and reduces performed XORs from 147,794,583,858 to 102,707,985,015; all smaller matrices remain on BlockTables</span>
+        <span><span class="chip">correctness</span> both arms complete 242/242 systems with exact source/equation identities and exhaustive UNSAT; profiling counters are zero</span>
+        <span><span class="chip">decision</span> wall and CPU both clear 0.97, so the already frozen three-pair confirmation may run; the candidate is not yet selected</span>
+        <span><span class="chip">accounting</span> Stage 197 lower bound: 12 components, 265.834501 wall-seconds, 1,101.564255 core-seconds, 5.247 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 670 components, 25,072.527086 wall-seconds, 66,321.843992 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-197-hybrid-m4ri-screen-20261002/result.json</code>; one-target screen only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage197-hybrid-screen -->
+<!-- BEGIN current-f4-stage198-hybrid-confirmation -->
+<div class="panel" id="current-f4-stage198-hybrid-confirmation">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 198: 4,096-row hybrid cuts median CPU 12.07% <span class="chip">confirmed</span></h2>
+        <p>Three interleaved current/hybrid pairs on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The hybrid sends exactly 481 matrices with at least 4,096 rows through full M4RI
+          and keeps five-column <code>BlockTables</code> elsewhere. Unset behavior is not changed yet.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Absolute rows are medians by arm. Selection uses the median of paired candidate/control ratios, preserving the frozen interleaving.</caption>
+          <thead><tr><th>Arm</th><th>Median wall s</th><th>Median total core s</th><th>Single-core s</th><th>Median peak RSS</th><th>Paired wall / core / RSS ratio</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current five-column BlockTables</td><td class="n">28.771602</td><td class="n">189.722829</td><td class="n">null</td><td class="n">5,089.72 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">63.256636 / 619.166491 / 123.938560</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Full M4RI at &ge;4096 rows</strong></td><td class="n"><strong>21.707852</strong></td><td class="n"><strong>163.730880</strong></td><td class="n">null</td><td class="n">3,181.54 MB</td><td class="n"><strong>0.908433 / 0.879279 / 0.630062</strong></td><td class="n">47.726424 / 534.340938 / 77.472970</td><td><span class="chip">confirmed</span> default-change replay required</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">paired evidence</span> wall ratios 0.754489, 0.956306, 0.908433; CPU ratios 0.884893, 0.859775, 0.879279; all six runs pass correctness</span>
+        <span><span class="chip">work</span> every control performs 147,794,583,858 XORs and routes zero full matrices; every hybrid performs 102,707,985,015 and routes 481</span>
+        <span><span class="chip">decision</span> confirmed for a separate default-change commit and unset replay; this stage itself leaves the default unchanged</span>
+        <span><span class="chip">accounting</span> Stage 198 lower bound: 12 components, 249.727289 wall-seconds, 1,362.341551 core-seconds, 5.192 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 682 components, 25,322.254375 wall-seconds, 67,684.185543 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/result.json</code>; confirmed one-target engineering only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage198-hybrid-confirmation -->
 </body>
 </html>

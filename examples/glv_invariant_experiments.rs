@@ -2310,6 +2310,107 @@ fn e13(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E14: Q-curves of degree 2 and 3 over F_{p²} ────────────────────
+
+/// E14: on a degree-`d` Q-curve over `F_{p²}`, every `ψ = π ∘ ι ∘ φ` the
+/// curve carries (verified on random points, `λ² ≡ ±d`), its eigenvalue
+/// order on `⟨G⟩`, and how many points of the `F_p`-line base `ψ` keeps
+/// in the base — E4's type-C measurement, on the `F_{p²}` group where a
+/// GLS map (`d = 1`) keeps all of a line.
+fn e14(o: &Opts) -> Vec<Value> {
+    use crypto_lib::cryptanalysis::ext_curve::ExtField;
+    use crypto_lib::cryptanalysis::glv_invariant_base::{fold_by_endomorphisms, Closure};
+    use crypto_lib::cryptanalysis::q_curve::generate_q_curve_instance;
+    let mut rows = Vec::new();
+    for d in [2u64, 3] {
+        for &bits in &o.bits {
+            for seed in 1..=o.seeds {
+                let started = Instant::now();
+                let inst = match generate_q_curve_instance(d, bits, seed, 16) {
+                    Ok(i) => i,
+                    Err(e) => {
+                        eprintln!("e14 d={d} {bits} seed {seed}: {e}");
+                        continue;
+                    }
+                };
+                let curve = &inst.curve;
+                let f = curve.f;
+                // The F_p-line: every point with x ∈ F_p, folded by negation.
+                let seed_pts: Vec<_> = (0..inst.p)
+                    .flat_map(|t| curve.lift_x(f.from_fp(t)))
+                    .collect();
+                let neg = Negation { r: inst.r };
+                let gens: Vec<&dyn Endomorphism<_>> = vec![&neg];
+                let (fb, _) = fold_by_endomorphisms(
+                    curve,
+                    inst.r,
+                    inst.cofactor,
+                    seed_pts,
+                    &gens,
+                    Closure::Close,
+                    16,
+                    |p| curve.key(p),
+                    |p| f.pack(p.x),
+                    "the F_p-line x ∈ F_p, negation only".into(),
+                )
+                .unwrap();
+                let mut maps = Vec::new();
+                for psi in &inst.maps {
+                    let check = verify_endomorphism(curve, inst.generator, inst.r, psi, 20, seed);
+                    let overlap = endomorphism_overlap(curve, &fb, psi, inst.r, inst.group_order);
+                    maps.push(json!({
+                        "name": psi.name(),
+                        "degree": psi.degree(),
+                        "eigenvalue_squared": psi.eigenvalue_squared,
+                        "square_is_plus_d": psi.square_is_plus_d,
+                        "verified": check.is_ok(),
+                        "overlap": overlap,
+                    }));
+                }
+                eprintln!(
+                    "e14 d={d} p={} r=2^{:.1} h={}: {} maps, ord {:?}, λ²=±d {:?}, images in base {:?} of {} (chance {:.2e}) [{:.1}s]",
+                    inst.p,
+                    (inst.r as f64).log2(),
+                    inst.cofactor,
+                    inst.maps.len(),
+                    inst.maps
+                        .iter()
+                        .map(|m| eigenvalue_order(m.eigenvalue, inst.r))
+                        .collect::<Vec<_>>(),
+                    inst.maps.iter().map(|m| m.square_is_plus_d).collect::<Vec<_>>(),
+                    maps.iter()
+                        .map(|m| m["overlap"]["images_in_base"].as_u64().unwrap_or(0))
+                        .collect::<Vec<_>>(),
+                    fb.points.len(),
+                    fb.points.len() as f64 / inst.group_order as f64,
+                    started.elapsed().as_secs_f64()
+                );
+                rows.push(json!({
+                    "experiment": "e14",
+                    "family": format!("q-curve-d{d}"),
+                    "degree": d,
+                    "bits": bits,
+                    "seed": seed,
+                    "instance": inst.name,
+                    "p": inst.p,
+                    "j": inst.j,
+                    "twisted": inst.twisted,
+                    "log2_r": (inst.r as f64).log2(),
+                    "r": inst.r,
+                    "group_order": inst.group_order,
+                    "cofactor": inst.cofactor,
+                    "base": "the F_p-line x ∈ F_p, folded by negation",
+                    "base_points": fb.points.len(),
+                    "search": inst.search,
+                    "maps": maps,
+                    "wall_seconds": started.elapsed().as_secs_f64(),
+                }));
+            }
+        }
+    }
+    rows
+}
+
 // ── E15: does the §6.5 degeneracy transfer to the ECC2K-130 family? ──
 
 /// The prime factorisation of a small cofactor, by trial division.
@@ -2534,8 +2635,9 @@ fn main() {
         "e12" => e12(&o),
         "e12p" => e12p(&o),
         "e13" => e13(&o),
+        "e14" => e14(&o),
         "e15" => e15(&o),
-        other => panic!("unknown experiment {other}; try e1..e9, e11, e12, e12p, e13"),
+        other => panic!("unknown experiment {other}; try e1..e9, e11..e15, e12p"),
     };
     let out = json!({
         "what_this_is": format!("Experiment {} of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.", o.exp),

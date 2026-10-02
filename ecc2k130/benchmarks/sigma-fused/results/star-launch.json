@@ -1,0 +1,19 @@
+{
+  "job": "benchmarks/sigma-fused/gpujob-star.sh",
+  "gpu": "RTX-PRO-6000",
+  "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+  "gitRev": "bb90178b1b2d5620d3537606abe52ff64e518c4f",
+  "gitDirty": false,
+  "env": {
+    "SOURCE_REV": "bb90178b1b2d5620d3537606abe52ff64e518c4f"
+  },
+  "provider": "modal",
+  "token": "8624f73be5a746ad8b6470048a63313a",
+  "volume": "ecc2k130-jobs",
+  "startedAt": "2026-10-02T07:53:53Z",
+  "functionCallId": "fc-01M3XSP086P7AGHJN9BN9BRMCJ",
+  "exitCode": 0,
+  "seconds": 3924.1756660938263,
+  "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+  "finishedAt": "2026-10-02T09:00:09Z"
+}
