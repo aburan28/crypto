@@ -17,4 +17,3 @@ unchanged. The correction canonicalizes the discovered stage root before every
 artifact and command replay. The first result and verification are preserved
 under `development/superseded-relative-path-verifier/`; the preservation
 commands and corrected build/test/replay are charged additively.
-

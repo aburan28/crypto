@@ -14,4 +14,3 @@ set charged by the stage. The previously valid `21/21` result with SHA-256
 is preserved under `development/superseded-receipt-coverage/`. Solver
 measurements and interpretations do not change; the preservation, corrected
 build/test, composition, and replay are charged additively.
-
