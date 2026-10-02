@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "discovery": {
+    "path": "qualified_discovery_01",
+    "source_head": "7b34fdd5a862a3439ae379db69bdae7877c2fcbe",
+    "source_sha256": "977c5d14b9991a567f61a5cab87f8dabe52dbb39b32fb804151447046a20d35a",
+    "verifier_sha256": "b6fb54267d9c1ab4ddca0cedb42fefd54f4b164230d795d23f2daefe81039713",
+    "protocol_sha256": "73a954c813732a58bb3a2ddc8f9b2d8f2c041fc4e4656c8c493fb96d8312af64",
+    "manifest_sha256": "529255bac0bac72d59d77155fba6f50b476292748431f229eb440f33c0d69564",
+    "raw_sha256": "8d72961e39859e8c0d9dd9e132a1df202a83bc464c7457bfcd3b8c1d471e8612",
+    "result_sha256": "27b972f3dba9a0918ec9ba40699abc73526be6fbfc9d5dc8bbb5fda92e93748c",
+    "cells": 72,
+    "systems": 1008,
+    "primary_passed": 18,
+    "primary_required": 18,
+    "gate_pass": true,
+    "native_replay": "PASS"
+  },
+  "holdout": null,
+  "decision": "advance_to_fresh_holdout",
+  "complete_f5_cost": null,
+  "full_ic_cost": null,
+  "rho_ratio": null
+}
