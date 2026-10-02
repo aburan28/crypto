@@ -23,10 +23,20 @@
 //! - `icprog callgrind-phases` and `icprog callgrind-control`: a callgrind
 //!   profile split by phase (`harness/callgrind_phases.py`, ported), and
 //!   R02b's control over a run tree's profiles.
+//! - `icprog rule <step>`: the single-target rule's comparison (ledger
+//!   §23's `run.py`, `claims.py` and `analyse.py`, ported): its rows on the
+//!   native runner, each row's identities, independent replay and checked
+//!   claim, and the figures read from the checked rows.
+#[path = "icprog/autolab.rs"]
+mod autolab;
 #[path = "icprog/bench.rs"]
 mod bench;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/identity.rs"]
+mod identity;
+#[path = "icprog/oracle.rs"]
+mod oracle;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
@@ -35,8 +45,12 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/pyrandom.rs"]
+mod pyrandom;
 #[path = "icprog/rounds.rs"]
 mod rounds;
+#[path = "icprog/rule.rs"]
+mod rule;
 #[path = "icprog/runs.rs"]
 mod runs;
 #[path = "icprog/stats.rs"]
@@ -65,6 +79,12 @@ enum Round {
     R02b,
     R03,
     R05,
+}
+
+#[derive(Clone, Copy, PartialEq, ValueEnum)]
+enum Comparison {
+    S23,
+    V2,
 }
 
 #[derive(Subcommand)]
@@ -116,6 +136,51 @@ enum Command {
     CallgrindControl {
         /// The directory holding the arms' `*.phases.json` and `*.workflow.json`.
         dir: PathBuf,
+    },
+    /// The single-target rule's comparison: `manifest`, `pin`, `size` and
+    /// `all` run its rows; `claims` writes every row's manifests, replay and
+    /// checked claim; `analyse` prints the figures.
+    Rule {
+        /// manifest, pin, size, all, reference, claims or analyse.
+        step: String,
+        /// Which comparison: ledger §23's (frozen) or the one at baseline v2.
+        #[arg(long, value_enum, default_value = "s23")]
+        comparison: Comparison,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The comparison's directory (default: the comparison's own).
+        #[arg(long)]
+        dir: Option<PathBuf>,
+        /// The run tree (default: the directory's `runs/`).
+        #[arg(long)]
+        runs: Option<PathBuf>,
+        /// Where `claims/` and `manifests/` go (default: the directory).
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// The repository whose objects hold the binary's build commit
+        /// (default: the checkout).
+        #[arg(long)]
+        git: Option<PathBuf>,
+        /// The size a `size` step runs, as `a,n`.
+        #[arg(long)]
+        size: Option<String>,
+        /// The `ic` binary the rows price.
+        #[arg(long)]
+        ic: Option<PathBuf>,
+        /// The commit `ic` was built from, for a fresh manifest.
+        #[arg(long)]
+        ic_commit: Option<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+        /// The strong rho fixture a `reference` step walks
+        /// (`examples/koblitz_rho_fixture.rs`).
+        #[arg(long)]
+        fixture: Option<PathBuf>,
+        /// The commit the fixture was built from, for a fresh reference check.
+        #[arg(long)]
+        fixture_commit: Option<String>,
     },
     /// One of a round's declared steps, natively (R05, R02b).
     Run {
@@ -275,6 +340,109 @@ fn baseline(
     Ok(String::new())
 }
 
+struct RuleArgs {
+    comparison: Comparison,
+    root: PathBuf,
+    dir: Option<PathBuf>,
+    runs: Option<PathBuf>,
+    out: Option<PathBuf>,
+    git: Option<PathBuf>,
+    size: Option<String>,
+    ic: Option<PathBuf>,
+    ic_commit: Option<String>,
+    isolate: Option<PathBuf>,
+    fixture: Option<PathBuf>,
+    fixture_commit: Option<String>,
+}
+
+/// One step of the rule's comparison.  Paths are made absolute but not
+/// resolved, so a record's path is relative to the checkout as given.
+fn rule(step: &str, args: RuleArgs) -> Result<String, String> {
+    let abs =
+        |p: &std::path::Path| std::path::absolute(p).map_err(|e| format!("{}: {e}", p.display()));
+    let root = abs(&args.root)?;
+    let (default_dir, constants) = match args.comparison {
+        Comparison::S23 => ("research/ic_single_target_20260930", &rule::S23),
+        Comparison::V2 => ("research/ic_tool_program/rule/v2", &rule::V2),
+    };
+    let here = abs(&args.dir.clone().unwrap_or_else(|| root.join(default_dir)))?;
+    let comparison = rule::Comparison {
+        git: abs(args.git.as_deref().unwrap_or(&root))?,
+        runs: abs(&args.runs.clone().unwrap_or_else(|| here.join("runs")))?,
+        out: abs(args.out.as_deref().unwrap_or(&here))?,
+        root,
+        here,
+        constants,
+    };
+    let tools = || -> Result<rule::Tools, String> {
+        let ic = args.ic.clone().ok_or("this step needs --ic")?;
+        if !ic.exists() {
+            return Err(format!("no binary at {}", ic.display()));
+        }
+        let isolate = match &args.isolate {
+            Some(p) => p.clone(),
+            None => std::env::current_exe()
+                .map_err(|e| e.to_string())?
+                .with_file_name("isolated_bench"),
+        };
+        if !isolate.exists() {
+            return Err(format!("no isolation tool at {}", isolate.display()));
+        }
+        Ok(rule::Tools {
+            ic: abs(&ic)?,
+            ic_commit: args.ic_commit.clone(),
+            isolate: abs(&isolate)?,
+        })
+    };
+    match step {
+        "manifest" => comparison
+            .manifest(&tools()?)
+            .map(|doc| json::dumps(&doc, 1)),
+        "pin" => comparison.pin(&tools()?).map(|doc| json::dumps(&doc, 1)),
+        "size" => {
+            let size = args.size.as_deref().ok_or("a size step needs --size a,n")?;
+            let (a, n) = size
+                .split_once(',')
+                .and_then(|(a, n)| Some((a.trim().parse().ok()?, n.trim().parse().ok()?)))
+                .ok_or("--size is a,n")?;
+            if !rule::SIZES.contains(&(a, n)) {
+                return Err(format!("k{a}n{n} is not one of the comparison's sizes"));
+            }
+            comparison
+                .size_runs(a, n, &tools()?)
+                .map(|()| String::new())
+        }
+        "all" => comparison.all(&tools()?).map(|()| String::new()),
+        "reference" => {
+            let fixture = args
+                .fixture
+                .as_deref()
+                .ok_or("a reference step needs --fixture")?;
+            if !fixture.exists() {
+                return Err(format!("no fixture at {}", fixture.display()));
+            }
+            let isolate = match &args.isolate {
+                Some(p) => p.clone(),
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            comparison
+                .reference(
+                    &abs(fixture)?,
+                    args.fixture_commit.as_deref(),
+                    &abs(&isolate)?,
+                )
+                .map(|()| String::new())
+        }
+        "claims" => comparison.claims(),
+        "analyse" => comparison.analyse().map(|doc| json::dumps(&doc, 1)),
+        other => Err(format!(
+            "unknown step {other:?}: manifest, pin, size, all, reference, claims or analyse"
+        )),
+    }
+}
+
 fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String, String> {
     let ctx = context(round, &root, runs)?;
     let doc = match round {
@@ -301,6 +469,37 @@ fn main() -> ExitCode {
         Command::CallgrindControl { dir } => {
             callgrind::control(&dir).map(|doc| json::dumps(&doc, 1))
         }
+        Command::Rule {
+            step,
+            comparison,
+            root,
+            dir,
+            runs,
+            out,
+            git,
+            size,
+            ic,
+            ic_commit,
+            isolate,
+            fixture,
+            fixture_commit,
+        } => rule(
+            &step,
+            RuleArgs {
+                comparison,
+                root,
+                dir,
+                runs,
+                out,
+                git,
+                size,
+                ic,
+                ic_commit,
+                isolate,
+                fixture,
+                fixture_commit,
+            },
+        ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
             Round::R05 | Round::R02b => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),

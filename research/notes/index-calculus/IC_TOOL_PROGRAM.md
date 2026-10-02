@@ -165,6 +165,9 @@ unchanged, as in §23. On top of them:
   online and cold.
   - It runs at §23's six sizes with 64 targets, as §23 did.
   - It moves the scoreboard's §23 row.
+  - Its rho must meet the ledger's minimum (`docs/ic/BOUNDARY_TARGETS.md`,
+    2026-10-01): no slower per step than the strong walk on the same
+    targets, measured with each comparison.
 - **The A/A.** Every round runs the baseline against a copy of itself,
   on `M1`'s rows for five rounds. That gives the noise floor, and a
   ratio inside the A/A band is not a gain. It is needed every round
@@ -555,7 +558,7 @@ from R03's `runs.tar.xz`, byte for byte.
 | isolation | `tools/isolated_bench.py` | every timed run from N1 on | N1: modes, refusals, the widened mask and the record's keys checked against the Python tool |
 | the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped. N2: `icprog run r02b` adds a fresh round's `manifest`, the `pin`, whose output reproduces R05's `pin.json` byte for byte from R05's run tree, and the round's own A/A (`aa`) |
 | the callgrind phase split, and R02b's control | `harness/callgrind_phases.py`, R02b's `analyse.py` | R02b's control | N2: `icprog callgrind-phases` reproduces R02's six phase splits and R01's two byte for byte; `icprog callgrind-control`, new code with no frozen output, reads R02's profiles as R02's README reports them |
-| the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3 |
+| the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3: `icprog rule claims` and `icprog rule analyse` reproduce §23's 408 claims, their replays, 396 manifests, `summary.json` and `analysis.json` byte for byte (only each replay's checker name differs: the replays are now `icprog`'s own arithmetic); `icprog rule` runs the rows (`manifest`, `pin`, `size`, `all`) and the reference check against the strong rho (`reference`) |
 | the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
 | Track B's chain | `harness/bround.py` | Track B's measurements | N5 |
 | the fuzz generator and its replays | `fuzz/fuzz_v2.py` | B6, whose replays in "independent Python arithmetic" become independent native arithmetic by an amendment | N6 |

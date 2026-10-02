@@ -3,8 +3,9 @@ name: ic programme harness
 # The ic tool programme's native harness (IC_TOOL_PROGRAM.md §10a): the
 # `icprog` and `isolated_bench` binaries.  Each port is held to the frozen
 # outputs of the script it replaces; `tests/icprog.rs` reproduces R03's
-# analysis.json from R03's runs and R02's callgrind phase splits from R02's
-# raw profiles, byte for byte.  It runs no experiment.
+# analysis.json from R03's runs, R02's callgrind phase splits from R02's
+# raw profiles, and ledger §23's claims, manifests and analysis from its run
+# tree, byte for byte.  It runs no experiment.
 
 on:
   pull_request:
@@ -18,6 +19,9 @@ on:
       - 'research/ic_tool_program/baselines.json'
       - 'docs/curves/registry.json'
       - 'src/cryptanalysis/curve_aliases.json'
+      - 'research/ic_single_target_20260930/**'
+      - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
+      - 'docs/ic/boundary_targets.json'
       - 'Cargo.toml'
       - '.github/workflows/ic-programme-harness.yml'
   push:
@@ -42,6 +46,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install valgrind, for callgrind_annotate
         run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: Fetch ledger §23's build commit, whose sources its claims hash
+        run: git fetch --no-tags --depth=1 origin 0bf67f169f0762c8bd225760196803379cabdcb9
       - name: Build the harness
         run: cargo build --release --bin icprog --bin isolated_bench
       - name: Unit tests, and every frozen output a port reproduces byte for byte

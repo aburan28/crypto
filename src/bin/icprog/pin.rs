@@ -78,7 +78,7 @@ pub fn r01_runs(programme: &Path) -> Result<PathBuf, String> {
 
 /// Counts only, under `taskset`: for pins, never for time.  An existing
 /// output is read, not re-run.
-fn untimed(binary: &Path, row: &Row, out: &Path) -> Result<J, String> {
+pub fn untimed(binary: &Path, row: &Row, out: &Path) -> Result<J, String> {
     if !out.exists() {
         if let Some(parent) = out.parent() {
             std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;

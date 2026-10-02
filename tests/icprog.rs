@@ -168,6 +168,105 @@ fn icprog_reproduces_r02s_callgrind_phases_byte_for_byte() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+/// Every file under `dir`, as paths relative to it, sorted.
+fn files(dir: &Path) -> Vec<PathBuf> {
+    fn walk(base: &Path, dir: &Path, out: &mut Vec<PathBuf>) {
+        for e in std::fs::read_dir(dir).unwrap() {
+            let p = e.unwrap().path();
+            if p.is_dir() {
+                walk(base, &p, out);
+            } else {
+                out.push(p.strip_prefix(base).unwrap().to_path_buf());
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(dir, dir, &mut out);
+    out.sort();
+    out
+}
+
+/// Ledger §23's claims, manifests and `analysis.json` were written by its
+/// retired `claims.py` and `analyse.py` from its frozen run tree;
+/// `icprog rule claims` and `icprog rule analyse` must write the same
+/// bytes.  The one difference is by design: a replay record names its
+/// checker, which is now `icprog`'s oracle and not `oracle.py`.
+///
+/// The claims hash the sources at the binary's build commit with `git
+/// show`, so the commit's objects must be present; the harness workflow
+/// fetches them.  The run writes into a scratch tree shaped like the
+/// repository, so that every path a record holds is the frozen one.
+#[test]
+#[ignore = "needs §23's build commit 0bf67f16 in the object store; the ic programme harness workflow fetches it"]
+fn icprog_reproduces_s23s_claims_and_analysis_byte_for_byte() {
+    let s23 = root().join("research/ic_single_target_20260930");
+    let scratch = std::env::temp_dir().join(format!("icprog-s23-{}", std::process::id()));
+    let here = scratch.join("research/ic_single_target_20260930");
+    for dir in [
+        &here,
+        &scratch.join("docs/ic"),
+        &scratch.join("research/sat_factor_base_review_20260908/autolab"),
+    ] {
+        std::fs::create_dir_all(dir).unwrap();
+    }
+    std::os::unix::fs::symlink(s23.join("runs"), here.join("runs")).unwrap();
+    std::os::unix::fs::symlink(
+        root().join("research/ic_descent_20260930"),
+        scratch.join("research/ic_descent_20260930"),
+    )
+    .unwrap();
+    for f in [
+        "research/ic_single_target_20260930/curve_ids.json",
+        "research/ic_single_target_20260930/prediction.json",
+        "docs/ic/boundary_targets.json",
+        "research/sat_factor_base_review_20260908/autolab/protocol.json",
+    ] {
+        std::fs::copy(root().join(f), scratch.join(f)).unwrap();
+    }
+    let rule = |step: &str| {
+        let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .args(["rule", step, "--root"])
+            .arg(&scratch)
+            .arg("--git")
+            .arg(root())
+            .output()
+            .expect("icprog runs");
+        assert!(
+            out.status.success(),
+            "icprog rule {step} failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        out.stdout
+    };
+    assert_eq!(
+        String::from_utf8(rule("claims")).unwrap(),
+        "408 of 408 rows pass the vs_rho check\n"
+    );
+    for sub in ["manifests", "claims"] {
+        let (frozen, native) = (s23.join(sub), here.join(sub));
+        let names = files(&frozen);
+        assert_eq!(names, files(&native), "{sub}: the files differ from §23's");
+        for name in &names {
+            let mut got = std::fs::read_to_string(native.join(name)).unwrap();
+            if name.to_string_lossy().ends_with(".replay.json") {
+                got = got.replace(
+                    "\"checker\": \"icprog's oracle (its own field arithmetic, not ic's)\"",
+                    "\"checker\": \"oracle.py (Python field arithmetic)\"",
+                );
+            }
+            let want = std::fs::read_to_string(frozen.join(name)).unwrap();
+            assert!(got == want, "{sub}/{}: differs from §23's", name.display());
+        }
+    }
+    let analysis = rule("analyse");
+    std::fs::remove_dir_all(&scratch).ok();
+    let frozen = std::fs::read(s23.join("analysis.json")).unwrap();
+    assert!(
+        analysis == frozen,
+        "icprog's §23 analysis differs from the frozen analysis.json"
+    );
+}
+
 /// A run tree that is not one is refused, with the reason.
 #[test]
 fn icprog_refuses_a_missing_run_tree() {

@@ -498,6 +498,46 @@ pub fn sorted(v: &J) -> J {
     }
 }
 
+/// `v` with no spaces (`separators=(",", ":")`), every object's keys sorted
+/// when `sort_keys`, and non-ASCII text escaped only when `ascii`: the form
+/// the identity and certificate digests hash.
+pub fn dumps_compact(v: &J, sort_keys: bool, ascii: bool) -> String {
+    fn compact(out: &mut String, v: &J, ascii: bool) {
+        match v {
+            J::Arr(items) => {
+                out.push('[');
+                for (k, item) in items.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    compact(out, item, ascii);
+                }
+                out.push(']');
+            }
+            J::Obj(kv) => {
+                out.push('{');
+                for (k, (key, item)) in kv.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    write_str_as(out, key, ascii);
+                    out.push(':');
+                    compact(out, item, ascii);
+                }
+                out.push('}');
+            }
+            scalar => write_as(out, scalar, 0, 0, ascii),
+        }
+    }
+    let mut out = String::new();
+    if sort_keys {
+        compact(&mut out, &sorted(v), ascii);
+    } else {
+        compact(&mut out, v, ascii);
+    }
+    out
+}
+
 /// `v` on one line with `", "` and `": "` between items, as a JSON lines
 /// record is written; with `sort_keys`, every object's keys sorted.
 pub fn dumps_line(v: &J, sort_keys: bool) -> String {
