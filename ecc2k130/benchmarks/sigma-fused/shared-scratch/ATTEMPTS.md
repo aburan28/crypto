@@ -57,3 +57,25 @@ This gate compiled native `sm_120` code without a GPU.  The two-block result is
 a static capacity calculation from registers and compiled shared extent;
 actual driver-reserved bytes, occupancy and helper correctness must still be
 read from the target RTX PRO 6000 before timing.
+
+## GPU attempt 1: native preflight failure
+
+The one allocation started from clean merged source
+`c942ee0dd547fdaaf4d54ca925741581d0d0ffa6` on the correct RTX PRO 6000 and
+CUDA 13.3.73, then exited before compiling or launching a CUDA arm.  The GPU
+producer's direct `g++` command for `test_native.cpp` retained `-Werror` but
+omitted the repository's `-Wno-unknown-pragmas` compatibility flag.  GCC
+therefore rejected existing CUDA-only `#pragma unroll` lines in `packed131.h`.
+
+- Modal app: `ap-MAQ3Rg69gN6UmAqCFApZHs`
+- function call: `fc-01M3Z2SAYFR549J7ZM5TXFVV3X`
+- recovery token: `fb552f8989c94e3898655ee8f7286fb6`
+- GPU UUID: `GPU-08af0821-3ec3-8ce1-36fb-00c4e37e95b5`
+- archive SHA-256: `a4fbe337a7e6f80fee271427be5d084da97ccd3389d86d5b4ffc7563803c318c`
+- exit code: `1`
+
+This is a producer-infrastructure failure.  It generated no CUDA candidate,
+device-helper result, replay, checkpoint, corpus or throughput sample.  The
+additive repair changes only that native compile command and adds a source-audit
+assertion for the compatibility flag.  A replacement allocation requires root
+coordination under the frozen one-panel authorization.

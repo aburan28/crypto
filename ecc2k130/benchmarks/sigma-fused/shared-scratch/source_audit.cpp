@@ -159,6 +159,8 @@ int main(int argc, char **argv) {
                  "traffic claim boundary");
         contains(job, "PACKED_SQUARE_TABLE=0", "no square-table combination");
         absent(job, "python", "native-only GPU producer");
+        contains(job, "-Werror -Wno-unknown-pragmas",
+                 "native helper GCC pragma compatibility");
         contains(job, "sample screen 5 4 cache4", "frozen timing schedule");
         contains(job, "SIGMA_FUSED_SHARED_SLOTS=", "one-knob builds");
         contains(job, "$((VERIFY_THREADS * 16 * 95 * 7)) 300 -1",

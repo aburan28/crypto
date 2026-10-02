@@ -71,7 +71,7 @@ shared_bytes() {
 
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
     benchmarks/sigma-fused/shared-scratch/model.cpp -o /tmp/scratch-model
-g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+g++ -O2 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas \
     benchmarks/sigma-fused/shared-scratch/test_native.cpp -o /tmp/scratch-native
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
     benchmarks/sigma-fused/shared-scratch/summarize.cpp -o /tmp/scratch-summarize
