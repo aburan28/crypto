@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 199, 2026-10-02.
+Current through Stage 200, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -266,6 +266,25 @@ a measured lower bound of 14 components, 205.639384 wall-seconds and
 verification passes 17/17 with result SHA-256
 `2f4551a1644b5fc49d15a8be07a13ff4a5b56219595d496ef9e12b2077902edd`.
 This is selected one-target F4 engineering; no SOTA gate changes.
+
+Stage 200 tests size-gated parallel target-row clearing inside the selected
+full-M4RI matrices. The corrected candidate/control ratios are 1.058804 wall,
+0.963229 total core and 1.008040 RSS: CPU falls 3.68 percent, but wall rises
+5.88 percent and misses the frozen strict-below-0.98 joint gate. Both arms
+route exactly 481 matrices and 351,164 blocks through full M4RI, perform
+102,707,985,015 XORs, complete all 242 systems and return exhaustive UNSAT.
+The candidate parallelizes 75,803 blocks covering 106,712,818,981 scheduled
+target-row words. Its first attempt panicked on re-entrant thread-local scratch;
+that failed process is preserved and charged, a twelve-outer-call regression
+certifies the correction, and the entire frozen pair is rerun from a fresh
+corrected binary. Confirmation is prohibited and runtime source is reverted to
+the Stage 199 default. Stage 200 adds a measured lower bound of 26 components,
+1,088.370919 wall-seconds and 4,553.408345 core-seconds. The cumulative lower
+bound becomes 722 components, 26,616.264678 wall-seconds and 73,077.015408
+core-seconds at the unchanged 6,310,576,128-byte maximum RSS. Complete cost
+remains `null`. Final native verification passes 27/27 with result SHA-256
+`5a1530a9f89645076b99c1c027996793c107f7eacb1d4907ec1cdedb76756f31`.
+This is a rejected one-target scheduling experiment; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the

@@ -10495,5 +10495,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage199-hybrid-default -->
+<!-- BEGIN current-f4-stage200-parallel-m4ri -->
+<div class="panel" id="current-f4-stage200-parallel-m4ri">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 200: nested parallel M4RI saves CPU but loses wall time <span class="chip">rejected</span></h2>
+        <p>One corrected serial/parallel pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate shares only M4RI target-row regions of at least 1,048,576
+          row-words across the existing Rayon pool; algebra, pivots, tables and work remain exact.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/control wall and total-core ratios both strictly below 0.98. The first candidate panic is excluded from timing but preserved and charged.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Candidate / control wall / core / RSS</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Selected serial M4RI row clearing</td><td class="n">20.914397</td><td class="n">173.316228</td><td class="n">null</td><td class="n">3,372.61 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">45.981950 / 565.623026 / 82.125673</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Parallel clear at &ge;1,048,576 row-words</strong></td><td class="n"><strong>22.144250</strong></td><td class="n"><strong>166.943149</strong></td><td class="n">null</td><td class="n">3,399.73 MB</td><td class="n"><strong>1.058804 / 0.963229 / 1.008040</strong></td><td class="n">48.685879 / 544.824280 / 82.785957</td><td><span class="chip">rejected</span> wall gate fails</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">work</span> both arms route 481 matrices / 351,164 blocks and perform 102,707,985,015 XORs; candidate parallelizes 75,803 blocks and 106,712,818,981 scheduled row-words</span>
+        <span><span class="chip">decision</span> CPU falls 3.68%, wall rises 5.88% and RSS rises 0.80%; confirmation is prohibited and the candidate is reverted</span>
+        <span><span class="chip">failure custody</span> the first candidate panicked on re-entrant thread-local scratch after 22.299680 wall / 161.557050 core seconds; the correction has a twelve-outer-call nested regression and the full pair was restarted</span>
+        <span><span class="chip">accounting</span> Stage 200 lower bound: 26 components, 1,088.370919 wall-seconds, 4,553.408345 core-seconds, 5.592 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 722 components, 26,616.264678 wall-seconds, 73,077.015408 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/result.json</code>; rejected one-target scheduling only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage200-parallel-m4ri -->
 </body>
 </html>
