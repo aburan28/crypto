@@ -1,5 +1,5 @@
 //! Print the tables of `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` §6 and §8
-//! (E1–E13) from the frozen experiment files.
+//! (E1–E15) from the frozen experiment files.
 //!
 //! ```text
 //! cargo run --release --example glv_invariant_experiment_tables -- experiments/23_glv_invariant_e*.json
@@ -1822,6 +1822,114 @@ fn e13(o: &mut String, rows: &[&Value]) {
     );
 }
 
+// ── E15: the ECC2K-130 family, two summands ────────────────────────
+
+fn e15(o: &mut String, rows: &[&Value]) {
+    o.push_str("### E15 — two summands on E_0: y² + xy = x³ + 1 over GF(2^m), the Frobenius-orbit base against the abscissa control\n\n");
+    o.push_str("| curve | m | ord_m(2) | intermediate subfields | log2 r | h | h = #E_0(F_2) | subspace dim | seed | cols fold / control | D fold / control | single-column rows fold / control (of relations) | chance, 1 / cols fold | full-rank rel fold / control | ratio | column ratio | rank fraction at k = cols, fold / control | correct |\n");
+    o.push_str("|:--|--:|--:|:--|--:|:--|:--|--:|--:|:--|:--|:--|--:|:--|--:|--:|:--|:--|\n");
+    let factors = |r: &Value| {
+        r["cofactor_factors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(py_str)
+            .collect::<Vec<_>>()
+            .join("·")
+    };
+    let subfields = |r: &Value| {
+        let v: Vec<String> = r["intermediate_subfield_degrees"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|d| format!("GF(2^{})", py_str(d)))
+            .collect();
+        if v.is_empty() {
+            "none".to_string()
+        } else {
+            v.join(", ")
+        }
+    };
+    let sorted_rows = sorted(rows, &["n", "seed"]);
+    for r in &sorted_rows {
+        let s = at(r, "stream");
+        let (f, c) = (at(s, "folded"), at(s, "control"));
+        let rel = fl(s, "relations").max(1.0);
+        let _ = writeln!(
+            o,
+            "| `{}` | {} | {} | {} | {:.1} | {} = {} | {} | {} | {} | {} / {} | {} / {} | {} ({:.3}) / {} ({:.3}) | {:.3} | {} / {} | {} | {:.2} | {} / {} | {} |",
+            py_str(at(r, "instance")),
+            py_str(at(r, "n")),
+            py_str(at(r, "ord_n_2")),
+            subfields(r),
+            fl(r, "log2_r"),
+            py_str(at(r, "cofactor")),
+            factors(r),
+            if bool_at(r, "cofactor_is_e0_f2") { "yes" } else { "no" },
+            py_str(at(r, "subspace_dimension")),
+            py_str(at(r, "seed")),
+            py_str(at(f, "columns")),
+            py_str(at(c, "columns")),
+            py_str(at(f, "deficiency_total")),
+            py_str(at(c, "deficiency_total")),
+            py_str(at(f, "single_column_rows")),
+            fl(f, "single_column_rows") / rel,
+            py_str(at(c, "single_column_rows")),
+            fl(c, "single_column_rows") / rel,
+            1.0 / fl(f, "columns"),
+            fmt(at(f, "square_relations")),
+            fmt(at(c, "square_relations")),
+            fmt(at(s, "square_ratio")),
+            fl(s, "column_ratio"),
+            fmt(at(f, "rank_fraction_at_columns")),
+            fmt(at(c, "rank_fraction_at_columns")),
+            yes(both_verified(s)),
+        );
+    }
+    o.push_str("\n#### E15 summary by degree\n\n");
+    o.push_str("| curve | m | h | h = #E_0(F_2) | instances | D fold / control | single-column fraction, fold, mean (min–max) | against chance | full-rank ratio mean (min–max) | column ratio | all correct |\n");
+    o.push_str("|:--|--:|:--|:--|--:|:--|--:|--:|--:|--:|:--|\n");
+    for (_, rs) in grouped(&sorted_rows, &["n"]) {
+        let r0 = rs[0];
+        let frac: Vec<f64> = rs
+            .iter()
+            .map(|r| fl(r, "stream.folded.single_column_rows") / fl(r, "stream.relations").max(1.0))
+            .collect();
+        let chance = 1.0 / fl(r0, "stream.folded.columns");
+        let sq = present(&rs, "stream.square_ratio");
+        let mut ds: Vec<String> = rs
+            .iter()
+            .map(|r| {
+                format!(
+                    "{} / {}",
+                    py_str(at(r, "stream.folded.deficiency_total")),
+                    py_str(at(r, "stream.control.deficiency_total"))
+                )
+            })
+            .collect();
+        ds.sort();
+        ds.dedup();
+        let _ = writeln!(
+            o,
+            "| `{}` | {} | {} = {} | {} | {} | {} | {:.3} ({:.3}–{:.3}) | {:.1}× | {} | {:.2} | {} |",
+            py_str(at(r0, "instance")),
+            py_str(at(r0, "n")),
+            py_str(at(r0, "cofactor")),
+            factors(r0),
+            if bool_at(r0, "cofactor_is_e0_f2") { "yes" } else { "no" },
+            rs.len(),
+            ds.join(", "),
+            mean(&frac),
+            min(&frac),
+            max(&frac),
+            mean(&frac) / chance,
+            mean_range(&sq),
+            fl(r0, "stream.column_ratio"),
+            yes(rs.iter().all(|r| both_verified(at(r, "stream")))),
+        );
+    }
+}
+
 fn main() {
     let mut rows: Vec<Value> = Vec::new();
     for path in env::args().skip(1) {
@@ -1835,7 +1943,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 13] = [
+    let printers: [(&str, Printer); 14] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -1849,6 +1957,7 @@ fn main() {
         ("e12", |o, r| e12(o, r, false)),
         ("e12p", |o, r| e12(o, r, true)),
         ("e13", e13),
+        ("e15", e15),
     ];
     for (exp, print) in printers {
         if let Some(rs) = by.get(exp) {
