@@ -1,10 +1,10 @@
 # Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E15, and the road to the state of the art
 
-**Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`), `src/cryptanalysis/orbit_pair_table.rs` (the pair table over orbit representatives, E12), `src/cryptanalysis/fghr_line.rs` (the `Y`-line, the `τ_T` fold and the `D₃` conic-resultant oracle, E13)
+**Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`), `src/cryptanalysis/orbit_pair_table.rs` (the pair table over orbit representatives, E12), `src/cryptanalysis/fghr_line.rs` (the `Y`-line, the `τ_T` fold and the `D₃` conic-resultant oracle, E13), `src/cryptanalysis/q_curve.rs` (Q-curves of degree 2 and 3 over `F_{p²}` and `ψ = π ∘ ι ∘ φ`, E14)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
 **Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
 **Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13,15}.{json,log}` (2026-10-02); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13,14,15}.{json,log}` (2026-10-02); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
 **Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5; legacy Python, not extended) and `cargo run --release --example glv_invariant_experiment_tables -- experiments/23_glv_invariant_e*.json` (§6, §8; the native replacement of the retired `scripts/glv_invariant_experiment_tables.py`, byte-identical output on E1–E11); every number in §5, §6 and §8 is printed by them from the frozen files
 
 > **Status.**  Implementation, pilot, and the seven experiments of §4
@@ -43,7 +43,9 @@
 > and the transfer check to the ECC2K-130 family (E15: on `E_0` at the
 > challenge's `4·prime` shape the fold is unconfined, `D = 1`; on
 > `m = 31`, which cannot have that shape, the `373` cofactor confines
-> `73 %` of two-summand rows).  Every class is engineering or
+> `73 %` of two-summand rows), and Q-curves of degree 2 and 3 over
+> `F_{p²}` (E14: every `ψ` verified, eigenvalue orders `≥ 1817`, base
+> points kept at chance — no fold).  Every class is engineering or
 > accounting; no row claims a speed.
 
 ## 1. What is new, against what exists
@@ -667,7 +669,7 @@ products.
   and the exponent panel is untouched.
 - Nothing here bears on any deployed curve: `r ≤ 2^32`, certified toy
   instances, and a fold that rho already takes as `√(w/2)`.
-- E14 of §8.1 is proposed, not run (Smith's Q-curve construction is not in the repository).  E15 ran on `E_0` at `m = 13, 15, 23, 31` only: the faithful `4·prime` degrees `19` and `41` are beyond the pair-table driver, and the §8a `m = 83` gate was not run (E15 claims no improvement).  E13 does not price the negation arm on the `Y`-line (it stalls below full rank there, not derived, §8.7), so the plan's fold-against-negation ratio is unmeasured on that base.
+- Every experiment of §8.1 has run.  E14 builds its Q-curves by scanning `F_{p²}` for the `j` with `Φ_d(j, j^p) = 0` and for the kernel, so it stops at `p = 2^{12}`.  E15 ran on `E_0` at `m = 13, 15, 23, 31` only: the faithful `4·prime` degrees `19` and `41` are beyond the pair-table driver, and the §8a `m = 83` gate was not run (E15 claims no improvement).  E13 does not price the negation arm on the `Y`-line (it stalls below full rank there, not derived, §8.7), so the plan's fold-against-negation ratio is unmeasured on that base.
 
 ## 8. Toward the state of the art: what the literature does, what is next, and E8–E15
 
@@ -725,7 +727,7 @@ That is the ordering below.
 | **E11** | The algebraic three-summand oracle on the line: `S₄(s t₁, s t₂, s t₃, x_R)` Weil-descended, `S₃`-symmetrised in the elementary symmetric functions of `t_i`, solved as `gaudry_cubic::solve_s4_subspace` solves the `x_i ∈ F_p` base; then GGMP's Frobenius symmetry breaking — only canonical `⟨−1, π⟩`-orbit representatives admitted as solutions | oracle cost `O(1)` in `p` (the Macaulay solve at degree `10`–`13`); the fold ratio unchanged at `3`; symmetry breaking removes the `3`-fold redundancy among a system's solutions, not systems | the fold's `S` ratio below `2.7` at any size with this oracle, or an oracle cost growing with `p`, falsifies | engineering | **done** (§8.5): `9.42e+05` multiplications a call, flat in `p`; agrees with the pair table on `3600` of `3600` targets; fitted exponent `0.53` on the fold; symmetry breaking reduces to the orbit duplicates |
 | **E12** | The pair table over orbit representatives: `P + φ^c P'` for representatives `P, P'` and `c < w/2` | table `w/2` smaller and `w/2` cheaper to build, one probe per target unchanged; `S` moves only by the table's share | a probe cost above `1.2×` the full table's falsifies "unchanged" | engineering (memory) | **done** (§8.6): table `÷ 2.95`–`2.97` (`w = 6`) and `÷ 1.98` (`w = 4`); probe `1.13×` at worst, so "unchanged" survives; `S ÷ 1.18` on `F_p` `j = 0`, `× 1.02` on the line |
 | **E13** | FGHR's `2`-torsion symmetry **and** the fold together: close the line base under translation by `T ∈ E(F_p)[2]` and under `π`, fold by `⟨−1, π⟩`, symmetrise the system by `(Z/2)^{m−1} ⋊ S_m` | the two levers multiply — columns `÷ 3`, system degree `÷ 2^{m−1}` — because one acts on the base and the other on the system | a combined `S` ratio below the product of the separate ratios by more than `20 %` falsifies "multiply" | engineering | **done** (§8.7), with the base closed under `τ_T` and folded by it too (`12` a column): `R(q₃)` of degree `16 = 64/4`, `S ÷ 27.0` from the system, `÷ 2.52` from `τ_T`; combined / product `≥ 0.82`, so "multiply" survives; the negation arm stalls below full rank on the `Y`-line and is not priced |
-| **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | pending; Smith's construction not in the repository |
+| **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | **done** (§8.9): `40` Q-curves (`d = 2, 3`, `r = 2^{12}`–`2^{22}`), every `ψ` verified with `λ² ≡ ±d`, `ord_r(λ) ≥ 1817`; `32` of `43310` base points kept against `39.3` at chance — no fold |
 | **E15** | Transfer to the binary Koblitz program (ECC2K-130, AGENTS.md §8a–8b): is the §6.5 degeneracy present there? | no: `E(F_2) ⊂ E(F_{2^n})` has order `2` or `4`, so at most two component classes and no block structure; the fold there is the known `2n` | a measured deficiency `D > 2` on a prime-order-times-`4` Koblitz subgroup with two summands falsifies | accounting | **done** (§8.8): on `E_0` at the challenge's `4·prime` shape (`m = 23`) `D = 1` on both arms and `4 %` single-column rows, so the prediction holds; at `m = 31`, whose `E_0` cannot be `4·prime` (cofactor `4·373`), `D = 12 / 342` and `73 %` single-column rows — `m = 31` is not a faithful proxy for two-summand relation structure |
 
 What is **not** on the list, and why: a larger fold on a fixed prime-order
@@ -1405,7 +1407,98 @@ neither required nor discharged.
 **Class: accounting.**  No algorithm changed; E15 measures where E2's and §6.5's relation
 structure applies, and finds that it follows the cofactor.
 
-### 8.4 Verdict after E8–E15
+### 8.9 E14 — Q-curves of degree 2 and 3 over `F_{p²}`
+
+**Runner:** `--exp e14 --bits 8,9,10,11,12 --seeds 4`.  **Data:**
+`experiments/23_glv_invariant_e14.{json,log}` (2026-10-02).  **Module:**
+`src/cryptanalysis/q_curve.rs`.
+
+**The object.**  A degree-`d` Q-curve is an `E/F_{p²}` with a `d`-isogeny `φ: E → E^σ` to its
+Frobenius conjugate; `ψ = π ∘ ι ∘ φ` is then an endomorphism of `E` over `F_{p²}` of degree
+`dp`, with `ψ² = [±d]` on `E(F_{p²})` (Smith's construction of fast GLV curves from Q-curves).
+It is the `F_{p²}` analogue of E4's degree-2 and degree-3 CM maps, and the second half of E4b.
+The module finds the Q-curve `j`-invariants as the `j ∈ F_{p²} ∖ F_p` with
+`Φ_d(j, j^p) = 0` (the repository's tabulated `Φ₂`, `Φ₃`; `Φ_d(j, j^p)` lies in `F_p`, one
+equation in the two coordinates of `j`), counts `E_j` and its quadratic twist, finds the
+kernel among the `F_{p²}`-roots of the `d`-division polynomial and **checks** it by Vélu's
+codomain (`j(φ(E)) = j^p` and `μ⁴a' = a^σ`, independent of `Φ_d`), and reads `ψ`'s eigenvalue
+off `ψ(G)` by baby-step giant-step.  Every map is then verified on random points of `⟨G⟩`
+(eigenvalue and additivity, as E4's were) and `ψ²(G) = [±d]G` is checked in the unit tests.
+The base is the `F_p`-line — every point with `x ∈ F_p`, folded by negation — the set a GLS
+map (`d = 1`) would keep whole if it were its line; the prediction (§8.1) is the chance overlap,
+`|F| / #E` of the base.
+
+**Every instance**
+
+| d | p | log2 r | h | twist | seed | map | λ² ≡ | ord_r(λ) | images in base | base points | chance fraction | expected at chance | verified |
+|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|:--|
+| 2 | 131 | 12.1 | 4 | yes | 1 | `q-curve-psi[d=2,lambda=3570]` | −d | 2148 | 2 | 118 | 0.00687 | 0.81 | True |
+| 2 | 397 | 13.5 | 14 | yes | 1 | `q-curve-psi[d=2,lambda=6707]` | +d | 11310 | 0 | 400 | 0.00253 | 1.01 | True |
+| 2 | 197 | 14.2 | 2 | no | 2 | `q-curve-psi[d=2,lambda=7459]` | +d | 9716 | 0 | 206 | 0.00530 | 1.09 | True |
+| 2 | 281 | 14.3 | 4 | yes | 4 | `q-curve-psi[d=2,lambda=7425]` | +d | 6584 | 0 | 284 | 0.00359 | 1.02 | True |
+| 2 | 199 | 14.3 | 2 | no | 3 | `q-curve-psi[d=2,lambda=7032]` | −d | 9945 | 2 | 186 | 0.00468 | 0.87 | True |
+| 2 | 359 | 14.4 | 6 | no | 3 | `q-curve-psi[d=2,lambda=1913]` | −d | 4280 | 2 | 360 | 0.00280 | 1.01 | True |
+| 2 | 229 | 14.7 | 2 | yes | 4 | `q-curve-psi[d=2,lambda=6142]` | +d | 8720 | 0 | 212 | 0.00405 | 0.86 | True |
+| 2 | 691 | 14.9 | 16 | no | 3 | `q-curve-psi[d=2,lambda=17962]` | +d | 29878 | 0 | 674 | 0.00141 | 0.95 | True |
+| 2 | 307 | 15.5 | 2 | yes | 2 | `q-curve-psi[d=2,lambda=44388]` | +d | 23571 | 0 | 294 | 0.00312 | 0.92 | True |
+| 2 | 659 | 16.1 | 6 | yes | 1 | `q-curve-psi[d=2,lambda=71503]` | −d | 72160 | 0 | 600 | 0.00139 | 0.83 | True |
+| 2 | 617 | 16.5 | 4 | no | 4 | `q-curve-psi[d=2,lambda=88319]` | +d | 95088 | 2 | 604 | 0.00159 | 0.96 | True |
+| 2 | 661 | 17.7 | 2 | no | 2 | `q-curve-psi[d=2,lambda=186822]` | −d | 108924 | 0 | 670 | 0.00154 | 1.03 | True |
+| 2 | 1259 | 18.0 | 6 | no | 1 | `q-curve-psi[d=2,lambda=262503]` | −d | 263760 | 2 | 1238 | 0.00078 | 0.97 | True |
+| 2 | 1409 | 18.3 | 6 | no | 3 | `q-curve-psi[d=2,lambda=283022]` | −d | 36714 | 0 | 1390 | 0.00070 | 0.97 | True |
+| 2 | 1381 | 18.9 | 4 | yes | 2 | `q-curve-psi[d=2,lambda=226919]` | +d | 238299 | 2 | 1356 | 0.00071 | 0.96 | True |
+| 2 | 2243 | 20.3 | 4 | yes | 1 | `q-curve-psi[d=2,lambda=461391]` | −d | 314610 | 2 | 2238 | 0.00044 | 1.00 | True |
+| 2 | 1621 | 20.3 | 2 | no | 4 | `q-curve-psi[d=2,lambda=679215]` | −d | 437680 | 0 | 1620 | 0.00062 | 1.00 | True |
+| 2 | 2861 | 21.0 | 4 | yes | 2 | `q-curve-psi[d=2,lambda=657756]` | +d | 2046192 | 2 | 2844 | 0.00035 | 0.99 | True |
+| 2 | 2269 | 21.3 | 2 | no | 3 | `q-curve-psi[d=2,lambda=2338418]` | −d | 2572032 | 0 | 2238 | 0.00044 | 0.97 | True |
+| 2 | 3169 | 22.3 | 2 | yes | 4 | `q-curve-psi[d=2,lambda=3727207]` | +d | 78492 | 0 | 3132 | 0.00031 | 0.98 | True |
+| 3 | 197 | 13.2 | 4 | no | 1 | `q-curve-psi[d=3,lambda=3243]` | −d | 9630 | 2 | 200 | 0.00519 | 1.04 | True |
+| 3 | 337 | 13.8 | 8 | yes | 3 | `q-curve-psi[d=3,lambda=1592]` | +d | 7079 | 0 | 340 | 0.00300 | 1.02 | True |
+| 3 | 241 | 13.8 | 4 | no | 2 | `q-curve-psi[d=3,lambda=3618]` | +d | 7296 | 0 | 252 | 0.00432 | 1.09 | True |
+| 3 | 239 | 14.2 | 3 | yes | 3 | `q-curve-psi[d=3,lambda=12163]` | +d | 19078 | 0 | 238 | 0.00416 | 0.99 | True |
+| 3 | 151 | 14.5 | 1 | no | 4 | `q-curve-psi[d=3,lambda=10323]` | +d | 22740 | 0 | 144 | 0.00633 | 0.91 | True |
+| 3 | 461 | 16.1 | 3 | no | 2 | `q-curve-psi[d=3,lambda=70685]` | +d | 35573 | 2 | 460 | 0.00216 | 0.99 | True |
+| 3 | 571 | 16.3 | 4 | no | 2 | `q-curve-psi[d=3,lambda=36214]` | +d | 81552 | 0 | 530 | 0.00162 | 0.86 | True |
+| 3 | 641 | 17.1 | 3 | no | 4 | `q-curve-psi[d=3,lambda=39148]` | +d | 68669 | 2 | 664 | 0.00161 | 1.07 | True |
+| 3 | 647 | 17.1 | 3 | no | 1 | `q-curve-psi[d=3,lambda=139319]` | +d | 139966 | 4 | 652 | 0.00155 | 1.01 | True |
+| 3 | 397 | 17.3 | 1 | yes | 1 | `q-curve-psi[d=3,lambda=87823]` | +d | 79080 | 0 | 400 | 0.00253 | 1.01 | True |
+| 3 | 439 | 17.6 | 1 | no | 4 | `q-curve-psi[d=3,lambda=128902]` | +d | 193572 | 0 | 442 | 0.00228 | 1.01 | True |
+| 3 | 809 | 17.7 | 3 | yes | 3 | `q-curve-psi[d=3,lambda=178911]` | +d | 109289 | 2 | 758 | 0.00116 | 0.88 | True |
+| 3 | 1709 | 17.9 | 12 | no | 1 | `q-curve-psi[d=3,lambda=191366]` | +d | 1817 | 4 | 1692 | 0.00058 | 0.98 | True |
+| 3 | 1759 | 18.4 | 9 | no | 4 | `q-curve-psi[d=3,lambda=196394]` | −d | 171771 | 0 | 1786 | 0.00058 | 1.03 | True |
+| 3 | 2663 | 18.8 | 16 | no | 4 | `q-curve-psi[d=3,lambda=349934]` | −d | 12310 | 0 | 2734 | 0.00039 | 1.05 | True |
+| 3 | 1619 | 19.3 | 4 | yes | 2 | `q-curve-psi[d=3,lambda=36459]` | −d | 109242 | 0 | 1670 | 0.00064 | 1.06 | True |
+| 3 | 2273 | 20.3 | 4 | yes | 3 | `q-curve-psi[d=3,lambda=615206]` | −d | 1291818 | 0 | 2332 | 0.00045 | 1.05 | True |
+| 3 | 3457 | 20.5 | 8 | no | 2 | `q-curve-psi[d=3,lambda=717085]` | +d | 746891 | 0 | 3436 | 0.00029 | 0.99 | True |
+| 3 | 1597 | 21.3 | 1 | no | 3 | `q-curve-psi[d=3,lambda=1598]` | +d | 6080 | 0 | 1632 | 0.00064 | 1.04 | True |
+| 3 | 2269 | 22.3 | 1 | no | 1 | `q-curve-psi[d=3,lambda=2480057]` | +d | 37324 | 0 | 2284 | 0.00044 | 1.01 | True |
+
+**Summary**
+
+| d | instances | maps | log2 r | λ² ≡ +d / −d | ord_r(λ) min–max | ord_r(λ) / r, min | images in base, total | expected at chance, total | base points, total | all verified |
+|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|:--|
+| 2 | 20 | 20 | 12.1–22.3 | 10 / 10 | 2148–2572032 | 0.016 | 16 | 19.2 | 20664 | yes |
+| 3 | 20 | 20 | 13.2–22.3 | 15 / 5 | 1817–1291818 | 0.002 | 16 | 20.1 | 22646 | yes |
+
+Reading.  **The prediction holds: a Q-curve endomorphism keeps no base.**  Over `40`
+instances (`20` per degree, `r = 2^{12}`–`2^{22}`) every `ψ` verifies, `λ² ≡ ±d` on every one
+(`+d` on `10` / `−d` on `10` at `d = 2`, `15` / `5` at `d = 3`), and the eigenvalue orders run
+from `1817` to `2.6·10⁶` — at least `0.2 %` of `r`, against `2` and `4` for the automorphisms
+and `n` for a Frobenius — so there is no small orbit to fold by.  The images of the
+`43310` base points land back in the base `32` times, against `39.3` expected at chance
+(`16` against `19.2` at `d = 2`, `16` against `20.1` at `d = 3`).  The search found `174`
+Q-curve `j`-invariants and counted `324` curves to get the `40` with a cofactor at most `16`;
+every kernel that reached `E^σ`'s `j` did so over `F_{p²}` (`0` needed `F_{p⁴}` for `ι`), and
+`41` roots of the division polynomial led to other `d`-isogenous neighbours and were set aside.
+This is E4's type-C reading on the `F_{p²}` group: a degree-`d` isogeny's `x`-map is a rational
+function of degree `d`, so no line or small set is stable, and a fast endomorphism is a scalar
+multiplication shortcut (GLV), not a factor-base symmetry.
+
+**Class: accounting.**  The lever list of §8.1 is closed on the base side: on these families
+the only folds are the automorphisms, the Frobenius-type maps (`π`, `τ`, GLS `ψ`) and, with a
+rational `2`-torsion point, the translation `τ_T` (E13).
+
+### 8.4 Verdict after E8–E15 (with E14)
 
 | lever | measured | class |
 |:--|:--|:--|
@@ -1416,6 +1509,7 @@ structure applies, and finds that it follows the cofactor.
 | the pair table over orbit representatives (E12) | table `÷ 2.95` / `2.97` / `1.98` at `w = 6, 6, 4`, build `÷ 2.59` / `2.77` / `1.91`; probe `1.11×` (line) and `1.00×` (`F_p`), under the `1.2×` falsification line; `S ÷ 1.18` on `j = 0`, `÷ 1.03` on `j = 1728`, `× 1.02` on the line; `0` collisions in `9.77e+07` probes | engineering (memory); relabelling if quoted as a cost gain on the line |
 | FGHR's `2`-torsion symmetry with the fold (E13) | system: `R(q₃)` of degree `16 = 64/4`, `1.25e+04`–`2.04e+04` multiplications a call (`÷ 33`–`41` against `S₃`), `S ÷ 27.0`; base: `τ_T` halves the columns, `S ÷ 2.52`; combined / product `≥ 0.82` (survives); `267`–`5741×` rho, total `p^{1.23}` | engineering |
 | the ECC2K-130 family, two summands (E15) | `E_0` at `4·prime` (`m = 23`): `D = 1` / `1`, `4 %` single-column rows, the fold buys relations; at `m = 31` (`h = 4·373`): `D = 12` / `342`, `73 %` single-column rows — the §6.5 confinement follows the cofactor, and `m = 31` cannot carry the challenge's shape | accounting |
+| Q-curves of degree 2 and 3 over `F_{p²}` (E14) | `40` instances, every `ψ = π ∘ ι ∘ φ` verified, `λ² ≡ ±d`, `ord_r(λ) = 1817`–`2.6·10⁶`; `32` images of `43310` base points in the base against `39.3` at chance | accounting |
 
 With E13 run, the cheapest arm in this note is the `Y`-line of a subfield curve with rational
 `2`-torsion, folded `12` a column by `⟨−1, π, τ_T⟩` and decomposed by the `D₃`-symmetrised
@@ -1424,4 +1518,4 @@ the cost.  Both uses of the `2`-torsion are now taken, on the base and on the sy
 compound with the Frobenius fold; the relation phase is still `p^{1+o(1)}` solves, so what
 remains is the constant of a solve (a degree-`16` univariate root-finding and three conics) and
 not a lever on the base.  E12 settles the pair-table regime: the table folds by `w/2`, and that
-is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 remains.
+is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 closes the base side: a Q-curve endomorphism of degree 2 or 3 keeps base points only at chance, as E4's CM maps did, so the folds on these families are the automorphisms, the Frobenius-type maps and `τ_T`, and every experiment of §8.1 has run.

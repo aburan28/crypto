@@ -232,6 +232,7 @@ pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
 pub mod preprocessing_rho;
+pub mod q_curve;
 pub mod quantum_estimator;
 pub mod quasi_subfield;
 pub mod research_bench;

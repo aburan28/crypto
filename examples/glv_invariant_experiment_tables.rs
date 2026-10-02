@@ -1822,6 +1822,90 @@ fn e13(o: &mut String, rows: &[&Value]) {
     );
 }
 
+// ── E14: Q-curves of degree 2 and 3 over F_{p²} ────────────────────
+
+fn e14(o: &mut String, rows: &[&Value]) {
+    o.push_str("### E14 — Q-curves of degree 2 and 3 over F_{p²}: ψ = π ∘ ι ∘ φ against the F_p-line base\n\n");
+    o.push_str("| d | p | log2 r | h | twist | seed | map | λ² ≡ | ord_r(λ) | images in base | base points | chance fraction | expected at chance | verified |\n");
+    o.push_str("|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|:--|\n");
+    let sign = |m: &Value| match at(m, "square_is_plus_d") {
+        Value::Bool(true) => "+d",
+        Value::Bool(false) => "−d",
+        _ => "neither",
+    };
+    let sorted_rows = sorted(rows, &["degree", "log2_r", "seed"]);
+    for r in &sorted_rows {
+        for m in r["maps"].as_array().unwrap() {
+            let ov = at(m, "overlap");
+            let _ = writeln!(
+                o,
+                "| {} | {} | {:.1} | {} | {} | {} | `{}` | {} | {} | {} | {} | {:.5} | {:.2} | {} |",
+                py_str(at(r, "degree")),
+                py_str(at(r, "p")),
+                fl(r, "log2_r"),
+                py_str(at(r, "cofactor")),
+                if bool_at(r, "twisted") { "yes" } else { "no" },
+                py_str(at(r, "seed")),
+                py_str(at(m, "name")),
+                sign(m),
+                py_str(at(ov, "eigenvalue_order")),
+                py_str(at(ov, "images_in_base")),
+                py_str(at(ov, "base_points")),
+                fl(ov, "chance_fraction"),
+                fl(ov, "chance_fraction") * fl(ov, "base_points"),
+                py_str(at(m, "verified")),
+            );
+        }
+    }
+    o.push_str("\n#### E14 summary\n\n");
+    o.push_str("| d | instances | maps | log2 r | λ² ≡ +d / −d | ord_r(λ) min–max | ord_r(λ) / r, min | images in base, total | expected at chance, total | base points, total | all verified |\n");
+    o.push_str("|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|:--|\n");
+    for (k, rs) in grouped(&sorted_rows, &["degree"]) {
+        let maps: Vec<(&Value, &Value)> = rs
+            .iter()
+            .flat_map(|r| r["maps"].as_array().unwrap().iter().map(move |m| (*r, m)))
+            .collect();
+        let ords: Vec<i128> = maps
+            .iter()
+            .map(|(_, m)| it(m, "overlap.eigenvalue_order"))
+            .collect();
+        let rel: Vec<f64> = maps
+            .iter()
+            .map(|(r, m)| fl(m, "overlap.eigenvalue_order") / fl(r, "r"))
+            .collect();
+        let inside: i128 = maps
+            .iter()
+            .map(|(_, m)| it(m, "overlap.images_in_base"))
+            .sum();
+        let expected: f64 = maps
+            .iter()
+            .map(|(_, m)| fl(m, "overlap.chance_fraction") * fl(m, "overlap.base_points"))
+            .sum();
+        let pts: i128 = maps.iter().map(|(_, m)| it(m, "overlap.base_points")).sum();
+        let plus = maps.iter().filter(|(_, m)| sign(m) == "+d").count();
+        let minus = maps.iter().filter(|(_, m)| sign(m) == "−d").count();
+        let lr: Vec<f64> = rs.iter().map(|r| fl(r, "log2_r")).collect();
+        let _ = writeln!(
+            o,
+            "| {} | {} | {} | {:.1}–{:.1} | {} / {} | {}–{} | {:.3} | {} | {:.1} | {} | {} |",
+            ks(&k[0]),
+            rs.len(),
+            maps.len(),
+            min(&lr),
+            max(&lr),
+            plus,
+            minus,
+            ords.iter().min().copied().unwrap_or(0),
+            ords.iter().max().copied().unwrap_or(0),
+            min(&rel),
+            inside,
+            expected,
+            pts,
+            yes(maps.iter().all(|(_, m)| bool_at(m, "verified"))),
+        );
+    }
+}
+
 // ── E15: the ECC2K-130 family, two summands ────────────────────────
 
 fn e15(o: &mut String, rows: &[&Value]) {
@@ -1943,7 +2027,7 @@ fn main() {
     }
     let mut o = String::new();
     type Printer = fn(&mut String, &[&Value]);
-    let printers: [(&str, Printer); 14] = [
+    let printers: [(&str, Printer); 15] = [
         ("e1", e1),
         ("e2", e2),
         ("e3", e3),
@@ -1957,6 +2041,7 @@ fn main() {
         ("e12", |o, r| e12(o, r, false)),
         ("e12p", |o, r| e12(o, r, true)),
         ("e13", e13),
+        ("e14", e14),
         ("e15", e15),
     ];
     for (exp, print) in printers {
