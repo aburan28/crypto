@@ -9942,5 +9942,37 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END parallel-branch-native-f4-single-target -->
+<!-- BEGIN current-f4-stage188-dense-reducer -->
+<div class="panel" id="current-f4-stage188-dense-reducer">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 188: 97.5% fewer reducer probes, confirmation wall regresses 7.64% <span class="chip">rejected</span></h2>
+        <p>One authenticated public <code>n=59, ell=9, m=3</code> true-negative. Both arms use the algebraic
+          <code>span(1,z,...,z^8)</code> factor base, exact dense critical-pair selection, one fixed-X1 batch,
+          twelve Rayon workers and five-column <code>BlockTables</code>. The candidate ports Stage 178's exact
+          dense leading-monomial index after pair selection became cheaper. All new execution, accounting,
+          hashing, terminal validation and replay are Rust-native. This remains a solver-stage diagnostic.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Ratios are candidate/current-control on fixed interleaved pairs; lower is better. Selection required median wall and total core strictly below 0.97.</caption>
+          <thead><tr><th>Variant</th><th>Wall ratio</th><th>Total-core ratio</th><th>Peak-RSS ratio</th><th>Reducer work</th><th>Correctness</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Current F4: linear reducer scan</td><td class="n">1.000000</td><td class="n">1.000000</td><td class="n">1.000000</td><td>4,190,633,182 exact divisor tests</td><td>exhaustive UNSAT; 242/242 systems</td><td><span class="chip">baseline</span></td></tr>
+            <tr><td>Indexed reducer, one-pair screen</td><td class="n">0.755640</td><td class="n">0.982456</td><td class="n">1.019396</td><td>103,532,494 submask probes; 1,062,392 B index</td><td>all structural counters identical</td><td><span class="chip">screen only</span></td></tr>
+            <tr><td><strong>Indexed reducer, three-pair confirmation</strong></td><td class="n"><strong>1.076402</strong></td><td class="n"><strong>0.972531</strong></td><td class="n">0.979483</td><td>97.5294% fewer lookup operations</td><td>58/58 phase checks; 31/31 final checks</td><td><span class="chip">rejected</span> misses both frozen gates</td></tr>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.01304</td><td class="n">0.001978</td><td class="n">0.01360</td><td>same opened target; decomposition reference</td><td>exact terminal replay</td><td><span class="chip">reference</span> still decisively faster</td></tr>
+            <tr><td>Automorphism-aware rho, full method</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>not a decomposition-stage unit</td><td>Stage 187 gate 6 remains false</td><td><span class="chip">full-cost boundary</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">mechanism</span> divisor work falls from 4.19 billion linear tests to 103.53 million exact submask probes, but the saved lookup work does not overcome index/reduction overhead in confirmation</span>
+        <span><span class="chip">selected runtime</span> dense exact pair selection + linear symbolic reducer scan + five-column <code>BlockTables</code>; the rejected candidate is preserved as a patch and reverted from runtime source</span>
+        <span><span class="chip">accounting</span> Stage 188 lower bound: 21 components, 898.725862 wall-seconds, 3,270.706466 core-seconds, 4.97 GB peak RSS; complete cost remains <code>null</code> because bootstrap work is explicitly unmetered</span>
+        <span><span class="chip">claim boundary</span> conflicts are <code>null</code>; no relation-yield, unknown-scalar, full-DLP, rho-crossover, independent-reproduction, novelty or SOTA evidence is added</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-188-dense-reducer-stacked-native-20261002/result.json</code></span>
+      </div>
+    </div>
+<!-- END current-f4-stage188-dense-reducer -->
 </body>
 </html>
