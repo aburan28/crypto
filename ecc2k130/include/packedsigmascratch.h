@@ -1,5 +1,7 @@
 // Full-word per-thread shared scratch for the fused sigma prefix and tagged
-// denominator fields. The production cache is deliberately ephemeral: a
+// denominator fields. Layout is [field][slot][word][thread], making a fixed
+// field/slot/word warp access cover 32 adjacent banks. The production cache is
+// deliberately ephemeral: a
 // launch prologue initializes every cached slot before the reverse pass reads
 // it, and the final pass has no successor that needs the scratch at exit.
 #pragma once

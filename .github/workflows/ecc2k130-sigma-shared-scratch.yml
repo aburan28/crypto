@@ -29,13 +29,17 @@ jobs:
         run: |
           make -C ecc2k130 test-sigma-fused-shared-scratch-model
           make -C ecc2k130 test-sigma-fused-shared-scratch-native
+          bash -n ecc2k130/benchmarks/sigma-fused/shared-scratch/compilecheck.sh
+          bash -n ecc2k130/benchmarks/sigma-fused/shared-scratch/gpujob.sh
+          shellcheck ecc2k130/benchmarks/sigma-fused/shared-scratch/compilecheck.sh
+          shellcheck -x ecc2k130/benchmarks/sigma-fused/shared-scratch/gpujob.sh
       - name: Strict and UBSAN helper replay
         run: |
-          g++ -O2 -std=c++17 -Wall -Wextra -Werror -pedantic \
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas -pedantic \
             ecc2k130/benchmarks/sigma-fused/shared-scratch/test_native.cpp \
             -o /tmp/shared-scratch-native-strict
           /tmp/shared-scratch-native-strict
-          g++ -O1 -g -std=c++17 -Wall -Wextra -Werror \
+          g++ -O1 -g -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas \
             -fsanitize=undefined -fno-sanitize-recover=undefined \
             ecc2k130/benchmarks/sigma-fused/shared-scratch/test_native.cpp \
             -o /tmp/shared-scratch-native-ubsan
@@ -52,9 +56,13 @@ jobs:
       image: nvidia/cuda:13.3.1-devel-ubuntu24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install native build tools
         run: apt-get update -qq && apt-get install -y -qq build-essential git
       - name: Compile exact sm_120 arms and audit resources
+        env:
+          SOURCE_REV: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           ecc2k130/benchmarks/sigma-fused/shared-scratch/compilecheck.sh \
             "$GITHUB_WORKSPACE/ecc2k130/build/shared-scratch-sm120"

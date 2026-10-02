@@ -9,9 +9,14 @@ cd "$ROOT"
 
 nvcc --version | tee "$OUT/nvcc-version.txt"
 grep -q 'release 13\.3, V13\.3\.73' "$OUT/nvcc-version.txt"
-SOURCE_REV=$(git rev-parse HEAD)
+SOURCE_REV=${SOURCE_REV:-}
+if git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then
+    GIT_REV=$(git -C "$ROOT" rev-parse HEAD)
+    [ -z "$SOURCE_REV" ] || [ "$SOURCE_REV" = "$GIT_REV" ]
+    SOURCE_REV=$GIT_REV
+    [ -z "$(git -C "$ROOT" status --porcelain -- .)" ]
+fi
 [[ $SOURCE_REV =~ ^[0-9a-f]{40}$ ]]
-[ -z "$(git status --porcelain -- .)" ]
 printf '%s\n' "$SOURCE_REV" > "$OUT/source-rev.txt"
 
 for spec in control:0 cache2:2 cache3:3 cache4:4; do
@@ -43,10 +48,15 @@ sha256sum Makefile include/packed131.h include/packedcompactstate.cuh \
     src/main.cu src/testsigmasharedscratchcuda.cu \
     benchmarks/sigma-fused/shared-scratch/PROPOSAL.md \
     benchmarks/sigma-fused/shared-scratch/PROTOCOL.md \
+    benchmarks/sigma-fused/shared-scratch/IMPLEMENTATION.md \
+    benchmarks/sigma-fused/shared-scratch/ATTEMPTS.md \
     benchmarks/sigma-fused/shared-scratch/model.cpp \
     benchmarks/sigma-fused/shared-scratch/model.json \
     benchmarks/sigma-fused/shared-scratch/test_native.cpp \
     benchmarks/sigma-fused/shared-scratch/compile_audit.cpp \
+    benchmarks/sigma-fused/shared-scratch/source_audit.cpp \
+    benchmarks/sigma-fused/shared-scratch/summarize.cpp \
+    benchmarks/sigma-fused/shared-scratch/gpujob.sh \
     benchmarks/sigma-fused/shared-scratch/compilecheck.sh \
     > "$OUT/source-files.sha256"
 sha256sum "$OUT"/ecc2k130-* "$OUT"/test-sigma-fused-shared-scratch-cuda-* \

@@ -995,10 +995,29 @@ test-sigma-fused-shared-scratch-model: build/sigma-fused-shared-scratch-model
 
 build/test-sigma-fused-shared-scratch-native: benchmarks/sigma-fused/shared-scratch/test_native.cpp include/packedsigmascratch.h include/packedcompactstate.cuh include/packed131.h
 	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas $< -o $@
+
+build/sigma-fused-shared-scratch-summarize: benchmarks/sigma-fused/shared-scratch/summarize.cpp
+	mkdir -p build
 	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
 
-test-sigma-fused-shared-scratch-native: build/test-sigma-fused-shared-scratch-native
+build/sigma-fused-shared-scratch-source-audit: benchmarks/sigma-fused/shared-scratch/source_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+build/sigma-fused-shared-scratch-compile-audit: benchmarks/sigma-fused/shared-scratch/compile_audit.cpp
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror $< -o $@
+
+test-sigma-fused-shared-scratch-native: build/test-sigma-fused-shared-scratch-native \
+                                      build/sigma-fused-shared-scratch-summarize \
+                                      build/sigma-fused-shared-scratch-source-audit \
+                                      build/sigma-fused-shared-scratch-compile-audit
 	./build/test-sigma-fused-shared-scratch-native
+	./build/sigma-fused-shared-scratch-summarize --self-test
+	./build/sigma-fused-shared-scratch-source-audit --self-test
+	./build/sigma-fused-shared-scratch-source-audit .
+	./build/sigma-fused-shared-scratch-compile-audit --self-test
 
 build/test-sigma-fused-shared-scratch-cuda-2: SIGMA_FUSED_SHARED_SLOTS = 2
 build/test-sigma-fused-shared-scratch-cuda-3: SIGMA_FUSED_SHARED_SLOTS = 3
@@ -1034,6 +1053,7 @@ clean:
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
 	rm -f build/test-sigma-fused-shared-scratch-native build/test-sigma-fused-shared-scratch-cuda-*
+	rm -f build/sigma-fused-shared-scratch-summarize build/sigma-fused-shared-scratch-source-audit build/sigma-fused-shared-scratch-compile-audit
 
 .PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model test-sigma-fused-shared-scratch-native compile-sigma-fused-shared-scratch-cuda test-sigma-fused-shared-scratch-cuda
 
