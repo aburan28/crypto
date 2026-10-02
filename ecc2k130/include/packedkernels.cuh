@@ -324,8 +324,14 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #ifndef ECC_TABLE_GLOBAL_HINTS
 #define ECC_TABLE_GLOBAL_HINTS 0
 #endif
+#ifndef ECC_TABLE_GLOBAL_HINT_THREADS
+#define ECC_TABLE_GLOBAL_HINT_THREADS 128
+#endif
 #if ECC_TABLE_GLOBAL_HINTS != 0 && ECC_TABLE_GLOBAL_HINTS != 1
 #error "ECC_TABLE_GLOBAL_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_GLOBAL_HINT_THREADS != 128 && ECC_TABLE_GLOBAL_HINT_THREADS != 256 && ECC_TABLE_GLOBAL_HINT_THREADS != 512
+#error "ECC_TABLE_GLOBAL_HINT_THREADS must be 128, 256 or 512"
 #endif
 #if ECC_TABLE_GLOBAL_HINTS && (!ECC_WALK_TABLE || !ECC_TABLE_BATCH_HINTS || \
     !ECC_TABLE_SPLIT_FORWARD || ECC_TABLE_BLOCK_HINTS || ECC_TABLE_FUSED || \
@@ -560,7 +566,7 @@ static __global__ void ECC_BOUNDS selectGlobalHints(WalkParams<unsigned> p,
     }
 }
 
-static __global__ __launch_bounds__(128, 1)
+static __global__ __launch_bounds__(ECC_TABLE_GLOBAL_HINT_THREADS, 1)
 void resolveGlobalHints(WalkParams<unsigned> p, const unsigned *queue, const unsigned *count) {
     extern __shared__ uint32_t table[];
     twLoadShared(table, p.twConsts);

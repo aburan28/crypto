@@ -6801,6 +6801,43 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-f5-exact-graded-batch-20261002">
+  <div class="panel-head">
+    <h2>Exact Boolean F5 graded batch cache: 1.78&ndash;1.84&times;, 2&times; gate rejected <span class="chip">engineering</span></h2>
+    <p>A native, same-binary graded-prefix cache completed 48 public discovery cells and
+      18,816 timed calls on one reserved Linux x86-64 AVX2 physical core. The candidate
+      recomputes the F5 criterion, checks the complete selected-row signature and high
+      prefix, replays the fixed row transform on changing low columns, resumes the
+      inherited M4RI echelon path, and charges compilation, fallbacks, output materialisation
+      and destruction. Ordered returned-polynomial digests matched on every timed call;
+      direct vector comparisons and native bundle replay passed. All eight n=16/20
+      nonregression groups passed, but <strong>all four n=24 primary groups failed</strong>
+      the preregistered paired median and 95% lower-bound-above-2 gate. Fresh holdouts
+      were not run.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/DISCOVERY.md">qualified decision and boundaries</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/qualified_discovery_01/results.json">native result</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/qualified_discovery_01/manifest.json">sealed bundle</a>,
+      <a href="https://github.com/aburan28/crypto/actions/runs/37045285547">source-pinned workflow</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>n=24, batch 32, discovery only. Baseline and candidate columns are descriptive
+      mean milliseconds for complete cold batches; the ratio and 95% bootstrap lower
+      bound are the seven paired, preregistered decision statistics. All outputs verified.</caption>
+    <thead><tr><th>Seed</th><th>Affine family</th><th>Fresh F5 mean (ms)</th><th>Cache mean (ms)</th><th>Paired median ratio</th><th>95% lower</th><th>A/A floor</th><th>&gt;2 gate</th></tr></thead>
+    <tbody>
+      <tr><td>20261020</td><td>Independent</td><td>2030.64</td><td>1110.69</td><td>1.838</td><td>1.832</td><td>1.011</td><td>REJECTED</td></tr>
+      <tr><td>20261020</td><td>Walk</td><td>2056.15</td><td>1140.32</td><td>1.797</td><td>1.768</td><td>1.010</td><td>REJECTED</td></tr>
+      <tr><td>3141691</td><td>Independent</td><td>2029.88</td><td>1124.11</td><td>1.829</td><td>1.807</td><td>1.012</td><td>REJECTED</td></tr>
+      <tr><td>3141691</td><td>Walk</td><td>1995.75</td><td>1128.23</td><td>1.784</td><td>1.730</td><td>1.016</td><td>REJECTED</td></tr>
+    </tbody>
+  </table></div>
+  <p>The retained context stayed below 128 MiB; the measured worker was uncontended and
+    completed in 976.835 seconds. Its approximately 5.6&times; counted GF(2) word-XOR reduction
+    is a stage-operation diagnostic, not the full-batch wall ratio. Natural relation yield,
+    independent rank, complete index-calculus cost and rho ratio remain unmeasured and null.
+    No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-f5-call-only-ceiling-20261002">
   <div class="panel-head">
     <h2>Boolean F5 call-only ceiling: feasibility confirmed, cache unmeasured <span class="chip">accounting</span></h2>

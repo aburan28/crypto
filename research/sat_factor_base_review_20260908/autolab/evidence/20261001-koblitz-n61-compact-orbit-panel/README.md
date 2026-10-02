@@ -15,8 +15,13 @@ directories are promoted under `autolab_runs/<run-id>/`.
 | `20261001T155442Z-9990f40315` | 1,024 | 700 | 0.282 (0.276–0.306) | 0.289 | 0.132 | PASS | FAIL (closed) |
 | `20261001T160852Z-1f8383bd42` | 4,096 | 1,000 | 0.262 (0.247–0.269) | 0.256 | 0.117 | PASS | FAIL (closed) |
 | `20261001T212647Z-c0875d45ed` | 65,536 | 1,480 | 0.332 (0.139–0.491) | 0.291 | 0.132 | PASS | FAIL (closed) |
+| `20261002T150549Z-89bc0af28f` | 1,024 | 700 | 0.285 (0.258–0.295) | 0.277 | 0.132 | PASS | FAIL (closed) |
+| `20261002T151923Z-95d6146694` | 4,096 | 1,000 | 0.255 (0.240–0.259) | 0.253 | 0.117 | PASS | FAIL (closed) |
+| `20261002T154358Z-c3faa1f97b` | 16,384 | 1,400 | 0.261 (0.255–0.295) | 0.245 | 0.116 | PASS | FAIL (closed) |
 
-All ratios are compact / rho on the same block pair.
+All ratios are compact / rho on the same block pair. The three `20261002T…`
+rows are reruns with producer logs archived; see
+[Reruns with producer logs](#reruns-with-producer-logs-and-l16384-2026-10-02).
 
 ## What this is and is not
 
@@ -139,6 +144,13 @@ records, the base dump, producer stderr; 4–60 MB per run) and the 930 KB
 Rerunning the `launch-panel` command regenerates everything from the public
 corpus names and seeds.
 
+The left-out `logs/` of `20261001T155442Z-9990f40315` and
+`20261001T160852Z-1f8383bd42` no longer exist. A search of every worktree and
+temporary directory on the host on 2026-10-02 found only checked-out copies
+of this bundle, none with `logs/`. Both panels were rerun through the
+autolab instead (below), and those runs keep their small producer logs. The
+two original runs stay as they are.
+
 ## Isolated timings (gap 3)
 
 `.github/workflows/compact-orbit-n61-isolated.yml` runs the same
@@ -161,6 +173,16 @@ Intel Xeon Platinum 8370C @ 2.80 GHz, 4 logical CPUs, Linux 6.17 (Azure),
 `autolab_runs/gha-36912327205-1/`, with the artifact's `isolation.jsonl`,
 `verify.json`, `preflight_1.log` and `lscpu.txt` in `hosted/`. `logs/` and
 `inputs/boundary_targets.json` are left out as above.
+
+Added 2026-10-02: the small producer logs from the Actions artifact
+(`compact-orbit-n61-isolated-L1024`, artifact id 11190340275, digest
+`sha256:12a40f31…`, expires 2026-12-30) are now in `logs/`: 33 files, the
+`*.stderr.txt`, `*.summary.json` and `replay_*.log`. All 76 entries of the
+run's committed `artifacts/review_manifest.json`, including the 44 `logs/`
+entries, match the downloaded artifact by SHA-256. The per-target
+`*.jsonl` records (13 MB) and `base_n61_K700.jsonl` (5.3 MB) are still left
+out. Their hashes are in `review_manifest.json`, and the artifact holds them
+until it expires.
 
 The tune ran on the disjoint 1,024-target corpus and picked K=700, as on macOS:
 
@@ -287,3 +309,132 @@ out, as above: the per-target `logs/*.jsonl` records, the base dump
 and `inputs/boundary_targets.json`. The two 1 MB scalar corpora are kept, as
 are the small producer logs: `logs/*.stderr.txt` (`/usr/bin/time -l`),
 `logs/*.summary.json` and `logs/replay_*.log`.
+
+## Reruns with producer logs, and L=16,384 (2026-10-02)
+
+Three new runs of
+`launch-panel --beat koblitz.compact_orbit.n61_panel --targets L` (3 blocks
+each), run one after another at `60fb2ae47` (`main`; `preflight` ok, 8/8
+checks, 0 dirty paths). L=1,024 and L=4,096 replace the two runs whose logs
+are gone. L=16,384 is the first autolab run at that L. PR #830 measured it
+outside the autolab (`autolab_orbit_extract_20260924/growing_n_n61_L16384/`,
+K=1,400, wall ratio median 0.205).
+
+Host: the same M4 Pro, unpinned, rustc 1.93.1. Other agents' jobs were running
+throughout. The 1-minute load before and after each timed process was
+7.8–19.2 (L=1,024), 6.9–10.4 (L=4,096) and 6.9–26.2 (L=16,384). System swap
+was 11.3–16.4 GiB used by other jobs, and every timed process reported
+**0 swaps**. These walls are **not** AGENTS.md §10 evidence. The user-CPU
+and instruction ratios are the less contaminated readings.
+
+### K tunes
+
+Each tune ran on the beat's disjoint corpus `n61-ks-growing-tune-{L}-v1`.
+That corpus has L targets, so only the L=1,024 tune uses a 1,024-target
+corpus (see [Tune corpora](#tune-corpora)). The memory gate
+(`ic_rss_model` + 2 GiB headroom against available memory at launch)
+skipped no candidate.
+
+| L | K | Wall s | User s | Sys s | Instructions | Est. / measured peak GiB | Available GiB | Load |
+|---:|---:|---:|---:|---:|---:|---|---:|---:|
+| 1,024 | 400 | 55.3 | 52.2 | 0.8 | 471.0 G | 1.28 / 1.23 | 10.7 | 19.2 |
+| 1,024 | 500 | 36.0 | 35.5 | 0.4 | 342.5 G | 1.40 / 1.35 | 10.9 | 16.9 |
+| 1,024 | 600 | 31.4 | 30.6 | 0.6 | 296.5 G | 2.55 / 2.51 | 11.6 | 12.4 |
+| 1,024 | **700** | **28.9** | 28.3 | 0.5 | **277.7 G** | 2.73 / 2.69 | 11.9 | 12.0 |
+| 1,024 | 800 | 33.1 | 31.0 | 1.3 | 291.0 G | 4.94 / 5.08 | 11.9 | 10.8 |
+| 1,024 | 1,000 | 45.1 | 39.5 | 2.6 | 338.5 G | 5.43 / 5.39 | 13.8 | 10.1 |
+| 4,096 | 600 | 72.5 | 70.4 | 0.9 | 667.0 G | 2.55 / 2.51 | 12.2 | 7.5 |
+| 4,096 | 800 | 57.0 | 54.6 | 1.7 | 513.7 G | 4.94 / 4.89 | 12.3 | 6.9 |
+| 4,096 | **1,000** | **51.6** | 50.1 | 1.2 | **476.0 G** | 5.43 / 5.39 | 15.7 | 7.3 |
+| 4,096 | 1,200 | 65.8 | 56.2 | 7.6 | 540.4 G | 10.03 / 9.99 | 15.8 | 7.4 |
+| 16,384 | 800 | 161.7 | 157.1 | 2.8 | 1,384.9 G | 4.94 / 4.89 | 12.5 | 9.8 |
+| 16,384 | 1,000 | 116.8 | 114.8 | 1.8 | 1,049.7 G | 5.43 / 5.39 | 14.3 | 10.5 |
+| 16,384 | 1,200 | 123.1 | 105.4 | 15.1 | 970.8 G | 10.03 / 10.00 | 13.9 | 9.0 |
+| 16,384 | **1,400** | **106.1** | 100.5 | 4.3 | **919.1 G** | 10.73 / 10.72 | 16.7 | 10.4 |
+
+- The wall rule picks K=700, 1,000 and 1,400, the same K as the earlier
+  runs (and PR #830 at L=16,384). Each pick is also the lowest instruction
+  count.
+- At L=16,384 the K=1,200 wall sits above K=1,000 because of 15 s of sys
+  (memory-pressure page work). Its user CPU and instructions are lower, and
+  K=1,400 is lowest on all three, so the pick does not hang on that noise.
+- At L=16,384, K=1,400 is the top of the registered grid. The optimum may
+  lie above it. K=1,480 is the last K below the root-table doubling.
+
+### Paired blocks
+
+Alternating order, the same eval targets in both arms. Wall s, with user s
+in parentheses.
+
+| L | Block | Order | IC | Rho (KS v2) | Wall | User | Instr. | Peak footprint IC / rho GiB |
+|---:|---:|---|---:|---:|---:|---:|---:|---|
+| 1,024 | 0 | IC→rho | 31.5 (30.0) | 106.7 (104.7) | 0.295 | 0.287 | 0.132 | 2.71 / 0.29 |
+| 1,024 | 1 | rho→IC | 28.6 (28.0) | 110.7 (107.1) | 0.258 | 0.261 | 0.132 | 2.71 / 0.29 |
+| 1,024 | 2 | IC→rho | 29.2 (28.2) | 102.5 (101.8) | 0.285 | 0.277 | 0.132 | 2.71 / 0.34 |
+| 4,096 | 0 | IC→rho | 52.4 (50.8) | 217.9 (204.8) | 0.240 | 0.248 | 0.116 | 5.61 / 0.58 |
+| 4,096 | 1 | rho→IC | 55.4 (51.5) | 217.4 (203.6) | 0.255 | 0.253 | 0.118 | 5.42 / 0.67 |
+| 4,096 | 2 | IC→rho | 53.4 (51.6) | 205.8 (203.6) | 0.259 | 0.254 | 0.117 | 5.42 / 0.67 |
+| 16,384 | 0 | IC→rho | 106.8 (99.3) | 419.1 (410.4) | 0.255 | 0.242 | 0.115 | 10.76 / 1.34 |
+| 16,384 | 1 | rho→IC | 121.4 (101.7) | 411.3 (406.3) | 0.295 | 0.250 | 0.118 | 10.76 / 1.34 |
+| 16,384 | 2 | IC→rho | 118.3 (103.4) | 453.9 (421.7) | 0.261 | 0.245 | 0.116 | 10.76 / 1.15 |
+
+- The L=1,024 and L=4,096 reruns reproduce the earlier runs' instruction
+  ratios (0.132 and 0.117 medians) and stay within their wall ranges.
+- At L=16,384 the instruction ratio median is 0.116, in line with L=4,096.
+  The wall ratio median (0.261) is above PR #830's 0.205, which ran under a
+  different load and is not comparable.
+- The IC arm's peak footprint is 8.0–9.7× rho's.
+- These are multi-target batch diagnostics against the superseded KS v2
+  comparator. Both arms scale as √(L·r/n) at optimal K, so the lead is a
+  constant factor, not an asymptotic one.
+
+### Verification and claim-check
+
+In every block of all three runs, both arms solved all L targets. IC
+`recovered_matches_published` and `group_verified` hold everywhere, rho's
+recovered scalar equals the published one, both arms walk the same points,
+and the scalars match the eval corpus. The pure-Python replays pass:
+
+| Run | IC replay | Rho replay | `verify` | `end_to_end_dlp` | `vs_rho` | Status |
+|---|---:|---:|---|---|---|---|
+| `20261002T150549Z-89bc0af28f` | 3,072 / 3,072 | 3,072 / 3,072 | PASS (58 files) | PASS | FAIL (closed) | `PENDING_INDEPENDENT_VALIDATION` |
+| `20261002T151923Z-95d6146694` | 12,288 / 12,288 | 12,288 / 12,288 | PASS (54 files) | PASS | FAIL (closed) | `PENDING_INDEPENDENT_VALIDATION` |
+| `20261002T154358Z-c3faa1f97b` | 49,152 / 49,152 | 49,152 / 49,152 | PASS (54 files) | PASS | FAIL (closed) | `PENDING_INDEPENDENT_VALIDATION` |
+
+The replays are same-host and same-campaign, so independent-host validation
+is still outstanding. `end_to_end_dlp` was also re-run standalone with
+`claim-check --stage end_to_end_dlp` on each `claim_draft.json` (PASS). It
+checks schema completeness only. `vs_rho` fails closed because these are
+batch runs (`target_count must equal 1`). No ledger row is promoted.
+
+The runs are archived under `autolab_runs/<run-id>/` in the same layout as
+`20261001T212647Z-c0875d45ed`: `state.json`, `artifacts/` (with
+`verify.json`), `receipts/`, `inputs/` (without `boundary_targets.json`) and
+the small producer logs in `logs/`. Left out: the per-target `logs/*.jsonl`
+records and the base dump. Their hashes are in each run's
+`review_manifest.json`.
+
+### Tune corpora
+
+Every panel's tune corpus is disjoint from its eval corpus. That is recorded
+in `panel_summary.json` and re-checked from the archived scalar files
+(0 shared scalars in each). The tune corpus is the beat's
+`n61-ks-growing-tune-{L}-v1`, which has **L** targets. Only the L=1,024
+panels tune on a 1,024-target corpus.
+
+| Run | L | Tune corpus | Tune targets | Disjoint from eval |
+|---|---:|---|---:|---|
+| `20261001T155442Z-9990f40315` | 1,024 | `n61-ks-growing-tune-1024-v1` | 1,024 | yes |
+| `20261001T160852Z-1f8383bd42` | 4,096 | `n61-ks-growing-tune-4096-v1` | 4,096 | yes |
+| `20261001T212647Z-c0875d45ed` | 65,536 | `n61-ks-growing-tune-65536-v1` | **65,536** | yes |
+| `gha-36912327205-1` | 1,024 | `n61-ks-growing-tune-1024-v1` | 1,024 | yes |
+| `20261002T150549Z-89bc0af28f` | 1,024 | `n61-ks-growing-tune-1024-v1` | 1,024 | yes |
+| `20261002T151923Z-95d6146694` | 4,096 | `n61-ks-growing-tune-4096-v1` | 4,096 | yes |
+| `20261002T154358Z-c3faa1f97b` | 16,384 | `n61-ks-growing-tune-16384-v1` | 16,384 | yes |
+
+This matches `protocol.json` (`k_selection`: "disjoint tune corpus of the
+same L") and PR #830's scripts. The autolab skill's wording, "K is chosen by
+lowest wall on a disjoint 1024-target corpus", holds only at L=1,024. The
+optimal K grows with L (700 → 1,000 → 1,400 → 1,480 here), so a 1,024-target
+tune would pick an L=1,024 K for every panel. Choosing between the two rules
+is left open. It would change `protocol.json` and is not done here.

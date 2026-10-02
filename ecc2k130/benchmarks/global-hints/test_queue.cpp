@@ -13,7 +13,8 @@ static void need(bool ok) { if (!ok) throw std::runtime_error("queue invariant")
 static uint32_t cold(uint32_t selected, uint32_t point) {
     return (selected & 0xffff0000u) | ((selected ^ point ^ 0x55aa) & 0xffffu);
 }
-static void check(int workers, int batch, const std::vector<bool> &hints, bool reverse) {
+static void check(int workers, int batch, const std::vector<bool> &hints, bool reverse,
+                  int resolverThreads) {
     const size_t count = size_t(workers) * batch;
     need(count <= std::numeric_limits<uint32_t>::max() && hints.size() == count);
     std::vector<uint32_t> selected(count), expected(count), actual(count), queue;
@@ -33,7 +34,8 @@ static void check(int workers, int batch, const std::vector<bool> &hints, bool r
     }
     need(queue.size() <= count);
     actual=selected;
-    const size_t stride=128*188;
+    need(resolverThreads == 128 || resolverThreads == 256 || resolverThreads == 512);
+    const size_t stride=size_t(resolverThreads)*188;
     for(size_t lane=0;lane<std::min(stride,queue.size());++lane)
         for(size_t pos=lane;pos<queue.size();pos+=stride) {
             const uint32_t key=queue[pos];
@@ -58,8 +60,11 @@ int main() {
                 std::vector<bool> hints(n);
                 for(uint32_t mask=0;mask<(1u<<n);++mask) {
                     for(int i=0;i<n;++i) hints[i]=(mask>>i)&1u;
-                    check(workers,batch,hints,false); check(workers,batch,hints,true);
-                    cases+=2;
+                    for (int resolverThreads : {128,256,512}) {
+                        check(workers,batch,hints,false,resolverThreads);
+                        check(workers,batch,hints,true,resolverThreads);
+                        cases+=2;
+                    }
                 }
             }
         for(int workers : {511,512,513,96256}) {
@@ -68,15 +73,21 @@ int main() {
                 for(size_t i=0;i<hints.size();++i)
                     hints[i]=pattern==1 || (pattern==2 && i%401==0) ||
                              (pattern==3 && (i==0 || i+1==hints.size()));
-                check(workers,16,hints,false); check(workers,16,hints,true); cases+=2;
+                for (int resolverThreads : {128,256,512}) {
+                    check(workers,16,hints,false,resolverThreads);
+                    check(workers,16,hints,true,resolverThreads);
+                    cases+=2;
+                }
             }
         }
         // The resolver must use size_t induction. An unsigned pos+stride can
         // wrap near UINT32_MAX even when key/count setup is valid.
         const size_t last=std::numeric_limits<uint32_t>::max()-10ull;
-        need(last+128*188 > std::numeric_limits<uint32_t>::max());
+        for (size_t resolverThreads : {128u,256u,512u})
+            need(last+resolverThreads*188 > std::numeric_limits<uint32_t>::max());
         std::cout << "PASS: " << cases << " ownership/phase cases; empty/full/sparse,"
-                     " partial-block owners, production population and 32-bit stride boundary\n";
+                     " partial-block owners, production population, resolver widths 128/256/512"
+                     " and 32-bit stride boundary\n";
         return 0;
     } catch(const std::exception &e) { std::cerr<<e.what()<<'\n'; return 1; }
 }
