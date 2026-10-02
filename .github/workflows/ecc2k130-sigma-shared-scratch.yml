@@ -1,0 +1,66 @@
+name: ECC2K fused sigma shared scratch
+
+on:
+  pull_request:
+    paths:
+      - 'ecc2k130/Makefile'
+      - 'ecc2k130/include/packedengine.cuh'
+      - 'ecc2k130/include/packedkernels.cuh'
+      - 'ecc2k130/include/packedsigmascratch.h'
+      - 'ecc2k130/src/testsigmasharedscratchcuda.cu'
+      - 'ecc2k130/benchmarks/sigma-fused/shared-scratch/**'
+      - '.github/workflows/ecc2k130-sigma-shared-scratch.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ecc2k130-sigma-shared-scratch-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Native model and compact/shared helper
+        run: |
+          make -C ecc2k130 test-sigma-fused-shared-scratch-model
+          make -C ecc2k130 test-sigma-fused-shared-scratch-native
+      - name: Strict and UBSAN helper replay
+        run: |
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror -pedantic \
+            ecc2k130/benchmarks/sigma-fused/shared-scratch/test_native.cpp \
+            -o /tmp/shared-scratch-native-strict
+          /tmp/shared-scratch-native-strict
+          g++ -O1 -g -std=c++17 -Wall -Wextra -Werror \
+            -fsanitize=undefined -fno-sanitize-recover=undefined \
+            ecc2k130/benchmarks/sigma-fused/shared-scratch/test_native.cpp \
+            -o /tmp/shared-scratch-native-ubsan
+          UBSAN_OPTIONS=halt_on_error=1 /tmp/shared-scratch-native-ubsan
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/sigma-fused/shared-scratch/compile_audit.cpp \
+            -o /tmp/shared-scratch-compile-audit
+          /tmp/shared-scratch-compile-audit --self-test
+
+  sm120-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container:
+      image: nvidia/cuda:13.3.1-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native build tools
+        run: apt-get update -qq && apt-get install -y -qq build-essential git
+      - name: Compile exact sm_120 arms and audit resources
+        run: |
+          ecc2k130/benchmarks/sigma-fused/shared-scratch/compilecheck.sh \
+            "$GITHUB_WORKSPACE/ecc2k130/build/shared-scratch-sm120"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecc2k130-sigma-shared-scratch-sm120
+          path: ecc2k130/build/shared-scratch-sm120/
+          if-no-files-found: error

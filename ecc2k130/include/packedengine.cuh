@@ -391,6 +391,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
         printf("packed sigma fused: %d\n", ECC_SIGMA_FUSED);
         printf("packed sigma fused late y: %d\n", ECC_SIGMA_FUSED_LATE_Y);
+        printf("packed sigma fused shared slots: %d\n", ECC_SIGMA_FUSED_SHARED_SLOTS);
         printf("packed witness: %d\n", ECC_WITNESS);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
