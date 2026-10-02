@@ -6801,6 +6801,43 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-f5-exact-graded-batch-20261002">
+  <div class="panel-head">
+    <h2>Exact Boolean F5 graded batch cache: 1.78&ndash;1.84&times;, 2&times; gate rejected <span class="chip">engineering</span></h2>
+    <p>A native, same-binary graded-prefix cache completed 48 public discovery cells and
+      18,816 timed calls on one reserved Linux x86-64 AVX2 physical core. The candidate
+      recomputes the F5 criterion, checks the complete selected-row signature and high
+      prefix, replays the fixed row transform on changing low columns, resumes the
+      inherited M4RI echelon path, and charges compilation, fallbacks, output materialisation
+      and destruction. Ordered returned-polynomial digests matched on every timed call;
+      direct vector comparisons and native bundle replay passed. All eight n=16/20
+      nonregression groups passed, but <strong>all four n=24 primary groups failed</strong>
+      the preregistered paired median and 95% lower-bound-above-2 gate. Fresh holdouts
+      were not run.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/DISCOVERY.md">qualified decision and boundaries</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/qualified_discovery_01/results.json">native result</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_graded_batch_20261002/qualified_discovery_01/manifest.json">sealed bundle</a>,
+      <a href="https://github.com/aburan28/crypto/actions/runs/37045285547">source-pinned workflow</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>n=24, batch 32, discovery only. Baseline and candidate columns are descriptive
+      mean milliseconds for complete cold batches; the ratio and 95% bootstrap lower
+      bound are the seven paired, preregistered decision statistics. All outputs verified.</caption>
+    <thead><tr><th>Seed</th><th>Affine family</th><th>Fresh F5 mean (ms)</th><th>Cache mean (ms)</th><th>Paired median ratio</th><th>95% lower</th><th>A/A floor</th><th>&gt;2 gate</th></tr></thead>
+    <tbody>
+      <tr><td>20261020</td><td>Independent</td><td>2030.64</td><td>1110.69</td><td>1.838</td><td>1.832</td><td>1.011</td><td>REJECTED</td></tr>
+      <tr><td>20261020</td><td>Walk</td><td>2056.15</td><td>1140.32</td><td>1.797</td><td>1.768</td><td>1.010</td><td>REJECTED</td></tr>
+      <tr><td>3141691</td><td>Independent</td><td>2029.88</td><td>1124.11</td><td>1.829</td><td>1.807</td><td>1.012</td><td>REJECTED</td></tr>
+      <tr><td>3141691</td><td>Walk</td><td>1995.75</td><td>1128.23</td><td>1.784</td><td>1.730</td><td>1.016</td><td>REJECTED</td></tr>
+    </tbody>
+  </table></div>
+  <p>The retained context stayed below 128 MiB; the measured worker was uncontended and
+    completed in 976.835 seconds. Its approximately 5.6&times; counted GF(2) word-XOR reduction
+    is a stage-operation diagnostic, not the full-batch wall ratio. Natural relation yield,
+    independent rank, complete index-calculus cost and rho ratio remain unmeasured and null.
+    No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-f5-call-only-ceiling-20261002">
   <div class="panel-head">
     <h2>Boolean F5 call-only ceiling: feasibility confirmed, cache unmeasured <span class="chip">accounting</span></h2>
@@ -10429,5 +10466,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage198-hybrid-confirmation -->
+<!-- BEGIN current-f4-stage199-hybrid-default -->
+<div class="panel" id="current-f4-stage199-hybrid-default">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 199: 4,096-row hybrid is now the unset default <span class="chip">engineering</span></h2>
+        <p>The selected-source replay contains no full-M4RI mode or minimum-row override. Unset routes
+          eligible matrices at or above 4,096 rows through full M4RI and keeps five-column
+          <code>BlockTables</code> elsewhere. Explicit disabled and broad-full controls remain available.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Fresh selected-source replay metrics. Stage 198 paired confirmation, not the noisy absolute cross-stage wall values, selected the default.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Performed XORs</th><th>Full matrices</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">117,369 group additions</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Prior default, Stage 192 replay</td><td class="n">16.765098</td><td class="n">181.297986</td><td class="n">null</td><td class="n">4,366.27 MB</td><td class="n">147,794,583,858</td><td class="n">0</td><td class="n">36.859390 / 591.671747 / 106.321963</td><td><span class="chip">before</span></td></tr>
+            <tr><td><strong>Selected unset hybrid replay</strong></td><td class="n"><strong>25.936151</strong></td><td class="n"><strong>153.825561</strong></td><td class="n">null</td><td class="n">3,270.03 MB</td><td class="n"><strong>102,707,985,015</strong></td><td class="n"><strong>481</strong></td><td class="n">57.022674 / 502.014614 / 79.627768</td><td><span class="chip">selected default</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">selection evidence</span> Stage 198 paired medians: 0.908433 wall, 0.879279 CPU and 0.630062 RSS; every pair favors the hybrid</span>
+        <span><span class="chip">controls</span> <code>F4_F2_FULL_M4RI=0</code> restores all-BlockTables; <code>=1</code> preserves broad full M4RI from 128 rows; an explicit minimum overrides the threshold</span>
+        <span><span class="chip">accounting</span> Stage 199 lower bound: 14 components, 205.639384 wall-seconds, 839.421520 core-seconds, 5.294 GB peak RSS; failed setup/finalizer attempts are preserved and charged</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 696 components, 25,527.893759 wall-seconds, 68,523.607063 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span><span class="chip">negative boundary</span> selected F4 still remains 502.01&times; direct MITM by CPU on this one target; no full-IC/rho or SOTA claim moves</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/result.json</code></span>
+      </div>
+    </div>
+<!-- END current-f4-stage199-hybrid-default -->
 </body>
 </html>
