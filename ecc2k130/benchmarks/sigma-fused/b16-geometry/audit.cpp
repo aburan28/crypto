@@ -33,12 +33,6 @@ struct Arm {
 
 constexpr Arm kArms[] = {{"t256", 256, 2, 2}, {"t512", 512, 1, 1}};
 
-const Arm &arm(const std::string &name) {
-    for (const Arm &candidate : kArms)
-        if (name == candidate.name) return candidate;
-    throw std::runtime_error("unknown arm " + name);
-}
-
 void commonMarkers(const std::string &log, const Arm &a, bool verification) {
     contains(log, "packed launch bounds: " + std::to_string(a.blockThreads) +
                   " threads, " + std::to_string(a.minBlocks) + " min blocks\n");
@@ -143,7 +137,7 @@ int main(int argc, char **argv) {
             std::getline(fields, column[8]);
             const std::string &phase = column[0];
             const std::string &variant = column[3];
-            const Arm &a = (variant == "candidate") ? arm("t512") : arm("t256");
+            const Arm &a = (variant == "candidate") ? kArms[1] : kArms[0];
             require(column[5] == "403726925824" && column[6] == "0", "unequal timing work");
             const std::string logPath = dir + "/" + phase + "-" + column[1] + "-" +
                                         column[2] + "-" + variant + ".log";
