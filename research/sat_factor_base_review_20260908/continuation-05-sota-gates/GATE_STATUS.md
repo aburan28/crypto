@@ -35,9 +35,12 @@ checkout, passes ten F4 and three backend tests in both selected and quadratic
 control modes, and verifies that an unset selector routes 1,011,275 updates
 through the dense path. Dense selection is now the repository default;
 `F4_F2_DENSE_PAIR_SELECT=0` retains the exact quadratic control. The clean
-replay also caught the missing ignored lockfile; commit `0c26ceb80` restores
-the exact supplied `Cargo.lock` with SHA-256
-`4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5`.
+replay also caught the missing ignored lockfile. An initial root-tracking repair
+was rejected because historical workflows deliberately copy and remove lock
+files at that path before clean-tree assertions. The exact supplied lock is
+instead force-added inside the Stage-185 evidence packet with SHA-256
+`4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5`;
+the measurements and selected implementation are unchanged.
 
 Stage 186 rechecks elimination after the pair-selector selection. Full M4RI
 still reduces XORs and RSS but takes 1.8478x wall and 1.0182x CPU in the frozen
