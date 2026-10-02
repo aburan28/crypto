@@ -279,24 +279,37 @@ impl Gf2 {
 
     /// `a^{-1}` by Fermat: `a^(2^n − 2)`.  Zero maps to zero.
     ///
-    /// Still `n` squarings and `n` multiplications — which is why the
-    /// code above it goes to some length to need only one per *row* of
-    /// the pair loop rather than one per polynomial division.
+    /// Itoh-Tsujii addition chain on the exponent: `n − 1` squarings like
+    /// the naive square-and-multiply, but only `⌊log₂(n−1)⌋ + popcount(n−1)
+    /// − 1` multiplications instead of `n − 2` (7 vs 51 at `n = 53`).
+    /// The value computed is the same power by the same field operations,
+    /// so outputs are bit-identical to the naive loop — only faster.
     pub fn inv(&self, a: u64) -> u64 {
         if a == 0 {
             return 0;
         }
-        let mut result = 1u64;
-        let mut base = a;
-        for _ in 1..self.n {
-            base = self.sqr(base);
-            result = if result == 1 {
-                base
-            } else {
-                self.mul(result, base)
-            };
+        let e = self.n - 1;
+        if e == 0 {
+            return 1;
         }
-        result
+        // Left-to-right binary method: invariant c = a^{2^k − 1} where k
+        // is the processed prefix of e, starting at k = 1 (c = a).
+        let mut c = a;
+        let mut k = 1u32;
+        let bits = 32 - e.leading_zeros();
+        for i in (0..bits - 1).rev() {
+            // Doubling step k → 2k: c · c^{2^k}.
+            c = self.mul(c, self.sqr_k(c, k));
+            k *= 2;
+            if (e >> i) & 1 == 1 {
+                // Increment k → k+1: c^2 · a.
+                c = self.mul(self.sqr(c), a);
+                k += 1;
+            }
+        }
+        debug_assert_eq!(k, e);
+        // c = a^{2^e − 1}, so c^2 = a^{2^{e+1} − 2} = a^{2^n − 2} = a^{-1}.
+        self.sqr(c)
     }
 
     /// Invert a whole slice with **one** field inversion, by
@@ -722,6 +735,60 @@ mod tests {
             let mut got = xs.clone();
             gf.batch_inv(&mut got, &mut Vec::new());
             assert_eq!(got, want, "n={n}: batch inversion");
+        }
+    }
+
+    /// Itoh-Tsujii inversion: exhaustive inverse law on tiny fields,
+    /// zero maps to zero, and agreement with Fermat `a^(2^n − 2)` on
+    /// random inputs at large `n` (computed independently here, not via
+    /// `inv`, so a chain bug cannot hide).
+    #[test]
+    fn itoh_tsujii_inverse_is_correct() {
+        use crate::binary_ecc::F2mElement;
+        // Exhaustive at n = 7.
+        let irr7 = IrreduciblePoly {
+            degree: 7,
+            low_terms: vec![0, 1],
+        };
+        let gf7 = Gf2::new(&irr7);
+        assert_eq!(gf7.inv(0), 0);
+        for a in 1..(1u64 << 7) {
+            assert_eq!(gf7.mul(a, gf7.inv(a)), 1, "inverse law at a={a}");
+        }
+        // Random agreement with an independent square-and-multiply
+        // Fermat computation at larger n.
+        for n in [13u32, 31, 41, 53, 63] {
+            let irr = crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n)
+                .unwrap();
+            let gf = Gf2::new(&irr);
+            assert_eq!(gf.inv(0), 0);
+            let mut state = 0x1234_5678_9ABC_DEF0u64 ^ ((n as u64) << 32);
+            for _ in 0..300 {
+                state = state
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1);
+                let a = (state >> 11) & gf.mask;
+                if a == 0 {
+                    continue;
+                }
+                // Independent: a^(2^n − 2) by textbook square-and-multiply.
+                let mut acc = 1u64;
+                let mut base = a;
+                let mut exp = (1u128 << n) - 2;
+                while exp > 0 {
+                    if exp & 1 == 1 {
+                        acc = gf.mul(acc, base);
+                    }
+                    base = gf.sqr(base);
+                    exp >>= 1;
+                }
+                // Cross-check the general field too on a subsample.
+                if a & 0xff == 0 {
+                    let big = gf.to_element(a).flt_inverse(&irr).unwrap();
+                    assert_eq!(gf.from_element(&big), acc, "n={n}: vs F2mElement");
+                }
+                assert_eq!(gf.inv(a), acc, "n={n}: IT vs Fermat at a={a}");
+            }
         }
     }
 

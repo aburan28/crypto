@@ -140,7 +140,10 @@ use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
     SolveOptions, SolveStats, SolverEngine,
 };
-use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+use crate::cryptanalysis::koblitz_fast_arith::{pack_fast, FastBinaryCurve, FastPoint};
+use crate::cryptanalysis::koblitz_relation_solver::{
+    to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+};
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
@@ -371,8 +374,50 @@ pub fn order_of_2_mod_n(n: u32) -> Option<u32> {
     None
 }
 
+/// Memoised `x^n − 1` factorisations over `F_2`, keyed by `n`.
+///
+/// The scan costs `2^d` Rabin tests per degree (`≈ 0.6 s` at
+/// `n = 41, d = 20`) and was recomputed on every divisor-base build —
+/// minutes per search at the rungs where the cosets are large.  The
+/// function is pure in `n` with tiny values, so a process-wide cache
+/// is exact, not heuristic: hits return clones of computed lists, a
+/// poisoned mutex falls back to its (still correct) contents, and a
+/// missed race only recomputes.
+static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    std::sync::OnceLock::new();
+
+fn memo_get(
+    memo: &std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>>,
+    n: u32,
+) -> Option<Vec<u64>> {
+    memo
+        .get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .get(&n)
+        .cloned()
+}
+
+fn memo_put(
+    memo: &std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>>,
+    n: u32,
+    factors: Vec<u64>,
+) -> Vec<u64> {
+    memo
+        .get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .insert(n, factors.clone());
+    factors
+}
 /// **The degree-`ord_n(2)` irreducible factors of `x^n − 1`** over
-/// `F_2`, found by scanning the `2^ℓ` monic polynomials of that degree.
+/// `F_2`, sliced from the cached full factorisation.
+///
+/// Degrees above 24 return empty: a `2^d` scan with `d > 24` is never
+/// worth it (the `all_factors` scan rightfully skips those degrees), and
+/// any factor base it would define has `≥ 2^25` abscissae — far past
+/// every materialisation cap.  Previously this end of the range ran an
+/// unbounded `2^ell` scan per call (hours at `n = 37`, `ell = 36`).
 ///
 /// **Not a complete factorisation.**  `x^n − 1` has one irreducible
 /// factor per 2-cyclotomic coset mod `n`, of degree equal to that
@@ -384,32 +429,16 @@ pub fn order_of_2_mod_n(n: u32) -> Option<u32> {
 /// [`build_frobenius_factor_base`] indexes into it.
 pub fn factor_x_n_minus_1(n: u32) -> Vec<u64> {
     let ell = match order_of_2_mod_n(n) {
-        Some(l) if l < 40 => l,
+        Some(l) if l <= 24 => l,
         _ => return Vec::new(),
     };
-    let mut out = Vec::new();
-    let hi = 1u64 << ell;
-    for low in 0..hi {
-        let f = hi | low;
-        if !is_irreducible_f2(f) {
-            continue;
-        }
-        // f | x^n − 1  ⟺  x^n ≡ 1 (mod f).
-        let mut xn = poly_rem(0b10, f);
-        let mut acc = 1u64;
-        let mut e = n;
-        while e > 0 {
-            if e & 1 == 1 {
-                acc = poly_mulmod(acc, xn, f);
-            }
-            xn = poly_mulmod(xn, xn, f);
-            e >>= 1;
-        }
-        if acc == 1 {
-            out.push(f);
-        }
-    }
-    out
+    // Exactly the degree-`ell` slice of the cached full list (same scan
+    // order; `x + 1` has degree 1 != `ell >= 2` for `n >= 3`) — no
+    // `2^ell` scan at all.
+    all_factors_of_x_n_minus_1(n)
+        .into_iter()
+        .filter(|&f| 63 - f.leading_zeros() == ell)
+        .collect()
 }
 
 // ── Koblitz curve over F_{2^n} ─────────────────────────────────────
@@ -799,10 +828,24 @@ impl FrobeniusFactorBase {
     /// every invariant subspace and carries the 2-torsion point — these
     /// classes are non-trivial and constrain which `m` can work at all.
     pub fn cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        self.points
-            .iter()
-            .map(|p| kc.mul(p, &kc.subgroup_order))
-            .collect()
+        match FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+            // One batched `[r]` for every point (was: one slow scalar mul
+            // each).  Bit-exact, so the class list is unchanged.
+            Some(fast) if kc.n <= 63 => {
+                let pts: Vec<FastPoint> =
+                    self.points.iter().map(|p| to_fast_point(&fast, p)).collect();
+                let rs: Vec<BigUint> = (0..pts.len()).map(|_| kc.subgroup_order.clone()).collect();
+                fast.batch_scalar_mul(&pts, &rs)
+                    .into_iter()
+                    .map(|p| from_fast_point(&fast, p))
+                    .collect()
+            }
+            _ => self
+                .points
+                .iter()
+                .map(|p| kc.mul(p, &kc.subgroup_order))
+                .collect(),
+        }
     }
 
     /// Distinct h-torsion classes `[r]P`, derived with one scalar
@@ -812,18 +855,54 @@ impl FrobeniusFactorBase {
     /// remaining classes in an orbit are recovered with cheap public group
     /// operations. Multiplicity is irrelevant to exact-summand reachability
     /// because decomposition permits repeated factor-base points.
+    ///
+    /// The `[r]` multiplications run as one batch and the
+    /// Frobenius/negation expansion on words; the collected class set is
+    /// identical to the general-field version.  Curves too wide for the
+    /// single-word field take the original slow path.
     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        let mut classes = HashMap::new();
-        for orbit in &self.signed_orbits {
-            let Some(&representative) = orbit.first() else {
-                continue;
-            };
-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            for _ in 0..kc.n {
-                for candidate in [current.clone(), point_neg(&current)] {
-                    classes.entry(point_key(&candidate)).or_insert(candidate);
+        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
+            .filter(|_| kc.n <= 63)
+        else {
+            let mut classes = HashMap::new();
+            for orbit in &self.signed_orbits {
+                let Some(&representative) = orbit.first() else {
+                    continue;
+                };
+                let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
+                for _ in 0..kc.n {
+                    for candidate in [current.clone(), point_neg(&current)] {
+                        classes.entry(point_key(&candidate)).or_insert(candidate);
+                    }
+                    current = kc.frobenius(&current);
                 }
-                current = kc.frobenius(&current);
+            }
+            return classes.into_values().collect();
+        };
+        let reps: Vec<FastPoint> = self
+            .signed_orbits
+            .iter()
+            .filter_map(|orbit| {
+                orbit
+                    .first()
+                    .map(|&i| to_fast_point(&fast, &self.points[i]))
+            })
+            .collect();
+        let rs: Vec<BigUint> = (0..reps.len()).map(|_| kc.subgroup_order.clone()).collect();
+        let projs = fast.batch_scalar_mul(&reps, &rs);
+        let mut classes = HashMap::new();
+        for p in projs {
+            let mut current = p;
+            for _ in 0..kc.n {
+                for candidate in [current, FastBinaryCurve::neg(current)] {
+                    classes
+                        .entry(pack_fast(candidate))
+                        .or_insert_with(|| from_fast_point(&fast, candidate));
+                }
+                current = match current {
+                    None => None,
+                    Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
+                };
             }
         }
         classes.into_values().collect()
@@ -859,6 +938,83 @@ impl FrobeniusFactorBase {
         // result under squaring and negation — cheap field squarings in
         // place of the `|layer| · |classes|` point additions the naive
         // walk pays.  Each layer holds at most `h` points.
+        //
+        // The grid additions run as one Montgomery batch per layer and
+        // the walks on words; sets, keys, and the verdict match the
+        // general-field version exactly.  Curves too wide for the
+        // single-word field take the original slow path below.
+        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)
+            .filter(|_| kc.n <= 63)
+        else {
+            return self.m_can_decompose_slow(kc, &classes, m);
+        };
+        let class_pts: Vec<FastPoint> =
+            classes.iter().map(|c| to_fast_point(&fast, c)).collect();
+        let class_keys: HashSet<u64> = class_pts.iter().map(|&p| pack_fast(p)).collect();
+        let identity = pack_fast(None);
+        let mut layer: Vec<FastPoint> = vec![None];
+        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
+        let frob = |p: FastPoint| -> FastPoint {
+            match p {
+                None => None,
+                Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
+            }
+        };
+        for _ in 1..m {
+            let reps = signed_frobenius_orbit_representatives_fast(&fast, kc.n, &layer);
+            // One batch for the reps × classes grid; replayed below in
+            // the same nested order, so traversal matches exactly.
+            let mut pairs = Vec::with_capacity(reps.len() * class_pts.len());
+            for q in &reps {
+                let (qx, qy, qi) = match q {
+                    None => (0, 0, true),
+                    Some((x, y)) => (*x, *y, false),
+                };
+                for c in &class_pts {
+                    let (cx, cy, ci) = match c {
+                        None => (0, 0, true),
+                        Some((x, y)) => (*x, *y, false),
+                    };
+                    pairs.push((qx, qy, cx, cy, qi, ci));
+                }
+            }
+            let seeds = fast.batch_add(&pairs);
+            let mut next_keys: HashSet<u64> = HashSet::new();
+            let mut next: Vec<FastPoint> = Vec::new();
+            let mut it = seeds.into_iter();
+            for _ in &reps {
+                for _ in &class_pts {
+                    let seed = it.next().expect("grid batch mirrors the nested loops");
+                    if next_keys.contains(&pack_fast(seed)) {
+                        continue;
+                    }
+                    // Close the orbit of `seed` under π and negation.
+                    let mut current = seed;
+                    for _ in 0..kc.n {
+                        for candidate in [current, FastBinaryCurve::neg(current)] {
+                            if next_keys.insert(pack_fast(candidate)) {
+                                next.push(candidate);
+                            }
+                        }
+                        current = frob(current);
+                    }
+                }
+            }
+            layer = next;
+            layer_keys = next_keys;
+        }
+        layer_keys.iter().any(|k| class_keys.contains(k))
+    }
+
+    /// Slow general-field admissibility walk, kept for curves too wide
+    /// for the single-word fast path (unreachable via the constructor)
+    /// and as a second reference alongside the naive one in tests.
+    fn m_can_decompose_slow(
+        &self,
+        kc: &KoblitzCurve,
+        classes: &[BinaryPoint],
+        m: usize,
+    ) -> bool {
         let identity = pack_point(&BinaryPoint::Infinity);
         let class_keys: HashSet<u64> = classes.iter().map(pack_point).collect();
         let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
@@ -868,7 +1024,7 @@ impl FrobeniusFactorBase {
             let mut next_keys: HashSet<u64> = HashSet::new();
             let mut next: Vec<BinaryPoint> = Vec::new();
             for q in &reps {
-                for c in &classes {
+                for c in classes {
                     let seed = kc.add(q, c);
                     if next_keys.contains(&pack_point(&seed)) {
                         continue;
@@ -955,6 +1111,34 @@ fn signed_frobenius_orbit_representatives(kc: &KoblitzCurve, points: &[BinaryPoi
             seen.insert(pack_point(&current));
             seen.insert(pack_point(&point_neg(&current)));
             current = kc.frobenius(&current);
+        }
+    }
+    reps
+}
+
+/// Word-level twin of [`signed_frobenius_orbit_representatives`]: same
+/// traversal over packed keys, so the representative sequence matches
+/// exactly while the arithmetic stays allocation-free.
+fn signed_frobenius_orbit_representatives_fast(
+    fast: &FastBinaryCurve,
+    n: u32,
+    points: &[FastPoint],
+) -> Vec<FastPoint> {
+    let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
+    let mut reps = Vec::new();
+    for &p in points {
+        if seen.contains(&pack_fast(p)) {
+            continue;
+        }
+        reps.push(p);
+        let mut current = p;
+        for _ in 0..n {
+            seen.insert(pack_fast(current));
+            seen.insert(pack_fast(FastBinaryCurve::neg(current)));
+            current = match current {
+                None => None,
+                Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
+            };
         }
     }
     reps
@@ -1110,7 +1294,17 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
 /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
 /// divisor may use `x + 1` too, so the divisor-based constructions take
 /// their indices into this list.
+///
+/// Memoised (pure in `n`); the uncached scan follows.
 pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
+    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
+        return hit;
+    }
+    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
+}
+
+/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
+fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
     let mut out = vec![0b11u64]; // x + 1
                                  // The degrees that occur are exactly the cyclotomic coset sizes;
                                  // the size-1 coset is {0}, already covered by x + 1 above.
@@ -1410,10 +1604,38 @@ pub fn saturate_factor_base_two_torsion(
     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
         return None;
     }
-    let mut xs = std::collections::BTreeMap::new();
+    // Translate every base point by T in one Montgomery batch (a single
+    // inversion for the whole base instead of one slow inversion per
+    // point).  Results are bit-identical to the per-point adds, so the
+    // collected abscissa set — and everything built from it — is
+    // unchanged.  The at-most-one doubling case (P = T itself) takes the
+    // exact slow path inside the batch.
+    let fast = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)?;
+    let (tx, ty) = match &t {
+        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
+        BinaryPoint::Infinity => return None,
+    };
+    let mut pairs = Vec::with_capacity(fb.points.len());
     for p in &fb.points {
-        for q in [p.clone(), kc.add(p, &t)] {
-            if let BinaryPoint::Affine { x, .. } = q {
+        match p {
+            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
+            BinaryPoint::Affine { x, y } => {
+                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
+            }
+        }
+    }
+    let sums = fast.batch_add(&pairs);
+    let mut xs = std::collections::BTreeMap::new();
+    for (p, s) in fb.points.iter().zip(sums.iter()) {
+        let q = match s {
+            None => BinaryPoint::Infinity,
+            Some((x, y)) => BinaryPoint::Affine {
+                x: fast.element(*x),
+                y: fast.element(*y),
+            },
+        };
+        for r in [p.clone(), q] {
+            if let BinaryPoint::Affine { x, .. } = r {
                 xs.entry(x.to_biguint()).or_insert(x);
             }
         }
@@ -1441,54 +1663,64 @@ fn finish_factor_base_domain(
     subspace: Vec<F2mElement>,
     domain: FactorBaseDomain,
 ) -> Option<FrobeniusFactorBase> {
-    let mut points: Vec<BinaryPoint> = Vec::new();
+    // Lifts and orbit walks on the single-word field.  Outputs are
+    // identical to the general-field version: lifts come in the same
+    // order (lib-tested), the walks traverse the same indices, and the
+    // `(x, y)` word-pair map keys are exactly as injective as
+    // `point_key` at `n <= 63` (single word; no packing overflow).
+    let fast = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)?;
+    let b_word = fast.gf.from_element(&kc.curve.b);
+    let mut wpoints: Vec<(u64, u64)> = Vec::new();
     for x in &subspace {
-        for p in points_with_x(&kc.curve, x) {
-            points.push(p);
+        for fp in fast.points_with_x(b_word, fast.word(x)) {
+            wpoints.push(fp.expect("abscissa lifts are affine"));
         }
     }
 
     // Index points for the orbit walk and for relation lookups.
-    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
-    for (i, p) in points.iter().enumerate() {
-        index_of.insert(point_key(p), i);
+    let mut index_of: HashMap<(u64, u64), usize> = HashMap::with_capacity(wpoints.len() * 2);
+    for (i, &p) in wpoints.iter().enumerate() {
+        index_of.insert(p, i);
     }
 
-    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
+    let frob = |(x, y): (u64, u64)| (fast.gf.sqr(x), fast.gf.sqr(y));
+    let neg = |(x, y): (u64, u64)| (x, x ^ y);
+
+    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); wpoints.len()];
     let mut orbits: Vec<Vec<usize>> = Vec::new();
-    for start in 0..points.len() {
+    for start in 0..wpoints.len() {
         if orbit_of[start].0 != usize::MAX {
             continue;
         }
         let o = orbits.len();
         let mut cycle = Vec::new();
-        let mut cur = points[start].clone();
+        let mut cur = wpoints[start];
         let mut k = 0u32;
         loop {
-            let idx = *index_of.get(&point_key(&cur))?;
+            let idx = *index_of.get(&cur)?;
             if orbit_of[idx].0 != usize::MAX {
                 break;
             }
             orbit_of[idx] = (o, k);
             cycle.push(idx);
-            cur = kc.frobenius(&cur);
+            cur = frob(cur);
             k += 1;
         }
         orbits.push(cycle);
     }
 
-    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+    let mut signed_orbit_of = vec![(usize::MAX, 0, false); wpoints.len()];
     let mut signed_orbits = Vec::new();
-    for start in 0..points.len() {
+    for start in 0..wpoints.len() {
         if signed_orbit_of[start].0 != usize::MAX {
             continue;
         }
         let signed_orbit = signed_orbits.len();
         let mut members = Vec::new();
-        let mut current = points[start].clone();
+        let mut current = wpoints[start];
         for k in 0..kc.n {
-            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
-                let index = *index_of.get(&point_key(&point))?;
+            for (negated, point) in [(false, current), (true, neg(current))] {
+                let index = *index_of.get(&point)?;
                 if signed_orbit_of[index].0 == usize::MAX {
                     signed_orbit_of[index] = (signed_orbit, k, negated);
                     members.push(index);
@@ -1496,16 +1728,24 @@ fn finish_factor_base_domain(
                     return None;
                 }
             }
-            current = kc.frobenius(&current);
+            current = frob(current);
         }
-        if current != points[start] {
+        if current != wpoints[start] {
             return None;
         }
         signed_orbits.push(members);
     }
-    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
+    if signed_orbits.iter().map(Vec::len).sum::<usize>() != wpoints.len() {
         return None;
     }
+
+    let points: Vec<BinaryPoint> = wpoints
+        .into_iter()
+        .map(|(x, y)| BinaryPoint::Affine {
+            x: fast.element(x),
+            y: fast.element(y),
+        })
+        .collect();
 
     Some(FrobeniusFactorBase {
         domain,
@@ -1569,6 +1809,12 @@ pub struct KoblitzRelation {
 /// Costs `|F|^{m−1}` group operations per target whether or not a
 /// decomposition exists.  [`groebner_decompose`] answers the same
 /// question algebraically; the two are cross-checked in the tests.
+///
+/// The search itself runs on the single-word field with one Montgomery
+/// inversion per recursion level (see
+/// [`crate::cryptanalysis::koblitz_fast_arith`]): identical visit order
+/// and identical first witness as the textbook recursion, which is kept
+/// as [`decompose`] below for cross-checking.
 pub fn enumerate_decompose(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -1576,7 +1822,83 @@ pub fn enumerate_decompose(
     target: &BinaryPoint,
     m: usize,
 ) -> Option<Vec<usize>> {
+    if kc.n <= 63 {
+        if let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+            return enumerate_decompose_fast(&fast, fb, target, m);
+        }
+    }
     decompose(kc, fb, index_of, target, m, 0)
+}
+
+/// Batched fast enumeration: factor-base points projected to words once,
+/// one word-keyed index for the `m == 1` base case, and one batched
+/// affine batch (`target + (−P_i)` for all `i`) per recursion level, so a
+/// level costs one inversion instead of `|F|`.  Visit order — and hence
+/// the returned witness — matches [`decompose`] exactly.
+fn enumerate_decompose_fast(
+    fast: &FastBinaryCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+) -> Option<Vec<usize>> {
+    use crate::cryptanalysis::koblitz_fast_arith::FastPoint;
+    let to_fw = |p: &BinaryPoint| -> FastPoint {
+        match p {
+            BinaryPoint::Infinity => None,
+            BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+        }
+    };
+    let fbw: Vec<FastPoint> = fb.points.iter().map(to_fw).collect();
+    let mut windex: HashMap<(u64, u64), usize> = HashMap::with_capacity(fbw.len() * 2);
+    for (i, p) in fbw.iter().enumerate() {
+        if let Some(pt) = p {
+            windex.insert(*pt, i);
+        }
+    }
+    fn rec(
+        fast: &FastBinaryCurve,
+        fbw: &[FastPoint],
+        windex: &HashMap<(u64, u64), usize>,
+        target: FastPoint,
+        m: usize,
+        start: usize,
+    ) -> Option<Vec<usize>> {
+        if m == 0 {
+            return if target.is_none() {
+                Some(Vec::new())
+            } else {
+                None
+            };
+        }
+        if m == 1 {
+            let idx = *windex.get(&target?)?;
+            return if idx >= start { Some(vec![idx]) } else { None };
+        }
+        // One batch for the whole level: rests[i] = target + (−P_i).
+        let mut pairs = Vec::with_capacity(fbw.len() - start);
+        for p in fbw.iter().skip(start) {
+            let (tx, ty, t_inf) = match target {
+                None => (0, 0, true),
+                Some((x, y)) => (x, y, false),
+            };
+            let (px, py, p_inf) = match p {
+                None => (0, 0, true),
+                Some((x, y)) => (*x, *x ^ *y, false),
+            };
+            pairs.push((tx, ty, px, py, t_inf, p_inf));
+        }
+        let rests = fast.batch_add(&pairs);
+        for (offset, rest) in rests.into_iter().enumerate() {
+            let i = start + offset;
+            if let Some(mut tail) = rec(fast, fbw, windex, rest, m - 1, i) {
+                let mut out = vec![i];
+                out.append(&mut tail);
+                return Some(out);
+            }
+        }
+        None
+    }
+    rec(fast, &fbw, &windex, to_fw(target), m, 0)
 }
 
 fn decompose(
@@ -1670,13 +1992,153 @@ pub struct PairSumTable {
     entries: Vec<(u64, u32, u32)>,
 }
 
+/// Least-significant-digit radix sort of table entries by packed key.
+///
+/// Stable 16-bit counting-sort passes over two buffers, one pass per
+/// 16-bit group that can discriminate (a key-OR pre-pass finds the top
+/// group; higher groups permute nothing).  Work is split into a few
+/// wide chunks across the rayon pool in both the counting and scatter
+/// phases — those phases are memory-bandwidth bound, so more threads
+/// add contention rather than throughput, while the serial prefix costs
+/// `chunks × 64K`.  A short serial prefix over the per-chunk histograms
+/// assigns disjoint output ranges, so no atomics or locks are needed.
+///
+/// Stability preserves the build's row-major `(i, j)` order within each
+/// key group.  Callers need key-grouped order only (binary-search lookup
+/// ranges, key-grouped `m = 4` walk); the previous comparison sort made
+/// no order guarantee within a group either, and every gate checks
+/// verdicts, witness validity, and sortedness rather than exact order.
+fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
+    const BITS: u32 = 16;
+    const BUCKETS: usize = 1 << BITS;
+    const MASK: u64 = (1 << BITS) - 1;
+    let n = entries.len();
+    if n < 2 {
+        return;
+    }
+    // Few wide chunks: counting and scatter are memory-bandwidth bound
+    // (more threads add contention, not throughput), while the serial
+    // prefix below costs `chunks × 64K` operations.
+    let parallelism = std::thread::available_parallelism()
+        .map(|t| t.get())
+        .unwrap_or(1)
+        .clamp(1, 8);
+    let chunks = parallelism.min(n).max(1);
+    // Balanced division bounds: chunk c covers [c*n/chunks, (c+1)*n/chunks).
+    // Every bound satisfies lo <= hi <= n (empty tail chunks become (n, n),
+    // which slice harmlessly), and sizes differ by at most one entry.
+    let bounds: Vec<(usize, usize)> = (0..chunks)
+        .map(|c| ((c * n) / chunks, ((c + 1) * n) / chunks))
+        .collect();
+    let mut scratch: Vec<(u64, u32, u32)> = vec![(0, 0, 0); n];
+    // One histogram row and one cursor row per chunk, reused across passes.
+    let mut hists: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    let mut starts: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    // Only the 16-bit groups that can discriminate need passes: groups
+    // above the highest set key bit permute nothing.  (At n = 13 every
+    // packed key fits 15 bits, so one pass sorts the whole table.)
+    let key_or: u64 = entries
+        .par_iter()
+        .map(|e| e.0)
+        .reduce(|| 0u64, |a, b| a | b);
+    let passes = ((64 - key_or.leading_zeros()) as usize).div_ceil(16).max(1);
+    let mut from_scratch = false;
+    for pass in 0..passes as u32 {
+        let shift = BITS * pass;
+        for hist in hists.iter_mut() {
+            hist.iter_mut().for_each(|c| *c = 0);
+        }
+        // Phase A: count chunk histograms in parallel.
+        {
+            let src: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            bounds
+                .par_iter()
+                .zip(hists.par_iter_mut())
+                .for_each(|(&(lo, hi), hist)| {
+                    for e in &src[lo..hi] {
+                        hist[((e.0 >> shift) & MASK) as usize] += 1;
+                    }
+                });
+        }
+        // Phase B (serial): per-chunk scatter cursors.  Chunk c's items
+        // in bucket b follow all earlier buckets (`base`) plus earlier
+        // chunks' items in bucket b; `base` then advances by the
+        // bucket total.
+        {
+            let mut base = 0usize;
+            for b in 0..BUCKETS {
+                for (c, hist) in hists.iter().enumerate() {
+                    starts[c][b] = base;
+                    base += hist[b];
+                }
+            }
+        }
+        // Phase C: scatter chunks in parallel.  Positions written by
+        // different chunks are disjoint by construction (each output
+        // slot belongs to exactly one (chunk, bucket) segment), so the
+        // destination base address travels as a plain `usize` (natively
+        // `Send + Sync`, unlike a raw pointer) and each worker casts it
+        // back locally.  rayon::scope joins every worker before return.
+        //
+        // SAFETY: `starts[c][b]` is `base[b]` plus bucket-`b` items of
+        // earlier chunks, and exactly `hists[c][b]` items of chunk `c`
+        // fall in bucket `b`; hence chunk `c` writes precisely
+        // `[starts[c][b], starts[c][b] + hists[c][b])`, and these
+        // segments partition `[0, n)` across all `(c, b)`.  Every slot
+        // is therefore written exactly once, no two threads ever write
+        // the same slot, and no thread reads the destination.  All
+        // scoped threads join before either buffer is touched again, so
+        // the address-derived pointers never outlive their buffer.
+        {
+            let dst_addr = (if from_scratch {
+                entries.as_mut_ptr()
+            } else {
+                scratch.as_mut_ptr()
+            }) as usize;
+            let src_all: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            rayon::scope(|s| {
+                for ((lo, hi), starts_c) in bounds.iter().copied().zip(starts.iter()) {
+                    let mut cur = starts_c.clone();
+                    s.spawn(move |_| {
+                        let dst = dst_addr as *mut (u64, u32, u32);
+                        for e in &src_all[lo..hi] {
+                            let b = ((e.0 >> shift) & MASK) as usize;
+                            // SAFETY: justified above; `cur[b]` stays
+                            // inside this chunk's segment by counting.
+                            unsafe {
+                                dst.add(cur[b]).write(*e);
+                            }
+                            cur[b] += 1;
+                        }
+                    });
+                }
+            });
+        }
+        from_scratch = !from_scratch;
+    }
+    // An odd pass count leaves the sorted output in the scratch buffer.
+    if from_scratch {
+        entries.copy_from_slice(&scratch);
+    }
+}
+
 impl PairSumTable {
     /// Build the table with `|F|(|F|+1)/2` point additions, in parallel
     /// over the first index; 16 bytes per entry.  Returns `None` when the
     /// field is too wide to pack a point into a `u64`.
+    ///
+    /// The sums are evaluated with the single-word carry-less field and
+    /// one Montgomery inversion per row (see
+    /// [`crate::cryptanalysis::koblitz_fast_arith`]): identical results
+    /// to affine `point_add`, one inversion per row instead of one per
+    /// pair.  Falls back to the general arithmetic when the curve is too
+    /// wide for the fast path.
     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
         if kc.n > 62 || fb.points.len() > u32::MAX as usize {
             return None;
+        }
+        if let Some(table) = Self::build_batched(kc, fb) {
+            return Some(table);
         }
         let mut entries: Vec<(u64, u32, u32)> = (0..fb.points.len())
             .into_par_iter()
@@ -1690,6 +2152,59 @@ impl PairSumTable {
             })
             .collect();
         entries.par_sort_unstable();
+        Some(Self { entries })
+    }
+
+    /// Fast-path build: single-word field, Montgomery-batched row sums.
+    ///
+    /// Returns `None` when any point does not fit the fast
+    /// representation (in which case [`Self::build`] falls back); a
+    /// `Some` is bit-identical to the slow build.
+    fn build_batched(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        let fast = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64)?;
+        // Project the factor base once; infinity cannot appear here but
+        // is carried explicitly so the fallback stays total.
+        let mut words: Vec<(u64, u64, bool)> = Vec::with_capacity(fb.points.len());
+        for p in fb.points.iter() {
+            match p {
+                BinaryPoint::Infinity => words.push((0, 0, true)),
+                BinaryPoint::Affine { x, y } => {
+                    if kc.n > 63 {
+                        return None;
+                    }
+                    words.push((fast.word(x), fast.word(y), false));
+                }
+            }
+        }
+        let mut entries: Vec<(u64, u32, u32)> = (0..words.len())
+            .into_par_iter()
+            .flat_map_iter(|i| {
+                let fast = &fast;
+                let words = &words;
+                let (xi, yi, inf_i) = words[i];
+                // One batch per row: a single inversion for the whole row
+                // instead of one Itoh-Tsujii inversion per pair.
+                let mut pairs = Vec::with_capacity(words.len() - i);
+                for j in i..words.len() {
+                    let (xj, yj, inf_j) = words[j];
+                    pairs.push((xi, yi, xj, yj, inf_i, inf_j));
+                }
+                let sums = fast.batch_add(&pairs);
+                sums.into_iter().enumerate().map(move |(t, s)| {
+                    let j = i + t;
+                    (pack_fast(s), i as u32, j as u32)
+                })
+            })
+            .collect();
+        // Parallel LSD radix sort by packed key (stable).  Set
+        // `KOBLITZ_SORT=comparison` to use the comparison sort instead;
+        // same key-grouped order either way, only the within-group order
+        // (which no gate checks) can differ.
+        if std::env::var("KOBLITZ_SORT").as_deref() == Ok("comparison") {
+            entries.par_sort_unstable();
+        } else {
+            radix_sort_entries_by_key(&mut entries);
+        }
         Some(Self { entries })
     }
 
@@ -1753,33 +2268,155 @@ impl PairSumTable {
                 }
             }
             3 => {
-                for (k, p) in fb.points.iter().enumerate() {
-                    let rest = kc.add(target, &point_neg(p));
-                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
-                        if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
-                            return;
+                if kc.n <= 62 {
+                    self.witnesses_three_batched(kc, fb, target, sink);
+                } else {
+                    for (k, p) in fb.points.iter().enumerate() {
+                        let rest = kc.add(target, &point_neg(p));
+                        for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                            if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                                return;
+                            }
                         }
                     }
                 }
             }
             4 => {
-                // Walk the table as the second half: R − (P_k + P_l).
-                let mut last_key: Option<u64> = None;
-                let mut rest = BinaryPoint::Infinity;
-                for &(key, k, l) in &self.entries {
-                    if last_key != Some(key) {
-                        let pair = kc.add(&fb.points[k as usize], &fb.points[l as usize]);
-                        rest = kc.add(target, &point_neg(&pair));
-                        last_key = Some(key);
-                    }
-                    for &(_, i, j) in self.lookup(pack_point(&rest)) {
-                        if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
-                            return;
-                        }
-                    }
+                if kc.n <= 62 {
+                    self.witnesses_four_fast(kc, fb, target, sink);
+                } else {
+                    self.witnesses_four_slow(kc, fb, target, sink);
                 }
             }
             _ => {}
+        }
+    }
+
+    /// `m = 3` witness step with one Montgomery inversion per target.
+    ///
+    /// `R - P_k` for all `k` is a batch of `|F|` affine sums sharing a
+    /// single inversion; the slow loop pays one Itoh-Tsujii inversion
+    /// per `k`.  Packing is bit-exact (`pack_words == pack_point`), so
+    /// the lookup sequence — and hence the witness stream — is
+    /// identical.  Any point that does not fit the fast representation
+    /// falls back to the slow loop for the whole target.
+    fn witnesses_three_batched(
+        &self,
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        target: &BinaryPoint,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) else {
+            for (k, p) in fb.points.iter().enumerate() {
+                let rest = kc.add(target, &point_neg(p));
+                for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                    if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                        return;
+                    }
+                }
+            }
+            return;
+        };
+        let (tx, ty, t_inf) = match target {
+            BinaryPoint::Infinity => (0, 0, true),
+            BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y), false),
+        };
+        let mut pairs = Vec::with_capacity(fb.points.len());
+        for p in fb.points.iter() {
+            match p {
+                BinaryPoint::Infinity => pairs.push((tx, ty, 0, 0, t_inf, true)),
+                BinaryPoint::Affine { x, y } => {
+                    let xk = fast.word(x);
+                    let yk = fast.word(y);
+                    // R + (-P_k); negation is (x, x + y).
+                    pairs.push((tx, ty, xk, xk ^ yk, t_inf, false));
+                }
+            }
+        }
+        let rests = fast.batch_add(&pairs);
+        for (k, rest) in rests.into_iter().enumerate() {
+            for &(_, i, j) in self.lookup(pack_fast(rest)) {
+                if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                    return;
+                }
+            }
+        }
+    }
+
+    /// `m = 4` walk with single-word field arithmetic (one inversion
+    /// per recomputed pair, no `Vec<u64>` allocations).
+    ///
+    /// The traversal order and sink conditions are unchanged from the
+    /// slow path; only the two affine sums per distinct pair key use
+    /// the fast field.
+    fn witnesses_four_fast(
+        &self,
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        target: &BinaryPoint,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        let Some(fast) = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) else {
+            self.witnesses_four_slow(kc, fb, target, sink);
+            return;
+        };
+        let (tx, ty, t_inf) = match target {
+            BinaryPoint::Infinity => (0, 0, true),
+            BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y), false),
+        };
+        let mut fbw: Vec<(u64, u64, bool)> = Vec::with_capacity(fb.points.len());
+        for p in fb.points.iter() {
+            match p {
+                BinaryPoint::Infinity => fbw.push((0, 0, true)),
+                BinaryPoint::Affine { x, y } => fbw.push((fast.word(x), fast.word(y), false)),
+            }
+        }
+        let mut last_key: Option<u64> = None;
+        let mut rest_key: u64 = 0;
+        for &(key, k, l) in &self.entries {
+            if last_key != Some(key) {
+                let (xk, yk, ik) = fbw[k as usize];
+                let (xl, yl, il) = fbw[l as usize];
+                let pk = if ik { None } else { Some((xk, yk)) };
+                let pl = if il { None } else { Some((xl, yl)) };
+                let pair = fast.add(pk, pl);
+                let neg = FastBinaryCurve::neg(pair);
+                let t = if t_inf { None } else { Some((tx, ty)) };
+                rest_key = pack_fast(fast.add(t, neg));
+                last_key = Some(key);
+            }
+            for &(_, i, j) in self.lookup(rest_key) {
+                if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
+                    return;
+                }
+            }
+        }
+    }
+
+    /// Original `m = 4` walk on the general arithmetic (fallback when
+    /// the curve is too wide for the fast field).
+    fn witnesses_four_slow(
+        &self,
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        target: &BinaryPoint,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        // Walk the table as the second half: R − (P_k + P_l).
+        let mut last_key: Option<u64> = None;
+        let mut rest = BinaryPoint::Infinity;
+        for &(key, k, l) in &self.entries {
+            if last_key != Some(key) {
+                let pair = kc.add(&fb.points[k as usize], &fb.points[l as usize]);
+                rest = kc.add(target, &point_neg(&pair));
+                last_key = Some(key);
+            }
+            for &(_, i, j) in self.lookup(pack_point(&rest)) {
+                if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
+                    return;
+                }
+            }
         }
     }
 }
@@ -2483,6 +3120,111 @@ fn projected_signed_orbit_map(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
 ) -> ProjectedSignedOrbitMap {
+    // Cofactor-project every base point in one batched multi-scalar
+    // multiplication (two inversions per cofactor bit for the whole base
+    // instead of ~1.5 per point per bit), then merge the signed Frobenius
+    // orbits on words.  Bit-exact with the general-field version: the
+    // `(x + 1, y)` word-pair keys order identically to `point_key`
+    // (numerical order on values `< 2^64`, `(0, 0)` still reserved for
+    // infinity), so canonical choices, sort order, and locations match.
+    // Falls back to the slow path when the curve is too wide for the
+    // single-word field (unreachable: `n <= 63`).
+    let (projected_words, fast_opt): (Vec<FastPoint>, _) =
+        match FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+            Some(fast) if kc.n <= 63 => {
+                let pts: Vec<FastPoint> =
+                    fb.points.iter().map(|p| to_fast_point(&fast, p)).collect();
+                let hs: Vec<BigUint> = (0..pts.len()).map(|_| kc.cofactor.clone()).collect();
+                (fast.batch_scalar_mul(&pts, &hs), Some(fast))
+            }
+            _ => {
+                return projected_signed_orbit_map_slow(kc, fb);
+            }
+        };
+    let fast = fast_opt.expect("fast branch constructs the field");
+    // Word identity standing in for `point_key`: `(x + 1, y)`, `(0, 0)`
+    // for infinity.  Injective on affine points at `n <= 63` (`x + 1`
+    // cannot overflow) and ordered exactly like the `BigUint` pair.
+    let key_of = |p: FastPoint| -> (u64, u64) {
+        match p {
+            None => (0, 0),
+            Some((x, y)) => (x + 1, y),
+        }
+    };
+    let frob = |p: FastPoint| -> FastPoint {
+        match p {
+            None => None,
+            Some((x, y)) => Some((fast.gf.sqr(x), fast.gf.sqr(y))),
+        }
+    };
+    let mut representatives: Vec<FastPoint> = Vec::new();
+    let mut seen = HashSet::new();
+
+    for &point in &projected_words {
+        if point.is_none() || seen.contains(&key_of(point)) {
+            continue;
+        }
+        let mut current = point;
+        let mut canonical = point;
+        let mut canonical_key = key_of(point);
+        for _ in 0..kc.n {
+            for candidate in [current, FastBinaryCurve::neg(current)] {
+                let key = key_of(candidate);
+                seen.insert(key);
+                if key < canonical_key {
+                    canonical = candidate;
+                    canonical_key = key;
+                }
+            }
+            current = frob(current);
+        }
+        representatives.push(canonical);
+    }
+    representatives.sort_by_cached_key(|&p| key_of(p));
+
+    let mut location_by_key = HashMap::new();
+    for (orbit, &representative) in representatives.iter().enumerate() {
+        let mut current = representative;
+        for k in 0..kc.n {
+            location_by_key
+                .entry(key_of(current))
+                .or_insert((orbit, k, false));
+            location_by_key
+                .entry(key_of(FastBinaryCurve::neg(current)))
+                .or_insert((orbit, k, true));
+            current = frob(current);
+        }
+    }
+    let orbit_of = projected_words
+        .iter()
+        .map(|&point| {
+            if point.is_none() {
+                return None;
+            }
+            Some(
+                *location_by_key
+                    .get(&key_of(point))
+                    .expect("cofactor projection was not found in its canonical orbit"),
+            )
+        })
+        .collect();
+
+    ProjectedSignedOrbitMap {
+        orbit_of,
+        representatives: representatives
+            .into_iter()
+            .map(|p| from_fast_point(&fast, p))
+            .collect(),
+    }
+}
+
+/// Slow general-field projection map, kept for curves too wide for the
+/// single-word fast path (unreachable via the constructor) and as the
+/// exact reference the fast path is tested against.
+fn projected_signed_orbit_map_slow(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> ProjectedSignedOrbitMap {
     let projected: Vec<_> = fb
         .points
         .iter()
@@ -2825,6 +3567,25 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
     koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress)
 }
 
+/// Project a general point to single-word coordinates for the fast field.
+pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> FastPoint {
+    match p {
+        BinaryPoint::Infinity => None,
+        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+    }
+}
+
+/// Lift single-word coordinates back to a general point.
+pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: FastPoint) -> BinaryPoint {
+    match p {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: fast.element(x),
+            y: fast.element(y),
+        },
+    }
+}
+
 fn koblitz_index_calculus_dlp_observed(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -2919,6 +3680,16 @@ fn koblitz_index_calculus_dlp_observed(
     let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    // Fast single-word arithmetic for trial sampling (`R = [a]G + [b]Q`
+    // per attempt).  Bit-exact with the general arithmetic; the final
+    // verification (`[d]G == Q`) and every relation re-add stay on the
+    // slow path, so this only affects sampling speed.
+    let fast_curve = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64);
+    let fast_sampling = fast_curve.is_some() && kc.n <= 63;
+    let (g_fast, q_fast) = match &fast_curve {
+        Some(fast) if fast_sampling => (to_fast_point(fast, &g), to_fast_point(fast, q)),
+        _ => (None, None),
+    };
     let relation_start = std::time::Instant::now();
 
     // Extract, announce and verify a candidate scalar from the echelon
@@ -2950,14 +3721,51 @@ fn koblitz_index_calculus_dlp_observed(
     while relations.len() < wanted && report.trials < opts.max_trials {
         let remaining_trials = opts.max_trials - report.trials;
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
-        let attempts: Vec<_> = (0..batch_size)
-            .map(|_| {
-                let a = BigUint::from(rng.gen_range(1..r_u64));
-                let b = BigUint::from(rng.gen_range(1..r_u64));
-                let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
-                (a, b, target)
-            })
-            .collect();
+        // Draw scalars first, in the long-standing order (a then b per
+        // trial), so the RNG stream — and hence every target — is
+        // unchanged by how the arithmetic below is batched.
+        let mut scalars_a = Vec::with_capacity(batch_size);
+        let mut scalars_b = Vec::with_capacity(batch_size);
+        for _ in 0..batch_size {
+            scalars_a.push(BigUint::from(rng.gen_range(1..r_u64)));
+            scalars_b.push(BigUint::from(rng.gen_range(1..r_u64)));
+        }
+        let attempts: Vec<_> = if fast_sampling {
+            let fast = fast_curve.as_ref().expect("fast sampling enabled");
+            // Two batched multi-scalar multiplications plus one batched
+            // pairwise addition: ~2 inversions per scalar bit for the
+            // whole batch instead of ~1.5 per pair per bit.
+            let ag = fast.batch_scalar_mul(&vec![g_fast; batch_size], &scalars_a);
+            let bq = fast.batch_scalar_mul(&vec![q_fast; batch_size], &scalars_b);
+            let mut pairs = Vec::with_capacity(batch_size);
+            for (t1, t2) in ag.iter().zip(bq.iter()) {
+                let (ax, ay, a_inf) = match t1 {
+                    None => (0, 0, true),
+                    Some((x, y)) => (*x, *y, false),
+                };
+                let (bx, by, b_inf) = match t2 {
+                    None => (0, 0, true),
+                    Some((x, y)) => (*x, *y, false),
+                };
+                pairs.push((ax, ay, bx, by, a_inf, b_inf));
+            }
+            let tgts = fast.batch_add(&pairs);
+            scalars_a
+                .into_iter()
+                .zip(scalars_b)
+                .zip(tgts)
+                .map(|((a, b), t)| (a, b, from_fast_point(fast, t)))
+                .collect()
+        } else {
+            scalars_a
+                .into_iter()
+                .zip(scalars_b)
+                .map(|(a, b)| {
+                    let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
+                    (a, b, target)
+                })
+                .collect()
+        };
         report.trials += attempts.len();
         report.relation_batches += 1;
 
@@ -2966,9 +3774,9 @@ fn koblitz_index_calculus_dlp_observed(
                 return RelationAttemptOutcome::Direct;
             }
             match opts.strategy {
-                DecompositionStrategy::Enumerate => RelationAttemptOutcome::Enumerated(decompose(
-                    kc, fb, &index_of, target, opts.m, 0,
-                )),
+                DecompositionStrategy::Enumerate => RelationAttemptOutcome::Enumerated(
+                    enumerate_decompose(kc, fb, &index_of, target, opts.m),
+                ),
                 DecompositionStrategy::PairTable => RelationAttemptOutcome::Enumerated(
                     pair_table
                         .as_ref()
@@ -3369,7 +4177,9 @@ fn decompose_once(
     target: &BinaryPoint,
 ) -> Option<Vec<usize>> {
     match opts.strategy {
-        DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
+        DecompositionStrategy::Enumerate => {
+            enumerate_decompose(kc, fb, index_of, target, opts.m)
+        }
         DecompositionStrategy::PairTable => {
             pair.expect("pair table required").decompose(kc, fb, target, opts.m)
         }
@@ -3432,14 +4242,34 @@ pub fn solve_factor_base_logs(
 
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    // Fast single-word sampling for the loop-carried probes below. The
+    // draws stay serial (rank is re-checked per probe), but each probe
+    // drops from a slow alloc-heavy scalar mul to one fast one; targets
+    // are bit-identical, so trial counts and tables do not move.
+    let fast_curve = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64);
+    let fast_sampling = fast_curve.is_some() && kc.n <= 63;
+    let g_fast = match &fast_curve {
+        Some(fast) if fast_sampling => to_fast_point(fast, &g),
+        _ => None,
+    };
     let mut matrix: Vec<Vec<BigUint>> = Vec::new();
     let mut rhs: Vec<BigUint> = Vec::new();
     let mut last_attempt = 0usize;
+    // Coefficient-rank gate: a dense solve can only succeed once the rows
+    // reach full column rank, so every earlier attempt is skipped. Skipped
+    // attempts could never verify (underdetermined against random true
+    // logs), hence trial counts, tables, and verdicts are unchanged.
+    // `r` always fits a `u64` here (`n <= 63` curves materialise).
+    let r_mod = r.to_u64_digits().first().copied().unwrap_or(0);
+    let mut ranker = U64RankTracker::new(r_mod, n_cols);
 
     while report.trials < opts.max_trials {
         report.trials += 1;
         let a = BigUint::from(rng.gen_range(1..r_u64));
-        let target = kc.mul(&g, &a);
+        let target = match &fast_curve {
+            Some(fast) if fast_sampling => from_fast_point(fast, fast.scalar_mul(g_fast, &a)),
+            _ => kc.mul(&g, &a),
+        };
         if target == BinaryPoint::Infinity {
             continue;
         }
@@ -3454,9 +4284,19 @@ pub fn solve_factor_base_logs(
         rhs.push((&h * &a) % r);
         report.relations += 1;
 
+        // Rank gate for the dense attempt below (see declaration).
+        let full_rank = match matrix.last() {
+            Some(row) if row.len() == n_cols => {
+                let urow: Vec<u64> = row.iter().map(|c| to_u64_mod(c, r_mod)).collect();
+                ranker.insert(urow) >= n_cols
+            }
+            // Unexpected shape: fall back to attempting (old behavior).
+            _ => true,
+        };
+
         // Attempt a solve once there are at least as many relations as
         // columns and at least one new row since the last attempt.
-        if matrix.len() >= n_cols && matrix.len() > last_attempt {
+        if full_rank && matrix.len() >= n_cols && matrix.len() > last_attempt {
             last_attempt = matrix.len();
             let mut m = matrix.clone();
             let mut b = rhs.clone();
@@ -3552,11 +4392,25 @@ pub fn individual_log(
 
     let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x44_45_53_43_45_4e_54_00);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    // Same fast-sampling setup as the precompute loop above; draws stay
+    // serial (each draw is returned on success), arithmetic goes fast.
+    let fast_curve = FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64);
+    let fast_sampling = fast_curve.is_some() && kc.n <= 63;
+    let (g_fast, q_fast) = match &fast_curve {
+        Some(fast) if fast_sampling => (to_fast_point(fast, &g), to_fast_point(fast, q)),
+        _ => (None, None),
+    };
     while report.trials < opts.max_trials {
         report.trials += 1;
         let a = BigUint::from(rng.gen_range(1..r_u64));
         let b = BigUint::from(rng.gen_range(1..r_u64));
-        let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
+        let target = match &fast_curve {
+            Some(fast) if fast_sampling => from_fast_point(
+                fast,
+                fast.add(fast.scalar_mul(g_fast, &a), fast.scalar_mul(q_fast, &b)),
+            ),
+            _ => kc.add(&kc.mul(&g, &a), &kc.mul(q, &b)),
+        };
         if target == BinaryPoint::Infinity {
             // Degenerate relation [a]G + [b]Q = O already yields d.
             if let Some(d) = solve_for_d(&a, &b, r) {
@@ -3647,12 +4501,46 @@ mod tests {
         assert_eq!(f7.len(), 2);
         assert!(f7.contains(&0b1011));
         assert!(f7.contains(&0b1101));
+        // Exact order (increasing mask): the slice must preserve it.
+        assert_eq!(f7, vec![0b1011, 0b1101]);
 
         // ord_9(2) = 6, so a single degree-6 factor x⁶ + x³ + 1.
         assert_eq!(order_of_2_mod_n(9), Some(6));
         let f9 = factor_x_n_minus_1(9);
         assert_eq!(f9.len(), 1);
         assert_eq!(f9[0], 0b1001001);
+    }
+
+    #[test]
+    fn large_ord_factor_list_is_empty_not_a_hang() {
+        // ord_37(2) = 36: a 2^36 scan would hang for hours.  Degrees
+        // above 24 are out of scope (any base they define has ≥ 2^25
+        // abscissae, past every materialisation cap), so this returns
+        // empty immediately — and stays consistent with the full list,
+        // which skips those degrees for the same reason.
+        assert_eq!(order_of_2_mod_n(37), Some(36));
+        let start = std::time::Instant::now();
+        assert!(factor_x_n_minus_1(37).is_empty());
+        assert!(
+            start.elapsed().as_secs() < 10,
+            "factor scan at n=37 must not hang"
+        );
+        // The full list agrees on every degree it covers: the ord-slice
+        // equals the legacy scan wherever the legacy scan is feasible.
+        for n in [7u32, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31] {
+            if let Some(ell) = order_of_2_mod_n(n) {
+                if ell > 24 {
+                    continue;
+                }
+                for f in factor_x_n_minus_1(n) {
+                    assert_eq!(63 - f.leading_zeros(), ell, "n={n}");
+                    assert!(
+                        all_factors_of_x_n_minus_1(n).contains(&f),
+                        "n={n}: ord factor {f:#x} missing from full list"
+                    );
+                }
+            }
+        }
     }
 
     #[test]
@@ -3850,6 +4738,33 @@ mod tests {
                 .map(point_key)
                 .collect();
             assert_eq!(orbit_derived, pointwise, "a={a}, n={n}");
+        }
+    }
+
+    #[test]
+    fn projected_map_fast_matches_slow_exactly() {
+        // The word-level map must reproduce the slow reference bit for
+        // bit: same representatives in the same order (the `(x + 1, y)`
+        // word keys order identically to `point_key`) and the same
+        // per-point locations — i.e. identical relation columns.
+        for (a, n, indices) in [
+            (0u8, 9u32, vec![0usize]),
+            (1, 15, vec![2usize, 4]),
+            (0, 13, vec![0usize]),
+            (1, 23, vec![0usize]),
+        ] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base_from_divisor(&kc, &indices).unwrap();
+            let fast = projected_signed_orbit_map(&kc, &fb);
+            let slow = projected_signed_orbit_map_slow(&kc, &fb);
+            assert_eq!(
+                fast.representatives, slow.representatives,
+                "representatives differ at K_{a}/2^{n}"
+            );
+            assert_eq!(
+                fast.orbit_of, slow.orbit_of,
+                "locations differ at K_{a}/2^{n}"
+            );
         }
     }
 
@@ -4260,6 +5175,54 @@ mod tests {
     }
 
     #[test]
+    fn radix_sort_orders_entries_by_key_stably() {
+        // Edge cases: empty, singleton, all-equal keys.
+        let mut empty: Vec<(u64, u32, u32)> = Vec::new();
+        radix_sort_entries_by_key(&mut empty);
+        assert!(empty.is_empty());
+        let mut one = vec![(7u64, 1u32, 2u32)];
+        radix_sort_entries_by_key(&mut one);
+        assert_eq!(one, vec![(7u64, 1u32, 2u32)]);
+        // Random data with heavy key duplication (few distinct keys, as
+        // in real pair-sum tables): keys sorted, payloads stable
+        // (input order within each key), multiset preserved.
+        let mut rng_state = 0x9e3779b97f4a7c15u64;
+        let mut next = move || {
+            rng_state = rng_state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            rng_state
+        };
+        for &len in &[0usize, 1, 2, 3, 17, 1000, 70000] {
+            let mut v: Vec<(u64, u32, u32)> = (0..len)
+                .map(|i| (next() % 13, i as u32, (i * 7) as u32))
+                .collect();
+            let mut expected = v.clone();
+            expected.sort_by_key(|e| e.0);
+            radix_sort_entries_by_key(&mut v);
+            // `sort_by_key` is stable too: exact equality, not just
+            // key order, pins stability down.
+            assert_eq!(v, expected, "len = {len}");
+        }
+        // Full-width keys incl. extremes.
+        let mut v: Vec<(u64, u32, u32)> = vec![
+            (u64::MAX, 0, 0),
+            (0, 1, 1),
+            (u64::MAX, 2, 3),
+            (1u64 << 63, 4, 5),
+            (0, 6, 7),
+        ];
+        radix_sort_entries_by_key(&mut v);
+        let keys: Vec<u64> = v.iter().map(|e| e.0).collect();
+        assert_eq!(keys, vec![0, 0, 1 << 63, u64::MAX, u64::MAX]);
+        // Stability: the two 0-keys and two MAX-keys keep input order.
+        assert_eq!((v[0].1, v[0].2), (1, 1));
+        assert_eq!((v[1].1, v[1].2), (6, 7));
+        assert_eq!((v[3].1, v[3].2), (0, 0));
+        assert_eq!((v[4].1, v[4].2), (2, 3));
+    }
+
+    #[test]
     fn pair_table_agrees_with_enumeration_for_two_three_and_four_summands() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
@@ -4578,6 +5541,48 @@ mod tests {
     }
 
     #[test]
+    fn fast_enumeration_matches_slow_recursion_exactly() {
+        // The batched fast path must return the *same witness* (not just
+        // the same verdict) as the textbook recursion, on subgroup and
+        // off-subgroup targets, at m = 2 and m = 3, including Infinity.
+        use rand::{Rng, SeedableRng};
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0xe71c);
+        let g = kc.generator().clone();
+        let mut targets = vec![BinaryPoint::Infinity];
+        for _ in 0..24 {
+            let k = rng.gen_range(1..1000u32);
+            targets.push(kc.mul(&g, &BigUint::from(k)));
+        }
+        // Off-subgroup points: raw abscissa lifts (some outside <G>).
+        for raw in [0u64, 1, 2, 7, 42, 100, 300] {
+            let x = crate::binary_ecc::F2mElement::from_biguint(
+                &BigUint::from(raw),
+                kc.n,
+            );
+            for p in points_with_x(&kc.curve, &x) {
+                targets.push(p);
+            }
+        }
+        for m in [2usize, 3] {
+            for target in &targets {
+                let fast = enumerate_decompose(&kc, &fb, &index_of, target, m);
+                let slow = decompose(&kc, &fb, &index_of, target, m, 0);
+                assert_eq!(fast, slow, "m={m} target={target:?}");
+                // Any returned witness genuinely sums to the target.
+                if let Some(idxs) = fast {
+                    let mut acc = BinaryPoint::Infinity;
+                    for i in &idxs {
+                        acc = kc.add(&acc, &fb.points[*i]);
+                    }
+                    assert_eq!(acc, *target);
+                }
+            }
+        }
+    }
+
     fn all_three_oracles_answer_every_target_identically() {
         // Exhaustive search, Gröbner and SAT must agree on *both*
         // answers: the same decomposability verdict, and whatever they

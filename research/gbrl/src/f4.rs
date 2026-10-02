@@ -1,17 +1,12 @@
 #![allow(dead_code)]
-// F4 Gröbner basis algorithm — STRUCTURAL SCAFFOLD ONLY.
-//
-// This file defines the public API and data structures for an F4 engine that
-// would drop into the existing rl_server / strategy framework. The hot inner
-// pieces (symbolic preprocessing, Macaulay matrix construction, sparse
-// reduction) are stubbed with `unimplemented!` and detailed TODOs.
+// Bounded prime-field F4 with symbolic preprocessing and dense elimination.
+// Sparse linear algebra and full Gebauer-Möller installation remain future
+// work; this backend has no claim to state-of-the-art performance.
 //
 // Why F4 vs Buchberger:
 //   - Buchberger processes one S-polynomial at a time.
 //   - F4 batches ALL pairs of a given lcm-degree into one matrix and reduces
-//     them simultaneously via Gaussian elimination. Same Gröbner basis output,
-//     ~10× faster on cyclic-n and dramatically faster on Semaev systems with
-//     m ≥ 3 (where Buchberger gets stuck on basis-size blow-up).
+//     them simultaneously via Gaussian elimination.
 //
 // References for an implementor:
 //   - Faugère (1999), "A new efficient algorithm for computing Gröbner bases (F4)".
@@ -115,6 +110,9 @@ impl F4State {
         let matrix_rows = rows.len();
         let matrix_cols = columns.len();
         if matrix_rows > max_rows || matrix_cols > max_cols {
+            // Selecting a bucket drains it. Preserve unfinished work so a
+            // caller can retry with a larger cap without silently losing pairs.
+            self.pairs.extend(selected);
             return F4StepResult {
                 added: 0,
                 matrix_rows,
@@ -172,50 +170,50 @@ impl F4State {
     }
 }
 
-// === Stubs that need real implementation ==============================
-
 /// Symbolic preprocessing (Faugère 1999, §3.3).
 ///
 /// Given a set of polynomials to reduce against `basis`, walk each polynomial's
-/// non-leading monomials, and for every monomial m that has a basis poly g with
+/// monomials, and for every monomial m that has a basis poly g with
 /// LM(g) dividing m, add the *shifted* g (m/LM(g) * g) as an extra row so the
 /// matrix-stage reduction can cancel m. Returns:
 ///   - rows: S-polys ∪ all shifted reductors
 ///   - columns: the union of monomials appearing in any row, sorted descending.
 ///
-/// TODO: implement. Use a worklist over monomials to discover new reductors.
 pub fn symbolic_preprocess(s_polys: Vec<Poly>, basis: &[Poly]) -> (Vec<Poly>, Vec<Monomial>) {
     let mut rows = s_polys;
-    let mut seen: HashSet<(usize, Monomial)> = HashSet::new();
-    let mut work: Vec<Monomial> = rows
-        .iter()
-        .flat_map(|p| p.terms.iter().map(|t| t.mono.clone()))
-        .collect();
+    let mut seen: HashSet<Monomial> = HashSet::new();
+    let mut work = Vec::new();
+    // Intern on discovery, rather than allocating a worklist entry for every
+    // occurrence. The set is also precisely the final column union.
+    for p in &rows {
+        for term in &p.terms {
+            if !seen.contains(&term.mono) {
+                seen.insert(term.mono.clone());
+                work.push(term.mono.clone());
+            }
+        }
+    }
     while let Some(mono) = work.pop() {
-        for (idx, g) in basis.iter().enumerate() {
+        for g in basis {
             let Some(lm) = g.lm() else {
                 continue;
             };
             let Some(multiplier) = mono.div(lm) else {
                 continue;
             };
-            if !seen.insert((idx, multiplier.clone())) {
-                continue;
-            }
             let shifted = g.mul_term(crate::field::Fp::one(), &multiplier);
             for term in &shifted.terms {
-                work.push(term.mono.clone());
+                if !seen.contains(&term.mono) {
+                    seen.insert(term.mono.clone());
+                    work.push(term.mono.clone());
+                }
             }
             rows.push(shifted);
             break;
         }
     }
-    let mut columns: Vec<Monomial> = rows
-        .iter()
-        .flat_map(|p| p.terms.iter().map(|t| t.mono.clone()))
-        .collect();
-    columns.sort_by(|a, b| b.cmp(a));
-    columns.dedup();
+    let mut columns: Vec<Monomial> = seen.into_iter().collect();
+    columns.sort_unstable_by(|a, b| b.cmp(a));
     (rows, columns)
 }
 
@@ -520,5 +518,49 @@ mod tests {
         let result = state.step_bounded(0, 0, 0);
         assert!(result.resource_exhausted);
         assert_eq!(state.basis.len(), before);
+        assert!(!state.is_done());
+        let retried = state.step_bounded(0, 64, 64);
+        assert!(!retried.resource_exhausted);
+        assert!(state.is_done());
+    }
+
+    #[test]
+    fn symbolic_preprocess_uses_one_reducer_for_repeated_monomials() {
+        let term = |x, y| Term { coef: Fp::one(), mono: mono(&[x, y]) };
+        let first = Poly::from_terms(vec![term(2, 0), term(0, 1)], 2);
+        let second = Poly::from_terms(vec![term(2, 0), term(0, 0)], 2);
+        let input = Poly::from_terms(vec![term(3, 0)], 2);
+        let (rows, _) = symbolic_preprocess(vec![input.clone(), input], &[first, second]);
+        assert_eq!(rows.len(), 3, "two inputs and one shifted reducer");
+    }
+
+    #[test]
+    fn f4_nonlinear_completion_matches_buchberger_and_all_s_pairs() {
+        use crate::reduce::reduce;
+        for constant in 1..=8 {
+            let term = |coef, x, y| Term { coef: Fp::new(coef), mono: mono(&[x, y]) };
+            let input = vec![
+                Poly::from_terms(vec![term(1, 2, 0), term(-1, 0, 1)], 2),
+                Poly::from_terms(vec![term(1, 1, 1), term(-constant, 0, 0)], 2),
+            ];
+            let mut f4 = F4State::new(input.clone());
+            let mut buch = BuchbergerState::new(input.clone());
+            for _ in 0..100 {
+                if f4.is_done() { break; }
+                assert!(!f4.step_bounded(0, 1000, 1000).resource_exhausted);
+            }
+            for _ in 0..100 {
+                if buch.is_done() { break; }
+                buch.step(0);
+            }
+            assert!(f4.is_done() && buch.is_done());
+            for p in &f4.basis { assert!(reduce(p, &buch.basis).0.is_zero()); }
+            for p in &buch.basis { assert!(reduce(p, &f4.basis).0.is_zero()); }
+            for i in 0..f4.basis.len() {
+                for j in i+1..f4.basis.len() {
+                    assert!(reduce(&spoly(&f4.basis[i], &f4.basis[j]), &f4.basis).0.is_zero());
+                }
+            }
+        }
     }
 }

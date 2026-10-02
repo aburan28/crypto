@@ -188,6 +188,23 @@ target then needs one or two relations. The `logs` trial budget
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
+## Primary one-target comparison
+
+For an IC-versus-rho speedup claim, the measured workload is one previously
+unseen public target point, and both algorithms solve that exact point. The IC
+clock starts at the first target-dependent step after reusable curve, base,
+index, and factor-log preparation is ready. The rho clock starts at its first
+target-dependent walk step. Both clocks stop after scalar recovery and
+independent verification. Exclude process launch, input loading, target
+fixture generation, and target-independent preparation from these online
+times; report setup separately when useful. Do not replace this result with
+batch throughput, a multi-target average, or shared-table amortization. Those
+are secondary measurements for a separately stated question.
+
+The `--batch` execution knob in the option list describes internal target scheduling. It
+does not change the primary workload definition: submit exactly one target
+when measuring the one-target online comparison.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json
@@ -278,11 +295,12 @@ to child runs launched by compare.
 
 Selection time includes process startup, curve and factor-base
 construction, relation collection, matrix solving, verification, and
-report emission. Child completion is polled every 10 ms; very small
-timing differences should not be interpreted as meaningful. The report
-also includes the total comparison time, so selection and unsuccessful
-candidate costs remain visible. A selected candidate is a bounded
-observation, not a global optimum, scaling claim, or challenge result.
+report emission. This is an engineering-selection diagnostic and is not the
+primary one-target online metric above. Child completion is polled every 10
+ms; very small timing differences should not be interpreted as meaningful.
+The report also includes the total comparison time, so selection and
+unsuccessful candidate costs remain visible. A selected candidate is a
+bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
 

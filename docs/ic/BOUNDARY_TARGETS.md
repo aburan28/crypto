@@ -10,7 +10,13 @@ from different runs into a synthetic win.
 
 **Claim hygiene.** Every positive result must state its claim boundary
 explicitly (what it is *not*). Public synthetic / known-answer fixtures only.
-No user keys, no production secrets, no undeclared scalars.
+The primary `vs_rho` workload is exactly one unseen target, solved on the same
+frozen public point under matched resources. Headline time is verified online
+wall after reusable IC preparation; exclude process launch, input loading,
+fixture generation, and target-independent setup. Multi-target averages, batch
+throughput, and shared-table amortization are secondary and need a separate
+declared question after the one-target result. No user keys, production
+secrets, or undeclared scalars.
 
 ---
 
@@ -41,7 +47,7 @@ it inapplicable (state why).
 | `relation_yield` | `n` (or `bits`); base id / hash; `eta` or coverage policy; `pr_decomposition` or hit-rate with CI; `trials_per_relation`; target mix (`natural` / `planted_sat` / `proven_unsat` counts) |
 | `rank` | `n` (or `bits`); `K` (orbit columns); `relations_collected`; `relations_needed` (usually `K` or `K+1`); `surplus`; `matrix_dims` `{rows,cols}`; `sparse_or_dense`; `rank_accumulation` (terminal rank + whether recomputed per row); `la_wall_ms` and/or `la_charged_ms` |
 | `end_to_end_dlp` | `n` (or `bits`); recovered `d` with `[d]G = Q`; stage timers (`factor_base`→`relations`→`la`→`verify`); `claim_boundary` (`synthetic_known_answer` / …) |
-| `vs_rho` | `n` (or `bits`); `timing_class` ∈ {`algorithmic_charged`, `projection_matched`, `whole_process_wall`}; IC cost; ρ cost; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); all material stages charged in the **same** process series; `verdict`; `claim_boundary`; independent-replay pointer |
+| `vs_rho` | One target count; identical IC/rho public point; verified IC and rho scalars; target-specific online intervals and phase costs; `online_speedup = rho_online_ms / IC_online_ms`; `n` (or `bits`); `timing_class`; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); same resource envelope; `verdict`; `claim_boundary`; independent-replay pointer. Whole-process wall, batch throughput, and amortized tables are secondary only. |
 
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.
@@ -123,21 +129,27 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | **n=53 finite batch winner plus exact Frobenius-orbit SAT domain**: the certified 23,320-point/220-column base is exactly 220 Frobenius x-orbits. Representative-plus-shift encoding reduces the complete n=53 S5 formula from 1,815,492 to 22,887 clauses (79.32x), with 24.34 ms encoding and no pair/edge domain | Expose reusable pair-sum support over representative/relative-Frobenius variables without constructing the explicit feasibility join | Same replayed base hash; generated orbit union equals all 11,660 x-values; no pair/edge selectors; group-valid extraction; full formula/solver/memory accounting | shared-log scaling and `autolab_implicit_s5_20260912/results.json` |
-| `decomposition` | **n=31 dim-16 m=2 F₄ completes** with zero disagreements. At **n=53**, the complete orbit-factorized S5 formula has 19,473 variables, 22,887 clauses, and 11,474 native XOR rows. CryptoMiniSat reaches 100k conflicts in 0.82 s and 1m in 8.96 s but remains **UNKNOWN**. The exact regular index-only theory passes n=7, then rejects 20,430 n=41 quadruples without extraction | Propagate a constraint between endpoint pairs before all four factors are fixed; isolated four-index nogoods are ruled out | Exhaustive n=7 SAT subset and group lift; exact orbit-union certification; n=41/n=53 UNKNOWN stays censored | n31 receipt; `autolab_implicit_s5_20260912/results.json` |
+| `factor_base` | **n=53 finite batch winner plus exact Frobenius-orbit SAT domain**: the certified 23,320-point/220-column base is exactly 220 Frobenius x-orbits. Representative-plus-shift encoding reduces the complete n=53 S5 formula from 1,815,492 to 22,887 clauses (79.32x), with 24.34 ms encoding and no pair/edge domain. On the retained base (hash `d859319…`), compact regular-root extraction (5.08M canonical roots, 0 pair edges) plus a pinned orbit-formula SAT check gives 12/12 SAT-confirmed group-valid relations (8/8 natural), 0 conflicts, median 625 ms extraction, ~600 MB peak RSS vs 9.74 GB for the pair table — pending independent replay | Independent replay, then cut per-relation extraction toward the table's 7.49 ms without a pair table | Same base hash; no pair/edge selectors; group-valid; claim-check PASS; UNKNOWN stays censored | `autolab_orbit_extract_20260924/` |
+| `decomposition` | **n=31 dim-16 m=2 F₄ completes** with zero disagreements. Block-6 M4RI gives exact degree-3 kernel speedups of 1.613x (x) and 1.574x (sym); the selected two-target paired repeat finds 2/2 x relations at 637 ms median and refutes 2/2 sym targets at 30.012 s median, with FFD 3/4 and zero inconclusive/gate failures. At **n=53**, the compact orbit-factorized SAT arm remains **UNKNOWN** | Repeat the selected F4 policy over the retained 8-target distribution, then advance the quadratic cell only if verdict mix and FFD remain stable; separately propagate pair support in the n=53 SAT arm | Byte-exact RREF controls; exhaustive small root sets; paired enumeration/group gates; process receipts; UNKNOWN stays censored | `autolab_groebner_hyperopt_20260921/results.json`; `autolab_implicit_s5_20260912/results.json` |
 | `relation_yield` | At n=53, rank-guided eta 1/10 produced one verified four-sum relation for every requested public target; 1,244 target trials yielded 1,244 relations in the 1,024-target batch. Post-precomputation cost: 7.49 ms median, 27.38 ms p95 | Freeze and measure the same policy at growing n with target/probe tails and support density | Public-natural fixture domain; exact group checks; trials, probes, timing distribution, and policy hash retained | `autolab_n53_eta_sweep_20260912/results.json` |
 | `rank` | **n=53 minimum-rank accumulation**: guided eta 1/10 reached rank 221 in exactly 221 rows on every measured selection/holdout fixture; one factor-log table then served 1,023 targets with one row each; full transcript independently replayed | Growing-n shared-log rank/yield panel with the same guidance policy | Preserved rows or independent replay; matrix dimensions and LA time explicit; relation LA kept distinct from FFD | `runs/shared_factor_logs_n53_eta_1_10_full_batch4/`; `runs/shared_factor_logs_independent_replay.json` |
 | `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
-| `vs_rho` | **n=53 finite multi-target wall crossover retained**: 1,024-target wall ratio 0.03958. A four-block fixed-32 growing-n panel crosses at n=37/41/53 but orders explicit-table direct growth above rho on log2 subgroup order: direct wall slope 0.4647 [0.4627,0.4706], rho 0.4563 [0.4350,0.4601]; fully charged direct 0.5705 vs rho 0.4587 | Extract with the edge-free formula fast enough to replace pair-table setup, then repeat the security-axis slope panel | All stages charged; independent replay; matched public fixtures; security axis is log2 subgroup order; automorphism discount explicit | `autolab_shared_log_scaling_20260912/results.json`; independent validation; implicit S5 results |
+| `vs_rho` | **Second primary single-target online rung at n=53:** one previously unseen target solved by IC and rho on the identical frozen public point (G, Q, fixture scalar 4572131355890, retained base `d859319…`, 23,320 points, 221 matrix columns) under the same 16 GiB cap; online clocks start after reusable guided shared-log preparation (eta 1/10, `pair_pair_guided_256`, 61.8 s and the pair table's 9.34 GB peak RSS excluded as logged setup) and at rho's first target-dependent walk step. IC online 15.5–18.0 ms vs rho online 865–919 ms → **51.0×–55.7×** across two paired runs (2026-10-02); both arms verified each run; standalone Python GF(2⁵³) scalar replay PASS on both runs. Automorphism discount √(2n), A=106 signed Frobenius. Constant-factor only — both arms stay √r-class. First rung n=41 (17.7×–18.8×, three paired runs) is history; multi-target shared-log results remain secondary | n=61 one-target online IC vs rho on the same frozen public point after reusable logs; **compact-orbit / representative-plus-Frobenius domain only** — no explicit pair table, peak RSS under the common cap (the factor_base priority folds into this rung) | Exactly one unseen target; identical point + resources in both arms; online intervals exclude launch/loading/fixture generation/reusable setup; guided precompute establishes the reusable table; independent scalar replay; verified answer with speedup ≥ 1.20; multi-target amortized rows stay secondary | `runs_manual/single_target_online_n41_n53_20261002/` (committed evidence: results.json, per-run claim drafts + Python replay validations, rejected-pairing audit) |
 
-Ledger verdict: **`N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER`**.
+Primary ledger verdict (single-target, achieved 2026-10-02): **`N53_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (51.0×–55.7× online, two paired runs, Python replay PASS) — second rung of the primary single-target ladder. First rung: **`N41_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER`** (17.7×–18.8×, three paired runs, 2026-10-02) is history. The prior multi-target verdict **`N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER`** (compact-orbit shared-log DLP `koblitz_orbit_dlp_fast`, 86,112/86,112 independently replayed) is retained as historical secondary evidence only.
+
+**Rejected pairing audit (2026-10-01):** autolab run `20261001T020900Z-d7138bdf44` originally had a schema-only PASS, but its IC arm published `Q=(1449233660742,1458580003288)` with fixture scalar `333438554656`, while rho published `Q=(231924015792,446643714743)` with scalar `301011581851`. The points and scalars differ, so this is not a paired comparison and has no valid speedup. The retained `paired_target_audit.json` marks `PAIRING_REJECTED`; revalidation under the single-target contract returns FAIL. The three promoted runs (20261001T055853Z, 20261001T151557Z, 20261002T213001Z) all pair the identical public point.
 
 **Explicit non-claims for the current `vs_rho` record:** the n=53 result is a
-finite public-synthetic multi-target amortized crossover. The fixed-32 growing-n
-panel finds `DIRECT_GROWS_FASTER` for the explicit pair-table method. It does not
-establish a single-target crossover, an asymptotic exponent below Pollard rho, a
-SAT extraction win, an external/private target capability, production key
-recovery, or deployed-curve security impact.
+finite public-synthetic single-target online comparison on one frozen binary
+curve after reusable guided shared-log IC preparation (explicit pair table this
+rung: 9.34 GB peak RSS under the 16 GiB cap, excluded setup, logged). It is a
+constant-factor win only — it does not establish an asymptotic exponent below
+Pollard rho, a SAT extraction win, an external/private target capability,
+production key recovery, or deployed-curve security impact. The n=61 rung must
+drop the explicit pair table (compact-orbit domain). The retained multi-target
+shared-log results remain secondary evidence and are not promoted by this
+record.
 
 ---
 
@@ -164,12 +176,12 @@ recovery, or deployed-curve security impact.
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz orbit-factorized S5 → add reusable pair-level support over representative and relative-Frobenius variables, extract a group-valid n=53 relation without enumerating pair edges, then repeat the security-axis slope panel.**
-2. **Koblitz factor base → replace the explicit pair table while preserving 309 ms certified-base ingestion and exact replay.**
-3. **Koblitz decomposition → repeat n=31 dim-16 m=2 over a distribution or advance the quadratic cell to n=37.**
-4. **Binary decomposition → first sub-`2^{2ℓ}` oracle at `ℓ = 8` with FFD logged.**
-5. **Prime end-to-end DLP → extend the j=0 known-answer IC ladder to ≥ 20 bits with split stage timers** *(16-bit achieved 2026-09-21: IC agrees with ρ and truth, independently replayed 3× with zero discrepancies — no vs_rho crossover)*.
-6. Fill missing binary/prime yield and rank distributions and backfill FFD/DoR where only wall or conflicts are cited.
+1. **Koblitz vs_rho → extend the verified single-target online ladder to n=61 on the same frozen public point and matched resources under the 16 GiB gate.** n=61 requires the compact-orbit / representative-plus-Frobenius precompute domain without the explicit pair table — the factor_base priority (below) folds into this rung. One unseen target online in each arm; exclude process launch, fixture generation, and reusable IC setup from both online clocks. *(n=53 achieved 2026-10-02: 51.0×–55.7× online across two paired runs on the identical public point, both arms verified, standalone Python GF(2⁵³) scalar replay PASS — constant-factor only, explicit pair table this rung at 9.34 GB logged. n=41 first rung: 17.7×–18.8×, three paired runs.)*
+2. **Koblitz factor base → use the representative-plus-Frobenius domain without the 9.74 GB pair table; report setup separately from one-target online time.**
+3. **Koblitz decomposition → measure the selected block-6 M4RI n=31 dim-16 m=2 policy on a frozen single target before advancing the quadratic cell. Multi-target distributions are secondary.**
+4. **Binary decomposition → first sub-`2^{2ℓ}` oracle at `ℓ = 8` on a frozen single target with FFD logged.**
+5. **Prime end-to-end DLP → extend the j=0 known-answer IC ladder to ≥ 20 bits with split stage timers and an identical-point one-target rho reference** *(16-bit achieved 2026-09-21: IC agrees with ρ and truth, independently replayed 3× with zero discrepancies — no vs_rho crossover)*.
+6. Fill missing binary/prime one-target yield and rank evidence and backfill FFD/DoR where only wall or conflicts are cited.
 
 ---
 

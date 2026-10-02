@@ -1,6 +1,8 @@
 //! Research CLI: read-only curve inspection and bounded known-answer experiments.
 #[path = "ic/experiment.rs"]
 mod experiment;
+#[path = "ic/fixed.rs"]
+mod fixed;
 #[path = "ic/params.rs"]
 mod params;
 
@@ -20,7 +22,7 @@ use std::{
     about = "Curve inspection and synthetic index-calculus research"
 )]
 #[command(
-    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, compare factor-base candidates, or search for high-yield factor bases. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. Imported parameters and points are never sent to a DLP solver."
+    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, compare factor-base candidates, or search for high-yield factor bases. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. The fixed subcommand accepts explicit K_0 parameters and points with full-width coordinates."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -55,6 +57,8 @@ enum Action {
     Logs(experiment::LogsArgs),
     /// Recover a target's logarithm by descent, reusing a saved database.
     Solve(experiment::SolveArgs),
+    /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
+    Fixed(fixed::FixedArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -98,6 +102,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Search(args)) => experiment::search(args.clone(), cli.json),
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
+        Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -280,7 +285,7 @@ fn main() -> ExitCode {
     }
     let success = matches!(
         report["status"].as_str(),
-        Some("complete" | "checks_passed")
+        Some("complete" | "checks_passed" | "stopped")
     ) || report.get("operation").is_none();
     let text = serde_json::to_string_pretty(&report).expect("JSON serializable");
     if let Some(path) = &cli.out {

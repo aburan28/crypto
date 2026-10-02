@@ -530,9 +530,19 @@ fn solve_fixture(
     let modulus = curve.subgroup_order.to_u64_digits()[0];
     let lambda = curve.lambda.to_u64_digits()[0];
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
+    let fixture_seed = std::env::var("KIC_RHO_WALK_SEED")
+        .ok()
+        .map(|value| value.parse::<u64>().expect("KIC_RHO_WALK_SEED must be an integer"))
+        .unwrap_or(fixture_seed);
+    let fixed_target = std::env::var("KIC_RHO_FIXED_TARGET_SCALAR")
+        .ok()
+        .map(|value| value.parse::<u64>().expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer"));
     let mut rng = StdRng::seed_from_u64(fixture_seed);
-    let d0 = rng.gen_range(1..modulus);
+    let d0 = fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus));
+    assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
+    let target_generation_started = Instant::now();
     let q = curve.mul(curve.generator(), &BigUint::from(d0));
+    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let mut charges = Charges {
         scalar_multiplications: 1,
         ..Charges::default()
@@ -645,6 +655,7 @@ fn solve_fixture(
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
         "published_fixture_scalar":d0,
+        "target_generation_ms_excluded":target_generation_ms,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -661,7 +672,7 @@ fn solve_fixture(
         "table_payload_lower_bound_bytes":table_entries * (1 + 5 * std::mem::size_of::<u64>()),
         "setup_ms":setup_ms,
         "walk_ms":walk_ms,
-        "total_ms":setup_ms + walk_ms,
+        "total_ms":target_generation_ms + setup_ms + walk_ms,
         "charges":{
             "group_additions":charges.group_additions,
             "scalar_multiplications":charges.scalar_multiplications,
@@ -688,12 +699,22 @@ fn solve_fixture_packed(
     let lambda = curve.lambda.to_u64_digits()[0];
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
     let generator = raw_point(curve.generator());
+    let fixture_seed = std::env::var("KIC_RHO_WALK_SEED")
+        .ok()
+        .map(|value| value.parse::<u64>().expect("KIC_RHO_WALK_SEED must be an integer"))
+        .unwrap_or(fixture_seed);
+    let fixed_target = std::env::var("KIC_RHO_FIXED_TARGET_SCALAR")
+        .ok()
+        .map(|value| value.parse::<u64>().expect("KIC_RHO_FIXED_TARGET_SCALAR must be an integer"));
     let mut rng = StdRng::seed_from_u64(fixture_seed);
-    let d0 = rng.gen_range(1..modulus);
+    let d0 = fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus));
+    assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
     let mut charges = Charges::default();
-    let started = Instant::now();
+    let target_generation_started = Instant::now();
     let q = raw_scalar_mul(curve, generator, d0);
+    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     charges.scalar_multiplications += 1;
+    let started = Instant::now();
     let jumps = raw_make_jumps(curve, generator, q, &mut rng, modulus, &mut charges);
     let setup_ms = started.elapsed().as_secs_f64() * 1000.0;
     let walk_started = Instant::now();
@@ -791,6 +812,7 @@ fn solve_fixture_packed(
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
         "published_fixture_scalar":d0,
+        "target_generation_ms_excluded":target_generation_ms,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -809,7 +831,7 @@ fn solve_fixture_packed(
         "setup_ms":setup_ms,
         "walk_ms":walk_ms,
         "validation_ms":validation_ms,
-        "total_ms":setup_ms + walk_ms + validation_ms,
+        "total_ms":target_generation_ms + setup_ms + walk_ms + validation_ms,
         "charges":{
             "group_additions":charges.group_additions,
             "scalar_multiplications":charges.scalar_multiplications,
@@ -856,7 +878,7 @@ fn main() {
         "KIC_RHO_BATCH_CORPUS requires the batch_seed argument"
     );
     assert!(matches!(backend, "reference" | "packed"));
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 61));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     for fixture_index in 0..fixtures {

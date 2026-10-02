@@ -2930,6 +2930,22 @@ fn main() {
         assert_eq!(sum, target, "independent reference relation validation");
     }
     let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let online_phase_ms = uses_retained_factor_logs.then(|| {
+        json!({
+            "target_query":fixture_setup_ms,
+            "target_pdp":collection_ms,
+            "target_relation_check":reference_validation_ms,
+            "target_descent":0.0,
+            "target_recovery_check":linear_solve_ms+solution_validation_ms
+        })
+    });
+    let target_online_ms = uses_retained_factor_logs.then_some(
+        fixture_setup_ms
+            + collection_ms
+            + reference_validation_ms
+            + linear_solve_ms
+            + solution_validation_ms,
+    );
     let q_key = point_key(&q);
     let generator_key = point_key(curve.generator());
     let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
@@ -2979,6 +2995,15 @@ fn main() {
             "required_surplus_relations":required_surplus_relations,
             "uses_retained_factor_logs":uses_retained_factor_logs,
             "shared_factor_log_precomputation":shared_factor_log_precomputation,
+            "precomputation_fixture":shared_factor_log_precomputation && !uses_retained_factor_logs,
+            "online_target_count":if uses_retained_factor_logs {1usize} else {0usize},
+            "target_online_wall_ms":target_online_ms,
+            "target_online_phase_ms":online_phase_ms,
+            "target_online_interval":if uses_retained_factor_logs {
+                "single target relation search after reusable factor-base/index/log preparation through exact relation and scalar replay; fixture point generation excluded"
+            } else {
+                "not an online target row; this fixture builds reusable factor logs"
+            },
             "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
             "orbit_columns":columns,
             "matrix_columns":columns+1,

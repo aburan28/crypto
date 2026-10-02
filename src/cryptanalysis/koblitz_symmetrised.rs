@@ -800,7 +800,7 @@ pub fn symmetrised_groebner_decompose_accepting(
         n_vars: sys.n_vars,
         n_equations: sys.equations.len(),
         degree: system_degree(&sys.equations),
-        effort: stats.splits as u64,
+        effort: stats.effort() as u64,
     })
 }
 
@@ -845,7 +845,7 @@ pub fn direct_x_groebner_decompose(
         n_vars,
         n_equations: equations.len(),
         degree: system_degree(&equations),
-        effort: stats.splits as u64,
+        effort: stats.effort() as u64,
     })
 }
 
@@ -1228,7 +1228,7 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
             n_vars: chained_sys.n_vars,
             n_equations: chained_sys.equations.len(),
             degree: system_degree(&chained_sys.equations),
-            effort: stats.splits as u64,
+            effort: stats.effort() as u64,
             relation: rel.clone(),
         };
         x_chain.record(&o, ms, truth_x, sum_check_x(&rel));

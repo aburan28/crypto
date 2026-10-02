@@ -5743,6 +5743,8 @@ fn main() {
     let lazy_relative_support = algebra_encoding == "orbit_factorized"
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
+    let disable_compact_extract =
+        std::env::var("KIC_ORBIT_DISABLE_COMPACT_EXTRACT").as_deref() == Ok("1");
     assert!(
         !lazy_relative_support || backend == "internal",
         "KIC_ORBIT_LAZY_RELATIVE_SUPPORT requires the internal solver"
@@ -5833,7 +5835,7 @@ fn main() {
                     compact_batch_failures.push(scalar);
                 }
             }
-        } else {
+        } else if !disable_compact_extract {
             let (extracted, entries, extract_ms) = extract_orbit_relation(
                 &curve,
                 &base,
@@ -6466,7 +6468,8 @@ fn main() {
                 "forced_intermediate_bits":lazy_relative_forced_bits
             },
             "compact_orbit_extraction":{
-                "enabled":lazy_relative_support,
+                "enabled":lazy_relative_support && !disable_compact_extract,
+                "disabled_for_unpinned_search":disable_compact_extract,
                 "pair_table_entries":0,
                 "edge_selectors":0,
                 "group_valid":compact_relation.is_some(),
@@ -6495,9 +6498,12 @@ fn main() {
                     "root_index_build_ms":compact_batch_index_build_ms,
                     "query_ms_sum":compact_batch_query_ms,
                     "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
-                    "sat_verification_included":true,
-                    "sat_verification_wall_ms":solve_ms,
-                    "charged_total_with_sat_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms + solve_ms
+                    "sat_verification_included":false,
+                    // The batch loop checks each group lift, but does not
+                    // run SAT on every extracted relation. `solve_ms` spans
+                    // extraction too and must not be added a second time.
+                    "sat_verification_wall_ms":null,
+                    "charged_total_with_sat_ms":null
             }))
             } else { None },
             "final_support_clauses":encoding.final_support_clauses,

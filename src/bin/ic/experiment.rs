@@ -907,6 +907,80 @@ fn median(values: &mut [f64]) -> f64 {
         values[n / 2]
     }
 }
+
+/// One child `ic run` invocation: its arguments plus an optional
+/// factor-base recipe file that must outlive the child process.
+struct ChildJob {
+    run_args: RunArgs,
+    timeout_seconds: u32,
+    /// Held (and cleaned up) for the duration of this job only, so
+    /// parallel jobs never share a recipe path.
+    _spec_file: Option<TempSpec>,
+}
+
+/// Concurrent child-process bound.  Each child is itself a full pipeline
+/// run with an internal rayon pool and transient 100MB+ tables, so this
+/// stays well below core count: enough to overlap children blocked in
+/// serial phases, small enough to bound peak memory and pool contention.
+fn child_parallelism_cap() -> usize {
+    std::thread::available_parallelism()
+        .map(|n| (n.get() / 3).clamp(2, 6))
+        .unwrap_or(2)
+}
+
+/// Run child jobs with bounded concurrency, returning one outcome per job
+/// in job order: `Ok(report)` from [`child`], or the first error in job
+/// order (matching serial `?` semantics).  `progress` fires per job in
+/// job order after each wave, so reports — and displayed progress —
+/// never depend on thread scheduling.  (A failing wave still runs its
+/// siblings before the error surfaces; temp files are per-job and
+/// cleaned up regardless.)
+fn run_children_ordered(
+    jobs: Vec<ChildJob>,
+    progress: &mut dyn FnMut(usize, usize, &Value),
+) -> Result<Vec<Value>, String> {
+    let total = jobs.len();
+    let cap = child_parallelism_cap().max(1);
+    let mut reports = Vec::with_capacity(total);
+    let mut base = 0usize;
+    for wave in jobs.chunks(cap) {
+        let mut wave_out: Vec<Option<Result<Value, String>>> =
+            (0..wave.len()).map(|_| None).collect();
+        std::thread::scope(|s| -> Result<(), String> {
+            let handles: Vec<_> = wave
+                .iter()
+                .enumerate()
+                .map(|(k, job)| {
+                    s.spawn(move || {
+                        (
+                            k,
+                            child(&job.run_args, job.timeout_seconds).map_err(|e| e.to_string()),
+                        )
+                    })
+                })
+                .collect();
+            for handle in handles {
+                let (k, outcome) = handle.join().map_err(|_| "child worker failed".to_string())?;
+                wave_out[k] = Some(outcome);
+            }
+            Ok(())
+        })?;
+        for (k, slot) in wave_out.into_iter().enumerate() {
+            let outcome = slot.expect("every wave slot is filled");
+            if let Ok(report) = &outcome {
+                progress(base + k, total, report);
+            }
+            reports.push(outcome);
+        }
+        base += wave.len();
+    }
+    // First error in job order, as serial `?` would surface it.
+    let mut values = Vec::with_capacity(total);
+    for outcome in reports {
+        values.push(outcome?);
+    }
+    Ok(values)
+}
 pub fn compare(args: CompareArgs, quiet: bool) -> Result<Value, String> {
     let started = Instant::now();
     validate_factor_size(args.degree)?;
@@ -915,23 +989,10 @@ pub fn compare(args: CompareArgs, quiet: bool) -> Result<Value, String> {
     if count == 0 || count > 16 {
         return Err("candidate count is outside the bounded comparison range 1..=16".into());
     }
-    let mut candidates = Vec::new();
-    let mut winner = None;
-    let mut best = f64::INFINITY;
+    let mut jobs = Vec::new();
+    let mut job_meta = Vec::new();
     for index in 0..count {
-        let mut trials = Vec::new();
-        let mut costs = Vec::new();
         for sample in 0..args.samples {
-            if !quiet {
-                println!(
-                    "Candidate {}/{}; training fixture {}/{}",
-                    index + 1,
-                    count,
-                    sample + 1,
-                    args.samples
-                );
-                let _ = std::io::stdout().flush();
-            }
             let opts = RunArgs {
                 degree: args.degree,
                 curve_a: args.curve_a,
@@ -944,13 +1005,42 @@ pub fn compare(args: CompareArgs, quiet: bool) -> Result<Value, String> {
                 control: args.control,
                 ..RunArgs::default()
             };
-            let result = child(&opts, args.timeout_seconds)?;
+            job_meta.push((index, sample));
+            jobs.push(ChildJob {
+                run_args: opts,
+                timeout_seconds: args.timeout_seconds,
+                _spec_file: None,
+            });
+        }
+    }
+    // Training fixtures are independent across candidates and samples;
+    // run them with bounded concurrency, then aggregate serially below.
+    let results = run_children_ordered(jobs, &mut |job_idx, _, _| {
+        if !quiet {
+            let (index, sample) = job_meta[job_idx];
+            println!(
+                "Candidate {}/{}; training fixture {}/{}",
+                index + 1,
+                count,
+                sample + 1,
+                args.samples
+            );
+            let _ = std::io::stdout().flush();
+        }
+    })?;
+    let mut candidates = Vec::new();
+    let mut winner = None;
+    let mut best = f64::INFINITY;
+    for (index, chunk) in results.chunks(args.samples.max(1) as usize).enumerate() {
+        let mut trials = Vec::new();
+        let mut costs = Vec::new();
+        for result in chunk {
             if result["status"] == "complete" && result["result"]["verified"] == true {
                 if let Some(cost) = result["process_elapsed_seconds"].as_f64() {
                     costs.push(cost);
                 }
             }
-            trials.push(result);
+            trials.push(result.clone());
         }
         let eligible = costs.len() == args.samples as usize;
         let med = if eligible {
@@ -968,15 +1058,8 @@ pub fn compare(args: CompareArgs, quiet: bool) -> Result<Value, String> {
     }
     let mut holdout = Vec::new();
     if let Some(index) = winner {
+        let mut jobs = Vec::new();
         for sample in 0..args.holdout {
-            if !quiet {
-                println!(
-                    "Candidate {index}; holdout fixture {}/{}",
-                    sample + 1,
-                    args.holdout
-                );
-                let _ = std::io::stdout().flush();
-            }
             let opts = RunArgs {
                 degree: args.degree,
                 curve_a: args.curve_a,
@@ -989,8 +1072,22 @@ pub fn compare(args: CompareArgs, quiet: bool) -> Result<Value, String> {
                 control: args.control,
                 ..RunArgs::default()
             };
-            holdout.push(child(&opts, args.timeout_seconds)?);
+            jobs.push(ChildJob {
+                run_args: opts,
+                timeout_seconds: args.timeout_seconds,
+                _spec_file: None,
+            });
         }
+        holdout = run_children_ordered(jobs, &mut |job_idx, _, _| {
+            if !quiet {
+                println!(
+                    "Candidate {index}; holdout fixture {}/{}",
+                    job_idx + 1,
+                    args.holdout
+                );
+                let _ = std::io::stdout().flush();
+            }
+        })?;
     }
     let accepted = winner.is_some()
         && holdout.len() == args.holdout as usize
@@ -1027,7 +1124,7 @@ pub fn write_new(path: &Path, value: &Value) -> Result<(), String> {
 }
 struct TempSpec(PathBuf);
 impl TempSpec {
-    fn new(doc: &FactorBaseDocument, tag: usize) -> Result<Self, String> {
+    fn new(doc: &FactorBaseDocument, tag: &str) -> Result<Self, String> {
         let path = std::env::temp_dir().join(format!(
             "ic-search-{}-{}-{tag}.json",
             std::process::id(),
@@ -1119,8 +1216,6 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     let census_ms = started.elapsed().as_secs_f64() * 1000.0;
 
     // Validate the best few by real end-to-end runs on fresh fixtures.
-    let mut validations = Vec::new();
-    let mut winner: Option<(usize, f64)> = None;
     let scored: Vec<(usize, &Candidate)> = report
         .candidates
         .iter()
@@ -1128,27 +1223,20 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         .filter(|(_, c)| c.expected_trials().is_finite())
         .take(args.validate_top as usize)
         .collect();
-    for (rank, candidate) in scored {
+    // Every (candidate, holdout) pair is independent; jobs are built
+    // here (one recipe file per job) and run with bounded concurrency
+    // below, then aggregated serially in rank order.
+    let mut job_meta = Vec::new();
+    let mut jobs = Vec::new();
+    for (rank, candidate) in &scored {
         let doc = FactorBaseDocument {
             schema_version: 1,
             degree: kc.n,
             curve_a: kc.a,
             spec: candidate.spec.clone(),
         };
-        let temp = TempSpec::new(&doc, rank)?;
-        let mut runs = Vec::new();
-        let mut costs = Vec::new();
         for sample in 0..args.holdout {
-            if !quiet {
-                println!(
-                    "Validating candidate #{}: {}; holdout fixture {}/{}",
-                    rank + 1,
-                    serde_json::to_string(&candidate.spec).unwrap_or_default(),
-                    sample + 1,
-                    args.holdout
-                );
-                let _ = std::io::stdout().flush();
-            }
+            let temp = TempSpec::new(&doc, &format!("rank{rank}-sample{sample}"))?;
             let run_args = RunArgs {
                 degree: kc.n,
                 curve_a: kc.a,
@@ -1160,22 +1248,50 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
                 solver: args.solver,
                 ..RunArgs::default()
             };
-            let result = child(&run_args, args.timeout_seconds)?;
+            job_meta.push((*rank, sample, candidate.spec.clone()));
+            jobs.push(ChildJob {
+                run_args,
+                timeout_seconds: args.timeout_seconds,
+                _spec_file: Some(temp),
+            });
+        }
+    }
+    let holdout_stride = (args.holdout as usize).max(1);
+    let job_reports = run_children_ordered(jobs, &mut |job_idx, _, report| {
+        if !quiet {
+            let (rank, sample, spec) = &job_meta[job_idx];
+            println!(
+                "Validated candidate #{}: {}; holdout fixture {}/{}: {}",
+                rank + 1,
+                serde_json::to_string(spec).unwrap_or_default(),
+                sample + 1,
+                args.holdout,
+                report["status"].as_str().unwrap_or("?"),
+            );
+            let _ = std::io::stdout().flush();
+        }
+    })?;
+    let mut validations = Vec::new();
+    let mut winner: Option<(usize, f64)> = None;
+    for ((rank, candidate), chunk) in scored.iter().zip(job_reports.chunks(holdout_stride)) {
+        let mut runs = Vec::new();
+        let mut costs = Vec::new();
+        for result in chunk {
             if result["status"] == "complete" && result["result"]["verified"] == true {
                 if let Some(cost) = result["process_elapsed_seconds"].as_f64() {
                     costs.push(cost);
                 }
             }
-            runs.push(result);
+            runs.push(result.clone());
         }
         let eligible = costs.len() == args.holdout as usize;
         let med = eligible.then(|| median(&mut costs));
         if let Some(cost) = med {
             if winner.map_or(true, |(_, best)| cost < best) {
-                winner = Some((rank, cost));
+                winner = Some((*rank, cost));
             }
         }
-        validations.push(json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+        validations.push(json!({"rank":*rank+1,"spec":candidate.spec,"eligible":eligible,
             "median_process_seconds":med,"holdout":runs}));
     }
     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
