@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage177-indexed-target-a337e2e90",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 172.4591971660002,
+    "user_seconds": 325.557869,
+    "system_seconds": 14.762724,
+    "total_core_seconds": 340.320593,
+    "single_core_seconds": 340.320593,
+    "peak_rss_bytes": 3700785152,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

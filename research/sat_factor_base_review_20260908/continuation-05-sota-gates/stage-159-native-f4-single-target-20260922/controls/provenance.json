@@ -1,0 +1,39 @@
+{
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "schema": "koblitz_stage159_same_target_control_provenance.v1",
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "stage26": {
+    "artifact": {
+      "digest": "sha256:0b7e8840b4da0e574032580e9ad47cafebb8b1a7dab2fef5184c1abbd652ed19",
+      "expires_at": "2026-12-10T18:12:57Z",
+      "id": 10282543184,
+      "name": "koblitz-stage26-n59-l9-m3-standard-a1-f0-34632018379",
+      "size_in_bytes": 6788558
+    },
+    "artifact_inventory_sha256": "120d0b75815320b5c1f0da3c07fe84a824b452ddea7a1c8be46d92ef1552cbeb",
+    "task_sha256": "0ffcbbab71447644bd6cae8ba3513926b5badbebb43155b52841b83f3d6f5fb8",
+    "verification": {
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "inventory_sha256": "a39e487df01326ccbfe485a5b9f1f9d4827952e77ccf4f9ddc453e60268f02b3",
+      "schema": "koblitz_stage26_affinity_cell_verification.v1",
+      "status": "verified"
+    }
+  },
+  "stage27": {
+    "artifact": {
+      "digest": "sha256:1ba9dc9c741ae1731471ed37dd072808786ed6e81e91bde7287de71722f36aa1",
+      "expires_at": "2026-12-10T18:33:21Z",
+      "id": 10277178866,
+      "name": "koblitz-stage27-n59-l9-m3-standard-a1-f0-34633920325",
+      "size_in_bytes": 6003458
+    },
+    "artifact_inventory_sha256": "56a21b9fc4a6442affbada01ab054c8989e1e5036db810b39a9dde909edc478e",
+    "task_sha256": "26457d2e31139b35d14d0b70986793f5c6c7804386e1690ba547dae43e0ec91a",
+    "verification": {
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "inventory_sha256": "d5ec240475d23e68bbd7d8994a202e5a347a8b1f03cb7fc26284446d387e2d83",
+      "schema": "koblitz_stage27_direct_mitm_verification.v1",
+      "status": "verified"
+    }
+  }
+}

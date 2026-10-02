@@ -1,0 +1,136 @@
+{
+  "algebraic_roots": 2,
+  "backend": "native-f4",
+  "budget_seconds": 300,
+  "conflicts": null,
+  "cost": {
+    "degree_reached": 6,
+    "extra": {
+      "active_candidate_visits": 301566739,
+      "active_deactivation_tests": 301566739,
+      "basis_len": 17,
+      "batch_insert_elements": 269299,
+      "batch_insert_groups": 321,
+      "build_ns": 16733477532,
+      "divisor_linear_tests": 34,
+      "divisor_submask_lookups": 29134639,
+      "divisor_tests": 29134673,
+      "eliminate_ns": 18773911221,
+      "extraction_tests": 119560,
+      "f4_calls": 65,
+      "field_pairs_reduced": 186661,
+      "m4ri_block_width_max": 8,
+      "m4ri_matrices": 196,
+      "m4ri_scratch_bytes_max": 967360,
+      "m4ri_table_word_xors": 2692459308,
+      "matrix_cols_max": 29308,
+      "matrix_rows_max": 39756,
+      "matrix_rows_sum": 1330859,
+      "new_elements": 265523,
+      "oversize": 0,
+      "pair_prune_linear_tests": 711912,
+      "pair_prune_passes": 321,
+      "pair_prune_submask_lookups": 21632543,
+      "pair_prune_tests": 22344455,
+      "pair_update_ns": 11087187296,
+      "pairs_chain_skipped": 229620889,
+      "pairs_left": 0,
+      "pairs_product_skipped": 70978814,
+      "pairs_reduced": 412194,
+      "reducer_rows": 501716,
+      "steps": 325,
+      "symbolic_bytes_estimate_max": 494849232,
+      "symbolic_cap_hit": 0
+    },
+    "op_unit": "word XORs (elimination, including M4RI tables)",
+    "ops": 29502218031,
+    "peak_bytes": 145665984,
+    "solving_degree": 5,
+    "timed_out": false,
+    "wall_ns": 48408159375
+  },
+  "exhaustive": true,
+  "factor_base_contract": {
+    "discrete_log_labels_used": false,
+    "target_subgroup_enumerated": false
+  },
+  "fixed_x1_nonrational_skipped": 73,
+  "fixed_x1_systems_completed": 65,
+  "fixed_x1_systems_constructed": 65,
+  "fixed_x1_values": 512,
+  "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+  "regenerated_source_exact": true,
+  "same_instance_fields": [
+    "n",
+    "ell",
+    "m",
+    "curve",
+    "algebraic_factor_base",
+    "affine_target"
+  ],
+  "schema": "koblitz_pdp_isolated_backend.v1",
+  "single_thread_requested": true,
+  "solver": "f4-f2",
+  "solver_constructor": "fixed_x1_constant_linear_specialisation",
+  "solver_description": "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+  "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+  "solver_equations_blake3": "d6969c5f89b5be6a7eacbdac45799fc734a273c9034949a482723b4422504ae7",
+  "solver_equations_total": 3835,
+  "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+  "solver_max_degree": 4,
+  "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+  "solver_pair_selector": "grouped_lcm_exact_submask_equivalent_to_quadratic_update",
+  "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+  "solver_schedule": "enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+  "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+  "solver_terms_max_per_system": 61922,
+  "solver_terms_total": 3864601,
+  "solver_variables": 18,
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+      "bytes": 219207,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+      "bytes": 404158,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+      "bytes": 255940,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_instance_verified": true,
+  "source_model_valid": true,
+  "source_representation": "symmetrised_s4",
+  "source_variables": 78,
+  "source_witness_valid": true,
+  "status": "sat",
+  "timing_ns": {
+    "factor_base_x1_membership": 8996216,
+    "fixed_x1_s4_construction": 970070499,
+    "native_f4_whole": 49459347500,
+    "source_verification": 43470458
+  },
+  "witness_points": [
+    {
+      "x": "137",
+      "y": "164288105115948905"
+    },
+    {
+      "x": "286",
+      "y": "349643848945327627"
+    },
+    {
+      "x": "159",
+      "y": "15349584312879311"
+    }
+  ]
+}

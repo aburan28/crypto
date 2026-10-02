@@ -148,7 +148,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, dense exact-LCM Gebauer–Möller selection on bounded domains, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
             .into()
     }
 
@@ -172,15 +172,35 @@ impl SystemSolver for F4F2 {
             ("field_pairs_reduced", st.field_pairs_reduced),
             ("pairs_product_skipped", st.pairs_product_skipped),
             ("pairs_chain_skipped", st.pairs_chain_skipped),
+            ("pair_dense_select_calls", st.pair_dense_select_calls),
+            (
+                "pair_quadratic_select_calls",
+                st.pair_quadratic_select_calls,
+            ),
+            ("pair_candidate_visits", st.pair_candidate_visits),
+            ("pair_lcm_groups", st.pair_lcm_groups),
+            ("pair_cover_lookups", st.pair_cover_lookups),
+            (
+                "pair_dense_scratch_bytes_max",
+                st.pair_dense_scratch_bytes_max,
+            ),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
             ("matrix_rows_sum", st.matrix_rows_sum),
+            ("word_xors_performed", st.word_xors_performed),
             ("divisor_tests", st.divisor_tests),
             ("new_elements", st.new_elements),
+            ("max_poly_degree", u64::from(st.max_poly_degree)),
             ("basis_len", st.basis_len),
+            ("peak_matrix_bytes", st.peak_matrix_bytes),
+            ("peak_table_bytes", st.peak_table_bytes),
+            ("full_m4ri_matrices", st.full_m4ri_matrices),
+            ("full_m4ri_blocks", st.full_m4ri_blocks),
+            ("full_m4ri_table_word_xors", st.full_m4ri_table_word_xors),
             ("build_ns", st.build_ns),
             ("eliminate_ns", st.eliminate_ns),
+            ("f4_wall_ns", st.wall_ns),
             ("pairs_left", st.pairs_left),
             ("oversize", st.oversize as u64),
         ] {
@@ -190,7 +210,14 @@ impl SystemSolver for F4F2 {
             ops: st.word_xors,
             op_unit: "word XORs (elimination only)".into(),
             wall_ns: 0,
-            peak_bytes: st.peak_matrix_bytes,
+            // Tables and their matrix are simultaneously live.  Summing
+            // their individually observed maxima is a conservative
+            // per-call upper bound and avoids silently omitting the table
+            // storage from charged memory.
+            peak_bytes: st
+                .peak_matrix_bytes
+                .saturating_add(st.peak_table_bytes)
+                .saturating_add(st.pair_dense_scratch_bytes_max),
             degree_reached: Some(st.degree_reached),
             solving_degree: Some(st.solving_degree),
             timed_out: st.timed_out,
