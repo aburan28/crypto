@@ -186,7 +186,7 @@ def test_reservation_unprivileged_enters_and_exits(tmp_path):
         assert any(ch.name == "isolation_tier" for ch in checks)
         settle = r.quiesce(0.3, retries=1, sample_period=0.1)
         assert any(ch.name.startswith("settle") for ch in settle)
-        if os.geteuid() == 0:
+        if c["cgroup_writable"]:
             assert r.mechanisms["cgroup"] and r.job_cgroup is not None and r.job_cgroup.exists()
-    if os.geteuid() == 0:
+    if c["cgroup_writable"]:
         assert not r.job_cgroup.exists()
