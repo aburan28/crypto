@@ -16,8 +16,12 @@ export TMPDIR="$build/tmp"
 
 "$build/audit" > "$here/result.json"
 
-shasum -a 256 "$here/PROTOCOL.md" "$here/audit.cpp" "$here/run.sh" \
-  "$here/result.json" > "$here/files.sha256"
+(cd "$root" && shasum -a 256 \
+  benchmarks/sparse-basis-compound/PROTOCOL.md \
+  benchmarks/sparse-basis-compound/RESULTS.md \
+  benchmarks/sparse-basis-compound/audit.cpp \
+  benchmarks/sparse-basis-compound/run.sh \
+  benchmarks/sparse-basis-compound/result.json) > "$here/files.sha256"
 
 cat "$here/result.json"
 echo "PASS: native sparse-basis compound static screen"

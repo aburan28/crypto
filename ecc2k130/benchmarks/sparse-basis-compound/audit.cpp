@@ -366,6 +366,7 @@ struct CandidateResult {
     int conversionDenseChecks = 0;
     int mapBasisChecks = 0;
     int mapDenseChecks = 0;
+    int productBasisChecks = 0;
     int productDenseChecks = 0;
 };
 
@@ -402,6 +403,18 @@ CandidateResult auditCandidate(const std::string &name, const std::string &modul
             const E oracleSparse = applyColumns(betaToSparse, repositoryL(beta, j));
             if (direct != oracleSparse) fail(name + ": sparse Frobenius basis mismatch");
             linear[m][i] = direct;
+        }
+    }
+
+    for (int i = 0; i < kBits; ++i) {
+        const E si = basis(i);
+        const E bi = applyColumns(sparseToBeta, si);
+        for (int j = 0; j < kBits; ++j) {
+            const E sj = basis(j);
+            const E bj = applyColumns(sparseToBeta, sj);
+            if (field.mul(si, sj) != applyColumns(betaToSparse, oldField.mul(bi, bj)))
+                fail(name + ": product basis-pair isomorphism mismatch");
+            ++result.productBasisChecks;
         }
     }
     if (rank(sparseToNormal) != kBits) fail(name + ": sparse-to-normal matrix rank");
@@ -512,6 +525,7 @@ void printCandidate(const CandidateResult &r, bool comma) {
               << ", \"conversionDense\": " << r.conversionDenseChecks
               << ", \"mapBasis\": " << r.mapBasisChecks
               << ", \"mapDense\": " << r.mapDenseChecks
+              << ", \"basisPairProducts\": " << r.productBasisChecks
               << ", \"denseProducts\": " << r.productDenseChecks << "}\n"
               << "    }" << (comma ? "," : "") << "\n";
 }
@@ -562,11 +576,16 @@ int main() {
         constexpr int sharedBytes = tableBytes + driverSharedBytes;
         constexpr int ldsPerMap = 88;
         constexpr int scalarWordsPerMap = 220;
-        constexpr int aluPerMap = 317;
+        constexpr int exactAluPerMap = 315;
+        // Retain the prior direct-sigma ledger's two-operation allowance in
+        // the admission model.  It is conservative; the straight-line data
+        // path has only three cross-word chunk boundaries and counts to 315.
+        constexpr int chargedAluPerMap = 317;
         constexpr double mapsPerUpdate = 3.0 + 2.0 / 16.0;
         constexpr double ldsPerUpdate = ldsPerMap * mapsPerUpdate;
         constexpr double scalarWordsPerUpdate = scalarWordsPerMap * mapsPerUpdate;
-        constexpr double mapAluPerUpdate = aluPerMap * mapsPerUpdate;
+        constexpr double exactMapAluPerUpdate = exactAluPerMap * mapsPerUpdate;
+        constexpr double mapAluPerUpdate = chargedAluPerMap * mapsPerUpdate;
 
         constexpr int currentReducerShifts = 86, currentReducerOrs = 39;
         constexpr int currentReducerXors = 53, currentReducerAnds = 2;
@@ -581,21 +600,32 @@ int main() {
         constexpr int forwardProducts = 30;
         constexpr int inverseProducts = 8;
         constexpr int reversePrefixProducts = 31;
-        constexpr int lambdaProducts = 16;
         constexpr int finalProducts = 16;
-        constexpr int totalProducts = forwardProducts + inverseProducts + reversePrefixProducts +
-                                      lambdaProducts + finalProducts;
+        // reversePrefixProducts includes all 16 inv*W_i products that yield
+        // lambda and the 15 simultaneous inv*D_i updates.  There is no
+        // separate lambda-product stage in PACKED_WEIGHTED_PREFIX=2.
+        constexpr int totalProducts =
+            forwardProducts + inverseProducts + reversePrefixProducts + finalProducts;
         constexpr int sparseProductReductions = totalProducts - inverseProducts;
         constexpr int sparseSquares = batch;
         constexpr double sparseReductionsPerUpdate =
             double(sparseProductReductions + sparseSquares) / batch;
-        constexpr double betaReductionsPerUpdate = double(inverseProducts) / batch;
-        constexpr double clmadPerUpdate = double(totalProducts * 6 + 5 * 4) / batch;
+        // PACKED_INV_POLY=0 converts the batch product to normal coordinates
+        // and uses fromPolynomialProduct131 for its eight products.  Those
+        // products do not execute the direct beta reducer.
+        constexpr double betaReductionsPerUpdate = 0.0;
+        constexpr int inverseNormalSquares = 5;
+        constexpr int lambdaPolynomialSquares = batch;
+        constexpr double clmadPerUpdate =
+            double(totalProducts * 6 + inverseNormalSquares * 4 +
+                   lambdaPolynomialSquares * 5) /
+            batch;
 
         constexpr double sms = 188.0, maxClockGhz = 2.430;
         constexpr double randomLdsLanes = 9.2, aluLanes = 64.0, clmadLanes = 2.0;
         constexpr double referenceBps = 15.436677;
         const double ldsCeiling = sms * maxClockGhz * randomLdsLanes / ldsPerUpdate;
+        const double idealConflictFreeLdsCeiling = sms * maxClockGhz * 16.0 / ldsPerUpdate;
         const double clmadCeiling = sms * maxClockGhz * clmadLanes / clmadPerUpdate;
         const double tableAluCeiling = sms * maxClockGhz * aluLanes / mapAluPerUpdate;
         const double admission = 1.05 * referenceBps;
@@ -603,12 +633,17 @@ int main() {
         const bool sharedFits = sharedBytes <= 101376;
         constexpr int fusedRegisters = 126, tableAddedLiveWords = 11;
         const bool registerEstimateFits = fusedRegisters + tableAddedLiveWords <= 255;
+        constexpr int registersPerSm = 65536;
+        constexpr int maxRegistersAt512Threads = registersPerSm / 512;
+        constexpr int sparseReducerNamedTemporarySaving = 10;
+        constexpr int netNamedWordEstimate =
+            fusedRegisters + tableAddedLiveWords - sparseReducerNamedTemporarySaving;
         const bool rooflinePass = ldsCeiling >= admission && clmadCeiling >= admission &&
                                   tableAluCeiling >= admission;
         const bool gpuPrototype = exactChecks && sharedFits && registerEstimateFits && rooflinePass;
 
         const double currentReductionSourceOps =
-            double((totalProducts + sparseSquares) * currentReducerOps) / batch;
+            double((sparseProductReductions + sparseSquares) * currentReducerOps) / batch;
         const double candidateReductionSourceOps =
             sparseReductionsPerUpdate * sparseReducerOps + betaReductionsPerUpdate * currentReducerOps;
         constexpr double currentSelectionSourceOps = 1230.0;
@@ -619,7 +654,7 @@ int main() {
                   << "  \"schema\": \"ecc2k130-sparse-basis-compound-static-v1\",\n"
                   << "  \"valid\": true,\n"
                   << "  \"sourceParent\": \"5434e208953527d2f37e14bde9f6c470542922cf\",\n"
-                  << "  \"referenceBillionUpdatesPerSecond\": " << referenceBps << ",\n"
+                  << "  \"reference\": {\"billionUpdatesPerSecond\": " << referenceBps << ", \"evidenceCommit\": \"e0b0858b179fe28f753353e7a7313cfe23d71884\", \"headlineResultSha256\": \"d31f2d758d2e787abe8f043b1b2ae69d337ebad9a30403afe74d50d4a003dd8c\", \"independentAuditSha256\": \"1b1a46ca52aa14ef86b96fc9b765c9c10e2815c1fe9bcad867422785ab7976d1\"},\n"
                   << "  \"repositoryBetaModulus\": {\"hex\": \"0xd1d0d000d0000000d000000000000000d\", \"weight\": 19, \"rabinIrreducible\": true, \"reductionBasisChecks\": "
                   << oldBasisChecks << ", \"reductionDenseChecks\": " << oldDenseChecks << "},\n"
                   << "  \"candidates\": [\n";
@@ -630,26 +665,26 @@ int main() {
                   << "    \"chunkBits\": 3, \"chunks\": 44, \"entriesPerChunk\": 8, \"wordsPerEntry\": 5,\n"
                   << "    \"bytesPerMap\": " << mapBytes << ", \"hotMaps\": 9, \"batchBoundaryMaps\": 2, \"runtimeMaps\": " << runtimeMaps << ",\n"
                   << "    \"tableBytes\": " << tableBytes << ", \"driverSharedBytes\": " << driverSharedBytes << ", \"totalSharedBytes\": " << sharedBytes << ", \"optinLimitBytes\": 101376, \"fitsOneBlock\": " << (sharedFits ? "true" : "false") << ",\n"
-                  << "    \"perMap\": {\"lds128\": 44, \"lds32\": 44, \"ldsInstructions\": " << ldsPerMap << ", \"scalarWordEquivalents\": " << scalarWordsPerMap << ", \"dataAlu\": " << aluPerMap << ", \"minimumLiveWords\": " << tableAddedLiveWords << "},\n"
-                  << "    \"mapsPerUpdateAtBatch16\": " << mapsPerUpdate << ", \"ldsInstructionsPerUpdate\": " << ldsPerUpdate << ", \"scalarWordEquivalentsPerUpdate\": " << scalarWordsPerUpdate << ", \"dataAluPerUpdate\": " << mapAluPerUpdate << "\n"
+                  << "    \"perMap\": {\"lds128\": 44, \"lds32\": 44, \"ldsInstructions\": " << ldsPerMap << ", \"scalarWordEquivalents\": " << scalarWordsPerMap << ", \"exactStraightLineDataAlu\": " << exactAluPerMap << ", \"chargedDataAlu\": " << chargedAluPerMap << ", \"minimumLiveWords\": " << tableAddedLiveWords << "},\n"
+                  << "    \"mapsPerUpdateAtBatch16\": " << mapsPerUpdate << ", \"ldsInstructionsPerUpdate\": " << ldsPerUpdate << ", \"scalarWordEquivalentsPerUpdate\": " << scalarWordsPerUpdate << ", \"exactStraightLineDataAluPerUpdate\": " << exactMapAluPerUpdate << ", \"chargedDataAluPerUpdate\": " << mapAluPerUpdate << "\n"
                   << "  },\n"
                   << "  \"reducerCircuits\": {\n"
                   << "    \"currentDirect\": {\"shifts\": " << currentReducerShifts << ", \"ors\": " << currentReducerOrs << ", \"xors\": " << currentReducerXors << ", \"ands\": " << currentReducerAnds << ", \"total32BitSourceOps\": " << currentReducerOps << "},\n"
                   << "    \"sparseTwoFold\": {\"shifts\": " << sparseReducerShifts << ", \"ors\": " << sparseReducerOrs << ", \"xors\": " << sparseReducerXors << ", \"ands\": " << sparseReducerAnds << ", \"total32BitSourceOps\": " << sparseReducerOps << ", \"ratioToCurrent\": " << double(sparseReducerOps) / currentReducerOps << "}\n"
                   << "  },\n"
                   << "  \"batch16Arithmetic\": {\n"
-                  << "    \"productsPerBatch\": {\"forward\": " << forwardProducts << ", \"inverse\": " << inverseProducts << ", \"reversePrefix\": " << reversePrefixProducts << ", \"lambda\": " << lambdaProducts << ", \"finalXY\": " << finalProducts << ", \"total\": " << totalProducts << "},\n"
-                  << "    \"sparseReductionsPerUpdateIncludingLambdaSquare\": " << sparseReductionsPerUpdate << ", \"betaReductionsPerUpdate\": " << betaReductionsPerUpdate << ", \"clmadPerUpdate\": " << clmadPerUpdate << ",\n"
+                  << "    \"productsPerBatch\": {\"forward\": " << forwardProducts << ", \"inverse\": " << inverseProducts << ", \"reversePrefixIncludingLambda\": " << reversePrefixProducts << ", \"finalXY\": " << finalProducts << ", \"total\": " << totalProducts << "},\n"
+                  << "    \"sparseReductionsPerUpdateIncludingLambdaSquare\": " << sparseReductionsPerUpdate << ", \"betaDirectReductionsPerUpdate\": " << betaReductionsPerUpdate << ", \"unchangedInverseProductsViaFromPolynomialProductPerBatch\": " << inverseProducts << ", \"inverseNormalSquaresPerBatch\": " << inverseNormalSquares << ", \"lambdaPolynomialSquaresPerBatch\": " << lambdaPolynomialSquares << ", \"clmadPerUpdate\": " << clmadPerUpdate << ",\n"
                   << "    \"currentReductionSourceOpsPerUpdate\": " << currentReductionSourceOps << ", \"candidateReductionSourceOpsPerUpdate\": " << candidateReductionSourceOps << ",\n"
                   << "    \"currentSelectionAndLjSourceOpsPerUpdate\": " << currentSelectionSourceOps << ", \"candidateSelectionAndLjPlusBatchMapsSourceOpsPerUpdate\": " << candidateSelectionSourceOps << ",\n"
                   << "    \"sourceOpsSavedAcrossThoseStagesPerUpdate\": " << (currentReductionSourceOps + currentSelectionSourceOps - candidateReductionSourceOps - candidateSelectionSourceOps) << "\n"
                   << "  },\n"
-                  << "  \"storage\": {\"fusedBaselineRegisters\": " << fusedRegisters << ", \"tableEvaluatorAddedLiveWords\": " << tableAddedLiveWords << ", \"naiveRegisterUpperEstimate\": " << fusedRegisters + tableAddedLiveWords << ", \"registerLimit\": 255, \"reducerTemporaryWordsCurrent\": 20, \"reducerTemporaryWordsSparse\": 10},\n"
+                  << "  \"storage\": {\"fusedBaselineRegisters\": " << fusedRegisters << ", \"tableEvaluatorMinimumLiveWords\": " << tableAddedLiveWords << ", \"naiveOverlapRegisterEstimate\": " << fusedRegisters + tableAddedLiveWords << ", \"reducerTemporaryWordsCurrent\": 20, \"reducerTemporaryWordsSparse\": 10, \"netNamedWordEstimateIfReuseTransfers\": " << netNamedWordEstimate << ", \"architecturalRegisterLimitPerThread\": 255, \"registersPerSm\": " << registersPerSm << ", \"maximumRegistersPerThreadAt512Threads\": " << maxRegistersAt512Threads << ", \"naiveOverlapEstimatePreserves512ThreadBlock\": " << (fusedRegisters + tableAddedLiveWords <= maxRegistersAt512Threads ? "true" : "false") << ", \"netNamedEstimatePreserves512ThreadBlock\": " << (netNamedWordEstimate <= maxRegistersAt512Threads ? "true" : "false") << ", \"actualCompilationRequired\": true},\n"
                   << "  \"optimisticRooflineBillionPerSecond\": {\n"
-                  << "    \"assumptions\": {\"sms\": 188, \"maxClockGhz\": " << maxClockGhz << ", \"randomSharedLanesPerSmClock\": " << randomLdsLanes << ", \"aluLanesPerSmClock\": " << aluLanes << ", \"clmadLanesPerSmClock\": " << clmadLanes << "},\n"
-                  << "    \"lookupOnly\": " << ldsCeiling << ", \"tableAluOnly\": " << tableAluCeiling << ", \"clmadOnly\": " << clmadCeiling << ", \"admissionThreshold\": " << admission << ", \"lookupOnlyRatioToReference\": " << ldsCeiling / referenceBps << "\n"
+                  << "    \"assumptions\": {\"sms\": 188, \"maxClockGhz\": " << maxClockGhz << ", \"randomSharedLanesPerSmClock\": " << randomLdsLanes << ", \"aluLanesPerSmClock\": " << aluLanes << ", \"clmadLanesPerSmClock\": " << clmadLanes << ", \"rateEvidenceSha256\": \"57d8541c28648911e3e59a9a6bdd34f114658f5df0b299bab651193293b4dc50\", \"capacityEvidenceSha256\": \"31d1c91ca70006086d0454f51be5a5f5866afdbab6c06adcda88026c88a54c1a\"},\n"
+                  << "    \"lookupOnlyProjectionAtTransferredRandomLdsU8Rate\": " << ldsCeiling << ", \"lookupOnlySensitivityAt16LaneRate\": " << idealConflictFreeLdsCeiling << ", \"tableAluOnly\": " << tableAluCeiling << ", \"clmadOnly\": " << clmadCeiling << ", \"admissionThreshold\": " << admission << ", \"transferredRateLookupRatioToReference\": " << ldsCeiling / referenceBps << ", \"clmadCeilingBelow26BObjective\": " << (clmadCeiling < 26.0 ? "true" : "false") << ", \"exactLds128MulticastRateMeasured\": false\n"
                   << "  },\n"
-                  << "  \"decision\": {\"boundedGpuPrototypeJustified\": " << (gpuPrototype ? "true" : "false") << ", \"classification\": \"NEGATIVE_STATIC_EVIDENCE\", \"reason\": \"Even with all multiplication, reduction, state traffic and control made free, the admitted three-bit shared-table route has a 15.283375 B/s lookup-only ceiling at the most favourable recorded clock, below the confirmed 15.436677 B/s reference and the frozen 5% admission margin.\"},\n"
+                  << "  \"decision\": {\"boundedWholeWalkGpuPrototypeJustifiedUnderFrozenTransferModel\": " << (gpuPrototype ? "true" : "false") << ", \"exactLayoutLdsMicroprobeJustified\": true, \"classification\": \"NEGATIVE_STATIC_EVIDENCE_UNDER_FROZEN_TRANSFER_MODEL\", \"reason\": \"After making all multiplication, reduction, state traffic and control free, transferring the measured 9.2-lane random LDS.U8 rate to the admitted three-bit table gives 15.283375 B/s, below the confirmed 15.436677 B/s reference and the frozen 5% admission margin. The exact aligned LDS.128+LDS.32 multicast rate is unmeasured; the 16-lane sensitivity passes, so this is conditional rather than a hardware impossibility result.\"},\n"
                   << "  \"scope\": \"Exact native field/isomorphism/linear-map evidence and a conservative static pipe ledger; no CUDA compile, GPU run, search, solver, collision recovery or key recovery.\"\n"
                   << "}\n";
     } catch (const std::exception &error) {
