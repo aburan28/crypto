@@ -49,3 +49,13 @@ for `gf2_elim.rs`, `6bf4b2c565d572923ac4907e78ced5051889a9251cf7b01bdb9483a5f766
 for `matrix_f5_f2.rs`, and `1b7dd569ad3908b84f86aa7b850ebaa8695e54f40e0712ff806d051887c23c9b`
 for `koblitz_groebner.rs`. The complete commands, environment,
 process outputs and host details are in the raw receipts.
+
+The local `origin/main` ancestry includes PR #801 at merge commit
+`35f22378c`; its historical source snapshots remove the earlier
+source-hash dependency for new row-building work. The isolated Linux
+one- and two-thread replay is prepared in
+[`f5-mainline-rank-segments.yml`](../../.github/workflows/f5-mainline-rank-segments.yml)
+at `ef4a1515d`, but has not run. It selects the first uncontended
+exact attempt on each of four seeds and fails the one-thread gate
+unless both the median and bootstrap lower bound exceed 2.00× against
+selective echelon.
