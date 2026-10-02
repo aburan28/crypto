@@ -10338,5 +10338,37 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage195-buffer-reuse -->
+<!-- BEGIN current-f4-stage196-shape-profile -->
+<div class="panel" id="current-f4-stage196-shape-profile">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 196: 4,096-row matrices identify a hybrid-M4RI screen <span class="chip">profile</span></h2>
+        <p>The exact public <code>n=59, ell=9, m=3</code> true-negative is profiled once with selected
+          five-column <code>BlockTables</code> and once with the existing full-M4RI control. Profiled timing
+          is diagnostic; this stage recommends a threshold but does not select a runtime.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Aggregate elimination inside F4 calls, binned by matrix rows. The frozen rule chooses the largest qualifying suffix with time and performed-XOR ratios below 0.90 and at least 5% of current elimination time.</caption>
+          <thead><tr><th>Rows</th><th>Matrices</th><th>Current s</th><th>Full-control s</th><th>Time ratio</th><th>Current performed XORs</th><th>Full performed XORs</th><th>XOR ratio</th><th>Full-routed</th></tr></thead>
+          <tbody>
+            <tr><td>&lt;256</td><td class="n">242</td><td class="n">0.004175</td><td class="n">0.004061</td><td class="n">0.972851</td><td class="n">5,645,858</td><td class="n">5,645,858</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>256&ndash;511</td><td class="n">241</td><td class="n">0.032891</td><td class="n">0.025950</td><td class="n">0.788966</td><td class="n">76,352,850</td><td class="n">76,352,850</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>512&ndash;1023</td><td class="n">240</td><td class="n">0.181640</td><td class="n">0.263765</td><td class="n">1.452133</td><td class="n">413,182,019</td><td class="n">413,182,019</td><td class="n">1.000000</td><td class="n">0</td></tr>
+            <tr><td>1024&ndash;2047</td><td class="n">1</td><td class="n">0.002699</td><td class="n">0.004745</td><td class="n">1.758364</td><td class="n">3,518,764</td><td class="n">2,957,063</td><td class="n">0.840370</td><td class="n">1</td></tr>
+            <tr><td>2048&ndash;4095</td><td class="n">241</td><td class="n">7.551798</td><td class="n">4.420244</td><td class="n">0.585323</td><td class="n">7,773,752,624</td><td class="n">4,266,448,249</td><td class="n">0.548827</td><td class="n">241</td></tr>
+            <tr><td><strong>&ge;4096</strong></td><td class="n"><strong>481</strong></td><td class="n"><strong>167.625839</strong></td><td class="n"><strong>103.292935</strong></td><td class="n"><strong>0.616211</strong></td><td class="n"><strong>139,522,131,743</strong></td><td class="n"><strong>94,428,351,487</strong></td><td class="n"><strong>0.676798</strong></td><td class="n"><strong>481</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">decision</span> all suffixes qualify; the largest-threshold rule recommends <code>min_rows=4096</code> for a separately preregistered unprofiled hybrid screen</span>
+        <span><span class="chip">dominance</span> the &ge;4096 bin represents 95.5683% of current profiled elimination time; full/current ratios are 0.616211 time and 0.676798 performed XORs</span>
+        <span><span class="chip">process diagnostics</span> current profile: 23.954849 wall / 182.059640 core / 4.812 GB RSS; full profile: 17.589464 wall / 158.782003 core / 3.311 GB RSS; no selected speedup is claimed</span>
+        <span><span class="chip">accounting</span> Stage 196 lower bound: 12 components, 207.508688 wall-seconds, 1,001.106379 core-seconds, 5.161 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 658 components, 24,806.692585 wall-seconds, 65,220.279737 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-196-elimination-shape-profile-20261002/result.json</code>; one-target profiling only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage196-shape-profile -->
 </body>
 </html>

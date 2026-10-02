@@ -144,6 +144,18 @@ pub struct F4Stats {
     /// One when this F4 call serializes only product, symbolic and packing
     /// work while retaining the selected parallel elimination path.
     pub inner_build_parallel_disabled_calls: u64,
+    /// Optional Stage 196 matrix-shape profile. Bins are `<256`, `256..512`,
+    /// `512..1024`, `1024..2048`, `2048..4096`, and `>=4096` rows.
+    pub matrix_profile_counts: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_rows_sum: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_cols_sum: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_eliminate_ns: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_logical_xors: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_performed_xors: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_full_m4ri_counts: [u64; MATRIX_PROFILE_BINS],
+    pub matrix_profile_unbinned_eliminate_ns: u64,
+    pub matrix_profile_unbinned_logical_xors: u64,
+    pub matrix_profile_unbinned_performed_xors: u64,
     /// Rows symbolic preprocessing added as reducers.
     pub reducer_rows: u64,
     /// Largest matrix built, and the sum of rows over every matrix.
@@ -195,6 +207,7 @@ pub struct F4Stats {
 pub const MAX_MATRIX_WORDS: u64 = 1 << 27;
 
 const NONE: u32 = u32::MAX;
+pub const MATRIX_PROFILE_BINS: usize = 6;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PairKind {
@@ -898,10 +911,50 @@ fn echelon(
     st: &mut F4Stats,
     deadline: Option<Instant>,
 ) -> Option<Vec<(usize, Row)>> {
-    if full_m4ri_enabled() && full_m4ri_shape(rows.len(), n_cols) {
+    let use_full_m4ri = full_m4ri_enabled() && full_m4ri_shape(rows.len(), n_cols);
+    if !matrix_profile_enabled() {
+        return if use_full_m4ri {
+            echelon_full_m4ri(rows, n_cols, st, deadline)
+        } else {
+            echelon_block_tables(rows, n_cols, st, deadline)
+        };
+    }
+    let n_rows = rows.len();
+    let bin = matrix_profile_bin(n_rows);
+    let logical_before = st.word_xors;
+    let performed_before = st.word_xors_performed;
+    let started = Instant::now();
+    let result = if use_full_m4ri {
         echelon_full_m4ri(rows, n_cols, st, deadline)
     } else {
         echelon_block_tables(rows, n_cols, st, deadline)
+    };
+    st.matrix_profile_counts[bin] += 1;
+    st.matrix_profile_rows_sum[bin] += n_rows as u64;
+    st.matrix_profile_cols_sum[bin] += n_cols as u64;
+    st.matrix_profile_eliminate_ns[bin] =
+        st.matrix_profile_eliminate_ns[bin].saturating_add(started.elapsed().as_nanos() as u64);
+    st.matrix_profile_logical_xors[bin] = st.matrix_profile_logical_xors[bin]
+        .saturating_add(st.word_xors.saturating_sub(logical_before));
+    st.matrix_profile_performed_xors[bin] = st.matrix_profile_performed_xors[bin]
+        .saturating_add(st.word_xors_performed.saturating_sub(performed_before));
+    st.matrix_profile_full_m4ri_counts[bin] += u64::from(use_full_m4ri);
+    result
+}
+
+fn matrix_profile_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("F4_F2_MATRIX_PROFILE").as_deref() == Ok("1"))
+}
+
+fn matrix_profile_bin(rows: usize) -> usize {
+    match rows {
+        0..=255 => 0,
+        256..=511 => 1,
+        512..=1023 => 2,
+        1024..=2047 => 3,
+        2048..=4095 => 4,
+        _ => 5,
     }
 }
 
@@ -1512,6 +1565,20 @@ pub fn groebner_basis_f4(
     let finish = |basis: Vec<F2BoolPoly>, mut st: F4Stats| {
         st.basis_len = basis.len() as u64;
         st.wall_ns = started.elapsed().as_nanos() as u64;
+        if matrix_profile_enabled() {
+            st.matrix_profile_unbinned_eliminate_ns = st
+                .eliminate_ns
+                .saturating_sub(st.matrix_profile_eliminate_ns.iter().copied().sum::<u64>());
+            st.matrix_profile_unbinned_logical_xors = st
+                .word_xors
+                .saturating_sub(st.matrix_profile_logical_xors.iter().copied().sum::<u64>());
+            st.matrix_profile_unbinned_performed_xors = st.word_xors_performed.saturating_sub(
+                st.matrix_profile_performed_xors
+                    .iter()
+                    .copied()
+                    .sum::<u64>(),
+            );
+        }
         (basis, st)
     };
 
@@ -2461,6 +2528,26 @@ mod tests {
             }
         }
         assert!(consistent > 3);
+    }
+
+    #[test]
+    fn matrix_profile_row_bins_cover_boundaries() {
+        for (rows, expected) in [
+            (0usize, 0usize),
+            (255, 0),
+            (256, 1),
+            (511, 1),
+            (512, 2),
+            (1023, 2),
+            (1024, 3),
+            (2047, 3),
+            (2048, 4),
+            (4095, 4),
+            (4096, 5),
+            (12000, 5),
+        ] {
+            assert_eq!(matrix_profile_bin(rows), expected);
+        }
     }
 
     /// A budget is honoured and reported, not silently turned into a
