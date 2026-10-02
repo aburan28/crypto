@@ -6799,6 +6799,39 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-f5-affine-signature-20261002">
+  <div class="panel-head">
+    <h2>Boolean F5 affine row signatures: structural gate passes, complete cost unknown <span class="chip">accounting</span></h2>
+    <p>The unchanged native Boolean F5 criterion was replayed on 144 cells and 2,016
+      generated public quadratic-system evaluations. For each fixed quadratic core,
+      all 32 changing-affine assignments in every declared n=16/20/24 batch-32
+      discovery and fresh holdout cell selected the exact same generator–multiplier
+      row bitstream: 18/18 cells passed in each split. Six different cores per size
+      produced six different signatures. This meets a necessary cache-feasibility
+      condition; no cached complete F5 call was timed.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_affine_signature_20261002/CONCLUSION.md">structural decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_affine_signature_20261002/qualified_discovery_01/results.json">discovery replay</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_affine_signature_20261002/qualified_holdout_01/results.json">fresh holdout replay</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_affine_signature_20261002/RUNS.json">hash-bound run registry</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact selected multiplier-row labels per system at degree four. The ratio is
+      selected labels divided by the full degree-at-most-two multiplier-label universe;
+      it is not a time, relation-yield or rho ratio.</caption>
+    <thead><tr><th>Variables</th><th>All labels</th><th>Selected</th><th>Selected / labels</th><th>Pruned</th><th>Distinct core signatures</th><th>Primary discovery / holdout</th></tr></thead>
+    <tbody>
+      <tr><td>12</td><td>948</td><td>870</td><td>0.918</td><td>78</td><td>6</td><td>bridge only</td></tr>
+      <tr><td>16</td><td>2,192</td><td>2,056</td><td>0.938</td><td>136</td><td>6</td><td>6/6 / 6/6</td></tr>
+      <tr><td>20</td><td>4,220</td><td>4,010</td><td>0.950</td><td>210</td><td>6</td><td>6/6 / 6/6</td></tr>
+      <tr><td>24</td><td>7,224</td><td>6,924</td><td>0.958</td><td>300</td><td>6</td><td>6/6 / 6/6</td></tr>
+    </tbody>
+  </table></div>
+  <p>The criterion still runs on every system; its counted GF(2) word work varies even
+    when row labels do not. High-block setup, per-assignment elimination, output
+    unpacking, complete F5 call cost, natural relations, calibrated IC operations
+    and rho comparison remain unmeasured. No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-graded-tail-reuse-20261003">
   <div class="panel-head">
     <h2>Graded Boolean tail reuse: n=24 stage gain, universal discovery gate rejected <span class="chip">engineering</span></h2>

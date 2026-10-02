@@ -1,15 +1,12 @@
 # Boolean F5 selected-row signature screen
 
-This is a frozen **protocol with passing native discovery and holdout**. It asks whether the repository's native
+This is a frozen **protocol with a native producer; discovery pending**. It asks whether the repository's native
 Boolean-safe F5 criterion retains the same multiplier-row labels across
 public generated quadratic systems whose affine coefficients change. A fixed
 quartic projection is insufficient if the criterion changes which rows exist.
 
-The [source-pinned discovery](DISCOVERY.md) and the fresh holdout each passed
-all 18 primary structural cells, with unchanged worker/verifier sources and
-sealed native replay. [CONCLUSION.md](CONCLUSION.md) gives the exact
-row-label counts and limits. No timing, complete F5 speedup, index-calculus
-cost or rho result exists yet.
+No qualified discovery, evidence, timing, complete F5 speedup,
+index-calculus cost or rho result exists yet. The holdout seeds are unused.
 `run.sh discovery NEW_DIRECTORY` builds and tests the Rust worker, runs the
 fixed grid, replays every selected-row bit and seals the result. It refuses
 to overwrite an attempt. A holdout invocation requires a sealed passing
