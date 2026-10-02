@@ -29,6 +29,17 @@ B32 in every long confirmation and B64 in the screen. See the frozen
 [two-cycle result](benchmarks/batch-hints-fast2/result.json). The selected
 block queue is recorded in [its result](benchmarks/block-hints/result.json)
 and [independent audit](benchmarks/block-hints/independent-audit.json).
+On that selected block-v3 schedule, the shared polynomial-square table and
+out-of-line polynomial inversion measured **5.095344–5.107611 B/s**, including
+**5.097573** and **5.100950 B/s**, against 5.064024–5.069412 B/s controls.
+All five paired ratios cleared 1.005, with median **1.006625**, while a matched
+control/control panel had median 1.000047 and stayed within the frozen noise
+bounds. The table preset now selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a bounded 0.66% same-walk engineering gain; it
+remains `Partial` against the older 1.040 roofline threshold and is not a
+full-solve improvement. See the [five-pair result](benchmarks/block-both2-confirm5/result.json),
+[artifact manifest](benchmarks/block-both2-confirm5/artifact-manifest.json) and
+[independent audit](benchmarks/block-both2-confirm5/independent-audit.json).
 
 The earlier **20.078 B/s** table result in
 [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) used the superseded v2 cycle

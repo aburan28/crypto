@@ -128,7 +128,19 @@ sorted v3 corpus. `TABLE_BLOCK_HINTS=1` also compacts pending owners across a
 measured **5.019275 B/s** versus **3.559925 B/s**, a median paired ratio of
 **1.408969**, with the same replay/corpus gate. The global knobs remain
 default-off; the RTX table preset selects split-forward, reconvergence, fast2
-and queue 512. This repairs a
+and queue 512.
+
+On that selected schedule, the shared square table plus out-of-line polynomial
+inversion measured **5.095344–5.107611 B/s**, including **5.097573** and
+**5.100950 B/s**, against 5.064024–5.069412 B/s controls in five alternating
+pairs. All five ratios cleared 1.005 and their median was **1.006625**. A
+matched control/control panel stayed within the preregistered noise bounds,
+with median 1.000047. Replay and the full 1,480,278-record v3 corpus remained
+identical. The RTX table preset therefore selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a narrow same-walk engineering selection and
+remains `Partial` against ROOFLINE.md's older 1.040 primary threshold.
+
+This repairs a
 correctness-current path but remains below the sigma preset and far below 26 B/s.
 
 Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
@@ -139,6 +151,8 @@ The fast2 result is
 The block result and independent audit are
 [`benchmarks/block-hints/result.json`](benchmarks/block-hints/result.json) and
 [`benchmarks/block-hints/independent-audit.json`](benchmarks/block-hints/independent-audit.json).
+The arithmetic confirmation, immutable-artifact manifest and independent audit
+are under [`benchmarks/block-both2-confirm5/`](benchmarks/block-both2-confirm5/).
 
 ## Historical table-walk comparison (superseded cycle rule)
 

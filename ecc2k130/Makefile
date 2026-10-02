@@ -717,8 +717,10 @@ PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # carrying the exact v3 schedule selected by the current matched comparison:
 # split selection from the prefix product and reconverge hinted slots before
 # the cold full-point probe.  See CYCLE-ESCAPE-V3.md and benchmarks/batch-hints.
-# ALU squaring is on in this preset.  The value is expanded into the child
-# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+# ALU squaring is on in this preset.  The five-pair block-v3 confirmation also
+# selected the shared square table and out-of-line polynomial inversion as a
+# bounded +0.66% same-walk engineering gain.  Values are expanded into the
+# child make, and KNOBS remains the explicit override route.
 # The knob set itself, so the recipe below and gpu-preset cannot drift apart.
 PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
@@ -726,6 +728,7 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
 	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+	    PACKED_SQUARE_TABLE=1 PACKED_INV_POLY=2 \
 	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 \
 	    TABLE_BLOCK_HINTS=1 TABLE_HINT_QUEUE=512 CYCLE_FAST2=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
