@@ -358,6 +358,10 @@ pub struct IcCostOptions {
     pub ffd_d_max: u32,
     /// Seed for probes and for the planted secret.
     pub seed: u64,
+    /// `#E` when it is already certified for the whole class — by the
+    /// explicit-isogeny walk, which proves `#E' = #E` on every edge — so a
+    /// member skips its `O(2ⁿ)` point count.  `None` counts, as always.
+    pub known_order: Option<u64>,
 }
 
 impl Default for IcCostOptions {
@@ -373,6 +377,7 @@ impl Default for IcCostOptions {
             ffd_targets: 12,
             ffd_d_max: 6,
             seed: DEFAULT_SEED,
+            known_order: None,
         }
     }
 }
@@ -396,7 +401,7 @@ pub enum ProbeOutcome {
 }
 
 /// One class member, fully measured.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct IcCostRow {
     pub a2: u8,
     pub a6: u64,
@@ -547,7 +552,7 @@ pub fn diagnose_member(
     a6: u64,
     seed: u64,
 ) -> Result<(u64, u64, u64), SkipReason> {
-    let me = Member::build(n, irr, a2, a6, seed)?;
+    let me = Member::build(n, irr, a2, a6, seed, None)?;
     Ok((me.order, me.r, me.cofactor))
 }
 
@@ -574,10 +579,11 @@ impl Member {
         a2: u8,
         a6: u64,
         seed: u64,
+        known_order: Option<u64>,
     ) -> Result<Self, SkipReason> {
         let gf = Gf2::new(irr);
         let ash = ArtinSchreier::new(&gf);
-        let order = curve_order(&gf, &ash, a2, a6);
+        let order = known_order.unwrap_or_else(|| curve_order(&gf, &ash, a2, a6));
         let (r, e) = *factorise(order)
             .last()
             .ok_or(SkipReason::SubgroupTooSmall)?;
@@ -763,7 +769,7 @@ pub fn measure_member(
     a6: u64,
     opts: &IcCostOptions,
 ) -> Result<IcCostRow, SkipReason> {
-    let me = Member::build(n, irr, a2, a6, opts.seed)?;
+    let me = Member::build(n, irr, a2, a6, opts.seed, opts.known_order)?;
     let group = BinaryGroup(&me.fast);
     let mut ops = GroupOps::default();
 
@@ -1578,7 +1584,8 @@ mod tests {
     fn bsgs_solves_a_small_instance_on_its_own() {
         let n = 11;
         let irr = field_for(n).expect("degree 11 has a sparse irreducible");
-        let me = Member::build(n, &irr, 0, 3, 7).expect("a6 = 3 over F_2^11 has a clean subgroup");
+        let me =
+            Member::build(n, &irr, 0, 3, 7, None).expect("a6 = 3 over F_2^11 has a clean subgroup");
         let group = BinaryGroup(&me.fast);
         let mut ops = GroupOps::default();
         let d = 12345 % me.r;

@@ -224,7 +224,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     // Tables above the 48 KB static limit need the opt-in before any query.
     static void prepareKernel() {
-        if (dynamicSharedBytes() > 48 * 1024)
+        // A static block-hint queue reduces the default dynamic allowance even
+        // though the table alone is just under 48 KiB. Opt in to the table's
+        // full dynamic size whenever that queue is compiled into the kernel.
+        if (dynamicSharedBytes() > 48 * 1024 || ECC_TABLE_BLOCK_HINTS)
             CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::walk,
                 cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
     }
@@ -331,6 +334,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+        printf("packed launch bounds: %d threads, %d min blocks\n", ECC_THREADS, ECC_MINBLOCKS);
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
@@ -356,6 +360,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed chains: %d\n", ECC_PACKED_CHAINS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
+        printf("packed sigma fused: %d\n", ECC_SIGMA_FUSED);
+        printf("packed sigma fused late y: %d\n", ECC_SIGMA_FUSED_LATE_Y);
+        printf("packed witness: %d\n", ECC_WITNESS);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
@@ -378,6 +385,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
         printf("packed table split forward: %d\n", ECC_TABLE_SPLIT_FORWARD);
         printf("packed table batch hints: %d\n", ECC_TABLE_BATCH_HINTS);
+        printf("packed table block hints: %d, queue %d\n", ECC_TABLE_BLOCK_HINTS, ECC_TABLE_HINT_QUEUE);
         printf("packed cycle fast2: %d\n", ECC_CYCLE_FAST2);
         printf("packed cycle profile: %d\n", ECC_CYCLE_PROFILE);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);

@@ -39,6 +39,8 @@
 #                        (default 0; requires TABLE_PIPE_SELECT)
 #   TABLE_BATCH_HINTS  reconverge split-forward v3 cycle probes across slots
 #                      before building the prefix (default 0)
+#   TABLE_BLOCK_HINTS  compact hinted slots across a CUDA block (default 0;
+#                      requires TABLE_BATCH_HINTS)
 #   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
 #   CYCLE_PROFILE  diagnostic exact-v3 cold-probe counters (default 0)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
@@ -94,6 +96,8 @@ PACKED_PAIR_ILP ?= 0
 UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
+SIGMA_FUSED ?= 0
+SIGMA_FUSED_LATE_Y ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
@@ -130,6 +134,9 @@ TABLE_PIPE_SELECT ?= 0
 TABLE_SPLIT_FORWARD ?= 0
 # Resolve the split-forward pass's cold v3 hints after all raw tags are known.
 TABLE_BATCH_HINTS ?= 0
+# Compact up to TABLE_HINT_QUEUE pending (thread,slot) pairs in shared memory.
+TABLE_BLOCK_HINTS ?= 0
+TABLE_HINT_QUEUE ?= 512
 # Prove raw two-cycles after one affine step and one denominator check.
 CYCLE_FAST2 ?= 0
 # Count exact-v3 cold-probe outcomes. Diagnostic only; instrumented timing is
@@ -244,6 +251,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
+       -DECC_SIGMA_FUSED=$(SIGMA_FUSED) \
+       -DECC_SIGMA_FUSED_LATE_Y=$(SIGMA_FUSED_LATE_Y) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
@@ -254,7 +263,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
-       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_TABLE_BLOCK_HINTS=$(TABLE_BLOCK_HINTS) -DECC_TABLE_HINT_QUEUE=$(TABLE_HINT_QUEUE) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
@@ -370,6 +379,30 @@ build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
 
 trailforest: build/trailforest
+
+# Strict host replay for versioned table-v3 corpora.  Keep every rule switch
+# explicit: this is an evidence checker for the selected reference walk, not a
+# build that inherits whichever experimental knobs happen to be on a command
+# line.  Run-id, DP weight and producer max-iters remain required runtime
+# context because the v3 file header does not carry them.
+TABLE_V3_REPLAY_DEFS = -DECC_NO_CUDA -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 \
+	-DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1
+
+build/table-v3-replay: src/tablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/tablev3replay.cpp -o $@
+
+table-v3-replay: build/table-v3-replay
+
+build/test-table-v3-replay: src/testtablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/testtablev3replay.cpp -o $@
+
+test-table-v3-replay: build/table-v3-replay build/test-table-v3-replay
+	./build/test-table-v3-replay
+	./build/table-v3-replay --help >/dev/null
 
 # Orbit witnesses for a corpus: the j-counts a cairn piecework node can check
 # with one double scalar multiplication.  Host only.
@@ -590,7 +623,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -680,6 +713,25 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Confirmed 15.436677 B/s sigma configuration. The existing Modal preset
+# above has its own historical validation; this native target gives the exact
+# compiler settings used by the fused comparison without extending its cache.
+PRO6000_SIGMA_FUSED_KNOBS = BATCH=16 THREADS=256 MINBLOCKS=2 \
+    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+    PACKED_INLINE_POLY=3 SIGMA_FUSED=1 WITNESS=0 WALK_TABLE=0
+gpu-rtx-pro6000-sigma-fused:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+# Matched replay, A/A noise and five-pair confirmation; benchmark-only.
+bench-rtx-pro6000-sigma-fused:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-fused/gpujob-headline.sh \
+	    --out $(FUSED_BENCH_OUT)
+FUSED_BENCH_OUT ?= /tmp/ecc2k-sigma-fused-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-fused bench-rtx-pro6000-sigma-fused
+
 # Architecture of the two RTX PRO 6000 builds below.  Override to run the same
 # knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
 # for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
@@ -688,8 +740,10 @@ PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # carrying the exact v3 schedule selected by the current matched comparison:
 # split selection from the prefix product and reconverge hinted slots before
 # the cold full-point probe.  See CYCLE-ESCAPE-V3.md and benchmarks/batch-hints.
-# ALU squaring is on in this preset.  The value is expanded into the child
-# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+# ALU squaring is on in this preset.  The five-pair block-v3 confirmation also
+# selected the shared square table and out-of-line polynomial inversion as a
+# bounded +0.66% same-walk engineering gain.  Values are expanded into the
+# child make, and KNOBS remains the explicit override route.
 # The knob set itself, so the recipe below and gpu-preset cannot drift apart.
 PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
@@ -697,7 +751,9 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
 	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
-	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 CYCLE_FAST2=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_SQUARE_TABLE=1 PACKED_INV_POLY=2 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 \
+	    TABLE_BLOCK_HINTS=1 TABLE_HINT_QUEUE=512 CYCLE_FAST2=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
@@ -921,10 +977,11 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/table-v3-replay build/test-table-v3-replay
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:
