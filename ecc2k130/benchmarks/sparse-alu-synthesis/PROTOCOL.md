@@ -13,16 +13,27 @@ recover a scalar.
 The measured fused sigma reference is **15.436677 B complete scalar
 updates/s**.  The engineering objective is **26 B/s** on one RTX PRO 6000.
 Using the most favourable recorded 188 SMs at 2.430 GHz and 64 ALU
-lanes/SM-clock gives complete-walk ALU budgets of:
+lanes/SM-clock defines a deliberately simple source-operation screen: each
+charged source word operation consumes one ALU lane-cycle, with no credit for
+compiler lowering, instruction mix, overlap, or latency hiding.  That model
+gives complete-walk screening allowances of:
 
 ```
 reference: 188 * 2.430e9 * 64 / 15.436677e9
 target:    188 * 2.430e9 * 64 / 26e9
 ```
 
-The checker reports both exact values.  A map-only construction above the
-target budget cannot reach 26 B/s even when every field operation, state
-access, branch, report, and loop instruction is free.
+The checker reports both values.  A map-only construction above the target
+allowance is not admitted to implementation by this frozen protocol, even
+when every field operation, state access, branch, report, and loop instruction
+is free.  This is a conditional screening rule, not a hardware lower bound.
+
+The reference row demonstrates the model's transfer limit.  Its 2,276.25
+charged source operations/update predict 12.844705 B/s at 29.23776 T
+lane-operations/s, while the fused kernel measured 15.436677 B/s.  The
+1.201793 ratio reflects compiler lowering and overlap that this static model
+does not represent.  Exact field checks and source counts are proved below;
+their conversion to throughput is explicitly modelled.
 
 For the complete comparable B16 source ledger, the reference charges 1,230
 word operations/update to selector plus `L_j` composition and 1,046.25 to the
@@ -51,10 +62,11 @@ bits are mandatory.
 The following finite set is fixed before the canonical run:
 
 1. **Generated masked diagonals.**  A nonzero `(diagonal, output-word)` term
-   uses one shifted source word and one constant mask.  The exact direct count
-   is one shift plus one fused `LOP3(out, shifted, mask)` per term, except the
-   zero diagonal needs no shift.  An optimistic count makes every shift free
-   and charges one `LOP3` per term.
+   uses one shifted source word and one constant mask.  Within the checker's
+   one-shifted-word abstraction, the direct count is one word shift plus one
+   fused `LOP3(out, shifted, mask)` per term, except the zero diagonal needs no
+   shift.  A 131-bit cross-word shift can cost more than that abstraction.
+   The stronger oracle makes every shift free and charges one `LOP3` per term.
 2. **Warp-divergent fixed circuits.**  With near-uniform `j`, the checker
    reports the expected number of distinct branches in a 32-lane warp and the
    serialized sum of the eight fixed circuits.  It also reports an impossible
@@ -82,16 +94,18 @@ common-subexpression win from being inferred from matrix density alone.
 
 ## Decision and stop rule
 
-A candidate survives only if all exact checks pass and at least one concrete
-circuit satisfies both:
+A candidate is admitted to a separate GPU protocol only if all exact checks
+pass and at least one concrete circuit satisfies both frozen model rules:
 
-1. its complete selector/direct-map/conversion map cost is below the entire
-   26 B/s ALU budget; and
+1. its complete selector/direct-map/conversion map cost is below the 26 B/s
+   source-operation screening allowance; and
 2. after adding the frozen 476.625 sparse-reducer and 75 ALU-square source
    operations, its comparable B16 subledger is below the reference's
    2,276.25 operations/update.
 
-The first condition is necessary but not sufficient because it gives all
-other walk work zero cost.  Passing authorizes a separate implementation
-protocol, not a speed claim.  If every concrete family fails, the workstream
-stops with a compact negative result and no GPU/full-walk experiment.
+The first rule gives all other walk work zero cost but remains a modelled
+admission rule rather than a universal necessary condition: actual compiler
+lowering and pipeline overlap can differ by operation mix.  Passing authorizes
+a separate implementation protocol, not a speed claim.  If every concrete
+family fails, the workstream stops for the enumerated constructions with a
+compact negative result and no GPU/full-walk experiment.

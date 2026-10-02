@@ -1,12 +1,21 @@
 # Sparse-basis ALU linear-map synthesis: negative static result
 
-Decision: **none of the bounded ALU/synthesized map families survives; do not
-implement or run a GPU/full-walk candidate.**  Even an impossible oracle that
+Decision: **none of the bounded ALU/synthesized map families passes the frozen
+source-operation screen; do not implement or run a GPU/full-walk candidate
+from these constructions.**  Even an impossible oracle that
 assigns the cheapest map `L_3` to every update, makes every word shift and
 dynamic selection free, and charges only one fused `LOP3` per nonzero masked
-word contribution needs **1,826.125 ALU operations/update** for the required
-maps.  The entire 26 B/s walk has room for only **1,124.529 ALU
-lane-instructions/update** on the favourable 188-SM, 2.430-GHz, 64-lane model.
+word contribution needs **1,826.125 charged source operations/update** for the
+required maps.  The one-source-operation-per-lane-cycle model allocates only
+**1,124.529 operations/update** at 26 B/s on the favourable 188-SM, 2.430-GHz,
+64-lane configuration.
+
+This conversion is a conditional model, not a hardware lower bound.  As a
+calibration, the reference's 2,276.25-operation comparable subledger predicts
+12.844705 B/s in the same model, while the fused kernel measured 15.436677
+B/s, 1.201793 times the prediction.  Compiler lowering, instruction mix,
+overlap, and latency hiding are not represented.  The exact matrix identities
+and source counts below are proved; their throughput translation is modelled.
 
 This is a native static circuit result.  No CUDA compilation, GPU run, sparse
 walk, search, distinguished-point collection, collision recovery, or key
@@ -26,9 +35,9 @@ table experiment.  It passes:
 - 59 exact composition identities covering `L_(a+b)`, `L_(2a)`, and
   `L_(j+1)` for powers through ten.
 
-The complete-walk ALU budgets are:
+The source-operation screening allowances are:
 
-| boundary | ALU lane-instructions/update |
+| boundary | modelled source operations/update |
 |:--|--:|
 | confirmed fused 15.436677 B/s | 1,894.044942 |
 | 26 B/s objective | **1,124.529231** |
@@ -36,11 +45,13 @@ The complete-walk ALU budgets are:
 ## Generated masked-word circuits
 
 Each nonzero `(diagonal, output-word)` term can be accumulated with one
-`LOP3(out, shifted, mask)`.  The exact circuit also needs one shifted word per
-term except on the zero diagonal.  “Free shift” below is deliberately
-impossible and gives the candidate the most favourable count.
+`LOP3(out, shifted, mask)`.  The one-shifted-word abstraction also charges one
+word shift per term except on the zero diagonal.  A real 131-bit cross-word
+shift can require more work, so even that column remains optimistic.  “Free
+shift” below is deliberately impossible and gives the candidate the most
+favourable count.
 
-| map | matrix ones | diagonals | word terms / free-shift `LOP3` | exact shift + `LOP3` |
+| map | matrix ones | diagonals | word terms / free-shift `LOP3` | optimistic one-word shift + `LOP3` |
 |:--|--:|--:|--:|--:|
 | sparse-to-normal | 8,541 | 261 | **754** | 1,503 |
 | sparse-to-beta | 8,559 | 259 | 751 | 1,497 |
@@ -59,12 +70,13 @@ The impossible oracle map ledger is therefore:
 ```
 normal + 2*L3 + (toBeta + fromBeta)/16
 = 754 + 2*489 + (751+755)/16
-= 1,826.125 ALU/update.
+= 1,826.125 charged source operations/update.
 ```
 
-That map-only count is 1.624 times the total 26 B/s ALU budget.  Its isolated
-ALU ceiling is 16.010821 B/s even though all shifts, selection, arithmetic,
-state, control, and reporting are free.  The exact masked-word circuit costs
+That map-only count is 1.624 times the 26 B/s screening allowance.  Its
+modelled isolated rate is 16.010821 B/s even though all shifts, selection,
+arithmetic, state, control, and reporting are free.  This is not measured
+throughput or a hardware ceiling.  The optimistic one-word-shift circuit costs
 3,636.625 operations/update.
 
 ## Dynamic selection and common structure
@@ -121,8 +133,8 @@ basis.  One sparse ALU square is five 15-operation spreads plus the 82-op
 two-fold reducer: 157 source operations.  Even perfect `j` compaction averages
 13 squares/update across X and Y, for 3,638.125 map operations after the
 normal and amortized basis maps.  Keeping those map squares on `CLMAD` costs
-65 `CLMAD`s/update and has a 14.056615 B/s isolated ceiling before the walk's
-ordinary field products.  The branchless `3+1+2+4` chain is worse.
+65 `CLMAD`s/update and has a 14.056615 B/s isolated modelled rate before the
+walk's ordinary field products.  The branchless `3+1+2+4` chain is worse.
 
 ## Complete comparable B16 source ledger
 
@@ -133,17 +145,19 @@ ordinary field products.  The branchless `3+1+2+4` chain is worse.
 
 The candidate is already **4.459% worse** in the comparable source unit while
 receiving free shifts, free selection, and `L_3` for every update.  Its
-source-ledger ALU ceiling is 12.296398 B/s.  Unchanged products, inverse
-transforms, state traffic, control, and reporting are outside both rows, so
-adding them cannot reverse the decision.  Source operations are not SASS or a
-measured rate; the stronger target-budget failure above does not require this
-translation.
+source-ledger modelled rate is 12.296398 B/s.  Unchanged products, inverse
+transforms, state traffic, control, and reporting are outside both rows.  The
+4.459% comparison is exact in the frozen source unit, but different operation
+mixes can lower and overlap differently, so it is not a measured throughput
+comparison.  It supplies no static case for implementing these constructions.
 
 ## Scope of the stop
 
 This closes the generated masked-diagonal, all-output shared-shift, divergent
 fixed-map, greedy XOR-CSE, and repeated-Frobenius families for this sparse
-basis.  It does not prove a lower bound for every possible GF(2) circuit.  A
-future route must present a materially different circuit whose complete map
-cost is below 1,124 ALU/update before any implementation or GPU request is
-justified.
+basis under the frozen static model.  It does not prove a lower bound for
+every possible GF(2) circuit or rule out a circuit whose native lowering and
+overlap materially differ from the model.  A future route must present a
+materially different circuit with a stronger complete-cost case, such as a
+source count below the modelled allowance or native instruction evidence that
+explains why this screen does not apply, before a GPU request is justified.

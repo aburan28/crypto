@@ -146,7 +146,7 @@ void printDiagonal(std::ostream &out, const char *name, const DiagonalStats &sta
         << ", \"wordTerms\": " << stats.wordTerms
         << ", \"zeroDiagonalTerms\": " << stats.zeroDiagonalTerms
         << ", \"optimisticFreeShiftLop3Ops\": " << stats.wordTerms
-        << ", \"exactShiftPlusLop3Ops\": " << stats.exactShiftLop3Ops << "}"
+        << ", \"optimisticOneWordShiftPlusLop3Ops\": " << stats.exactShiftLop3Ops << "}"
         << (comma ? "," : "") << "\n";
 }
 
@@ -334,6 +334,8 @@ int main() {
     const double targetAluBudget = sms * clockGhz * aluLanes / targetRate;
     const double oracleMapAluCeiling = sms * clockGhz * aluLanes / oracleMapOnly;
     const double oracleSubledgerAluCeiling = sms * clockGhz * aluLanes / oracleCandidateSubledger;
+    const double referenceSubledgerModelRate = sms * clockGhz * aluLanes / referenceSubledger;
+    const double fusedOverReferenceSubledgerModel = fusedRate / referenceSubledgerModelRate;
 
     constexpr int squareSourceOps = 5 * 15 + 82;
     const double compactedMeanSquares = 2.0 * 6.5;
@@ -349,13 +351,19 @@ int main() {
 
     std::cout << std::fixed << std::setprecision(12);
     std::cout << "{\n"
-              << "  \"schema\": \"ecc2k130-sparse-alu-synthesis-v1\",\n"
+              << "  \"schema\": \"ecc2k130-sparse-alu-synthesis-v2\",\n"
               << "  \"valid\": true,\n"
               << "  \"sourceParent\": \"b3d0095f6fb74c180c71780ead8ab692b4831cc1\",\n"
               << "  \"checks\": {\"basisVectors\": 131, \"denseVectors\": 4096, \"denseLjComparisons\": "
               << denseChecks << ", \"compositionIdentities\": " << compositionChecks << "},\n"
-              << "  \"aluBudgetsPerUpdate\": {\"fused15_436677\": " << fusedAluBudget
+              << "  \"sourceOpScreenBudgetsPerUpdate\": {\"fused15_436677\": " << fusedAluBudget
               << ", \"target26\": " << targetAluBudget << "},\n"
+              << "  \"modelCalibration\": {\"referenceSubledgerSourceOps\": "
+              << referenceSubledger << ", \"referenceSubledgerModelRateBillionPerSecond\": "
+              << referenceSubledgerModelRate << ", \"confirmedFusedRateBillionPerSecond\": "
+              << fusedRate << ", \"actualOverReferenceSubledgerModel\": "
+              << fusedOverReferenceSubledgerModel
+              << ", \"limitation\": \"One charged source operation per ALU lane-cycle does not model compiler lowering, instruction mix, overlap or latency hiding.\"},\n"
               << "  \"diagonalCircuits\": {\n";
     printDiagonal(std::cout, "sparseToNormal", normalDiag, true);
     printDiagonal(std::cout, "sparseToBeta", toBetaDiag, true);
@@ -391,9 +399,9 @@ int main() {
     std::cout << "]},\n"
               << "  \"mapOnlySourceOpsPerUpdate\": {\n"
               << "    \"oracleCheapestFreeShiftFreeSelection\": " << oracleMapOnly << ",\n"
-              << "    \"oracleCheapestExactDiagonal\": " << oracleExactMapOnly << ",\n"
+              << "    \"oracleCheapestOneWordShiftDiagonal\": " << oracleExactMapOnly << ",\n"
               << "    \"perfectCompactionWeightedMeanFreeShift\": " << compactedMeanMapOnly << ",\n"
-              << "    \"warpDivergentExactDiagonal\": " << divergentMapOnly << ",\n"
+              << "    \"warpDivergentOneWordShiftDiagonal\": " << divergentMapOnly << ",\n"
               << "    \"allOutputsSharedShiftsAndBranchlessSelect\": " << allOutputMapOnly << ",\n"
               << "    \"greedyXorNormalOnly\": " << normalXor.totalXors << ",\n"
               << "    \"greedyXorNormalPlusL3XPlusL3Y\": "
@@ -414,13 +422,13 @@ int main() {
               << "    \"oracleCandidateTotal\": " << oracleCandidateSubledger << ",\n"
               << "    \"candidateOverReference\": " << oracleCandidateSubledger / referenceSubledger
               << "\n  },\n"
-              << "  \"ceilingsBillionUpdatesPerSecond\": {\"oracleMapOnlyAlu\": "
+              << "  \"modelledCeilingsBillionUpdatesPerSecond\": {\"oracleMapOnlyAlu\": "
               << oracleMapAluCeiling << ", \"oracleComparableSubledgerAlu\": "
               << oracleSubledgerAluCeiling << "},\n"
               << "  \"decision\": {\"survivesStaticGate\": "
               << (survivesTarget ? "true" : "false")
-              << ", \"classification\": \"NEGATIVE_STATIC_EVIDENCE\", \"reason\": \"Even the impossible oracle that assigns L3 to every update, makes every shift and dynamic selection free, and ignores all other walk work spends more ALU on maps than the entire 26 B/s budget. Adding the frozen sparse reducer and ALU-square spread is also worse than the reference comparable source subledger.\"},\n"
-              << "  \"scope\": \"Bounded native static circuit feasibility only; no CUDA compile, GPU run, sparse walk, search, solver or key recovery.\"\n"
+              << ", \"classification\": \"NEGATIVE_STATIC_MODEL_EVIDENCE\", \"reason\": \"Under the frozen one-source-operation-per-lane-cycle screen, even the free-shift, free-selection L3 oracle exceeds the 26 B/s screening allowance. Adding the frozen sparse reducer and ALU-square spread is also worse than the reference comparable source subledger, so none of the enumerated constructions is admitted to GPU implementation.\"},\n"
+              << "  \"scope\": \"Bounded native static circuit feasibility for the enumerated constructions only; source-operation rates are a conditional model, not SASS, measured throughput or a hardware lower bound. No CUDA compile, GPU run, sparse walk, search, solver or key recovery.\"\n"
               << "}\n";
     return survivesTarget ? 2 : 0;
 }
