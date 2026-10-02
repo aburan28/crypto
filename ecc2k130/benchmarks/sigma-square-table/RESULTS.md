@@ -123,6 +123,27 @@ passed, while the Linux native replay exposed an exact C++ ABI-type mismatch
 in its test-only limb array.  The repair changes that array to the reference
 API's `unsigned long long` type and does not touch CUDA kernel sources.
 
+## Frozen device producer
+
+The committed producer remains undispatched.  It now fails before building
+unless its mounted `SOURCE_REV` equals a separately supplied clean
+`EXPECTED_SOURCE_REV`.  Before any correctness or timing kernel, an automatic-
+geometry one-step run must report two resident 256-thread blocks on the named
+RTX PRO 6000 for each arm.
+
+The native log checker requires exactly one finished line, the exact final
+progress count `threads * 16 * steps * launches`, and zero drops for occupancy,
+checkpoint, verification, and timing modes.  The 513-thread partial-block gate
+also requires byte-identical one-launch prefixes, byte-identical two-launch
+whole/cross-arm endpoints, and exact cross-arm resume at iteration 16.
+
+Every timed row records the exact 201,863,462,912 updates and zero drops.  A
+separate native postrun audit enforces the exact two-warmup/five-A/A/five-A/B
+22-row schedule, full numeric parsing, lowercase 64-hex log digests, and a
+checked 22-log SHA-256 manifest before the summarizer can issue a decision.
+Synthetic promote/reject/optional/noise ledgers, truncated-log rejection, and
+strict parser tests pass under optimized and UBSAN builds.
+
 ## Next gate
 
 The repaired compile artifact requires an independent read-only audit, followed by the
