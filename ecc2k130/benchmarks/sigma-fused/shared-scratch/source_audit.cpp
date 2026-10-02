@@ -120,6 +120,8 @@ int main(int argc, char **argv) {
                  "exact geometry validation");
         contains(kernels, "!ECC_PACKED_COMPACT_STATE || !ECC_PACKED_SHARED_SIGMA || ECC_WITNESS",
                  "exact mode validation");
+        contains(kernels, "ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SQUARE_TABLE",
+                 "square-table combination guard");
         contains(kernels,
                  "SIGMA_FUSED_SCRATCH_FIELDS * ECC_SIGMA_FUSED_SHARED_SLOTS * 5 * ECC_THREADS",
                  "full-word static allocation");

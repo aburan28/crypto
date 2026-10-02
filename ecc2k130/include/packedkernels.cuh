@@ -162,7 +162,7 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_SHARED_SLOTS && \
     (!ECC_SIGMA_FUSED || ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_MINBLOCKS != 2 || \
      !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_SHARED_SIGMA || ECC_WITNESS || \
-     ECC_PACKED_INLINE_POLY != 3 || ECC_SIGMA_FUSED_LATE_Y)
+     ECC_PACKED_INLINE_POLY != 3 || ECC_SIGMA_FUSED_LATE_Y || ECC_PACKED_SQUARE_TABLE)
 #error "sigma fused shared scratch requires the exact counter-free B16/T256/min2 fused preset"
 #endif
 #ifndef ECC_PACKED_STATE_TILE

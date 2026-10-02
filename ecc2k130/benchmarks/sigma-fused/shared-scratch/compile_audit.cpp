@@ -72,8 +72,9 @@ struct Resources {
     int registers = 0;
     int stack = 0;
     int local = 0;
-    int functionShared = 0;
-    int commonShared = 0;
+    int functionStaticShared = 0;
+    int compiledSharedExtent = 0;
+    int compiledReservedShared = 0;
     int staticBlocksPerSm = 0;
 };
 
@@ -90,17 +91,22 @@ Resources parseResources(const fs::path &path, const Arm &arm) {
     Resources out;
     out.registers = int(strictInteger(match[1].str(), "register count"));
     out.stack = int(strictInteger(match[2].str(), "stack bytes"));
-    out.functionShared = int(strictInteger(match[3].str(), "function shared bytes"));
+    out.compiledSharedExtent = int(strictInteger(match[3].str(), "compiled shared extent"));
     out.local = int(strictInteger(match[4].str(), "local bytes"));
-    contains(text, "GLOBAL:" + std::to_string(arm.expectedStaticShared),
-             "cuobjdump " + std::string(arm.name));
-    out.commonShared = arm.expectedStaticShared;
+    // The immutable sigma mask source table remains 1,792 bytes of common
+    // device global data. cuobjdump's function SHARED includes the driver's
+    // 1,024-byte per-block reserve; ptxas reports function static separately.
+    contains(text, "GLOBAL:1792", "cuobjdump " + std::string(arm.name));
+    out.functionStaticShared = arm.expectedStaticShared;
+    out.compiledReservedShared = out.compiledSharedExtent - out.functionStaticShared;
     need(out.registers > 0 && out.registers <= 128,
          "register ceiling failed " + std::string(arm.name));
-    need(out.stack == 0 && out.local == 0 && out.functionShared == 0,
-         "stack/local/function-shared gate failed " + std::string(arm.name));
+    need(out.stack == 0 && out.local == 0,
+         "stack/local gate failed " + std::string(arm.name));
+    need(out.compiledReservedShared == 1024,
+         "compiled shared reserve mismatch " + std::string(arm.name));
     const int registerBlocks = 65536 / (out.registers * 256);
-    const int sharedBlocks = 102400 / (out.commonShared + 1024);
+    const int sharedBlocks = 102400 / out.compiledSharedExtent;
     out.staticBlocksPerSm = std::min(registerBlocks, sharedBlocks);
     need(out.staticBlocksPerSm == 2,
          "static two-block gate failed " + std::string(arm.name));
@@ -127,7 +133,7 @@ void verifyPtxas(const fs::path &path, const Arm &arm, int registers) {
         contains(text, marker, "build " + std::string(arm.name));
 
     const std::regex walk(
-        R"(Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj\r?\n    ([0-9]+) bytes stack frame, ([0-9]+) bytes spill stores, ([0-9]+) bytes spill loads\r?\nptxas info    : Used ([0-9]+) registers)");
+        R"(Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj\r?\n    ([0-9]+) bytes stack frame, ([0-9]+) bytes spill stores, ([0-9]+) bytes spill loads\r?\nptxas info    : Used ([0-9]+) registers, used 1 barriers, ([0-9]+) bytes smem)");
     std::smatch match;
     need(std::regex_search(text, match, walk),
          "missing ptxas walk receipt " + std::string(arm.name));
@@ -137,6 +143,9 @@ void verifyPtxas(const fs::path &path, const Arm &arm, int registers) {
          "ptxas zero-spill gate failed " + std::string(arm.name));
     need(strictInteger(match[4].str(), "ptxas registers") == registers,
          "ptxas/cuobjdump register mismatch " + std::string(arm.name));
+    need(strictInteger(match[5].str(), "ptxas function static shared") ==
+             arm.expectedStaticShared,
+         "ptxas function static shared mismatch " + std::string(arm.name));
 }
 
 void selfTest() {
@@ -213,7 +222,9 @@ int main(int argc, char **argv) {
                    << arm.slots << ",\"registers\":" << current.registers
                    << ",\"stackBytes\":" << current.stack
                    << ",\"localBytes\":" << current.local
-                   << ",\"staticSharedBytes\":" << current.commonShared
+                   << ",\"functionStaticSharedBytes\":" << current.functionStaticShared
+                   << ",\"compiledReservedSharedBytes\":" << current.compiledReservedShared
+                   << ",\"compiledSharedExtentBytes\":" << current.compiledSharedExtent
                    << ",\"staticBlocksPerSm\":" << current.staticBlocksPerSm
                    << "}" << (index + 1 == kArms.size() ? "\n" : ",\n");
         }

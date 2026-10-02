@@ -19,3 +19,27 @@ resource conclusion.
 Neither failure compiled a candidate kernel, ran a GPU, produced a resource
 receipt, or measured throughput.  They are producer-infrastructure failures,
 not evidence for or against shared scratch.
+
+## Hosted compile attempt 2
+
+GitHub Actions run `37051703235` used preparation commit
+`0c0178ad6538061760707eb225ac89319112d56e`.  All four production clients and
+all three device helpers compiled successfully with CUDA 13.3.73 for native
+`sm_120`.  The job then stopped in the independent resource auditor because it
+treated cuobjdump's function `SHARED` field as function static alone.
+
+The retained artifact establishes the actual distinction:
+
+| arm | registers | ptxas function static | cuobjdump function extent | difference | stack/local/spills |
+|---|---:|---:|---:|---:|---|
+| control | 126 | 1,792 | 2,816 | 1,024 | zero |
+| cache2 | 126 | 22,272 | 23,296 | 1,024 | zero |
+| cache3 | 126 | 32,512 | 33,536 | 1,024 | zero |
+| cache4 | 126 | 42,752 | 43,776 | 1,024 | zero |
+
+The 1,024-byte difference is the compiled per-block driver reserve already
+registered by the static proposal.  The additive audit repair records ptxas
+function static, compiled reserve and compiled extent separately.  This
+attempt is positive compile evidence but remains superseded because the audit
+process exited nonzero and the subsequent source adds the explicit
+square-table incompatibility guard.  No GPU or timing operation ran.
