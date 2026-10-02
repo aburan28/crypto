@@ -191,6 +191,13 @@ pub struct F4Stats {
     pub full_m4ri_matrices: u64,
     pub full_m4ri_blocks: u64,
     pub full_m4ri_table_word_xors: u64,
+    /// Exact-end candidate mechanism counters: table entries and row lookups
+    /// whose word suffix was shorter than the block-wide maximum, and the
+    /// corresponding table-preparation and row-application words avoided.
+    pub full_m4ri_trimmed_table_entries: u64,
+    pub full_m4ri_trimmed_row_lookups: u64,
+    pub full_m4ri_trimmed_table_words: u64,
+    pub full_m4ri_trimmed_row_words: u64,
     /// Wall time spent building matrices (products, columns, packing)
     /// and eliminating them.
     pub build_ns: u64,
@@ -439,6 +446,7 @@ struct FullM4riScratch {
     block_pivots: Vec<Vec<u64>>,
     table: Vec<u64>,
     table_counts: Vec<u64>,
+    table_ends: Vec<usize>,
 }
 
 thread_local! {
@@ -482,6 +490,11 @@ fn full_m4ri_shape_for(n_rows: usize, n_cols: usize, min_rows: usize) -> bool {
     n_rows >= min_rows && n_cols >= 256 && n_cols <= n_rows.saturating_mul(4)
 }
 
+fn full_m4ri_trim_ends_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("F4_F2_FULL_M4RI_TRIM_ENDS").as_deref() == Ok("1"))
+}
+
 /// Full-matrix Method of Four Russians elimination.
 ///
 /// Each block first finds up to eight pivots and triangularises those pivot
@@ -494,6 +507,18 @@ fn echelon_full_m4ri(
     n_cols: usize,
     st: &mut F4Stats,
     deadline: Option<Instant>,
+) -> Option<Vec<(usize, Row)>> {
+    echelon_full_m4ri_with_trim_ends(rows, n_cols, st, deadline, full_m4ri_trim_ends_enabled())
+}
+
+/// [`echelon_full_m4ri`] with the exact-end candidate supplied by the caller,
+/// so differential tests can force both representations in one process.
+fn echelon_full_m4ri_with_trim_ends(
+    rows: Vec<Row>,
+    n_cols: usize,
+    st: &mut F4Stats,
+    deadline: Option<Instant>,
+    trim_ends: bool,
 ) -> Option<Vec<(usize, Row)>> {
     let n_rows = rows.len();
     let words = n_cols.div_ceil(64).max(1);
@@ -509,6 +534,9 @@ fn echelon_full_m4ri(
         }
         scratch.table.resize((1usize << FULL_M4RI_BLOCK) * words, 0);
         scratch.table_counts.resize(1usize << FULL_M4RI_BLOCK, 0);
+        if trim_ends {
+            scratch.table_ends.resize(1usize << FULL_M4RI_BLOCK, 0);
+        }
         let scratch_bytes = scratch.pivot_columns.capacity() * std::mem::size_of::<usize>()
             + scratch.pivot_ends.capacity() * std::mem::size_of::<usize>()
             + scratch
@@ -517,7 +545,8 @@ fn echelon_full_m4ri(
                 .map(|row| row.capacity() * std::mem::size_of::<u64>())
                 .sum::<usize>()
             + scratch.table.capacity() * std::mem::size_of::<u64>()
-            + scratch.table_counts.capacity() * std::mem::size_of::<u64>();
+            + scratch.table_counts.capacity() * std::mem::size_of::<u64>()
+            + scratch.table_ends.capacity() * std::mem::size_of::<usize>();
         st.peak_table_bytes = st.peak_table_bytes.max(scratch_bytes as u64);
         let FullM4riScratch {
             pivot_columns,
@@ -525,6 +554,7 @@ fn echelon_full_m4ri(
             block_pivots,
             table,
             table_counts,
+            table_ends,
         } = &mut *scratch;
 
         let mut all_pivots = Vec::with_capacity(n_rows.min(n_cols));
@@ -534,6 +564,10 @@ fn echelon_full_m4ri(
         let mut performed_xors = 0u64;
         let mut preparation_xors = 0u64;
         let mut blocks = 0u64;
+        let mut trimmed_table_entries = 0u64;
+        let mut trimmed_row_lookups = 0u64;
+        let mut trimmed_table_words = 0u64;
+        let mut trimmed_row_words = 0u64;
 
         while pivot_row < n_rows && column < n_cols {
             if deadline.is_some_and(|limit| Instant::now() >= limit) {
@@ -624,6 +658,9 @@ fn echelon_full_m4ri(
             let combinations = 1usize << block_rows;
             table[..suffix_words].fill(0);
             table_counts[0] = 0;
+            if trim_ends {
+                table_ends[0] = first_word;
+            }
             let mut filled = 1usize;
             for index in 0..block_rows {
                 let pivot = &block_pivots[index][first_word..block_end];
@@ -633,15 +670,43 @@ fn echelon_full_m4ri(
                 let pivot_cost = (pivot_ends[index] - pivot_columns[index] / 64) as u64;
                 for mask in 0..filled {
                     let offset = mask * suffix_words;
-                    for word_index in 0..suffix_words {
-                        target_tables[offset + word_index] =
-                            source_tables[offset + word_index] ^ pivot[word_index];
+                    if trim_ends {
+                        let source_words = table_ends[mask] - first_word;
+                        let pivot_words = pivot_ends[index] - first_word;
+                        let build_words = source_words.max(pivot_words);
+                        let common = source_words.min(pivot_words);
+                        for word_index in 0..common {
+                            target_tables[offset + word_index] =
+                                source_tables[offset + word_index] ^ pivot[word_index];
+                        }
+                        if source_words > common {
+                            target_tables[offset + common..offset + source_words].copy_from_slice(
+                                &source_tables[offset + common..offset + source_words],
+                            );
+                        } else if pivot_words > common {
+                            target_tables[offset + common..offset + pivot_words]
+                                .copy_from_slice(&pivot[common..pivot_words]);
+                        }
+                        let mut exact_words = build_words;
+                        while exact_words > 0 && target_tables[offset + exact_words - 1] == 0 {
+                            exact_words -= 1;
+                        }
+                        table_ends[filled + mask] = first_word + exact_words;
+                        let saved = suffix_words - build_words;
+                        trimmed_table_entries += u64::from(saved > 0);
+                        trimmed_table_words += saved as u64;
+                        performed_xors += build_words as u64;
+                        preparation_xors += build_words as u64;
+                    } else {
+                        for word_index in 0..suffix_words {
+                            target_tables[offset + word_index] =
+                                source_tables[offset + word_index] ^ pivot[word_index];
+                        }
+                        performed_xors += suffix_words as u64;
+                        preparation_xors += suffix_words as u64;
                     }
                     table_counts[filled + mask] = table_counts[mask] + pivot_cost;
                 }
-                let cost = (filled * suffix_words) as u64;
-                performed_xors += cost;
-                preparation_xors += cost;
                 filled *= 2;
             }
 
@@ -677,15 +742,28 @@ fn echelon_full_m4ri(
                 };
                 if pattern != 0 {
                     let offset = pattern * suffix_words;
-                    for (target, &source) in matrix[row][first_word..block_end]
+                    let combination_end = if trim_ends {
+                        table_ends[pattern]
+                    } else {
+                        block_end
+                    };
+                    for (target, &source) in matrix[row][first_word..combination_end]
                         .iter_mut()
-                        .zip(&table[offset..offset + suffix_words])
+                        .zip(&table[offset..offset + combination_end - first_word])
                     {
                         *target ^= source;
                     }
                     logical_xors += table_counts[pattern];
-                    performed_xors += suffix_words as u64;
+                    performed_xors += (combination_end - first_word) as u64;
+                    // Preserve the control's row-end metadata exactly. The
+                    // omitted words are known zero, but later pivot/table
+                    // scheduling must remain identical in this experiment.
                     row_ends[row] = row_ends[row].max(block_end);
+                    if trim_ends {
+                        let saved = block_end - combination_end;
+                        trimmed_row_lookups += u64::from(saved > 0);
+                        trimmed_row_words += saved as u64;
+                    }
                 }
             }
             all_pivots.extend_from_slice(&pivot_columns[..block_rows]);
@@ -708,6 +786,10 @@ fn echelon_full_m4ri(
         st.full_m4ri_matrices += 1;
         st.full_m4ri_blocks += blocks;
         st.full_m4ri_table_word_xors += preparation_xors;
+        st.full_m4ri_trimmed_table_entries += trimmed_table_entries;
+        st.full_m4ri_trimmed_row_lookups += trimmed_row_lookups;
+        st.full_m4ri_trimmed_table_words += trimmed_table_words;
+        st.full_m4ri_trimmed_row_words += trimmed_row_words;
         Some(pivots)
     })
 }
@@ -2225,6 +2307,90 @@ mod tests {
             assert!(stats.word_xors > 0);
             assert!(stats.word_xors_performed > 0);
         }
+    }
+
+    #[test]
+    fn full_m4ri_exact_combination_ends_match_fixed_block_ends() {
+        let mut rng = StdRng::seed_from_u64(0x201_4d52_454e_44);
+        let (n_rows, n_cols) = (193usize, 385usize);
+        let words = n_cols.div_ceil(64);
+        let mut raw = Vec::with_capacity(n_rows);
+        for row_index in 0..n_rows {
+            let cap = n_cols - (row_index % 7) * 37;
+            let mut bits = vec![0u64; words];
+            for column in 0..cap {
+                if column % 19 != 0 && rng.gen_ratio(1, 4) {
+                    bits[column / 64] |= 1u64 << (column % 64);
+                }
+            }
+            raw.push(bits);
+        }
+        let make_rows = || {
+            raw.iter()
+                .cloned()
+                .map(|bits| {
+                    let start = bits.iter().position(|word| *word != 0).unwrap_or(0);
+                    let end = bits
+                        .iter()
+                        .rposition(|word| *word != 0)
+                        .map_or(0, |index| index + 1);
+                    Row { bits, start, end }
+                })
+                .collect::<Vec<_>>()
+        };
+
+        let mut control_stats = F4Stats::default();
+        let control =
+            echelon_full_m4ri_with_trim_ends(make_rows(), n_cols, &mut control_stats, None, false)
+                .unwrap();
+        let mut candidate_stats = F4Stats::default();
+        let candidate =
+            echelon_full_m4ri_with_trim_ends(make_rows(), n_cols, &mut candidate_stats, None, true)
+                .unwrap();
+
+        assert_eq!(control.len(), candidate.len());
+        for ((control_lead, control_row), (candidate_lead, candidate_row)) in
+            control.iter().zip(&candidate)
+        {
+            assert_eq!(control_lead, candidate_lead);
+            assert_eq!(control_row.bits, candidate_row.bits);
+            assert_eq!(control_row.start, candidate_row.start);
+            assert_eq!(control_row.end, candidate_row.end);
+        }
+        let expected_space = canonical_rref(raw, n_cols);
+        assert_eq!(
+            canonical_rref(
+                candidate.iter().map(|(_, row)| row.bits.clone()).collect(),
+                n_cols,
+            ),
+            expected_space
+        );
+        assert_eq!(control_stats.word_xors, candidate_stats.word_xors);
+        assert_eq!(
+            control_stats.full_m4ri_blocks,
+            candidate_stats.full_m4ri_blocks
+        );
+        assert_eq!(control_stats.full_m4ri_matrices, 1);
+        assert_eq!(candidate_stats.full_m4ri_matrices, 1);
+        assert_eq!(control_stats.full_m4ri_trimmed_table_entries, 0);
+        assert_eq!(control_stats.full_m4ri_trimmed_row_lookups, 0);
+        assert_eq!(control_stats.full_m4ri_trimmed_table_words, 0);
+        assert_eq!(control_stats.full_m4ri_trimmed_row_words, 0);
+        assert!(candidate_stats.full_m4ri_trimmed_table_entries > 0);
+        assert!(candidate_stats.full_m4ri_trimmed_row_lookups > 0);
+        assert!(candidate_stats.full_m4ri_trimmed_table_words > 0);
+        assert!(candidate_stats.full_m4ri_trimmed_row_words > 0);
+        assert_eq!(
+            candidate_stats.full_m4ri_table_word_xors
+                + candidate_stats.full_m4ri_trimmed_table_words,
+            control_stats.full_m4ri_table_word_xors
+        );
+        assert_eq!(
+            candidate_stats.word_xors_performed
+                + candidate_stats.full_m4ri_trimmed_table_words
+                + candidate_stats.full_m4ri_trimmed_row_words,
+            control_stats.word_xors_performed
+        );
     }
 
     /// Large enough for the leading block's tables, with blocks of every
