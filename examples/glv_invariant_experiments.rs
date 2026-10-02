@@ -1,4 +1,4 @@
-//! **Experiments E1–E7 of `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` —
+//! **Experiments E1–E13 of `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` —
 //! measurement.**
 //!
 //! ```text
@@ -23,16 +23,19 @@ use std::fs;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::ext_curve::{take_field_counters, Fp2, Fp3};
+use crypto_lib::cryptanalysis::fghr_line::{
+    fghr_line_base, fghr_polynomials, generate_fghr_instance, FghrFold, FghrOracle, YLineS4Oracle,
+};
 use crypto_lib::cryptanalysis::gls_fp2::{
     generate_gls_instance_of, gls_line_base_by, GlsFamily, GlsFold, GlsInstance,
 };
 use crypto_lib::cryptanalysis::glv_invariant_base::{
     automorphism_generators, eigenvalue_order, endomorphism_overlap, generate_cm_instance,
     glv_orbit_base, rho_reference_folded, velu_degree2_endomorphisms, velu_degree3_endomorphisms,
-    verify_endomorphism, AutomorphismGroup, CmFamily, Endomorphism, Negation,
+    verify_endomorphism, AutomorphismGroup, CmFamily, Endomorphism, EndomorphismClasses, Negation,
 };
 use crypto_lib::cryptanalysis::glv_invariant_experiments::{
-    classes_for, e1_stream, full_rank_stream, StreamReport,
+    classes_for, e1_stream, full_rank_stream, full_rank_stream_until, StopRule, StreamReport,
 };
 use crypto_lib::cryptanalysis::ic_boundary::{
     koblitz_factor_base, koblitz_instance, rho_reference_negation, BinaryGroup, ColumnFold,
@@ -45,6 +48,9 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 };
 use crypto_lib::cryptanalysis::line_oracle::LineOracle;
 use crypto_lib::cryptanalysis::line_s4_oracle::LineS4Oracle;
+use crypto_lib::cryptanalysis::orbit_pair_table::{
+    OrbitMitmOracle, PrimePowerKey, SubfieldOrbitKey,
+};
 use crypto_lib::cryptanalysis::subfield_fp3::{
     generate_subfield_instance, subfield_line_base, SubfieldFold,
 };
@@ -1574,6 +1580,736 @@ fn e11(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E12: the pair table over orbit representatives ─────────────────
+
+/// One stream on a subfield line with a given three-summand oracle,
+/// field multiplications counted around the table build and the stream.
+#[allow(clippy::too_many_arguments)]
+fn e12_subfield_arm(
+    inst: &crypto_lib::cryptanalysis::subfield_fp3::SubfieldInstance,
+    ctx: &InstanceCtx<'_, crypto_lib::cryptanalysis::subfield_fp3::Fp3Curve>,
+    folded: &crypto_lib::cryptanalysis::ic_boundary::FactorBase<
+        crypto_lib::cryptanalysis::subfield_fp3::Fp3Point,
+    >,
+    control: &crypto_lib::cryptanalysis::ic_boundary::FactorBase<
+        crypto_lib::cryptanalysis::subfield_fp3::Fp3Point,
+    >,
+    classes: &EndomorphismClasses<'_, crypto_lib::cryptanalysis::subfield_fp3::Fp3Curve>,
+    planted: u64,
+    seed: u64,
+    max_trials: u64,
+    oracle: &mut dyn DecompositionOracle<crypto_lib::cryptanalysis::subfield_fp3::Fp3Curve>,
+) -> (Value, Value, StreamReport) {
+    take_field_counters();
+    let mut table_ops = GroupOps::default();
+    let mut params = Params::default();
+    params.set("negation_folded", "1");
+    let started = Instant::now();
+    oracle
+        .prepare(ctx, folded, &params, &mut table_ops)
+        .unwrap();
+    let table_wall = started.elapsed().as_secs_f64();
+    let (tm, ti) = take_field_counters();
+    let rep = full_rank_stream(
+        &inst.curve,
+        inst.generator,
+        ctx.target,
+        inst.r,
+        inst.cofactor,
+        planted,
+        folded,
+        control,
+        seed,
+        max_trials,
+        3,
+        Some(classes),
+        |ops, ctr, pt| oracle.decompose(ctx, folded, ops, ctr, pt),
+    )
+    .unwrap();
+    let (sm, si) = take_field_counters();
+    (
+        json!({"group_ops": table_ops, "fp_muls": tm, "fp_invs": ti, "wall_seconds": table_wall}),
+        json!({"fp_muls": sm, "fp_invs": si}),
+        rep,
+    )
+}
+
+/// The negation table and the orbit table on one target set, target by
+/// target (AGENTS.md §6).
+fn e12_agreement<G: CountedGroup>(
+    ctx: &InstanceCtx<'_, G>,
+    fb: &crypto_lib::cryptanalysis::ic_boundary::FactorBase<G::Elt>,
+    a: &mut dyn DecompositionOracle<G>,
+    b: &mut dyn DecompositionOracle<G>,
+    targets: u64,
+) -> Value {
+    let mut ops = GroupOps::default();
+    let (mut ca, mut cb) = (OracleCounters::default(), OracleCounters::default());
+    let (mut agree, mut a_only, mut b_only, mut hits) = (0u64, 0u64, 0u64, 0u64);
+    for k in 2..targets + 2 {
+        let pt = ctx.group.mul(&mut ops, ctx.generator, k);
+        let x = a.decompose(ctx, fb, &mut ops, &mut ca, pt);
+        let y = b.decompose(ctx, fb, &mut ops, &mut cb, pt);
+        if let Some(idx) = &x {
+            let sum = idx.iter().fold(ctx.group.identity(), |acc, &i| {
+                ctx.group.add(&mut ops, acc, fb.points[i])
+            });
+            assert_eq!(
+                sum, pt,
+                "an orbit-table decomposition did not sum to its target"
+            );
+            hits += 1;
+        }
+        match (x.is_some(), y.is_some()) {
+            (true, true) | (false, false) => agree += 1,
+            (true, false) => a_only += 1,
+            (false, true) => b_only += 1,
+        }
+    }
+    json!({"targets": targets, "agree": agree, "orbit_only": a_only, "negation_only": b_only, "hits": hits})
+}
+
+/// E12 on the subfield line, three summands: E8's stream once over the
+/// negation table and once over the orbit table, every phase counted.
+fn e12(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    for &p_bits in &o.bits {
+        for seed in 1..=o.seeds {
+            let inst = match generate_subfield_instance(p_bits, seed, false, 8) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("e12 {p_bits} seed {seed}: {e}");
+                    continue;
+                }
+            };
+            let started = Instant::now();
+            let k_inv = inversion_in_multiplications(inst.p);
+            take_field_counters();
+            let (folded, frep) = subfield_line_base(&inst, SubfieldFold::Frobenius).unwrap();
+            let (build_muls_f, build_invs_f) = take_field_counters();
+            let (control, _) = subfield_line_base(&inst, SubfieldFold::Negation).unwrap();
+            let (build_muls_c, build_invs_c) = take_field_counters();
+            let neg = Negation { r: inst.r };
+            let refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &inst.frobenius];
+            let classes = classes_for(&inst.curve, inst.generator, inst.r, &refs).unwrap();
+            let planted = planted_for(seed, inst.r);
+            let mut ops = GroupOps::default();
+            let target = inst.curve.mul(&mut ops, inst.generator, planted);
+            let ctx = InstanceCtx {
+                group: &inst.curve,
+                generator: inst.generator,
+                target,
+                r: inst.r,
+                cofactor: inst.cofactor,
+                group_order: inst.group_order,
+                name: inst.name.clone(),
+                field_degree: Some(3),
+            };
+            let mut neg_oracle = MitmOracle::new(3);
+            let (neg_table, neg_stream, neg_rep) = e12_subfield_arm(
+                &inst,
+                &ctx,
+                &folded,
+                &control,
+                &classes,
+                planted,
+                seed,
+                o.max_trials,
+                &mut neg_oracle,
+            );
+            let orbit_classes =
+                EndomorphismClasses::new(&inst.curve, inst.generator, inst.r, refs.clone())
+                    .unwrap();
+            let mut orbit_oracle = OrbitMitmOracle::new(3, SubfieldOrbitKey, orbit_classes);
+            let (orbit_table, orbit_stream, orbit_rep) = e12_subfield_arm(
+                &inst,
+                &ctx,
+                &folded,
+                &control,
+                &classes,
+                planted,
+                seed,
+                o.max_trials,
+                &mut orbit_oracle,
+            );
+            let entries = orbit_oracle
+                .table()
+                .map(|t| (t.entries, t.representatives))
+                .unwrap();
+            let agreement = if p_bits <= 9 {
+                let ac =
+                    EndomorphismClasses::new(&inst.curve, inst.generator, inst.r, refs.clone())
+                        .unwrap();
+                let mut a = OrbitMitmOracle::new(3, SubfieldOrbitKey, ac);
+                let mut b = MitmOracle::new(3);
+                let mut params = Params::default();
+                params.set("negation_folded", "1");
+                let mut tmp = GroupOps::default();
+                a.prepare(&ctx, &folded, &params, &mut tmp).unwrap();
+                b.prepare(&ctx, &folded, &params, &mut tmp).unwrap();
+                Some(e12_agreement(&ctx, &folded, &mut a, &mut b, 200))
+            } else {
+                None
+            };
+            let mut walks = Vec::new();
+            let (mut st_neg, mut st_fold, mut all_ok) = (0u64, 0u64, true);
+            for k in 0..o.rho_runs as u64 {
+                let ws = seed ^ (k * 0x9E37);
+                take_field_counters();
+                let n = rho_reference_negation(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                );
+                let (nm, ni) = take_field_counters();
+                let f = rho_reference_folded(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                    &refs,
+                )
+                .unwrap();
+                let (fm, fi) = take_field_counters();
+                all_ok &= n.verified && f.verified;
+                st_neg += n.steps;
+                st_fold += f.steps;
+                walks.push(json!({
+                    "walk_seed": ws,
+                    "negation": n,
+                    "negation_fp_muls": nm,
+                    "negation_fp_invs": ni,
+                    "folded": f,
+                    "folded_fp_muls": fm,
+                    "folded_fp_invs": fi,
+                }));
+            }
+            eprintln!(
+                "e12 p=2^{p_bits} r=2^{:.1}: entries orbit {} | table muls orbit {} neg {} | stream muls orbit {} neg {} | square {:?}/{:?} vs {:?}/{:?} | collisions {} mismatches {} | ok {}/{}/{}/{}/{} [{:.1}s]",
+                (inst.r as f64).log2(),
+                entries.0,
+                orbit_table["fp_muls"],
+                neg_table["fp_muls"],
+                orbit_stream["fp_muls"],
+                neg_stream["fp_muls"],
+                orbit_rep.folded.square_relations,
+                orbit_rep.control.square_relations,
+                neg_rep.folded.square_relations,
+                neg_rep.control.square_relations,
+                orbit_oracle.stats.key_collisions,
+                orbit_oracle.stats.image_mismatches,
+                orbit_rep.folded.verified,
+                orbit_rep.control.verified,
+                neg_rep.folded.verified,
+                neg_rep.control.verified,
+                all_ok,
+                started.elapsed().as_secs_f64()
+            );
+            rows.push(json!({
+                "experiment": "e12",
+                "family": "subfield",
+                "p_bits": p_bits,
+                "seed": seed,
+                "instance": inst.name,
+                "log2_r": (inst.r as f64).log2(),
+                "r": inst.r,
+                "base_order": inst.base_order,
+                "group_order": inst.group_order,
+                "cofactor": inst.cofactor,
+                "summands": 3,
+                "group_order_of_fold": classes.group_order,
+                "points_per_column_folded": frep.points_per_orbit,
+                "points": folded.points.len(),
+                "unit": "F_p multiplications; an inversion is priced at inversion_in_multiplications, measured on this host; the orbit key's two uncounted multiplications per call are added; a row operation of the linear algebra is one Z/rZ multiplication, priced as one",
+                "inversion_in_multiplications": k_inv,
+                "base_build": {
+                    "folded": {"fp_muls": build_muls_f, "fp_invs": build_invs_f},
+                    "control": {"fp_muls": build_muls_c, "fp_invs": build_invs_c},
+                },
+                "negation_table": {"table": neg_table, "stream_cost": neg_stream, "stream": stream_json(&neg_rep)},
+                "orbit_table": {
+                    "table": orbit_table,
+                    "entries": entries.0,
+                    "representatives": entries.1,
+                    "build_uncounted_muls": orbit_oracle.build_uncounted_muls(),
+                    "stream_uncounted_muls": orbit_oracle.uncounted_muls() - orbit_oracle.build_uncounted_muls(),
+                    "probe_stats": orbit_oracle.stats,
+                    "stream_cost": orbit_stream,
+                    "stream": stream_json(&orbit_rep),
+                },
+                "agreement": agreement,
+                "rho_runs": o.rho_runs,
+                "rho_steps_ratio": st_neg as f64 / st_fold.max(1) as f64,
+                "rho_expected_ratio": ((classes.group_order as f64) / 2.0).sqrt(),
+                "rho_all_verified": all_ok,
+                "walks": walks,
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
+/// Measured conversions on a prime-field curve: an `F_p` multiplication
+/// and a square root, each in affine additions (median of three timed
+/// batches each).  AGENTS.md §2: a foreign unit converts at a measured
+/// factor, and the factor is recorded with the row.
+fn prime_conversions(inst: &PrimeInstance) -> (f64, f64) {
+    use crypto_lib::cryptanalysis::glv_invariant_base::mulm;
+    let curve = &inst.curve;
+    let g = inst.generator_point();
+    let p = curve.p;
+    let med = |f: &mut dyn FnMut() -> f64| {
+        let mut v: Vec<f64> = (0..3).map(|_| f()).collect();
+        v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        v[1]
+    };
+    let n = 100_000u64;
+    let add_ns = med(&mut || {
+        let mut ops = GroupOps::default();
+        let mut acc = g;
+        let t = Instant::now();
+        for _ in 0..n {
+            acc = curve.add(&mut ops, acc, g);
+        }
+        std::hint::black_box(acc);
+        t.elapsed().as_nanos() as f64 / n as f64
+    });
+    let mul_ns = med(&mut || {
+        let mut acc = 3u64;
+        let t = Instant::now();
+        for k in 1..=n {
+            acc = mulm(acc, k % (p - 1) + 1, p);
+        }
+        std::hint::black_box(acc);
+        t.elapsed().as_nanos() as f64 / n as f64
+    });
+    let sqrt_ns = med(&mut || {
+        let mut acc = 0u64;
+        let t = Instant::now();
+        for k in 1..=(n / 10) {
+            acc ^= curve.sqrt(k % (p - 1) + 1).unwrap_or(0);
+        }
+        std::hint::black_box(acc);
+        t.elapsed().as_nanos() as f64 / (n / 10) as f64
+    });
+    (mul_ns / add_ns, sqrt_ns / add_ns)
+}
+
+/// E12 on F_p, two summands: the regime where the pair table is the
+/// cost (§5.2).  Unit: group additions; key multiplications, row
+/// operations and square roots convert at measured factors.
+fn e12p(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    for (family, exponent) in [(CmFamily::J0, 3u32), (CmFamily::J1728, 2)] {
+        for &bits in &o.bits {
+            for seed in 1..=o.seeds {
+                let inst = match generate_cm_instance(family, bits, seed, 8) {
+                    Ok(i) => i,
+                    Err(e) => {
+                        eprintln!("e12p {} {bits} seed {seed}: {e}", family.name());
+                        continue;
+                    }
+                };
+                let started = Instant::now();
+                let (mul_in_adds, sqrt_in_adds) = prime_conversions(&inst);
+                let size = base_size(inst.r);
+                let (folded, frep) =
+                    glv_orbit_base(&inst, size, AutomorphismGroup::Auto, true).unwrap();
+                let (control, _) =
+                    glv_orbit_base(&inst, size, AutomorphismGroup::Auto, false).unwrap();
+                let gens = automorphism_generators(&inst, AutomorphismGroup::Auto).unwrap();
+                let refs: Vec<&dyn Endomorphism<_>> = gens.iter().map(|b| b.as_ref()).collect();
+                let planted = planted_for(seed, inst.r);
+                let (ctx, target) = prime_ctx(&inst, planted);
+                let g = ctx.generator;
+                let run = |oracle: &mut dyn DecompositionOracle<_>| {
+                    let mut params = Params::default();
+                    params.set("negation_folded", "1");
+                    let mut prep_ops = GroupOps::default();
+                    oracle
+                        .prepare(&ctx, &folded, &params, &mut prep_ops)
+                        .unwrap();
+                    let rep = full_rank_stream(
+                        &inst.curve,
+                        g,
+                        target,
+                        inst.r,
+                        inst.cofactor,
+                        planted,
+                        &folded,
+                        &control,
+                        seed,
+                        o.max_trials,
+                        2,
+                        None,
+                        |ops, ctr, pt| oracle.decompose(&ctx, &folded, ops, ctr, pt),
+                    )
+                    .unwrap();
+                    (prep_ops, rep)
+                };
+                let mut neg_oracle = MitmOracle::new(2);
+                let (neg_prep, neg_rep) = run(&mut neg_oracle);
+                let classes =
+                    EndomorphismClasses::new(&inst.curve, g, inst.r, refs.clone()).unwrap();
+                let w = classes.group_order;
+                let mut orbit_oracle = OrbitMitmOracle::new(2, PrimePowerKey { exponent }, classes);
+                let (orbit_prep, orbit_rep) = run(&mut orbit_oracle);
+                let entries = orbit_oracle
+                    .table()
+                    .map(|t| (t.entries, t.representatives, t.build_keys))
+                    .unwrap();
+                let agreement = if bits <= 20 {
+                    let ac =
+                        EndomorphismClasses::new(&inst.curve, g, inst.r, refs.clone()).unwrap();
+                    let mut a = OrbitMitmOracle::new(2, PrimePowerKey { exponent }, ac);
+                    let mut b = MitmOracle::new(2);
+                    let mut params = Params::default();
+                    params.set("negation_folded", "1");
+                    let mut tmp = GroupOps::default();
+                    a.prepare(&ctx, &folded, &params, &mut tmp).unwrap();
+                    b.prepare(&ctx, &folded, &params, &mut tmp).unwrap();
+                    Some(e12_agreement(&ctx, &folded, &mut a, &mut b, 3000))
+                } else {
+                    None
+                };
+                let mut walks = Vec::new();
+                let (mut st_neg, mut st_fold, mut all_ok) = (0u64, 0u64, true);
+                for k in 0..o.rho_runs as u64 {
+                    let ws = seed ^ (k * 0x9E37);
+                    let n =
+                        rho_reference_negation(&inst.curve, g, target, inst.r, ws, o.rho_max_steps);
+                    let f = rho_reference_folded(
+                        &inst.curve,
+                        g,
+                        target,
+                        inst.r,
+                        ws,
+                        o.rho_max_steps,
+                        &refs,
+                    )
+                    .unwrap();
+                    all_ok &= n.verified && f.verified;
+                    st_neg += n.steps;
+                    st_fold += f.steps;
+                    walks.push(json!({"walk_seed": ws, "negation": n, "folded": f}));
+                }
+                eprintln!(
+                    "e12p {} 2^{:.1}: points {} w {} | table adds orbit {} neg {} | entries orbit {} | stream adds orbit {} neg {} | square {:?}/{:?} vs {:?}/{:?} | collisions {} mismatches {} | mul/add {:.3} sqrt/add {:.2} | ok {}/{}/{}/{}/{} [{:.1}s]",
+                    family.name(),
+                    (inst.r as f64).log2(),
+                    folded.points.len(),
+                    w,
+                    orbit_prep.adds,
+                    neg_prep.adds,
+                    entries.0,
+                    orbit_rep.group_ops.adds,
+                    neg_rep.group_ops.adds,
+                    orbit_rep.folded.square_relations,
+                    orbit_rep.control.square_relations,
+                    neg_rep.folded.square_relations,
+                    neg_rep.control.square_relations,
+                    orbit_oracle.stats.key_collisions,
+                    orbit_oracle.stats.image_mismatches,
+                    mul_in_adds,
+                    sqrt_in_adds,
+                    orbit_rep.folded.verified,
+                    orbit_rep.control.verified,
+                    neg_rep.folded.verified,
+                    neg_rep.control.verified,
+                    all_ok,
+                    started.elapsed().as_secs_f64()
+                );
+                rows.push(json!({
+                    "experiment": "e12p",
+                    "family": family.name(),
+                    "bits": bits,
+                    "seed": seed,
+                    "instance": inst.name,
+                    "log2_r": (inst.r as f64).log2(),
+                    "r": inst.r,
+                    "cofactor": inst.cofactor,
+                    "summands": 2,
+                    "group_order_of_fold": w,
+                    "seed_abscissae": size,
+                    "points": folded.points.len(),
+                    "points_per_column_folded": frep.points_per_orbit,
+                    "unit": "group additions and doublings; F_p multiplications (orbit keys, generator maps on hits, linear-algebra row operations) at mul_in_adds and square roots (base build) at sqrt_in_adds, both measured on this host",
+                    "mul_in_adds": mul_in_adds,
+                    "sqrt_in_adds": sqrt_in_adds,
+                    "base_build": {
+                        "folded": {"group_ops": folded.cost.group_ops, "sqrt_solves": folded.cost.get("sqrt_solves"), "endomorphism_maps": folded.cost.get("endomorphism_maps")},
+                        "control": {"group_ops": control.cost.group_ops, "sqrt_solves": control.cost.get("sqrt_solves"), "endomorphism_maps": control.cost.get("endomorphism_maps")},
+                    },
+                    "negation_table": {"table_group_ops": neg_prep, "stream": stream_json(&neg_rep)},
+                    "orbit_table": {
+                        "table_group_ops": orbit_prep,
+                        "entries": entries.0,
+                        "representatives": entries.1,
+                        "build_keys": entries.2,
+                        "build_uncounted_muls": orbit_oracle.build_uncounted_muls(),
+                        "stream_uncounted_muls": orbit_oracle.uncounted_muls() - orbit_oracle.build_uncounted_muls(),
+                        "probe_stats": orbit_oracle.stats,
+                        "stream": stream_json(&orbit_rep),
+                    },
+                    "agreement": agreement,
+                    "rho_runs": o.rho_runs,
+                    "rho_steps_ratio": st_neg as f64 / st_fold.max(1) as f64,
+                    "rho_expected_ratio": ((w as f64) / 2.0).sqrt(),
+                    "rho_all_verified": all_ok,
+                    "walks": walks,
+                    "wall_seconds": started.elapsed().as_secs_f64(),
+                }));
+            }
+        }
+    }
+    rows
+}
+
+// ── E13: the 2-torsion symmetry of the system with the fold ────────
+
+/// E13: on the `Y`-line of a subfield curve with a rational 2-torsion
+/// point, the `D₃`-symmetrised oracle (16 solutions a system) on three
+/// arms — fold `⟨−1, π, τ_T⟩` (12 a column), fold `⟨−1, π⟩` (6), negation
+/// (2) — and, at `p ≤ 2^10`, the `S₃`-symmetrised Macaulay oracle (64) on
+/// the two folded bases and the same targets, every phase counted, beside
+/// the matched rho.
+fn e13(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    for &p_bits in &o.bits {
+        for seed in 1..=o.seeds {
+            let inst = match generate_fghr_instance(p_bits, seed, 8) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("e13 {p_bits} seed {seed}: {e}");
+                    continue;
+                }
+            };
+            let sub = &inst.sub;
+            let started = Instant::now();
+            let k_inv = inversion_in_multiplications(sub.p);
+            take_field_counters();
+            let (fold12, r12) = fghr_line_base(&inst, FghrFold::FrobeniusTranslation).unwrap();
+            let (b12m, b12i) = take_field_counters();
+            let (fold6, r6) = fghr_line_base(&inst, FghrFold::Frobenius).unwrap();
+            let (b6m, b6i) = take_field_counters();
+            let (control, _) = fghr_line_base(&inst, FghrFold::Negation).unwrap();
+            let (b2m, b2i) = take_field_counters();
+            let polys = fghr_polynomials(&inst).unwrap();
+            let neg = Negation { r: sub.r };
+            let refs: Vec<&dyn Endomorphism<_>> = vec![&neg, &sub.frobenius];
+            let classes = classes_for(&sub.curve, sub.generator, sub.r, &refs).unwrap();
+            let planted = planted_for(seed, sub.r);
+            let mut ops = GroupOps::default();
+            let target = sub.curve.mul(&mut ops, sub.generator, planted);
+            let ctx = InstanceCtx {
+                group: &sub.curve,
+                generator: sub.generator,
+                target,
+                r: sub.r,
+                cofactor: sub.cofactor,
+                group_order: sub.group_order,
+                name: sub.name.clone(),
+                field_degree: Some(3),
+            };
+            let stream = |folded: &crypto_lib::cryptanalysis::ic_boundary::FactorBase<
+                crypto_lib::cryptanalysis::subfield_fp3::Fp3Point,
+            >,
+                          oracle: &mut dyn DecompositionOracle<
+                crypto_lib::cryptanalysis::subfield_fp3::Fp3Curve,
+            >| {
+                take_field_counters();
+                let rep = full_rank_stream_until(
+                    &sub.curve,
+                    sub.generator,
+                    target,
+                    sub.r,
+                    sub.cofactor,
+                    planted,
+                    folded,
+                    &control,
+                    seed,
+                    o.max_trials,
+                    3,
+                    Some(&classes),
+                    StopRule::FoldedSquareBothPinned,
+                    |ops, ctr, pt| oracle.decompose(&ctx, folded, ops, ctr, pt),
+                )
+                .unwrap();
+                let (m, i) = take_field_counters();
+                (rep, m, i)
+            };
+            let mut d3a = FghrOracle::new(&inst, &polys, seed);
+            let (rep_a, ma, ia) = stream(&fold12, &mut d3a);
+            let mut d3b = FghrOracle::new(&inst, &polys, seed);
+            let (rep_b, mb, ib) = stream(&fold6, &mut d3b);
+            // Both bases under the S₃ oracle too, so that the combined
+            // ratio (fold 6 with S₃ against fold 12 with D₃) is measured,
+            // not composed from the two separate ones.
+            let s3_run = |base| {
+                (p_bits <= 10).then(|| {
+                    let mut s3 = YLineS4Oracle::new(&inst, &polys, seed);
+                    let (rep, m, i) = stream(base, &mut s3);
+                    json!({
+                        "stream": stream_json(&rep),
+                        "stream_cost": {"fp_muls": m, "fp_invs": i},
+                        "solver": {"calls": s3.stats.solves, "fp_muls": s3.stats.fp_muls, "unsolved": s3.stats.unsolved, "quotient_dim_total": s3.stats.quotient_dim_total, "unliftable": s3.unliftable},
+                    })
+                })
+            };
+            let s3_stream = s3_run(&fold12);
+            let s3_fold6 = s3_run(&fold6);
+            let agreement = if p_bits <= 9 {
+                let mut d3 = FghrOracle::new(&inst, &polys, seed ^ 5);
+                let mut s3 = YLineS4Oracle::new(&inst, &polys, seed ^ 5);
+                let mut mitm = MitmOracle::new(3);
+                let mut params = Params::default();
+                params.set("negation_folded", "1");
+                let mut tmp = GroupOps::default();
+                mitm.prepare(&ctx, &fold12, &params, &mut tmp).unwrap();
+                let mut c = [
+                    OracleCounters::default(),
+                    OracleCounters::default(),
+                    OracleCounters::default(),
+                ];
+                let (mut hits, mut d3_dis, mut s3_dis) = (0u64, 0u64, 0u64);
+                let n = 200u64;
+                for k in 2..n + 2 {
+                    let pt = sub.curve.mul(&mut tmp, sub.generator, k);
+                    let a = d3.decompose(&ctx, &fold12, &mut tmp, &mut c[0], pt);
+                    let b = s3.decompose(&ctx, &fold12, &mut tmp, &mut c[1], pt);
+                    let m = mitm.decompose(&ctx, &fold12, &mut tmp, &mut c[2], pt);
+                    for idx in [&a, &b].into_iter().flatten() {
+                        let sum = idx.iter().fold(sub.curve.identity(), |acc, &i| {
+                            sub.curve.add(&mut tmp, acc, fold12.points[i])
+                        });
+                        assert_eq!(
+                            sum, pt,
+                            "an algebraic decomposition did not sum to its target"
+                        );
+                    }
+                    hits += m.is_some() as u64;
+                    d3_dis += (a.is_some() != m.is_some()) as u64;
+                    s3_dis += (b.is_some() != m.is_some()) as u64;
+                }
+                Some(
+                    json!({"targets": n, "pair_table_hits": hits, "d3_disagreements": d3_dis, "s3_disagreements": s3_dis, "d3_muls_per_call": d3.stats.fp_muls as f64 / n as f64, "s3_muls_per_call": s3.stats.fp_muls as f64 / n as f64, "s3_quotient_per_call": s3.stats.quotient_dim_total as f64 / n as f64}),
+                )
+            } else {
+                None
+            };
+            let mut walks = Vec::new();
+            let (mut st_neg, mut st_fold, mut all_ok) = (0u64, 0u64, true);
+            for k in 0..o.rho_runs as u64 {
+                let ws = seed ^ (k * 0x9E37);
+                take_field_counters();
+                let n = rho_reference_negation(
+                    &sub.curve,
+                    sub.generator,
+                    target,
+                    sub.r,
+                    ws,
+                    o.rho_max_steps,
+                );
+                let (nm, ni) = take_field_counters();
+                let f = rho_reference_folded(
+                    &sub.curve,
+                    sub.generator,
+                    target,
+                    sub.r,
+                    ws,
+                    o.rho_max_steps,
+                    &refs,
+                )
+                .unwrap();
+                let (fm, fi) = take_field_counters();
+                all_ok &= n.verified && f.verified;
+                st_neg += n.steps;
+                st_fold += f.steps;
+                walks.push(json!({
+                    "walk_seed": ws,
+                    "negation": n,
+                    "negation_fp_muls": nm,
+                    "negation_fp_invs": ni,
+                    "folded": f,
+                    "folded_fp_muls": fm,
+                    "folded_fp_invs": fi,
+                }));
+            }
+            eprintln!(
+                "e13 p=2^{p_bits} r=2^{:.1} h={}: cols {}/{}/{} | square fold12 {:?}/{:?} fold6 {:?}/{:?} | D3 muls/call {:.0} deg max {} unsolved {} | S3 {} | agreement {} | ok {}/{}/{} [{:.1}s]",
+                (sub.r as f64).log2(),
+                sub.cofactor,
+                fold12.columns,
+                fold6.columns,
+                control.columns,
+                rep_a.folded.square_relations,
+                rep_a.control.square_relations,
+                rep_b.folded.square_relations,
+                rep_b.control.square_relations,
+                d3a.stats.fp_muls as f64 / d3a.stats.calls.max(1) as f64,
+                d3a.stats.resultant_degree_max,
+                d3a.stats.unsolved,
+                s3_stream
+                    .as_ref()
+                    .map(|v| format!("muls/call {:.0}", v["solver"]["fp_muls"].as_f64().unwrap() / v["solver"]["calls"].as_f64().unwrap().max(1.0)))
+                    .unwrap_or_else(|| "—".into()),
+                agreement
+                    .as_ref()
+                    .map(|a| format!("d3 {}/{} s3 {}/{}", a["d3_disagreements"], a["targets"], a["s3_disagreements"], a["targets"]))
+                    .unwrap_or_else(|| "—".into()),
+                rep_a.folded.verified && rep_a.control.verified,
+                rep_b.folded.verified,
+                all_ok,
+                started.elapsed().as_secs_f64()
+            );
+            rows.push(json!({
+                "experiment": "e13",
+                "family": "subfield-2torsion",
+                "p_bits": p_bits,
+                "seed": seed,
+                "instance": sub.name,
+                "log2_r": (sub.r as f64).log2(),
+                "r": sub.r,
+                "base_order": sub.base_order,
+                "group_order": sub.group_order,
+                "cofactor": sub.cofactor,
+                "x0": inst.x0,
+                "c": inst.c,
+                "summands": 3,
+                "unit": "F_p multiplications; an inversion is priced at inversion_in_multiplications, measured on this host; each solver counts its own multiplications; a row operation of the linear algebra is one Z/rZ multiplication, priced as one; the polynomials' once-per-curve set-up is charged to every arm",
+                "inversion_in_multiplications": k_inv,
+                "points": fold12.points.len(),
+                "points_per_column": {"fold12": r12.points_per_orbit, "fold6": r6.points_per_orbit, "control": 2.0},
+                "columns": {"fold12": fold12.columns, "fold6": fold6.columns, "control": control.columns},
+                "base_build": {
+                    "fold12": {"fp_muls": b12m, "fp_invs": b12i},
+                    "fold6": {"fp_muls": b6m, "fp_invs": b6i},
+                    "control": {"fp_muls": b2m, "fp_invs": b2i},
+                },
+                "polynomials": {"y_terms": polys.y_terms, "s3_terms": polys.s3_terms, "d3_terms": polys.d3_terms, "setup_fp_muls": polys.setup_muls},
+                "d3_fold12": {"stream": stream_json(&rep_a), "stream_cost": {"fp_muls": ma, "fp_invs": ia}, "solver": d3a.stats},
+                "d3_fold6": {"stream": stream_json(&rep_b), "stream_cost": {"fp_muls": mb, "fp_invs": ib}, "solver": d3b.stats},
+                "s3_fold12": s3_stream,
+                "s3_fold6": s3_fold6,
+                "agreement": agreement,
+                "rho_runs": o.rho_runs,
+                "rho_steps_ratio": st_neg as f64 / st_fold.max(1) as f64,
+                "rho_expected_ratio": ((classes.group_order as f64) / 2.0).sqrt(),
+                "rho_all_verified": all_ok,
+                "walks": walks,
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut o = Opts {
@@ -1620,7 +2356,10 @@ fn main() {
         "e8" => e8(&o),
         "e9" => e9(&o),
         "e11" => e11(&o),
-        other => panic!("unknown experiment {other}; try e1..e9, e11"),
+        "e12" => e12(&o),
+        "e12p" => e12p(&o),
+        "e13" => e13(&o),
+        other => panic!("unknown experiment {other}; try e1..e9, e11, e12, e12p, e13"),
     };
     let out = json!({
         "what_this_is": format!("Experiment {} of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.", o.exp),

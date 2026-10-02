@@ -689,9 +689,9 @@ impl Hasher for MixHasher {
     }
 }
 
-type FastMap<V> = HashMap<u64, V, BuildHasherDefault<MixHasher>>;
+pub(crate) type FastMap<V> = HashMap<u64, V, BuildHasherDefault<MixHasher>>;
 
-fn fast_map<V>(capacity: usize) -> FastMap<V> {
+pub(crate) fn fast_map<V>(capacity: usize) -> FastMap<V> {
     HashMap::with_capacity_and_hasher(capacity, BuildHasherDefault::default())
 }
 

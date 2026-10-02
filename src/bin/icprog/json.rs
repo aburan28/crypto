@@ -89,6 +89,42 @@ impl J {
     }
 }
 
+/// A number, as Python compares numbers: `True == 1 == 1.0`.
+fn number(v: &J) -> Option<f64> {
+    match v {
+        J::Bool(b) => Some(f64::from(u8::from(*b))),
+        J::Int(i) => Some(*i as f64),
+        J::Float(f) => Some(*f),
+        _ => None,
+    }
+}
+
+/// Python's `==` on parsed JSON: objects as unordered maps, numbers by
+/// value whatever their type.
+pub fn py_eq(a: &J, b: &J) -> bool {
+    match (a, b) {
+        (J::Int(x), J::Int(y)) => x == y,
+        (J::Int(i), J::Float(f)) | (J::Float(f), J::Int(i)) => {
+            f.is_finite() && f.fract() == 0.0 && (*f as i128) == *i && (*i as f64) == *f
+        }
+        (J::Null, J::Null) => true,
+        (J::Str(x), J::Str(y)) => x == y,
+        (J::Arr(x), J::Arr(y)) => x.len() == y.len() && x.iter().zip(y).all(|(p, q)| py_eq(p, q)),
+        (J::Obj(x), J::Obj(y)) => {
+            x.len() == y.len()
+                && x.iter().all(|(k, v)| {
+                    y.iter()
+                        .find(|(k2, _)| k2 == k)
+                        .is_some_and(|(_, w)| py_eq(v, w))
+                })
+        }
+        _ => match (number(a), number(b)) {
+            (Some(x), Some(y)) => x == y,
+            _ => false,
+        },
+    }
+}
+
 /// An object built in order: `obj([("a", J::Int(1)), ...])`.
 pub fn obj<const N: usize>(kv: [(&str, J); N]) -> J {
     J::Obj(kv.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
@@ -460,6 +496,46 @@ pub fn sorted(v: &J) -> J {
         }
         other => other.clone(),
     }
+}
+
+/// `v` with no spaces (`separators=(",", ":")`), every object's keys sorted
+/// when `sort_keys`, and non-ASCII text escaped only when `ascii`: the form
+/// the identity and certificate digests hash.
+pub fn dumps_compact(v: &J, sort_keys: bool, ascii: bool) -> String {
+    fn compact(out: &mut String, v: &J, ascii: bool) {
+        match v {
+            J::Arr(items) => {
+                out.push('[');
+                for (k, item) in items.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    compact(out, item, ascii);
+                }
+                out.push(']');
+            }
+            J::Obj(kv) => {
+                out.push('{');
+                for (k, (key, item)) in kv.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    write_str_as(out, key, ascii);
+                    out.push(':');
+                    compact(out, item, ascii);
+                }
+                out.push('}');
+            }
+            scalar => write_as(out, scalar, 0, 0, ascii),
+        }
+    }
+    let mut out = String::new();
+    if sort_keys {
+        compact(&mut out, &sorted(v), ascii);
+    } else {
+        compact(&mut out, v, ascii);
+    }
+    out
 }
 
 /// `v` on one line with `", "` and `": "` between items, as a JSON lines

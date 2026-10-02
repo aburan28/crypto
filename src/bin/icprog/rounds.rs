@@ -11,7 +11,9 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use super::bench::{self, Arm, Bench};
+use super::callgrind;
 use super::json::{self, obj, opt_f64, J};
+use super::pin;
 use super::runs;
 use super::stats;
 use super::suite::{self, Row};
@@ -30,21 +32,42 @@ fn report(d: &Path, arm: &str, row: &str, k: u32) -> Result<Option<J>, String> {
     runs::figure(&d.join(arm).join(row).join(format!("r{k}.price.json")))
 }
 
-/// Every (base, candidate) figure pair, by the base's rounds.
-fn pairs(d: &Path, rows: &[Row]) -> Result<Vec<(Option<J>, Option<J>)>, String> {
+/// Every figure pair of two arms, by the first arm's rounds.
+fn pairs_of(
+    d: &Path,
+    rows: &[Row],
+    arms: (&str, &str),
+) -> Result<Vec<(Option<J>, Option<J>)>, String> {
     let mut out = Vec::new();
     for r in rows {
-        for k in runs::rounds_of(d, "base", &r.id) {
-            out.push((report(d, "base", &r.id, k)?, report(d, "cand", &r.id, k)?));
+        for k in runs::rounds_of(d, arms.0, &r.id) {
+            out.push((report(d, arms.0, &r.id, k)?, report(d, arms.1, &r.id, k)?));
         }
     }
     Ok(out)
 }
 
-/// The paired ratios' interval, with the pairs that had no figure.
+/// Every (base, candidate) figure pair, by the base's rounds.
+fn pairs(d: &Path, rows: &[Row]) -> Result<Vec<(Option<J>, Option<J>)>, String> {
+    pairs_of(d, rows, ("base", "cand"))
+}
+
+/// The paired ratios' interval, base over candidate, with the pairs that
+/// had no figure.
 fn paired(d: &Path, rows: &[Row], measure: Measure, half_width: bool) -> Result<J, String> {
+    paired_of(d, rows, ("base", "cand"), measure, half_width)
+}
+
+/// The same for any two arms, the first over the second.
+fn paired_of(
+    d: &Path,
+    rows: &[Row],
+    arms: (&str, &str),
+    measure: Measure,
+    half_width: bool,
+) -> Result<J, String> {
     let (mut ratios, mut missing) = (Vec::new(), 0i128);
-    for (a, b) in pairs(d, rows)? {
+    for (a, b) in pairs_of(d, rows, arms)? {
         match (a, b) {
             (Some(a), Some(b)) => ratios.push(measure(&a)? / measure(&b)?),
             _ => missing += 1,
@@ -310,6 +333,7 @@ pub mod r03 {
                     recipe_seed: None,
                     params: None,
                     rho_seed: None,
+                    suite_id: None,
                 });
             }
         }
@@ -349,28 +373,32 @@ pub mod r03 {
     }
 }
 
-// ── R05: the sharper presence filter ────────────────────────────────
+// ── speed rounds with R05's shape ───────────────────────────────────
 
-pub mod r05 {
+/// A speed round with R05's shape, which R02b's protocol shares: `M1`'s
+/// rows at every size and every suite row at the target sizes, eight frozen
+/// holdout rows at each target size, five rounds, and rounds 6–10 for a set
+/// whose interval is wider than 3%.
+pub struct Spec {
+    pub targets: &'static [(u8, u32)],
+    pub holdouts: &'static [(i128, u32)],
+    pub what_this_is: &'static str,
+    /// The sizes its callgrind control profiles, `M1`'s first target each;
+    /// none for a round without one.
+    pub callgrind: &'static [(u8, u32)],
+    /// The note `manifest-resumed` writes into `host-resumed.json`.
+    pub resumed_note: &'static str,
+}
+
+pub mod speed {
     use super::*;
 
-    pub const TARGETS: [(u8, u32); 3] = [(0, 53), (1, 59), (0, 61)];
-    pub const HOLDOUTS: [(i128, u32); 8] = [
-        (210, 111),
-        (210, 112),
-        (211, 113),
-        (211, 114),
-        (212, 115),
-        (212, 116),
-        (213, 117),
-        (213, 118),
-    ];
-    const ACCEPT_LO: f64 = 1.10;
+    pub const ACCEPT_LO: f64 = 1.10;
     /// Suite v1's rho seeds: `0x230000 +` the target's number.
-    const RHO_SEED_BASE: i128 = 0x230000;
-    const ROUNDS: u32 = 5;
-    const EXTENDED_ROUNDS: u32 = 10;
-    const HALF_WIDTH_LIMIT: f64 = 0.03;
+    pub const RHO_SEED_BASE: i128 = 0x230000;
+    pub const ROUNDS: u32 = 5;
+    pub const EXTENDED_ROUNDS: u32 = 10;
+    pub const HALF_WIDTH_LIMIT: f64 = 0.03;
 
     fn collect(rep: &J) -> Result<f64, String> {
         runs::setup_phase_ns(rep, "collect")
@@ -387,28 +415,37 @@ pub mod r05 {
         Ok(collect(rep)? / summands)
     }
 
-    /// `M1`'s 22 rows, and every suite row at the three target sizes: 40.
-    pub fn suite_rows(c: &Ctx) -> Result<Vec<Row>, String> {
+    /// `M1`'s rows at every size: 22.
+    pub fn m1_rows(c: &Ctx) -> Result<Vec<Row>, String> {
         Ok(suite::rows(&c.programme, "S")?
             .into_iter()
-            .filter(|r| r.recipe_seed == Some(201) || TARGETS.contains(&(r.a, r.n)))
+            .filter(|r| r.recipe_seed == Some(201))
             .collect())
     }
 
-    /// Eight fresh rows at each target size, from the frozen `holdouts/`.
-    pub fn holdout_rows(c: &Ctx) -> Result<Vec<Row>, String> {
+    /// `M1`'s 22 rows, and every suite row at the target sizes.
+    pub fn suite_rows(c: &Ctx, s: &Spec) -> Result<Vec<Row>, String> {
+        Ok(suite::rows(&c.programme, "S")?
+            .into_iter()
+            .filter(|r| r.recipe_seed == Some(201) || s.targets.contains(&(r.a, r.n)))
+            .collect())
+    }
+
+    /// Eight fresh rows at each target size, from the frozen `holdouts/`,
+    /// checked against its `SHA256SUMS`.
+    pub fn holdout_rows(c: &Ctx, s: &Spec) -> Result<Vec<Row>, String> {
         let dir = c.round_dir.join("holdouts");
         suite::check_sums(&dir)?;
         let all = suite::rows(&c.programme, "S")?;
         let mut out = Vec::new();
-        for (a, n) in TARGETS {
+        for &(a, n) in s.targets {
             let slug = suite::curve_slug(a, n)?;
             let r = all
                 .iter()
                 .find(|x| (x.a, x.n) == (a, n))
                 .ok_or("no suite row at a target size")?
                 .r;
-            for (seed, i) in HOLDOUTS {
+            for &(seed, i) in s.holdouts {
                 let name = format!("M{}-T{i}", seed - 200);
                 let path = dir.join(&slug).join(format!("{name}.json"));
                 if !path.exists() {
@@ -422,6 +459,7 @@ pub mod r05 {
                     recipe_seed: Some(seed),
                     params: Some(path),
                     rho_seed: Some(RHO_SEED_BASE + i as i128),
+                    suite_id: None,
                 });
             }
         }
@@ -479,30 +517,100 @@ pub mod r05 {
         Ok(J::Arr(out))
     }
 
-    pub fn analyse(c: &Ctx) -> Result<J, String> {
-        let (aa, units) = (r01_aa(c)?, unit_v0(c)?);
+    /// The round's own A/A, for a host that is not R01's: the base against
+    /// a byte-identical copy (`A` and `A2`) on `M1`'s rows, size by size, as
+    /// R01 measured its own.  Also the bands by slug.
+    fn own_aa(c: &Ctx) -> Result<(J, HashMap<String, J>), String> {
+        let d = c.runs.join("aa");
+        let arms = ("A", "A2");
+        let (mut out, mut bands) = (Vec::new(), HashMap::new());
+        for ((a, n), rs) in suite::by_size(&m1_rows(c)?) {
+            let slug = suite::curve_slug(a, n)?;
+            let mut kv = size_head(&slug, a, n, &rs);
+            let rounds = rs
+                .iter()
+                .map(|r| runs::rounds_of(&d, arms.0, &r.id).len())
+                .max()
+                .unwrap_or(0);
+            kv.push(("rounds".into(), J::Int(rounds as i128)));
+            let cold = paired_of(&d, &rs, arms, runs::ic_cold_ns, false)?;
+            kv.push(("cold".into(), cold.clone()));
+            kv.push((
+                "online".into(),
+                paired_of(&d, &rs, arms, runs::ic_online_ns, false)?,
+            ));
+            kv.push((
+                "rho_online".into(),
+                paired_of(&d, &rs, arms, runs::rho_online_ns, false)?,
+            ));
+            if cold.get("lo").is_some() {
+                bands.insert(slug, cold);
+            }
+            out.push(J::Obj(kv));
+        }
+        Ok((J::Arr(out), bands))
+    }
+
+    /// Whether the round's host is R01's, as its `aa-source.json` records.
+    fn host_matches_r01(c: &Ctx) -> Result<bool, String> {
+        Ok(json::read_opt(&c.runs.join("aa-source.json"))?
+            .and_then(|d| d.get("host_matches_r01").cloned())
+            .is_none_or(|v| v.truthy()))
+    }
+
+    /// The round's figures and decision, from its run tree only.
+    pub fn analyse(c: &Ctx, s: &Spec) -> Result<J, String> {
+        let units = unit_v0(c)?;
+        let same_host = host_matches_r01(c)?;
+        let (own, aa) = if same_host {
+            (None, r01_aa(c)?)
+        } else {
+            let (record, bands) = own_aa(c)?;
+            (Some(record), bands)
+        };
         let pin = json::read_opt(&c.runs.join("pin").join("pin.json"))?;
-        let suite_j = comparison(&c.runs.join("compare"), &suite_rows(c)?, &aa, &units)?;
+        let suite_rows = suite_rows(c, s)?;
+        let suite_j = comparison(&c.runs.join("compare"), &suite_rows, &aa, &units)?;
         let holdouts = comparison(
             &c.runs.join("holdout"),
-            &holdout_rows(c)?,
+            &holdout_rows(c, s)?,
             &HashMap::new(),
             &units,
         )?;
+        let control = if s.callgrind.is_empty() {
+            None
+        } else {
+            Some(callgrind::control(&c.runs.join("callgrind"))?)
+        };
         let mut reasons = Vec::new();
+        if let Some(cg) = &control {
+            if !cg.get("control_held").is_some_and(J::truthy) {
+                reasons.push(J::Str("the callgrind control did not hold".into()));
+            }
+        }
         if !pin_flag(&pin, "held") {
             reasons.push(J::Str("an output differs from v0's".into()));
         }
         if !pin_flag(&pin, "names_agree") {
             reasons.push(J::Str("a name disagrees with the registry".into()));
         }
-        for (a, n) in TARGETS {
+        for &(a, n) in s.targets {
             let slug = suite::curve_slug(a, n)?;
             bound_reasons(&suite_j, &slug, "suite", ACCEPT_LO, &mut reasons);
             bound_reasons(&holdouts, &slug, "holdouts", ACCEPT_LO, &mut reasons);
         }
         aa_reasons(&suite_j, &mut reasons);
-        let extension = extension_record(c)?;
+        if !same_host {
+            for ((a, n), _) in suite::by_size(&suite_rows) {
+                let slug = suite::curve_slug(a, n)?;
+                if !aa.contains_key(&slug) {
+                    reasons.push(J::Str(format!(
+                        "{slug}: the host is not R01's, and the round's own A/A has no band there"
+                    )));
+                }
+            }
+        }
+        let extension = extension_record(c, s)?;
         let recorded = json::read_opt(&c.runs.join("extended.json"))?;
         if let Some(rec) = &recorded {
             let listed = |e: &J| -> bool {
@@ -529,35 +637,51 @@ pub mod r05 {
                 J::Str("the tests run with cargo before the timed steps and are recorded beside this analysis".into()),
             ),
         ]);
-        Ok(obj([
+        let mut by_tool = Vec::new();
+        for step in ["aa", "compare", "holdout"] {
+            let d = c.runs.join(step);
+            if step != "aa" || d.exists() {
+                by_tool.push((step.to_string(), runs::by_tool(&d)?));
+            }
+        }
+        let mut doc = vec![
+            ("what_this_is".to_string(), J::Str(s.what_this_is.into())),
             (
-                "what_this_is",
-                J::Str("R05, the sharper presence filter: every figure the README, the ledger and the scoreboard quote".into()),
+                "host".into(),
+                opt(json::read_opt(&c.runs.join("host.json"))?),
             ),
-            ("host", opt(json::read_opt(&c.runs.join("host.json"))?)),
             (
-                "host_resumed",
+                "host_resumed".into(),
                 opt(json::read_opt(&c.runs.join("host-resumed.json"))?),
             ),
-            ("aa_source", opt(json::read_opt(&c.runs.join("aa-source.json"))?)),
-            ("accounting", accounting(c, &["compare", "holdout"])?),
             (
-                "isolation_by_tool",
-                J::Obj(vec![
-                    ("compare".into(), runs::by_tool(&c.runs.join("compare"))?),
-                    ("holdout".into(), runs::by_tool(&c.runs.join("holdout"))?),
-                ]),
+                "aa_source".into(),
+                opt(json::read_opt(&c.runs.join("aa-source.json"))?),
             ),
-            ("pin", pin_summary(&pin)?),
-            ("extended", opt(recorded)),
-            ("extension_test", extension),
-            ("suite", suite_j),
-            ("holdouts", holdouts),
-            ("decision", decision),
-        ]))
+        ];
+        if let Some(own) = own {
+            doc.push(("aa".into(), own));
+        }
+        doc.extend([
+            (
+                "accounting".to_string(),
+                accounting(c, &["aa", "compare", "holdout"])?,
+            ),
+            ("isolation_by_tool".into(), J::Obj(by_tool)),
+            ("pin".into(), pin_summary(&pin)?),
+            ("extended".into(), opt(recorded)),
+            ("extension_test".into(), extension),
+            ("suite".into(), suite_j),
+            ("holdouts".into(), holdouts),
+        ]);
+        if let Some(cg) = control {
+            doc.push(("callgrind".into(), cg));
+        }
+        doc.push(("decision".into(), decision));
+        Ok(J::Obj(doc))
     }
 
-    // ── the declared runs, natively (PROTOCOL.md "What runs") ────────
+    // ── the declared runs, natively (each PROTOCOL.md's "Rows") ──────
 
     fn status(rep: &J) -> Option<&str> {
         rep.get("status").and_then(J::as_str)
@@ -580,20 +704,23 @@ pub mod r05 {
         Ok(out)
     }
 
-    fn sets(c: &Ctx) -> Result<[(&'static str, PathBuf, Vec<Row>); 2], String> {
+    fn sets(c: &Ctx, s: &Spec) -> Result<[(&'static str, PathBuf, Vec<Row>); 2], String> {
         Ok([
-            ("suite", c.runs.join("compare"), suite_rows(c)?),
-            ("holdouts", c.runs.join("holdout"), holdout_rows(c)?),
+            ("suite", c.runs.join("compare"), suite_rows(c, s)?),
+            ("holdouts", c.runs.join("holdout"), holdout_rows(c, s)?),
         ])
     }
 
     /// The extension rule's test, set by set at each target size: the
     /// cold interval over the first five rounds and its half-width.  The
     /// test reads the interval's width only.
-    fn extension_tests(c: &Ctx) -> Result<Vec<(&'static str, String, stats::GeoCi)>, String> {
+    fn extension_tests(
+        c: &Ctx,
+        s: &Spec,
+    ) -> Result<Vec<(&'static str, String, stats::GeoCi)>, String> {
         let mut out = Vec::new();
-        for (name, d, rows) in sets(c)? {
-            for (a, n) in TARGETS {
+        for (name, d, rows) in sets(c, s)? {
+            for &(a, n) in s.targets {
                 let rs: Vec<Row> = rows
                     .iter()
                     .filter(|r| (r.a, r.n) == (a, n))
@@ -612,9 +739,9 @@ pub mod r05 {
 
     /// What the extension rule read, for the analysis: rounds 1–5 only,
     /// whatever ran after.
-    fn extension_record(c: &Ctx) -> Result<J, String> {
+    fn extension_record(c: &Ctx, s: &Spec) -> Result<J, String> {
         let mut out = Vec::new();
-        for (set, slug, ci) in extension_tests(c)? {
+        for (set, slug, ci) in extension_tests(c, s)? {
             let mut kv = vec![
                 ("set".to_string(), J::Str(set.into())),
                 ("slug".to_string(), J::Str(slug)),
@@ -633,14 +760,14 @@ pub mod r05 {
 
     /// Rounds 6–10 for a set whose half-width at a target size exceeds 3%
     /// after five rounds.  The test reads the interval's width only.
-    pub fn extend(c: &Ctx, b: &Bench, arms: &[Arm]) -> Result<J, String> {
+    pub fn extend(c: &Ctx, s: &Spec, b: &Bench, arms: &[Arm]) -> Result<J, String> {
         let record = c.runs.join("extended.json");
-        let sets = sets(c)?;
+        let sets = sets(c, s)?;
         let done = if record.exists() {
             json::read(&record)?
         } else {
             let mut kv: Vec<(String, J)> = Vec::new();
-            for (name, slug, ci) in extension_tests(c)? {
+            for (name, slug, ci) in extension_tests(c, s)? {
                 if half_width(&ci).is_some_and(|h| h > HALF_WIDTH_LIMIT) {
                     let slug = J::Str(slug);
                     match kv.iter_mut().find(|(k, _)| k == name) {
@@ -677,9 +804,9 @@ pub mod r05 {
 
     /// What `compare` and `holdout` would still run, in their order: the
     /// rounds with no first attempt yet, and the attempts owed a retry.
-    pub fn plan(c: &Ctx, arms: &[Arm]) -> Result<J, String> {
+    pub fn plan(c: &Ctx, s: &Spec, arms: &[Arm]) -> Result<J, String> {
         let mut out = Vec::new();
-        for (name, d, rows) in sets(c)? {
+        for (name, d, rows) in sets(c, s)? {
             let mut missing = Vec::new();
             for k in 1..=ROUNDS {
                 let order: Vec<&Arm> = if k % 2 == 1 {
@@ -722,61 +849,320 @@ pub mod r05 {
         Ok(J::Obj(out))
     }
 
-    /// One declared step on the native runner.  `manifest` and `pin`
-    /// ran under the declared runner at the round's start; their records
-    /// are in the run tree and are not re-run.  `manifest-resumed` records
-    /// the host the round resumed on, once.
+    /// Each arm's binary, as a manifest names it: its file name, SHA-256 and,
+    /// where given, the commit it was built from.
+    fn binaries(arms: &[Arm], commits: &[Option<String>]) -> Result<J, String> {
+        let mut kv = Vec::new();
+        for (i, a) in arms.iter().enumerate() {
+            let name = if a.name == "cand" {
+                "candidate".to_string()
+            } else {
+                a.name.clone()
+            };
+            let mut fields = vec![
+                (
+                    "path_basename".to_string(),
+                    J::Str(
+                        a.binary
+                            .file_name()
+                            .map(|f| f.to_string_lossy().into_owned())
+                            .unwrap_or_default(),
+                    ),
+                ),
+                ("sha256".into(), J::Str(bench::sha256_file(&a.binary)?)),
+            ];
+            if let Some(Some(commit)) = commits.get(i) {
+                fields.push(("built_from".into(), J::Str(commit.clone())));
+            }
+            kv.push((name, J::Obj(fields)));
+        }
+        Ok(J::Obj(kv))
+    }
+
+    /// The host a round starts on (`host.json`), and whether it is R01's
+    /// (`aa-source.json`): the A/A bands are R01's if so, the round's own
+    /// if not.  Both are written once.
+    pub fn manifest(
+        c: &Ctx,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+        note: &str,
+    ) -> Result<J, String> {
+        let doc = bench::host_manifest(
+            &c.runs.join("host.json"),
+            root,
+            binaries(arms, commits)?,
+            &b.isolate,
+            note,
+        )?;
+        let out = c.runs.join("aa-source.json");
+        if out.exists() {
+            return json::read(&out);
+        }
+        let r01 = json::read(&pin::r01_runs(&c.programme)?.join("host.json"))?;
+        let same = [
+            "cpu_model",
+            "cpu_flags_relevant",
+            "logical_cores",
+            "memory",
+            "transparent_hugepage",
+            "os",
+        ]
+        .iter()
+        .all(|k| match (doc.get(k), r01.get(k)) {
+            (Some(x), Some(y)) => json::py_eq(x, y),
+            _ => false,
+        });
+        let record = obj([
+            ("host_matches_r01", J::Bool(same)),
+            (
+                "aa",
+                J::Str(if same { "R01's" } else { "the round's own" }.into()),
+            ),
+        ]);
+        std::fs::write(&out, json::dumps(&record, 1) + "\n")
+            .map_err(|e| format!("{}: {e}", out.display()))?;
+        Ok(record)
+    }
+
+    /// The host a round resumed on after its container changed, once.
+    pub fn manifest_resumed(
+        c: &Ctx,
+        s: &Spec,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+    ) -> Result<J, String> {
+        bench::host_manifest(
+            &c.runs.join("host-resumed.json"),
+            root,
+            binaries(arms, &[])?,
+            &b.isolate,
+            s.resumed_note,
+        )
+    }
+
+    /// The round's own A/A: the base against a byte-identical copy beside
+    /// it, on `M1`'s 22 rows, five rounds, as R01's.
+    pub fn aa(c: &Ctx, b: &Bench, arms: &[Arm]) -> Result<J, String> {
+        let base = &arms
+            .iter()
+            .find(|a| a.name == "base")
+            .ok_or("no base arm")?
+            .binary;
+        let name = base
+            .file_name()
+            .ok_or("the base arm has no file name")?
+            .to_string_lossy();
+        let copy = base.with_file_name(format!("{name}-aa-copy"));
+        if !copy.exists() {
+            std::fs::copy(base, &copy).map_err(|e| format!("{}: {e}", copy.display()))?;
+        }
+        if bench::sha256_file(&copy)? != bench::sha256_file(base)? {
+            return Err(format!(
+                "{} is not byte-identical to the base",
+                copy.display()
+            ));
+        }
+        let pair = [
+            Arm {
+                name: "A".into(),
+                binary: base.clone(),
+            },
+            Arm {
+                name: "A2".into(),
+                binary: copy,
+            },
+        ];
+        b.interleave(&pair, &m1_rows(c)?, ROUNDS, &c.runs.join("aa"), &[])?;
+        Ok(J::Null)
+    }
+
+    /// The callgrind control's profiles: `ic workflow` under callgrind on
+    /// `M1`'s first target at each of the round's sizes, both arms, untimed
+    /// under `taskset`; then each profile's phases, natively.
+    pub fn callgrind_step(c: &Ctx, s: &Spec, arms: &[Arm]) -> Result<J, String> {
+        let d = c.runs.join("callgrind");
+        std::fs::create_dir_all(&d).map_err(|e| format!("{}: {e}", d.display()))?;
+        let rows = suite_rows(c, s)?;
+        for arm in arms {
+            for &(a, n) in s.callgrind {
+                let row = rows
+                    .iter()
+                    .find(|r| (r.a, r.n) == (a, n) && r.id.ends_with("/M1-T01"))
+                    .ok_or("no M1-T01 row at a callgrind size")?;
+                let tag = format!("{}-{}", arm.name, row.id.replace('/', "-"));
+                let stem = format!("{tag}.callgrind.out");
+                let phases = d.join(format!("{tag}.phases.json"));
+                if phases.exists() {
+                    continue;
+                }
+                let params = row.params.as_ref().ok_or("a suite row has no parameters")?;
+                let work = std::env::temp_dir()
+                    .join(format!("icprog-workflow-{}-{tag}", std::process::id()));
+                std::fs::create_dir_all(&work).map_err(|e| format!("{}: {e}", work.display()))?;
+                let stdout = std::fs::File::create(d.join(format!("{tag}.workflow.json")))
+                    .map_err(|e| format!("{tag}.workflow.json: {e}"))?;
+                let stderr = std::fs::File::create(d.join(format!("{tag}.valgrind.log")))
+                    .map_err(|e| format!("{tag}.valgrind.log: {e}"))?;
+                std::process::Command::new("taskset")
+                    .args([
+                        "-c",
+                        bench::CPUS,
+                        "valgrind",
+                        "--tool=callgrind",
+                        "--cache-sim=yes",
+                    ])
+                    .args(["--I1=32768,8,64", "--D1=32768,8,64", "--LL=2097152,16,64"])
+                    .arg(format!("--callgrind-out-file={}", d.join(&stem).display()))
+                    .arg(&arm.binary)
+                    .args(["--json", "workflow", "--params"])
+                    .arg(params)
+                    .arg("--dir")
+                    .arg(&work)
+                    .env("RAYON_NUM_THREADS", "1")
+                    .stdout(stdout)
+                    .stderr(stderr)
+                    .status()
+                    .map_err(|e| format!("valgrind: {e}"))?;
+                let _ = std::fs::remove_dir_all(&work);
+                let doc = callgrind::phases(&d, &stem, 60)?;
+                std::fs::write(&phases, json::dumps(&doc, 1) + "\n")
+                    .map_err(|e| format!("{}: {e}", phases.display()))?;
+                println!("callgrind {tag}: done");
+            }
+        }
+        Ok(J::Null)
+    }
+
+    /// The steps every round of this shape has: `plan`, `compare`,
+    /// `holdout` and `extend`.
+    pub fn run_common(
+        c: &Ctx,
+        s: &Spec,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+    ) -> Option<Result<J, String>> {
+        Some(match step {
+            "plan" => plan(c, s, arms),
+            "compare" => suite_rows(c, s)
+                .and_then(|rows| b.interleave(arms, &rows, ROUNDS, &c.runs.join("compare"), &[]))
+                .map(|()| J::Null),
+            "holdout" => holdout_rows(c, s)
+                .and_then(|rows| b.interleave(arms, &rows, ROUNDS, &c.runs.join("holdout"), &[]))
+                .map(|()| J::Null),
+            "extend" => extend(c, s, b, arms),
+            _ => return None,
+        })
+    }
+}
+
+// ── R05: the sharper presence filter ────────────────────────────────
+
+pub mod r05 {
+    use super::*;
+
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (210, 111),
+            (210, 112),
+            (211, 113),
+            (211, 114),
+            (212, 115),
+            (212, 116),
+            (213, 117),
+            (213, 118),
+        ],
+        what_this_is: "R05, the sharper presence filter: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        resumed_note: "the host R05 resumed on after its container was rebuilt mid-holdouts",
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One declared step on the native runner.  `manifest` ran under the
+    /// declared runner at the round's start, and its record is in the run
+    /// tree.  `pin` reads the run tree's record, or recomputes it from the
+    /// candidate outputs there when the record is absent.
     pub fn run(c: &Ctx, step: &str, b: &Bench, arms: &[Arm], root: &Path) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
         match step {
-            "plan" => plan(c, arms),
-            "manifest-resumed" => {
-                let binaries = J::Obj(
-                    arms.iter()
-                        .map(|a| {
-                            Ok((
-                                if a.name == "cand" {
-                                    "candidate".to_string()
-                                } else {
-                                    a.name.clone()
-                                },
-                                json::obj([
-                                    (
-                                        "path_basename",
-                                        J::Str(
-                                            a.binary
-                                                .file_name()
-                                                .map(|f| f.to_string_lossy().into_owned())
-                                                .unwrap_or_default(),
-                                        ),
-                                    ),
-                                    ("sha256", J::Str(bench::sha256_file(&a.binary)?)),
-                                ]),
-                            ))
-                        })
-                        .collect::<Result<Vec<_>, String>>()?,
-                );
-                bench::host_manifest(
-                    &c.runs.join("host-resumed.json"),
-                    root,
-                    binaries,
-                    &b.isolate,
-                    "the host R05 resumed on after its container was rebuilt mid-holdouts",
-                )
-            }
-            "compare" => {
-                b.interleave(arms, &suite_rows(c)?, ROUNDS, &c.runs.join("compare"), &[])?;
-                Ok(J::Null)
-            }
-            "holdout" => {
-                b.interleave(arms, &holdout_rows(c)?, ROUNDS, &c.runs.join("holdout"), &[])?;
-                Ok(J::Null)
-            }
-            "extend" => extend(c, b, arms),
-            "manifest" | "pin" => Err(format!(
-                "`{step}` ran under the declared runner at the round's start; its record is in the run tree"
-            )),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "manifest" => Err(
+                "`manifest` ran under the declared runner at the round's start; its record is in the run tree"
+                    .into(),
+            ),
             other => Err(format!(
-                "unknown step `{other}`; try plan, manifest-resumed, compare, holdout or extend"
+                "unknown step `{other}`; try plan, manifest-resumed, pin, compare, holdout or extend"
+            )),
+        }
+    }
+}
+
+// ── R02b: the wide-tail kernel, re-tested ───────────────────────────
+
+pub mod r02b {
+    use super::*;
+
+    pub const SPEC: Spec = Spec {
+        targets: &[(1, 59), (0, 61)],
+        holdouts: &[
+            (206, 103),
+            (206, 104),
+            (207, 105),
+            (207, 106),
+            (208, 107),
+            (208, 108),
+            (209, 109),
+            (209, 110),
+        ],
+        what_this_is: "R02b, the wide-tail kernel re-tested on fresh holdouts: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[(0, 61), (1, 59), (0, 41)],
+        resumed_note: "the host R02b resumed on after its container changed",
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R02b's declared steps, natively (amendment 2): `manifest`,
+    /// `pin`, `aa`, `compare`, `holdout`, `extend`, `callgrind`, and `plan`
+    /// and `manifest-resumed` as for R05.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R02b ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            "callgrind" => speed::callgrind_step(c, &SPEC, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend, callgrind or manifest-resumed"
             )),
         }
     }
