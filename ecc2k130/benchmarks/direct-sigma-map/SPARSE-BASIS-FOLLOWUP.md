@@ -1,8 +1,10 @@
 # Sparse polynomial basis plus direct maps: follow-up assessment
 
-Status: **credible compound experiment, unimplemented and unmeasured.**  It is
-not part of the frozen direct-sigma GPU panel.  That panel must finish before
-this route is admitted or rejected.
+Status: **defer before implementation.**  The direct-sigma panel measured the
+shared table at 0.826916x control.  A sparse basis remains a mathematically
+coherent compound route, but it is no longer a clear GPU candidate without a
+new native/SASS model showing that its reduction cut repays that measured loss
+and the additional X-conversion lookups.
 
 ## Why the old rejection changes
 
@@ -48,14 +50,17 @@ prediction.
 
 The resulting hot lookup traffic would be 176 shared instructions for the X/Y
 direct maps plus 44 for the X normal map, **220 per update**.  Whether the
-reduction cut pays for that traffic depends directly on the current direct-map
-panel.  If the 56,320-byte candidate is already limited by shared-memory bank
-conflicts, this compound route begins behind; if ALU removal transfers, the
-sparse reducer can remove a second large independent ALU block.
+reduction cut pays for that traffic is now constrained by measurement: the
+56,320-byte direct table fell from 15.893066 to 13.143106 B/s, so the compound
+candidate would need a **1.2092x** improvement merely to tie the composed
+control while adding another 44 shared instructions.  The provisional
+238-slot reduction is not enough evidence of that transfer.  Reduction and
+lookup issue on different pipes, but the direct result shows the lookup pipe
+is already material.
 
 ## Required experiment
 
-Before any GPU run:
+Before any implementation or GPU run:
 
 1. choose and record one irreducible modulus, initially
    `x^131 + x^8 + x^3 + x^2 + 1`;
@@ -64,8 +69,9 @@ Before any GPU run:
 3. prove every map on all basis vectors, prove reduction by long division, and
    test dense products, squares, inverses, point updates and external normal-
    basis checkpoint round trips;
-4. compile native `sm_120` SASS and require a material total packed-walk ALU
-   cut, an 84,480-byte dynamic-shared request, zero static shared, zero walk
+4. compile native `sm_120` SASS and require a modelled end-to-end gain greater
+   than the measured 1.2092x break-even, not merely a reduction-local ALU cut,
+   with an 84,480-byte dynamic-shared request, zero static shared, zero walk
    spills and one 512-thread block per SM; and
 5. freeze a matched control/candidate replay, corpus, checkpoint, A/A and A/B
    protocol before allocating a GPU.

@@ -1,0 +1,49 @@
+{
+  "schema": "ecc2k130-direct-sigma-artifact-v1",
+  "sourceCommit": "af2151c5555757e5a605cdcec03f2ce14602bbde",
+  "sourceDirty": false,
+  "provider": "modal",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "modal": {
+    "appId": "ap-I7XoLNOmkAAyps6LEFm5Fp",
+    "functionCallId": "fc-01M3XSR2PSKCKZHA1ZSWS06FA5",
+    "volumeToken": "99bd6b3eacaf470ba73e1d1b11777f62",
+    "exitCode": 0,
+    "seconds": 1290.870659828186
+  },
+  "archive": {
+    "externalPath": "/private/tmp/ecc2k-direct-sigma-gpu-r6-20261002/results.tgz",
+    "bytes": 72622932,
+    "sha256": "2734894090f9885640aea546771ce6d5d042f5abb501bc985d1d7983880b3526",
+    "members": 59
+  },
+  "committedFiles": {
+    "launch": {
+      "path": "results/gpu-r6-launch.json",
+      "sha256": "46c7d6f703c82f3ae8c74e2c97bb0bbbdaf87b10dc703481ef1bb277b82a0083"
+    },
+    "result": {
+      "path": "results/gpu-r6-result.json",
+      "sha256": "01a8819e41d85020cccb88950ed6ff275e7c9d1b9680eb6bb822d480ab2e38c7"
+    },
+    "samples": {
+      "path": "results/gpu-r6-samples.tsv",
+      "sha256": "675a785600c01d82558b795bd99032c346f1db7ace7b40464c5ad8e18f14b8f8"
+    }
+  },
+  "rawEvidence": {
+    "sourceManifestSha256": "bb723d8184966a841f821dbcb6171542e15f8185f40774b6e3a4c9f2311964c6",
+    "binaryManifestSha256": "ef5f241388fc4a3fad5afc4a6cdd12b186356736e179d7f4f12e2b9e266a0bf8",
+    "artifactManifestSha256": "58211ce1bdd1e1e908e1bacc4026d4ebbc290542b98ba2dd66864b186ec615d4",
+    "nativeSynthesisSha256": "9877ae2a7cba348d4f9c7f8829647d91ba9f6143af78cc99498d384ff7a908d3",
+    "directTableHeaderSha256": "0d385683efbc15afd4f31618ed569ff2b076722881a51091ddf51adca827e047",
+    "controlBinarySha256": "cd585a06c032fae6795cd785dea1dadab44a0c2bcce81b6c03b5dfef9b2d68fb",
+    "candidateBinarySha256": "b909818137bae52e93c53484bf5697aa038a38e78152047cc76f84f82827be61",
+    "canonicalSortedCorpusSha256": "d93e276e7f92e6114a00df9e250f8bc299a47768eda4c34c50148a24aec60a85",
+    "canonicalSortedCorpusBytes": 54730464,
+    "recordCountPerArm": 1710327,
+    "checkpointManifestSha256": "e32f39103d1ecd12ed0ae3d5f6ca7dae252f49adb370cf285000a2302d74267d"
+  },
+  "packagingNote": "The in-job artifact manifest verifies 55 of 56 listed files after extraction. job.log changed when the wrapper appended the final job output, and exit-code was written after the manifest. The archive itself hashes, lists and extracts cleanly; neither packaging race affects samples, result, source, binaries, corpora or checkpoints."
+}

@@ -1,12 +1,56 @@
-# Direct polynomial-basis sigma map: static result
+# Direct polynomial-basis sigma map: static and GPU result
 
-Decision: **retain the table3 circuit as a GPU-screen candidate; reject the
-diagonal and half5 circuits.**  No GPU was used for this result.
+Decision: **do not promote the direct table.**  The table3 circuit passed the
+static screen and every correctness gate, then lost every matched GPU pair by
+about 17.3%.  Retain the generator, implementation and negative evidence with
+`DIRECT_SIGMA=0` as the default.  The active 26 B/s objective remains unmet.
 
 The native generator derives every matrix from the repository arithmetic and
 proves every generated family on all 131 basis inputs for each `j=3..10`.
 Every `L_j` has rank 130, as expected from `I + sigma^j`.  The separately
 compiled generated headers also passed 32,768 deterministic dense vectors.
+
+## RTX PRO 6000 measurement
+
+One NVIDIA RTX PRO 6000 Blackwell Server Edition, CUDA 13.3.73 and native
+`sm_120` code ran the frozen B16/T512/min1 protocol.  Both arms used 385,024
+threads, 16 slots and 64 launches of 1,024 steps: **403,726,925,824 complete
+scalar updates per timing row**.  Four warmups were excluded, three A/A pairs
+measured session noise, and five alternating A/B pairs were ranked.
+
+| arm | median B/s | registers | local bytes | static shared | dynamic shared | result |
+|---|---:|---:|---:|---:|---:|---|
+| composed shared-sigma control | **15.893066** | 126 | 0 | 1,792 | 0 | reference |
+| direct table3 | **13.143106** | 128 | 0 | 0 | 56,320 | reject |
+
+The candidate/control ratios were 0.826654, 0.826692, 0.826986, 0.827032 and
+0.826916.  Median 0.826916 is a **17.31% loss**; every pair lost.  A/A maximum
+absolute drift was 0.0371%, so noise is two orders of magnitude smaller than
+the effect.  Every timing row completed the exact expected work with zero
+drops.
+
+Correctness and identity gates passed before timing:
+
+- the dedicated device test checked 1,048 basis cases and 4,096 dense cases;
+- both repository arithmetic/storage suites passed;
+- each arm replayed 300/300 reports with zero drops;
+- both produced 1,710,327 complete v1 records with identical sorted payloads;
+- uninterrupted checkpoints and both cross-arm resume directions were byte
+  identical; and
+- both packed walk kernels had zero stack, spills and local bytes and resident
+  one 512-thread block per SM.
+
+The static ALU cut was real but the predicted lookup risk dominated: two maps
+perform 176 random shared-memory load instructions per update, with bank
+conflicts, in place of 56 shared mask loads.  This falsifies promotion of this
+table circuit on this GPU.
+
+The control's 15.893066 B/s is 2.96% above the separately allocated published
+B16/T256 fused headline of 15.436677 B/s.  That is not a matched geometry
+comparison and therefore not a promotion result.  The earlier fused geometry
+panel tested T512 only at batches 32 and 64.  A separate same-allocation
+B16/T256/min2 versus B16/T512/min1 panel is justified; it must keep direct
+sigma disabled in both arms.
 
 ## Static comparison
 
@@ -31,7 +75,7 @@ normal-basis conversion remains necessary for Hamming weight.  Applying the
 direct map to both coordinates therefore models 742 data-ALU operations
 against 1,230, a cut of 488 (39.7%).
 
-## Why this is only a candidate
+## Why the static candidate failed
 
 The direct matrices are dense: 1,724 to 4,383 one-bits.  A diagonal evaluator
 needs 228 to 247 of the 261 possible diagonals and 537 to 633 nonzero word
@@ -47,11 +91,10 @@ shared-mask loads per pair.  The 56,320-byte table plus the existing small
 allocation permits one block per SM.  A 512-thread block retains 16 resident
 warps, matching two current 256-thread blocks.
 
-That shared layout is the only admitted GPU follow-up: batch 16, 512 threads,
-one block/SM, identical worker and update counts, matched control geometry,
-host replay, corpus identity, A/A noise, then alternating A/B.  The experiment
-must be frozen separately before launch.  The static result is not throughput
-evidence and does not establish the 26 B/s objective.
+The measured shared layout used batch 16, 512 threads, one block/SM, identical
+worker and update counts, matched control geometry, host replay, corpus
+identity, A/A noise and alternating A/B.  Its loss shows why the static result
+alone was not throughput evidence.
 
 Generated artifact hashes from the frozen run:
 
@@ -61,3 +104,6 @@ Generated artifact hashes from the frozen run:
 
 Run `benchmarks/direct-sigma-map/run.sh` from any directory to regenerate and
 recheck the native evidence without Python.
+
+GPU evidence is indexed by `results/gpu-r6-artifact.json`; the independently
+reopened terminal audit is `results/gpu-r6-independent-audit.json`.
