@@ -6799,6 +6799,55 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-graded-tail-reuse-20261003">
+  <div class="panel-head">
+    <h2>Graded Boolean tail reuse: n=24 stage gain, universal discovery gate rejected <span class="chip">engineering</span></h2>
+    <p>A native Linux ARM64 discovery verified 200 generated public Boolean-matrix cells,
+      14,000 cold arm batches and 299,600 exact outputs. The candidate caches elimination
+      of the cubic block common to changing affine tails. Only 2/8 declared batch-64 groups
+      cleared the 1.5&times; discovery lower-bound screen; both are at n=24. Fresh holdouts
+      were not run, so no primary 2&times; holdout claim exists.</p>
+    <p>The strongest-control result includes a 16-bit dense packed lookup at n=24. A
+      prior successful run used 32-bit slots and incorrectly marked that control above
+      the same 64 MiB cap, creating an apparent ~2.9&times; n=24 ratio against a weaker
+      reference. That raw run and an earlier post-seal float-readback failure remain
+      preserved and excluded; neither is substituted for the corrected comparison.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_graded_tail_reuse_20261003/CONCLUSION.md">decision and cost table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_graded_tail_reuse_20261003/qualified_discovery_01/results.json">paired gates</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_graded_tail_reuse_20261003/qualified_discovery_01/manifest.json">qualified bundle</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_graded_tail_reuse_20261003/ATTEMPTS.md">preserved corrections</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_graded_tail_reuse_20261003/RUNS.json">run registry</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>n=24 cold batches of 64, milliseconds including setup, construction,
+      elimination and validation. Values are pooled medians over two discovery seeds and
+      ten repetitions; ratios of pooled medians are descriptive. Gate decisions use
+      separate paired lower bounds against the pointwise fastest control.</caption>
+    <thead><tr><th>Variant</th><th>Independent affine (ms)</th><th>Walk affine (ms)</th><th>Packed direct / arm, independent</th><th>Retained context bytes</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Packed direct, 16-bit dense</td><td>110.711</td><td>110.056</td><td>1.000</td><td>33,600,796</td><td>PASS</td></tr>
+      <tr><td>Ranked dense</td><td>180.925</td><td>177.284</td><td>0.612</td><td>46,332</td><td>PASS</td></tr>
+      <tr><td>Ranked sparse</td><td>217.533</td><td>213.353</td><td>0.509</td><td>46,332</td><td>PASS</td></tr>
+      <tr><td>Completed-matrix cache</td><td>181.150</td><td>177.783</td><td>0.611</td><td>257,436</td><td>PASS</td></tr>
+      <tr><td>Graded high-block reuse</td><td>62.250</td><td>60.218</td><td>1.779</td><td>1,831,020</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Paired fastest-control / graded ratios at batch 64: median [95% lower bound].
+      The frozen discovery rule requires every lower bound above 1.5 and its A/A floor.</caption>
+    <thead><tr><th>Original variables</th><th>Independent affine</th><th>Walk affine</th><th>Discovery groups above 1.5</th></tr></thead>
+    <tbody>
+      <tr><td>12</td><td>1.041 [1.034]</td><td>1.070 [1.065]</td><td>0/2</td></tr>
+      <tr><td>16</td><td>1.336 [1.327]</td><td>1.366 [1.354]</td><td>0/2</td></tr>
+      <tr><td>20</td><td>1.432 [1.423]</td><td>1.471 [1.464]</td><td>0/2</td></tr>
+      <tr><td>24</td><td>1.779 [1.760]</td><td>1.826 [1.819]</td><td>2/2</td></tr>
+    </tbody>
+  </table></div>
+  <p>This is a construction-and-elimination stage diagnostic on generated systems. Complete
+    polynomial solving, natural relation yield, calibrated IC operations and rho comparison
+    remain unmeasured. No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-pivot-screen-20261003">
   <div class="panel-head">
     <h2>Sibling Boolean pivot replay: full trace rejected <span class="chip">accounting</span></h2>

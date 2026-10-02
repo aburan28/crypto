@@ -33,13 +33,13 @@ outputs. The table is descriptive; acceptance uses paired pointwise minima,
 not ratios of these pooled medians. Retained bytes count the arm's stored
 context capacity and map payload, excluding allocator metadata.
 
-| Arm | Independent affine (ms) | Walk affine (ms) | Retained context bytes | Exact output |
-|---|---:|---:|---:|---|
-| Packed direct, 16-bit dense lookup | 110.711 | 110.056 | 33,600,796 | PASS |
-| Ranked dense intermediate | 180.925 | 177.284 | 46,332 | PASS |
-| Ranked sparse intermediate | 217.533 | 213.353 | 46,332 | PASS |
-| Completed-matrix cache | 181.150 | 177.783 | 257,436 | PASS |
-| **Graded high-block reuse** | **62.250** | **60.218** | **1,831,020** | PASS |
+| Arm | Independent affine (ms) | Walk affine (ms) | Packed direct / arm, independent | Retained context bytes | Exact output |
+|---|---:|---:|---:|---:|---|
+| Packed direct, 16-bit dense lookup | 110.711 | 110.056 | 1.000 | 33,600,796 | PASS |
+| Ranked dense intermediate | 180.925 | 177.284 | 0.612 | 46,332 | PASS |
+| Ranked sparse intermediate | 217.533 | 213.353 | 0.509 | 46,332 | PASS |
+| Completed-matrix cache | 181.150 | 177.783 | 0.611 | 257,436 | PASS |
+| **Graded high-block reuse** | **62.250** | **60.218** | **1.779** | **1,831,020** | PASS |
 
 The high-block identity is exact: for quadratic `f_j=q_j+a_j` and any admitted
 degree-at-most-one multiplier `t`, the cubic projection of `t*f_j` is
