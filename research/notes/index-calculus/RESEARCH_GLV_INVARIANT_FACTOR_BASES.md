@@ -1,10 +1,10 @@
-# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E13, and the road to the state of the art
+# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E15, and the road to the state of the art
 
 **Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`), `src/cryptanalysis/orbit_pair_table.rs` (the pair table over orbit representatives, E12), `src/cryptanalysis/fghr_line.rs` (the `Y`-line, the `τ_T` fold and the `D₃` conic-resultant oracle, E13)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
 **Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
 **Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13}.{json,log}` (2026-10-02); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13,15}.{json,log}` (2026-10-02); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
 **Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5; legacy Python, not extended) and `cargo run --release --example glv_invariant_experiment_tables -- experiments/23_glv_invariant_e*.json` (§6, §8; the native replacement of the retired `scripts/glv_invariant_experiment_tables.py`, byte-identical output on E1–E11); every number in §5, §6 and §8 is printed by them from the frozen files
 
 > **Status.**  Implementation, pilot, and the seven experiments of §4
@@ -39,8 +39,12 @@
 > `F_p` `j = 0`, and nothing on the line) and FGHR's `2`-torsion symmetry
 > with the fold (E13: a degree-`16` resultant in place of a `64`-dimensional
 > quotient, `S ÷ 27`, and the same `T` folding the base `12` a column for
-> `S ÷ 2.5` more; the two compound, and the best arm is `267×` rho).
-> Every class is engineering; no row claims a speed.
+> `S ÷ 2.5` more; the two compound, and the best arm is `267×` rho),
+> and the transfer check to the ECC2K-130 family (E15: on `E_0` at the
+> challenge's `4·prime` shape the fold is unconfined, `D = 1`; on
+> `m = 31`, which cannot have that shape, the `373` cofactor confines
+> `73 %` of two-summand rows).  Every class is engineering or
+> accounting; no row claims a speed.
 
 ## 1. What is new, against what exists
 
@@ -663,9 +667,9 @@ products.
   and the exponent panel is untouched.
 - Nothing here bears on any deployed curve: `r ≤ 2^32`, certified toy
   instances, and a fold that rho already takes as `√(w/2)`.
-- E14 and E15 of §8.1 are proposed, not run.  E13 does not price the negation arm on the `Y`-line (it stalls below full rank there, not derived, §8.7), so the plan's fold-against-negation ratio is unmeasured on that base.
+- E14 of §8.1 is proposed, not run (Smith's Q-curve construction is not in the repository).  E15 ran on `E_0` at `m = 13, 15, 23, 31` only: the faithful `4·prime` degrees `19` and `41` are beyond the pair-table driver, and the §8a `m = 83` gate was not run (E15 claims no improvement).  E13 does not price the negation arm on the `Y`-line (it stalls below full rank there, not derived, §8.7), so the plan's fold-against-negation ratio is unmeasured on that base.
 
-## 8. Toward the state of the art: what the literature does, what is next, and E8–E13
+## 8. Toward the state of the art: what the literature does, what is next, and E8–E15
 
 ### 8.0 Where E1–E7 stand against the literature
 
@@ -722,7 +726,7 @@ That is the ordering below.
 | **E12** | The pair table over orbit representatives: `P + φ^c P'` for representatives `P, P'` and `c < w/2` | table `w/2` smaller and `w/2` cheaper to build, one probe per target unchanged; `S` moves only by the table's share | a probe cost above `1.2×` the full table's falsifies "unchanged" | engineering (memory) | **done** (§8.6): table `÷ 2.95`–`2.97` (`w = 6`) and `÷ 1.98` (`w = 4`); probe `1.13×` at worst, so "unchanged" survives; `S ÷ 1.18` on `F_p` `j = 0`, `× 1.02` on the line |
 | **E13** | FGHR's `2`-torsion symmetry **and** the fold together: close the line base under translation by `T ∈ E(F_p)[2]` and under `π`, fold by `⟨−1, π⟩`, symmetrise the system by `(Z/2)^{m−1} ⋊ S_m` | the two levers multiply — columns `÷ 3`, system degree `÷ 2^{m−1}` — because one acts on the base and the other on the system | a combined `S` ratio below the product of the separate ratios by more than `20 %` falsifies "multiply" | engineering | **done** (§8.7), with the base closed under `τ_T` and folded by it too (`12` a column): `R(q₃)` of degree `16 = 64/4`, `S ÷ 27.0` from the system, `÷ 2.52` from `τ_T`; combined / product `≥ 0.82`, so "multiply" survives; the negation arm stalls below full rank on the `Y`-line and is not priced |
 | **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | pending; Smith's construction not in the repository |
-| **E15** | Transfer to the binary Koblitz program (ECC2K-130, AGENTS.md §8a–8b): is the §6.5 degeneracy present there? | no: `E(F_2) ⊂ E(F_{2^n})` has order `2` or `4`, so at most two component classes and no block structure; the fold there is the known `2n` | a measured deficiency `D > 2` on a prime-order-times-`4` Koblitz subgroup with two summands falsifies | accounting | pending; one `m = 31` stream with the deficiency column suffices |
+| **E15** | Transfer to the binary Koblitz program (ECC2K-130, AGENTS.md §8a–8b): is the §6.5 degeneracy present there? | no: `E(F_2) ⊂ E(F_{2^n})` has order `2` or `4`, so at most two component classes and no block structure; the fold there is the known `2n` | a measured deficiency `D > 2` on a prime-order-times-`4` Koblitz subgroup with two summands falsifies | accounting | **done** (§8.8): on `E_0` at the challenge's `4·prime` shape (`m = 23`) `D = 1` on both arms and `4 %` single-column rows, so the prediction holds; at `m = 31`, whose `E_0` cannot be `4·prime` (cofactor `4·373`), `D = 12 / 342` and `73 %` single-column rows — `m = 31` is not a faithful proxy for two-summand relation structure |
 
 What is **not** on the list, and why: a larger fold on a fixed prime-order
 subgroup.  §6.8's closed form bounds it by the roots of unity the curve's
@@ -1309,7 +1313,99 @@ oracle) and by `2.5×` (the `τ_T` fold) on top of E11's, and the ratio to rho f
 constants; nothing moves an exponent (`p^{1.23}`, the same `p^{1+o(1)}` relation phase as E11),
 and the method is not faster than rho at any size run.
 
-### 8.4 Verdict after E8–E13
+### 8.8 E15 — does the §6.5 degeneracy reach the ECC2K-130 family?
+
+**Runner:** `--exp e15 --bits 13,…,33 --seeds 4` (`m` from `13` to `33`; degrees with no
+instance or no usable invariant subspace are logged and skipped).  **Data:**
+`experiments/23_glv_invariant_e15.{json,log}` (2026-10-02).
+
+**The question.**  On a subfield curve `E(F_p)` is cofactor and fixed by `π`, and two-summand
+relations on the Frobenius line pair a point with its own orbit: every folded row is a
+single-column row and the fold buys columns but not relations (§6.5).  The ECC2K-130 group has
+the same shape in miniature — `E_0: y² + xy = x³ + 1` over `GF(2^{131})` has order `4·prime`, and
+the cofactor `E_0(F_2) ≅ Z/4` is fixed by the Frobenius `τ`.  E15 runs E2's two-summand stream —
+the signed-Frobenius-orbit base on a `τ`-invariant subspace against the abscissa control, the
+pair-table oracle, both arms to full rank — on `E_0` itself at every degree the driver can carry,
+and reads the structural deficiency `D` (§6.0) and the single-column rows.  Prediction (§8.1):
+with `h = 4` there is at most one non-self-negative component class, so `D ≤ 1`, no block
+structure, and the fold buys relations; `D > 2` on a `4·prime` subgroup falsifies.
+
+**Which degrees are faithful.**  `#E_0(GF(2^m))` is `4·prime` at `m = 13, 19, 23, 41` in the range
+`11`–`61` (and at `83` and `131`), and not at `31`: `#E_0(GF(2^{31})) = 4 · 373 · 1439393`, so every
+prime-order subgroup there carries a cofactor of at least `4·373`.  Of the faithful degrees, `13`
+(`ord₁₃(2) = 12`) and `19` (`18`) have no proper `τ`-invariant subspace — the base would be the
+whole group (`13`, run and reported) or `2.6·10⁵` points (`19`, beyond the pair table) — and `41`
+(`r ≈ 2^{39}`, a `20`-dimensional subspace) is beyond this driver.  That leaves **`m = 23`**:
+`icv1-f2m23-t5197-69e76b73`, `r = 2095853`, `h = 4`, no intermediate subfield, `ord₂₃(2) = 11`
+— so, as at `m = 31` and unlike `53`, `83` and `131`, the nontrivial cyclotomic block splits
+(AGENTS.md §8b), which is what gives the `11`-dimensional invariant subspace the base is built on.
+`m = 15` (subfields `GF(2^3)`, `GF(2^5)`) is reported separately and supports nothing at a prime
+degree.
+
+**Every instance**
+
+| curve | m | ord_m(2) | intermediate subfields | log2 r | h | h = #E_0(F_2) | subspace dim | seed | cols fold / control | D fold / control | single-column rows fold / control (of relations) | chance, 1 / cols fold | full-rank rel fold / control | ratio | column ratio | rank fraction at k = cols, fold / control | correct |
+|:--|--:|--:|:--|--:|:--|:--|--:|--:|:--|:--|:--|--:|:--|--:|--:|:--|:--|
+| `icv1-f2m13-t181-515ee569` | 13 | 12 | none | 11.0 | 4 = 2·2 | yes | 12 | 1 | 155 / 2003 | 1 / 1 | 0 (0.000) / 0 (0.000) | 0.006 | — / — | — | 12.92 | 0.46 / — | yes |
+| `icv1-f2m13-t181-515ee569` | 13 | 12 | none | 11.0 | 4 = 2·2 | yes | 12 | 2 | 155 / 2003 | 1 / 1 | 0 (0.000) / 0 (0.000) | 0.006 | — / — | — | 12.92 | 0.46 / — | yes |
+| `icv1-f2m13-t181-515ee569` | 13 | 12 | none | 11.0 | 4 = 2·2 | yes | 12 | 3 | 155 / 2003 | 1 / 1 | 0 (0.000) / 0 (0.000) | 0.006 | — / — | — | 12.92 | 0.43 / — | yes |
+| `icv1-f2m13-t181-515ee569` | 13 | 12 | none | 11.0 | 4 = 2·2 | yes | 12 | 4 | 155 / 2003 | 1 / 1 | 0 (0.000) / 0 (0.000) | 0.006 | — / — | — | 12.92 | 0.46 / — | yes |
+| `icv1-f2m15-tm275-2d22ff5d` | 15 | 4 | GF(2^3), GF(2^5) | 9.6 | 44 = 2·2·11 | no | 6 | 1 | 2 / 16 | 1 / 6 | 14 (1.000) / 0 (0.000) | 0.500 | 2 / 14 | 7.00 | 8.00 | 1.00 / — | yes |
+| `icv1-f2m15-tm275-2d22ff5d` | 15 | 4 | GF(2^3), GF(2^5) | 9.6 | 44 = 2·2·11 | no | 6 | 2 | 2 / 16 | 1 / 6 | 15 (1.000) / 0 (0.000) | 0.500 | 2 / 15 | 7.50 | 8.00 | 1.00 / — | yes |
+| `icv1-f2m15-tm275-2d22ff5d` | 15 | 4 | GF(2^3), GF(2^5) | 9.6 | 44 = 2·2·11 | no | 6 | 3 | 2 / 16 | 1 / 6 | 16 (1.000) / 0 (0.000) | 0.500 | 2 / 16 | 8.00 | 8.00 | 1.00 / 1.00 | yes |
+| `icv1-f2m15-tm275-2d22ff5d` | 15 | 4 | GF(2^3), GF(2^5) | 9.6 | 44 = 2·2·11 | no | 6 | 4 | 2 / 16 | 1 / 6 | 14 (1.000) / 0 (0.000) | 0.500 | 2 / 14 | 7.00 | 8.00 | 1.00 / — | yes |
+| `icv1-f2m23-t5197-69e76b73` | 23 | 11 | none | 21.0 | 4 = 2·2 | yes | 11 | 1 | 45 / 1013 | 1 / 1 | 124 (0.037) / 2 (0.001) | 0.022 | 56 / 3397 | 60.66 | 22.51 | 0.91 / 0.84 | yes |
+| `icv1-f2m23-t5197-69e76b73` | 23 | 11 | none | 21.0 | 4 = 2·2 | yes | 11 | 2 | 45 / 1013 | 1 / 1 | 144 (0.040) / 6 (0.002) | 0.022 | 97 / 3566 | 36.76 | 22.51 | 0.80 / 0.84 | yes |
+| `icv1-f2m23-t5197-69e76b73` | 23 | 11 | none | 21.0 | 4 = 2·2 | yes | 11 | 3 | 45 / 1013 | 1 / 1 | 145 (0.043) / 4 (0.001) | 0.022 | 182 / 3364 | 18.48 | 22.51 | 0.84 / 0.83 | yes |
+| `icv1-f2m23-t5197-69e76b73` | 23 | 11 | none | 21.0 | 4 = 2·2 | yes | 11 | 4 | 45 / 1013 | 1 / 1 | 132 (0.039) / 3 (0.001) | 0.022 | 111 / 3408 | 30.70 | 22.51 | 0.82 / 0.83 | yes |
+| `icv1-f2m31-tm90707-c95f16f5` | 31 | 5 | none | 20.5 | 1492 = 2·2·373 | no | 10 | 1 | 20 / 590 | 12 / 342 | 1392 (0.729) / 15 (0.008) | 0.050 | 68 / 1910 | 28.09 | 29.50 | 0.67 / 0.57 | yes |
+| `icv1-f2m31-tm90707-c95f16f5` | 31 | 5 | none | 20.5 | 1492 = 2·2·373 | no | 10 | 2 | 20 / 590 | 12 / 342 | 1406 (0.730) / 15 (0.008) | 0.050 | 23 / 1925 | 83.70 | 29.50 | 0.89 / 0.64 | yes |
+| `icv1-f2m31-tm90707-c95f16f5` | 31 | 5 | none | 20.5 | 1492 = 2·2·373 | no | 10 | 3 | 20 / 590 | 12 / 342 | 1490 (0.737) / 17 (0.008) | 0.050 | 32 / 2023 | 63.22 | 29.50 | 0.89 / 0.56 | yes |
+| `icv1-f2m31-tm90707-c95f16f5` | 31 | 5 | none | 20.5 | 1492 = 2·2·373 | no | 10 | 4 | 20 / 590 | 12 / 342 | 1354 (0.739) / 14 (0.008) | 0.050 | 51 / 1833 | 35.94 | 29.50 | 0.44 / 0.55 | yes |
+
+**Summary by degree**
+
+| curve | m | h | h = #E_0(F_2) | instances | D fold / control | single-column fraction, fold, mean (min–max) | against chance | full-rank ratio mean (min–max) | column ratio | all correct |
+|:--|--:|:--|:--|--:|:--|--:|--:|--:|--:|:--|
+| `icv1-f2m13-t181-515ee569` | 13 | 4 = 2·2 | yes | 4 | 1 / 1 | 0.000 (0.000–0.000) | 0.0× | — (—–—) | 12.92 | yes |
+| `icv1-f2m15-tm275-2d22ff5d` | 15 | 44 = 2·2·11 | no | 4 | 1 / 6 | 1.000 (1.000–1.000) | 2.0× | 7.38 (7.00–8.00) | 8.00 | yes |
+| `icv1-f2m23-t5197-69e76b73` | 23 | 4 = 2·2 | yes | 4 | 1 / 1 | 0.040 (0.037–0.043) | 1.8× | 36.65 (18.48–60.66) | 22.51 | yes |
+| `icv1-f2m31-tm90707-c95f16f5` | 31 | 1492 = 2·2·373 | no | 4 | 12 / 342 | 0.734 (0.729–0.739) | 14.7× | 52.74 (28.09–83.70) | 29.50 | yes |
+
+Reading.  **At the challenge's shape the prediction holds.**  On `icv1-f2m23-t5197-69e76b73`
+`D = 1` on both arms on every seed, `4.0 %` of folded rows are single-column (`1.8×` the `1/45`
+chance of two summands landing in one column, against `100 %` on the subfield line), both arms
+reach the same rank fraction after `columns` relations (`0.80`–`0.91` / `0.83`–`0.84`), and the
+fold's relation ratio, `18.5`–`60.7` (mean `36.7`), sits where the column ratio `22.5` and the
+coupon factor put it.  The falsification target, `D > 2` on a `4·prime` subgroup, is not met: a
+Frobenius-fixed cofactor of order `4` leaves two-summand relations unconfined, and the fold on
+`E_0` buys relations as well as columns.  E2's `E_1` rows (`h = 2` at `m = 17, 23`) read the same
+(`D = 1`).
+
+**At `m = 31` it does not, and the cause is the cofactor, not the field.**
+`icv1-f2m31-tm90707-c95f16f5` with `r = 1439393` has `h = 4·373`: `D = 12` / `342`, and `73 %` of
+folded rows are single-column (`14.7×` chance) — the §6.5 confinement, from a cofactor that
+`τ` does **not** fix (`E_0(F_2)` has order `4`; the `373`-part is not `F_2`-rational).  What the
+two cases share with the subfield line is a cofactor that is large against the base (`1492`
+against `1180` points here, `#E(F_p) ≈ p` against `≈ p` points there), so that a point's
+cofactor component has few partners in the base; that reading is not derived here.  The fold
+still reaches full rank at `m = 31` (`23`–`68` relations against `1833`–`2023`), because the
+single-column rows it collects are not useless, but the relation structure is not the
+challenge's.  E2's `m = 31` row was the same curve and subgroup and shows the same `D`.
+
+**Consequence for the ECC2K-130 program.**  AGENTS.md §8b names `m = 31` the primary exploratory
+size and asks that its different Frobenius-module structure be disclosed; E15 adds a second
+disclosure.  `E_0` over `GF(2^{31})` cannot have the challenge's `4·prime` order, and any
+two-summand relation statistic measured there is shaped by the `373` cofactor (here `73 %`
+single-column rows against `4 %` at the faithful `m = 23`).  For two-summand relation structure
+the faithful sizes this driver can carry stop at `m = 23`; `41`, `83` (the §8a gate) and `131` are
+the faithful sizes above it.  Nothing here is an improvement claim, so the §8a `m = 83` gate is
+neither required nor discharged.
+
+**Class: accounting.**  No algorithm changed; E15 measures where E2's and §6.5's relation
+structure applies, and finds that it follows the cofactor.
+
+### 8.4 Verdict after E8–E15
 
 | lever | measured | class |
 |:--|:--|:--|
@@ -1319,6 +1415,7 @@ and the method is not faster than rho at any size run.
 | exponents (E10) | fold `0.88`, control `0.86`, rho `0.37` / `0.39` over `18` instances; no arm's exponent below rho's `1/2` | accounting |
 | the pair table over orbit representatives (E12) | table `÷ 2.95` / `2.97` / `1.98` at `w = 6, 6, 4`, build `÷ 2.59` / `2.77` / `1.91`; probe `1.11×` (line) and `1.00×` (`F_p`), under the `1.2×` falsification line; `S ÷ 1.18` on `j = 0`, `÷ 1.03` on `j = 1728`, `× 1.02` on the line; `0` collisions in `9.77e+07` probes | engineering (memory); relabelling if quoted as a cost gain on the line |
 | FGHR's `2`-torsion symmetry with the fold (E13) | system: `R(q₃)` of degree `16 = 64/4`, `1.25e+04`–`2.04e+04` multiplications a call (`÷ 33`–`41` against `S₃`), `S ÷ 27.0`; base: `τ_T` halves the columns, `S ÷ 2.52`; combined / product `≥ 0.82` (survives); `267`–`5741×` rho, total `p^{1.23}` | engineering |
+| the ECC2K-130 family, two summands (E15) | `E_0` at `4·prime` (`m = 23`): `D = 1` / `1`, `4 %` single-column rows, the fold buys relations; at `m = 31` (`h = 4·373`): `D = 12` / `342`, `73 %` single-column rows — the §6.5 confinement follows the cofactor, and `m = 31` cannot carry the challenge's shape | accounting |
 
 With E13 run, the cheapest arm in this note is the `Y`-line of a subfield curve with rational
 `2`-torsion, folded `12` a column by `⟨−1, π, τ_T⟩` and decomposed by the `D₃`-symmetrised
@@ -1327,4 +1424,4 @@ the cost.  Both uses of the `2`-torsion are now taken, on the base and on the sy
 compound with the Frobenius fold; the relation phase is still `p^{1+o(1)}` solves, so what
 remains is the constant of a solve (a degree-`16` univariate root-finding and three conics) and
 not a lever on the base.  E12 settles the pair-table regime: the table folds by `w/2`, and that
-is worth having only where the table is the cost (`F_p`, two summands).  E14 and E15 remain.
+is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 remains.

@@ -1,4 +1,4 @@
-//! **Experiments E1–E13 of `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` —
+//! **Experiments E1–E15 of `RESEARCH_GLV_INVARIANT_FACTOR_BASES.md` —
 //! measurement.**
 //!
 //! ```text
@@ -2310,6 +2310,181 @@ fn e13(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E15: does the §6.5 degeneracy transfer to the ECC2K-130 family? ──
+
+/// The prime factorisation of a small cofactor, by trial division.
+fn small_factors(mut h: u64) -> Vec<u64> {
+    let mut out = Vec::new();
+    let mut d = 2u64;
+    while d * d <= h {
+        while h.is_multiple_of(d) {
+            out.push(d);
+            h /= d;
+        }
+        d += 1;
+    }
+    if h > 1 {
+        out.push(h);
+    }
+    out
+}
+
+/// The multiplicative order of 2 modulo an odd `n`.
+fn ord2(n: u32) -> u32 {
+    let (mut x, mut k) = (2 % n, 1);
+    while x != 1 {
+        x = x * 2 % n;
+        k += 1;
+    }
+    k
+}
+
+/// E15: two-summand streams on `E_0: y² + xy = x³ + 1` (the ECC2K-130
+/// family) over `GF(2^n)`, the signed-Frobenius-orbit base against the
+/// abscissa control, as E2 ran them on `E_1`.  The question is the §6.5
+/// one: `E_0(F_2) ≅ Z/4` is cofactor and Frobenius-fixed, as `E(F_p)` is
+/// on a subfield curve — does the block degeneracy follow?  Each row
+/// records the cofactor's factorisation, whether the cofactor is exactly
+/// `E_0(F_2)` (the challenge's shape), `ord_n(2)` and the intermediate
+/// subfields (AGENTS.md §8b), the structural deficiency `D` and the
+/// single-column rows of both arms.
+fn e15(o: &Opts) -> Vec<Value> {
+    let mut rows = Vec::new();
+    let degrees: Vec<u32> = if o.bits.is_empty() {
+        (13..=33).collect()
+    } else {
+        o.bits.clone()
+    };
+    for n in degrees {
+        let Some(inst) = koblitz_instance(0, n) else {
+            eprintln!("e15 n={n}: no instance");
+            continue;
+        };
+        let Some(kc) = inst.koblitz.as_ref() else {
+            continue;
+        };
+        let subfields: Vec<u32> = (2..n).filter(|d| n.is_multiple_of(*d)).collect();
+        let cofactor_factors = small_factors(inst.cofactor);
+        let target_dim = ((inst.r as f64).log2() / 3.0).ceil() as u32 + 2;
+        let Some(idx) = koblitz_divisor_for(n, target_dim) else {
+            eprintln!(
+                "e15 n={n}: no proper invariant subspace (ord_n(2) = {})",
+                ord2(n)
+            );
+            continue;
+        };
+        let Some(frob) = build_frobenius_factor_base_from_divisor(kc, &idx) else {
+            eprintln!("e15 n={n}: divisor {idx:?} gives no base");
+            continue;
+        };
+        if frob.points.len() > 60_000 {
+            eprintln!(
+                "e15 n={n}: the invariant subspace of dimension {} carries {} points, too many for a pair table",
+                frob.ell,
+                frob.points.len()
+            );
+            continue;
+        }
+        let Some(folded) = koblitz_factor_base(
+            &inst,
+            &frob,
+            ColumnFold::SignedFrobeniusOrbit,
+            "orbit".into(),
+        ) else {
+            continue;
+        };
+        let Some(control) =
+            koblitz_factor_base(&inst, &frob, ColumnFold::Abscissa, "abscissa".into())
+        else {
+            continue;
+        };
+        let group = BinaryGroup(&inst.fast);
+        for seed in 1..=o.seeds {
+            let started = Instant::now();
+            let planted = planted_for(seed, inst.r);
+            let mut ops = GroupOps::default();
+            let target = group.mul(&mut ops, inst.generator, planted);
+            let ctx = InstanceCtx {
+                group: &group,
+                generator: inst.generator,
+                target,
+                r: inst.r,
+                cofactor: inst.cofactor,
+                group_order: inst.group_order,
+                name: inst.name.clone(),
+                field_degree: Some(n),
+            };
+            let mut oracle = MitmOracle::new(2);
+            let mut params = Params::default();
+            params.set("negation_folded", "1");
+            oracle.prepare(&ctx, &folded, &params, &mut ops).unwrap();
+            let rep = match full_rank_stream(
+                &group,
+                inst.generator,
+                target,
+                inst.r,
+                inst.cofactor,
+                planted,
+                &folded,
+                &control,
+                seed,
+                o.max_trials,
+                2,
+                None,
+                |ops, ctr, pt| oracle.decompose(&ctx, &folded, ops, ctr, pt),
+            ) {
+                Ok(r) => r,
+                Err(e) => {
+                    eprintln!("e15 n={n}: {e}");
+                    break;
+                }
+            };
+            eprintln!(
+                "e15 E_0 n={n} r=2^{:.1} h={} {:?} dim {}: cols {}/{} D {}/{} single-column rows {}/{} square {:?}/{:?} ok {}/{} [{:.1}s]",
+                (inst.r as f64).log2(),
+                inst.cofactor,
+                cofactor_factors,
+                frob.ell,
+                rep.folded.columns,
+                rep.control.columns,
+                rep.folded.deficiency_total,
+                rep.control.deficiency_total,
+                rep.folded.single_column_rows,
+                rep.control.single_column_rows,
+                rep.folded.square_relations,
+                rep.control.square_relations,
+                rep.folded.verified,
+                rep.control.verified,
+                started.elapsed().as_secs_f64()
+            );
+            rows.push(json!({
+                "experiment": "e15",
+                "family": "koblitz-e0",
+                "curve": "E_0: y^2 + xy = x^3 + 1",
+                "n": n,
+                "seed": seed,
+                "instance": inst.name,
+                "irreducible": format!("{:?}", inst.irreducible),
+                "log2_r": (inst.r as f64).log2(),
+                "r": inst.r,
+                "group_order": inst.group_order,
+                "cofactor": inst.cofactor,
+                "cofactor_factors": cofactor_factors,
+                "cofactor_is_e0_f2": inst.cofactor == 4,
+                "ord_n_2": ord2(n),
+                "intermediate_subfield_degrees": subfields,
+                "eigenvalue_order": n,
+                "divisor": idx,
+                "subspace_dimension": frob.ell,
+                "oracle": "mitm",
+                "stream": stream_json(&rep),
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut o = Opts {
@@ -2359,6 +2534,7 @@ fn main() {
         "e12" => e12(&o),
         "e12p" => e12p(&o),
         "e13" => e13(&o),
+        "e15" => e15(&o),
         other => panic!("unknown experiment {other}; try e1..e9, e11, e12, e12p, e13"),
     };
     let out = json!({
