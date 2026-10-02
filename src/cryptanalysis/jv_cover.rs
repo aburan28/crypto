@@ -2322,7 +2322,7 @@ pub fn run_cover_dlp(
         rep.stream_muls += ctx.f.muls();
         ctx.f.reset_muls();
         let f4_before = f4_fp::field_ops_total();
-        let found: Vec<(u64, u64, Div<E2>, Vec<Dec6>, NagaoCost, u64, bool)> = batch
+        let found: Vec<(u64, u64, Div<E2>, Vec<Dec6>, NagaoCost, u64, bool, bool)> = batch
             .par_iter()
             .map_init(
                 || Ctx::new(&spec),
@@ -2339,20 +2339,21 @@ pub fn run_cover_dlp(
                         .filter(|d| verify_dec(&jc, &base, r, d))
                         .collect();
                     let vm = c.f.muls() - v0;
-                    let checked = match (&table, check_every > 0 && idx % check_every == 0) {
-                        (Some(t), true) => {
-                            let o = mitm6(&jc, t, r);
-                            cost.incomplete || cost.timed_out || o == ok
-                        }
-                        _ => true,
-                    };
-                    (*a, *b, r.clone(), ok, cost, vm, checked)
+                    let (checked, was_checked) =
+                        match (&table, check_every > 0 && idx % check_every == 0) {
+                            (Some(t), true) => {
+                                let o = mitm6(&jc, t, r);
+                                (cost.incomplete || cost.timed_out || o == ok, true)
+                            }
+                            _ => (true, false),
+                        };
+                    (*a, *b, r.clone(), ok, cost, vm, checked, was_checked)
                 },
             )
             .collect();
         // the F4 work is counted once, globally, by the batch's difference
         rep.f4_muls += f4_fp::field_ops_total() - f4_before;
-        for (a, b, _r, decs, cost, vm, checked) in found {
+        for (a, b, _r, decs, cost, vm, checked, was_checked) in found {
             rep.residuals += 1;
             rep.weil_muls += cost.weil_muls;
             rep.lin_muls += cost.lin_muls;
@@ -2363,6 +2364,9 @@ pub fn run_cover_dlp(
             }
             if cost.timed_out {
                 rep.timed_out += 1;
+            }
+            if was_checked {
+                rep.cross_checked += 1;
             }
             if !checked {
                 rep.mismatches += 1;
