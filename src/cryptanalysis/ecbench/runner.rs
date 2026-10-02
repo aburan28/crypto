@@ -437,7 +437,7 @@ fn execute_session(
         for ex in &p.executions {
             let arm = &p.arms[ex.arm];
             let w = &p.workloads[ex.workload];
-            let inst = &p.instances[ex.workload];
+            let inst = p.instance(ex.workload);
             let input = ChildInput {
                 schema: CHILD_INPUT_SCHEMA.into(),
                 curve: CurveSpec::explicit(inst).unwrap_or_else(|| w.curve_spec.clone()),

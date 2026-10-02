@@ -192,6 +192,37 @@ pub fn registry() -> &'static [MethodDecl] {
     ]
 }
 
+/// The leading-order expected `S` of a generic method on a curve whose
+/// generic automorphism group has order `a_available`, or `None` when
+/// the method has no such constant (index calculus).  Derived, not
+/// measured: these are the boundaries a calibration run is read against.
+///
+/// - rho on points: `√(π/2)` (the birthday bound on `r` points);
+///   on classes of size `A`: `√(π/2A)` (negation `A = 2`, signed
+///   Frobenius `A = 2m`).
+/// - BSGS, textbook: `m = ⌈√r⌉` baby steps, then a uniform target's
+///   giant steps, mean `m/2`: `1.5`.  Interleaved: `E[2·max(i, j)]` for
+///   uniform `i, j < m`, `(4/3)`.  Negation-folded: `m = √r/2` baby
+///   steps and a mean of `√r/2` giant steps of stride `2m + 1`: `1`.
+/// - Kangaroo (van Oorschot–Wiener, one tame and one wild, mean jump
+///   `√r/2` on the interval `[0, r)`): `2`.
+///
+/// Every one omits `O(log r)` set-up, so measured `S` approaches it from
+/// above as `r` grows.
+pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
+    use std::f64::consts::PI;
+    match id {
+        "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
+        "rho.negation" => Some((PI / 4.0).sqrt()),
+        "rho.signed_frobenius" => Some((PI / (2.0 * a_available.max(1) as f64)).sqrt()),
+        "bsgs.textbook" => Some(1.5),
+        "bsgs.interleaved" => Some(4.0 / 3.0),
+        "bsgs.negation" => Some(1.0),
+        "kangaroo.vow" => Some(2.0),
+        _ => None,
+    }
+}
+
 /// A method as a spec names it.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

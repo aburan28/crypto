@@ -543,12 +543,13 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
     Ok(ExitCode::SUCCESS)
 }
 
-/// One row per (session, arm, curve): mean S over verified measured runs,
-/// ratio to the curve's generic floor and to the reference arm on the
-/// same workloads, how many runs verified, and the worst isolation level.
+/// One row per (session, arm, curve): mean S over verified measured runs
+/// with its two-stage bootstrap interval (workloads, then runs), the
+/// method's derived expectation, and the ratios to the curve's generic
+/// floor and to the reference arm on the same workloads.
 fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
-    println!("| session | arm | method | curve | log2 r | verified | mean S | S / floor | S / reference | lower bound | levels |");
-    println!("|---|---|---|---|---:|---:|---:|---:|---:|---|---|");
+    println!("| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |");
+    println!("|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|");
     for d in dirs {
         let s = runner::read_session(d)?;
         let recs = runner::read_records(d)?;
@@ -578,8 +579,28 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     .filter_map(|r| r.cost.s)
                     .collect();
                 let mean = stats::mean(&ok);
+                // Strata: this arm's verified S per workload.
+                let mut by_w: std::collections::BTreeMap<&str, Vec<f64>> =
+                    std::collections::BTreeMap::new();
+                for r in mine.iter().filter(|r| r.counts()) {
+                    if let Some(v) = r.cost.s {
+                        by_w.entry(r.workload.workload_id.as_str())
+                            .or_default()
+                            .push(v);
+                    }
+                }
+                let strata: Vec<Vec<f64>> = by_w.into_values().collect();
+                let ci = stats::cluster_bootstrap_ci(&strata, 4000, 20261002, |s| {
+                    stats::mean(&s.concat())
+                })
+                .or_else(|| {
+                    stats::bootstrap_ci(&strata, 4000, 20261002, |s| stats::mean(&s.concat()))
+                });
                 let any = mine.first();
                 let floor = any.map(|r| r.boundaries.floor_s).unwrap_or(f64::NAN);
+                let theory = any.and_then(|r| {
+                    methods::expected_s(&arm.method.id, r.boundaries.automorphisms_available)
+                });
                 let refm = ref_arm.as_ref().and_then(|ra| {
                     let v: Vec<f64> = recs
                         .iter()
@@ -595,7 +616,7 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                 }
                 let o = |v: Option<f64>| v.map(|x| format!("{x:.3}")).unwrap_or_else(|| "–".into());
                 println!(
-                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} |",
+                    "| {} | {} | {} | {} | {:.2} | {}/{} | {} | {} | {} | {} | {} | {} | {} | {} |",
                     s.session_id,
                     arm.name,
                     arm.method.id,
@@ -605,6 +626,13 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                     ok.len(),
                     mine.len(),
                     o(mean),
+                    ci.map(|(l, h)| format!("[{l:.3}, {h:.3}]"))
+                        .unwrap_or_else(|| "–".into()),
+                    o(theory),
+                    o(match (mean, theory) {
+                        (Some(m), Some(t)) => Some(m / t),
+                        _ => None,
+                    }),
                     o(mean.map(|m| m / floor)),
                     o(match (mean, refm) {
                         (Some(m), Some(r)) if r > 0.0 => Some(m / r),

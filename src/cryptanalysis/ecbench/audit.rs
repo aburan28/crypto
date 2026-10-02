@@ -214,7 +214,7 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
             record_problems.push(format!("{tag}: workload differs from the plan"));
         }
         // Re-check the answer here.
-        let inst = &p.instances[ex.workload];
+        let inst = p.instance(ex.workload);
         let rec: Option<u64> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
         let target_ok = rec.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
         let planted_ok = rec.map(|k| k == w.planted);
@@ -266,7 +266,7 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
             let w = &p.workloads[ex.workload];
             let input = ChildInput {
                 schema: CHILD_INPUT_SCHEMA.into(),
-                curve: CurveSpec::explicit(&p.instances[ex.workload])
+                curve: CurveSpec::explicit(p.instance(ex.workload))
                     .unwrap_or_else(|| w.curve_spec.clone()),
                 target_seed: w.target_seed,
                 target_index: w.target_index,

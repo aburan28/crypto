@@ -355,13 +355,28 @@ pub struct Workload {
 }
 
 impl Workload {
-    /// Build workload `index` on `spec` under `target_seed`.
+    /// Build workload `index` on `spec` under `target_seed`.  This builds
+    /// the curve; for several targets on one curve, build it once and
+    /// call [`Workload::on`] for each (a 26-bit prime search counts
+    /// points in `O(p)` per candidate curve).
     pub fn build(
         spec: &CurveSpec,
         target_seed: u64,
         index: u64,
     ) -> Result<(Workload, Instance), String> {
         let inst = spec.build()?;
+        let w = Self::on(spec, &inst, target_seed, index)?;
+        Ok((w, inst))
+    }
+
+    /// Workload `index` under `target_seed` on `inst`, already built from
+    /// `spec`.
+    pub fn on(
+        spec: &CurveSpec,
+        inst: &Instance,
+        target_seed: u64,
+        index: u64,
+    ) -> Result<Workload, String> {
         let curve = inst.facts(spec);
         if curve.r < 5 {
             return Err(format!(
@@ -377,20 +392,17 @@ impl Workload {
             "W",
             &Self::identity_view(&curve, target_seed, index, &target),
         )?;
-        Ok((
-            Workload {
-                workload_id,
-                workload_sha256,
-                curve_spec: spec.clone(),
-                curve,
-                target_law: TARGET_LAW.into(),
-                target_seed,
-                target_index: index,
-                target,
-                planted,
-            },
-            inst,
-        ))
+        Ok(Workload {
+            workload_id,
+            workload_sha256,
+            curve_spec: spec.clone(),
+            curve,
+            target_law: TARGET_LAW.into(),
+            target_seed,
+            target_index: index,
+            target,
+            planted,
+        })
     }
 
     /// What the workload id is a hash of: the exact curve model, the

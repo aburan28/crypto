@@ -162,8 +162,18 @@ pub struct Plan {
     pub spec_sha256: String,
     pub arms: Vec<Arm>,
     pub workloads: Vec<Workload>,
+    /// One built curve per spec curve, in spec order.
     pub instances: Vec<Instance>,
+    /// The index into `instances` of each workload's curve.
+    pub curve_of: Vec<usize>,
     pub executions: Vec<Execution>,
+}
+
+impl Plan {
+    /// The built curve workload `w` runs on.
+    pub fn instance(&self, w: usize) -> &Instance {
+        &self.instances[self.curve_of[w]]
+    }
 }
 
 impl Spec {
@@ -221,9 +231,13 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
     }
     let mut workloads = Vec::new();
     let mut instances = Vec::new();
+    let mut curve_of = Vec::new();
     for c in &spec.workloads.curves {
+        // One build per curve: a prime search counts points in O(p) per
+        // candidate, so building per target would multiply that.
+        let inst = c.build()?;
         for i in 0..spec.workloads.targets_per_curve {
-            let (w, inst) = Workload::build(c, spec.workloads.target_seed, i)?;
+            let w = Workload::on(c, &inst, spec.workloads.target_seed, i)?;
             for a in &arms {
                 let d = decl(&a.method.id).expect("resolved");
                 if d.applies == Applies::KoblitzOnly && w.curve.family != "koblitz" {
@@ -234,8 +248,9 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
                 }
             }
             workloads.push(w);
-            instances.push(inst);
+            curve_of.push(instances.len());
         }
+        instances.push(inst);
     }
     let m = &spec.measurement;
     let mut executions = Vec::new();
@@ -289,6 +304,7 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
         arms,
         workloads,
         instances,
+        curve_of,
         executions,
     })
 }
