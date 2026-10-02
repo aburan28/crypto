@@ -33,7 +33,9 @@ reported target logs were replayed using the *source-curve pullbacks* and
 checked by full-point scalar multiplication. All 917 recovered values also
 equal the published fixture scalars. No scalar is reported for the 107 misses.
 
-[`RAW.json`](RAW.json) is the 1,585,747-byte producer record, SHA-256
+[`RAW.json.gz`](RAW.json.gz) is the 82,629-byte gzip archive, SHA-256
+`6a0e8c9243aae9360048fc0918d55463ea09b980caeae6d62669855bad043346`.
+It expands to the 1,585,747-byte producer record with SHA-256
 `2cc0275cfe5b2fc0bef4f84bd3dce9105b7d9576ed26340c8a5b404a16cd9d7e`.
 It retains every relation probe, rank step, witness, target decision,
 recovered scalar, source coordinate, phase timer, and logical operation
@@ -83,9 +85,10 @@ Reproduce from the source commit with the committed lock file:
 ```sh
 cargo test --locked --lib native_signed_mitm
 cargo build --release --locked --example n37_native_m6_mitm --example n37_native_m6_replay
+gzip -dc research/notes/ecc2k130/n37_native_m6_mitm_20261002/RAW.json.gz > /tmp/n37-native-frozen-raw.json
 /usr/bin/time -p target/release/examples/n37_native_m6_mitm /tmp/n37-native-raw.json
 jq -S 'del(.phase_wall_ms)' /tmp/n37-native-raw.json > /tmp/n37-native-counts.json
-jq -S 'del(.phase_wall_ms)' research/notes/ecc2k130/n37_native_m6_mitm_20261002/RAW.json > /tmp/n37-native-frozen-counts.json
+jq -S 'del(.phase_wall_ms)' /tmp/n37-native-frozen-raw.json > /tmp/n37-native-frozen-counts.json
 cmp /tmp/n37-native-counts.json /tmp/n37-native-frozen-counts.json
 target/release/examples/n37_native_m6_replay /tmp/n37-native-raw.json /tmp/n37-native-replay.json
 jq -S 'del(.raw_result_sha256)' /tmp/n37-native-replay.json > /tmp/n37-native-replay-normalized.json
