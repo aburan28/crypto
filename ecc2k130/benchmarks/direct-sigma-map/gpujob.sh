@@ -84,8 +84,14 @@ build_arm() {
   make -B ecc2k130 ARCH="$ARCH" "${COMMON[@]}" DIRECT_SIGMA="$direct" \
     PACKED_SHARED_SIGMA="$shared" > "$R/build-$name.log" 2>&1 || return 1
   mv ecc2k130 "client-$name"
-  if grep -Eq '[1-9][0-9]* bytes spill (stores|loads)' "$R/build-$name.log"; then
-    echo "nonzero ptxas spill for $name" | tee -a "$R/failures.txt"; return 1
+  if ! awk '
+    /Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj/ {
+      getline
+      if ($0 == "    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads") ok++
+    }
+    END { exit ok == 1 ? 0 : 1 }
+  ' "$R/build-$name.log"; then
+    echo "packed GF(2^131) walk spill/resource gate failed for $name" | tee -a "$R/failures.txt"; return 1
   fi
   make -B test-packed-cuda ARCH="$ARCH" "${COMMON[@]}" DIRECT_SIGMA="$direct" \
     PACKED_SHARED_SIGMA="$shared" > "$R/gate-$name-arithmetic.log" 2>&1 || return 1

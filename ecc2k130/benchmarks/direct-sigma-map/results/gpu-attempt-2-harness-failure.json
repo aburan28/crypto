@@ -1,0 +1,19 @@
+{
+  "classification": "HARNESS_FAILURE",
+  "scientificDisposition": "Both CUDA clients compiled, but no CUDA correctness gate or performance sample ran.",
+  "cause": "The initial spill scanner rejected nonzero ptxas spills in unrelated generic small/prime-curve kernels that share src/main.cu. The measured packed GF(2^131) walk had a zero-byte stack frame and zero spill stores/loads in both arms.",
+  "repair": "Scope the frozen zero-spill gate to the exact mangled eccPacked131::walk kernel. Runtime still requires zero local bytes for that kernel.",
+  "packedWalkResources": {
+    "control": "126 registers, 0-byte stack, 0 spill stores, 0 spill loads, 1792 static shared bytes",
+    "candidate": "128 registers, 0-byte stack, 0 spill stores, 0 spill loads, 0 static shared bytes; 56320 opt-in dynamic shared bytes requested at runtime"
+  },
+  "sourceCommit": "4904dacc241a62df5dbec66225f2bc3a6dd3b7e3",
+  "modal": {
+    "appId": "ap-Fao2WjxAqS8klsqGeRN6Yc",
+    "functionCallId": "fc-01M3X8RFVNZ1M2KDAHZ9GTM9A7",
+    "volumeToken": "657579418dec4ea7b50f98001cbc91c0",
+    "exitCode": 1
+  },
+  "archiveSha256": "7b739c84be871b3d4f9562159a2707c73cc8bd78eeb9b8d5a7710b943bfe18a7",
+  "launchReceiptSha256": "417035f9e47248f72bc75ba0bdf25b90a9304ad427b4407f419f5abac4fb7862"
+}
