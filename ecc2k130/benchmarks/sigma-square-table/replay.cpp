@@ -17,9 +17,9 @@ static uint64_t randomWord() {
 }
 
 static R::Elem unpack(P p) {
-    const uint64_t limbs[3] = {
-        p.v[0] | (uint64_t(p.v[1]) << 32),
-        p.v[2] | (uint64_t(p.v[3]) << 32),
+    const unsigned long long limbs[3] = {
+        p.v[0] | (static_cast<unsigned long long>(p.v[1]) << 32),
+        p.v[2] | (static_cast<unsigned long long>(p.v[3]) << 32),
         p.v[4]
     };
     return R::fromLimbs(limbs);

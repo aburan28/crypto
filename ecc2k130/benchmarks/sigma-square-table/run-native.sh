@@ -61,9 +61,14 @@ grep -q 'keep PACKED_SQUARE_TABLE and PACKED_ALU_SQUARE off' "$build/guard-table
   benchmarks/sigma-square-table/RESULTS.md \
   benchmarks/sigma-square-table/replay.cpp \
   benchmarks/sigma-square-table/audit.cpp \
+  benchmarks/sigma-square-table/compile_audit.cpp \
   benchmarks/sigma-square-table/guard-probe.cu \
   benchmarks/sigma-square-table/run-native.sh \
   benchmarks/sigma-square-table/attempt-1-compile-failure.json \
+  benchmarks/sigma-square-table/attempt-2-native-portability-failure.json \
+  benchmarks/sigma-square-table/compile-artifact.json \
+  benchmarks/sigma-square-table/compile-files.sha256 \
+  benchmarks/sigma-square-table/compile-result.json \
   benchmarks/sigma-square-table/result.json \
   benchmarks/sigma-square-table/streams.sha256) > "$here/MANIFEST.sha256"
 

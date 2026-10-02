@@ -174,3 +174,13 @@ A/B median is at most 1.0.  A positive median below 1.005 is retained as
 inconclusive/optional.  The 26 B/s objective is reported separately and is met
 only by a measured complete-walk candidate rate at or above 26 B/s; no source
 ledger or isolated primitive rate can satisfy it.
+
+## Post-freeze compile clarification
+
+The allocation table above counts the 1,792-byte generated shared-sigma mask
+array plus the requested 8,320 dynamic bytes.  The exact CUDA 13.3.73 `sm_120`
+binary later reported 2,816 compiled shared bytes for both arms: the masks plus
+the compiler/runtime's existing 1,024-byte shared base.  The resource gate
+therefore uses 2,816 + 8,320 = 11,136 bytes/block and 22,272 bytes for two
+candidate blocks.  This additive correction does not change either arm, the
+decision thresholds, or the requirement for device occupancy readback.
