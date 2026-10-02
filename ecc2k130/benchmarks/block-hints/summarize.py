@@ -38,9 +38,9 @@ def parse_verify(path, expected_block):
         row["errors"].append(f"backend geometry marker count {len(backend)}")
     else:
         threads, batch, walks = map(int, backend[0])
-        if batch != 16 or walks != threads * batch:
+        if (threads, batch, walks) != (96256, 16, 1540096):
             row["errors"].append(
-                f"backend geometry {threads}x{batch}={walks}, expected B16 consistency"
+                f"backend geometry {threads}x{batch}={walks}, expected 96256x16=1540096"
             )
         row.update(runtimeThreads=threads, batch=batch, liveSlots=walks)
     row["fast2"] = int(fast2[0]) if len(fast2) == 1 else None
@@ -59,13 +59,26 @@ def validate_block_timing_markers(results, rows):
         except OSError as exc:
             errors.append(str(exc))
             continue
+        split = re.findall(r"^packed table split forward: ([01])$", text, re.MULTILINE)
+        batch_hints = re.findall(r"^packed table batch hints: ([01])$", text, re.MULTILINE)
         fast2 = re.findall(r"^packed cycle fast2: ([01])$", text, re.MULTILINE)
         markers = re.findall(r"^packed table block hints: ([01]), queue (\d+)$", text, re.MULTILINE)
+        backend = re.findall(
+            r"^backend cuda-packed131: (\d+) threads x (\d+) slots x 1 lanes = (\d+) walks,",
+            text,
+            re.MULTILINE,
+        )
         expected = "1" if row["variant"] == "candidate" else "0"
+        if split != ["1"]:
+            errors.append(f"{name}: split-forward markers {split!r}, expected ['1']")
+        if batch_hints != ["1"]:
+            errors.append(f"{name}: batch-hint markers {batch_hints!r}, expected ['1']")
         if fast2 != ["1"]:
             errors.append(f"{name}: fast2 markers {fast2!r}, expected ['1']")
         if markers != [(expected, "512")]:
             errors.append(f"{name}: block-hint markers {markers!r}, expected {[(expected, '512')]!r}")
+        if backend != [("96256", "16", "1540096")]:
+            errors.append(f"{name}: backend geometry markers {backend!r}")
     return errors
 
 

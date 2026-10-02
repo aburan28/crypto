@@ -48,6 +48,11 @@ backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp w
             self.assertEqual(SUMMARY.validate_block_timing_markers(root, rows), [])
             candidate.write_text(self.verify_text(0))
             self.assertTrue(SUMMARY.validate_block_timing_markers(root, rows))
+            candidate.write_text(self.verify_text(1).replace("split forward: 1", "split forward: 0"))
+            self.assertTrue(SUMMARY.validate_block_timing_markers(root, rows))
+            candidate.write_text(self.verify_text(1).replace(
+                "96256 threads x 16 slots", "48128 threads x 32 slots"))
+            self.assertTrue(SUMMARY.validate_block_timing_markers(root, rows))
 
 
 if __name__ == "__main__":

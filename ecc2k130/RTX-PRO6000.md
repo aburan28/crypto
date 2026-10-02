@@ -123,8 +123,12 @@ denominator is nonzero. It preserves the DP stop, cyclic eligibility and anchor
 order, and otherwise resumes the unchanged v3 probe. Three long pairs measured
 **3.592794 B/s** versus **2.450018 B/s**, a median paired ratio of **1.466604**.
 Every measured mode replayed 300/300 reports, dropped none and produced the same
-sorted v3 corpus. The global knobs remain default-off; the RTX table preset
-selects split-forward, reconvergence and fast2. This repairs a
+sorted v3 corpus. `TABLE_BLOCK_HINTS=1` also compacts pending owners across a
+512-entry block queue. Three long pairs
+measured **5.019275 B/s** versus **3.559925 B/s**, a median paired ratio of
+**1.408969**, with the same replay/corpus gate. The global knobs remain
+default-off; the RTX table preset selects split-forward, reconvergence, fast2
+and queue 512. This repairs a
 correctness-current path but remains below the sigma preset and far below 26 B/s.
 
 Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
@@ -132,6 +136,9 @@ Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.j
 and [`benchmarks/hint-geometry/result.json`](benchmarks/hint-geometry/result.json).
 The fast2 result is
 [`benchmarks/batch-hints-fast2/result.json`](benchmarks/batch-hints-fast2/result.json).
+The block result and independent audit are
+[`benchmarks/block-hints/result.json`](benchmarks/block-hints/result.json) and
+[`benchmarks/block-hints/independent-audit.json`](benchmarks/block-hints/independent-audit.json).
 
 ## Historical table-walk comparison (superseded cycle rule)
 
