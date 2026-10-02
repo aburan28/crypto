@@ -770,6 +770,16 @@ gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
 
+# Build the queue control with exactly the same arithmetic/layout preset.
+build/test-global-hints-cuda: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+test-global-hints-preset: PACKED_ALU_SQUARE = 1
+test-global-hints-preset:
+	$(MAKE) -B build/test-global-hints-cuda ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+	./build/test-global-hints-cuda
+.PHONY: test-global-hints-preset
+
 # The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
 # pass per step, which does the same work per clock as the 20 B/s build and
 # 7% more per joule; on a 165 W part that sits on its power limit, per joule is

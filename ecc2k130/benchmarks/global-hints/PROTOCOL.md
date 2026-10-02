@@ -61,3 +61,43 @@ qualifies at geometric-mean paired ratio at least1.10 and every pair above1.0
 under the noise gate. Otherwise preserve the negative result without selecting
 the mode. Any correctness/identity/overflow failure suppresses timing. This
 first bounded panel ends after the five pairs; no search or solver is run.
+
+## Native producer details frozen before dispatch
+
+`gpujob.sh` runs native packed field and strict v3 replay controls, then builds
+both arms and the production queue device control with the same preset flags.
+The device control uses 64 public fixture points, including the established
+scalar1184 inverse-edge pair. It compares production selected/resolved histories
+against scalar-reference tags, checks every queue owner exactly once and both
+allocation canaries, and reuses allocations through empty/full/empty/sparse/
+endpoint/full/empty patterns at1,127,128,511,512,513 and1537 workers. Dead flags
+suppress report emission only in this queue control; full-walk controls retain
+the ordinary DP and reseed behavior.
+
+Whole-walk controls use95 steps for7 launches, run-id7 and DP weight48. The
+96,256-worker corpora require300 replayed reports per arm and independent
+evenly spread300-record replay with at least299 nonzero trails. Separate
+511/513-worker device runs require the same300 replay and corpus identity.
+For checkpoint continuation, each arm produces a513-worker prefix of4 launches,
+then both arms resume copies of each prefix for3 launches. All four final
+checkpoint payloads and sorted continuation corpora must be byte-identical.
+
+Each arm's one excluded warmup completes the same32 launches as a ranked row.
+The fixed timing schedule is five A/A pairs followed by five A/B pairs, with
+odd pairs control-first and even pairs candidate-first. Native summary rejects
+missing/reordered rows and invalid rates/digests; producer separately requires
+the exact201,863,462,912 update count, zero drops and feature/resource markers
+in every timed log. Binaries and helper executables are retained in the raw
+archive. Any failed build/control/sample exits nonzero and remains an attempt
+artifact; no failed attempt may be used as a throughput result.
+
+Require exactly one visible GPU and a clean40-hex source revision. Runtime
+markers bind the complete frozen backend/feature identity and188 resolver
+blocks. Each binary's first full verification log records its hot/select/resolve
+resource tuple; every subsequent log must match that tuple. Local stack is
+recorded and charged, including the unchanged cold anchor's legitimate local
+array, rather than admitted through an assumption of zero local bytes. The
+native summary requires the exact preflight marker and records its SHA256.
+The producer manifest covers binaries, corpora, checkpoints, logs and source
+manifests, excluding only itself and the wrapper's still-growing job.log and
+later-added exit-code; an independent post-run manifest/archive binds those.

@@ -409,6 +409,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed polynomial inversion: %d\n", ECC_PACKED_INV_POLY);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
         printf("packed table GPU-wide hints: %d\n", ECC_TABLE_GLOBAL_HINTS);
+        printf("packed hint scheduling: table fused %d, pipe select %d, chain first %d, inline polynomial %d, phase profile %d, cycle profile %d\n",
+               ECC_TABLE_FUSED, ECC_TABLE_PIPE_SELECT, ECC_PACKED_CHAIN_FIRST,
+               ECC_PACKED_INLINE_POLY, ECC_PHASE_PROFILE, ECC_CYCLE_PROFILE);
 #if ECC_TABLE_GLOBAL_HINTS
         printf("packed GPU-wide hint queue: %llu entries, %d resolver blocks of 128 threads\n",
                (unsigned long long)laneCount(), globalResolverBlocks);
