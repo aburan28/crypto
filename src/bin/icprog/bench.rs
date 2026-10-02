@@ -112,6 +112,18 @@ fn with_suffix_name(p: &Path, suffix: &str) -> PathBuf {
 impl Bench {
     /// One timed process through the isolation tool, after PSI has fallen.
     pub fn launch(&self, cmd: &[String], out: &Path, log_dir: &Path) -> Result<(), String> {
+        self.launch_to(cmd, out, log_dir, false)
+    }
+
+    /// [`Bench::launch`], with the process's standard output kept as `out`
+    /// when `capture` is set (the isolation tool writes nothing there).
+    pub fn launch_to(
+        &self,
+        cmd: &[String],
+        out: &Path,
+        log_dir: &Path,
+        capture: bool,
+    ) -> Result<(), String> {
         let rec = runs::record_path(out);
         let label = out
             .strip_prefix(log_dir)
@@ -120,21 +132,34 @@ impl Bench {
             .into_owned();
         let err = with_suffix_name(out, ".stderr");
         let tmp = with_suffix_name(out, ".stderr.tmp");
+        let out_tmp = with_suffix_name(out, ".stdout.tmp");
         for attempt in 0..REFUSAL_LIMIT {
             let waited = wait_for_quiet();
             let stderr =
                 std::fs::File::create(&tmp).map_err(|e| format!("{}: {e}", tmp.display()))?;
+            let stdout = if capture {
+                Stdio::from(
+                    std::fs::File::create(&out_tmp)
+                        .map_err(|e| format!("{}: {e}", out_tmp.display()))?,
+                )
+            } else {
+                Stdio::null()
+            };
             Command::new(&self.isolate)
                 .args(["run", "--wait", "--cpus", CPUS, "--out"])
                 .arg(&rec)
                 .args(["--label", &label, "--"])
                 .args(cmd)
                 .env("RAYON_NUM_THREADS", "1")
-                .stdout(Stdio::null())
+                .stdout(stdout)
                 .stderr(Stdio::from(stderr))
                 .status()
                 .map_err(|e| format!("{}: {e}", self.isolate.display()))?;
             if rec.exists() {
+                if capture {
+                    std::fs::rename(&out_tmp, out)
+                        .map_err(|e| format!("{}: {e}", out.display()))?;
+                }
                 std::fs::rename(&tmp, &err).map_err(|e| format!("{}: {e}", err.display()))?;
                 append(
                     &log_dir.join("psi-waits.log"),
@@ -153,6 +178,7 @@ impl Bench {
                 ),
             )?;
             let _ = std::fs::remove_file(&tmp);
+            let _ = std::fs::remove_file(&out_tmp);
             std::thread::sleep(REFUSAL_WAIT);
         }
         Err(format!(
@@ -459,6 +485,7 @@ mod tests {
             recipe_seed: Some(201),
             params: Some(PathBuf::from("/p/M1-T01.json")),
             rho_seed: Some(2293761),
+            suite_id: None,
         };
         let cmd = price_cmd(Path::new("/b/ic"), &row, Path::new("/o/r1.price.json"), &[]).unwrap();
         assert_eq!(

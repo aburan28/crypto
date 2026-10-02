@@ -68,6 +68,13 @@ graded targets and the class (accounting: no algorithm changed).
 
 ## Reproducing
 
+The Python scripts here are the record of what ran. Since N3
+(`research/ic_tool_program/README.md`) the native `icprog rule` replaces
+them: `icprog rule claims` and `icprog rule analyse` reproduce this
+directory's `claims/`, `manifests/` and `analysis.json` from `runs/`, byte
+for byte, apart from each replay's checker name (`tests/icprog.rs`). The
+commands below are those that ran.
+
     cargo build --release --bin ic      # at the declaration commit; kept outside the tree
     cd research/ic_single_target_20260930
     IC=<ic> IC_COMMIT=<commit> IC_RUNS=runs python3 run.py all
