@@ -14,7 +14,7 @@ directories are promoted under `autolab_runs/<run-id>/`.
 |---|---:|---:|---|---:|---:|---|---|
 | `20261001T155442Z-9990f40315` | 1,024 | 700 | 0.282 (0.276–0.306) | 0.289 | 0.132 | PASS | FAIL (closed) |
 | `20261001T160852Z-1f8383bd42` | 4,096 | 1,000 | 0.262 (0.247–0.269) | 0.256 | 0.117 | PASS | FAIL (closed) |
-| `20261001T212647Z-c0875d45ed` | 65,536 | 1,480 | 0.332 (0.139–0.492) | 0.291 | 0.132 | PASS | FAIL (closed) |
+| `20261001T212647Z-c0875d45ed` | 65,536 | 1,480 | 0.332 (0.139–0.491) | 0.291 | 0.132 | PASS | FAIL (closed) |
 
 All ratios are compact / rho on the same block pair.
 
@@ -246,10 +246,10 @@ parentheses):
 | Block | Order | IC | Rho (KS v2) | Wall | User | Instr. | Peak footprint IC / rho GiB |
 |---:|---|---:|---:|---:|---:|---:|---|
 | 0 | IC→rho | 277.6 (238.3) | 835.2 (819.6) | 0.332 | 0.291 | 0.132 | 11.08 / 2.97 |
-| 1 | rho→IC | 503.2 (265.4) | 1,023.8 (843.7) | 0.492 | 0.315 | 0.149 | 11.08 / 2.68 |
+| 1 | rho→IC | 503.2 (265.4) | 1,023.8 (843.7) | 0.491 | 0.315 | 0.149 | 11.08 / 2.68 |
 | 2 | IC→rho | 289.0 (240.2) | 2,072.2 (1,555.4) | 0.139 | 0.154 | 0.132 | 11.08 / 2.30 |
 
-- The wall ratio median is **0.332** (range 0.139–0.492). The user-CPU ratio
+- The wall ratio median is **0.332** (range 0.139–0.491). The user-CPU ratio
   median is 0.291, and the instruction ratio median is **0.132**.
 - Contention dominates the walls. Block 1's IC wall is 238 s above its user
   CPU. Block 2's rho used 1,555 s of user CPU against 820–844 s in blocks
@@ -283,5 +283,7 @@ Claim-check:
 - `verify`: PASS, 54 manifest files with 0 mismatches (`artifacts/verify.json`).
 
 The run is archived under `autolab_runs/20261001T212647Z-c0875d45ed/`. Left
-out, as above: `logs/` (per-target records and the base dump)
-and `inputs/boundary_targets.json`. The two 1 MB scalar corpora are kept.
+out, as above: the per-target `logs/*.jsonl` records, the base dump
+and `inputs/boundary_targets.json`. The two 1 MB scalar corpora are kept, as
+are the small producer logs: `logs/*.stderr.txt` (`/usr/bin/time -l`),
+`logs/*.summary.json` and `logs/replay_*.log`.
