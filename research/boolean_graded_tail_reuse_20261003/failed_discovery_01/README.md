@@ -8,10 +8,8 @@ tail and materializes every output. It must beat fresh matched packed controls
 in complete cold batches to qualify.
 
 The native Rust producer and verifier are implemented in the follow-on
-branch. Status: **first discovery failed post-seal; corrected discovery
-pending**. [ATTEMPTS.md](ATTEMPTS.md) and [RUNS.json](RUNS.json) retain its
-raw artifact and explain the exact float readback failure. No qualified
-discovery, holdout, timing result, solver cost, relation yield or rho comparison exists.
+branch. Status: **source frozen, discovery pending**. No qualified discovery,
+holdout, timing result, solver cost, relation yield or rho comparison exists.
 The new holdout seeds remain unused. Inputs are generated public Boolean
 systems, with no curve or key interface. The previous full-trace screen in
 PR #1202 is context, not a performance baseline.

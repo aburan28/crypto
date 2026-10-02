@@ -80,14 +80,4 @@ if [[ $verify_status -ne 0 ]]; then
   exit "$verify_status"
 fi
 "$worker" --seal "$out"
-set +e
 "$worker" --verify-bundle "$out"
-postseal_status=$?
-set -e
-if [[ $postseal_status -ne 0 ]]; then
-  mv "$out/manifest.json" "$out/manifest-before-postcheck.json"
-  "$worker" --failure "$out" post-seal-replay-failed
-  "$worker" --seal "$out"
-  "$worker" --verify-bundle "$out"
-  exit "$postseal_status"
-fi

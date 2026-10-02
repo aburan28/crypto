@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "discovery": null,
+  "full": null,
+  "failed_attempts": [
+    {
+      "path": "failed_discovery_01",
+      "workflow_run_id": 36960153463,
+      "workflow_attempt": 1,
+      "artifact_id": 11206899826,
+      "source_head": "1c9b658ff9b183176d7f0cae6e8d2fb05b423813",
+      "manifest_sha256": "fe542fed0ea4bee987f4828debb7283f86235d4029d2225e202bdae272b2daf2",
+      "raw_sha256": "3408bd4c545b54a7b1631949df9b47ed30435c5cd15e414275d436722692e86a",
+      "result_sha256": "988aba9c172c11717d29c10554195e71eb888de5141c64ba30b16bcfa0d0e9ca",
+      "status": "post_seal_float_readback_failure",
+      "performance_admitted": false,
+      "holdout_executed": false
+    }
+  ],
+  "decision": "awaiting_fresh_discovery",
+  "full_solver_cost": null,
+  "rho_ratio": null
+}
