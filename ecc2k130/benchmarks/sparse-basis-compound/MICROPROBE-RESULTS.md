@@ -39,6 +39,13 @@ This directly identifies joint-key bank conflicts as the dominant lookup
 wall.  The earlier transferred random-`LDS.U8` estimate of 15.283375 B/s was
 optimistic for the complete route.
 
+Even replacing both varying joint maps with the measured warp-uniform
+multicast control produces only **24.027482 B updates/s** with the fixed maps
+unchanged.  Reaching 26 B/s would require a joint-map rate of **95.485342 B
+maps/s**: 3.3341 times the measured varying-key rate and 1.1507 times the
+uniform-key control.  This exact three-bit table layout is therefore terminal
+for the 26 B/s objective independently of the arithmetic changes below.
+
 The five A/A ratios are
 `1.000376/0.999700/1.000008/1.000554/1.000166`; maximum absolute drift is
 0.0554%, well inside the frozen 1% gate.  Every ranked arm reproduced its
@@ -134,3 +141,9 @@ rows, seven SASS rows, 64-key histogram, output digests, correctness receipt,
 launch identity, and manifest.  It recomputed 11.448092 B/s and the 0.741616
 ratio.  Its SHA-256 is
 `6366ef4628b2723ce15a929b9116dd388a36128ba04a1fd6081ebf363bbc8145`.
+
+A second read-only audit freshly extracted the raw archive, verified every
+source/scientific manifest entry, rebuilt both native auditors, checked that
+all table loads are inside the 65,536-round loop, and derived the 24.027482 B/s
+uniform-key counterfactual and 95.485342 B/s requirement.  Its compact report
+is `microprobe-external-audit.json`.
