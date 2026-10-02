@@ -1,0 +1,64 @@
+{
+  "schema": "ecc2k130-b16-geometry-independent-audit-v1",
+  "auditedArchiveSha256": "836a9e5b15c402067cfb59a1a790ec043bb20e3835e554086ff7742db4cc7a34",
+  "auditedResultSha256": "ff78c79e1679d8e0e2c2b87961267bc0cf26e324ef5be66aa2a0464a39a23d63",
+  "verdict": "PASS_RETAIN_T256",
+  "goal26bMet": false,
+  "t512Selected": false,
+  "checks": {
+    "archiveExtracts": true,
+    "archiveOnlyRegularFilesAndDirectories": true,
+    "sourceManifestMatchesCommit": true,
+    "packedWalkZeroSpillsBothArms": true,
+    "t256Resources": {
+      "registersPerThread": 126,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 1792,
+      "residentBlocksPerSm": 2,
+      "threadsPerBlock": 256
+    },
+    "t512Resources": {
+      "registersPerThread": 126,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 1792,
+      "residentBlocksPerSm": 1,
+      "threadsPerBlock": 512
+    },
+    "referenceReplayPerArm": 300,
+    "droppedPerArm": 0,
+    "sortedCorpusIdentity": true,
+    "recordCountPerArm": 1711551,
+    "checkpointWholeIdentity": true,
+    "checkpointT256ToT512Identity": true,
+    "checkpointT512ToT256Identity": true,
+    "sampleLogHashesMatch": true,
+    "warmupRows": 4,
+    "aaRows": 6,
+    "abRows": 10,
+    "updatesPerRow": 403726925824,
+    "equalWorkEveryRow": true,
+    "zeroDropsEveryRow": true,
+    "nativeResummarizationByteIdentical": true
+  },
+  "measurement": {
+    "aaMaxAbsoluteDrift": 0.0002838092582918561,
+    "t512OverT256Ratios": [
+      1.0052506655348856,
+      1.0047718842675628,
+      1.0062541431239755,
+      1.0058346993034137,
+      1.0026691823894462
+    ],
+    "medianRatio": 1.0052506655348856,
+    "minimumRatio": 1.0026691823894462,
+    "t256MedianMps": 15357.665000000001,
+    "t512MedianMps": 15431.035,
+    "t512ChangePercent": 0.5250665534885623,
+    "selectionThresholdRatio": 1.01
+  },
+  "interpretation": "T512 is consistently but only 0.525 percent faster in this allocation. It misses the frozen 1 percent threshold, so retain T256 and treat the larger cross-allocation difference as session variation.",
+  "limitations": [
+    "The archive records executable hashes but does not embed the binaries.",
+    "The in-job artifact manifest's job.log hash predates the final wrapper append and exit-code postdates the manifest."
+  ]
+}

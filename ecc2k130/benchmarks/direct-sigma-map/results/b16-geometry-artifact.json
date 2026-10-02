@@ -1,0 +1,47 @@
+{
+  "schema": "ecc2k130-b16-geometry-artifact-v1",
+  "sourceCommit": "5c306e18daef823af50cb4c967718c64c57edc1a",
+  "sourceDirty": false,
+  "provider": "modal",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "modal": {
+    "appId": "ap-9yHEzeHBKjBDpKS5xPrt0O",
+    "functionCallId": "fc-01M3XVY1KKY0DXHAGKSQNECC6T",
+    "volumeToken": "79e2c96eb1d4421187eb0008b19529ab",
+    "exitCode": 0,
+    "seconds": 1077.0950164794922
+  },
+  "archive": {
+    "externalPath": "/private/tmp/ecc2k-b16-geometry-gpu-20261002/results.tgz",
+    "bytes": 72615904,
+    "sha256": "836a9e5b15c402067cfb59a1a790ec043bb20e3835e554086ff7742db4cc7a34",
+    "members": 58
+  },
+  "committedFiles": {
+    "launch": {
+      "path": "results/b16-geometry-launch.json",
+      "sha256": "de7f2fcd2cf499ebe72f3f1d6fb35ef278e47387ba02fd6b51549d37e93852b5"
+    },
+    "result": {
+      "path": "results/b16-geometry-result.json",
+      "sha256": "ff78c79e1679d8e0e2c2b87961267bc0cf26e324ef5be66aa2a0464a39a23d63"
+    },
+    "samples": {
+      "path": "results/b16-geometry-samples.tsv",
+      "sha256": "7168d1c0af22074107b5562012273156dbeade6057b367ecd36b0395464f9464"
+    }
+  },
+  "rawEvidence": {
+    "sourceManifestSha256": "8562ea313c21b87fcf0f2bec9d2efa85527a9d9206a034436cdb41ec7c86a0c1",
+    "binaryManifestSha256": "1ea9fdb7d0f08d53b7abfde7527c3137f38b93a84f8e09d88415f47235d7e843",
+    "artifactManifestSha256": "9f51ad6a00fb11c4a9bfed1348f3f04d7e93ddabf3412f4bdbf5b2b5e4a01a2a",
+    "t256BinarySha256": "5f99311bbff7203e98bf80868e97211d15499752cba909e8ad775535bdefc651",
+    "t512BinarySha256": "74504a7a625b078cd6bfff137334d23c87a64623e5de00b41f4ee325bf1a0b27",
+    "canonicalSortedCorpusSha256": "0109a818cd25ef2b9dd8f73c7894195642af4110372a8b137aa9ba16fb74cc68",
+    "canonicalSortedCorpusBytes": 54769632,
+    "recordCountPerArm": 1711551,
+    "checkpointManifestSha256": "34981fd5f7955fbd6cb04c748c0eea790f3863f3d91a48a1cb482bf45770ec20"
+  },
+  "packagingNote": "The in-job artifact manifest's job.log entry predates the wrapper's final append, and exit-code was added after the manifest. All scientific files listed by the manifest verify."
+}
