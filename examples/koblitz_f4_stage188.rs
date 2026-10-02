@@ -928,9 +928,7 @@ fn verify_final(result_path: &Path) -> AnyResult<Verification> {
     let bytes = fs::read(result_path).map_err(|e| format!("{}: {e}", result_path.display()))?;
     let result: FinalResult =
         serde_json::from_slice(&bytes).map_err(|e| format!("final result JSON: {e}"))?;
-    let stage = result_path
-        .parent()
-        .ok_or_else(|| "final result has no stage directory".to_string())?;
+    let stage = find_stage_root(result_path)?;
     let mut checks = 0usize;
     let mut failures = Vec::new();
     check(
@@ -1122,6 +1120,15 @@ fn collect_named_files(directory: &Path, name: &str, out: &mut Vec<PathBuf>) -> 
         }
     }
     Ok(())
+}
+
+fn find_stage_root(path: &Path) -> AnyResult<&Path> {
+    path.ancestors()
+        .skip(1)
+        .find(|candidate| {
+            candidate.join("PROTOCOL.md").is_file() && candidate.join("development").is_dir()
+        })
+        .ok_or_else(|| format!("{} has no Stage 188 root ancestor", path.display()))
 }
 
 fn charges_match(left: &Charge, right: &Charge) -> bool {
@@ -1600,6 +1607,24 @@ mod tests {
         assert_eq!(charge.wall_seconds_sum, 9.0);
         assert_eq!(charge.total_core_seconds_sum, 14.0);
         assert_eq!(charge.peak_rss_bytes_max, 13);
+        fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn final_verifier_finds_stage_root_above_development_drafts() {
+        let directory = env::temp_dir().join(format!(
+            "koblitz-stage188-root-test-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(directory.join("development/nested")).unwrap();
+        fs::write(directory.join("PROTOCOL.md"), b"frozen\n").unwrap();
+        let draft = directory.join("development/nested/draft.json");
+        fs::write(&draft, b"{}\n").unwrap();
+        assert_eq!(find_stage_root(&draft).unwrap(), directory.as_path());
         fs::remove_dir_all(directory).unwrap();
     }
 
