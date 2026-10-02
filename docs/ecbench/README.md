@@ -1,0 +1,381 @@
+# ecbench: one harness for every ECDLP method
+
+`ecbench` measures Pollard rho (in its variants), baby-step giant-step,
+the kangaroo, and index calculus **behind one interface, on the same
+single-target workloads, in the same unit, under the same isolation, into
+the same records**. A number from one method can therefore be read
+against a number from another without first asking what each one
+counted, where it ran, or which target it solved.
+
+It is native code (`src/cryptanalysis/ecbench/`, `src/bin/ecbench.rs`),
+as AGENTS.md requires of measurement work. It does not replace the
+repository's accounting rules; it is the machinery that applies them to
+every method at once.
+
+```
+spec.json ──ecbench run──► session/                ──ecbench verify──► audit receipt (replay certificate)
+                           ├─ spec.json            ──ecbench compare─► comparison.json
+                           ├─ plan.json            ──ecbench table───► the one-unit table (AGENTS.md §2)
+                           ├─ host.json            ──ecbench db sql──► SQLite (docs/ecbench/schema.sql)
+                           ├─ session.json
+                           ├─ records.jsonl        ◄── one sealed record per execution, failures included
+                           └─ exec/NNNNNN.stderr
+```
+
+## Contents
+
+1. [Quick start](#1-quick-start)
+2. [Where it sits](#2-where-it-sits)
+3. [What a measurement is](#3-what-a-measurement-is)
+4. [Names and identities](#4-names-and-identities)
+5. [Confounders, and how each one is controlled](#5-confounders-and-how-each-one-is-controlled)
+6. [Isolation levels](#6-isolation-levels)
+7. [The unit, and what each method is charged](#7-the-unit-and-what-each-method-is-charged)
+8. [Statistics](#8-statistics)
+9. [Reproduction and the independent runner](#9-reproduction-and-the-independent-runner)
+10. [The database](#10-the-database)
+11. [Adding a method, a curve family or a factor base](#11-adding-a-method-a-curve-family-or-a-factor-base)
+12. [Limits](#12-limits)
+
+## 1. Quick start
+
+```bash
+cargo build --release --bin ecbench
+```
+
+```bash
+./target/release/ecbench plan --spec docs/ecbench/specs/smoke-prime.json
+```
+
+```bash
+./target/release/ecbench run --spec docs/ecbench/specs/smoke-prime.json --out /tmp/ecbench/smoke-1
+```
+
+```bash
+./target/release/ecbench verify --dir /tmp/ecbench/smoke-1 --replay 8
+```
+
+```bash
+./target/release/ecbench compare --dir /tmp/ecbench/smoke-1 --a rho-neg --b bsgs-neg
+```
+
+```bash
+./target/release/ecbench table --dir /tmp/ecbench/smoke-1
+```
+
+```bash
+./target/release/ecbench db sql /tmp/ecbench/smoke-1 | sqlite3 -bail ecbench.db
+```
+
+`ecbench methods` lists every method and its parameters; `ecbench host`
+prints the host capsule. On Linux `run` reserves a whole core by default
+(`--cpus auto`); on macOS there is no affinity control, so it records
+every run at L0 and says so. Operation counts are unaffected.
+
+The skills in [`.agents/skills/`](../../.agents/skills) walk an agent
+through a measurement (`ecbench-measure`), an independent run
+(`ecbench-independent-runner`) and an extension (`ecbench-extend`).
+
+## 2. Where it sits
+
+| tool | language | what it is for | relation to `ecbench` |
+|---|---|---|---|
+| `tools/isolated_bench.py`, `src/bin/isolated_bench.rs` | Python, Rust | pin one command, keep others off its core, record conditions | `ecbench` takes the **same lock** (`/tmp/crypto-bench.lock`), refuses the same things and uses the same preflight defaults, natively, per measured child |
+| ICMS (`tools/icms/`, `docs/ic/measurement/`) | Python | index-calculus configurations through producer adapters | `ecbench` keeps its vocabulary (windows, isolation levels L0–L3, env class, never-overwrite sessions, A/A arms) and extends it to every ECDLP method in native code. ICMS sessions stay valid evidence |
+| `isolab/` | Python service | an independent lab worker: cgroup partitions, NUMA, IRQs, PSI gates | `ecbench isolab-job` writes the job; `ecbench` runs inside it with `--cpus inherit` (§9) |
+| `taskq/` | Python service | the Kubernetes fleet queue | unchanged; a spec runs there the same way, as a command |
+| boundary autolab, IC tournament | Python | their own frozen protocols | unchanged; `ecbench` does not redefine historical protocols |
+
+AGENTS.md forbids Python for new measurement work, and that is the reason
+`ecbench` is native. The Python tools above remain where they are and
+keep their own evidence. New cross-method measurements use `ecbench`.
+
+## 3. What a measurement is
+
+The question is AGENTS.md's: **what does it cost to solve one previously
+unseen target**, cold, with every phase charged, verified.
+
+- **One target per workload.** A workload is one curve, one prime-order
+  subgroup, one generator and one target point. `targets_per_curve: 8`
+  makes eight workloads, eight rows, never one eight-target run. Nothing
+  is shared between workloads.
+- **Cold.** Each execution is a fresh process. Nothing a method builds
+  (a jump table, a baby-step table, a factor base, a pair table)
+  survives to the next execution, so its cost is inside every row.
+- **The window is `cold_end_to_end`.** `S` covers set-up, search,
+  relation collection, linear algebra and the method's own internal
+  verification. For index calculus that window is the right one for
+  `S`, but it is not the IC online window (AGENTS.md "IC measurements"),
+  which `ecbench` does not split out yet (§12).
+- **Verified, by someone else.** No solver receives the planted scalar.
+  The runner checks `[k]G = Q` and `k = planted` in its own process, and
+  `ecbench verify` checks it again from the files. A run that does not
+  verify is a row with status `wrong_answer`, `exhausted`, `error`,
+  `timeout` or `crashed`. It is kept, never dropped, and it makes any
+  comparison involving it `incomplete`.
+
+### Boundaries
+
+Every record carries the curve's generic floor in `S`,
+`floor_s = √(π / 2A)`, with `A` the automorphisms a generic algorithm may
+use: 2 (negation) on any curve, `2m` on a Koblitz curve over `GF(2^m)`
+(signed Frobenius). The ratio `S / floor_s` is in every record and every
+table. The *reference* is an arm of the session, normally the matched
+rho: `rho.negation` on a prime curve, `rho.signed_frobenius` on a Koblitz
+curve. `ecbench table` divides every arm by it.
+
+## 4. Names and identities
+
+Every object is named by a hash of what it is. A label never enters an
+identity, and two objects that hash alike are the same object.
+
+| object | id | hashed from |
+|---|---|---|
+| curve | ICV1 slug `icv1-…` ([ICV1](../curves/ICV1.md)), EC1 alias when the registry holds this generator | the curve model (AGENTS.md §11) |
+| workload | `W` + 12 hex | ICV1 string, subgroup order, cofactor, generator, **target point**, target law, seed, index, `target_count: 1`, `cache_policy: cold` |
+| method | `ECM1h` + 12 hex | registry id and every parameter, defaults written out |
+| factor base | `FB1h` + 12 hex | curve slug, family, parameters, column count, point count, SHA-256 of the sorted point keys |
+| spec | `ECS1h` + 12 hex | the spec without its label and description |
+| host class | `ECBENV1h` + 12 hex | the stable host facts (§5) |
+| session | `ECBS1h` + 12 hex | spec, host and plan hashes, start time |
+| record | `ECR1h` + 12 hex | the exact record line, with the id empty |
+| run | `<method_id><workload_id>R<n>` | the repository's `{candidate}W{workload}R{number}` convention; `n ≥ 1` counts executions of the pair in the session |
+| comparison | `ECC1h` + 12 hex | both arms' sessions and methods, the resampling request |
+
+Canonical JSON is sorted, compact and ASCII-escaped, as
+`docs/curve-identities.md` hashes it. Floats never enter an identity. The
+host-class prefix is deliberately not ICMS's `ENV1h`: the two hash
+different fact sets.
+
+## 5. Confounders, and how each one is controlled
+
+Every row of this table is something that has moved a figure in this
+repository or in the literature without the algorithm changing. Each is
+**controlled** (removed by construction), **gated** (checked per run, and
+a run that fails the check loses its isolation level), or **recorded**
+(kept beside the figure so a later reader can see it).
+
+| confounder | how it moves a figure | what `ecbench` does | kind |
+|---|---|---|---|
+| Which target | rho's and BSGS's cost depend on the target; a lucky target flatters a method | targets are derived by SHA-256 from (curve, seed, index), every arm solves the same ones, and intervals resample workloads (§8) | controlled |
+| Algorithm randomness | one rho walk is one draw of a wide distribution | one seed per (workload, round) is shared by every arm, so arms are paired; rounds vary it | controlled |
+| Order and drift | heat, a filling page cache, a background job ramping up | arms interleave every round (`alternate` reverses order on odd rounds; `shuffle` permutes by seed); warm-up rounds are run and marked | controlled |
+| One-time costs | page faults, lazy statics, allocator warm-up land on whoever runs first | every execution is a fresh process; nothing is cached across executions | controlled |
+| Another benchmark | two timed jobs on one machine measure each other | the shared lock `/tmp/crypto-bench.lock`, the one `isolated_bench` takes; `--wait` queues | controlled |
+| Other processes on the core | preemption, cache eviction | whole-core reservation; every movable thread moved off; the runner itself leaves the reservation; busy ticks on the run CPU not explained by the child are measured per run | gated (L1, L2) |
+| SMT sibling | a neighbour on the sibling shares the pipeline and caches | a CPU is reserved only with all its siblings; the idle siblings' busy ticks are checked per run | gated (L2) |
+| CPU 0 | the kernel's housekeeping and many IRQs land there | `auto` never picks CPU 0's core; a run on it loses L1 | gated (L1) |
+| Migration | a process moved mid-run pays cold caches | pinned between fork and exec; the child reads its own mask back and reports the CPU it started and ended on | gated (L1) |
+| NUMA | memory on the far node costs every miss | memory is bound to the run CPU's node with `set_mempolicy(MPOL_BIND)` in the child; `Mems_allowed_list` is read back | gated (L1, multi-node hosts) |
+| Run-queue delay | time runnable but not running is not the method's | the child's `/proc/self/schedstat` across the solve; above 0.5 % of the solve, L2 is lost | gated (L2) |
+| Preemption | each one costs cache and branch state | involuntary context switches per second from `wait4` | gated (L2) |
+| Hypervisor steal | invisible to a process tick count | per-CPU steal ticks from `/proc/stat` around every run | gated (L2) |
+| Memory pressure | reclaim stalls a run | PSI memory `some` total around every run | gated (L2) |
+| A busy host at start | everything above, before the first run | a settle-window preflight (busy ticks per reserved CPU, PSI); refused unless `--allow-busy`, which records it and caps runs below L2 | gated (L2) |
+| Frequency and turbo | the clock is the denominator of wall time | governor, `no_turbo`, `boost`, `isolcpus`, `nohz_full` and SMT control recorded per CPU; required for L3 | recorded, gated (L3) |
+| Virtualisation | a guest cannot see or control most of the above | CPU `hypervisor` flag, DMI, `systemd-detect-virt`, `kern.hv_vmm_present` recorded; bare metal required for L3 | recorded, gated (L3) |
+| Heterogeneous cores | Apple P and E cores differ by about 2× | performance levels recorded; with no affinity control the runs are L0 | recorded |
+| Threads | four Rayon threads on one pinned CPU wait on each other | `RAYON_NUM_THREADS=1`, `OMP_NUM_THREADS=1`; child CPU time over wall above 1.05 loses L1 | controlled, gated (L1) |
+| Environment leakage | an engine knob in the operator's shell changes the search | the child's environment is cleared and rebuilt: `PATH`, `HOME`, a pinned locale and thread counts, nothing else; its hash is in the session | controlled |
+| Build | a debug build or another binary is another experiment | the binary's SHA-256, the commit and whether the tree was dirty, `rustc -Vv`, compiler flags in the environment; a debug build loses L1 | recorded, gated (L1) |
+| Host | the same binary differs by 17–20 % across hosts | the host capsule's stable facts hash to the class id; wall-clock ratios are formed only inside one session | recorded, controlled |
+| What each method counts | one tool counts additions, another wall time, another instructions | one `CountedGroup` ledger for every method; native work the unit does not charge is counted as `*_uncharged` and makes the total a lower bound (§7) | controlled |
+| Pricing drift | per-run measured ratios repriced identical runs by up to 8 % | IC native work is priced only at the repository's pinned ratios (`docs/ic/calibration.json`); a unit without one stays unpriced, never host-measured; an algebraic solver's wall-priced work is taken back out | controlled |
+| Selective reporting | dropping a failure, rerunning until it looks good | every execution writes a sealed record before the next starts; output directories are never overwritten; an interrupted session is marked, never deleted | controlled |
+| Tampering and transcription | a figure edited by hand, or copied wrong | every file is hashed into `session.json`; `verify` re-derives identities, the plan, the answers and the seals, and replays runs | controlled |
+
+## 6. Isolation levels
+
+A run earns the highest level whose checks, and every lower level's,
+passed. Its record lists every check it failed as a blocker
+(`"L2: 3 ticks of hypervisor steal on the run CPU"`), so a level is never
+a bare label.
+
+| level | requires |
+|---|---|
+| **L0 recorded** | the run executed under a saved host capsule. Enough for operation counts, which do not depend on contention |
+| **L1 pinned** | a reservation (`--cpus` not `none`); a release build; the child's own affinity read back as exactly the run CPU, and the run CPU at its start and end; the run CPU not on CPU 0's core; the runner off the reservation; no user thread left unmovable on the reserved CPUs (a non-root run usually fails this); child CPU time over wall ≤ 1.05; on a multi-node host, memory bound to the run CPU's node |
+| **L2 quiet** | L1, and: a quiet preflight; zero steal ticks on the run CPU; foreign busy time on the run CPU within max(2 ticks, 1 % of wall); idle siblings within 2 ticks; run-queue delay ≤ 0.5 % of the solve; ≤ 50 preemptions per second; memory stall ≤ 0.5 % of wall |
+| **L3 isolated** | L2, and the host configured for measurement: run CPU in `isolcpus` or `nohz_full`; `performance` governor; turbo known off; bare metal known |
+
+A spec's `isolation_required` (default L2) is the level a **wall-clock**
+figure needs to be admitted. Operation counts never need one.
+
+What hosts earn, as recorded so far: macOS, L0 (no affinity control). A
+GitHub-hosted Linux runner run as root, L1 (it is a VM; steal and
+frequency are outside its control). See the CI summary of
+`.github/workflows/ecbench.yml` for the current blocker counts. L2 and L3
+need a lab host. `isolab` prepares one (§9).
+
+## 7. The unit, and what each method is charged
+
+```
+S = total group-addition equivalents / √r
+```
+
+An addition and a doubling are one each. A scalar multiplication is
+charged as the additions and doublings it performs. `S ≈ 1.25` is plain
+rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
+
+| family | charged | counted, not charged (`*_uncharged`) |
+|---|---|---|
+| `rho.*` | jump-table set-up, walk starts, every step, cycle escapes, look-ahead additions, internal verification | canonicalisations (negation, signed Frobenius), Frobenius maps |
+| `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
+| `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
+| `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+
+Two consequences to read every table with:
+
+- **BSGS's `S` omits its memory.** BSGS stores about `√r` points and
+  probes a hash table every step. Neither is a group operation, so a
+  BSGS row can sit below rho in `S` and still be the slower and far
+  larger method at any interesting size. The records keep `max_rss_kib`
+  and the lookup counts. This is the known time–memory trade, never a
+  finding.
+- **A lower bound is marked.** `cost.lower_bound` is set whenever
+  anything is unpriced, and comparisons carry `bounded: true`. A rho with
+  the negation map is a lower bound by this rule (its canonicalisations
+  are counted, not charged), exactly as in the rest of the repository.
+
+## 8. Statistics
+
+- **The mean, not the median.** The floor `√(πr/2A)` is an expected
+  value, so the comparable statistic is the mean `S`.
+- **Paired.** Within a session, the arms share an algorithm seed per
+  (workload, round) and are resampled as pairs.
+- **Two-stage (cluster) bootstrap.** Intervals resample *workloads*, then
+  rounds within each. This matters: BSGS's cost is fixed by its target,
+  so all its variance is between workloads, and an interval that held
+  the workloads fixed would be a point. With one workload only the
+  within-workload interval exists, and the comparison says
+  `ci_method: within`.
+- **Per curve.** A ratio is reported per curve (one size each) as well as
+  pooled. A claim about scaling reads the per-curve rows and fits
+  exponents over at least four sizes (AGENTS.md §5).
+- **An A/A in operations is exactly 1.** Two arms running one method on
+  the same seeds do identical work, so the ops A/A is a check of
+  determinism, not of noise. The noise in operations comes from targets
+  and seeds, and the intervals above already carry it. The A/A arm is
+  for wall time, where its interval is the session's noise floor.
+- **Wall time is gated.** It is compared only within one session, only
+  over pairs where both runs reached `isolation_required`, only with at
+  least five such pairs. It is reported as the median per-pair ratio with
+  a bootstrap interval, set beside the A/A interval, and marked
+  `outside_noise` only when it excludes 1 and does not overlap the A/A
+  interval. Anything less prints as `descriptive`, never as a result.
+
+A speedup in the sense of AGENTS.md §8 is still
+`baseline_total_operations / candidate_total_operations`, over the whole
+cold method with every phase priced. `ecbench compare` reports the ratio.
+Classifying the change (advance, engineering, relabelling, accounting)
+stays with the author.
+
+## 9. Reproduction and the independent runner
+
+**Exact replay.** Operation counts depend only on the code, the workload
+and the seed, never on the host. `ecbench verify --replay N` re-executes
+N measured runs and requires the same answer, total, phase counts,
+counters and factor base, bit for bit. Run on another machine, it is an
+independent check of the figure. The audit receipt names every file by
+SHA-256, and its own SHA-256 is the replay certificate a claim cites.
+CI re-audits every committed session under `research/ecbench_*/sessions`
+on a Linux x86-64 runner with replays.
+
+**Independent runner (isolab).** `ecbench isolab-job` writes an
+`isolab.job/v1` that runs a spec on a lab worker:
+
+```bash
+./target/release/ecbench isolab-job --spec docs/ecbench/specs/smoke-prime.json --binary target/release/ecbench > job.json
+```
+
+isolab places the job on whole cores of one NUMA node (`smt: isolate`,
+`numa_node: single`), moves threads and IRQs off, sets frequency policy,
+gates on PSI, and runs `ecbench run --cpus inherit`. Inside, `ecbench`
+pins its children to the placement it was given and grades every run
+from its own observations, as anywhere else. After the clock stops, the
+job's `verify` step runs `ecbench verify --replay 3 --exit-code` on the
+worker. The session comes back as hashed artifacts.
+
+- `--binary` (preferred) uploads a binary built for the worker's
+  architecture. The job needs no network and the binary's hash is its
+  identity.
+- `--git-url URL --commit SHA` builds on the worker. The repository does
+  not track `Cargo.lock`, so dependencies are resolved there and the job
+  needs network. The job labels this, and every record still carries the
+  binary hash a comparison checks.
+
+## 10. The database
+
+[`schema.sql`](schema.sql) is the schema, compiled into the binary.
+
+```bash
+./target/release/ecbench db sql research/ecbench_smoke_20261002/sessions/* | sqlite3 -bail ecbench.db
+```
+
+The database is an **index**, rebuilt from session directories; it is
+never the record of a measurement. Loading is idempotent in one way only:
+an insert tolerates a conflict on its table's primary key (the same row
+loaded again) and nothing else. A second row claiming an existing run id,
+or a curve slug with a different ICV1 string, is an error.
+
+| table | holds |
+|---|---|
+| `curves`, `curve_representations`, `curve_constructions` | ICV1 slug, ICV1 string, family, sizes, floor; the generator measured and its EC1 alias; the constructor calls that produced it |
+| `workloads` | one curve, generator and target, with the known answer |
+| `algorithms` | every method configuration (`ECM1h…`): rho, BSGS, kangaroo, IC |
+| `factor_bases`, `factor_base_points` | every factor base a run used, by `FB1h…`; with its points when an `ecbench fb` dump is loaded |
+| `hosts`, `sessions`, `arms` | the host class and capsule, the session's build and reservation, its arms |
+| `runs`, `phases`, `run_counters`, `isolation_blockers` | one row per execution, its phases, its counters, and why it did not reach a higher level |
+| `comparisons` | every saved comparison |
+
+Views: `arm_workload_summary` (the AGENTS.md §2 table, per workload),
+`method_by_curve` (each method's mean `S` and ratio to the floor per curve,
+across sessions), `ic_phase_split` (each IC run's phase shares with its
+factor base).
+
+```sql
+SELECT method, curve_slug, verified_runs, round(mean_s, 3), round(mean_ratio_to_floor, 2)
+FROM method_by_curve ORDER BY curve_slug, mean_s;
+```
+
+## 11. Adding a method, a curve family or a factor base
+
+- **A method:** an entry in `methods::registry()` and an arm in
+  `methods::solve`. Charge every group operation through `CountedGroup`,
+  count everything else under a name ending `_uncharged`, never read the
+  planted scalar, and return the recovered value unverified. Give it a
+  unit test that recovers known logarithms on a prime and a Koblitz curve.
+  The `ecbench-extend` skill walks through it.
+- **A curve construction:** a variant of `workload::CurveSpec` that calls
+  an existing constructor. Register any new curve before citing its slug
+  (AGENTS.md §11).
+- **A factor base or oracle:** add it to `ic_framework` as a plug-in;
+  `ic.pipeline` reaches it through its name. Dump it with `ecbench fb` to
+  store its points.
+
+## 12. Limits
+
+Stated so that nothing here is read as more than it is:
+
+- **The IC online window is not split out.** `ic.pipeline` reports the
+  cold end-to-end window with five phases. The one-target online window
+  of the IC measurement rules (five exclusive target-dependent phases) is
+  not produced yet, so an `ecbench` IC row is not eligible for the
+  `vs_rho` claim checker.
+- **Word-size curves only.** The counted group types hold `GF(p)` with
+  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
+  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
+  it.
+- **NUMA binding has not met a multi-node host yet.** The binding and its
+  read-back are implemented and the single-node path runs in CI. The
+  first multi-node session (an isolab worker or a two-node VM) is the
+  test of that path, and until then a multi-node L1 is unconfirmed.
+- **No hardware counters.** Instructions retired would be a third,
+  host-robust measure beside operations and wall time. `perf_event_open`
+  is not wired in.
+- **Rho's distinguished-point table is not counted.** Its stores happen
+  once per distinguished point, a vanishing fraction of steps. BSGS and
+  the kangaroo count their table operations.
+- **One thread.** Parallel collision search is out of scope until a
+  multi-thread run can be graded (a parallel change must be measured at
+  one thread and at many, AGENTS.md §10).

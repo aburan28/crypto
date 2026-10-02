@@ -536,6 +536,28 @@ retired form in Markdown or HTML outside a code fence, every slug
 registered, and no retired form on a line a pull request adds to prose or
 code.  `--fix` rewrites retired names in place.
 
+### 12. Measure across ECDLP methods with ecbench
+
+New measurements that put ECDLP methods side by side (Pollard rho in its
+variants, baby-step giant-step, the kangaroo, index calculus) use the
+native harness `ecbench` ([docs/ecbench/README.md](docs/ecbench/README.md)),
+so every method is charged in one counted unit, on the same one-target
+workloads, under the same isolation, into the same sealed records.
+
+- **Spec, session, audit.** Write an `ecbench.spec/v1`, run it into a new
+  directory, and pass `ecbench verify --replay N` before citing a figure;
+  the receipt's SHA-256 is the replay certificate.
+- **Levels gate wall time, never counts.** Operation counts stand at any
+  isolation level; a wall-clock figure needs the spec's level (L2 by
+  default) and is read against the session's A/A interval.
+- **Sessions are evidence.** Commit them under `research/<topic>_<date>/
+  sessions/`; CI re-audits them with replays on another host and never
+  lets one be edited.  The SQLite database is an index rebuilt from them.
+- **Skills:** `ecbench-measure`, `ecbench-independent-runner` and
+  `ecbench-extend` under `.agents/skills/`.
+
+Historical autolab, tournament and ICMS evidence keeps its own protocols.
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this

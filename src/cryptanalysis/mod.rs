@@ -123,6 +123,7 @@ pub mod curve_id;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
+pub mod ecbench;
 pub mod descent_expansion;
 pub mod descent_lowgamma;
 pub mod descent_treewidth;

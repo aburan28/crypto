@@ -1,0 +1,1038 @@
+//! The method registry: every ECDLP algorithm `ecbench` can run, behind
+//! one interface, charged in one unit.
+//!
+//! A method is an id from [`registry`] plus string parameters.  Defaults
+//! are written into the parameters before the method id is hashed, so an
+//! omitted default and an explicit one are the same method, and an
+//! unknown parameter is refused rather than ignored.
+//!
+//! Every method runs on the instance's [`CountedGroup`], so an addition
+//! costs the same in every row: rho's walk step, a BSGS giant step, a
+//! kangaroo jump and an index-calculus relation trial are all charged
+//! through `GroupOps`.  Native work the unit does not price is counted
+//! under a name ending `_uncharged` and listed in
+//! [`SolveReport::unpriced`]; a report with any unpriced work is a lower
+//! bound and says so.
+
+use std::collections::BTreeMap;
+use std::time::Instant;
+
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+
+use crate::cryptanalysis::ecbench::canonical::{sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::generic::{
+    bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
+};
+use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance};
+use crate::cryptanalysis::ic_boundary::{
+    rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
+    Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
+    PrimePoint, RhoResult, RhoWalk,
+};
+use crate::cryptanalysis::ic_framework::plugins::{
+    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
+    KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+};
+use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
+use crate::cryptanalysis::ic_framework::stages::{
+    DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
+};
+use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec, RunReport};
+use crate::cryptanalysis::koblitz_fast::FastPoint;
+
+/// A parameter a method reads.  `default: None` means required: a value
+/// that changes the search is never left to a producer default.
+#[derive(Clone, Copy, Debug)]
+pub struct ParamDecl {
+    pub name: &'static str,
+    pub default: Option<&'static str>,
+    pub help: &'static str,
+}
+
+/// Which curves a method runs on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Applies {
+    Any,
+    KoblitzOnly,
+}
+
+/// One registered method.
+#[derive(Clone, Copy, Debug)]
+pub struct MethodDecl {
+    pub id: &'static str,
+    /// `rho`, `bsgs`, `kangaroo` or `ic`.
+    pub family: &'static str,
+    pub summary: &'static str,
+    /// The code the method runs, for the record.
+    pub entry: &'static str,
+    pub applies: Applies,
+    pub params: &'static [ParamDecl],
+}
+
+const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
+    name: "cap_multiple",
+    default: Some("64"),
+    help: "step budget as a multiple of √r before the run counts as exhausted",
+}];
+
+/// Every method `ecbench` knows.  Adding one is an entry here and an arm
+/// in [`solve`]; nothing else changes.
+pub fn registry() -> &'static [MethodDecl] {
+    &[
+        MethodDecl {
+            id: "rho.frozen_reference",
+            family: "rho",
+            summary: "the frozen r-adding walk every ledger row was priced against through §17 (A = 1); the historical \"before\" mark",
+            entry: "ic_boundary::rho_reference",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.plain",
+            family: "rho",
+            summary: "tuned r-adding walk on points (A = 1), distinguished points, stride starts",
+            entry: "ic_boundary::rho_walk_with(PointClasses, RhoWalk::plain())",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.negation",
+            family: "rho",
+            summary: "tuned walk on {P, −P} (A = 2) with Wiener–Zuccherato look-ahead and cycle escape",
+            entry: "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius",
+            family: "rho",
+            summary: "tuned walk on signed Frobenius orbits {±φ^t P} (A = 2n), Koblitz curves only",
+            entry: "ic_boundary::signed_frobenius_rho_tuned",
+            applies: Applies::KoblitzOnly,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "bsgs.textbook",
+            family: "bsgs",
+            summary: "baby table of m = ⌈√r⌉ steps first, then giant steps; worst 2√r, mean 1.5√r",
+            entry: "ecbench::generic::bsgs_textbook",
+            applies: Applies::Any,
+            params: &[],
+        },
+        MethodDecl {
+            id: "bsgs.interleaved",
+            family: "bsgs",
+            summary: "Pollard's interleaved baby and giant steps, two tables; mean (4/3)√r",
+            entry: "ecbench::generic::bsgs_interleaved",
+            applies: Applies::Any,
+            params: &[],
+        },
+        MethodDecl {
+            id: "bsgs.negation",
+            family: "bsgs",
+            summary: "baby table keyed by {P, −P}, giant stride 2m + 1; mean about √r",
+            entry: "ecbench::generic::bsgs_negation",
+            applies: Applies::Any,
+            params: &[],
+        },
+        MethodDecl {
+            id: "kangaroo.vow",
+            family: "kangaroo",
+            summary: "van Oorschot–Wiener tame/wild kangaroo on [0, r), distinguished points; mean about 2√r",
+            entry: "ecbench::generic::kangaroo",
+            applies: Applies::Any,
+            params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "ic.pipeline",
+            family: "ic",
+            summary: "index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged",
+            entry: "ic_framework::run_pipeline",
+            applies: Applies::Any,
+            params: &[
+                ParamDecl {
+                    name: "factor_base",
+                    default: None,
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2",
+                },
+                ParamDecl {
+                    name: "oracle",
+                    default: None,
+                    help: "subtract, mitm, mitm-frobenius or descent-algebraic, with :m=2|3",
+                },
+                ParamDecl {
+                    name: "solver",
+                    default: Some(""),
+                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+                },
+                ParamDecl {
+                    name: "linalg",
+                    default: Some("incremental-gauss"),
+                    help: "incremental-gauss or structured-gauss",
+                },
+                ParamDecl {
+                    name: "targets",
+                    default: Some("walk"),
+                    help: "random ([a]G+[b]Q per trial) or walk (one addition per trial)",
+                },
+                ParamDecl {
+                    name: "max_trials",
+                    default: Some("100000000"),
+                    help: "relation trials before the run counts as exhausted",
+                },
+                ParamDecl {
+                    name: "solver_budget_seconds",
+                    default: Some("0"),
+                    help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
+                },
+            ],
+        },
+    ]
+}
+
+/// A method as a spec names it.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MethodSpec {
+    pub id: String,
+    #[serde(default)]
+    pub params: BTreeMap<String, String>,
+}
+
+/// A method with its defaults written out and its identity computed.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ResolvedMethod {
+    pub id: String,
+    pub family: String,
+    pub params: BTreeMap<String, String>,
+    /// `ECM1h` + 12 hex of `{id, params}`.  The configuration, not the
+    /// code: the binary's hash is recorded beside it.
+    pub method_id: String,
+    pub method_sha256: String,
+    pub entry: String,
+}
+
+pub fn decl(id: &str) -> Option<&'static MethodDecl> {
+    registry().iter().find(|m| m.id == id)
+}
+
+/// Fill defaults, refuse unknown and missing parameters, hash.
+pub fn resolve(spec: &MethodSpec) -> Result<ResolvedMethod, String> {
+    let d = decl(&spec.id).ok_or_else(|| {
+        let ids: Vec<&str> = registry().iter().map(|m| m.id).collect();
+        format!("unknown method `{}`; known: {}", spec.id, ids.join(", "))
+    })?;
+    for k in spec.params.keys() {
+        if !d.params.iter().any(|p| p.name == k) {
+            return Err(format!("method `{}` has no parameter `{k}`", d.id));
+        }
+    }
+    let mut params = BTreeMap::new();
+    for p in d.params {
+        match (spec.params.get(p.name), p.default) {
+            (Some(v), _) => {
+                params.insert(p.name.to_string(), v.clone());
+            }
+            (None, Some(def)) => {
+                params.insert(p.name.to_string(), def.to_string());
+            }
+            (None, None) => {
+                return Err(format!(
+                    "method `{}` needs `{}` ({}); it has no default because it changes the search",
+                    d.id, p.name, p.help
+                ))
+            }
+        }
+    }
+    let (method_id, method_sha256) = short_id(
+        "ECM1",
+        &json!({"schema": "ecbench.method/v1", "id": d.id, "params": params}),
+    )?;
+    Ok(ResolvedMethod {
+        id: d.id.into(),
+        family: d.family.into(),
+        params,
+        method_id,
+        method_sha256,
+        entry: d.entry.into(),
+    })
+}
+
+/// One phase of a solve, in the unit and natively.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct PhaseRecord {
+    pub name: String,
+    pub adds: u64,
+    pub doubles: u64,
+    pub scalar_mults: u64,
+    /// Group-addition equivalents charged to this phase.
+    pub gae: f64,
+    /// In-process wall time of the phase where the producer clocks it.
+    pub wall_ns: Option<u64>,
+    #[serde(default)]
+    pub native: BTreeMap<String, u64>,
+}
+
+/// The factor base an index-calculus run used, identified by its points.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct FactorBaseFacts {
+    /// `FB1h` + 12 hex of the curve, family, parameters and the sorted
+    /// point keys: two runs with the same id used the same points.
+    pub fb_id: String,
+    pub fb_sha256: String,
+    pub family: String,
+    pub params: BTreeMap<String, String>,
+    pub description: String,
+    pub signed_points: u64,
+    pub abscissae: u64,
+    pub columns: u64,
+    pub dimension: Option<u32>,
+    /// SHA-256 of the sorted group keys of every point.
+    pub points_sha256: String,
+}
+
+/// What a solve reports.  The runner adds verification and timing.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct SolveReport {
+    pub recovered: Option<u64>,
+    /// The budget ran out before an answer.
+    pub exhausted: bool,
+    pub phases: Vec<PhaseRecord>,
+    pub total_gae: f64,
+    /// Automorphism group order the method's walk or table uses.
+    pub automorphisms_used: u32,
+    /// Counters by name; shape descriptors and `*_uncharged` work.
+    pub counters: BTreeMap<String, u64>,
+    /// Work counted but not priced in the unit.  Nonempty makes the
+    /// total a lower bound.
+    pub unpriced: Vec<String>,
+    /// The same inputs give the same counts.  False when any price came
+    /// from host wall time or a solver ran under a wall-clock budget.
+    pub deterministic: bool,
+    pub nondeterminism: Vec<String>,
+    /// Wall time of the algorithm alone, inside the measured process.
+    pub solve_wall_ns: u64,
+    pub factor_base: Option<FactorBaseFacts>,
+    /// Method-specific detail kept whole (the IC report's structure).
+    pub detail: Value,
+}
+
+fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
+    PhaseRecord {
+        name: name.into(),
+        adds: ops.adds,
+        doubles: ops.doubles,
+        scalar_mults: ops.scalar_mults,
+        gae: ops.gae(),
+        wall_ns: None,
+        native: BTreeMap::new(),
+    }
+}
+
+fn unpriced_of(counters: &BTreeMap<String, u64>) -> Vec<String> {
+    counters
+        .iter()
+        .filter(|(k, v)| k.ends_with("_uncharged") && **v > 0)
+        .map(|(k, _)| k.clone())
+        .collect()
+}
+
+fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
+    m.params[name]
+        .parse()
+        .map_err(|_| format!("parameter `{name}` is not an integer: `{}`", m.params[name]))
+}
+
+fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
+    let total = out.setup.gae() + out.search.gae();
+    SolveReport {
+        recovered: out.recovered,
+        exhausted: out.exhausted,
+        phases: vec![
+            ops_phase("setup", out.setup),
+            ops_phase("search", out.search),
+        ],
+        total_gae: total,
+        automorphisms_used: a,
+        unpriced: unpriced_of(&out.counters),
+        counters: out.counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: wall,
+        factor_base: None,
+        detail: Value::Null,
+    }
+}
+
+/// Split a tuned rho run into set-up, walk and verification from its own
+/// counters; the frozen walk has none and stays one phase.
+fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
+    let c = &res.counters;
+    let get = |k: &str| c.get(k).copied().unwrap_or(0);
+    let phases = if c.is_empty() {
+        vec![ops_phase("search", res.group_ops)]
+    } else {
+        let setup = get("setup_additions") + get("setup_doublings");
+        let verify = get("verification_operations");
+        let total = res.group_ops.adds + res.group_ops.doubles;
+        let search = total.saturating_sub(setup + verify);
+        let mk = |name: &str, gae: u64| PhaseRecord {
+            name: name.into(),
+            gae: gae as f64,
+            ..Default::default()
+        };
+        let mut s = mk("setup", setup);
+        s.adds = get("setup_additions");
+        s.doubles = get("setup_doublings");
+        let mut w = mk("search", search);
+        w.scalar_mults = res.group_ops.scalar_mults;
+        vec![s, w, mk("internal_verification", verify)]
+    };
+    let mut counters = res.counters.clone();
+    counters.insert("steps".into(), res.steps);
+    counters.insert("walks".into(), res.walks);
+    counters.insert("distinguished_points".into(), res.distinguished_points);
+    SolveReport {
+        recovered: res.recovered,
+        exhausted: res.recovered.is_none(),
+        total_gae: res.gae,
+        automorphisms_used: res.automorphisms,
+        unpriced: unpriced_of(&counters),
+        counters,
+        phases,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: wall,
+        factor_base: None,
+        detail: json!({"method": res.method, "expected_steps": res.expected_steps}),
+    }
+}
+
+/// Run the generic and rho methods on any counted group.
+fn solve_generic<G: CountedGroup>(
+    m: &ResolvedMethod,
+    g: &G,
+    gen: G::Elt,
+    target: G::Elt,
+    r: u64,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let cap = || -> Result<u64, String> { Ok(rho_cap(r, param_u64(m, "cap_multiple")? as f64)) };
+    let t = Instant::now();
+    let rep = match m.id.as_str() {
+        "rho.frozen_reference" => {
+            let res = rho_reference(g, gen, target, r, seed, cap()?);
+            rho_report(res, t.elapsed().as_nanos() as u64)
+        }
+        "rho.plain" => {
+            let res = rho_walk_with(
+                g,
+                &PointClasses,
+                gen,
+                target,
+                r,
+                seed,
+                cap()?,
+                RhoWalk::plain(),
+            );
+            rho_report(res, t.elapsed().as_nanos() as u64)
+        }
+        "rho.negation" => {
+            let res = rho_walk_with(
+                g,
+                &NegationClasses { r },
+                gen,
+                target,
+                r,
+                seed,
+                cap()?,
+                RhoWalk::negation(),
+            );
+            rho_report(res, t.elapsed().as_nanos() as u64)
+        }
+        "bsgs.textbook" => {
+            let o = bsgs_textbook(g, gen, target, r);
+            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+        }
+        "bsgs.interleaved" => {
+            let o = bsgs_interleaved(g, gen, target, r);
+            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+        }
+        "bsgs.negation" => {
+            let o = bsgs_negation(g, gen, target, r);
+            generic_report(o, t.elapsed().as_nanos() as u64, 2)
+        }
+        "kangaroo.vow" => {
+            let o = kangaroo(g, gen, target, r, seed, cap()?);
+            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+        }
+        other => return Err(format!("`{other}` is not a generic method")),
+    };
+    Ok(rep)
+}
+
+fn parse_hex(s: &str) -> Result<u64, String> {
+    u64::from_str_radix(s.trim_start_matches("0x"), 16).map_err(|_| format!("bad hex `{s}`"))
+}
+
+/// Solve for `target` with method `m` on `inst`, under algorithm seed
+/// `seed`.  The planted logarithm is not an argument.
+pub fn solve(
+    m: &ResolvedMethod,
+    inst: &Instance,
+    curve: &CurveFacts,
+    target: &[String; 2],
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let d = decl(&m.id).ok_or("unregistered method")?;
+    if d.applies == Applies::KoblitzOnly && curve.family != "koblitz" {
+        return Err(format!(
+            "`{}` runs on Koblitz curves only; {} is {}",
+            m.id, curve.slug, curve.family
+        ));
+    }
+    let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
+    match (inst, d.family) {
+        (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
+        (Instance::Binary(i), "ic") => {
+            solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
+        (Instance::Binary(i), _) if m.id == "rho.signed_frobenius" => {
+            let t = Instant::now();
+            let res = signed_frobenius_rho_tuned(
+                i,
+                FastPoint::affine(tx, ty),
+                seed,
+                rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
+            )
+            .ok_or("not a Koblitz instance")?;
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64))
+        }
+        (Instance::Prime(i), _) => solve_generic(
+            m,
+            &i.curve,
+            i.generator_point(),
+            PrimePoint::affine(tx, ty),
+            i.r,
+            seed,
+        ),
+        (Instance::Binary(i), _) => {
+            let g = BinaryGroup(&i.fast);
+            solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
+        }
+    }
+}
+
+// ── Index calculus ─────────────────────────────────────────────────
+
+/// A calibration that prices only what the repository has pinned for
+/// this curve, and nothing from the host: `ns_per_add = 1`, and every
+/// unit without a pinned ratio left at zero (and reported unpriced).
+/// The total is then a function of the counts alone.
+fn pinned_only_calibration(regime: &str, slug: &str) -> Calibration {
+    let mut c = Calibration {
+        ns_per_add: 1.0,
+        ns_per_double: 1.0,
+        ..Default::default()
+    };
+    c.pin(regime, slug);
+    c
+}
+
+/// Native counters the calibration prices, with the unit field that
+/// prices each (`price_phase`'s table).
+const PRICED_NATIVE: &[(&str, &str)] = &[
+    ("sqrt_solves", "ns_per_sqrt"),
+    ("as_solves", "ns_per_as_solve"),
+    ("s4_pairs", "ns_per_s4_pair"),
+    ("lookups", "ns_per_lookup"),
+    ("row_ops", "ns_per_row_op"),
+    ("legendre_symbols", "ns_per_legendre"),
+    ("inversions", "ns_per_inversion"),
+    ("frobenius_maps", "ns_per_frobenius"),
+    ("canonicalisations", "ns_per_canon"),
+    ("target_guard_probes", "ns_per_lookup"),
+];
+
+fn phase_of(name: &str, p: &PhaseCost) -> PhaseRecord {
+    PhaseRecord {
+        name: name.into(),
+        adds: p.group_ops.adds,
+        doubles: p.group_ops.doubles,
+        scalar_mults: p.group_ops.scalar_mults,
+        gae: p.gae,
+        wall_ns: Some(p.wall_ns),
+        native: p.native.clone(),
+    }
+}
+
+fn ic_report(
+    m: &ResolvedMethod,
+    rep: RunReport,
+    calib: &Calibration,
+    fb: FactorBaseFacts,
+    wall: u64,
+    automorphisms: u32,
+) -> SolveReport {
+    let mut phases = vec![
+        phase_of("factor_base", &rep.factor_base.cost),
+        phase_of("oracle_setup", &rep.decomposition.setup),
+        phase_of("relations", &rep.decomposition.cost),
+        phase_of("linear_algebra", &rep.linear_algebra.cost),
+        phase_of("verify", &rep.verify),
+    ];
+    let mut unpriced = Vec::new();
+    let mut nondeterminism = Vec::new();
+    // Solver work: run_pipeline prices it from this host's wall time,
+    // which is not a count.  Take it back out and list it unpriced.
+    let mut total = rep.total_gae;
+    if let Some(s) = &rep.decomposition.solver {
+        if s.gae > 0.0 && s.priced_by != "pinned" {
+            phases[2].gae -= s.gae;
+            total -= s.gae;
+            unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
+        }
+        if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
+            nondeterminism.push("solver ran under a wall-clock budget".into());
+        }
+    }
+    // Native counters with no pinned ratio for this curve.
+    for (counter, unit) in PRICED_NATIVE {
+        let present = phases
+            .iter()
+            .any(|p| p.native.get(*counter).copied().unwrap_or(0) > 0);
+        if present && !calib.is_pinned(unit) {
+            let name = format!("{counter}_uncharged");
+            if !unpriced.contains(&name) {
+                unpriced.push(name);
+            }
+        }
+    }
+    let mut counters = BTreeMap::new();
+    counters.insert("targets_tried".into(), rep.decomposition.targets_tried);
+    counters.insert("relations_found".into(), rep.decomposition.relations_found);
+    counters.insert("matrix_rows".into(), rep.linear_algebra.rows);
+    counters.insert("matrix_rank".into(), rep.linear_algebra.rank);
+    counters.insert("matrix_dependent".into(), rep.linear_algebra.dependent);
+    counters.insert("matrix_work".into(), rep.linear_algebra.work);
+    let detail = json!({
+        "label": rep.label,
+        "decomposition": {
+            "name": rep.decomposition.name,
+            "summands": rep.decomposition.summands,
+            "hit_rate": format!("{:.6e}", rep.decomposition.hit_rate),
+            "system": rep.decomposition.system,
+            "solver": rep.decomposition.solver,
+        },
+        "linear_algebra": {"name": rep.linear_algebra.name, "work_unit": rep.linear_algebra.work_unit},
+        "calibration_pinned_units": calib.pinned_units,
+        "framework_total_gae_before_solver_removal": rep.total_gae,
+    });
+    SolveReport {
+        recovered: rep.recovered,
+        exhausted: rep.exhausted,
+        phases,
+        total_gae: total,
+        automorphisms_used: automorphisms,
+        counters,
+        unpriced,
+        deterministic: nondeterminism.is_empty(),
+        nondeterminism,
+        solve_wall_ns: wall,
+        factor_base: Some(fb),
+        detail,
+    }
+}
+
+fn factor_base_facts<E: Copy>(
+    slug: &str,
+    spec: &str,
+    params: &Params,
+    fb: &crate::cryptanalysis::ic_boundary::FactorBase<E>,
+    key: impl Fn(&E) -> u64,
+) -> Result<FactorBaseFacts, String> {
+    let mut keys: Vec<u64> = fb.points.iter().map(key).collect();
+    keys.sort_unstable();
+    let mut bytes = Vec::with_capacity(keys.len() * 8);
+    for k in &keys {
+        bytes.extend_from_slice(&k.to_be_bytes());
+    }
+    let points_sha256 = sha256_hex(&bytes);
+    let family = spec.split(':').next().unwrap_or(spec).to_string();
+    let (fb_id, fb_sha256) = short_id(
+        "FB1",
+        &json!({
+            "schema": "ecbench.factor_base/v1",
+            "curve": slug,
+            "family": family,
+            "params": params.0,
+            "columns": fb.columns,
+            "signed_points": fb.points.len(),
+            "points_sha256": points_sha256,
+        }),
+    )?;
+    Ok(FactorBaseFacts {
+        fb_id,
+        fb_sha256,
+        family,
+        params: params.0.clone(),
+        description: fb.description.clone(),
+        signed_points: fb.points.len() as u64,
+        abscissae: fb.abscissae as u64,
+        columns: fb.columns as u64,
+        dimension: fb.dimension,
+        points_sha256,
+    })
+}
+
+fn pipeline_spec(m: &ResolvedMethod, seed: u64) -> Result<(PipelineSpec, String, String), String> {
+    let (fb_name, fb_params) = Params::parse_spec(&m.params["factor_base"])?;
+    let (or_name, or_params) = Params::parse_spec(&m.params["oracle"])?;
+    let solver = m.params["solver"].clone();
+    let (solver_name, solver_params) = if solver.is_empty() {
+        (None, Params::default())
+    } else {
+        let (n, p) = Params::parse_spec(&solver)?;
+        (Some(n), p)
+    };
+    let spec = PipelineSpec {
+        factor_base: fb_name.clone(),
+        factor_base_params: fb_params,
+        oracle: or_name.clone(),
+        oracle_params: or_params,
+        solver: solver_name,
+        solver_params,
+        targets: Targets::parse(&m.params["targets"])?,
+        linalg: m.params["linalg"].clone(),
+        max_trials: param_u64(m, "max_trials")?,
+        seed,
+        solver_budget_seconds: param_u64(m, "solver_budget_seconds")?,
+    };
+    Ok((spec, fb_name, or_name))
+}
+
+fn solve_ic_prime(
+    m: &ResolvedMethod,
+    inst: &PrimeInstance,
+    curve: &CurveFacts,
+    target: PrimePoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
+    let abscissa = PrimeAbscissaBase { instance: inst };
+    let orbit = GlvOrbitBase { instance: inst };
+    let base: &dyn FactorBaseBuilder<_> = match fb_name.as_str() {
+        "prime-abscissa" => &abscissa,
+        "glv-orbit" => &orbit,
+        other => {
+            return Err(format!(
+                "factor base `{other}` does not run on a prime curve"
+            ))
+        }
+    };
+    let ms = spec.oracle_params.u64_or("m", 2)? as u32;
+    let mut subtract = SubtractOracle;
+    let mut mitm = MitmOracle::new(ms);
+    let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
+        "subtract" => &mut subtract,
+        "mitm" => &mut mitm,
+        other => return Err(format!("oracle `{other}` does not run on a prime curve")),
+    };
+    let ctx = InstanceCtx {
+        group: &inst.curve,
+        generator: inst.generator_point(),
+        target,
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: None,
+    };
+    let calib = pinned_only_calibration("prime", &curve.slug);
+    let t = Instant::now();
+    // The runner, not the pipeline, checks the answer: pass a planted
+    // value that cannot match so `verified` carries no information.
+    let rep = run_pipeline(&ctx, &spec, base, oracle, u64::MAX, &calib, None)?;
+    let wall = t.elapsed().as_nanos() as u64;
+    let mut scratch = GroupOps::default();
+    let fb = base.build(&ctx, &spec.factor_base_params, &mut scratch)?;
+    let facts = factor_base_facts(
+        &curve.slug,
+        &m.params["factor_base"],
+        &spec.factor_base_params,
+        &fb,
+        |p| inst.curve.key(p),
+    )?;
+    Ok(ic_report(m, rep, &calib, facts, wall, 2))
+}
+
+fn solve_ic_binary(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    curve: &CurveFacts,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let (spec, fb_name, or_name) = pipeline_spec(m, seed)?;
+    let g = BinaryGroup(&inst.fast);
+    let subspace = BinarySubspaceBase { instance: inst };
+    let orbit = KoblitzOrbitBase { instance: inst };
+    let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
+        "binary-subspace" => &subspace,
+        "koblitz-orbit" => &orbit,
+        other => {
+            return Err(format!(
+                "factor base `{other}` does not run on a binary curve"
+            ))
+        }
+    };
+    let ms = spec.oracle_params.u64_or("m", 2)? as u32;
+    let mut subtract = SubtractOracle;
+    let mut mitm = MitmOracle::new(ms);
+    let mut frob = FrobeniusMitmOracle::new(ms, inst);
+    let mut algebraic = match or_name.as_str() {
+        "descent-algebraic" => {
+            let name = spec
+                .solver
+                .as_deref()
+                .ok_or("descent-algebraic needs `solver`")?;
+            let budget = (spec.solver_budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+            Some(DescentAlgebraicOracle::new(
+                ms,
+                inst,
+                solver_by_name(name)?,
+                spec.solver_params.clone(),
+                budget,
+            ))
+        }
+        _ => None,
+    };
+    let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name.as_str() {
+        "subtract" => &mut subtract,
+        "mitm" => &mut mitm,
+        "mitm-frobenius" => &mut frob,
+        "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        other => return Err(format!("oracle `{other}` does not run on a binary curve")),
+    };
+    let ctx = InstanceCtx {
+        group: &g,
+        generator: inst.generator,
+        target,
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: Some(inst.n),
+    };
+    let regime = if inst.koblitz.is_some() {
+        "koblitz"
+    } else {
+        "char2"
+    };
+    let calib = pinned_only_calibration(regime, &curve.slug);
+    let t = Instant::now();
+    let rep = run_pipeline(&ctx, &spec, base, oracle, u64::MAX, &calib, None)?;
+    let wall = t.elapsed().as_nanos() as u64;
+    let mut scratch = GroupOps::default();
+    let fb = base.build(&ctx, &spec.factor_base_params, &mut scratch)?;
+    let facts = factor_base_facts(
+        &curve.slug,
+        &m.params["factor_base"],
+        &spec.factor_base_params,
+        &fb,
+        |p| g.key(p),
+    )?;
+    let a = if inst.koblitz.is_some() {
+        2 * inst.n
+    } else {
+        2
+    };
+    Ok(ic_report(m, rep, &calib, facts, wall, a))
+}
+
+// ── Factor-base dumps ──────────────────────────────────────────────
+
+pub const FB_DUMP_SCHEMA: &str = "ecbench.factor_base_dump/v1";
+
+/// One point of a dumped factor base.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FbPoint {
+    pub x: String,
+    pub y: String,
+    /// The relation-matrix column the point contributes to.
+    pub col: u64,
+    /// Its coefficient in that column (mod r).
+    pub coef: u64,
+}
+
+/// A factor base with its points: what `ecbench fb` writes and the
+/// database's `factor_base_points` table holds.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct FactorBaseDump {
+    pub schema: String,
+    pub curve: CurveFacts,
+    pub factor_base: FactorBaseFacts,
+    /// Group operations the builder charged.
+    pub build_adds: u64,
+    pub build_doubles: u64,
+    pub points: Vec<FbPoint>,
+}
+
+fn dump_points<E: Copy>(
+    fb: &crate::cryptanalysis::ic_boundary::FactorBase<E>,
+    xy: impl Fn(&E) -> (u64, u64),
+) -> Vec<FbPoint> {
+    fb.points
+        .iter()
+        .enumerate()
+        .map(|(i, p)| {
+            let (x, y) = xy(p);
+            FbPoint {
+                x: format!("0x{x:x}"),
+                y: format!("0x{y:x}"),
+                col: fb.col_of.get(i).copied().unwrap_or(0) as u64,
+                coef: fb.coef_of.get(i).copied().unwrap_or(0),
+            }
+        })
+        .collect()
+}
+
+/// Build the factor base `fb_spec` (a plug-in spec such as
+/// `koblitz-orbit:divisor=1`) on `curve` and return it whole.  The id is
+/// the one an `ic.pipeline` run with the same `factor_base` reports.
+pub fn dump_factor_base(
+    curve: &crate::cryptanalysis::ecbench::workload::CurveSpec,
+    fb_spec: &str,
+) -> Result<FactorBaseDump, String> {
+    let inst = curve.build()?;
+    let facts = inst.facts(curve);
+    let (name, params) = Params::parse_spec(fb_spec)?;
+    match &inst {
+        Instance::Prime(i) => {
+            let abscissa = PrimeAbscissaBase { instance: i };
+            let orbit = GlvOrbitBase { instance: i };
+            let base: &dyn FactorBaseBuilder<_> = match name.as_str() {
+                "prime-abscissa" => &abscissa,
+                "glv-orbit" => &orbit,
+                other => {
+                    return Err(format!(
+                        "factor base `{other}` does not run on a prime curve"
+                    ))
+                }
+            };
+            let ctx = InstanceCtx {
+                group: &i.curve,
+                generator: i.generator_point(),
+                target: i.generator_point(),
+                r: i.r,
+                cofactor: i.cofactor,
+                group_order: i.group_order,
+                name: facts.slug.clone(),
+                field_degree: None,
+            };
+            let mut ops = GroupOps::default();
+            let fb = base.build(&ctx, &params, &mut ops)?;
+            let fbf = factor_base_facts(&facts.slug, fb_spec, &params, &fb, |p| i.curve.key(p))?;
+            let total = {
+                let mut t = fb.cost.group_ops;
+                t.merge(ops);
+                t
+            };
+            Ok(FactorBaseDump {
+                schema: FB_DUMP_SCHEMA.into(),
+                points: dump_points(&fb, |p| (p.x, p.y)),
+                curve: facts,
+                factor_base: fbf,
+                build_adds: total.adds,
+                build_doubles: total.doubles,
+            })
+        }
+        Instance::Binary(i) => {
+            let g = BinaryGroup(&i.fast);
+            let subspace = BinarySubspaceBase { instance: i };
+            let orbit = KoblitzOrbitBase { instance: i };
+            let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
+                "binary-subspace" => &subspace,
+                "koblitz-orbit" => &orbit,
+                other => {
+                    return Err(format!(
+                        "factor base `{other}` does not run on a binary curve"
+                    ))
+                }
+            };
+            let ctx = InstanceCtx {
+                group: &g,
+                generator: i.generator,
+                target: i.generator,
+                r: i.r,
+                cofactor: i.cofactor,
+                group_order: i.group_order,
+                name: facts.slug.clone(),
+                field_degree: Some(i.n),
+            };
+            let mut ops = GroupOps::default();
+            let fb = base.build(&ctx, &params, &mut ops)?;
+            let fbf = factor_base_facts(&facts.slug, fb_spec, &params, &fb, |p| g.key(p))?;
+            let total = {
+                let mut t = fb.cost.group_ops;
+                t.merge(ops);
+                t
+            };
+            Ok(FactorBaseDump {
+                schema: FB_DUMP_SCHEMA.into(),
+                points: dump_points(&fb, |p| (p.x, p.y)),
+                curve: facts,
+                factor_base: fbf,
+                build_adds: total.adds,
+                build_doubles: total.doubles,
+            })
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn defaults_are_written_before_hashing() {
+        let a = resolve(&MethodSpec {
+            id: "rho.negation".into(),
+            params: BTreeMap::new(),
+        })
+        .unwrap();
+        let mut p = BTreeMap::new();
+        p.insert("cap_multiple".to_string(), "64".to_string());
+        let b = resolve(&MethodSpec {
+            id: "rho.negation".into(),
+            params: p,
+        })
+        .unwrap();
+        assert_eq!(a.method_id, b.method_id);
+        assert!(a.method_id.starts_with("ECM1h"));
+    }
+
+    #[test]
+    fn unknown_and_missing_parameters_are_refused() {
+        let mut p = BTreeMap::new();
+        p.insert("jumps".to_string(), "8".to_string());
+        assert!(resolve(&MethodSpec {
+            id: "bsgs.textbook".into(),
+            params: p
+        })
+        .is_err());
+        assert!(resolve(&MethodSpec {
+            id: "ic.pipeline".into(),
+            params: BTreeMap::new()
+        })
+        .is_err());
+        assert!(resolve(&MethodSpec {
+            id: "rho.nope".into(),
+            params: BTreeMap::new()
+        })
+        .is_err());
+    }
+}
