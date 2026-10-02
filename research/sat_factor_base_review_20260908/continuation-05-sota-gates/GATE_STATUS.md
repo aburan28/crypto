@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 188, 2026-10-02.
+Current through Stage 189, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -78,6 +78,20 @@ Complete cost remains `null` because the explicitly recorded native-meter
 bootstrap work was not outer-metered. Final native verification passes 31/31
 with result SHA-256
 `8c3e1d1fc09f341434f71e28ff25b29119b4a0b9854d05f4568992d8a5bbdeb3`.
+No SOTA gate changes.
+
+Stage 189 keeps the twelve-way outer fixed-X1 batch but serializes product,
+symbolic, packing, table-build and row-reduction sections inside each F4 call.
+The exact current/outer-only screen has ratios 1.003837 wall, 0.953393 total
+core and 0.946659 RSS. All algebraic and structural counters agree, but the
+candidate misses the pre-registered below-1.00 wall gate; confirmation is
+therefore prohibited, and the scheduling knob is reverted. Stage 189 adds a
+measured lower bound of 11 components, 283.337375 wall-seconds and 1,258.115755
+core-seconds. The cumulative lower bound becomes 540 components,
+22,990.944527 wall-seconds and 56,916.084439 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 19/19 with result SHA-256
+`9b5e957686d9af59a8fad3bfaf0f0a58715876ab15019a9cd7476fbc31d05967`.
 No SOTA gate changes.
 
 The historical optimization chain is
