@@ -39,6 +39,13 @@ g++ -O2 -std=c++17 -Wall -Wextra -Werror \
 The same source also passed a C++17 UBSAN self-test build with
 `-fsanitize=undefined -fno-sanitize-recover=undefined`.
 
+The first current-main CI replay compiled all three CUDA widths and passed the
+native models before Ubuntu GCC rejected a self-test loop that bound a
+`std::string` reference to a temporary conversion.  Commit `6569f927` copies
+those two test strings by value.  The repair changes no audit rule or measured
+source, and the full raw audit reproduced the same output SHA afterward.
+`results/audit-gcc-portability-repair.json` preserves the failed job and fix.
+
 Audit result: **PASS / DO_NOT_PROMOTE**.  The audit independently checked the
 exact 27-file source inventory, 11 binary hashes, 178 in-job artifact hashes,
 34 sample-log hashes, all 66 runtime logs (32 correctness and 34 timing), 32
