@@ -141,6 +141,58 @@ pub fn echelon_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u6
     eliminate(matrix, n_cols, false, Config::from_env(), word_ops)
 }
 
+/// Echelonise only the leading `pivot_cols` while applying every row operation
+/// to `total_cols` of packed data. This lets a caller retain a sidecar row
+/// transform without allowing its columns to become pivots. The ordinary
+/// `echelon_counted` path remains byte-for-byte unchanged.
+pub fn echelon_prefix_counted(
+    matrix: &mut [Vec<u64>],
+    pivot_cols: usize,
+    total_cols: usize,
+    word_ops: &mut u64,
+) -> usize {
+    assert!(pivot_cols <= total_cols);
+    eliminate_with(
+        matrix,
+        pivot_cols,
+        false,
+        false,
+        Config::from_env(),
+        word_ops,
+        None,
+        false,
+        Some(total_cols.div_ceil(64)),
+        None,
+    )
+}
+
+/// Continue an already prefix-echelonised matrix at a complete word boundary.
+/// The caller must have obtained `pivot_row` by applying the same route to
+/// the first `start_word * 64` columns, with every operation applied to the
+/// full packed row width. This exact continuation is used only after that
+/// prefix and is checked against a fresh full echelon in tests.
+pub fn echelon_resume_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    start_word: usize,
+    pivot_row: usize,
+    word_ops: &mut u64,
+) -> usize {
+    assert!(start_word * 64 <= n_cols && pivot_row <= matrix.len());
+    eliminate_with(
+        matrix,
+        n_cols,
+        false,
+        false,
+        Config::from_env(),
+        word_ops,
+        None,
+        false,
+        None,
+        Some((pivot_row, start_word)),
+    )
+}
+
 /// The elimination with explicit settings.
 pub fn eliminate(
     matrix: &mut [Vec<u64>],
@@ -166,6 +218,8 @@ pub fn eliminate(
         word_ops,
         None,
         reuse_table,
+        None,
+        None,
     )
 }
 
@@ -178,6 +232,8 @@ fn eliminate_with(
     word_ops: &mut u64,
     reverse_tile_words: Option<usize>,
     reuse_table: bool,
+    full_words_override: Option<usize>,
+    start: Option<(usize, usize)>,
 ) -> usize {
     static BRANCHLESS_STRIP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let branchless_strip = *BRANCHLESS_STRIP.get_or_init(|| {
@@ -199,8 +255,9 @@ fn eliminate_with(
     #[cfg(target_arch = "x86_64")]
     let avx2_strip = branchless_strip && std::arch::is_x86_feature_detected!("avx2");
     let rows = matrix.len();
-    let words = n_cols.div_ceil(64);
-    if rows == 0 || words == 0 {
+    let pivot_words = n_cols.div_ceil(64);
+    let words = full_words_override.unwrap_or(pivot_words);
+    if rows == 0 || pivot_words == 0 {
         return 0;
     }
     debug_assert!(matrix.iter().all(|r| r.len() >= words));
@@ -214,11 +271,10 @@ fn eliminate_with(
     let mut table: Vec<u64> = Vec::new();
     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
 
-    let mut pivot_row = 0usize;
-    let mut word = 0usize;
+    let (mut pivot_row, mut word) = start.unwrap_or((0, 0));
     // Columns of the current word below `low` are already decided.
     let mut low = 0u32;
-    while pivot_row < rows && word < words {
+    while pivot_row < rows && word < pivot_words {
         let block_start = pivot_row;
         pivot_cols.clear();
         // The strip: each unpivoted row's current word, in reduced form
@@ -226,7 +282,7 @@ fn eliminate_with(
         for (s, row) in strip[block_start..].iter_mut().zip(&matrix[block_start..]) {
             *s = row[word];
         }
-        let last_col_in_word = if word + 1 == words && !n_cols.is_multiple_of(64) {
+        let last_col_in_word = if word + 1 == pivot_words && !n_cols.is_multiple_of(64) {
             (n_cols % 64) as u32
         } else {
             64
@@ -886,6 +942,8 @@ mod tests {
                             &mut old_ops,
                             None,
                             false,
+                            None,
+                            None,
                         );
                         let new_rank = eliminate_with(
                             &mut new,
@@ -896,6 +954,8 @@ mod tests {
                             &mut new_ops,
                             None,
                             true,
+                            None,
+                            None,
                         );
                         assert_eq!(new_rank, old_rank);
                         assert_eq!(new, old);
@@ -937,6 +997,8 @@ mod tests {
                             &mut ops,
                             Some(2),
                             false,
+                            None,
+                            None,
                         );
                         assert_eq!(
                             r, rank,
@@ -993,6 +1055,8 @@ mod tests {
                             &mut ops,
                             Some(3),
                             false,
+                            None,
+                            None,
                         ),
                         rank
                     );
@@ -1052,6 +1116,8 @@ mod tests {
                     &mut ops,
                     width,
                     false,
+                    None,
+                    None,
                 ),
                 rank
             );
@@ -1059,5 +1125,102 @@ mod tests {
             counts.push(ops);
         }
         assert!(counts.iter().all(|&ops| ops == counts[0]));
+    }
+
+    #[test]
+    fn prefix_echelon_carries_exact_sidecar_transform_across_word_boundary() {
+        let high_cols = 70;
+        let total_cols = high_cols + 6;
+        let high = [
+            (1u128 << 0) | (1u128 << 65),
+            (1u128 << 1) | (1u128 << 66),
+            (1u128 << 2) | (1u128 << 67),
+            (1u128 << 3) | (1u128 << 68),
+            (1u128 << 0) | (1u128 << 1) | (1u128 << 65) | (1u128 << 66),
+            0,
+        ];
+        let original = high
+            .iter()
+            .enumerate()
+            .map(|(index, &mask)| {
+                let full = mask | (1u128 << (high_cols + index));
+                vec![full as u64, (full >> 64) as u64]
+            })
+            .collect::<Vec<_>>();
+        let mut augmented = original.clone();
+        let mut count = 0;
+        let rank = echelon_prefix_counted(&mut augmented, high_cols, total_cols, &mut count);
+        assert_eq!(rank, 4);
+        let mut high_only = original
+            .iter()
+            .map(|row| {
+                let mut high = row.clone();
+                high[1] &= (1u64 << (high_cols - 64)) - 1;
+                high
+            })
+            .collect::<Vec<_>>();
+        let mut high_ops = 0;
+        assert_eq!(
+            echelon_counted(&mut high_only, high_cols, &mut high_ops),
+            rank
+        );
+        for (index, row) in augmented.iter().enumerate() {
+            let mut rebuilt = [0u64; 2];
+            for source in 0..original.len() {
+                let coefficient = high_cols + source;
+                if row[coefficient / 64] >> (coefficient % 64) & 1 != 0 {
+                    rebuilt[0] ^= original[source][0];
+                    rebuilt[1] ^= original[source][1] & ((1u64 << (high_cols - 64)) - 1);
+                }
+            }
+            assert_eq!(rebuilt[0], row[0]);
+            assert_eq!(rebuilt[1], row[1] & ((1u64 << (high_cols - 64)) - 1));
+            assert_eq!(row[0], high_only[index][0]);
+            assert_eq!(
+                row[1] & ((1u64 << (high_cols - 64)) - 1),
+                high_only[index][1]
+            );
+        }
+        assert!(count > 0);
+    }
+
+    #[test]
+    fn word_aligned_prefix_then_resume_matches_fresh_echelon() {
+        let mut rng = StdRng::seed_from_u64(20261002);
+        for rows in [8, 37, 128] {
+            for cols in [129, 193] {
+                for density in [0.03, 0.25, 0.75] {
+                    let input = random_matrix(&mut rng, rows, cols, density);
+                    let mut expected = input.clone();
+                    let mut baseline_ops = 0;
+                    let rank = echelon_counted(&mut expected, cols, &mut baseline_ops);
+                    for start_word in 1..cols.div_ceil(64) {
+                        let mut candidate = input.clone();
+                        let mut prefix_ops = 0;
+                        let prefix_rank = echelon_prefix_counted(
+                            &mut candidate,
+                            start_word * 64,
+                            cols,
+                            &mut prefix_ops,
+                        );
+                        let resumed_rank = echelon_resume_counted(
+                            &mut candidate,
+                            cols,
+                            start_word,
+                            prefix_rank,
+                            &mut prefix_ops,
+                        );
+                        assert_eq!(
+                            resumed_rank, rank,
+                            "rows={rows} cols={cols} density={density}"
+                        );
+                        assert_eq!(
+                            candidate, expected,
+                            "rows={rows} cols={cols} density={density}"
+                        );
+                    }
+                }
+            }
+        }
     }
 }
