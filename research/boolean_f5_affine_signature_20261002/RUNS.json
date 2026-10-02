@@ -16,8 +16,24 @@
     "gate_pass": true,
     "native_replay": "PASS"
   },
-  "holdout": null,
-  "decision": "advance_to_fresh_holdout",
+  "holdout": {
+    "path": "qualified_holdout_01",
+    "source_head": "b9f4d839160ac385a17a1571bcfd735fd61444ce",
+    "worker_source_sha256": "977c5d14b9991a567f61a5cab87f8dabe52dbb39b32fb804151447046a20d35a",
+    "verifier_sha256": "b6fb54267d9c1ab4ddca0cedb42fefd54f4b164230d795d23f2daefe81039713",
+    "protocol_sha256": "73a954c813732a58bb3a2ddc8f9b2d8f2c041fc4e4656c8c493fb96d8312af64",
+    "manifest_sha256": "71064b2ee7d48b2dc2dcda7fcbdb98469a6b8a4335688f1430f0a79167dc324f",
+    "raw_sha256": "5c0dbe5ca003dbf9e3bf662fa19d48f11b59bcbaa0e7688a69c7def23c6a8790",
+    "result_sha256": "10332a302f03fb70398ca1fe5effa5d04fbf709ec5629757086fa23fc0e9308a",
+    "binding_sha256": "0f4ec4c7e70a314b1439e369f9ee542e298ba5a888a2e3b13b14b7d59ad05701",
+    "cells": 72,
+    "systems": 1008,
+    "primary_passed": 18,
+    "primary_required": 18,
+    "gate_pass": true,
+    "native_replay": "PASS"
+  },
+  "decision": "structural_gate_passed_full_f5_timing_unmeasured",
   "complete_f5_cost": null,
   "full_ic_cost": null,
   "rho_ratio": null
