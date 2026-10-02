@@ -338,6 +338,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
             &globalResolverBlocksPerSm, eccPacked131::resolveGlobalHints,
             ECC_TABLE_GLOBAL_HINT_THREADS, dynamicSharedBytes()));
+        if (globalResolverBlocksPerSm < 1) {
+            fprintf(stderr, "GPU-wide resolver geometry cannot resident one block per SM\n");
+            exit(2);
+        }
 #endif
 #endif
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));
