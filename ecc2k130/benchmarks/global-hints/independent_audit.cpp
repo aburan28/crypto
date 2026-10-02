@@ -321,7 +321,7 @@ void checkRuntimeLog(const fs::path &path, const std::string &arm, int workers,
     const int block = candidate ? 0 : 1;
     requireExactLine(lines, "packed table GPU-wide hints: " + std::to_string(global), path.string());
     requireExactLine(lines, "packed table block hints: " + std::to_string(block) + ", queue 512", path.string());
-    for (const std::string &line : {
+    for (const std::string line : {
              "packed table split forward: 1", "packed table batch hints: 1",
              "packed cycle fast2: 1", "packed witness: 0", "packed square table: 1",
              "packed polynomial inversion: 2", "packed table pivot bytes: 1, table shared bytes 57052",

@@ -66,12 +66,22 @@ run. The scientific manifest verifies 79 immutable files; a post-run manifest
 also binds the manifest itself and the wrapper's final job.log and exit-code
 (82 files). All 24 recorded source hashes match the measured checkout.
 
-The frozen `results/launch.json` is the explicit-fetch receipt used by the
-independent audit. The original collector later received the same completed
+The frozen `results/launch.json` records the earlier explicit volume fetch.
+The original collector later received the same completed
 archive and wrote a supplementary `collector-completion-receipt.json` with a
 different completion timestamp. Both identify the same function call, token,
-clean source and exit code; the earlier audited receipt remains unchanged.
+clean source and exit code. The independent audit binds the later collector
+receipt; the root rerun also passes using the earlier fetch receipt. Their
+scientific audit fields are identical; both immutable receipts are retained.
 
 The later source-manifest glob correction only prevents future attempts from
 trying to hash the newly added results directory. It changes no measured
 source, binary, sample or decision input. The default mode remains off.
+
+The added Linux checker compilation exposed a GCC range-loop-construction
+warning promoted to an error. Making that local string construction explicit
+repairs portability without changing any audit predicate. The repaired checker
+again passes the full sealed-archive audit; all scientific fields match the
+frozen audit. The original source/audit hashes remain evidence, and the additive
+`results/gcc-portability-repair.json` binds the repaired source and failed CI
+job. This repair requires no additional GPU measurement.
