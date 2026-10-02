@@ -194,9 +194,9 @@ fn compose(stage: &Path, out: &Path, source_commit: &str, finalizer_commit: &str
     };
     let measured_stage_charge = measured_charge(&stage.join("development"))?;
     let cumulative_measured_lower_bound = Charge {
-        components: 564 + measured_stage_charge.components,
-        wall_seconds_sum: 23_476.882_993_374 + measured_stage_charge.wall_seconds_sum,
-        total_core_seconds_sum: 59_943.278_38 + measured_stage_charge.total_core_seconds_sum,
+        components: 572 + measured_stage_charge.components,
+        wall_seconds_sum: 23_714.619_161_833 + measured_stage_charge.wall_seconds_sum,
+        total_core_seconds_sum: 60_598.525_724 + measured_stage_charge.total_core_seconds_sum,
         peak_rss_bytes_max: 6_310_576_128u64.max(measured_stage_charge.peak_rss_bytes_max),
     };
     let mut artifacts = BTreeMap::new();
@@ -347,9 +347,9 @@ fn verify(path: &Path) -> AnyResult<Verification> {
         "stage charge replay",
     );
     let cumulative = Charge {
-        components: 564 + charge.components,
-        wall_seconds_sum: 23_476.882_993_374 + charge.wall_seconds_sum,
-        total_core_seconds_sum: 59_943.278_38 + charge.total_core_seconds_sum,
+        components: 572 + charge.components,
+        wall_seconds_sum: 23_714.619_161_833 + charge.wall_seconds_sum,
+        total_core_seconds_sum: 60_598.525_724 + charge.total_core_seconds_sum,
         peak_rss_bytes_max: 6_310_576_128u64.max(charge.peak_rss_bytes_max),
     };
     check(
