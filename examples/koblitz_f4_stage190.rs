@@ -145,6 +145,9 @@ struct FinalResult {
     claim_boundary: String,
     conflicts: Option<u64>,
     screen: Assessment,
+    confirmation: Assessment,
+    default_replay_verified: bool,
+    default_replay_process: ProcessMetrics,
     measured_stage_charge: Charge,
     cumulative_measured_lower_bound: Charge,
     complete_campaign_cost: Option<Charge>,
@@ -732,10 +735,22 @@ fn finalize_stage(
         .canonicalize()
         .map_err(|e| format!("{}: {e}", stage.display()))?;
     let screen_path = stage.join("development/screen/result.json");
+    let confirmation_path = stage.join("development/confirmation/result.json");
+    let default_path = stage.join("development/default-replay/result.json");
     let screen: PhaseResult = read_json(&screen_path)?;
-    let replay = verify_result(&screen_path)?;
-    if !replay.failed.is_empty() || screen.assessment.status != "REJECTED_SCREEN" {
-        return Err("screen is not a verified rejection".into());
+    let confirmation: PhaseResult = read_json(&confirmation_path)?;
+    let default_replay: DefaultReplay = read_json(&default_path)?;
+    let screen_replay = verify_result(&screen_path)?;
+    let confirmation_replay = verify_result(&confirmation_path)?;
+    let default_verification = verify_default_replay(&default_path, &confirmation_path)?;
+    if !screen_replay.failed.is_empty()
+        || !confirmation_replay.failed.is_empty()
+        || !default_verification.failed.is_empty()
+        || screen.assessment.status != "CONTINUE_TO_CONFIRMATION"
+        || confirmation.assessment.status != "SELECTED_FOR_DEFAULT_REPLAY"
+        || !default_replay.correct
+    {
+        return Err("selected screen, confirmation or default replay is not verified".into());
     }
     let measured_stage_charge = measured_charge(&stage.join("development"))?;
     let cumulative_measured_lower_bound = Charge {
@@ -748,11 +763,24 @@ fn finalize_stage(
     };
     let artifact_paths = [
         ("protocol", "PROTOCOL.md"),
-        ("rejected_patch", "rejected-build-serial-schedule.patch"),
+        ("selected_patch", "selected-build-serial-schedule.patch"),
         ("screen_result", "development/screen/result.json"),
         (
             "screen_verification",
             "development/screen/verification.json",
+        ),
+        (
+            "confirmation_result",
+            "development/confirmation/result.json",
+        ),
+        (
+            "confirmation_verification",
+            "development/confirmation/verification.json",
+        ),
+        ("default_result", "development/default-replay/result.json"),
+        (
+            "default_verification",
+            "development/default-replay/verification.json",
         ),
     ];
     let mut artifacts = BTreeMap::new();
@@ -766,12 +794,15 @@ fn finalize_stage(
         schema: FINAL_SCHEMA.into(),
         candidate_commit: candidate_commit.into(),
         finalizer_commit: finalizer_commit.into(),
-        decision_status: "REJECTED_SCREEN".into(),
-        candidate_selected: false,
-        runtime_default: "adaptive inner product, symbolic, packing and elimination sections within each F4 call plus the parallel fixed-X1 outer batch".into(),
+        decision_status: "SELECTED_FOR_REPOSITORY_DEFAULT".into(),
+        candidate_selected: true,
+        runtime_default: "serial inner monomial-product, symbolic-preprocessing and row-packing sections; parallel inner BlockTables elimination; parallel fixed-X1 outer batch".into(),
         claim_boundary: "One opened n=59 decomposition target and a solver-scheduling experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.".into(),
         conflicts: None,
         screen: screen.assessment,
+        confirmation: confirmation.assessment,
+        default_replay_verified: true,
+        default_replay_process: default_replay.receipt.process,
         measured_stage_charge,
         cumulative_measured_lower_bound,
         complete_campaign_cost: None,
@@ -802,15 +833,18 @@ fn verify_final(path: &Path) -> AnyResult<Verification> {
     check(
         &mut checks,
         &mut failures,
-        result.decision_status == "REJECTED_SCREEN" && !result.candidate_selected,
-        "rejected decision",
+        result.decision_status == "SELECTED_FOR_REPOSITORY_DEFAULT" && result.candidate_selected,
+        "selected decision",
     );
     check(
         &mut checks,
         &mut failures,
-        result.screen.status == "REJECTED_SCREEN"
+        result.screen.status == "CONTINUE_TO_CONFIRMATION"
             && result.screen.all_correct
-            && !result.screen.passed_performance_gate,
+            && result.screen.passed_performance_gate
+            && result.confirmation.status == "SELECTED_FOR_DEFAULT_REPLAY"
+            && result.confirmation.all_correct
+            && result.confirmation.passed_performance_gate,
         "screen projection",
     );
     check(
@@ -860,8 +894,13 @@ fn verify_final(path: &Path) -> AnyResult<Verification> {
         }
     }
     let screen_path = stage.join("development/screen/result.json");
+    let confirmation_path = stage.join("development/confirmation/result.json");
+    let default_path = stage.join("development/default-replay/result.json");
     let screen: PhaseResult = read_json(&screen_path)?;
+    let confirmation: PhaseResult = read_json(&confirmation_path)?;
     let screen_replay = verify_result(&screen_path)?;
+    let confirmation_replay = verify_result(&confirmation_path)?;
+    let default_replay = verify_default_replay(&default_path, &confirmation_path)?;
     check(
         &mut checks,
         &mut failures,
@@ -874,24 +913,42 @@ fn verify_final(path: &Path) -> AnyResult<Verification> {
         assessments_match(&screen.assessment, &result.screen),
         "screen assessment",
     );
-    let patch = result
-        .artifacts
-        .get("rejected_patch")
-        .ok_or_else(|| "rejected patch missing".to_string())?;
     check(
         &mut checks,
         &mut failures,
-        patch.sha256 == "2fc375782fa8e6305c218d41aa5b942c38879df85b36359ad2ef240f55b63666",
-        "rejected patch identity",
+        confirmation_replay.failed.is_empty()
+            && assessments_match(&confirmation.assessment, &result.confirmation),
+        "confirmation replay",
+    );
+    let default: DefaultReplay = read_json(&default_path)?;
+    check(
+        &mut checks,
+        &mut failures,
+        default_replay.failed.is_empty()
+            && result.default_replay_verified
+            && default.correct
+            && default.receipt.process == result.default_replay_process,
+        "default replay",
+    );
+    let patch = result
+        .artifacts
+        .get("selected_patch")
+        .ok_or_else(|| "selected patch missing".to_string())?;
+    check(
+        &mut checks,
+        &mut failures,
+        patch.sha256 == "cf856d6f2609adc29c013a640260811cb6d4f01a41579afe0ae663048b512137",
+        "selected patch identity",
     );
     let source = fs::read_to_string("src/cryptanalysis/pq_f4_f2.rs")
         .map_err(|e| format!("current F4 source: {e}"))?;
     check(
         &mut checks,
         &mut failures,
-        !source.contains("F4_F2_DISABLE_INNER_BUILD_PARALLEL")
-            && !source.contains("inner_build_parallel_disabled_calls"),
-        "runtime candidate reverted",
+        source.contains("F4_F2_DISABLE_INNER_BUILD_PARALLEL")
+            && source.contains("inner_build_parallel_disabled_calls")
+            && source.contains("== Ok(\"0\")"),
+        "selected runtime default",
     );
     Ok(Verification {
         schema: FINAL_VERIFICATION_SCHEMA.into(),
