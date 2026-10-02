@@ -16,8 +16,12 @@
 //! - `icprog run <round> <step>`: a round's declared timed steps on the
 //!   native runner (`harness/bench.py`, ported), through `isolated_bench`.
 //!   It resumes a run tree where it stopped and never overwrites.
+//! - `icprog table <round> <analysis.json>`: the README's tables, rendered
+//!   from the analysis only.
 #[path = "icprog/bench.rs"]
 mod bench;
+#[path = "icprog/report.rs"]
+mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
 #[path = "icprog/json.rs"]
 #[allow(dead_code)]
@@ -64,6 +68,28 @@ enum Command {
         /// The run tree (default: the round's `runs/`).
         #[arg(long)]
         runs: Option<PathBuf>,
+    },
+    /// A round's README tables, rendered from its analysis only (Markdown).
+    Table {
+        round: Round,
+        /// The round's `analysis.json`.
+        analysis: PathBuf,
+    },
+    /// An accepted round's baseline entry, appended to `baselines.json`.
+    Baseline {
+        /// The round's `analysis.json`.
+        analysis: PathBuf,
+        /// The run tree whose `host.json` (and `host-resumed.json`) it names.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The entry's identity: baseline, round, class, commit, built_from,
+        /// base, src_tree, binary_sha256, source, what_changed, measured,
+        /// and `previous`, the baseline whose sizes carry the EC1 identities.
+        #[arg(long)]
+        meta: PathBuf,
+        /// The ledger to append to.
+        #[arg(long)]
+        ledger: PathBuf,
     },
     /// One of a round's declared timed steps, natively; R05 for now.
     Run {
@@ -155,6 +181,42 @@ fn run(
     })
 }
 
+/// Append an accepted round's entry to the ledger; none is ever edited.
+fn baseline(
+    analysis: &std::path::Path,
+    runs: &std::path::Path,
+    meta: &std::path::Path,
+    ledger: &std::path::Path,
+) -> Result<String, String> {
+    let meta = json::read(meta)?;
+    let mut doc = json::read(ledger)?;
+    let name = meta.at("baseline")?.clone();
+    let host_resumed = json::read_opt(&runs.join("host-resumed.json"))?;
+    let entry = report::baseline_entry(
+        &json::read(analysis)?,
+        &doc,
+        &json::read(&runs.join("host.json"))?,
+        host_resumed.as_ref(),
+        &meta,
+    )?;
+    let Some(json::J::Arr(list)) = (match &mut doc {
+        json::J::Obj(kv) => kv
+            .iter_mut()
+            .find(|(k, _)| k == "baselines")
+            .map(|(_, v)| v),
+        _ => None,
+    }) else {
+        return Err("the ledger has no `baselines` list".into());
+    };
+    if list.iter().any(|b| b.get("baseline") == Some(&name)) {
+        return Err(format!("the ledger already has {}", json::dumps(&name, 0)));
+    }
+    list.push(entry);
+    std::fs::write(ledger, json::dumps_utf8(&doc, 1) + "\n")
+        .map_err(|e| format!("{}: {e}", ledger.display()))?;
+    Ok(String::new())
+}
+
 fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String, String> {
     let ctx = context(round, &root, runs)?;
     let doc = match round {
@@ -168,6 +230,16 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
         Command::Analyse { round, root, runs } => analyse(round, root, runs),
+        Command::Baseline {
+            analysis,
+            runs,
+            meta,
+            ledger,
+        } => baseline(&analysis, &runs, &meta, &ledger),
+        Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
+            Round::R05 => report::r05(&doc),
+            Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
+        }),
         Command::Run {
             round,
             step,

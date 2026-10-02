@@ -502,6 +502,25 @@ pub mod r05 {
             bound_reasons(&holdouts, &slug, "holdouts", ACCEPT_LO, &mut reasons);
         }
         aa_reasons(&suite_j, &mut reasons);
+        let extension = extension_record(c)?;
+        let recorded = json::read_opt(&c.runs.join("extended.json"))?;
+        if let Some(rec) = &recorded {
+            let listed = |e: &J| -> bool {
+                let (set, slug) = (e.get("set"), e.get("slug"));
+                rec.get(set.and_then(J::as_str).unwrap_or(""))
+                    .and_then(J::as_arr)
+                    .is_some_and(|v| v.iter().any(|s| Some(s) == slug))
+            };
+            let tests = extension.as_arr().unwrap_or(&[]);
+            let agree = tests
+                .iter()
+                .all(|e| listed(e) == (e.get("extended") == Some(&J::Bool(true))));
+            if !agree {
+                reasons.push(J::Str(
+                    "the extension record differs from the rule's test".into(),
+                ));
+            }
+        }
         let decision = obj([
             ("accepted", J::Bool(reasons.is_empty())),
             ("reasons", J::Arr(reasons)),
@@ -530,7 +549,8 @@ pub mod r05 {
                 ]),
             ),
             ("pin", pin_summary(&pin)?),
-            ("extended", opt(json::read_opt(&c.runs.join("extended.json"))?)),
+            ("extended", opt(recorded)),
+            ("extension_test", extension),
             ("suite", suite_j),
             ("holdouts", holdouts),
             ("decision", decision),
@@ -567,6 +587,50 @@ pub mod r05 {
         ])
     }
 
+    /// The extension rule's test, set by set at each target size: the
+    /// cold interval over the first five rounds and its half-width.  The
+    /// test reads the interval's width only.
+    fn extension_tests(c: &Ctx) -> Result<Vec<(&'static str, String, stats::GeoCi)>, String> {
+        let mut out = Vec::new();
+        for (name, d, rows) in sets(c)? {
+            for (a, n) in TARGETS {
+                let rs: Vec<Row> = rows
+                    .iter()
+                    .filter(|r| (r.a, r.n) == (a, n))
+                    .cloned()
+                    .collect();
+                let ci = stats::geo_ci(&cold_ratios(&d, &rs, ROUNDS)?, LEVEL);
+                out.push((name, suite::curve_slug(a, n)?, ci));
+            }
+        }
+        Ok(out)
+    }
+
+    fn half_width(ci: &stats::GeoCi) -> Option<f64> {
+        Some(ci.hi? / ci.geomean? - 1.0)
+    }
+
+    /// What the extension rule read, for the analysis: rounds 1–5 only,
+    /// whatever ran after.
+    fn extension_record(c: &Ctx) -> Result<J, String> {
+        let mut out = Vec::new();
+        for (set, slug, ci) in extension_tests(c)? {
+            let mut kv = vec![
+                ("set".to_string(), J::Str(set.into())),
+                ("slug".to_string(), J::Str(slug)),
+                ("rounds".to_string(), J::Int(ROUNDS as i128)),
+            ];
+            kv.extend(ci.fields());
+            kv.push(("half_width".into(), opt_f64(half_width(&ci))));
+            kv.push((
+                "extended".into(),
+                J::Bool(half_width(&ci).is_some_and(|h| h > HALF_WIDTH_LIMIT)),
+            ));
+            out.push(J::Obj(kv));
+        }
+        Ok(J::Arr(out))
+    }
+
     /// Rounds 6–10 for a set whose half-width at a target size exceeds 3%
     /// after five rounds.  The test reads the interval's width only.
     pub fn extend(c: &Ctx, b: &Bench, arms: &[Arm]) -> Result<J, String> {
@@ -576,22 +640,12 @@ pub mod r05 {
             json::read(&record)?
         } else {
             let mut kv: Vec<(String, J)> = Vec::new();
-            for (name, d, rows) in &sets {
-                for (a, n) in TARGETS {
-                    let rs: Vec<Row> = rows
-                        .iter()
-                        .filter(|r| (r.a, r.n) == (a, n))
-                        .cloned()
-                        .collect();
-                    let ci = stats::geo_ci(&cold_ratios(d, &rs, ROUNDS)?, LEVEL);
-                    if let (Some(hi), Some(g)) = (ci.hi, ci.geomean) {
-                        if hi / g - 1.0 > HALF_WIDTH_LIMIT {
-                            let slug = J::Str(suite::curve_slug(a, n)?);
-                            match kv.iter_mut().find(|(k, _)| k == name) {
-                                Some((_, J::Arr(v))) => v.push(slug),
-                                _ => kv.push((name.to_string(), J::Arr(vec![slug]))),
-                            }
-                        }
+            for (name, slug, ci) in extension_tests(c)? {
+                if half_width(&ci).is_some_and(|h| h > HALF_WIDTH_LIMIT) {
+                    let slug = J::Str(slug);
+                    match kv.iter_mut().find(|(k, _)| k == name) {
+                        Some((_, J::Arr(v))) => v.push(slug),
+                        _ => kv.push((name.to_string(), J::Arr(vec![slug]))),
                     }
                 }
             }

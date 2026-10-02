@@ -214,7 +214,7 @@ A Track B round may change no speed at all. It must then show:
 ## 7. The baseline ledger
 
 Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01),
-and R03 v1 (2026-10-01). A baseline's `S` comes from the round that made
+R03 v1 and R05 v2 (both 2026-10-01). A baseline's `S` comes from the round that made
 it, beside its base's `S` in the same runs: runs hours apart on this host
 differ by several per cent, so only a paired ratio compares across
 rounds.
@@ -223,6 +223,7 @@ rounds.
 |:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 | v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, #1166 |
+| v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, R05_PR |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
@@ -331,20 +332,43 @@ when a division changes what is left, and skips even divisors after 2
   to the floor is flat. The construction's median is now 2.2 ms or less
   at every suite size.
 
-**R05 tests a sharper presence filter, before R02b (declared
-2026-10-01).** Three bits a key in one 64-bit word, at eight to sixteen
-bits a stored pair, keep the probe at one word read. At the three
-largest sizes they cut the predicted false-positive rate from 0.17–0.21
-to 0.019–0.031 ([protocol](../../ic_tool_program/rounds/R05-presence-filter/PROTOCOL.md)).
+**R05 made v2 (2026-10-01).** The presence filter now sets three bits a
+key in one 64-bit word, at eight to sixteen bits a stored pair, so a
+probe still reads one word. At the three largest sizes that cuts the
+predicted false-positive rate from 0.17–0.21 to 0.019–0.031
+([protocol](../../ic_tool_program/rounds/R05-presence-filter/PROTOCOL.md),
+[results](../../ic_tool_program/rounds/R05-presence-filter/README.md)).
+- **At the three target sizes collection runs 1.356–1.522 times
+  faster.** Cold time is 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and
+  1.303 [1.281, 1.324] times faster at `2^44.3`, `2^44.5` and `2^47.2`.
+  The fresh holdouts read 1.276, 1.240 and 1.319. Every pinned output is
+  v0's.
+- **`S` falls** from 8.74, 10.12 and 16.74 to 6.72, 8.13 and 12.77 there,
+  each arm in R05's own runs. A scanned summand falls from 1.80–2.56
+  units to 1.18–1.88.
+- **Elsewhere cold time reads 0.933–1.139,** every interval overlapping
+  its A/A band. At the two smallest sizes it reads
+  0.939 and 0.933, but collection did not move there, and rho's online
+  interval, which the patch does not change, reads 0.936 and 0.948 in
+  the same pairs.
+- **The model held from `2^27.8` up,** within 5% in collection. At the
+  three smallest sizes it priced a rejected false positive at the mean
+  admitted key's cost; true hits are common there (R04), so it promised a
+  collection gain that did not come. Collection is 6–11% of cold time at
+  those sizes.
+- **The class is engineering:** nothing the pipeline decides changes, so
+  the ratio to the floor is flat.
 - **An exploration came first, and is disclosed.** On Track B's stack,
   the prototype ran 1.27× and 1.37× faster in cold time at `2^44.3` and
-  `2^47.2`, with identical outputs
+  `2^47.2`
   ([record](../../ic_tool_program/explorations/R05-filter-20261001/README.md)).
   It is not a round's measurement.
-- **The order changes.** R05 runs after R03's decision and before R02b
-  (R02b's amendment 1). Both are on the scan, after R02's rejection
-  there, so under §11 a failed R05 sets the scan aside, and R02b does
-  not run.
+- **The container was rebuilt during the holdouts.** The rest ran on the
+  native runner (§10a). One pair straddles the rebuild; without it, its
+  set's figure is the same to three decimals.
+- **The order.** R05 ran after R03's decision and before R02b (R02b's
+  amendment 1). R02b now runs on v2, and the scan is not set aside
+  (§11).
 
 ## 9. Track B: generality and robustness
 
