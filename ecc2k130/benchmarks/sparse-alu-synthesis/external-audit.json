@@ -1,0 +1,41 @@
+{
+  "schema": "ecc2k130-sparse-alu-synthesis-external-audit-v1",
+  "auditStatus": "PASS",
+  "scope": "Independent read-only audit of the native checker, matrix formulation, circuit counts, B16 accounting and claim boundary. No GPU was launched.",
+  "integrity": {
+    "manifestVerified": true,
+    "freshStrictBuildReproducedResultByteForByte": true,
+    "resultSha256": "8b480ebd46144cb73ac69cee2812c49e368761e2590eb76a9b380a920abfae60"
+  },
+  "recomputedDiagonalTerms": {
+    "sparseToNormal": 754,
+    "L3": 489,
+    "sparseToBeta": 751,
+    "betaToSparse": 755
+  },
+  "recomputedOracle": {
+    "formula": "754 + 2*489 + (751+755)/16",
+    "mapOpsPerUpdate": 1826.125,
+    "target26AluBudget": 1124.529230769231,
+    "oracleOverTargetBudget": 1.623905285827,
+    "necessaryConditionPass": false
+  },
+  "recomputedComparableB16": {
+    "oracleMaps": 1826.125,
+    "sparseReducers": 476.625,
+    "aluSquareSpread": 75.0,
+    "candidateTotal": 2377.75,
+    "referenceTotal": 2276.25,
+    "candidateOverReference": 1.044590884130,
+    "comparisonPass": false
+  },
+  "reviewFindings": {
+    "matrixAndDiagonalFormulationCorrect": true,
+    "ranksAnd59CompositionIdentitiesChecked": true,
+    "selectorModelNeededForDecision": false,
+    "greedyCseCorrectlyLabelledCandidateHeuristic": true,
+    "universalGf2LowerBoundClaimed": false,
+    "gpuCandidateJustified": false
+  },
+  "conclusion": "No count or accounting blocker found. The free-shift, free-selection, cheapest-map oracle already exceeds the entire 26 B/s ALU budget, and its complete comparable source ledger is worse than the beta reference. The negative conclusion is valid for the enumerated circuit families."
+}
