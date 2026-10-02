@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 189, 2026-10-02.
+Current through Stage 190, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -93,6 +93,21 @@ core-seconds. The cumulative lower bound becomes 540 components,
 verification passes 19/19 with result SHA-256
 `9b5e957686d9af59a8fad3bfaf0f0a58715876ab15019a9cd7476fbc31d05967`.
 No SOTA gate changes.
+
+Stage 190 retains inner parallel `BlockTables` construction and row reduction
+but serializes monomial products, symbolic preprocessing and row packing inside
+each of the 242 concurrently scheduled F4 calls. Three fixed confirmation pairs
+select the candidate at median ratios 0.913292 wall, 0.926973 total core and
+1.026266 RSS. Unset now selects build-serial; `F4_F2_DISABLE_INNER_BUILD_PARALLEL=0`
+retains the prior nested-build control. An exact selected-commit unset replay
+passes without a scheduling override and reproduces every structural counter.
+Stage 190 adds a measured lower bound of 24 components, 485.938466 wall-seconds
+and 3,027.193941 core-seconds. The cumulative lower bound becomes 564
+components, 23,476.882993 wall-seconds and 59,943.278380 core-seconds at the
+unchanged 6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final
+native verification passes 29/29 with result SHA-256
+`ea84b500f977acd66b5a36b4632620c357cc2b301a5c9987be39a096b0d24384`.
+This is one-target engineering; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
