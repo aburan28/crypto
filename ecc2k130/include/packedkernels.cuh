@@ -121,6 +121,25 @@ namespace eccPacked131 {
 #if ECC_TABLE_FUSED_PIPE && !ECC_TABLE_FUSED
 #error "ECC_TABLE_FUSED_PIPE requires ECC_TABLE_FUSED"
 #endif
+// ECC_SIGMA_FUSED=1 applies the same reverse/next-forward fusion to the
+// sigma^j+1 walk.  The launch begins with one ordinary forward pass.  Each
+// reverse pass then computes the next points and, except on the final step,
+// immediately builds the next step's denominator, numerator and prefix chain
+// from those register values.  Slot order alternates so Montgomery inversion
+// still consumes each chain in reverse.  The walk and completed-launch state
+// are bit-identical; one x/y load pass per update is removed.
+#ifndef ECC_SIGMA_FUSED
+#define ECC_SIGMA_FUSED 0
+#endif
+#if ECC_SIGMA_FUSED != 0 && ECC_SIGMA_FUSED != 1
+#error "ECC_SIGMA_FUSED must be 0 or 1"
+#endif
+#if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
+                        !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
+                        ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
+                        ECC_PACKED_SLOT_PIPELINE || ECC_PACKED_SLOT_PREFETCH)
+#error "ECC_SIGMA_FUSED requires the one-chain polynomial sigma walk in weighted-prefix mode 2"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -314,6 +333,9 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_PACKED_CHAINS == 2 && (ECC_BATCH % 2 != 0 || ECC_BATCH < 4)
 #error "ECC_PACKED_CHAINS=2 needs an even ECC_BATCH of at least 4"
 #endif
+#if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
+#error "ECC_SIGMA_FUSED requires one Montgomery chain"
+#endif
 
 #if ECC_WALK_TABLE
 #if ECC_CYCLE_PROFILE
@@ -475,7 +497,131 @@ __device__ __forceinline__ void tableAddendFromHist(const WalkParams<unsigned> &
 #endif
 #endif
 
-#if ECC_TABLE_FUSED
+#if ECC_SIGMA_FUSED
+// Forward work for one polynomial-state sigma slot.  `xp` and `yp` are either
+// freshly loaded launch inputs or the reverse pass's register outputs.  The
+// latter is the fusion: selection and prefix construction do not reload the
+// point that was just stored.
+__device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
+                                                 const P131 &xp, const P131 &yp,
+                                                 size_t id, int slot, int tid,
+                                                 unsigned long long now, bool guard,
+                                                 bool first, unsigned *denominators,
+                                                 P131 *prod) {
+    const P131 x = fromPolynomial131(xp);
+    const P131 normalY = fromPolynomial131(yp);
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(normalY, rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    const int j = 3 + ((hw >> 1) & 7);
+#if ECC_WITNESS
+    if (!p.dead[id])
+        p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
+#endif
+#if ECC_PACKED_SHARED_SIGMA
+    const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
+#else
+    const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
+#endif
+    const P131 dp = toPolynomial131(add131(x, sigmas.first));
+    const P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+    if (!first) {
+        const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
+        store(p.pchain, slot, tid, p.threads, pair.first);
+        *prod = pair.second;
+    } else {
+        *prod = dp;
+        store(p.pchain, slot, tid, p.threads, ep);
+    }
+    P131 tagged = dp;
+    tagged.v[4] |= unsigned(j - 3) << 3;
+    store(denominators, slot, tid, p.threads, tagged);
+}
+
+static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
+    const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_PACKED_SHARED_SIGMA
+    initSigmaWalkShared131();
+#endif
+    if (tid >= p.threads) return;
+    P131 prod;
+    {
+        // Launch prologue: ordinary forward pass in slot order 0..B-1.
+        const unsigned long long now = p.iterBase;
+        const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot) {
+            const size_t id = size_t(slot) * p.threads + tid;
+            sigmaFusedSelect(p, load(p.x, slot, tid, p.threads),
+                             load(p.y, slot, tid, p.threads), id, slot, tid,
+                             now, guard, slot == 0, denominators, &prod);
+        }
+    }
+#pragma unroll 1
+    for (int step = 0; step < p.steps; ++step) {
+        const bool forward = (step & 1) != 0;
+        const bool last = step + 1 == p.steps;
+        const unsigned long long now = p.iterBase + step + 1;
+        const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+        P131 inv = invPolynomial131(prod), next;
+#if ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
+#pragma unroll 1
+#endif
+        for (int i = 0; i < ECC_BATCH; ++i) {
+            const int slot = forward ? i : ECC_BATCH - 1 - i;
+            const size_t id = size_t(slot) * p.threads + tid;
+            const P131 x = load(p.x, slot, tid, p.threads);
+            const P131 y = load(p.y, slot, tid, p.threads);
+            P131 dp = load(denominators, slot, tid, p.threads);
+            dp.v[4] &= 7;
+            const P131 w = load(p.pchain, slot, tid, p.threads);
+            P131 lambdaPoly;
+            if (i + 1 < ECC_BATCH) {
+                const PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
+                lambdaPoly = pair.first;
+                inv = pair.second;
+            } else {
+                lambdaPoly = mulPolynomial131(inv, w);
+            }
+            const P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+            const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
+            const P131 ny = add131(add131(product, nx), y);
+            store(p.x, slot, tid, p.threads, nx);
+            store(p.y, slot, tid, p.threads, ny);
+            if (!last)
+                sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
+                                 denominators, &next);
+        }
+        if (!last) prod = next;
+    }
+}
+#elif ECC_TABLE_FUSED
 // The forward-pass work for one point of one slot: the normal-basis weight and
 // distinguished-point test, the table-walk selection with its history update,
 // the addend, and this slot's contribution to the running prefix chain.
