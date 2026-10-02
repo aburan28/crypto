@@ -1049,6 +1049,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; construct rational systems in deterministic batches of {x1_batch_size} with ordered parallel collection={parallel_construction}; solve each batch in parallel; inspect completed results in schedule order"),
             "solver_parallel_construction":parallel_construction,
             "solver_parallel_construction_control":"PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+            "solver_inner_build_parallel_policy":if std::env::var("F4_F2_DISABLE_INNER_BUILD_PARALLEL").as_deref() == Ok("1") { "serial monomial-product, symbolic-preprocessing and row-packing sections inside each F4 call; inner BlockTables construction and row reduction remain parallel; independent fixed-X1 calls remain in the outer Rayon batch" } else { "adaptive Rayon build and elimination sections inside each F4 call plus parallel independent fixed-X1 calls" },
+            "solver_inner_build_parallel_control":"F4_F2_DISABLE_INNER_BUILD_PARALLEL=1",
             "solver_x1_order":x1_order,
             "solver_x1_order_target_independent":true,
             "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
