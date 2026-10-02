@@ -1203,6 +1203,16 @@ impl SymmetrisedS4 {
     pub fn terms(&self) -> &HashMap<[u8; 4], E3> {
         &self.terms
     }
+
+    /// A symmetrised polynomial built elsewhere — the same `S₄` in
+    /// another coordinate, say — handed to the solver as it is.  The
+    /// terms must have total degree ≤ 4 in `(e₁, e₂, e₃)`.
+    pub fn from_terms(terms: HashMap<[u8; 4], E3>) -> SymmetrisedS4 {
+        SymmetrisedS4 {
+            terms,
+            plan: std::sync::OnceLock::new(),
+        }
+    }
     /// Once per curve.  Reduces the lex-leading term of the symmetric
     /// polynomial by the matching product of elementary symmetric
     /// polynomials until nothing is left.
