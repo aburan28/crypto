@@ -89,6 +89,42 @@ impl J {
     }
 }
 
+/// A number, as Python compares numbers: `True == 1 == 1.0`.
+fn number(v: &J) -> Option<f64> {
+    match v {
+        J::Bool(b) => Some(f64::from(u8::from(*b))),
+        J::Int(i) => Some(*i as f64),
+        J::Float(f) => Some(*f),
+        _ => None,
+    }
+}
+
+/// Python's `==` on parsed JSON: objects as unordered maps, numbers by
+/// value whatever their type.
+pub fn py_eq(a: &J, b: &J) -> bool {
+    match (a, b) {
+        (J::Int(x), J::Int(y)) => x == y,
+        (J::Int(i), J::Float(f)) | (J::Float(f), J::Int(i)) => {
+            f.is_finite() && f.fract() == 0.0 && (*f as i128) == *i && (*i as f64) == *f
+        }
+        (J::Null, J::Null) => true,
+        (J::Str(x), J::Str(y)) => x == y,
+        (J::Arr(x), J::Arr(y)) => x.len() == y.len() && x.iter().zip(y).all(|(p, q)| py_eq(p, q)),
+        (J::Obj(x), J::Obj(y)) => {
+            x.len() == y.len()
+                && x.iter().all(|(k, v)| {
+                    y.iter()
+                        .find(|(k2, _)| k2 == k)
+                        .is_some_and(|(_, w)| py_eq(v, w))
+                })
+        }
+        _ => match (number(a), number(b)) {
+            (Some(x), Some(y)) => x == y,
+            _ => false,
+        },
+    }
+}
+
 /// An object built in order: `obj([("a", J::Int(1)), ...])`.
 pub fn obj<const N: usize>(kv: [(&str, J); N]) -> J {
     J::Obj(kv.into_iter().map(|(k, v)| (k.to_string(), v)).collect())

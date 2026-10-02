@@ -459,6 +459,7 @@ mod tests {
             recipe_seed: Some(201),
             params: Some(PathBuf::from("/p/M1-T01.json")),
             rho_seed: Some(2293761),
+            suite_id: None,
         };
         let cmd = price_cmd(Path::new("/b/ic"), &row, Path::new("/o/r1.price.json"), &[]).unwrap();
         assert_eq!(

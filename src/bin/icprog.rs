@@ -11,21 +11,30 @@
 //! changes the code it measures.
 //!
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
-//!   tree only.  `r05` is the native analysis of R05; `r03` reproduces
-//!   R03's frozen `analysis.json` from its frozen runs.
-//! - `icprog run <round> <step>`: a round's declared timed steps on the
-//!   native runner (`harness/bench.py`, ported), through `isolated_bench`.
-//!   It resumes a run tree where it stopped and never overwrites.
+//!   tree only.  `r05` and `r02b` are native; `r03` reproduces R03's
+//!   frozen `analysis.json` from its frozen runs.
+//! - `icprog run <round> <step>`: a round's declared steps on the native
+//!   runner (`harness/bench.py`, ported), through `isolated_bench`: its
+//!   manifest, pin, A/A, timed rows and callgrind profiles.  It resumes a
+//!   run tree where it stopped and never overwrites.
 //! - `icprog table <round> <analysis.json>`: the README's tables, rendered
 //!   from the analysis only.
+//! - `icprog baseline`: an accepted round's ledger entry, appended.
+//! - `icprog callgrind-phases` and `icprog callgrind-control`: a callgrind
+//!   profile split by phase (`harness/callgrind_phases.py`, ported), and
+//!   R02b's control over a run tree's profiles.
 #[path = "icprog/bench.rs"]
 mod bench;
+#[path = "icprog/callgrind.rs"]
+mod callgrind;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
 #[path = "icprog/json.rs"]
 #[allow(dead_code)]
 mod json;
+#[path = "icprog/pin.rs"]
+mod pin;
 #[path = "icprog/rounds.rs"]
 mod rounds;
 #[path = "icprog/runs.rs"]
@@ -51,8 +60,9 @@ struct Cli {
     command: Command,
 }
 
-#[derive(Clone, Copy, ValueEnum)]
+#[derive(Clone, Copy, PartialEq, ValueEnum)]
 enum Round {
+    R02b,
     R03,
     R05,
 }
@@ -91,10 +101,28 @@ enum Command {
         #[arg(long)]
         ledger: PathBuf,
     },
-    /// One of a round's declared timed steps, natively; R05 for now.
+    /// A callgrind profile split by measurement phase, as JSON (the retired
+    /// `harness/callgrind_phases.py`).
+    CallgrindPhases {
+        /// The directory holding the profile and its parts.
+        dir: PathBuf,
+        /// The `--callgrind-out-file` basename, without a part suffix.
+        stem: String,
+        /// How many functions to list, by exclusive instructions.
+        #[arg(long, default_value_t = 30)]
+        top: usize,
+    },
+    /// R02b's callgrind control from a run tree's `callgrind/`, as JSON.
+    CallgrindControl {
+        /// The directory holding the arms' `*.phases.json` and `*.workflow.json`.
+        dir: PathBuf,
+    },
+    /// One of a round's declared steps, natively (R05, R02b).
     Run {
         round: Round,
-        /// plan, manifest-resumed, compare, holdout or extend.
+        /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
+        /// R02b: plan, manifest, pin, aa, compare, holdout, extend,
+        /// callgrind or manifest-resumed.
         step: String,
         /// The repository checkout (default: the current directory).
         #[arg(long, default_value = ".")]
@@ -111,7 +139,25 @@ enum Command {
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
+        /// The commit the base arm was built from, for a fresh manifest.
+        #[arg(long)]
+        base_commit: Option<String>,
+        /// The commit the candidate was built from, for a fresh manifest.
+        #[arg(long)]
+        cand_commit: Option<String>,
     },
+}
+
+/// The programme's directory and the round's.
+fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf), String> {
+    let programme = suite::programme(root)?;
+    let dir = match round {
+        Round::R02b => "R02b-wide-tail-retest",
+        Round::R03 => "R03-curve-construction",
+        Round::R05 => "R05-presence-filter",
+    };
+    let round_dir = programme.join("rounds").join(dir);
+    Ok((programme, round_dir))
 }
 
 fn context(
@@ -119,12 +165,7 @@ fn context(
     root: &std::path::Path,
     runs: Option<PathBuf>,
 ) -> Result<rounds::Ctx, String> {
-    let programme = suite::programme(root)?;
-    let dir = match round {
-        Round::R03 => "R03-curve-construction",
-        Round::R05 => "R05-presence-filter",
-    };
-    let round_dir = programme.join("rounds").join(dir);
+    let (programme, round_dir) = round_dir(round, root)?;
     let runs = runs.unwrap_or_else(|| round_dir.join("runs"));
     if !runs.is_dir() {
         return Err(format!("{} is not a run tree", runs.display()));
@@ -136,15 +177,31 @@ fn context(
     })
 }
 
-fn run(
-    round: Round,
-    step: &str,
+struct RunArgs {
     root: PathBuf,
     runs: Option<PathBuf>,
     arms: [PathBuf; 2],
     isolate: Option<PathBuf>,
-) -> Result<String, String> {
-    let ctx = context(round, &root, runs)?;
+    commits: [Option<String>; 2],
+}
+
+fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
+    let RunArgs {
+        root,
+        runs,
+        arms,
+        isolate,
+        commits,
+    } = args;
+    // A fresh round's first step makes its run tree; R03's is frozen.
+    let runs = match runs {
+        Some(r) => r,
+        None => round_dir(round, &root)?.1.join("runs"),
+    };
+    if round != Round::R03 {
+        std::fs::create_dir_all(&runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    }
+    let ctx = context(round, &root, Some(runs))?;
     let isolate = match isolate {
         Some(p) => p,
         None => std::env::current_exe()
@@ -172,6 +229,7 @@ fn run(
     ];
     let b = bench::Bench { isolate };
     let doc = match round {
+        Round::R02b => rounds::r02b::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R05 => rounds::r05::run(&ctx, step, &b, &arms, &root)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
@@ -220,6 +278,7 @@ fn baseline(
 fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String, String> {
     let ctx = context(round, &root, runs)?;
     let doc = match round {
+        Round::R02b => rounds::r02b::analyse(&ctx)?,
         Round::R03 => rounds::r03::analyse(&ctx)?,
         Round::R05 => rounds::r05::analyse(&ctx)?,
     };
@@ -236,8 +295,14 @@ fn main() -> ExitCode {
             meta,
             ledger,
         } => baseline(&analysis, &runs, &meta, &ledger),
+        Command::CallgrindPhases { dir, stem, top } => {
+            callgrind::phases(&dir, &stem, top).map(|doc| json::dumps(&doc, 1))
+        }
+        Command::CallgrindControl { dir } => {
+            callgrind::control(&dir).map(|doc| json::dumps(&doc, 1))
+        }
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 => report::r05(&doc),
+            Round::R05 | Round::R02b => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Run {
@@ -248,7 +313,19 @@ fn main() -> ExitCode {
             base,
             cand,
             isolate,
-        } => run(round, &step, root, runs, [base, cand], isolate),
+            base_commit,
+            cand_commit,
+        } => run(
+            round,
+            &step,
+            RunArgs {
+                root,
+                runs,
+                arms: [base, cand],
+                isolate,
+                commits: [base_commit, cand_commit],
+            },
+        ),
     };
     match result {
         Ok(text) if text.is_empty() => ExitCode::SUCCESS,

@@ -553,8 +553,8 @@ from R03's `runs.tar.xz`, byte for byte.
 |:--|:--|:--|:--|
 | statistics, run-tree access, round analysis | `harness/stats.py`, the rounds' `analyse.py` | R05's results | N1: R03 reproduced byte for byte |
 | isolation | `tools/isolated_bench.py` | every timed run from N1 on | N1: modes, refusals, the widened mask and the record's keys checked against the Python tool |
-| the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped; the pin and the manifest for a fresh round come with R02b's steps (N2) |
-| the callgrind phase split | `harness/callgrind_phases.py` | R02b's control | N2 |
+| the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped. N2: `icprog run r02b` adds a fresh round's `manifest`, the `pin`, whose output reproduces R05's `pin.json` byte for byte from R05's run tree, and the round's own A/A (`aa`) |
+| the callgrind phase split, and R02b's control | `harness/callgrind_phases.py`, R02b's `analyse.py` | R02b's control | N2: `icprog callgrind-phases` reproduces R02's six phase splits and R01's two byte for byte; `icprog callgrind-control`, new code with no frozen output, reads R02's profiles as R02's README reports them |
 | the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3 |
 | the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
 | Track B's chain | `harness/bround.py` | Track B's measurements | N5 |
