@@ -296,6 +296,9 @@ impl Gf2 {
     /// copy of themselves compiled with that feature so the calls inline
     /// (see [`Self::batch_inv_clmul`]).  Folding implies the CPU has the
     /// instruction.
+    ///
+    /// Only the x86-64 paths ask; elsewhere the tests alone do.
+    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     #[inline(always)]
     pub(crate) fn folds(&self) -> bool {
         self.fold_tail != 0
@@ -1923,6 +1926,8 @@ mod tests {
             pub mask: u64,
             red: Box<[[u64; 256]; 8]>,
             positions: usize,
+            // Read by the x86-64 multiply only.
+            #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
             has_clmul: bool,
         }
 
@@ -2183,8 +2188,11 @@ mod tests {
                 assert_eq!(zeros, vec![0u64; 6]);
             }
         }
-        #[cfg(target_arch = "x86_64")]
-        if std::arch::is_x86_feature_detected!("pclmulqdq") {
+        // Where the CPU folds (x86-64 with pclmulqdq) the moduli really
+        // were on both sides of the tail bound, and this was no table
+        // against a table.
+        let probe = Gf2::new(&find_irreducible_sparse(53).unwrap());
+        if probe.folds() {
             assert!(
                 folded_seen > 100 && table_seen > 100,
                 "{folded_seen} folded, {table_seen} table"
