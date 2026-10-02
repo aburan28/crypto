@@ -40,6 +40,10 @@ or SOTA.
 - CryptoMiniSat executable: `/opt/homebrew/bin/cryptominisat5`, version
   `5.14.7`, observed executable SHA-256
   `a3f85c3709b5e2a040bf82a4a604d1c7b9f10219bbf180a9e0f72319a2e892ac`.
+- Native process meter: the Stage 192 selected binary at
+  `/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_f4_stage188`,
+  SHA-256
+  `971ddd3b0a77b86aa1388632a201747cec42d570e4d9ba9536c7c61e8361c524`.
 
 Create the detached WDSat worktree
 `/Volumes/SSD990/wdsat-stage193-55d55b2` at the frozen source commit, install

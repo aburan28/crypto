@@ -22,6 +22,10 @@ const WDSAT_CONFIG_SHA256: &str =
 const WDSAT_SOURCE_COMMIT: &str = "55d55b2620d768d9f7c78dcd8990a0689533c1d0";
 const CMS_VERSION: &str = "5.14.7";
 const CMS_BINARY_SHA256: &str = "a3f85c3709b5e2a040bf82a4a604d1c7b9f10219bbf180a9e0f72319a2e892ac";
+const METER_BINARY_PATH: &str =
+    "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_f4_stage188";
+const METER_BINARY_SHA256: &str =
+    "971ddd3b0a77b86aa1388632a201747cec42d570e4d9ba9536c7c61e8361c524";
 const STAGE192_SHA256: &str = "e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48";
 const METER_DESCRIPTION: &str = "fresh child process wait4/getrusage; all child threads included";
 const THREAD_CAPS: [&str; 7] = [
@@ -189,6 +193,7 @@ struct ResultRecord {
     finalizer_commit: String,
     source_instance_id: String,
     factor_base_contract: Value,
+    meter_binary: Artifact,
     manifest: Artifact,
     wdsat_anf: Artifact,
     cryptominisat_xor_dimacs: Artifact,
@@ -256,10 +261,12 @@ fn compose(stage: &Path, out: &Path, source_commit: &str, finalizer_commit: &str
         .canonicalize()
         .map_err(|e| format!("{}: {e}", stage.display()))?;
     let manifest = artifact(&stage, &stage.join("input/manifest.json"))?;
+    let meter_binary = artifact(&stage, Path::new(METER_BINARY_PATH))?;
     let anf = artifact(&stage, &stage.join("input/instance.anf"))?;
     let xor = artifact(&stage, &stage.join("input/instance.xor.cnf"))?;
     let config = artifact(&stage, &stage.join("input/wdsat-config.h"))?;
     require_hash("manifest", &manifest, MANIFEST_SHA256)?;
+    require_hash("native process meter", &meter_binary, METER_BINARY_SHA256)?;
     require_hash("ANF", &anf, ANF_SHA256)?;
     require_hash("XOR-DIMACS", &xor, XOR_SHA256)?;
     require_hash("WDSat config", &config, WDSAT_CONFIG_SHA256)?;
@@ -306,6 +313,7 @@ fn compose(stage: &Path, out: &Path, source_commit: &str, finalizer_commit: &str
                 "target_subgroup_enumerated":false,
                 "discrete_log_labels_used":false,
             }),
+            meter_binary,
             manifest,
             wdsat_anf: anf,
             cryptominisat_xor_dimacs: xor,
@@ -347,6 +355,11 @@ fn verify(path: &Path) -> AnyResult<Verification> {
         "manifest contract",
     );
     for (name, artifact, expected) in [
+        (
+            "native process meter",
+            &result.meter_binary,
+            METER_BINARY_SHA256,
+        ),
         ("manifest", &result.manifest, MANIFEST_SHA256),
         ("ANF", &result.wdsat_anf, ANF_SHA256),
         ("XOR", &result.cryptominisat_xor_dimacs, XOR_SHA256),
