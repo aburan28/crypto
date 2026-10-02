@@ -43,8 +43,9 @@ Timing is suppressed unless all gates pass:
 2. native `sm_120` builds for the block control and all three resolver widths;
 3. one production device queue control per width, each reporting exactly 49
    empty/full/sparse/endpoint/repeated-reset cases, intact canaries, exact
-   scalar-reference histories, its requested launch maximum, at least one
-   active block/SM and 57,052 dynamic shared bytes;
+   scalar-reference histories, its requested launch maximum, exactly one
+   active block/SM and 57,052 dynamic shared bytes, preserving the registered
+   4/8/16-warps-per-SM interpretation;
 4. runtime resource receipts for hot, select and resolver stages, including
    registers, local bytes, static/dynamic shared bytes, launch bounds, active
    blocks/SM, 188 resolver blocks and exact queue/counter bytes;
@@ -58,9 +59,10 @@ Timing is suppressed unless all gates pass:
    combination at 513 workers, with byte-identical final checkpoints and
    sorted continuation corpora.
 
-Resource lines captured by the first full verification become the immutable
-per-arm resource receipts; every subsequent log must reproduce its appropriate
-feature, launch and resource identity.  Any mismatch, overflow, missing owner,
+Kernel-resource and resolver-geometry lines captured by the first full
+verification become the immutable per-arm resource receipts; every subsequent
+log must reproduce them.  Queue entries and bytes are checked exactly against
+each log's worker population.  Any mismatch, overflow, missing owner,
 duplicate owner, stale queue entry, report mismatch, dropped record, partial
 record or incorrect work count invalidates the run.
 
@@ -88,12 +90,17 @@ duplicated or reordered rows and independently reopens all logs and exact work.
 
 ## Decisions
 
-- A non-default resolver width qualifies as a **geometry-only** follow-up only
-  when its median complete-update ratio to `r128` is at least 1.05, all five
-  within-round ratios exceed one, A/A drift is below 1%, and every gate passes.
-- The GPU-wide map itself qualifies only under the unchanged parent rule:
-  geometric-mean candidate/control ratio at least 1.10, every pair above one,
-  the same noise/correctness gates, and no omitted cold cost.
+- The geometry statistic is the median of the five within-round `r256/r128` or
+  `r512/r128` ratios, never a ratio of medians or geometric mean.  A non-default
+  width qualifies as a **geometry-only** follow-up only when that paired median
+  is at least 1.05, all five ratios exceed one, A/A drift is below 1%, and every
+  gate passes.  If both qualify, the width with the higher paired median is the
+  geometry candidate; an exact tie selects 256 deterministically.  Qualification
+  does not promote either width in this screen.
+- The unchanged parent GPU-wide-map gate is evaluated only on the preregistered
+  `r128/control` pair: geometric mean of its five within-round ratios at least
+  1.10, every ratio above one, the same noise/correctness gates, and no omitted
+  cold cost.  No post-hoc best-of-three width may satisfy the parent gate.
 - The 26 B/s objective is met only by a verified complete-update median above
   26,000 M/s on this one GPU.
 - Otherwise retain resolver width 128 and the block-queue production path, and
