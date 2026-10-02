@@ -33,7 +33,7 @@ nvcc --version | grep -q 'release 13\.3, V13\.3\.73' || {
 
 sha256sum Makefile include/packedkernels.cuh include/packedengine.cuh \
   include/packed131.h include/packedsigma131.h src/main.cu \
-  benchmarks/sigma-fused/PROTOCOL.md benchmarks/sigma-fused/gpujob.sh \
+  benchmarks/sigma-fused/HEADLINE-PROTOCOL.md benchmarks/sigma-fused/gpujob-headline.sh \
   benchmarks/sigma-fused/corpus_identity.cpp benchmarks/sigma-fused/summarize.cpp \
   > "$R/source-files.sha256"
 
@@ -49,7 +49,7 @@ COMMON=(
   PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1
   PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256
   PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1
-  PACKED_INLINE_POLY=3 WITNESS=1 WALK_TABLE=0
+  PACKED_INLINE_POLY=3 WITNESS=0 WALK_TABLE=0
 )
 
 build() {
@@ -80,7 +80,7 @@ verify() {
   grep -E "MISMATCH|OVERFLOW|finished|packed sigma fused|resident|registers" \
     "$R/verify-$name.log" | tee "$R/verify-$name.txt" || true
   grep -qx "packed sigma fused: $fused" "$R/verify-$name.log" || status=1
-  grep -qx "packed witness: 1" "$R/verify-$name.log" || status=1
+  grep -qx "packed witness: 0" "$R/verify-$name.log" || status=1
   grep -Eq "^backend cuda-packed131: $VERIFY_THREADS threads x 16 slots x 1 lanes = $((VERIFY_THREADS*16)) walks, dp weight 48, 95 steps per launch$" \
     "$R/verify-$name.log" || status=1
   grep -Eq "\(300 verified against the reference, 0 dropped\)" "$R/verify-$name.log" || status=1
@@ -115,7 +115,7 @@ sample() {
   count=$(grep -c '^[[:space:]]*finished: [0-9.][0-9.]* M it/s' "$log" || true)
   rate=$(sed -nE 's/^[[:space:]]*finished: ([0-9.]+) M it\/s.*/\1/p' "$log")
   grep -qx "packed sigma fused: $fused" "$log" || rc=1
-  grep -qx "packed witness: 1" "$log" || rc=1
+  grep -qx "packed witness: 0" "$log" || rc=1
   grep -Eq "^backend cuda-packed131: $BENCH_THREADS threads x 16 slots x 1 lanes = $((BENCH_THREADS*16)) walks, dp weight 0, 1024 steps per launch$" \
     "$log" || rc=1
   if [ "$count" != 1 ] || ! awk -v r="$rate" 'BEGIN{exit !(r+0>0)}'; then rc=1; fi
