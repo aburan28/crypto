@@ -5,6 +5,8 @@ on:
     paths:
       - 'research/notes/ecc2k130/paired_fullrank_20260925/**'
       - 'research/notes/ecc2k130/PAIRED_N37_N41_FULLRANK_PROTOCOL_20260925.md'
+      - 'research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/**'
+      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py'
       - '.github/workflows/paired-n37-n41-fullrank.yml'
   workflow_dispatch:
 
@@ -23,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Source pins pass live or from a committed snapshot, else fail closed
+        run: python3 research/notes/ecc2k130/paired_fullrank_20260925/test_verify_committed.py -v
       - name: Validate committed clean panel if present
         run: |
           if test -f research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/clean_archive_manifest.json; then
