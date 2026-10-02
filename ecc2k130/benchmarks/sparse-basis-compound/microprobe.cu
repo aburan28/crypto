@@ -201,6 +201,14 @@ ECC_HD void evolveAfter(P131 &a, const P131 &mapped, uint32_t round,
     a.v[4] &= 7u;
 }
 
+ECC_HD void foldMapped(P131 &accumulator, const P131 &mapped, uint32_t round) {
+    accumulator.v[0] = rotl32(accumulator.v[0] + mapped.v[0] + round, 3);
+    accumulator.v[1] = rotl32(accumulator.v[1] + mapped.v[1] + round, 8);
+    accumulator.v[2] = rotl32(accumulator.v[2] + mapped.v[2] + round, 13);
+    accumulator.v[3] = rotl32(accumulator.v[3] + mapped.v[3] + round, 18);
+    accumulator.v[4] = rotl32(accumulator.v[4] + mapped.v[4] + round, 23);
+}
+
 ECC_HD uint32_t inputChunk(const P131 &a, int chunk) {
     const int start = 3 * chunk, word = start >> 5, offset = start & 31;
     uint32_t value = a.v[word] >> offset;
@@ -267,12 +275,15 @@ __global__ __launch_bounds__(kProbeThreads, 1) void benchmarkKernel(const uint32
     __syncthreads();
     const uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     P131 a = seedInput(tid);
+    P131 accumulator = seedInput(tid ^ 0xa5a5a5a5u);
 #pragma unroll 1
     for (uint32_t round = 0; round < rounds; ++round) {
         evolveBefore(a, round, tid);
         const P131 mapped = mapShared<MODE>(shared, a, round, tid);
+        foldMapped(accumulator, mapped, round);
         evolveAfter(a, mapped, round, tid);
     }
+    for (int w = 0; w < 5; ++w) a.v[w] ^= accumulator.v[w];
     output[tid] = a;
 }
 
@@ -338,11 +349,14 @@ P131 mapHost(const std::vector<uint32_t> &table, const P131 &a, int mode,
 P131 simulateHost(const std::vector<uint32_t> &table, int mode, uint32_t tid,
                   uint32_t rounds) {
     P131 a = seedInput(tid);
+    P131 accumulator = seedInput(tid ^ 0xa5a5a5a5u);
     for (uint32_t round = 0; round < rounds; ++round) {
         evolveBefore(a, round, tid);
         const P131 mapped = mapHost(table, a, mode, round, tid);
+        foldMapped(accumulator, mapped, round);
         evolveAfter(a, mapped, round, tid);
     }
+    for (int w = 0; w < 5; ++w) a.v[w] ^= accumulator.v[w];
     return a;
 }
 
