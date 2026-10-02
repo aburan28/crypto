@@ -1,0 +1,15 @@
+{
+  "status": "complete_negative",
+  "source_commit": "2fa4692e",
+  "source_worker_sha256": "fbc20112acb69a3c5050089d7bb6702d92147287077335733ddba3eb1c125854",
+  "binary_sha256": "be4d62333505f624d65cf8d5bdf9c12c4217ac07af0da132cac5090ab6e6976d",
+  "affine_proxy_sha256": "ca76514b8a86256580b930b63c0e794c1b702cc65a68180081e77816cdebedd6",
+  "affine_shortlist_sha256": "3f839e910b6b14109db1c2a3ba49d37cd1ad106518de69f0d678ab035bc710a9",
+  "affine_winner_sha256": "1763b61547682e7943418a010cff59cac6052f2a834a53ff6c815e97190a65f7",
+  "affine_results_sha256": "d315b6b3528d70ee3041bcedfca7570f93dd600e72642edac3c30adcac2fd3bb",
+  "isolation_sha256": "88379889f0a71b7082a727731ea2122b60cc5fe4995a89f90a47a6cae49cd395",
+  "command": "F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 RAYON_NUM_THREADS=1 nonlinear-factor-labels --mode affine --output research/nonlinear_factor_labels_20261002/run_03",
+  "primary_success_5_percent_each_holdout": false,
+  "strict_reduction": false,
+  "note": "The checked-in worker was rustfmt-only after this run; the exact measured source remains available at source_commit and source_worker_sha256."
+}

@@ -109,3 +109,43 @@ not an admitted discovery binding; its `performance_admitted` and
 `full_discovery_binding_eligible` fields remain false. No raw values, kernels or
 gates changed, and no repaired timings were used to tune the solver. A fresh
 unchanged-kernel campaign must pass the complete workflow before the full phase.
+
+## Corrected verifier — provisioning-service contention
+
+Run 36938560536, attempt 1, source
+`127f9830252f238f3fd5fcfb99a046bb9daf5ff2`, passed eight fixture pairs. The n16 /
+seed17 / unplanted worker exited normally in 1.1292658130000746 seconds, but the
+provisioning service consumed 0.16 CPU seconds and the Actions worker another
+0.01 seconds. Their total exceeds the unchanged 10% guard. The complete 133-member
+bundle is retained in `failed_isolation_05` and contributes no admitted samples.
+
+A fresh complete attempt 2 uses the same commit, protocol, inputs and thresholds.
+It does not resume at the failed fixture or pool samples. No code or acceptance
+rule changes accompany this retry.
+
+Attempt 2 completed successfully. All 257 artifact members, the timed Rust sources,
+the discovery protocol and every resource receipt were verified locally. The complete
+replay exactly reproduced `results.json`: 24 fixtures, 14,640 A/B observations and
+480 A/A observations. The unchanged-kernel discovery is retained in
+`qualified_probe_02` and registered with its manifest hash and Actions artifact identity.
+No dramatic group passed. `half64_native` and `half64_eor3` each passed four of nine
+incremental groups. The full comparison remains required and uses the same kernels.
+
+## First 240-fixture full attempt — short-worker resource refusal
+
+Run 36943520046, attempt 1, source
+`c54c5ba32f75b6c879d7977398b4bfb1f62e57ae`, passed 44 complete fixture
+pairs before the n12 / regression / seed20261022 / unplanted worker was classified
+contended. That worker exited normally in 0.07541467700002613 seconds, but a
+background Python process used 0.01 CPU seconds. The unchanged 10% limit for
+that interval was only 0.0075414677 seconds. The 421-member artifact is retained
+unchanged in `failed_full_01`. No holdout fixture was reached, and none of this
+attempt's timings is admitted or pooled with qualified discovery.
+
+The paired-worker design still leaves some n12 resource windows too short for
+the host's 0.01-second CPU accounting. A future measurement revision must
+preregister a longer scope of real solves with exact per-call timers and an
+honest resource envelope, then requalify discovery before using the untouched
+holdouts. Raising the CPU threshold or replaying only failed cells is not an
+accepted repair. The timed Rust kernels and the negative discovery verdict
+remain unchanged.

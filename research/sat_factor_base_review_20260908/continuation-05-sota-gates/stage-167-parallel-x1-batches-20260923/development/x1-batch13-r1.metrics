@@ -1,0 +1,34 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "-i",
+    "LANG=C",
+    "LC_ALL=C",
+    "MKL_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "RAYON_NUM_THREADS=13",
+    "TMPDIR=/tmp",
+    "TZ=UTC",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "PQ_F4_X1_BATCH=13",
+    "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/target/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/koblitz-native-f4-run14-ac3e385c/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 5.495079665997764,
+    "user_seconds": 35.010381,
+    "system_seconds": 1.083202,
+    "total_core_seconds": 36.093583,
+    "single_core_seconds": 36.093583,
+    "peak_rss_bytes": 3408920576,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

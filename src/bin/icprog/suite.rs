@@ -21,6 +21,8 @@ pub struct Row {
     pub params: Option<PathBuf>,
     /// The rho walk's seed for the row's single target.
     pub rho_seed: Option<i128>,
+    /// The suite's frozen id, `k<a>n<n>-<recipe>-<target>`, for a suite row.
+    pub suite_id: Option<String>,
 }
 
 /// The programme's directory, `research/ic_tool_program`, under `root`.
@@ -76,6 +78,7 @@ pub fn rows(programme: &Path, tier: &str) -> Result<Vec<Row>, String> {
             recipe_seed: Some(int(row, "recipe_seed")?),
             params: Some(programme.join("suite").join("v1").join(params)),
             rho_seed: Some(int(row, "rho_seed")?),
+            suite_id: Some(frozen.to_string()),
         });
     }
     Ok(out)

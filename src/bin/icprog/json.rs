@@ -89,6 +89,42 @@ impl J {
     }
 }
 
+/// A number, as Python compares numbers: `True == 1 == 1.0`.
+fn number(v: &J) -> Option<f64> {
+    match v {
+        J::Bool(b) => Some(f64::from(u8::from(*b))),
+        J::Int(i) => Some(*i as f64),
+        J::Float(f) => Some(*f),
+        _ => None,
+    }
+}
+
+/// Python's `==` on parsed JSON: objects as unordered maps, numbers by
+/// value whatever their type.
+pub fn py_eq(a: &J, b: &J) -> bool {
+    match (a, b) {
+        (J::Int(x), J::Int(y)) => x == y,
+        (J::Int(i), J::Float(f)) | (J::Float(f), J::Int(i)) => {
+            f.is_finite() && f.fract() == 0.0 && (*f as i128) == *i && (*i as f64) == *f
+        }
+        (J::Null, J::Null) => true,
+        (J::Str(x), J::Str(y)) => x == y,
+        (J::Arr(x), J::Arr(y)) => x.len() == y.len() && x.iter().zip(y).all(|(p, q)| py_eq(p, q)),
+        (J::Obj(x), J::Obj(y)) => {
+            x.len() == y.len()
+                && x.iter().all(|(k, v)| {
+                    y.iter()
+                        .find(|(k2, _)| k2 == k)
+                        .is_some_and(|(_, w)| py_eq(v, w))
+                })
+        }
+        _ => match (number(a), number(b)) {
+            (Some(x), Some(y)) => x == y,
+            _ => false,
+        },
+    }
+}
+
 /// An object built in order: `obj([("a", J::Int(1)), ...])`.
 pub fn obj<const N: usize>(kv: [(&str, J); N]) -> J {
     J::Obj(kv.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
@@ -355,7 +391,10 @@ pub fn py_float(x: f64) -> String {
     }
 }
 
-fn write_str(out: &mut String, s: &str) {
+/// A string as Python's `json.dumps` writes it: with `ascii`, every
+/// character outside printable ASCII escaped (its default); without, only
+/// the control characters (`ensure_ascii=False`).
+fn write_str_as(out: &mut String, s: &str, ascii: bool) {
     out.push('"');
     for c in s.chars() {
         match c {
@@ -367,6 +406,7 @@ fn write_str(out: &mut String, s: &str) {
             '\u{8}' => out.push_str("\\b"),
             '\u{c}' => out.push_str("\\f"),
             ' '..='~' => out.push(c),
+            c if !ascii && c >= ' ' => out.push(c),
             _ => {
                 let mut buf = [0u16; 2];
                 for unit in c.encode_utf16(&mut buf) {
@@ -378,7 +418,15 @@ fn write_str(out: &mut String, s: &str) {
     out.push('"');
 }
 
+fn write_str(out: &mut String, s: &str) {
+    write_str_as(out, s, true);
+}
+
 fn write(out: &mut String, v: &J, indent: usize, depth: usize) {
+    write_as(out, v, indent, depth, true);
+}
+
+fn write_as(out: &mut String, v: &J, indent: usize, depth: usize, ascii: bool) {
     let pad = |out: &mut String, d: usize| {
         out.push('\n');
         out.push_str(&" ".repeat(indent * d));
@@ -390,7 +438,7 @@ fn write(out: &mut String, v: &J, indent: usize, depth: usize) {
             let _ = write!(out, "{i}");
         }
         J::Float(x) => out.push_str(&py_float(*x)),
-        J::Str(s) => write_str(out, s),
+        J::Str(s) => write_str_as(out, s, ascii),
         J::Arr(items) if items.is_empty() => out.push_str("[]"),
         J::Arr(items) => {
             out.push('[');
@@ -399,7 +447,7 @@ fn write(out: &mut String, v: &J, indent: usize, depth: usize) {
                     out.push(',');
                 }
                 pad(out, depth + 1);
-                write(out, item, indent, depth + 1);
+                write_as(out, item, indent, depth + 1, ascii);
             }
             pad(out, depth);
             out.push(']');
@@ -412,9 +460,9 @@ fn write(out: &mut String, v: &J, indent: usize, depth: usize) {
                     out.push(',');
                 }
                 pad(out, depth + 1);
-                write_str(out, key);
+                write_str_as(out, key, ascii);
                 out.push_str(": ");
-                write(out, item, indent, depth + 1);
+                write_as(out, item, indent, depth + 1, ascii);
             }
             pad(out, depth);
             out.push('}');
@@ -429,6 +477,14 @@ pub fn dumps(v: &J, indent: usize) -> String {
     out
 }
 
+/// `v` with non-ASCII text left as it is, as the ledger (`baselines.json`)
+/// was written (`ensure_ascii=False`).
+pub fn dumps_utf8(v: &J, indent: usize) -> String {
+    let mut out = String::new();
+    write_as(&mut out, v, indent, 0, false);
+    out
+}
+
 /// Every object's keys in sorted order, at every depth.
 pub fn sorted(v: &J) -> J {
     match v {
@@ -440,6 +496,46 @@ pub fn sorted(v: &J) -> J {
         }
         other => other.clone(),
     }
+}
+
+/// `v` with no spaces (`separators=(",", ":")`), every object's keys sorted
+/// when `sort_keys`, and non-ASCII text escaped only when `ascii`: the form
+/// the identity and certificate digests hash.
+pub fn dumps_compact(v: &J, sort_keys: bool, ascii: bool) -> String {
+    fn compact(out: &mut String, v: &J, ascii: bool) {
+        match v {
+            J::Arr(items) => {
+                out.push('[');
+                for (k, item) in items.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    compact(out, item, ascii);
+                }
+                out.push(']');
+            }
+            J::Obj(kv) => {
+                out.push('{');
+                for (k, (key, item)) in kv.iter().enumerate() {
+                    if k > 0 {
+                        out.push(',');
+                    }
+                    write_str_as(out, key, ascii);
+                    out.push(':');
+                    compact(out, item, ascii);
+                }
+                out.push('}');
+            }
+            scalar => write_as(out, scalar, 0, 0, ascii),
+        }
+    }
+    let mut out = String::new();
+    if sort_keys {
+        compact(&mut out, &sorted(v), ascii);
+    } else {
+        compact(&mut out, v, ascii);
+    }
+    out
 }
 
 /// `v` on one line with `", "` and `": "` between items, as a JSON lines
@@ -513,6 +609,18 @@ mod tests {
         let v = parse(text).unwrap();
         assert_eq!(dumps(&v, 1), text);
         assert_eq!(v.get("b"), Some(&J::Int(1)));
+    }
+
+    #[test]
+    fn the_programmes_records_read_and_write_back_byte_for_byte() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("research/ic_tool_program");
+        // The ledger was written with non-ASCII text as it is ...
+        let ledger = std::fs::read_to_string(root.join("baselines.json")).unwrap();
+        assert_eq!(dumps_utf8(&parse(&ledger).unwrap(), 1) + "\n", ledger);
+        // ... and the rounds' analyses with it escaped.
+        let r03 = root.join("rounds/R03-curve-construction/analysis.json");
+        let analysis = std::fs::read_to_string(r03).unwrap();
+        assert_eq!(dumps(&parse(&analysis).unwrap(), 1) + "\n", analysis);
     }
 
     #[test]

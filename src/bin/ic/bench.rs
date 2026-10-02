@@ -179,20 +179,9 @@ fn frozen_factor_base<'c>(
     }))
 }
 
-/// `name:k=v,k=v` → `(name, params)`.
+/// `name:k=v,k=v` → `(name, params)`; list values use `;`.
 fn parse_plugin(spec: &str) -> Result<(String, Params), String> {
-    let (name, rest) = match spec.split_once(':') {
-        None => (spec, ""),
-        Some((n, r)) => (n, r),
-    };
-    let mut params = Params::default();
-    for kv in rest.split(',').filter(|s| !s.is_empty()) {
-        let (k, v) = kv
-            .split_once('=')
-            .ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
-        params.set(k.trim(), v.trim());
-    }
-    Ok((name.to_string(), params))
+    Params::parse_spec(spec)
 }
 
 fn listing() -> Value {
@@ -229,11 +218,11 @@ fn listing() -> Value {
                      "parameters": [{"name": "dimension", "means": "F_2-dimension of the abscissa subspace"}]},
                     {"name": "koblitz-orbit", "regimes": ["koblitz"],
                      "parameters": [
-                        {"name": "divisor", "means": "comma-separated factor indices selecting the Frobenius-invariant subspace"},
+                        {"name": "divisor", "means": "`;`-separated factor indices selecting the Frobenius-invariant subspace, e.g. divisor=1;2 (a `,` would end the parameter)"},
                         {"name": "no_fold", "means": "1 for one column per abscissa: the control that shows what the fold buys"}]},
                     {"name": "koblitz-symmetrised", "regimes": ["koblitz"],
                      "parameters": [
-                        {"name": "divisor", "means": "`;`-separated factor indices; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
+                        {"name": "divisor", "means": "`;`-separated factor indices, e.g. divisor=0;1; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
                         {"name": "no_fold", "means": "1 for one column per abscissa"}]},
                 ],
             },

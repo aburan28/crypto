@@ -62,17 +62,9 @@ pub struct DescentArgs {
     pub repeats: usize,
 }
 
-/// `name:k=v,k=v` → `(name, params)`.
+/// `name:k=v,k=v` → `(name, params)`; list values use `;`.
 fn parse_engine(spec: &str) -> Result<(String, Params), String> {
-    let (name, rest) = spec.split_once(':').unwrap_or((spec, ""));
-    let mut params = Params::default();
-    for kv in rest.split(',').filter(|s| !s.is_empty()) {
-        let (k, v) = kv
-            .split_once('=')
-            .ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
-        params.set(k.trim(), v.trim());
-    }
-    Ok((name.to_string(), params))
+    Params::parse_spec(spec)
 }
 
 /// `n' = ceil(n/m)` makes the descent square: `m·n'` unknowns against

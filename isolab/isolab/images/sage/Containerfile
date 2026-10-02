@@ -1,0 +1,12 @@
+# isolab-sage: the official SageMath image (Debian based) with the base image's Python additions.
+# Sage already ships NumPy, SciPy, SymPy, Cython, PARI, FLINT, GMP and MPFR.
+# DOT_SAGE points at /tmp because containers run with a read-only root filesystem.
+ARG SAGE_TAG=latest
+FROM docker.io/sagemath/sagemath:${SAGE_TAG}
+USER root
+ENV DEBIAN_FRONTEND=noninteractive DOT_SAGE=/tmp/dot_sage PIP_NO_CACHE_DIR=1
+RUN (apt-get update && apt-get install -y --no-install-recommends numactl time hwloc-nox && rm -rf /var/lib/apt/lists/*) || true
+RUN sage -pip install gmpy2 pandas || true
+RUN mkdir -p /isolab/work /isolab/out /isolab/scratch /isolab/bin && chmod 1777 /isolab/work /isolab/out /isolab/scratch
+WORKDIR /isolab/work
+LABEL org.opencontainers.image.title="isolab-sage"
