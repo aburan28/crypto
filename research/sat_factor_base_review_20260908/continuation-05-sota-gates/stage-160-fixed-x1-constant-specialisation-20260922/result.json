@@ -1,0 +1,531 @@
+{
+  "campaign_accounting": {
+    "complete_campaign_cost": null,
+    "measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 38,
+      "summed_wall_seconds": 2319.762065749015,
+      "total_core_seconds": 2281.647854
+    },
+    "reason_complete_is_null": "some development commands lack an outer meter; measured totals remain a lower bound",
+    "stage159_measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 31,
+      "summed_wall_seconds": 1596.064122959007,
+      "total_core_seconds": 1565.839519
+    },
+    "stage160_incremental_measured": {
+      "peak_rss_bytes": 1683472384,
+      "resource_components": 7,
+      "summed_wall_seconds": 723.697942790008,
+      "total_core_seconds": 715.808335
+    },
+    "unmetered_development_commands_present": true,
+    "unmetered_scope": [
+      "incremental release compiles for development binaries",
+      "focused Rust tests and Python evidence composition",
+      "score composition, Git operations, and issue/PR updates"
+    ]
+  },
+  "claim_boundary": "Strong internal engineering and one finite public toy-PDP native-F4 construction improvement. It is not licensed Magma F4, a full native-F4 panel, an end-to-end index-calculus speedup, a direct-MITM improvement, or a Koblitz index-calculus SOTA.",
+  "comparisons": {
+    "selected_cold_build_plus_run": {
+      "peak_rss_bytes": 1683472384,
+      "total_core_seconds": 236.554363,
+      "wall_seconds": 241.26225399900434
+    },
+    "selected_over_same_host_direct_mitm": {
+      "core_ratio": 24.596031413105063,
+      "rss_ratio": 19.870979270907792,
+      "wall_ratio": 24.588777330905284
+    },
+    "selected_over_stage159": {
+      "construction_ratio": 0.036984262162183285,
+      "construction_speedup": 27.038527782839164,
+      "core_ratio": 0.7364370974193526,
+      "rss_ratio": 0.9883388143276153,
+      "same_equation_fingerprint": true,
+      "same_f4_calls": true,
+      "same_term_count": true,
+      "same_verified_witness": true,
+      "same_word_xors": true,
+      "wall_ratio": 0.7362592004443677,
+      "wall_speedup": 1.3582173226445962
+    }
+  },
+  "date": "2026-09-22",
+  "development": {
+    "arms": [
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 841,
+            "path": "ordered-matrix.metrics",
+            "sha256": "9cc3097001efdd9dcd6fd7bdf167acf53d2e9fde26a5b2678091cfd6f6fed443"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "ordered-matrix.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3517,
+            "path": "ordered-matrix.stdout",
+            "sha256": "539c0c0b9c2b98f550bd2f6db5964d10f0ec3ea45fcf3fe9c3f4b2b348cb4aaf"
+          }
+        },
+        "decision": "rejected",
+        "description": "Sort complete F4 matrices by leading monomial and sparse tie-break; lower RSS but slower wall and more XOR work.",
+        "divisor_tests": 1150944931,
+        "f4_wall_ns": 71823538835,
+        "fixed_x1_s4_construction_ns": 29644819459,
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 835436544,
+          "single_core_seconds": 101.367792,
+          "system_seconds": 0.365904,
+          "total_core_seconds": 101.367792,
+          "user_seconds": 101.001888,
+          "wall_seconds": 102.03992608300177
+        },
+        "name": "ordered-matrix",
+        "peak_matrix_bytes": 142839960,
+        "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+        "source_patch_retained": false,
+        "word_xors": 89835994387
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 841,
+            "path": "trim-row-end.metrics",
+            "sha256": "15ec0a88687af3cb626ba0250b01b3017413c76bb4710ae53a136eab2973bd94"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "trim-row-end.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3517,
+            "path": "trim-row-end.stdout",
+            "sha256": "fba793409ba086b0cd4b62d431ccadacecb7eea51f722944e273e59ba14e511d"
+          }
+        },
+        "decision": "rejected",
+        "description": "Trim zero suffix words after row XOR; negligible work reduction and slower wall.",
+        "divisor_tests": 1151227822,
+        "f4_wall_ns": 73770114954,
+        "fixed_x1_s4_construction_ns": 27402574126,
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 981417984,
+          "single_core_seconds": 101.116164,
+          "system_seconds": 0.400925,
+          "total_core_seconds": 101.116164,
+          "user_seconds": 100.715239,
+          "wall_seconds": 101.73912458300038
+        },
+        "name": "trim-row-end",
+        "peak_matrix_bytes": 145665984,
+        "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+        "source_patch_retained": false,
+        "word_xors": 87504415748
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 840,
+            "path": "hashed-reducer-index.metrics",
+            "sha256": "75a8d6ff42600947a1adc3b90cd90ea445451f27f211070bd2a64db6c464e19c"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "hashed-reducer-index.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3515,
+            "path": "hashed-reducer-index.stdout",
+            "sha256": "1746165ea872afa3ff73449ab4fc726bce5f99710bec7d613996dc4c24e3c48e"
+          }
+        },
+        "decision": "rejected",
+        "description": "Enumerate monomial divisors through a hash index; probes fell sharply but wall did not improve.",
+        "divisor_tests": 29136159,
+        "f4_wall_ns": 73266078916,
+        "fixed_x1_s4_construction_ns": 27021110923,
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 961069056,
+          "single_core_seconds": 100.230797,
+          "system_seconds": 0.369226,
+          "total_core_seconds": 100.230797,
+          "user_seconds": 99.861571,
+          "wall_seconds": 100.86901408300037
+        },
+        "name": "hashed-reducer-index",
+        "peak_matrix_bytes": 145665984,
+        "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+        "source_patch_retained": false,
+        "word_xors": 87513949370
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 857,
+            "path": "dense-reducer-index.metrics",
+            "sha256": "08b8dd498f282112c8080b855a01045fc710d7e3f90414c9a3b46f83835cd14e"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "dense-reducer-index.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3515,
+            "path": "dense-reducer-index.stdout",
+            "sha256": "060026a5bf981f2ecf7e5af289312929bf3872c8bff606a2fb36f1b8970b3380"
+          }
+        },
+        "decision": "rejected",
+        "description": "Replace the reducer hash with a bounded dense index; internal F4 improved slightly but whole-target wall regressed.",
+        "divisor_tests": 29136159,
+        "f4_wall_ns": 72581470583,
+        "fixed_x1_s4_construction_ns": 29724658583,
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 975634432,
+          "single_core_seconds": 102.24529500000001,
+          "system_seconds": 0.376084,
+          "total_core_seconds": 102.24529500000001,
+          "user_seconds": 101.869211,
+          "wall_seconds": 102.90921399999934
+        },
+        "name": "dense-reducer-index",
+        "peak_matrix_bytes": 145665984,
+        "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+        "source_patch_retained": false,
+        "word_xors": 87513949370
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 837,
+            "path": "fixed-x1-specialised-provisional.metrics",
+            "sha256": "078a84884fb7a7327faccae7156b9b4a3acacedf2de59ed698cb66614c850142"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "fixed-x1-specialised-provisional.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3514,
+            "path": "fixed-x1-specialised-provisional.stdout",
+            "sha256": "98831f77254fb065202f8e8ad3298e4f3be6ccff8d9e14e390a53334fb1c69df"
+          }
+        },
+        "decision": "promoted_after_clean_rebuild",
+        "description": "Apply fixed and target field elements as linear maps and form X2*X3 once; provisional dirty-tree timing only.",
+        "divisor_tests": 1151227822,
+        "f4_wall_ns": 73345192125,
+        "fixed_x1_s4_construction_ns": 972998451,
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 918798336,
+          "single_core_seconds": 74.293924,
+          "system_seconds": 0.311868,
+          "total_core_seconds": 74.293924,
+          "user_seconds": 73.982056,
+          "wall_seconds": 74.87841004200163
+        },
+        "name": "fixed-x1-specialised-provisional",
+        "peak_matrix_bytes": 145665984,
+        "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+        "source_patch_retained": false,
+        "word_xors": 87513949370
+      }
+    ],
+    "complete_development_cost": null,
+    "reason_complete_is_null": "incremental compiles and focused test invocations lacked an outer meter",
+    "schema": "koblitz_stage160_development_arms.v1",
+    "status": "metered_development_arms_retained"
+  },
+  "factor_base": {
+    "definition": "span(1,z,...,z^8), with exact rational-lift membership checks",
+    "discrete_log_labels_used": false,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "instance": {
+    "basis": "standard polynomial subspace",
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "curve": "K_1 over GF(2^59)",
+    "ell": 9,
+    "m": 3,
+    "n": 59,
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "target": {
+      "x": "342002423881678665",
+      "y": "482559600513111561"
+    },
+    "target_class_opened_after_run_seal": "decomposable"
+  },
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "mechanism": {
+    "equivalence_test": "fixed_x1_specialisation_matches_the_generic_s4_system",
+    "generic_equivalence_cases": 60,
+    "known_field_factors": "applied as exact linear maps in the polynomial basis",
+    "name": "fixed_x1_constant_linear_specialisation",
+    "shared_symbolic_product": "X2*X3 formed once"
+  },
+  "predecessor": {
+    "stage159_result_sha256": "02ba6f46dfbfdcf42200038f1ca61a976dc4eb69b97ca1657fbb70688687c4ea",
+    "stage159_seal_sha256": "dfc2875be117ccf397913b138ef4de0f123f90e207e0aba13f5a90636a4a91d7"
+  },
+  "same_target_table": [
+    {
+      "backend": "native-f4-selected",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "fixed-X1 direct S4; constant-linear constructor; non-rational X1 skipped",
+      "host": "local arm64",
+      "operations": {
+        "f4_calls": 65,
+        "word_xors_elimination_only": 87513949370
+      },
+      "peak_rss_bytes": 910934016,
+      "status": "sat",
+      "total_core_seconds": 73.585054,
+      "wall_seconds": 73.75799025000015
+    },
+    {
+      "backend": "native-xor",
+      "classification": "inconclusive",
+      "conflicts": 100000,
+      "formulation": "frozen S4 correspondence system",
+      "host": "local arm64",
+      "operations": null,
+      "peak_rss_bytes": 168361984,
+      "status": "unknown_inconclusive",
+      "total_core_seconds": 8.890455,
+      "wall_seconds": 8.906471791000513
+    },
+    {
+      "backend": "direct-mitm",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "exact factor-point pair table",
+      "host": "local arm64",
+      "operations": {
+        "group_additions": 117015,
+        "pair_entries": 116635
+      },
+      "peak_rss_bytes": 45842432,
+      "status": "sat",
+      "total_core_seconds": 2.991745,
+      "wall_seconds": 2.999660749999748
+    },
+    {
+      "backend": "wdsat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 ANF",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 19632128,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 88.060134,
+      "wall_seconds": 120.00305557999997
+    },
+    {
+      "backend": "cryptominisat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 CNF plus XOR",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 69353472,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 87.983526,
+      "wall_seconds": 120.005938571
+    },
+    {
+      "backend": "magma-f4",
+      "classification": "not_run",
+      "conflicts": null,
+      "formulation": "frozen direct Boolean F4 source",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_run_licensed_tool_missing",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    },
+    {
+      "backend": "ggmp",
+      "classification": "not_applicable",
+      "conflicts": null,
+      "formulation": "GGMP invariant-kernel base exists only in the frozen n31 cell",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_same_instance",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    }
+  ],
+  "schema": "koblitz_stage160_fixed_x1_constant_specialisation.v1",
+  "selected_native_f4": {
+    "classification": "true_positive",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 910934016,
+      "single_core_seconds": 73.585054,
+      "system_seconds": 0.311471,
+      "total_core_seconds": 73.585054,
+      "user_seconds": 73.273583,
+      "wall_seconds": 73.75799025000015
+    },
+    "report": {
+      "algebraic_roots": 2,
+      "backend": "native-f4",
+      "budget_seconds": 300,
+      "conflicts": null,
+      "cost": {
+        "degree_reached": 6,
+        "extra": {
+          "basis_len": 17,
+          "build_ns": 30523303373,
+          "divisor_tests": 1151227822,
+          "eliminate_ns": 25923008077,
+          "extraction_tests": 119560,
+          "f4_calls": 65,
+          "field_pairs_reduced": 186661,
+          "matrix_cols_max": 29308,
+          "matrix_rows_max": 39756,
+          "matrix_rows_sum": 1330928,
+          "new_elements": 265523,
+          "oversize": 0,
+          "pairs_chain_skipped": 229620889,
+          "pairs_left": 0,
+          "pairs_product_skipped": 70978814,
+          "pairs_reduced": 412194,
+          "reducer_rows": 501782,
+          "steps": 325,
+          "symbolic_bytes_estimate_max": 495286352,
+          "symbolic_cap_hit": 0
+        },
+        "op_unit": "word XORs (elimination only)",
+        "ops": 87513949370,
+        "peak_bytes": 145665984,
+        "solving_degree": 5,
+        "timed_out": false,
+        "wall_ns": 72650546412
+      },
+      "exhaustive": true,
+      "factor_base_contract": {
+        "discrete_log_labels_used": false,
+        "target_subgroup_enumerated": false
+      },
+      "fixed_x1_nonrational_skipped": 73,
+      "fixed_x1_systems_completed": 65,
+      "fixed_x1_systems_constructed": 65,
+      "fixed_x1_values": 512,
+      "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+      "regenerated_source_exact": true,
+      "same_instance_fields": [
+        "n",
+        "ell",
+        "m",
+        "curve",
+        "algebraic_factor_base",
+        "affine_target"
+      ],
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "single_thread_requested": true,
+      "solver": "f4-f2",
+      "solver_constructor": "fixed_x1_constant_linear_specialisation",
+      "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, bit-packed elimination, reduced basis",
+      "solver_equations_blake3": "d6969c5f89b5be6a7eacbdac45799fc734a273c9034949a482723b4422504ae7",
+      "solver_equations_total": 3835,
+      "solver_max_degree": 4,
+      "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+      "solver_schedule": "enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+      "solver_terms_max_per_system": 61922,
+      "solver_terms_total": 3864601,
+      "solver_variables": 18,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_model_valid": true,
+      "source_representation": "symmetrised_s4",
+      "source_variables": 78,
+      "source_witness_valid": true,
+      "status": "sat",
+      "timing_ns": {
+        "factor_base_x1_membership": 8961154,
+        "fixed_x1_s4_construction": 973558384,
+        "native_f4_whole": 73704453125,
+        "source_verification": 38939833
+      },
+      "witness_points": [
+        {
+          "x": "137",
+          "y": "164288105115948905"
+        },
+        {
+          "x": "286",
+          "y": "349643848945327627"
+        },
+        {
+          "x": "159",
+          "y": "15349584312879311"
+        }
+      ]
+    },
+    "run_inventory_sha256": "8586dd4a7282dedab69ee97a1a14541e8aa0295bdf5a50380d18c46f5d43ae81",
+    "source_model_valid": true,
+    "source_revision": {
+      "commit": "3cb24b82e8a059a293f6371178bd0d3647272a63",
+      "dirty": false,
+      "porcelain": []
+    },
+    "source_witness_valid": true,
+    "status": "sat"
+  },
+  "status": "complete_fixed_x1_constant_specialisation_true_positive"
+}
