@@ -1,4 +1,4 @@
-# 16-bit predecessor reaches about 1.55x on n24; specialization pending
+# 16-bit specialization discovery complete; full comparison pending
 
 The complete 16-bit syndrome implementation preserves the original model and
 assignment order and checks every projected zero on the original equations. The
@@ -219,6 +219,92 @@ All values below are n24 discovery milliseconds per cold solve plus validation. 
 | eor3_word16 | 3.146378 | 3.144396 | 3.832539 | 0.6698 | PASS |
 | eor3_word64 | 1.755348 | 1.750443 | 2.137465 | 1.2006 | PASS |
 
+## Current qualified discovery
+
+Source `127f9830252f238f3fd5fcfb99a046bb9daf5ff2` completed 24 fixtures, 14,640 A/B observations and 480 A/A observations. All resource receipts passed and every arm completed verification. Discovery only; no promotion. The group A/A symmetric noise floors range from 1.0037 to 1.4500. Campaign duration, including readiness waits, was 351.248 seconds; peak worker RSS was 14,295,040 bytes. Host: Linux aarch64, 4 logical CPUs; reserved CPUs [3]; EOR3 available: True. Host/compiler details and exact per-group confidence intervals remain in the sealed artifact.
+
+The gate uses the pointwise fastest of all 52 frozen reference methods and requires the lower 95% bound to exceed the A/A floor as well as the numeric threshold.
+
+Predecessor and current campaigns used separate hosted VMs. Their absolute before/after times do not isolate the effect of budget specialization; only within-campaign comparisons to the frozen reference roster are admitted here.
+
+| Candidate | Groups above 2x | Groups above 1x | Primary dramatic verdict |
+|---|---:|---:|---|
+| eor3_word16 | 0/9 | 0/9 | discovery only |
+| eor3_word64 | 0/9 | 2/9 | discovery only |
+| half16_eor3 | 0/9 | 0/9 | discovery only |
+| half16_native | 0/9 | 0/9 | discovery only |
+| half16_scalar | 0/9 | 0/9 | discovery only |
+| half64_eor3 | 0/9 | 4/9 | discovery only |
+| half64_native | 0/9 | 4/9 | discovery only |
+| half64_scalar | 0/9 | 0/9 | discovery only |
+| half_dispatch | 0/9 | 1/9 | discovery only |
+
+All methods below use n24 discovery milliseconds per complete solve plus validation. The displayed ratio divides pooled planted dispatcher medians; it is descriptive, not the primary fastest-reference gate.
+
+| Method | Planted ms | Cross-planted ms | Unplanted ms | Dispatcher / arm, planted | Correctness |
+|---|---:|---:|---:|---:|---|
+| search | 104.553748 | 106.881303 | 136.359259 | 0.0200 | PASS |
+| flat | 487.309635 | 167.425981 | 641.582068 | 0.0043 | PASS |
+| bucket | 1335.511633 | 468.448710 | 1783.931259 | 0.0016 | PASS |
+| hybrid | 711.492731 | 239.108532 | 1007.641847 | 0.0029 | PASS |
+| small_flat | 129.447555 | 131.286347 | 167.912848 | 0.0162 | PASS |
+| word_tail | 111.626884 | 113.428723 | 144.069997 | 0.0187 | PASS |
+| merge_search | 85.081701 | 87.188851 | 109.238916 | 0.0246 | PASS |
+| quadratic_state | 47.169623 | 48.128025 | 60.369006 | 0.0444 | PASS |
+| packed_state | 26.777940 | 27.083433 | 34.339220 | 0.0781 | PASS |
+| basis_list | 330.361128 | 155.108903 | 518.784663 | 0.0063 | PASS |
+| basis_wide | 91.609356 | 43.146001 | 142.323885 | 0.0228 | PASS |
+| tail_list | 233.379305 | 72.119328 | 296.231722 | 0.0090 | PASS |
+| tail_wide | 80.487677 | 25.895419 | 100.309107 | 0.0260 | PASS |
+| packed_untraced | 18.984797 | 19.275845 | 24.459836 | 0.1102 | PASS |
+| affine_sl_basis_list | 224.297336 | 163.738504 | 558.450240 | 0.0093 | PASS |
+| affine_sl_basis_fast | 31.090414 | 19.872093 | 76.315011 | 0.0673 | PASS |
+| gray_scalar | 32.051380 | 32.052146 | 39.271082 | 0.0653 | PASS |
+| gray_simd | 6.742654 | 6.760577 | 8.253766 | 0.3103 | PASS |
+| packed_gray12_scalar | 32.346322 | 33.999190 | 43.771149 | 0.0647 | PASS |
+| packed_gray12_simd | 13.729873 | 14.623010 | 19.179692 | 0.1524 | PASS |
+| packed_gray16_scalar | 27.409869 | 30.170752 | 40.191046 | 0.0763 | PASS |
+| packed_gray16_simd | 6.294831 | 6.922709 | 9.248537 | 0.3323 | PASS |
+| gray_delta_scalar | 24.439484 | 24.384396 | 29.814465 | 0.0856 | PASS |
+| gray_delta_simd | 3.860983 | 3.848304 | 4.732903 | 0.5419 | PASS |
+| initial_list | 24.411808 | 12.183588 | 29.825623 | 0.0857 | PASS |
+| initial_simd | 3.851884 | 1.942227 | 4.758058 | 0.5431 | PASS |
+| packed_gray16_delta_scalar | 21.007015 | 23.223705 | 30.798582 | 0.0996 | PASS |
+| packed_gray16_delta_simd | 4.062911 | 4.451808 | 5.952367 | 0.5149 | PASS |
+| fiber_rows | 6.649902 | 6.008488 | 13.163386 | 0.3146 | PASS |
+| fiber_columns | 5.878600 | 5.517244 | 12.580246 | 0.3559 | PASS |
+| fiber_simd | 1.762293 | 1.595330 | 3.837722 | 1.1871 | PASS |
+| fiber_zero_simd | 2.432231 | 2.441140 | 5.981624 | 0.8601 | PASS |
+| gray_quiet | 5.956030 | 5.930328 | 7.210914 | 0.3513 | PASS |
+| wide64_quiet | 2.960438 | 2.900965 | 3.635572 | 0.7067 | PASS |
+| byte_scalar | 6.914671 | 6.823484 | 8.361628 | 0.3026 | PASS |
+| byte_simd | 2.086683 | 2.001860 | 2.600838 | 1.0026 | PASS |
+| leaf16_quiet | 5.595007 | 6.149719 | 8.191797 | 0.3739 | PASS |
+| leaf16_byte_scalar | 6.603875 | 6.918960 | 9.700167 | 0.3168 | PASS |
+| leaf16_byte_simd | 2.470855 | 2.455643 | 3.697033 | 0.8467 | PASS |
+| byte_single_quiet | 2.556373 | 2.442363 | 3.218628 | 0.8184 | PASS |
+| leaf16_single_quiet | 2.886058 | 2.833537 | 4.321749 | 0.7249 | PASS |
+| byte_planes | 2.014807 | 1.953040 | 2.493056 | 1.0384 | PASS |
+| leaf16_byte_planes | 2.480596 | 2.531086 | 3.689154 | 0.8434 | PASS |
+| byte_unrolled | 1.850756 | 1.721880 | 2.333818 | 1.1304 | PASS |
+| wide64_unrolled | 2.105225 | 2.113662 | 2.569311 | 0.9938 | PASS |
+| leaf16_byte_unrolled | 2.279297 | 2.222987 | 3.375850 | 0.9179 | PASS |
+| word16_unrolled | 3.280844 | 3.281335 | 3.994311 | 0.6377 | PASS |
+| word_dispatch | 2.092079 | 2.103739 | 2.573336 | 1.0000 | PASS |
+| leaf16_word_unrolled | 3.477716 | 3.802679 | 5.093454 | 0.6016 | PASS |
+| projected4 | 3.068396 | 2.826070 | 4.277967 | 0.6818 | PASS |
+| projected5 | 4.093949 | 3.305119 | 5.053212 | 0.5110 | PASS |
+| projected6 | 5.345794 | 4.072516 | 6.501048 | 0.3914 | PASS |
+| half16_scalar | 11.216853 | 11.212701 | 13.743119 | 0.1865 | PASS |
+| half64_scalar | 2.202784 | 2.207496 | 2.685017 | 0.9497 | PASS |
+| half16_native | 3.552208 | 3.535434 | 4.358923 | 0.5890 | PASS |
+| half64_native | 1.362587 | 1.402410 | 1.625218 | 1.5354 | PASS |
+| half_dispatch | 1.359452 | 1.401814 | 1.622493 | 1.5389 | PASS |
+| half16_eor3 | 3.716743 | 3.723616 | 4.549493 | 0.5629 | PASS |
+| half64_eor3 | 1.373667 | 1.388459 | 1.672346 | 1.5230 | PASS |
+| eor3_word16 | 3.071503 | 3.066976 | 3.755245 | 0.6811 | PASS |
+| eor3_word64 | 1.767829 | 1.767456 | 2.162423 | 1.1834 | PASS |
+
 ## Retained execution and validation failures
 
 - GitHub run 36922805760, attempt 1: Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted. The complete artifact is retained in `failed_isolation_01` and contributes no accepted timing samples.
@@ -226,5 +312,7 @@ All values below are n24 discovery milliseconds per cold solve plus validation. 
 - GitHub run 36930298574, attempt 2: Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted. The complete artifact is retained in `failed_isolation_03` and contributes no accepted timing samples.
 - GitHub run 36935271707, attempt 1: After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted. The complete artifact is retained in `failed_isolation_04` and contributes no accepted timing samples.
 - GitHub run 36936730092, attempt 1: All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding. The complete artifact is retained in `failed_analysis_01` and contributes no accepted timing samples.
+- GitHub run 36938560536, attempt 1: After eight fixture pairs, the n16/seed17/unplanted paired worker completed normally but provisioning-service CPU use raised total other-process CPU to 0.17 seconds in 1.129265813 seconds, above the unchanged 10% threshold. No performance samples admitted. The complete artifact is retained in `failed_isolation_05` and contributes no accepted timing samples.
+- GitHub run 36943520046, attempt 1: Full run stopped after 44 of 240 fixture pairs before holdouts: n12/regression/seed20261022/unplanted worker exited normally in 0.075414677 seconds, but 0.01 seconds of other-process CPU exceeded the unchanged 10% limit. No full performance sample is admitted or pooled. The complete artifact is retained in `failed_full_01` and contributes no accepted timing samples.
 
 `ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.

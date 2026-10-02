@@ -256,6 +256,19 @@ fn component_classes<G: CountedGroup>(
         .collect()
 }
 
+/// When a stream stops.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StopRule {
+    /// Both arms at their achievable full rank (E1–E12).
+    BothSquare,
+    /// The folded arm at full rank and the target's logarithm pinned on
+    /// both arms: for an arm whose achievable rank is below the
+    /// driver's `columns + 1 − D` (E13's control, where `P` and `P + T`
+    /// are two columns), full rank is never declared, and the
+    /// logarithm — what a pipeline stops at — is the end point.
+    FoldedSquareBothPinned,
+}
+
 /// Feed one target stream to a folded arm and a control arm over the
 /// same points, until both are square or `max_trials` targets are
 /// drawn.  `oracle` decomposes a target into indices into the shared
@@ -275,6 +288,42 @@ pub fn full_rank_stream<G: CountedGroup>(
     max_trials: u64,
     summands: u32,
     classes: Option<&EndomorphismClasses<'_, G>>,
+    oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
+) -> Result<StreamReport, String> {
+    full_rank_stream_until(
+        g,
+        generator,
+        target,
+        r,
+        h,
+        planted,
+        folded,
+        control,
+        seed,
+        max_trials,
+        summands,
+        classes,
+        StopRule::BothSquare,
+        oracle,
+    )
+}
+
+/// [`full_rank_stream`] with its stopping rule chosen.
+#[allow(clippy::too_many_arguments)]
+pub fn full_rank_stream_until<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    h: u64,
+    planted: u64,
+    folded: &FactorBase<G::Elt>,
+    control: &FactorBase<G::Elt>,
+    seed: u64,
+    max_trials: u64,
+    summands: u32,
+    classes: Option<&EndomorphismClasses<'_, G>>,
+    stop: StopRule,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
 ) -> Result<StreamReport, String> {
     if folded.points.len() != control.points.len()
@@ -340,7 +389,13 @@ pub fn full_rank_stream<G: CountedGroup>(
     let mut orbit_duplicates = 0u64;
     let mut trials = 0u64;
     let mut relations = 0u64;
-    while trials < max_trials && arms.iter().any(|a| a.square.is_none()) {
+    let done = |arms: &[Arm<'_, G::Elt>; 2]| match stop {
+        StopRule::BothSquare => arms.iter().all(|a| a.square.is_some()),
+        StopRule::FoldedSquareBothPinned => {
+            arms[0].square.is_some() && arms.iter().all(|a| a.first_pin.is_some())
+        }
+    };
+    while trials < max_trials && !done(&arms) {
         let a = rng.gen_range(1..r);
         let b = rng.gen_range(1..r);
         let ag = g.mul(&mut ops, generator, a);

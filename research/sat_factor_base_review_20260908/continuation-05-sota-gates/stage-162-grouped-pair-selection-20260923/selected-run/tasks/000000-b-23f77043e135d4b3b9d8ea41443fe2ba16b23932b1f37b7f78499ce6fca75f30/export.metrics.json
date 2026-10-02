@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build9-29524b34/bin/koblitz_pdp_export",
+    "59",
+    "9",
+    "standard",
+    "207239054604238230",
+    "100000",
+    "/Volumes/SSD990/koblitz-native-f4-run9-29524b34/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance",
+    "1",
+    "0",
+    "--target-x",
+    "342002423881678665",
+    "--target-y",
+    "482559600513111561",
+    "--blind-instance-id",
+    "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "--export-only"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.48609391600621166,
+    "user_seconds": 0.08473,
+    "system_seconds": 0.005333,
+    "total_core_seconds": 0.090063,
+    "single_core_seconds": 0.090063,
+    "peak_rss_bytes": 14761984,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

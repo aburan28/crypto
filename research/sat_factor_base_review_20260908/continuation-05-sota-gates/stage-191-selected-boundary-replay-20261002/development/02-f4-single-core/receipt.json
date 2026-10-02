@@ -1,0 +1,50 @@
+{
+  "metrics": {
+    "bytes": 1050,
+    "path": "metrics.json",
+    "sha256": "c6513d119c59d035fc5784193d6e0107956528c9500ec05de32b996426335e9e"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "RAYON_NUM_THREADS=1",
+      "PQ_F4_X1_BATCH=1",
+      "F4_F2_DENSE_PAIR_SELECT=1",
+      "F4_F2_FULL_M4RI=0",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "MKL_NUM_THREADS=1",
+      "BLIS_NUM_THREADS=1",
+      "NUMEXPR_NUM_THREADS=1",
+      "/Volumes/SSD990/kic-stage191-target-17e25d958/release/examples/koblitz_pdp_backend",
+      "native-f4",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+      "300"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 480526336,
+    "pid": 39806,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.57831,
+    "timed_out": false,
+    "total_core_seconds": 109.12147300000001,
+    "user_seconds": 108.543163,
+    "wall_seconds": 109.175285833,
+    "watchdog_seconds": 360
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 6687,
+    "path": "stdout.txt",
+    "sha256": "46f7cb7e39b960ca26f7bb9363ee4dfcd14a73fec1c0cbd34c257eccc28e6a18"
+  }
+}

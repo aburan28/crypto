@@ -220,3 +220,69 @@ nor `factorise_u64`, so it merges with both without interaction.
   control, the prediction, the rule and the cost. On R05's base the
   subtraction is a larger share of cold time, which if anything raises
   the ratio R02b measures. The prediction stays as declared.
+
+## Amendment 2 (2026-10-02, before any R02b build or run): native tooling, v2, and the host
+
+**The base and the candidate.**
+- **The base is v2:** R05's candidate, `edcb0bec`, whose binary has
+  SHA-256 `76a2a2fd…` (`baselines.json`). Amendment 1 named it.
+- **The candidate** is `edcb0bec` plus R02's
+  [`candidate.patch`](../R02-wide-tail-kernel/candidate.patch), unchanged
+  (SHA-256 `2d3fb1b5…`). It applies to v2 without conflict.
+- **A tree on v1 was committed and abandoned.** It is `c88cf863`: R03's
+  candidate plus the same patch, made just before amendment 1 moved
+  R02b after R05. It was never built or run.
+
+**The tooling is native.** AGENTS.md's rule against Python tooling
+(#1180) merged after this declaration.
+- **Each step runs on `icprog run r02b <step>`,** with `isolated_bench`
+  (plan §10a, N2): `manifest`, `pin`, `aa` (below), `compare`,
+  `holdout`, `extend` and `callgrind`.
+- **The analysis is `icprog analyse r02b`.**
+- **Each piece reproduces the declared script's frozen outputs, byte
+  for byte:**
+  - the pin reproduces R05's `pin.json` from R05's run tree;
+  - the callgrind phase split reproduces R02's six profiles and R01's
+    two;
+  - the runner resumed R05's holdouts;
+  - the analysis is R05's, whose statistics and run-tree reading are
+    the ones that reproduce R03's frozen analysis.
+- **The callgrind control is new code.** It has no frozen output to
+  match, so it was checked on R02's profiles against R02's README
+  instead. The base ran 1.00102, 1.00085 and 1.00098 times the
+  candidate's instructions, and every kernel was identical.
+- **`run.py` and `analyse.py` stay** as the record of what was declared.
+
+**The host has changed, so the A/A is the round's own.**
+- R01's manifest names the kernel build `6.18.44-fc-v50`, and this
+  container runs `-fc-v51`. The declared manifest compares that field,
+  so it reports the host as changed.
+- "Success and stop" 3 then measures a regression against the round's
+  own A/A. Plan §5 asks for one every round in any case.
+- **The A/A:**
+  - the base against a byte-identical copy of itself;
+  - on `M1`'s 22 rows, five rounds, ABAB, isolated;
+  - 220 processes, as R01's;
+  - run after the pin and before the comparison.
+- **The declared `analyse.py` read R01's band whatever the host.** The
+  native analysis reads the round's own band when `aa-source.json`
+  reports the host as changed. A size without a band is then a reason
+  to reject.
+- If the manifest finds the host matching R01's after all, the bands are
+  R01's as declared, and the A/A runs as a check only.
+
+**The holdouts' files are checked by `SHA256SUMS`.**
+- Their sums were written from suite v1's construction when the files
+  were committed (#1157).
+- The declared runner rebuilt the files with `make_suite.py` and
+  compared. That script stays unported (plan §10a).
+
+**The analysis adds** these, beside the declared figures:
+- the extension rule's five-round test, checked against
+  `extended.json`;
+- each process's isolation tool;
+- the own A/A's record.
+
+**Unchanged:** the hypothesis, the rows, the callgrind control's rule,
+the prediction and the success rule. The cost grows by the A/A's 220
+processes, about an hour.

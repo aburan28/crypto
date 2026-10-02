@@ -182,6 +182,12 @@ fn main() {
             4,
             usize::MAX,
             DEFAULT_SEED ^ ((n as u64) << 8) ^ a2 as u64,
+            std::env::var_os("KOBLITZ_WALK_CHECKPOINT")
+                .map(|d| std::path::PathBuf::from(d).join(format!("walk_{n}_{a2}.ckpt")))
+                .as_deref(),
+            std::env::var("KOBLITZ_WALK_CLASSIFY_LIMIT")
+                .ok()
+                .and_then(|v| v.parse().ok()),
             |r| {
                 if r.reached.len() >= last + 64 {
                     last = r.reached.len();
@@ -201,10 +207,11 @@ fn main() {
             let pred = predicted_rank2(&cls.conductor_factors, ell);
             let got = report.rank2.get(&ell).copied().unwrap_or(0);
             println!(
-                "   ℓ = {ell:>3}: E[ℓ] proved rank 2 at {got} vertices (volcano predicts {pred}) {},  rank 1 at {},  undecided {}",
+                "   ℓ = {ell:>3}: E[ℓ] proved rank 2 at {got} vertices (volcano predicts {pred}) {},  rank 1 at {},  undecided {},  not classified (budget) {}",
                 if pred == BigInt::from(got) { "✓" } else { "✗" },
                 report.rank1.get(&ell).copied().unwrap_or(0),
-                report.undecided.get(&ell).copied().unwrap_or(0)
+                report.undecided.get(&ell).copied().unwrap_or(0),
+                report.unclassified.get(&ell).copied().unwrap_or(0)
             );
         }
         let depths = report
@@ -280,6 +287,7 @@ fn main() {
             "irrational_images": report.irrational_images,
             "rank2_vertices": report.rank2.iter().map(|(l, c)| (l.to_string(), *c)).collect::<std::collections::BTreeMap<_, _>>(),
             "rank1_vertices": report.rank1.iter().map(|(l, c)| (l.to_string(), *c)).collect::<std::collections::BTreeMap<_, _>>(),
+            "unclassified_vertices": report.unclassified.iter().map(|(l, c)| (l.to_string(), *c)).collect::<std::collections::BTreeMap<_, _>>(),
             "undecided_vertices": report.undecided.iter().map(|(l, c)| (l.to_string(), *c)).collect::<std::collections::BTreeMap<_, _>>(),
             "predicted_rank2": ells.iter().map(|&l| (l.to_string(), predicted_rank2(&cls.conductor_factors, l).to_string())).collect::<std::collections::BTreeMap<_, _>>(),
             "census_size": cen_size,

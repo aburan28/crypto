@@ -1,0 +1,444 @@
+{
+  "schema": "koblitz_stage192_boundary_result.v1",
+  "source_commit": "56bdc4c51cae7f718ff0953b6e7e7e8b2baa8dc3",
+  "finalizer_commit": "e575d53f1af4f6c41cfe272c21bcbc2b394a6456",
+  "claim_boundary": "One opened n=59 decomposition target. Selected twelve-worker F4 versus same-binary direct MITM only; relation collection, linear algebra, recovery, full rho, external reproduction, novelty and SOTA remain outside this ratio.",
+  "direct_before": {
+    "schema": "koblitz_native_meter_receipt.v1",
+    "process": {
+      "schema": "koblitz_native_process_meter.v1",
+      "meter": "fresh child process wait4/getrusage; all child threads included",
+      "command": [
+        "/usr/bin/env",
+        "VECLIB_MAXIMUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "OMP_NUM_THREADS=1",
+        "MKL_NUM_THREADS=1",
+        "BLIS_NUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_pdp_backend",
+        "direct-mitm",
+        "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+      ],
+      "environment": {},
+      "pid": 57974,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 120,
+      "wall_seconds": 0.584046166,
+      "user_seconds": 0.297379,
+      "system_seconds": 0.004971,
+      "total_core_seconds": 0.30235,
+      "single_core_seconds": null,
+      "peak_rss_bytes": 41222144
+    },
+    "stdout": {
+      "path": "stdout.txt",
+      "bytes": 1259,
+      "sha256": "d90554144bc5574083090fbeab6f487b5e8b8f9f72bb894c50b49c24825fb146"
+    },
+    "stderr": {
+      "path": "stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "metrics": {
+      "path": "metrics.json",
+      "bytes": 917,
+      "sha256": "8b0ff7c96caacbfbc91de12c9b4a56c490e806bb93c32f71f272b4a780dddf54"
+    }
+  },
+  "direct_before_report": {
+    "backend": "direct-mitm",
+    "exhaustive": true,
+    "factor_points": 483,
+    "group_additions": 117369,
+    "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+    "pair_entries": 116635,
+    "regenerated_source_exact": true,
+    "schema": "koblitz_pdp_isolated_backend.v1",
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+        "bytes": 208168,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+        "bytes": 373254,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+        "bytes": 236183,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+    "source_instance_verified": true,
+    "source_witness_valid": null,
+    "status": "unsat",
+    "timing_ns": {
+      "factor_base_materialisation": 2914333,
+      "search": 287815500,
+      "source_verification": 10209083
+    },
+    "witness_indices": null
+  },
+  "f4_parallel": {
+    "schema": "koblitz_native_meter_receipt.v1",
+    "process": {
+      "schema": "koblitz_native_process_meter.v1",
+      "meter": "fresh child process wait4/getrusage; all child threads included",
+      "command": [
+        "/usr/bin/env",
+        "RAYON_NUM_THREADS=12",
+        "PQ_F4_X1_BATCH=512",
+        "F4_F2_DENSE_PAIR_SELECT=1",
+        "F4_F2_FULL_M4RI=0",
+        "VECLIB_MAXIMUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "OMP_NUM_THREADS=1",
+        "MKL_NUM_THREADS=1",
+        "BLIS_NUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_pdp_backend",
+        "native-f4",
+        "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+        "300"
+      ],
+      "environment": {},
+      "pid": 58060,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 360,
+      "wall_seconds": 16.765098125,
+      "user_seconds": 178.813634,
+      "system_seconds": 2.484352,
+      "total_core_seconds": 181.297986,
+      "single_core_seconds": null,
+      "peak_rss_bytes": 4366270464
+    },
+    "stdout": {
+      "path": "stdout.txt",
+      "bytes": 6690,
+      "sha256": "d79159afcb48976942d17415c0a80ac253b9c70dda0cdd0edebf588ead692a79"
+    },
+    "stderr": {
+      "path": "stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "metrics": {
+      "path": "metrics.json",
+      "bytes": 1046,
+      "sha256": "f32e6642c7c9dfde870623459a907e7c241d8a5d840728dc040bb083e61dcdd7"
+    }
+  },
+  "f4_report": {
+    "algebraic_roots": 0,
+    "backend": "native-f4",
+    "budget_seconds": 300,
+    "conflicts": null,
+    "cost": {
+      "degree_reached": 5,
+      "extra": {
+        "basis_len": 1,
+        "build_ns": 42797493588,
+        "divisor_tests": 4190633182,
+        "eliminate_ns": 142309948890,
+        "extraction_tests": 0,
+        "f4_calls": 242,
+        "f4_wall_ns": 211874074213,
+        "field_pairs_reduced": 633185,
+        "full_m4ri_blocks": 0,
+        "full_m4ri_matrices": 0,
+        "full_m4ri_table_word_xors": 0,
+        "inner_build_parallel_disabled_calls": 242,
+        "matrix_cols_max": 12348,
+        "matrix_rows_max": 12000,
+        "matrix_rows_sum": 4764760,
+        "max_poly_degree": 5,
+        "new_elements": 997056,
+        "oversize": 0,
+        "pair_candidate_visits": 1137001812,
+        "pair_cover_lookups": 698657372,
+        "pair_dense_scratch_bytes_max": 4472832,
+        "pair_dense_select_calls": 1011275,
+        "pair_lcm_groups": 594604504,
+        "pair_quadratic_select_calls": 0,
+        "pairs_chain_skipped": 865909122,
+        "pairs_left": 0,
+        "pairs_product_skipped": 267427242,
+        "pairs_reduced": 1543629,
+        "peak_matrix_bytes": 18528000,
+        "peak_table_bytes": 53070336,
+        "reducer_rows": 1732933,
+        "steps": 1204,
+        "word_xors_performed": 147794583858
+      },
+      "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+      "ops": 319313687585,
+      "peak_bytes": 76071168,
+      "solving_degree": 5,
+      "timed_out": false,
+      "wall_ns": 212278060217
+    },
+    "exhaustive": true,
+    "factor_base_contract": {
+      "discrete_log_labels_used": false,
+      "target_subgroup_enumerated": false
+    },
+    "fixed_x1_masks_visited": 512,
+    "fixed_x1_nonrational_skipped": 270,
+    "fixed_x1_systems_completed": 242,
+    "fixed_x1_systems_constructed": 242,
+    "fixed_x1_values": 512,
+    "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+    "regenerated_source_exact": true,
+    "same_instance_fields": [
+      "n",
+      "ell",
+      "m",
+      "curve",
+      "algebraic_factor_base",
+      "affine_target"
+    ],
+    "schema": "koblitz_pdp_isolated_backend.v1",
+    "single_thread_requested": false,
+    "solver": "f4-f2",
+    "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+    "solver_block_table_columns": 5,
+    "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+    "solver_constructor": "fixed_x1_constant_linear_specialisation",
+    "solver_description": "F4 over F_2[v]/(v²−v): normal strategy, dense exact-LCM Gebauer–Möller selection on bounded domains, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+    "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+    "solver_engine": "repository_current_block_tables_f4",
+    "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+    "solver_equations_total": 14278,
+    "solver_full_m4ri_control": "F4_F2_FULL_M4RI=1",
+    "solver_inner_build_parallel_control": "F4_F2_DISABLE_INNER_BUILD_PARALLEL=0 selects the prior nested-build control; unset or 1 selects build-serial",
+    "solver_inner_build_parallel_policy": "serial monomial-product, symbolic-preprocessing and row-packing sections inside each F4 call; inner BlockTables construction and row reduction remain parallel; independent fixed-X1 calls remain in the outer Rayon batch",
+    "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+    "solver_max_degree": 4,
+    "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+    "solver_new_pair_selector": "reused dense exact LCM groups and submask cover lookup through 20 variables",
+    "solver_new_pair_selector_control": "F4_F2_DENSE_PAIR_SELECT=0; unset or 1 selects dense",
+    "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+    "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+    "solver_parallel_construction": true,
+    "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+    "solver_rayon_threads_requested": 12,
+    "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+    "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+    "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+    "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+    "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+    "solver_terms_max_per_system": 62087,
+    "solver_terms_total": 14515915,
+    "solver_variables": 18,
+    "solver_x1_batch_cap": 512,
+    "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+    "solver_x1_batch_size": 512,
+    "solver_x1_batches_completed": 1,
+    "solver_x1_order": "hamming_weight_then_mask",
+    "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+    "solver_x1_order_target_independent": true,
+    "solver_x1_speculative_systems_completed": 0,
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+        "bytes": 208168,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+        "bytes": 373254,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+        "bytes": 236183,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+    "source_instance_verified": true,
+    "source_model_valid": null,
+    "source_representation": "symmetrised_s4",
+    "source_variables": 78,
+    "source_witness_valid": null,
+    "status": "unsat",
+    "timing_ns": {
+      "factor_base_x1_membership": 3089917,
+      "fixed_x1_s4_construction": 414894708,
+      "native_f4_whole": 16692197167,
+      "source_verification": 7022709
+    },
+    "witness_points": null
+  },
+  "direct_after": {
+    "schema": "koblitz_native_meter_receipt.v1",
+    "process": {
+      "schema": "koblitz_native_process_meter.v1",
+      "meter": "fresh child process wait4/getrusage; all child threads included",
+      "command": [
+        "/usr/bin/env",
+        "VECLIB_MAXIMUM_THREADS=1",
+        "OPENBLAS_NUM_THREADS=1",
+        "OMP_NUM_THREADS=1",
+        "MKL_NUM_THREADS=1",
+        "BLIS_NUM_THREADS=1",
+        "NUMEXPR_NUM_THREADS=1",
+        "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_pdp_backend",
+        "direct-mitm",
+        "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+      ],
+      "environment": {},
+      "pid": 58158,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 120,
+      "wall_seconds": 0.325632375,
+      "user_seconds": 0.307026,
+      "system_seconds": 0.003457,
+      "total_core_seconds": 0.310483,
+      "single_core_seconds": null,
+      "peak_rss_bytes": 40910848
+    },
+    "stdout": {
+      "path": "stdout.txt",
+      "bytes": 1258,
+      "sha256": "c7f67a8eaa5b85086c7289c98f79987f9ced591b2b0764bca530aa3e95714443"
+    },
+    "stderr": {
+      "path": "stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "metrics": {
+      "path": "metrics.json",
+      "bytes": 918,
+      "sha256": "90a4ecd67eae04cdb8f08205b74a4db2a5ff19062a4d6b5ad3f5bdb6e844278f"
+    }
+  },
+  "direct_after_report": {
+    "backend": "direct-mitm",
+    "exhaustive": true,
+    "factor_points": 483,
+    "group_additions": 117369,
+    "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+    "pair_entries": 116635,
+    "regenerated_source_exact": true,
+    "schema": "koblitz_pdp_isolated_backend.v1",
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+        "bytes": 208168,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+        "bytes": 373254,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+        "bytes": 236183,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+    "source_instance_verified": true,
+    "source_witness_valid": null,
+    "status": "unsat",
+    "timing_ns": {
+      "factor_base_materialisation": 3054291,
+      "search": 297203375,
+      "source_verification": 7315292
+    },
+    "witness_indices": null
+  },
+  "direct_reference_mean": {
+    "wall_seconds": 0.4548392705,
+    "total_core_seconds": 0.3064165,
+    "single_core_seconds": 0.3064165,
+    "peak_rss_bytes": 41066496.0,
+    "conflicts": null
+  },
+  "f4_resources": {
+    "wall_seconds": 16.765098125,
+    "total_core_seconds": 181.297986,
+    "single_core_seconds": null,
+    "peak_rss_bytes": 4366270464.0,
+    "conflicts": null
+  },
+  "f4_over_direct": {
+    "wall": 36.859390145820754,
+    "total_core": 591.6717474417991,
+    "single_core": null,
+    "peak_rss": 106.32196289646917
+  },
+  "structural_checks_passed": true,
+  "measured_stage_charge": {
+    "components": 8,
+    "wall_seconds_sum": 146.713446374,
+    "total_core_seconds_sum": 728.886849,
+    "peak_rss_bytes_max": 5648957440
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 572,
+    "wall_seconds_sum": 23623.596439748002,
+    "total_core_seconds_sum": 60672.165229000006,
+    "peak_rss_bytes_max": 6310576128
+  },
+  "complete_campaign_cost": null,
+  "artifacts": {
+    "direct_after_receipt": {
+      "path": "development/03-direct-after/receipt.json",
+      "bytes": 1468,
+      "sha256": "1776998f115f1c3c0d8e66dea51a130b5f75ebb3b4dd455c6774fc4816c251ac"
+    },
+    "direct_after_stdout": {
+      "path": "development/03-direct-after/stdout.txt",
+      "bytes": 1258,
+      "sha256": "c7f67a8eaa5b85086c7289c98f79987f9ced591b2b0764bca530aa3e95714443"
+    },
+    "direct_before_receipt": {
+      "path": "development/01-direct-before/receipt.json",
+      "bytes": 1467,
+      "sha256": "5ae497155aec92ae69a0eac010cccbf5a7e99e91ff4ac7c4e1bacce41918dcf4"
+    },
+    "direct_before_stdout": {
+      "path": "development/01-direct-before/stdout.txt",
+      "bytes": 1259,
+      "sha256": "d90554144bc5574083090fbeab6f487b5e8b8f9f72bb894c50b49c24825fb146"
+    },
+    "f4_receipt": {
+      "path": "development/02-f4-parallel/receipt.json",
+      "bytes": 1607,
+      "sha256": "29c63ad53938f8d0fa938dc6b7237dfdb909d6da990f463c9e0ed41706eddc14"
+    },
+    "f4_stdout": {
+      "path": "development/02-f4-parallel/stdout.txt",
+      "bytes": 6690,
+      "sha256": "d79159afcb48976942d17415c0a80ac253b9c70dda0cdd0edebf588ead692a79"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 3069,
+      "sha256": "f217baac04755190a246241d40d39114e09ba3c71485c26b58c7ad9d5f622400"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

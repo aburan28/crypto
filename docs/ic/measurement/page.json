@@ -2882,6 +2882,410 @@
     "threads_moved": 52
    },
    "session_id": "ICSESS1h64285700b1c4"
+  },
+  {
+   "arms": [
+    {
+     "S_median": null,
+     "abscissae": 67,
+     "arm": 0,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 67,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)",
+     "levels": [
+      "L1"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 558967,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 2129.725834,
+     "process_wall_ms_min": 2062.801176,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1hcff45cfed423",
+     "unit": "count.s3_solves",
+     "usable_points": 134,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 2011.622066999962,
+     "window_wall_ms_min": 1940.9785930000112,
+     "workload_id": "W025bd6f59537",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": null,
+     "abscissae": 67,
+     "arm": 1,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 67,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 20-bit prime curve: 67 smallest abscissae, mitm m=3, tails of 2 (autoresearcher)",
+     "levels": [
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 9935,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 160.995727,
+     "process_wall_ms_min": 160.662305,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1hf1e387d9c444",
+     "unit": "count.s3_solves",
+     "usable_points": 134,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 42.73065300003509,
+     "window_wall_ms_min": 41.84119400002828,
+     "workload_id": "W025bd6f59537",
+     "xor_rows": null,
+     "xor_rows_total": null
+    },
+    {
+     "S_median": null,
+     "abscissae": 67,
+     "arm": 2,
+     "cnf_clauses": null,
+     "cnf_clauses_total": null,
+     "columns": 67,
+     "complete": 5,
+     "deterministic": true,
+     "empty": false,
+     "label": "random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)",
+     "levels": [
+      "L1",
+      "L2"
+     ],
+     "lower_bound": false,
+     "n_equations": null,
+     "n_vars": null,
+     "ops_distinct": 1,
+     "ops_median": 558967,
+     "points_per_column": 2.0,
+     "priced_by": null,
+     "process_wall_ms_median": 2101.18343,
+     "process_wall_ms_min": 2070.473547,
+     "runs": 5,
+     "solver": null,
+     "solver_conflicts": null,
+     "solver_op_unit": null,
+     "solver_ops": null,
+     "spec_id": "ICS1hcff45cfed423",
+     "unit": "count.s3_solves",
+     "usable_points": 134,
+     "window": "cold_end_to_end",
+     "window_wall_ms_median": 1982.517974000018,
+     "window_wall_ms_min": 1943.1738389999964,
+     "workload_id": "W025bd6f59537",
+     "xor_rows": null,
+     "xor_rows_total": null
+    }
+   ],
+   "capsule": [
+    [
+     "env_class_id",
+     "ENV1h0aa2154374f6"
+    ],
+    [
+     "CPU",
+     "Intel(R) Xeon(R) Processor @ 2.10GHz \u00b7 family 6 model 207 stepping 2 \u00b7 microcode 0x1 \u00b7 4 logical"
+    ],
+    [
+     "features",
+     "popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor"
+    ],
+    [
+     "kernel",
+     "6.18.44-fc-v51 \u00b7 clocksource tsc"
+    ],
+    [
+     "isolation flags",
+     "isolcpus='' nohz_full=None \u00b7 cmdline {\"mitigations\": \"auto,no_guest_host,no_guest_guest\", \"psi\": \"1\"}"
+    ],
+    [
+     "frequency",
+     "governors ['None'] \u00b7 no_turbo None \u00b7 boost None"
+    ],
+    [
+     "SMT",
+     "control notsupported \u00b7 active 0"
+    ],
+    [
+     "virtualisation",
+     "docker \u00b7 vm kvm \u00b7 container docker \u00b7 hypervisor flag True"
+    ],
+    [
+     "memory / THP",
+     "16480972 kB \u00b7 THP always [madvise] never"
+    ],
+    [
+     "sysctls",
+     "nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0"
+    ],
+    [
+     "toolchain",
+     "Python 3.11.15 \u00b7 rustc 1.94.1 (e408947bf 2026-03-25) \u00b7 gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    ],
+    [
+     "OS",
+     "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
+    ]
+   ],
+   "commit": "37ab295dfc579e9b8a7cb3638084b318aa5caf82",
+   "comparisons": [
+    {
+     "a": {
+      "arm": 0,
+      "label": "random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)",
+      "spec_id": "ICS1hcff45cfed423"
+     },
+     "aa": false,
+     "aa_noise": [
+      {
+       "arms": [
+        0,
+        2
+       ],
+       "estimate": {
+        "ci95": [
+         0.9091257452905439,
+         1.0011309995936597
+        ],
+        "excludes_1": false,
+        "max_ratio": 1.0011309995936597,
+        "median_ratio": 0.9855320273736367,
+        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+        "min_ratio": 0.9091257452905439,
+        "n_pairs": 5
+       },
+       "spec_id": "ICS1hcff45cfed423"
+      }
+     ],
+     "b": {
+      "arm": 1,
+      "label": "random 20-bit prime curve: 67 smallest abscissae, mitm m=3, tails of 2 (autoresearcher)",
+      "spec_id": "ICS1hf1e387d9c444"
+     },
+     "declared_variables": [
+      {
+       "a": "enumerate",
+       "b": "mitm",
+       "field": "decomposition.method"
+      },
+      {
+       "a": {},
+       "b": null,
+       "field": "decomposition.params"
+      },
+      {
+       "a": null,
+       "b": 2,
+       "field": "decomposition.params.table_arity"
+      }
+     ],
+     "name": "mitm-vs-enumerate",
+     "ops": {
+      "a_median": 558967.0,
+      "a_spread": [
+       558967.0,
+       558967.0
+      ],
+      "admitted": true,
+      "b_median": 9935.0,
+      "b_spread": [
+       9935.0,
+       9935.0
+      ],
+      "completed": {
+       "a": "5/5",
+       "b": "5/5"
+      },
+      "deterministic": true,
+      "lower_bound": false,
+      "ratio_b_over_a": 0.017773857848495528,
+      "speedup_a_over_b": 56.26240563663815,
+      "unit": "count.s3_solves",
+      "window": "cold_end_to_end"
+     },
+     "refusals": [],
+     "wall": {
+      "admitted": false,
+      "contended_runs": 5,
+      "estimate": {
+       "ci95": [
+        0.020046629173091333,
+        0.030986380232857127
+       ],
+       "excludes_1": true,
+       "max_ratio": 0.030986380232857127,
+       "median_ratio": 0.021748560315005182,
+       "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+       "min_ratio": 0.020046629173091333,
+       "n_pairs": 5
+      },
+      "pairs": 5,
+      "refusals": [
+       {
+        "blocking": [
+         "bare_metal",
+         "fixed_frequency",
+         "foreign_runnable",
+         "kernel_isolation",
+         "steal"
+        ],
+        "count": 5,
+        "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+       }
+      ],
+      "window": "cold_end_to_end"
+     }
+    }
+   ],
+   "dirty": false,
+   "env_class_id": "ENV1h0aa2154374f6",
+   "gates": {
+    "checks": {
+     "affinity_observed": {
+      "fail": 0,
+      "level": "L1",
+      "note": "child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them",
+      "pass": 15,
+      "unknown": 0
+     },
+     "bare_metal": {
+      "fail": 15,
+      "level": "L3",
+      "note": "a virtual CPU can be descheduled by its host without a trace inside the guest",
+      "pass": 0,
+      "unknown": 0
+     },
+     "excludes_cpu0": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU 0 takes most housekeeping interrupts",
+      "pass": 15,
+      "unknown": 0
+     },
+     "fixed_frequency": {
+      "fail": 0,
+      "level": "L3",
+      "note": "frequency scaling moves wall time between runs",
+      "pass": 0,
+      "unknown": 15
+     },
+     "foreign_runnable": {
+      "fail": 3,
+      "level": "L2",
+      "note": "sampler ticks with another runnable task on a pinned CPU (40 ticks)",
+      "pass": 12,
+      "unknown": 0
+     },
+     "involuntary_switches": {
+      "fail": 0,
+      "level": "L2",
+      "note": "preemptions of the child per second",
+      "pass": 15,
+      "unknown": 0
+     },
+     "kernel_isolation": {
+      "fail": 15,
+      "level": "L3",
+      "note": "pinned CPUs must be in isolcpus or nohz_full",
+      "pass": 0,
+      "unknown": 0
+     },
+     "memory_stall": {
+      "fail": 0,
+      "level": "L2",
+      "note": "memory PSI 'full' stall during the window",
+      "pass": 15,
+      "unknown": 0
+     },
+     "parallelism": {
+      "fail": 0,
+      "level": "L1",
+      "note": "CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing",
+      "pass": 15,
+      "unknown": 0
+     },
+     "preflight_quiet": {
+      "fail": 0,
+      "level": "L2",
+      "note": "the machine was quiet before the session started, by a preflight no looser than the default",
+      "pass": 15,
+      "unknown": 0
+     },
+     "reservation": {
+      "fail": 0,
+      "level": "L1",
+      "note": "isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user's, when not run as root), fails this check, so a session not run as root earns at most L0",
+      "pass": 15,
+      "unknown": 0
+     },
+     "run_delay": {
+      "fail": 0,
+      "level": "L2",
+      "note": "share of the child's runnable time spent waiting for a CPU",
+      "pass": 15,
+      "unknown": 0
+     },
+     "smt": {
+      "fail": 0,
+      "level": "L3",
+      "note": "an SMT sibling shares the core's execution units",
+      "pass": 15,
+      "unknown": 0
+     },
+     "steal": {
+      "fail": 9,
+      "level": "L2",
+      "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
+      "pass": 6,
+      "unknown": 0
+     }
+    },
+    "levels": {
+     "L1": 9,
+     "L2": 6
+    }
+   },
+   "label": "autoresearcher random 20-bit prime curve, m=3: enumerate vs mitm, A/A on enumerate",
+   "measured": 15,
+   "name": "2026-10-02-ar-p20-m3-engine",
+   "preflight_quiet": true,
+   "records": 18,
+   "reservation": {
+    "cpus": [
+     3
+    ],
+    "evicted": true,
+    "left_on_reserved": {
+     "kernel_threads": 26,
+     "user_threads": []
+    },
+    "threads_moved": 56
+   },
+   "session_id": "ICSESS1hdcf85c1c60d4"
   }
  ],
  "sources": {
@@ -2948,6 +3352,22 @@
   "2026-10-01-k23-subspace-dimension/session.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/session.json",
    "sha256": "87b5f9ca5ccc593e5fefbf07db005a1ecbe7136bf8eb92228a725e707ca7251e"
+  },
+  "2026-10-02-ar-p20-m3-engine/capsule.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/capsule.json",
+   "sha256": "650cf1f8713baefc0bca2eabf8d5075d312cdf12d2bd9da79f0fb1dbbdc61490"
+  },
+  "2026-10-02-ar-p20-m3-engine/comparisons/mitm-vs-enumerate.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/comparisons/mitm-vs-enumerate.json",
+   "sha256": "7d50d95689a78b311447f57997d936017b280b27329902061f6483e6f074a9cb"
+  },
+  "2026-10-02-ar-p20-m3-engine/records.jsonl": {
+   "path": "docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/records.jsonl",
+   "sha256": "e55acc670ebecf18d8227f1f5228e4065d9548ea398c38c6e89f600de63f4c4a"
+  },
+  "2026-10-02-ar-p20-m3-engine/session.json": {
+   "path": "docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/session.json",
+   "sha256": "1cb0d78ebe9c8b87455863a1fca8ce7f1d1092193611234ec07c7e7bd5119b33"
   },
   "audit": {
    "path": "docs/ic/measurement/audit.json",

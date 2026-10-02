@@ -1,0 +1,198 @@
+{
+  "arms": [
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 841,
+          "path": "ordered-matrix.metrics",
+          "sha256": "9cc3097001efdd9dcd6fd7bdf167acf53d2e9fde26a5b2678091cfd6f6fed443"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "ordered-matrix.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3517,
+          "path": "ordered-matrix.stdout",
+          "sha256": "539c0c0b9c2b98f550bd2f6db5964d10f0ec3ea45fcf3fe9c3f4b2b348cb4aaf"
+        }
+      },
+      "decision": "rejected",
+      "description": "Sort complete F4 matrices by leading monomial and sparse tie-break; lower RSS but slower wall and more XOR work.",
+      "divisor_tests": 1150944931,
+      "f4_wall_ns": 71823538835,
+      "fixed_x1_s4_construction_ns": 29644819459,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 835436544,
+        "single_core_seconds": 101.367792,
+        "system_seconds": 0.365904,
+        "total_core_seconds": 101.367792,
+        "user_seconds": 101.001888,
+        "wall_seconds": 102.03992608300177
+      },
+      "name": "ordered-matrix",
+      "peak_matrix_bytes": 142839960,
+      "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+      "source_patch_retained": false,
+      "word_xors": 89835994387
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 841,
+          "path": "trim-row-end.metrics",
+          "sha256": "15ec0a88687af3cb626ba0250b01b3017413c76bb4710ae53a136eab2973bd94"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "trim-row-end.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3517,
+          "path": "trim-row-end.stdout",
+          "sha256": "fba793409ba086b0cd4b62d431ccadacecb7eea51f722944e273e59ba14e511d"
+        }
+      },
+      "decision": "rejected",
+      "description": "Trim zero suffix words after row XOR; negligible work reduction and slower wall.",
+      "divisor_tests": 1151227822,
+      "f4_wall_ns": 73770114954,
+      "fixed_x1_s4_construction_ns": 27402574126,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 981417984,
+        "single_core_seconds": 101.116164,
+        "system_seconds": 0.400925,
+        "total_core_seconds": 101.116164,
+        "user_seconds": 100.715239,
+        "wall_seconds": 101.73912458300038
+      },
+      "name": "trim-row-end",
+      "peak_matrix_bytes": 145665984,
+      "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+      "source_patch_retained": false,
+      "word_xors": 87504415748
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 840,
+          "path": "hashed-reducer-index.metrics",
+          "sha256": "75a8d6ff42600947a1adc3b90cd90ea445451f27f211070bd2a64db6c464e19c"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "hashed-reducer-index.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3515,
+          "path": "hashed-reducer-index.stdout",
+          "sha256": "1746165ea872afa3ff73449ab4fc726bce5f99710bec7d613996dc4c24e3c48e"
+        }
+      },
+      "decision": "rejected",
+      "description": "Enumerate monomial divisors through a hash index; probes fell sharply but wall did not improve.",
+      "divisor_tests": 29136159,
+      "f4_wall_ns": 73266078916,
+      "fixed_x1_s4_construction_ns": 27021110923,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 961069056,
+        "single_core_seconds": 100.230797,
+        "system_seconds": 0.369226,
+        "total_core_seconds": 100.230797,
+        "user_seconds": 99.861571,
+        "wall_seconds": 100.86901408300037
+      },
+      "name": "hashed-reducer-index",
+      "peak_matrix_bytes": 145665984,
+      "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+      "source_patch_retained": false,
+      "word_xors": 87513949370
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 857,
+          "path": "dense-reducer-index.metrics",
+          "sha256": "08b8dd498f282112c8080b855a01045fc710d7e3f90414c9a3b46f83835cd14e"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "dense-reducer-index.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3515,
+          "path": "dense-reducer-index.stdout",
+          "sha256": "060026a5bf981f2ecf7e5af289312929bf3872c8bff606a2fb36f1b8970b3380"
+        }
+      },
+      "decision": "rejected",
+      "description": "Replace the reducer hash with a bounded dense index; internal F4 improved slightly but whole-target wall regressed.",
+      "divisor_tests": 29136159,
+      "f4_wall_ns": 72581470583,
+      "fixed_x1_s4_construction_ns": 29724658583,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 975634432,
+        "single_core_seconds": 102.24529500000001,
+        "system_seconds": 0.376084,
+        "total_core_seconds": 102.24529500000001,
+        "user_seconds": 101.869211,
+        "wall_seconds": 102.90921399999934
+      },
+      "name": "dense-reducer-index",
+      "peak_matrix_bytes": 145665984,
+      "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+      "source_patch_retained": false,
+      "word_xors": 87513949370
+    },
+    {
+      "artifacts": {
+        "metrics": {
+          "bytes": 837,
+          "path": "fixed-x1-specialised-provisional.metrics",
+          "sha256": "078a84884fb7a7327faccae7156b9b4a3acacedf2de59ed698cb66614c850142"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "fixed-x1-specialised-provisional.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 3514,
+          "path": "fixed-x1-specialised-provisional.stdout",
+          "sha256": "98831f77254fb065202f8e8ad3298e4f3be6ccff8d9e14e390a53334fb1c69df"
+        }
+      },
+      "decision": "promoted_after_clean_rebuild",
+      "description": "Apply fixed and target field elements as linear maps and form X2*X3 once; provisional dirty-tree timing only.",
+      "divisor_tests": 1151227822,
+      "f4_wall_ns": 73345192125,
+      "fixed_x1_s4_construction_ns": 972998451,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 918798336,
+        "single_core_seconds": 74.293924,
+        "system_seconds": 0.311868,
+        "total_core_seconds": 74.293924,
+        "user_seconds": 73.982056,
+        "wall_seconds": 74.87841004200163
+      },
+      "name": "fixed-x1-specialised-provisional",
+      "peak_matrix_bytes": 145665984,
+      "source_boundary": "dirty incremental development binary; useful only as a charged exploratory receipt",
+      "source_patch_retained": false,
+      "word_xors": 87513949370
+    }
+  ],
+  "complete_development_cost": null,
+  "reason_complete_is_null": "incremental compiles and focused test invocations lacked an outer meter",
+  "schema": "koblitz_stage160_development_arms.v1",
+  "status": "metered_development_arms_retained"
+}
