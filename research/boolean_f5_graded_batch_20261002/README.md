@@ -19,6 +19,10 @@ recompute the cached prefix. An ignored n=24 batch-32 test provides local
 profiling on public development seeds only. Its timings are unisolated and do
 not qualify the registered performance gate. The discovery and holdout seeds
 in `protocol.json` remain for the frozen Linux x86-64 campaign.
+The producer directly compares both outputs once per unique fixture before
+timing and checks every timed return against its ordered-output SHA-256 digest;
+the verifier independently repeats the direct comparisons. Validation work
+between timed calls is matched between baseline and candidate arms.
 
 On a clean committed Linux x86-64 AVX2 checkout, run
 `bash research/boolean_f5_graded_batch_20261002/run.sh discovery NEW_DIRECTORY`.

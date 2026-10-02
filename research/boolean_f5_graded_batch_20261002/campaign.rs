@@ -291,19 +291,19 @@ fn timed_batch(
         assert_eq!(digest, expected.output_digest);
         assert_eq!(rows.len(), expected.returned_rows);
         assert_eq!(terms, expected.returned_terms);
+        // Keep validation work matched between arms. Every timed return is
+        // pinned by its ordered-output digest; the full Vec comparison is
+        // performed once per unique public fixture before the timed batches.
+        let selected = selected_matrix(&systems[index], &Basis::new(n));
+        assert_eq!(selected.rows_f4, expected.report.rows_f4);
+        assert_eq!(selected.rows.len() as u64, expected.report.rows_built);
+        assert_eq!(selected.criterion_rows, expected.report.criterion_rows);
+        assert_eq!(
+            selected.criterion_word_xors,
+            expected.report.criterion_word_ops
+        );
         let (selected_rows, rows_f4, criterion_rows, criterion_word_xors, transform_word_xors) =
             if candidate {
-                let selected = selected_matrix(&systems[index], &Basis::new(n));
-                assert_eq!(selected.rows_f4, expected.report.rows_f4);
-                assert_eq!(selected.rows.len() as u64, expected.report.rows_built);
-                assert_eq!(selected.criterion_rows, expected.report.criterion_rows);
-                assert_eq!(
-                    selected.criterion_word_xors,
-                    expected.report.criterion_word_ops
-                );
-                let (fresh, fresh_report, _) = call_f5(&polys[index], n);
-                assert_eq!(fresh_report, expected.report);
-                assert_eq!(rows, fresh, "ordered Boolean F5 output differs");
                 let transform = if hit {
                     assert!(candidate_word_xors >= selected.criterion_word_xors + tail_word_xors);
                     candidate_word_xors - selected.criterion_word_xors - tail_word_xors
@@ -359,6 +359,24 @@ fn cell(split: &str, n: u8, seed: u64, family: &str, batch: usize, repetitions: 
     let systems = assignments(n, seed, batch, family);
     let polys = systems.iter().map(polynomials).collect::<Vec<_>>();
     let references = polys.iter().map(|p| reference(p, n)).collect::<Vec<_>>();
+    let preflight_cache = match HighCache::compile(&systems[0]) {
+        Ok(cache) => Some(cache),
+        Err(reason) => {
+            assert_ne!(reason, "context-cap", "resource cap is censored");
+            None
+        }
+    };
+    for (index, system) in systems.iter().enumerate() {
+        let actual = if let Some(ref cache) = preflight_cache {
+            cache.apply(system).0
+        } else {
+            baseline(system)
+        };
+        let (expected, report, _) = call_f5(&polys[index], n);
+        assert_eq!(report, references[index].report);
+        assert_eq!(actual, expected, "direct preflight ordered output {index}");
+    }
+    drop(preflight_cache);
     let f4_fingerprint = f4_cross_check(&polys[0], n);
     let cell_id = format!("n{n}-{split}-{seed}-{family}-b{batch}");
     println!(
@@ -367,7 +385,8 @@ fn cell(split: &str, n: u8, seed: u64, family: &str, batch: usize, repetitions: 
             "kind":"fixture","cell":cell_id,"n":n,"seed":seed,
             "family":family,"batch":batch,"quadratic":systems[0].quadratic,
             "affine":systems.iter().map(|s| &s.affine).collect::<Vec<_>>(),
-            "references":references,"small_f4_fingerprint":f4_fingerprint
+            "references":references,"small_f4_fingerprint":f4_fingerprint,
+            "direct_preflight":true
         })
     );
     for repetition in 0..repetitions {
@@ -418,15 +437,15 @@ fn campaign(phase: &str, protocol_path: &str) {
                         ])
                         .output()
                         .expect("cell process");
+                    bytes += output.stdout.len();
+                    assert!(bytes <= p.evidence_cap_bytes, "evidence cap; censored");
+                    writer.write_all(&output.stdout).expect("raw records");
+                    writer.flush().expect("flush cell");
                     assert!(
                         output.status.success(),
                         "cell failed: {}",
                         String::from_utf8_lossy(&output.stderr)
                     );
-                    bytes += output.stdout.len();
-                    assert!(bytes <= p.evidence_cap_bytes, "evidence cap; censored");
-                    writer.write_all(&output.stdout).expect("raw records");
-                    writer.flush().expect("flush cell");
                     assert!(
                         started.elapsed().as_secs() <= p.worker_seconds,
                         "worker cap; censored"
@@ -750,11 +769,13 @@ fn compute_report(phase: &str, raw: &Path, conditions: &Path) -> Value {
                         "kind":"fixture","cell":cell_id,"n":n,"seed":seed,
                         "family":family,"batch":batch,"quadratic":systems[0].quadratic,
                         "affine":systems.iter().map(|s| &s.affine).collect::<Vec<_>>(),
-                        "references":references,"small_f4_fingerprint":fingerprint
+                        "references":references,"small_f4_fingerprint":fingerprint,
+                        "direct_preflight":true
                     });
                     assert_eq!(take(), &fixture, "fixture {cell_id}");
-                    // Independent replay of each unique candidate output. The
-                    // timed producer also compared each instance byte for byte.
+                    // Independent direct replay of each unique output. The
+                    // producer preflight compares vectors, and every timed
+                    // return carries an ordered-output digest.
                     let cache = HighCache::compile(&systems[0]).ok();
                     for (index, system) in systems.iter().enumerate() {
                         let (actual, _, _, _, _) = if let Some(ref cache) = cache {
