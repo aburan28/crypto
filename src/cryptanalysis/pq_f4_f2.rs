@@ -141,6 +141,9 @@ pub struct F4Stats {
     pub pair_lcm_groups: u64,
     pub pair_cover_lookups: u64,
     pub pair_dense_scratch_bytes_max: u64,
+    /// One when this F4 call serializes only product, symbolic and packing
+    /// work while retaining the selected parallel elimination path.
+    pub inner_build_parallel_disabled_calls: u64,
     /// Rows symbolic preprocessing added as reducers.
     pub reducer_rows: u64,
     /// Largest matrix built, and the sum of rows over every matrix.
@@ -1184,6 +1187,12 @@ const ELIMINATION_BATCH_WORDS: usize = 1 << 16;
 /// thread.
 const PAR_BATCH_WORDS: usize = 1 << 10;
 
+fn inner_build_parallel_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED
+        .get_or_init(|| std::env::var("F4_F2_DISABLE_INNER_BUILD_PARALLEL").as_deref() == Ok("0"))
+}
+
 fn is_one(p: &F2BoolPoly) -> bool {
     p.terms.len() == 1 && p.terms[0].mask == 0
 }
@@ -1495,7 +1504,10 @@ pub fn groebner_basis_f4(
         *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
-    let mut st = F4Stats::default();
+    let mut st = F4Stats {
+        inner_build_parallel_disabled_calls: u64::from(!inner_build_parallel_enabled()),
+        ..F4Stats::default()
+    };
     let one = || vec![F2BoolPoly::one(n_vars)];
     let finish = |basis: Vec<F2BoolPoly>, mut st: F4Stats| {
         st.basis_len = basis.len() as u64;
@@ -1592,7 +1604,11 @@ pub fn groebner_basis_f4(
         let product = |&(mult, g): &(u64, usize)| s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
         let products = |keys: &[(u64, usize)]| -> Vec<F2BoolPoly> {
             let terms: usize = keys.iter().map(|&(_, g)| s.polys[g].terms.len()).sum();
-            if keys.len() > 1 && terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1 {
+            if keys.len() > 1
+                && terms >= PAR_PRODUCT_TERMS
+                && inner_build_parallel_enabled()
+                && rayon::current_num_threads() > 1
+            {
                 keys.par_iter().map(product).collect()
             } else {
                 keys.iter().map(product).collect()
@@ -1612,7 +1628,9 @@ pub fn groebner_basis_f4(
             .chain(&field_rows)
             .map(|p| p.terms.len())
             .sum();
-        let par_terms = s_terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1;
+        let par_terms = s_terms >= PAR_PRODUCT_TERMS
+            && inner_build_parallel_enabled()
+            && rayon::current_num_threads() > 1;
         // (The S-rows carry many times more terms than distinct monomials,
         // so each share of them is deduplicated into a set of its own.)
         let mut queue: Vec<u64> = if par_terms {
@@ -1669,6 +1687,7 @@ pub fn groebner_basis_f4(
             // (sizes first: asking rayon its thread count starts its pool)
             let parallel = frontier.len() >= PAR_REDUCERS
                 && frontier.len() * mean_terms >= PAR_PRODUCT_TERMS
+                && inner_build_parallel_enabled()
                 && rayon::current_num_threads() > 1;
             let rows: Vec<Option<F2BoolPoly>> = if parallel {
                 frontier.par_iter().map(|&m| reducer_row(m)).collect()
@@ -1742,7 +1761,10 @@ pub fn groebner_basis_f4(
         }
         let all: Vec<&F2BoolPoly> = reducers.iter().chain(s_rows).collect();
         // Packing is one lookup per term and independent across rows.
-        let rows: Vec<Row> = if all.len() * cols.words() > PAR_WORDS {
+        let rows: Vec<Row> = if all.len() * cols.words() > PAR_WORDS
+            && inner_build_parallel_enabled()
+            && rayon::current_num_threads() > 1
+        {
             all.par_iter().map(|p| cols.pack(p)).collect()
         } else {
             all.iter().map(|p| cols.pack(p)).collect()

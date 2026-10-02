@@ -184,6 +184,10 @@ impl SystemSolver for F4F2 {
                 "pair_dense_scratch_bytes_max",
                 st.pair_dense_scratch_bytes_max,
             ),
+            (
+                "inner_build_parallel_disabled_calls",
+                st.inner_build_parallel_disabled_calls,
+            ),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
