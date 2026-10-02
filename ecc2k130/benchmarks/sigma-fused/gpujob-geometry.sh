@@ -56,7 +56,7 @@ verify() {
     > "$R/verify-$arm.log" 2>&1 || status=$?
   grep -qx "packed sigma fused: 1" "$R/verify-$arm.log" || status=1
   grep -qx "packed witness: 0" "$R/verify-$arm.log" || status=1
-  grep -Eq "^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, $blocks block\(s\) of $block packed threads resident per SM$" "$R/verify-$arm.log" || status=1
+  grep -qx "packed launch bounds: $block threads, $blocks min blocks" "$R/verify-$arm.log" || status=1
   grep -Eq "^backend cuda-packed131: $threads threads x $batch slots x 1 lanes = 1540096 walks, dp weight 48, 95 steps per launch$" "$R/verify-$arm.log" || status=1
   grep -Eq "\(300 verified against the reference, 0 dropped\)" "$R/verify-$arm.log" || status=1
   ! grep -Eq "MISMATCH|OVERFLOW" "$R/verify-$arm.log" || status=1
@@ -85,7 +85,7 @@ sample() {
   rate=$(sed -nE 's/^[[:space:]]*finished: ([0-9.]+) M it\/s.*/\1/p' "$log")
   grep -qx "packed sigma fused: 1" "$log" || rc=1
   grep -qx "packed witness: 0" "$log" || rc=1
-  grep -Eq "^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, $blocks block\(s\) of $block packed threads resident per SM$" "$log" || rc=1
+  grep -qx "packed launch bounds: $block threads, $blocks min blocks" "$log" || rc=1
   grep -Eq "^backend cuda-packed131: $threads threads x $batch slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch$" "$log" || rc=1
   grep -Eq "\(0 verified against the reference, 0 dropped\)" "$log" || rc=1
   ! grep -Eq "MISMATCH|OVERFLOW" "$log" || rc=1

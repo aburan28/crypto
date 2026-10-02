@@ -134,6 +134,15 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED != 0 && ECC_SIGMA_FUSED != 1
 #error "ECC_SIGMA_FUSED must be 0 or 1"
 #endif
+#ifndef ECC_SIGMA_FUSED_LATE_Y
+#define ECC_SIGMA_FUSED_LATE_Y 0
+#endif
+#if ECC_SIGMA_FUSED_LATE_Y != 0 && ECC_SIGMA_FUSED_LATE_Y != 1
+#error "ECC_SIGMA_FUSED_LATE_Y must be 0 or 1"
+#endif
+#if ECC_SIGMA_FUSED_LATE_Y && !ECC_SIGMA_FUSED
+#error "ECC_SIGMA_FUSED_LATE_Y requires ECC_SIGMA_FUSED"
+#endif
 #if ECC_SIGMA_FUSED && (ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE || \
                         !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN || \
                         ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || \
@@ -511,7 +520,9 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                                                  bool first, unsigned *denominators,
                                                  P131 *prod) {
     const P131 x = fromPolynomial131(xp);
+#if !ECC_SIGMA_FUSED_LATE_Y
     const P131 normalY = fromPolynomial131(yp);
+#endif
     const int hw = weight(x);
     if (!p.dead[id]) {
         if (hw <= p.dpWeight) {
@@ -522,7 +533,12 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                 rec.seed = p.seed[id];
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
+#if ECC_SIGMA_FUSED_LATE_Y
+                const P131 reportY = fromPolynomial131(yp);
+                toLimbs(reportY, rec.y);
+#else
                 toLimbs(normalY, rec.y);
+#endif
                 for (int k = 0; k < ECC_JCOUNT; ++k) {
 #if ECC_WITNESS
                     rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
@@ -543,6 +559,13 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #if ECC_WITNESS
     if (!p.dead[id])
         p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
+#endif
+#if ECC_SIGMA_FUSED_LATE_Y
+    // Keep normal Y out of the report/guard branch's live range on the hot
+    // DP-weight-zero path. A rare reported point converts once for the record
+    // above and again here for the step; arithmetic and record bytes are
+    // unchanged.
+    const P131 normalY = fromPolynomial131(yp);
 #endif
 #if ECC_PACKED_SHARED_SIGMA
     const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
