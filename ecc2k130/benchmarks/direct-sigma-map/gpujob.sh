@@ -181,8 +181,9 @@ echo 'PASS: native/GPU map, replay, checkpoints, resources and sorted corpus ide
 
 printf 'phase\tpair\torder\tvariant\trateMps\titerations\tdropped\tlogSha256\tgpuState\n' > "$R/samples.tsv"
 sample() {
-  local phase=$1 pair=$2 order=$3 variant=$4 binary=$variant direct shared
+  local phase=$1 pair=$2 order=$3 variant=$4 binary direct shared
   local log="$R/${phase}-${pair}-${order}-${variant}.log" rc=0 count rate iterations dropped digest state
+  binary=$variant
   case "$variant" in
     control|control_a|control_b) binary=control; direct=0; shared=1 ;;
     candidate) direct=1; shared=0 ;;

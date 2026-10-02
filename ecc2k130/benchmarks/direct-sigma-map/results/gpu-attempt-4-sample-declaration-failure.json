@@ -1,0 +1,25 @@
+{
+  "classification": "HARNESS_FAILURE",
+  "scientificDisposition": "Every frozen pre-timing gate passed. No warmup or ranked timing row started, so the run has no throughput conclusion.",
+  "cause": "With `set -u`, Bash expanded `binary=$variant` inside the same local declaration before the preceding `variant=$4` assignment took effect.",
+  "repair": "Declare the local names first and assign `binary=$variant` on the next line. No build, correctness, geometry, workload or decision input changes.",
+  "passedEvidence": {
+    "nativeAndGpuMap": "all 1048 basis cases and 4096 GPU dense cases",
+    "arithmeticAndStorage": "both arms passed repository CUDA gates",
+    "packedWalkResources": "control 126 registers / candidate 128, both zero local bytes and zero packed-walk spills",
+    "sharedMemory": "control 1792 static + 0 dynamic; candidate 0 static + 56320 opt-in dynamic",
+    "replay": "300/300 each arm, zero drops",
+    "corpus": "1710327 complete v1 records per arm, sorted payloads identical",
+    "checkpoint": "whole and both cross-arm resumes byte-identical",
+    "occupancy": "188 SMs, one 512-thread block per SM in both verification arms"
+  },
+  "sourceCommit": "6f4404b3a33e0aae31442163f594d8bb8da3757c",
+  "modal": {
+    "appId": "ap-ayrUd9oLGBOGcZC1fyPLnH",
+    "functionCallId": "fc-01M3X9T0CM4EVNB8874PEYNJKA",
+    "volumeToken": "a03fe28b88e548abb8e22b0d6918c7c0",
+    "exitCode": 1
+  },
+  "archiveSha256": "0671f952695a35f3e6ee0d5b441d451e5a558d5792ca73a3e78b49d5b9276247",
+  "launchReceiptSha256": "04037b093a8b6182aaea5934c62771218599dcbc88dc80cb64ff6f84741b47f7"
+}
