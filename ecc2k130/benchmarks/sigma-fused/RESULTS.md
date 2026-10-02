@@ -93,6 +93,25 @@ framing and byte-identical sorted records, and reproduced canonical SHA-256
 The successful archive and the preserved first-attempt producer failure are
 bound in `results/inline-refresh-artifact.json`.
 
+## Closed geometry and direct-map follow-ups
+
+The missing matched B16 block-width comparison is now closed.  On one current-
+main allocation, B16/T512/min1 beat B16/T256/min2 in all five pairs, but only
+by a 1.006030 median ratio (minimum 1.005781) against 0.0833% maximum A/A
+drift.  That misses the frozen 1.01 selection threshold, so the native fused
+preset remains **B16/T256/min2**.  Both arms replayed 300/300 with zero drops,
+produced identical sorted 1,711,916-record corpora, and passed cross-geometry
+checkpoint replay.  Protocol, raw manifests and the corrected native audit are
+in [`b16-geometry/`](b16-geometry/).
+
+The larger direct polynomial-basis `I + sigma^j` experiment is also terminal.
+Its exact three-bit shared table cut fixed-`j` host instructions by 30.2%, but
+on the RTX PRO 6000 it reduced matched throughput from 15.893066 to 13.143106
+B/s: median ratio 0.826916, with every pair negative and 0.0371% A/A drift.
+All map, replay, corpus and checkpoint gates passed.  The default remains the
+composed shared-sigma network; terminal evidence is in
+[`direct-map-rejection/`](direct-map-rejection/).
+
 ## Correctness and equivalence
 
 Both protocols use seven odd 95-step launches at DP weight 48 before timing.
