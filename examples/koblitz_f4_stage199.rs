@@ -399,7 +399,7 @@ fn finalize(
         .canonicalize()
         .map_err(|e| format!("{}: {e}", stage.display()))?;
     verify_stage198_parent(&stage)?;
-    let replay_path = stage.join("development/default-replay/result.json");
+    let replay_path = stage.join("development/default-replay/run/result.json");
     let replay: DefaultReplay = read_json(&replay_path)?;
     let verification = verify_replay(&replay_path)?;
     if !replay.correct || !verification.failed.is_empty() {
@@ -416,10 +416,13 @@ fn finalize(
     let mut artifacts = BTreeMap::new();
     for (name, relative) in [
         ("protocol", "PROTOCOL.md"),
-        ("replay_result", "development/default-replay/result.json"),
+        (
+            "replay_result",
+            "development/default-replay/run/result.json",
+        ),
         (
             "replay_verification",
-            "development/default-replay/verification.json",
+            "development/default-replay/run/verification.json",
         ),
     ] {
         artifacts.insert(
@@ -498,7 +501,7 @@ fn verify_final(path: &Path) -> AnyResult<Verification> {
         verify_stage198_parent(&stage).is_ok(),
         "Stage 198 parent",
     );
-    let replay_path = stage.join("development/default-replay/result.json");
+    let replay_path = stage.join("development/default-replay/run/result.json");
     let replay_verification = verify_replay(&replay_path)?;
     check(
         &mut checks,
