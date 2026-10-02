@@ -68,9 +68,14 @@ def spec_differences(a: dict[str, Any], b: dict[str, Any], declared: list[str]) 
         if fa.get(k) == fb.get(k):
             continue
         item = {"field": k, "a": fa.get(k), "b": fb.get(k)}
+        # An empty mapping on one side and children on the other: the
+        # container's difference is its children's, so it is declared when a
+        # declared field lies under it (each child is still classified alone).
+        emptied = (fa.get(k) == {} and k not in fb) or (fb.get(k) == {} and k not in fa)
         if k.startswith(FORBIDDEN_PREFIXES) or k == "instance.workload.seeds":
             out["forbidden"].append(item)
-        elif any(k == d or k.startswith(d + ".") for d in declared):
+        elif any(k == d or k.startswith(d + ".") for d in declared) or \
+                (emptied and any(d.startswith(k + ".") or d.startswith(k + '["') for d in declared)):
             out["declared"].append(item)
         else:
             out["confound"].append(item)
