@@ -1,0 +1,37 @@
+{
+  "schema": "ecc2k130-sparse-table-microprobe-attempt-v1",
+  "status": "PRODUCER_FAILURE",
+  "scientificDecision": null,
+  "timingSuppressed": true,
+  "sourceCommit": "e9a8237e0306ee36dfaace904de3db6beef920c6",
+  "reason": "The fixed-stride cubin removed every device call and emitted exactly 44 LDS.128 plus 44 scalar LDS instructions in each of the seven benchmark kernels, with zero local instructions. The native SASS parser nevertheless stopped the job because it treated repeated nvdisasm .section/.text/.type metadata lines as new zero-length functions. No correctness or timing kernel was launched.",
+  "repair": "Recognize only nvdisasm section-banner lines, or cuobjdump Function markers, as function boundaries. Keep the compiled CUDA kernels, tables, workload, correctness panel, timing count, arms and decision gate unchanged.",
+  "launch": {
+    "provider": "modal",
+    "appId": "ap-oHvxL1INHCATqi2jtQ85E8",
+    "functionCallId": "fc-01M3YK1R2DWGYVHH70ETE4D5JC",
+    "token": "a347c0fa64794bf2be3a16318427006d",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "cuda": "13.3.73",
+    "exitCode": 1,
+    "gpuKernelsExecuted": 0,
+    "timingRows": 0
+  },
+  "nativeInspection": {
+    "benchmarkKernels": 7,
+    "lds128PerKernel": 44,
+    "ldsScalarPerKernel": 44,
+    "localInstructionsPerKernel": 0,
+    "callsPerKernel": 0
+  },
+  "artifact": {
+    "archiveSha256": "53faea23b6499ae6005890583da920ed7110c8c7394694f5162444bf950d365f",
+    "archiveBytes": 607124,
+    "binarySha256": "bcb58da92c55b40d08e2ed108976d485c468124f1b11b58b0f7cefe3c69bd429",
+    "cubinSha256": "0009ae398c82a88f43eb4def3e0c791727f8de973e49a8eada1292b82a54c4dc",
+    "sassSha256": "d2570ecb3eb05bcaf488eaac7f8b2c741b5c6184352ac30d49d9f26ba6ca67e5",
+    "launchSha256": "30abbc3a1e202754e079460489fa8d1acc9efa5d7611d1da566d7b2c1d1a3994"
+  },
+  "scope": "Preserved native auditor failure before any GPU scientific work; no sparse walk, search, distinguished-point collection, collision recovery or key recovery."
+}
