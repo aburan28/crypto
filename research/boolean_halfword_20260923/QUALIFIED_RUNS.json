@@ -89,6 +89,22 @@
       "other_cpu_seconds": 0.17,
       "worker_wall_seconds": 1.1292658130000746,
       "maximum_other_cpu_fraction": 0.1
+    },
+    {
+      "path": "failed_full_01",
+      "manifest_sha256": "b70ffe5eeadb8f8f8b1c67db0903062c430747aa6c54aec73d7c320a4698db9e",
+      "github_run_id": 36943520046,
+      "github_attempt": 1,
+      "source_head": "c54c5ba32f75b6c879d7977398b4bfb1f62e57ae",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36943520046",
+      "failure_kind": "resource",
+      "phase": "full",
+      "reason": "Full run stopped after 44 of 240 fixture pairs before holdouts: n12/regression/seed20261022/unplanted worker exited normally in 0.075414677 seconds, but 0.01 seconds of other-process CPU exceeded the unchanged 10% limit. No full performance sample is admitted or pooled.",
+      "completed_cells": 44,
+      "worker_wall_seconds": 0.07541467700002613,
+      "other_cpu_seconds": 0.01,
+      "maximum_other_cpu_fraction": 0.1,
+      "holdout_fixtures_executed": 0
     }
   ],
   "historical_qualified_runs": [

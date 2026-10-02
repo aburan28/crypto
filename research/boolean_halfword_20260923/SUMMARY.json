@@ -395,6 +395,22 @@
         "source_head": "127f9830252f238f3fd5fcfb99a046bb9daf5ff2",
         "worker_wall_seconds": 1.1292658130000746,
         "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36938560536"
+      },
+      {
+        "completed_cells": 44,
+        "failure_kind": "resource",
+        "github_attempt": 1,
+        "github_run_id": 36943520046,
+        "holdout_fixtures_executed": 0,
+        "manifest_sha256": "b70ffe5eeadb8f8f8b1c67db0903062c430747aa6c54aec73d7c320a4698db9e",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.01,
+        "path": "failed_full_01",
+        "phase": "full",
+        "reason": "Full run stopped after 44 of 240 fixture pairs before holdouts: n12/regression/seed20261022/unplanted worker exited normally in 0.075414677 seconds, but 0.01 seconds of other-process CPU exceeded the unchanged 10% limit. No full performance sample is admitted or pooled.",
+        "source_head": "c54c5ba32f75b6c879d7977398b4bfb1f62e57ae",
+        "worker_wall_seconds": 0.07541467700002613,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36943520046"
       }
     ],
     "full": null,
@@ -495,6 +511,20 @@
         "exception_type": "AssertionError",
         "message": "Isolation refused, contended, or failed: n16-discovery-17-unplanted/paired",
         "recorded_utc": "2026-10-01T23:05:36.631551+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "failure_kind": "resource",
+      "github_attempt": 1,
+      "github_run_id": 36943520046,
+      "path": "failed_full_01",
+      "reason": "Full run stopped after 44 of 240 fixture pairs before holdouts: n12/regression/seed20261022/unplanted worker exited normally in 0.075414677 seconds, but 0.01 seconds of other-process CPU exceeded the unchanged 10% limit. No full performance sample is admitted or pooled.",
+      "status": {
+        "completed_cells": 44,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n12-regression-20261022-unplanted/paired",
+        "recorded_utc": "2026-10-02T00:03:16.078916+00:00",
         "status": "FAILED_OR_UNQUALIFIED"
       }
     }
