@@ -1,0 +1,15 @@
+{
+  "classification": "PRODUCER_FAILURE",
+  "scientificDisposition": "No CUDA arm was built and no correctness or performance sample was produced.",
+  "cause": "The native C++ table generator was compiled by GCC with -Werror but without the repository's host-side -Wno-unknown-pragmas allowance; CUDA #pragma unroll lines therefore stopped compilation.",
+  "repair": "Add -Wno-unknown-pragmas only to the native generator compile. The frozen map, CUDA source, build flags, correctness gates, geometry and timing protocol are unchanged.",
+  "sourceCommit": "560c863c0136a5d56559e00ec78af37d541b7a4c",
+  "modal": {
+    "appId": "ap-P3tiZp3jd3qCTl1QHQmRaa",
+    "functionCallId": "fc-01M3X8HJC1DJXVEV9V2Z9EFDWA",
+    "volumeToken": "9a309c463a4c4438845a6a20366ca2db",
+    "exitCode": 1
+  },
+  "archiveSha256": "57f1d39cf42cd15a76b19220a7aa7bf2ea2c21be3b9ddfd033f1d69533c78dca",
+  "launchReceiptSha256": "d00afb5a51e76b7425497d260bcdd58bf367b691d1157bb6458faaea0c4b64d0"
+}

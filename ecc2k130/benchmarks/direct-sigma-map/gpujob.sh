@@ -55,7 +55,7 @@ fi
 
 # Rebuild the exact map from repository arithmetic before compiling CUDA.
 mkdir -p /tmp/direct-sigma
-g++ -O3 -std=c++17 -Wall -Wextra -Werror -DECC_PACKED_PERM_SIGMA=1 \
+g++ -O3 -std=c++17 -Wall -Wextra -Werror -Wno-unknown-pragmas -DECC_PACKED_PERM_SIGMA=1 \
   benchmarks/direct-sigma-map/synthesize.cpp -o /tmp/direct-sigma/synthesize || exit 1
 /tmp/direct-sigma/synthesize /tmp/direct-sigma/table3.h /tmp/direct-sigma/half5.h \
   /tmp/direct-sigma/gpu.cuh > "$R/native-synthesis.txt" || exit 1
