@@ -1,0 +1,28 @@
+{
+  "schema":"ecc2k130_sigma_fused_shared_scratch_static.v1",
+  "sourceCommit":"18ee85c1075010ce83be60a4a02636e9aa4ac83a",
+  "classification":"STATIC_FEASIBLE_IMPLEMENTATION_NOT_MEASURED",
+  "batch":16,
+  "threadsPerBlock":256,
+  "stepsPerLaunch":1024,
+  "compactGlobalFieldBytes":17,
+  "fullSharedFieldBytes":20,
+  "baselineRegistersPerThread":126,
+  "launchBoundRegisterCeiling":128,
+  "registersPerSm":65536,
+  "sharedBytesPerSm":102400,
+  "baselineFunctionSharedBytes":1792,
+  "observedDriverReservedSharedBytes":1024,
+  "launchBoundaryCases":[1,2,3,4,7,16,95,1024],
+  "layout":{"formula":"[field][slot][word][thread]","uniqueOwners":true,"fixedTupleWarpBanks":32,"requiresInterthreadBarrier":false},
+  "registeredArms":[
+    {"cachedSlots":0,"scratchBytesPerBlock":0,"functionSharedBytesPerBlock":1792,"compiledSharedExtentBytesPerBlock":2816,"sharedCapacityBlocksPerSm":36,"registerCapacityBlocksPerSm":2,"staticCapacityBlocksPerSm":2,"globalFieldBytesPerUpdate":136.033203125,"steadyStateGlobalFieldBytesPerUpdate":136.000000000,"launchBoundaryGlobalFieldBytesPerUpdate":0.033203125,"globalFieldBytesSavedPerUpdate":0.000000000,"sharedScratchBytesPerUpdate":0.000000000,"sharedWordOperationsPerUpdate":0.000000000},
+    {"cachedSlots":2,"scratchBytesPerBlock":20480,"functionSharedBytesPerBlock":22272,"compiledSharedExtentBytesPerBlock":23296,"sharedCapacityBlocksPerSm":4,"registerCapacityBlocksPerSm":2,"staticCapacityBlocksPerSm":2,"globalFieldBytesPerUpdate":127.533203125,"steadyStateGlobalFieldBytesPerUpdate":127.500000000,"launchBoundaryGlobalFieldBytesPerUpdate":0.033203125,"globalFieldBytesSavedPerUpdate":8.500000000,"sharedScratchBytesPerUpdate":10.000000000,"sharedWordOperationsPerUpdate":2.500000000},
+    {"cachedSlots":3,"scratchBytesPerBlock":30720,"functionSharedBytesPerBlock":32512,"compiledSharedExtentBytesPerBlock":33536,"sharedCapacityBlocksPerSm":3,"registerCapacityBlocksPerSm":2,"staticCapacityBlocksPerSm":2,"globalFieldBytesPerUpdate":123.283203125,"steadyStateGlobalFieldBytesPerUpdate":123.250000000,"launchBoundaryGlobalFieldBytesPerUpdate":0.033203125,"globalFieldBytesSavedPerUpdate":12.750000000,"sharedScratchBytesPerUpdate":15.000000000,"sharedWordOperationsPerUpdate":3.750000000},
+    {"cachedSlots":4,"scratchBytesPerBlock":40960,"functionSharedBytesPerBlock":42752,"compiledSharedExtentBytesPerBlock":43776,"sharedCapacityBlocksPerSm":2,"registerCapacityBlocksPerSm":2,"staticCapacityBlocksPerSm":2,"globalFieldBytesPerUpdate":119.033203125,"steadyStateGlobalFieldBytesPerUpdate":119.000000000,"launchBoundaryGlobalFieldBytesPerUpdate":0.033203125,"globalFieldBytesSavedPerUpdate":17.000000000,"sharedScratchBytesPerUpdate":20.000000000,"sharedWordOperationsPerUpdate":5.000000000}
+  ],
+  "capacityStop":
+    {"cachedSlots":5,"scratchBytesPerBlock":51200,"functionSharedBytesPerBlock":52992,"compiledSharedExtentBytesPerBlock":54016,"sharedCapacityBlocksPerSm":1,"registerCapacityBlocksPerSm":2,"staticCapacityBlocksPerSm":1,"globalFieldBytesPerUpdate":114.783203125,"steadyStateGlobalFieldBytesPerUpdate":114.750000000,"launchBoundaryGlobalFieldBytesPerUpdate":0.033203125,"globalFieldBytesSavedPerUpdate":21.250000000,"sharedScratchBytesPerUpdate":25.000000000,"sharedWordOperationsPerUpdate":6.250000000},
+  "accountingScope":"logical hot x/y/pchain/denominator field bytes; excludes metadata, cache-line amplification and measured bandwidth",
+  "nextGate":"implement only after review; require sm_120 zero-spill two-block resource proof and matched correctness before timing"
+}
