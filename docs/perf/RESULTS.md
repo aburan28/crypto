@@ -250,6 +250,94 @@ with no PR: `pdp/descend_s3_n31_np20` 2.36x wall / 3.46x `Ir`,
 `descend_s4_n23_np6` 2.43x / 3.30x, pdp area 1.082x, overall 1.040x (CI
 1.016-1.044) against `suite-base-v3`.
 
+## Changes after #1172
+
+Changes accepted after the four PRs above.  They are not in the 1.904x, which
+covers #908 to #1172 only; each gets a per-PR index when its PR merges.
+
+### `gf2-fold-reduce`: `Gf2` reduced by two carry-less folds
+
+`Gf2::mul`, `sqr`, `sqr_k`, `inv` and `batch_inv` (`semaev_decomp.rs`,
+`koblitz_fast.rs`) reduce a product by two carry-less folds with the sparse
+modulus tail, when the tail is short (`2·deg(tail) <= n + 1`) and the CPU has
+`pclmulqdq`.  The byte-table path stays for dense tails and for other CPUs.
+Branch `perf/opt-gf2-fold-reduce`, merged into the crypto branch as
+`809a7318`; the review verdict is accept.  All 133 `perfbench` fingerprints
+are equal to a rebuilt `b072fcf5` control at one and four threads.  Source for
+every figure here: `results-gf2-fold-reduce.txt`.
+
+Review, interleaved min-of-samples wall time against that control, one thread,
+host load 2.5-4 (ctl / cand): `gf2_n53_mul_sqr_1m` 2.44x, `gf2_n53_inv_16k`
+2.49x, `gf2_n53_batch_inv_4x64k` 1.66x, `koblitz_n53_fast_mul_2k` 2.86x,
+`koblitz_curve_mul_n53_1k` 3.61x, `pdp/mitm_m3_n31` 1.59x, `pdp/mitm_m4_n31`
+1.67x, `pdp/pair_table_build_n31_l10` 1.64x, `pdp/subspace_oracle_n20_l7`
+1.48x, `pdp/enumerate_m3_n15` 1.82x, `pdp/enumerate_m2_n23` 1.87x,
+`dlp/koblitz_signed_rho_k0_n41` 1.76x, `relation/koblitz_collect_k0n41` 1.17x,
+`relation/koblitz_pair_table_k0n41_folded` 1.28x,
+`relation/koblitz_descent_k0n53_m2_x4` 1.11x, `relation/koblitz_collect_k0n53`
+1.05x, `relation/koblitz_rung_k0n31` 1.01x; `koblitz_n53_add_many_lazy_64x2k`
+0.99x, neutral, because this host runs its `Simd512` path.  Instruction counts
+on the same pair: `gf2_n53_mul_sqr` 2.97x, `inv` 5.05x, `batch_inv` 2.53x,
+`koblitz_n53_fast_mul` 6.27x, `koblitz_curve_mul_n53_1k` 8.98x.  AArch64
+compiles the dispatch out and was not measured.
+
+Measured on the merged tree, after main's own `SubspaceOracle` table change
+(`14290207`) and other commits had landed, callgrind `Ir` against the build of
+`441293ee`: `pdp/subspace_oracle_n20_l7` 192.3M to 139.6M (1.377x), so the two
+changes compose; `pdp/enumerate_m2_n23` 1.92x, `pdp/pair_table_build_n31_l10`
+2.15x, `pdp/mitm_m3_n31` 2.12x and `mitm_m4_n31` 2.23x, `dlp/koblitz_signed_rho_k0_n41`
+2.44x, `relation/koblitz_collect_k0n53_w477_u1024` 1.39x.  Fingerprints are
+equal on every kernel measured except `relation/koblitz_pair_table_k0n41_folded`,
+whose fingerprint differs between main at `441293ee` and main at `ff5a31d06`
+and is the same in the merged tree as in main at `ff5a31d06`; the difference
+arrives with main's commits between those two (`3314760bc` is the one among them
+that touches this kernel's code), not with this change.
+
+Caveats the review recorded:
+
+- **The fallback is not unchanged.**  For a field that does not fold (tail
+  degree above `(n+1)/2`, or no `pclmulqdq`) the new `folds()` test makes
+  independent-multiply throughput 7-49% slower than before (`n = 7` +39%,
+  `n = 15` +49%, `n = 31` +24%, `n = 41` +14%, `n = 53` +7%, `n = 63` about
+  0; `batch_inv` 5-12% slower; latency unchanged).  No pipeline or `perfbench`
+  modulus is affected: `find_irreducible` and `find_irreducible_sparse` give
+  short tails, and every `perfbench` kernel folds.  The commit messages on the
+  branch say "unchanged"; the merge commit corrects that.
+- **Layout shifts on kernels with no `Gf2` code.**  Against the control,
+  `sat/random3sat_n150` +2.4% `Ir`, `random3sat_n200` +2.8%,
+  `sat/semaev_s4_n15l5_cnf` +3.3%, `sat/koblitz_bool_cnf` +2.0% and
+  `dlp/aut_folded_rho` +7.0%.  Interleaved wall time for these is within noise
+  (ratios 0.93-1.05, no consistent sign), so this is code layout, the same
+  effect as the `ct_scalar_mul` kernels below.
+
+Two things happened when the change was integrated (the first in the merge
+commit `809a7318`, the second in a later commit):
+
+- **Merge conflict.**  Main had gained `Gf2::dot2` (the `SubspaceOracle`
+  quartic route) at the spot where this change makes `Gf2::sqr` a
+  `folds()`-dispatching wrapper.  Both are kept; `dot2` calls `Gf2::reduce`,
+  which dispatches to the fold path, so `dot2` and the other new call sites
+  pick the fold up unchanged.
+- **One test narrowed.**  `general_quartic_matches_994784af_even_for_unreduced_b`
+  (from the `SubspaceOracle` change) passes a curve constant `b` wider than the
+  field (it sets bits up to 63; the failing case was `n = 20` with `b` about
+2^58), so the product exceeds the
+  documented domain of `reduce` (below 2^(2n-1)).  The byte table stays
+  F2-linear there; the fold path promises nothing, and `Gf2::mul` on such an
+  operand is not `reduce(clmul(a, b))` once it folds.  Production never
+  passes such a `b`: `ic_boundary` builds it as `1` for a Koblitz instance
+  and as `(rng.gen::<u64>() & gf.mask) | 2` for a random binary one, so it is
+  below 2^n, and the other callers pass `1`.  (The commit message of
+  `e378cae2` says `ic_boundary` draws `b` from `1..short` and that the
+  narrowing is disclosed in the merge commit; both are wrong: those draws are
+  walk scalars, and the disclosure is here and in the PR description.)  The
+  fold review asserted `operand < 2^n` in `mul`,
+  `sqr`, `sqr_k`, `inv` and `batch_inv` over the whole library suite with no
+  failure.  The off-domain case now runs on table fields in release builds
+  only; every in-domain case still runs on every field (commit `e378cae2`).
+  This narrows a test that another change had added, so it is stated here and
+  in the PR.
+
 ## Caveats
 
 ### Hosts and wall time
