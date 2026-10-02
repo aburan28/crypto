@@ -481,8 +481,8 @@ fn solver_outcome(
     validate_receipt(&directory, &receipt)?;
     let (binary_path, executed_input_path) =
         validate_solver_command(stage, solver, &receipt, expected_binary)?;
-    let stdout = artifact(&stage, &directory.join(&receipt.stdout.path))?;
-    let stderr = artifact(&stage, &directory.join(&receipt.stderr.path))?;
+    let stdout = artifact(stage, &directory.join(&receipt.stdout.path))?;
+    let stderr = artifact(stage, &directory.join(&receipt.stderr.path))?;
     let output = fs::read_to_string(directory.join(&receipt.stdout.path))
         .map_err(|e| format!("{solver} stdout: {e}"))?;
     let (mut status, terminal, conflicts) = if solver == "cryptominisat" {
