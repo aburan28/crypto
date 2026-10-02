@@ -59,3 +59,12 @@ at `ef4a1515d`, but has not run. It selects the first uncontended
 exact attempt on each of four seeds and fails the one-thread gate
 unless both the median and bootstrap lower bound exceed 2.00× against
 selective echelon.
+
+## Local mainline synchronization, 2026-10-02
+
+The five unpublished port commits were rebased onto local `origin/main`
+`d532b3369` and now end at `4f9a4156c`. The worktree is clean and
+`git diff --check origin/main..HEAD` passes. The three source SHA-256
+digests above are unchanged by the rebase, so the archived Apple screen
+still describes the same solver source. No new isolated Linux timing has
+been run; the further-2× gate remains open.
