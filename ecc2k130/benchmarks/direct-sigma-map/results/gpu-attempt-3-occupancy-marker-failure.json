@@ -1,0 +1,23 @@
+{
+  "classification": "HARNESS_FAILURE",
+  "scientificDisposition": "All arithmetic, CUDA direct-map, storage, checkpoint, replay and corpus gates passed. Timing was suppressed, so the run has no throughput conclusion.",
+  "cause": "The harness required the auto-occupancy 'device:' line while also passing an explicit --threads count. The client prints that line only when it computes the thread count automatically.",
+  "repair": "Let verification use the frozen auto geometry (188 SMs times one 512-thread block = 96256 threads), retaining the exact backend-thread assertion. Ranked runs keep the explicit equal-work 385024 threads and rely on the already established build and verification resource gates.",
+  "passedEvidence": {
+    "gpuDirectMap": "1048 basis plus 4096 dense cases",
+    "replay": "300/300 each arm, zero drops",
+    "corpus": "1710327 complete v1 records per arm, sorted payloads identical",
+    "checkpoint": "whole and both cross-arm resumes byte-identical",
+    "controlWalk": "126 registers, zero local bytes, 1792 static shared bytes",
+    "candidateWalk": "128 registers, zero local bytes, zero static shared bytes, 56320 opt-in dynamic shared bytes"
+  },
+  "sourceCommit": "9e55eba435512cbd4f6bd6dccae4583dc3be16da",
+  "modal": {
+    "appId": "ap-DK3Dnln4ElSgh21g6lU69L",
+    "functionCallId": "fc-01M3X8Y3FKK1W9GPJRKKA5H1YM",
+    "volumeToken": "59904be2bcd64e5d961480480081b166",
+    "exitCode": 1
+  },
+  "archiveSha256": "2187e0ee4112c1da3bbbb150cba39d69645cb941b206db72362dbdd902a86e8d",
+  "launchReceiptSha256": "6b4af89d85a826138045e7de3591db75a8f91eddfd1cc05d12ce083b649172d1"
+}

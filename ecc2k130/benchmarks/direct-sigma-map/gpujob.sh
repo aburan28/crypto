@@ -148,7 +148,7 @@ sha256sum "$R"/*.ck > "$R/checkpoint-sha256.txt"
 
 verify_arm() {
   local name=$1 direct=$2 shared=$3 log="$R/verify-$1.log" rc=0
-  "./client-$name" --curve 131 --packed --threads "$VERIFY_THREADS" \
+  "./client-$name" --curve 131 --packed \
     --dp-weight 48 --dp-cap 262144 --steps 95 --launches 7 --verify 300 \
     --run-id "$RUN_ID" --dp-file "$R/dp-$name.bin" > "$log" 2>&1 || rc=$?
   [ "$rc" = 0 ] || return 1
@@ -197,7 +197,6 @@ sample() {
   grep -qx "packed direct sigma: $direct" "$log" || rc=1
   grep -qx "packed shared sigma: $shared" "$log" || rc=1
   grep -qx 'packed sigma fused: 1' "$log" || rc=1
-  grep -Eq '^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block\(s\) of 512 packed threads resident per SM$' "$log" || rc=1
   grep -Eq "^backend cuda-packed131: $BENCH_THREADS threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch$" "$log" || rc=1
   ! grep -Eq 'MISMATCH|OVERFLOW|stopping:|collision found|solved' "$log" || rc=1
   if [ "$count" != 1 ] || [ "$iterations" != "$EXPECTED_UPDATES" ] ||
