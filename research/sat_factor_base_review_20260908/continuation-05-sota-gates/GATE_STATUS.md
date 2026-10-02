@@ -1,6 +1,63 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 161, 2026-09-22. The historical optimization chain is
+Current through Stage 187, 2026-10-01.
+
+Stages 162–174 are the native-Boolean-F4 branch that culminated in the
+size-gated contiguous-M4RI result on the already-opened public
+`n=59, ell=9, m=3` true-negative. Stage 175 reconciles that branch with current
+`main` and deliberately restores the repository's newer five-column
+`BlockTables` engine rather than merging the older F4 fork. On the identical
+target, the current engine is correct and exhaustive but regresses the Stage
+174 medians by 1.3157x wall, 1.8071x CPU and 1.4622x RSS. Same-binary direct
+MITM is much faster still. The result is retained as a negative current-engine
+baseline, not rewritten as progress.
+
+Stages 176–180 reject fixed-X1 schedule tuning, hash-indexed and dense-indexed
+symbolic reducers, and the built-in four- and six-column table alternatives.
+Every arm preserves the frozen equation fingerprint and exact exhaustive UNSAT.
+The dense reducer index cuts its lookup count by 97.5 percent but misses the
+frozen CPU threshold; four and six columns perform more actual XORs than the
+five-column default.
+
+Stages 181–182 add a separately controlled full-matrix block-8 M4RI path to the
+current engine and certify its rank, pivot columns and row space. It reduces
+actual elimination XORs from 147,794,583,858 to 99,192,937,526 and improves
+multi-worker CPU, but misses the frozen paired wall gate and is slower on one
+worker. It therefore remains available only through `F4_F2_FULL_M4RI=1`.
+
+Stages 183–185 replace the current quadratic new-pair selection with exact
+dense LCM groups and submask cover lookup on Boolean domains through 20
+variables. The full-M4RI panel has median paired dense/quadratic ratios of
+0.7368 wall and 0.8023 CPU. The decisive replay on current five-column
+`BlockTables` has median paired ratios of 0.8078 wall, 0.8313 CPU and 0.9481
+RSS. Stage 185 then builds selection commit `8014149a2` from a detached
+checkout, passes ten F4 and three backend tests in both selected and quadratic
+control modes, and verifies that an unset selector routes 1,011,275 updates
+through the dense path. Dense selection is now the repository default;
+`F4_F2_DENSE_PAIR_SELECT=0` retains the exact quadratic control. The clean
+replay also caught the missing ignored lockfile; commit `0c26ceb80` restores
+the exact supplied `Cargo.lock` with SHA-256
+`4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5`.
+
+Stage 186 rechecks elimination after the pair-selector selection. Full M4RI
+still reduces XORs and RSS but takes 1.8478x wall and 1.0182x CPU in the frozen
+screen, so no confirmation is run. The selected Phase-B configuration is the
+current repository F4 with five-column `BlockTables` and dense exact pair
+selection; full M4RI remains a research control.
+
+Stage 187 composes the current audit without double-counting inherited setup.
+Stages 175–186 add 96 uniquely metered components, 9,028.458755 wall-seconds
+and 22,105.703870 core-seconds. The campaign's measured lower bound through
+Stage 186 is 508 components, 21,808.881290 wall-seconds, 52,387.262218
+core-seconds and 6,310,576,128 bytes maximum RSS. Complete campaign cost stays
+`null` because interactive compile/test work outside process meters remains.
+The public reproduction issue contains 36 comments, all from `aburan28`, and
+zero unaffiliated comments. Gates 1–3 remain partial, gates 4–5 retain finite
+coverage, gate 6 remains false and gate 7 remains open. All-seven and SOTA
+remain false. Stage 187 audit SHA-256 is
+`1778162909b1722fe006b2721f6c42fb89793113158727ba4b9f97657fd2092d`.
+
+The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
