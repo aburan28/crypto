@@ -9,6 +9,19 @@ fill none of the single-target fields. The claim drafts leave them absent, so
 claim-check fails closed. This note lists what the current producers can supply
 and what would need a decision. **No option is chosen here.**
 
+> **Update (2026-10-01):** option A was chosen and run, with option C's
+> plumbing (`launch-single`). The result is in
+> [`../20261001-koblitz-n61-single-target/`](../20261001-koblitz-n61-single-target/README.md).
+> Against strong rho R3 on 64 one-target workloads:
+>
+> - Contended macOS run: median online speedup 9.9×, ratio of means 5.0×.
+>   On a cold start IC is 117× slower.
+> - Isolated hosted run: median online speedup 12.7×, ratio of means 9.6×.
+>   On a cold start IC is 98× slower.
+>
+> The claim-check `vs_rho` passes 64/64 per workload in both runs. Status
+> remains `PENDING_INDEPENDENT_VALIDATION`.
+
 ## What the producers already emit
 
 | Requirement | Compact orbit (`koblitz_orbit_dlp_fast`) | Rho |

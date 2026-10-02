@@ -1,0 +1,299 @@
+{
+  "calibrated_operation_ratio": null,
+  "classification": "engineering",
+  "current_qualified_readbacks": [],
+  "full_ic_cost": null,
+  "historical_cells": 48,
+  "historical_observations": 21888,
+  "historical_probe_02_decisions": {
+    "half16_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half16_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half64_native": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 5,
+      "incremental_pass": false
+    },
+    "half64_scalar": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "half_dispatch": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 9,
+      "incremental_groups": 3,
+      "incremental_pass": false
+    }
+  },
+  "historical_qualification": "unisolated; not eligible under current policy",
+  "historical_qualified_runs": [
+    {
+      "capabilities": {
+        "architecture": "aarch64",
+        "eor3_available": true
+      },
+      "cpus": [
+        3
+      ],
+      "decisions": {
+        "eor3_word16": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "eor3_word64": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 2,
+          "incremental_pass": false
+        },
+        "half16_eor3": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half16_native": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half16_scalar": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half64_eor3": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 4,
+          "incremental_pass": false
+        },
+        "half64_native": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 4,
+          "incremental_pass": false
+        },
+        "half64_scalar": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 0,
+          "incremental_pass": false
+        },
+        "half_dispatch": {
+          "dramatic_groups": 0,
+          "dramatic_pass": false,
+          "groups": 9,
+          "incremental_groups": 1,
+          "incremental_pass": false
+        }
+      },
+      "host": {
+        "cpu_info": {
+          "CPU architecture": "8",
+          "CPU implementer": "0x41",
+          "CPU part": "0xd49",
+          "CPU revision": "0",
+          "CPU variant": "0x0",
+          "Features": "fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm uscat ilrcpc flagm sb paca pacg dcpodp sve2 sveaes svebitperm svesha3 svesm4 flagm2 frint svei8mm svebf16 i8mm bf16"
+        },
+        "logical_cpus": 4,
+        "machine": "aarch64",
+        "memory_total_kib": 16330088,
+        "platform": "Linux-6.17.0-1022-azure-aarch64-with-glibc2.39",
+        "system": "Linux"
+      },
+      "manifest_sha256": "247a477a90e055ad758dff3b5813cb96d525f0067bd74b9c78fc07933331a0ac",
+      "phase": "discovery",
+      "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c"
+    }
+  ],
+  "production_solver_cost": null,
+  "qualified_decisions": null,
+  "qualified_runs": {
+    "discovery": null,
+    "failed_attempts": [
+      {
+        "github_attempt": 1,
+        "github_run_id": 36922805760,
+        "manifest_sha256": "8abd6431d91dd4ada9bc460fd8488ab344dd078c0225a987af9a01174b0868ae",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.01,
+        "path": "failed_isolation_01",
+        "reason": "Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted.",
+        "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c",
+        "worker_wall_seconds": 0.08303723499989246,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36922805760"
+      },
+      {
+        "github_attempt": 1,
+        "github_run_id": 36930298574,
+        "manifest_sha256": "949dc54ad1ae6cc2fd8e106568aec63dddc8eba5c14d037c4e1b80fc0f0937f8",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.01,
+        "path": "failed_isolation_02",
+        "reason": "Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted.",
+        "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
+        "worker_wall_seconds": 0.0018080019999615615,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574"
+      },
+      {
+        "github_attempt": 2,
+        "github_run_id": 36930298574,
+        "manifest_sha256": "593ee9f372d4362a6b0e1f789167c4c352aa28a44529f3f38b835eb2248ecf56",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.01,
+        "path": "failed_isolation_03",
+        "reason": "Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted.",
+        "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
+        "worker_wall_seconds": 0.032861717000002955,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574"
+      },
+      {
+        "github_attempt": 1,
+        "github_run_id": 36935271707,
+        "manifest_sha256": "0a26ed7a5971d4a0c7f25424ced7cdc4b986ed5ab629474144ba1c5138ee6520",
+        "maximum_psi_some_avg10": 5.0,
+        "path": "failed_isolation_04",
+        "preflight_other_cpu_seconds": 0.12,
+        "preflight_psi_some_avg10": 18.36,
+        "preflight_settle_seconds": 2.0,
+        "reason": "After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted.",
+        "source_head": "6a36f1e206e7d2e10eb15973b2e369d6905e2345",
+        "worker_launched": false,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36935271707"
+      },
+      {
+        "completed_cells": 24,
+        "failure_kind": "analysis",
+        "github_attempt": 1,
+        "github_run_id": 36936730092,
+        "manifest_sha256": "478d676e97ae87057914dff84e2cf5e8aab3ef0bf8ad02afa877f0fd12312792",
+        "path": "failed_analysis_01",
+        "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
+        "repaired_analysis_path": "analysis_replay_01",
+        "source_head": "62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0",
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36936730092"
+      }
+    ],
+    "full": null,
+    "historical_qualified_runs": [
+      {
+        "github_attempt": 2,
+        "github_run_id": 36922805760,
+        "manifest_sha256": "247a477a90e055ad758dff3b5813cb96d525f0067bd74b9c78fc07933331a0ac",
+        "path": "qualified_probe_01",
+        "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c",
+        "status": "qualified discovery for the pre-specialization source; no dramatic group passed",
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36922805760"
+      }
+    ],
+    "schema_version": 1
+  },
+  "retained_analysis_failures": [
+    {
+      "failure_kind": "analysis",
+      "github_attempt": 1,
+      "github_run_id": 36936730092,
+      "path": "failed_analysis_01",
+      "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
+      "status": {
+        "completed_cells": 24,
+        "exception_type": "CalledProcessError",
+        "message": "Command '['/usr/bin/python3', '/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1/analyze.py', '/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1']' returned non-zero exit status 1.",
+        "recorded_utc": "2026-10-01T22:51:36.080470+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    }
+  ],
+  "retained_resource_failures": [
+    {
+      "failure_kind": "resource",
+      "github_attempt": 1,
+      "github_run_id": 36922805760,
+      "path": "failed_isolation_01",
+      "reason": "Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted.",
+      "status": {
+        "completed_cells": 2,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n12-discovery-17-unplanted/ab",
+        "recorded_utc": "2026-10-01T20:39:55.875813+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "failure_kind": "resource",
+      "github_attempt": 1,
+      "github_run_id": 36930298574,
+      "path": "failed_isolation_02",
+      "reason": "Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted.",
+      "status": {
+        "completed_cells": 1,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n12-discovery-17-cross_planted/aa",
+        "recorded_utc": "2026-10-01T21:43:44.254876+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "failure_kind": "resource",
+      "github_attempt": 2,
+      "github_run_id": 36930298574,
+      "path": "failed_isolation_03",
+      "reason": "Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted.",
+      "status": {
+        "completed_cells": 14,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n20-discovery-17-unplanted/aa",
+        "recorded_utc": "2026-10-01T22:07:16.695907+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "failure_kind": "resource",
+      "github_attempt": 1,
+      "github_run_id": 36935271707,
+      "path": "failed_isolation_04",
+      "reason": "After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted.",
+      "status": {
+        "completed_cells": 19,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n24-discovery-17-cross_planted/paired",
+        "recorded_utc": "2026-10-01T22:33:24.506490+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    }
+  ],
+  "rho_ratio": null,
+  "schema_version": 1,
+  "status": "16-bit predecessor reaches about 1.55x on n24; specialization pending"
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the tables of RESEARCH_GLV_INVARIANT_FACTOR_BASES.md §6 (E1–E7)
+"""Print the tables of RESEARCH_GLV_INVARIANT_FACTOR_BASES.md §6 and §8 (E1–E9)
 from the frozen experiment files.
 
     python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e1.json ...
@@ -226,12 +226,144 @@ def e7(rows):
         )
 
 
+def fit_exponent(points):
+    """Least-squares slope of log2(y) against log2(x) over (x, y) pairs."""
+    pts = [(math.log2(x), math.log2(y)) for x, y in points if x > 0 and y > 0]
+    if len(pts) < 2:
+        return None
+    mx = mean(p[0] for p in pts)
+    my = mean(p[1] for p in pts)
+    sxx = sum((p[0] - mx) ** 2 for p in pts)
+    if sxx == 0:
+        return None
+    return sum((p[0] - mx) * (p[1] - my) for p in pts) / sxx
+
+
+def e8_costs(r):
+    """Every phase of one E8 row in F_p multiplications (inversions priced
+    by the row's measured conversion; a row operation of the linear
+    algebra is one Z/rZ multiplication, priced as one).  Returns a dict
+    per arm and per rho walk, plus the shares used."""
+    k = r["inversion_in_multiplications"]
+    s = r["stream"]
+    unit = lambda m, i: m + k * i
+    stream_total = unit(r["stream_cost"]["fp_muls"], r["stream_cost"]["fp_invs"])
+    # The algebraic oracle counts its own multiplications (E11); they
+    # are stream cost, shared by the arms in the same proportion.
+    if "solver" in r:
+        stream_total += r["solver"]["fp_muls"]
+    table = unit(r["pair_table"]["fp_muls"], r["pair_table"]["fp_invs"]) if "pair_table" in r else 0.0
+    out = {}
+    for arm in ("folded", "control"):
+        a = s[arm]
+        build = unit(r["base_build"][arm]["fp_muls"], r["base_build"][arm]["fp_invs"])
+        # The stream is one uniform process feeding both arms; each arm's
+        # share is the part up to its own full rank.
+        share = (a["square_trials"] / s["trials"]) if (a["square_trials"] and s["trials"]) else 1.0
+        stream = stream_total * share
+        la = a["row_ops"]
+        total = build + table + stream + la
+        out[arm] = {"build": build, "table": table, "stream": stream, "la": la, "total": total, "share": share,
+                    "S": total / math.sqrt(r["r"])}
+    for walk in ("negation", "folded"):
+        tot = [unit(w[f"{walk}_fp_muls"], w[f"{walk}_fp_invs"]) for w in r["walks"]]
+        steps = [w[walk]["steps"] for w in r["walks"]]
+        gae = [w[walk]["gae"] for w in r["walks"]]
+        out[f"rho_{walk}"] = {"total": mean(tot), "S": mean(tot) / math.sqrt(r["r"]), "steps": mean(steps),
+                              "per_op": mean(tot) / max(1.0, mean(gae)),
+                              "verified": all(w[walk]["verified"] for w in r["walks"])}
+    out["muls_per_add"] = r["stream_cost"]["fp_muls"] / max(1, s["group_ops"]["adds"] + s["group_ops"]["doubles"])
+    return out
+
+
+def e11(rows):
+    e8(rows, label="E11", oracle="the algebraic S₄ oracle")
+    print("\n#### E11 — the solver, per instance\n")
+    print("| p | log2 r | solver calls | F_p muls per call | Macaulay muls per call | unsolved (border unreachable) | retried at 11 / 12 / 13 | root triples | unliftable systems | agreement with the pair table (S₄ only / pair table only) | wall s per call |")
+    print("|--:|--:|--:|--:|--:|:--|:--|--:|--:|:--|--:|")
+    for r in sorted(rows, key=lambda r: (r["log2_r"], r["seed"])):
+        sv = r["solver"]
+        calls = max(1, sv["calls"])
+        agr = r.get("agreement_with_mitm")
+        agr_s = f"{agr['agree']}/{agr['targets']} ({agr['s4_only']} / {agr['mitm_only']})" if agr else "—"
+        print(f"| 2^{r['p_bits']} | {r['log2_r']:.1f} | {sv['calls']} | {sv['fp_muls'] / calls:.0f} | {sv['macaulay_muls'] / calls:.0f} | {sv['unsolved']} ({sv['border_unreachable']}) | {sv['retried_at_degree_11']} / {sv['retried_at_degree_12']} / {sv['retried_at_degree_13']} | {sv['root_triples']} | {sv['unliftable_systems']} | {agr_s} | {sv['wall_ns'] / calls / 1e9:.4f} |")
+    print("\n#### E11 — solver summary\n")
+    calls = sum(r["solver"]["calls"] for r in rows)
+    muls = sum(r["solver"]["fp_muls"] for r in rows)
+    uns = sum(r["solver"]["unsolved"] for r in rows)
+    agr = [r["agreement_with_mitm"] for r in rows if r.get("agreement_with_mitm")]
+    print("| calls | F_p muls per call (mean) | unsolved | unsolved fraction | agreement with the pair table | S₄ only | pair table only |")
+    print("|--:|--:|--:|--:|:--|--:|--:|")
+    print(f"| {calls} | {muls / max(1, calls):.0f} | {uns} | {uns / max(1, calls):.4f} | {sum(a['agree'] for a in agr)}/{sum(a['targets'] for a in agr)} | {sum(a['s4_only'] for a in agr)} | {sum(a['mitm_only'] for a in agr)} |")
+
+
+def e8(rows, label="E8", oracle="the pair-table oracle"):
+    print(f"### {label} — three summands on the Frobenius line of a subfield curve, {oracle}: relations\n")
+    print("| p | log2 r | h / #E(F_p) | cols π | cols negation | full-rank rel π | full-rank rel negation | ratio | rank fraction at k = cols, π / negation | single-column rows π / negation | orbit duplicates | targets | hit rate | correct |")
+    print("|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|--:|--:|:--|")
+    rows = sorted(rows, key=lambda r: (r["log2_r"], r["seed"]))
+    for r in rows:
+        s = r["stream"]
+        f, c = s["folded"], s["control"]
+        print(f"| 2^{r['p_bits']} | {r['log2_r']:.1f} | {r['cofactor'] // r['base_order']} | {f['columns']} | {c['columns']} | {fmt(f['square_relations'])} | {fmt(c['square_relations'])} | {fmt(s['square_ratio'])} | "
+              f"{fmt(f['rank_fraction_at_columns'])} / {fmt(c['rank_fraction_at_columns'])} | {f['single_column_rows']} / {c['single_column_rows']} | {s['orbit_duplicates']} | {s['trials']} | {s['hit_rate']:.4f} | {'yes' if f['verified'] and c['verified'] else 'NO'} |")
+    print(f"\n#### {label} — every phase priced, one unit (F_p multiplications; inversion = measured factor; LA row op = 1); rows that reached full rank on both arms\n")
+    print("| p | log2 r | inv / mul (measured) | muls per addition | base build π / neg | pair table | stream (incl. oracle) π / neg | LA π / neg | total π | total negation | S π | S negation | S neg / S π | rho S negation | rho S folded | rho muls per group op, negation / folded | rho steps ratio (expected) | S π / rho S folded | all verified |")
+    print("|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|:--|")
+    fits = defaultdict(list)
+    full = [r for r in rows if r["stream"]["folded"]["square_relations"] and r["stream"]["control"]["square_relations"]]
+    for r in rows:
+        if r not in full:
+            print(f"| 2^{r['p_bits']} | {r['log2_r']:.1f} | — | — | not full rank on both arms: the stream exhausted the group's targets | | | | | | | | | | | | | | |")
+            continue
+        c = e8_costs(r)
+        f, n = c["folded"], c["control"]
+        rn, rf = c["rho_negation"], c["rho_folded"]
+        ok = r["stream"]["folded"]["verified"] and r["stream"]["control"]["verified"] and rn["verified"] and rf["verified"]
+        for key, val in (("folded", f["total"]), ("control", n["total"]), ("rho_folded", rf["total"]), ("rho_negation", rn["total"])):
+            fits[key].append((r["r"], val))
+        print(f"| 2^{r['p_bits']} | {r['log2_r']:.1f} | {r['inversion_in_multiplications']:.1f} | {c['muls_per_add']:.1f} | {f['build']:.3g} / {n['build']:.3g} | {f['table']:.3g} | {f['stream']:.3g} / {n['stream']:.3g} | {f['la']:.3g} / {n['la']:.3g} | {f['total']:.3g} | {n['total']:.3g} | {f['S']:.1f} | {n['S']:.1f} | {n['S'] / f['S']:.2f} | {rn['S']:.1f} | {rf['S']:.1f} | {rn['per_op']:.0f} / {rf['per_op']:.0f} | {r['rho_steps_ratio']:.2f} ({r['rho_expected_ratio']:.2f}) | {f['S'] / rf['S']:.0f} | {'yes' if ok else 'NO'} |")
+    print(f"\n#### {label} summary (rows at full rank on both arms)\n")
+    print("| arms | instances (of run) | log2 r | column ratio | full-rank ratio mean (min–max) | rank fraction at k = cols, π / negation | S neg / S π mean (min–max) | S π / rho S folded, min–max | rho steps ratio mean (expected) | rho muls per group op, negation / folded | rho S negation / rho S folded, mean | fitted exponent of total: π, negation, rho folded, rho negation (rho: 0.50) | all verified |")
+    print("|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|")
+    sq = [r["stream"]["square_ratio"] for r in full]
+    rf_ = [r["stream"]["folded"]["rank_fraction_at_columns"] for r in full if r["stream"]["folded"]["rank_fraction_at_columns"] is not None]
+    rc_ = [r["stream"]["control"]["rank_fraction_at_columns"] for r in full if r["stream"]["control"]["rank_fraction_at_columns"] is not None]
+    costs = [e8_costs(r) for r in full]
+    s_ratio = [c["control"]["S"] / c["folded"]["S"] for c in costs]
+    vs_rho = [c["folded"]["S"] / c["rho_folded"]["S"] for c in costs]
+    rho_ratio = [c["rho_negation"]["S"] / c["rho_folded"]["S"] for c in costs]
+    ok = all(r["stream"]["folded"]["verified"] and r["stream"]["control"]["verified"] and r["rho_all_verified"] for r in rows)
+    lr = [r["log2_r"] for r in full]
+    col = {round(r["stream"]["column_ratio"], 2) for r in full}
+    exps = ", ".join(f"{fmt(fit_exponent(fits[k]))}" for k in ("folded", "control", "rho_folded", "rho_negation"))
+    print(f"| π-line fold vs negation, m = 3, {oracle} | {len(full)} ({len(rows)}) | {min(lr):.1f}–{max(lr):.1f} | {', '.join(str(x) for x in sorted(col))} | {fmt(mean(sq))} ({fmt(min(sq))}–{fmt(max(sq))}) | {fmt(mean(rf_)) if rf_ else '—'} / {fmt(mean(rc_)) if rc_ else '—'} | {mean(s_ratio):.2f} ({min(s_ratio):.2f}–{max(s_ratio):.2f}) | {min(vs_rho):.0f}–{max(vs_rho):.0f} | {mean(r['rho_steps_ratio'] for r in full):.2f} ({full[0]['rho_expected_ratio']:.2f}) | {mean(c['rho_negation']['per_op'] for c in costs):.0f} / {mean(c['rho_folded']['per_op'] for c in costs):.0f} | {mean(rho_ratio):.2f} | {exps} | {'yes' if ok else 'NO'} |")
+
+
+def e9(rows):
+    print("### E9 — the matched folded rho on the F_{p²} and F_{p³} groups\n")
+    print("| family | p | log2 r | generators | A | walks | S negation (mean) | S folded (mean) | S ratio | steps ratio | expected √(A/2) | all verified |")
+    print("|:--|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|:--|")
+    for r in sorted(rows, key=lambda r: (r["family"], r["log2_r"], r["seed"])):
+        print(f"| {r['family']} | 2^{r['p_bits']} | {r['log2_r']:.1f} | {', '.join(r['generators'])} | {r['group_order_of_fold']} | {r['rho_runs']} | {r['negation_s_mean']:.3f} | {r['folded_s_mean']:.3f} | {r['s_ratio']:.2f} | {r['steps_ratio']:.2f} | {r['expected_ratio']:.2f} | {r['all_verified']} |")
+    print("\n#### E9 summary\n")
+    print("| family | A | instances | log2 r | walks | S ratio mean (min–max) | steps ratio mean | expected | all verified |")
+    print("|:--|--:|--:|:--|--:|--:|--:|--:|:--|")
+    groups = defaultdict(list)
+    for r in rows:
+        groups[(r["family"], r["group_order_of_fold"])].append(r)
+    for (fam, a), rs in sorted(groups.items()):
+        sr = [r["s_ratio"] for r in rs]
+        lr = [r["log2_r"] for r in rs]
+        print(f"| {fam} | {a} | {len(rs)} | {min(lr):.1f}–{max(lr):.1f} | {sum(r['rho_runs'] for r in rs) * 2} | {mean(sr):.2f} ({min(sr):.2f}–{max(sr):.2f}) | {mean(r['steps_ratio'] for r in rs):.2f} | {rs[0]['expected_ratio']:.2f} | {all(r['all_verified'] for r in rs)} |")
+
+
 def main():
     rows = load(sys.argv[1:])
     by = defaultdict(list)
     for r in rows:
         by[r["experiment"]].append(r)
-    for exp, fn in [("e1", e1), ("e2", e2), ("e3", e3), ("e4", e4), ("e5", e5), ("e6", e6), ("e7", e7)]:
+    for exp, fn in [("e1", e1), ("e2", e2), ("e3", e3), ("e4", e4), ("e5", e5), ("e6", e6), ("e7", e7), ("e8", e8), ("e9", e9), ("e11", e11)]:
         if exp in by:
             fn(by[exp])
             print()

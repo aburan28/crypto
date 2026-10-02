@@ -9,6 +9,33 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
+## Implementation language: no Python
+
+**Do not use Python for cryptographic research or performance work in this
+repository.** This applies to algorithms, field and curve arithmetic,
+factor-base construction, relation collection, solvers, linear algebra,
+experiment harnesses, benchmark drivers, correctness tests, certificate
+verifiers, replay tools, and research result generation.
+
+- Use **Rust by default**, integrating with the existing library and Cargo
+  tests. Use an existing compiled C, C++, CUDA, or other native backend where
+  the component requires it.
+- Do not introduce Python prototypes, Python orchestration, embedded Python,
+  or compiled wrappers that delegate this work to a Python process. Moving
+  only a hot loop to native code does not satisfy this rule.
+- When continuing work implemented in Python, replace the relevant execution
+  path with a native implementation before extending it or running further
+  research comparisons. A working Python harness is not an acceptable final
+  deliverable. Use shell commands only for thin build/run orchestration.
+- Preserve frozen inputs, historical measurements, source snapshots, and
+  certificates as evidence. Do not delete or rewrite them to conceal their
+  Python provenance. Label historical Python timings accordingly and rerun
+  matched native baseline/candidate measurements before making new performance
+  claims.
+- Older instructions that name Python scripts describe legacy tooling; they
+  do not grant an exception. Preserve their mathematical contracts, fixtures,
+  and accounting requirements in the native replacement.
+
 ## Default workflow: finish and merge when authorized
 
 The repository owner's standing preference is autonomous delivery. For work

@@ -35,6 +35,12 @@
 #   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
+#   TABLE_SPLIT_FORWARD  report/select all slots before prefix products
+#                        (default 0; requires TABLE_PIPE_SELECT)
+#   TABLE_BATCH_HINTS  reconverge split-forward v3 cycle probes across slots
+#                      before building the prefix (default 0)
+#   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
+#   CYCLE_PROFILE  diagnostic exact-v3 cold-probe counters (default 0)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
 #                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
@@ -120,6 +126,15 @@ PHASE_PROFILE ?= 0
 # Forward pass software-pipelined: slot k's products issue before slot k+1's
 # selection (needs TAG_DENOM; two-pass kernel only).
 TABLE_PIPE_SELECT ?= 0
+# Keep the established kernel as the default until a matched GPU A/B qualifies.
+TABLE_SPLIT_FORWARD ?= 0
+# Resolve the split-forward pass's cold v3 hints after all raw tags are known.
+TABLE_BATCH_HINTS ?= 0
+# Prove raw two-cycles after one affine step and one denominator check.
+CYCLE_FAST2 ?= 0
+# Count exact-v3 cold-probe outcomes. Diagnostic only; instrumented timing is
+# never performance evidence.
+CYCLE_PROFILE ?= 0
 # Reverse pass issues the chain product before lambda's.
 PACKED_CHAIN_FIRST ?= 0
 # Two independent Montgomery chains of BATCH/2 slots per thread, interleaved
@@ -239,7 +254,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
-       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
@@ -318,6 +333,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 	python3 -m unittest discover -s codegen -p 'testlambdaprojective.py'
+	python3 -m unittest benchmarks/test_dp_identity.py
 
 # Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
 # Equivariance alone does not rule out cycles. This check does not cover the
@@ -574,7 +590,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -668,10 +684,10 @@ bench-rtx-pro6000:
 # knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
 # for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
 PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
-# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
-# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
-# from the step tag, the products inlined, the forward pass software-pipelined.
-# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+# The knob set that measured 20 B/s under the historical v2 table rule, now
+# carrying the exact v3 schedule selected by the current matched comparison:
+# split selection from the prefix product and reconverge hinted slots before
+# the cold full-point probe.  See CYCLE-ESCAPE-V3.md and benchmarks/batch-hints.
 # ALU squaring is on in this preset.  The value is expanded into the child
 # make, so a command-line PACKED_ALU_SQUARE reaches the build.
 # The knob set itself, so the recipe below and gpu-preset cannot drift apart.
@@ -681,7 +697,7 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
 	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
-	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 TABLE_SPLIT_FORWARD=1 TABLE_BATCH_HINTS=1 CYCLE_FAST2=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
@@ -906,8 +922,9 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
+	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:
@@ -916,4 +933,17 @@ test-cycle-escape:
 	./build/test-cycle-escape
 	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
 	./build/test-cycle-escape-hybrid
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2
+	./build/test-cycle-escape-fast2
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2-hybrid
+	./build/test-cycle-escape-fast2-hybrid
 .PHONY: test-cycle-escape
+
+# Diagnostic counter reconciliation, both with the fast2 shortcut absent and
+# with the exact branch used by the B16 GPU profile.
+test-cycle-profile:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_PROFILE=1 -DECC_CYCLE_FAST2=0 src/testcycleprofile.cpp -o build/test-cycle-profile
+	./build/test-cycle-profile
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_PROFILE=1 -DECC_CYCLE_FAST2=1 src/testcycleprofile.cpp -o build/test-cycle-profile-fast2
+	./build/test-cycle-profile-fast2
