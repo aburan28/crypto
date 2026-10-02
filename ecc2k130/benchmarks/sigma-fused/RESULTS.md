@@ -27,6 +27,25 @@ The counter-free row is the headline because it matches the existing campaign
 and throughput objective. It is 3.917% above the prior 14.8547595 B/s verified
 sigma result. Reaching 26 B/s from the new best still requires 1.6843x.
 
+## Refreshed inline control
+
+The fused comparison deliberately holds `PACKED_INLINE_POLY=3` in both arms.
+A separate current-source five-pair panel re-establishes that prerequisite
+against out-of-line polynomial helpers: **14.941312 versus 14.534256 B/s**,
+with paired ratios 1.025384/1.028820/1.028007/1.028821/1.029012 and a paired
+geometric mean of 1.028008. Its 95% paired log-ratio interval is
+`[1.026123, 1.029896]`. Both arms replayed 300/300 with zero drops, passed
+arithmetic/storage/shared-sigma and bidirectional checkpoint gates, and
+produced identical 29,779-record v1 corpora.
+
+That producer used the repository's legacy format-aware comparison script.
+Before incorporating its result here, the native C++ comparator in this
+directory independently reopened both raw corpora, confirmed headerless-v1
+framing and byte-identical sorted records, and reproduced canonical SHA-256
+`17e29b9695e175f306b0c76136b7331601596c98b4a9e1c27311f03c6b4a635d`.
+The successful archive and the preserved first-attempt producer failure are
+bound in `results/inline-refresh-artifact.json`.
+
 ## Correctness and equivalence
 
 Both protocols use seven odd 95-step launches at DP weight 48 before timing.
