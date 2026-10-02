@@ -139,20 +139,20 @@ markers() {
     local cached expectedShared
     cached=$(slots "$arm")
     expectedShared=$(shared_bytes "$arm")
-    grep -qx 'packed sigma fused: 1' "$log"
-    grep -qx 'packed sigma fused late y: 0' "$log"
-    grep -qx "packed sigma fused shared slots: $cached" "$log"
-    grep -qx 'packed shared sigma: 1' "$log"
-    grep -qx 'packed compact state: 1' "$log"
-    grep -qx 'packed launch bounds: 256 threads, 2 min blocks' "$log"
-    grep -Eq '^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block\(s\) of 256 packed threads resident per SM$' "$log"
-    grep -Eq "^packed kernel: ([1-9][0-9]?|1[01][0-9]|12[0-8]) registers/thread, 0 local bytes/thread, $expectedShared shared bytes/block, single-product multiplier$" "$log"
-    grep -qx "backend cuda-packed131: $workers threads x 16 slots x 1 lanes = $((workers * 16)) walks, dp weight $dp, $steps steps per launch" "$log"
+    grep -qx 'packed sigma fused: 1' "$log" || return 1
+    grep -qx 'packed sigma fused late y: 0' "$log" || return 1
+    grep -qx "packed sigma fused shared slots: $cached" "$log" || return 1
+    grep -qx 'packed shared sigma: 1' "$log" || return 1
+    grep -qx 'packed compact state: 1' "$log" || return 1
+    grep -qx 'packed launch bounds: 256 threads, 2 min blocks' "$log" || return 1
+    grep -Eq '^device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block\(s\) of 256 packed threads resident per SM$' "$log" || return 1
+    grep -Eq "^packed kernel: ([1-9][0-9]?|1[01][0-9]|12[0-8]) registers/thread, 0 local bytes/thread, $expectedShared shared bytes/block, single-product multiplier$" "$log" || return 1
+    grep -qx "backend cuda-packed131: $workers threads x 16 slots x 1 lanes = $((workers * 16)) walks, dp weight $dp, $steps steps per launch" "$log" || return 1
     if grep -Eq 'MISMATCH|OVERFLOW|unusable|collision found|solved|stopping:' "$log"; then
         return 1
     fi
     if [ -f "$R/resource-$arm.txt" ]; then
-        diff "$R/resource-$arm.txt" <(grep '^packed kernel:' "$log")
+        diff "$R/resource-$arm.txt" <(grep '^packed kernel:' "$log") || return 1
     fi
 }
 

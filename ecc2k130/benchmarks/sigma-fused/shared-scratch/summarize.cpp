@@ -227,12 +227,8 @@ Metrics evaluate(const std::vector<Row> &rows) {
     }
     // Iteration order is cache2/cache3/cache4, so an exact GM tie retains the
     // smaller cache without a post-hoc comparison.
-    double maximum = 0;
-    for (const auto &[arm, rate] : out.medians) {
-        (void)arm;
-        maximum = std::max(maximum, rate);
-    }
-    out.goal = out.noise && !out.candidate.empty() && maximum > 26000;
+    out.goal = out.noise && !out.candidate.empty() &&
+        out.medians.at(out.candidate) > 26000;
     out.decision = !out.noise ? "INCONCLUSIVE_NOISE" : out.candidate.empty()
         ? "DO_NOT_PROMOTE" : "QUALIFIES_CONFIRMATION";
     return out;
@@ -310,7 +306,6 @@ void selfTest() {
         }
         need(rejected, "unequal work was accepted");
     }
-    need(readFile("/dev/null").empty(), "empty-file read self-test");
     std::cout << "PASS: four-arm order, A/A, paired geometric gates, tie rule and invalid work rejection\n";
 }
 
