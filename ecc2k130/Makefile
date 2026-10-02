@@ -95,6 +95,7 @@ UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
 SIGMA_FUSED ?= 0
+DIRECT_SIGMA ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
@@ -221,7 +222,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packeddirectsigma131.cuh include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -246,6 +247,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
        -DECC_SIGMA_FUSED=$(SIGMA_FUSED) \
+       -DECC_DIRECT_SIGMA=$(DIRECT_SIGMA) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
@@ -519,6 +521,11 @@ test-shared-sigma-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
+
+test-direct-sigma-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testdirectsigmacuda.cu -o build/test-direct-sigma-cuda
+	./build/test-direct-sigma-cuda
 
 # The table walk's cycle rule on its own: every tau-relation 4-cycle and every
 # pairwise cycle up to 8 steps refused, the rule a class function
@@ -926,7 +933,7 @@ clean:
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-direct-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:

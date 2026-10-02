@@ -56,7 +56,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaFree(P.cycleProfile);
 #endif
     }
-#if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
+#if ECC_DIRECT_SIGMA
+    static size_t dynamicSharedBytes() { return eccPacked131::DIRECT_SIGMA_SHARED_BYTES; }
+    unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
+#elif ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
     unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
@@ -331,7 +334,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
-#if ECC_PACKED_SHARED_SIGMA
+#if ECC_PACKED_SHARED_SIGMA || ECC_DIRECT_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
         CUDA_CHECK(cudaDeviceGetAttribute(&driverReservedShared,
@@ -357,6 +360,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
         printf("packed sigma fused: %d\n", ECC_SIGMA_FUSED);
+        printf("packed direct sigma: %d\n", ECC_DIRECT_SIGMA);
+#if ECC_DIRECT_SIGMA
+        printf("packed direct sigma shared bytes: %d\n", eccPacked131::DIRECT_SIGMA_SHARED_BYTES);
+#endif
         printf("packed witness: %d\n", ECC_WITNESS);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);

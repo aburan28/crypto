@@ -2,6 +2,15 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_DIRECT_SIGMA
+#define ECC_DIRECT_SIGMA 0
+#endif
+#if ECC_DIRECT_SIGMA != 0 && ECC_DIRECT_SIGMA != 1
+#error "ECC_DIRECT_SIGMA must be 0 or 1"
+#endif
+#if ECC_DIRECT_SIGMA
+#include "packeddirectsigma131.cuh"
+#endif
 #ifndef ECC_PACKED_COMPACT_STATE
 #define ECC_PACKED_COMPACT_STATE 0
 #endif
@@ -141,6 +150,9 @@ namespace eccPacked131 {
                         ECC_PACKED_SLOT_PREFETCH || ECC_PHASE_PROFILE || \
                         ECC_PACKED_CHAIN_FIRST)
 #error "ECC_SIGMA_FUSED requires the one-chain polynomial sigma walk in weighted-prefix mode 2"
+#endif
+#if ECC_DIRECT_SIGMA && (!ECC_SIGMA_FUSED || ECC_PACKED_SHARED_SIGMA)
+#error "ECC_DIRECT_SIGMA requires SIGMA_FUSED=1 and PACKED_SHARED_SIGMA=0"
 #endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
@@ -509,9 +521,14 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                                                  size_t id, int slot, int tid,
                                                  unsigned long long now, bool guard,
                                                  bool first, unsigned *denominators,
-                                                 P131 *prod) {
+                                                 P131 *prod, const uint32_t *directSigma) {
+#if !ECC_DIRECT_SIGMA
+    (void)directSigma;
+#endif
     const P131 x = fromPolynomial131(xp);
+#if !ECC_DIRECT_SIGMA
     const P131 normalY = fromPolynomial131(yp);
+#endif
     const int hw = weight(x);
     if (!p.dead[id]) {
         if (hw <= p.dpWeight) {
@@ -522,7 +539,11 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
                 rec.seed = p.seed[id];
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
+#if ECC_DIRECT_SIGMA
+                toLimbs(fromPolynomial131(yp), rec.y);
+#else
                 toLimbs(normalY, rec.y);
+#endif
                 for (int k = 0; k < ECC_JCOUNT; ++k) {
 #if ECC_WITNESS
                     rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
@@ -544,13 +565,18 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     if (!p.dead[id])
         p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
 #endif
-#if ECC_PACKED_SHARED_SIGMA
+#if ECC_DIRECT_SIGMA
+    const P131 dp = directSigmaShared131(xp, j - 3, directSigma);
+    const P131 ep = directSigmaShared131(yp, j - 3, directSigma);
+#elif ECC_PACKED_SHARED_SIGMA
     const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
 #else
     const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
 #endif
+#if !ECC_DIRECT_SIGMA
     const P131 dp = toPolynomial131(add131(x, sigmas.first));
     const P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#endif
     if (!first) {
         const PolynomialPair pair = mulPolynomialPair131(*prod, ep, dp);
         store(p.pchain, slot, tid, p.threads, pair.first);
@@ -566,7 +592,10 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-#if ECC_PACKED_SHARED_SIGMA
+#if ECC_DIRECT_SIGMA
+    extern __shared__ uint32_t directSigma[];
+    initDirectSigmaShared131(directSigma);
+#elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
     if (tid >= p.threads) return;
@@ -580,7 +609,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const size_t id = size_t(slot) * p.threads + tid;
             sigmaFusedSelect(p, load(p.x, slot, tid, p.threads),
                              load(p.y, slot, tid, p.threads), id, slot, tid,
-                             now, guard, slot == 0, denominators, &prod);
+                             now, guard, slot == 0, denominators, &prod,
+#if ECC_DIRECT_SIGMA
+                             directSigma
+#else
+                             nullptr
+#endif
+                             );
         }
     }
 #pragma unroll 1
@@ -618,7 +653,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             store(p.y, slot, tid, p.threads, ny);
             if (!last)
                 sigmaFusedSelect(p, nx, ny, id, slot, tid, now, guard, i == 0,
-                                 denominators, &next);
+                                 denominators, &next,
+#if ECC_DIRECT_SIGMA
+                                 directSigma
+#else
+                                 nullptr
+#endif
+                                 );
         }
         if (!last) prod = next;
     }

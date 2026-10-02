@@ -27,6 +27,13 @@ weight and branch rule.  All field products, inversion, point formulas,
 distinguished-point test, restart behavior and scalar-update accounting stay
 fixed.
 
+The generated device-source header is frozen at SHA-256
+`0d385683efbc15afd4f31618ed569ff2b076722881a51091ddf51adca827e047`.
+Its 56,320-byte source array lives in device global read-only storage only for
+the coalesced once-per-kernel block copy.  The hot lookup table is opt-in
+dynamic shared memory.  Candidate builds set `PACKED_SHARED_SIGMA=0`, so the
+1,792-byte normal sigma mask array is absent rather than added to the table.
+
 ## Builds and equal work
 
 Both arms use CUDA 13.3.73, native `sm_120`, one NVIDIA RTX PRO 6000 Blackwell
