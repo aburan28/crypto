@@ -11,6 +11,8 @@ use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use std::collections::BTreeSet;
 use std::mem::size_of;
 
+mod campaign;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct System {
     n: u8,
@@ -201,7 +203,7 @@ fn baseline(system: &System) -> Vec<F2BoolPoly> {
     .0
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 struct Selected {
     labels: Vec<(usize, u64)>,
     rows: Vec<Vec<u64>>,
@@ -690,6 +692,18 @@ impl HighCache {
             return (baseline(input), false, "context-change", 0, 0, false);
         }
         let selected = selected_matrix(input, &self.basis);
+        self.apply_support_selected(input, &selected, direct_unpack)
+    }
+
+    fn apply_support_selected(
+        &self,
+        input: &System,
+        selected: &Selected,
+        direct_unpack: bool,
+    ) -> (Vec<F2BoolPoly>, bool, &'static str, u64, u64, bool) {
+        if input.n != self.base.n || input.quadratic != self.base.quadratic {
+            return (baseline(input), false, "context-change", 0, 0, false);
+        }
         if selected.labels != self.labels {
             return (baseline(input), false, "signature-change", 0, 0, false);
         }
@@ -800,8 +814,141 @@ impl HighCache {
     }
 }
 
+// The third registered ablation keeps the quadratic part of every possible
+// generator-multiplier product. The F5 criterion and changing affine tail are
+// still recomputed on each assignment; all rows and labels are checked before
+// the high-prefix transform is reused.
+struct LayoutCache {
+    high: HighCache,
+    multipliers: Vec<u64>,
+    quadratic_rows: Vec<Vec<u64>>,
+    scratch: Selected,
+    context_bytes: usize,
+}
+
+impl LayoutCache {
+    fn compile(base: &System) -> Result<Self, &'static str> {
+        let high = HighCache::compile(base)?;
+        let multipliers = source_multipliers(base.n, 2);
+        let mut quadratic_rows = Vec::with_capacity(base.quadratic.len() * multipliers.len());
+        for quadratic in &base.quadratic {
+            for &multiplier in &multipliers {
+                let mut row = vec![0u64; high.basis.words()];
+                for &term in quadratic {
+                    let slot = high.basis.slot(term | multiplier);
+                    row[slot / 64] ^= 1u64 << (slot % 64);
+                }
+                quadratic_rows.push(row);
+            }
+        }
+        let scratch = Selected {
+            labels: Vec::with_capacity(high.labels.len()),
+            rows: high.base_rows.clone(),
+            occupied_columns: vec![0u64; high.basis.words()],
+            full_columns: false,
+            rows_f4: 0,
+            criterion_rows: 0,
+            criterion_word_xors: 0,
+        };
+        let context_bytes = high.context_bytes + size_of::<Self>() - size_of::<HighCache>()
+            + multipliers.capacity() * size_of::<u64>()
+            + quadratic_rows.capacity() * size_of::<Vec<u64>>()
+            + quadratic_rows
+                .iter()
+                .map(|row| row.capacity() * 8)
+                .sum::<usize>()
+            + scratch.rows.capacity() * size_of::<Vec<u64>>()
+            + scratch
+                .rows
+                .iter()
+                .map(|row| row.capacity() * 8)
+                .sum::<usize>()
+            + scratch.labels.capacity() * size_of::<(usize, u64)>()
+            + scratch.occupied_columns.capacity() * size_of::<u64>();
+        if context_bytes > 128 * 1024 * 1024 {
+            return Err("context-cap");
+        }
+        Ok(Self {
+            high,
+            multipliers,
+            quadratic_rows,
+            scratch,
+            context_bytes,
+        })
+    }
+
+    fn fill_selected(&mut self, input: &System) -> &Selected {
+        assert_eq!(input.n, self.high.base.n);
+        assert_eq!(input.quadratic, self.high.base.quadratic);
+        let polys = polynomials(input);
+        let mask = (1u64 << input.n) - 1;
+        let criterion = F5Criterion::new(&polys, input.n as usize, 4, mask);
+        let scratch = &mut self.scratch;
+        scratch.labels.clear();
+        scratch.occupied_columns.fill(0);
+        let mut rows_f4 = 0u64;
+        let mut used = 0usize;
+        for (generator, &affine) in input.affine.iter().enumerate() {
+            for (multiplier_index, &multiplier) in self.multipliers.iter().enumerate() {
+                let static_index = generator * self.multipliers.len() + multiplier_index;
+                if used == scratch.rows.len() {
+                    scratch.rows.push(vec![0u64; self.high.basis.words()]);
+                }
+                let row = &mut scratch.rows[used];
+                row.copy_from_slice(&self.quadratic_rows[static_index]);
+                if affine & 1 != 0 {
+                    let slot = self.high.basis.slot(multiplier);
+                    row[slot / 64] ^= 1u64 << (slot % 64);
+                }
+                let mut variables = affine >> 1;
+                while variables != 0 {
+                    let variable = variables.trailing_zeros();
+                    let slot = self.high.basis.slot(multiplier | (1u64 << variable));
+                    row[slot / 64] ^= 1u64 << (slot % 64);
+                    variables &= variables - 1;
+                }
+                if row.iter().all(|&word| word == 0) {
+                    continue;
+                }
+                rows_f4 += 1;
+                if criterion.prunes(generator, multiplier) {
+                    continue;
+                }
+                for (seen, &word) in scratch.occupied_columns.iter_mut().zip(row.iter()) {
+                    *seen |= word;
+                }
+                scratch.labels.push((generator, multiplier));
+                used += 1;
+            }
+        }
+        scratch.rows.truncate(used);
+        let last_bits = self.high.basis.cols.len() % 64;
+        let last_mask = if last_bits == 0 {
+            u64::MAX
+        } else {
+            (1u64 << last_bits) - 1
+        };
+        scratch.full_columns = scratch.occupied_columns[..scratch.occupied_columns.len() - 1]
+            .iter()
+            .all(|&word| word == u64::MAX)
+            && scratch.occupied_columns[scratch.occupied_columns.len() - 1] == last_mask;
+        scratch.rows_f4 = rows_f4;
+        scratch.criterion_rows = criterion.lower_level_rows().0;
+        scratch.criterion_word_xors = criterion.word_ops();
+        scratch
+    }
+
+    fn apply(&mut self, input: &System) -> (Vec<F2BoolPoly>, bool, &'static str, u64, u64, bool) {
+        if input.n != self.high.base.n || input.quadratic != self.high.base.quadratic {
+            return (baseline(input), false, "context-change", 0, 0, false);
+        }
+        self.fill_selected(input);
+        self.high.apply_support_selected(input, &self.scratch, true)
+    }
+}
+
 fn main() {
-    panic!("development kernel only; registered source and seeds remain frozen");
+    campaign::main_cli();
 }
 
 #[cfg(test)]
@@ -900,6 +1047,33 @@ mod tests {
     }
 
     #[test]
+    fn static_quadratic_layout_matches_native_selected_rows_and_output() {
+        let mut projected_n24 = 0;
+        for n in [12, 16, 20, 24] {
+            for seed in 17..=20 {
+                let base = fixture(n, seed);
+                let mut layout = LayoutCache::compile(&base).expect("development layout cache");
+                assert!(layout.context_bytes <= 128 * 1024 * 1024);
+                let mut walk = base.clone();
+                for (generator, affine) in walk.affine.iter_mut().enumerate() {
+                    *affine = 1u64 << (1 + generator % n as usize);
+                }
+                for input in [base.clone(), with_affine(base.clone(), 29), walk] {
+                    let ordinary = selected_matrix(&input, &layout.high.basis);
+                    assert_eq!(layout.fill_selected(&input), &ordinary);
+                    let (got, hit, reason, _, _, projected) = layout.apply(&input);
+                    assert_eq!(got, baseline(&input), "n={n} seed={seed} reason={reason}");
+                    if n == 24 && projected {
+                        assert!(hit);
+                        projected_n24 += 1;
+                    }
+                }
+            }
+        }
+        assert!(projected_n24 > 0);
+    }
+
+    #[test]
     #[ignore = "development-only, unisolated timing; registered seeds remain untouched"]
     fn development_support_batch_timing() {
         use std::time::Instant;
@@ -926,6 +1100,13 @@ mod tests {
                 assert_eq!(preflight.apply_support(input, true).0, expected);
             }
             drop(preflight);
+            let mut layout_preflight = LayoutCache::compile(&systems[0]).unwrap();
+            for input in &systems {
+                let ordinary = selected_matrix(input, &layout_preflight.high.basis);
+                assert_eq!(layout_preflight.fill_selected(input), &ordinary);
+                assert_eq!(layout_preflight.apply(input).0, baseline(input));
+            }
+            drop(layout_preflight);
             let start = Instant::now();
             for input in &systems {
                 drop(baseline(input));
@@ -956,8 +1137,21 @@ mod tests {
                 drop(cache);
                 candidates.push((start.elapsed().as_nanos(), projected, fallbacks));
             }
+            let start = Instant::now();
+            let mut layout = LayoutCache::compile(&systems[0]).unwrap();
+            let layout_context_bytes = layout.context_bytes;
+            let mut layout_projected = 0;
+            let mut layout_fallbacks = 0;
+            for input in &systems {
+                let (rows, hit, _, _, _, compacted) = layout.apply(input);
+                layout_projected += usize::from(compacted);
+                layout_fallbacks += usize::from(!hit);
+                drop(rows);
+            }
+            drop(layout);
+            let layout_ns = start.elapsed().as_nanos();
             eprintln!(
-                "development n24 B32 family={family} fresh_ns={fresh_ns} anchor_ns={anchor_ns} anchor_fallbacks={anchor_fallbacks} support_ns={} support_projected={} support_fallbacks={} support_direct_ns={} direct_projected={} direct_fallbacks={}",
+                "development n24 B32 family={family} fresh_ns={fresh_ns} anchor_ns={anchor_ns} anchor_fallbacks={anchor_fallbacks} support_ns={} support_projected={} support_fallbacks={} support_direct_ns={} direct_projected={} direct_fallbacks={} layout_ns={layout_ns} layout_projected={layout_projected} layout_fallbacks={layout_fallbacks} layout_context_bytes={layout_context_bytes}",
                 candidates[0].0, candidates[0].1, candidates[0].2,
                 candidates[1].0, candidates[1].1, candidates[1].2,
             );
