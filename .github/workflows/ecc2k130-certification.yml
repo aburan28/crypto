@@ -125,3 +125,11 @@ jobs:
           g++ -O2 -std=c++17 -Wall -Wextra -Werror \
             ecc2k130/benchmarks/global-hints/independent_audit.cpp -o /tmp/table-global-hints-audit
           /tmp/table-global-hints-audit --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/summarize.cpp \
+            -o /tmp/table-global-hints-geometry-summary
+          /tmp/table-global-hints-geometry-summary --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/independent_audit.cpp \
+            -o /tmp/table-global-hints-geometry-audit
+          /tmp/table-global-hints-geometry-audit --self-test

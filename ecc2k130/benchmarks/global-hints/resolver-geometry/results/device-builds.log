@@ -1,0 +1,36 @@
+benchmarks/global-hints/../../include/packedkernels.cuh(1021): warning #177-D: variable "guard" was declared but never referenced
+          const bool guard = p.maxIters && now % 4096 == 0;
+                     ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+benchmarks/global-hints/test_device.cu: In function ‘int main()’:
+benchmarks/global-hints/test_device.cu:116:13: warning: format ‘%d’ expects argument of type ‘int’, but argument 6 has type ‘long unsigned int’ [-Wformat=]
+  116 |     std::printf("PASS: %u production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories; resolver %d threads, launch max %d, %d active block(s)/SM, %d dynamic shared bytes\n",
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                                                    
+      |                                                                                                                                                                                                                                                                                                                            |
+      |                                                                                                                                                                                                                                                                                                                            long unsigned int
+benchmarks/global-hints/../../include/packedkernels.cuh(1021): warning #177-D: variable "guard" was declared but never referenced
+          const bool guard = p.maxIters && now % 4096 == 0;
+                     ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+benchmarks/global-hints/test_device.cu: In function ‘int main()’:
+benchmarks/global-hints/test_device.cu:116:13: warning: format ‘%d’ expects argument of type ‘int’, but argument 6 has type ‘long unsigned int’ [-Wformat=]
+  116 |     std::printf("PASS: %u production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories; resolver %d threads, launch max %d, %d active block(s)/SM, %d dynamic shared bytes\n",
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                                                    
+      |                                                                                                                                                                                                                                                                                                                            |
+      |                                                                                                                                                                                                                                                                                                                            long unsigned int
+benchmarks/global-hints/../../include/packedkernels.cuh(1021): warning #177-D: variable "guard" was declared but never referenced
+          const bool guard = p.maxIters && now % 4096 == 0;
+                     ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+benchmarks/global-hints/test_device.cu: In function ‘int main()’:
+benchmarks/global-hints/test_device.cu:116:13: warning: format ‘%d’ expects argument of type ‘int’, but argument 6 has type ‘long unsigned int’ [-Wformat=]
+  116 |     std::printf("PASS: %u production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories; resolver %d threads, launch max %d, %d active block(s)/SM, %d dynamic shared bytes\n",
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                                                    
+      |                                                                                                                                                                                                                                                                                                                            |
+      |                                                                                                                                                                                                                                                                                                                            long unsigned int
