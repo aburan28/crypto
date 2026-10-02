@@ -17,6 +17,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 const RESULT_SCHEMA: &str = "koblitz_stage188_native_result.v1";
 const VERIFICATION_SCHEMA: &str = "koblitz_stage188_native_verification.v1";
+const FINAL_SCHEMA: &str = "koblitz_stage188_final.v1";
+const FINAL_VERIFICATION_SCHEMA: &str = "koblitz_stage188_final_verification.v1";
 const METER_SCHEMA: &str = "koblitz_native_process_meter.v1";
 const SOURCE_INSTANCE_ID: &str = "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7";
 const EQUATION_FINGERPRINT: &str =
@@ -132,6 +134,38 @@ struct Verification {
     failed: Vec<String>,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+struct Charge {
+    components: usize,
+    wall_seconds_sum: f64,
+    total_core_seconds_sum: f64,
+    peak_rss_bytes_max: u64,
+    single_core_seconds: Option<f64>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct FinalResult {
+    schema: String,
+    candidate_commit: String,
+    verifier_commit: String,
+    finalizer_commit: String,
+    decision_status: String,
+    candidate_selected: bool,
+    runtime_default: String,
+    claim_boundary: String,
+    conflicts: Option<u64>,
+    screen: Assessment,
+    confirmation: Assessment,
+    mechanism: Value,
+    measured_stage_charge: Charge,
+    cumulative_measured_lower_bound: Charge,
+    complete_campaign_cost: Option<Charge>,
+    unmetered_components: Vec<String>,
+    artifacts: BTreeMap<String, Artifact>,
+    all_seven_gates_passed: bool,
+    koblitz_index_calculus_sota: bool,
+}
+
 fn main() {
     if let Err(error) = real_main() {
         eprintln!("{error}");
@@ -174,6 +208,33 @@ fn real_main() -> AnyResult<()> {
                 ))
             }
         }
+        "finalize" => {
+            if args.len() != 6 {
+                return Err(usage());
+            }
+            finalize_stage(
+                Path::new(&args[1]),
+                Path::new(&args[2]),
+                &args[3],
+                &args[4],
+                &args[5],
+            )
+        }
+        "verify-final" => {
+            if args.len() != 3 {
+                return Err(usage());
+            }
+            let verification = verify_final(Path::new(&args[1]))?;
+            write_json(Path::new(&args[2]), &verification)?;
+            if verification.failed.is_empty() {
+                Ok(())
+            } else {
+                Err(format!(
+                    "final verification failed: {}",
+                    verification.failed.join("; ")
+                ))
+            }
+        }
         "meter" => {
             if args.len() < 4 {
                 return Err(usage());
@@ -188,7 +249,7 @@ fn real_main() -> AnyResult<()> {
 }
 
 fn usage() -> String {
-    "usage:\n  koblitz_f4_stage188 screen|confirm BACKEND MANIFEST PROTOCOL LOCK OUT SOURCE_COMMIT\n  koblitz_f4_stage188 verify RESULT_JSON VERIFICATION_JSON\n  koblitz_f4_stage188 meter OUT WATCHDOG_SECONDS COMMAND [ARG ...]".into()
+    "usage:\n  koblitz_f4_stage188 screen|confirm BACKEND MANIFEST PROTOCOL LOCK OUT SOURCE_COMMIT\n  koblitz_f4_stage188 verify RESULT_JSON VERIFICATION_JSON\n  koblitz_f4_stage188 finalize STAGE_DIR OUT CANDIDATE_COMMIT VERIFIER_COMMIT FINALIZER_COMMIT\n  koblitz_f4_stage188 verify-final RESULT_JSON VERIFICATION_JSON\n  koblitz_f4_stage188 meter OUT WATCHDOG_SECONDS COMMAND [ARG ...]".into()
 }
 
 fn run_phase(
@@ -740,6 +801,349 @@ fn meter_command(out: &Path, watchdog: u64, command: &[String]) -> AnyResult<()>
     }
 }
 
+fn finalize_stage(
+    stage: &Path,
+    out: &Path,
+    candidate_commit: &str,
+    verifier_commit: &str,
+    finalizer_commit: &str,
+) -> AnyResult<()> {
+    for (label, commit) in [
+        ("candidate", candidate_commit),
+        ("verifier", verifier_commit),
+        ("finalizer", finalizer_commit),
+    ] {
+        if commit.len() != 40 || !commit.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return Err(format!("{label} commit must be a full hexadecimal SHA"));
+        }
+    }
+    let stage = stage
+        .canonicalize()
+        .map_err(|e| format!("{}: {e}", stage.display()))?;
+    let screen_path = stage.join("development/screen/result.json");
+    let confirmation_path = stage.join("development/confirmation/result.json");
+    let screen: PhaseResult = read_json(&screen_path)?;
+    let confirmation: PhaseResult = read_json(&confirmation_path)?;
+    let screen_replay = verify_result(&screen_path)?;
+    let confirmation_replay = verify_result(&confirmation_path)?;
+    if !screen_replay.failed.is_empty() || !confirmation_replay.failed.is_empty() {
+        return Err("phase replay failed during finalization".into());
+    }
+    if screen.assessment.status != "CONTINUE_TO_CONFIRMATION"
+        || confirmation.assessment.status != "REJECTED_CONFIRMATION"
+    {
+        return Err(format!(
+            "unexpected phase decisions: screen={} confirmation={}",
+            screen.assessment.status, confirmation.assessment.status
+        ));
+    }
+    let measured_stage_charge = measured_charge(&stage.join("development"))?;
+    let cumulative_measured_lower_bound = Charge {
+        components: 508 + measured_stage_charge.components,
+        wall_seconds_sum: 21_808.881_290 + measured_stage_charge.wall_seconds_sum,
+        total_core_seconds_sum: 52_387.262_218 + measured_stage_charge.total_core_seconds_sum,
+        peak_rss_bytes_max: 6_310_576_128u64.max(measured_stage_charge.peak_rss_bytes_max),
+        single_core_seconds: None,
+    };
+    let linear = confirmation
+        .runs
+        .iter()
+        .find(|run| run.arm == Arm::Linear)
+        .ok_or_else(|| "confirmation has no linear run".to_string())?;
+    let indexed = confirmation
+        .runs
+        .iter()
+        .find(|run| run.arm == Arm::Indexed)
+        .ok_or_else(|| "confirmation has no indexed run".to_string())?;
+    let linear_divisors = pointer_u64(&linear.report, "/cost/extra/divisor_tests")?;
+    let indexed_divisors = pointer_u64(&indexed.report, "/cost/extra/divisor_tests")?;
+    let mechanism = json!({
+        "linear_divisor_tests":linear_divisors,
+        "indexed_divisor_tests":indexed_divisors,
+        "indexed_submask_lookups":pointer_u64(&indexed.report, "/cost/extra/divisor_submask_lookups")?,
+        "indexed_linear_tests":pointer_u64(&indexed.report, "/cost/extra/divisor_linear_tests")?,
+        "reducer_index_bytes_max":pointer_u64(&indexed.report, "/cost/extra/reducer_index_bytes_max")?,
+        "lookup_reduction_percent":100.0 * (1.0 - indexed_divisors as f64 / linear_divisors as f64),
+        "structural_f4_counts_identical":true,
+    });
+    let artifact_paths = [
+        ("protocol", "PROTOCOL.md"),
+        ("verifier_correction_note", "VERIFIER_CORRECTION.md"),
+        ("rejected_patch", "rejected-stacked-dense-reducer.patch"),
+        ("screen_result", "development/screen/result.json"),
+        (
+            "screen_original_verification",
+            "development/screen/verification.json",
+        ),
+        (
+            "screen_corrected_verification",
+            "development/screen/verification-correction.json",
+        ),
+        (
+            "confirmation_result",
+            "development/confirmation/result.json",
+        ),
+        (
+            "confirmation_verification",
+            "development/confirmation/verification.json",
+        ),
+    ];
+    let mut artifacts = BTreeMap::new();
+    for (name, relative) in artifact_paths {
+        artifacts.insert(
+            name.into(),
+            artifact_relative(&stage, &stage.join(relative))?,
+        );
+    }
+    let result = FinalResult {
+        schema: FINAL_SCHEMA.into(),
+        candidate_commit: candidate_commit.into(),
+        verifier_commit: verifier_commit.into(),
+        finalizer_commit: finalizer_commit.into(),
+        decision_status: "REJECTED_CONFIRMATION".into(),
+        candidate_selected: false,
+        runtime_default: "dense exact pair selection plus linear symbolic-reducer scan plus five-column BlockTables".into(),
+        claim_boundary: "One opened n=59 decomposition target and a solver-stage engineering experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.".into(),
+        conflicts: None,
+        screen: screen.assessment,
+        confirmation: confirmation.assessment,
+        mechanism,
+        measured_stage_charge,
+        cumulative_measured_lower_bound,
+        complete_campaign_cost: None,
+        unmetered_components: vec![
+            "initial development compilation and tests before the native meter existed".into(),
+            "failed attempt to invoke the cargo-test-only hashed runner as a normal example binary".into(),
+            "one bootstrap build of the native meter".into(),
+            "final result write and final verification after their charged dry-run controls".into(),
+        ],
+        artifacts,
+        all_seven_gates_passed: false,
+        koblitz_index_calculus_sota: false,
+    };
+    write_json(out, &result)
+}
+
+fn verify_final(result_path: &Path) -> AnyResult<Verification> {
+    let bytes = fs::read(result_path).map_err(|e| format!("{}: {e}", result_path.display()))?;
+    let result: FinalResult =
+        serde_json::from_slice(&bytes).map_err(|e| format!("final result JSON: {e}"))?;
+    let stage = result_path
+        .parent()
+        .ok_or_else(|| "final result has no stage directory".to_string())?;
+    let mut checks = 0usize;
+    let mut failures = Vec::new();
+    check(
+        &mut checks,
+        &mut failures,
+        result.schema == FINAL_SCHEMA,
+        "final schema",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.decision_status == "REJECTED_CONFIRMATION" && !result.candidate_selected,
+        "rejected decision",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.screen.status == "CONTINUE_TO_CONFIRMATION"
+            && result.confirmation.status == "REJECTED_CONFIRMATION"
+            && !result.confirmation.passed_performance_gate,
+        "phase decisions",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.complete_campaign_cost.is_none(),
+        "complete cost remains unavailable",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        !result.all_seven_gates_passed && !result.koblitz_index_calculus_sota,
+        "claim boundary",
+    );
+    let current_charge = measured_charge(&stage.join("development"))?;
+    check(
+        &mut checks,
+        &mut failures,
+        charges_match(&current_charge, &result.measured_stage_charge),
+        "measured charge replay",
+    );
+    let expected_cumulative = Charge {
+        components: 508 + current_charge.components,
+        wall_seconds_sum: 21_808.881_290 + current_charge.wall_seconds_sum,
+        total_core_seconds_sum: 52_387.262_218 + current_charge.total_core_seconds_sum,
+        peak_rss_bytes_max: 6_310_576_128u64.max(current_charge.peak_rss_bytes_max),
+        single_core_seconds: None,
+    };
+    check(
+        &mut checks,
+        &mut failures,
+        charges_match(
+            &expected_cumulative,
+            &result.cumulative_measured_lower_bound,
+        ),
+        "cumulative charge replay",
+    );
+    for (name, artifact) in &result.artifacts {
+        checks += 2;
+        match artifact_relative(stage, &stage.join(&artifact.path)) {
+            Ok(actual) => {
+                if actual.bytes != artifact.bytes {
+                    failures.push(format!("{name} byte count"));
+                }
+                if actual.sha256 != artifact.sha256 {
+                    failures.push(format!("{name} SHA-256"));
+                }
+            }
+            Err(error) => failures.push(format!("{name}: {error}")),
+        }
+    }
+    let screen_path = stage.join("development/screen/result.json");
+    let confirmation_path = stage.join("development/confirmation/result.json");
+    let screen: PhaseResult = read_json(&screen_path)?;
+    let confirmation: PhaseResult = read_json(&confirmation_path)?;
+    check(
+        &mut checks,
+        &mut failures,
+        assessments_match(&screen.assessment, &result.screen),
+        "screen assessment projection",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        assessments_match(&confirmation.assessment, &result.confirmation),
+        "confirmation assessment projection",
+    );
+    let screen_replay = verify_result(&screen_path)?;
+    let confirmation_replay = verify_result(&confirmation_path)?;
+    check(
+        &mut checks,
+        &mut failures,
+        screen_replay.failed.is_empty(),
+        "screen replay",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        confirmation_replay.failed.is_empty(),
+        "confirmation replay",
+    );
+    let original: Verification = read_json(&stage.join("development/screen/verification.json"))?;
+    let corrected: Verification =
+        read_json(&stage.join("development/screen/verification-correction.json"))?;
+    check(
+        &mut checks,
+        &mut failures,
+        original.failed == vec!["paired assessment replay"],
+        "original verifier failure retained",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        corrected.failed.is_empty()
+            && corrected.result_sha256 == original.result_sha256
+            && corrected.passed == corrected.checks,
+        "corrected verifier receipt",
+    );
+    let patch = result
+        .artifacts
+        .get("rejected_patch")
+        .ok_or_else(|| "rejected patch artifact missing".to_string())?;
+    check(
+        &mut checks,
+        &mut failures,
+        patch.sha256 == "629a876825479a32835c767e72bdc4fff1682812d5f1660ec9f9a5285fbfab6b",
+        "rejected patch identity",
+    );
+    let f4_source = fs::read_to_string("src/cryptanalysis/pq_f4_f2.rs")
+        .map_err(|e| format!("current F4 source: {e}"))?;
+    check(
+        &mut checks,
+        &mut failures,
+        !f4_source.contains("F4_F2_INDEXED_REDUCERS") && !f4_source.contains("DenseReducerIndex"),
+        "runtime candidate reverted",
+    );
+    let passed = checks.saturating_sub(failures.len());
+    Ok(Verification {
+        schema: FINAL_VERIFICATION_SCHEMA.into(),
+        result_sha256: hex::encode(sha256(&bytes)),
+        checks,
+        passed,
+        failed: failures,
+    })
+}
+
+fn measured_charge(development: &Path) -> AnyResult<Charge> {
+    let mut files = Vec::new();
+    collect_named_files(development, "metrics.json", &mut files)?;
+    files.sort();
+    let mut wall = 0.0;
+    let mut core = 0.0;
+    let mut peak = 0u64;
+    for path in &files {
+        let metrics: ProcessMetrics = read_json(path)?;
+        if metrics.schema != METER_SCHEMA {
+            return Err(format!("{} has wrong meter schema", path.display()));
+        }
+        wall += metrics.wall_seconds;
+        core += metrics
+            .total_core_seconds
+            .ok_or_else(|| format!("{} has no core time", path.display()))?;
+        peak = peak.max(
+            metrics
+                .peak_rss_bytes
+                .ok_or_else(|| format!("{} has no peak RSS", path.display()))?,
+        );
+    }
+    Ok(Charge {
+        components: files.len(),
+        wall_seconds_sum: wall,
+        total_core_seconds_sum: core,
+        peak_rss_bytes_max: peak,
+        single_core_seconds: None,
+    })
+}
+
+fn collect_named_files(directory: &Path, name: &str, out: &mut Vec<PathBuf>) -> AnyResult<()> {
+    for entry in fs::read_dir(directory).map_err(|e| format!("{}: {e}", directory.display()))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let file_type = entry.file_type().map_err(|e| e.to_string())?;
+        if file_type.is_symlink() {
+            return Err(format!("refusing symlink {}", entry.path().display()));
+        }
+        if file_type.is_dir() {
+            collect_named_files(&entry.path(), name, out)?;
+        } else if file_type.is_file() && entry.file_name() == name {
+            out.push(entry.path());
+        }
+    }
+    Ok(())
+}
+
+fn charges_match(left: &Charge, right: &Charge) -> bool {
+    left.components == right.components
+        && close(left.wall_seconds_sum, right.wall_seconds_sum)
+        && close(left.total_core_seconds_sum, right.total_core_seconds_sum)
+        && left.peak_rss_bytes_max == right.peak_rss_bytes_max
+        && left.single_core_seconds == right.single_core_seconds
+}
+
+fn pointer_u64(value: &Value, pointer: &str) -> AnyResult<u64> {
+    value
+        .pointer(pointer)
+        .and_then(Value::as_u64)
+        .ok_or_else(|| format!("{pointer}: missing unsigned integer"))
+}
+
+fn read_json<T: for<'de> Deserialize<'de>>(path: &Path) -> AnyResult<T> {
+    let bytes = fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    serde_json::from_slice(&bytes).map_err(|e| format!("{}: {e}", path.display()))
+}
+
 fn execute_command(
     command: &[String],
     environment: &BTreeMap<String, String>,
@@ -1159,6 +1563,43 @@ mod tests {
         let metrics = execute_command(&command, &BTreeMap::new(), &stdout, &stderr, 5).unwrap();
         assert_eq!(metrics.returncode, 0);
         assert!(!metrics.timed_out);
+        fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn measured_charge_sums_components_and_takes_peak_rss() {
+        let directory = env::temp_dir().join(format!(
+            "koblitz-stage188-charge-test-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(directory.join("a/b")).unwrap();
+        let metric = |wall, core, rss| ProcessMetrics {
+            schema: METER_SCHEMA.into(),
+            meter: "test".into(),
+            command: Vec::new(),
+            environment: BTreeMap::new(),
+            pid: 1,
+            returncode: 0,
+            timed_out: false,
+            watchdog_seconds: 1,
+            wall_seconds: wall,
+            user_seconds: Some(core),
+            system_seconds: Some(0.0),
+            total_core_seconds: Some(core),
+            single_core_seconds: None,
+            peak_rss_bytes: Some(rss),
+        };
+        write_json(&directory.join("a/metrics.json"), &metric(2.0, 3.0, 5)).unwrap();
+        write_json(&directory.join("a/b/metrics.json"), &metric(7.0, 11.0, 13)).unwrap();
+        let charge = measured_charge(&directory).unwrap();
+        assert_eq!(charge.components, 2);
+        assert_eq!(charge.wall_seconds_sum, 9.0);
+        assert_eq!(charge.total_core_seconds_sum, 14.0);
+        assert_eq!(charge.peak_rss_bytes_max, 13);
         fs::remove_dir_all(directory).unwrap();
     }
 
