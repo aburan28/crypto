@@ -27,6 +27,53 @@ The counter-free row is the headline because it matches the existing campaign
 and throughput objective. It is 3.917% above the prior 14.8547595 B/s verified
 sigma result. Reaching 26 B/s from the new best still requires 1.6843x.
 
+## Native one-knob tuning star
+
+The frozen B16/T256/minBlocks2 fused baseline was screened against ten
+single-knob arms on the same RTX PRO 6000 at source
+`bb90178b1b2d5620d3537606abe52ff64e518c4f`. The decision is **no qualifier
+for five-pair confirmation**. A/A maximum symmetric drift was 0.043663%; the
+preregistered thresholds were a paired geometric mean of at least 1.015 and
+every pair at least 1.005. No arm met either improvement threshold.
+
+Each retained row completed 201,863,462,912 scalar updates. The table reports
+three paired screens after one equal-work warmup per binary and five A/A pairs.
+Candidate and baseline medians are session-local; the paired ratios determine
+the decision.
+
+| arm | baseline B/s | candidate B/s | paired geometric mean | paired minimum | registers | decision |
+|---|---:|---:|---:|---:|---:|---|
+| `PACKED_PAIR_ILP=1` | 15.544693 | 15.472354 | 0.995181 | 0.994859 | 126 | reject |
+| `PACKED_PAIR_CLMUL=1` | 15.547648 | 15.512038 | 0.997657 | 0.997628 | 121 | reject |
+| `PACKED_L2_PERSIST=1` | 15.545369 | 15.384414 | 0.989916 | 0.989481 | 126 | reject |
+| `UNROLL_SLOTS=2` | 15.546543 | 14.949043 | 0.961708 | 0.961532 | 110 | reject |
+| `PACKED_FROM_REDUCED=1` | 15.540744 | **15.591620** | 1.003152 | 1.003045 | 126 | below gate |
+| `PACKED_INV_POLY=1` | 15.543421 | 15.487097 | 0.996307 | 0.995520 | 126 | reject |
+| `PACKED_INV_POLY=2` | 15.539228 | 15.588653 | **1.003483** | 1.003103 | 126 | below gate |
+| `PACKED_CLMUL_FLAT=1` | 15.538979 | 15.401233 | 0.991193 | 0.990714 | 117 | reject |
+| `PACKED_ALU_SQUARE=1` | 15.536713 | 15.361170 | 0.988597 | 0.988164 | 126 | reject |
+| `SIGMA_FUSED_LATE_Y=1` | 15.539583 | 15.516274 | 0.998542 | 0.998500 | 126 | reject |
+
+Every arm replayed 300/300 reports with zero drops over seven odd 95-step
+launches. All eleven headerless-v1 corpora contained 1,709,940 records and had
+identical sorted payloads, SHA-256
+`7dd0ef1b4ee02d3ec5310d7c44322b324db594f695b726a0be5bdf0119aea178`.
+Every arm used zero local bytes/thread and 1,792 static shared bytes/block. The
+L2 arm installed an 83,886,080-byte window over its 104,726,528-byte field
+blob; installation did not produce a speedup.
+
+An independent native audit reopened all 65 source-manifest entries, 81 sample
+logs and their hashes, eleven verification/resource logs, the canonical
+corpus, all paired ratios and the native decision. It reproduced `SELECT NONE`.
+The audit is `results/star-independent-audit.json`, SHA-256
+`f2392f58f16e72130106cf5284bdcdfaec67a6ba9501a2ab1b1f466579c29d44`.
+The 32 MiB raw archive, SHA-256
+`30623e6cc2abd865650fdfebbe72c66cdf7071ed4b1b509cf1e7165f4a119d6e`,
+is bound by `results/star-artifact.json` and remains retrievable from the
+recorded Modal volume token. The largest raw
+candidate median was 15.591620 B/s, only 0.600 of 26 B/s and not a promoted
+result.
+
 ## Refreshed inline control
 
 The fused comparison deliberately holds `PACKED_INLINE_POLY=3` in both arms.
