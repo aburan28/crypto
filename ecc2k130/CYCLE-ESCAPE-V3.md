@@ -72,6 +72,15 @@ versus 2.450018 B/s control, with paired ratios 1.466220–1.466757 and the same
 300/300, zero-drop, identical-corpus gate. The RTX table preset selects it;
 the general option defaults off.
 
+`TABLE_BLOCK_HINTS=1` next assigns hinted `(thread,slot)` owners to a
+512-entry per-block shared queue. Queue entries are resolved by consecutive
+threads and every owner waits before the original prefix pass; overflow retains
+the per-lane exact fallback. It measured 5.019275 B/s versus 3.559925 B/s
+control, with paired ratios 1.408683–1.410538 and the same replay/corpus gate.
+The candidate adds 1,040 static shared bytes and keeps 128 registers, a
+400-byte frame and zero spills. The RTX table preset selects queue 512; the
+general option defaults off.
+
 The default sigma walk is unchanged.
 The hashed controls in `walkconstant.cpp` explicitly retain v2; native rows use
 v3 and identify it in their output. Their old merge-loss model is not a v3 model.
