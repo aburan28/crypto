@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 192, 2026-10-02.
+Current through Stage 193, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -138,6 +138,31 @@ maximum RSS. Complete cost remains `null`. Final native verification passes
 `e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48`.
 This strengthens the negative parallel decomposition boundary; no SOTA gate
 changes.
+
+Stage 193 runs freshly authenticated WDSat and CryptoMiniSat controls on the
+same opened `n=59, ell=9, m=3` target used by Stage 192. WDSat is rebuilt from
+commit `55d55b2620d768d9f7c78dcd8990a0689533c1d0` after all 16 sealed source
+files and the compatible capacity header are rehashed. Its rebuilt binary
+exactly matches the historical sealed binary. WDSat reaches its outer watchdog
+without a terminal in 120.274299 wall-seconds, 118.710537 core/single-core
+seconds and 13,910,016 bytes RSS; conflicts remain `null`. CryptoMiniSat 5.14.7
+reaches its internal limit and emits `INDETERMINATE` plus 3,473,638 conflicts
+in 121.436959 wall-seconds, 121.201177 core/single-core seconds and 280,756,224
+bytes RSS. Both outcomes remain inconclusive. Relative to Stage 192's completed
+direct-MITM mean, their consumed-work wall ratios are 264.432530 and 266.988730
+and their CPU ratios are 387.415616 and 395.543899. A relative-path verifier
+replay exposed and corrected a path-canonicalization defect; the superseded
+absolute-only result remains preserved. A final custody hardening also replays
+all meter receipts and requires an exact match to all charged metrics. Stage
+193 adds a measured lower bound of 32 components, 252.416574 wall-seconds and
+251.207316 core-seconds. The cumulative lower bound becomes 614 components,
+24,163.163195 wall-seconds and 61,810.903842 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 21/21 with result SHA-256
+`d119bc42060ea55f6bc2a91739f86ecebb8bc09914c6f5c3fe9e88cca9c51ab5`.
+The current same-instance named-solver evidence improves, but licensed Magma,
+an executable same-instance GGMP construction and gates 5--7 remain open; no
+SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the

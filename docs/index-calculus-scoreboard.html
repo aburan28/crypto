@@ -10174,5 +10174,38 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage192-parallel-boundary -->
+<!-- BEGIN current-sat-stage193-comparators -->
+<div class="panel" id="current-sat-stage193-comparators">
+      <div class="panel-head">
+        <h2>Current named SAT controls, Stage 193: both remain inconclusive after about 120 seconds <span class="chip">negative boundary</span></h2>
+        <p>Fresh WDSat and CryptoMiniSat controls on the exact public
+          <code>n=59, ell=9, m=3</code> true-negative used by the selected F4 and direct-MITM rows.
+          WDSat is rebuilt from its sealed source inventory; CryptoMiniSat stops internally and reports
+          conflicts. This prices decomposition only.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>One exact instance and one unit per column. Ratios use the completed Stage 192 direct-MITM arithmetic mean; ratios for censored rows describe consumed work, not completed-solver cost.</caption>
+          <thead><tr><th>Arm</th><th>Terminal</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Conflicts</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td>exhaustive UNSAT</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td>null</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Selected parallel Boolean F4, inherited exact replay</td><td>exhaustive UNSAT</td><td class="n">16.765098</td><td class="n">181.297986</td><td class="n">null</td><td class="n">4,366.27 MB</td><td>null</td><td class="n">36.859390 / 591.671747 / 106.321963</td><td><span class="chip">completed negative</span></td></tr>
+            <tr><td><strong>WDSat, fresh sealed-source rebuild</strong></td><td>outer timeout; no terminal</td><td class="n"><strong>120.274299</strong></td><td class="n"><strong>118.710537</strong></td><td class="n"><strong>118.710537</strong></td><td class="n">13.91 MB</td><td>null</td><td class="n">264.432530 / 387.415616 / 0.338719</td><td><span class="chip">censored</span></td></tr>
+            <tr><td><strong>CryptoMiniSat 5.14.7, fresh</strong></td><td>INDETERMINATE</td><td class="n"><strong>121.436959</strong></td><td class="n"><strong>121.201177</strong></td><td class="n"><strong>121.201177</strong></td><td class="n">280.76 MB</td><td class="n">3,473,638</td><td class="n">266.988730 / 395.543899 / 6.836625</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Licensed Magma F4</td><td>unavailable</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td class="n">null</td><td><span class="chip">missing gate</span></td></tr>
+            <tr><td>GGMP construction</td><td>no same-instance executable construction</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td class="n">null</td><td><span class="chip">missing gate</span></td></tr>
+            <tr><td>Automorphism-aware Pollard rho, full method</td><td>not run in this decomposition unit</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td class="n">null</td><td><span class="chip">full-cost boundary</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">provenance</span> WDSat commit <code>55d55b2</code>, all 16 source files and the capacity header are authenticated; the rebuilt binary exactly matches the sealed compatible binary</span>
+        <span><span class="chip">terminal semantics</span> WDSat emits no terminal or conflict count; CryptoMiniSat emits <code>INDETERMINATE</code> and 3,473,638 conflicts; neither is UNSAT evidence</span>
+        <span><span class="chip">accounting</span> Stage 193 lower bound: 32 components, 252.416574 wall-seconds, 251.207316 core-seconds, 280.76 MB stage peak RSS; preserved verifier corrections are included and every receipt is replayed</span>
+        <span><span class="chip">claim boundary</span> cumulative measured lower bound: 614 components, 24,163.163195 wall-seconds, 61,810.903842 core-seconds, 6.31 GB maximum RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/result.json</code>; licensed Magma, executable same-instance GGMP, unknown-scalar recovery, full rho, independent reproduction, novelty and SOTA remain open</span>
+      </div>
+    </div>
+<!-- END current-sat-stage193-comparators -->
 </body>
 </html>
