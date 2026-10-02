@@ -1458,19 +1458,27 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
         require(state.get("beat_id") == beat_id, "resume beat differs from the run's beat")
         require(state.get("phase") != "done", "run already finished")
         targets, blocks = int(state["targets"]), int(state["blocks"])
+        tune_targets = int(state.get("tune_targets", targets))
         candidates = [int(k) for k in state["k_candidates"]]
         state.setdefault("resumed_at", []).append(now())
+        if state.get("status") == "TUNE_ONLY":
+            state["status"] = "ACTIVE"
     else:
         targets = arguments.targets or int(beat["targets_default"])
         blocks = arguments.blocks or int(beat["blocks_default"])
+        tune_targets = arguments.tune_targets or targets
         if arguments.k is not None:
             candidates = [arguments.k]
         elif arguments.k_candidates:
             candidates = [int(v) for v in arguments.k_candidates.split(",") if v.strip()]
+        elif tune_targets != targets:
+            by_tune = beat.get("k_candidates_by_tune_targets", {}).get(str(tune_targets), {})
+            candidates = [int(v) for v in by_tune.get(str(targets), [])]
         else:
             candidates = [int(v) for v in beat["k_candidates"].get(str(targets), [])]
     minimum = int(beat["targets_minimum"])
     require(targets >= minimum, f"panel targets must be >= {minimum} (no small-L panels)")
+    require(tune_targets >= minimum, f"tune targets must be >= {minimum} (no small-L tunes)")
     require(blocks >= 1, "blocks must be positive")
     require(bool(candidates) and all(k > 0 for k in candidates), "no K candidates for this L")
     n, a = int(beat["n"]), int(beat["a"])
@@ -1512,7 +1520,8 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             state = {
                 "schema_version": "1.0", "task_id": TASK_ID, "run_id": run_id, "beat_id": beat_id,
                 "launch_mode": "batch_panel", "status": "ACTIVE", "phase": "build",
-                "targets": targets, "blocks": blocks, "k_candidates": candidates,
+                "targets": targets, "tune_targets": tune_targets, "blocks": blocks,
+                "k_candidates": candidates,
                 "pinned_cpu": arguments.cpu, "git_head": git_head, "created_at": now(), "updated_at": now(),
             }
 
@@ -1553,9 +1562,10 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
         corpora: dict[str, Any] = {}
         corpus_values: dict[str, list[int]] = {}
         for role in ("tune", "eval"):
-            name = panel_corpus_name(beat["corpora"][role], targets)
+            size = tune_targets if role == "tune" else targets
+            name = panel_corpus_name(beat["corpora"][role], size)
             generated = subprocess.run(
-                [binaries["rho"], str(n), str(a), "signed_frobenius", str(targets), str(beat["batch_seed"])],
+                [binaries["rho"], str(n), str(a), "signed_frobenius", str(size), str(beat["batch_seed"])],
                 cwd=REPO, capture_output=True, text=True,
                 env=dict(env, KIC_RHO_GENERATE_ONLY="1", KIC_RHO_BATCH_CORPUS=name),
             )
@@ -1565,7 +1575,7 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
                 for row in parse_json_lines(generated.stdout)
                 if row.get("kind") == "rho_ks_public_fixture"
             ]
-            require(len(scalars) == targets, f"corpus {name} has {len(scalars)} != {targets} targets")
+            require(len(scalars) == size, f"corpus {name} has {len(scalars)} != {size} targets")
             path = run / f"inputs/scalars_{name}.txt"
             text = "".join(f"{s}\n" for s in scalars)
             if path.is_file():
@@ -1573,7 +1583,10 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             path.write_text(text)
             corpora[role] = {"name": name, "scalars_sha256": sha256(path), "targets": len(scalars)}
             corpus_values[role] = scalars
-        corpora["disjoint"] = not (set(corpus_values["tune"]) & set(corpus_values["eval"]))
+        overlap = set(corpus_values["tune"]) & set(corpus_values["eval"])
+        corpora["disjoint"] = not overlap
+        if tune_targets != targets:
+            corpora["tune_eval_shared_targets"] = len(overlap)
         require(corpora["disjoint"], "tune and eval corpora share targets")
         tune_path = run / f"inputs/scalars_{corpora['tune']['name']}.txt"
         eval_path = run / f"inputs/scalars_{corpora['eval']['name']}.txt"
@@ -1611,7 +1624,7 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             summary_rows = read_jsonl(run / f"logs/tune_K{k}.summary.json")
             ic_summary = summary_rows[-1] if summary_rows else {}
             ok = measured["exit_code"] == 0 and ic_summary.get("targets_failed") == 0 and (
-                ic_summary.get("targets_solved") == targets
+                ic_summary.get("targets_solved") == tune_targets
             )
             row.update(state="ok" if ok else "failed", run=measured, ic_summary=ic_summary)
             tune_rows.append(row)
@@ -1627,8 +1640,27 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
         write_json(
             run / "artifacts/k_tune.json",
             {"rows": tune_rows, "tune_corpus": corpora["tune"], "selection": "lowest wall_s",
-             "chosen_K": k_choice, "k_source": "fixed" if chosen["state"] == "fixed" else "tuned"},
+             "chosen_K": k_choice, "k_source": "fixed" if chosen["state"] == "fixed" else "tuned"}
+            | ({"tune_targets": tune_targets, "panel_targets": targets,
+                "tune_eval_disjoint": corpora["disjoint"]} if tune_targets != targets else {}),
         )
+        if getattr(arguments, "tune_only", False):
+            state.update(status="TUNE_ONLY", phase="tuned", updated_at=now(), chosen_K=k_choice)
+            write_json(run / "state.json", state)
+            write_json(
+                run / "artifacts/candidate.json",
+                {"schema_version": "1.0", "task_id": TASK_ID, "run_id": run_id, "beat_id": beat_id,
+                 "status": "TUNE_ONLY", "chosen_K": k_choice, "tune_targets": tune_targets,
+                 "panel_targets": targets, "tune_corpus": corpora["tune"],
+                 "tune_eval_disjoint": corpora["disjoint"], "created_at": now(),
+                 "note": "K tune only; no panel blocks. Resume without --tune-only to run the panel."},
+            )
+            files = {
+                str(path.relative_to(run)): sha256(path) for path in sorted(run.rglob("*")) if path.is_file()
+            }
+            write_json(run / "artifacts/review_manifest.json",
+                       {"schema_version": "1.0", "task_id": TASK_ID, "files": files})
+            return state
 
         advance("blocks", chosen_K=k_choice)
         base_path = run / f"logs/base_n{n}_K{k_choice}.jsonl"
@@ -1800,6 +1832,8 @@ def launch_panel(arguments: argparse.Namespace) -> dict[str, Any]:
             {"schema_version": "1.0", "task_id": TASK_ID, "run_id": run_id, "beat_id": beat_id,
              "status": status_value, "claim_draft_sha256": sha256(run / "artifacts/claim_draft.json"),
              "claim_check": validation, "claim_check_vs_rho": vs_rho_validation,
+             "chosen_K": k_choice, "tune_targets": tune_targets, "tune_corpus": corpora["tune"],
+             "tune_eval_disjoint": corpora["disjoint"],
              "ledger_sha256": sha256(ledger_path(protocol)), "created_at": now(),
              "note": "Multi-target batch diagnostic; never a vs_rho ledger promotion."},
         )
@@ -1894,6 +1928,10 @@ def parser() -> argparse.ArgumentParser:
     panel.add_argument("--blocks", type=int, help="Paired blocks (default: beat blocks_default)")
     panel.add_argument("--k", type=int, help="Use this K and skip the tune")
     panel.add_argument("--k-candidates", help="Comma-separated K tune candidates (default: beat list for this L)")
+    panel.add_argument("--tune-targets", type=int,
+                       help="Targets in the disjoint tune corpus (default: the panel L; e.g. 1024)")
+    panel.add_argument("--tune-only", action="store_true",
+                       help="Stop after the K tune (status TUNE_ONLY); --resume the run to continue")
     panel.add_argument("--cpu", type=int, help="Pin every producer to this CPU with taskset (Linux)")
     panel.add_argument("--resume", metavar="RUN_ID",
                        help="Continue an interrupted panel run; finished K rows and blocks are kept")
@@ -1946,7 +1984,7 @@ def main() -> int:
         if arguments.command == "launch-panel":
             state = launch_panel(arguments)
             print(json.dumps(state, indent=2, sort_keys=True))
-            return 0 if state.get("status") == "PENDING_INDEPENDENT_VALIDATION" else 3
+            return 0 if state.get("status") in ("PENDING_INDEPENDENT_VALIDATION", "TUNE_ONLY") else 3
         if arguments.command == "launch-single":
             import single_target_panel
 

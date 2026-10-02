@@ -522,6 +522,27 @@ class BatchPanelTests(unittest.TestCase):
         legacy["ic_bytes_per_regular_state"] = 94
         self.assertEqual(lab.estimate_ic_rss_bytes(legacy, 1000), 94 * 61 * 1000 * 1000)
 
+    def test_tune_targets_option_is_bounded_and_has_grids(self) -> None:
+        args = lab.parser().parse_args(
+            ["launch-panel", "--beat", self.BEAT, "--targets", "4096", "--tune-targets", "512"]
+        )
+        self.assertEqual(args.tune_targets, 512)
+        self.assertFalse(args.tune_only)
+        with self.assertRaisesRegex(lab.AutolabError, "tune targets must be >= 1024"):
+            lab.launch_panel(args)
+        self.assertIsNone(lab.parser().parse_args(["launch-panel", "--beat", self.BEAT]).tune_targets)
+        grids = self.beat["k_candidates_by_tune_targets"]
+        for tune_targets, by_l in grids.items():
+            self.assertGreaterEqual(int(tune_targets), self.beat["targets_minimum"])
+            for targets, ks in by_l.items():
+                self.assertIn(targets, self.beat["k_candidates"])
+                self.assertNotEqual(targets, tune_targets)
+                for k in ks:
+                    self.assertLess(lab.estimate_ic_rss_bytes(self.beat, k), 12 * 2**30)
+        tune = lab.panel_corpus_name(self.beat["corpora"]["tune"], 1024)
+        for targets in grids["1024"]:
+            self.assertNotEqual(tune, lab.panel_corpus_name(self.beat["corpora"]["eval"], int(targets)))
+
     def test_panel_resume_needs_an_existing_run(self) -> None:
         args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--resume", "no-such-run"])
         with self.assertRaisesRegex(lab.AutolabError, "no run to resume"):
