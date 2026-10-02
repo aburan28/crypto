@@ -3,7 +3,9 @@
 The frozen 128-thread resolver experiment completed from clean source
 `7e5281e6b276b89428dbb74a1c05a50ca5b61a02` on one NVIDIA RTX PRO6000 Blackwell
 Server Edition, CUDA 13.3.73. Its terminal producer decision is
-**DO_NOT_PROMOTE**. Independent post-run audit is pending.
+**DO_NOT_PROMOTE**. The independent native post-run audit passes; see
+`INDEPENDENT-AUDIT.md` and `results/independent-audit.json` (SHA-256
+`948903619feb3c92f99aac4afd20265d6a52a903ec8b37278c912eceb491d5dc`).
 
 | Complete-update benchmark arm | Median B updates/s | Ratio to matched control | Correctness |
 |:--|--:|--:|:--|
