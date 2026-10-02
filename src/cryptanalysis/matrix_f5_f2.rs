@@ -458,6 +458,16 @@ pub struct F5Timings {
     pub unpack_ns: u64,
     /// Whether the full-column direct packed-row builder was used.
     pub direct_pack_used: bool,
+    /// Whether the full-matrix rank certificate was attempted.
+    pub rank_cert_attempted: bool,
+    /// Whether the certified original rows were returned.
+    pub certified_original_used: bool,
+    /// Whether selected actual columns were checked for full row rank.
+    pub column_cert_attempted: bool,
+    /// Whether selected columns certified the original rows.
+    pub selected_original_used: bool,
+    /// Width of the selected-column submatrix, or zero.
+    pub selected_cols: usize,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
 }
@@ -471,6 +481,95 @@ pub enum F5OutputForm {
     /// Echelon only for degree-4 systems with at least 20 variables,
     /// where the saved reduction outweighed unpacking in the first study.
     SelectiveEchelon,
+    /// Return original rows if their full rank is certified on a copy;
+    /// otherwise return the copy's echelon rows. The successful output
+    /// spans the same row space but is not necessarily in echelon form.
+    CertifiedOriginalRows,
+    /// Certify original rows using selected actual columns, with exact
+    /// full-width echelon fallback when the submatrix loses rank.
+    SelectedColumnCertificate,
+}
+
+fn column_sample_hash(mut value: u64) -> u64 {
+    value = value.wrapping_add(0x9e37_79b9_7f4a_7c15);
+    value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+    value ^ (value >> 31)
+}
+
+fn sampled_columns(n_cols: usize, count: usize) -> Vec<usize> {
+    let mut columns: Vec<usize> = (0..n_cols).collect();
+    columns.sort_unstable_by_key(|&j| (column_sample_hash(0x9e37_79b9_7f4a_7c15 ^ j as u64), j));
+    columns.truncate(count.min(n_cols));
+    columns.sort_unstable();
+    columns
+}
+
+fn certify_selected_columns_or_echelon(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    slack: usize,
+    word_ops: &mut u64,
+) -> (usize, bool, usize) {
+    let selected_cols = matrix.len().saturating_add(slack).min(n_cols);
+    if matrix.is_empty() || selected_cols < matrix.len() {
+        let rank = crate::cryptanalysis::gf2_elim::echelon_counted(matrix, n_cols, word_ops);
+        return (rank, false, selected_cols);
+    }
+    let chosen = sampled_columns(n_cols, selected_cols);
+    let mut position = vec![usize::MAX; n_cols];
+    for (dst, &src) in chosen.iter().enumerate() {
+        position[src] = dst;
+    }
+    let mut projected = vec![vec![0u64; selected_cols.div_ceil(64)]; matrix.len()];
+    for (source, target) in matrix.iter().zip(&mut projected) {
+        for (word_index, &word) in source.iter().enumerate() {
+            let mut bits = word;
+            while bits != 0 {
+                let column = word_index * 64 + bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                if column < n_cols {
+                    let dst = position[column];
+                    if dst != usize::MAX {
+                        target[dst / 64] |= 1u64 << (dst % 64);
+                    }
+                }
+            }
+        }
+    }
+    static ROW_BASIS_RANK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let row_basis_rank = *ROW_BASIS_RANK
+        .get_or_init(|| std::env::var("KIC_GF2_ROW_BASIS_RANK").as_deref() == Ok("1"));
+    let projected_rank = if row_basis_rank {
+        crate::cryptanalysis::gf2_elim::rank_row_basis_counted(
+            &mut projected,
+            selected_cols,
+            word_ops,
+        )
+    } else {
+        crate::cryptanalysis::gf2_elim::echelon_counted(&mut projected, selected_cols, word_ops)
+    };
+    if projected_rank == matrix.len() {
+        (projected_rank, true, selected_cols)
+    } else {
+        let rank = crate::cryptanalysis::gf2_elim::echelon_counted(matrix, n_cols, word_ops);
+        (rank, false, selected_cols)
+    }
+}
+
+fn certify_full_rank_or_echelon(
+    matrix: &mut Vec<Vec<u64>>,
+    n_cols: usize,
+    word_ops: &mut u64,
+) -> (usize, bool) {
+    let mut echelon = matrix.clone();
+    let rank = crate::cryptanalysis::gf2_elim::echelon_counted(&mut echelon, n_cols, word_ops);
+    if rank == matrix.len() {
+        (rank, true)
+    } else {
+        *matrix = echelon;
+        (rank, false)
+    }
 }
 
 /// Expand a packed pivot row into its canonical, descending monomial list.
@@ -584,8 +683,10 @@ pub fn matrix_f5_f2_timed(
 }
 
 /// A timed matrix-F5 step with an explicit output form. `Echelon` skips
-/// above-pivot reduction; callers that need a canonical basis can request
-/// `Reduced` or reduce the returned rows themselves.
+/// above-pivot reduction; `CertifiedOriginalRows` can return an
+/// untriangularized basis after exact full-rank certification. Callers
+/// needing a canonical basis can request `Reduced` or reduce the returned
+/// rows themselves.
 pub fn matrix_f5_f2_with_form_timed(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -659,8 +760,43 @@ pub fn matrix_f5_f2_with_form_timed(
     let t = Instant::now();
     let mut word_ops = 0u64;
     let echelon = matches!(form, F5OutputForm::Echelon)
-        || (matches!(form, F5OutputForm::SelectiveEchelon) && degree == 4 && n_vars >= 20);
-    let rank = if !echelon {
+        || (matches!(
+            form,
+            F5OutputForm::SelectiveEchelon
+                | F5OutputForm::CertifiedOriginalRows
+                | F5OutputForm::SelectedColumnCertificate
+        ) && degree == 4
+            && n_vars >= 20);
+    let certify = matches!(form, F5OutputForm::CertifiedOriginalRows)
+        && degree == 4
+        && n_vars >= 24
+        && matrix.len() >= 4096
+        && cols.len() >= 8192;
+    let sample = matches!(form, F5OutputForm::SelectedColumnCertificate)
+        && degree == 4
+        && n_vars >= 24
+        && matrix.len() >= 4096
+        && cols.len() >= 8192;
+    let rank = if sample {
+        static SLACK: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+        let slack = *SLACK.get_or_init(|| match std::env::var("KIC_F5_COLUMN_SLACK").as_deref() {
+            Ok("1024") => 1024,
+            Ok("2048") => 2048,
+            _ => 512,
+        });
+        timings.column_cert_attempted = true;
+        let (rank, used, width) =
+            certify_selected_columns_or_echelon(&mut matrix, cols.len(), slack, &mut word_ops);
+        timings.selected_original_used = used;
+        timings.selected_cols = width;
+        rank
+    } else if certify {
+        timings.rank_cert_attempted = true;
+        let (rank, original_used) =
+            certify_full_rank_or_echelon(&mut matrix, cols.len(), &mut word_ops);
+        timings.certified_original_used = original_used;
+        rank
+    } else if !echelon {
         rref_f2_counted(&mut matrix, cols.len(), &mut word_ops)
     } else if matrix.len() >= 128 && cols.len() >= 256 {
         crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, cols.len(), &mut word_ops)
@@ -741,6 +877,65 @@ mod tests {
     use crate::cryptanalysis::koblitz_groebner::{
         f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
     };
+
+    #[test]
+    fn sampled_column_certificate_is_exact_and_falls_back() {
+        let n_cols = 12usize;
+        let columns = sampled_columns(n_cols, 6);
+        let mut independent = vec![vec![0u64]; 3];
+        for (row, &column) in independent.iter_mut().zip(columns.iter()) {
+            row[0] = 1u64 << column;
+        }
+        let original = independent.clone();
+        let mut ops = 0;
+        assert_eq!(
+            certify_selected_columns_or_echelon(&mut independent, n_cols, 3, &mut ops),
+            (3, true, 6)
+        );
+        assert_eq!(independent, original);
+
+        let mut dependent = original;
+        dependent[2] = dependent[0].clone();
+        let mut reference = dependent.clone();
+        let mut expected_ops = 0;
+        let expected_rank = crate::cryptanalysis::gf2_elim::echelon_counted(
+            &mut reference,
+            n_cols,
+            &mut expected_ops,
+        );
+        let mut ops = 0;
+        assert_eq!(
+            certify_selected_columns_or_echelon(&mut dependent, n_cols, 3, &mut ops),
+            (expected_rank, false, 6)
+        );
+        assert_eq!(dependent, reference);
+    }
+
+    #[test]
+    fn certified_original_rows_preserve_independent_rows_and_exact_fallback() {
+        let independent = vec![vec![0b0011], vec![0b0110], vec![0b1110]];
+        let mut retained = independent.clone();
+        let mut ops = 0;
+        assert_eq!(
+            certify_full_rank_or_echelon(&mut retained, 4, &mut ops),
+            (3, true)
+        );
+        assert_eq!(retained, independent);
+
+        let dependent = vec![vec![0b0011], vec![0b0110], vec![0b0101]];
+        let mut reference = dependent.clone();
+        let mut reference_ops = 0;
+        let reference_rank =
+            crate::cryptanalysis::gf2_elim::echelon_counted(&mut reference, 4, &mut reference_ops);
+        let mut fallback = dependent;
+        let mut ops = 0;
+        assert_eq!(
+            certify_full_rank_or_echelon(&mut fallback, 4, &mut ops),
+            (reference_rank, false)
+        );
+        assert_eq!(fallback, reference);
+        assert_eq!(ops, reference_ops);
+    }
 
     #[test]
     fn direct_scalar_unpack_matches_push_path() {
