@@ -3,7 +3,7 @@
 use crypto_lib::hash::sha256::sha256;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs::{self, File};
 use std::io::Write;
@@ -968,6 +968,22 @@ fn measured_charge(development: &Path) -> AnyResult<Charge> {
     let mut files = Vec::new();
     collect_named_files(development, "metrics.json", &mut files)?;
     files.sort();
+    let mut receipt_files = Vec::new();
+    collect_named_files(development, "receipt.json", &mut receipt_files)?;
+    receipt_files.sort();
+    let mut covered_metrics = BTreeSet::new();
+    for receipt_file in receipt_files {
+        let directory = receipt_file
+            .parent()
+            .ok_or_else(|| format!("{} has no parent", receipt_file.display()))?;
+        let receipt: MeterReceipt = read_json(&receipt_file)?;
+        validate_receipt(directory, &receipt)?;
+        covered_metrics.insert(directory.join(&receipt.metrics.path));
+    }
+    let measured_metrics = files.iter().cloned().collect::<BTreeSet<_>>();
+    if covered_metrics != measured_metrics {
+        return Err("development metrics and authenticated receipts differ".into());
+    }
     let mut charge = Charge {
         components: files.len(),
         wall_seconds_sum: 0.0,
