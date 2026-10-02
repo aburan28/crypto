@@ -8,15 +8,8 @@ tail and materializes every output. It must beat fresh matched packed controls
 in complete cold batches to qualify.
 
 The native Rust producer and verifier are implemented in the follow-on
-branch. Status: **strongest-control discovery complete; universal gate
-rejected before holdout**. [CONCLUSION.md](CONCLUSION.md) records the exact
-2/8 discovery decision and n=24 finite stage gain. [ATTEMPTS.md](ATTEMPTS.md)
-and [RUNS.json](RUNS.json) retain both earlier excluded raw artifacts: the
-first failed post-seal float readback; the second replayed completely but
-omitted an applicable 16-bit dense control at n=24. The admitted bundle is
-in [qualified_discovery_01](qualified_discovery_01/manifest.json). Fresh
-holdouts were not run. Full-solver cost, relation yield and rho ratio remain
-null.
+branch. Status: **source frozen, discovery pending**. No qualified discovery,
+holdout, timing result, solver cost, relation yield or rho comparison exists.
 The new holdout seeds remain unused. Inputs are generated public Boolean
 systems, with no curve or key interface. The previous full-trace screen in
 PR #1202 is context, not a performance baseline.
