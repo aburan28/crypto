@@ -223,7 +223,7 @@ rounds.
 |:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 | v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, #1166 |
-| v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, R05_PR |
+| v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, #1187 |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
