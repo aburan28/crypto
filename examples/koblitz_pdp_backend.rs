@@ -1077,8 +1077,6 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_full_m4ri_control":"unset selects the 4096-row hybrid; F4_F2_FULL_M4RI=0 disables full M4RI; =1 selects the historical broad-full control",
             "solver_full_m4ri_min_rows":std::env::var("F4_F2_FULL_M4RI_MIN_ROWS").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or_else(|| if std::env::var("F4_F2_FULL_M4RI").as_deref() == Ok("1") { 128 } else { 4096 }).max(128),
             "solver_full_m4ri_min_rows_control":"F4_F2_FULL_M4RI_MIN_ROWS explicitly overrides the selected/broad minimum",
-            "solver_full_m4ri_trim_ends":std::env::var("F4_F2_FULL_M4RI_TRIM_ENDS").as_deref() == Ok("1"),
-            "solver_full_m4ri_trim_ends_control":"F4_F2_FULL_M4RI_TRIM_ENDS=1 enables exact combination ends; unset or 0 preserves the block-wide end",
             "solver_matrix_profile":std::env::var("F4_F2_MATRIX_PROFILE").as_deref() == Ok("1"),
             "solver_matrix_profile_bins":["lt256","r256_511","r512_1023","r1024_2047","r2048_4095","ge4096"],
             "solver_matrix_profile_control":"F4_F2_MATRIX_PROFILE=1",
