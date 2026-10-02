@@ -373,6 +373,7 @@ fn measure_case(
     original: &[F2BoolPoly],
     n_vars: usize,
     p: &[u8; 8],
+    max_degree: u32,
 ) -> CaseResult {
     let started = Instant::now();
     let transformed = transform_system(original, p);
@@ -381,7 +382,7 @@ fn measure_case(
     let mut degree_5 = None;
     let mut degree_6 = None;
     let mut resolution = None;
-    for degree in input_degree.max(1)..=6 {
+    for degree in input_degree.max(1)..=max_degree {
         let profile = solving_profile_sparse(&transformed, n_vars, degree).map(Profile::from);
         if let Some(profile) = &profile {
             if resolution.is_none() && profile.resolves {
@@ -450,12 +451,13 @@ fn measure_candidate(
     class_index: usize,
     p: [u8; 8],
     cases: &[(FrozenCase, Vec<F2BoolPoly>, usize)],
+    max_degree: u32,
 ) -> CandidateResult {
     verify_inverse(&p);
     let anf_degree = anf_degree(&p);
     let measured = cases
         .iter()
-        .map(|(case, system, n_vars)| measure_case(*case, system, *n_vars, &p))
+        .map(|(case, system, n_vars)| measure_case(*case, system, *n_vars, &p, max_degree))
         .collect();
     CandidateResult {
         class_index,
@@ -472,15 +474,24 @@ fn write_json(path: &Path, value: &impl Serialize) {
     fs::write(path, bytes).expect("write result");
 }
 
-fn output_directory() -> PathBuf {
+fn arguments() -> (String, PathBuf) {
     let args: Vec<_> = std::env::args().collect();
-    assert_eq!(args.len(), 3, "usage: nonlinear-factor-labels --output DIR");
-    assert_eq!(args[1], "--output");
-    PathBuf::from(&args[2])
+    match args.as_slice() {
+        [_, flag, directory] if flag == "--output" => {
+            ("nonlinear".to_owned(), PathBuf::from(directory))
+        }
+        [_, mode_flag, mode, output_flag, directory]
+            if mode_flag == "--mode" && output_flag == "--output" =>
+        {
+            (mode.to_owned(), PathBuf::from(directory))
+        }
+        _ => panic!(
+            "usage: nonlinear-factor-labels [--mode nonlinear|affine] --output DIR"
+        ),
+    }
 }
 
-fn main() {
-    let output = output_directory();
+fn run_nonlinear(output: PathBuf) {
     assert!(!output.exists(), "refusing to overwrite {}", output.display());
     fs::create_dir_all(&output).expect("create output directory");
     let started = Instant::now();
@@ -505,7 +516,7 @@ fn main() {
 
     let mut discovery_results = Vec::new();
     for (class_index, &p) in representatives.iter().enumerate() {
-        let result = measure_candidate(class_index, p, discovery);
+        let result = measure_candidate(class_index, p, discovery, 6);
         assert!(result.cases.iter().all(|case| {
             case.exhaustive_equivalence && case.exhaustive_solution_count == 0
         }));
@@ -545,8 +556,8 @@ fn main() {
     });
     write_json(&output.join("winner.json"), &winner_record);
 
-    let baseline_holdout = measure_candidate(0, representatives[0], holdout);
-    let winner_holdout = measure_candidate(winner.class_index, winner.permutation, holdout);
+    let baseline_holdout = measure_candidate(0, representatives[0], holdout, 6);
+    let winner_holdout = measure_candidate(winner.class_index, winner.permutation, holdout, 6);
     assert!(baseline_holdout.cases.iter().all(|case| {
         case.exhaustive_equivalence
             && case.exhaustive_solution_count == 0
@@ -596,6 +607,192 @@ fn main() {
     });
     write_json(&output.join("results.json"), &result);
     println!("{}", serde_json::to_string_pretty(&result).unwrap());
+}
+
+fn affine_proxy_key(result: &CandidateResult) -> (usize, usize, usize, u32) {
+    let cols = result
+        .cases
+        .iter()
+        .map(|case| case.degree_5.as_ref().expect("affine degree-5 profile").cols)
+        .sum();
+    let rows = result
+        .cases
+        .iter()
+        .map(|case| case.degree_5.as_ref().expect("affine degree-5 profile").rows)
+        .sum();
+    let terms = result.cases.iter().map(|case| case.input_terms).sum();
+    (cols, rows, terms, result.permutation_code)
+}
+
+fn affine_final_key(result: &CandidateResult) -> (usize, usize, usize, usize, u32) {
+    let degree_6_cols = result
+        .cases
+        .iter()
+        .map(|case| case.degree_6.as_ref().expect("affine degree-6 profile").cols)
+        .sum();
+    let degree_6_rows = result
+        .cases
+        .iter()
+        .map(|case| case.degree_6.as_ref().expect("affine degree-6 profile").rows)
+        .sum();
+    let (degree_5_cols, _, input_terms, permutation_code) = affine_proxy_key(result);
+    (
+        degree_6_cols,
+        degree_6_rows,
+        degree_5_cols,
+        input_terms,
+        permutation_code,
+    )
+}
+
+fn run_affine(output: PathBuf) {
+    assert!(!output.exists(), "refusing to overwrite {}", output.display());
+    fs::create_dir_all(&output).expect("create output directory");
+    let started = Instant::now();
+    let affine = affine_group();
+    assert_eq!(affine.len(), 1_344, "|AGL(3,2)|");
+
+    let modulus = find_irreducible_sparse(N).expect("degree-7 irreducible modulus");
+    let field = FieldStructure::new(N, &modulus);
+    let frozen: Vec<_> = CASES
+        .iter()
+        .map(|case| {
+            let (system, n_vars) = build_case(*case, &field);
+            (*case, system, n_vars)
+        })
+        .collect();
+    let discovery = &frozen[..2];
+    let holdout = &frozen[2..];
+
+    let mut proxy = Vec::with_capacity(affine.len());
+    for (index, &permutation) in affine.iter().enumerate() {
+        let result = measure_candidate(index, permutation, discovery, 5);
+        assert!(result.affine);
+        assert!(result.cases.iter().all(|case| {
+            case.input_degree <= 3
+                && case.exhaustive_equivalence
+                && case.exhaustive_solution_count == 0
+        }));
+        if index % 64 == 0 || index + 1 == affine.len() {
+            eprintln!(
+                "affine proxy {index:04}/{} key={:?}",
+                affine.len() - 1,
+                affine_proxy_key(&result)
+            );
+        }
+        proxy.push(result);
+    }
+    write_json(&output.join("affine_proxy.json"), &proxy);
+
+    let mut proxy_order: Vec<_> = (0..proxy.len()).collect();
+    proxy_order.sort_by_key(|&index| affine_proxy_key(&proxy[index]));
+    proxy_order.truncate(12);
+    let shortlist_permutations: Vec<_> = proxy_order
+        .iter()
+        .map(|&index| proxy[index].permutation)
+        .collect();
+
+    let mut shortlist = Vec::new();
+    for (rank, permutation) in shortlist_permutations.into_iter().enumerate() {
+        let index = affine
+            .binary_search(&permutation)
+            .expect("affine group is sorted");
+        let result = measure_candidate(index, permutation, discovery, 6);
+        eprintln!(
+            "affine exact {rank:02}/11 index={index} key={:?}",
+            affine_final_key(&result)
+        );
+        shortlist.push(result);
+    }
+    write_json(&output.join("affine_shortlist.json"), &shortlist);
+
+    let identity = [0, 1, 2, 3, 4, 5, 6, 7];
+    let identity_index = affine.binary_search(&identity).expect("identity in AGL");
+    let baseline_discovery = measure_candidate(identity_index, identity, discovery, 6);
+    assert!(baseline_discovery
+        .cases
+        .iter()
+        .all(|case| case.resolution_degree_through_6 == Some(6)));
+    let winner = shortlist
+        .iter()
+        .filter(|result| {
+            result
+                .cases
+                .iter()
+                .all(|case| case.resolution_degree_through_6 == Some(6))
+        })
+        .min_by_key(|result| affine_final_key(result))
+        .expect("at least one shortlisted affine gauge resolves discovery")
+        .clone();
+    let winner_record = json!({
+        "frozen_before_holdout": true,
+        "affine_index": winner.class_index,
+        "permutation": winner.permutation,
+        "permutation_code": winner.permutation_code,
+        "proxy_key": affine_proxy_key(&winner),
+        "final_key": affine_final_key(&winner),
+        "discovery_cases": winner.cases,
+    });
+    write_json(&output.join("affine_winner.json"), &winner_record);
+
+    let baseline_holdout = measure_candidate(identity_index, identity, holdout, 6);
+    let winner_holdout = measure_candidate(winner.class_index, winner.permutation, holdout, 6);
+    for result in [&baseline_holdout, &winner_holdout] {
+        assert!(result.cases.iter().all(|case| {
+            case.exhaustive_equivalence
+                && case.exhaustive_solution_count == 0
+                && case.resolution_degree_through_6 == Some(6)
+        }));
+    }
+    let strict_reduction = winner_holdout
+        .cases
+        .iter()
+        .zip(&baseline_holdout.cases)
+        .all(|(winner, baseline)| {
+            winner.degree_6.as_ref().unwrap().cols < baseline.degree_6.as_ref().unwrap().cols
+        });
+    let primary_success = winner_holdout
+        .cases
+        .iter()
+        .zip(&baseline_holdout.cases)
+        .all(|(winner, baseline)| {
+            winner.degree_6.as_ref().unwrap().cols * 100
+                <= baseline.degree_6.as_ref().unwrap().cols * 95
+        });
+    let result = json!({
+        "schema_version": 1,
+        "scope": "GF(2^7) affine engineering diagnostic; not ECC2K-130 evidence",
+        "search_space": {
+            "affine_gauges": affine.len(),
+            "proxy_shortlist": 12
+        },
+        "field_modulus": {
+            "degree": modulus.degree,
+            "low_terms": modulus.low_terms,
+        },
+        "baseline_discovery": baseline_discovery,
+        "winner_discovery": winner,
+        "baseline_holdout": baseline_holdout,
+        "winner_holdout": winner_holdout,
+        "strict_reduction": strict_reduction,
+        "primary_success_5_percent_each_holdout": primary_success,
+        "elapsed_ms": started.elapsed().as_millis(),
+        "full_ic_cost": null,
+        "rho_ratio": null,
+        "m83_gate": null,
+        "gf2_131_result": null
+    });
+    write_json(&output.join("affine_results.json"), &result);
+    println!("{}", serde_json::to_string_pretty(&result).unwrap());
+}
+
+fn main() {
+    let (mode, output) = arguments();
+    match mode.as_str() {
+        "nonlinear" => run_nonlinear(output),
+        "affine" => run_affine(output),
+        _ => panic!("unknown mode {mode}; expected nonlinear or affine"),
+    }
 }
 
 #[cfg(test)]
