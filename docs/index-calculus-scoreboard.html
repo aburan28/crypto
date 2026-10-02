@@ -10271,5 +10271,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage194-table-build -->
+<!-- BEGIN current-f4-stage195-buffer-reuse -->
+<div class="panel" id="current-f4-stage195-buffer-reuse">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 195: table-buffer reuse improves one wall sample but not CPU <span class="chip">rejected</span></h2>
+        <p>One exact current/reuse pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate reuses adequate word-buffer capacity from tables retired in the
+          same extension call. Table construction order, pivots and row operations are unchanged.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/current wall and total-core ratios both strictly below 0.98. Direct ratios inherit the completed Stage 192 reference.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Candidate / current wall / core / RSS</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current fresh buffer per table run</td><td class="n">17.787954</td><td class="n">184.000982</td><td class="n">null</td><td class="n">3,639.54 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">39.108220 / 600.493061 / 88.625574</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Same-add retired-buffer reuse</strong></td><td class="n"><strong>16.902013</strong></td><td class="n"><strong>184.334805</strong></td><td class="n">null</td><td class="n">4,032.50 MB</td><td class="n"><strong>0.950194 / 1.001814 / 1.107968</strong></td><td class="n">37.160408 / 601.582503 / 98.194295</td><td><span class="chip">rejected</span> CPU gate fails</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">mechanism</span> 26,591 of 728,503 buffers are reused, covering 24,469,504 of 1,700,553,592 scheduled table words; all 147,794,583,858 performed XORs remain identical</span>
+        <span><span class="chip">decision</span> wall falls 4.98%, CPU rises 0.18% and RSS rises 10.80%; the frozen joint gate rejects a wall-only sample and prohibits confirmation</span>
+        <span><span class="chip">accounting</span> Stage 195 lower bound: 16 components, 219.075331 wall-seconds, 1,204.681181 core-seconds, 5.303 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative measured lower bound: 646 components, 24,599.183898 wall-seconds, 64,219.173358 core-seconds, 6.31 GB maximum RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/result.json</code>; one-target allocation only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage195-buffer-reuse -->
 </body>
 </html>

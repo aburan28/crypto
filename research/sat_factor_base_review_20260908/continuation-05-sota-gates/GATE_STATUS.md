@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 194, 2026-10-02.
+Current through Stage 195, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -181,6 +181,23 @@ wall-seconds and 63,014.492177 core-seconds at the unchanged
 verification passes 19/19 with result SHA-256
 `918687ed0358356d1309c866ede15b003eec9d3b94a09ce9d5b5b65ece4abaad`.
 This is a rejected one-target scheduling experiment; no SOTA gate changes.
+
+Stage 195 reuses adequate retired `BlockTables` word-buffer capacity within
+the same table-extension call while retaining the selected parallel table
+construction schedule. The candidate reuses 26,591 of 728,503 buffers and
+reduces fresh allocations by 3.650088 percent; those buffers cover only
+1.438914 percent of the 1,700,553,592 scheduled table words. All table, XOR,
+matrix and algebraic work remains exact. Candidate/current ratios are 0.950194
+wall, 1.001814 total core and 1.107968 RSS. The wall sample improves, but CPU
+does not clear the frozen strict-below-0.98 joint gate and RSS rises 10.80
+percent. Confirmation is prohibited and the candidate is reverted from
+runtime source. Stage 195 adds a measured lower bound of 16 components,
+219.075331 wall-seconds and 1,204.681181 core-seconds. The cumulative lower
+bound becomes 646 components, 24,599.183898 wall-seconds and 64,219.173358
+core-seconds at the unchanged 6,310,576,128-byte maximum RSS. Complete cost
+remains `null`. Final native verification passes 19/19 with result SHA-256
+`505b772e029c529d573856f06f906ebd3dbe3d0e5cffba40acf0565435ece628`.
+This is a rejected one-target allocation experiment; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the

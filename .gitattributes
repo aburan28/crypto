@@ -44,5 +44,8 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-ad
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/*.patch -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/PROTOCOL.md whitespace=-blank-at-eof
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/BOOTSTRAP_FAILURE.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/PROTOCOL.md whitespace=-blank-at-eof
 # Preserve sealed Rust test stdout in the Boolean half-word comparison.
 research/boolean_halfword_20260923/*/test.stdout whitespace=-blank-at-eof
