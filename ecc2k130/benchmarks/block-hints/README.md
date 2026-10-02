@@ -15,10 +15,28 @@ history word has one writer.
 
 The experiment requires both arms to replay 300/300 reports with zero drops,
 identify the exact B16 geometry and feature markers, and produce identical
-header-aware table-v3 corpora before timing. Two warmups are excluded. A
-control-candidate-control screen must clear the faster control by 0.5% before
-three alternating 64-launch pairs are admitted. Instrumented or overflowing
-rows are not substituted for this fixed queue-512 candidate.
+header-aware table-v3 corpora before timing. Atomic report order can put 300
+distinguished starting points at the front of a corpus, so that prefix replay
+does not by itself exercise a completed walk update. The native
+`build/table-v3-replay` gate also selects 300 deterministic indices spanning
+each complete corpus, binds every record to run-id 7, replays those seeds with
+the exact host table-v3/fast2 reference at DP weight 48, and requires nonzero
+trail coverage. Its JSON receipt reports zero/nonzero counts and the sampled
+step range. Any framing, run-id, endpoint, or coverage error suppresses timing.
+
+Two warmups are excluded. A control-candidate-control screen must clear the
+faster control by 0.5% before three alternating 64-launch pairs are admitted.
+Instrumented or overflowing rows are not substituted for this fixed queue-512
+candidate.
+
+The reusable host check can also audit retained corpora without CUDA:
+
+```sh
+make table-v3-replay
+./build/table-v3-replay --run-id 7 --dp-weight 48 \
+  --max-iters 4294967296 --samples 300 --min-nonzero 1 \
+  dp-control.bin dp-candidate.bin
+```
 
 ## Measured result
 

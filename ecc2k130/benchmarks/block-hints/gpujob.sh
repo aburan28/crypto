@@ -22,7 +22,17 @@ fail=0
 
 sha256sum Makefile include/packedkernels.cuh include/packedengine.cuh \
   include/packedtablewalk.cuh include/tablewalk.h include/cycleanchor_body.h \
-  include/ref.h src/main.cu > "$R/source-files.sha256"
+  include/ref.h include/tablev3replay.h src/main.cu src/tablev3replay.cpp \
+  > "$R/source-files.sha256"
+
+echo "=== build native table-v3 spread replay"
+make -s table-v3-replay > "$R/build-spread-replay.log" 2>&1 || fail=1
+if [ -x build/table-v3-replay ]; then
+  sha256sum build/table-v3-replay > "$R/replay-binary-sha256.txt"
+else
+  echo "BUILD FAILED native table-v3 spread replay" | tee -a "$R/failures.txt"
+  fail=1
+fi
 
 build() {
   local name=$1 block=$2
@@ -67,6 +77,19 @@ verify control 0 || fail=1
 verify candidate 1 || fail=1
 python3 benchmarks/dp_identity.py "$R" control candidate \
   | tee "$R/dp-identity.txt" || fail=1
+
+# The producer's first 300 atomic reports can all be distinguished starting
+# points.  Replay an evenly spread host-reference sample and require at least
+# one completed table step in each arm before any timing is admitted.
+if [ "$fail" = 0 ]; then
+  ./build/table-v3-replay --run-id 7 --dp-weight 48 \
+    --max-iters 4294967296 --samples 300 --min-nonzero 1 \
+    "$R/dp-control.bin" "$R/dp-candidate.bin" \
+    > "$R/spread-replay.json" 2> "$R/spread-replay.log" || fail=1
+  if [ "$fail" = 0 ]; then
+    (cd "$R" && sha256sum spread-replay.json) > "$R/spread-replay-sha256.txt"
+  fi
+fi
 
 python3 benchmarks/block-hints/summarize.py "$R" \
   --out "$R/preflight.json" --preflight || fail=1

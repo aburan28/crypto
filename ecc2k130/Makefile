@@ -376,6 +376,30 @@ build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 
 trailforest: build/trailforest
 
+# Strict host replay for versioned table-v3 corpora.  Keep every rule switch
+# explicit: this is an evidence checker for the selected reference walk, not a
+# build that inherits whichever experimental knobs happen to be on a command
+# line.  Run-id, DP weight and producer max-iters remain required runtime
+# context because the v3 file header does not carry them.
+TABLE_V3_REPLAY_DEFS = -DECC_NO_CUDA -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 \
+	-DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1
+
+build/table-v3-replay: src/tablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/tablev3replay.cpp -o $@
+
+table-v3-replay: build/table-v3-replay
+
+build/test-table-v3-replay: src/testtablev3replay.cpp include/tablev3replay.h $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(TABLE_V3_REPLAY_DEFS) -Wall -Wextra \
+	    -Wno-unused-function -Wno-unknown-pragmas src/testtablev3replay.cpp -o $@
+
+test-table-v3-replay: build/table-v3-replay build/test-table-v3-replay
+	./build/test-table-v3-replay
+	./build/table-v3-replay --help >/dev/null
+
 # Orbit witnesses for a corpus: the j-counts a cairn piecework node can check
 # with one double scalar multiplication.  Host only.
 build/witness: src/witness.cpp $(HDRS) $(GEN)
@@ -595,7 +619,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -927,10 +951,11 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/table-v3-replay build/test-table-v3-replay
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:
