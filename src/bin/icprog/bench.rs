@@ -329,8 +329,7 @@ pub fn host_manifest(
         std::fs::read_to_string(format!("/sys/kernel/mm/transparent_hugepage/{name}"))
             .map_or(J::Null, |s| J::Str(s.trim().to_string()))
     };
-    // SAFETY: sysconf has no preconditions.
-    let cores = unsafe { libc::sysconf(libc::_SC_NPROCESSORS_ONLN) }.max(0) as i128;
+    let cores = std::thread::available_parallelism().map_or(0, |n| n.get() as i128);
     let release = std::fs::read_to_string("/proc/sys/kernel/osrelease")
         .map(|s| s.trim().to_string())
         .unwrap_or_default();
