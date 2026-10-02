@@ -66,4 +66,3 @@ reopens the TSV and computes all ratios.
 
 The experiment stops after this matched panel. No search, solver, collision
 recovery or multi-GPU aggregation is part of it.
-
