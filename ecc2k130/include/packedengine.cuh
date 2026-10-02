@@ -22,6 +22,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     bool restartPending = false;
     unsigned *denominators = nullptr;
     unsigned *twConsts = nullptr;
+#if ECC_TABLE_GLOBAL_HINTS
+    unsigned *globalHintQueue = nullptr, *globalHintCount = nullptr;
+    int globalResolverBlocks = 0;
+#endif
 #if ECC_PACKED_L2_PERSIST
     // One allocation: the access-policy window is a single contiguous range.
     unsigned *fieldBlob = nullptr;
@@ -52,6 +56,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
         cudaFree(P.hist); cudaFree(twConsts);
         cudaFree(P.counts);
+#if ECC_TABLE_GLOBAL_HINTS
+        cudaFree(globalHintQueue); cudaFree(globalHintCount);
+#endif
 #if ECC_CYCLE_PROFILE
         cudaFree(P.cycleProfile);
 #endif
@@ -197,14 +204,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         // The witness counters setup allocates alongside the walk state;
         // zero when ECC_WITNESS is compiled out.
         const size_t counterBytes = eccScalarCountWords(1, BATCH) * sizeof(unsigned);
+        const size_t hintBytes = ECC_TABLE_GLOBAL_HINTS ? size_t(BATCH) * sizeof(unsigned) : 0;
 #if ECC_PACKED_COMPACT_STATE
         // autoThreads rounds to complete 256-worker tiles; each stored field
         // consumes sixteen low bytes and one top byte per worker/slot.
         const size_t perThread = size_t(BATCH) *
-            ((3 + denominatorFields) * 17 + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes;
+            ((3 + denominatorFields) * 17 + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes + hintBytes;
 #else
         const size_t perThread = size_t(BATCH) *
-            ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes;
+            ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes + hintBytes;
 #endif
         size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
@@ -230,6 +238,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         if (dynamicSharedBytes() > 48 * 1024 || ECC_TABLE_BLOCK_HINTS)
             CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::walk,
                 cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
+#if ECC_TABLE_GLOBAL_HINTS
+        if (dynamicSharedBytes() > 48 * 1024) {
+            CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::selectGlobalHints,
+                cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
+            CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::resolveGlobalHints,
+                cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
+        }
+#endif
     }
 
 #if ECC_PACKED_L2_PERSIST
@@ -308,6 +324,18 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             P.twConsts = twConsts;
         }
         CUDA_CHECK(cudaMalloc(&P.hist, laneCount() * sizeof(u64)));
+#if ECC_TABLE_GLOBAL_HINTS
+        if (laneCount() > 0xffffffffull) {
+            fprintf(stderr, "GPU-wide hint keys require at most UINT32_MAX walks\n"); exit(2);
+        }
+        CUDA_CHECK(cudaMalloc(&globalHintQueue, laneCount() * sizeof(unsigned)));
+        CUDA_CHECK(cudaMalloc(&globalHintCount, sizeof(unsigned)));
+        int currentDevice = 0;
+        cudaDeviceProp globalHintDevice;
+        CUDA_CHECK(cudaGetDevice(&currentDevice));
+        CUDA_CHECK(cudaGetDeviceProperties(&globalHintDevice, currentDevice));
+        globalResolverBlocks = globalHintDevice.multiProcessorCount;
+#endif
 #endif
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));
         // Second counter signals overdue restarts without emitting false DPs.
@@ -381,6 +409,22 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed square table: %d\n", ECC_PACKED_SQUARE_TABLE);
         printf("packed polynomial inversion: %d\n", ECC_PACKED_INV_POLY);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
+        printf("packed table GPU-wide hints: %d\n", ECC_TABLE_GLOBAL_HINTS);
+        printf("packed hint scheduling: table fused %d, pipe select %d, chain first %d, inline polynomial %d, phase profile %d, cycle profile %d\n",
+               ECC_TABLE_FUSED, ECC_TABLE_PIPE_SELECT, ECC_PACKED_CHAIN_FIRST,
+               ECC_PACKED_INLINE_POLY, ECC_PHASE_PROFILE, ECC_CYCLE_PROFILE);
+#if ECC_TABLE_GLOBAL_HINTS
+        printf("packed GPU-wide hint queue: %llu entries, %d resolver blocks of 128 threads\n",
+               (unsigned long long)laneCount(), globalResolverBlocks);
+        for (int stage = 0; stage < 2; ++stage) {
+            cudaFuncAttributes hintAttrs;
+            if (stage == 0) CUDA_CHECK(cudaFuncGetAttributes(&hintAttrs, eccPacked131::selectGlobalHints));
+            else CUDA_CHECK(cudaFuncGetAttributes(&hintAttrs, eccPacked131::resolveGlobalHints));
+            printf("packed hint %s kernel: %d registers/thread, %zu local bytes/thread, %zu static shared bytes\n",
+                   stage == 0 ? "select" : "resolve", hintAttrs.numRegs,
+                   hintAttrs.localSizeBytes, hintAttrs.sharedSizeBytes);
+        }
+#endif
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
         printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
@@ -404,9 +448,27 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_PROFILE_RANGE
         CUDA_CHECK(cudaProfilerStart());
 #endif
+#if ECC_TABLE_GLOBAL_HINTS
+        WalkParams<unsigned> one = P;
+        one.steps = 1;
+        const int activeBlocks = (P.threads + ECC_THREADS - 1) / ECC_THREADS;
+        for (int step = 0; step < P.steps; ++step) {
+            one.iterBase = iterBase + (u64)step;
+            CUDA_CHECK(cudaMemsetAsync(globalHintCount, 0, sizeof(unsigned)));
+            eccPacked131::selectGlobalHints<<<activeBlocks, ECC_THREADS, dynamicSharedBytes()>>>(
+                one, globalHintQueue, globalHintCount);
+            CUDA_CHECK(cudaGetLastError());
+            eccPacked131::resolveGlobalHints<<<globalResolverBlocks, 128, dynamicSharedBytes()>>>(
+                one, globalHintQueue, globalHintCount);
+            CUDA_CHECK(cudaGetLastError());
+            eccPacked131::walk<<<activeBlocks, ECC_THREADS, dynamicSharedBytes()>>>(one, denominators);
+            CUDA_CHECK(cudaGetLastError());
+        }
+#else
         eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS,
                              dynamicSharedBytes()>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
+#endif
 #if ECC_PHASE_PROFILE
         profWarpSteps += double(P.threads / 32) * P.steps;
 #endif

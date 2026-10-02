@@ -321,6 +321,17 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #ifndef ECC_TABLE_BLOCK_HINTS
 #define ECC_TABLE_BLOCK_HINTS 0
 #endif
+#ifndef ECC_TABLE_GLOBAL_HINTS
+#define ECC_TABLE_GLOBAL_HINTS 0
+#endif
+#if ECC_TABLE_GLOBAL_HINTS != 0 && ECC_TABLE_GLOBAL_HINTS != 1
+#error "ECC_TABLE_GLOBAL_HINTS must be 0 or 1"
+#endif
+#if ECC_TABLE_GLOBAL_HINTS && (!ECC_WALK_TABLE || !ECC_TABLE_BATCH_HINTS || \
+    !ECC_TABLE_SPLIT_FORWARD || ECC_TABLE_BLOCK_HINTS || ECC_TABLE_FUSED || \
+    ECC_TABLE_GLOBAL || ECC_TABLE_ADDEND_GLOBAL || ECC_CYCLE_PROFILE || ECC_PHASE_PROFILE)
+#error "GPU-wide hints require split/batch v3 with full shared tables, no block queue, fusion or profiling"
+#endif
 #ifndef ECC_TABLE_HINT_QUEUE
 #define ECC_TABLE_HINT_QUEUE 512
 #endif
@@ -358,6 +369,9 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #endif
 #if ECC_SIGMA_FUSED && ECC_PACKED_CHAINS != 1
 #error "ECC_SIGMA_FUSED requires one Montgomery chain"
+#endif
+#if ECC_TABLE_GLOBAL_HINTS && ECC_PACKED_CHAINS != 1
+#error "GPU-wide hints require one Montgomery chain"
 #endif
 
 #if ECC_WALK_TABLE
@@ -518,6 +532,47 @@ __device__ __forceinline__ void tableAddendFromHist(const WalkParams<unsigned> &
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
 #endif
+#endif
+
+#if ECC_TABLE_GLOBAL_HINTS
+// Queue ownership is flat slot*workers+worker. Each worker reserves a range
+// once, then writes each hinted slot to a different entry. The following
+// kernel consumes only after every selection block completes on this stream.
+static __global__ void ECC_BOUNDS selectGlobalHints(WalkParams<unsigned> p,
+                                                     unsigned *queue, unsigned *count) {
+    extern __shared__ uint32_t table[];
+    twLoadShared(table, p.twConsts);
+    const unsigned tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid >= unsigned(p.threads)) return;
+    const bool guard = p.maxIters && p.iterBase % ECC_GUARD_PERIOD == 0;
+    unsigned long long pending = 0;
+#pragma unroll 1
+    for (int slot = 0; slot < ECC_BATCH; ++slot)
+        if (tableSelectRawTagSlot(p, slot, int(tid), p.iterBase, guard, table))
+            pending |= 1ull << slot;
+    const unsigned n = __popcll(pending);
+    if (!n) return;
+    unsigned pos = atomicAdd(count, n);
+    while (pending) {
+        const unsigned slot = unsigned(__ffsll((long long)pending) - 1);
+        queue[pos++] = slot * unsigned(p.threads) + tid;
+        pending &= pending - 1;
+    }
+}
+
+static __global__ __launch_bounds__(128, 1)
+void resolveGlobalHints(WalkParams<unsigned> p, const unsigned *queue, const unsigned *count) {
+    extern __shared__ uint32_t table[];
+    twLoadShared(table, p.twConsts);
+    const unsigned n = *count;
+    const size_t stride = size_t(gridDim.x) * blockDim.x;
+    for (size_t pos = size_t(blockIdx.x) * blockDim.x + threadIdx.x; pos < n; pos += stride) {
+        const unsigned owner = queue[pos];
+        const int tid = int(owner % unsigned(p.threads));
+        const int slot = int(owner / unsigned(p.threads));
+        tableResolveHintSlot(p, slot, tid, table, table);
+    }
+}
 #endif
 
 #if ECC_SIGMA_FUSED
@@ -960,7 +1015,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
         ECC_PHASE_MARK(ph0);
 #if ECC_TABLE_PIPE_SELECT
-#if ECC_TABLE_SPLIT_FORWARD
+#if ECC_TABLE_SPLIT_FORWARD && !ECC_TABLE_GLOBAL_HINTS
 #if ECC_TABLE_BATCH_HINTS
         unsigned long long pendingHints = 0;
 #if ECC_TABLE_BLOCK_HINTS && defined(__CUDA_ARCH__)

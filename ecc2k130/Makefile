@@ -136,6 +136,7 @@ TABLE_SPLIT_FORWARD ?= 0
 TABLE_BATCH_HINTS ?= 0
 # Compact up to TABLE_HINT_QUEUE pending (thread,slot) pairs in shared memory.
 TABLE_BLOCK_HINTS ?= 0
+TABLE_GLOBAL_HINTS ?= 0
 TABLE_HINT_QUEUE ?= 512
 # Prove raw two-cycles after one affine step and one denominator check.
 CYCLE_FAST2 ?= 0
@@ -265,6 +266,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_TABLE_BLOCK_HINTS=$(TABLE_BLOCK_HINTS) -DECC_TABLE_HINT_QUEUE=$(TABLE_HINT_QUEUE) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
+       -DECC_TABLE_GLOBAL_HINTS=$(TABLE_GLOBAL_HINTS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
@@ -767,6 +769,16 @@ gpu-rtx-pro6000-20b:
 gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+
+# Build the queue control with exactly the same arithmetic/layout preset.
+build/test-global-hints-cuda: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+test-global-hints-preset: PACKED_ALU_SQUARE = 1
+test-global-hints-preset:
+	$(MAKE) -B build/test-global-hints-cuda ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+	./build/test-global-hints-cuda
+.PHONY: test-global-hints-preset
 
 # The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
 # pass per step, which does the same work per clock as the 20 B/s build and
