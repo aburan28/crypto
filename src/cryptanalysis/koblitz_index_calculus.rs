@@ -129,7 +129,7 @@ use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::{One, ToPrimitive, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
@@ -142,6 +142,7 @@ use crate::cryptanalysis::crossbred::{
     extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions as CrossbredSearchOptions,
     SearchStats as CrossbredSearchStats,
 };
+use crate::cryptanalysis::curve_id;
 use crate::cryptanalysis::ec_index_calculus::{
     gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, sqrt_mod_p,
 };
@@ -521,9 +522,93 @@ fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u6
     count
 }
 
-/// Trial-division factorisation into `(prime, exponent)` pairs.  Only
-/// ever called on `#E` for toy `n`.
-fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
+/// Trial-division factorisation into `(prime, exponent)` pairs,
+/// ascending.  Only ever called on `#E`, which for `n ≤ MAX_N` fits a
+/// `u64`: there it stops as soon as what is left is prime (a
+/// deterministic Miller–Rabin test), instead of dividing up to the
+/// square root of the large prime `r` — about 2²² big-integer divisions
+/// at `n = 53`, which was most of building a curve.
+fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
+    if let Some(small) = v.to_u64() {
+        return factorise_u64(small)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
+    factorise_big(v)
+}
+
+fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
+    let mut out = Vec::new();
+    // Whether what is left is prime changes only when a division changes
+    // it, so the test runs then and not at every trial divisor: a
+    // Miller–Rabin test per divisor was most of building a curve whose
+    // order has a composite cofactor (`n = 57`).  Even divisors past 2
+    // are skipped, since the 2s are gone by then.
+    let mut prime = is_prime_u64(v);
+    let mut d = 2u64;
+    while v > 1 && !prime && d.saturating_mul(d) <= v {
+        let mut e = 0;
+        while v.is_multiple_of(d) {
+            v /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d, e));
+            prime = is_prime_u64(v);
+        }
+        d += if d == 2 { 1 } else { 2 };
+    }
+    if v > 1 {
+        out.push((v, 1));
+    }
+    out
+}
+
+/// Deterministic Miller–Rabin for every `u64`: the first twelve primes
+/// as bases are a complete witness set below `3.3 · 10²⁴`.
+fn is_prime_u64(n: u64) -> bool {
+    const BASES: [u64; 12] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+    if n < 2 {
+        return false;
+    }
+    for &p in &BASES {
+        if n.is_multiple_of(p) {
+            return n == p;
+        }
+    }
+    let mul = |a: u64, b: u64| ((a as u128 * b as u128) % n as u128) as u64;
+    let pow = |mut b: u64, mut e: u64| {
+        let mut r = 1u64;
+        b %= n;
+        while e > 0 {
+            if e & 1 == 1 {
+                r = mul(r, b);
+            }
+            b = mul(b, b);
+            e >>= 1;
+        }
+        r
+    };
+    let s = (n - 1).trailing_zeros();
+    let d = (n - 1) >> s;
+    'witness: for &a in &BASES {
+        let mut x = pow(a, d);
+        if x == 1 || x == n - 1 {
+            continue;
+        }
+        for _ in 1..s {
+            x = mul(x, x);
+            if x == n - 1 {
+                continue 'witness;
+            }
+        }
+        return false;
+    }
+    true
+}
+
+fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
     while &d * &d <= v {
@@ -734,17 +819,23 @@ impl KoblitzCurve {
         acc
     }
 
-    /// Short label: `K_a / GF(2^n)`, or the subfield form
-    /// `E_{a,b}/GF(2^k) over GF(2^n)`.
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), in the
+    /// polynomial basis this curve's field is built on.  A Koblitz curve
+    /// (`k = 1`) certifies `End(E) = Z[τ]`, discriminant `−7`; a subfield
+    /// curve leaves the endomorphism ring unknown.
+    pub fn curve_id(&self) -> curve_id::CurveId {
+        let modulus = curve_id::modulus_integer(&self.curve.irreducible);
+        let (a, b) = (self.curve.a.to_biguint(), self.curve.b.to_biguint());
+        let end = (self.k == 1).then_some(-7);
+        curve_id::binary(self.n, &modulus, &a, &b, &self.group_order, end)
+            .expect("a constructed curve is non-singular and inside the Hasse interval")
+    }
+
+    /// The curve's name: its ICV1 slug.  Reports written before ICV1
+    /// named it `K_a / GF(2^n)` or `E_{a,b}/GF(2^k) over GF(2^n)`; the
+    /// registry resolves those to this slug ([`curve_id::same_curve`]).
     pub fn label(&self) -> String {
-        if self.k == 1 {
-            format!("K_{} / GF(2^{})", self.a, self.n)
-        } else {
-            format!(
-                "E_{{{},{}}}/GF(2^{}) over GF(2^{})",
-                self.a_index, self.b_index, self.k, self.n
-            )
-        }
+        self.curve_id().slug
     }
 
     /// `[k]·P` on this curve.
@@ -2860,6 +2951,52 @@ fn pair_filter_hash(key: u64) -> u64 {
     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
 }
 
+/// Bits a key sets in its presence-filter word, in this module's builds
+/// and `gpu/ecc2k/pairtable.cuh`'s: three, all in the one word its hash
+/// names, so a probe still reads one word.  A table built elsewhere says
+/// how many its builder set ([`FoldedParts::filter_probes`]).
+pub const FILTER_PROBES: u8 = 3;
+
+/// Filter bits per stored key, before the filter is rounded up to a power
+/// of two.
+const FILTER_BITS_PER_KEY: usize = 8;
+
+/// The filter's width in bits, as a power of two: `FILTER_BITS_PER_KEY` a
+/// stored key, rounded up, within `2^6..=2^32`.
+pub(crate) fn filter_bits_for(keys: usize) -> u32 {
+    (usize::BITS
+        - keys
+            .max(1)
+            .saturating_mul(FILTER_BITS_PER_KEY)
+            .leading_zeros())
+    .clamp(6, 32)
+}
+
+/// `extra` for [`filter_slot`]: every bit for three probes, none for one.
+pub(crate) const fn filter_extra(probes: u8) -> u64 {
+    if probes >= 3 {
+        u64::MAX
+    } else {
+        0
+    }
+}
+
+/// A key's filter word and the bits it sets there, from its hash `h`.  The
+/// word is `(h & mask) / 64` and the first bit `h`'s low six bits, as with
+/// one probe; with three (`extra` all ones) the other two come from `h`'s
+/// top twelve bits, which the word index (at most 32 bits) never reaches.
+#[inline(always)]
+pub(crate) fn filter_slot(h: u64, mask: u64, extra: u64) -> (usize, u64) {
+    let more = (1u64 << ((h >> 52) & 63)) | (1u64 << (h >> 58));
+    (
+        ((h & mask) >> 6) as usize,
+        (1u64 << (h & 63)) | (more & extra),
+    )
+}
+
+/// [`filter_extra`] for this module's own builds.
+const FILTER_EXTRA: u64 = filter_extra(FILTER_PROBES);
+
 /// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
 /// by packed point identity so a sum can be looked up by binary search.
 ///
@@ -2958,6 +3095,8 @@ pub struct FoldedStorage<'a> {
     pub words: &'a [u32],
     pub present: &'a [u64],
     pub present_mask: u64,
+    /// Bits each key set in its filter word: 1 or [`FILTER_PROBES`].
+    pub filter_probes: u8,
     pub tagged: bool,
     /// The normal basis the keys were named in; empty if the build fell
     /// back to the squaring chain.
@@ -2974,6 +3113,7 @@ impl FoldedStorage<'_> {
             words: self.words.to_vec(),
             present: self.present.to_vec(),
             present_mask: self.present_mask,
+            filter_probes: self.filter_probes,
             canon_tables: self.canon_tables.to_vec(),
         }
     }
@@ -2992,9 +3132,15 @@ pub struct FoldedParts {
     /// `(orbit << 16) | hash16` on a tagged table, the hash's low word
     /// otherwise.
     pub words: Vec<u32>,
-    /// One bit per `pair_filter_hash(key) & present_mask`.
+    /// The presence filter: each key sets `filter_probes` bits of word
+    /// `(pair_filter_hash(key) & present_mask) / 64` ([`filter_slot`]).
     pub present: Vec<u64>,
     pub present_mask: u64,
+    /// Bits each key set in its filter word: [`FILTER_PROBES`] for this
+    /// module's builds and `gpu/ecc2k/pairtable.cuh`'s, 1 for a table
+    /// built with one bit a key, as both built them before (a `PTFOLD1`
+    /// file).  The probe reads as many as were set.
+    pub filter_probes: u8,
     /// The normal basis the keys were named in, as
     /// [`FrobeniusCanon::tables`] gives it.
     pub canon_tables: Vec<[u64; 256]>,
@@ -3049,14 +3195,17 @@ pub struct PairSumTable {
     /// walking a binary search across the whole table.
     bucket_start: Vec<u32>,
     bucket_shift: u32,
-    /// One bit per hashed key, about four per stored sum: a lookup that
-    /// finds its bit clear is certainly absent and never touches the
-    /// entries.  Most lookups of a decomposition search miss, and the
+    /// [`FILTER_PROBES`] bits per hashed key, all in one word, in a filter
+    /// of eight to sixteen bits per stored sum: a lookup that finds any of
+    /// its bits clear is certainly absent and never touches the entries.
+    /// Most lookups of a decomposition search miss, and the
     /// entries are far too large to cache, so this turns the hot path
     /// from a miss in a table of hundreds of megabytes into one in a
     /// few.  No false negatives, so the answer is unchanged.
     present: Vec<u64>,
     present_mask: u64,
+    /// [`filter_extra`] of the probes the filter was built with.
+    filter_extra: u64,
     /// Whether the stored keys are folded by the signed Frobenius group
     /// `G = ⟨π, −1⟩`.
     ///
@@ -3424,7 +3573,7 @@ impl PairSumTable {
     pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
         let pairs = Self::pair_count(points);
         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
-        pairs * 4 + buckets * 4 + pairs / 2
+        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
     }
 
     /// [`Self::compact_byte_size`] plus one packed pair witness per
@@ -3468,7 +3617,7 @@ impl PairSumTable {
     pub fn folded_byte_size(orbits: usize, points: usize, degree: u32) -> u128 {
         let pairs = Self::folded_pair_count(orbits, points);
         let buckets = 1u128 << Self::folded_bucket_bits(pairs, degree);
-        pairs * 4 + buckets * 4 + pairs / 2
+        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
     }
 
     /// Bucket bits for the compact table: about one bucket per sixteen
@@ -3674,13 +3823,13 @@ impl PairSumTable {
         for b in 0..buckets {
             bucket_start[b + 1] += bucket_start[b];
         }
-        // Four bits per entry, rounded up to a power of two.
-        let filter_bits = (usize::BITS - (entries.len().max(1) * 4).leading_zeros()).clamp(6, 32);
+        // Eight bits per entry, rounded up to a power of two.
+        let filter_bits = filter_bits_for(entries.len());
         let present_mask = (1u64 << filter_bits) - 1;
         let mut present = vec![0u64; (1usize << filter_bits) / 64];
         for &(key, _, _) in &entries {
-            let h = (pair_filter_hash(key) & present_mask) as usize;
-            present[h >> 6] |= 1u64 << (h & 63);
+            let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+            present[word] |= bits;
         }
         Some(Self {
             entries,
@@ -3694,6 +3843,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -3770,7 +3920,7 @@ impl PairSumTable {
         let total = bucket_start[buckets] as usize;
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -3789,8 +3939,8 @@ impl PairSumTable {
                 unsafe {
                     *(slots as *mut u32).add(slot) = Self::compact_rest(key);
                 }
-                let h = (pair_filter_hash(key) & present_mask) as usize;
-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
             });
         });
         let present: Vec<u64> = present_atomic
@@ -3810,6 +3960,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -3888,7 +4039,7 @@ impl PairSumTable {
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
         let mut compact_witnesses = vec![0u32; total];
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -3908,8 +4059,8 @@ impl PairSumTable {
                     *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
                     *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
                 }
-                let h = (pair_filter_hash(key) & present_mask) as usize;
-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
             }
         });
         drop(cached_keys);
@@ -3929,6 +4080,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            filter_extra: FILTER_EXTRA,
             fold: false,
             canon: None,
             orbit_start: Vec::new(),
@@ -4040,7 +4192,7 @@ impl PairSumTable {
             });
         drop(keyed);
         // 4. Each partition counting-sorted into its own bucket range.
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let filter_bits = filter_bits_for(total);
         let present_mask = (1u64 << filter_bits) - 1;
         let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
             .map(|_| AtomicU64::new(0))
@@ -4072,8 +4224,8 @@ impl PairSumTable {
                     // bucket cursors stay inside it.
                     unsafe { *(rp as *mut u32).add(at[b]) = w };
                     at[b] += 1;
-                    let f = (h & present_mask) as usize;
-                    present_atomic[f >> 6].fetch_or(1u64 << (f & 63), Ordering::Relaxed);
+                    let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
+                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
                 }
             });
         bucket_start[buckets] = total as u32;
@@ -4219,7 +4371,7 @@ impl PairSumTable {
             let total = bucket_start[buckets] as usize;
             let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
             let mut rests = vec![0u32; total];
-            let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+            let filter_bits = filter_bits_for(total);
             let present_mask = (1u64 << filter_bits) - 1;
             let words = (1usize << filter_bits) / 64;
             let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
@@ -4238,8 +4390,9 @@ impl PairSumTable {
                             Self::compact_rest(key)
                         };
                     }
-                    let h = (pair_filter_hash(key) & present_mask) as usize;
-                    present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+                    let (word, bits) =
+                        filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
+                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
                 });
             });
             let present: Vec<u64> = present_atomic
@@ -4259,6 +4412,7 @@ impl PairSumTable {
                 words: rests,
                 present,
                 present_mask,
+                filter_probes: FILTER_PROBES,
                 canon_tables: Vec::new(),
             },
             tagged,
@@ -4300,6 +4454,7 @@ impl PairSumTable {
             bucket_shift: parts.bucket_shift,
             present: parts.present,
             present_mask: parts.present_mask,
+            filter_extra: filter_extra(parts.filter_probes),
             fold: true,
             canon,
             orbit_start,
@@ -4381,6 +4536,12 @@ impl PairSumTable {
                 parts.present_mask
             ));
         }
+        if parts.filter_probes != 1 && parts.filter_probes != FILTER_PROBES {
+            return Err(format!(
+                "a presence filter of {} probes a key, not 1 or {FILTER_PROBES}",
+                parts.filter_probes
+            ));
+        }
         let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
         if tagged {
             let orbits = fb.signed_orbits.len() as u32;
@@ -4459,6 +4620,11 @@ impl PairSumTable {
             words: &self.rests,
             present: &self.present,
             present_mask: self.present_mask,
+            filter_probes: if self.filter_extra != 0 {
+                FILTER_PROBES
+            } else {
+                1
+            },
             tagged: self.tagged,
             canon_tables: self.canon.as_ref().map_or(&[], |c| c.tables()),
         })
@@ -4691,18 +4857,19 @@ impl PairSumTable {
         }
     }
 
-    /// Index of the filter word holding this key's bit.
+    /// Index of the filter word holding this key's bits.
     #[inline]
     fn filter_word(&self, key: u64) -> usize {
         ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
     }
 
-    /// Whether the filter admits this key.  A `false` is certain; a
-    /// `true` still has to be checked against the entries.
+    /// Whether the filter admits this key: every bit it would have set is
+    /// set.  A `false` is certain; a `true` still has to be checked
+    /// against the entries.
     #[inline]
     fn admitted(&self, key: u64) -> bool {
-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
-        self.present[h >> 6] >> (h & 63) & 1 == 1
+        let (word, bits) = filter_slot(pair_filter_hash(key), self.present_mask, self.filter_extra);
+        self.present[word] & bits == bits
     }
 
     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
@@ -10321,6 +10488,104 @@ pub struct IndividualLogSolver<'a> {
     fast: Option<(FastCurve, FastPoint)>,
     h: BigUint,
     r_u64: u64,
+    /// The walks' stride and its multiples `[j·stride]G`, `j = 1..WALKS`,
+    /// built once so every target's starts are one batched addition.
+    /// Empty without the single-word curve.
+    stride: u64,
+    stride_multiples: Vec<FastPoint>,
+    /// The relation's arithmetic modulo `r` in machine words, when `r`
+    /// fits one.
+    word: Option<WordRelation>,
+}
+
+/// Walks a walked descent steps together (see
+/// [`IndividualLogSolver::solve_by_walking`]).
+const DESCENT_WALKS: usize = 64;
+
+/// What turning a descent relation into `d` needs, as machine words:
+/// `r`, `h mod r`, `λᵏ mod r` for every Frobenius power a column can carry,
+/// and each column's logarithm.  Every quantity is below `r < 2⁶³`, so a
+/// product fits a `u128`.
+struct WordRelation {
+    r: u64,
+    h: u64,
+    lambda_pow: Vec<u64>,
+    column_log: Vec<u64>,
+}
+
+impl WordRelation {
+    fn new(kc: &KoblitzCurve, column_log: &[BigUint]) -> Option<Self> {
+        let r_big = &kc.subgroup_order;
+        if r_big.bits() > 63 {
+            return None;
+        }
+        let word = |v: &BigUint| v.to_u64_digits().first().copied().unwrap_or(0);
+        let r = word(r_big);
+        let lambda = word(&(&kc.lambda % r_big));
+        let mut lambda_pow = Vec::with_capacity(kc.n as usize);
+        let mut power = 1 % r;
+        for _ in 0..kc.n {
+            lambda_pow.push(power);
+            power = mul_mod_u64(power, lambda, r);
+        }
+        Some(Self {
+            r,
+            h: word(&(&kc.cofactor % r_big)),
+            lambda_pow,
+            column_log: column_log.iter().map(word).collect(),
+        })
+    }
+
+    /// `d` with `Σ ±λᵏ·x_o − h·a ≡ h·b·d (mod r)`, or `None` when `h·b`
+    /// is not invertible — the relation
+    /// [`relation_from_decomposition_with_mode`] builds and the solver
+    /// used to reduce in big integers, summed column by column.
+    fn logarithm(
+        &self,
+        projected: &ProjectedSignedOrbitMap,
+        idxs: &[usize],
+        a: u64,
+        b: u64,
+    ) -> Option<u64> {
+        let r = self.r;
+        let mut sum = 0u64;
+        for &i in idxs {
+            let Some((o, k, negated)) = projected.orbit_of[i] else {
+                // [h]P = O: the summand contributes nothing.
+                continue;
+            };
+            let mut coeff = self.lambda_pow[k as usize];
+            if negated && coeff != 0 {
+                coeff = r - coeff;
+            }
+            sum = add_mod_u64(sum, mul_mod_u64(coeff, self.column_log[o], r), r);
+        }
+        let ha = mul_mod_u64(self.h, a % r, r);
+        let numerator = add_mod_u64(sum, r - ha, r);
+        let hb = mul_mod_u64(self.h, b % r, r);
+        Some(mul_mod_u64(numerator, inverse_mod_u64(hb, r)?, r))
+    }
+}
+
+fn mul_mod_u64(a: u64, b: u64, m: u64) -> u64 {
+    ((a as u128 * b as u128) % m as u128) as u64
+}
+
+fn add_mod_u64(a: u64, b: u64, m: u64) -> u64 {
+    ((a as u128 + b as u128) % m as u128) as u64
+}
+
+/// `a⁻¹ mod m` by the extended Euclidean algorithm, or `None` when
+/// `gcd(a, m) ≠ 1`.
+fn inverse_mod_u64(a: u64, m: u64) -> Option<u64> {
+    let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
+    let (mut old_s, mut s) = (1i128, 0i128);
+    while r != 0 {
+        let q = old_r / r;
+        (old_r, r) = (r, old_r - q * r);
+        (old_s, s) = (s, old_s - q * s);
+    }
+    (old_r == 1).then(|| old_s.rem_euclid(m as i128) as u64)
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -10391,6 +10656,24 @@ impl<'a> IndividualLogSolver<'a> {
             let g = fc.lift(kc.generator());
             (fc, g)
         });
+        let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        // Walks must not tread on each other, so they start one stride
+        // apart on the same line (see `solve_by_walking`).
+        let stride = (r_u64 / DESCENT_WALKS as u64).max(1 << 20);
+        let stride_multiples = match &fast {
+            Some((fc, g)) => {
+                let step = fc.mul_u64(*g, stride);
+                let mut multiples = Vec::with_capacity(DESCENT_WALKS - 1);
+                let mut current = step;
+                for _ in 1..DESCENT_WALKS {
+                    multiples.push(current);
+                    current = fc.add(current, step);
+                }
+                multiples
+            }
+            None => Vec::new(),
+        };
+        let word = WordRelation::new(kc, &column_log);
         Some(Self {
             kc,
             fb,
@@ -10402,8 +10685,68 @@ impl<'a> IndividualLogSolver<'a> {
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             fast,
             h: &kc.cofactor % r,
-            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+            r_u64,
+            stride,
+            stride_multiples,
+            word,
         })
+    }
+
+    /// The 64 walks' starting points: `start + [j·stride]G` for
+    /// `j = 0..64`, the first given, the rest by one batched addition to
+    /// the precomputed multiples — one inversion where adding the stride
+    /// 63 times, one point after another, paid 63.  The points are the
+    /// ones the sequential sums reach, so every walk starts where it did.
+    fn walk_starts(
+        &self,
+        fc: &FastCurve,
+        start: FastPoint,
+        scratch: &mut BatchScratch,
+    ) -> Vec<FastPoint> {
+        let mut states = Vec::with_capacity(DESCENT_WALKS);
+        states.push(start);
+        fc.add_many(start, &self.stride_multiples, &mut states, scratch);
+        states
+    }
+
+    /// `d` from a decomposition of `[a]G + [b]Q`, in machine words when
+    /// `r` fits one, else in big integers.
+    fn relation_logarithm(&self, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        if let Some(word) = &self.word {
+            return word
+                .logarithm(self.projected.as_ref(), idxs, a, b)
+                .map(BigUint::from);
+        }
+        self.relation_logarithm_big(idxs, a, b)
+    }
+
+    /// The same `d` in big-integer arithmetic: the relation row over the
+    /// projected columns, its dot product with the column logarithms and
+    /// a modular inverse.
+    fn relation_logarithm_big(&self, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        let kc = self.kc;
+        let r = &kc.subgroup_order;
+        let (a, b) = (BigUint::from(a), BigUint::from(b));
+        let relation = relation_from_decomposition_with_mode(
+            kc,
+            self.fb,
+            idxs,
+            &a,
+            &b,
+            self.opts.collapse_negation,
+            Some(self.projected.as_ref()),
+        );
+        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
+        let mut sum = BigUint::zero();
+        for (coeff, log) in relation.row.iter().zip(&self.column_log) {
+            if !coeff.is_zero() {
+                sum = (sum + coeff * log) % r;
+            }
+        }
+        let ha = (&self.h * &a) % r;
+        let numerator = (sum + r - ha) % r;
+        let hb = (&self.h * &b) % r;
+        Some((numerator * mod_inverse(&hb, r)?) % r)
     }
 
     /// Draw one query and preserve the frontend's verdict, including identity queries.
@@ -10461,33 +10804,23 @@ impl<'a> IndividualLogSolver<'a> {
 
     /// Turn a decomposition of `[a]G + [b]Q` into the logarithm, or
     /// `None` when this relation cannot give one.
-    fn logarithm_from(&self, q: &BinaryPoint, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+    ///
+    /// The recovery check `[d]G = Q` is made in the single-word
+    /// arithmetic the walk already uses; the caller's own final
+    /// verification is independent of it.
+    fn logarithm_from(
+        &self,
+        fc: &FastCurve,
+        g: FastPoint,
+        q_fast: FastPoint,
+        idxs: &[usize],
+        a: u64,
+        b: u64,
+    ) -> Option<BigUint> {
         let _descent = measurement::scope(Phase::TargetDescent);
-        let kc = self.kc;
-        let r = &kc.subgroup_order;
-        let (a, b) = (BigUint::from(a), BigUint::from(b));
-        let relation = relation_from_decomposition_with_mode(
-            kc,
-            self.fb,
-            idxs,
-            &a,
-            &b,
-            self.opts.collapse_negation,
-            Some(self.projected.as_ref()),
-        );
-        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
-        let mut sum = BigUint::zero();
-        for (coeff, log) in relation.row.iter().zip(&self.column_log) {
-            if !coeff.is_zero() {
-                sum = (sum + coeff * log) % r;
-            }
-        }
-        let ha = (&self.h * &a) % r;
-        let numerator = (sum + r - ha) % r;
-        let hb = (&self.h * &b) % r;
-        let d = (numerator * mod_inverse(&hb, r)?) % r;
+        let d = self.relation_logarithm(idxs, a, b)?;
         let _replay = measurement::scope(Phase::RecoveryCheck);
-        (kc.mul(kc.generator(), &d) == *q).then_some(d)
+        (fc.mul(g, &d) == q_fast).then_some(d)
     }
 
     /// **Walk the probes instead of drawing them.**
@@ -10511,32 +10844,28 @@ impl<'a> IndividualLogSolver<'a> {
         let pair = self.pair?;
         let m = self.descent_m();
         let q_fast = fc.lift(q);
-        const WALKS: usize = 64;
         // Walks must not tread on each other, so they start one stride
         // apart on the same line and each is stepped by G.  Building
-        // them that way costs three scalar multiplications and 63
-        // additions, where drawing each start costs two scalar
-        // multiplications apiece — which on a walk of a few hundred
-        // rounds is most of the descent.
-        let stride = (self.r_u64 / WALKS as u64).max(1 << 20);
+        // them that way costs two scalar multiplications and one batched
+        // addition of the precomputed stride multiples, where drawing
+        // each start costs two scalar multiplications apiece — which on
+        // a walk of a few hundred rounds is most of the descent.
+        let stride = self.stride;
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x57_41_4c_4b_44_45_53_00);
         let a0 = rng.gen_range(1..self.r_u64);
         let b = rng.gen_range(1..self.r_u64);
-        let stride_point = fc.mul_u64(*g, stride);
-        let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(WALKS);
-        let mut states: Vec<FastPoint> = Vec::with_capacity(WALKS);
-        let mut state = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
+        let mut scratch = BatchScratch::default();
+        let start = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
+        let mut states = self.walk_starts(fc, start, &mut scratch);
+        let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(DESCENT_WALKS);
         let mut a = a0;
-        for _ in 0..WALKS {
+        for _ in 0..DESCENT_WALKS {
             coefficients.push((a, b));
-            states.push(state);
-            state = fc.add(state, stride_point);
             a = (a + stride) % self.r_u64;
         }
-        let mut advanced = Vec::with_capacity(WALKS);
-        let mut lambdas: Vec<u64> = Vec::with_capacity(WALKS);
-        let mut scratch = BatchScratch::default();
-        let mut keys: Vec<u64> = Vec::with_capacity(WALKS);
+        let mut advanced = Vec::with_capacity(DESCENT_WALKS);
+        let mut lambdas: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
+        let mut keys: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
         while report.trials < self.opts.max_trials {
             // Key every state of the round first and prefetch its filter
             // word, so the 64 probes' cache misses overlap instead of
@@ -10594,7 +10923,7 @@ impl<'a> IndividualLogSolver<'a> {
                 let Some(idxs) = pdp.points else {
                     continue;
                 };
-                if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                if let Some(d) = self.logarithm_from(fc, *g, q_fast, &idxs, *a, *b) {
                     report.relation = Some(DescentRelation {
                         a: *a,
                         b: *b,
@@ -10702,39 +11031,13 @@ impl<'a> IndividualLogSolver<'a> {
                 None => continue,
             };
             measurement::mark(Phase::TargetDescent);
-            let a = BigUint::from(a);
-            let b = BigUint::from(b);
-            let relation = relation_from_decomposition_with_mode(
-                kc,
-                self.fb,
-                &idxs,
-                &a,
-                &b,
-                self.opts.collapse_negation,
-                Some(self.projected.as_ref()),
-            );
-            // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
-            let mut sum = BigUint::zero();
-            for (coeff, log) in relation.row.iter().zip(&self.column_log) {
-                if !coeff.is_zero() {
-                    sum = (sum + coeff * log) % r;
-                }
-            }
-            let ha = (&self.h * &a) % r;
-            let numerator = (sum + r - ha) % r;
-            let hb = (&self.h * &b) % r;
-            let Some(hb_inv) = mod_inverse(&hb, r) else {
+            let Some(d) = self.relation_logarithm_big(&idxs, a, b) else {
                 continue;
             };
-            let d = (numerator * hb_inv) % r;
             measurement::mark(Phase::RecoveryCheck);
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
-                report.relation = Some(DescentRelation {
-                    a: a.to_u64_digits()[0],
-                    b: b.to_u64_digits()[0],
-                    points: idxs,
-                });
+                report.relation = Some(DescentRelation { a, b, points: idxs });
                 return report;
             }
             // A non-matching d means this factor base cannot place Q in the
@@ -11554,6 +11857,142 @@ mod tests {
         );
     }
 
+    /// A descent solver over `fb` whose column logarithms are arbitrary
+    /// residues: enough to compare two ways of doing the same arithmetic,
+    /// at any size, without solving the base.
+    fn solver_with_arbitrary_logs<'a>(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        pair: &'a PairSumTable,
+        seed: u64,
+    ) -> IndividualLogSolver<'a> {
+        let mut rng = StdRng::seed_from_u64(seed);
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let table = FactorBaseLogTable {
+            columns: projected_signed_orbit_map(kc, fb)
+                .representatives
+                .iter()
+                .map(|p| (p.clone(), BigUint::from(rng.gen_range(0..r))))
+                .collect(),
+        };
+        IndividualLogSolver::new(kc, fb, &table, opts, Some(pair)).expect("a solver")
+    }
+
+    /// Ledger §22: the batched walk starts are the sequential sums, the
+    /// relation's machine-word arithmetic gives the big-integer `d`, and
+    /// the single-word recovery check agrees with the general one — so a
+    /// descent walks, tries and recovers exactly as it did.
+    #[test]
+    fn descent_starts_and_word_relations_match_the_general_arithmetic() {
+        let mut checked = 0;
+        for (a, n, points) in [
+            (1u8, 19u32, 304usize),
+            (1, 23, 368),
+            (0, 37, 592),
+            (0, 41, 1200),
+            (0, 53, 1200),
+            (0, 61, 1200),
+        ] {
+            let kc = KoblitzCurve::new(a, n).expect("curve");
+            let fc = FastCurve::new(&kc.curve).expect("single word");
+            let g = fc.lift(kc.generator());
+            let fb = build_subgroup_orbit_factor_base(&kc, 7, points).expect("base");
+            let pair =
+                PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                    .expect("pair table");
+            let opts = KoblitzIcOptions {
+                m: 3,
+                descent_m: Some(2),
+                strategy: DecompositionStrategy::PairTable,
+                collapse_negation: true,
+                collapse_projected_orbits: true,
+                ..KoblitzIcOptions::default()
+            };
+            let solver = solver_with_arbitrary_logs(&kc, &fb, &opts, &pair, u64::from(n));
+            assert!(solver.word.is_some(), "{}: r fits a word", kc.label());
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let mut rng = StdRng::seed_from_u64(0x5eed ^ u64::from(n));
+            let mut scratch = BatchScratch::default();
+            for _ in 0..40 {
+                // The starts, batched and one after another.
+                let start = fc.mul_u64(g, rng.gen_range(1..r));
+                let batched = solver.walk_starts(&fc, start, &mut scratch);
+                let step = fc.mul_u64(g, solver.stride);
+                let mut sequential = Vec::with_capacity(DESCENT_WALKS);
+                let mut state = start;
+                for _ in 0..DESCENT_WALKS {
+                    sequential.push(state);
+                    state = fc.add(state, step);
+                }
+                assert_eq!(batched, sequential, "{}: walk starts", kc.label());
+
+                // A relation over two or three base points, both ways.
+                let idxs: Vec<usize> = (0..rng.gen_range(2..=3))
+                    .map(|_| rng.gen_range(0..fb.points.len()))
+                    .collect();
+                let (a, b) = (rng.gen_range(0..r), rng.gen_range(0..r));
+                assert_eq!(
+                    solver.relation_logarithm(&idxs, a, b),
+                    solver.relation_logarithm_big(&idxs, a, b),
+                    "{}: d from {idxs:?}",
+                    kc.label()
+                );
+
+                // The recovery check, single-word against general.
+                let d = BigUint::from(rng.gen_range(0..r));
+                let q = kc.mul(kc.generator(), &BigUint::from(rng.gen_range(0..r)));
+                for candidate in [d, BigUint::from(0u8)] {
+                    assert_eq!(
+                        fc.mul(g, &candidate) == fc.lift(&q),
+                        kc.mul(kc.generator(), &candidate) == q
+                    );
+                }
+                checked += 1;
+            }
+            // b = 0 makes h·b non-invertible in both.
+            assert_eq!(solver.relation_logarithm(&[0, 1], 5, 0), None);
+            assert_eq!(solver.relation_logarithm_big(&[0, 1], 5, 0), None);
+        }
+        assert_eq!(checked, 240);
+        assert_eq!(inverse_mod_u64(0, 7), None);
+        assert_eq!(inverse_mod_u64(3, 7), Some(5));
+        assert_eq!(inverse_mod_u64(6, 9), None);
+    }
+
+    /// Ledger §22: a real descent over solved logarithms still recovers
+    /// every target, and recovers it after the same trials whichever
+    /// arithmetic turns its relation into `d`.
+    #[test]
+    fn descent_recovers_the_same_logarithm_after_the_same_trials() {
+        for (a, n) in [(0u8, 9u32), (1, 11)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let opts = KoblitzIcOptions {
+                m: 2,
+                strategy: DecompositionStrategy::PairTable,
+                ..KoblitzIcOptions::default()
+            };
+            let (table, _) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+            let pair = PairSumTable::build(&kc, &fb).unwrap();
+            let words = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            let mut big = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            big.word = None;
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            for d in (1..r).step_by(((r / 40) as usize).max(1)) {
+                let d = BigUint::from(d);
+                let q = kc.mul(kc.generator(), &d);
+                let (found, report) = words.solve(&q).expect("descends");
+                let (found_big, report_big) = big.solve(&q).expect("descends");
+                assert_eq!(found, d);
+                assert_eq!(found_big, d);
+                assert_eq!(report.trials, report_big.trials);
+            }
+        }
+    }
+
     #[test]
     fn descent_certificates_bind_actual_probes_and_trial_caps() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
@@ -11622,6 +12061,26 @@ mod tests {
         // x² + 1 = (x + 1)², x³ + 1 = (x + 1)(x² + x + 1).
         assert!(!is_irreducible_f2(0b101));
         assert!(!is_irreducible_f2(0b1001));
+    }
+
+    #[test]
+    fn the_filter_sets_its_probes_in_one_word_and_one_probe_is_the_old_bit() {
+        let mask = (1u64 << 20) - 1;
+        for key in [0u64, 1, 0xdead_beef, u64::MAX, 0x1234_5678_9abc_def0] {
+            let h = pair_filter_hash(key);
+            let (w1, b1) = filter_slot(h, mask, filter_extra(1));
+            let (w3, b3) = filter_slot(h, mask, filter_extra(FILTER_PROBES));
+            // One probe is the filter as it was: bit `h & mask` of the array.
+            let old = (h & mask) as usize;
+            assert_eq!((w1, b1), (old >> 6, 1u64 << (old & 63)));
+            // Three probes stay in that word and include its bit.
+            assert_eq!(w3, w1);
+            assert_eq!(b3 & b1, b1);
+            assert!((1..=3).contains(&b3.count_ones()));
+        }
+        assert_eq!(filter_bits_for(0), 6);
+        assert_eq!(filter_bits_for(1000), 13);
+        assert_eq!(filter_bits_for(usize::MAX >> 8), 32);
     }
 
     #[test]
@@ -13262,6 +13721,58 @@ mod tests {
     }
 
     #[test]
+    fn the_u64_factorisation_matches_trial_division() {
+        let mut rng = StdRng::seed_from_u64(29);
+        let mut values: Vec<u64> = (0..300).map(|_| rng.gen_range(2u64..1 << 32)).collect();
+        values.extend([2, 3, 4, 97, 1 << 40, 999_983 * 999_979, (1 << 31) - 1]);
+        for a in 0u8..=1 {
+            for n in 3u32..=63 {
+                values.push(koblitz_point_count(a, n).to_u64().unwrap());
+            }
+        }
+        // The version before the primality test moved out of the loop,
+        // kept verbatim: the change must not alter a single factor.
+        fn factorise_u64_per_divisor(mut v: u64) -> Vec<(u64, u32)> {
+            let mut out = Vec::new();
+            let mut d = 2u64;
+            while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+                let mut e = 0;
+                while v.is_multiple_of(d) {
+                    v /= d;
+                    e += 1;
+                }
+                if e > 0 {
+                    out.push((d, e));
+                }
+                d += 1;
+            }
+            if v > 1 {
+                out.push((v, 1));
+            }
+            out
+        }
+        for v in values {
+            assert_eq!(factorise_u64(v), factorise_u64_per_divisor(v), "{v}");
+            let fast: Vec<(BigUint, u32)> = factorise_u64(v)
+                .into_iter()
+                .map(|(p, e)| (BigUint::from(p), e))
+                .collect();
+            if v < 1 << 32 {
+                assert_eq!(fast, factorise_big(BigUint::from(v)), "{v}");
+            }
+            let product = fast
+                .iter()
+                .fold(BigUint::one(), |acc, (p, e)| acc * p.pow(*e));
+            assert_eq!(product, BigUint::from(v), "{v}");
+            assert!(
+                fast.iter().all(|(p, _)| is_prime_u64(p.to_u64().unwrap())),
+                "{v}"
+            );
+            assert!(fast.windows(2).all(|w| w[0].0 < w[1].0), "{v}");
+        }
+    }
+
+    #[test]
     fn the_partitioned_fold_build_stores_the_two_pass_table() {
         for (a, n, seed, points) in [
             (0u8, 23u32, 5u64, 300usize),
@@ -13315,6 +13826,23 @@ mod tests {
     }
 
     #[test]
+    fn a_folded_table_read_as_one_bit_a_key_gives_the_same_answers() {
+        // A `PTFOLD1` table set one bit a key: bit `h & 63` of the word
+        // `filter_slot` names.  A three-bit filter sets that bit too, so
+        // its words read as one bit a key are such a filter, and a table
+        // loaded that way must miss nothing.
+        let kc = KoblitzCurve::new(0, 31).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let built = PairSumTable::build_folded_within(&kc, &fb, u128::MAX).unwrap();
+        let mut parts = built.folded_storage().unwrap().to_parts();
+        assert_eq!(parts.filter_probes, FILTER_PROBES);
+        parts.filter_probes = 1;
+        let loaded = PairSumTable::from_folded_parts(&kc, &fb, parts).unwrap();
+        assert_eq!(loaded.folded_storage().unwrap().filter_probes, 1);
+        assert_same_answers(&kc, &fb, &built, &loaded);
+    }
+
+    #[test]
     fn a_folded_table_is_refused_when_a_lookup_could_not_trust_it() {
         let kc = KoblitzCurve::new(0, 23).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 300).unwrap();
@@ -13353,6 +13881,10 @@ mod tests {
                 Box::new(|p| {
                     p.present.pop();
                 }),
+            ),
+            (
+                "a filter of two probes a key",
+                Box::new(|p| p.filter_probes = 2),
             ),
             (
                 "a tag naming no orbit",
@@ -15933,7 +16465,11 @@ mod subfield_tests {
                 (1, 2, u64::from(a), 1)
             );
             assert_eq!(koblitz.subfield_basis, vec![F2mElement::one(n)]);
-            assert_eq!(koblitz.label(), format!("K_{a} / GF(2^{n})"));
+            assert!(koblitz.label().starts_with(&format!("icv1-f2m{n}-")));
+            assert!(curve_id::same_curve(
+                &koblitz.label(),
+                &format!("K_{a} / GF(2^{n})")
+            ));
             // The factor list and the legacy family are the F_2 ones.
             let masks: Vec<u64> = invariant_factors(&koblitz)
                 .iter()

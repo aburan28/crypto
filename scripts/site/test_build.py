@@ -48,6 +48,8 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/ic-current-state.html",
+            "scoreboard/ic-measurement.html",
             "scoreboard/algorithm-lab.html",
             "scoreboard/algorithm-lab/core.js",
             "scoreboard/algorithm-lab/ui.js",
@@ -98,6 +100,14 @@ class BuildTests(unittest.TestCase):
         # is only ever a republish of it.
         source = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"), "rb")
         self.assertEqual(read(os.path.join(self.out, "scoreboard", "index.html"), "rb"), source)
+
+    def test_measurement_standard_page_is_a_copy_of_the_generated_file(self):
+        # scripts/build_ic_measurement.py writes the canonical file; the site
+        # republishes it byte for byte, like the scoreboard.
+        self.assertEqual(
+            read(os.path.join(self.out, "scoreboard", "ic-measurement.html")),
+            read(os.path.join(ROOT, "docs", "ic-measurement.html")),
+        )
 
     def test_dashboard_fetches_resolve_next_to_the_published_page(self):
         page = read(os.path.join(self.out, "status", "index.html"))
@@ -644,7 +654,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -674,7 +684,7 @@ class BuildTests(unittest.TestCase):
         # generic link check above catches it, but only by filename, so this
         # names the cause and the fix. See scripts/site/README.md.
         relative = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-measurement.html"):
             page = read(os.path.join(self.out, rel))
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
                 if re.match(r"(?:\.\./)*research/", href):
@@ -687,7 +697,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)

@@ -1,0 +1,22 @@
+{
+ "control": "baseline batch rho counts == \u00a720's at k0n41 M1",
+ "pass": true,
+ "report": "k0n41-M1-baseline.price.json",
+ "clean": true,
+ "compared": {
+  "gae": true,
+  "setup_gae": true,
+  "steps_per_target": true,
+  "counters": true,
+  "solved_by": true,
+  "recovered": true,
+  "all_verified": true,
+  "agrees_with_expected": true
+ },
+ "s_priced_per_target": {
+  "s20": 0.061012588579277605,
+  "baseline": 0.05998919642099657
+ },
+ "pipeline_counts_equal_s20": true,
+ "pipeline_recovered_equal_s20": true
+}

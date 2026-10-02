@@ -1,0 +1,22 @@
+# isolab-base: the general-purpose lab image.
+# Python 3.12 with NumPy, SciPy, SymPy, Cython, gmpy2, pandas; PARI/GP, FLINT, GMP, MPFR;
+# GCC, Clang, CMake; Rust stable (WITH_RUST=0 to skip); hwloc and numactl for topology dumps.
+# Containers run read-only: CARGO_HOME points at /tmp (a tmpfs), the toolchain lives in /opt/rustup.
+FROM docker.io/library/python:3.12-slim-bookworm
+ARG WITH_RUST=1
+ENV DEBIAN_FRONTEND=noninteractive PIP_NO_CACHE_DIR=1 PIP_ROOT_USER_ACTION=ignore \
+    CARGO_HOME=/tmp/cargo RUSTUP_HOME=/opt/rustup PATH=/opt/rustup/toolchains/stable/bin:/opt/cargo/bin:$PATH
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential clang cmake git pkg-config m4 ca-certificates curl time \
+      libgmp-dev libmpfr-dev libmpc-dev libflint-dev pari-gp libpari-dev \
+      numactl hwloc-nox \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install numpy scipy sympy cython gmpy2 pandas
+RUN if [ "$WITH_RUST" = "1" ]; then \
+      curl -sSf https://sh.rustup.rs | CARGO_HOME=/opt/cargo RUSTUP_HOME=/opt/rustup sh -s -- -y --profile minimal --default-toolchain stable --no-modify-path \
+      && ln -s /opt/rustup/toolchains/stable-* /opt/rustup/toolchains/stable \
+      && chmod -R a+rX /opt/rustup /opt/cargo; \
+    fi
+RUN mkdir -p /isolab/work /isolab/out /isolab/scratch /isolab/bin && chmod 1777 /isolab/work /isolab/out /isolab/scratch
+WORKDIR /isolab/work
+LABEL org.opencontainers.image.title="isolab-base" org.opencontainers.image.source="https://github.com/aburan28/crypto/tree/main/isolab"

@@ -53,6 +53,13 @@ ic descent --cells 17:9:2 --targets 8 --repeats 3 \
     --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
     --solver crossbred-f2 --solver fes-f2
 
+# A Koblitz factor base chosen by divisor: the indices are separated by
+# `;` (quoted, for the shell), because `,` separates the plug-in's
+# parameters (`divisor=1,2` is refused, not read as `divisor=1`).
+ic bench --koblitz-degree 17 \
+    --factor-base 'koblitz-orbit:divisor=0;1' \
+    --oracle mitm-frobenius:m=2
+
 # The relation matrix is a stage too.
 ic bench --bits 20 \
     --factor-base prime-abscissa:size=256 \
@@ -618,7 +625,11 @@ configurations or a **matrix** whose product is taken.
   curve whose cofactor is allowed to be large can hand back a tiny
   subgroup, and `S = ops / √r` over a tiny `r` means nothing against
   rho.
-- A plug-in is `name` or `name:key=value,key=value`.
+- A plug-in is `name` or `name:key=value,key=value`. A `,` ends a
+  parameter, so a value that is a list takes `;` between its items:
+  `koblitz-orbit:divisor=1;2`, never `divisor=1,2` (quote the argument
+  in a shell, where a bare `;` ends the command). The comma form is
+  refused with an error that names the `;`, not read as `divisor=1`.
 - The keys are the stages: `factor_base`, `oracle`, `targets`,
   `solver` (for `descent-algebraic`) and `linalg`. A key left out takes
   the command line's value.
@@ -733,8 +744,10 @@ worse than none:
   `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
   A variant taking F4's steps by polynomial degree (§14) matches F4's
   degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
-  stops there; the next lever for F4's zero rows is an exact early exit
-  once a step's residue block reaches full rank.
+  stops there. The exact lever it left for F4's zero rows, stopping a
+  step's elimination once the residue echelon is full, is round 6 (§15):
+  every output unchanged, 39% fewer multiply-adds at `m = 4`, `N = 12` and
+  25% at `N = 16`, all in the refutation step.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -755,6 +768,8 @@ worse than none:
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
+A parameter that takes several values (`divisor` on `koblitz-orbit` and
+`koblitz-symmetrised`) takes them separated by `;`, quoted in a shell.
 
 ### Source map
 

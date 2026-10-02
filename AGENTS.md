@@ -9,6 +9,33 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
+## Implementation language: no Python
+
+**Do not use Python for cryptographic research or performance work in this
+repository.** This applies to algorithms, field and curve arithmetic,
+factor-base construction, relation collection, solvers, linear algebra,
+experiment harnesses, benchmark drivers, correctness tests, certificate
+verifiers, replay tools, and research result generation.
+
+- Use **Rust by default**, integrating with the existing library and Cargo
+  tests. Use an existing compiled C, C++, CUDA, or other native backend where
+  the component requires it.
+- Do not introduce Python prototypes, Python orchestration, embedded Python,
+  or compiled wrappers that delegate this work to a Python process. Moving
+  only a hot loop to native code does not satisfy this rule.
+- When continuing work implemented in Python, replace the relevant execution
+  path with a native implementation before extending it or running further
+  research comparisons. A working Python harness is not an acceptable final
+  deliverable. Use shell commands only for thin build/run orchestration.
+- Preserve frozen inputs, historical measurements, source snapshots, and
+  certificates as evidence. Do not delete or rewrite them to conceal their
+  Python provenance. Label historical Python timings accordingly and rerun
+  matched native baseline/candidate measurements before making new performance
+  claims.
+- Older instructions that name Python scripts describe legacy tooling; they
+  do not grant an exception. Preserve their mathematical contracts, fixtures,
+  and accounting requirements in the native replacement.
+
 ## Default workflow: finish and merge when authorized
 
 The repository owner's standing preference is autonomous delivery. For work
@@ -468,6 +495,47 @@ conditions both sides ran under.  Before changing code for speed:
   the A/B table with identical-output checks, and the changes that were
   tried and rejected with their numbers.
 
+### 11. Name every curve by its ICV1 slug
+
+A number quoted against the wrong curve is a wrong number, and until this
+rule one Koblitz curve went by five spellings, a prime curve by whichever
+generator found it, and no name said which modulus or model it meant.
+Every elliptic curve is now named by an identity computed from the curve,
+specified in [`docs/curves/ICV1.md`](docs/curves/ICV1.md).
+
+- **Write the slug.** In prose, tables, scoreboard rows, report `name`
+  fields, parameter and run file names, a curve is its ICV1 slug
+  (`icv1-f2m41-tm2308219-7f48b14a`).  A curve a standards body or public
+  challenge published may go by that name (`ECC2K-130`, `sect163k1`,
+  `secp256k1`, `P-256`).  Family notation with a free parameter is fine
+  when a sentence is about the family.
+- **Never write a retired form.** The spellings in `ICV1.md`'s table of
+  retired names carry no model and may not appear in new text or be
+  emitted by new code.  Frozen reports keep them; the registry resolves
+  them, and code that replays a report or reads a table keyed the old way
+  matches through `curve_id::same_curve`, never by string equality.
+- **Register before you cite.** Every slug written must be in
+  [`docs/curves/registry.json`](docs/curves/registry.json).  A new curve is
+  registered in the pull request that first names it
+  (`python3 scripts/build_curve_registry.py`; a curve built from a seed
+  also goes in `docs/curves/sources/specs.txt`).
+- **Join on EC1, write ICV1.** The slug names a curve *model*.  A
+  comparison, UI export or candidate manifest that joins across
+  repositories carries the EC1 alias and curve UID of the exact
+  representation measured, subgroup and generator included, as the
+  cross-repository section below and
+  [`docs/curve-identities.md`](docs/curve-identities.md) require.  The
+  registry lists each model's EC1 representations.
+- **Do not rename evidence.** Frozen run JSON, hash-pinned files and
+  anything under a `results/`, `runs/`, `raw/`, `evidence/` or `archives/`
+  directory keep the names they were written with.  Prose about them uses
+  the slug.
+
+`scripts/check_curve_names.py` enforces this in CI (`curve-names`): no
+retired form in Markdown or HTML outside a code fence, every slug
+registered, and no retired form on a line a pull request adds to prose or
+code.  `--fix` rewrites retired names in place.
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
@@ -495,3 +563,55 @@ For new curve comparisons and UI exports, follow [docs/curve-identities.md](docs
 and `tools/curve_identity.py`. Reuse EC1 aliases and full curve UIDs across IC and
 Pollard rho; keep factor-base/isogeny candidate identities separate. Preserve
 immutable historical names and never infer exact identity from field degree alone.
+Within this repository the text name is the ICV1 slug (§11); the curve
+registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
+slug to the EC1 identities of its recorded representations.
+
+# Agent rules for IC measurements
+
+## Primary comparison uses one target
+
+The default elliptic-curve index-calculus (IC) question is the cost to solve
+one previously unseen public target. Every primary comparison run must use
+exactly one target and pair IC with Pollard rho on that same point under the
+same resource envelope. A panel of independent points is a set of separate
+one-target workloads, with one result row per point; do not combine them into
+a multi-target DLP run or replace the per-target results with a batch average.
+
+Start the IC online clock when target-dependent computation begins, after
+reusable target-independent base, index, relation-log, or solver setup is
+ready. Include all target-dependent attempts and point-query generation, and
+stop after scalar recovery and independent verification. Report reusable
+setup separately. Exclude process launch, input loading, and construction of a
+known-answer target from both IC and rho online intervals. Start rho timing at
+its first target-dependent walk and stop after recovery and independent
+verification. If scalar replay is outside either interval, report its cost
+separately and keep the correctness check.
+
+Do not use multi-target rho batches, cross-target distinguished-point tables,
+batch throughput divided by target count, or shared-collision work as the
+one-target rho reference. Multi-target work needs a separate, explicit
+research question after the one-target measurement; it cannot be the default,
+headline, or acceptance gate for a speedup claim. Preserve old batch results
+as historical diagnostics and label their target count and shared setup.
+
+An IC-vs-rho speedup is eligible only when both methods solve and verify the
+same point and both online intervals are complete. Report
+`rho_online_ms / ic_online_ms`, target identity, candidate and workload
+identity, included phases, resource conditions, and correctness evidence.
+Timeouts, failures, OOMs, and unverified scalars stay in the record and never
+count as wins. Missing phase costs make the total and speedup unknown. Key result rows by
+`(candidate_id, workload_id, run_id)`, preserve their manifest hashes, and
+use the canonical run-id convention from the repository's IC measurement
+rules. Keep the five exclusive IC online phase costs; their sum must equal the
+charged IC online wall time. Each claim must retain independent replay
+certificate SHA-256 digests and the exact nonempty resource-envelope object for
+both arms; the claim checker requires those envelopes to match and rejects a
+bare boolean verification or resource-match assertion. The IC interval must
+name all five target-dependent phases, and rho must name walk, collision, and
+recovery check.
+
+The current `boundary_autolab.py` producer timing is whole-process or
+operation-counted. Treat those outputs as legacy diagnostics until producers
+emit the online intervals above; they cannot establish the primary speedup.
+Its launch interface now permits one target per run only.

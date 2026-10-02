@@ -1,0 +1,10 @@
+{
+  "schema": "isolab.job/v1",
+  "name": "calibration-example",
+  "runtime": {"backend": "direct"},
+  "inputs": [{"path": "isolab-spin", "sha256": "<the worker's calibration.sha256 from isolab workers --full>", "bytes": 0, "mode": "0755"}],
+  "command": {"argv": ["./isolab-spin", "2000000000"]},
+  "measure": {"warmups": 1, "repeats": 10},
+  "resources": {"cpus": 1},
+  "fidelity": {"policy": "standard"}
+}

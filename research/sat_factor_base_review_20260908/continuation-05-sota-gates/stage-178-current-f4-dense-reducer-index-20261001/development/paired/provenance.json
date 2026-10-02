@@ -1,0 +1,16 @@
+{
+  "schema": "koblitz_stage178_pair_provenance.v1",
+  "binary": "/Volumes/SSD990/kic-stage178-dense-target-c580c450c/release/examples/koblitz_pdp_backend",
+  "binary_sha256": "745fefcef1d6b731a9edfaab298e1a925d1b616e9fcd9987378fb53c95de7cb4",
+  "binary_source_commit": "c580c450cbce58ec23de8ce4a622481864420a4f",
+  "runner_commit": "1becd640f0f860902a4a4abd7a8f17214d295dc3",
+  "sequence": [
+    "linear",
+    "dense",
+    "dense",
+    "linear",
+    "linear",
+    "dense"
+  ],
+  "manifest": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+}

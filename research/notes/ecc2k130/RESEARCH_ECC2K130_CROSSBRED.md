@@ -151,7 +151,7 @@ Two readings, both of them the point:
 
 ### 4.1 One instance refuses every arm
 
-`K_0 / F_2^7` at `m = 2` collects **zero** relations in 20,000 trials under
+`icv1-f2m7-t13-616700dd` at `m = 2` collects **zero** relations in 20,000 trials under
 all four strategies. That is a property of the instance, not of any oracle:
 four independent engines agreeing on "no relation" is what an admissibility
 failure looks like, and `RESEARCH_ECC2K130_DECOMPOSITION.md` §3 documents the

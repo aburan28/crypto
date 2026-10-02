@@ -156,7 +156,7 @@ fn bsgs_in_exponent(
     let mut table: HashMap<(BigUint, BigUint), BigUint> = HashMap::new();
     let mut z = BigUint::one();
     for i in 0..m_u64 {
-        let pt = base.scalar_mul(&z, &a_fe);
+        let pt = base.scalar_mul_vartime(&z, &a_fe);
         exps += 1;
         if let Some(key) = point_key(&pt) {
             table.entry(key).or_insert_with(|| BigUint::from(i));
@@ -168,7 +168,7 @@ fn bsgs_in_exponent(
     let step = gen_inv.modpow(&m, n);
     let mut z = BigUint::one();
     for j in 0..=m_u64 {
-        let pt = target.scalar_mul(&z, &a_fe);
+        let pt = target.scalar_mul_vartime(&z, &a_fe);
         exps += 1;
         if let Some(key) = point_key(&pt) {
             if let Some(i) = table.get(&key) {
@@ -236,7 +236,7 @@ pub fn cheon_attack(
     // Step 2: α ζ^{−k₀} = ζ̌^{k₁}, ζ̌ = ζ^N of order d.
     let zeta_inv = zeta.modpow(&(n - 2u32), n);
     let shift = zeta_inv.modpow(&k0, n);
-    let shifted = alpha_g.scalar_mul(&shift, &a_fe);
+    let shifted = alpha_g.scalar_mul_vartime(&shift, &a_fe);
     let zeta_check = zeta.modpow(&big_n, n);
     let (k1, e2) = bsgs_in_exponent(curve, g, &shifted, n, &zeta_check, d);
     report.step2_exps = e2 + 1;
@@ -251,7 +251,7 @@ pub fn cheon_attack(
     let alpha = zeta.modpow(&(&k0 + &k1 * &big_n), n);
     // Verify: [α]G must equal the given [α]G.
     report.step2_exps += 1;
-    if &g.scalar_mul(&alpha, &a_fe) == alpha_g {
+    if &g.scalar_mul_vartime(&alpha, &a_fe) == alpha_g {
         report.recovered_alpha = Some(alpha);
     } else {
         report.error = Some("recovered α failed verification".into());

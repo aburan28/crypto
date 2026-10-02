@@ -1,0 +1,33 @@
+name: Koblitz degree-73 descent archive replay
+
+on:
+  pull_request:
+    paths:
+      - "research/koblitz_isogeny_descent_37_results_20260925/**"
+      - "research/koblitz_isogeny_descent_37_20260925/**"
+      - "research/toy_f5_neighbors_20260924/matrix.py"
+      - ".github/workflows/koblitz-isogeny-descent-37-archive.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-committed-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            research/koblitz_isogeny_descent_37_results_20260925
+            research/koblitz_isogeny_descent_37_20260925
+            research/toy_f5_neighbors_20260924
+      - name: Check raw custody and archived claims
+        run: |
+          python3 research/koblitz_isogeny_descent_37_20260925/verify.py \
+            research/koblitz_isogeny_descent_37_results_20260925
+          python3 research/koblitz_isogeny_descent_37_results_20260925/verify_archive.py \
+            --out "$RUNNER_TEMP/n37-archive-replay.json"
+          cmp "$RUNNER_TEMP/n37-archive-replay.json" \
+            research/koblitz_isogeny_descent_37_results_20260925/REPLAY.json

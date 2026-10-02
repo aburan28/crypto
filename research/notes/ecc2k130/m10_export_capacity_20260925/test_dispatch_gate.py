@@ -45,5 +45,44 @@ class DispatchGateTests(unittest.TestCase):
             self.assertEqual(receipt["error_type"], "KeyError")
 
 
+    def test_follow_on_pr_requires_independent_exact_head_review(self):
+        head = "a" * 40
+        pr_number = 936
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            event_path = folder / "event.json"
+            event_path.write_text(json.dumps({
+                "action": "labeled",
+                "label": {"name": dispatch_gate.LABEL},
+                "number": pr_number,
+                "pull_request": {
+                    "number": pr_number,
+                    "head": {"ref": dispatch_gate.BRANCH,
+                             "repo": {"full_name": "owner/repo"}, "sha": head},
+                },
+            }))
+            environment = {
+                "GITHUB_TOKEN": "test-token", "GITHUB_REPOSITORY": "owner/repo",
+                "GITHUB_RUN_ID": "100", "GITHUB_RUN_ATTEMPT": "1",
+                "GITHUB_EVENT_PATH": str(event_path),
+            }
+            live = {"number": pr_number, "state": "open", "draft": False,
+                    "head": {"sha": head, "ref": dispatch_gate.BRANCH},
+                    "user": {"id": 1}}
+            def api(path, _token):
+                if path.endswith("/reviews?per_page=100"):
+                    return []
+                return live
+            out = folder / "gate"
+            with patch.dict(os.environ, environment, clear=True), \
+                 patch.object(dispatch_gate, "api", side_effect=api), \
+                 patch.object(dispatch_gate.subprocess, "check_output", return_value=head + "\n"):
+                with self.assertRaisesRegex(AssertionError, "independent exact-head approval is missing"):
+                    dispatch_gate.admit(out)
+            receipt = json.loads((out / "predispatch.json").read_text())
+            self.assertEqual(receipt["decision"], "REFUSED")
+            self.assertEqual(receipt["measurement_children"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

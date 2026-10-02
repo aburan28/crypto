@@ -164,8 +164,9 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
         &[
             (
                 "divisor",
-                "comma-separated indices into the factorisation of the Frobenius characteristic \
-                 polynomial; the invariant subspace they span becomes the abscissa set. This is \
+                "`;`-separated indices into the factorisation of the Frobenius characteristic \
+                 polynomial, e.g. `divisor=1;2` (a `,` would end the parameter on the command \
+                 line); the invariant subspace they span becomes the abscissa set. This is \
                  the knob that chooses the base, so sweeping it sweeps factor bases",
             ),
             (
@@ -186,22 +187,7 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             .koblitz
             .as_ref()
             .ok_or("this instance is not a Koblitz curve, so it has no Frobenius to fold by")?;
-        let raw = params
-            .get("divisor")
-            .ok_or("missing parameter `divisor`; try 0 or 0,1")?;
-        let idx: Result<Vec<usize>, String> = raw
-            .split([',', ';'])
-            .filter(|s| !s.is_empty())
-            .map(|s| {
-                s.trim()
-                    .parse::<usize>()
-                    .map_err(|_| format!("divisor index `{s}` is not a number"))
-            })
-            .collect();
-        let idx = idx?;
-        if idx.is_empty() {
-            return Err("parameter `divisor` selected no factors".into());
-        }
+        let idx = divisor_indices(params)?;
         let frob = build_frobenius_factor_base_from_divisor(kc, &idx)
             .ok_or_else(|| format!("no invariant subspace for divisor {idx:?} on this curve"))?;
         let fold = if params.flag("no_fold") {
@@ -756,7 +742,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
 
 /// Parse a `divisor` parameter: indices into
 /// [`crate::cryptanalysis::koblitz_index_calculus::all_factors_of_x_n_minus_1`],
-/// separated by `;` (a `,` would split the plug-in spec itself).
+/// separated by `;` (a `,` would split the plug-in spec itself; a `,` is
+/// still accepted here for a [`Params`] built in code, but
+/// [`Params::parse_spec`] never lets one through from a command line).
 fn divisor_indices(params: &Params) -> Result<Vec<usize>, String> {
     let raw = params
         .get("divisor")
@@ -816,9 +804,10 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
         &[
             (
                 "divisor",
-                "`;`-separated indices into the factorisation of xⁿ − 1 (index 0 is x + 1, which \
-                 must be included so that 1 ∈ V); the same indices on koblitz-orbit give the \
-                 x-frame base for the same V",
+                "`;`-separated indices into the factorisation of xⁿ − 1, e.g. `divisor=0;1` (a `,` \
+                 would end the parameter on the command line); index 0 is x + 1, which must be \
+                 included so that 1 ∈ V; the same indices on koblitz-orbit give the x-frame base \
+                 for the same V",
             ),
             (
                 "no_fold",
@@ -903,7 +892,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
 /// (`inherited-f4` default, `matrix-f4`, `matrix-f5`), `max_degree`
 /// (Macaulay cap, default 3: the cap is absolute, so the degree-4
 /// `m = 3` system still builds its own degree at the root) and
-/// `node_budget` (splits before a call gives up, default 4096).
+/// `node_budget` (algebraic reduction calls before a solve gives up,
+/// default 4096; splitting decisions are counted separately).
 pub struct SymmetrisedOracle<'i> {
     summands: u32,
     instance: &'i BinaryInstance,
@@ -950,7 +940,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
 
     fn describe(&self, params: &Params) -> String {
         format!(
-            "solve the symmetrised S_{} in w = u² + u, s = Σu over F_u with {} (Macaulay cap {}, {} splits)",
+            "solve the symmetrised S_{} in w = u² + u, s = Σu over F_u with {} (Macaulay cap {}, {} reduction calls)",
             self.summands + 1,
             params.get("engine").unwrap_or("inherited-f4"),
             params.get("max_degree").unwrap_or("3"),
@@ -972,7 +962,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
             ),
             (
                 "node_budget",
-                "splits before a call gives up (default 4096)",
+                "algebraic reduction calls before a solve gives up (default 4096)",
             ),
         ]
     }
@@ -1141,5 +1131,49 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
 
     fn solver_totals(&self) -> Option<SolverTotals> {
         Some(self.totals.clone())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The command-line form of a multi-factor divisor, end to end from
+    /// the plug-in string to the indices both Koblitz bases read.
+    #[test]
+    fn divisor_indices_parse_the_semicolon_form_from_a_plugin_string() {
+        for spec in [
+            "koblitz-orbit:divisor=1;2",
+            "koblitz-symmetrised:divisor=1;2",
+        ] {
+            let (_, params) = Params::parse_spec(spec).unwrap();
+            assert_eq!(divisor_indices(&params).unwrap(), vec![1, 2], "{spec}");
+        }
+        let (_, params) = Params::parse_spec("koblitz-orbit:divisor=0,no_fold=1").unwrap();
+        assert_eq!(divisor_indices(&params).unwrap(), vec![0]);
+    }
+
+    /// The comma form never reaches `divisor_indices` from a command
+    /// line: the spec parser refuses it first, and says why.
+    #[test]
+    fn the_comma_form_is_refused_before_the_plugin_sees_it() {
+        let err = Params::parse_spec("koblitz-orbit:divisor=1,2").unwrap_err();
+        assert!(err.contains("`divisor=1;2`"), "{err}");
+    }
+
+    #[test]
+    fn divisor_indices_reject_a_missing_empty_or_non_numeric_value() {
+        let mut p = Params::default();
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("missing parameter `divisor`"));
+        p.set("divisor", ";");
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("selected no factors"));
+        p.set("divisor", "1;x");
+        assert!(divisor_indices(&p)
+            .unwrap_err()
+            .contains("`x` is not a number"));
     }
 }

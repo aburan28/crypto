@@ -1,0 +1,47 @@
+{
+  "schema": "isogeny_rho_gpu_access_probe/v1",
+  "utc": "2026-09-30T20:02:23Z",
+  "gpu_execution_confirmed": false,
+  "env": {
+    "modal": {
+      "MODAL_TOKEN_ID_set": false,
+      "MODAL_TOKEN_SECRET_set": false
+    },
+    "runpod": {
+      "RUNPOD_API_KEY_set": false
+    }
+  },
+  "pip": {
+    "modal": {
+      "import_ok": false,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'modal'"
+    },
+    "runpod": {
+      "import_ok": false,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'runpod'"
+    }
+  },
+  "http": {
+    "modal_api": {
+      "ok": false,
+      "status": 503,
+      "url": "https://api.modal.com",
+      "reason": "Service Unavailable"
+    },
+    "runpod_graphql": {
+      "ok": false,
+      "status": 403,
+      "url": "https://api.runpod.io/graphql",
+      "reason": "Forbidden"
+    }
+  },
+  "prior_repo_receipt": {
+    "path": "research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu/results/runpod-access-01.json",
+    "status": "http_error",
+    "http_status": 403,
+    "note": "prior authenticated RunPod inventory failed Forbidden"
+  },
+  "decision": "No Modal/RunPod credentials in this environment; do not launch a paid GPU job. Leaf-curve GPU rho is unimplemented in ecc2k130/; automorphism floor already prices leaf rho \u221a131 worse than E0 before any kernel constant."
+}

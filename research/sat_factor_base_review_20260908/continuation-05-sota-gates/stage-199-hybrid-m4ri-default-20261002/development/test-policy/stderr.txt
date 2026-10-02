@@ -1,0 +1,86 @@
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:945:5
+    |
+941 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+945 |     qx: Vec<u64>,
+    |     ^^
+946 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto-kic-pr660-main-20261001)
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2262:13
+     |
+2262 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: `crypto` (lib test) generated 5 warnings (3 duplicates) (run `cargo fix --lib -p crypto --tests` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 37s
+     Running unittests src/lib.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/crypto_lib-9a85b111100957be)
+     Running unittests src/main.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/crypto-b6a40c4eb9750e30)
+     Running unittests src/bin/ecc2k_guard.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ecc2k_guard-33abff0046ab3795)
+     Running unittests src/bin/ic.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ic-1db4aa53ae2fe424)
+     Running unittests src/bin/icprog.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/icprog-a2cabd365efbdeb7)
+     Running unittests src/bin/icx.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/icx-9e0bca337e50ed34)
+     Running unittests src/bin/isolated_bench.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/isolated_bench-297b16fabe1baaae)
+     Running unittests src/bin/koblitz_pdp_prepare.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/koblitz_pdp_prepare-6c1e6598cd3974d1)
+     Running tests/curve_audit.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/curve_audit-aa1385209803103f)
+     Running tests/curve_id.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/curve_id-6996be153af1847a)
+     Running tests/ec_vartime_tiny_fields.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ec_vartime_tiny_fields-ed0e56d39029bffe)
+     Running tests/ec_vartime_walks_pinned.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ec_vartime_walks_pinned-2fdbac5ada57168c)
+     Running tests/ic_fixed.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ic_fixed-f58c84587f837003)
+     Running tests/ic_framework.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ic_framework-74d71762881eb116)
+     Running tests/ic_progress.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/ic_progress-948b3e33a2a2dbc4)
+     Running tests/icprog.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/icprog-cda03bc6d175ce6a)
+     Running tests/icx.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/icx-4fd92b0fecab1429)
+     Running tests/lll_degeneracy_probe.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/lll_degeneracy_probe-d0ec8d1ac33ffec7)
+     Running tests/volcano_metadata_exhaustive.rs (/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/deps/volcano_metadata_exhaustive-b5e3249d3471ed67)

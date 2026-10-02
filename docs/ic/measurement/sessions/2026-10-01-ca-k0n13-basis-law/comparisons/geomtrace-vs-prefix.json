@@ -1,0 +1,634 @@
+{
+ "a": {
+  "arm": 0,
+  "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+  "spec_id": "ICS1h35585e581598"
+ },
+ "aa": false,
+ "aa_noise": [
+  {
+   "arms": [
+    0,
+    2
+   ],
+   "estimate": {
+    "ci95": [
+     0.9602385097571726,
+     1.3079399003829404
+    ],
+    "excludes_1": false,
+    "max_ratio": 1.3079399003829404,
+    "median_ratio": 1.0740593564517382,
+    "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+    "min_ratio": 0.9602385097571726,
+    "n_pairs": 5
+   },
+   "spec_id": "ICS1h35585e581598"
+  }
+ ],
+ "b": {
+  "arm": 1,
+  "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): geomtrace subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+  "spec_id": "ICS1h2a42530bb4bd"
+ },
+ "confounds": [],
+ "declared_variables": [
+  {
+   "a": "prefix",
+   "b": "geomtrace",
+   "field": "factor_base.params.basis_law"
+  }
+ ],
+ "env_class_id": "ENV1h7292c40d7f20",
+ "forbidden": [],
+ "ops": {
+  "a_median": 36430578687.0,
+  "a_spread": [
+   36430578687.0,
+   36430578687.0
+  ],
+  "admitted": true,
+  "b_median": 33739039805.0,
+  "b_spread": [
+   33739039805.0,
+   33739039805.0
+  ],
+  "completed": {
+   "a": "5/5",
+   "b": "5/5"
+  },
+  "deterministic": true,
+  "lower_bound": false,
+  "ratio_b_over_a": 0.9261186898752048,
+  "speedup_a_over_b": 1.0797752069281215,
+  "unit": "cryptanalysis.rps",
+  "window": "cold_end_to_end"
+ },
+ "outcomes": {
+  "a": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ],
+  "b": [
+   "complete",
+   "complete",
+   "complete",
+   "complete",
+   "complete"
+  ]
+ },
+ "records_sha256": "a123b115e5e999f9b0aa31c0c455800fa4747136a817d5acac1e48e1eb28cbe0",
+ "refusals": [],
+ "request": {
+  "a": 0,
+  "b": 1,
+  "declared": [
+   "factor_base.params.basis_law"
+  ]
+ },
+ "schema": "icms.comparison/v1",
+ "session_id": "ICSESS1h31417fae01a9",
+ "structure": {
+  "a": {
+   "decomposition.arity": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.05223880597014925,
+    "median": 0.05223880597014925,
+    "min": 0.05223880597014925,
+    "n": 5
+   },
+   "decomposition.native.descent_attempts": {
+    "max": 28.0,
+    "median": 28.0,
+    "min": 28.0,
+    "n": 5
+   },
+   "decomposition.native.effective_columns": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.final_rank": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.novel_rows": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.ordinary_queries": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_attempts": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_budget": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_error": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_lift_rejected": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_proved_unsat": {
+    "max": 127.0,
+    "median": 127.0,
+    "min": 127.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_timeout": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_verified": {
+    "max": 7.0,
+    "median": 7.0,
+    "min": 7.0,
+    "n": 5
+   },
+   "decomposition.native.solved_queries": {
+    "max": 7.0,
+    "median": 7.0,
+    "min": 7.0,
+    "n": 5
+   },
+   "decomposition.native.targets": {
+    "max": 1.0,
+    "median": 1.0,
+    "min": 1.0,
+    "n": 5
+   },
+   "decomposition.native.targets_verified": {
+    "max": 1.0,
+    "median": 1.0,
+    "min": 1.0,
+    "n": 5
+   },
+   "decomposition.native.verified_decompositions": {
+    "max": 7.0,
+    "median": 7.0,
+    "min": 7.0,
+    "n": 5
+   },
+   "decomposition.native.verified_relations": {
+    "max": 7.0,
+    "median": 7.0,
+    "min": 7.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 7.0,
+    "median": 7.0,
+    "min": 7.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "factor_base.abscissae_allowed": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "factor_base.native.exact_p_decomposable": {
+    "max": 0.027972027972027972,
+    "median": 0.027972027972027972,
+    "min": 0.027972027972027972,
+    "n": 5
+   },
+   "factor_base.native.geometric_points": {
+    "max": 11.0,
+    "median": 11.0,
+    "min": 11.0,
+    "n": 5
+   },
+   "factor_base.nominal_dimension": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 11.0,
+    "median": 11.0,
+    "min": 11.0,
+    "n": 5
+   },
+   "factor_base.usable_points": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "linear_algebra.native.modr_mul": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "solver.calls": {
+    "max": 134.0,
+    "median": 134.0,
+    "min": 134.0,
+    "n": 5
+   },
+   "solver.extra.limits.d_max": {
+    "max": 10.0,
+    "median": 10.0,
+    "min": 10.0,
+    "n": 5
+   },
+   "solver.extra.limits.max_cols": {
+    "max": 40000.0,
+    "median": 40000.0,
+    "min": 40000.0,
+    "n": 5
+   },
+   "solver.extra.limits.max_rows": {
+    "max": 200000.0,
+    "median": 200000.0,
+    "min": 200000.0,
+    "n": 5
+   },
+   "solver.extra.pdp_counters.anf_op": {
+    "max": 42653.0,
+    "median": 42653.0,
+    "min": 42653.0,
+    "n": 5
+   },
+   "solver.extra.pdp_counters.mac_op": {
+    "max": 55600379.0,
+    "median": 55600379.0,
+    "min": 55600379.0,
+    "n": 5
+   },
+   "solver.extra.pdp_mac_ops_per_query": {
+    "max": 414928.20149253734,
+    "median": 414928.20149253734,
+    "min": 414928.20149253734,
+    "n": 5
+   },
+   "solver.ops": {
+    "max": 55600379.0,
+    "median": 55600379.0,
+    "min": 55600379.0,
+    "n": 5
+   },
+   "solver.wall_ns": {
+    "max": 186006639.0,
+    "median": 179356342.0,
+    "min": 148455250.0,
+    "n": 5
+   }
+  },
+  "b": {
+   "decomposition.arity": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "decomposition.hit_rate": {
+    "max": 0.027972027972027972,
+    "median": 0.027972027972027972,
+    "min": 0.027972027972027972,
+    "n": 5
+   },
+   "decomposition.native.descent_attempts": {
+    "max": 9.0,
+    "median": 9.0,
+    "min": 9.0,
+    "n": 5
+   },
+   "decomposition.native.effective_columns": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.final_rank": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.novel_rows": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.ordinary_queries": {
+    "max": 143.0,
+    "median": 143.0,
+    "min": 143.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_attempts": {
+    "max": 143.0,
+    "median": 143.0,
+    "min": 143.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_budget": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_error": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_lift_rejected": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_proved_unsat": {
+    "max": 139.0,
+    "median": 139.0,
+    "min": 139.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_timeout": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 5
+   },
+   "decomposition.native.pdp_verified": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.solved_queries": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.targets": {
+    "max": 1.0,
+    "median": 1.0,
+    "min": 1.0,
+    "n": 5
+   },
+   "decomposition.native.targets_verified": {
+    "max": 1.0,
+    "median": 1.0,
+    "min": 1.0,
+    "n": 5
+   },
+   "decomposition.native.verified_decompositions": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.native.verified_relations": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.relations_found": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "decomposition.targets_tried": {
+    "max": 143.0,
+    "median": 143.0,
+    "min": 143.0,
+    "n": 5
+   },
+   "factor_base.abscissae_allowed": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "factor_base.columns": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "factor_base.native.exact_p_decomposable": {
+    "max": 0.03196803196803197,
+    "median": 0.03196803196803197,
+    "min": 0.03196803196803197,
+    "n": 5
+   },
+   "factor_base.native.geometric_points": {
+    "max": 9.0,
+    "median": 9.0,
+    "min": 9.0,
+    "n": 5
+   },
+   "factor_base.nominal_dimension": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "factor_base.orbit_representatives": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "factor_base.points_per_column": {
+    "max": 2.0,
+    "median": 2.0,
+    "min": 2.0,
+    "n": 5
+   },
+   "factor_base.signed_points": {
+    "max": 9.0,
+    "median": 9.0,
+    "min": 9.0,
+    "n": 5
+   },
+   "factor_base.usable_points": {
+    "max": 8.0,
+    "median": 8.0,
+    "min": 8.0,
+    "n": 5
+   },
+   "linear_algebra.native.modr_mul": {
+    "max": 3.0,
+    "median": 3.0,
+    "min": 3.0,
+    "n": 5
+   },
+   "linear_algebra.rank": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "linear_algebra.rows": {
+    "max": 4.0,
+    "median": 4.0,
+    "min": 4.0,
+    "n": 5
+   },
+   "solver.calls": {
+    "max": 143.0,
+    "median": 143.0,
+    "min": 143.0,
+    "n": 5
+   },
+   "solver.extra.limits.d_max": {
+    "max": 10.0,
+    "median": 10.0,
+    "min": 10.0,
+    "n": 5
+   },
+   "solver.extra.limits.max_cols": {
+    "max": 40000.0,
+    "median": 40000.0,
+    "min": 40000.0,
+    "n": 5
+   },
+   "solver.extra.limits.max_rows": {
+    "max": 200000.0,
+    "median": 200000.0,
+    "min": 200000.0,
+    "n": 5
+   },
+   "solver.extra.pdp_counters.anf_op": {
+    "max": 17819.0,
+    "median": 17819.0,
+    "min": 17819.0,
+    "n": 5
+   },
+   "solver.extra.pdp_counters.mac_op": {
+    "max": 54853330.0,
+    "median": 54853330.0,
+    "min": 54853330.0,
+    "n": 5
+   },
+   "solver.extra.pdp_mac_ops_per_query": {
+    "max": 383589.72027972026,
+    "median": 383589.72027972026,
+    "min": 383589.72027972026,
+    "n": 5
+   },
+   "solver.ops": {
+    "max": 54853330.0,
+    "median": 54853330.0,
+    "min": 54853330.0,
+    "n": 5
+   },
+   "solver.wall_ns": {
+    "max": 206146406.0,
+    "median": 178998319.0,
+    "min": 174210611.0,
+    "n": 5
+   }
+  }
+ },
+ "wall": {
+  "admitted": false,
+  "contended_runs": 3,
+  "estimate": {
+   "ci95": [
+    0.9096223917105527,
+    1.0900403731812782
+   ],
+   "excludes_1": false,
+   "max_ratio": 1.0900403731812782,
+   "median_ratio": 0.9244674574224081,
+   "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
+   "min_ratio": 0.9096223917105527,
+   "n_pairs": 5
+  },
+  "pairs": 5,
+  "refusals": [
+   {
+    "blocking": [
+     "bare_metal",
+     "fixed_frequency",
+     "kernel_isolation",
+     "steal"
+    ],
+    "count": 3,
+    "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
+   }
+  ],
+  "window": "cold_end_to_end"
+ }
+}

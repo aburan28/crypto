@@ -97,21 +97,82 @@
     "vs_rho": {
       "required": [
         "n_or_bits",
+        "candidate_id",
+        "candidate_manifest_sha256",
+        "workload_id",
+        "workload_manifest_sha256",
+        "run_id",
+        "target_count",
+        "ic_target_hash",
+        "rho_target_hash",
         "timing_class",
-        "ic_cost",
-        "rho_cost",
-        "automorphism_discount",
-        "all_stages_charged_same_series",
+        "ic_online_wall_ms",
+        "rho_online_wall_ms",
+        "online_speedup",
+        "ic_online_phase_ms",
+        "online_interval",
+        "same_resource_envelope",
+        "independent_validation",
+        "ic_replay_certificate_sha256",
+        "rho_replay_certificate_sha256",
+        "ic_resource_envelope",
+        "rho_resource_envelope",
+        "ic_scalar_verified",
+        "rho_scalar_verified",
+        "rho_policy",
         "verdict",
         "claim_boundary",
         "independent_replay_pointer"
       ],
       "timing_class_enum": [
-        "algorithmic_charged",
-        "projection_matched",
-        "whole_process_wall"
+        "single_target_online_wall"
       ],
-      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control"
+      "ic_online_phase_fields": [
+        "T_target_query_ms",
+        "T_target_PDP_ms",
+        "T_target_relation_check_ms",
+        "T_target_descent_ms",
+        "T_target_recovery_check_ms"
+      ],
+      "online_interval_event_fields": [
+        "ic_start_event",
+        "ic_stop_event",
+        "rho_start_event",
+        "rho_stop_event"
+      ],
+      "online_interval_stage_fields": [
+        "ic_included_stages",
+        "rho_included_stages"
+      ],
+      "rho_policy_integer_fields": [
+        "worker_count",
+        "distinguished_point_memory_bytes"
+      ],
+      "rho_policy_minimums": {
+        "worker_count": 1,
+        "distinguished_point_memory_bytes": 0
+      },
+      "rho_policy_string_fields": [
+        "walk_policy",
+        "collision_policy"
+      ],
+      "notes": "Schema completeness only; scientific replay, source/manifest binding and matched resources must be independently audited. Historical batch and whole-process rows remain supplementary and cannot satisfy this primary single-target online claim.",
+      "rho_reference_minimum": {
+        "since": "2026-10-01",
+        "single_target": "koblitz_rho_fixture <n> <a> signed_frobenius 1 strong [batch_seed] [scalar] (library crypto_lib::cryptanalysis::koblitz_strong_rho)",
+        "batch": [
+          "koblitz_rho_batch_ks_strong rung 3",
+          "koblitz_rho_batch_ks_v3 normal_basis backend"
+        ],
+        "other_rho_admissible_if": "measured per-step cost (instructions or ns per step, same target) no worse than the strong reference",
+        "inadmissible": [
+          "koblitz_rho_fixture packed",
+          "koblitz_rho_fixture reference",
+          "koblitz_rho_batch_ks (unmodified)",
+          "koblitz_rho_batch_ks_matched_arith"
+        ],
+        "evidence": "research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md"
+      }
     }
   },
   "how_to_beat": [
@@ -128,7 +189,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Compact-orbit point-only full-rank n37/n41/n53 L=1/1024 replayed; corrected rho CPU ratios at n41/n53 are 2.727/0.309 and 2.283/0.252 (single/batch). S is unset; no selected-panel promotion. Next: precomputed-start signed-Frobenius rho and calibrated full-operation unit on identical n41/n53 Q, then n83 and n61 L=65536 transfer probes. No 32-target panels."
+      "beat": "Compact-orbit W64 n41/n53 L=1024 blocked-root-prefilter repeat passed full-rank and independent replay, A/A and isolation gates. Same-K complete CPU filter/off ratios 0.8528/0.8924 are engineering gains, but filter/rho remains 1.3282/1.4727; common S, n83/n131 transfer and selected-panel or native-PDP promotion are unset. Next high-arity gate: independently reviewed, label-gated m10 capacity PR #937; if it passes, freeze natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP with rank and full cost, retaining matched automorphism-aware rho."
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
@@ -140,7 +201,8 @@
       "beat": "Reduce the selected n=53 median direct/rho core ratio from 2.2616 to <=1 and the 17.6367x fresh-build ratio while preserving the 0.8392 wall median and scalar-blind completion",
       "rank": 3,
       "regime": "koblitz",
-      "stage": "vs_rho"
+      "stage": "vs_rho",
+      "note": "Constraint withdrawn by the 2026-09-30 erratum: the 0.8392 wall median is against a rho 44-60x slower than a strong single-target rho; the operative reference is the strong rho (see strong_rho_single_target_n53)."
     },
     {
       "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged",
@@ -11370,6 +11432,14 @@
               "evidence": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md",
               "status": "PENDING_INDEPENDENT_VALIDATION"
             },
+            "compact_s3_prefilter_followup": {
+              "summary": "n41/K255 and n53/K440 W64 same-binary blocked-root-prefilter: first panel correctness PASS but timing gates failed; one frozen both-size repeat passed full-rank/log replay, A/A and isolation gates. Complete CPU filter/off 0.8528/0.8924, filter/rho 1.3282/1.4727. Engineering gain only; no ECC2K-130 crossover, common S, n83/n131 transfer, or descendant-native PDP conclusion.",
+              "producer": "examples/koblitz_orbit_dlp_s3_batch.rs",
+              "rho": "examples/koblitz_rho_batch_ks_v3.rs",
+              "evidence": "research/notes/ecc2k130/compact_s3_prefilter_20260930/RESULT.md",
+              "status": "ENGINEERING_GAIN_NO_RHO_CROSSOVER",
+              "next_gate": "Independently reviewed, label-gated m10 capacity PR #937, then frozen natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP if capacity passes; measure common operation unit against matched signed-Frobenius rho."
+            },
             "matched_arithmetic_check": {
               "summary": "Gave the growing-n vs_rho comparator's rho (koblitz_rho_batch_ks.rs, squaring-walk canonicalization + Fermat inversion) the IC arm's own normal-basis rotation and Itoh-Tsujii inversion (new koblitz_rho_batch_ks_matched_arith.rs, 4 passing correctness gates), and reran the frozen n=53 L=1024 K=440 batch_seed=531310 dp_bits=4 cell.",
               "producer": "examples/koblitz_orbit_dlp_fast.rs",
@@ -11564,6 +11634,64 @@
               "verdict_independence": "IC retires 1.52x rho R3's instructions at this cell; at rho's ns per instruction it would still cost 1.52x, so no cache-level fix flips the instruction verdict",
               "note": "research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md",
               "evidence": "research/notes/index-calculus/cachegrind_n41_20260929_run/",
+              "date": "2026-09-30"
+            },
+            "strong_rho_single_target_n53": {
+              "summary": "ERRATUM: selected-panel n=53 wall crossover (ratios 0.8392 / 0.9056 / 0.9875) was measured against koblitz_rho_fixture packed (no distinguished points, O(n) polynomial-basis canonicalization). Against a strong single-target rho on the same target the direct arm is 44x slower in wall (strong rho on ONE core). Registered verdict: wall win dies; panel rho is a strawman.",
+              "target_scalar": 476811900269,
+              "host": "4 vCPU Intel Xeon 2.80 GHz VM (EPYC panel numbers quoted, not reproduced)",
+              "timing_median_of_9_blocks": {
+                "direct_4_threads": {
+                  "wall_s": 5.799,
+                  "cpu_s": 14.82,
+                  "rss_gb": 1.03
+                },
+                "panel_rho_1_thread": {
+                  "wall_s": 5.665,
+                  "cpu_s": 5.6,
+                  "rss_mb": 35
+                },
+                "strong_rho_1_thread": {
+                  "wall_s": 0.1317,
+                  "cpu_s": 0.13,
+                  "rss_mb": 21
+                }
+              },
+              "wall_direct_over_strong": {
+                "point": 44.04,
+                "ci95": [
+                  39.36,
+                  45.43
+                ]
+              },
+              "cpu_direct_over_strong": 113.7,
+              "whole_process_ir": {
+                "direct": 27067359137,
+                "panel_rho": 46908101406,
+                "strong_rho": 1093432564,
+                "direct_over_strong": 24.75,
+                "panel_over_strong": 42.9
+              },
+              "walk_seed_distribution_16_seeds": {
+                "panel_rho_median_wall_s": 7.743,
+                "strong_rho_median_wall_s": 0.13,
+                "ratio": 59.53,
+                "ci95": [
+                  33.55,
+                  127.23
+                ],
+                "strong_rho_slowest_wall_s": 0.316,
+                "panel_rho_range_wall_s": [
+                  1.359,
+                  18.068
+                ]
+              },
+              "direct_over_panel_rho_wall_on_this_host": 1.024,
+              "registered_verdict_wall_win": "DIES",
+              "registered_verdict_panel_rho": "STRAWMAN",
+              "not_tested": "n=41, n=61, other targets, other hosts; full-cost ratio not rescored",
+              "note": "research/notes/index-calculus/RESEARCH_SINGLE_TARGET_STRONG_RHO_N53_20260930.md",
+              "evidence": "research/notes/index-calculus/single_target_rho_n53_20260930_run/",
               "date": "2026-09-30"
             }
           },
@@ -11913,6 +12041,14 @@
             "question": "Both n=41 results in this record are live and point opposite ways. The current record reports an online charged crossover at ic_over_rho_online = 0.286 on a two_torsion_saturated base over 5 targets; the autolab remeasurement above reports per-target relation collection at 821.7 ms against rho's 247.5 ms on a signed_expanded base, 3.3x the other way.",
             "not_yet_a_contradiction": "Different factor-base families, different target counts, and different cost boundaries. The current record's own amortised ratio is 5.026 and its full available wall is 110.79x rho, so the 0.286 figure excludes base construction rather than disagreeing about it.",
             "to_settle_it": "Run both base families through one harness at one target count with one charged definition, and state which costs are inside the boundary. Until then neither n=41 number should be quoted without its configuration."
+          },
+          "n61_compact_L65536_batch_diagnostic_20260930": {
+            "status": "measured_observation_not_a_record",
+            "summary": "a=0 n=61 compact-orbit shared-log DLP (koblitz_orbit_dlp_fast, memory-capped K=1400) vs the historical KS v2 batched rho (koblitz_rho_batch_ks_v2_n61, d=4) at L=65536, three paired blocks on corpus n61-ks-growing-65536-v1. Compact/rho wall ratios 1.968/0.343/0.352 (median 0.352; block 0 is a compact loss under swapping), user-CPU 0.379/0.328/0.331, retired instructions 0.201/0.135/0.135. 196608/196608 independently replayed; end_to_end_dlp claim-check PASS, vs_rho claim-check FAIL by design (multi-target batch, no single-target online fields).",
+            "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+            "claim_boundary": "Public synthetic known-answer fixtures; multi-target batch diagnostic against a comparator superseded by the 2026-09-29 strong-rho ladder (IC/rho 2.297 at n=61 L=1024); walls unisolated on a shared macOS host (tools/isolated_bench.py unsupported), not AGENTS.md section-10 evidence; no key recovery, no asymptotic claim; does not promote this record.",
+            "independent_validation": "PENDING_INDEPENDENT_VALIDATION",
+            "evidence": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md"
           }
         }
       }

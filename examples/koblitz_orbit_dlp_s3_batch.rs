@@ -14,6 +14,8 @@
 //!
 //! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
 
+#![recursion_limit = "256"]
+
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
@@ -292,6 +294,14 @@ struct S3Counts {
     table_lookup_probes: u64,
     table_insert_probes: u64,
     lift_attempts: u64,
+    root_keys_considered: u64,
+    prefilter_checks: u64,
+    prefilter_definite_misses: u64,
+    prefilter_false_positives: u64,
+    prefilter_true_positives: u64,
+    point_query_calls: u64,
+    point_query_multiplications: u64,
+    point_query_fallback_calls: u64,
 }
 
 impl S3Counts {
@@ -303,6 +313,22 @@ impl S3Counts {
             self.consumed_candidates + self.discarded_candidates
         );
         assert!(self.table_lookup_probes >= self.table_lookups);
+        assert_eq!(
+            self.root_keys_considered,
+            self.table_lookups + self.prefilter_definite_misses
+        );
+        assert_eq!(
+            self.prefilter_checks,
+            self.prefilter_definite_misses
+                + self.prefilter_false_positives
+                + self.prefilter_true_positives
+        );
+        assert!(self.prefilter_checks == 0 || self.prefilter_checks == self.root_keys_considered);
+        assert!(self.point_query_calls <= self.calls);
+        assert!(self.point_query_fallback_calls <= self.point_query_calls);
+        if self.point_query_calls > 0 {
+            assert_eq!(self.point_query_multiplications, self.regular_calls * 2);
+        }
         if window == 1 {
             assert_eq!(self.scalar_inversions, self.regular_calls);
             assert_eq!(self.batch_inversions, 0);
@@ -328,6 +354,14 @@ impl S3Counts {
         self.table_lookup_probes += other.table_lookup_probes;
         self.table_insert_probes += other.table_insert_probes;
         self.lift_attempts += other.lift_attempts;
+        self.root_keys_considered += other.root_keys_considered;
+        self.prefilter_checks += other.prefilter_checks;
+        self.prefilter_definite_misses += other.prefilter_definite_misses;
+        self.prefilter_false_positives += other.prefilter_false_positives;
+        self.prefilter_true_positives += other.prefilter_true_positives;
+        self.point_query_calls += other.point_query_calls;
+        self.point_query_multiplications += other.point_query_multiplications;
+        self.point_query_fallback_calls += other.point_query_fallback_calls;
     }
 
     fn as_json(&self) -> Value {
@@ -345,6 +379,14 @@ impl S3Counts {
             "table_lookup_probes":self.table_lookup_probes,
             "table_insert_probes":self.table_insert_probes,
             "lift_attempts":self.lift_attempts,
+            "root_keys_considered":self.root_keys_considered,
+            "prefilter_checks":self.prefilter_checks,
+            "prefilter_definite_misses":self.prefilter_definite_misses,
+            "prefilter_false_positives":self.prefilter_false_positives,
+            "prefilter_true_positives":self.prefilter_true_positives,
+            "point_query_calls":self.point_query_calls,
+            "point_query_multiplications":self.point_query_multiplications,
+            "point_query_fallback_calls":self.point_query_fallback_calls,
         })
     }
 }
@@ -356,9 +398,79 @@ struct RootBatchScratch {
     prefixes: Vec<u64>,
     regular_indices: Vec<usize>,
     results: Vec<Option<[u64; 2]>>,
+    point_denominators: Vec<u64>,
 }
 
 impl RootBatchScratch {
+    fn solve_point(
+        &mut self,
+        gf: &Gf2,
+        basis: &NormalBasis,
+        solver: &S3Solver,
+        curve_a: u64,
+        candidates: &[QueryCandidate],
+        target: (u64, u64),
+        counts: &mut S3Counts,
+    ) {
+        self.inverses.clear();
+        self.prefixes.clear();
+        self.regular_indices.clear();
+        self.results.clear();
+        self.point_denominators.clear();
+        self.inverses.resize(candidates.len(), 0);
+        self.prefixes.resize(candidates.len(), 0);
+        self.results.resize(candidates.len(), None);
+        for (index, candidate) in candidates.iter().enumerate() {
+            let denominator = candidate.absolute ^ target.0;
+            self.point_denominators.push(denominator);
+            counts.calls += 1;
+            counts.point_query_calls += 1;
+            if denominator == 0 || candidate.pair_y == u64::MAX {
+                counts.exceptional_calls += 1;
+                counts.point_query_fallback_calls += 1;
+            } else {
+                counts.regular_calls += 1;
+                self.regular_indices.push(index);
+            }
+        }
+        if !self.regular_indices.is_empty() {
+            let mut product = 1;
+            for &index in &self.regular_indices {
+                self.prefixes[index] = product;
+                product = gf.mul(product, self.point_denominators[index]);
+                counts.batch_multiplications += 1;
+            }
+            let mut inverse_product = invert(gf, basis, product);
+            counts.batch_inversions += 1;
+            for &index in self.regular_indices.iter().rev() {
+                self.inverses[index] = gf.mul(inverse_product, self.prefixes[index]);
+                inverse_product = gf.mul(inverse_product, self.point_denominators[index]);
+                counts.batch_multiplications += 2;
+            }
+        }
+        for (index, candidate) in candidates.iter().enumerate() {
+            let roots = if self.point_denominators[index] == 0 || candidate.pair_y == u64::MAX {
+                solver.roots(gf, basis, candidate.absolute, target.0)
+            } else {
+                counts.point_query_multiplications += 2;
+                Some(point_partner_roots(
+                    gf,
+                    curve_a,
+                    candidate.absolute,
+                    candidate.pair_y,
+                    target,
+                    self.inverses[index],
+                ))
+            };
+            if roots.is_some() {
+                counts.returned_pairs += 1;
+            } else {
+                counts.no_root_returns += 1;
+            }
+            self.results[index] = roots;
+        }
+    }
+
     fn solve(
         &mut self,
         gf: &Gf2,
@@ -499,6 +611,61 @@ impl RootTable {
     }
 }
 
+/// Three hashes within one 64-byte block. Every inserted key sets all three
+/// bits; a definite miss is therefore safe to skip, regardless of collisions.
+struct BlockedBloom {
+    blocks: Vec<[u64; 8]>,
+}
+
+impl BlockedBloom {
+    fn with_capacity(expected_keys: usize) -> Self {
+        let blocks = expected_keys
+            .saturating_mul(12)
+            .div_ceil(512)
+            .next_power_of_two()
+            .max(1);
+        Self {
+            blocks: vec![[0; 8]; blocks],
+        }
+    }
+
+    #[inline(always)]
+    fn positions(&self, key: u64) -> (usize, [usize; 3]) {
+        let mut h = key.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        h = (h ^ (h >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        h = (h ^ (h >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        h ^= h >> 31;
+        (
+            (h as usize) & (self.blocks.len() - 1),
+            [
+                ((h >> 19) & 511) as usize,
+                ((h >> 28) & 511) as usize,
+                ((h >> 37) & 511) as usize,
+            ],
+        )
+    }
+
+    #[inline(always)]
+    fn insert(&mut self, key: u64) {
+        let (block, positions) = self.positions(key);
+        for position in positions {
+            self.blocks[block][position >> 6] |= 1u64 << (position & 63);
+        }
+    }
+
+    #[inline(always)]
+    fn may_contain(&self, key: u64) -> bool {
+        let (block, positions) = self.positions(key);
+        positions
+            .iter()
+            .all(|&position| self.blocks[block][position >> 6] & (1u64 << (position & 63)) != 0)
+    }
+
+    fn bytes(&self) -> usize {
+        self.blocks.len() * 64
+    }
+}
+
 struct State {
     left: u16,
     right: u16,
@@ -509,8 +676,14 @@ struct State {
 struct Index {
     states: Vec<State>,
     table: RootTable,
+    prefilter: Option<BlockedBloom>,
     shifted: Vec<Vec<u64>>,
     representative_candidates: usize,
+    /// Normal-basis y for each indexed root, in the original root order.
+    /// u64::MAX means that the full point could not be materialized.
+    point_ys: Option<Vec<[u64; 2]>>,
+    point_index_group_additions: usize,
+    point_index_fallback_states: usize,
 }
 
 /// Choose one state from the involution (l,r,t) <-> (r,l,-t mod n).
@@ -566,6 +739,7 @@ fn build_index(
     solver: &S3Solver,
     reps: &[u64],
     window: usize,
+    use_prefilter: bool,
     counts: &mut S3Counts,
 ) -> Index {
     let n = gf.n as usize;
@@ -640,9 +814,13 @@ fn build_index(
         );
     }
     let mut table = RootTable::with_capacity(states.len() * 2);
+    let mut prefilter = use_prefilter.then(|| BlockedBloom::with_capacity(states.len() * 2));
     for state in &states {
         for &root in &state.normal_roots {
             let (canonical, shift) = basis.canonical(root);
+            if let Some(filter) = prefilter.as_mut() {
+                filter.insert(canonical);
+            }
             counts.table_insert_probes += table.insert_if_absent(
                 canonical,
                 pack(state.left, state.right, state.relative, shift),
@@ -652,9 +830,78 @@ fn build_index(
     Index {
         states,
         table,
+        prefilter,
         shifted,
         representative_candidates,
+        point_ys: None,
+        point_index_group_additions: 0,
+        point_index_fallback_states: 0,
     }
+}
+
+/// Materialize a full rational point for each existing S3 pair root.
+/// This runs in the charged index interval and leaves the root table intact.
+fn attach_point_ys(
+    fast: &FastBinaryCurve,
+    basis: &NormalBasis,
+    index: &mut Index,
+    representatives: &[Option<[u64; 2]>],
+) {
+    let gf = &fast.gf;
+    let n = gf.n as usize;
+    let shifted_y: Vec<Vec<u64>> = representatives
+        .iter()
+        .map(|point| {
+            let mut value = point.expect("affine representative")[1];
+            let mut row = Vec::with_capacity(n);
+            for _ in 0..n {
+                row.push(value);
+                value = gf.sqr(value);
+            }
+            row
+        })
+        .collect();
+    let mut all_ys = Vec::with_capacity(index.states.len());
+    for states in index.states.chunks(1024) {
+        let plus_inputs: Vec<_> = states
+            .iter()
+            .map(|state| {
+                let left = state.left as usize;
+                let right = state.right as usize;
+                let shift = state.relative as usize;
+                (
+                    index.shifted[left][0],
+                    shifted_y[left][0],
+                    index.shifted[right][shift],
+                    shifted_y[right][shift],
+                    false,
+                    false,
+                )
+            })
+            .collect();
+        let minus_inputs: Vec<_> = plus_inputs
+            .iter()
+            .map(|&(x1, y1, x2, y2, _, _)| (x1, y1, x2, x2 ^ y2, false, false))
+            .collect();
+        let plus = fast.batch_add(&plus_inputs);
+        let minus = fast.batch_add(&minus_inputs);
+        index.point_index_group_additions += 2 * states.len();
+        for ((state, plus), minus) in states.iter().zip(plus).zip(minus) {
+            let mut ys = [u64::MAX; 2];
+            for point in [plus, minus].into_iter().flatten() {
+                for (root, &normal_x) in state.normal_roots.iter().enumerate() {
+                    if ys[root] == u64::MAX && point.0 == basis.to_poly.apply(normal_x) {
+                        ys[root] = basis.to_normal.apply(point.1);
+                    }
+                }
+            }
+            if ys.contains(&u64::MAX) {
+                index.point_index_fallback_states += 1;
+            }
+            all_ys.push(ys);
+        }
+    }
+    index.point_ys = Some(all_ys);
 }
 
 struct Relation {
@@ -708,6 +955,62 @@ struct QueryCandidate {
     left_x: u64,
     right_x: u64,
     absolute: u64,
+    pair_y: u64,
+}
+
+/// x(Q+R), x(Q-R), from rational points Q and R with distinct x.
+#[inline(always)]
+fn point_partner_roots(
+    gf: &Gf2,
+    curve_a: u64,
+    pair_x: u64,
+    pair_y: u64,
+    target: (u64, u64),
+    inverse_delta: u64,
+) -> [u64; 2] {
+    let lambda = gf.mul(pair_y ^ target.1, inverse_delta);
+    let h = gf.mul(pair_x, inverse_delta);
+    let plus = gf.sqr(lambda) ^ lambda ^ pair_x ^ target.0 ^ curve_a;
+    [plus, plus ^ gf.sqr(h) ^ h]
+}
+
+#[inline(always)]
+fn point_roots_counted(
+    gf: &Gf2,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    curve_a: u64,
+    candidate: QueryCandidate,
+    target: (u64, u64),
+    counts: &mut S3Counts,
+) -> Option<[u64; 2]> {
+    counts.calls += 1;
+    counts.point_query_calls += 1;
+    counts.consumed_candidates += 1;
+    let denominator = candidate.absolute ^ target.0;
+    let roots = if denominator == 0 || candidate.pair_y == u64::MAX {
+        counts.exceptional_calls += 1;
+        counts.point_query_fallback_calls += 1;
+        solver.roots(gf, basis, candidate.absolute, target.0)
+    } else {
+        counts.regular_calls += 1;
+        counts.scalar_inversions += 1;
+        counts.point_query_multiplications += 2;
+        Some(point_partner_roots(
+            gf,
+            curve_a,
+            candidate.absolute,
+            candidate.pair_y,
+            target,
+            invert(gf, basis, denominator),
+        ))
+    };
+    if roots.is_some() {
+        counts.returned_pairs += 1;
+    } else {
+        counts.no_root_returns += 1;
+    }
+    roots
 }
 
 fn consume_query_batch(
@@ -726,18 +1029,42 @@ fn consume_query_batch(
     probes: &mut u64,
 ) -> Option<Relation> {
     if window > 1 {
-        scratch.solve(gf, basis, solver, inputs, counts);
+        if index.point_ys.is_some() {
+            scratch.solve_point(
+                gf,
+                basis,
+                solver,
+                fast.a,
+                candidates,
+                target.expect("query target is affine"),
+                counts,
+            );
+        } else {
+            scratch.solve(gf, basis, solver, inputs, counts);
+        }
     }
     let n = gf.n;
     for (candidate_index, &candidate) in candidates.iter().enumerate() {
         let roots = if window == 1 {
-            solver.roots_counted(
-                gf,
-                basis,
-                inputs[candidate_index].0,
-                inputs[candidate_index].1,
-                counts,
-            )
+            if index.point_ys.is_some() {
+                point_roots_counted(
+                    gf,
+                    basis,
+                    solver,
+                    fast.a,
+                    candidate,
+                    target.expect("query target is affine"),
+                    counts,
+                )
+            } else {
+                solver.roots_counted(
+                    gf,
+                    basis,
+                    inputs[candidate_index].0,
+                    inputs[candidate_index].1,
+                    counts,
+                )
+            }
         } else {
             counts.consumed_candidates += 1;
             scratch.results[candidate_index]
@@ -748,9 +1075,24 @@ fn consume_query_batch(
         for partner in partners {
             *probes += 1;
             let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+            counts.root_keys_considered += 1;
+            if let Some(filter) = &index.prefilter {
+                counts.prefilter_checks += 1;
+                if !filter.may_contain(canonical) {
+                    counts.prefilter_definite_misses += 1;
+                    continue;
+                }
+            }
             let (value, slot_probes) = index.table.get_counted(canonical);
             counts.table_lookups += 1;
             counts.table_lookup_probes += slot_probes;
+            if index.prefilter.is_some() {
+                if value.is_some() {
+                    counts.prefilter_true_positives += 1;
+                } else {
+                    counts.prefilter_false_positives += 1;
+                }
+            }
             let Some(value) = value else {
                 continue;
             };
@@ -801,18 +1143,32 @@ fn extract(
     // Keep the original state/shift/root order. A full batch is prepared
     // before consumption, and unused prefetched candidates remain charged.
     let start = start % index.states.len().max(1);
-    for state in index.states[start..].iter().chain(&index.states[..start]) {
+    for (offset, state) in index.states[start..]
+        .iter()
+        .chain(&index.states[..start])
+        .enumerate()
+    {
+        let state_index = (start + offset) % index.states.len();
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
             let right_x = index.shifted[state.right as usize]
                 [(shift as usize + state.relative as usize) % n as usize];
-            for &normal_root in &state.normal_roots {
+            for (root_index, &normal_root) in state.normal_roots.iter().enumerate() {
                 let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
+                let pair_y = index.point_ys.as_ref().map_or(u64::MAX, |ys| {
+                    let normal_y = ys[state_index][root_index];
+                    if normal_y == u64::MAX {
+                        u64::MAX
+                    } else {
+                        basis.to_poly.apply(basis.rotate(normal_y, shift))
+                    }
+                });
                 inputs.push((absolute, target_x));
                 candidates.push(QueryCandidate {
                     left_x,
                     right_x,
                     absolute,
+                    pair_y,
                 });
                 if inputs.len() == window {
                     if let Some(relation) = consume_query_batch(
@@ -1030,6 +1386,16 @@ fn main() {
         matches!(window, 1 | 16 | 64),
         "batch window must be 1, 16, or 64"
     );
+    let use_prefilter = match std::env::var("KIC_S3_PREFILTER").as_deref() {
+        Ok("blocked") => true,
+        Ok("off") | Err(_) => false,
+        _ => panic!("KIC_S3_PREFILTER must be off or blocked"),
+    };
+    let point_query = match std::env::var("KIC_QUERY_BACKEND").as_deref() {
+        Ok("point_sum") => true,
+        Ok("s3") | Err(_) => false,
+        _ => panic!("KIC_QUERY_BACKEND must be s3 or point_sum"),
+    };
     let constructed: Option<(u32, u8, usize)> =
         arguments[1].strip_prefix("construct:").map(|spec| {
             let parts: Vec<&str> = spec.split(':').collect();
@@ -1167,7 +1533,18 @@ fn main() {
 
     let index_started = Instant::now();
     let mut index_counts = S3Counts::default();
-    let index = build_index(&gf, &basis, &solver, &reps, window, &mut index_counts);
+    let mut index = build_index(
+        &gf,
+        &basis,
+        &solver,
+        &reps,
+        window,
+        use_prefilter,
+        &mut index_counts,
+    );
+    if point_query {
+        attach_point_ys(&fast, &basis, &mut index, &representatives);
+    }
     index_counts.validate(window);
     let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
@@ -1403,7 +1780,11 @@ fn main() {
         "orbit_columns":base.columns,
         "factor_base_points":base.points.len(),
         "index_policy":"swap_frobenius_quotient",
+        "query_backend":if point_query { "point_sum" } else { "s3" },
         "s3_batch_window":window,
+        "root_prefilter_policy":if use_prefilter { "blocked_bloom_512_3hash" } else { "off" },
+        "root_prefilter_bytes":index.prefilter.as_ref().map_or(0, BlockedBloom::bytes),
+        "root_prefilter_blocks":index.prefilter.as_ref().map_or(0, |filter| filter.blocks.len()),
         "index_s3_counts":index_counts.as_json(),
         "rank_s3_counts":rank_counts.as_json(),
         "target_s3_counts":target_counts.as_json(),
@@ -1412,6 +1793,9 @@ fn main() {
         "regular_states":index.states.len(),
         "root_table_entries":index.table.len,
         "root_table_slots":index.table.slots.len(),
+        "point_index_y_bytes":index.point_ys.as_ref().map_or(0, |ys| ys.capacity() * 16),
+        "point_index_group_additions":index.point_index_group_additions,
+        "point_index_fallback_states":index.point_index_fallback_states,
         "pair_table_entries":0,
         "edge_selectors":0,
         "timing_ms":{
@@ -1462,6 +1846,125 @@ mod swap_quotient_tests {
     use super::*;
     use crypto_lib::binary_ecc::IrreduciblePoly;
     use std::collections::HashSet;
+
+    #[test]
+    fn full_point_partner_roots_match_group_law_and_s3_over_gf32() {
+        let fast = FastBinaryCurve::new(
+            &IrreduciblePoly {
+                degree: 5,
+                low_terms: vec![0, 2],
+            },
+            0,
+        )
+        .unwrap();
+        let gf = &fast.gf;
+        let basis = NormalBasis::new(gf);
+        let solver = S3Solver::new(gf, 1);
+        let points: Vec<_> = (0..32)
+            .flat_map(|x| fast.points_with_x(1, x))
+            .flatten()
+            .collect();
+        assert!(points.iter().any(|point| point.0 == 0));
+        let mut exceptional = 0;
+        let mut regular = 0;
+        for &pair in &points {
+            for &target in &points {
+                let candidate = QueryCandidate {
+                    left_x: 0,
+                    right_x: 0,
+                    absolute: pair.0,
+                    pair_y: pair.1,
+                };
+                let mut counts = S3Counts::default();
+                let actual = point_roots_counted(
+                    gf,
+                    &basis,
+                    &solver,
+                    fast.a,
+                    candidate,
+                    target,
+                    &mut counts,
+                );
+                counts.validate(1);
+                let expected = solver.roots(gf, &basis, pair.0, target.0);
+                assert_eq!(actual.is_some(), expected.is_some());
+                if pair.0 == target.0 {
+                    exceptional += 1;
+                    assert_eq!(actual, expected);
+                } else {
+                    regular += 1;
+                    let mut roots = actual.unwrap();
+                    let mut s3 = expected.unwrap();
+                    roots.sort_unstable();
+                    s3.sort_unstable();
+                    assert_eq!(roots, s3);
+                    let plus = fast.add(Some(pair), Some(target)).unwrap().0;
+                    let minus = fast
+                        .add(FastBinaryCurve::neg(Some(pair)), Some(target))
+                        .unwrap()
+                        .0;
+                    let mut group_roots = [plus, minus];
+                    group_roots.sort_unstable();
+                    assert_eq!(roots, group_roots);
+                }
+            }
+        }
+        assert!(regular > 0 && exceptional > 0);
+    }
+
+    #[test]
+    fn indexed_point_coordinates_cover_existing_regular_roots() {
+        let curve = KoblitzCurve::new(0, 37).unwrap();
+        let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+        let gf = &fast.gf;
+        let b = gf.from_element(&curve.curve.b);
+        let basis = NormalBasis::new(gf);
+        let solver = S3Solver::new(gf, b);
+        let r = curve.subgroup_order.to_u64().unwrap();
+        let (_, _, representatives, _) = construct_base(&fast, &curve, b, 2, r);
+        let reps: Vec<_> = representatives
+            .iter()
+            .map(|point| point.unwrap()[0])
+            .collect();
+        let mut counts = S3Counts::default();
+        let mut index = build_index(gf, &basis, &solver, &reps, 64, false, &mut counts);
+        attach_point_ys(&fast, &basis, &mut index, &representatives);
+        assert_eq!(index.point_index_group_additions, index.states.len() * 2);
+        assert_eq!(index.point_index_fallback_states, 0);
+        let ys = index.point_ys.as_ref().unwrap();
+        let target = representatives[0].map(|[x, y]| (x, y)).unwrap();
+        for (state, pair_ys) in index.states.iter().zip(ys) {
+            for (&normal_x, &normal_y) in state.normal_roots.iter().zip(pair_ys) {
+                assert_ne!(normal_y, u64::MAX);
+                let pair_x = basis.to_poly.apply(normal_x);
+                let pair_y = basis.to_poly.apply(normal_y);
+                let on_curve = fast.points_with_x(b, pair_x);
+                assert!(on_curve.contains(&Some((pair_x, pair_y))));
+                let candidate = QueryCandidate {
+                    left_x: 0,
+                    right_x: 0,
+                    absolute: pair_x,
+                    pair_y,
+                };
+                let mut point_counts = S3Counts::default();
+                let point_roots = point_roots_counted(
+                    gf,
+                    &basis,
+                    &solver,
+                    fast.a,
+                    candidate,
+                    target,
+                    &mut point_counts,
+                );
+                let s3_roots = solver.roots(gf, &basis, pair_x, target.0);
+                let mut point_roots = point_roots.unwrap();
+                let mut s3_roots = s3_roots.unwrap();
+                point_roots.sort_unstable();
+                s3_roots.sort_unstable();
+                assert_eq!(point_roots, s3_roots);
+            }
+        }
+    }
 
     #[test]
     fn exhaustive_gf32_scalar_and_batch_roots_match_in_original_order() {
@@ -1519,7 +2022,19 @@ mod swap_quotient_tests {
             columns: 1,
         };
         let mut index_counts = S3Counts::default();
-        let index = build_index(&gf, &basis, &solver, &reps, 1, &mut index_counts);
+        let index = build_index(&gf, &basis, &solver, &reps, 1, false, &mut index_counts);
+        let mut filter_index_counts = S3Counts::default();
+        let filtered = build_index(
+            &gf,
+            &basis,
+            &solver,
+            &reps,
+            1,
+            true,
+            &mut filter_index_counts,
+        );
+        assert_eq!(filtered.table.slots, index.table.slots);
+        assert_eq!(filter_index_counts.as_json(), index_counts.as_json());
         let mut found = None;
         for i in 0..8 {
             for j in 0..8 {
@@ -1573,6 +2088,30 @@ mod swap_quotient_tests {
                 scalar_counts.consumed_candidates
             );
             assert!(counts.discarded_candidates < window as u64);
+            let mut filter_counts = S3Counts::default();
+            let filtered_relation = extract(
+                &gf,
+                &fast,
+                &basis,
+                &solver,
+                &filtered,
+                &base,
+                q,
+                0,
+                window,
+                &mut filter_counts,
+            )
+            .unwrap();
+            filter_counts.validate(window);
+            assert_eq!(filtered_relation.point_indices, actual.point_indices);
+            assert_eq!(filtered_relation.x_codes, actual.x_codes);
+            assert_eq!(filtered_relation.intermediates, actual.intermediates);
+            assert_eq!(filtered_relation.probes, actual.probes);
+            assert_eq!(
+                filter_counts.root_keys_considered,
+                counts.root_keys_considered
+            );
+            assert_eq!(filter_counts.calls, counts.calls);
         }
         // This deliberately invalid point cannot be a sum of curve points.
         // Its complete scan ends in a non-full batch, whose actual work is counted.
@@ -1609,6 +2148,60 @@ mod swap_quotient_tests {
         assert_eq!(batch_counts.calls, scalar_counts.calls);
         assert_ne!(batch_counts.calls % 64, 0);
         assert_eq!(batch_counts.discarded_candidates, 0);
+        let mut filtered_counts = S3Counts::default();
+        assert!(extract(
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &filtered,
+            &base,
+            impossible,
+            0,
+            64,
+            &mut filtered_counts
+        )
+        .is_none());
+        filtered_counts.validate(64);
+        assert_eq!(filtered_counts.calls, batch_counts.calls);
+        assert_eq!(
+            filtered_counts.root_keys_considered,
+            batch_counts.root_keys_considered
+        );
+        assert!(filtered_counts.prefilter_definite_misses > 0);
+    }
+
+    #[test]
+    fn exhaustive_gf32_root_filter_only_skips_absent_keys() {
+        let gf = Gf2::new(&IrreduciblePoly {
+            degree: 5,
+            low_terms: vec![0, 2],
+        });
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, 1);
+        let mut table = RootTable::with_capacity(2048);
+        let mut filter = BlockedBloom::with_capacity(2048);
+        for left in 0..32 {
+            for right in 0..32 {
+                if let Some(roots) = solver.roots(&gf, &basis, left, right) {
+                    for root in roots {
+                        let (key, _) = basis.canonical(basis.to_normal.apply(root));
+                        filter.insert(key);
+                        table.insert_if_absent(key, left * 32 + right);
+                    }
+                }
+            }
+        }
+        let mut skipped_absent = 0;
+        for key in 0..4096u64 {
+            let actual = table.get(key);
+            if !filter.may_contain(key) {
+                assert!(actual.is_none(), "false negative for canonical root {key}");
+                skipped_absent += 1;
+            }
+        }
+        assert!(table.len > 0);
+        assert!(skipped_absent > 3000);
     }
 
     #[test]
@@ -1624,7 +2217,7 @@ mod swap_quotient_tests {
         let solver = S3Solver::new(&gf, 1);
         let reps: Vec<u64> = (0..(1u64 << 5)).collect();
         let mut counts = S3Counts::default();
-        let index = build_index(&gf, &basis, &solver, &reps, 1, &mut counts);
+        let index = build_index(&gf, &basis, &solver, &reps, 1, false, &mut counts);
         counts.validate(1);
         let n = gf.n as usize;
         let ordered = reps.len() * reps.len() * n;

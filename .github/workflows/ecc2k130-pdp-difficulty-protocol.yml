@@ -1,0 +1,39 @@
+name: ECC2K-130 PDP difficulty input freeze
+
+on:
+  pull_request:
+    paths:
+      - "research/notes/ecc2k130/pdp_difficulty_features_20261001/**"
+      - ".github/workflows/ecc2k130-pdp-difficulty-protocol.yml"
+  push:
+    branches: [main]
+    paths:
+      - "research/notes/ecc2k130/pdp_difficulty_features_20261001/**"
+      - ".github/workflows/ecc2k130-pdp-difficulty-protocol.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen archives without scoring public-point features
+        run: |
+          python3 research/notes/ecc2k130/pdp_difficulty_features_20261001/check_config.py \
+            --out /tmp/ecc2k130-pdp-difficulty-input-check.json
+          cmp /tmp/ecc2k130-pdp-difficulty-input-check.json \
+            research/notes/ecc2k130/pdp_difficulty_features_20261001/INPUT_CHECK.json
+      - name: Check source-only toy algebra and deterministic statistics
+        run: python3 -m unittest discover -s research/notes/ecc2k130/pdp_difficulty_features_20261001 -p test_source.py -v
+      - name: Check frozen pre-outcome source and protocol bytes
+        run: |
+          python3 research/notes/ecc2k130/pdp_difficulty_features_20261001/source_preflight.py \
+            --out /tmp/ecc2k130-pdp-difficulty-source-check.json
+          cmp /tmp/ecc2k130-pdp-difficulty-source-check.json \
+            research/notes/ecc2k130/pdp_difficulty_features_20261001/SOURCE_CHECK.json

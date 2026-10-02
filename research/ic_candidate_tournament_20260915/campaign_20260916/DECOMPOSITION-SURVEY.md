@@ -225,7 +225,7 @@ repository's notes and not re-read here.
   with `E(0, 3) = 1/2`.
 
 **Cheapest pre-compute falsification (proof search map).**
-- **Baseline reproduction.** Re-run two frozen cells (`K_0/2^9` m=4 and `K_1/2^15` m=4)
+- **Baseline reproduction.** Re-run two frozen cells (`icv1-f2m9-t5-81e744be` m=4 and `icv1-f2m15-t275-b7f03703` m=4)
   through `groebner_stage_bench` and match `tables.md`'s word-operation totals exactly.
   The counts are deterministic.
 - **Observation collision.** The observable is the per-target refutation cost. If random

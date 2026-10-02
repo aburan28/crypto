@@ -1,0 +1,46 @@
+{
+ "commit": "0bf67f169f0762c8bd225760196803379cabdcb9",
+ "tree_status": "",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16480972 kB",
+ "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "ic_binary_sha256": "6f58b075b7d16f01d5ffbd1ff87cdc3fdaf9fc5ec11aa53dbf87ac85c89c64d5",
+ "ic_built_from": "0bf67f169f0762c8bd225760196803379cabdcb9",
+ "isolation_tool": {
+  "path": "tools/isolated_bench.py",
+  "sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+ },
+ "pinning": "tools/isolated_bench.py run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); the pin untimed under taskset -c 2",
+ "smt_siblings": {
+  "0": "0",
+  "1": "1",
+  "2": "2",
+  "3": "3"
+ },
+ "uptime": "23:22:12 up  1:14,  0 user,  load average: 0.30, 0.31, 0.72",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}

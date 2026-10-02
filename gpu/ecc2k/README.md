@@ -496,7 +496,7 @@ as the tag, which is what lets the CPU recover a hit's summands by
 walking `2n` points instead of the base. `pt_fold_count` and
 `pt_fold_fill` then store it in the CPU's own layout: the bucket from the
 top of `pt_filter_hash(key)`, the word `(orbit << 16) | (hash & 0xffff)`,
-and a presence bit.
+and three presence bits in one filter word (`pt_filter_bits_of`).
 
 The row plan (sorted base, representatives, suffix starts) is host data
 from `PairSumTable::folded_rows`, uploaded the way the basis is, so
@@ -514,8 +514,8 @@ bucket's count with `atomicAdd`. The host then scans the counts into
 offsets, which also gives the total the presence filter is sized from,
 so the build is two launches. The fill pass takes a slot from its
 bucket's cursor with `atomicAdd`, writes the tagged word there and sets
-the presence bit with `atomicOr`. Both passes recompute every row, as
-`build_folded_within` does on the CPU. That is twice the curve
+the key's presence bits with one `atomicOr`. Both passes recompute
+every row, as `build_folded_within` does on the CPU. That is twice the curve
 arithmetic, with nothing on the device but the table. Keeping the first
 pass's keys would halve the arithmetic for three times the table's
 memory; which is faster is a question for a device.
@@ -643,6 +643,7 @@ the rest:
 
 - bucket offsets that do not partition the words;
 - a presence filter that is not a whole power of two;
+- a presence filter of other than one or three bits a key;
 - a tag naming no orbit of the base;
 - keys named in a basis other than the one this side would use.
 

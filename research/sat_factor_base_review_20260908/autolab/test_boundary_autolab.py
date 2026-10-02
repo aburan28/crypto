@@ -31,6 +31,11 @@ class LedgerContractTests(unittest.TestCase):
         self.assertIn("smoke.koblitz.vs_rho.n13", beat_ids)
         self.assertIn("koblitz.vs_rho.n37_wall", beat_ids)
         self.assertTrue(report["agent_priorities"])
+        self.assertFalse(report["commands"].get("n37_full"))
+        self.assertTrue(report["primary_speedup_contract"])
+        for row in report["beats"]:
+            self.assertFalse(row["primary_speedup_eligible"])
+            self.assertTrue(row["primary_speedup_blocker"])
 
 
 class MeasurementSchemaTests(unittest.TestCase):
@@ -44,26 +49,160 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertIn("timing_class", result["missing_stage_fields"])
         self.assertTrue(result["missing_global_provenance"])
 
-    def test_vs_rho_complete_passes(self) -> None:
+    def test_vs_rho_single_target_online_claim_passes(self) -> None:
         report = {
             "n": 37,
-            "timing_class": "whole_process_wall",
-            "ic_cost": 1.0,
-            "rho_cost": 2.0,
-            "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
-            "all_stages_charged_same_series": True,
+            "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
+            "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
+            "workload_id": "abcdef123456",
+            "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
+            "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
+            "target_count": 1,
+            "ic_target_hash": "target-abc",
+            "rho_target_hash": "target-abc",
+            "timing_class": "single_target_online_wall",
+            "ic_online_wall_ms": 10.0,
+            "rho_online_wall_ms": 20.0,
+            "online_speedup": 2.0,
+            "ic_online_phase_ms": {
+                "T_target_query_ms": 1.0,
+                "T_target_PDP_ms": 3.0,
+                "T_target_relation_check_ms": 1.0,
+                "T_target_descent_ms": 4.0,
+                "T_target_recovery_check_ms": 1.0,
+            },
+            "online_interval": {
+                "ic_start_event": "first target-dependent IC query after reusable setup",
+                "ic_stop_event": "scalar recovered and independently verified",
+                "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
+                "rho_start_event": "first target-dependent rho walk",
+                "rho_stop_event": "scalar recovered and independently verified",
+                "rho_included_stages": ["walk", "collision", "recovery_check"],
+            },
+            "same_resource_envelope": True,
+            "independent_validation": True,
+            "ic_replay_certificate_sha256": "a" * 64,
+            "rho_replay_certificate_sha256": "b" * 64,
+            "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "ic_scalar_verified": True,
+            "rho_scalar_verified": True,
+            "rho_policy": {
+                "worker_count": 1,
+                "walk_policy": "signed_frobenius",
+                "collision_policy": "distinguished_point",
+                "distinguished_point_memory_bytes": 0,
+            },
             "verdict": "DRAFT",
-            "claim_boundary": "synthetic only",
+            "claim_boundary": "single public target only",
             "independent_replay_pointer": "research/example",
-            "fixture_hash": "abc",
-            "executable_or_source_hash": "def",
+            "fixture_hash": "target-abc",
+            "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
             "host_id": {"node": "test"},
             "resource_caps": {"common_cap_bytes": 1},
-            "seeds": {"direct": 1},
+            "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
         }
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "PASS", result)
+
+    def test_vs_rho_batch_mismatch_and_legacy_timing_are_rejected(self) -> None:
+        import copy
+
+        base = {
+            "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
+            "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
+            "workload_id": "abcdef123456",
+            "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
+            "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
+            "target_count": 1,
+            "ic_target_hash": "target-abc",
+            "rho_target_hash": "target-abc",
+            "timing_class": "single_target_online_wall",
+            "ic_online_wall_ms": 10.0,
+            "rho_online_wall_ms": 20.0,
+            "online_speedup": 2.0,
+            "ic_online_phase_ms": {
+                "T_target_query_ms": 1.0,
+                "T_target_PDP_ms": 3.0,
+                "T_target_relation_check_ms": 1.0,
+                "T_target_descent_ms": 4.0,
+                "T_target_recovery_check_ms": 1.0,
+            },
+            "online_interval": {
+                "ic_start_event": "target computation after reusable setup",
+                "ic_stop_event": "verified scalar recovered",
+                "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
+                "rho_start_event": "target walk begins",
+                "rho_stop_event": "verified scalar recovered",
+                "rho_included_stages": ["walk", "collision", "recovery_check"],
+            },
+            "same_resource_envelope": True,
+            "independent_validation": True,
+            "ic_replay_certificate_sha256": "a" * 64,
+            "rho_replay_certificate_sha256": "b" * 64,
+            "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "ic_scalar_verified": True,
+            "rho_scalar_verified": True,
+            "rho_policy": {
+                "worker_count": 1,
+                "walk_policy": "walk",
+                "collision_policy": "collision",
+                "distinguished_point_memory_bytes": 0,
+            },
+            "verdict": "DRAFT",
+            "claim_boundary": "single public target only",
+            "independent_replay_pointer": "research/example",
+            "fixture_hash": "target-abc",
+            "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
+            "host_id": "test",
+            "resource_caps": {},
+            "seeds": 1,
+            "claim_boundary_non_claims": ["not key recovery"],
+        }
+        variants = []
+        batched = copy.deepcopy(base)
+        batched["target_count"] = 2
+        variants.append(batched)
+        for invalid_count in (True, 1.0):
+            malformed = copy.deepcopy(base)
+            malformed["target_count"] = invalid_count
+            variants.append(malformed)
+        mismatched = copy.deepcopy(base)
+        mismatched["rho_target_hash"] = "another-target"
+        variants.append(mismatched)
+        legacy = copy.deepcopy(base)
+        legacy["timing_class"] = "whole_process_wall"
+        variants.append(legacy)
+        wrong_ratio = copy.deepcopy(base)
+        wrong_ratio["online_speedup"] = 3.0
+        variants.append(wrong_ratio)
+        unverified = copy.deepcopy(base)
+        unverified["rho_scalar_verified"] = False
+        variants.append(unverified)
+        wrong_phase_total = copy.deepcopy(base)
+        wrong_phase_total["ic_online_phase_ms"]["T_target_PDP_ms"] = 4.0
+        variants.append(wrong_phase_total)
+        wrong_run_id = copy.deepcopy(base)
+        wrong_run_id["run_id"] = "legacy-timestamp-run"
+        variants.append(wrong_run_id)
+        no_independent_validation = copy.deepcopy(base)
+        no_independent_validation["independent_validation"] = False
+        variants.append(no_independent_validation)
+        bad_certificate_hash = copy.deepcopy(base)
+        bad_certificate_hash["ic_replay_certificate_sha256"] = "not-a-digest"
+        variants.append(bad_certificate_hash)
+        mismatched_resources = copy.deepcopy(base)
+        mismatched_resources["rho_resource_envelope"]["worker_count"] = 2
+        variants.append(mismatched_resources)
+        missing_relation_check = copy.deepcopy(base)
+        missing_relation_check["online_interval"]["ic_included_stages"].remove("target_relation_check")
+        variants.append(missing_relation_check)
+        for report in variants:
+            result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+            self.assertEqual(result["status"], "FAIL", result)
+            self.assertTrue(result["validation_errors"])
 
     def test_decomposition_requires_ffd(self) -> None:
         report = {
@@ -111,14 +250,22 @@ class HelperTests(unittest.TestCase):
         for a,b,count in [(direct,rho,2),(direct+direct,rho,1),([],rho,1)]:
             self.assertEqual(lab.comparison_integrity(a,b,count)['status'],'INVALID_COMPARISON')
 
-    def test_only_complete_ic_cost_and_total_rho_batch_are_comparable(self):
+    def test_only_single_target_rho_cost_is_comparable(self):
         self.assertIsNone(lab.extract_ic_cost([{'online_charged_ms':1}], 'algorithmic_charged'))
         self.assertIsNone(lab.extract_ic_cost([{'charged_total_ms':1}], 'algorithmic_charged'))
         self.assertEqual(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':9}], 'algorithmic_charged'),9)
-        self.assertEqual(lab.extract_rho_cost([{'total_ms':2},{'total_ms':3}]),5)
-        self.assertIsNone(lab.extract_rho_cost([{'total_ms':2},{}]))
-        self.assertIsNone(lab.extract_rho_cost([{'total_ms':float('nan')}]))
+        one = {'kind': 'rho_public_fixture', 'total_ms': 2}
+        self.assertEqual(lab.extract_rho_cost([one]), 2)
+        self.assertIsNone(lab.extract_rho_cost([one, dict(one, fixture_index=1)]))
+        self.assertIsNone(lab.extract_rho_cost([{'kind': 'rho_public_fixture', 'total_ms':float('nan')}]))
         self.assertIsNone(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':-1}], 'algorithmic_charged'))
+
+    def test_launch_rejects_more_than_one_target_before_preflight(self):
+        args = lab.parser().parse_args([
+            'launch', '--beat', 'koblitz.vs_rho.n37_wall', '--fixtures', '2'
+        ])
+        with self.assertRaisesRegex(lab.AutolabError, 'exactly one target'):
+            lab.launch(args)
 
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
@@ -157,8 +304,9 @@ class HelperTests(unittest.TestCase):
                 ["claim-check", "--report", str(path), "--stage", "vs_rho", "--out", str(out)]
             )
             result = lab.claim_check(args)
-            self.assertEqual(result["status"], "PASS")
-            self.assertEqual(json.loads(out.read_text())["status"], "PASS")
+            self.assertEqual(result["status"], "FAIL")
+            self.assertIn("target_count", result["missing_stage_fields"])
+            self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
 
 
 class TimingTests(unittest.TestCase):
@@ -256,6 +404,198 @@ class TimingTests(unittest.TestCase):
 
         self.assertEqual(observed["exit_code"], 3)
         self.assertEqual(observed["timed_repeats"], 1)
+
+
+class BatchPanelTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_panel"
+
+    def setUp(self) -> None:
+        self.protocol = lab.load_protocol()
+        self.ledger = lab.load_ledger(self.protocol)
+        self.beat = self.protocol["beats"][self.BEAT]
+
+    def test_panel_beat_is_registered_as_diagnostic_only(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "batch_panel")
+        self.assertEqual(self.beat["stage"], "end_to_end_dlp")
+        self.assertFalse(self.beat["primary_speedup_eligible"])
+        self.assertGreaterEqual(self.beat["targets_minimum"], 1024)
+        for targets in self.beat["k_candidates"]:
+            self.assertGreaterEqual(int(targets), self.beat["targets_minimum"])
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+
+    def test_single_target_launch_rejects_the_panel_beat(self) -> None:
+        args = lab.parser().parse_args(["launch", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "launch-panel"):
+            lab.launch(args)
+
+    def test_panel_rejects_small_batches_and_single_target_beats(self) -> None:
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--targets", "32"])
+        with self.assertRaisesRegex(lab.AutolabError, ">= 1024"):
+            lab.launch_panel(args)
+        args = lab.parser().parse_args(["launch-panel", "--beat", "koblitz.vs_rho.n37_wall"])
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(args)
+
+    def test_parse_time_l_ignores_producer_lines(self) -> None:
+        text = textwrap.dedent(
+            """\
+            note: producer line 12
+                  295.04 real       273.93 user        16.72 sys
+               11502862336  maximum resident set size
+                  2274502049018  instructions retired
+                       12  swaps
+            """
+        )
+        parsed = lab.parse_time_l(text)
+        self.assertEqual(parsed["max_rss_bytes"], 11502862336)
+        self.assertEqual(parsed["instructions_retired"], 2274502049018)
+        self.assertEqual(parsed["swaps"], 12)
+        self.assertNotIn("page_faults", parsed)
+
+    def block_records(self, scalars):
+        ic = [
+            {"kind": "compact_orbit_dlp_target", "fixture_index": i, "published_fixture_scalar": s,
+             "target": [s, s + 1], "recovered_matches_published": True, "group_verified": True,
+             "probes": 3, "target_ms": 0.5}
+            for i, s in enumerate(scalars)
+        ]
+        rho = [
+            {"kind": "rho_ks_batch_fixture", "fixture_index": i, "published_fixture_scalar": s,
+             "recovered_fixture_scalar": s, "published_q": [s, s + 1], "verified": True}
+            for i, s in enumerate(scalars)
+        ] + [{"kind": "rho_ks_batch_summary"}]
+        return ic, rho
+
+    def test_block_check_requires_same_verified_targets(self) -> None:
+        ic, rho = self.block_records([5, 9])
+        checks = lab.check_panel_block(ic, rho, [5, 9])
+        for key in ("ic_all_verified", "rho_all_verified", "ic_matches_corpus",
+                    "rho_matches_corpus", "same_target_points"):
+            self.assertTrue(checks[key], key)
+        rho[1]["published_q"] = [9, 11]
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["same_target_points"])
+        ic[0]["group_verified"] = False
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["ic_all_verified"])
+        self.assertFalse(lab.check_panel_block([], rho, [5, 9])["ic_all_verified"])
+
+    def test_untimed_digest_ignores_timers(self) -> None:
+        ic, _ = self.block_records([5])
+        slower = [dict(ic[0], target_ms=99.0)]
+        self.assertEqual(lab.untimed_digest(ic), lab.untimed_digest(slower))
+
+    def test_panel_claims_pass_end_to_end_and_fail_vs_rho_closed(self) -> None:
+        with tempfile.TemporaryDirectory(dir=lab.RUNS_DIR.parent) as tmp:
+            run = Path(tmp)
+            (run / "artifacts").mkdir()
+            (run / "artifacts/replay_ic.json").write_text("{}\n")
+            summary = {
+                "targets": 1024, "K": 600, "subgroup_order_bits": 47.21,
+                "corpora": {"eval": {"name": "e"}, "tune": {"name": "t"}, "disjoint": True},
+                "executables": {"git_head": "0" * 40},
+                "host": {"node": "test"},
+                "isolation": "none",
+                "wall_ratio": {"median": 0.3}, "user_ratio": None, "instructions_ratio": None,
+                "verification": {"ic_all_verified": True, "rho_all_verified": True},
+                "blocks": [{"block": 0, "ic_timing_ms": {"process_total": 1.0}}],
+            }
+            end_to_end, vs_rho = lab.draft_panel_claims(
+                beat_id=self.BEAT, beat=self.beat, run=run, summary=summary
+            )
+        e2e = lab.validate_claim(end_to_end, stage="end_to_end_dlp", ledger=self.ledger)
+        self.assertEqual(e2e["status"], "PASS", e2e)
+        check = lab.validate_claim(vs_rho, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(check["status"], "FAIL")
+        self.assertIn("target_count must equal 1", check["validation_errors"])
+        for absent in ("ic_online_wall_ms", "rho_online_wall_ms", "ic_online_phase_ms", "online_interval"):
+            self.assertNotIn(absent, vs_rho)
+
+    def test_rss_model_covers_measured_peaks_and_the_table_doubling(self) -> None:
+        # Measured n=61 IC peaks (GiB) from the 1,024/4,096-target tunes, 2026-10-01.
+        measured = {400: 1.23, 500: 1.35, 600: 2.51, 700: 2.68, 800: 4.89, 1000: 5.39, 1200: 10.00}
+        for k, gib in measured.items():
+            ratio = lab.estimate_ic_rss_bytes(self.beat, k) / 2**30 / gib
+            self.assertTrue(1.0 <= ratio <= 1.05, (k, ratio))
+        self.assertLess(lab.estimate_ic_rss_bytes(self.beat, 1480), 12 * 2**30)
+        self.assertGreater(lab.estimate_ic_rss_bytes(self.beat, 1500), 19 * 2**30)
+        legacy = {key: value for key, value in self.beat.items() if key != "ic_rss_model"}
+        legacy["ic_bytes_per_regular_state"] = 94
+        self.assertEqual(lab.estimate_ic_rss_bytes(legacy, 1000), 94 * 61 * 1000 * 1000)
+
+    def test_panel_resume_needs_an_existing_run(self) -> None:
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--resume", "no-such-run"])
+        with self.assertRaisesRegex(lab.AutolabError, "no run to resume"):
+            lab.launch_panel(args)
+
+
+class SingleTargetPanelTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_single_target"
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        import single_target_panel
+
+        cls.stp = single_target_panel
+        cls.protocol = lab.load_protocol()
+        cls.ledger = lab.load_ledger(cls.protocol)
+        cls.beat = cls.protocol["beats"][cls.BEAT]
+        cls.curve = single_target_panel.cached_curve(cls.beat["curve_fixture"])
+
+    def test_beat_is_one_target_against_strong_rho(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "single_target_panel")
+        self.assertEqual(self.beat["stage"], "vs_rho")
+        self.assertEqual(self.beat["panel_producers"]["rho"]["env"]["KIC_RHO_RUNG"], "3")
+        for producer in list(self.beat["panel_producers"].values()) + list(self.beat["frozen_originals"].values()):
+            self.assertTrue((lab.REPO / producer["source"]).is_file(), producer["source"])
+        self.assertNotEqual(self.beat["panel_producers"]["ic"]["source"], self.beat["frozen_originals"]["ic"]["source"])
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+
+    def test_other_launchers_reject_the_beat(self) -> None:
+        with self.assertRaisesRegex(lab.AutolabError, "launch-single"):
+            lab.launch(lab.parser().parse_args(["launch", "--beat", self.BEAT]))
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(lab.parser().parse_args(["launch-panel", "--beat", self.BEAT]))
+        args = lab.parser().parse_args(["launch-single", "--beat", self.BEAT, "--workloads", "4"])
+        with self.assertRaisesRegex(lab.AutolabError, ">= 16"):
+            self.stp.launch_single(args, lab)
+
+    def test_public_points_are_deterministic_subgroup_points(self) -> None:
+        domain = self.beat["target_law"]["domain"]
+        first = self.stp.public_point(self.curve, domain, "eval", 0)
+        self.assertEqual(first, self.stp.public_point(self.curve, domain, "eval", 0))
+        self.assertNotEqual(first, self.stp.public_point(self.curve, domain, "tune", 0))
+        self.assertIsNone(self.curve.mul(first, self.curve.r))
+        self.assertEqual(self.curve.decode(list(first)), first)
+
+    def test_replay_checks_digest_scalar_and_relation(self) -> None:
+        scalar = 987654321
+        target = list(self.curve.mul(self.curve.g, scalar))
+        fixture = dict(self.beat["curve_fixture"], targets=[[str(v) for v in target]])
+        generator = [int(v) for v in fixture["generator"]]
+        cert = {"arm": "rho", "curve_id": "c", "generator": generator, "target": target, "scalar": scalar}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cert.json"
+            path.write_bytes(self.stp.identity.canonical(cert) + b"\n")
+            digest = self.stp.identity.sha256(cert)
+            self.assertTrue(self.stp.replay_certificate(path, digest, fixture, None)["statement_holds"])
+            self.assertFalse(self.stp.replay_certificate(path, "0" * 64, fixture, None)["statement_holds"])
+            points = [self.curve.mul(self.curve.g, s) for s in (11, 22, 33)]
+            last = self.curve.add(self.curve.neg(self.curve.add(self.curve.add(points[0], points[1]), points[2])),
+                                  tuple(target))
+            base = points + [last]
+            ic = {"arm": "ic", "curve_id": "c", "generator": generator, "target": target, "scalar": scalar,
+                  "relation": {"base_hash": "b", "point_indices": [0, 1, 2, 3], "x_codes": [p[0] for p in base]}}
+            path.write_bytes(self.stp.identity.canonical(ic) + b"\n")
+            replay = self.stp.replay_certificate(path, self.stp.identity.sha256(ic), fixture, base)
+            self.assertTrue(replay["statement_holds"], replay)
+            replay = self.stp.replay_certificate(path, self.stp.identity.sha256(ic), fixture, base[:3] + [points[0]])
+            self.assertFalse(replay["checks"]["relation_sums_to_target"])
+
+    def test_untimed_view_drops_timers_only(self) -> None:
+        record = {"kind": "k", "probes": 3, "online_ms": 1.0, "target_generation_ms_excluded": 0.1,
+                  "online_start_ns": 5, "online_stop_event": "e", "relation_checks": 1}
+        self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
 
 
 if __name__ == "__main__":

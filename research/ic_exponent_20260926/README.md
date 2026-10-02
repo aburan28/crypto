@@ -12,7 +12,7 @@ page panel is `#koblitz-exponent-20260926` in
 
 - **No crossing.**
   - Across nine sizes from `r = 2^18` to `2^47.2`, the thread sits
-    4.86× [4.21, 5.55] batch rho at its best (`K_0/GF(2^41)`, `2^39`).
+    4.86× [4.21, 5.55] batch rho at its best (`icv1-f2m41-tm2308219-7f48b14a`, `2^39`).
   - It sits 24.8× at `2^18` and 13.6× at `2^47.2`.
 - **The page's `r^{1/6}` law, carried from §19.5's 6.38×, is falsified at
   the small end.** It predicted 0.8–1.2× below `2^25`, and the thread

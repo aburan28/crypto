@@ -1241,6 +1241,22 @@ pub fn ladder_measure(
     d_max: u32,
     ffd_max: u32,
 ) -> Option<LadderDraw> {
+    ladder_measure_from(n, basis, x_r, 1, d_max, ffd_max)
+}
+
+/// [`ladder_measure`] with the degree scan starting at `d_min`, for a draw
+/// whose lower degrees are already measured not to resolve (a committed
+/// run of the same draw).  `Resolved { degree }` is then the exact
+/// resolving degree and `AtLeast(d_max + 1)` the bound, as before.
+pub fn ladder_measure_from(
+    n: u32,
+    basis: &[F2mElement],
+    x_r: &F2mElement,
+    d_min: u32,
+    d_max: u32,
+    ffd_max: u32,
+) -> Option<LadderDraw> {
+    use crate::cryptanalysis::koblitz_groebner::solving_degree_from;
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
     let started = Instant::now();
     let irr = find_irreducible_sparse(n)?;
@@ -1254,7 +1270,7 @@ pub fn ladder_measure(
         LadderOutcome::Satisfiable
     } else {
         ffd = first_fall_degree(&sys.equations, sys.n_vars, ffd_max).0;
-        let (d, profs) = solving_degree(&sys.equations, sys.n_vars, d_max);
+        let (d, profs) = solving_degree_from(&sys.equations, sys.n_vars, d_min, d_max);
         let built = profs.last().map(|p| p.degree);
         match d {
             Some(degree) => LadderOutcome::Resolved {
@@ -1415,6 +1431,29 @@ pub struct RefutationProfile {
     pub vanished: usize,
     pub linear_rows: usize,
     pub max_weight: usize,
+}
+
+/// For one degree of one ladder draw (arguments as in
+/// [`ladder_refutation_profile`]): the Macaulay rows, the rows the F5
+/// criterion keeps, and the milliseconds evaluating the criterion and
+/// counting took.  Nothing is eliminated.
+pub fn ladder_f5_row_counts(
+    n: u32,
+    basis: &[u64],
+    x_r: u64,
+    degree: u32,
+) -> Option<(usize, usize, f64)> {
+    use crate::cryptanalysis::koblitz_groebner::f5_row_counts;
+    use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+
+    let irr = find_irreducible_sparse(n)?;
+    let st = FieldStructure::new(n, &irr);
+    let elem = |w: u64| F2mElement::from_biguint(&BigUint::from(w), n);
+    let basis: Vec<F2mElement> = basis.iter().map(|&w| elem(w)).collect();
+    let sys = build_decomposition_system(&basis, &elem(x_r), &F2mElement::one(n), 3, &st)?;
+    let t0 = Instant::now();
+    let (full, kept) = f5_row_counts(&sys.equations, sys.n_vars, degree)?;
+    Some((full, kept, t0.elapsed().as_secs_f64() * 1e3))
 }
 
 /// Profile one degree of one ladder draw.  `basis` and `x_r` are the
@@ -1770,6 +1809,189 @@ mod tests {
             }
         }
         assert!(compared >= 100, "only {compared} comparisons ran");
+    }
+
+    /// The budgeted dense finish is the sparse path with a different switch
+    /// point: at every budget from nothing to unlimited it finds the same
+    /// high rank and the same linear span, and it switches after the leading
+    /// band when the budget is unlimited, and not before the linear boundary
+    /// when the budget is zero.
+    #[test]
+    fn budgeted_dense_finish_matches_the_sparse_path() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            build_macaulay_sparse, rref_f2, system_degree,
+        };
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{
+            band_ends, eliminate_high_columns, eliminate_high_columns_dense_finish_budgeted,
+            leading_band_end, low_column_start,
+        };
+
+        let span = |rows: &[Vec<u32>], low: usize, n_cols: usize| -> Vec<Vec<u64>> {
+            let width = n_cols - low;
+            let mut m: Vec<Vec<u64>> = rows
+                .iter()
+                .map(|r| {
+                    let mut bits = vec![0u64; width.div_ceil(64).max(1)];
+                    for &c in r {
+                        let k = c as usize - low;
+                        bits[k / 64] |= 1 << (k % 64);
+                    }
+                    bits
+                })
+                .collect();
+            let rank = if m.is_empty() {
+                0
+            } else {
+                rref_f2(&mut m, width)
+            };
+            m.truncate(rank);
+            m
+        };
+
+        let mut rng = StdRng::seed_from_u64(0xB0D6_E7);
+        let mut compared = 0;
+        for (n, ell, d_top) in [(5u32, 2usize, 6u32), (7, 3, 5), (4, 3, 6)] {
+            for _ in 0..3 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let sys =
+                    build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                for degree in system_degree(&sys.equations)..=d_top {
+                    let Some((cols, rows)) =
+                        build_macaulay_sparse(&sys.equations, sys.n_vars, degree)
+                    else {
+                        continue;
+                    };
+                    let low = low_column_start(&cols);
+                    let ends = band_ends(&cols);
+                    let want = eliminate_high_columns(rows.clone(), cols.len(), low);
+                    for budget in [0u64, 1 << 10, 1 << 16, u64::MAX] {
+                        let got = eliminate_high_columns_dense_finish_budgeted(
+                            rows.clone(),
+                            cols.len(),
+                            low,
+                            &ends,
+                            budget,
+                        );
+                        assert_eq!(got.high_rank, want.high_rank, "({n}, {ell}) d {degree}");
+                        assert_eq!(
+                            span(&got.linear_rows, low, cols.len()),
+                            span(&want.linear_rows, low, cols.len()),
+                            "({n}, {ell}) degree {degree} budget {budget}"
+                        );
+                        assert_eq!(
+                            got.high_rank + got.vanished + got.linear_rows.len(),
+                            rows.len()
+                        );
+                        let from = got.dense_from.expect("the dense finish records its switch");
+                        assert!(from == low || ends.contains(&from));
+                        if budget == u64::MAX && low > 0 {
+                            assert_eq!(from, leading_band_end(&cols).min(low));
+                        }
+                        if budget == 0 {
+                            assert!(from == low || want.linear_rows.is_empty() || from >= ends[0]);
+                        }
+                        compared += 1;
+                    }
+                }
+            }
+        }
+        assert!(compared >= 60, "only {compared} comparisons ran");
+    }
+
+    /// The F5-pruned sparse Macaulay matrix has the full one's columns,
+    /// high rank and linear span, with fewer rows: dropping rows the
+    /// criterion proves redundant never changes a refutation.
+    #[test]
+    fn f5_rows_keep_the_sparse_refutation() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            build_macaulay_sparse, build_macaulay_sparse_f5, rref_f2, system_degree,
+        };
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+        let span = |rows: &[Vec<u32>], low: usize, n_cols: usize| -> Vec<Vec<u64>> {
+            let width = n_cols - low;
+            let mut m: Vec<Vec<u64>> = rows
+                .iter()
+                .map(|r| {
+                    let mut bits = vec![0u64; width.div_ceil(64).max(1)];
+                    for &c in r {
+                        let k = c as usize - low;
+                        bits[k / 64] |= 1 << (k % 64);
+                    }
+                    bits
+                })
+                .collect();
+            let rank = if m.is_empty() {
+                0
+            } else {
+                rref_f2(&mut m, width)
+            };
+            m.truncate(rank);
+            m
+        };
+
+        let mut rng = StdRng::seed_from_u64(0xF5_0B0E);
+        let (mut compared, mut pruned) = (0, 0usize);
+        for (n, ell, d_top) in [(5u32, 2usize, 6u32), (7, 3, 6), (4, 3, 6), (8, 4, 5)] {
+            for _ in 0..3 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let sys =
+                    build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                for degree in system_degree(&sys.equations)..=d_top {
+                    let (Some((cols, rows)), Some((f5_cols, f5_rows))) = (
+                        build_macaulay_sparse(&sys.equations, sys.n_vars, degree),
+                        build_macaulay_sparse_f5(&sys.equations, sys.n_vars, degree),
+                    ) else {
+                        continue;
+                    };
+                    assert_eq!(f5_cols, cols, "({n}, {ell}) degree {degree}");
+                    assert!(f5_rows.len() <= rows.len());
+                    pruned += rows.len() - f5_rows.len();
+                    let low = low_column_start(&cols);
+                    let want = eliminate_high_columns(rows, cols.len(), low);
+                    let got = eliminate_high_columns(f5_rows, cols.len(), low);
+                    assert_eq!(
+                        got.high_rank, want.high_rank,
+                        "({n}, {ell}) degree {degree}"
+                    );
+                    assert_eq!(
+                        span(&got.linear_rows, low, cols.len()),
+                        span(&want.linear_rows, low, cols.len()),
+                        "({n}, {ell}) degree {degree}"
+                    );
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared >= 30, "only {compared} comparisons ran");
+        assert!(pruned > 0, "the criterion pruned nothing");
+    }
+
+    /// `ladder_measure_from` gives the same outcome as `ladder_measure` when
+    /// the degrees it skips do not resolve, and it builds none of them.
+    #[test]
+    fn measuring_from_a_higher_degree_skips_only_non_resolving_degrees() {
+        // (7, 2) has surplus +1, so most draws are refuted, at degree 5.
+        let mut rng = StdRng::seed_from_u64(0xD_A1A);
+        let mut checked = 0;
+        for _ in 0..40 {
+            let (basis, x_r) = ladder_sample(7, 2, &mut rng);
+            let full = ladder_measure(7, &basis, &x_r, 6, 4).unwrap();
+            let LadderOutcome::Resolved { degree, .. } = full.outcome else {
+                continue;
+            };
+            let from = ladder_measure_from(7, &basis, &x_r, degree, 6, 4).unwrap();
+            assert_eq!(from.outcome, full.outcome);
+            assert_eq!(from.ffd, full.ffd);
+            checked += 1;
+        }
+        assert!(checked >= 6, "only {checked} draws resolved");
     }
 
     /// A draw with solutions is never sent to the Macaulay path, and a

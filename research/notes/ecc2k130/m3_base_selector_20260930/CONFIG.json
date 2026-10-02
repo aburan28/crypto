@@ -1,0 +1,37 @@
+{
+  "schema": "ecc2k130-degree7-m3-base-selector-protocol-v1",
+  "pre_outcome": true,
+  "reference_result_sha256": "f0cb3c18dac3b01da91892a3fb4ecb9c77f9fbab86ccc6b38f6343d5738989aa",
+  "field_degree": 21,
+  "field_modulus_hex": "0x200005",
+  "source_curve": "y^2+xy=x^3+1",
+  "subgroup_order": 421,
+  "cofactor": 4988,
+  "isogeny_degree": 7,
+  "arity": 3,
+  "base_size": 8,
+  "source_signed_orbit_quota": 2,
+  "source_signed_orbits": "first four sorted nonzero source signed-Frobenius orbit IDs",
+  "base_seeds": [2026100101, 2026100102, 2026100103, 2026100104],
+  "candidates_per_role_seed": 2,
+  "holdouts": ["A", "B"],
+  "accepted_relation_targets_per_holdout": 512,
+  "max_target_draws_per_holdout": 8192,
+  "max_base_x_trials_per_candidate": 4096,
+  "producer_wall_cap_seconds": 240,
+  "verifier_wall_cap_seconds": 360,
+  "process_rss_cap_bytes": 1073741824,
+  "labels": {
+    "secret": "degree7-m3-base-selector-secret-v1",
+    "base": "degree7-m3-base-selector-base-v1|seed|source-or-leaf|candidate|trial",
+    "target": "degree7-m3-base-selector-target-v1|holdout|trial|u-or-v"
+  },
+  "source_lock_required_before_fixture_generation": true,
+  "score": {
+    "universe": "all 420 nonzero source subgroup points",
+    "pair_additions_per_candidate": 36,
+    "third_additions_per_candidate": 288,
+    "eligible_base_row_rank": 8,
+    "order": "eligible rank8 first; maximum distinct three-sum support; maximum distinct first-witness base rows; lower candidate index"
+  }
+}

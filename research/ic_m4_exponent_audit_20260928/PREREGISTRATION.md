@@ -28,13 +28,13 @@ It is Weil-descended to a Boolean system with `4ℓ + 2n` unknowns and `3n` cubi
 
   | cell | `#E` | why it fails |
   |:--|:--|:--|
-  | `K_0/2^11` | 2116 = 2²·23² | `23² ∣ #E` |
-  | `K_0/2^17` | 130972 = 2²·137·239 | `r = 239 < h = 548` |
-  | `K_1/2^13` | 8374 = 2·53·79 | `r = 79 < h = 106` |
+  | `icv1-f2m11-tm67-f393fc83` | 2116 = 2²·23² | `23² ∣ #E` |
+  | `icv1-f2m17-t101-e6c4b64d` | 130972 = 2²·137·239 | `r = 239 < h = 548` |
+  | `icv1-f2m13-tm181-25e736d2` | 8374 = 2·53·79 | `r = 79 < h = 106` |
 
   They are not run and not censored: they are absent. **Nine cells remain**, and every `n`
   in the grid has at least one curve:
-  `K_0/2^{9,13,15,19}` and `K_1/2^{9,11,15,17,19}`.
+  `icv1-f2m9-t5-81e744be`, `icv1-f2m13-t181-515ee569`, `icv1-f2m15-tm275-2d22ff5d`, `icv1-f2m19-t797-b6cf2467` and `icv1-f2m9-tm5-4a3ea183`, `icv1-f2m11-t67-05f5aa36`, `icv1-f2m15-t275-b7f03703`, `icv1-f2m17-tm101-00378d4e`, `icv1-f2m19-tm797-9c54981b`.
 - **Factor base.** `F = {P : x(P) ∈ V}`, with `V` a uniformly random `ℓ`-dimensional
   `F_2`-subspace of `F_{2^n}` and `ℓ = round(n/4) = ⌊(n+2)/4⌋`, giving 2, 3, 3, 4, 4, 5.
   `V` is drawn exactly as `examples/dreg_ladder.rs` draws it (`random_subspace_basis`,
@@ -49,21 +49,21 @@ It is Weil-descended to a Boolean system with `4ℓ + 2n` unknowns and `3n` cubi
 
   | cell | proper intermediate subfields over `GF(2)` | `r` | `h` | `ℓ` | unknowns | `|F|` |
   |:--|:--|--:|--:|--:|--:|--:|
-  | `K_0/2^9` | `GF(2^3)` | 127 | 4 | 2 | 26 | 3 |
-  | `K_0/2^13` | none | 2,003 | 4 | 3 | 38 | 11 |
-  | `K_0/2^15` | `GF(2^3)`, `GF(2^5)` | 751 | 44 | 4 | 46 | 11 |
-  | `K_0/2^19` | none | 130,873 | 4 | 5 | 58 | 25 |
-  | `K_1/2^9` | `GF(2^3)` | 37 | 14 | 2 | 26 | 1 |
-  | `K_1/2^11` | none | 991 | 2 | 3 | 34 | 11 |
-  | `K_1/2^15` | `GF(2^3)`, `GF(2^5)` | 211 | 154 | 4 | 46 | 13 |
-  | `K_1/2^17` | none | 65,587 | 2 | 4 | 50 | 21 |
-  | `K_1/2^19` | none | 262,543 | 2 | 5 | 58 | 31 |
+  | `icv1-f2m9-t5-81e744be` | `GF(2^3)` | 127 | 4 | 2 | 26 | 3 |
+  | `icv1-f2m13-t181-515ee569` | none | 2,003 | 4 | 3 | 38 | 11 |
+  | `icv1-f2m15-tm275-2d22ff5d` | `GF(2^3)`, `GF(2^5)` | 751 | 44 | 4 | 46 | 11 |
+  | `icv1-f2m19-t797-b6cf2467` | none | 130,873 | 4 | 5 | 58 | 25 |
+  | `icv1-f2m9-tm5-4a3ea183` | `GF(2^3)` | 37 | 14 | 2 | 26 | 1 |
+  | `icv1-f2m11-t67-05f5aa36` | none | 991 | 2 | 3 | 34 | 11 |
+  | `icv1-f2m15-t275-b7f03703` | `GF(2^3)`, `GF(2^5)` | 211 | 154 | 4 | 46 | 13 |
+  | `icv1-f2m17-tm101-00378d4e` | none | 65,587 | 2 | 4 | 50 | 21 |
+  | `icv1-f2m19-tm797-9c54981b` | none | 262,543 | 2 | 5 | 58 | 31 |
 
   The anchors `n = 9, 15` are composite. Their subfield structure and large cofactors are
   disclosed confounds (§10). No arm uses a subfield.
 
   The Semaev system is `x`-only. Its cost depends on `V` and `x_R`, not on `|F|`. The
-  `K_1/2^9` base is a single point, the 2-torsion point: every target there is refuted, but
+  `icv1-f2m9-tm5-4a3ea183` base is a single point, the 2-torsion point: every target there is refuted, but
   the system is still well defined and is still decided.
 - **Targets.** 16 per cell, uniform and natural (unplanted): `R = [k]G` with
   `k = 1 + (u mod (r−1))`, where `u` is the first `u64` of
@@ -119,7 +119,7 @@ The engine is the inherited F4 with the interleaved chain order and linear elimi
 | `semaev` (primary) | `groebner_decompose` on the chained system. Ground truth comes from exhaustive enumeration, uncharged; a returned decomposition is re-added in the group. | 64-bit word XORs in the Macaulay eliminations (`f4_profile().word_ops`, reset per target) | 16 |
 | `enumerate` (null 1) | the library's exhaustive `decompose` (non-decreasing index tuples, depth first, stop at the first) with every point addition counted | point additions | 16 |
 | `null` (null 2) | `koblitz_bench::random_control_system(n_vars, n_eqs, degree, mean terms/eq, seed_t)`, taking the target's own Semaev system's unknown count, equation count, degree (3) and density. It is solved by the same engine, options and node budget in natural variable order, with every root rejected (a full-tree search, the refutation analogue). `seed_t = cell_seed ^ 0x0C017201·(t+1)` | word XORs | 8 (the first 8 targets) |
-| `degree` (secondary) | exact Boolean root count of the chained system (`O(2^{2ℓ+n})`), cross-checked against the engine's own full-tree root count. On the first 4 targets with no root: `solving_degree` in natural layout up to `d_max = 6`, with the `dreg_ladder` caps (`F4_F2_MAX_ROWS=F4_F2_MAX_COLS=50000000`) | refutation degree `D`: resolved, `≥ d_max+1`, or caps | 16 counted, ≤ 4 measured; cells `K_0/2^9`, `K_1/2^9`, `K_1/2^11`, `K_0/2^13` (`ℓ = 2, 2, 3, 3`) |
+| `degree` (secondary) | exact Boolean root count of the chained system (`O(2^{2ℓ+n})`), cross-checked against the engine's own full-tree root count. On the first 4 targets with no root: `solving_degree` in natural layout up to `d_max = 6`, with the `dreg_ladder` caps (`F4_F2_MAX_ROWS=F4_F2_MAX_COLS=50000000`) | refutation degree `D`: resolved, `≥ d_max+1`, or caps | 16 counted, ≤ 4 measured; cells `icv1-f2m9-t5-81e744be`, `icv1-f2m9-tm5-4a3ea183`, `icv1-f2m11-t67-05f5aa36`, `icv1-f2m13-t181-515ee569` (`ℓ = 2, 2, 3, 3`) |
 
 The null has 8 targets rather than 16 for a reason. The smoke target (§9) was censored at
 the full 20,000-node budget already at `n = 9`, so the null is expected to censor. Eight
@@ -145,7 +145,7 @@ before any audit cell ran.
   - the satisfiable-only medians. They are fitted only if every retained cell has at least 3
     satisfiable targets. The expected yield is `C(|F|+3,4)/#E`, well under 1 in 16 on most
     cells, so no fit is expected;
-  - a prime-`n`-only fit (`K_0/2^{13,19}`, `K_1/2^{11,17,19}`), read with the same rule. It
+  - a prime-`n`-only fit (`icv1-f2m13-t181-515ee569`, `icv1-f2m19-t797-b6cf2467`, `icv1-f2m11-t67-05f5aa36`, `icv1-f2m17-tm101-00378d4e`, `icv1-f2m19-tm797-9c54981b`), read with the same rule. It
     cannot change the verdict. If its reading differs from the primary one, the difference
     is reported.
 - **Units.** Word operations are not converted to group operations. The conversion is a
@@ -163,10 +163,10 @@ The frozen cells the survey names were re-run through `groebner_stage_bench` bui
 
 | cell | arm | `tables.md` (frozen) | rerun | verdict digest |
 |:--|:--|--:|--:|:--|
-| `K_0/2^9` m=4 (chain) | reference | 2,868,312 | **2,868,312** | `7b29f94a…` = |
-| `K_0/2^9` m=4 (chain) | candidate | 917,450 | **917,450** | `85f028df…` = |
-| `K_1/2^15` m=4 (chain-holdout) | reference | 345,384,853 | **345,384,853** | `f859ba30…` = |
-| `K_1/2^15` m=4 (chain-holdout) | candidate | 39,537,587 | **39,537,587** | `edbe5196…` = |
+| `icv1-f2m9-t5-81e744be` m=4 (chain) | reference | 2,868,312 | **2,868,312** | `7b29f94a…` = |
+| `icv1-f2m9-t5-81e744be` m=4 (chain) | candidate | 917,450 | **917,450** | `85f028df…` = |
+| `icv1-f2m15-t275-b7f03703` m=4 (chain-holdout) | reference | 345,384,853 | **345,384,853** | `f859ba30…` = |
+| `icv1-f2m15-t275-b7f03703` m=4 (chain-holdout) | candidate | 39,537,587 | **39,537,587** | `edbe5196…` = |
 
 All 14 rows of the two ladders, not only these four, match the frozen rep-1 `stage.json`
 exactly in:
@@ -184,13 +184,13 @@ built at `1722bad1`, with the same three policy variables, gives different total
 
 | cell | arm | frozen | branch head |
 |:--|:--|--:|--:|
-| `K_0/2^9` m=4 | reference | 2,868,312 | 595,511 |
-| `K_0/2^9` m=4 | candidate | 917,450 | 294,112 |
-| `K_1/2^15` m=4 | reference | 345,384,853 | 83,790,974 |
-| `K_1/2^15` m=4 | candidate | 39,537,587 | 27,620,511 |
+| `icv1-f2m9-t5-81e744be` m=4 | reference | 2,868,312 | 595,511 |
+| `icv1-f2m9-t5-81e744be` m=4 | candidate | 917,450 | 294,112 |
+| `icv1-f2m15-t275-b7f03703` m=4 | reference | 345,384,853 | 83,790,974 |
+| `icv1-f2m15-t275-b7f03703` m=4 | candidate | 39,537,587 | 27,620,511 |
 
 - The decomposed counts are the same.
-- On `K_0/2^9` the candidate's F4 call count is the same but the verdict digest differs: a
+- On `icv1-f2m9-t5-81e744be` the candidate's F4 call count is the same but the verdict digest differs: a
   different decomposition is found.
 - The cause: after `2809b498`, 20 commits, merges included, touched the engine sources
   (`koblitz_groebner.rs`, `inherited_f4.rs`, `pq_groebner_f2.rs`, `polynomial_reuse.rs`).
@@ -335,7 +335,7 @@ The `degree` cells add `ulimit -v 10000000`, `F4_F2_MAX_ROWS=50000000 F4_F2_MAX_
 
 - **Expected, a model and not a measurement:**
   - `semaev`: about 1–2 min, if the frozen readout's ≈0.8 bits per unit `n` holds. That puts
-    `n = 19` at about 1 s per target, from 0.115 s per target on the frozen `K_1/2^15` m=4
+    `n = 19` at about 1 s per target, from 0.115 s per target on the frozen `icv1-f2m15-t275-b7f03703` m=4
     cell. At 2 bits per unit `n` the `n = 19` cells run into their limits, about 20 min.
   - `null`: about 10–18 min. Most cells are expected to hit the 120 s limit or censor at
     20,000 nodes; the smoke target used 1.2 s at `n = 9`.
@@ -347,7 +347,7 @@ The `degree` cells add `ulimit -v 10000000`, `F4_F2_MAX_ROWS=50000000 F4_F2_MAX_
 
 ## 9. Smoke (phase 1; labelled `smoke`; not data)
 
-One target through each arm, at `K_0/2^9` with seed 7: `ℓ = 2`, `V = [113, 44]`, `|F| = 3`,
+One target through each arm, at `icv1-f2m9-t5-81e744be` with seed 7: `ℓ = 2`, `V = [113, 44]`, `|F| = 3`,
 target `k = 24`, 26 unknowns, 27 equations, degree 3, 54 terms per equation. Files are in
 `smoke/`.
 
@@ -442,7 +442,7 @@ Only whitespace and line breaks changed; no token did.
 - **Unchanged:** `groebner_stage_bench-2809b498` (`95565496…7fc5`) and `Cargo.lock.pinned`
   (`469209e8…a869`).
 - **Behaviour checked equal.** The new binary re-ran the §9 smoke targets for `semaev`,
-  `enumerate` and `null` (seed 7, `K_0/2^9`). Every field of every report equals the
+  `enumerate` and `null` (seed 7, `icv1-f2m9-t5-81e744be`). Every field of every report equals the
   committed `smoke/` output except `secs`, the wall time. That includes word operations, F4
   calls, matrix rows and columns, reductions, splits, verdicts and the null's censoring
   point.

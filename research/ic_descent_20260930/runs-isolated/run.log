@@ -1,0 +1,176 @@
+== manifest
+{
+ "commit": "6029f7beb1aa18066032e6ca01fbe5a78101a363",
+ "tree_status": "",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16480972 kB",
+ "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "binaries": {
+  "baseline": {
+   "ic_sha256": "07e527a4d9339e54020db55b5477a95f472b6abb6e6969ed1c003d48e7ee2612",
+   "probe_sha256": "75e59a8646be792a7b364f0062c516ee766d3511fddb12c0e49bc1de4758f711",
+   "built_from": "57e7ce3a"
+  },
+  "candidate": {
+   "ic_sha256": "d390908ae8501426b51c8ba5f7a84e41f23107de9071c5663a2c3b0b361a9886",
+   "probe_sha256": "4caa046cc7fdc6e639ff6977e036261bea61ca19c883d2e49f0085dd7af53c7e",
+   "built_from": "20ff4765"
+  },
+  "copy": {
+   "ic_sha256": "07e527a4d9339e54020db55b5477a95f472b6abb6e6969ed1c003d48e7ee2612",
+   "built_from": "57e7ce3a (byte-identical copy of the baseline)"
+  }
+ },
+ "build": "cargo build --release --bin ic --example koblitz_descent_prices, clean tree, rustc above",
+ "uptime": "04:55:42 up  1:35,  0 user,  load average: 0.01, 0.52, 1.04",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+ "pinning": "tools/isolated_bench.py run --wait: RAYON_NUM_THREADS=1 on CPU 2; the thread check RAYON_NUM_THREADS=3 on CPUs 1-3; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI some avg10 at most 5)",
+ "isolation_tool": {
+  "path": "tools/isolated_bench.py",
+  "sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+ },
+ "smt_siblings": {
+  "0": "0",
+  "1": "1",
+  "2": "2",
+  "3": "3"
+ }
+}
+== inputs
+inputs: all 36 match inputs.sha256
+== aa
+k1n19 M1: A/A done
+k1n23 M1: A/A done
+k1n45 M1: A/A done
+k0n37 M1: A/A done
+k1n43 M1: A/A done
+k1n47 M1: A/A done
+k0n41 M1: A/A done
+k0n53 M1: A/A done
+k0n61 M1: A/A done
+== main
+main/k1n19/M1 r5: contended, slot run again
+k1n19 M1: A/A spread 1.112
+k1n19 M2: A/A spread 1.028
+k1n19 M3: A/A spread 1.019
+k1n19 M4: A/A spread 1.020
+k1n23 M1: A/A spread 1.027
+k1n23 M2: A/A spread 1.018
+k1n23 M3: A/A spread 1.041
+k1n23 M4: A/A spread 1.029
+k1n45 M1: A/A spread 1.022
+== resumed 05:59:35Z (harness restarted detached; the previous invocation was stopped between processes)
+== manifest
+/tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/runs-isolated/host.json exists; not overwritten
+== inputs
+inputs: all 36 match inputs.sha256
+== aa
+k1n19 M1: A/A done
+k1n23 M1: A/A done
+k1n45 M1: A/A done
+k0n37 M1: A/A done
+k1n43 M1: A/A done
+k1n47 M1: A/A done
+k0n41 M1: A/A done
+k0n53 M1: A/A done
+k0n61 M1: A/A done
+== main
+main/k1n19/M1 r5: contended, slot run again
+k1n19 M1: A/A spread 1.112
+k1n19 M2: A/A spread 1.028
+k1n19 M3: A/A spread 1.019
+k1n19 M4: A/A spread 1.020
+k1n23 M1: A/A spread 1.027
+k1n23 M2: A/A spread 1.018
+k1n23 M3: A/A spread 1.041
+k1n23 M4: A/A spread 1.029
+k1n45 M1: A/A spread 1.022
+k1n45 M2: A/A spread 1.060
+k1n45 M3: A/A spread 1.059
+k1n45 M4: A/A spread 1.032
+k0n37 M1: A/A spread 1.131
+k0n37 M2: A/A spread 1.004
+k0n37 M3: A/A spread 1.001
+k0n37 M4: A/A spread 1.022
+k1n43 M1: A/A spread 1.025
+k1n43 M2: A/A spread 1.022
+k1n43 M3: A/A spread 1.025
+k1n43 M4: A/A spread 1.091
+k1n47 M1: A/A spread 1.089
+k1n47 M2: A/A spread 1.048
+k1n47 M3: A/A spread 1.048
+k1n47 M4: A/A spread 1.091
+k0n41 M1: A/A spread 1.134
+k0n41 M2: A/A spread 1.220
+k0n41 M3: A/A spread 1.256
+k0n41 M4: A/A spread 1.201
+k0n53 M1: A/A spread 1.136
+k0n53 M2: A/A spread 1.123
+k0n53 M3: A/A spread 1.089
+k0n53 M4: A/A spread 1.100
+k0n61 M1: A/A spread 1.084
+k0n61 M2: A/A spread 1.118
+k0n61 M3: A/A spread 1.096
+k0n61 M4: A/A spread 1.091
+== rho
+{
+ "control": "baseline batch rho counts == \u00a720's at k0n41 M1",
+ "pass": true,
+ "report": "k0n41-M1-baseline.price.json",
+ "clean": true,
+ "compared": {
+  "gae": true,
+  "setup_gae": true,
+  "steps_per_target": true,
+  "counters": true,
+  "solved_by": true,
+  "recovered": true,
+  "all_verified": true,
+  "agrees_with_expected": true
+ },
+ "s_priced_per_target": {
+  "s20": 0.061012588579277605,
+  "baseline": 0.05998919642099657
+ },
+ "pipeline_counts_equal_s20": true,
+ "pipeline_recovered_equal_s20": true
+}
+== threads
+k0n41 M1: three threads done
+== probe
+k1n19-M1-baseline.json
+k1n19-M1-candidate.json
+k1n23-M1-baseline.json
+k1n23-M1-candidate.json
+k1n45-M1-baseline.json
+k1n45-M1-candidate.json
+k0n37-M1-baseline.json
+k0n37-M1-candidate.json
+k1n43-M1-baseline.json
+k1n43-M1-candidate.json
+k0n41-M1-baseline.json
+k0n41-M1-candidate.json

@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "bytes": 749,
+    "path": "metrics.json",
+    "sha256": "24d38ab5b8a7d20ae6cfc963f7f2d43d613f6cc954c6f2c36747cc4353c212eb"
+  },
+  "process": {
+    "command": [
+      "/bin/cp",
+      "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-run-successor-01-20260910/tool-builds/wdsat/build/src/config.h",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/input/wdsat-config.h"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1261568,
+    "pid": 83296,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001272,
+    "timed_out": false,
+    "total_core_seconds": 0.001784,
+    "user_seconds": 0.000512,
+    "wall_seconds": 0.021280958,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

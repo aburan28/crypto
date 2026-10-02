@@ -1,0 +1,36 @@
+== build 18:43:44 in /tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/r05cand-v1-wt at edcb0bec948ffab566a3c8998dc3c92d52375da2
+    Finished `release` profile [optimized] target(s) in 2m 25s
+== lib tests 18:46:09
+test result: ok. 134 passed; 0 failed; 3 ignored; 0 measured; 3122 filtered out; finished in 17.00s
+== gpu host tests 18:49:39
+gpu host tests start 18:49:39 in /tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/r05cand-v1-wt
+build exit 0
+=== ./test_ecc2k95: exit 0, ALL PASSED
+=== ./test_k23: exit 0, ALL PASSED
+=== ./test_k41: exit 0, ALL PASSED
+=== ./test_pt_ecc2k95: exit 0, field too wide to pack into a u64 (m = 97 > 62); koblitz_fast::FastCurve refuses the same case.
+=== ./test_pt_k23: exit 0, all checks passed (0 failures)
+=== ./test_pt_k41: exit 0, all checks passed (0 failures)
+=== ./test_emu_ecc2k95: exit 0, field too wide to pack into a u64 (m = 97 > 62); neither key is defined here, and koblitz_fast::FastCurve refuses the same case.
+=== ./test_emu_k23: exit 0, all checks passed (0 failures)
+=== ./test_emu_k41: exit 0, all checks passed (0 failures)
+=== roundtrip ===
+cd ../.. && cargo run --release --quiet --example load_fold_table -- \
+  gpu/ecc2k/fold_table_k23.bin gpu/ecc2k/fold_table_k41.bin
+gpu/ecc2k/fold_table_k23.bin: n = 23, 736 points, 6256 stored words, stored state identical to the CPU's; 271216 stored pairs asked, 17661 probes absent from the CPU's table
+  loaded: agrees with the CPU's table on every question, and finds every pair
+  control: one bucket's words in the wrong bucket load, and are caught (740 disagreements, 368 pairs missed)
+gpu/ecc2k/fold_table_k41.bin: n = 41, 1312 points, 11152 stored words, stored state identical to the CPU's; 861328 stored pairs asked, 19999 probes absent from the CPU's table
+  loaded: agrees with the CPU's table on every question, and finds every pair
+  control: one bucket's words in the wrong bucket load, and are caught (1476 disagreements, 738 pairs missed)
+=== tsan ===
+=== ./test_tsan_k23 (ThreadSanitizer) ===
+all checks passed (0 failures)
+=== ./test_tsan_k41 (ThreadSanitizer) ===
+all checks passed (0 failures)
+=== ./test_racy_k23 (every atomic a plain read-modify-write) ===
+reported as a data race in pt_atomic_*, as it must be
+rc=0
+gpu host tests done 18:51:45
+76a2a2fd05acd47d6dc9a0851a013d8056cc9d7d9b7a34320d1d92089a794597  /tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/bin/ic-r05-cand-on-30f6c153-edcb0bec
+23c83a4744a4d3e206a6923db48eb631042ba45c231e088f15824b55fb6ff432  /tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/bin/ic-r03-cand-on-c1a2e5f8-30f6c153

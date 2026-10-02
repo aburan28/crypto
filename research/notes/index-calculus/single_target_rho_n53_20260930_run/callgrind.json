@@ -1,0 +1,59 @@
+{
+  "stage": "callgrind",
+  "runs": [
+    {
+      "tag": "cg_D",
+      "arm": "D",
+      "rc": 0,
+      "wall_s": 203.44267982600002,
+      "user_s": 198.292404,
+      "sys_s": 2.631034,
+      "cpu_s": 200.923438,
+      "maxrss_kb": 1103524,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_D.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_D.stderr",
+      "gate": true,
+      "extra": {
+        "admitted_relations": 95
+      },
+      "Ir": 27067359137
+    },
+    {
+      "tag": "cg_P",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 112.35781077999991,
+      "user_s": 111.028668,
+      "sys_s": 0.181575,
+      "cpu_s": 111.21024299999999,
+      "maxrss_kb": 65840,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_P.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_P.stderr",
+      "gate": true,
+      "extra": {
+        "walk_steps": 369507,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 369507
+      },
+      "Ir": 46908101406
+    },
+    {
+      "tag": "cg_S",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 4.408803929999976,
+      "user_s": 4.323584,
+      "sys_s": 0.04779,
+      "cpu_s": 4.371374,
+      "maxrss_kb": 39584,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_S.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_S.stderr",
+      "gate": true,
+      "extra": {
+        "walk_steps": 470279,
+        "ideal_steps": 558444.48690292
+      },
+      "Ir": 1093432564
+    }
+  ]
+}
