@@ -4,10 +4,11 @@ Status: **native and exact sm_120 compile pass; independent review and device
 execution pending.** No GPU was launched and there is no throughput result.
 
 The protocol was frozen at `18ee85c1075010ce83be60a4a02636e9aa4ac83a`.
-Before compile review, the implementation was merged onto current main
-`6eb3d660a95fc22145154ff53479a7df467cb375`, including the selected GPU-wide
-hint work.  That merge did not change the frozen sigma baseline or candidate
-delta; all native evidence below was regenerated afterward.
+Before device dispatch, the implementation was merged through current main
+`bc217d318dde444014cde4e81dea02c70b126995`, including the selected GPU-wide
+hint evidence and the separate fused shared-scratch static screen.  Those
+merges do not enable either feature in the frozen sigma baseline or candidate;
+all native evidence below was regenerated afterward.
 
 ## Novelty decision
 

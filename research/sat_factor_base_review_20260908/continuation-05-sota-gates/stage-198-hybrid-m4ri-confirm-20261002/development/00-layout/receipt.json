@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "bytes": 700,
+    "path": "metrics.json",
+    "sha256": "4fae468bbe8259f733faabeb2198afc5f8cd2495220fb6ca044648a9f7232864"
+  },
+  "process": {
+    "command": [
+      "/bin/mkdir",
+      "-p",
+      "/Volumes/SSD990/kic-stage198-target-6519bd72b",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/development/confirmation"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1228800,
+    "pid": 88489,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001197,
+    "timed_out": false,
+    "total_core_seconds": 0.001827,
+    "user_seconds": 0.00063,
+    "wall_seconds": 0.029068041,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
