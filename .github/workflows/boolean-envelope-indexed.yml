@@ -1,0 +1,19 @@
+name: Indexed Boolean support envelope
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'research/boolean_envelope_indexed_20261002/**'
+      - '.github/workflows/boolean-envelope-indexed.yml'
+permissions:
+  contents: read
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Frozen math and compatibility controls
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --manifest-path research/boolean_envelope_indexed_20261002/Cargo.toml -- --test-threads=1
