@@ -33,6 +33,14 @@ int main() {
         checked(cudaFuncSetAttribute(selectGlobalHints,cudaFuncAttributeMaxDynamicSharedMemorySize,int(TW_SHARED_BYTES)));
         checked(cudaFuncSetAttribute(resolveGlobalHints,cudaFuncAttributeMaxDynamicSharedMemorySize,int(TW_SHARED_BYTES)));
     }
+    cudaFuncAttributes resolverAttrs{};
+    checked(cudaFuncGetAttributes(&resolverAttrs,resolveGlobalHints));
+    need(resolverAttrs.maxThreadsPerBlock==ECC_TABLE_GLOBAL_HINT_THREADS);
+    need(resolverAttrs.sharedSizeBytes==0);
+    int resolverBlocksPerSm=0;
+    checked(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+        &resolverBlocksPerSm,resolveGlobalHints,ECC_TABLE_GLOBAL_HINT_THREADS,TW_SHARED_BYTES));
+    need(resolverBlocksPerSm>=1);
     std::vector<R::Point> points;
     for(unsigned i=0;i<64;++i)
         points.push_back(R::startPoint(0x5eed0000ull+7919ull*i,sol.basis,sol.target,0,sol.ell,sol.spow));
@@ -85,7 +93,7 @@ int main() {
             checked(cudaMemsetAsync(count,0,4));
             selectGlobalHints<<<(workers+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS,TW_SHARED_BYTES>>>(p,queue+1,count);
             checked(cudaGetLastError());
-            resolveGlobalHints<<<3,128,TW_SHARED_BYTES>>>(p,queue+1,count);
+            resolveGlobalHints<<<3,ECC_TABLE_GLOBAL_HINT_THREADS,TW_SHARED_BYTES>>>(p,queue+1,count);
             checked(cudaGetLastError()); checked(cudaDeviceSynchronize());
             unsigned actualCount; checked(cudaMemcpy(&actualCount,count,4,cudaMemcpyDeviceToHost));
             checked(cudaMemcpy(q.data(),queue,q.size()*4,cudaMemcpyDeviceToHost));
@@ -105,5 +113,7 @@ int main() {
         checked(cudaFree(p.dead)); checked(cudaFree(queue)); checked(cudaFree(count));
     }
     checked(cudaFree(dt));
-    std::printf("PASS: %u production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories\n",cases);
+    std::printf("PASS: %u production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories; resolver %d threads, launch max %d, %d active block(s)/SM, %d dynamic shared bytes\n",
+                cases,ECC_TABLE_GLOBAL_HINT_THREADS,resolverAttrs.maxThreadsPerBlock,
+                resolverBlocksPerSm,TW_SHARED_BYTES);
 }

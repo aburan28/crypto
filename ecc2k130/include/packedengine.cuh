@@ -24,7 +24,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     unsigned *twConsts = nullptr;
 #if ECC_TABLE_GLOBAL_HINTS
     unsigned *globalHintQueue = nullptr, *globalHintCount = nullptr;
-    int globalResolverBlocks = 0;
+    int globalResolverBlocks = 0, globalResolverBlocksPerSm = 0;
 #endif
 #if ECC_PACKED_L2_PERSIST
     // One allocation: the access-policy window is a single contiguous range.
@@ -341,6 +341,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaGetDevice(&currentDevice));
         CUDA_CHECK(cudaGetDeviceProperties(&globalHintDevice, currentDevice));
         globalResolverBlocks = globalHintDevice.multiProcessorCount;
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            &globalResolverBlocksPerSm, eccPacked131::resolveGlobalHints,
+            ECC_TABLE_GLOBAL_HINT_THREADS, dynamicSharedBytes()));
+        if (globalResolverBlocksPerSm < 1) {
+            fprintf(stderr, "GPU-wide resolver geometry cannot resident one block per SM\n");
+            exit(2);
+        }
 #endif
 #elif ECC_SIGMA_SQUARE_TABLE
         {
@@ -432,8 +439,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                ECC_TABLE_FUSED, ECC_TABLE_PIPE_SELECT, ECC_PACKED_CHAIN_FIRST,
                ECC_PACKED_INLINE_POLY, ECC_PHASE_PROFILE, ECC_CYCLE_PROFILE);
 #if ECC_TABLE_GLOBAL_HINTS
-        printf("packed GPU-wide hint queue: %llu entries, %d resolver blocks of 128 threads\n",
-               (unsigned long long)laneCount(), globalResolverBlocks);
+        printf("packed GPU-wide hint queue: %llu entries, %d resolver blocks of %d threads\n",
+               (unsigned long long)laneCount(), globalResolverBlocks,
+               ECC_TABLE_GLOBAL_HINT_THREADS);
+        printf("packed GPU-wide hint memory: %llu queue bytes, 4 counter bytes\n",
+               (unsigned long long)(laneCount() * sizeof(unsigned)));
+        printf("packed GPU-wide resolver geometry: %d blocks, %d threads/block, %d warps/block, %d active block(s)/SM, %zu dynamic shared bytes, launch bounds %d x 1\n",
+               globalResolverBlocks, ECC_TABLE_GLOBAL_HINT_THREADS,
+               ECC_TABLE_GLOBAL_HINT_THREADS / 32, globalResolverBlocksPerSm,
+               dynamicSharedBytes(), ECC_TABLE_GLOBAL_HINT_THREADS);
         for (int stage = 0; stage < 2; ++stage) {
             cudaFuncAttributes hintAttrs;
             if (stage == 0) CUDA_CHECK(cudaFuncGetAttributes(&hintAttrs, eccPacked131::selectGlobalHints));
@@ -477,7 +491,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             eccPacked131::selectGlobalHints<<<activeBlocks, ECC_THREADS, dynamicSharedBytes()>>>(
                 one, globalHintQueue, globalHintCount);
             CUDA_CHECK(cudaGetLastError());
-            eccPacked131::resolveGlobalHints<<<globalResolverBlocks, 128, dynamicSharedBytes()>>>(
+            eccPacked131::resolveGlobalHints<<<globalResolverBlocks, ECC_TABLE_GLOBAL_HINT_THREADS, dynamicSharedBytes()>>>(
                 one, globalHintQueue, globalHintCount);
             CUDA_CHECK(cudaGetLastError());
             eccPacked131::walk<<<activeBlocks, ECC_THREADS, dynamicSharedBytes()>>>(one, denominators);

@@ -5,10 +5,11 @@ execution pending.** No GPU was launched and there is no throughput result.
 
 The protocol was frozen at `18ee85c1075010ce83be60a4a02636e9aa4ac83a`.
 Before device dispatch, the implementation was merged through current main
-`bc217d318dde444014cde4e81dea02c70b126995`, including the selected GPU-wide
-hint evidence and the separate fused shared-scratch static screen.  Those
-merges do not enable either feature in the frozen sigma baseline or candidate;
-all native evidence below was regenerated afterward.
+`f38c14aafe7b3568dc35b34f30cb7dec253d2c7d`, including the selected GPU-wide
+hint evidence, its resolver-geometry closeout, and the separate fused
+shared-scratch static screen.  Those merges do not enable any of those features
+in the frozen sigma baseline or candidate; all native evidence below was
+regenerated afterward.
 
 ## Novelty decision
 

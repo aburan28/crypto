@@ -122,13 +122,16 @@ jobs:
             -c ecc2k130/src/main.cu -o /tmp/sigma-square-table-client.o
       - name: Compile GPU-wide hint stages (no GPU needed)
         run: |
-          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 \
-            -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_THREADS=128 -DECC_MINBLOCKS=1 \
-            -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 \
-            -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 \
-            -DECC_TABLE_TAG_DENOM=1 -DECC_TABLE_PIPE_SELECT=1 -DECC_TABLE_SPLIT_FORWARD=1 \
-            -DECC_TABLE_BATCH_HINTS=1 -DECC_TABLE_GLOBAL_HINTS=1 \
-            -c ecc2k130/src/main.cu -o /tmp/table-global-hints-client.o
+          for resolver_threads in 128 256 512; do
+            nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 \
+              -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_THREADS=128 -DECC_MINBLOCKS=1 \
+              -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 \
+              -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 \
+              -DECC_TABLE_TAG_DENOM=1 -DECC_TABLE_PIPE_SELECT=1 -DECC_TABLE_SPLIT_FORWARD=1 \
+              -DECC_TABLE_BATCH_HINTS=1 -DECC_TABLE_GLOBAL_HINTS=1 \
+              -DECC_TABLE_GLOBAL_HINT_THREADS="$resolver_threads" \
+              -c ecc2k130/src/main.cu -o "/tmp/table-global-hints-client-$resolver_threads.o"
+          done
           g++ -O2 -std=c++17 -Wall -Wextra -Werror \
             ecc2k130/benchmarks/global-hints/test_queue.cpp -o /tmp/table-global-hints-model
           /tmp/table-global-hints-model
@@ -138,6 +141,14 @@ jobs:
           g++ -O2 -std=c++17 -Wall -Wextra -Werror \
             ecc2k130/benchmarks/global-hints/independent_audit.cpp -o /tmp/table-global-hints-audit
           /tmp/table-global-hints-audit --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/summarize.cpp \
+            -o /tmp/table-global-hints-geometry-summary
+          /tmp/table-global-hints-geometry-summary --self-test
+          g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+            ecc2k130/benchmarks/global-hints/resolver-geometry/independent_audit.cpp \
+            -o /tmp/table-global-hints-geometry-audit
+          /tmp/table-global-hints-geometry-audit --self-test
 
   sigma-square-sm120-compile:
     runs-on: ubuntu-24.04

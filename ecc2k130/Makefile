@@ -45,6 +45,8 @@
 #                      requires TABLE_BATCH_HINTS)
 #   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
 #   CYCLE_PROFILE  diagnostic exact-v3 cold-probe counters (default 0)
+#   TABLE_GLOBAL_HINT_THREADS  GPU-wide cold-resolver block width: 128, 256 or
+#                    512 (default 128; does not change the 188-block grid)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
 #                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
@@ -140,6 +142,7 @@ TABLE_BATCH_HINTS ?= 0
 # Compact up to TABLE_HINT_QUEUE pending (thread,slot) pairs in shared memory.
 TABLE_BLOCK_HINTS ?= 0
 TABLE_GLOBAL_HINTS ?= 0
+TABLE_GLOBAL_HINT_THREADS ?= 128
 TABLE_HINT_QUEUE ?= 512
 # Prove raw two-cycles after one affine step and one denominator check.
 CYCLE_FAST2 ?= 0
@@ -271,6 +274,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_TABLE_BLOCK_HINTS=$(TABLE_BLOCK_HINTS) -DECC_TABLE_HINT_QUEUE=$(TABLE_HINT_QUEUE) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL_HINTS=$(TABLE_GLOBAL_HINTS) \
+       -DECC_TABLE_GLOBAL_HINT_THREADS=$(TABLE_GLOBAL_HINT_THREADS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
@@ -781,11 +785,26 @@ gpu-preset:
 build/test-global-hints-cuda: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+build/test-global-hints-cuda-128: TABLE_GLOBAL_HINT_THREADS = 128
+build/test-global-hints-cuda-256: TABLE_GLOBAL_HINT_THREADS = 256
+build/test-global-hints-cuda-512: TABLE_GLOBAL_HINT_THREADS = 512
+build/test-global-hints-cuda-128 build/test-global-hints-cuda-256 build/test-global-hints-cuda-512: benchmarks/global-hints/test_device.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -Xcompiler -fopenmp $< -o $@ -lgomp
+compile-global-hints-geometries: PACKED_ALU_SQUARE = 1
+compile-global-hints-geometries:
+	$(MAKE) -B build/test-global-hints-cuda-128 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+	$(MAKE) -B build/test-global-hints-cuda-256 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+	$(MAKE) -B build/test-global-hints-cuda-512 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) TABLE_BLOCK_HINTS=0 TABLE_GLOBAL_HINTS=1
+test-global-hints-geometries: compile-global-hints-geometries
+	./build/test-global-hints-cuda-128
+	./build/test-global-hints-cuda-256
+	./build/test-global-hints-cuda-512
 test-global-hints-preset: PACKED_ALU_SQUARE = 1
 test-global-hints-preset:
 	$(MAKE) -B build/test-global-hints-cuda ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
 	./build/test-global-hints-cuda
-.PHONY: test-global-hints-preset
+.PHONY: test-global-hints-preset compile-global-hints-geometries test-global-hints-geometries
 
 # The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
 # pass per step, which does the same work per clock as the 20 B/s build and

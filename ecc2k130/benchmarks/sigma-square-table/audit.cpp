@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
         "  \"schema\": \"ecc2k130-sigma-square-table-native-v1\",\n"
         "  \"valid\": true,\n"
         "  \"protocolSourceParent\": \"18ee85c1075010ce83be60a4a02636e9aa4ac83a\",\n"
-        "  \"integrationBase\": \"bc217d318dde444014cde4e81dea02c70b126995\",\n"
+        "  \"integrationBase\": \"f38c14aafe7b3568dc35b34f30cb7dec253d2c7d\",\n"
         "  \"history\": {\"previousSigmaFusedTableMeasurement\": false, "
         "\"tableWalkCombinedMeasurementExists\": true},\n"
         "  \"replay\": {\"casesPerArm\": %d, \"streamBytesPerArm\": %zu, "
