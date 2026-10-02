@@ -183,10 +183,18 @@ fn main() {
             ffd_d_max: 6,
             max_trials: env_usize("KOBLITZ_SWEEP_MAX_TRIALS", 60_000),
             yield_probes: env_usize("KOBLITZ_SWEEP_YIELD_PROBES", defaults.yield_probes),
+            // A class named by the walk has `#E` certified on every edge.
+            known_order: (census.scanned == 0).then_some(census.target_order as u64),
             ..defaults
         };
         let t1 = Instant::now();
-        let (rows, summary) = sweep_class(n, &irr, a2, &census.members, &opts);
+        let (rows, summary) = match std::env::var_os("KOBLITZ_SWEEP_CHECKPOINT") {
+            Some(dir) => {
+                let path = std::path::PathBuf::from(dir).join(format!("sweep_{n}_{a2}.jsonl"));
+                sweep_with_checkpoint(n, &irr, a2, &census.members, &opts, &path)
+            }
+            None => sweep_class(n, &irr, a2, &census.members, &opts),
+        };
         let sweep_s = t1.elapsed().as_secs_f64();
         println!(
             "   measured {} of {} members in {sweep_s:.1}s ({} skipped)",
@@ -331,6 +339,65 @@ fn main() {
     }
 
     write_json(&reach_rows, &sweeps);
+}
+
+/// `sweep_class` in batches, appending every measured row (and every
+/// member attempted) to a JSON-lines file, so a restarted sweep measures
+/// only what is left.  Each member's measurement is deterministic in its
+/// seed, so a resumed sweep is the sweep it would have been.
+fn sweep_with_checkpoint(
+    n: u32,
+    irr: &crypto_lib::binary_ecc::IrreduciblePoly,
+    a2: u8,
+    members: &[u64],
+    opts: &IcCostOptions,
+    path: &std::path::Path,
+) -> (Vec<IcCostRow>, ClassCostSummary) {
+    use std::io::Write;
+    let mut rows: BTreeMap<u64, IcCostRow> = BTreeMap::new();
+    let mut attempted: std::collections::BTreeSet<u64> = Default::default();
+    if let Ok(text) = std::fs::read_to_string(path) {
+        for line in text.lines() {
+            let Ok(v) = serde_json::from_str::<serde_json::Value>(line) else {
+                continue;
+            };
+            if let Some(a6) = v["attempted"].as_u64() {
+                attempted.insert(a6);
+            } else if let Ok(r) = serde_json::from_value::<IcCostRow>(v) {
+                rows.insert(r.a6, r);
+            }
+        }
+    }
+    let mut file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .expect("checkpoint file");
+    let todo: Vec<u64> = members
+        .iter()
+        .copied()
+        .filter(|a| !attempted.contains(a))
+        .collect();
+    let t0 = Instant::now();
+    for (i, chunk) in todo.chunks(64).enumerate() {
+        let (got, _) = sweep_class(n, irr, a2, chunk, opts);
+        for r in got {
+            let _ = writeln!(file, "{}", serde_json::to_string(&r).unwrap());
+            rows.insert(r.a6, r);
+        }
+        for a in chunk {
+            let _ = writeln!(file, "{{\"attempted\": {a}}}");
+        }
+        eprintln!(
+            "     … sweep n={n}: {} of {} members attempted, {:.0}s",
+            members.len() - todo.len() + (i * 64 + chunk.len()),
+            members.len(),
+            t0.elapsed().as_secs_f64()
+        );
+    }
+    let rows: Vec<IcCostRow> = members.iter().filter_map(|a| rows.remove(a)).collect();
+    let summary = summarise(n, members.len(), &rows, opts);
+    (rows, summary)
 }
 
 /// Past the scan budget the class is named by the explicit-isogeny walk
