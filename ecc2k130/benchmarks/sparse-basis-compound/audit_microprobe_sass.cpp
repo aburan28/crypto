@@ -52,8 +52,8 @@ int main(int argc, char **argv) {
             counts = Counts{};
             continue;
         }
-        if (line.find("benchmarkKernel") != std::string::npos &&
-            line.find("/*") == std::string::npos) {
+        if (line.rfind("//--------------------- .text.", 0) == 0 &&
+            line.find("benchmarkKernel") != std::string::npos) {
             finish(current, counts, &kernels, output);
             current = line;
             counts = Counts{};
