@@ -3,6 +3,8 @@
   "study": "complete_boolean_f5_graded_reuse_ceiling",
   "degree_bound": 4,
   "output_form": "Echelon",
+  "direct_pack_fallback_allowed": true,
+  "require_direct_unpack": true,
   "env": {
     "KIC_F5_DIRECT_PACK": "1",
     "KIC_F5_UNPACK_DIRECT": "1",

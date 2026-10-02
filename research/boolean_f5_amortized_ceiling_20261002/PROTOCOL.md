@@ -12,7 +12,9 @@ returned polynomial representation and public API stay unchanged.
 
 For each call, use the outer cold time `T` from immediately before
 `matrix_f5_f2_with_form_timed` through destruction of its returned rows and
-report. The source already reports exclusive `criterion_ns`, `build_ns`,
+report. Exact returned-row digest validation occurs within that outer timer;
+the independent small F4 cross-check is supplied-reference work outside it.
+The source already reports exclusive `criterion_ns`, `build_ns`,
 `reduce_ns` and `unpack_ns` inside the call. Define the deliberately
 optimistic ceiling
 
@@ -35,17 +37,22 @@ process for each cell with `KIC_F5_DIRECT_PACK=1`,
 `KIC_F5_UNPACK_DIRECT=1`, `KIC_GF2_TABLES=4`,
 `KIC_F5_AVX512_UNPACK=0`, `KIC_GF2_REUSE_TABLE=0` and
 `RAYON_NUM_THREADS=1`; leave all other F5/GF2 option variables unset.
-The worker must confirm the direct-pack and direct-unpack route flags in
-every returned `F5Timings`. This route is the comparison's named reference;
-do not silently substitute a faster or slower historical option. The
+The worker must confirm direct unpacking and record the actual direct-pack
+flag in every returned `F5Timings`. The source's full-column guard can
+fall back to its sorted packed builder when selected rows leave ambient
+columns unused; such cases remain in the fixed grid and are reported,
+not censored or selected away. This option set is the comparison's named
+reference; do not silently substitute a historical option. The
 candidate batch cache is not implemented in this study.
 
 Use the same generated public fixed-quadratic-core fixture construction and
 two changing-affine families as
 `research/boolean_f5_affine_signature_20261002/PROTOCOL.md`: n=12/16/20/24,
 m=n, 2n distinct quadratic monomials per generator, and full n-variable
-multiplier mask. Batches are 2/8/32. Every system is rebuilt cold for each
-timed call; no coefficient or matrix state leaks across repetitions. The
+multiplier mask. Batches are 2/8/32. Each timed F5 call starts with fresh
+internal matrix and criterion state on its immutable supplied polynomial
+input; input construction is common fixture work outside the call clock.
+No cached F5 state leaks across repetitions. The
 source-pinned Boolean F5 result must complete, report unchanged selected and
 built row counts within a core, and have an exact stable row-space fingerprint
 across repeated calls on the same input. An independent small-system F4
