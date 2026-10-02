@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 193, 2026-10-02.
+Current through Stage 194, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -163,6 +163,24 @@ verification passes 21/21 with result SHA-256
 The current same-instance named-solver evidence improves, but licensed Magma,
 an executable same-instance GGMP construction and gates 5--7 remain open; no
 SOTA gate changes.
+
+Stage 194 isolates nested construction scheduling inside the selected
+five-column `BlockTables` elimination path. The current arm uses a Rayon
+parallel iterator for every table-add call; the candidate serializes calls
+with fewer than two runs or fewer than 65,536 scheduled table words. It moves
+1,647 of 5,500 calls to serial execution while preserving all 728,503 table
+runs, 1,700,553,592 scheduled table words, 147,794,583,858 performed XORs,
+algebraic counters and exhaustive UNSAT. Candidate/current ratios are 0.998308
+wall, 1.014546 total core and 0.973726 RSS. The candidate misses the frozen
+strict-below-0.98 wall-and-core screen gate, so confirmation is prohibited and
+the implementation is reverted from runtime source. Stage 194 adds a measured
+lower bound of 16 components, 216.945372 wall-seconds and 1,203.588335 core-
+seconds. The cumulative lower bound becomes 630 components, 24,380.108566
+wall-seconds and 63,014.492177 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 19/19 with result SHA-256
+`918687ed0358356d1309c866ede15b003eec9d3b94a09ce9d5b5b65ece4abaad`.
+This is a rejected one-target scheduling experiment; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
