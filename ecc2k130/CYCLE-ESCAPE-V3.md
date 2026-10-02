@@ -72,6 +72,28 @@ versus 2.450018 B/s control, with paired ratios 1.466220–1.466757 and the same
 300/300, zero-drop, identical-corpus gate. The RTX table preset selects it;
 the general option defaults off.
 
+`TABLE_BLOCK_HINTS=1` next assigns hinted `(thread,slot)` owners to a
+512-entry per-block shared queue. Queue entries are resolved by consecutive
+threads and every owner waits before the original prefix pass; overflow retains
+the per-lane exact fallback. It measured 5.019275 B/s versus 3.559925 B/s
+control, with paired ratios 1.408683–1.410538 and the same replay/corpus gate.
+The candidate adds 1,040 static shared bytes and keeps 128 registers, a
+400-byte frame and zero spills. The RTX table preset selects queue 512; the
+general option defaults off.
+
+The selected schedule was then retested with the roofline note's two arithmetic
+knobs: a shared polynomial-square table and the out-of-line polynomial-basis
+inversion (`PACKED_SQUARE_TABLE=1 PACKED_INV_POLY=2`). Five alternating
+64-launch pairs measured candidate rates from 5.095344 to 5.107611 B/s,
+including **5.097573** and **5.100950 B/s**, against controls from 5.064024 to
+5.069412 B/s. Every paired ratio was at least 1.005 and the median was
+**1.006625**. A matched five-pair control/control panel had median 1.000047
+and stayed inside the preregistered noise bounds. The same replay and complete
+v3 corpus gates passed. This selects the arithmetic knobs as a bounded 0.66%
+same-walk engineering improvement; it remains `Partial` against the older
+roofline experiment's 1.040 threshold and says nothing about full-solve cost.
+See [`benchmarks/block-both2-confirm5/`](benchmarks/block-both2-confirm5/).
+
 The default sigma walk is unchanged.
 The hashed controls in `walkconstant.cpp` explicitly retain v2; native rows use
 v3 and identify it in their output. Their old merge-loss model is not a v3 model.

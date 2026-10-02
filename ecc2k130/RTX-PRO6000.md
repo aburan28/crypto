@@ -1,5 +1,19 @@
 # RTX PRO 6000 benchmark and audit preset
 
+The current confirmed sigma benchmark reaches **15.436677 B/s** with inline
+polynomial products and the fused reverse/next-prefix schedule. Use
+`make gpu-rtx-pro6000-sigma-fused` for that exact native build or
+`make bench-rtx-pro6000-sigma-fused FUSED_BENCH_OUT=/tmp/my-new-run` for the
+matched benchmark protocol. Five positive pairs measured 1.028257x over its
+15.015004 B/s control, with maximum A/A drift 0.0861%, 300/300 replay per arm
+and identical 1,709,477-record v1 corpora. The geometry follow-up retains
+B16/T256/min2: larger batches lose by 10–30%. See
+[fused results](benchmarks/sigma-fused/RESULTS.md) and
+[geometry results](benchmarks/sigma-fused/GEOMETRY-RESULTS.md).
+
+The 26 B/s one-GPU objective remains unmet. The existing public Modal presets
+below retain their historical build identity and audits.
+
 Run from the `ecc2k130` directory with Modal installed and authenticated:
 
 ```bash
@@ -123,8 +137,24 @@ denominator is nonzero. It preserves the DP stop, cyclic eligibility and anchor
 order, and otherwise resumes the unchanged v3 probe. Three long pairs measured
 **3.592794 B/s** versus **2.450018 B/s**, a median paired ratio of **1.466604**.
 Every measured mode replayed 300/300 reports, dropped none and produced the same
-sorted v3 corpus. The global knobs remain default-off; the RTX table preset
-selects split-forward, reconvergence and fast2. This repairs a
+sorted v3 corpus. `TABLE_BLOCK_HINTS=1` also compacts pending owners across a
+512-entry block queue. Three long pairs
+measured **5.019275 B/s** versus **3.559925 B/s**, a median paired ratio of
+**1.408969**, with the same replay/corpus gate. The global knobs remain
+default-off; the RTX table preset selects split-forward, reconvergence, fast2
+and queue 512.
+
+On that selected schedule, the shared square table plus out-of-line polynomial
+inversion measured **5.095344–5.107611 B/s**, including **5.097573** and
+**5.100950 B/s**, against 5.064024–5.069412 B/s controls in five alternating
+pairs. All five ratios cleared 1.005 and their median was **1.006625**. A
+matched control/control panel stayed within the preregistered noise bounds,
+with median 1.000047. Replay and the full 1,480,278-record v3 corpus remained
+identical. The RTX table preset therefore selects `PACKED_SQUARE_TABLE=1` and
+`PACKED_INV_POLY=2`. This is a narrow same-walk engineering selection and
+remains `Partial` against ROOFLINE.md's older 1.040 primary threshold.
+
+This repairs a
 correctness-current path but remains below the sigma preset and far below 26 B/s.
 
 Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
@@ -132,6 +162,11 @@ Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.j
 and [`benchmarks/hint-geometry/result.json`](benchmarks/hint-geometry/result.json).
 The fast2 result is
 [`benchmarks/batch-hints-fast2/result.json`](benchmarks/batch-hints-fast2/result.json).
+The block result and independent audit are
+[`benchmarks/block-hints/result.json`](benchmarks/block-hints/result.json) and
+[`benchmarks/block-hints/independent-audit.json`](benchmarks/block-hints/independent-audit.json).
+The arithmetic confirmation, immutable-artifact manifest and independent audit
+are under [`benchmarks/block-both2-confirm5/`](benchmarks/block-both2-confirm5/).
 
 ## Historical table-walk comparison (superseded cycle rule)
 

@@ -1,0 +1,17 @@
+{
+  "correctness_preflight": true,
+  "equal_updates_per_row": 201863462912,
+  "baseline_median_million_per_second": 15275.127,
+  "qualification_threshold_million_per_second": 15538.24703,
+  "best_arm": "b16t256",
+  "best_median_million_per_second": 15275.127,
+  "best_ratio_to_baseline_median": 1,
+  "qualified_for_confirmation": false,
+  "arms": {
+    "b16t256": {"samples_million_per_second": [15384.403, 15249.411, 15275.127], "median": 15275.127},
+    "b32t256": {"samples_million_per_second": [13697.531000000001, 13693.16, 13695.901], "median": 13695.901},
+    "b32t512": {"samples_million_per_second": [13459.296, 13453.548000000001, 13458.151], "median": 13458.151},
+    "b64t256": {"samples_million_per_second": [10660.661, 10663.847, 10665.861999999999], "median": 10663.847},
+    "b64t512": {"samples_million_per_second": [10628.281999999999, 10640.138999999999, 10650.52], "median": 10640.138999999999}
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "backend_identity": {
+    "bytes": 1308688,
+    "path": "/Volumes/SSD990/koblitz-native-f4-build5-3de514e1/bin/koblitz_pdp_backend",
+    "sha256": "d0c6132c212d34eb738d77bcfadb3653ca7703556e1d45e40f200360e5c8c2a3"
+  },
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "conflicts": {
+    "direct_mitm": null,
+    "native_xor": 100000
+  },
+  "direct_mitm": {
+    "backend_report": {
+      "backend": "direct-mitm",
+      "exhaustive": true,
+      "factor_points": 483,
+      "group_additions": 117015,
+      "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+      "pair_entries": 116635,
+      "regenerated_source_exact": true,
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_witness_valid": true,
+      "status": "sat",
+      "timing_ns": {
+        "factor_base_materialisation": 32066958,
+        "search": 2923345750,
+        "source_verification": 39343875
+      },
+      "witness_indices": [
+        151,
+        266,
+        128
+      ]
+    },
+    "command": [
+      "/Volumes/SSD990/koblitz-native-f4-build5-3de514e1/bin/koblitz_pdp_backend",
+      "direct-mitm",
+      "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/local-same-host-controls/instance/manifest.json"
+    ],
+    "conflicts": null,
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 45842432,
+      "single_core_seconds": 2.991745,
+      "system_seconds": 0.008541,
+      "total_core_seconds": 2.991745,
+      "user_seconds": 2.9832039999999997,
+      "wall_seconds": 2.999660749999748
+    },
+    "returncode": 0,
+    "solver": "direct-mitm",
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "source_model_valid": null,
+    "source_witness_valid": true,
+    "status": "sat",
+    "timed_out": false
+  },
+  "full_cost_gate_passed": false,
+  "known_witnesses_present": false,
+  "koblitz_index_calculus_sota": false,
+  "native_xor": {
+    "backend_report": {
+      "backend": "native-sat",
+      "conflict_budget": 100000,
+      "initial_cnf_clauses": 6495,
+      "interpretation": "Unknown is inconclusive; SAT is accepted only after exact source-row and rational point-witness validation",
+      "manifest_conflict_budget": 100000,
+      "max_models": 64,
+      "models_examined": 0,
+      "native_xor_rows": 110,
+      "nonlifting_models_blocked": 0,
+      "regenerated_source_exact": true,
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "solver_variables": 2000,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_model_valid": null,
+      "source_variables": 78,
+      "source_witness_valid": null,
+      "stats": {
+        "analyze_lit_visits": 294781728,
+        "clause_lit_visits": 101980194,
+        "clause_visits": 102910259,
+        "conflicts": 100000,
+        "decisions": 105286,
+        "learnt_clauses": 99999,
+        "learnt_lits_kept": 30759408,
+        "learnt_lits_raw": 92676918,
+        "max_level": 27,
+        "phase_ns": {
+          "analyze": 3808330184,
+          "minimize": 1400621810,
+          "propagate_clauses": 2353320630,
+          "propagate_xors": 2492811007,
+          "reduce_db": 2371040
+        },
+        "propagations": 79568487,
+        "restarts": 254,
+        "xor_conflicts": 99717,
+        "xor_passes": 399577,
+        "xor_propagations": 3133350,
+        "xor_reason_lits": 89373738,
+        "xor_repivots": 8092673,
+        "xor_row_ops": 40859031,
+        "xor_row_scans": 27161498
+      },
+      "status": "unknown_inconclusive",
+      "timing_ns": {
+        "encoding": 36208750,
+        "solve": 8814159708,
+        "source_verification": 39137000
+      }
+    },
+    "command": [
+      "/Volumes/SSD990/koblitz-native-f4-build5-3de514e1/bin/koblitz_pdp_backend",
+      "native-sat",
+      "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/local-same-host-controls/instance/manifest.json",
+      "100000"
+    ],
+    "conflicts": 100000,
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 168361984,
+      "single_core_seconds": 8.890455,
+      "system_seconds": 0.040222,
+      "total_core_seconds": 8.890455,
+      "user_seconds": 8.850233,
+      "wall_seconds": 8.906471791000513
+    },
+    "returncode": 0,
+    "solver": "native-sat",
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "source_model_valid": null,
+    "source_witness_valid": null,
+    "status": "unknown_inconclusive",
+    "timed_out": false
+  },
+  "outer_resources": {
+    "total_core_seconds": 12.045921,
+    "wall_seconds": 12.10890208300043
+  },
+  "schema": "koblitz_stage159_local_same_host_controls.v1",
+  "single_thread_requested": true,
+  "source_artifacts_unchanged": true,
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "status": "complete",
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "truth_labels_present": false
+}

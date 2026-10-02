@@ -34,7 +34,7 @@ use std::process::ExitCode;
 use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_subgroup_orbit_factor_base, FoldedParts, FoldedStorage, FrobeniusFactorBase,
-    KoblitzCurve, PairSumTable,
+    KoblitzCurve, PairSumTable, FILTER_PROBES,
 };
 
 struct TableFile {
@@ -82,9 +82,13 @@ fn read_table(path: &str) -> Result<TableFile, String> {
         bytes: &bytes,
         at: 0,
     };
-    if c.take(8)? != b"PTFOLD1\0" {
-        return Err(format!("{path}: not a folded-table file"));
-    }
+    // The version names the presence filter's bits a key: one before
+    // R05, this module's [`FILTER_PROBES`] since.
+    let filter_probes = match c.take(8)? {
+        b"PTFOLD2\0" => FILTER_PROBES,
+        b"PTFOLD1\0" => 1,
+        _ => return Err(format!("{path}: not a folded-table file")),
+    };
     let degree = c.u32()?;
     let base_request = c.u32()? as usize;
     let seed = c.u64()?;
@@ -116,6 +120,7 @@ fn read_table(path: &str) -> Result<TableFile, String> {
             words,
             present,
             present_mask,
+            filter_probes,
             canon_tables,
         },
     })
@@ -136,7 +141,10 @@ struct Tally {
 /// some bucket.  Order within a bucket is whatever a build's parallel
 /// cursors made it, on either side, so each bucket is compared sorted.
 fn stored_difference(a: &FoldedStorage<'_>, b: &FoldedStorage<'_>) -> Option<String> {
-    if a.bucket_shift != b.bucket_shift || a.present_mask != b.present_mask {
+    if a.bucket_shift != b.bucket_shift
+        || a.present_mask != b.present_mask
+        || a.filter_probes != b.filter_probes
+    {
         return Some("bucket or filter geometry".into());
     }
     if a.bucket_start != b.bucket_start {

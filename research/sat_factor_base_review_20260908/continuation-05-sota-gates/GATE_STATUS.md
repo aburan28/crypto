@@ -1,6 +1,205 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 161, 2026-09-22. The historical optimization chain is
+Current through Stage 195, 2026-10-02.
+
+Stages 162–174 are the native-Boolean-F4 branch that culminated in the
+size-gated contiguous-M4RI result on the already-opened public
+`n=59, ell=9, m=3` true-negative. Stage 175 reconciles that branch with current
+`main` and deliberately restores the repository's newer five-column
+`BlockTables` engine rather than merging the older F4 fork. On the identical
+target, the current engine is correct and exhaustive but regresses the Stage
+174 medians by 1.3157x wall, 1.8071x CPU and 1.4622x RSS. Same-binary direct
+MITM is much faster still. The result is retained as a negative current-engine
+baseline, not rewritten as progress.
+
+Stages 176–180 reject fixed-X1 schedule tuning, hash-indexed and dense-indexed
+symbolic reducers, and the built-in four- and six-column table alternatives.
+Every arm preserves the frozen equation fingerprint and exact exhaustive UNSAT.
+The dense reducer index cuts its lookup count by 97.5 percent but misses the
+frozen CPU threshold; four and six columns perform more actual XORs than the
+five-column default.
+
+Stages 181–182 add a separately controlled full-matrix block-8 M4RI path to the
+current engine and certify its rank, pivot columns and row space. It reduces
+actual elimination XORs from 147,794,583,858 to 99,192,937,526 and improves
+multi-worker CPU, but misses the frozen paired wall gate and is slower on one
+worker. It therefore remains available only through `F4_F2_FULL_M4RI=1`.
+
+Stages 183–185 replace the current quadratic new-pair selection with exact
+dense LCM groups and submask cover lookup on Boolean domains through 20
+variables. The full-M4RI panel has median paired dense/quadratic ratios of
+0.7368 wall and 0.8023 CPU. The decisive replay on current five-column
+`BlockTables` has median paired ratios of 0.8078 wall, 0.8313 CPU and 0.9481
+RSS. Stage 185 then builds selection commit `8014149a2` from a detached
+checkout, passes ten F4 and three backend tests in both selected and quadratic
+control modes, and verifies that an unset selector routes 1,011,275 updates
+through the dense path. Dense selection is now the repository default;
+`F4_F2_DENSE_PAIR_SELECT=0` retains the exact quadratic control. The clean
+replay also caught the missing ignored lockfile. An initial root-tracking repair
+was rejected because historical workflows deliberately copy and remove lock
+files at that path before clean-tree assertions. The exact supplied lock is
+instead force-added inside the Stage-185 evidence packet with SHA-256
+`4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5`;
+the measurements and selected implementation are unchanged.
+
+Stage 186 rechecks elimination after the pair-selector selection. Full M4RI
+still reduces XORs and RSS but takes 1.8478x wall and 1.0182x CPU in the frozen
+screen, so no confirmation is run. The selected Phase-B configuration is the
+current repository F4 with five-column `BlockTables` and dense exact pair
+selection; full M4RI remains a research control.
+
+Stage 187 composes the current audit without double-counting inherited setup.
+Stages 175–186 add 96 uniquely metered components, 9,028.458755 wall-seconds
+and 22,105.703870 core-seconds. The campaign's measured lower bound through
+Stage 186 is 508 components, 21,808.881290 wall-seconds, 52,387.262218
+core-seconds and 6,310,576,128 bytes maximum RSS. Complete campaign cost stays
+`null` because interactive compile/test work outside process meters remains.
+The public reproduction issue contains 36 comments, all from `aburan28`, and
+zero unaffiliated comments. Gates 1–3 remain partial, gates 4–5 retain finite
+coverage, gate 6 remains false and gate 7 remains open. All-seven and SOTA
+remain false. Stage 187 audit SHA-256 is
+`1778162909b1722fe006b2721f6c42fb89793113158727ba4b9f97657fd2092d`.
+
+Stage 188 re-tests the exact Stage 178 dense symbolic-reducer index after dense
+critical-pair selection became the current F4 default. A Rust-native runner
+replaces the legacy Python measurement path for the new experiment and owns
+fresh-process CPU/wall/RSS accounting, watchdogs, hashing, terminal validation,
+composition and replay. The index again cuts divisor operations by 97.5294
+percent, from 4,190,633,182 linear tests to 103,532,494 exact submask probes.
+The frozen three-pair confirmation nevertheless has median paired ratios
+1.076402 wall, 0.972531 total core and 0.979483 RSS. It misses the unchanged
+0.97 wall-and-core gate, so the candidate is rejected and reverted; the
+selected runtime remains dense exact pair selection, linear reducer scan and
+five-column `BlockTables`. Stage 188 adds a measured lower bound of 21
+components, 898.725862 wall-seconds and 3,270.706466 core-seconds, taking the
+cumulative lower bound to 529 components, 22,707.607152 wall-seconds and
+55,657.968684 core-seconds at the unchanged 6,310,576,128-byte maximum RSS.
+Complete cost remains `null` because the explicitly recorded native-meter
+bootstrap work was not outer-metered. Final native verification passes 31/31
+with result SHA-256
+`8c3e1d1fc09f341434f71e28ff25b29119b4a0b9854d05f4568992d8a5bbdeb3`.
+No SOTA gate changes.
+
+Stage 189 keeps the twelve-way outer fixed-X1 batch but serializes product,
+symbolic, packing, table-build and row-reduction sections inside each F4 call.
+The exact current/outer-only screen has ratios 1.003837 wall, 0.953393 total
+core and 0.946659 RSS. All algebraic and structural counters agree, but the
+candidate misses the pre-registered below-1.00 wall gate; confirmation is
+therefore prohibited, and the scheduling knob is reverted. Stage 189 adds a
+measured lower bound of 11 components, 283.337375 wall-seconds and 1,258.115755
+core-seconds. The cumulative lower bound becomes 540 components,
+22,990.944527 wall-seconds and 56,916.084439 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 19/19 with result SHA-256
+`9b5e957686d9af59a8fad3bfaf0f0a58715876ab15019a9cd7476fbc31d05967`.
+No SOTA gate changes.
+
+Stage 190 retains inner parallel `BlockTables` construction and row reduction
+but serializes monomial products, symbolic preprocessing and row packing inside
+each of the 242 concurrently scheduled F4 calls. Three fixed confirmation pairs
+select the candidate at median ratios 0.913292 wall, 0.926973 total core and
+1.026266 RSS. Unset now selects build-serial; `F4_F2_DISABLE_INNER_BUILD_PARALLEL=0`
+retains the prior nested-build control. An exact selected-commit unset replay
+passes without a scheduling override and reproduces every structural counter.
+Stage 190 adds a measured lower bound of 24 components, 485.938466 wall-seconds
+and 3,027.193941 core-seconds. The cumulative lower bound becomes 564
+components, 23,476.882993 wall-seconds and 59,943.278380 core-seconds at the
+unchanged 6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final
+native verification passes 29/29 with result SHA-256
+`ea84b500f977acd66b5a36b4632620c357cc2b301a5c9987be39a096b0d24384`.
+This is one-target engineering; no SOTA gate changes.
+
+Stage 191 rebuilds the selected Stage 190 source and runs fresh direct MITM,
+strict single-core F4, and fresh direct MITM on the same opened target. The
+arithmetic mean of both direct controls is 0.535369 wall-seconds, 0.307900
+core/single-core seconds and 41,369,600 bytes RSS. Selected F4 takes 109.175286
+wall, 109.121473 core/single-core seconds and 480,526,336 bytes, leaving ratios
+203.925343 wall, 354.406139 CPU and 11.615446 RSS. Both methods are exhaustive
+and scalar/log-label blind; conflicts remain `null`. Stage 191 adds a measured
+lower bound of 8 components, 237.736168 wall-seconds and 655.247344 core-
+seconds. The cumulative lower bound becomes 572 components, 23,714.619162
+wall-seconds and 60,598.525724 core-seconds at the unchanged 6,310,576,128-byte
+maximum RSS. Complete cost remains `null`. Final native verification passes
+24/24 with result SHA-256
+`7708914c8e1ac5a0dfec6bd5b4bdb3fed32669aa17b1e189769c10dad8ba781d`.
+This strengthens the negative decomposition boundary; no SOTA gate changes.
+
+Stage 192 brackets the selected twelve-worker F4 path with two fresh same-
+binary direct-MITM controls. Their arithmetic-mean reference is 0.454839 wall-
+seconds, 0.306417 total/single-core seconds and 41,066,496 bytes RSS. Selected
+parallel F4 takes 16.765098 wall-seconds, 181.297986 total core-seconds and
+4,366,270,464 bytes RSS; its single-core field is correctly `null`. The ratios
+are 36.859390 wall, 591.671747 CPU and 106.321963 RSS. Stage 192 adds a measured
+lower bound of 10 components, 196.127459 wall-seconds and 961.170802 core-
+seconds. The cumulative lower bound becomes 582 components, 23,910.746621
+wall-seconds and 61,559.696526 core-seconds at the unchanged 6,310,576,128-byte
+maximum RSS. Complete cost remains `null`. Final native verification passes
+24/24 with result SHA-256
+`e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48`.
+This strengthens the negative parallel decomposition boundary; no SOTA gate
+changes.
+
+Stage 193 runs freshly authenticated WDSat and CryptoMiniSat controls on the
+same opened `n=59, ell=9, m=3` target used by Stage 192. WDSat is rebuilt from
+commit `55d55b2620d768d9f7c78dcd8990a0689533c1d0` after all 16 sealed source
+files and the compatible capacity header are rehashed. Its rebuilt binary
+exactly matches the historical sealed binary. WDSat reaches its outer watchdog
+without a terminal in 120.274299 wall-seconds, 118.710537 core/single-core
+seconds and 13,910,016 bytes RSS; conflicts remain `null`. CryptoMiniSat 5.14.7
+reaches its internal limit and emits `INDETERMINATE` plus 3,473,638 conflicts
+in 121.436959 wall-seconds, 121.201177 core/single-core seconds and 280,756,224
+bytes RSS. Both outcomes remain inconclusive. Relative to Stage 192's completed
+direct-MITM mean, their consumed-work wall ratios are 264.432530 and 266.988730
+and their CPU ratios are 387.415616 and 395.543899. A relative-path verifier
+replay exposed and corrected a path-canonicalization defect; the superseded
+absolute-only result remains preserved. A final custody hardening also replays
+all meter receipts and requires an exact match to all charged metrics. Stage
+193 adds a measured lower bound of 32 components, 252.416574 wall-seconds and
+251.207316 core-seconds. The cumulative lower bound becomes 614 components,
+24,163.163195 wall-seconds and 61,810.903842 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 21/21 with result SHA-256
+`d119bc42060ea55f6bc2a91739f86ecebb8bc09914c6f5c3fe9e88cca9c51ab5`.
+The current same-instance named-solver evidence improves, but licensed Magma,
+an executable same-instance GGMP construction and gates 5--7 remain open; no
+SOTA gate changes.
+
+Stage 194 isolates nested construction scheduling inside the selected
+five-column `BlockTables` elimination path. The current arm uses a Rayon
+parallel iterator for every table-add call; the candidate serializes calls
+with fewer than two runs or fewer than 65,536 scheduled table words. It moves
+1,647 of 5,500 calls to serial execution while preserving all 728,503 table
+runs, 1,700,553,592 scheduled table words, 147,794,583,858 performed XORs,
+algebraic counters and exhaustive UNSAT. Candidate/current ratios are 0.998308
+wall, 1.014546 total core and 0.973726 RSS. The candidate misses the frozen
+strict-below-0.98 wall-and-core screen gate, so confirmation is prohibited and
+the implementation is reverted from runtime source. Stage 194 adds a measured
+lower bound of 16 components, 216.945372 wall-seconds and 1,203.588335 core-
+seconds. The cumulative lower bound becomes 630 components, 24,380.108566
+wall-seconds and 63,014.492177 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 19/19 with result SHA-256
+`918687ed0358356d1309c866ede15b003eec9d3b94a09ce9d5b5b65ece4abaad`.
+This is a rejected one-target scheduling experiment; no SOTA gate changes.
+
+Stage 195 reuses adequate retired `BlockTables` word-buffer capacity within
+the same table-extension call while retaining the selected parallel table
+construction schedule. The candidate reuses 26,591 of 728,503 buffers and
+reduces fresh allocations by 3.650088 percent; those buffers cover only
+1.438914 percent of the 1,700,553,592 scheduled table words. All table, XOR,
+matrix and algebraic work remains exact. Candidate/current ratios are 0.950194
+wall, 1.001814 total core and 1.107968 RSS. The wall sample improves, but CPU
+does not clear the frozen strict-below-0.98 joint gate and RSS rises 10.80
+percent. Confirmation is prohibited and the candidate is reverted from
+runtime source. Stage 195 adds a measured lower bound of 16 components,
+219.075331 wall-seconds and 1,204.681181 core-seconds. The cumulative lower
+bound becomes 646 components, 24,599.183898 wall-seconds and 64,219.173358
+core-seconds at the unchanged 6,310,576,128-byte maximum RSS. Complete cost
+remains `null`. Final native verification passes 19/19 with result SHA-256
+`505b772e029c529d573856f06f906ebd3dbe3d0e5cffba40acf0565435ece628`.
+This is a rejected one-target allocation experiment; no SOTA gate changes.
+
+The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -739,3 +938,426 @@ query count grows faster than rho's with degree. Its memory, core, and
 fresh-build costs remain above rho. Licensed Magma and unaffiliated
 reproduction/novelty review remain open. This is not a new Koblitz
 index-calculus SOTA result.
+
+## Parallel-branch native-F4 history (Stages 159–170)
+
+These stage numbers were assigned on the native-F4 branch before `main` used the same numbers for the n=59 collector chain. The collector Stage-159 audit is preserved under `stage-159-bucket25-current-gate-audit-20260922`; the text below retains the native-F4 numbering required by its sealed Stage-162–170 predecessor chain.
+
+The native chain includes Stages 161 and 162 trusted-mask hashing and grouped
+critical-pair selection, plus Stage 163 shape-selected block-4 M4RI elimination,
+followed by the dense pipeline, target-independent ordering, product
+cancellation, deterministic parallel batches, fresh-target holdout and
+parallel fixed-X1 construction documented below.
+
+## Stage 159 native-F4 single-target supplement
+
+Stage 159 runs the repository's full Boolean `f4-f2` implementation on one
+authenticated `n=59, ell=9, m=3` Phase-B target. The solver receives no truth
+class, witness, discrete-log label, or target-subgroup enumeration. A direct
+three-summand S4 expansion exceeded the watchdog at 5.25--6.31 GB RSS in two
+censored attempts. The retained formulation fixes `X1`, runs full F4 over the
+remaining 18 Boolean variables, and checks every returned root by exact curve
+lifting and group addition.
+
+The first complete arm took 205.702959 wall seconds, 204.982191 core-seconds,
+and 950,878,208 bytes RSS. Skipping only `X1` masks with no rational curve lift
+reduced it to 100.179380 wall seconds, 99.920352 core-seconds, 921,681,920
+bytes RSS, 65 F4 calls, and 87,513,949,370 elimination word XORs while
+returning the same exact witness. This is a 2.05x solver-stage engineering
+gain. A trace-homomorphism equation was retained as a rejection: it raised
+wall by 18.2 percent and word XORs by 58.8 percent despite lowering RSS.
+
+On the same local host and exact target, direct MITM completed in 2.999661
+seconds / 2.991745 core-seconds / 45,842,432 bytes, so selected F4 remains
+33.40x slower by wall and CPU and 20.11x larger by RSS. Native XOR SAT reached
+its 100,000-conflict cap in 8.906472 seconds. The authenticated Linux receipts
+for this target leave WDSat and CryptoMiniSat censored at their 120-second
+watchdogs. Native F4 is a distinct implementation and formulation; it does
+not satisfy the still-missing licensed Magma F4 gate. Its conflict field is
+`null` because F4 does not expose SAT conflicts.
+
+The Stage 159 measured research lower bound, including five distinct clean
+builds, six F4 attempts, local controls, failed builds, and dependency-fetch
+receipts, is 1,596.064123 sequential wall-seconds, 1,565.839519 core-seconds,
+and 6,310,576,128 bytes maximum process RSS. Complete campaign cost remains
+`null` because some early incremental checks lacked an outer meter. The full
+160-input native-F4 panel, licensed Magma, end-to-end IC/rho cost, and
+unaffiliated review remain open. The canonical result is
+[`stage-159-native-f4-single-target-20260922/result.json`](stage-159-native-f4-single-target-20260922/result.json).
+
+## Stage 160 fixed-X1 constant-linear construction
+
+Stage 160 preserves the exact Stage 159 factor base, blind target, X1 schedule,
+65 F4 calls, 3,864,601 Boolean terms, equation fingerprint, 87,513,949,370
+elimination word XORs, algebraic roots, and group-verified witness. It changes
+only how each fixed-X1 S4 system is constructed. The shared symbolic `X2*X3`
+product is formed once, while fixed `X1` and target powers act through exact
+linear multiplication maps in the polynomial basis. A unit gate compares the
+complete specialized and generic polynomial vectors across 60 field/value
+cases.
+
+The clean blind run reduces fixed-X1 construction from 26.323585 seconds to
+0.973558 seconds, a 27.04x construction improvement. Whole-target F4 wall
+falls from 100.179380 to 73.757990 seconds and core cost from 99.920352 to
+73.585054 seconds, a 1.36x wall improvement. Peak RSS falls slightly from
+921,681,920 to 910,934,016 bytes. The clean one-job build plus custody run is
+241.262254 wall seconds / 236.554363 core-seconds / 1,683,472,384 bytes peak
+RSS.
+
+Direct MITM remains 24.59x faster by same-host wall, 24.60x cheaper by CPU,
+and 19.87x smaller by RSS. Four other metered ideas are retained as rejected:
+global matrix ordering, trailing-zero row trimming, a hashed reducer index,
+and a dense reducer index. Through this stage the measured campaign lower
+bound is 2,319.762066 sequential wall-seconds, 2,281.647854 core-seconds, and
+6,310,576,128 bytes maximum process RSS. Complete campaign cost remains
+`null` because the incremental compiles and focused tests were not outer
+metered.
+
+This remains one finite toy-PDP target. Licensed Magma, the full native-F4
+panel, end-to-end IC/rho cost, and unaffiliated reproduction remain open. The
+canonical additive result is
+[`stage-160-fixed-x1-constant-specialisation-20260922/result.json`](stage-160-fixed-x1-constant-specialisation-20260922/result.json).
+
+## Stage 161 trusted-mask hashing
+
+A charged 20-second sample of the Stage 160 binary collected 3,334
+top-of-stack samples: 1,143 in dense echelon elimination, 533 in critical-pair
+installation, 238 in column packing, 225 directly in SipHash writes, and 118
+in queued-pair retention. Stage 161 replaces SipHash only for internal maps
+and sets keyed by solver-constructed `u64` monomial masks. The deterministic
+SplitMix64 hash changes bucket placement only; hashbrown still resolves every
+collision by exact key equality. Tuple keys and other data retain their prior
+hashers.
+
+The clean blind run preserves the equation fingerprint, 3,864,601 terms, all
+65 F4 calls, matrix dimensions, pair counters, 87,513,949,370 elimination word
+XORs, roots, and group-verified witness. Symbolic/matrix build falls from
+30.523303 to 17.204156 seconds, a 1.77x phase improvement. Whole-target F4
+wall falls from 73.757990 to 60.645599 seconds and core cost from 73.585054 to
+60.498754 core-seconds, a 1.22x improvement. Peak RSS rises 5.85 percent to
+964,263,936 bytes.
+
+Same-host direct MITM remains 20.22x faster by wall and CPU and 21.03x smaller
+by RSS. The clean one-job build plus custody run costs 228.347900 wall seconds,
+224.535510 core-seconds, and 1,692,057,600 bytes peak RSS. Through this stage
+the measured campaign lower bound is 2,684.534288 sequential wall-seconds,
+2,641.558033 core-seconds, and 6,310,576,128 bytes maximum process RSS.
+Complete cost remains `null` because one sandbox-denied profiler attempt was
+interrupted before its receipt and incremental compiles and focused tests were
+not all outer metered.
+
+The result remains one finite toy-PDP target. Licensed Magma, the full
+native-F4 panel, end-to-end IC/rho cost, and unaffiliated reproduction remain
+open. The canonical additive result is
+[`stage-161-fast-mask-hash-20260923/result.json`](stage-161-fast-mask-hash-20260923/result.json).
+
+## Stage 162 grouped critical-pair selection
+
+A charged post-hash profile put 695 of 3,327 top-of-stack samples in
+`State::insert`. Binary disassembly placed its dominant samples in the
+quadratic scan that tests whether any other new-pair LCM divides the current
+LCM. Stage 162 groups equal LCMs and finds proper divisor LCMs by exact submask
+lookup. It then emits the same lowest-index duplicate representative in the
+same pair order as the previous UPDATE implementation. A 3,600-case randomized
+test compares selected pairs, order, and chain/product counters directly with
+that quadratic reference.
+
+The clean blind run preserves every equation, term, F4 call, matrix dimension,
+pair counter, 87,513,949,370 elimination word XORs, root, and exact witness.
+Whole-target wall falls from 60.645599 to 57.862894 seconds and core cost from
+60.498754 to 57.736423 core-seconds, a 1.048x improvement. Peak RSS changes by
+0.40 percent to 968,146,944 bytes.
+
+Same-host direct MITM remains 19.29x faster by wall, 19.30x cheaper by CPU,
+and 21.12x smaller by RSS. The clean build plus custody run costs 225.353725
+wall seconds, 221.602144 core-seconds, and 1,692,352,512 bytes peak RSS. The
+measured campaign lower bound through Stage 162 is 3,029.348391 sequential
+wall-seconds, 2,981.632960 core-seconds, and 6,310,576,128 bytes maximum process
+RSS. Complete campaign cost remains `null`.
+
+This remains a finite one-target solver-stage result. Licensed Magma, the full
+native-F4 panel, end-to-end IC/rho cost, and unaffiliated reproduction remain
+open. The canonical additive result is
+[`stage-162-grouped-pair-selection-20260923/result.json`](stage-162-grouped-pair-selection-20260923/result.json).
+
+## Stage 163 shape-selected block-4 M4RI
+
+Stage 163 routes matrices with at least 128 rows and 256 columns and at most
+four times as many columns as rows through block-4 Method of Four Russians
+elimination. Other shapes retain streaming elimination, and
+`PQ_F4_DISABLE_M4RI=1` provides a same-binary control. Four large synthetic
+matrix shapes across word boundaries return identical pivot-column sets and
+canonical row spaces under the two kernels.
+
+The same-binary control takes 58.370052 wall seconds / 57.840795 core-seconds;
+M4RI takes 54.538915 / 54.413164, a 1.070x wall and 1.063x CPU improvement.
+The clean selected run takes 54.773779 wall seconds, 54.662604 core-seconds,
+and 915,668,992 bytes peak RSS. It routes 196 matrices through M4RI and reduces
+counted elimination-and-table work from 87,513,949,370 to 45,879,309,338 word
+XORs. The equation fingerprint, target classification, roots, and exact
+group-verified witness are unchanged; a few intermediate basis-path row and
+reducer counters differ slightly and are retained rather than called
+identical.
+
+Direct MITM remains 18.26x faster by wall, 18.27x cheaper by CPU, and 19.97x
+smaller by RSS. The selected clean build plus run costs 223.248497 wall
+seconds, 218.415925 core-seconds, and 1,689,485,312 bytes peak RSS. The measured
+campaign lower bound through Stage 163 is 3,589.954839 sequential wall-seconds,
+3,532.297699 core-seconds, and 6,310,576,128 bytes maximum process RSS.
+Complete campaign cost remains `null`.
+
+The result remains a finite one-target solver-stage improvement. Licensed
+Magma, a full native-F4 panel, end-to-end IC/rho cost, and unaffiliated
+reproduction remain open. The canonical additive result is
+[`stage-163-m4ri-echelons-20260923/result.json`](stage-163-m4ri-echelons-20260923/result.json).
+
+## Stage 164 dense native-F4 pipeline
+
+Stage 164 keeps the same algebraic factor base, blind `n=59, ell=9, m=3`
+target, 65 fixed-X1 F4 calls, 3,864,601 Boolean terms, equation fingerprint,
+two algebraic roots, and exact three-point curve witness. It adds dense
+epoch-stamped LCM grouping on the 18-variable systems, exact restricted
+submask covers, reusable pair-selection storage, indexed symbolic reducers,
+dense monomial-to-column maps, order-preserving batch UPDATE, cache-local
+M4RI tables, consecutive-pivot extraction, and trailing-zero table trimming.
+Eleven focused tests include 3,600 randomized UPDATE comparisons, 230,400
+indexed-reducer comparisons, randomized batch-vs-sequential state equality,
+100,000 DegRevLex comparator comparisons, and exact large-matrix row-space
+equality against streaming elimination.
+
+The clean blind F4 process takes 36.450481 wall seconds, 36.319425
+core-seconds, and 946,388,992 bytes peak RSS. It charges 27,264,366,281
+elimination-and-table word XORs. The same clean binary takes 48.447073 seconds
+with M4RI disabled and 38.698749 seconds with batch insertion disabled; all
+arms retain the same equations, pair-criterion totals, roots, and witness.
+Relative to Stage 163, selected wall improves by 1.503x and core cost by
+1.505x. A separately metered lockfile dependency fetch costs 0.316796 wall
+seconds / 0.102986 core-seconds, while dependency acquisition plus the clean
+one-job build and custody run cost 214.044317 wall seconds / 208.873448
+core-seconds / 1,689,780,224 bytes peak RSS.
+
+Direct MITM remains 12.15x faster by wall, 12.14x cheaper by CPU, and 20.64x
+smaller by RSS. The measured native-F4 campaign lower bound through Stage 164
+is 6,464.947902 sequential wall-seconds, 6,383.990738 core-seconds, and
+6,310,576,128 bytes maximum process RSS across 132 components. Complete cost
+remains `null` because some development checks were not outer-metered.
+
+This remains one finite toy-PDP solver-stage improvement. Licensed Magma, the
+full native-F4 panel, end-to-end IC/rho cost, and unaffiliated reproduction and
+novelty review remain open. The canonical additive result is
+[`stage-164-native-f4-dense-20260923/result.json`](stage-164-native-f4-dense-20260923/result.json).
+
+## Stage 165 target-independent sparse fixed-X1 order
+
+Stage 165 changes only the order in which the symmetric direct-S4 solver fixes
+the first factor-base coordinate. Coefficient masks are sorted by Hamming
+weight and then numeric value. This permutation is defined solely by the
+published polynomial-basis coefficients: it does not inspect the target,
+truth class, witness, subgroup, discrete-log labels, or a known scalar.
+`PQ_F4_X1_ORDER=ascending` retains the previous same-binary order, and a unit
+test checks exact permutation and ordering for dimensions zero through twelve.
+
+On the clean blind target, the selected process visits 85 masks, constructs
+and completes 39 rational fixed-X1 F4 systems, and returns the same exact three
+curve points as the ascending schedule. It takes 21.512089 wall seconds,
+21.484441 core-seconds, 948,502,528 bytes peak RSS, and 16,821,055,616 charged
+word XORs. The same clean binary in ascending order visits 138 masks, completes
+65 systems, and takes 34.446599 wall / 34.412474 core-seconds, for a 1.601x
+wall improvement. Three interleaved development pairs have 21.368530 versus
+34.230726 wall-second medians, also 1.602x.
+
+The schedule itself is target-independent, but it was selected post hoc after
+inspecting this target. The result is therefore target-specific engineering,
+not evidence that the order improves expected time over fresh or adversarial
+targets. Direct MITM remains 7.17x faster by wall, 7.18x cheaper by CPU, and
+20.69x smaller by RSS. The clean build plus custody run costs 200.076092 wall
+seconds / 195.904177 core-seconds / 1,723,154,432 bytes peak RSS.
+
+The measured native-F4 campaign lower bound through Stage 165 is 6,902.647655 sequential wall-seconds, 6,817.038349 core-seconds, and 6,310,576,128 bytes
+maximum process RSS across 150 components. Complete cost remains `null`.
+
+Licensed Magma, the full native-F4 panel, end-to-end IC/rho cost, and
+unaffiliated reproduction and novelty review remain open. The canonical
+additive result is
+[`stage-165-x1-weight-order-20260923/result.json`](stage-165-x1-weight-order-20260923/result.json).
+
+## Stage 166 dense F4 product cancellation
+
+Stage 166 changes the construction of F4 rows after monomial multiplication.
+For Boolean systems with at most twenty variables, one generation-tagged
+`u32` array now records the parity of every mapped output mask. The first
+occurrence stores a compact key whose natural order is descending degree and
+ascending mask. The solver sorts only odd-parity survivors instead of sorting
+all mapped terms and cancelling adjacent duplicates afterward.
+`PQ_F4_DISABLE_DENSE_MUL=1` restores the exact previous path. A randomized
+test compares the two products through twenty variables, including generation
+wraparound, and the existing F4/Buchberger and M4RI/streaming certificates
+continue to pass.
+
+The clean blind process takes 19.887753 wall seconds, 19.858236 core-seconds,
+and 900,169,728 bytes peak RSS. Across 818,171 monomial products it maps
+651,502,431 input terms to 549,909,017 surviving terms, cancelling 101,593,414
+terms before sorting. The exact clean disabled control takes 21.582929 wall /
+21.552617 core-seconds / 939,032,576 bytes, for a 1.085x wall improvement.
+Three interleaved development pairs have 20.107567 versus 21.526022
+wall-second medians, a 1.071x improvement. Equation fingerprint, F4 calls,
+matrix and algebraic counters outside the new product counters, roots, and the
+exact curve-verified witness agree.
+
+Direct MITM remains 6.63x faster by wall, 6.64x cheaper by CPU, and 19.64x
+smaller by RSS. The clean build plus custody run costs 193.162520 wall seconds
+/ 187.303839 core-seconds / 1,703,051,264 bytes peak RSS. The failed default
+offline-cache build is retained and charged; it stopped at vendoring because
+`redis 0.32.7` was absent and did not fall back to the network.
+
+The measured native-F4 campaign lower bound through Stage 166 is 7,400.453979 sequential wall-seconds, 7,307.628306 core-seconds, and 6,310,576,128 bytes
+maximum process RSS across 180 components. Complete cost remains `null`.
+
+Licensed Magma, the full native-F4 panel, end-to-end IC/rho cost, and
+unaffiliated reproduction and novelty review remain open. The canonical
+additive result is
+[`stage-166-dense-product-cancellation-20260923/result.json`](stage-166-dense-product-cancellation-20260923/result.json).
+
+## Stage 167 deterministic parallel fixed-X1 batches
+
+Stage 167 exploits only the independence already present between rational
+fixed-X1 systems. The backend gathers the next deterministic batch in the
+algebraic schedule, solves every launched system through a bounded Rayon
+pool, waits for the complete batch, charges every result, and then inspects
+results in schedule order. It does not receive target labels, a known scalar,
+the witness, subgroup enumeration, or factor-base logarithms.
+
+The clean thirteen-thread F4 process takes 5.589951 wall seconds, 36.302718
+total core-seconds, and 3,033,563,136 bytes peak RSS. The same clean binary at
+batch one takes 19.828459 wall seconds, 19.805719 single-core seconds, and
+904,085,504 bytes. Parallel wall improves 3.547x while total CPU rises 1.833x
+and RSS rises 3.355x. Three interleaved development pairs give 5.534149 versus
+19.708587 wall-second medians, a 3.561x speedup. Both clean arms visit 85
+masks, complete the same 39 F4 systems, charge 16,821,055,616 word XORs, have
+the same equation fingerprint, roots and exact witness, and execute no
+speculative system after the successful one.
+
+Batch width thirteen was selected post hoc: this target's first valid
+relation is in rational system 39, so three batches end exactly there. The
+mechanism is label-blind, but this width result is target-specific rather than
+fresh-target or expected-time evidence. Direct MITM remains 1.86x faster by
+wall, 12.13x cheaper by CPU, and 66.17x smaller by RSS. Clean build plus the
+parallel custody run costs 173.190335 wall seconds / 199.814249 core-seconds /
+3,033,563,136 bytes peak RSS. The full-cost gate remains false.
+
+The measured native-F4 campaign lower bound through Stage 167 is 7,948.233270 sequential wall-seconds, 8,144.184517 core-seconds, and 6,310,576,128 bytes
+maximum process RSS across 215 components. Complete cost remains `null`.
+
+Licensed Magma, the full native-F4 panel, fresh-target validation, end-to-end
+IC/rho cost, and unaffiliated reproduction and novelty review remain open. The
+canonical additive result is
+[`stage-167-parallel-x1-batches-20260923/result.json`](stage-167-parallel-x1-batches-20260923/result.json).
+
+## Stage 168 one deterministic batch of 39 systems
+
+Stage 168 puts the same selected 39 rational fixed-X1 systems into one
+deterministic batch, removing the two barriers in Stage 167. Twelve Rayon
+workers execute the full batch dynamically; every system is charged before
+the completed results are inspected in algebraic schedule order. The
+factor base, equations, roots, work counters, and exact witness are unchanged.
+
+The clean F4 process takes 4.987010 wall seconds, 28.179809 total core-seconds,
+and 2,763,997,184 bytes peak RSS; `single_core_seconds` is `null`. Relative to
+Stage 167's clean batch-13 arm, wall improves 1.121x, CPU falls to 0.776x, and
+RSS falls to 0.911x. Three twelve-thread development runs have a 4.744985
+wall-second median. The selected source and clean build are unchanged, and
+the build cost is reused rather than charged twice.
+
+Batch size 39 is exactly the already known successful prefix and was selected
+post hoc. It is not a generic stopping rule: an unknown fresh target could
+require additional batches or no relation within the cap. Direct MITM remains
+1.66x faster by wall, 9.42x cheaper by CPU, and 60.29x smaller by RSS. Clean
+build plus the selected custody run is 172.146798 wall seconds / 191.677868
+core-seconds / 2,763,997,184 bytes peak RSS. The full-cost gate remains false.
+
+The measured native-F4 campaign lower bound through Stage 168 is 7,988.745489 sequential wall-seconds, 8,381.199829 core-seconds, and 6,310,576,128 bytes
+maximum process RSS across 223 components. Complete cost remains `null`.
+
+Licensed Magma, the full native-F4 panel, fresh-target validation, end-to-end
+IC/rho cost, and unaffiliated reproduction and novelty review remain open. The
+canonical additive result is
+[`stage-168-single-batch-39-20260923/result.json`](stage-168-single-batch-39-20260923/result.json).
+
+## Stage 169 preregistered fresh-target holdout
+
+Stage 169 selects the first presentation-order `n=59, ell=9, m=3` blind
+instance after excluding the Stage-168 target. The selected ID, batch size 39,
+twelve Rayon threads, budgets, no-retry policy, and publication of every
+terminal were committed before execution or truth scoring. The selection did
+not consult the target class or a witness.
+
+Native F4 exhaustively visits all 512 coefficient masks, skips 270
+non-rational values, constructs and completes 242 rational systems in seven
+batches, processes 14,278 equations and 14,515,915 terms, and finds no roots.
+It returns UNSAT in 20.539819 wall seconds / 169.094100 core-seconds /
+2,872,541,184 bytes peak RSS while charging 99,199,976,264 word XORs. Only
+after the run seal was frozen did scoring identify the target as
+nondecomposable, producing one true negative.
+
+On the same exported instance, direct MITM is also a true negative in 2.953129
+wall seconds. Native XOR is inconclusive in 8.986403 seconds at 100,000
+conflicts. WDSat and CryptoMiniSat reach 120.002468 and 120.007540-second
+watchdogs. Licensed Magma remains unexecuted, and GGMP is not a same-instance
+`n=59` construction. F4 is 6.96x slower than direct MITM by wall, 57.35x by
+CPU, and 63.80x by RSS.
+
+The fresh negative takes 4.119x the wall, 6.001x the CPU, and 6.205x the F4
+systems of the post-hoc selected positive target. This rejects treating the
+4.99-second Stage-168 result as generic fresh-target time. One holdout remains
+finite evidence rather than an expected-time distribution or full panel.
+
+The measured native-F4 campaign lower bound through Stage 169 is 8,261.489665 sequential wall-seconds, 8,801.978114 core-seconds, and 6,310,576,128 bytes
+maximum process RSS across 229 components. Complete cost remains `null`.
+
+Licensed Magma, the full native-F4 panel, end-to-end IC/rho cost, and
+unaffiliated reproduction and novelty review remain open. The canonical
+additive result is
+[`stage-169-fresh-target-holdout-20260923/result.json`](stage-169-fresh-target-holdout-20260923/result.json).
+
+## Stage 170 parallel fixed-X1 construction
+
+Stage 170 keeps the Stage-169 algebraic factor base, target, Hamming-weight
+mask order, batch size 39, twelve-thread pool, F4 implementation, and exact
+verification path. It changes how each deterministic batch is prepared:
+rational fixed-X1 S4 systems are constructed through an indexed Rayon
+parallel iterator and collected in their original mask order before the
+unchanged parallel F4 solve. `PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1` restores
+serial construction in the same binary.
+
+The clean selected process returns the same exhaustive true-negative UNSAT
+terminal in 17.131544 wall seconds / 176.171665 total core-seconds /
+2,904,489,984 bytes peak RSS. The clean same-binary serial-construction control
+takes 20.796178 wall seconds / 172.001422 core-seconds / 2,839,740,416 bytes,
+for a 1.214x wall speedup, 1.024x CPU ratio, and 1.023x RSS ratio. Construction
+itself falls from 4.629543 to 0.528026 wall seconds, an 8.768x phase speedup.
+Three alternating development pairs have 20.694938 versus 17.163728-second
+wall medians, a 1.206x speedup.
+
+Every selected and serial arm retains all 512 masks, 270 non-rational skips,
+242 constructed and completed systems, 14,278 equations, 14,515,915 terms,
+equation fingerprint
+`02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb`,
+99,199,976,264 word XORs, zero roots, and the same true-negative
+classification. A clean 14-thread/batch-64 arm reaches 14.661977 seconds, but
+it was selected after seeing this negative target, raises RSS to 3,535,716,352
+bytes, and can do extra work on decomposable targets. It is a post-hoc ceiling,
+not the selected generic policy.
+
+Selected F4 remains 5.80x slower than direct MITM by wall, 59.75x by CPU, and
+64.51x by RSS. Clean build plus the selected run costs 186.059675 wall seconds
+/ 340.897134 core-seconds / 2,904,489,984 bytes peak RSS. The measured
+native-F4 campaign lower bound through Stage 170 is 8,808.374612 sequential
+wall-seconds, 12,423.234481 core-seconds, and 6,310,576,128 bytes maximum
+process RSS across 264 components. Complete cost remains `null`.
+
+The optimization was developed after the Stage-169 truth was opened, so it is
+same-target engineering rather than another fresh holdout. Licensed Magma, a
+larger preregistered native-F4 target distribution, full index-calculus/rho
+cost, and unaffiliated reproduction and novelty review remain open. The
+canonical additive result is
+[`stage-170-parallel-fixed-x1-construction-20260923/result.json`](stage-170-parallel-fixed-x1-construction-20260923/result.json).

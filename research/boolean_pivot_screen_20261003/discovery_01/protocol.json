@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "study": "sibling_boolean_pivot_trace_feasibility",
+  "degree_bound": 3,
+  "generator_count": "n",
+  "quadratic_terms_per_generator": "2*n",
+  "variables": [8, 12, 16, 20, 24],
+  "branch_variables": ["0", "floor(n/3)", "floor(2*n/3)", "n-1"],
+  "discovery_seeds": [20261003, 3141593, 2718281, 1618033],
+  "holdout_seeds": [20261010, 4242421, 5772157, 1414213],
+  "row_cap": 4096,
+  "column_cap": 8192,
+  "pivot_order": "descending_numeric_monomials_first_eligible_row",
+  "eligibility": "same_generator_degrees_and_labelled_row_skeleton",
+  "screen": {
+    "sizes_at_least": 12,
+    "minimum_fraction": 0.8,
+    "maximum_delta_rank_fraction": 0.125,
+    "require_identical_full_pivot_trace": true,
+    "run_holdout_only_if_discovery_passes": true
+  },
+  "performance_gate": null,
+  "full_solver_cost": null,
+  "rho_ratio": null
+}
