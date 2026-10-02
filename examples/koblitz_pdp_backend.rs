@@ -1077,8 +1077,6 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_full_m4ri_control":"F4_F2_FULL_M4RI=1",
             "solver_block_table_columns":if cfg!(feature = "f4-wide-tables") { 6 } else if cfg!(feature = "f4-four-tables") { 4 } else { 5 },
             "solver_block_table_build":"automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
-            "solver_block_table_build_schedule":if std::env::var("F4_F2_ADAPTIVE_TABLE_BUILD").as_deref() == Ok("1") { "adaptive: serial unless at least two runs schedule at least 65536 table words; otherwise Rayon" } else { "current: every BlockTables add uses a Rayon parallel iterator" },
-            "solver_block_table_build_schedule_control":"F4_F2_ADAPTIVE_TABLE_BUILD=1 selects the Stage 194 adaptive threshold; unset or 0 preserves current scheduling",
             "single_thread_requested":x1_batch_size == 1 && rayon_threads_requested.unwrap_or(1) == 1,
             "budget_seconds":budget_seconds,
             "source_variables":instance.n_vars,

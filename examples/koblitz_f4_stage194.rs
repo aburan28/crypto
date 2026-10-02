@@ -827,10 +827,10 @@ fn verify_final(path: &Path) -> AnyResult<Verification> {
     check(
         &mut checks,
         &mut failures,
-        source.contains("F4_F2_ADAPTIVE_TABLE_BUILD")
-            && source.contains("PAR_TABLE_BUILD_WORDS: usize = 1 << 16")
-            && source.contains("runs > 1 && words >= PAR_TABLE_BUILD_WORDS"),
-        "opt-in candidate retained",
+        !source.contains("F4_F2_ADAPTIVE_TABLE_BUILD")
+            && !source.contains("block_table_parallel_add_calls")
+            && !source.contains("PAR_TABLE_BUILD_WORDS"),
+        "runtime candidate reverted",
     );
     Ok(Verification {
         schema: FINAL_VERIFICATION_SCHEMA.into(),
@@ -966,13 +966,9 @@ fn ratios_match(left: &Ratios, right: &Ratios) -> bool {
 
 fn valid_screen_terminal(assessment: &Assessment) -> bool {
     match assessment.status.as_str() {
-        "CONTINUE_TO_CONFIRMATION" => {
-            assessment.all_correct && assessment.passed_performance_gate
-        }
+        "CONTINUE_TO_CONFIRMATION" => assessment.all_correct && assessment.passed_performance_gate,
         "REJECTED_SCREEN" => assessment.all_correct && !assessment.passed_performance_gate,
-        "REJECTED_CORRECTNESS" => {
-            !assessment.all_correct && !assessment.passed_performance_gate
-        }
+        "REJECTED_CORRECTNESS" => !assessment.all_correct && !assessment.passed_performance_gate,
         _ => false,
     }
 }

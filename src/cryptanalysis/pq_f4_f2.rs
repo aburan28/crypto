@@ -144,14 +144,6 @@ pub struct F4Stats {
     /// One when this F4 call serializes only product, symbolic and packing
     /// work while retaining the selected parallel elimination path.
     pub inner_build_parallel_disabled_calls: u64,
-    /// Block-table construction scheduling diagnostics. `add_calls`, `runs`
-    /// and `words_scheduled` are invariant across the current and adaptive
-    /// schedules; only the parallel/serial call split may differ.
-    pub block_table_add_calls: u64,
-    pub block_table_runs: u64,
-    pub block_table_words_scheduled: u64,
-    pub block_table_parallel_add_calls: u64,
-    pub block_table_serial_add_calls: u64,
     /// Rows symbolic preprocessing added as reducers.
     pub reducer_rows: u64,
     /// Largest matrix built, and the sum of rows over every matrix.
@@ -895,13 +887,6 @@ fn echelon_block_tables(
             }
         }
     }
-    if let Some(tables) = &tables {
-        st.block_table_add_calls += tables.add_calls;
-        st.block_table_runs += tables.runs_built;
-        st.block_table_words_scheduled += tables.words_scheduled;
-        st.block_table_parallel_add_calls += tables.parallel_add_calls;
-        st.block_table_serial_add_calls += tables.serial_add_calls;
-    }
     st.word_xors += xors;
     st.word_xors_performed += performed;
     Some(pivots)
@@ -984,11 +969,6 @@ struct BlockTables {
     built_words: u64,
     /// Words the live tables hold.
     held_words: usize,
-    add_calls: u64,
-    runs_built: u64,
-    words_scheduled: u64,
-    parallel_add_calls: u64,
-    serial_add_calls: u64,
 }
 
 impl BlockTables {
@@ -1027,11 +1007,6 @@ impl BlockTables {
             tables: Vec::new(),
             built_words: 0,
             held_words: 0,
-            add_calls: 0,
-            runs_built: 0,
-            words_scheduled: 0,
-            parallel_add_calls: 0,
-            serial_add_calls: 0,
         };
         tables.built_words = tables.add(&runs, pivot_of, pivots);
         Some(tables)
@@ -1115,61 +1090,49 @@ impl BlockTables {
     /// Table `runs` and index them.  Returns the words written.
     fn add(&mut self, runs: &[(usize, usize)], pivot_of: &[u32], pivots: &[(usize, Row)]) -> u64 {
         let pivot = |c: usize| &pivots[pivot_of[c] as usize].1;
-        let scheduled_words = runs
-            .iter()
-            .map(|r| Self::width(r, pivot_of, pivots) << r.1)
-            .sum::<usize>();
-        let use_parallel = table_build_uses_parallel(runs.len(), scheduled_words);
-        self.add_calls += 1;
-        self.runs_built += runs.len() as u64;
-        self.words_scheduled = self.words_scheduled.saturating_add(scheduled_words as u64);
-        self.parallel_add_calls += u64::from(use_parallel);
-        self.serial_add_calls += u64::from(!use_parallel);
-        let build = |r: &(usize, usize)| {
-            let (first, k) = *r;
-            let (base, shift) = (first / 64, first % 64);
-            let width = Self::width(r, pivot_of, pivots);
-            let size = 1usize << k;
-            let mut words = vec![0u64; size * width];
-            let mut ends = [base; 1 << TABLE_BLOCK];
-            let mut counts = [0u64; 1 << TABLE_BLOCK];
-            for j in (0..k).rev() {
-                let p = pivot(first + j);
-                let pattern = ((p.bits[base] >> shift) & ((1u64 << k) - 1)) as usize;
-                let (pe, cost) = (p.end, (p.end - base) as u64);
-                for high in 0..size >> (j + 1) {
-                    let b = (1 << j) | (high << (j + 1));
-                    let dep = b ^ pattern;
-                    let (de, end) = (ends[dep], ends[dep].max(pe));
-                    let (entry, earlier) = if b < dep {
-                        let (lo, hi) = words.split_at_mut(dep * width);
-                        (&mut lo[b * width..(b + 1) * width], &hi[..width])
-                    } else {
-                        let (lo, hi) = words.split_at_mut(b * width);
-                        (&mut hi[..width], &lo[dep * width..(dep + 1) * width])
-                    };
-                    entry[..pe - base].copy_from_slice(&p.bits[base..pe]);
-                    for (a, x) in entry[..de - base].iter_mut().zip(&earlier[..de - base]) {
-                        *a ^= *x;
+        let built: Vec<BlockTable> = runs
+            .par_iter()
+            .map(|r| {
+                let (first, k) = *r;
+                let (base, shift) = (first / 64, first % 64);
+                let width = Self::width(r, pivot_of, pivots);
+                let size = 1usize << k;
+                let mut words = vec![0u64; size * width];
+                let mut ends = [base; 1 << TABLE_BLOCK];
+                let mut counts = [0u64; 1 << TABLE_BLOCK];
+                for j in (0..k).rev() {
+                    let p = pivot(first + j);
+                    let pattern = ((p.bits[base] >> shift) & ((1u64 << k) - 1)) as usize;
+                    let (pe, cost) = (p.end, (p.end - base) as u64);
+                    for high in 0..size >> (j + 1) {
+                        let b = (1 << j) | (high << (j + 1));
+                        let dep = b ^ pattern;
+                        let (de, end) = (ends[dep], ends[dep].max(pe));
+                        let (entry, earlier) = if b < dep {
+                            let (lo, hi) = words.split_at_mut(dep * width);
+                            (&mut lo[b * width..(b + 1) * width], &hi[..width])
+                        } else {
+                            let (lo, hi) = words.split_at_mut(b * width);
+                            (&mut hi[..width], &lo[dep * width..(dep + 1) * width])
+                        };
+                        entry[..pe - base].copy_from_slice(&p.bits[base..pe]);
+                        for (a, x) in entry[..de - base].iter_mut().zip(&earlier[..de - base]) {
+                            *a ^= *x;
+                        }
+                        ends[b] = end;
+                        counts[b] = cost + counts[dep];
                     }
-                    ends[b] = end;
-                    counts[b] = cost + counts[dep];
                 }
-            }
-            BlockTable {
-                first,
-                k,
-                width,
-                words,
-                ends,
-                counts,
-            }
-        };
-        let built: Vec<BlockTable> = if use_parallel {
-            runs.par_iter().map(build).collect()
-        } else {
-            runs.iter().map(build).collect()
-        };
+                BlockTable {
+                    first,
+                    k,
+                    width,
+                    words,
+                    ends,
+                    counts,
+                }
+            })
+            .collect();
         let mut written = 0u64;
         for table in built {
             let t = self.tables.len() as u32;
@@ -1203,34 +1166,6 @@ impl BlockTables {
         row.end = row.end.max(end);
         Some((table.counts[b], (end - base) as u64))
     }
-}
-
-/// The selected implementation uses Rayon for every block-table `add`, even
-/// for one tiny run. The Stage 194 candidate keeps that exact control unless
-/// explicitly enabled, then serializes calls below a fixed useful-work floor.
-const PAR_TABLE_BUILD_WORDS: usize = 1 << 16;
-
-fn adaptive_table_build_enabled() -> bool {
-    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ENABLED.get_or_init(|| std::env::var("F4_F2_ADAPTIVE_TABLE_BUILD").as_deref() == Ok("1"))
-}
-
-fn table_build_uses_parallel(runs: usize, words: usize) -> bool {
-    table_build_uses_parallel_for(
-        adaptive_table_build_enabled(),
-        runs,
-        words,
-        rayon::current_num_threads(),
-    )
-}
-
-fn table_build_uses_parallel_for(
-    adaptive: bool,
-    runs: usize,
-    words: usize,
-    threads: usize,
-) -> bool {
-    !adaptive || (runs > 1 && words >= PAR_TABLE_BUILD_WORDS && threads > 1)
 }
 
 /// Monomials on a symbolic-preprocessing level from which
@@ -2526,35 +2461,6 @@ mod tests {
             }
         }
         assert!(consistent > 3);
-    }
-
-    #[test]
-    fn adaptive_table_build_requires_multiple_large_runs() {
-        assert!(table_build_uses_parallel_for(false, 0, 0, 1));
-        assert!(!table_build_uses_parallel_for(
-            true,
-            1,
-            PAR_TABLE_BUILD_WORDS,
-            12
-        ));
-        assert!(!table_build_uses_parallel_for(
-            true,
-            2,
-            PAR_TABLE_BUILD_WORDS - 1,
-            12
-        ));
-        assert!(!table_build_uses_parallel_for(
-            true,
-            2,
-            PAR_TABLE_BUILD_WORDS,
-            1
-        ));
-        assert!(table_build_uses_parallel_for(
-            true,
-            2,
-            PAR_TABLE_BUILD_WORDS,
-            12
-        ));
     }
 
     /// A budget is honoured and reported, not silently turned into a
