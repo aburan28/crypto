@@ -18,16 +18,12 @@ set-parity oracle. The generator and caps remain bounded at n<=12.
 The constructor currently passes the inherited exhaustive 8,192 coefficient,
 degree and active-mask cases, focused fallback/cancellation/cap tests, an
 exact legacy-source port, a deterministic plan-count check, and native replay
-mutations (13 Rust tests).
+mutations (12 Rust tests).
 At n=12, a quadratic generator visits 13
 eligible multipliers instead of scanning all 299 envelope plans; the same
 compiled support still admits all 299 when a generator becomes constant. This
 is an operation-count fact, not a wall-time speedup. The native campaign and
-replay paths compile and pass unit checks. The first Linux discovery attempt
-was refused before timing because startup CPU PSI exceeded the unchanged limit;
-the complete artifact and native readiness revision are in
-[`ATTEMPTS.md`](ATTEMPTS.md) and [`RUNS.json`](RUNS.json). Resource-qualified
-timing, fresh holdouts and
+replay paths compile and pass unit checks; resource-qualified timing, fresh holdouts and
 the dramatic gate are pending. No production solver or IC/rho result is claimed.
 
 The old `research/boolean_support_envelope_20260922/run_01` files are immutable

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "discovery": null,
+  "full": null,
+  "failed_attempts": [
+    {
+      "path": "failed_discovery_01",
+      "manifest_sha256": "1761609502cb824531fb929ccdee4f01d1f1cb9ed0ebe6913eba635dcad93f80",
+      "github_run_id": 36949246631,
+      "github_attempt": 1,
+      "source_head": "0a5b4e8f577d2f7f5badd3f03192f289713553a1",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36949246631",
+      "phase": "discovery",
+      "reason": "Isolation preflight refused CPU PSI some avg10 6.18 above the fixed 5.0 limit after release compilation; other-process CPU was 0.02 seconds in 2.0 seconds against a 0.20-second limit. No timed worker was launched and no sample is admitted.",
+      "timed_worker_launched": false,
+      "performance_admitted": false
+    }
+  ]
+}

@@ -993,7 +993,6 @@ struct StudyProtocol {
     dramatic_gate: DramaticGate,
     noise: NoiseConfig,
     limits: StudyLimits,
-    resource: ResourceConfig,
 }
 #[derive(serde::Deserialize)]
 struct BootstrapConfig {
@@ -1014,18 +1013,6 @@ struct StudyLimits {
     worker_seconds: u64,
     campaign_seconds: u64,
 }
-#[derive(serde::Deserialize)]
-struct ResourceConfig {
-    maximum_other_cpu_fraction: f64,
-    maximum_psi_some_avg10: f64,
-    startup_quiet: QuietConfig,
-}
-#[derive(serde::Deserialize)]
-struct QuietConfig {
-    max_samples: usize,
-    sample_seconds: u64,
-    max_psi: f64,
-}
 
 fn campaign(phase: &str, path: &str) {
     let bytes = std::fs::read(path).unwrap();
@@ -1044,11 +1031,6 @@ fn campaign(phase: &str, path: &str) {
     assert_eq!(protocol.noise.floor_quantile, 0.975);
     assert_eq!(protocol.limits.worker_seconds, 900);
     assert_eq!(protocol.limits.campaign_seconds, 1200);
-    assert_eq!(protocol.resource.maximum_other_cpu_fraction, 0.1);
-    assert_eq!(protocol.resource.maximum_psi_some_avg10, 5.0);
-    assert_eq!(protocol.resource.startup_quiet.max_samples, 30);
-    assert_eq!(protocol.resource.startup_quiet.sample_seconds, 2);
-    assert_eq!(protocol.resource.startup_quiet.max_psi, 5.0);
     let names: Vec<_> = protocol
         .reference_arms
         .iter()
@@ -1085,10 +1067,6 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     if args.len() == 3 && args[1] == "--seal" {
         verify::seal(&args[2]);
-        return;
-    }
-    if args.len() == 3 && args[1] == "--wait-quiet" {
-        verify::wait_quiet(&args[2]);
         return;
     }
     if args.len() == 4 && args[1] == "--failure" {

@@ -53,16 +53,6 @@ if [[ "$phase" == full ]]; then
 fi
 
 set +e
-"$worker" --wait-quiet "$out/readiness.json" > "$out/readiness.stdout" 2> "$out/readiness.stderr"
-readiness_status=$?
-set -e
-if [[ $readiness_status -ne 0 ]]; then
-  "$worker" --failure "$out" resource-run-failed
-  "$worker" --seal "$out"
-  exit "$readiness_status"
-fi
-
-set +e
 python3 "$isolation" run --cpus 3 --out "$out/conditions.jsonl" --label "envelope-indexed/$phase" \
   --settle 2 --max-other-cpu 0.10 --max-psi 5.0 -- \
   "$worker" --campaign "$phase" "$out/protocol.json" > "$out/raw.jsonl" 2> "$out/worker.stderr"

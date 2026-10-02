@@ -31,66 +31,6 @@ fn sha256(bytes: &[u8]) -> String {
         .map(|b| format!("{b:02x}"))
         .collect()
 }
-fn psi_avg10(kind: &str) -> f64 {
-    let source = std::fs::read_to_string(format!("/proc/pressure/{kind}"))
-        .expect("Linux PSI is required for native readiness");
-    for line in source.lines().filter(|line| line.starts_with("some ")) {
-        for term in line.split_whitespace() {
-            if let Some(value) = term.strip_prefix("avg10=") {
-                let value: f64 = value.parse().expect("numeric PSI avg10");
-                assert!(value.is_finite() && value >= 0.0);
-                return value;
-            }
-        }
-    }
-    panic!("missing Linux PSI some avg10");
-}
-pub(super) fn wait_quiet(path: &str) {
-    let protocol: StudyProtocol = serde_json::from_str(include_str!("protocol.json")).unwrap();
-    let spec = protocol.resource.startup_quiet;
-    assert_eq!(
-        (spec.max_samples, spec.sample_seconds, spec.max_psi),
-        (30, 2, 5.0)
-    );
-    let started = Instant::now();
-    let mut observations = Vec::new();
-    for attempt in 1..=spec.max_samples {
-        std::thread::sleep(std::time::Duration::from_secs(spec.sample_seconds));
-        let cpu_psi = psi_avg10("cpu");
-        let memory_psi = psi_avg10("memory");
-        let accepted = cpu_psi <= spec.max_psi && memory_psi <= spec.max_psi;
-        observations.push(json!({"attempt":attempt,"elapsed_ms":started.elapsed().as_millis(),"cpu_psi":cpu_psi,"memory_psi":memory_psi,"accepted":accepted}));
-        std::fs::write(path, serde_json::to_vec_pretty(&observations).unwrap()).unwrap();
-        if accepted {
-            return;
-        }
-    }
-    panic!("host did not become quiet in bounded readiness samples");
-}
-fn verify_readiness(path: &Path, spec: &QuietConfig) -> Value {
-    assert_eq!(
-        (spec.max_samples, spec.sample_seconds, spec.max_psi),
-        (30, 2, 5.0)
-    );
-    let observations: Value =
-        serde_json::from_slice(&std::fs::read(path).expect("readiness evidence")).unwrap();
-    let records = observations.as_array().expect("readiness observations");
-    assert!(!records.is_empty() && records.len() <= spec.max_samples);
-    let mut prior = 0u64;
-    for (index, record) in records.iter().enumerate() {
-        assert_eq!(integer(record, "attempt"), (index + 1) as u64);
-        let elapsed = integer(record, "elapsed_ms");
-        assert!(elapsed >= prior + spec.sample_seconds * 1000);
-        prior = elapsed;
-        let cpu = number(record, "cpu_psi");
-        let memory = number(record, "memory_psi");
-        assert!(cpu >= 0.0 && memory >= 0.0);
-        let accepted = cpu <= spec.max_psi && memory <= spec.max_psi;
-        assert_eq!(field(record, "accepted").as_bool(), Some(accepted));
-        assert_eq!(accepted, index + 1 == records.len());
-    }
-    observations
-}
 fn next_json(lines: &mut impl Iterator<Item = std::io::Result<String>>) -> Value {
     let line = lines
         .next()
@@ -215,14 +155,7 @@ fn verify_sample(
     total
 }
 
-fn verify_resource(
-    path: &str,
-    phase: &str,
-    protocol_path: &str,
-    worker_cap: f64,
-    other_fraction: f64,
-    max_psi: f64,
-) -> Value {
+fn verify_resource(path: &str, phase: &str, protocol_path: &str, worker_cap: f64) -> Value {
     let raw = std::fs::read_to_string(path).expect("resource conditions");
     let mut lines = raw.lines();
     let conditions: Value = serde_json::from_str(lines.next().expect("one resource row")).unwrap();
@@ -234,7 +167,7 @@ fn verify_resource(
     assert_eq!(number(settle, "seconds"), 2.0);
     assert!((0.0..=0.2).contains(&number(settle, "other_cpu_seconds")));
     for key in ["psi_cpu", "psi_memory"] {
-        assert!((0.0..=max_psi).contains(&number(
+        assert!((0.0..=5.0).contains(&number(
             field(field(pre, "conditions"), key).get("some").unwrap(),
             "avg10"
         )));
@@ -244,7 +177,7 @@ fn verify_resource(
     assert_eq!(field(run, "contended").as_bool(), Some(false));
     let wall = number(run, "wall_seconds");
     assert!(wall > 0.0 && wall <= worker_cap);
-    assert!((0.0..=other_fraction * wall).contains(&number(run, "other_cpu_seconds")));
+    assert!((0.0..=0.1 * wall).contains(&number(run, "other_cpu_seconds")));
     let cpus = field(&conditions, "reserved_cpus")
         .as_array()
         .expect("reserved cpus");
@@ -313,18 +246,11 @@ pub(super) fn run(
         ("holdout", &protocol.holdout_seeds)
     };
     let replay_started = Instant::now();
-    let result_directory = Path::new(result_path).parent().unwrap();
-    let readiness = verify_readiness(
-        &result_directory.join("readiness.json"),
-        &protocol.resource.startup_quiet,
-    );
     let resource = verify_resource(
         conditions_path,
         phase,
         protocol_path,
         protocol.limits.worker_seconds as f64,
-        protocol.resource.maximum_other_cpu_fraction,
-        protocol.resource.maximum_psi_some_avg10,
     );
     let file = File::open(raw_path).expect("raw campaign stream");
     let mut lines = BufReader::new(file).lines();
@@ -499,6 +425,7 @@ pub(super) fn run(
     }).collect();
     let raw = std::fs::read(raw_path).unwrap();
     let conditions = std::fs::read(conditions_path).unwrap();
+    let result_directory = Path::new(result_path).parent().unwrap();
     let binding = if phase == "full" {
         serde_json::from_slice::<Value>(
             &std::fs::read(result_directory.join("binding.json")).unwrap(),
@@ -512,7 +439,7 @@ pub(super) fn run(
             <= protocol.limits.campaign_seconds as f64,
         "campaign/replay cap"
     );
-    let result = json!({"schema_version":1,"phase":phase,"qualified":true,"all_complete":true,"cells":cells,"gates":gates,"decisions":decisions,"aa_observations":aa_observations,"ab_observations":ab_observations,"verified_outputs":verified_outputs,"protocol_sha256":sha256(&protocol_bytes),"raw_sha256":sha256(&raw),"conditions_sha256":sha256(&conditions),"discovery_binding":binding,"readiness":readiness,"resource":resource,"full_ic_cost":Value::Null,"calibrated_operation_ratio":Value::Null,"rho_ratio":Value::Null});
+    let result = json!({"schema_version":1,"phase":phase,"qualified":true,"all_complete":true,"cells":cells,"gates":gates,"decisions":decisions,"aa_observations":aa_observations,"ab_observations":ab_observations,"verified_outputs":verified_outputs,"protocol_sha256":sha256(&protocol_bytes),"raw_sha256":sha256(&raw),"conditions_sha256":sha256(&conditions),"discovery_binding":binding,"resource":resource,"full_ic_cost":Value::Null,"calibrated_operation_ratio":Value::Null,"rho_ratio":Value::Null});
     std::fs::write(result_path, serde_json::to_vec_pretty(&result).unwrap()).unwrap();
     let report_path = Path::new(result_path).with_file_name("RESULT.md");
     std::fs::write(report_path, render(&result)).unwrap();
@@ -640,12 +567,7 @@ pub(super) fn seal(path: &str) {
         assert!(files.contains_key(name), "missing retained member {name}");
     }
     if !failed {
-        for name in [
-            "readiness.json",
-            "conditions.jsonl",
-            "results.json",
-            "RESULT.md",
-        ] {
+        for name in ["conditions.jsonl", "results.json", "RESULT.md"] {
             assert!(files.contains_key(name), "missing qualified member {name}");
         }
     }
@@ -696,32 +618,6 @@ pub(super) fn check_discovery(path: &str, source: &str, binding_path: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn readiness_replays_every_rejection_and_requires_one_accepted_tail() {
-        let path = std::env::temp_dir().join(format!(
-            "boolean-envelope-readiness-{}.json",
-            std::process::id()
-        ));
-        let spec = QuietConfig {
-            max_samples: 30,
-            sample_seconds: 2,
-            max_psi: 5.0,
-        };
-        let mut records = json!([
-            {"attempt":1,"elapsed_ms":2000,"cpu_psi":6.18,"memory_psi":0.0,"accepted":false},
-            {"attempt":2,"elapsed_ms":4000,"cpu_psi":4.85,"memory_psi":0.0,"accepted":true}
-        ]);
-        std::fs::write(&path, serde_json::to_vec(&records).unwrap()).unwrap();
-        assert_eq!(verify_readiness(&path, &spec), records);
-        records[1]["accepted"] = json!(false);
-        std::fs::write(&path, serde_json::to_vec(&records).unwrap()).unwrap();
-        assert!(std::panic::catch_unwind(|| verify_readiness(&path, &spec)).is_err());
-        records[1]["accepted"] = json!(true);
-        records[0]["accepted"] = json!(true);
-        std::fs::write(&path, serde_json::to_vec(&records).unwrap()).unwrap();
-        assert!(std::panic::catch_unwind(|| verify_readiness(&path, &spec)).is_err());
-        std::fs::remove_file(path).unwrap();
-    }
     #[test]
     fn intervals_are_deterministic_and_use_paired_values() {
         let ratios = [2.5f64; 10];
@@ -816,7 +712,7 @@ mod tests {
         });
         std::fs::write(&path, format!("{sample}\n")).unwrap();
         let path_text = path.to_str().unwrap();
-        verify_resource(path_text, "discovery", "protocol.json", 900.0, 0.1, 5.0);
+        verify_resource(path_text, "discovery", "protocol.json", 900.0);
         sample["run"]["other_cpu_seconds"] = json!(0.01);
         sample["run"]["contended"] = json!(true);
         std::fs::write(&path, format!("{sample}\n")).unwrap();
@@ -824,9 +720,7 @@ mod tests {
             path_text,
             "discovery",
             "protocol.json",
-            900.0,
-            0.1,
-            5.0
+            900.0
         ))
         .is_err());
         std::fs::remove_file(path).unwrap();
