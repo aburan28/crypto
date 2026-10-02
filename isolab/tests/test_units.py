@@ -115,7 +115,8 @@ def test_tiers():
 
 
 def summary(**over):
-    s = {"n_samples": 5, "wall_s": 5.0, "psi_some_avg10_max": {"cpu": 0.1, "memory": 0.0, "io": 0.3}, "job_cpu_steal_pct": 0.0,
+    s = {"n_samples": 5, "wall_s": 5.0, "psi_some_avg10_max": {"cpu": 0.1, "memory": 0.0, "io": 0.3},
+         "psi_some_pct": {"cpu": 0.1, "memory": 0.0, "io": 0.3}, "job_cpu_steal_pct": 0.0,
          "job_cpu_busy_pct": 99.0, "irqs_on_job_cpus": 50, "freq_cv_max": 0.001, "throttle_events": 0, "thermal_max_c": 50.0,
          "net_bytes": 0, "contended_samples": 0, "other_cpu_ratio": 0.001, "other_top": {}}
     s.update(over)
@@ -123,7 +124,7 @@ def summary(**over):
 
 
 def fid(**over):
-    f = {"max_other_cpu": 0.05, "max_psi_some_avg10": 1.0, "max_job_cpu_steal_pct": 0.5, "governor": "performance", "require": []}
+    f = {"max_other_cpu": 0.05, "max_psi_some_pct": 1.0, "max_job_cpu_steal_pct": 0.5, "governor": "performance", "require": []}
     f.update(over)
     return f
 
@@ -141,7 +142,8 @@ def test_post_checks_clean_run():
 
 
 def test_post_checks_detect_contention():
-    checks = post_checks(summary(other_cpu_ratio=0.3, psi_some_avg10_max={"cpu": 5.0, "memory": 0.0, "io": 0.0},
+    checks = post_checks(summary(other_cpu_ratio=0.3, psi_some_pct={"cpu": 5.0, "memory": 0.0, "io": 0.0},
+                                 cg_psi_some_pct={"cpu": 4.0, "memory": 0.0},
                                  job_cpu_steal_pct=3.0, freq_cv_max=0.2, throttle_events=2),
                          {"cpu_migrations": 7, "hardware_counters": False}, {"nr_throttled": 1, "oom_kill": 1}, None,
                          fid(require=["perf_counters"]), {"partition_state": "isolated"}, None)
@@ -151,6 +153,11 @@ def test_post_checks_detect_contention():
     # without a partition, migrations are informational
     checks = post_checks(summary(), {"cpu_migrations": 7, "hardware_counters": True}, None, None, fid(), {"partition_state": None}, None)
     assert {c.name: c.status for c in checks}["cpu_migrations"] == "info"
+    # host pressure alone does not fail a run whose own cgroup was never stalled
+    quiet = post_checks(summary(psi_some_pct={"cpu": 9.0, "memory": 0.0, "io": 0.0}, cg_psi_some_pct={"cpu": 0.0, "memory": 0.0}),
+                        None, None, None, fid(), {"reserved_cpus": [2]}, None)
+    by = {c.name: c for c in quiet}
+    assert by["psi_cpu"].status == "pass" and by["host_psi_cpu"].value == 9.0
     assert post_checks({"n_samples": 0}, None, None, None, fid(), {}, None)[0].status == "unavailable"
 
 
@@ -172,7 +179,7 @@ def test_reservation_unprivileged_enters_and_exits(tmp_path):
     online = topo["online"]
     p = plan_cpus(topo, online, 1, "any", "allow")
     c = probe_capabilities()
-    fidel = {"policy": "best_effort", "require": [], "max_other_cpu": 1e9, "max_psi_some_avg10": 1e9, "max_job_cpu_steal_pct": 100.0,
+    fidel = {"policy": "best_effort", "require": [], "max_other_cpu": 1e9, "max_psi_some_pct": 1e9, "max_job_cpu_steal_pct": 100.0,
              "governor": "any", "turbo": "any", "min_isolation_tier": "D"}
     with Reservation("test", p, fidel, c, [x for x in online if x not in p.cpus], None, 100, lock_path=str(tmp_path / "lock")) as r:
         checks = r.pre_checks({"topology": topo, "cpufreq": {"available": False}, "knobs": {}, "virtualization": {}, "cmdline": {}})

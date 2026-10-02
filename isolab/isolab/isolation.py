@@ -567,11 +567,13 @@ class Reservation:
                           "nohz_full": reserved <= set(cmd.get("nohz_full") or []),
                           "rcu_nocbs": reserved <= set(cmd.get("rcu_nocbs") or [])}))
         if self.memory_mb:
-            nodes = topo.get("nodes") or {}
-            free = sum((nodes.get(n) or nodes.get(str(n)) or {}).get("mem_free_kb") or 0 for n in self.placement.nodes)
-            if free:
-                out.append(Check("memory_available", "pre", "pass" if free >= self.memory_mb * 1024 else "fail",
-                                 free // 1024, self.memory_mb))
+            # read live: the inventory snapshot is from worker start and memory moves constantly
+            from .inventory import cpu_topology
+            live_nodes = cpu_topology(self.paths).get("nodes") or {}
+            avail = sum((live_nodes.get(n) or {}).get("mem_available_kb") or 0 for n in self.placement.nodes)
+            if avail:
+                out.append(Check("memory_available", "pre", "pass" if avail >= self.memory_mb * 1024 else "fail",
+                                 avail // 1024, self.memory_mb, detail="MiB available on the job's NUMA node(s): free + reclaimable cache"))
         out.append(Check("swap", "pre", "pass" if m.get("cgroup") and caps.get("memory_cgroup") else "info",
                          "job swap.max=0" if m.get("cgroup") else (host.get("memory") or {}).get("swap_total_kb")))
         out.append(Check("exclusive_lock", "pre", "pass", self.lock_path))
@@ -635,9 +637,13 @@ class Reservation:
                          detail=f"top: {summ['other_top']}" if summ["other_top"] else None))
         if self.caps["psi"]:
             for kind in ("cpu", "memory", "io"):
-                v = summ["psi_some_avg10_max"].get(kind)
-                status = "pass" if v is not None and v <= f["max_psi_some_avg10"] else ("fail" if kind != "io" else "info")
-                out.append(Check(f"settle_psi_{kind}", "pre", status, v, f["max_psi_some_avg10"]))
+                v = summ["psi_some_pct"].get(kind)
+                if v is None:
+                    out.append(Check(f"settle_psi_{kind}", "pre", "unavailable"))
+                    continue
+                status = "pass" if v <= f["max_psi_some_pct"] else ("fail" if kind != "io" else "info")
+                out.append(Check(f"settle_psi_{kind}", "pre", status, round(v, 3), f["max_psi_some_pct"],
+                                 detail=f"% of the settle window with {kind} pressure; avg10 was {summ['psi_some_avg10_max'].get(kind)}"))
         else:
             out.append(Check("settle_psi_cpu", "pre", "unavailable", detail="no PSI"))
         busy = summ.get("job_cpu_busy_pct")
@@ -670,13 +676,21 @@ def post_checks(summ: dict[str, Any], counters: dict[str, Any] | None, cg: dict[
         out.append(Check("other_cpu", "post", "pass" if summ["other_cpu_ratio"] <= f["max_other_cpu"] else "fail",
                          round(summ["other_cpu_ratio"], 4), f["max_other_cpu"],
                          detail=f"top: {summ['other_top']}" if summ["other_top"] else None))
+        cg_psi = summ.get("cg_psi_some_pct") or {}
         for kind in ("cpu", "memory"):
-            v = summ["psi_some_avg10_max"].get(kind)
-            if v is None:
+            host_v = summ["psi_some_pct"].get(kind)
+            cg_v = cg_psi.get(kind)
+            if cg_v is not None:
+                # the job's own cgroup: did its tasks stall waiting for cpu or memory
+                out.append(Check(f"psi_{kind}", "post", "pass" if cg_v <= f["max_psi_some_pct"] else "fail", round(cg_v, 3), f["max_psi_some_pct"],
+                                 detail=f"% of the run the job's own tasks were stalled on {kind}; host-wide share {None if host_v is None else round(host_v, 3)}"))
+                out.append(Check(f"host_psi_{kind}", "post", "info", None if host_v is None else round(host_v, 3)))
+            elif host_v is None:
                 out.append(Check(f"psi_{kind}", "post", "unavailable"))
             else:
-                out.append(Check(f"psi_{kind}", "post", "pass" if v <= f["max_psi_some_avg10"] else "fail", v, f["max_psi_some_avg10"]))
-        out.append(Check("psi_io", "post", "info", summ["psi_some_avg10_max"].get("io")))
+                out.append(Check(f"psi_{kind}", "post", "pass" if host_v <= f["max_psi_some_pct"] else "fail", round(host_v, 3), f["max_psi_some_pct"],
+                                 detail=f"% of the run with {kind} pressure somewhere on the host (no job cgroup to read)"))
+        out.append(Check("psi_io", "post", "info", summ["psi_some_pct"].get("io")))
         if summ.get("job_cpu_steal_pct") is None:
             out.append(Check("steal", "post", "unavailable"))
             out.append(Check("reserved_cpu_busy", "post", "unavailable"))

@@ -30,15 +30,18 @@ jobs:
           curl -fsSL -o ns.tgz https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz
           tar xzf ns.tgz && echo "ISOLAB_TEST_NATS_SERVER=$HOME/nats/nats-server-v2.15.0-linux-amd64/nats-server" >> "$GITHUB_ENV"
       - name: Unit and integration tests (unprivileged, direct backend)
-        run: python -m pytest -q isolab/tests
+        working-directory: isolab
+        run: python -m pytest -q tests
       - name: Privileged end-to-end (root worker, cgroup partition, eviction, IRQ moves)
+        working-directory: isolab
         run: |
           sudo -E env "PATH=$PATH" ISOLAB_TEST_NATS_SERVER="$ISOLAB_TEST_NATS_SERVER" ISOLAB_TEST_PRIVILEGED=1 \
-            python -m pytest -q isolab/tests/test_e2e.py -k privileged
+            python -m pytest -q tests/test_e2e.py -k privileged
       - name: Rootless podman end-to-end
+        working-directory: isolab
         run: |
           podman --version
-          python -m pytest -q isolab/tests/test_e2e.py -k podman
+          python -m pytest -q tests/test_e2e.py -k podman
   image:
     runs-on: ubuntu-24.04
     timeout-minutes: 40

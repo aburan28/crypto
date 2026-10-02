@@ -104,17 +104,20 @@ def cpu_topology(paths: Paths = Paths()) -> dict[str, Any]:
             ncpus = parse_cpulist(read_text(nd / "cpulist"))
             mem = {}
             for line in (read_text(nd / "meminfo") or "").splitlines():
-                m = re.match(r"Node \d+ (\w+):\s+(\d+) kB", line)
+                m = re.match(r"Node \d+ ([\w()]+):\s+(\d+) kB", line)
                 if m:
                     mem[m.group(1)] = int(m.group(2))
             dist = read_text(nd / "distance")
+            free = mem.get("MemFree")
+            # per-node meminfo has no MemAvailable; free plus the page cache and slab the kernel can drop is the usable figure
+            available = None if free is None else free + mem.get("Inactive(file)", 0) + mem.get("SReclaimable", 0)
             nodes[nid] = {"cpus": ncpus, "mem_total_kb": mem.get("MemTotal"),
-                          "mem_free_kb": mem.get("MemFree"),
+                          "mem_free_kb": free, "mem_available_kb": available,
                           "distances": [int(x) for x in dist.split()] if dist else None}
             for c in ncpus:
                 cpu_node[c] = nid
     if not nodes:
-        nodes[0] = {"cpus": present, "mem_total_kb": None, "mem_free_kb": None, "distances": None}
+        nodes[0] = {"cpus": present, "mem_total_kb": None, "mem_free_kb": None, "mem_available_kb": None, "distances": None}
         cpu_node = {c: 0 for c in present}
     cpus: dict[int, dict[str, Any]] = {}
     for c in present:

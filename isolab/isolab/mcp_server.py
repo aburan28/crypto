@@ -125,7 +125,9 @@ async def isolab_doctor(worker_id: str) -> dict[str, Any] | None:
     if w is None:
         return None
     inv = {**w, "topology": w["topology"], "tools": w.get("tools") or {}}
-    items = diagnose(inv, w["capabilities"], w["lab_cpus"], launcher=(w.get("launcher") or {}).get("spin") and "present")
+    linfo = w.get("launcher") or {}
+    items = diagnose(inv, w["capabilities"], w["lab_cpus"], launcher=linfo.get("spin"),
+                     launcher_present=bool(linfo.get("spin")) and linfo.get("error") is None)
     return {"worker": w["id"], "max_tier": w.get("max_tier"), "items": as_json(items)}
 
 

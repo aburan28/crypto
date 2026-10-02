@@ -33,7 +33,7 @@ def _sysctl(key: str, value: str) -> Callable[[], None]:
 
 
 def diagnose(inv: dict[str, Any], caps: dict[str, Any], lab_cpus: list[int], paths: Paths = Paths(),
-             launcher: str | None = None, which=shutil.which) -> list[dict[str, Any]]:
+             launcher: str | None = None, which=shutil.which, launcher_present: bool | None = None) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     kv = kernel_version(inv.get("kernel"))
     items.append(_item("linux", "ok" if caps["linux"] else "fail", inv.get("os")))
@@ -106,7 +106,8 @@ def diagnose(inv: dict[str, Any], caps: dict[str, Any], lab_cpus: list[int], pat
                        (tools.get("crun") or tools.get("runc") or {}).get("version"), "apt install crun"))
     items.append(_item("runsc", "ok" if tools.get("runsc") else "info", (tools.get("runsc") or {}).get("version"),
                        "deploy/install.sh --gvisor", note="only needed for runtime.oci_runtime=runsc"))
-    items.append(_item("launcher", "ok" if launcher and Path(launcher).is_file() else "fail", launcher, "isolab launcher-build"))
+    present = launcher_present if launcher_present is not None else bool(launcher and Path(launcher).is_file())
+    items.append(_item("launcher", "ok" if present else "fail", launcher, "isolab launcher-build"))
     items.append(_item("numactl", "ok" if tools.get("numactl") else "info", bool(tools.get("numactl")), "apt install numactl",
                        note="only the direct backend without cgroups needs it"))
     virt = inv.get("virtualization") or {}

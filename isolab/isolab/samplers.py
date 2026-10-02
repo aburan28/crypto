@@ -344,9 +344,15 @@ class Sampler(threading.Thread):
         for x in s:
             for k, v in x["other_top"].items():
                 tops[k] = tops.get(k, 0.0) + v
+        psi = _sum_psi(x["psi_delta_us"] for x in s)
         return {
             "n_samples": len(s), "wall_s": wall,
-            "psi_delta_us": _sum_psi(x["psi_delta_us"] for x in s),
+            "psi_delta_us": psi,
+            # share of the window during which at least one task (some) / every task (full) was stalled
+            "psi_some_pct": {k: (100.0 * v["some"] / (wall * 1e6)) if v and "some" in v and wall else None for k, v in psi.items()},
+            "psi_full_pct": {k: (100.0 * v["full"] / (wall * 1e6)) if v and "full" in v and wall else None for k, v in psi.items()},
+            "cg_psi_some_pct": {k: (100.0 * v["some"] / (wall * 1e6)) if v and "some" in v and wall else None
+                                for k, v in _sum_psi(x["cg_psi_delta_us"] for x in s).items()},
             "psi_some_avg10_max": {k: max((x["psi_avg10"][k] or 0.0) for x in s) for k in ("cpu", "memory", "io")},
             "job_cpu_busy_pct": _wmean(s, lambda x: x["job_cpu"]["busy_pct"]),
             "job_cpu_irq_pct": _wmean(s, lambda x: x["job_cpu"]["irq_pct"]),

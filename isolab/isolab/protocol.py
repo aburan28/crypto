@@ -37,19 +37,19 @@ DEFAULT_PERF_EVENTS = [
 #: Policy presets. An explicit value in the spec always wins over these.
 POLICY_DEFAULTS: dict[str, dict[str, Any]] = {
     "strict": {
-        "settle_s": 5.0, "max_psi_some_avg10": 0.5, "max_other_cpu": 0.02,
+        "settle_s": 5.0, "max_psi_some_pct": 0.5, "max_other_cpu": 0.02,
         "max_job_cpu_steal_pct": 0.0, "governor": "performance", "turbo": "off",
         "aslr": "any", "min_isolation_tier": "A",
         "require": ["perf_counters", "cpu_partition", "numa_bind", "evicted",
                     "irq_moved", "no_steal", "bare_metal"],
     },
     "standard": {
-        "settle_s": 3.0, "max_psi_some_avg10": 1.0, "max_other_cpu": 0.05,
+        "settle_s": 3.0, "max_psi_some_pct": 1.0, "max_other_cpu": 0.05,
         "max_job_cpu_steal_pct": 0.5, "governor": "any", "turbo": "any",
         "aslr": "any", "min_isolation_tier": "C", "require": [],
     },
     "best_effort": {
-        "settle_s": 1.0, "max_psi_some_avg10": 1e9, "max_other_cpu": 1e9,
+        "settle_s": 1.0, "max_psi_some_pct": 1e9, "max_other_cpu": 1e9,
         "max_job_cpu_steal_pct": 100.0, "governor": "any", "turbo": "any",
         "aslr": "any", "min_isolation_tier": "D", "require": [],
     },

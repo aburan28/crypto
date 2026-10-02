@@ -86,11 +86,11 @@ isolation it did not verify.
 | confounder | mechanism | evidence recorded |
 |:--|:--|:--|
 | other processes on the job's cores | cgroup v2 cpuset **isolated partition** holding the job CPUs, which also removes them from the scheduler's load balancing; every other movable thread evicted with `sched_setaffinity`; one job per host under an exclusive lock | partition state as the kernel reports it, threads moved, user threads that refused to move, CPU seconds other processes used during the run, `cpu-migrations` on the job CPUs |
-| interrupts landing on the job's cores | every IRQ's `smp_affinity_list` rewritten to the housekeeping CPUs, and `default_smp_affinity` | IRQs that could not be moved; IRQ and softirq counts that landed on the job CPUs during the run |
+| interrupts landing on the job's cores | every IRQ's `smp_affinity_list` rewritten to the housekeeping CPUs, and `default_smp_affinity`; per-CPU and kernel-managed interrupts (local timer, IPIs, managed device queues) refuse the write and are listed as unmovable, which boot-time `isolcpus=managed_irq` and `irqaffinity` address | IRQs moved and unmovable; interrupts per second that actually landed on each reserved CPU during the run, failed above 1500/s |
 | SMT sibling sharing the core | `smt: isolate` allocates whole cores and keeps the sibling inside the partition but idle; `smt: off` requires SMT disabled on the host | siblings reserved idle; `smt/control` |
 | remote memory, NUMA balancing | job CPUs chosen from one node; `cpuset.mems` bound to that node; `numa_balancing` recorded, host-prep turns it off | node, mems, node free memory, memory peak |
 | memory pressure, swapping | `memory.max`, `memory.swap.max=0`, OOM events read from the job cgroup | peak bytes, OOM kills, memory PSI |
-| contention anywhere on the host | pressure stall information (CPU, memory, I/O; `some` and `full`) sampled before, during and after; a settle window that must be quiet before the run starts, retried then failed as an infrastructure error | PSI totals per phase, load average, per-second samples kept as an artifact |
+| contention anywhere on the host | pressure stall information (CPU, memory, I/O; `some` and `full`) differenced over the settle window and over the run, so the check is the share of *that interval* spent under pressure rather than a decaying average; a settle window that must be quiet before the run starts, retried then failed as an infrastructure error | pressure share per phase, `avg10` peaks, load average, per-second samples kept as an artifact |
 | CPU frequency | governor set to `performance` and turbo disabled for the run where the host exposes the controls; frequency sampled per job CPU every second | governor, turbo state, frequency min/mean/max and coefficient of variation per CPU, thermal throttle counts |
 | the hypervisor | steal time on the job CPUs sampled; virtualisation detected and recorded; `bare_metal` can be required | steal ticks during the run, hypervisor name |
 | network and disk | containers run with `network: none` by default; host NIC and disk byte counters sampled | bytes moved during the run |
@@ -115,8 +115,8 @@ The job's `fidelity.policy` says what is acceptable:
 
 | policy | minimum tier | settle window | refuses to start when | after the run |
 |:--|:--|:--|:--|:--|
-| `strict` | A | 5 s, PSI `some avg10` ≤ 0.5, other CPU ≤ 0.02 | any required mechanism is unavailable, the machine will not go quiet, the host is a VM, counters are missing | a contended repeat is re-run; the summary uses clean repeats only |
-| `standard` | C | 3 s, PSI ≤ 1.0, other CPU ≤ 0.05 | the machine will not go quiet | contended repeats are flagged and excluded from the summary |
+| `strict` | A | 5 s, pressure present ≤ 0.5% of the window, other CPU ≤ 0.02 | any required mechanism is unavailable, the machine will not go quiet, the host is a VM, counters are missing | a contended repeat is re-run; the summary uses clean repeats only |
+| `standard` | C | 3 s, pressure present ≤ 1% of the window, other CPU ≤ 0.05 | the machine will not go quiet | contended repeats are flagged and excluded from the summary |
 | `best_effort` | D | 1 s | never | everything recorded, nothing excluded |
 
 Every check is one of `pass`, `fail`, `unavailable` or `info`, split into
@@ -154,15 +154,26 @@ asked, and an automatic user namespace. A hub token therefore means "can run
 code on every worker of this lab, inside those boundaries"; treat it as a
 credential.
 
-**Images.** `images/` holds three Containerfiles. `isolab-base` has Python
-3.12 with NumPy, SciPy, SymPy, Cython, gmpy2 and pandas, PARI/GP, FLINT, GMP,
-MPFR, GCC, Clang, CMake, Rust (stable), hwloc and numactl. `isolab-sage` is
-the official `sagemath/sagemath` image with the same Python additions on top.
-`isolab-cuda` is `nvidia/cuda` devel with Python and NumPy. Build them on a
-worker with `isolab images build`; the worker lists what it has, with
-digests, and every result pins the image digest it ran. A job may name any
-image the worker has; `placement.require_images` (default true) keeps a job
-off a worker that lacks it.
+**Images.** `isolab/images/` holds three Containerfiles. `isolab-base` has
+Python 3.12 with NumPy, SciPy, SymPy, Cython, gmpy2 and pandas, PARI/GP,
+FLINT, GMP, MPFR, GCC, Clang, CMake, Rust (stable; `--build-arg WITH_RUST=0`
+to skip), hwloc and numactl. `isolab-sage` is the official `sagemath/sagemath`
+image with the same Python additions on top; that upstream image is published
+for x86-64 only, so it builds on an x86-64 worker and not on Arm. `isolab-cuda`
+is `nvidia/cuda` devel with Python and NumPy. Build them on a worker with
+`isolab images build base`; the worker lists what it has, with digests, and
+every result pins the image digest it ran. A job may name any image the
+worker has; `placement.require_images` (default true) keeps a job off a
+worker that lacks it.
+
+Two container details worth knowing. Podman's `conmon` for the job's
+`exec` session lives inside the job cgroup, so a command that writes
+megabytes to stdout pays for relaying them on its own CPUs; write outputs
+to `$ISOLAB_OUTPUT_DIR` and keep stdout small. And gVisor's release tarball
+now ships `runsc` together with a `gvisor-bin/` directory of sidecar
+binaries (`gvisor_sentry` among them) that `runsc` expects next to itself;
+the installer copies all of it, and a `runsc` installed by hand without that
+directory fails with "sidecar gvisor_sentry not usable".
 
 **Inputs.** A job carries its own files. Each entry in `inputs` is a path
 under the working directory and one of: inline `content` (a Sage script, a
