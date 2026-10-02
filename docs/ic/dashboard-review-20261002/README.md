@@ -47,3 +47,10 @@ historical-body preservation and idempotent rendering. Skill validation passes
 with the existing Python 3.13/PyYAML environment; the initial Python 3.12 invocation
 lacked PyYAML and was not counted as a pass. All scientific F5 replay is recorded
 separately in the consumed control's result.
+
+The first published-site CI found eight unresolved relative links and seven
+relative research links. [The original failure](initial-site-link-failure.log)
+is retained. Evidence/data links now use their durable GitHub repository paths
+and the actual site builder passes [all 42 checks](site-build-tests.log).
+The page needs no network fetch to draw its graphs or search the retained ledger;
+opening a source link intentionally visits the repository.
