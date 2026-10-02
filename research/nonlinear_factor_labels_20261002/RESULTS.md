@@ -63,3 +63,35 @@ the bounded experiment falsifies this version of it.  This is `GF(2^7)` data,
 not the required `m = 83` confidence gate and not evidence at `GF(2^131)`.
 Full IC cost, `S`, calibrated operations and the rho ratio remain null.
 
+## Result 2: affine follow-up
+
+The exact affine tuner is also negative.  All 1,344 gauges produced exactly
+the same summed discovery matrix dimensions at degree 5: 12,789 columns and
+13,496 rows.  Input support did move—summed generator terms ranged from 950 to
+1,221—so the census was capable of distinguishing presentations.  The 12
+preregistered finalists all produced the same summed degree-6 dimensions:
+29,038 columns and 49,364 rows, and all refuted at degree 6.
+
+The frozen winner was `[0,4,3,7,1,5,2,6]`.  On the holdouts its matrix sizes
+were identical to identity:
+
+| split / draw | variant | input terms | degree-6 rows | degree-6 columns | refutation degree | correct |
+|---|---|---:|---:|---:|---:|---|
+| holdout / 9 | identity | 565 | 22,498 | 14,396 | 6 | yes |
+| holdout / 9 | affine winner | 520 | 22,498 | 14,396 | 6 | yes |
+| holdout / 11 | identity | 489 | 22,498 | 14,396 | 6 | yes |
+| holdout / 11 | affine winner | 524 | 22,498 | 14,396 | 6 | yes |
+
+The term-count change is mixed: lower on draw 9, higher on draw 11.  It did not
+move the registered exact-work metrics.  The 5% gate and the weaker strict-
+reduction gate both fail.  Classification: **accounting / negative stage
+diagnostic**.  The result also gives a useful invariant for this frozen panel:
+affine gauges move generator sparsity but not the actual Macaulay dimensions
+observed at degrees 5 and 6.
+
+Run 03 completed with exit status zero after serializing the winner before the
+holdouts.  The isolation record reports 0.46 other CPU-seconds during 495.75
+wall-seconds and no contention, but Docker threads remained on the reserved
+CPU; the time is not used as evidence.  Every one of the 1,344 discovery
+gauges and both holdout arms passed exhaustive assignment equivalence and kept
+solution count zero.

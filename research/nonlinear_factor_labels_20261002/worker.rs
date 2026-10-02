@@ -226,7 +226,10 @@ fn anf_forms(p: &[u8; 8]) -> [Vec<u8>; 3] {
                 }
             }
         }
-        (0..8).filter(|&mask| truth[mask] == 1).map(|x| x as u8).collect()
+        (0..8)
+            .filter(|&mask| truth[mask] == 1)
+            .map(|x| x as u8)
+            .collect()
     })
 }
 
@@ -355,14 +358,9 @@ fn element(word: u64) -> F2mElement {
 
 fn build_case(case: FrozenCase, field: &FieldStructure) -> (Vec<F2BoolPoly>, usize) {
     let basis: Vec<_> = case.basis.into_iter().map(element).collect();
-    let system = build_decomposition_system(
-        &basis,
-        &element(case.target),
-        &F2mElement::one(N),
-        M,
-        field,
-    )
-    .expect("frozen system fits the 64-variable engine");
+    let system =
+        build_decomposition_system(&basis, &element(case.target), &F2mElement::one(N), M, field)
+            .expect("frozen system fits the 64-variable engine");
     assert_eq!(system.n_vars, 16);
     assert_eq!(system.equations.len(), 14);
     (system.equations, system.n_vars)
@@ -430,12 +428,22 @@ fn selection_key(result: &CandidateResult) -> SelectionKey {
     let degree_5_cols = result
         .cases
         .iter()
-        .map(|case| case.degree_5.as_ref().map(|p| p.cols).unwrap_or(1usize << 50))
+        .map(|case| {
+            case.degree_5
+                .as_ref()
+                .map(|p| p.cols)
+                .unwrap_or(1usize << 50)
+        })
         .sum();
     let degree_5_rows = result
         .cases
         .iter()
-        .map(|case| case.degree_5.as_ref().map(|p| p.rows).unwrap_or(1usize << 50))
+        .map(|case| {
+            case.degree_5
+                .as_ref()
+                .map(|p| p.rows)
+                .unwrap_or(1usize << 50)
+        })
         .sum();
     SelectionKey {
         unresolved_through_5,
@@ -485,14 +493,16 @@ fn arguments() -> (String, PathBuf) {
         {
             (mode.to_owned(), PathBuf::from(directory))
         }
-        _ => panic!(
-            "usage: nonlinear-factor-labels [--mode nonlinear|affine] --output DIR"
-        ),
+        _ => panic!("usage: nonlinear-factor-labels [--mode nonlinear|affine] --output DIR"),
     }
 }
 
 fn run_nonlinear(output: PathBuf) {
-    assert!(!output.exists(), "refusing to overwrite {}", output.display());
+    assert!(
+        !output.exists(),
+        "refusing to overwrite {}",
+        output.display()
+    );
     fs::create_dir_all(&output).expect("create output directory");
     let started = Instant::now();
 
@@ -517,14 +527,19 @@ fn run_nonlinear(output: PathBuf) {
     let mut discovery_results = Vec::new();
     for (class_index, &p) in representatives.iter().enumerate() {
         let result = measure_candidate(class_index, p, discovery, 6);
-        assert!(result.cases.iter().all(|case| {
-            case.exhaustive_equivalence && case.exhaustive_solution_count == 0
-        }));
+        assert!(result
+            .cases
+            .iter()
+            .all(|case| { case.exhaustive_equivalence && case.exhaustive_solution_count == 0 }));
         eprintln!(
             "class {class_index:02}/29 anf={} key={:?} elapsed={}ms",
             result.anf_degree,
             selection_key(&result),
-            result.cases.iter().map(|case| case.elapsed_ms).sum::<u128>()
+            result
+                .cases
+                .iter()
+                .map(|case| case.elapsed_ms)
+                .sum::<u128>()
         );
         discovery_results.push(result);
     }
@@ -573,14 +588,18 @@ fn run_nonlinear(output: PathBuf) {
         .iter()
         .all(|case| matches!(case.resolution_degree_through_6, Some(d) if d <= 5));
     let secondary_success = !primary_success
-        && winner_holdout.cases.iter().zip(&baseline_holdout.cases).all(|(winner, baseline)| {
-            winner.resolution_degree_through_6 == baseline.resolution_degree_through_6
-                && winner
-                    .degree_6
-                    .as_ref()
-                    .zip(baseline.degree_6.as_ref())
-                    .is_some_and(|(w, b)| w.cols < b.cols)
-        });
+        && winner_holdout
+            .cases
+            .iter()
+            .zip(&baseline_holdout.cases)
+            .all(|(winner, baseline)| {
+                winner.resolution_degree_through_6 == baseline.resolution_degree_through_6
+                    && winner
+                        .degree_6
+                        .as_ref()
+                        .zip(baseline.degree_6.as_ref())
+                        .is_some_and(|(w, b)| w.cols < b.cols)
+            });
     let result = json!({
         "schema_version": 1,
         "scope": "GF(2^7) bounded algebra-stage diagnostic; not ECC2K-130 evidence",
@@ -613,12 +632,22 @@ fn affine_proxy_key(result: &CandidateResult) -> (usize, usize, usize, u32) {
     let cols = result
         .cases
         .iter()
-        .map(|case| case.degree_5.as_ref().expect("affine degree-5 profile").cols)
+        .map(|case| {
+            case.degree_5
+                .as_ref()
+                .expect("affine degree-5 profile")
+                .cols
+        })
         .sum();
     let rows = result
         .cases
         .iter()
-        .map(|case| case.degree_5.as_ref().expect("affine degree-5 profile").rows)
+        .map(|case| {
+            case.degree_5
+                .as_ref()
+                .expect("affine degree-5 profile")
+                .rows
+        })
         .sum();
     let terms = result.cases.iter().map(|case| case.input_terms).sum();
     (cols, rows, terms, result.permutation_code)
@@ -628,12 +657,22 @@ fn affine_final_key(result: &CandidateResult) -> (usize, usize, usize, usize, u3
     let degree_6_cols = result
         .cases
         .iter()
-        .map(|case| case.degree_6.as_ref().expect("affine degree-6 profile").cols)
+        .map(|case| {
+            case.degree_6
+                .as_ref()
+                .expect("affine degree-6 profile")
+                .cols
+        })
         .sum();
     let degree_6_rows = result
         .cases
         .iter()
-        .map(|case| case.degree_6.as_ref().expect("affine degree-6 profile").rows)
+        .map(|case| {
+            case.degree_6
+                .as_ref()
+                .expect("affine degree-6 profile")
+                .rows
+        })
         .sum();
     let (degree_5_cols, _, input_terms, permutation_code) = affine_proxy_key(result);
     (
@@ -646,7 +685,11 @@ fn affine_final_key(result: &CandidateResult) -> (usize, usize, usize, usize, u3
 }
 
 fn run_affine(output: PathBuf) {
-    assert!(!output.exists(), "refusing to overwrite {}", output.display());
+    assert!(
+        !output.exists(),
+        "refusing to overwrite {}",
+        output.display()
+    );
     fs::create_dir_all(&output).expect("create output directory");
     let started = Instant::now();
     let affine = affine_group();
@@ -817,11 +860,7 @@ mod tests {
             for x in 0u8..8 {
                 let mut y = 0u8;
                 for (bit, form) in forms.iter().enumerate() {
-                    let value = form
-                        .iter()
-                        .filter(|&&monomial| monomial & !x == 0)
-                        .count()
-                        % 2;
+                    let value = form.iter().filter(|&&monomial| monomial & !x == 0).count() % 2;
                     y |= (value as u8) << bit;
                 }
                 assert_eq!(y, p[x as usize]);
@@ -845,6 +884,9 @@ mod tests {
         let reps = right_coset_representatives(&affine_group());
         let p = reps[1];
         let transformed = transform_system(&system, &p);
-        assert_eq!(exhaustive_equivalence(&system, &transformed, n_vars, &p), (true, 0));
+        assert_eq!(
+            exhaustive_equivalence(&system, &transformed, n_vars, &p),
+            (true, 0)
+        );
     }
 }

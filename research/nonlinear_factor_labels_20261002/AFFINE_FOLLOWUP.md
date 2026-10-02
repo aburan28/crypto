@@ -34,3 +34,5 @@ engineering diagnostic.  A regression on either holdout fails.  The floor is
 the invariant resolution degree 6; this study cannot be an algebraic advance.
 Full IC cost, the rho ratio, `m = 83`, and `GF(2^131)` remain unmeasured.
 
+Status: completed as run 03.  Both the 5% primary gate and strict-reduction
+diagnostic failed; see [RESULTS.md](RESULTS.md#result-2-affine-follow-up).

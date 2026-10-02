@@ -7,6 +7,7 @@ factor-base label cube.  It uses only native Rust.
 The nonlinear census is complete; see [RESULTS.md](RESULTS.md).  It is a
 negative degree result: the selected nonlinear gauge halves the visible matrix
 width but no longer refutes by degree 6, while identity does.  The exact affine
-gauge follow-up is preregistered in [AFFINE_FOLLOWUP.md](AFFINE_FOLLOWUP.md).
+gauge follow-up is preregistered in [AFFINE_FOLLOWUP.md](AFFINE_FOLLOWUP.md)
+and complete: all 1,344 gauges left the measured matrix dimensions unchanged.
 
 No ECC2K-130, end-to-end index-calculus or speedup claim is made.
