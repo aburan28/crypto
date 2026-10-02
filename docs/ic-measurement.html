@@ -83,7 +83,7 @@ footer p { margin: 0; max-width: 90ch; overflow-wrap: anywhere; }
 <p class="verdict">Two index-calculus figures are comparable only when they measured the same problem, in the same unit, over the same window, against the same reference, on the same class of host, under conditions that could not have moved the result. ICMS writes each of those down for every run and refuses a comparison when one differs. The audit behind it found <strong>31 ways the existing figures were not apples to apples</strong>, 15 of them severe. The demonstrations below run on this repository's cloud container, a virtual machine that can be pinned and is sometimes quiet (L2) but is never isolated (L3). Operation counts there are exact except in rows marked host-dependent, where a solver was priced from host wall time. Wall time is admitted only when every run of both arms earned its declared level, and is otherwise shown as descriptive only.</p>
 <dl class="facts">
 <div class="fact"><dt>Audit findings</dt><dd>31</dd><p>15 high severity; each with its evidence path</p></div>
-<div class="fact"><dt>Runs recorded</dt><dd>60</dd><p>in 4 frozen session(s), warm-ups kept separately</p></div>
+<div class="fact"><dt>Runs recorded</dt><dd>75</dd><p>in 5 frozen session(s), warm-ups kept separately</p></div>
 <div class="fact"><dt>Isolation earned here</dt><dd>L1, L2</dd><p>L1 pinned, L2 quiet, L3 isolated; see the gate below</p></div>
 <div class="fact"><dt>Units kept apart</dt><dd>9</dd><p>never compared with each other</p></div>
 </dl></header>
@@ -379,6 +379,45 @@ execution: {adapter: crypto.ic_bench, threads: 1, cpus: 1}
 <tr><th>toolchain</th><td class="mono">Python 3.11.15 · rustc 1.94.1 (e408947bf 2026-03-25) · gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0</td></tr>
 <tr><th>OS</th><td class="mono">Ubuntu 24.04.4 LTS · glibc-2.39</td></tr>
 </tbody></table></div></details></section>
+<section class="panel" id="session-2026-10-02-ar-p20-m3-engine"><h2>Demonstration: autoresearcher random 20-bit prime curve, m=3: enumerate vs mitm, A/A on enumerate</h2><p>Session <code>ICSESS1hdcf85c1c60d4</code> on host class <code>ENV1h0aa2154374f6</code>, commit <code>37ab295dfc57</code>. Preflight quiet; reserved CPUs [3], 56 threads moved off. 15 measured runs plus warm-ups, every one kept.</p>
+<h3>Arms</h3><div class="scroll"><table><thead><tr><th class="n">arm</th><th>configuration</th><th class="n">runs ok</th><th>levels</th><th class="n">usable pts</th><th class="n">columns</th><th class="n">vars / eqs</th><th class="n">clauses / XOR per system</th><th class="n">solver effort</th><th class="n">ops (unit)</th><th class="n">S</th><th class="n">window ms med / min</th></tr></thead><tbody>
+<tr><td class="n">0</td><td class="cfg">random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)<br><code class="muted">ICS1hcff45cfed423 · W025bd6f59537</code></td><td class="n">5/5</td><td><span class="chip unknown">L1</span></td><td class="n">134</td><td class="n">67</td><td class="n">— / —</td><td class="n">— / —</td><td class="n">—</td><td class="n">558,967<br><span class="muted">count.s3_solves</span></td><td class="n">—</td><td class="n">2,012 / 1,941</td></tr>
+<tr><td class="n">1</td><td class="cfg">random 20-bit prime curve: 67 smallest abscissae, mitm m=3, tails of 2 (autoresearcher)<br><code class="muted">ICS1hf1e387d9c444 · W025bd6f59537</code></td><td class="n">5/5</td><td><span class="chip pass">L2</span></td><td class="n">134</td><td class="n">67</td><td class="n">— / —</td><td class="n">— / —</td><td class="n">—</td><td class="n">9,935<br><span class="muted">count.s3_solves</span></td><td class="n">—</td><td class="n">42.7 / 41.8</td></tr>
+<tr><td class="n">2</td><td class="cfg">random 20-bit prime curve: 67 smallest abscissae, enumerate m=3 (autoresearcher)<br><code class="muted">ICS1hcff45cfed423 · W025bd6f59537</code></td><td class="n">5/5</td><td><span class="chip unknown">L1</span> <span class="chip pass">L2</span></td><td class="n">134</td><td class="n">67</td><td class="n">— / —</td><td class="n">— / —</td><td class="n">—</td><td class="n">558,967<br><span class="muted">count.s3_solves</span></td><td class="n">—</td><td class="n">1,983 / 1,943</td></tr>
+</tbody></table></div>
+<h3>Comparisons, as frozen by <code>icms compare</code></h3><div class="scroll"><table><thead><tr><th>pair</th><th>declared variable</th><th class="n">ops B/A</th><th>wall B/A</th><th>A/A noise</th></tr></thead><tbody>
+<tr><td>0 vs 1<br><code class="muted">mitm-vs-enumerate</code></td><td><code>decomposition.method: enumerate → mitm, decomposition.params: {} → None, decomposition.params.table_arity: None → 2</code></td><td class="n"><span class="ratio">0.01777</span><br><span class="muted">count.s3_solves</span></td><td>refused: runs below their declared isolation level (earned [&#x27;L1&#x27;, &#x27;L2&#x27;])<br><span class="muted">descriptive only: median 0.0217 over 5 pairs, [0.02, 0.031]</span></td><td class="mono">arms [0, 2]: [0.909, 1]</td></tr>
+</tbody></table></div>
+<h3>What the gate saw</h3><div class="scroll"><table><thead><tr><th>check</th><th>level</th><th class="n">pass</th><th class="n">fail</th><th class="n">unknown</th><th>what it measures</th></tr></thead><tbody>
+<tr><td><code>affinity_observed</code></td><td>L1</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>child CPU mask read back after exec, and every task of the tree on every sample: mask within the pinned CPUs and last ran on one of them</td></tr>
+<tr><td><code>excludes_cpu0</code></td><td>L1</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>CPU 0 takes most housekeeping interrupts</td></tr>
+<tr><td><code>reservation</code></td><td>L1</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>isolated_bench.evict over the whole session; a thread confined to the reservation, or one the session lacks permission to move (another user&#x27;s, when not run as root), fails this check, so a session not run as root earns at most L0</td></tr>
+<tr><td><code>parallelism</code></td><td>L1</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>CPU time of the measured tree / wall; peak thread count 1 is recorded but not gated, because an idle pool thread costs nothing</td></tr>
+<tr><td><code>run_delay</code></td><td>L2</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>share of the child&#x27;s runnable time spent waiting for a CPU</td></tr>
+<tr><td><code>steal</code></td><td>L2</td><td class="n">6</td><td class="n">9</td><td class="n">0</td><td>hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0</td></tr>
+<tr><td><code>foreign_runnable</code></td><td>L2</td><td class="n">12</td><td class="n">3</td><td class="n">0</td><td>sampler ticks with another runnable task on a pinned CPU (40 ticks)</td></tr>
+<tr><td><code>memory_stall</code></td><td>L2</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>memory PSI &#x27;full&#x27; stall during the window</td></tr>
+<tr><td><code>involuntary_switches</code></td><td>L2</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>preemptions of the child per second</td></tr>
+<tr><td><code>preflight_quiet</code></td><td>L2</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>the machine was quiet before the session started, by a preflight no looser than the default</td></tr>
+<tr><td><code>kernel_isolation</code></td><td>L3</td><td class="n">0</td><td class="n">15</td><td class="n">0</td><td>pinned CPUs must be in isolcpus or nohz_full</td></tr>
+<tr><td><code>fixed_frequency</code></td><td>L3</td><td class="n">0</td><td class="n">0</td><td class="n">15</td><td>frequency scaling moves wall time between runs</td></tr>
+<tr><td><code>smt</code></td><td>L3</td><td class="n">15</td><td class="n">0</td><td class="n">0</td><td>an SMT sibling shares the core&#x27;s execution units</td></tr>
+<tr><td><code>bare_metal</code></td><td>L3</td><td class="n">0</td><td class="n">15</td><td class="n">0</td><td>a virtual CPU can be descheduled by its host without a trace inside the guest</td></tr>
+</tbody></table></div>
+<details><summary>Host capsule</summary><div class="scroll"><table><tbody>
+<tr><th>env_class_id</th><td class="mono">ENV1h0aa2154374f6</td></tr>
+<tr><th>CPU</th><td class="mono">Intel(R) Xeon(R) Processor @ 2.10GHz · family 6 model 207 stepping 2 · microcode 0x1 · 4 logical</td></tr>
+<tr><th>features</th><td class="mono">popcnt, bmi2, avx2, avx512f, pclmulqdq, vpclmulqdq, gfni, aes, hypervisor</td></tr>
+<tr><th>kernel</th><td class="mono">6.18.44-fc-v51 · clocksource tsc</td></tr>
+<tr><th>isolation flags</th><td class="mono">isolcpus=&#x27;&#x27; nohz_full=None · cmdline {&quot;mitigations&quot;: &quot;auto,no_guest_host,no_guest_guest&quot;, &quot;psi&quot;: &quot;1&quot;}</td></tr>
+<tr><th>frequency</th><td class="mono">governors [&#x27;None&#x27;] · no_turbo None · boost None</td></tr>
+<tr><th>SMT</th><td class="mono">control notsupported · active 0</td></tr>
+<tr><th>virtualisation</th><td class="mono">docker · vm kvm · container docker · hypervisor flag True</td></tr>
+<tr><th>memory / THP</th><td class="mono">16480972 kB · THP always [madvise] never</td></tr>
+<tr><th>sysctls</th><td class="mono">nmi_watchdog=0, numa_balancing=0, perf_event_paranoid=2, randomize_va_space=2, sched_autogroup_enabled=1, sched_rt_period_us=1000000, sched_rt_runtime_us=950000, timer_migration=1, watchdog=1, compaction_proactiveness=20, dirty_background_ratio=10, dirty_ratio=20, nr_hugepages=0, overcommit_memory=0, stat_interval=1, swappiness=60, zone_reclaim_mode=0</td></tr>
+<tr><th>toolchain</th><td class="mono">Python 3.11.15 · rustc 1.94.1 (e408947bf 2026-03-25) · gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0</td></tr>
+<tr><th>OS</th><td class="mono">Ubuntu 24.04.4 LTS · glibc-2.39</td></tr>
+</tbody></table></div></details></section>
 <section class="panel" id="registry"><h2>Windows and units</h2><div class="scroll"><table><thead><tr><th>window</th><th>primary</th><th>definition</th></tr></thead><tbody>
 <tr><td><code>online_one_target</code></td><td>yes</td><td>AGENTS.md &#x27;Primary comparison uses one target&#x27; and cryptanalysis AGENTS.md: start when target-dependent computation begins, after reusable target-independent setup is ready; stop after scalar recovery and independent verification. Exactly one target. Process launch, input loading and known-answer target construction are outside.</td></tr>
 <tr><td><code>cold_end_to_end</code></td><td>no</td><td>AGENTS.md section 2: the whole method, cold, from setup to the recovered and verified logarithm, every phase charged. The unit S is defined over this window.</td></tr>
@@ -427,6 +466,10 @@ python3 scripts/build_ic_measurement.py</pre><p>The audit re-derives every commi
 <p><code>docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/comparisons/d8-vs-d7.json</code> sha256 <code>cee2a161b0db</code></p>
 <p><code>docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/records.jsonl</code> sha256 <code>ff86791c065c</code></p>
 <p><code>docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/session.json</code> sha256 <code>87b5f9ca5ccc</code></p>
+<p><code>docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/capsule.json</code> sha256 <code>650cf1f8713b</code></p>
+<p><code>docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/comparisons/mitm-vs-enumerate.json</code> sha256 <code>7d50d95689a7</code></p>
+<p><code>docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/records.jsonl</code> sha256 <code>e55acc670ebe</code></p>
+<p><code>docs/ic/measurement/sessions/2026-10-02-ar-p20-m3-engine/session.json</code> sha256 <code>1cb0d78ebe9c</code></p>
 <p><code>docs/ic/measurement/audit.json</code> sha256 <code>617de8b19fb0</code></p>
 <p><code>docs/ic/measurement/specs/k17-subspace-d6-sat-native.yaml</code> sha256 <code>ad6c2dc41755</code></p>
 <p><code>docs/ic/measurement/registry.json</code> sha256 <code>d3e6254d3d2f</code></p>
