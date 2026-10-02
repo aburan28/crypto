@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 187, 2026-10-01.
+Current through Stage 188, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -59,6 +59,26 @@ zero unaffiliated comments. Gates 1–3 remain partial, gates 4–5 retain finit
 coverage, gate 6 remains false and gate 7 remains open. All-seven and SOTA
 remain false. Stage 187 audit SHA-256 is
 `1778162909b1722fe006b2721f6c42fb89793113158727ba4b9f97657fd2092d`.
+
+Stage 188 re-tests the exact Stage 178 dense symbolic-reducer index after dense
+critical-pair selection became the current F4 default. A Rust-native runner
+replaces the legacy Python measurement path for the new experiment and owns
+fresh-process CPU/wall/RSS accounting, watchdogs, hashing, terminal validation,
+composition and replay. The index again cuts divisor operations by 97.5294
+percent, from 4,190,633,182 linear tests to 103,532,494 exact submask probes.
+The frozen three-pair confirmation nevertheless has median paired ratios
+1.076402 wall, 0.972531 total core and 0.979483 RSS. It misses the unchanged
+0.97 wall-and-core gate, so the candidate is rejected and reverted; the
+selected runtime remains dense exact pair selection, linear reducer scan and
+five-column `BlockTables`. Stage 188 adds a measured lower bound of 21
+components, 898.725862 wall-seconds and 3,270.706466 core-seconds, taking the
+cumulative lower bound to 529 components, 22,707.607152 wall-seconds and
+55,657.968684 core-seconds at the unchanged 6,310,576,128-byte maximum RSS.
+Complete cost remains `null` because the explicitly recorded native-meter
+bootstrap work was not outer-metered. Final native verification passes 31/31
+with result SHA-256
+`8c3e1d1fc09f341434f71e28ff25b29119b4a0b9854d05f4568992d8a5bbdeb3`.
+No SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
