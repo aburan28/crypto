@@ -65,6 +65,64 @@ definition in the corresponding retained nvcc client command and rejects the
 opposite definition.  Runtime resources, binary hashes and SASS bind every
 sample to that executable.
 
+## Measured result
+
+Attempt 1 stopped before timing because the producer expected a runtime inline
+marker that current main does not print.  Its arithmetic, storage, shared-sigma,
+checkpoint and replay/corpus observations passed, but the attempt remains a
+[`PRODUCER_FAILURE`](attempt-1-producer-failure.json) with no scientific
+decision.  The additive repair changed only that producer gate to the exact
+retained nvcc-definition check described above.
+
+Attempt 2 ran on one RTX PRO 6000 (UUID
+`GPU-85cc08d8-b26d-7c50-1b69-72ea66d6787a`, driver 580.95.05) from source
+commit `9f2086cc791bdf1e42fe9f83e0e6d0b520815c37`, with CUDA 13.3.73 native
+sm_120 code.  Both arms passed the arithmetic, compact-storage and shared-sigma
+GPU gates.  Bidirectional cross-binary resume produced the same final
+checkpoint as each uninterrupted run.  Each arm emitted 29,779 headerless v1
+records, replayed 300/300 against the reference with zero mismatches and zero
+drops, and the shared format-aware comparator produced the same sorted-record
+SHA-256, `17e29b9695e175f306b0c76136b7331601596c98b4a9e1c27311f03c6b4a635d`.
+
+The two excluded full-work warmups were 14.839194 B/s control and 15.134070
+B/s inline3.  The five ranked pairs were:
+
+| Pair | Order | Control B/s | inline3 B/s | inline3 / control |
+|---:|:---:|---:|---:|---:|
+| 1 | AB | 14.635580 | 15.007083 | 1.025383552 |
+| 2 | BA | 14.552702 | 14.972113 | 1.028820146 |
+| 3 | AB | 14.534256 | 14.941312 | 1.028006662 |
+| 4 | BA | 14.517639 | 14.936047 | 1.028820664 |
+| 5 | AB | 14.510774 | 14.931758 | 1.029011823 |
+
+The control and inline3 medians are **14.534256 B/s** and **14.941312 B/s**,
+a 2.800666% ratio of arm medians.  The median paired ratio is **1.028820146**;
+the geometric mean paired ratio is 1.028007672 with a two-sided 95% log-ratio
+interval of **[1.026123156, 1.029895649]**.  All five pairs favor inline3, so
+the frozen admission rule says **promote `PACKED_INLINE_POLY=3` for this exact
+checkpoint-compatible sigma preset**.
+
+This does not meet the separate 26 B/s objective: 14.941312 B/s is 57.466585%
+of the objective, 11.058688 B/s short.  It is bounded kernel-engineering
+evidence on one allocation, not a full-ECDLP result or cryptanalytic advance.
+The walk resources moved from 104 to 91 registers; both arms have zero walk
+stack/local bytes, 1,792 function shared bytes plus the 1,024-byte driver
+reservation, and a 2,816-byte compiled shared extent.  Full cubins and SASS are
+retained in the raw archive and hash-bound in the
+[`independent audit`](independent-audit.json).
+
+The canonical derived artifact is [`result.json`](result.json).  The raw
+68-file archive is stored in the `ecc2k130-jobs` Modal volume at
+`594e18cedb0048d6aafba591eba51b11/results.tgz`: 12,187,638 bytes, SHA-256
+`bba5b4bc46a22a6d297114fb96933e8b143526cace83b58908414525df7b0fd2`.
+Fetch it with:
+
+```sh
+modal run modal_job.py \
+  --fetch-token 594e18cedb0048d6aafba591eba51b11 \
+  --out /tmp/ecc2k-sigma-inline-refresh-audit
+```
+
 ## Reproduction
 
 From `ecc2k130/` on the committed protocol revision:
