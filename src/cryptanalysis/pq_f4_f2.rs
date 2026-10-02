@@ -452,7 +452,22 @@ fn full_m4ri_enabled() -> bool {
 }
 
 fn full_m4ri_shape(n_rows: usize, n_cols: usize) -> bool {
-    n_rows >= 128 && n_cols >= 256 && n_cols <= n_rows.saturating_mul(4)
+    full_m4ri_shape_for(n_rows, n_cols, full_m4ri_min_rows())
+}
+
+fn full_m4ri_min_rows() -> usize {
+    static MIN_ROWS: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *MIN_ROWS.get_or_init(|| {
+        std::env::var("F4_F2_FULL_M4RI_MIN_ROWS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(128)
+            .max(128)
+    })
+}
+
+fn full_m4ri_shape_for(n_rows: usize, n_cols: usize, min_rows: usize) -> bool {
+    n_rows >= min_rows && n_cols >= 256 && n_cols <= n_rows.saturating_mul(4)
 }
 
 /// Full-matrix Method of Four Russians elimination.
@@ -2548,6 +2563,15 @@ mod tests {
         ] {
             assert_eq!(matrix_profile_bin(rows), expected);
         }
+    }
+
+    #[test]
+    fn full_m4ri_minimum_rows_preserves_other_shape_gates() {
+        assert!(!full_m4ri_shape_for(4095, 4096, 4096));
+        assert!(full_m4ri_shape_for(4096, 4096, 4096));
+        assert!(!full_m4ri_shape_for(4096, 255, 4096));
+        assert!(!full_m4ri_shape_for(4096, 16_385, 4096));
+        assert!(full_m4ri_shape_for(128, 256, 128));
     }
 
     /// A budget is honoured and reported, not silently turned into a

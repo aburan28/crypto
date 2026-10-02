@@ -10371,5 +10371,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage196-shape-profile -->
+<!-- BEGIN current-f4-stage197-hybrid-screen -->
+<div class="panel" id="current-f4-stage197-hybrid-screen">
+      <div class="panel-head">
+        <h2>Current Boolean F4, Stage 197: 4,096-row hybrid clears the one-pair screen <span class="chip">continue</span></h2>
+        <p>One unprofiled current/hybrid pair on the public <code>n=59, ell=9, m=3</code>
+          true-negative. The candidate routes only matrices with at least 4,096 rows through existing
+          full M4RI and keeps selected five-column <code>BlockTables</code> everywhere else.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The screen required candidate/current wall and total-core ratios both strictly below 0.97. Confirmation remains mandatory before any default change.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Single-core s</th><th>Peak RSS</th><th>Candidate / current wall / core / RSS</th><th>Ratio to direct wall / core / RSS</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, inherited exact replay</td><td class="n">0.454839</td><td class="n">0.306417</td><td class="n">0.306417</td><td class="n">41.07 MB</td><td class="n">&mdash;</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Current five-column BlockTables</td><td class="n">38.813683</td><td class="n">190.758951</td><td class="n">null</td><td class="n">4,065.13 MB</td><td class="n">1.000000 / 1.000000 / 1.000000</td><td class="n">85.334943 / 622.547908 / 98.989029</td><td><span class="chip">selected control</span></td></tr>
+            <tr><td><strong>Full M4RI at &ge;4096 rows</strong></td><td class="n"><strong>29.680804</strong></td><td class="n"><strong>168.655318</strong></td><td class="n">null</td><td class="n">3,379.00 MB</td><td class="n"><strong>0.764699 / 0.884128 / 0.831216</strong></td><td class="n">65.255587 / 550.411998 / 82.281269</td><td><span class="chip">continue</span> passes screen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">work</span> candidate routes exactly 481 matrices and reduces performed XORs from 147,794,583,858 to 102,707,985,015; all smaller matrices remain on BlockTables</span>
+        <span><span class="chip">correctness</span> both arms complete 242/242 systems with exact source/equation identities and exhaustive UNSAT; profiling counters are zero</span>
+        <span><span class="chip">decision</span> wall and CPU both clear 0.97, so the already frozen three-pair confirmation may run; the candidate is not yet selected</span>
+        <span><span class="chip">accounting</span> Stage 197 lower bound: 12 components, 265.834501 wall-seconds, 1,101.564255 core-seconds, 5.247 GB peak RSS</span>
+        <span><span class="chip">claim boundary</span> cumulative lower bound: 670 components, 25,072.527086 wall-seconds, 66,321.843992 core-seconds, 6.31 GB maximum RSS; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-197-hybrid-m4ri-screen-20261002/result.json</code>; one-target screen only, with no relation-yield, unknown-scalar, full-rho, independent-review, novelty or SOTA movement</span>
+      </div>
+    </div>
+<!-- END current-f4-stage197-hybrid-screen -->
 </body>
 </html>
