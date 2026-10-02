@@ -1,0 +1,48 @@
+{
+  "schema": "ecc2k130-sparse-alu-synthesis-v1",
+  "valid": true,
+  "sourceParent": "b3d0095f6fb74c180c71780ead8ab692b4831cc1",
+  "checks": {"basisVectors": 131, "denseVectors": 4096, "denseLjComparisons": 32768, "compositionIdentities": 59},
+  "aluBudgetsPerUpdate": {"fused15_436677": 1894.044942444543, "target26": 1124.529230769231},
+  "diagonalCircuits": {
+    "sparseToNormal": {"matrixOnes": 8541, "nonemptyDiagonals": 261, "wordTerms": 754, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 754, "exactShiftPlusLop3Ops": 1503},
+    "sparseToBeta": {"matrixOnes": 8559, "nonemptyDiagonals": 259, "wordTerms": 751, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 751, "exactShiftPlusLop3Ops": 1497},
+    "betaToSparse": {"matrixOnes": 8551, "nonemptyDiagonals": 259, "wordTerms": 755, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 755, "exactShiftPlusLop3Ops": 1505},
+    "L3": {"matrixOnes": 1474, "nonemptyDiagonals": 223, "wordTerms": 489, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 489, "exactShiftPlusLop3Ops": 973},
+    "L4": {"matrixOnes": 2567, "nonemptyDiagonals": 233, "wordTerms": 569, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 569, "exactShiftPlusLop3Ops": 1133},
+    "L5": {"matrixOnes": 3894, "nonemptyDiagonals": 243, "wordTerms": 643, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 643, "exactShiftPlusLop3Ops": 1281},
+    "L6": {"matrixOnes": 5302, "nonemptyDiagonals": 254, "wordTerms": 687, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 687, "exactShiftPlusLop3Ops": 1369},
+    "L7": {"matrixOnes": 6511, "nonemptyDiagonals": 258, "wordTerms": 724, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 724, "exactShiftPlusLop3Ops": 1443},
+    "L8": {"matrixOnes": 7261, "nonemptyDiagonals": 257, "wordTerms": 729, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 729, "exactShiftPlusLop3Ops": 1453},
+    "L9": {"matrixOnes": 7790, "nonemptyDiagonals": 256, "wordTerms": 730, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 730, "exactShiftPlusLop3Ops": 1455},
+    "L10": {"matrixOnes": 8266, "nonemptyDiagonals": 257, "wordTerms": 746, "zeroDiagonalTerms": 5, "optimisticFreeShiftLop3Ops": 746, "exactShiftPlusLop3Ops": 1487}
+  },
+  "jointCommonStructure": {"unionWordTerms": 769, "unionZeroDiagonalTerms": 5, "totalMapMemberships": 5317, "uniqueNonzeroMasksAcrossTerms": 5010, "identicalMasksAcrossAllEight": 0, "uniqueOutputRows": 1048, "duplicateOutputRows": 0},
+  "xorCse": {
+    "sparseToNormal": {"outputs": 131, "temporaries": 953, "signals": 1084, "finalTerms": 2177, "finalXors": 2046, "totalXors": 2999},
+    "L3": {"outputs": 131, "temporaries": 200, "signals": 331, "finalTerms": 666, "finalXors": 535, "totalXors": 735},
+    "sparseToNormalPlusL3": {"outputs": 262, "temporaries": 1114, "signals": 1245, "finalTerms": 2850, "finalXors": 2588, "totalXors": 3702}
+  },
+  "dynamicSelector": {"expectedDistinctBranchesPerWarp": 7.874658657010, "selectorProbabilities": [0.142841847214,0.142841847214,0.132383104631,0.117606669961,0.107168378195,0.107168378195,0.117606669961,0.132383104631], "warpPresenceProbabilities": [0.992789743280,0.992789743280,0.989370911616,0.981753022674,0.973415650936,0.973415650936,0.981753022674,0.989370911616]},
+  "mapOnlySourceOpsPerUpdate": {
+    "oracleCheapestFreeShiftFreeSelection": 1826.125000000000,
+    "oracleCheapestExactDiagonal": 3636.625000000000,
+    "perfectCompactionWeightedMeanFreeShift": 2162.867223071344,
+    "warpDivergentExactDiagonal": 22532.377287681145,
+    "allOutputsSharedShiftsAndBranchlessSelect": 13922.625000000000,
+    "greedyXorNormalOnly": 2999,
+    "greedyXorNormalPlusL3XPlusL3Y": 4437
+  },
+  "frobeniusComposition": {"sparseAluSquareSourceOps": 157, "perfectCompactionMeanSquaresPerUpdate": 13.000000000000, "perfectCompactionMapOps": 3638.125000000000, "branchlessTenSquareMapOps": 4807.125000000000, "perfectCompactionClmadSquaresPerUpdate": 65.000000000000, "perfectCompactionClmadOnlyCeilingBillionPerSecond": 14.056615384615},
+  "completeB16ComparableSubledger": {
+    "referenceSelectorAndReductionSourceOps": 2276.250000000000,
+    "oracleCandidateMaps": 1826.125000000000,
+    "sparseReducers": 476.625000000000,
+    "aluSquareSpread": 75.000000000000,
+    "oracleCandidateTotal": 2377.750000000000,
+    "candidateOverReference": 1.044590884130
+  },
+  "ceilingsBillionUpdatesPerSecond": {"oracleMapOnlyAlu": 16.010820726949, "oracleComparableSubledgerAlu": 12.296397855115},
+  "decision": {"survivesStaticGate": false, "classification": "NEGATIVE_STATIC_EVIDENCE", "reason": "Even the impossible oracle that assigns L3 to every update, makes every shift and dynamic selection free, and ignores all other walk work spends more ALU on maps than the entire 26 B/s budget. Adding the frozen sparse reducer and ALU-square spread is also worse than the reference comparable source subledger."},
+  "scope": "Bounded native static circuit feasibility only; no CUDA compile, GPU run, sparse walk, search, solver or key recovery."
+}
