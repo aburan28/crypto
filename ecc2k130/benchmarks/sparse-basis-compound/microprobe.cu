@@ -263,7 +263,7 @@ __global__ __launch_bounds__(kProbeThreads, 1) void benchmarkKernel(const uint32
                                                                    P131 *output,
                                                                    uint32_t rounds) {
     extern __shared__ __align__(16) uint32_t shared[];
-    for (int i = threadIdx.x; i < kTableWords; i += blockDim.x) shared[i] = table[i];
+    for (int i = threadIdx.x; i < kTableWords; i += kProbeThreads) shared[i] = table[i];
     __syncthreads();
     const uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     P131 a = seedInput(tid);
@@ -280,7 +280,7 @@ template <int MODE>
 __global__ __launch_bounds__(kProbeThreads, 1) void correctnessKernel(
     const uint32_t *table, const P131 *input, const uint32_t *j, P131 *output, int n) {
     extern __shared__ __align__(16) uint32_t shared[];
-    for (int i = threadIdx.x; i < kTableWords; i += blockDim.x) shared[i] = table[i];
+    for (int i = threadIdx.x; i < kTableWords; i += kProbeThreads) shared[i] = table[i];
     __syncthreads();
     const int id = int(blockIdx.x * blockDim.x + threadIdx.x);
     if (id >= n) return;
