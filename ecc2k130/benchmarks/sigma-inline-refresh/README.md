@@ -59,6 +59,11 @@ No optional early screen changes the five-pair trial count.  Failures and partia
 logs remain in the Modal result archive.  Full SASS, extracted cubins, ptxas logs,
 runtime resources, source hashes, executable hashes, toolchain identity, GPU
 identity and raw timing logs are retained so the derived result can be replayed.
+Current main does not emit a runtime marker for `PACKED_INLINE_POLY`; the gate
+therefore requires exactly one matching `-DECC_PACKED_INLINE_POLY=0` or `=3`
+definition in the corresponding retained nvcc client command and rejects the
+opposite definition.  Runtime resources, binary hashes and SASS bind every
+sample to that executable.
 
 ## Reproduction
 
@@ -77,4 +82,3 @@ bash benchmarks/sigma-inline-refresh/audit.sh \
 The job script invokes only bounded `--bench`, bounded `--verify 300` and small
 checkpoint-continuation commands.  It never invokes `--load`, `--replay`, a search
 entrypoint, `mergeCorpus` or `solveCorpus`.
-

@@ -131,6 +131,19 @@ if [ ! -x client-control ] || [ ! -x client-inline3 ]; then
   exit 1
 fi
 
+# Current main does not print ECC_PACKED_INLINE_POLY at runtime. Bind each
+# executable to its mode through the retained, exact nvcc command instead.
+if [ "$(grep -o -- '-DECC_PACKED_INLINE_POLY=0' "$R/build-control.log" | wc -l)" -ne 1 ] ||
+   grep -q -- '-DECC_PACKED_INLINE_POLY=3' "$R/build-control.log"; then
+  echo 'control build is not uniquely bound to PACKED_INLINE_POLY=0' | tee -a "$R/failures.txt"
+  fail=1
+fi
+if [ "$(grep -o -- '-DECC_PACKED_INLINE_POLY=3' "$R/build-inline3.log" | wc -l)" -ne 1 ] ||
+   grep -q -- '-DECC_PACKED_INLINE_POLY=0' "$R/build-inline3.log"; then
+  echo 'candidate build is not uniquely bound to PACKED_INLINE_POLY=3' | tee -a "$R/failures.txt"
+  fail=1
+fi
+
 {
   sha256sum client-control client-inline3
   sha256sum packed-cuda-control packed-cuda-inline3
@@ -230,12 +243,11 @@ fi
 sha256sum "$R"/*.ck > "$R/checkpoint-sha256.txt"
 
 verify_arm() {
-  local name=$1 mode=$2 log="$R/verify-$1.log" rc=0
+  local name=$1 log="$R/verify-$1.log" rc=0
   "./client-$name" --curve 131 --packed --threads "$WORKERS" --steps "$VERIFY_STEPS" \
     --launches "$VERIFY_LAUNCHES" --dp-weight "$VERIFY_WEIGHT" --dp-cap 2000000 \
     --verify 300 --run-id "$RUN_ID" --dp-file "$R/dp-$name.bin" > "$log" 2>&1 || rc=$?
   if [ "$rc" -ne 0 ] ||
-     ! grep -qx "packed inline polynomial: $mode" "$log" ||
      ! grep -qx 'packed shared sigma: 1' "$log" ||
      ! grep -qx 'packed table walk: 0 (0 branches, 0 shared bytes)' "$log" ||
      ! grep -Eq "^backend cuda-packed131: $WORKERS threads x 16 slots x 1 lanes = 6160384 walks, dp weight $VERIFY_WEIGHT, $VERIFY_STEPS steps per launch$" "$log" ||
@@ -247,8 +259,8 @@ verify_arm() {
   fi
 }
 
-verify_arm control 0 || fail=1
-verify_arm inline3 3 || fail=1
+verify_arm control || fail=1
+verify_arm inline3 || fail=1
 python3 benchmarks/dp_identity.py "$R" control inline3 > "$R/dp-identity.txt" 2>&1 || fail=1
 if ! grep -Eq '^inline3 +[1-9][0-9]* records .* IDENTICAL to control$' "$R/dp-identity.txt"; then
   echo 'format-aware sorted DP identity failed or corpus empty' | tee -a "$R/failures.txt"
@@ -264,8 +276,7 @@ fi
 printf 'phase\tpair\torder\tvariant\trateMps\titerations\tdropped\tlogSha256\tgpuState\n' > "$R/samples.tsv"
 
 check_timing_markers() {
-  local log=$1 mode=$2
-  grep -qx "packed inline polynomial: $mode" "$log" &&
+  local log=$1
   grep -qx 'packed denominator cache: 1' "$log" &&
   grep -qx 'packed multiply by value: 1' "$log" &&
   grep -qx 'packed Frobenius network: 3' "$log" &&
@@ -285,7 +296,7 @@ check_timing_markers() {
 }
 
 sample() {
-  local phase=$1 pair=$2 order=$3 name=$4 mode=$5
+  local phase=$1 pair=$2 order=$3 name=$4
   local log="$R/${phase}-${pair}-${order}-${name}.log" rc=0 count rate iterations dropped digest state
   "./client-$name" --curve 131 --packed --threads "$WORKERS" --steps "$STEPS" \
     --launches "$LAUNCHES" --verify 0 --run-id "$RUN_ID" --bench > "$log" 2>&1 || rc=$?
@@ -295,7 +306,7 @@ sample() {
     for (i=1;i<=NF;i++) if ($i=="iterations") v=$(i-1)
   } END {print v+0}' "$log")
   dropped=$(sed -nE 's/.*\(([0-9]+) verified against the reference, ([0-9]+) dropped\).*/\2/p' "$log" | tail -1)
-  check_timing_markers "$log" "$mode" || rc=1
+  check_timing_markers "$log" || rc=1
   if [ "$count" -ne 1 ] || [ "$iterations" -ne "$EXPECTED_UPDATES" ] ||
      [ "${dropped:-1}" -ne 0 ] || ! awk -v r="${rate:-0}" 'BEGIN { exit !(r+0 > 0) }'; then
     rc=1
@@ -310,17 +321,17 @@ sample() {
 }
 
 # Exactly two full-work warmups, excluded by the auditor.
-sample warmup 0 1 control 0 || fail=1
-sample warmup 0 2 inline3 3 || fail=1
+sample warmup 0 1 control || fail=1
+sample warmup 0 2 inline3 || fail=1
 
 # Exactly five equal-work pairs with alternating order AB, BA, AB, BA, AB.
 for pair in 1 2 3 4 5; do
   if [ $((pair % 2)) -eq 1 ]; then
-    sample ranked "$pair" 1 control 0 || fail=1
-    sample ranked "$pair" 2 inline3 3 || fail=1
+    sample ranked "$pair" 1 control || fail=1
+    sample ranked "$pair" 2 inline3 || fail=1
   else
-    sample ranked "$pair" 1 inline3 3 || fail=1
-    sample ranked "$pair" 2 control 0 || fail=1
+    sample ranked "$pair" 1 inline3 || fail=1
+    sample ranked "$pair" 2 control || fail=1
   fi
 done
 

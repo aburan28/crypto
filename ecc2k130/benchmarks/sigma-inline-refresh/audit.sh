@@ -22,13 +22,23 @@ need_file() {
 }
 
 for path in config.txt host-before.txt source-files.sha256 source-manifest.sha256 \
-  binary-sha256.txt code-sha256.txt resources-control.txt resources-inline3.txt \
+  build-control.log build-inline3.log binary-sha256.txt code-sha256.txt \
+  resources-control.txt resources-inline3.txt \
   sass-control.txt.gz sass-inline3.txt.gz gate-control-arithmetic.log \
   gate-inline3-arithmetic.log gate-control-storage.log gate-inline3-storage.log \
   gate-control-shared-sigma.log gate-inline3-shared-sigma.log checkpoint-sha256.txt \
   verify-control.log verify-inline3.log dp-control.bin dp-inline3.bin dp-identity.txt; do
   need_file "$path"
 done
+
+if [ "$(grep -o -- '-DECC_PACKED_INLINE_POLY=0' "$R/build-control.log" 2>/dev/null | wc -l)" -ne 1 ] ||
+   grep -q -- '-DECC_PACKED_INLINE_POLY=3' "$R/build-control.log" 2>/dev/null; then
+  fail=1
+fi
+if [ "$(grep -o -- '-DECC_PACKED_INLINE_POLY=3' "$R/build-inline3.log" 2>/dev/null | wc -l)" -ne 1 ] ||
+   grep -q -- '-DECC_PACKED_INLINE_POLY=0' "$R/build-inline3.log" 2>/dev/null; then
+  fail=1
+fi
 
 for name in control inline3; do
   grep -qx 'PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing' \
