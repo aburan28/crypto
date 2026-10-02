@@ -188,18 +188,6 @@ impl SystemSolver for F4F2 {
                 "inner_build_parallel_disabled_calls",
                 st.inner_build_parallel_disabled_calls,
             ),
-            ("block_table_add_calls", st.block_table_add_calls),
-            ("block_table_runs", st.block_table_runs),
-            (
-                "block_table_words_scheduled",
-                st.block_table_words_scheduled,
-            ),
-            (
-                "block_table_buffer_allocations",
-                st.block_table_buffer_allocations,
-            ),
-            ("block_table_buffer_reuses", st.block_table_buffer_reuses),
-            ("block_table_reused_words", st.block_table_reused_words),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
