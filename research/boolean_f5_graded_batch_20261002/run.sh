@@ -69,6 +69,7 @@ fi
 set +e
 python3 "$isolation" run --cpus "$(cat "$out/cpu-siblings.txt")" --out "$out/conditions.jsonl" --label "f5-graded-batch/$phase" \
   --settle 2 --max-other-cpu 0.10 --max-psi 5.0 -- \
+  timeout --signal=TERM --kill-after=5s 1200 \
   "$worker" --campaign "$phase" "$out/protocol.json" > "$out/raw.jsonl" 2> "$out/worker.stderr"
 worker_status=$?
 set -e
