@@ -978,6 +978,28 @@ class SessionAuditTests(unittest.TestCase):
         g["relations"].update(stop="count", count=1000)
         self.assertTrue(spec_differences(validate(f), validate(g), ["relations.count"])["forbidden"])
 
+    def test_first_parameter_under_an_empty_mapping_is_its_declared_field(self):
+        # The enumerate arm normalises to decomposition.params: {}; giving the
+        # mitm arm its first parameter must not read as a second, undeclared
+        # change (the m = 3 autoresearcher session hit exactly this).
+        specs = os.path.join(REPO, "docs", "ic", "measurement", "specs")
+        a = load(os.path.join(specs, "ar-p20-smallx-m3-enum.yaml"))["spec"]
+        b = load(os.path.join(specs, "ar-p20-smallx-m3-mitm.yaml"))["spec"]
+        self.assertEqual(a["decomposition"]["params"], {})
+        declared = ["decomposition.method", "decomposition.params.table_arity"]
+        d = spec_differences(a, b, declared)
+        self.assertEqual(d["confound"], [])
+        self.assertEqual([x["field"] for x in d["declared"]],
+                         ["decomposition.method", "decomposition.params", "decomposition.params.table_arity"])
+        # Undeclared, the same change is still refused, and a second child
+        # under the container stays a confound of its own.
+        self.assertIn("decomposition.params",
+                      [x["field"] for x in spec_differences(a, b, ["decomposition.method"])["confound"]])
+        b = copy.deepcopy(b)
+        b["decomposition"]["params"]["extra"] = 1
+        self.assertEqual([x["field"] for x in spec_differences(a, b, declared)["confound"]],
+                         ["decomposition.params.extra"])
+
     def test_a_session_from_another_build_gets_integrity_checks_and_a_note(self):
         from unittest import mock
         import icms.session as sess
