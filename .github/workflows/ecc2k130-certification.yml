@@ -33,6 +33,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: make -C ecc2k130 check-cli
+      - run: make -C ecc2k130 test-sigma-fused-shared-scratch-model
       - run: python3 ecc2k130/codegen/lambda_projective.py --table
 
   # The sigma step schedule must exclude orbit returns through the tested bound: a walk
