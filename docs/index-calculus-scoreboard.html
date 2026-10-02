@@ -6799,6 +6799,42 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     matrices and the effect on complete solving remain unresolved. Historical results below
     and the full-method verdict remain unchanged.</p>
 </section>
+<section class="panel" id="boolean-f5-amortized-ceiling-20261002">
+  <div class="panel-head">
+    <h2>Boolean F5 phase ceiling: registered validated metric fails 2&times; <span class="chip">accounting</span></h2>
+    <p>A native Linux x86-64 AVX2 discovery completed 48 public generated cells and 9,408
+      timed F5 calls on one reserved physical core. The registered optimistic ceiling
+      assumes matrix build and reduction become free while criterion work, returned-row
+      unpacking, SHA-256 output validation and destruction remain. All four n=24
+      upper confidence bounds are below 2&times;; fresh holdouts were not run.</p>
+    <p>Accounting boundary: exact returned-row digest validation consumed about
+      <strong>50.01%</strong> of the frozen n=24 outer timer, while build plus reduction
+      consumed about <strong>37.88%</strong>. Thus the roughly 1.61&times; bound applies
+      only to this validation-inclusive benchmark metric. It does not bound the F5
+      API call without that digest. A call-only ceiling requires a new protocol and
+      fresh seeds. The first attempt's preflight SMT refusal remains retained with
+      zero admitted timing.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_amortized_ceiling_20261002/CONCLUSION.md">qualified decision and accounting correction</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_amortized_ceiling_20261002/qualified_discovery_01/results.json">paired upper bounds</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_amortized_ceiling_20261002/qualified_discovery_01/manifest.json">sealed bundle</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_f5_amortized_ceiling_20261002/RUNS.json">run registry</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Registered n=24 batch-32 optimistic validation-inclusive ceiling,
+      median and 95% bootstrap upper bound. A value above 2 would only permit
+      testing a cache; it would not measure a speedup.</caption>
+    <thead><tr><th>Seed and affine family</th><th>Median ceiling</th><th>95% upper</th><th>A/A floor</th><th>&gt;2 upper gate</th></tr></thead>
+    <tbody>
+      <tr><td>20261008, independent</td><td>1.612</td><td>1.613</td><td>1.007</td><td>REJECTED</td></tr>
+      <tr><td>20261008, walk</td><td>1.609</td><td>1.610</td><td>1.006</td><td>REJECTED</td></tr>
+      <tr><td>3141627, independent</td><td>1.611</td><td>1.612</td><td>1.004</td><td>REJECTED</td></tr>
+      <tr><td>3141627, walk</td><td>1.607</td><td>1.608</td><td>1.004</td><td>REJECTED</td></tr>
+    </tbody>
+  </table></div>
+  <p>No graded F5 batch cache, complete-call speedup, natural relation-yield result,
+    calibrated IC cost or rho comparison is measured here. No curve or key input is present.</p>
+</section>
 <section class="panel" id="boolean-f5-affine-signature-20261002">
   <div class="panel-head">
     <h2>Boolean F5 affine row signatures: structural gate passes, complete cost unknown <span class="chip">accounting</span></h2>

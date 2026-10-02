@@ -1,6 +1,26 @@
 {
   "schema_version": 1,
-  "discovery": null,
+  "discovery": {
+    "path": "qualified_discovery_01",
+    "workflow_run_id": 37006736293,
+    "workflow_attempt": 1,
+    "artifact_id": 11226853809,
+    "artifact_archive_sha256": "63ce9a5b5b3e99b96e0c274b65db2f2a2f3b7f232de59d8d735e994f85e8f5aa",
+    "source_head": "7404964eb2bb52faa667fce83d3bcc3fb3e9c766",
+    "manifest_sha256": "f7c177888fbf7c5fca8d173940d098fd037e1269abb826656696e454b8d55468",
+    "raw_sha256": "549fa88040223255ab85e8f09259b7d0bc014573221d7d2c374e061679eb156e",
+    "result_sha256": "03c8de9ecdae1a528b2e8728a9e68e78756c265c953816aed193c57863319ff5",
+    "resource_qualified": true,
+    "native_replay": "PASS",
+    "cells": 48,
+    "timed_calls": 9408,
+    "primary_passed": 0,
+    "primary_required": 4,
+    "gate_pass": false,
+    "metric": "validation_inclusive_optimistic_ceiling",
+    "call_only_ceiling": null,
+    "holdout_executed": false
+  },
   "holdout": null,
   "failed_attempts": [
     {
@@ -18,7 +38,7 @@
       "holdout_executed": false
     }
   ],
-  "decision": "awaiting_full_core_reserved_discovery",
+  "decision": "reject_before_holdout_for_registered_validation_inclusive_metric",
   "complete_f5_speedup": null,
   "full_ic_cost": null,
   "rho_ratio": null
