@@ -7,11 +7,22 @@ apt-get install -y -qq make g++ >/dev/null 2>&1
 
 R=${RESULTS:-/results}
 mkdir -p "$R"
+GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)
 CAP=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -1 | tr -d '. ')
 ARCH="-gencode arch=compute_${CAP},code=sm_${CAP}"
-VERIFY_THREADS=${VERIFY_THREADS:-96256}
-BENCH_THREADS=${BENCH_THREADS:-385024}
+VERIFY_THREADS=96256
+BENCH_THREADS=385024
 fail=0
+
+if [ "$GPU_NAME" != "NVIDIA RTX PRO 6000 Blackwell Server Edition" ] || [ "$CAP" != 120 ]; then
+  echo "frozen hardware mismatch: $GPU_NAME sm_$CAP" >&2
+  exit 2
+fi
+nvcc --version | grep -q 'release 13\.3, V13\.3\.73' || {
+  echo "frozen compiler mismatch" >&2
+  nvcc --version >&2
+  exit 2
+}
 
 {
   nvidia-smi --query-gpu=name,uuid,driver_version,clocks.max.sm,power.limit,memory.total,compute_cap --format=csv,noheader
@@ -69,7 +80,7 @@ verify() {
   grep -E "MISMATCH|OVERFLOW|finished|packed sigma fused|resident|registers" \
     "$R/verify-$name.log" | tee "$R/verify-$name.txt" || true
   grep -qx "packed sigma fused: $fused" "$R/verify-$name.log" || status=1
-  grep -Eq "^backend cuda-packed131: $VERIFY_THREADS threads x 16 slots x 1 lanes = $((VERIFY_THREADS*16)) walks," \
+  grep -Eq "^backend cuda-packed131: $VERIFY_THREADS threads x 16 slots x 1 lanes = $((VERIFY_THREADS*16)) walks, dp weight 48, 95 steps per launch$" \
     "$R/verify-$name.log" || status=1
   grep -Eq "\(300 verified against the reference, 0 dropped\)" "$R/verify-$name.log" || status=1
   ! grep -Eq "MISMATCH|OVERFLOW" "$R/verify-$name.log" || status=1
@@ -103,7 +114,7 @@ sample() {
   count=$(grep -c '^[[:space:]]*finished: [0-9.][0-9.]* M it/s' "$log" || true)
   rate=$(sed -nE 's/^[[:space:]]*finished: ([0-9.]+) M it\/s.*/\1/p' "$log")
   grep -qx "packed sigma fused: $fused" "$log" || rc=1
-  grep -Eq "^backend cuda-packed131: $BENCH_THREADS threads x 16 slots x 1 lanes = $((BENCH_THREADS*16)) walks," \
+  grep -Eq "^backend cuda-packed131: $BENCH_THREADS threads x 16 slots x 1 lanes = $((BENCH_THREADS*16)) walks, dp weight 0, 1024 steps per launch$" \
     "$log" || rc=1
   if [ "$count" != 1 ] || ! awk -v r="$rate" 'BEGIN{exit !(r+0>0)}'; then rc=1; fi
   digest=$(sha256sum "$log" | awk '{print $1}')
@@ -151,4 +162,3 @@ fi
   | tee "$R/summary.txt" || exit 1
 sha256sum "$R"/* > "$R/artifact-files.sha256"
 echo "=== done"
-
