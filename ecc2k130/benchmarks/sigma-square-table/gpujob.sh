@@ -13,8 +13,15 @@ EXPECTED_UPDATES=201863462912
 RUN_ID=43
 fail=0
 
-if [[ ! ${SOURCE_REV:-} =~ ^[0-9a-f]{40}$ ]]; then
-  echo "SOURCE_REV must be one clean 40-hex commit" | tee "$R/failures.txt"
+if [[ ! ${SOURCE_REV:-} =~ ^[0-9a-f]{40}$ ]] ||
+   [[ ! ${EXPECTED_SOURCE_REV:-} =~ ^[0-9a-f]{40}$ ]] ||
+   [ "$SOURCE_REV" != "$EXPECTED_SOURCE_REV" ]; then
+  echo "SOURCE_REV and EXPECTED_SOURCE_REV must be the same clean 40-hex commit" \
+    | tee "$R/failures.txt"
+  exit 2
+fi
+if [ $((BENCH_THREADS * 16 * 1024 * 32)) -ne "$EXPECTED_UPDATES" ]; then
+  echo "frozen timing-work arithmetic mismatch" | tee "$R/failures.txt"
   exit 2
 fi
 GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)
@@ -30,6 +37,7 @@ fi
   nvcc --version
   uname -a
   echo "source=$SOURCE_REV"
+  echo "expectedSource=$EXPECTED_SOURCE_REV"
   echo "geometry=B16/T256/minBlocks2 WITNESS0; verifyThreads=$VERIFY_THREADS; benchThreads=$BENCH_THREADS; partialThreads=$PARTIAL_THREADS"
   echo "updatesPerTimingRow=$EXPECTED_UPDATES"
 } > "$R/host.txt" 2>&1
@@ -41,6 +49,7 @@ fi
     benchmarks/sigma-square-table/gpujob.sh \
     benchmarks/sigma-square-table/log_check.cpp \
     benchmarks/sigma-square-table/summarize.cpp \
+    benchmarks/sigma-square-table/postrun_audit.cpp \
     benchmarks/sigma-square-table/compile_audit.cpp \
     benchmarks/sigma-square-table/replay.cpp \
     benchmarks/sigma-square-table/audit.cpp \
@@ -56,9 +65,12 @@ g++ -O2 -std=c++17 -Wall -Wextra -Werror \
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
   benchmarks/sigma-square-table/compile_audit.cpp -o /tmp/sigma-square-compile-audit || exit 1
 g++ -O2 -std=c++17 -Wall -Wextra -Werror \
+  benchmarks/sigma-square-table/postrun_audit.cpp -o /tmp/sigma-square-postrun-audit || exit 1
+g++ -O2 -std=c++17 -Wall -Wextra -Werror \
   benchmarks/sigma-fused/corpus_identity.cpp -o /tmp/corpus-identity || exit 1
 /tmp/sigma-square-log-check --self-test || exit 1
 /tmp/sigma-square-summarize --self-test || exit 1
+/tmp/sigma-square-postrun-audit --self-test || exit 1
 make -s test-sigma-square-table-native CXX=g++ > "$R/native-field-replay.log" 2>&1 || exit 1
 
 COMMON=(
@@ -118,6 +130,20 @@ cuobjdump --dump-sass client-candidate > /tmp/sigma-runtime-compile/candidate.sa
 sha256sum /tmp/sigma-runtime-compile/control.sass /tmp/sigma-runtime-compile/candidate.sass \
   > "$R/runtime-sass.sha256"
 
+# The occupancy API must admit two blocks before any correctness or timing
+# kernel.  Omitting --threads forces the engine to use that API's worker count.
+for arm in control candidate; do
+  "./client-$arm" --curve 131 --packed --bench --steps 1 --launches 1 --verify 0 \
+    > "$R/occupancy-$arm.log" 2>&1 || fail=1
+  /tmp/sigma-square-log-check "$arm" occupancy "$R/occupancy-$arm.log" \
+    "$VERIFY_THREADS" 0 1 1 -1 "$R/occupancy-$arm.check" || fail=1
+done
+if [ "$fail" != 0 ]; then
+  echo "two-block occupancy gate failed; correctness and timing suppressed" \
+    | tee -a "$R/failures.txt"
+  exit 1
+fi
+
 for arm in control candidate; do
   table=0; [ "$arm" = candidate ] && table=1
   for target in test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda; do
@@ -131,27 +157,30 @@ if [ "$fail" != 0 ]; then
 fi
 
 check_log() {
-  local arm=$1 mode=$2 log=$3 threads=$4 dp=$5 steps=$6 out=$7
-  /tmp/sigma-square-log-check "$arm" "$mode" "$log" "$threads" "$dp" "$steps" "$out"
+  local arm=$1 mode=$2 log=$3 threads=$4 dp=$5 steps=$6 launches=$7 resume=$8 out=$9
+  /tmp/sigma-square-log-check "$arm" "$mode" "$log" "$threads" "$dp" "$steps" \
+    "$launches" "$resume" "$out"
 }
 
 checkpoint_run() {
-  local arm=$1 launches=$2 checkpoint=$3 label=$4 rc=0 log
+  local arm=$1 launches=$2 checkpoint=$3 label=$4 resume=$5 rc=0 log
   log="$R/checkpoint-$label.log"
   "./client-$arm" --curve 131 --packed --threads "$PARTIAL_THREADS" --steps 16 \
     --launches "$launches" --verify 0 --run-id "$RUN_ID" --bench \
     --checkpoint "$checkpoint" --checkpoint-every 3600 > "$log" 2>&1 || rc=$?
   [ "$rc" = 0 ] || return 1
-  check_log "$arm" checkpoint "$log" "$PARTIAL_THREADS" 0 16 "$R/checkpoint-$label.check"
+  check_log "$arm" checkpoint "$log" "$PARTIAL_THREADS" 0 16 "$launches" "$resume" \
+    "$R/checkpoint-$label.check"
 }
-checkpoint_run control 2 "$R/control-whole.ck" control-whole || fail=1
-checkpoint_run candidate 2 "$R/candidate-whole.ck" candidate-whole || fail=1
-checkpoint_run control 1 "$R/control-prefix.ck" control-prefix || fail=1
+checkpoint_run control 2 "$R/control-whole.ck" control-whole -1 || fail=1
+checkpoint_run candidate 2 "$R/candidate-whole.ck" candidate-whole -1 || fail=1
+checkpoint_run control 1 "$R/control-prefix.ck" control-prefix -1 || fail=1
 cp "$R/control-prefix.ck" "$R/control-to-candidate.ck"
-checkpoint_run candidate 1 "$R/control-to-candidate.ck" control-to-candidate || fail=1
-checkpoint_run candidate 1 "$R/candidate-prefix.ck" candidate-prefix || fail=1
+checkpoint_run candidate 1 "$R/control-to-candidate.ck" control-to-candidate 16 || fail=1
+checkpoint_run candidate 1 "$R/candidate-prefix.ck" candidate-prefix -1 || fail=1
 cp "$R/candidate-prefix.ck" "$R/candidate-to-control.ck"
-checkpoint_run control 1 "$R/candidate-to-control.ck" candidate-to-control || fail=1
+checkpoint_run control 1 "$R/candidate-to-control.ck" candidate-to-control 16 || fail=1
+cmp "$R/control-prefix.ck" "$R/candidate-prefix.ck" || fail=1
 for checkpoint in candidate-whole.ck control-to-candidate.ck candidate-to-control.ck; do
   cmp "$R/control-whole.ck" "$R/$checkpoint" || fail=1
 done
@@ -163,7 +192,7 @@ verify_arm() {
     --dp-weight 48 --dp-cap 262144 --steps 95 --launches 7 --verify 300 \
     --run-id "$RUN_ID" --dp-file "$R/dp-$arm.bin" > "$log" 2>&1 || rc=$?
   [ "$rc" = 0 ] || return 1
-  check_log "$arm" verify "$log" "$VERIFY_THREADS" 48 95 "$R/verify-$arm.check"
+  check_log "$arm" verify "$log" "$VERIFY_THREADS" 48 95 7 -1 "$R/verify-$arm.check"
 }
 verify_arm control || fail=1
 verify_arm candidate || fail=1
@@ -177,9 +206,10 @@ if [ "$fail" != 0 ]; then
 fi
 echo "PASS: all correctness and identity gates" | tee "$R/preflight.txt"
 
-printf 'phase\tpair\torder\tvariant\trateMps\tlogSha256\tgpuState\n' > "$R/samples.tsv"
+printf 'phase\tpair\torder\tvariant\trateMps\titerations\tdropped\tlogSha256\tgpuState\n' > "$R/samples.tsv"
 sample() {
   local phase=$1 pair=$2 order=$3 variant=$4 arm rateFile log digest state rc=0
+  local rate iterations dropped
   arm=$variant
   case "$variant" in
     control|control_a|control_b) arm=control ;;
@@ -191,13 +221,15 @@ sample() {
   "./client-$arm" --curve 131 --packed --threads "$BENCH_THREADS" --bench \
     --steps 1024 --launches 32 --verify 0 > "$log" 2>&1 || rc=$?
   [ "$rc" = 0 ] || return 1
-  check_log "$arm" timing "$log" "$BENCH_THREADS" 0 1024 "$rateFile" || return 1
-  rate=$(cat "$rateFile")
+  check_log "$arm" timing "$log" "$BENCH_THREADS" 0 1024 32 -1 "$rateFile" || return 1
+  read -r rate iterations dropped < "$rateFile"
+  [ "$iterations" = "$EXPECTED_UPDATES" ] && [ "$dropped" = 0 ] || return 1
   digest=$(sha256sum "$log" | awk '{print $1}')
   state=$(nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu \
     --format=csv,noheader,nounits | head -1 | tr '\t' ' ')
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$phase" "$pair" "$order" "$variant" "$rate" "$digest" "$state" \
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$phase" "$pair" "$order" "$variant" "$rate" "$iterations" "$dropped" \
+    "$digest" "$state" \
     | tee -a "$R/samples.tsv"
 }
 
@@ -220,6 +252,12 @@ if [ "$fail" != 0 ]; then
   echo "timing row failed" | tee -a "$R/failures.txt"
   exit 1
 fi
+sha256sum "$R"/warmup-*.log "$R"/aa-*.log "$R"/ab-*.log > "$R/sample-files.sha256"
+sha256sum -c "$R/sample-files.sha256" > "$R/sample-files.check" 2>&1 || exit 1
+/tmp/sigma-square-postrun-audit "$R/samples.tsv" "$R/sample-files.sha256" \
+  "$R/sample-files.check" "$R" "$R/postrun-audit.json" | tee "$R/postrun-audit.txt" \
+  || exit 1
+echo "PASS: postrun timing ledger and log manifest" >> "$R/preflight.txt"
 /tmp/sigma-square-summarize "$R/samples.tsv" "$R/preflight.txt" "$R/result.json" \
   | tee "$R/summary.txt" || exit 1
 sha256sum "$R"/* > "$R/artifact-files.sha256"

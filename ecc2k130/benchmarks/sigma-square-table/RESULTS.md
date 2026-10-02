@@ -102,15 +102,19 @@ instructions occur after its second initialization barrier; the 65-instruction
 delta is therefore in the post-prologue walk body rather than the cooperative
 table copy.
 
-The producer is GitHub run `37044967938`, job `110964020023`, artifact
-`11243409010`; the immutable ZIP SHA-256 is
-`8d4044f1aef862396374c7961009584b3ad95451fdbf95bcbf9844dfd53669d3`.
+The repaired producer is GitHub run `37048199847`, job `110974759153`, artifact
+`11245940827`; the immutable ZIP SHA-256 is
+`99152a84774032f27959648be99f13792b5f00282f481323a18bd749e3bfab4e`.
+It contains all 22 manifest entries, including the six preregistered native
+`sm_120` probe objects for packed arithmetic, compact storage, and shared sigma
+under both arm values.
 [`compile-artifact.json`](compile-artifact.json),
 [`compile-files.sha256`](compile-files.sha256), and
-[`compile-result-core.json`](compile-result-core.json) retain the bindings and
-core-client audit.  Independent review correctly blocked GPU dispatch because
-that artifact did not contain the six preregistered CUDA probe objects; the
-next exact compile artifact must add and bind them before dispatch.
+[`compile-result.json`](compile-result.json) retain the repaired bindings and
+audit.  The superseded core-only artifact and the independent review that
+blocked it remain in `compile-artifact-core.json`,
+`compile-files-core.sha256`, `compile-result-core.json`, and
+`independent-compile-review.json`.
 
 Two fail-closed harness attempts remain recorded.  The first omitted a
 Makefile-supplied macro and incorrectly used CUDA-13.3 CLMAD in the generic
@@ -121,7 +125,7 @@ API's `unsigned long long` type and does not touch CUDA kernel sources.
 
 ## Next gate
 
-The compile artifact requires an independent read-only audit, followed by the
+The repaired compile artifact requires an independent read-only audit, followed by the
 frozen matched device replay, checkpoint, corpus, occupancy, A/A, and A/B
 gates.  Until then the flag remains default-off and the decision is
 `COMPILE_RESOURCE_PASS_DEVICE_OCCUPANCY_AND_RUNTIME_PENDING`.

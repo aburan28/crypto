@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -18,6 +19,57 @@ struct Decision {
     bool noise = false, promote = false, reject = false, goal = false;
     std::string name;
 };
+
+struct Expected { std::string phase, variant; int pair, order; };
+
+std::vector<std::string> splitTabs(const std::string &line) {
+    std::vector<std::string> fields;
+    size_t at = 0;
+    while (true) {
+        const size_t end = line.find('\t', at);
+        fields.push_back(line.substr(at, end == std::string::npos ? end : end - at));
+        if (end == std::string::npos) return fields;
+        at = end + 1;
+    }
+}
+
+bool parseInt(const std::string &text, int64_t *value) {
+    const char *begin = text.data(), *end = begin + text.size();
+    const auto parsed = std::from_chars(begin, end, *value);
+    return parsed.ec == std::errc() && parsed.ptr == end;
+}
+
+bool parseDouble(const std::string &text, double *value) {
+    char *end = nullptr;
+    *value = std::strtod(text.c_str(), &end);
+    return end == text.c_str() + text.size() && std::isfinite(*value);
+}
+
+bool hex64(const std::string &text) {
+    if (text.size() != 64) return false;
+    for (unsigned char c : text)
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+    return true;
+}
+
+std::vector<Expected> schedule() {
+    std::vector<Expected> expected = {
+        {"warmup", "control", 0, 1}, {"warmup", "candidate", 0, 2}};
+    for (int pair = 1; pair <= 5; ++pair) {
+        if (pair & 1) {
+            expected.push_back({"ab", "control", pair, 1});
+            expected.push_back({"ab", "candidate", pair, 2});
+            expected.push_back({"aa", "control_a", pair, 1});
+            expected.push_back({"aa", "control_b", pair, 2});
+        } else {
+            expected.push_back({"aa", "control_b", pair, 1});
+            expected.push_back({"aa", "control_a", pair, 2});
+            expected.push_back({"ab", "candidate", pair, 1});
+            expected.push_back({"ab", "control", pair, 2});
+        }
+    }
+    return expected;
+}
 
 double median(std::vector<double> values) {
     std::sort(values.begin(), values.end());
@@ -62,8 +114,16 @@ bool selfTest() {
     if (decide(aa, std::vector<double>(5, 1.003), control, candidate).name !=
         "RETAIN_OPTIONAL") return false;
     std::vector<double> noisy(5, 1.0); noisy[0] = 1.006;
+    int64_t integer = 0;
+    double real = 0;
+    const std::vector<Expected> expected = schedule();
     return decide(noisy, std::vector<double>(5, 1.02), control, candidate).name ==
-           "INVALID_AA_NOISE";
+           "INVALID_AA_NOISE" && expected.size() == 22 &&
+           expected.front().variant == "control" && expected.back().variant == "control_b" &&
+           parseInt("201863462912", &integer) && integer == 201863462912ll &&
+           !parseInt("1x", &integer) && parseDouble("15500.25", &real) &&
+           real == 15500.25 && !parseDouble("1.0x", &real) &&
+           hex64(std::string(64, 'f')) && !hex64(std::string(64, 'F'));
 }
 }  // namespace
 
@@ -87,29 +147,31 @@ int main(int argc, char **argv) {
     std::ifstream input(argv[1]);
     if (!input) return 1;
     std::map<std::string, std::map<int, std::map<std::string, double>>> rows;
-    int dataRows = 0, warmups = 0;
+    const std::vector<Expected> expected = schedule();
+    size_t dataRows = 0;
     std::string line;
     if (!std::getline(input, line) || line !=
-        "phase\tpair\torder\tvariant\trateMps\tlogSha256\tgpuState") return 1;
+        "phase\tpair\torder\tvariant\trateMps\titerations\tdropped\tlogSha256\tgpuState")
+        return 1;
     while (std::getline(input, line)) {
-        ++dataRows;
-        std::istringstream fields(line);
-        std::string phase, value, variant, digest, gpuState;
-        if (!std::getline(fields, phase, '\t') || !std::getline(fields, value, '\t')) return 1;
-        const int pair = std::atoi(value.c_str());
-        if (!std::getline(fields, value, '\t')) return 1;
-        const int order = std::atoi(value.c_str());
-        if (!std::getline(fields, variant, '\t') || !std::getline(fields, value, '\t') ||
-            !std::getline(fields, digest, '\t') || !std::getline(fields, gpuState)) return 1;
-        const double rate = std::atof(value.c_str());
-        if (order < 1 || order > 2 || !(rate > 0) || !std::isfinite(rate) ||
-            digest.size() != 64 || gpuState.empty()) return 1;
-        if (phase == "warmup") { ++warmups; continue; }
-        if ((phase != "aa" && phase != "ab") || pair < 1 || pair > 5 ||
-            rows[phase][pair].count(variant)) return 1;
-        rows[phase][pair][variant] = rate;
+        if (dataRows >= expected.size()) return 1;
+        const std::vector<std::string> fields = splitTabs(line);
+        if (fields.size() != 9) return 1;
+        int64_t pair = 0, order = 0, iterations = 0, dropped = 0;
+        double rate = 0;
+        if (!parseInt(fields[1], &pair) || !parseInt(fields[2], &order) ||
+            !parseDouble(fields[4], &rate) || !parseInt(fields[5], &iterations) ||
+            !parseInt(fields[6], &dropped) || !(rate > 0) ||
+            iterations != 201863462912ll || dropped != 0 || !hex64(fields[7]) ||
+            fields[8].empty()) return 1;
+        const Expected &want = expected[dataRows++];
+        if (fields[0] != want.phase || pair != want.pair || order != want.order ||
+            fields[3] != want.variant) return 1;
+        if (fields[0] == "warmup") continue;
+        if (rows[fields[0]][int(pair)].count(fields[3])) return 1;
+        rows[fields[0]][int(pair)][fields[3]] = rate;
     }
-    if (dataRows != 22 || warmups != 2) return 1;
+    if (dataRows != expected.size()) return 1;
     std::vector<double> aa, ab, control, candidate;
     for (int pair = 1; pair <= 5; ++pair) {
         const auto &same = rows["aa"][pair];
