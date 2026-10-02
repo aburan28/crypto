@@ -25,7 +25,6 @@ from typing import Any
 
 import build_koblitz_phase_b_native_f4 as tool_builder
 import run_koblitz_blind_pdp_phase_b as phase_b
-import run_koblitz_pdp_matrix as matrix
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -53,6 +52,115 @@ BACKEND = "native-f4"
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise phase_b.PhaseBError(message)
+
+
+def native_f4_backend_status(run: dict[str, Any], manifest: dict[str, Any]) -> dict[str, Any]:
+    """Validate one native-F4 terminal without changing the frozen SAT parser.
+
+    ``scripts/run_koblitz_pdp_matrix.py`` is hash-pinned by older SAT evidence.
+    Native F4 therefore owns its additive terminal contract here instead of
+    widening that shared historical parser.
+    """
+    report = None
+    try:
+        report = json.loads(run["stdout"])
+    except (json.JSONDecodeError, TypeError):
+        pass
+    if run["timed_out"]:
+        status = "timeout_inconclusive"
+    elif report is None:
+        status = "backend_error" if run["returncode"] != 0 else "backend_contract_error"
+    else:
+        expected_id = manifest.get("source_instance", {}).get("id_blake3")
+        artifacts = report.get("source_artifacts")
+        artifacts_valid = (
+            isinstance(artifacts, dict)
+            and set(artifacts)
+            == {"wdsat_anf", "cryptominisat_xor_dimacs", "magma_boolean_f4"}
+            and all(
+                isinstance(receipt, dict) and receipt.get("valid") is True
+                for receipt in artifacts.values()
+            )
+        )
+        contract_valid = (
+            report.get("schema") == "koblitz_pdp_isolated_backend.v1"
+            and report.get("backend") == BACKEND
+            and expected_id is not None
+            and report.get("source_instance_id") == expected_id
+            and report.get("source_instance_verified") is True
+            and report.get("regenerated_source_exact") is True
+            and artifacts_valid
+        )
+        result_status = report.get("status")
+        cost = report.get("cost")
+        cost_valid = (
+            isinstance(cost, dict)
+            and cost.get("op_unit")
+            in {
+                "word XORs (elimination only)",
+                "word XORs (elimination, including M4RI tables)",
+                "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+            }
+            and isinstance(cost.get("ops"), int)
+            and cost["ops"] >= 0
+            and isinstance(cost.get("wall_ns"), int)
+            and cost["wall_ns"] >= 0
+            and report.get("conflicts") is None
+        )
+        if not contract_valid:
+            status = "backend_contract_error"
+        elif (
+            run["returncode"] == 0
+            and result_status == "not_run_resource_cap"
+            and report.get("exhaustive") is False
+        ):
+            status = "not_run_resource_cap"
+        elif not cost_valid:
+            status = "backend_contract_error"
+        elif (
+            run["returncode"] == 0
+            and result_status == "sat"
+            and report.get("source_model_valid") is True
+            and report.get("source_witness_valid") is True
+            and report.get("exhaustive") is True
+        ):
+            status = "sat"
+        elif (
+            run["returncode"] == 0
+            and result_status == "unsat"
+            and report.get("exhaustive") is True
+            and report.get("source_witness_valid") is None
+        ):
+            status = "unsat"
+        elif (
+            run["returncode"] == 0
+            and result_status == "unknown_inconclusive"
+            and report.get("exhaustive") is False
+        ):
+            status = "unknown_inconclusive"
+        elif run["returncode"] == 2 and result_status == "sat_invalid_model":
+            status = "sat_invalid_model"
+        else:
+            status = "backend_contract_error"
+    return {
+        "solver": BACKEND,
+        "status": status,
+        "conflicts": None,
+        "source_model_valid": (
+            report.get("source_model_valid") if isinstance(report, dict) else None
+        ),
+        "source_witness_valid": (
+            report.get("source_witness_valid") if isinstance(report, dict) else None
+        ),
+        "source_instance_id": (
+            report.get("source_instance_id") if isinstance(report, dict) else None
+        ),
+        "returncode": run["returncode"],
+        "timed_out": run["timed_out"],
+        "metrics": run["metrics"],
+        "command": run["command"],
+        "backend_report": report,
+    }
 
 
 def read_inputs(protocol_path: Path, bundle_path: Path) -> tuple[dict[str, Any], bytes, dict[str, Any], bytes]:
@@ -209,9 +317,7 @@ def run_one(
         expected_executable_sha256=identities["backend"]["sha256"],
     )
     phase_b.require_source_unchanged(instance_root, manifest, source_before, BACKEND)
-    row = matrix.isolated_backend_status(
-        phase_b.process_record_for_matrix(record), BACKEND, manifest
-    )
+    row = native_f4_backend_status(phase_b.process_record_for_matrix(record), manifest)
     validate_f4_result(row, manifest)
     if row["status"] != "timeout_inconclusive":
         require(

@@ -41,6 +41,74 @@ class SelectionTests(unittest.TestCase):
             native_f4.select_instances(self.bundle, args)
 
 
+class NativeTerminalTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.manifest = {"source_instance": {"id_blake3": "source-id"}}
+        self.artifacts = {
+            name: {"valid": True}
+            for name in ("wdsat_anf", "cryptominisat_xor_dimacs", "magma_boolean_f4")
+        }
+
+    def run_record(self, report: dict, *, returncode: int = 0, timed_out: bool = False) -> dict:
+        return {
+            "stdout": json.dumps(report),
+            "returncode": returncode,
+            "timed_out": timed_out,
+            "metrics": {},
+            "command": ["koblitz_pdp_backend", "native-f4"],
+        }
+
+    def report(self, status: str) -> dict:
+        value = {
+            "schema": "koblitz_pdp_isolated_backend.v1",
+            "backend": "native-f4",
+            "status": status,
+            "source_instance_id": "source-id",
+            "source_instance_verified": True,
+            "regenerated_source_exact": True,
+            "source_artifacts": self.artifacts,
+            "source_model_valid": None,
+            "source_witness_valid": None,
+            "conflicts": None,
+            "exhaustive": status in {"sat", "unsat"},
+            "cost": {
+                "ops": 123,
+                "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+                "wall_ns": 456,
+            },
+        }
+        if status == "sat":
+            value["source_model_valid"] = True
+            value["source_witness_valid"] = True
+        return value
+
+    def test_accepts_only_charged_valid_native_f4_terminals(self) -> None:
+        for status in ("sat", "unsat", "unknown_inconclusive"):
+            row = native_f4.native_f4_backend_status(
+                self.run_record(self.report(status)), self.manifest
+            )
+            self.assertEqual(row["status"], status)
+            self.assertIsNone(row["conflicts"])
+
+        invented_conflicts = self.report("sat")
+        invented_conflicts["conflicts"] = 1
+        self.assertEqual(
+            native_f4.native_f4_backend_status(
+                self.run_record(invented_conflicts), self.manifest
+            )["status"],
+            "backend_contract_error",
+        )
+
+        incomplete_unsat = self.report("unsat")
+        incomplete_unsat["exhaustive"] = False
+        self.assertEqual(
+            native_f4.native_f4_backend_status(
+                self.run_record(incomplete_unsat), self.manifest
+            )["status"],
+            "backend_contract_error",
+        )
+
+
 class AccountingTests(unittest.TestCase):
     def test_process_resources_keep_wall_cpu_and_peak_separate(self) -> None:
         records = [
