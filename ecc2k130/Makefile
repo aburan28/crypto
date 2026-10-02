@@ -713,6 +713,25 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Confirmed 15.436677 B/s sigma configuration. The existing Modal preset
+# above has its own historical validation; this native target gives the exact
+# compiler settings used by the fused comparison without extending its cache.
+PRO6000_SIGMA_FUSED_KNOBS = BATCH=16 THREADS=256 MINBLOCKS=2 \
+    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+    PACKED_INLINE_POLY=3 SIGMA_FUSED=1 WITNESS=0 WALK_TABLE=0
+gpu-rtx-pro6000-sigma-fused:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_SIGMA_FUSED_KNOBS)
+
+# Matched replay, A/A noise and five-pair confirmation; benchmark-only.
+bench-rtx-pro6000-sigma-fused:
+	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-fused/gpujob-headline.sh \
+	    --out $(FUSED_BENCH_OUT)
+FUSED_BENCH_OUT ?= /tmp/ecc2k-sigma-fused-benchmark
+.PHONY: gpu-rtx-pro6000-sigma-fused bench-rtx-pro6000-sigma-fused
+
 # Architecture of the two RTX PRO 6000 builds below.  Override to run the same
 # knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
 # for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).

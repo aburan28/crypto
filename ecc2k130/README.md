@@ -13,6 +13,14 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
+The current confirmed sigma path reaches **15.436677 B complete scalar
+updates/s** on one RTX PRO 6000: the fused reverse/next-prefix schedule improves
+its same-allocation control by 2.826% across five alternating pairs. The
+arithmetic, walk and odd-launch replay gates pass with identical complete
+corpora. Use `make gpu-rtx-pro6000-sigma-fused` for the native build and see
+[the result and receipts](benchmarks/sigma-fused/RESULTS.md). A matched B32/B64
+screen retains B16/T256/min2. The goal of 26 B/s remains unmet.
+
 The exact v3 table walk now measures **5.019275 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
 hints across the batch first raised the path to 2.449169 B/s. Proving raw

@@ -1,5 +1,19 @@
 # RTX PRO 6000 benchmark and audit preset
 
+The current confirmed sigma benchmark reaches **15.436677 B/s** with inline
+polynomial products and the fused reverse/next-prefix schedule. Use
+`make gpu-rtx-pro6000-sigma-fused` for that exact native build or
+`make bench-rtx-pro6000-sigma-fused FUSED_BENCH_OUT=/tmp/my-new-run` for the
+matched benchmark protocol. Five positive pairs measured 1.028257x over its
+15.015004 B/s control, with maximum A/A drift 0.0861%, 300/300 replay per arm
+and identical 1,709,477-record v1 corpora. The geometry follow-up retains
+B16/T256/min2: larger batches lose by 10–30%. See
+[fused results](benchmarks/sigma-fused/RESULTS.md) and
+[geometry results](benchmarks/sigma-fused/GEOMETRY-RESULTS.md).
+
+The 26 B/s one-GPU objective remains unmet. The existing public Modal presets
+below retain their historical build identity and audits.
+
 Run from the `ecc2k130` directory with Modal installed and authenticated:
 
 ```bash
