@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 198, 2026-10-02.
+Current through Stage 199, 2026-10-02.
 
 Stages 162–174 are the native-Boolean-F4 branch that culminated in the
 size-gated contiguous-M4RI result on the already-opened public
@@ -249,6 +249,23 @@ a measured lower bound of 12 components, 249.727289 wall-seconds and
 verification passes 17/17 with result SHA-256
 `38dd39b13cbcf26ac0fd6e5f43f27bf6e733488d349cc24c197c4842047c5198`.
 This is confirmed one-target F4 engineering; no SOTA gate changes.
+
+Stage 199 selects the confirmed 4,096-row hybrid as the unset Boolean-F4
+default. Unset routes exactly 481 matrices through full M4RI, performs
+102,707,985,015 XORs, completes all 242 systems and returns exhaustive UNSAT in
+25.936151 wall-seconds, 153.825561 core-seconds and 3,270,033,408 bytes RSS.
+`F4_F2_FULL_M4RI=0` preserves the prior all-BlockTables control; `=1` preserves
+the broad full-M4RI control from 128 rows. The unset selected-source replay
+passes without either a mode or threshold override. Against the inherited
+direct-MITM mean it remains 57.022674x wall, 502.014614x CPU and 79.627768x
+RSS, so the decomposition boundary remains decisively negative. Stage 199 adds
+a measured lower bound of 14 components, 205.639384 wall-seconds and
+839.421520 core-seconds. The cumulative lower bound becomes 696 components,
+25,527.893759 wall-seconds and 68,523.607063 core-seconds at the unchanged
+6,310,576,128-byte maximum RSS. Complete cost remains `null`. Final native
+verification passes 17/17 with result SHA-256
+`2f4551a1644b5fc49d15a8be07a13ff4a5b56219595d496ef9e12b2077902edd`.
+This is selected one-target F4 engineering; no SOTA gate changes.
 
 The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
