@@ -11,6 +11,8 @@ use std::path::Path;
 
 const RESULT_SCHEMA: &str = "koblitz_stage189_phase_result.v1";
 const VERIFICATION_SCHEMA: &str = "koblitz_stage189_phase_verification.v1";
+const FINAL_SCHEMA: &str = "koblitz_stage189_final.v1";
+const FINAL_VERIFICATION_SCHEMA: &str = "koblitz_stage189_final_verification.v1";
 const METER_SCHEMA: &str = "koblitz_native_process_meter.v1";
 const RECEIPT_SCHEMA: &str = "koblitz_native_meter_receipt.v1";
 const SOURCE_INSTANCE_ID: &str = "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7";
@@ -122,6 +124,35 @@ struct Verification {
     failed: Vec<String>,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+struct Charge {
+    components: usize,
+    wall_seconds_sum: f64,
+    total_core_seconds_sum: f64,
+    peak_rss_bytes_max: u64,
+    single_core_seconds: Option<f64>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct FinalResult {
+    schema: String,
+    candidate_commit: String,
+    finalizer_commit: String,
+    decision_status: String,
+    candidate_selected: bool,
+    runtime_default: String,
+    claim_boundary: String,
+    conflicts: Option<u64>,
+    screen: Assessment,
+    measured_stage_charge: Charge,
+    cumulative_measured_lower_bound: Charge,
+    complete_campaign_cost: Option<Charge>,
+    unmetered_components: Vec<String>,
+    artifacts: BTreeMap<String, Artifact>,
+    all_seven_gates_passed: bool,
+    koblitz_index_calculus_sota: bool,
+}
+
 fn main() {
     if let Err(error) = real_main() {
         eprintln!("{error}");
@@ -167,7 +198,22 @@ fn real_main() -> AnyResult<()> {
                 Err("phase verification failed".into())
             }
         }
-        _ => Err("usage: koblitz_f4_stage189 screen|confirm RUN_DIR RESULT VERIFICATION\n       koblitz_f4_stage189 verify RESULT VERIFICATION".into()),
+        Some("finalize") if args.len() == 5 => finalize_stage(
+            Path::new(&args[1]),
+            Path::new(&args[2]),
+            &args[3],
+            &args[4],
+        ),
+        Some("verify-final") if args.len() == 3 => {
+            let verification = verify_final(Path::new(&args[1]))?;
+            write_json(Path::new(&args[2]), &verification)?;
+            if verification.failed.is_empty() {
+                Ok(())
+            } else {
+                Err("final verification failed".into())
+            }
+        }
+        _ => Err("usage: koblitz_f4_stage189 screen|confirm RUN_DIR RESULT VERIFICATION\n       koblitz_f4_stage189 verify RESULT VERIFICATION\n       koblitz_f4_stage189 finalize STAGE RESULT CANDIDATE_COMMIT FINALIZER_COMMIT\n       koblitz_f4_stage189 verify-final RESULT VERIFICATION".into()),
     }
 }
 
@@ -498,6 +544,274 @@ fn verify_result(path: &Path) -> AnyResult<Verification> {
         checks,
         passed: checks.saturating_sub(failures.len()),
         failed: failures,
+    })
+}
+
+fn finalize_stage(
+    stage: &Path,
+    out: &Path,
+    candidate_commit: &str,
+    finalizer_commit: &str,
+) -> AnyResult<()> {
+    for (name, commit) in [
+        ("candidate", candidate_commit),
+        ("finalizer", finalizer_commit),
+    ] {
+        if commit.len() != 40 || !commit.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return Err(format!("{name} commit must be a full SHA"));
+        }
+    }
+    let stage = stage
+        .canonicalize()
+        .map_err(|e| format!("{}: {e}", stage.display()))?;
+    let screen_path = stage.join("development/screen/result.json");
+    let screen: PhaseResult = read_json(&screen_path)?;
+    let replay = verify_result(&screen_path)?;
+    if !replay.failed.is_empty() || screen.assessment.status != "REJECTED_SCREEN" {
+        return Err("screen is not a verified rejection".into());
+    }
+    let measured_stage_charge = measured_charge(&stage.join("development"))?;
+    let cumulative_measured_lower_bound = Charge {
+        components: 529 + measured_stage_charge.components,
+        wall_seconds_sum: 22_707.607_151_833_003 + measured_stage_charge.wall_seconds_sum,
+        total_core_seconds_sum: 55_657.968_684_000_01
+            + measured_stage_charge.total_core_seconds_sum,
+        peak_rss_bytes_max: 6_310_576_128u64.max(measured_stage_charge.peak_rss_bytes_max),
+        single_core_seconds: None,
+    };
+    let artifact_paths = [
+        ("protocol", "PROTOCOL.md"),
+        ("rejected_patch", "rejected-outer-only-schedule.patch"),
+        ("screen_result", "development/screen/result.json"),
+        (
+            "screen_verification",
+            "development/screen/verification.json",
+        ),
+    ];
+    let mut artifacts = BTreeMap::new();
+    for (name, relative) in artifact_paths {
+        artifacts.insert(
+            name.into(),
+            artifact_relative(&stage, &stage.join(relative))?,
+        );
+    }
+    let result = FinalResult {
+        schema: FINAL_SCHEMA.into(),
+        candidate_commit: candidate_commit.into(),
+        finalizer_commit: finalizer_commit.into(),
+        decision_status: "REJECTED_SCREEN".into(),
+        candidate_selected: false,
+        runtime_default: "adaptive inner Rayon sections within each F4 call plus the parallel fixed-X1 outer batch".into(),
+        claim_boundary: "One opened n=59 decomposition target and a solver-scheduling experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.".into(),
+        conflicts: None,
+        screen: screen.assessment,
+        measured_stage_charge,
+        cumulative_measured_lower_bound,
+        complete_campaign_cost: None,
+        unmetered_components: vec![
+            "development compilation and tests before the exact native build".into(),
+            "final result write and final verification after a charged composition control".into(),
+        ],
+        artifacts,
+        all_seven_gates_passed: false,
+        koblitz_index_calculus_sota: false,
+    };
+    write_json(out, &result)
+}
+
+fn verify_final(path: &Path) -> AnyResult<Verification> {
+    let bytes = fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let result: FinalResult =
+        serde_json::from_slice(&bytes).map_err(|e| format!("final result: {e}"))?;
+    let stage = find_stage_root(path)?;
+    let mut checks = 0usize;
+    let mut failures = Vec::new();
+    check(
+        &mut checks,
+        &mut failures,
+        result.schema == FINAL_SCHEMA,
+        "final schema",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.decision_status == "REJECTED_SCREEN" && !result.candidate_selected,
+        "rejected decision",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.screen.status == "REJECTED_SCREEN"
+            && result.screen.all_correct
+            && !result.screen.passed_performance_gate,
+        "screen projection",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        result.complete_campaign_cost.is_none(),
+        "complete cost unavailable",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        !result.all_seven_gates_passed && !result.koblitz_index_calculus_sota,
+        "claim boundary",
+    );
+    let charge = measured_charge(&stage.join("development"))?;
+    check(
+        &mut checks,
+        &mut failures,
+        charges_match(&charge, &result.measured_stage_charge),
+        "stage charge replay",
+    );
+    let cumulative = Charge {
+        components: 529 + charge.components,
+        wall_seconds_sum: 22_707.607_151_833_003 + charge.wall_seconds_sum,
+        total_core_seconds_sum: 55_657.968_684_000_01 + charge.total_core_seconds_sum,
+        peak_rss_bytes_max: 6_310_576_128u64.max(charge.peak_rss_bytes_max),
+        single_core_seconds: None,
+    };
+    check(
+        &mut checks,
+        &mut failures,
+        charges_match(&cumulative, &result.cumulative_measured_lower_bound),
+        "cumulative charge replay",
+    );
+    for (name, artifact) in &result.artifacts {
+        checks += 2;
+        match artifact_relative(stage, &stage.join(&artifact.path)) {
+            Ok(actual) => {
+                if actual.bytes != artifact.bytes {
+                    failures.push(format!("{name} bytes"));
+                }
+                if actual.sha256 != artifact.sha256 {
+                    failures.push(format!("{name} SHA-256"));
+                }
+            }
+            Err(error) => failures.push(format!("{name}: {error}")),
+        }
+    }
+    let screen_path = stage.join("development/screen/result.json");
+    let screen: PhaseResult = read_json(&screen_path)?;
+    let screen_replay = verify_result(&screen_path)?;
+    check(
+        &mut checks,
+        &mut failures,
+        screen_replay.failed.is_empty(),
+        "screen replay",
+    );
+    check(
+        &mut checks,
+        &mut failures,
+        assessments_match(&screen.assessment, &result.screen),
+        "screen assessment",
+    );
+    let patch = result
+        .artifacts
+        .get("rejected_patch")
+        .ok_or_else(|| "rejected patch missing".to_string())?;
+    check(
+        &mut checks,
+        &mut failures,
+        patch.sha256 == "2fc375782fa8e6305c218d41aa5b942c38879df85b36359ad2ef240f55b63666",
+        "rejected patch identity",
+    );
+    let source = fs::read_to_string("src/cryptanalysis/pq_f4_f2.rs")
+        .map_err(|e| format!("current F4 source: {e}"))?;
+    check(
+        &mut checks,
+        &mut failures,
+        !source.contains("F4_F2_DISABLE_INNER_PARALLEL")
+            && !source.contains("inner_parallel_disabled_calls"),
+        "runtime candidate reverted",
+    );
+    Ok(Verification {
+        schema: FINAL_VERIFICATION_SCHEMA.into(),
+        result_sha256: hex::encode(sha256(&bytes)),
+        checks,
+        passed: checks.saturating_sub(failures.len()),
+        failed: failures,
+    })
+}
+
+fn measured_charge(development: &Path) -> AnyResult<Charge> {
+    let mut files = Vec::new();
+    collect_named_files(development, "metrics.json", &mut files)?;
+    files.sort();
+    let mut wall = 0.0;
+    let mut core = 0.0;
+    let mut peak = 0u64;
+    for file in &files {
+        let metrics: ProcessMetrics = read_json(file)?;
+        if metrics.schema != METER_SCHEMA {
+            return Err(format!("{} has wrong schema", file.display()));
+        }
+        wall += metrics.wall_seconds;
+        core += metrics
+            .total_core_seconds
+            .ok_or_else(|| format!("{} lacks core time", file.display()))?;
+        peak = peak.max(
+            metrics
+                .peak_rss_bytes
+                .ok_or_else(|| format!("{} lacks peak RSS", file.display()))?,
+        );
+    }
+    Ok(Charge {
+        components: files.len(),
+        wall_seconds_sum: wall,
+        total_core_seconds_sum: core,
+        peak_rss_bytes_max: peak,
+        single_core_seconds: None,
+    })
+}
+
+fn collect_named_files(
+    directory: &Path,
+    name: &str,
+    out: &mut Vec<std::path::PathBuf>,
+) -> AnyResult<()> {
+    for entry in fs::read_dir(directory).map_err(|e| format!("{}: {e}", directory.display()))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let kind = entry.file_type().map_err(|e| e.to_string())?;
+        if kind.is_symlink() {
+            return Err(format!("refusing symlink {}", entry.path().display()));
+        }
+        if kind.is_dir() {
+            collect_named_files(&entry.path(), name, out)?;
+        } else if kind.is_file() && entry.file_name() == name {
+            out.push(entry.path());
+        }
+    }
+    Ok(())
+}
+
+fn charges_match(left: &Charge, right: &Charge) -> bool {
+    left.components == right.components
+        && close(left.wall_seconds_sum, right.wall_seconds_sum)
+        && close(left.total_core_seconds_sum, right.total_core_seconds_sum)
+        && left.peak_rss_bytes_max == right.peak_rss_bytes_max
+        && left.single_core_seconds == right.single_core_seconds
+}
+
+fn find_stage_root(path: &Path) -> AnyResult<&Path> {
+    path.ancestors()
+        .skip(1)
+        .find(|candidate| {
+            candidate.join("PROTOCOL.md").is_file() && candidate.join("development").is_dir()
+        })
+        .ok_or_else(|| format!("{} has no Stage 189 root", path.display()))
+}
+
+fn artifact_relative(root: &Path, path: &Path) -> AnyResult<Artifact> {
+    let relative = path
+        .strip_prefix(root)
+        .map_err(|_| format!("{} escapes {}", path.display(), root.display()))?;
+    let bytes = fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(Artifact {
+        path: relative.display().to_string(),
+        bytes: bytes.len() as u64,
+        sha256: hex::encode(sha256(&bytes)),
     })
 }
 
