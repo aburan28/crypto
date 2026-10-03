@@ -101,6 +101,31 @@ class BuildTests(unittest.TestCase):
         source = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"), "rb")
         self.assertEqual(read(os.path.join(self.out, "scoreboard", "index.html"), "rb"), source)
 
+    def test_progress_chart_data_file_is_canonical_and_fully_plotted(self):
+        # AGENTS.md §7a: docs/ic/progress-timeline.json is the one source of
+        # the progress chart. The copy embedded in the scoreboard must be the
+        # same data, every point must have a row in the "every plotted point"
+        # table, and the file's `updated` date is never older than its
+        # newest point.
+        import json
+
+        page = read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html"))
+        timeline = json.loads(read(os.path.join(ROOT, "docs", "ic", "progress-timeline.json")))
+        embedded = re.search(r'<script type="application/json" id="progress-data">(.*?)</script>', page, re.S)
+        self.assertIsNotNone(embedded, "the scoreboard embeds no progress-data script")
+        self.assertEqual(json.loads(embedded.group(1)), timeline, "embedded progress chart data differs from docs/ic/progress-timeline.json")
+
+        table = re.search(r"<summary>Every plotted point as a table</summary>(.*?)</details>", page, re.S)
+        self.assertIsNotNone(table, "the progress panel has no plotted-point table")
+        rows = table.group(1)
+        newest = None
+        for series in timeline["series"]:
+            for point in series["points"]:
+                newest = max(newest or point["date"], point["date"])
+                anchor = re.escape(point["anchor"])
+                self.assertRegex(rows, rf'<tr><td>{point["date"]}</td>.*?href="{anchor}".*?</tr>', f"no table row for the {point['date']} point anchored at {point['anchor']} in series {series['id']}")
+        self.assertGreaterEqual(timeline["updated"], newest, "progress-timeline.json `updated` is older than its newest point")
+
     def test_scoreboard_panels_close_and_sit_at_the_top_level(self):
         # An unclosed <section> once swallowed every later panel into one
         # collapsed panel. Every tag must close in order, and no panel may
