@@ -271,6 +271,34 @@ fn replay(raw: &[u8]) -> Result<Value, String> {
     {
         return Err("producer verification counters differ".into());
     }
+    if report["rank_search"]["native"]["trials"].as_u64() != Some(trials)
+        || report["rank_search"]["native"]["hits"].as_u64()
+            != Some(transcript.len() as u64)
+        || report["linear_algebra"]["native"]["rows"].as_u64()
+            != Some(transcript.len() as u64)
+        || report["linear_algebra"]["native"]["rank"].as_u64() != Some(K as u64)
+        || report["linear_algebra"]["native"]["dependent_rows"].as_u64()
+            != Some(transcript.len() as u64 - K as u64)
+    {
+        return Err("producer search or rank counters differ".into());
+    }
+    // The prior independent folded-table gate established these exact
+    // source-support counts. They are a frozen ledger identity here, not a
+    // second implementation of the table cost model.
+    if report["table"]["group_ops"]["adds"].as_u64() != Some(66_822)
+        || report["table"]["native"]["pair_table_entries"].as_u64() != Some(64_467)
+    {
+        return Err("frozen folded-table ledger differs".into());
+    }
+    let mut phase_sum = 0.0;
+    for name in ["base", "table", "rank_search", "linear_algebra", "verification"] {
+        phase_sum += report[name]["gae"]
+            .as_f64()
+            .ok_or_else(|| format!("missing {name} GAE"))?;
+    }
+    if report["total_gae"].as_f64() != Some(phase_sum) {
+        return Err("phase GAE sum differs from reported setup total".into());
+    }
     Ok(json!({
         "status":"PASS",
         "raw_sha256":sha256_hex(raw),

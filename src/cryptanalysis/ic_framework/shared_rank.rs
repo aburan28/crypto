@@ -127,6 +127,7 @@ pub fn run_shared_rank(
     base_params.set("raw_x_cap", spec.raw_x_cap.to_string());
     let builder = CompactOrbitScanBase { instance: inst };
     let mut base_ops = GroupOps::default();
+    let base_start = Instant::now();
     let fb = builder.build(&ctx, &base_params, &mut base_ops)?;
     if fb.columns != spec.columns {
         return Err(format!(
@@ -136,6 +137,7 @@ pub fn run_shared_rank(
     }
     let mut base = fb.cost.clone();
     base.group_ops.merge(base_ops);
+    base.wall_ns = base_start.elapsed().as_nanos() as u64;
     let base_sha256 = base_digest(&fb);
 
     let mut oracle = FrobeniusMitmOracle::new_counted(3, inst);
