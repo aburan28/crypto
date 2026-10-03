@@ -8,7 +8,9 @@ The first screen answers the current decision. Subsequent sections show the
 last challenger comparison and its uncertainty, the matched rho reference,
 solver readiness, a complete pipeline diagram and the proposed tournament
 process. Historical results by regime and the complete ledger are collapsed
-under Evidence. Search and old fragment links open the relevant detail.
+under Evidence, along with the compact-orbit panels, cross-method tables,
+progress timeline and dashboard-maintenance rules. Search and old fragment
+links open the relevant detail.
 
 [Desktop preview](dashboard-preview-desktop.png) ·
 [Phone comparison preview](dashboard-preview-mobile.png) ·
@@ -50,8 +52,9 @@ for overview content. Regenerate the page and its source-bound overview data
 in the same PR.
 
 The renderer retains the historical evidence and existing regime summary
-verbatim. The legacy collapse handler is scoped to the ledger so it cannot
-hide the overview's graphs. It records the ledger and summary hashes in the overview data and checks
+verbatim, including the progress timeline and cross-method panels. The legacy
+collapse handler is scoped to the ledger so it cannot hide the overview's
+graphs. The renderer records the ledger and summary hashes and checks
 preservation during rendering. Old anchors must continue to work. Do not use
 the overview renderer to delete superseded evidence, turn an incomplete result
 into a win, or compare diagnostic times from differently qualified controls.

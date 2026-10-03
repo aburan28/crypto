@@ -32,6 +32,16 @@ function replace(text, start, end, value) {
   const i = text.indexOf(start) + start.length;
   return text.slice(0, i) + value + text.slice(text.indexOf(end, i));
 }
+function section(text, id) {
+  const opening = [...text.matchAll(/<section\b[^>]*>/g)].find(match => match[0].includes(`id="${id}"`));
+  assert.ok(opening, `Missing preserved section ${id}`);
+  let depth = 0;
+  for (const match of text.slice(opening.index).matchAll(/<\/?section\b[^>]*>/g)) {
+    depth += match[0].startsWith('</') ? -1 : 1;
+    if (!depth) return text.slice(opening.index, opening.index + match.index + match[0].length);
+  }
+  assert.fail(`Unclosed section ${id}`);
+}
 
 const [round3, roundPin] = source('improvement/round3/RESULTS.json', '8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143');
 const [f5, f5Pin] = source('prepared-f5-v3-control-v1/TERMINAL.json', 'a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e');
@@ -64,10 +74,19 @@ const rhoGraph = `<div class="rho-plot" data-measurement-chart role="group" aria
 
 let page = readFileSync(PAGE, 'utf8');
 const oldFront = between(page, START, END);
-const historicStart = oldFront.indexOf('<section class="dash-section" id="lab-best"');
-assert.ok(historicStart >= 0, 'Historical regime summary must be retained');
-const historicEnd = oldFront.indexOf('</section>', historicStart) + '</section>'.length;
-const historical = oldFront.slice(historicStart, historicEnd);
+const historical = section(oldFront, 'lab-best');
+const retainedPanels = [
+  ['cold-compact-orbit-20261003','Historical compact-orbit cold-cost panel'],
+  ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
+  ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
+  ['lab-progress','Research progress over time · separate regimes and references'],
+  ['lab-currency','How new results update this dashboard']
+].map(([id,label])=>({id,label,html:section(oldFront,id)}));
+const historicalDetails = retainedPanels.map(panel=>`<details class="dash-details"><summary>${panel.label}</summary><div class="dash-detail-body">${panel.html}</div></details>`).join('\n');
+const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
+const embedded = oldFront.match(/<script type="application\/json" id="progress-data">([\s\S]*?)<\/script>/);
+assert.ok(embedded, 'Progress timeline evidence must be retained');
+assert.deepEqual(JSON.parse(embedded[1]), JSON.parse(progressRaw), 'Embedded progress timeline differs from canonical data');
 // The legacy collapse handler must not hide the overview's graphs. Its only
 // permitted migration is a selector scope change; all evidence stays verbatim.
 const oldSelector = 'document.querySelectorAll(SEL)';
@@ -98,7 +117,8 @@ const front = `
 
 <section class="dash-section" id="lab-next" aria-labelledby="next-title"><div class="dash-section-head"><div><p class="dash-kicker">05 / Tournament design</p><h2 id="next-title">A local win is a candidate, not a final answer.</h2></div></div><div class="tournament-flow" aria-label="Proposed tournament flow"><article><span class="flow-number">01 / EXPLORE</span><strong>Keep diverse candidates</strong><p>Different bases, solver families and stage combinations. Preserve alternatives with different resource tradeoffs.</p></article><article><span class="flow-number">02 / ADMIT</span><strong>Pass correctness gates</strong><p>Source identity, natural yield, failed attempts, complete costs and verified recovered answers.</p></article><article><span class="flow-number">03 / COMPARE</span><strong>Pair frozen workloads</strong><p>Same fresh point, resources and reference. Screening and untouched confirmation have separate roles.</p></article><article><span class="flow-number">04 / DECIDE</span><strong>Promote or retain</strong><p>Apply the declared uncertainty gate. Keep negative outcomes and useful alternatives for later combinations.</p></article></div><div class="next-callout"><span class="status pending">Next gate</span><div><strong>Finish the native F5 control and both natural-yield records.</strong><p>Then freeze new target exclusions, calibrated resources and strong references before a fresh paired tournament. The three historical confirmation sets remain closed.</p></div></div><p class="dash-footnote">This diagram describes the proposed process. It does not claim that a fresh F5/SAT tournament has run, or that any implementation is globally fastest.</p></section>
 
-<section class="dash-library-intro" id="evidence-search" aria-labelledby="library-title"><p class="dash-kicker">06 / Evidence</p><h2 id="library-title">Open the detail you need.</h2><p>The historical ledger contains other curves, cost units and questions. Its reports are preserved; they are not a combined leaderboard.</p><label for="evidence-query">Search historical reports</label><input id="evidence-query" type="search" placeholder="Frobenius, F5, rho, factor base…" autocomplete="off" aria-controls="evidence-results"><p id="evidence-count" aria-live="polite"></p><ul id="evidence-results"></ul><noscript><p>Open the full ledger below and use your browser’s Find command.</p></noscript><details class="dash-details" id="historical-regimes"><summary>Historical best results by regime · different workloads and accounting</summary><div class="dash-detail-body">${historical}</div></details></section>
+<section class="dash-library-intro" id="evidence-search" aria-labelledby="library-title"><p class="dash-kicker">06 / Evidence</p><h2 id="library-title">Open the detail you need.</h2><p>The historical ledger contains other curves, cost units and questions. Its reports are preserved; they are not a combined leaderboard.</p><label for="evidence-query">Search historical reports</label><input id="evidence-query" type="search" placeholder="Frobenius, F5, rho, factor base…" autocomplete="off" aria-controls="evidence-results"><p id="evidence-count" aria-live="polite"></p><ul id="evidence-results"></ul><noscript><p>Open the full ledger below and use your browser’s Find command.</p></noscript><details class="dash-details" id="historical-regimes"><summary>Historical best results by regime · different workloads and accounting</summary><div class="dash-detail-body">${historical}</div></details>
+${historicalDetails}</section>
 </main>
 `;
 page = replace(page, START, END, front);
@@ -111,6 +131,7 @@ page = page.replace(/<link[^>]*href="https:\/\/fonts\.[^"]*"[^>]*>\n?/g, '');
 page = page.replace('it loads two webfont\n  families from Google Fonts and needs nothing else.', 'its overview needs no network requests\n  or installed dependencies.');
 assert.equal(between(page, '<div id="legacy-evidence">', '<!-- END IC EVIDENCE LIBRARY -->'), ledgerBefore, 'Historical ledger changed');
 assert.ok(page.includes(historical), 'Historical regime summary lost');
+for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
   sources: [roundPin,f5Pin,oldSatPin,satPin], confirmation_online: online,
@@ -118,7 +139,9 @@ const data = {
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
-  historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical)
+  historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),
+  historical_overview_panels: retainedPanels.map(panel=>({section_id:panel.id,sha256:sha(panel.html)})),
+  progress_timeline_sha256: sha(progressRaw)
 };
 const output = JSON.stringify(data,null,2) + '\n';
 if (process.argv.includes('--check')) {

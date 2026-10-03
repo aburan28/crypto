@@ -277,5 +277,28 @@
     }
   ],
   "historical_ledger_sha256": "da011238da2c2e4e9eb0a3eb13389c433d879e821cd46d8fba5820cb81710486",
-  "historical_regime_summary_sha256": "a053375133f51909a1bc54f0a6273c051e00dbc7029ab488f622a977d9846d1a"
+  "historical_regime_summary_sha256": "a053375133f51909a1bc54f0a6273c051e00dbc7029ab488f622a977d9846d1a",
+  "historical_overview_panels": [
+    {
+      "section_id": "cold-compact-orbit-20261003",
+      "sha256": "bc6b92f8fb545f93b7b7cd4b1e5e0362d1ea13aad34802a1958a1755b45a98c7"
+    },
+    {
+      "section_id": "full-rank-compact-orbit-20261003",
+      "sha256": "6268e38beddc33d317796f6e05cd79766dc7572d87cee575eb2664d053ca31bb"
+    },
+    {
+      "section_id": "lab-ecbench-all",
+      "sha256": "3a758c8b4d65d276ce6712e13a91db6d301b8d91b61d381377016354ebbdd8cc"
+    },
+    {
+      "section_id": "lab-progress",
+      "sha256": "74d53b1b9bfe4c660b82ed175dbcb4387659832b7d89bb30141cd4c564101720"
+    },
+    {
+      "section_id": "lab-currency",
+      "sha256": "d7d18fc5d520921ba70577ac23b503fd4f6af5f75ed25075cc2b535f7c98e683"
+    }
+  ],
+  "progress_timeline_sha256": "19de153634987bf9869042e2dd7d43237d9d90e6ccf704f275bfd1ca41c15bd3"
 }

@@ -96,6 +96,9 @@ try {
   assert.ok(await evaluate("document.getElementById('boundary-ledger').getBoundingClientRect().height > 100"),'Old evidence panel did not open');
   await evaluate("location.hash='lab-best'; true"); await frame();
   assert.equal(await evaluate("document.getElementById('historical-regimes').open"),true);
+  await evaluate("location.hash='lab-progress'; true"); await frame();
+  assert.ok(await evaluate("document.getElementById('lab-progress').closest('details').open"),'Progress history deep link did not open');
+  assert.ok(await evaluate("document.querySelector('#lab-progress svg').getBoundingClientRect().height > 0"),'Preserved progress chart did not render');
   receipts.push('desktop: visible graphs, correct readiness, quiet evidence, search, retained fragment links');
   await evaluate("document.getElementById('evidence-library').open=false; document.getElementById('historical-regimes').open=false; location.hash='ic-overview'; true");
   for (const width of [390,320]) {
@@ -117,7 +120,7 @@ try {
   receipts.push('dark theme rendered');
   await call('Emulation.setScriptExecutionDisabled',{value:true});
   await call('Page.navigate',{url});
-  await sleep(150);
+  for (let i=0;i<100 && !(await evaluate("document.readyState === 'complete'"));i++) await sleep(50);
   assert.equal(await evaluate("document.querySelectorAll('[data-measurement-chart]').length"),2);
   assert.ok(await evaluate("Array.from(document.querySelectorAll('[data-measurement-chart]')).every(el=>el.getBoundingClientRect().height>0)"));
   receipts.push('JavaScript disabled: static measurements, graphs, diagrams and native details remain available');
