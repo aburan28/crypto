@@ -1,0 +1,110 @@
+name: ecbench
+# The native ECDLP measurement harness (docs/ecbench/README.md).
+#
+# Unit and integration tests run on every change.  Then a real session
+# runs on Linux as root, so the paths a laptop cannot exercise are
+# exercised here: whole-core reservation, eviction, pinning between fork
+# and exec, the kernel's tick, steal and PSI counters, and the grading
+# that reads them.  The job requires every measured child to report the
+# run CPU as its whole affinity mask and to start and finish on it, and
+# the audit's replays to reproduce exactly.  A hosted runner is a shared
+# VM, so its records are expected to stop at L1 (steal and frequency are
+# outside a guest's control); the job checks the machinery, never the
+# numbers.
+#
+# Committed evidence sessions (research/ecbench_*/sessions) are re-audited
+# with replays on this runner: their operation counts were recorded on
+# another host and architecture and must reproduce here bit for bit.
+# They are evidence and are never edited.
+on:
+  pull_request:
+    paths:
+      - "src/cryptanalysis/ecbench/**"
+      - "src/bin/ecbench.rs"
+      - "tests/ecbench.rs"
+      - "docs/ecbench/**"
+      - "research/ecbench_*/**"
+      - ".github/workflows/ecbench.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ecbench-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+jobs:
+  harness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Committed sessions are evidence and are never edited
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-only --diff-filter=MDRT "origin/${{ github.base_ref }}...HEAD" -- 'research/ecbench_*/sessions')
+          if [ -n "$changed" ]; then
+            echo "these committed session files were modified, renamed or deleted; add a new session instead:" >&2
+            echo "$changed" >&2
+            exit 1
+          fi
+      - name: Unit tests
+        run: cargo test --release --lib ecbench
+      - name: Integration tests
+        run: cargo test --release --test ecbench
+      - name: Build
+        run: cargo build --release --bin ecbench
+      - name: Host
+        run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Pinned session as root
+        run: |
+          sudo git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          sudo ./target/release/ecbench run --spec docs/ecbench/specs/smoke-prime.json \
+            --out "$RUNNER_TEMP/prime" --allow-busy --settle 1 --quiet
+          sudo chown -R "$(id -u):$(id -g)" "$RUNNER_TEMP/prime"
+      - name: Pinning took effect in every measured child
+        run: |
+          jq -s -e '
+            map(select(.isolation.run_cpu != null)) as $p
+            | ($p | length) == 72
+              and ($p | all(.isolation.placement.affinity == [.isolation.run_cpu]))
+              and ($p | all(.isolation.placement.cpu_at_start == .isolation.run_cpu
+                            and .isolation.placement.cpu_at_end == .isolation.run_cpu))
+              and (map(.outcome.status) | all(. == "verified"))
+          ' "$RUNNER_TEMP/prime/records.jsonl"
+          {
+            echo "### Levels earned on this runner"
+            jq -s -r 'group_by(.isolation.level) | map("- \(.[0].isolation.level): \(length)") | .[]' "$RUNNER_TEMP/prime/records.jsonl"
+            echo "### Most common blockers"
+            jq -s -r '[.[].isolation.blockers[]] | group_by(sub("[0-9.]+"; "N"; "g")) | map({n: length, b: .[0]}) | sort_by(-.n) | .[:8] | map("- \(.n)× \(.b)") | .[]' "$RUNNER_TEMP/prime/records.jsonl"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Audit with replays
+        run: ./target/release/ecbench verify --dir "$RUNNER_TEMP/prime" --replay 8 --exit-code --out "$RUNNER_TEMP/prime-audit.json" > /dev/null
+      - name: Compare and tabulate
+        run: |
+          ./target/release/ecbench compare --dir "$RUNNER_TEMP/prime" --a rho-neg --b bsgs-neg | tee -a "$GITHUB_STEP_SUMMARY"
+          ./target/release/ecbench compare --dir "$RUNNER_TEMP/prime" --a rho-neg --b rho-neg-aa > /dev/null
+          ./target/release/ecbench table --dir "$RUNNER_TEMP/prime" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Database loads, twice, strictly
+        run: |
+          command -v sqlite3 >/dev/null || sudo apt-get install -y -qq sqlite3
+          for i in 1 2; do ./target/release/ecbench db sql "$RUNNER_TEMP/prime" | sqlite3 -bail "$RUNNER_TEMP/ecbench.db"; done
+          test "$(sqlite3 "$RUNNER_TEMP/ecbench.db" 'select count(*) from runs')" = 72
+      - name: Committed evidence reproduces on this host
+        run: |
+          shopt -s nullglob
+          for d in research/ecbench_*/sessions/*/; do
+            echo "auditing $d"
+            ./target/release/ecbench verify --dir "$d" --replay 12 --exit-code > /dev/null
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecbench-session
+          path: |
+            ${{ runner.temp }}/prime
+            ${{ runner.temp }}/prime-audit.json
+          if-no-files-found: ignore
