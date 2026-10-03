@@ -83,6 +83,10 @@ binary executes on Linux. The receipt retains checker source/binary identity,
 the old native producer build identity and historical Python orchestration
 provenance. This is postexecution analysis and does not replace the original
 preexecution-frozen auditor or retroactively repair its source coverage.
+Checker self-identification allows a bounded 512 MiB executable so Linux debug
+test builds can be identified. It retains the regular-file/symlink gate and
+reports the path, file size and limit on read failure. This is replay provenance,
+not a relaxation of the scientific worker's native launch limits.
 
 ## Gates still open
 

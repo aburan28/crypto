@@ -13,6 +13,9 @@ const PREPARATION: &str = "research/ic_candidate_tournament_20260915/goal_202609
 const RETAINED_REPORT: &str = "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/controls/pipeline.stdout";
 const RETAINED_REPORT_SHA: &str =
     "57cb2e8e885c5da4912abd32b767b26ac6263175c5ec98f8f20b93fbc8d250ca";
+// Linux debug/test ELF files can exceed the native release-child limit.
+// Self-identification remains bounded and uses the regular-file/symlink gate.
+const CHECKER_BYTE_LIMIT: u64 = 512 * 1024 * 1024;
 const PHASES: [&str; 5] = [
     "target_query",
     "target_pdp",
@@ -40,12 +43,23 @@ fn power(mut value: u64, mut exponent: u64, r: u64) -> u64 {
     }
     result
 }
+fn checker_digest(path: &Path) -> Result<String, String> {
+    native::read(path, CHECKER_BYTE_LIMIT)
+        .map(|bytes| identity::sha256_hex(&bytes))
+        .map_err(|error| {
+            format!(
+                "F5 replay checker {} (file bytes {:?}, limit {CHECKER_BYTE_LIMIT}): {error}",
+                path.display(),
+                std::fs::symlink_metadata(path).map(|m| m.len()).ok()
+            )
+        })
+}
 
 /// Postexecution mathematics only. The original registration stays consumed;
 /// this command never starts the old worker or substitutes for its frozen audit.
 pub fn replay(root: &Path, out: &Path) -> Result<String, String> {
     let own = std::env::current_exe().map_err(|e| e.to_string())?;
-    let own_before = identity::sha256_hex(&native::read(&own, 128 * 1024 * 1024)?);
+    let own_before = checker_digest(&own)?;
     let report_path = root.join(RETAINED_REPORT);
     let raw = native::read(&report_path, 16 * 1024 * 1024)?;
     require(
@@ -56,7 +70,7 @@ pub fn replay(root: &Path, out: &Path) -> Result<String, String> {
     let report: Value = serde_json::from_slice(&raw).map_err(|e| e.to_string())?;
     let mut result = verify(&prep, 2026093032, 8, &report)?;
     require(
-        identity::sha256_hex(&native::read(&own, 128 * 1024 * 1024)?) == own_before
+        checker_digest(&own)? == own_before
             && identity::sha256_hex(&native::read(&report_path, 16 * 1024 * 1024)?)
                 == RETAINED_REPORT_SHA
             && native::load(&root.join(PREPARATION))? == prep,
@@ -69,6 +83,7 @@ pub fn replay(root: &Path, out: &Path) -> Result<String, String> {
     result["historical_provenance"] = json!({"producer":"retained native Rust worker", "controller":"historical Python orchestration", "timings":"unchanged historical uncalibrated diagnostic; no new performance measurement"});
     result["original_registration_consumed_and_closed"] = json!(true);
     result["checker_binary_sha256"] = json!(own_before);
+    result["checker_binary_byte_limit"] = json!(CHECKER_BYTE_LIMIT);
     result["checker_binary_unchanged_before_after"] = json!(true);
     result["fresh_targets_generated"] = json!(0);
     native::save(out, &result)?;
