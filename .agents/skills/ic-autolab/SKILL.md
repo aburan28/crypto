@@ -59,6 +59,12 @@ requires the original external seal and independently reconstructs all 216
 ordinary attempts, negatives, rank and logs. It starts no solver and does not
 admit a complete native F5 runtime or establish new natural yield. The complete
 F5 controller needs a separately frozen registration; old controls stay closed.
+The [native F5 target replay](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/PROTOCOL.md)
+uses `icprog f5-target-replay --root . --out NEWFILE` to reconstruct the retained
+target queries, geometric negatives, witness, scalar and phase ledger without
+starting a worker. Its shared transport supports bounded explicit stdin and
+environment with nonblocking delivery under the watchdog. This foundation is
+postexecution mathematics, not a native F5 registration or runtime admission.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.

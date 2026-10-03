@@ -33,6 +33,8 @@ mod autolab;
 mod bench;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/f5_target.rs"]
+mod f5_target;
 #[path = "icprog/identity.rs"]
 mod identity;
 #[path = "icprog/oracle.rs"]
@@ -101,6 +103,13 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Replay retained disclosed F5 target mathematics; no worker, fresh yield or admission.
+    F5TargetReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Reconstruct retained F5 ordinary preparation natively; no search or new timing.
     F5PreparationReplay {
         #[arg(long, default_value = ".")]
@@ -534,6 +543,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
         Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
         Command::SatControlPublish {
             capsule,
