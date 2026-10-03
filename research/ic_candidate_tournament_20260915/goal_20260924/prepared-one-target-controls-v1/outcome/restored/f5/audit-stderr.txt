@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/prepared_runtime_transport_v1.py", line 174, in <module>
+    main()
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/prepared_runtime_transport_v1.py", line 170, in main
+    frozen_audit(args.execution, args.expected_execution_sha256, args.out)
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/prepared_runtime_transport_v1.py", line 98, in frozen_audit
+    result = module.audit(execution, spec)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/prepared_f5_runtime_v2.py", line 211, in audit
+    mathematical = audit_native_target(report,arguments['job'],arguments['preparation'],
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/prepared_target_v1.py", line 107, in audit_native_target
+    query_audit = verify_queries(report, report['fixture'], 3)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/generic_queries_exact_v1.py", line 22, in verify_queries
+    require(report.get('query_schema_version') == 1, 'missing query schema')
+  File "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001-restored/f5-execution/extracted/research/ic_candidate_tournament_20260915/oracle.py", line 14, in require
+    raise InvalidEvidence(message)
+oracle.InvalidEvidence: missing query schema

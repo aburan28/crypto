@@ -80,20 +80,8 @@ for b in $VARIANTS; do
 done
 if [ -n "$FORCE" ]; then
 # The shipping walk is a different walk, so it is held to 300/300 but not to the table walk's points.
-python3 - "$R" $(echo $VARIANTS | tr ' ' '\n' | grep -v '^ship-') <<'PY' | tee "$R/dp-identity.txt" || fail=1
-import hashlib, os, sys
-r = sys.argv[1]; ref = None; bad = 0
-for name in sys.argv[2:]:
-    path = os.path.join(r, "dp-%s.bin" % name)
-    if not os.path.exists(path): print("%-22s missing" % name); bad = 1; continue
-    data = open(path, "rb").read()
-    recs = sorted(data[i:i+32] for i in range(0, len(data) - len(data) % 32, 32))
-    digest = hashlib.sha256(b"".join(recs)).hexdigest()
-    if ref is None: ref = digest
-    if digest != ref: bad = 1
-    print("%-22s %8d records  sha256 %s  %s" % (name, len(recs), digest[:16], "IDENTICAL to ref" if digest == ref else "DIFFERS from ref"))
-sys.exit(bad)
-PY
+python3 benchmarks/dp_identity.py "$R" $(echo $VARIANTS | tr ' ' '\n' | grep -v '^ship-') \
+    | tee "$R/dp-identity.txt" || fail=1
 fi
 
 # One timed run with the board sampled every 100 ms while it runs.

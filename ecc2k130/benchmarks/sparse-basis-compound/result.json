@@ -1,0 +1,54 @@
+{
+  "schema": "ecc2k130-sparse-basis-compound-static-v1",
+  "valid": true,
+  "sourceParent": "5434e208953527d2f37e14bde9f6c470542922cf",
+  "reference": {"billionUpdatesPerSecond": 15.436677000, "evidenceCommit": "e0b0858b179fe28f753353e7a7313cfe23d71884", "headlineResultSha256": "d31f2d758d2e787abe8f043b1b2ae69d337ebad9a30403afe74d50d4a003dd8c", "independentAuditSha256": "1b1a46ca52aa14ef86b96fc9b765c9c10e2815c1fe9bcad867422785ab7976d1"},
+  "repositoryBetaModulus": {"hex": "0xd1d0d000d0000000d000000000000000d", "weight": 19, "rabinIrreducible": true, "reductionBasisChecks": 261, "reductionDenseChecks": 4096},
+  "candidates": [
+    {
+      "name": "pentanomial-8-3-2",
+      "modulus": "0x80000000000000000000000000000010d",
+      "rabinIrreducible": true,
+      "betaRoot": "0x30a16693fefe59e60962fc4e3ddc388eb",
+      "order263ConstructionAttempts": 1,
+      "matrixRanks": {"betaToSparse": 131, "sparseToBeta": 131, "sparseToNormal": 131, "Lj": [130,130,130,130,130,130,130,130]},
+      "matrixOnes": {"betaToSparse": 8551, "sparseToBeta": 8559, "sparseToNormal": 8541, "Lj": [1474,2567,3894,5302,6511,7261,7790,8266]},
+      "checks": {"reductionBasis": 261, "reductionDense": 4096, "conversionBasis": 131, "conversionDense": 8192, "mapBasis": 1179, "mapDense": 36864, "basisPairProducts": 17161, "denseProducts": 4096}
+    },
+    {
+      "name": "pentanomial-8-5-2",
+      "modulus": "0x800000000000000000000000000000125",
+      "rabinIrreducible": true,
+      "betaRoot": "0x2e5b018fed55839b4cbcbe6b7a6332dd4",
+      "order263ConstructionAttempts": 1,
+      "matrixRanks": {"betaToSparse": 131, "sparseToBeta": 131, "sparseToNormal": 131, "Lj": [130,130,130,130,130,130,130,130]},
+      "matrixOnes": {"betaToSparse": 8515, "sparseToBeta": 8619, "sparseToNormal": 8493, "Lj": [1486,2602,4107,5573,6765,7512,8023,8350]},
+      "checks": {"reductionBasis": 261, "reductionDense": 4096, "conversionBasis": 131, "conversionDense": 8192, "mapBasis": 1179, "mapDense": 36864, "basisPairProducts": 17161, "denseProducts": 4096}
+    }
+  ],
+  "tableRoute": {
+    "chunkBits": 3, "chunks": 44, "entriesPerChunk": 8, "wordsPerEntry": 5,
+    "bytesPerMap": 7040, "hotMaps": 9, "batchBoundaryMaps": 2, "runtimeMaps": 11,
+    "tableBytes": 77440, "driverSharedBytes": 1024, "totalSharedBytes": 78464, "optinLimitBytes": 101376, "fitsOneBlock": true,
+    "perMap": {"lds128": 44, "lds32": 44, "ldsInstructions": 88, "scalarWordEquivalents": 220, "exactStraightLineDataAlu": 315, "chargedDataAlu": 317, "minimumLiveWords": 11},
+    "mapsPerUpdateAtBatch16": 3.125000000, "ldsInstructionsPerUpdate": 275.000000000, "scalarWordEquivalentsPerUpdate": 687.500000000, "exactStraightLineDataAluPerUpdate": 984.375000000, "chargedDataAluPerUpdate": 990.625000000
+  },
+  "reducerCircuits": {
+    "currentDirect": {"shifts": 86, "ors": 39, "xors": 53, "ands": 2, "total32BitSourceOps": 180},
+    "sparseTwoFold": {"shifts": 40, "ors": 16, "xors": 24, "ands": 2, "total32BitSourceOps": 82, "ratioToCurrent": 0.455555556}
+  },
+  "batch16Arithmetic": {
+    "productsPerBatch": {"forward": 30, "inverse": 8, "reversePrefixIncludingLambda": 31, "finalXY": 16, "total": 85},
+    "sparseReductionsPerUpdateIncludingLambdaSquare": 5.812500000, "betaDirectReductionsPerUpdate": 0.000000000, "unchangedInverseProductsViaFromPolynomialProductPerBatch": 8, "inverseNormalSquaresPerBatch": 5, "lambdaPolynomialSquaresPerBatch": 16, "clmadPerUpdate": 38.125000000,
+    "currentReductionSourceOpsPerUpdate": 1046.250000000, "candidateReductionSourceOpsPerUpdate": 476.625000000,
+    "currentSelectionAndLjSourceOpsPerUpdate": 1230.000000000, "candidateSelectionAndLjPlusBatchMapsSourceOpsPerUpdate": 990.625000000,
+    "sourceOpsSavedAcrossThoseStagesPerUpdate": 809.000000000
+  },
+  "storage": {"fusedBaselineRegisters": 126, "tableEvaluatorMinimumLiveWords": 11, "naiveOverlapRegisterEstimate": 137, "reducerTemporaryWordsCurrent": 20, "reducerTemporaryWordsSparse": 10, "netNamedWordEstimateIfReuseTransfers": 127, "architecturalRegisterLimitPerThread": 255, "registersPerSm": 65536, "maximumRegistersPerThreadAt512Threads": 128, "naiveOverlapEstimatePreserves512ThreadBlock": false, "netNamedEstimatePreserves512ThreadBlock": true, "actualCompilationRequired": true},
+  "optimisticRooflineBillionPerSecond": {
+    "assumptions": {"sms": 188, "maxClockGhz": 2.430000000, "randomSharedLanesPerSmClock": 9.200000000, "aluLanesPerSmClock": 64.000000000, "clmadLanesPerSmClock": 2.000000000, "rateEvidenceSha256": "57d8541c28648911e3e59a9a6bdd34f114658f5df0b299bab651193293b4dc50", "capacityEvidenceSha256": "31d1c91ca70006086d0454f51be5a5f5866afdbab6c06adcda88026c88a54c1a"},
+    "lookupOnlyProjectionAtTransferredRandomLdsU8Rate": 15.283374545, "lookupOnlySensitivityAt16LaneRate": 26.579781818, "tableAluOnly": 29.514458044, "clmadOnly": 23.965377049, "admissionThreshold": 16.208510850, "transferredRateLookupRatioToReference": 0.990068947, "clmadCeilingBelow26BObjective": true, "exactLds128MulticastRateMeasured": false
+  },
+  "decision": {"boundedWholeWalkGpuPrototypeJustifiedUnderFrozenTransferModel": false, "exactLayoutLdsMicroprobeJustified": true, "classification": "NEGATIVE_STATIC_EVIDENCE_UNDER_FROZEN_TRANSFER_MODEL", "reason": "After making all multiplication, reduction, state traffic and control free, transferring the measured 9.2-lane random LDS.U8 rate to the admitted three-bit table gives 15.283375 B/s, below the confirmed 15.436677 B/s reference and the frozen 5% admission margin. The exact aligned LDS.128+LDS.32 multicast rate is unmeasured; the 16-lane sensitivity passes, so this is conditional rather than a hardware impossibility result."},
+  "scope": "Exact native field/isomorphism/linear-map evidence and a conservative static pipe ledger; no CUDA compile, GPU run, search, solver, collision recovery or key recovery."
+}

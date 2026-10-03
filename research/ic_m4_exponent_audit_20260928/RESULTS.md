@@ -13,7 +13,7 @@ log.
 | branch head at launch | `b1133883` (`runs/branch_head.txt`) |
 | wall time | 2026-09-29 07:17:29Z to 07:38:57Z |
 | commands | `run_audit.sh`, the §8 list in `phase2-commands.txt` |
-| cells | the nine registered cells; three are structurally excluded as registered (`K_0/2^11`, `K_0/2^17`, `K_1/2^13`: no such curve in the tooling) |
+| cells | the nine registered cells; three are structurally excluded as registered (`icv1-f2m11-tm67-f393fc83`, `icv1-f2m17-t101-e6c4b64d`, `icv1-f2m13-tm181-25e736d2`: no such curve in the tooling) |
 
 ## Registered verdict
 
@@ -27,15 +27,15 @@ anyway.
 
 | cell | targets | censored | lower median (word XORs) | log₂ |
 |:--|--:|--:|--:|--:|
-| `K_0/2^9`, ℓ = 2 | 16 | 0 | 68,235 | 16.06 |
-| `K_0/2^13`, ℓ = 3 | 16 | 0 | 1,493,937 | 20.51 |
-| `K_0/2^15`, ℓ = 4 | 16 | 0 | 5,259,157 | 22.33 |
-| `K_0/2^19`, ℓ = 5 | 16 | 0 | 50,076,470 | 25.58 |
-| `K_1/2^9`, ℓ = 2 | 16 | 0 | 39,941 | 15.29 |
-| `K_1/2^11`, ℓ = 3 | 16 | 0 | 719,041 | 19.46 |
-| `K_1/2^15`, ℓ = 4 | 16 | 0 | 5,079,215 | 22.28 |
-| `K_1/2^17`, ℓ = 4 | 16 | 0 | 17,475,739 | 24.06 |
-| `K_1/2^19`, ℓ = 5 | 16 | 0 | 80,892,472 | 26.27 |
+| `icv1-f2m9-t5-81e744be`, ℓ = 2 | 16 | 0 | 68,235 | 16.06 |
+| `icv1-f2m13-t181-515ee569`, ℓ = 3 | 16 | 0 | 1,493,937 | 20.51 |
+| `icv1-f2m15-tm275-2d22ff5d`, ℓ = 4 | 16 | 0 | 5,259,157 | 22.33 |
+| `icv1-f2m19-t797-b6cf2467`, ℓ = 5 | 16 | 0 | 50,076,470 | 25.58 |
+| `icv1-f2m9-tm5-4a3ea183`, ℓ = 2 | 16 | 0 | 39,941 | 15.29 |
+| `icv1-f2m11-t67-05f5aa36`, ℓ = 3 | 16 | 0 | 719,041 | 19.46 |
+| `icv1-f2m15-t275-b7f03703`, ℓ = 4 | 16 | 0 | 5,079,215 | 22.28 |
+| `icv1-f2m17-tm101-00378d4e`, ℓ = 4 | 16 | 0 | 17,475,739 | 24.06 |
+| `icv1-f2m19-tm797-9c54981b`, ℓ = 5 | 16 | 0 | 80,892,472 | 26.27 |
 
 No Semaev target censored. Every cell is in the fit.
 
@@ -54,7 +54,7 @@ No Semaev target censored. Every cell is in the fit.
 ## Reported, not decisive
 
 - **Refuted-only fit.** `ĉ = 0.984`, band [0.983, 0.986].
-- **Prime `n` only** (`K_0/2^{13,19}`, `K_1/2^{11,17,19}`). `ĉ = 0.833`, band
+- **Prime `n` only** (`icv1-f2m13-t181-515ee569`, `icv1-f2m19-t797-b6cf2467`, `icv1-f2m11-t67-05f5aa36`, `icv1-f2m17-tm101-00378d4e`, `icv1-f2m19-tm797-9c54981b`). `ĉ = 0.833`, band
   [0.830, 0.953]. It gives the same reading, *closed*, as the primary fit. The point estimates
   differ. On nine points that span two curves and both composite and prime `n`, this difference
   is one of §10's listed confounds. It is not explained further here.
@@ -63,9 +63,9 @@ No Semaev target censored. Every cell is in the fit.
 - **Refutation degree (secondary arm, §6).**
   - The exact Boolean root count matched the engine's full-tree count on every target that
     ran: 0 faults.
-  - At `ℓ = 2`, both cells, `K_0/2^9` and `K_1/2^9`, resolved their first unsatisfiable
+  - At `ℓ = 2`, both cells, `icv1-f2m9-t5-81e744be` and `icv1-f2m9-tm5-4a3ea183`, resolved their first unsatisfiable
     target at `D = 6`, the registered `d_max`, in 200 and 219 s.
-  - Both `ℓ = 3` cells, `K_0/2^13` and `K_1/2^11`, hit the 300 s per-cell CPU limit
+  - Both `ℓ = 3` cells, `icv1-f2m13-t181-515ee569` and `icv1-f2m11-t67-05f5aa36`, hit the 300 s per-cell CPU limit
     before finishing a target. All four `degree` processes were killed by that limit, which is
     machine protection (§7), so these targets are **censored, not negative**.
   - With resolved degrees at only one `ℓ`, the slope `s` is not fitted.

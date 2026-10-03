@@ -19,7 +19,7 @@ logarithms then run `1.41×` faster.  §0–§4 were committed before any
 registered run (`1f0d9751`); §1 lists every run made before registration.
 Results are appended below §4 and do not edit it.
 
-*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): T1 reads `1.12×` in instructions, below its registered `1.3×`, and `1.01×` on the three `K_0/2^31` cells; the frozen `K_1/2^15 m=2` rung is `0.79×`. The status above, registered in word operations, stands.*
+*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): T1 reads `1.12×` in instructions, below its registered `1.3×`, and `1.01×` on the three `icv1-f2m31-tm90707-c95f16f5` cells; the frozen `icv1-f2m15-t275-b7f03703 m=2` rung is `0.79×`. The status above, registered in word operations, stands.*
 
 ## The question
 
@@ -77,13 +77,13 @@ All on `2026-09-24`, on scratch code (environment switches not in this
 commit), disclosed so that the cells they touched are read as tuning data:
 
 - A cost probe of the round-1 default on the four existing ladders.  The roots
-  cost `43–88%` of the quadratic rungs and of `K_0/2^13, m = 3` and
-  `K_0/2^23, m = 3`; on the heaviest `m = 4` cells re-reduction during
-  specialisation dominates (`K_0/2^15 m=4 divisor 2`: `40.7 M` of `64.8 M`).
+  cost `43–88%` of the quadratic rungs and of `icv1-f2m13-t181-515ee569, m = 3` and
+  `icv1-f2m23-t5197-69e76b73, m = 3`; on the heaviest `m = 4` cells re-reduction during
+  specialisation dominates (`icv1-f2m15-tm275-2d22ff5d m=4 divisor 2`: `40.7 M` of `64.8 M`).
 - The Macaulay degree cap on the T1′ ladder: degree 2 costs about what degree 3
-  does (the tree grows `2,376 → 10,493` F4 calls on `K_0/2^23 m=3`), degree 4
+  does (the tree grows `2,376 → 10,493` F4 calls on `icv1-f2m23-t5197-69e76b73 m=3`), degree 4
   costs `20–200×` more.  Not pursued.
-- On `koblitz_decompose_bench 0 23 4 3` (= the T1′ cell `K_0/2^23 m=3`): the
+- On `koblitz_decompose_bench 0 23 4 3` (= the T1′ cell `icv1-f2m23-t5197-69e76b73 m=3`): the
   four initial roots (56 unknowns, rank 1,333, 13,884 columns) cost
   `6.9–7.3 M` each, `73%` of the cell.  Excluding the first two summands'
   variables from the root's multipliers: `38,953,101 → 19,696,631` on the same
@@ -119,11 +119,11 @@ predecessor — all tuning data now (§1) — and one new ladder:
   factor index `0…7`, `m ∈ {3, 4}` for existence, admissibility and at most 64
   unknowns, deciding no target (`screen_wide.json`).  It finds nineteen
   admissible cells: the fifteen of the predecessor's screen, and four no
-  ladder has used — `K_0/2^31, m = 3` at factor indices 0, 1 and 5 (`ℓ = 5`,
-  63 base points, 46 unknowns) and `K_1/2^29, m = 4` (`ℓ = 1`, one base point,
+  ladder has used — `icv1-f2m31-tm90707-c95f16f5, m = 3` at factor indices 0, 1 and 5 (`ℓ = 5`,
+  63 base points, 46 unknowns) and `icv1-f2m29-tm40309-30c52b96, m = 4` (`ℓ = 1`, one base point,
   62 unknowns).  The R2 holdout is those four cells with targets `0…`, and
   **fresh targets `5000…`** on each of the fifteen: 19 rungs, 8 targets each
-  (16 on `K_0/2^9 m=3`, 4 where a cell has 56 or more unknowns).
+  (16 on `icv1-f2m9-t5-81e744be m=3`, 4 where a cell has 56 or more unknowns).
 
 ## 3. The falsification target
 
@@ -154,9 +154,9 @@ engineering.
 ## 4. Whole logarithms
 
 `ic run --solver groebner --summands 3 --random-target --batch 1`, both arms on
-one binary, on the two cells the predecessor sized (`K_0/2^13`, `K_0/2^9`), with
-seeds no earlier run used: `201…210` and holdout `301…305` on `K_0/2^13`,
-`201…205` on `K_0/2^9` (`e2e.sh`).  Reported as in the predecessor: status,
+one binary, on the two cells the predecessor sized (`icv1-f2m13-t181-515ee569`, `icv1-f2m9-t5-81e744be`), with
+seeds no earlier run used: `201…210` and holdout `301…305` on `icv1-f2m13-t181-515ee569`,
+`201…205` on `icv1-f2m9-t5-81e744be` (`e2e.sh`).  Reported as in the predecessor: status,
 recovered and planted `k`, trials, relations, oracle word operations, wall.  The
 method's `S` stays null for the reason given there (no measured conversion
 between the oracle's unit and the rest of `ic run`), and any statement about
@@ -189,7 +189,7 @@ T1, T2 and T3 are met, so the candidate is the engine's default.  Class:
 
 The unit does not show the whole of it.  On the registered code the whole
 logarithms did `2.19×` less oracle work and ran **slower**: `0.82×` in wall
-time on `K_0/2^13`, confirmed with the arms interleaved (§5.4).  The row
+time on `icv1-f2m13-t181-515ee569`, confirmed with the arms interleaved (§5.4).  The row
 building that both arms leave uncharged (§0) had grown in the candidate by
 more than the elimination it saved.  In AGENTS.md §3's terms that is the
 relabelling pattern, seen in wall time rather than in `S`, which is null here.
@@ -215,11 +215,11 @@ every counted decomposition was lifted and verified in the group.
 
 The R2 holdout rung by rung is in `tables.md`:
 
-- The four cells no ladder had used: `K_0/2^31, m = 3` at factor indices 0, 1
+- The four cells no ladder had used: `icv1-f2m31-tm90707-c95f16f5, m = 3` at factor indices 0, 1
   and 5 run `1.45×`, `1.43×` and `1.44×` (about `1.9 × 10⁸` word operations
-  each in the reference), and `K_1/2^29, m = 4` runs `1.63×`.
+  each in the reference), and `icv1-f2m29-tm40309-30c52b96, m = 4` runs `1.63×`.
 - The fresh targets on the fifteen known cells run between `1.40×`
-  (`K_1/2^15 m=4`) and `3.57×` (`K_1/2^11 m=4`).
+  (`icv1-f2m15-t275-b7f03703 m=4`) and `3.57×` (`icv1-f2m11-t67-05f5aa36 m=4`).
 
 The tree grows by at most ten nodes on any rung, as §0 predicts: the tails are
 weaker, and the tree can only grow.
@@ -228,18 +228,18 @@ Where the saving comes from: the roots, which §1 found cost `43–88%` of the
 chained cells, and the specialisation that inherits their rows.  The
 specialisation's reads and writes fall `114.5 M → 68.2 M` over the R2
 holdout.  The largest gains, `2.5–3.6×`, are on the `m = 4` rungs with trees
-of 124–264 nodes, where the roots are most of the cost.  `K_1/2^29 m=4`, with
+of 124–264 nodes, where the roots are most of the cost.  `icv1-f2m29-tm40309-30c52b96 m=4`, with
 16 nodes and 62 unknowns, gains `1.63×`.
 
 ### 5.2 Against the registered targets
 
 - **T1: met.**  Nineteen comparable rungs of nineteen (fifteen required).  The
   total is `1.50×` against a threshold of `1.3×`.  No rung rises; the least
-  gain is `1.396×`, on `K_1/2^15 m=4`, targets `5000…`.  Nothing is exhausted
+  gain is `1.396×`, on `icv1-f2m15-t275-b7f03703 m=4`, targets `5000…`.  Nothing is exhausted
   on either side, and the same targets are decomposed on every rung.
 - **T2: met.**  The frozen pair is accepted.  Two rungs rise, both by far less
-  than the `2%` allowed: `K_1/2^17 m=2` by `0.12%` (1,982,352 → 1,984,783) and
-  `K_1/2^23 m=2` by `0.05%` (7,974,980 → 7,979,328).  Both trees have the
+  than the `2%` allowed: `icv1-f2m17-tm101-00378d4e m=2` by `0.12%` (1,982,352 → 1,984,783) and
+  `icv1-f2m23-tm5197-1f85e9e1 m=2` by `0.05%` (7,974,980 → 7,979,328).  Both trees have the
   same size, and at `m = 2` only completion rows differ (§0), so the rise is
   theirs.
 - **T3: met.**  All 153 tests of the three modules pass, among them
@@ -281,14 +281,14 @@ on every seed.
 
 | cell | runs | trials = relations | oracle word ops ref → cand | ratio (per run) | wall ref → cand | wall ratio, geometric mean [95% paired bootstrap] |
 |:--|--:|--:|:--|:--|:--|:--|
-| `K_0/2^13`, seeds 201–210, holdout 301–305 | 15 + 15 | 141 | 104,865,593 → 47,966,249 | **2.19×** (2.15–2.23) | 2.07 → 2.61 s | **0.82×** [0.77, 0.87] |
+| `icv1-f2m13-t181-515ee569`, seeds 201–210, holdout 301–305 | 15 + 15 | 141 | 104,865,593 → 47,966,249 | **2.19×** (2.15–2.23) | 2.07 → 2.61 s | **0.82×** [0.77, 0.87] |
 | the same, rerun with the arms interleaved, 3 repetitions (§6) | 45 + 45 | 141 | the same | the same | 1.89 → 2.33 s | **0.82×** [0.80, 0.84] |
-| `K_0/2^9`, seeds 201–205 | 5 + 5 | 17 | 750,778 → 361,523 | **2.08×** (2.02–2.16) | 0.05 → 0.05 s | 0.96× [0.79, 1.22] |
+| `icv1-f2m9-t5-81e744be`, seeds 201–205 | 5 + 5 | 17 | 750,778 → 361,523 | **2.08×** (2.02–2.16) | 0.05 → 0.05 s | 0.96× [0.79, 1.22] |
 
 By the registered rule of §4, `baseline_total / candidate_total > 1` on every
 run: every counted phase but the oracle does equal work, and the oracle does
 less.  The wall contradicts it.  The candidate is `18%` slower on
-`K_0/2^13`, and the interleaved rerun rules out host drift.  So some work
+`icv1-f2m13-t181-515ee569`, and the interleaved rerun rules out host drift.  So some work
 outside the count grew by more than the count fell.  The stage ladders show
 the same thing more weakly: their wall ratios are `0.90–1.03×` against
 `1.02–2.25×` in word operations (`postfix_identity.md`, registered binary).
@@ -297,14 +297,14 @@ the same thing more weakly: their wall ratios are `0.90–1.03×` against
 
 *Made after every registered run of §5 and after §5.4's wall result.  The
 diagnosis and the fix came first.  Then came one exploratory check on the
-fixed binary: `K_0/2^13` seed 209, five interleaved pairs, the candidate
+fixed binary: `icv1-f2m13-t181-515ee569` seed 209, five interleaved pairs, the candidate
 `0.35 → 0.19 s`, the reference unchanged at `0.27 s`, word operations
 identical.  The reruns below were then fixed in `run_postfix.sh` before any of
 them ran.  The amendment changes no ladder, target, budget, degree, cap or
 counter definition.*
 
 **What the profile found.**  I ran callgrind on one whole logarithm
-(`K_0/2^13`, seed 210, both arms; `profile/`):
+(`icv1-f2m13-t181-515ee569`, seed 210, both arms; `profile/`):
 
 | | reference | candidate, registered | candidate, fixed |
 |:--|--:|--:|--:|
@@ -345,7 +345,7 @@ same engine's counters were just shown identical on 60 ladder runs.
 **Wall time after the fix**, a practicality note: interleaved, medians of
 three repetitions, the same host.
 
-| | frozen | chain | chain-holdout | chain-holdout-2 | R2 holdout | whole logs `K_0/2^13` | whole logs `K_0/2^9` |
+| | frozen | chain | chain-holdout | chain-holdout-2 | R2 holdout | whole logs `icv1-f2m13-t181-515ee569` | whole logs `icv1-f2m9-t5-81e744be` |
 |:--|--:|--:|--:|--:|--:|--:|--:|
 | reference / candidate, registered binary | 0.96× | 0.90× | 1.03× | 0.98× | 1.01× | 0.82× [0.80, 0.84] | 1.05× [1.00, 1.10] |
 | reference / candidate, fixed binary | 1.00× | 1.49× | 1.29× | 1.21× | 1.08× | **1.41× [1.37, 1.44]** | **1.24× [1.18, 1.30]** |
@@ -395,7 +395,7 @@ more.  Only the wall time, kept as a practicality note, showed it.
   own note.
 - **Next levers,** all measured in §1 or §6, none claimed:
   - re-reduction during specialisation on the heaviest `m = 4` cells
-    (`40.7 M` of `64.8 M` on `K_0/2^15 m=4 divisor 2` in §1's probe);
+    (`40.7 M` of `64.8 M` on `icv1-f2m15-tm275-2d22ff5d m=4 divisor 2` in §1's probe);
   - the quadratic roots, which §1 found cost `43–88%` of the `m = 2` rungs;
   - the gap on the R2 holdout between word operations (`1.50×`) and wall
     time (`1.08×`), not yet profiled.

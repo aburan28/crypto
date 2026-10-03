@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage174-flat-target",
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--lib",
+    "cryptanalysis::pq_f4_f2::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 300.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.4758512920088833,
+    "user_seconds": 0.308236,
+    "system_seconds": 0.056424999999999996,
+    "total_core_seconds": 0.364661,
+    "single_core_seconds": 0.364661,
+    "peak_rss_bytes": 48021504,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

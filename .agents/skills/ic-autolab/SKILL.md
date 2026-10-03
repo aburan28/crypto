@@ -14,7 +14,31 @@ do not create a parallel scoreboard or redefine historical protocols.
 
 ## Begin or resume
 
-Run `python3.12 research/ic_candidate_tournament_20260915/autolab.py doctor`.
+**The current `AGENTS.md` requires native research execution and verification.**
+The Python scripts named later in this skill describe historical evidence and
+mathematical contracts; do not execute or extend them for new research. Port the
+relevant execution path to Rust before continuing comparisons. Preserve the
+frozen sources, identities, failures and Python provenance.
+
+For the disclosed n17 SAT source/preparation control, use the existing native
+harness:
+
+```sh
+rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o /tmp/ic-native-busy
+/tmp/ic-native-busy busy -- cargo build --locked --bin icprog --bin isolated_bench
+target/debug/icprog sat-source-replay --root . --out /tmp/ic-native-sat-replay.json
+```
+
+Use a new output path: replay refuses to overwrite evidence. This command checks
+the retained source witness, ordinary rows, exact geometric negatives, rank and
+logs. It launches no solver and establishes neither new yield nor performance.
+The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
+separate this replay from the pending native controller and fresh comparison.
+On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
+the historical wrapper; macOS supports busy only. Timed affinity/reservation
+still requires the Linux implementation. Do not infer a quiet measurement host
+from a successful busy lock.
+
 Inspect the latest local round's contract, source identity, summary and failures.
 Archived winners must be restored and identified by their candidate's
 `source_directory` and configuration, not assumed to be `round/source`.
@@ -31,6 +55,9 @@ algorithmic failure. The separate Crypto Autoresearcher Coordinator harness is
 not required by this repository-local runner.
 
 ## Quality and accounting first
+
+The following historical adapters and commands remain retained documentation.
+Their invocation instructions are superseded by the native requirement above.
 
 Historical static SAT registrations replay through
 [`frozen_sat_runtime.py`](../../../research/ic_candidate_tournament_20260915/frozen_sat_runtime.py)
@@ -107,6 +134,83 @@ certificate seal, validate/load preparation before online timing, and charge
 all new target attempts and scalar replay. These certificates do not authorize
 a fresh paired dispatch or reopen any consumed registration. Reviewed exposure,
 reference, hardware rebuild, calibration and resource/order gates remain pending.
+
+The [prepared target-only adapters](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-target-runtime-v1/README.md)
+add an optional native F5 preparation import and a SAT adapter core plus
+`prepared_sat_runtime_v1.py` registrar/entrypoint/auditor. They independently
+replay preparation before online start and retain all failed target attempts.
+Only disclosed development controls are admitted; no fresh comparison has
+executed. `prepared_f5_runtime_v1.py` registers that F5 path for a new build only. It
+rejects the consumed v2 worker and source manifest. No prepared F5 registration
+was frozen or executed under that original implementation protocol. The later
+prepared F5 v2 and SAT controls below are now consumed. Fresh campaign gates remain pending. Run the four strict native unit controls
+in an isolated `RAYON_NUM_THREADS=1` process with `--ignored --test-threads=1`;
+the ordinary parallel runner intentionally skips them and CI explicitly runs
+them. Callback/oracle tests are not native SAT yield evidence. The committed
+preparation-only exclusion union contains 1,340 points, including failed queries
+and all known-log sign/Frobenius orbits; merge it with the complete historical
+and current exposure census before any fresh sampling. Candidate identity binds
+math preparation and executed code; certificate/build/transport evidence remains
+in the frozen run. Do not bypass a consumed registrar or weaken a source gate.
+
+The [prepared F5 source/runtime follow-up](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v1/README.md)
+adds `prepared_f5_inputs_v1.py` and `prepared_f5_runtime_v2.py`. Its rebuilt worker
+retains all Rust dependency sources and a mathematical-only unit fixture;
+historical certificates remain invocation data. Its audit CLI runs the
+preexecution-frozen auditor in a fresh isolated interpreter and executes no
+native solver. Only disclosed development controls are admitted. Implementation
+is accepted in PR #1098; the separately frozen F5/SAT controls below have now
+executed and closed incomplete. Mock runtime
+tests and real import-only source controls are not native execution evidence.
+
+For newly frozen prepared controls, use the
+[shared audit/claim protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-runtime-transport-v1/PROTOCOL.md).
+`prepared_runtime_transport_v1.py audit` runs the preexecution-frozen SAT v1 or
+F5 v2 auditor under isolated Python; it executes no native solver. New runtime
+registrations declare an atomic one-use execution claim. Once acquired, failure,
+timeout or setup interruption consumes that registration, even with another
+output directory. Preserve the claim and external registration/exposure ledger.
+Legacy registrations remain audit-only; never rewrite one to add this policy or
+the new transport helper. Synthetic transport controls are not IC solve evidence.
+
+The [prepared one-target controls](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/RESULT.md)
+were preregistered in PR #1110 and each executed exactly once. Both are consumed
+and closed at eight attempts without a scalar. Never retry, resume, extend or
+regenerate either registration. F5's original frozen audit rejects its actual
+native report because `query_schema_version` is missing. A labelled postexecution
+in-memory header view passes mathematical checks; all eight F5 queries are
+exactly nondecomposable. It does not replace the original rejection. SAT's
+frozen audit admits an incomplete source-bound control with eight conflict-budget
+inconclusive attempts; one recorded query is geometrically feasible. Group
+feasibility alone does not prove its CNF has a corresponding assignment.
+The durable archive and local relocation preserve both original outcomes.
+Merge the new partial sign/Frobenius query-exposure census with all historical
+exclusions before fresh sampling. Repair the F5 native report contract with an
+actual native-to-auditor control under a newly bound build; diagnose SAT source
+constraints/budgets on the retained feasible query. No verified online time,
+speedup, family promotion or fresh paired comparison follows from these controls.
+
+The [prepared report-contract follow-up](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/EVIDENCE.md)
+adds the missing native header and tests actual complete/incomplete CLI reports
+with the independent Python auditor. Autolab CI explicitly runs the ignored
+prepared Rust controls and this release-worker interface check. These are
+repeatable disclosed fixtures, not registered scientific runtime executions.
+The old input v1 source pin and runtime v2 remain unchanged; the corrected worker
+requires its own versioned retained-input/admission adapter and new registration.
+The retained SAT trial 1 witness also satisfies every original ANF equation,
+CNF clause and XOR row and lifts to the exact query. This proves that specific
+source instance is satisfiable; its original native result remains budget-
+inconclusive. Investigate the solver/encoding budget on that retained case rather
+than replacing failed queries. Fresh comparison and full goal gates remain open.
+
+The [corrected prepared F5 runtime gate](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v3/README.md)
+adds native input v2, runtime v3 and frozen transport v2. Its retained corrected
+worker includes all root and registry source bytes; it cannot enter the immutable
+old input gate. The new helper must have been frozen before execution. Import,
+relocation and mocked native controls are implementation evidence only. This
+implementation now has one consumed, complete disclosed native control in
+[the v3 result](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md). Its known target/seed and three attempts independently replay with its own frozen helper. Never execute that registration again; its original failed attempts remain charged. Publish a separately frozen protocol and external execution seal before any later solve. Never substitute
+these assets or helper into old registrations. Fresh paired gates remain pending.
 
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 

@@ -10,7 +10,7 @@ Pinned source ref: `3bec69ca636cebc71f828a3035c49b8258e13f5f` (the parent of thi
 
 | Fixed setting | Value |
 | --- | --- |
-| Curves | `K_0/F_{2^37}`, then `K_0/F_{2^41}` after n37 pilot passes |
+| Curves | `icv1-f2m37-tm534059-32aad96b`, then `icv1-f2m41-tm2308219-7f48b14a` after n37 pilot passes |
 | Targets | public hash seeds `202609250037` (pilot), `202609250137`, `202609250237` (holdouts); n41 analogues `202609250041`, `202609250141`, `202609250241` |
 | Direct | `koblitz_rank_fixture N 0 1 2 13737 signed_expanded independent pair_pair_16 1 hash:SEED` |
 | Rho | `koblitz_rho_fixture N 0 signed_frobenius 1 packed 13737 hash:SEED` |

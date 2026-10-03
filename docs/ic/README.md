@@ -201,7 +201,7 @@ Expected trials is half the collection cost. A trial is paid whether or not
 it succeeds, so collection spends `trials × (cost per trial)`, and the
 second factor is the one that varies: coverage saturates at 100% as the
 subspace grows while the Weil-restricted summation system keeps `m·ℓ`
-Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
+Boolean unknowns. At `icv1-f2m15-t275-b7f03703` the two orders disagree by `22.41×` over
 twelve verified logarithms — see
 [`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
 
@@ -292,7 +292,7 @@ default): its columns are canonical cofactor projections `R_o ∈ ⟨G⟩`, so
 each column logarithm is a genuine, self-certifying discrete log.
 
 The precomputation reaches whatever the factor base and summand count
-support. On `K_0/2^31` over a search-selected dimension-11 base
+support. On `icv1-f2m31-tm90707-c95f16f5` over a search-selected dimension-11 base
 (`--summands 3`, 35 columns) it completes in about 15 s; each subsequent
 target then needs one or two relations. The `logs` trial budget
 (`--max-trials`, default 200000) bounds the search for a full-rank
@@ -427,7 +427,7 @@ relations loaded, rejected and deduplicated and which units were used.
 
 A parameter file (schema_version 1):
 
-    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+    {"schema_version":1,"name":"icv1-f2m31-tm90707-c95f16f5","curve":{"degree":31,"curve_a":0},
      "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
      "linear_algebra":{"mode":"sparse",
                        "sparse":{"wiedemann":{"block_m":4,"block_n":4},
@@ -610,7 +610,7 @@ fitted entirely inside DRAM, and the law's whole purpose is to push the
 table out of it.
 
 `docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
-offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
+offers: `icv1-f2m61-t158598901-ab42b6c5`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
 a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
 against ρ's 3.248 s — charged 61.2, amortised 1.29, and all three
 verdicts true at 32 targets.
@@ -960,6 +960,12 @@ configurations from a JSON file and prints one table.
         --factor-base binary-subspace:dimension=6 \
         --oracle descent-algebraic:m=2 --solver buchberger-f2
     ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
+
+A plug-in is written `name:key=value,key=value`. The `,` ends a
+parameter, so a parameter that takes several values separates them with
+`;`: `--factor-base 'koblitz-orbit:divisor=1;2'` selects factors 1 and 2
+(quote it, since a bare `;` ends a shell command). `divisor=1,2` is
+refused with an error that names the `;`.
 
 [`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
 columns, the stage contracts, a worked example of adding a solver (the

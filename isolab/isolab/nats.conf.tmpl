@@ -1,0 +1,17 @@
+# nats-server configuration written by `isolab hub`. Edit the env file, not this.
+server_name: "${SERVER_NAME}"
+listen: "${LISTEN}"
+${HTTP_LINE}
+max_payload: 8MB
+
+jetstream {
+  store_dir: "${STORE_DIR}"
+  max_memory_store: ${MAX_MEMORY}
+  max_file_store: ${MAX_FILE}
+}
+
+authorization {
+  token: "${TOKEN}"
+}
+${CLUSTER_BLOCK}
+${LEAF_BLOCK}

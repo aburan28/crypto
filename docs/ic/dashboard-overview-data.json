@@ -1,0 +1,135 @@
+{
+  "confirmation_familywise_online_upper": 1.0338915916497726,
+  "confirmation_online": {
+    "boundary": "one supplied public point after reusable preparation through scalar replay",
+    "candidate_over_baseline": 0.9733345435416899,
+    "ci95": [
+      0.9325768245217102,
+      1.01609917768834
+    ],
+    "per_cell": {
+      "n17a1": 0.9216253334289247,
+      "n19a0": 0.9986328694169639,
+      "n23a0": 0.8941787899837073,
+      "n23a1": 1.0017894045440883,
+      "n29a1": 0.981708530365438,
+      "n31a0": 1.0505801644881685
+    }
+  },
+  "f5_control": {
+    "additional_executions_authorized": false,
+    "archive_bytes": 25476819,
+    "archive_sha256": "12ea04c458036c0ca56c588d151ae317ada2cbc661124344be472bbecc94804b",
+    "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h5cc365241aec",
+    "execution_sha256": "5c0a1473b7d2637a7e97666db68262d038c628f937f3b0ea0338fd83f949f98d",
+    "fresh_paired_qualification": false,
+    "full_objective_complete": false,
+    "headline_online_admissible": false,
+    "native_executions": 1,
+    "negative_queries_independently_checked": 2,
+    "online_phases_ns": {
+      "target_descent": 11875,
+      "target_pdp": 11955937581,
+      "target_query": 11293,
+      "target_recovery_check": 8917,
+      "target_relation_check": 251
+    },
+    "online_speedup": null,
+    "online_wall_ns": 11955969917,
+    "ordinary_queries_executed": 0,
+    "preregistration_applicable_ci": [
+      {
+        "conclusion": "success",
+        "id": 36890344161
+      },
+      {
+        "conclusion": "success",
+        "id": 36890344091
+      }
+    ],
+    "preregistration_head": "b3fe186b22b4ef092d782865018d05161dc975ad",
+    "preregistration_merge": "45b2b9adc3405309ba07d005d9d141f89c4a2afb",
+    "preregistration_pr": "https://github.com/aburan28/crypto/pull/1159",
+    "promotion_eligible": false,
+    "restoration_members": 269,
+    "restoration_native_solvers_executed": 0,
+    "restored_admission_identical": true,
+    "run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h5cc365241aecW8b3d9065d872R2026100104",
+    "scalar_verified": true,
+    "schema_version": 1,
+    "source_bound_execution_admitted": true,
+    "status": "CONSUMED_CLOSED_COMPLETE_DISCLOSED_CONTROL",
+    "target_attempt_count": 3,
+    "workload_id": "8b3d9065d872"
+  },
+  "paired_targets": 72,
+  "rho_online_comparison": {
+    "boundary": "one supplied public point after reusable preparation through scalar replay",
+    "candidate_over_baseline": 0.13428518699194839,
+    "ci95": [
+      0.12470685325491643,
+      0.14408489854717127
+    ],
+    "per_cell": {
+      "n17a1": 0.13644478526504644,
+      "n19a0": 0.13645871795314143,
+      "n23a0": 0.12678977242303394,
+      "n23a1": 0.13326228645196742,
+      "n29a1": 0.13507460923417813,
+      "n31a0": 0.13798923853928072
+    }
+  },
+  "rho_online_table": [
+    {
+      "alias": "incumbent",
+      "online_ms": 0.03392627559359315,
+      "rho_online_over_IC_online": 7.44683775180623,
+      "scheduled": 216,
+      "verified": 216
+    },
+    {
+      "alias": "ic_online",
+      "online_ms": 0.03488011051765443,
+      "rho_online_over_IC_online": 7.2431957960877815,
+      "scheduled": 216,
+      "verified": 216
+    },
+    {
+      "alias": "rho",
+      "online_ms": 0.2865062747183838,
+      "rho_online_over_IC_online": 0.8818078072352278,
+      "scheduled": 216,
+      "verified": 216
+    },
+    {
+      "alias": "rho_online",
+      "online_ms": 0.2526434698685518,
+      "rho_online_over_IC_online": 1.0,
+      "scheduled": 216,
+      "verified": 216
+    },
+    {
+      "alias": "stop7_word",
+      "online_ms": 0.03395001644938487,
+      "rho_online_over_IC_online": 7.441630263867792,
+      "scheduled": 216,
+      "verified": 216
+    }
+  ],
+  "schema_version": 1,
+  "scope": "bounded IC autolab overview; not all repository research",
+  "sources": [
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json",
+      "sha256": "8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
+      "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
+      "sha256": "9def5e0e4a3c3fd2e47252d08e3509a88205691c39a77912cd315428b7bed2eb"
+    }
+  ]
+}

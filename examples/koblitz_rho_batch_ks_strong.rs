@@ -654,6 +654,8 @@ struct RunCfg {
     corpus: Option<String>,
     rung: u8,
     lanes: usize,
+    /// Plant this scalar instead of drawing one (single-fixture runs only).
+    explicit_scalar: Option<u64>,
 }
 
 struct RunResult {
@@ -802,7 +804,17 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let mut rng = StdRng::seed_from_u64(seed);
-        let generated_d0 = rng.gen_range(1..modulus);
+        let drawn_d0 = rng.gen_range(1..modulus);
+        let generated_d0 = match cfg.explicit_scalar {
+            Some(scalar) => {
+                assert!(
+                    cfg.fixtures == 1 && (1..modulus).contains(&scalar),
+                    "KIC_RHO_EXPLICIT_SCALAR needs one fixture and a scalar in [1, r)"
+                );
+                scalar
+            }
+            None => drawn_d0,
+        };
         let started = Instant::now();
         charges.scalar_multiplications += 1;
         let q = scalar_mul(&f, generator, generated_d0);
@@ -1040,7 +1052,7 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
         "kind":"rho_ks_batch_summary","producer_version":"v5_strong_rho_ladder",
         "rung":cfg.rung,"lanes":if cfg.rung >= 3 { cfg.lanes } else { 1 },
         "n":n,"a":a,"quotient_mode":"signed_frobenius","automorphism_size":automorphisms,
-        "fixtures":cfg.fixtures,"batch_seed":cfg.batch_seed,"corpus":cfg.corpus,
+        "fixtures":cfg.fixtures,"batch_seed":cfg.batch_seed,"corpus":cfg.corpus,"explicit_scalar":cfg.explicit_scalar,
         "dp_bits":cfg.dp_bits,"jump_count":JUMPS,
         "target_source":"derived_known_scalar",
         "library_gf2_kernel":gf.kernel_name(),
@@ -1096,6 +1108,9 @@ fn main() {
         lanes: std::env::var("KIC_RHO_LANES")
             .map(|v| v.parse().expect("KIC_RHO_LANES must be an integer"))
             .unwrap_or(32),
+        explicit_scalar: std::env::var("KIC_RHO_EXPLICIT_SCALAR")
+            .ok()
+            .map(|v| v.parse().expect("KIC_RHO_EXPLICIT_SCALAR must be a u64")),
     };
     assert!(cfg.dp_bits < 32 && cfg.fixtures > 0 && cfg.rung <= 3);
     assert!(matches!(
@@ -1299,6 +1314,7 @@ mod tests {
             corpus: Some(format!("strong-test-a{a}-n{n}")),
             rung,
             lanes,
+            explicit_scalar: None,
         }
     }
 
@@ -1343,5 +1359,40 @@ mod tests {
             }
         });
         assert!(ran >= 2, "end-to-end exercised only {ran} curves");
+    }
+
+    /// A planted explicit scalar is the one recovered, at every rung, for a
+    /// single fixture; the same explicit scalar plants the same target whatever
+    /// the batch seed (only the walk changes).
+    #[test]
+    fn explicit_scalar_is_planted_and_recovered() {
+        let mut ran = 0;
+        each_curve(|a, n, curve| {
+            if !(17..=23).contains(&n) {
+                return;
+            }
+            ran += 1;
+            let modulus = curve.subgroup_order.to_u64_digits()[0];
+            let scalar = modulus / 3 + 1;
+            for (rung, lanes) in [(0u8, 1usize), (3, 8), (3, 32)] {
+                for seed in [531_310u64, 7] {
+                    let mut c = cfg(a, n, 1, rung, lanes);
+                    c.batch_seed = seed;
+                    c.explicit_scalar = Some(scalar);
+                    let r = run(&c, &mut |_| {});
+                    assert_eq!(
+                        r.planted,
+                        vec![scalar],
+                        "n={n} a={a} rung={rung} seed={seed}"
+                    );
+                    assert_eq!(
+                        r.recovered,
+                        vec![scalar],
+                        "n={n} a={a} rung={rung} seed={seed}"
+                    );
+                }
+            }
+        });
+        assert!(ran >= 2, "explicit-scalar test exercised only {ran} curves");
     }
 }

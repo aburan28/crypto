@@ -215,6 +215,10 @@ def render_markdown(parts):
 def render_html(parts):
     out = [BEGIN, '<section class="panel" id="ic-generic-reference-qualification-20260926">',
            '<h2>Generic/reference qualification: complete evidence, no promoted IC winner</h2>',
+           # One-line summary shown under the title while the panel is collapsed.
+           '<p class="panel-summary">Run 36290704597 completed all 1,350 pairs with zero failures, '
+           'the pairinv incumbent stays the cold leader, generic IC is far slower, and no IC winner '
+           'is promoted, classed accounting.</p>',
            '<p><span class="chip">accounting</span> '
            f'<a href="{URL}README.md">Research note and archive</a> · '
            f'<a href="{URL}RESULTS.json">Frozen results</a> · '

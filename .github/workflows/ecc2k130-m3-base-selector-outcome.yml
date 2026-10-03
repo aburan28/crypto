@@ -1,0 +1,53 @@
+name: ECC2K-130 m3 base-selector outcome replay
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-outcome.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+      - docs/index-calculus-scoreboard.html
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ecc2k130-m3-base-selector-outcome.yml
+      - research/notes/ecc2k130/m3_base_selector_20260930/**
+      - docs/index-calculus-scoreboard.html
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            .github/workflows/ecc2k130-m3-four-policy.yml
+            .github/workflows/ecc2k130-m3-base-selector-source.yml
+            research/notes/ecc2k130/m3_base_selector_20260930
+            research/notes/ecc2k130/m3_four_policy_20260930
+            research/ecc2k130_factor_base_pilot_20260924
+            research/ecc2k130_factor_base_replication_20260925
+            research/ecc2k130_dual_transport_20260925
+            research/ecc2k130_relations
+            research/ecc2k130_oriented_transport_20260924
+          sparse-checkout-cone-mode: false
+      - name: Check source lock and independently replay every raw case
+        run: |
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/check_source_lock.py
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/verify.py \
+            --evidence research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z \
+            --manifest research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z/EVIDENCE.json \
+            --out "$RUNNER_TEMP/replay.json"
+          cmp "$RUNNER_TEMP/replay.json" \
+            research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z/replay.json
+      - name: Regenerate frozen decision and pair table
+        run: |
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/analyze.py \
+            --evidence research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2127Z \
+            --out "$RUNNER_TEMP/analysis.json"
+          cmp "$RUNNER_TEMP/analysis.json" \
+            research/notes/ecc2k130/m3_base_selector_20260930/ANALYSIS.json

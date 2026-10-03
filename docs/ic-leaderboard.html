@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every curve priced end to end by index calculus in this repository, with the best recipe, the phase split and the ratio to matched Pollard rho.">
+<title>Index Calculus Leaderboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; the board and the step table are the page, everything else hangs off them. */
+:root {
+  --ground: #e7ebef; --surface: #fbfcfd; --sunk: #f0f3f6; --ink: #0e1922; --ink-2: #354855;
+  --muted: #576976; --rule: #ccd5dc; --data: #1f6fd0; --data-soft: #d7e4f6; --bound: #b3372a;
+  --bound-soft: #f3dcd8;
+  --ph-precomputation: #b9c3cb; --ph-setup: #9aa7b1; --ph-constructions: #c4a35a; --ph-factor_base: #2f8f83; --ph-table: #6fb7a8;
+  --ph-relations: #1f6fd0; --ph-linear_algebra: #8b5bc4; --ph-descent: #d0782f; --ph-verify: #4d5b66;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
+  --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
+  --bound-soft: #38221f;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
+  --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
+  --bound-soft: #38221f;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
+  color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding-inline: 16px; padding-block: 36px 64px; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(30px, 5.2vw, 44px); line-height: 1.08; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0; text-wrap: balance; }
+.verdict { font-family: var(--serif); font-size: clamp(17px, 2.2vw, 20px); line-height: 1.45; color: var(--ink-2); max-width: 64ch; margin: 0; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--rule);
+  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.fact dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.fact dd { margin: 0; font-family: var(--mono); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.fact p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; display: flex; flex-direction: column; gap: 12px; padding-block: 18px; }
+.panel > * { padding-inline: 20px; }
+.panel p { margin: 0; max-width: 72ch; color: var(--ink-2); font-size: 14px; }
+.scroll { overflow-x: auto; padding-inline: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td.recipe { min-width: 210px; }
+tr.lead td { background: var(--data-soft); }
+code, .slug { font-family: var(--mono); font-size: 12px; }
+.slug { white-space: nowrap; }
+.chip { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 1px 6px; border: 1px solid var(--rule); border-radius: 2px; color: var(--ink-2); white-space: nowrap; }
+.ratio { font-family: var(--mono); font-weight: 600; color: var(--bound); }
+.bar { display: flex; height: 12px; min-width: 160px; border-radius: 2px; overflow: hidden; background: var(--sunk); }
+.bar span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.muted { color: var(--muted); }
+.defs { margin-block: 0; display: flex; flex-direction: column; gap: 6px; }
+.defs div { display: grid; grid-template-columns: 84px 1fr; gap: 12px; }
+.defs dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.defs dd { margin: 0; font-size: 13px; color: var(--ink-2); max-width: 90ch; }
+@media (max-width: 560px) { .defs div { grid-template-columns: 1fr; gap: 1px; } }
+svg text { fill: var(--ink-2); font-family: var(--mono); font-size: 10px; }
+svg .axis { stroke: var(--rule); }
+svg .rho { stroke: var(--bound); stroke-width: 1.5; }
+details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; color: var(--data); }
+details summary:focus-visible, a:focus-visible { outline: 2px solid var(--data); outline-offset: 2px; }
+a { color: var(--data); }
+footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+footer p { margin: 0; max-width: 90ch; }
+</style>
+</head>
+<body>
+<div class="wrap"><header><span class="eyebrow">ECDLP · index calculus · whole pipeline · accounting view, no new measurement</span><h1>Index Calculus Leaderboard</h1><p class="verdict">Every curve this repository has priced end to end, with the best index-calculus recipe measured on it, against Pollard rho on the same curve and the same point. <strong>The units differ between the three tables below, and so do the references and the floors: S and the ratios are comparable inside a table and nowhere else.</strong> <strong>Cold, set-up included, no row is below its reference.</strong> On one unseen point of a Koblitz curve (table A) the index calculus's online interval is 8.84–17.5× faster than rho once its reusable set-up exists, but the set-up is paid first: cold it is 4.95–31.6× slower, and a generic walk given the same precomputation would be 2.02–8.04× faster online again (a model). Prime and random-binary curves (table B), one target each: 5.47× to 13.5× and 10.6× to 38.2×.</p><dl class="facts">
+<div class="fact"><dt>Koblitz · one point, cold</dt><dd>4.95×</dd><p>at log₂ r = 36.6, <span class="slug">icv1-f2m47-t22705043-f4e44623</span>; online alone 9.77× faster than rho; largest size 31.6× cold<br>× one-target rho, in batched-addition units (table A)</p></div>
+<div class="fact"><dt>Closest · Prime field</dt><dd>5.47×</dd><p>at log₂ r = 11.9, <span class="slug">icv1-fp12-t19-d4a315df</span>; at the largest size, log₂ r = 23.4: 13.5×<br>× matched negation-map rho, in GAE (table B)</p></div>
+<div class="fact"><dt>Closest · Random binary</dt><dd>10.6×</dd><p>at log₂ r = 15.0, <span class="slug">icv1-f2m18-t393-d2c04152</span>; at the largest size, log₂ r = 24.4: 38.2×<br>× matched negation-map rho, in GAE (table B)</p></div>
+<div class="fact"><dt>Curves</dt><dd>24 priced</dd><p>of 111 named in the repository; every one by its ICV1 slug</p></div></dl></header>
+<section class="panel" id="board"><h2>The board</h2><p>One row per curve: its best recipe, ranked within its table by the cold ratio to that table's reference, the whole method from set-up to a verified logarithm. <strong>There is no single unit here.</strong> Tables A, B and C below are priced in different units against different references and floors, stated at the head of each; S, × ref and × floor are comparable inside a table and nowhere else. Tables A and B solve one target per row, as AGENTS.md's one-target rule requires: A on one unseen public point per process against one-target rho on the same point (§23, 64 points per size), B against the matched negation-map rho (ledger §18). Table C is a historical 32-target diagnostic. For the Koblitz rows of A the online interval, the reading with rho at the canonical step and the generic-precomputation model sit beside the cold ratio, as §23 requires. The bar splits S into phases. A walked-target row on the ladder is resolved to about a factor 1.8 either way at three repetitions (ledger §13.7).</p><div class="scroll"><svg viewBox="0 0 980 138" width="100%" role="img" aria-label="Ratio to reference per curve, log scale" style="min-width:640px"><line class="axis" x1="150.0" y1="18" x2="150.0" y2="120"/><text x="150.0" y="134" text-anchor="middle">1×</text><line class="axis" x1="278.8" y1="18" x2="278.8" y2="120"/><text x="278.8" y="134" text-anchor="middle">3×</text><line class="axis" x1="420.0" y1="18" x2="420.0" y2="120"/><text x="420.0" y="134" text-anchor="middle">10×</text><line class="axis" x1="548.8" y1="18" x2="548.8" y2="120"/><text x="548.8" y="134" text-anchor="middle">30×</text><line class="axis" x1="690.0" y1="18" x2="690.0" y2="120"/><text x="690.0" y="134" text-anchor="middle">100×</text><line class="axis" x1="818.8" y1="18" x2="818.8" y2="120"/><text x="818.8" y="134" text-anchor="middle">300×</text><line class="axis" x1="960.0" y1="18" x2="960.0" y2="120"/><text x="960.0" y="134" text-anchor="middle">1000×</text><line class="rho" x1="150.0" y1="14" x2="150.0" y2="120"/><text x="154.0" y="12">reference = 1×</text><text x="0" y="40">Koblitz (A)</text><circle cx="337.5" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m47-t22705043-f4e44623: 4.95× at 2^36.6</title></circle><circle cx="230.4" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m57-tm747311035-c1f545af: 1.98× at 2^38.0</title></circle><circle cx="394.5" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m41-tm2308219-7f48b14a: 8.04× at 2^39.0</title></circle><circle cx="465.2" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m53-tm56619371-dac20a85: 14.7× at 2^44.3</title></circle><circle cx="472.7" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m59-tm943548413-98844ecc: 15.7× at 2^44.5</title></circle><circle cx="554.9" cy="36" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m61-t158598901-ab42b6c5: 31.6× at 2^47.2</title></circle><text x="0" y="66">Prime field (B)</text><circle cx="366.5" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp10-t5-192cb216: 6.34× at 2^9.7</title></circle><circle cx="349.3" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp12-t19-d4a315df: 5.47× at 2^11.9</title></circle><circle cx="368.2" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp14-tm43-158b6914: 6.43× at 2^14.0</title></circle><circle cx="373.3" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp16-t351-d433f24e: 6.71× at 2^16.0</title></circle><circle cx="356.5" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp18-t175-45770ebc: 5.82× at 2^18.0</title></circle><circle cx="398.2" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp20-t1293-3c2999ba: 8.3× at 2^20.0</title></circle><circle cx="425.7" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp22-tm1267-a5acaf6d: 10.5× at 2^21.7</title></circle><circle cx="454.8" cy="62" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-fp24-t1577-77336155: 13.5× at 2^23.4</title></circle><text x="0" y="92">Random binary (B)</text><circle cx="451.4" cy="88" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m15-t131-ed7256f0: 13.1× at 2^14.0</title></circle><circle cx="427.1" cy="88" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m18-t393-d2c04152: 10.6× at 2^15.0</title></circle><circle cx="488.8" cy="88" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m21-t2591-de54d72e: 18× at 2^20.0</title></circle><circle cx="517.8" cy="88" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m24-tm3047-2d0c0e8c: 23× at 2^21.0</title></circle><circle cx="577.2" cy="88" r="5" fill="var(--data)" fill-opacity=".55" stroke="var(--data)"><title>icv1-f2m27-t12543-569dca8b: 38.2× at 2^24.4</title></circle></svg></div><p class="muted">Each dot is a ratio to its own table's reference, in that table's unit; the three rows of dots are not comparable with one another.</p><div class="legend"><span><i style="background:var(--ph-precomputation)"></i>Reusable set-up</span><span><i style="background:var(--ph-setup)"></i>Curve and subgroup</span><span><i style="background:var(--ph-constructions)"></i>Workflow constructions</span><span><i style="background:var(--ph-factor_base)"></i>Factor base</span><span><i style="background:var(--ph-table)"></i>Pair table</span><span><i style="background:var(--ph-relations)"></i>Relations (PDP)</span><span><i style="background:var(--ph-linear_algebra)"></i>Linear algebra</span><span><i style="background:var(--ph-descent)"></i>Descent</span><span><i style="background:var(--ph-verify)"></i>Verification</span></div></section>
+<section class="panel" id="board-A"><h2>Table A · Koblitz, one target <span class="chip">§23</span></h2><dl class="defs"><div><dt>Unit</dt><dd>one batched affine addition (<code>add_many</code> over 1,024 subgroup points), per √r. A clock reading, not a count: <code>ic price</code> times each phase exclusively, on one thread, and divides by this unit, measured around each repetition (§20, §23).</dd></div><div><dt>Reference</dt><dd>One-target rho on the same point, measured as built (its set-up plus its walk), in the same unit and the same process; its answer replayed and verified (§23).</dd></div><div><dt>Floor</dt><dd>√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed Frobenius and negation, n the extension degree. Stated in steps and not rescaled to units, so × floor here divides units by steps.</dd></div><div><dt>Targets</dt><dd>one unseen public point per process, 64 per size</dd></div><div><dt>Status</dt><dd>primary comparison: one target, as AGENTS.md&#x27;s one-target rule requires</dd></div><div><dt>Rho step</dt><dd>rho&#x27;s walk as built costs 3.99–4.97 units a step; the canonical step costs 2.14–2.27</dd></div></dl><p class="muted">Read S, × ref and × floor in table A only.</p>
+<div class="scroll"><table><thead><tr><th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th><th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th><th class="n">S, ref</th><th class="n">× ref</th><th class="n">S, floor</th><th class="n">× floor</th><th>phases</th><th>ok</th></tr></thead><tbody>
+<tr class=""><td class="n">—</td><td><span class="slug">icv1-f2m57-tm747311035-c1f545af</span></td><td class="n">38.0</td><td class="recipe">aimed m = 3 collection, m = 2 descent; one target</td><td class="n">3</td><td class="n">7,296</td><td class="n">64</td><td class="n">8.12</td><td class="n">4.09</td><td class="n"><span class="ratio">1.98×</span><br><span class="muted">[1.95, 2.02]</span><br><span class="muted">online 13.5× faster [10.7, 17.3]; 5.97× at the canonical step</span><br><span class="muted">model: 3.29× slower online than a generic walk with the same set-up; break-even 15.2 targets</span><br><span class="muted">curve construction exceeds rho's walk here (§23.9); without it 8.21×</span></td><td class="n">0.117</td><td class="n">69.2×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:99.48%;background:var(--ph-precomputation)" title="Reusable set-up: 99.5%"></span><span style="width:0.51%;background:var(--ph-descent)" title="Descent: 0.5%"></span><span style="width:0.00%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+<tr class="lead"><td class="n">2</td><td><span class="slug">icv1-f2m47-t22705043-f4e44623</span></td><td class="n">36.6</td><td class="recipe">aimed m = 3 collection, m = 3 descent; one target</td><td class="n">3</td><td class="n">5,264</td><td class="n">56</td><td class="n">4.27</td><td class="n">0.863</td><td class="n"><span class="ratio">4.95×</span><br><span class="muted">[4.55, 5.41]</span><br><span class="muted">online 9.77× faster [7.83, 12.5]; 4.34× at the canonical step</span><br><span class="muted">model: 2.42× slower online than a generic walk with the same set-up; break-even 7.12 targets</span></td><td class="n">0.129</td><td class="n">33×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:98.42%;background:var(--ph-precomputation)" title="Reusable set-up: 98.4%"></span><span style="width:1.56%;background:var(--ph-descent)" title="Descent: 1.6%"></span><span style="width:0.01%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">3</td><td><span class="slug">icv1-f2m41-tm2308219-7f48b14a</span></td><td class="n">39.0</td><td class="recipe">aimed m = 3 collection, m = 2 descent; one target</td><td class="n">3</td><td class="n">6,560</td><td class="n">80</td><td class="n">5.58</td><td class="n">0.694</td><td class="n"><span class="ratio">8.04×</span><br><span class="muted">[7.26, 9.01]</span><br><span class="muted">online 9.38× faster [7.43, 12.1]; 4.57× at the canonical step</span><br><span class="muted">model: 2.5× slower online than a generic walk with the same set-up; break-even 9.88 targets</span></td><td class="n">0.138</td><td class="n">40.3×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:98.81%;background:var(--ph-precomputation)" title="Reusable set-up: 98.8%"></span><span style="width:1.21%;background:var(--ph-descent)" title="Descent: 1.2%"></span><span style="width:0.00%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">4</td><td><span class="slug">icv1-f2m53-tm56619371-dac20a85</span></td><td class="n">44.3</td><td class="recipe">aimed m = 3 collection, m = 2 descent; one target</td><td class="n">3</td><td class="n">27,984</td><td class="n">264</td><td class="n">7.4</td><td class="n">0.503</td><td class="n"><span class="ratio">14.7×</span><br><span class="muted">[13.1, 16.7]</span><br><span class="muted">online 17.5× faster [13.6, 22.6]; 9.37× at the canonical step</span><br><span class="muted">model: 2.02× slower online than a generic walk with the same set-up; break-even 16.1 targets</span></td><td class="n">0.122</td><td class="n">60.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:99.63%;background:var(--ph-precomputation)" title="Reusable set-up: 99.6%"></span><span style="width:0.37%;background:var(--ph-descent)" title="Descent: 0.4%"></span><span style="width:0.00%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">5</td><td><span class="slug">icv1-f2m59-tm943548413-98844ecc</span></td><td class="n">44.5</td><td class="recipe">aimed m = 3 collection, m = 2 descent; one target</td><td class="n">3</td><td class="n">30,208</td><td class="n">256</td><td class="n">9.03</td><td class="n">0.577</td><td class="n"><span class="ratio">15.7×</span><br><span class="muted">[13.9, 17.9]</span><br><span class="muted">online 16.9× faster [13, 22.1]; 8.9× at the canonical step</span><br><span class="muted">model: 2.77× slower online than a generic walk with the same set-up; break-even 18.4 targets</span></td><td class="n">0.115</td><td class="n">78.3×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:99.66%;background:var(--ph-precomputation)" title="Reusable set-up: 99.7%"></span><span style="width:0.34%;background:var(--ph-descent)" title="Descent: 0.3%"></span><span style="width:0.00%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">6</td><td><span class="slug">icv1-f2m61-t158598901-ab42b6c5</span></td><td class="n">47.2</td><td class="recipe">aimed m = 3 collection, m = 2 descent; one target</td><td class="n">3</td><td class="n">39,040</td><td class="n">320</td><td class="n">15.1</td><td class="n">0.479</td><td class="n"><span class="ratio">31.6×</span><br><span class="muted">[28.2, 35.7]</span><br><span class="muted">online 8.84× faster [6.76, 11.9]; 4.68× at the canonical step</span><br><span class="muted">model: 8.04× slower online than a generic walk with the same set-up; break-even 36.5 targets</span></td><td class="n">0.113</td><td class="n">134×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:99.65%;background:var(--ph-precomputation)" title="Reusable set-up: 99.7%"></span><span style="width:0.35%;background:var(--ph-descent)" title="Descent: 0.4%"></span><span style="width:0.00%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+</tbody></table></div>
+</section>
+<section class="panel" id="board-B"><h2>Table B · prime and random-binary ladder <span class="chip">§18</span></h2><dl class="defs"><div><dt>Unit</dt><dd>one group-addition equivalent (GAE), per √r. A count, not a clock: exact native operation counts converted to additions at the dimensionless ratios pinned per instance in <code>docs/ic/calibration.json</code> (ns per native operation over ns per group addition; all 13 instances used the pinned ratios; <code>ic boundary</code>, ledger §12). No conversion to table A&#x27;s or C&#x27;s unit is applied or claimed.</dd></div><div><dt>Reference</dt><dd>Matched Pollard rho on the same instance, one target: the negation-map r-adding walk (A = 2), counted in GAE, verified [d]G = Q (§18).</dd></div><div><dt>Floor</dt><dd>√(π/4) ≈ 0.886 GAE per √r: generic, one target, no precomputation, A = 2 usable automorphisms (negation).</dd></div><div><dt>Targets</dt><dd>one planted target per instance</dd></div><div><dt>Status</dt><dd>primary comparison: one target per instance</dd></div></dl><p class="muted">Read S, × ref and × floor in table B only.</p>
+<div class="scroll"><table><thead><tr><th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th><th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th><th class="n">S, ref</th><th class="n">× ref</th><th class="n">S, floor</th><th class="n">× floor</th><th>phases</th><th>ok</th></tr></thead><tbody>
+<tr><td colspan="14"><span class="chip">Prime field</span></td></tr>
+<tr class="lead"><td class="n">1</td><td><span class="slug">icv1-fp12-t19-d4a315df</span></td><td class="n">11.9</td><td class="recipe">folded table, walked targets, m = 2</td><td class="n">2</td><td class="n">32</td><td class="n">16</td><td class="n">15.6</td><td class="n">2.85</td><td class="n"><span class="ratio">5.47×</span></td><td class="n">0.886</td><td class="n">17.6×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:30.16%;background:var(--ph-factor_base)" title="Factor base: 30.2%"></span><span style="width:68.06%;background:var(--ph-relations)" title="Relations (PDP): 68.1%"></span><span style="width:0.41%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.4%"></span><span style="width:1.37%;background:var(--ph-verify)" title="Verification: 1.4%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">2</td><td><span class="slug">icv1-fp18-t175-45770ebc</span></td><td class="n">18.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">64</td><td class="n">32</td><td class="n">8.41</td><td class="n">1.45</td><td class="n"><span class="ratio">5.82×</span></td><td class="n">0.886</td><td class="n">9.49×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:26.07%;background:var(--ph-factor_base)" title="Factor base: 26.1%"></span><span style="width:73.37%;background:var(--ph-relations)" title="Relations (PDP): 73.4%"></span><span style="width:0.07%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.1%"></span><span style="width:0.49%;background:var(--ph-verify)" title="Verification: 0.5%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">3</td><td><span class="slug">icv1-fp10-t5-192cb216</span></td><td class="n">9.7</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">10</td><td class="n">5</td><td class="n">22.8</td><td class="n">3.6</td><td class="n"><span class="ratio">6.34×</span></td><td class="n">0.886</td><td class="n">25.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:5.28%;background:var(--ph-factor_base)" title="Factor base: 5.3%"></span><span style="width:93.04%;background:var(--ph-relations)" title="Relations (PDP): 93.0%"></span><span style="width:0.15%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.2%"></span><span style="width:1.53%;background:var(--ph-verify)" title="Verification: 1.5%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">4</td><td><span class="slug">icv1-fp14-tm43-158b6914</span></td><td class="n">14.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">26</td><td class="n">13</td><td class="n">13.1</td><td class="n">2.03</td><td class="n"><span class="ratio">6.43×</span></td><td class="n">0.886</td><td class="n">14.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:12.27%;background:var(--ph-factor_base)" title="Factor base: 12.3%"></span><span style="width:86.50%;background:var(--ph-relations)" title="Relations (PDP): 86.5%"></span><span style="width:0.15%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.1%"></span><span style="width:1.08%;background:var(--ph-verify)" title="Verification: 1.1%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">5</td><td><span class="slug">icv1-fp16-t351-d433f24e</span></td><td class="n">16.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">40</td><td class="n">20</td><td class="n">11.7</td><td class="n">1.74</td><td class="n"><span class="ratio">6.71×</span></td><td class="n">0.886</td><td class="n">13.2×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:18.69%;background:var(--ph-factor_base)" title="Factor base: 18.7%"></span><span style="width:80.49%;background:var(--ph-relations)" title="Relations (PDP): 80.5%"></span><span style="width:0.13%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.1%"></span><span style="width:0.69%;background:var(--ph-verify)" title="Verification: 0.7%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">6</td><td><span class="slug">icv1-fp20-t1293-3c2999ba</span></td><td class="n">20.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">102</td><td class="n">51</td><td class="n">10.7</td><td class="n">1.29</td><td class="n"><span class="ratio">8.3×</span></td><td class="n">0.886</td><td class="n">12.1×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:25.03%;background:var(--ph-factor_base)" title="Factor base: 25.0%"></span><span style="width:74.70%;background:var(--ph-relations)" title="Relations (PDP): 74.7%"></span><span style="width:0.05%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.1%"></span><span style="width:0.22%;background:var(--ph-verify)" title="Verification: 0.2%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">7</td><td><span class="slug">icv1-fp22-tm1267-a5acaf6d</span></td><td class="n">21.7</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">148</td><td class="n">74</td><td class="n">12.8</td><td class="n">1.22</td><td class="n"><span class="ratio">10.5×</span></td><td class="n">0.886</td><td class="n">14.4×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:24.55%;background:var(--ph-factor_base)" title="Factor base: 24.5%"></span><span style="width:75.28%;background:var(--ph-relations)" title="Relations (PDP): 75.3%"></span><span style="width:0.04%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.13%;background:var(--ph-verify)" title="Verification: 0.1%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">8</td><td><span class="slug">icv1-fp24-t1577-77336155</span></td><td class="n">23.4</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">222</td><td class="n">111</td><td class="n">14</td><td class="n">1.04</td><td class="n"><span class="ratio">13.5×</span></td><td class="n">0.886</td><td class="n">15.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:28.31%;background:var(--ph-factor_base)" title="Factor base: 28.3%"></span><span style="width:71.59%;background:var(--ph-relations)" title="Relations (PDP): 71.6%"></span><span style="width:0.03%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.07%;background:var(--ph-verify)" title="Verification: 0.1%"></span></div></td><td>✓</td></tr>
+<tr><td colspan="14"><span class="chip">Random binary</span></td></tr>
+<tr class="lead"><td class="n">1</td><td><span class="slug">icv1-f2m18-t393-d2c04152</span></td><td class="n">15.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">30</td><td class="n">15</td><td class="n">21.3</td><td class="n">2.01</td><td class="n"><span class="ratio">10.6×</span></td><td class="n">0.886</td><td class="n">24×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:6.25%;background:var(--ph-factor_base)" title="Factor base: 6.3%"></span><span style="width:93.24%;background:var(--ph-relations)" title="Relations (PDP): 93.2%"></span><span style="width:0.02%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.48%;background:var(--ph-verify)" title="Verification: 0.5%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">2</td><td><span class="slug">icv1-f2m15-t131-ed7256f0</span></td><td class="n">14.0</td><td class="recipe">folded table, walked targets, m = 2</td><td class="n">2</td><td class="n">30</td><td class="n">15</td><td class="n">26.3</td><td class="n">2.01</td><td class="n"><span class="ratio">13.1×</span></td><td class="n">0.886</td><td class="n">29.7×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:52.29%;background:var(--ph-factor_base)" title="Factor base: 52.3%"></span><span style="width:47.13%;background:var(--ph-relations)" title="Relations (PDP): 47.1%"></span><span style="width:0.03%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.55%;background:var(--ph-verify)" title="Verification: 0.5%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">3</td><td><span class="slug">icv1-f2m21-t2591-de54d72e</span></td><td class="n">20.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">62</td><td class="n">31</td><td class="n">24.4</td><td class="n">1.36</td><td class="n"><span class="ratio">18×</span></td><td class="n">0.886</td><td class="n">27.5×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:3.99%;background:var(--ph-factor_base)" title="Factor base: 4.0%"></span><span style="width:95.89%;background:var(--ph-relations)" title="Relations (PDP): 95.9%"></span><span style="width:0.01%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.11%;background:var(--ph-verify)" title="Verification: 0.1%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">4</td><td><span class="slug">icv1-f2m24-tm3047-2d0c0e8c</span></td><td class="n">21.0</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">134</td><td class="n">67</td><td class="n">27.2</td><td class="n">1.18</td><td class="n"><span class="ratio">23×</span></td><td class="n">0.886</td><td class="n">30.7×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:11.56%;background:var(--ph-factor_base)" title="Factor base: 11.6%"></span><span style="width:88.35%;background:var(--ph-relations)" title="Relations (PDP): 88.4%"></span><span style="width:0.01%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.08%;background:var(--ph-verify)" title="Verification: 0.1%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">5</td><td><span class="slug">icv1-f2m27-t12543-569dca8b</span></td><td class="n">24.4</td><td class="recipe">folded, walked, base at the family optimum, m = 2</td><td class="n">2</td><td class="n">254</td><td class="n">127</td><td class="n">36.9</td><td class="n">0.966</td><td class="n"><span class="ratio">38.2×</span></td><td class="n">0.886</td><td class="n">41.7×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:9.32%;background:var(--ph-factor_base)" title="Factor base: 9.3%"></span><span style="width:90.66%;background:var(--ph-relations)" title="Relations (PDP): 90.7%"></span><span style="width:0.00%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.0%"></span><span style="width:0.02%;background:var(--ph-verify)" title="Verification: 0.0%"></span></div></td><td>✓</td></tr>
+</tbody></table></div>
+</section>
+<section class="panel" id="batch"><h2>Table C · Koblitz, 32 targets in a batch <span class="chip">§19–§22</span></h2><p>The collection thread's rounds before §23 solved 32 targets together and priced them per target against batch rho on the same 32 (§19–§22). Under the one-target rule that is a historical diagnostic, not a primary comparison; it is kept here with its §21 figure as the before mark and the one-target cold ratio §20 derived from this run (shared phases plus one mean descent, against single-target rho), which table A's measured figure replaces. The phase split is the most detailed the thread has.</p><dl class="defs"><div><dt>Unit</dt><dd>one batched affine addition (<code>add_many</code> over 1,024 subgroup points), per √r, per target. A clock reading, not a count: <code>ic price</code> times each phase exclusively, on one thread, and divides by this unit (§20, §22 isolated re-run).</dd></div><div><dt>Reference</dt><dd>Batch rho on the same 32 targets (signed Frobenius and negation), its counted operations priced at the canonical step, one batched addition plus the table canonicalisation, in the same process (§20). Collisions shared across the 32 targets are in its cost per target.</dd></div><div><dt>Floor</dt><dd>L(32)·√(π/4n) steps per √r per target, with L(32) = 0.19869: the one-target floor of table A times Kuhn–Struik&#x27;s batch share. Stated in steps and not rescaled to units, and a smaller object than table A&#x27;s floor, so × floor in C and in A do not compare.</dd></div><div><dt>Targets</dt><dd>32 targets solved together, priced per target</dd></div><div><dt>Status</dt><dd>historical diagnostic under AGENTS.md&#x27;s one-target rule: 32 targets solved together</dd></div><div><dt>Rho step</dt><dd>the canonical step costs 1.8–2.3</dd></div></dl><p class="muted">Read S, × ref and × floor in table C only.</p>
+<div class="scroll"><table><thead><tr><th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th><th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th><th class="n">S, ref</th><th class="n">× ref</th><th class="n">S, floor</th><th class="n">× floor</th><th>phases</th><th>ok</th></tr></thead><tbody>
+<tr class="lead"><td class="n">1</td><td><span class="slug">icv1-f2m41-tm2308219-7f48b14a</span></td><td class="n">39.0</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">6,560</td><td class="n">80</td><td class="n">0.241</td><td class="n">0.0666</td><td class="n"><span class="ratio">3.62×</span><br><span class="muted">[3.28, 3.97]</span><br><span class="muted">was 4.28× (§21)</span><br><span class="muted">derived one-target cold estimate: 22.6× (§20; not table A's measurement)</span></td><td class="n">0.0275</td><td class="n">8.76×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:8.69%;background:var(--ph-setup)" title="Curve and subgroup: 8.7%"></span><span style="width:3.51%;background:var(--ph-constructions)" title="Workflow constructions: 3.5%"></span><span style="width:3.90%;background:var(--ph-factor_base)" title="Factor base: 3.9%"></span><span style="width:12.07%;background:var(--ph-table)" title="Pair table: 12.1%"></span><span style="width:49.68%;background:var(--ph-relations)" title="Relations (PDP): 49.7%"></span><span style="width:0.46%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.5%"></span><span style="width:19.90%;background:var(--ph-descent)" title="Descent: 19.9%"></span><span style="width:1.80%;background:var(--ph-verify)" title="Verification: 1.8%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">2</td><td><span class="slug">icv1-f2m47-t22705043-f4e44623</span></td><td class="n">36.6</td><td class="recipe">aimed m = 3 collection, m = 3 descent</td><td class="n">3</td><td class="n">5,264</td><td class="n">56</td><td class="n">0.234</td><td class="n">0.0602</td><td class="n"><span class="ratio">3.89×</span><br><span class="muted">[3.46, 4.35]</span><br><span class="muted">was 4.44× (§21)</span><br><span class="muted">derived one-target cold estimate: 38.7× (§20; not table A's measurement)</span></td><td class="n">0.0257</td><td class="n">9.13×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:9.40%;background:var(--ph-setup)" title="Curve and subgroup: 9.4%"></span><span style="width:6.69%;background:var(--ph-constructions)" title="Workflow constructions: 6.7%"></span><span style="width:7.27%;background:var(--ph-factor_base)" title="Factor base: 7.3%"></span><span style="width:15.81%;background:var(--ph-table)" title="Pair table: 15.8%"></span><span style="width:24.71%;background:var(--ph-relations)" title="Relations (PDP): 24.7%"></span><span style="width:0.65%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.7%"></span><span style="width:32.63%;background:var(--ph-descent)" title="Descent: 32.6%"></span><span style="width:2.85%;background:var(--ph-verify)" title="Verification: 2.9%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">3</td><td><span class="slug">icv1-f2m43-tm998717-e2e742b0</span></td><td class="n">32.1</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">1,376</td><td class="n">16</td><td class="n">0.325</td><td class="n">0.0666</td><td class="n"><span class="ratio">4.88×</span><br><span class="muted">[4.16, 5.62]</span><br><span class="muted">was 5.53× (§21)</span><br><span class="muted">derived one-target cold estimate: 39.9× (§20; not table A's measurement)</span></td><td class="n">0.0269</td><td class="n">12.1×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:10.45%;background:var(--ph-setup)" title="Curve and subgroup: 10.5%"></span><span style="width:7.09%;background:var(--ph-constructions)" title="Workflow constructions: 7.1%"></span><span style="width:5.97%;background:var(--ph-factor_base)" title="Factor base: 6.0%"></span><span style="width:4.36%;background:var(--ph-table)" title="Pair table: 4.4%"></span><span style="width:29.91%;background:var(--ph-relations)" title="Relations (PDP): 29.9%"></span><span style="width:0.60%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.6%"></span><span style="width:38.15%;background:var(--ph-descent)" title="Descent: 38.1%"></span><span style="width:3.46%;background:var(--ph-verify)" title="Verification: 3.5%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">4</td><td><span class="slug">icv1-f2m53-tm56619371-dac20a85</span></td><td class="n">44.3</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">27,984</td><td class="n">264</td><td class="n">0.261</td><td class="n">0.0509</td><td class="n"><span class="ratio">5.11×</span><br><span class="muted">[3.82, 6.6]</span><br><span class="muted">was 7.77× (§21)</span><br><span class="muted">derived one-target cold estimate: 43× (§20; not table A's measurement)</span></td><td class="n">0.0242</td><td class="n">10.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:6.63%;background:var(--ph-setup)" title="Curve and subgroup: 6.6%"></span><span style="width:2.23%;background:var(--ph-constructions)" title="Workflow constructions: 2.2%"></span><span style="width:2.52%;background:var(--ph-factor_base)" title="Factor base: 2.5%"></span><span style="width:23.45%;background:var(--ph-table)" title="Pair table: 23.4%"></span><span style="width:56.33%;background:var(--ph-relations)" title="Relations (PDP): 56.3%"></span><span style="width:0.22%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.2%"></span><span style="width:7.78%;background:var(--ph-descent)" title="Descent: 7.8%"></span><span style="width:0.85%;background:var(--ph-verify)" title="Verification: 0.9%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">5</td><td><span class="slug">icv1-f2m37-tm534059-32aad96b</span></td><td class="n">27.8</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">592</td><td class="n">8</td><td class="n">0.485</td><td class="n">0.0922</td><td class="n"><span class="ratio">5.26×</span><br><span class="muted">[4.4, 6.15]</span><br><span class="muted">was 6.31× (§21)</span><br><span class="muted">derived one-target cold estimate: 41.6× (§20; not table A's measurement)</span></td><td class="n">0.0289</td><td class="n">16.8×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:15.58%;background:var(--ph-setup)" title="Curve and subgroup: 15.6%"></span><span style="width:12.81%;background:var(--ph-constructions)" title="Workflow constructions: 12.8%"></span><span style="width:8.48%;background:var(--ph-factor_base)" title="Factor base: 8.5%"></span><span style="width:5.01%;background:var(--ph-table)" title="Pair table: 5.0%"></span><span style="width:17.14%;background:var(--ph-relations)" title="Relations (PDP): 17.1%"></span><span style="width:1.01%;background:var(--ph-linear_algebra)" title="Linear algebra: 1.0%"></span><span style="width:33.36%;background:var(--ph-descent)" title="Descent: 33.4%"></span><span style="width:6.61%;background:var(--ph-verify)" title="Verification: 6.6%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">6</td><td><span class="slug">icv1-f2m23-tm5197-1f85e9e1</span></td><td class="n">22.0</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">368</td><td class="n">8</td><td class="n">1.43</td><td class="n">0.205</td><td class="n"><span class="ratio">6.99×</span><br><span class="muted">[4.44, 10.3]</span><br><span class="muted">was 9.68× (§21)</span><br><span class="muted">derived one-target cold estimate: 62.3× (§20; not table A's measurement)</span></td><td class="n">0.0367</td><td class="n">39×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:11.48%;background:var(--ph-setup)" title="Curve and subgroup: 11.5%"></span><span style="width:20.15%;background:var(--ph-constructions)" title="Workflow constructions: 20.1%"></span><span style="width:11.76%;background:var(--ph-factor_base)" title="Factor base: 11.8%"></span><span style="width:9.53%;background:var(--ph-table)" title="Pair table: 9.5%"></span><span style="width:8.34%;background:var(--ph-relations)" title="Relations (PDP): 8.3%"></span><span style="width:2.55%;background:var(--ph-linear_algebra)" title="Linear algebra: 2.6%"></span><span style="width:21.33%;background:var(--ph-descent)" title="Descent: 21.3%"></span><span style="width:14.86%;background:var(--ph-verify)" title="Verification: 14.9%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">7</td><td><span class="slug">icv1-f2m45-tm6236725-40939294</span></td><td class="n">24.8</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">720</td><td class="n">8</td><td class="n">0.856</td><td class="n">0.119</td><td class="n"><span class="ratio">7.19×</span><br><span class="muted">[6.41, 8.02]</span><br><span class="muted">was 9.93× (§21)</span><br><span class="muted">derived one-target cold estimate: 123× (§20; not table A's measurement)</span></td><td class="n">0.0262</td><td class="n">32.6×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:21.18%;background:var(--ph-setup)" title="Curve and subgroup: 21.2%"></span><span style="width:22.42%;background:var(--ph-constructions)" title="Workflow constructions: 22.4%"></span><span style="width:15.18%;background:var(--ph-factor_base)" title="Factor base: 15.2%"></span><span style="width:8.13%;background:var(--ph-table)" title="Pair table: 8.1%"></span><span style="width:4.74%;background:var(--ph-relations)" title="Relations (PDP): 4.7%"></span><span style="width:1.46%;background:var(--ph-linear_algebra)" title="Linear algebra: 1.5%"></span><span style="width:17.59%;background:var(--ph-descent)" title="Descent: 17.6%"></span><span style="width:9.30%;background:var(--ph-verify)" title="Verification: 9.3%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">8</td><td><span class="slug">icv1-f2m61-t158598901-ab42b6c5</span></td><td class="n">47.2</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">39,040</td><td class="n">320</td><td class="n">0.488</td><td class="n">0.0531</td><td class="n"><span class="ratio">9.2×</span><br><span class="muted">[8.24, 10.2]</span><br><span class="muted">was 12.1× (§21)</span><br><span class="muted">derived one-target cold estimate: 85× (§20; not table A's measurement)</span></td><td class="n">0.0225</td><td class="n">21.7×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:3.43%;background:var(--ph-setup)" title="Curve and subgroup: 3.4%"></span><span style="width:0.61%;background:var(--ph-constructions)" title="Workflow constructions: 0.6%"></span><span style="width:0.72%;background:var(--ph-factor_base)" title="Factor base: 0.7%"></span><span style="width:7.46%;background:var(--ph-table)" title="Pair table: 7.5%"></span><span style="width:78.82%;background:var(--ph-relations)" title="Relations (PDP): 78.8%"></span><span style="width:0.05%;background:var(--ph-linear_algebra)" title="Linear algebra: 0.1%"></span><span style="width:8.70%;background:var(--ph-descent)" title="Descent: 8.7%"></span><span style="width:0.21%;background:var(--ph-verify)" title="Verification: 0.2%"></span></div></td><td>✓</td></tr>
+<tr class=""><td class="n">9</td><td><span class="slug">icv1-f2m19-tm797-9c54981b</span></td><td class="n">18.0</td><td class="recipe">aimed m = 3 collection, m = 2 descent</td><td class="n">3</td><td class="n">304</td><td class="n">8</td><td class="n">4.87</td><td class="n">0.327</td><td class="n"><span class="ratio">14.9×</span><br><span class="muted">[13.8, 16]</span><br><span class="muted">was 20.8× (§21)</span><br><span class="muted">derived one-target cold estimate: 113× (§20; not table A's measurement)</span></td><td class="n">0.0404</td><td class="n">121×</td><td><div class="bar" role="img" aria-label="phase shares"><span style="width:12.80%;background:var(--ph-setup)" title="Curve and subgroup: 12.8%"></span><span style="width:18.76%;background:var(--ph-constructions)" title="Workflow constructions: 18.8%"></span><span style="width:11.73%;background:var(--ph-factor_base)" title="Factor base: 11.7%"></span><span style="width:10.35%;background:var(--ph-table)" title="Pair table: 10.4%"></span><span style="width:5.30%;background:var(--ph-relations)" title="Relations (PDP): 5.3%"></span><span style="width:2.67%;background:var(--ph-linear_algebra)" title="Linear algebra: 2.7%"></span><span style="width:18.76%;background:var(--ph-descent)" title="Descent: 18.8%"></span><span style="width:19.63%;background:var(--ph-verify)" title="Verification: 19.6%"></span></div></td><td>✓</td></tr>
+</tbody></table></div>
+</section>
+<section class="panel" id="recipes"><h2>Every recipe on every ladder curve</h2><p>Table B only: ratio to the matched rho for each variant the ladder ran, three repetitions averaged. The minimum per curve is the row on the board. The balanced recipe sizes the base at the family optimum F = (c·#E·t/k)<sup>1/3</sup>, which is 0.75·r<sup>1/6</sup> in S on a prime-order curve (ledger §11.2): a rising cost against a flat reference, so this family has no crossover to find at any size.</p><div class="scroll"><table><thead><tr><th>recipe</th>
+<th class="n" title="icv1-fp10-t5-192cb216">p·9.7</th>
+<th class="n" title="icv1-fp12-t19-d4a315df">p·11.9</th>
+<th class="n" title="icv1-fp14-tm43-158b6914">p·14.0</th>
+<th class="n" title="icv1-fp16-t351-d433f24e">p·16.0</th>
+<th class="n" title="icv1-fp18-t175-45770ebc">p·18.0</th>
+<th class="n" title="icv1-fp20-t1293-3c2999ba">p·20.0</th>
+<th class="n" title="icv1-fp22-tm1267-a5acaf6d">p·21.7</th>
+<th class="n" title="icv1-fp24-t1577-77336155">p·23.4</th>
+<th class="n" title="icv1-f2m15-t131-ed7256f0">b·14.0</th>
+<th class="n" title="icv1-f2m18-t393-d2c04152">b·15.0</th>
+<th class="n" title="icv1-f2m21-t2591-de54d72e">b·20.0</th>
+<th class="n" title="icv1-f2m24-tm3047-2d0c0e8c">b·21.0</th>
+<th class="n" title="icv1-f2m27-t12543-569dca8b">b·24.4</th>
+</tr></thead><tbody>
+<tr><td>folded, walked, base at the family optimum, m = 2</td>
+<td class="n"><strong>6.34×</strong></td>
+<td class="n">5.8×</td>
+<td class="n"><strong>6.43×</strong></td>
+<td class="n"><strong>6.71×</strong></td>
+<td class="n"><strong>5.82×</strong></td>
+<td class="n"><strong>8.3×</strong></td>
+<td class="n"><strong>10.5×</strong></td>
+<td class="n"><strong>13.5×</strong></td>
+<td class="n">15.1×</td>
+<td class="n"><strong>10.6×</strong></td>
+<td class="n"><strong>18×</strong></td>
+<td class="n"><strong>23×</strong></td>
+<td class="n"><strong>38.2×</strong></td>
+</tr>
+<tr><td>negation-folded table, m = 3</td>
+<td class="n">6.63×</td>
+<td class="n">6.16×</td>
+<td class="n">9.75×</td>
+<td class="n">17.1×</td>
+<td class="n">16.7×</td>
+<td class="n">22.4×</td>
+<td class="n">39.6×</td>
+<td class="n">35.6×</td>
+<td class="n">33.4×</td>
+<td class="n">37.1×</td>
+<td class="n">57×</td>
+<td class="n">75.1×</td>
+<td class="n">198×</td>
+</tr>
+<tr><td>folded table, walked targets, m = 2</td>
+<td class="n">7.19×</td>
+<td class="n"><strong>5.47×</strong></td>
+<td class="n">7.71×</td>
+<td class="n">12.9×</td>
+<td class="n">8.93×</td>
+<td class="n">15.3×</td>
+<td class="n">32.3×</td>
+<td class="n">23.9×</td>
+<td class="n"><strong>13.1×</strong></td>
+<td class="n">17.4×</td>
+<td class="n">18.4×</td>
+<td class="n">32.1×</td>
+<td class="n">43.1×</td>
+</tr>
+<tr><td>folded table, walked targets, m = 3</td>
+<td class="n">7.3×</td>
+<td class="n">6.01×</td>
+<td class="n">8.47×</td>
+<td class="n">13.7×</td>
+<td class="n">13×</td>
+<td class="n">18.1×</td>
+<td class="n">33.9×</td>
+<td class="n">30.5×</td>
+<td class="n">26.4×</td>
+<td class="n">29.4×</td>
+<td class="n">47.8×</td>
+<td class="n">67.1×</td>
+<td class="n">175×</td>
+</tr>
+<tr><td>pair table, m = 3</td>
+<td class="n">9.11×</td>
+<td class="n">7.6×</td>
+<td class="n">13.7×</td>
+<td class="n">26.3×</td>
+<td class="n">22.2×</td>
+<td class="n">34.8×</td>
+<td class="n">69.3×</td>
+<td class="n">54.7×</td>
+<td class="n">34.3×</td>
+<td class="n">39.9×</td>
+<td class="n">59.7×</td>
+<td class="n">86.1×</td>
+<td class="n">213×</td>
+</tr>
+<tr><td>negation-folded table, m = 2</td>
+<td class="n">10.2×</td>
+<td class="n">18.1×</td>
+<td class="n">27.6×</td>
+<td class="n">45.4×</td>
+<td class="n">76.7×</td>
+<td class="n">85.5×</td>
+<td class="n">115×</td>
+<td class="n">239×</td>
+<td class="n">97.5×</td>
+<td class="n">113×</td>
+<td class="n">411×</td>
+<td class="n">580×</td>
+<td class="n">1,702×</td>
+</tr>
+<tr><td>Semaev S3 roots, m = 2</td>
+<td class="n">10.6×</td>
+<td class="n">26.3×</td>
+<td class="n">49×</td>
+<td class="n">349×</td>
+<td class="n">209×</td>
+<td class="n">329×</td>
+<td class="n">631×</td>
+<td class="n">4,922×</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+</tr>
+<tr><td>pair table, m = 2</td>
+<td class="n">12.7×</td>
+<td class="n">19.5×</td>
+<td class="n">31.5×</td>
+<td class="n">54.6×</td>
+<td class="n">82.2×</td>
+<td class="n">97.8×</td>
+<td class="n">144×</td>
+<td class="n">258×</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+</tr>
+<tr><td>direct subtraction, m = 2</td>
+<td class="n">14×</td>
+<td class="n">32×</td>
+<td class="n">59.5×</td>
+<td class="n">133×</td>
+<td class="n">254×</td>
+<td class="n">406×</td>
+<td class="n">798×</td>
+<td class="n">1,962×</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+</tr>
+<tr><td>Semaev S4 pairs-and-solve, m = 3</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">677×</td>
+<td class="n">1,358×</td>
+<td class="n">6,283×</td>
+<td class="n">15,492×</td>
+<td class="n">119,465×</td>
+</tr>
+</tbody></table></div><p class="muted">Column heads: p = prime field, b = random binary, then log₂ r. Hover a head for the curve's slug.</p></section>
+<section class="panel" id="steps"><h2>The ECDLP, step by step</h2><p>What each phase computes, what it costs, and how fast it grows. The exponent α is the fit of that phase's operations to r<sup>α</sup> on the Round-5 ladder (table B, in GAE) for the balanced recipe; rho grows as r<sup>1/2</sup>, so a phase with α above ½ loses ground at every size. The share columns are the phase's part of S on each family's leading row.</p><div class="scroll"><table><thead><tr><th>phase</th><th>what it does</th><th>cost model</th><th class="n">α prime</th><th class="n">α binary</th><th class="n">share · Koblitz batch 2^39 (§22)</th><th class="n">share · prime 2^11.9</th></tr></thead><tbody>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-setup);margin-right:6px"></i>Curve and subgroup</td><td>#E by Schoof / Koblitz recurrence, factor, clear the cofactor</td><td>one-off; Koblitz: 25–171 units a base point at 2^27.8 and up</td><td class="n">—</td><td class="n">—</td><td class="n">8.7%</td><td class="n">—</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-factor_base);margin-right:6px"></i>Factor base</td><td>Base of |F| points: small abscissae (prime), a subspace (binary), Frobenius orbits (Koblitz)</td><td>|F|; the balanced optimum puts |F| ∝ r^{1/3}</td><td class="n">0.623</td><td class="n">0.731</td><td class="n">3.9%</td><td class="n">30.2%</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-constructions);margin-right:6px"></i>Workflow constructions</td><td>Orbit map, point index and decomposition classes around the work (Koblitz); built once per base since §21</td><td>per base point; 0.4–16% of S after §21 (ledger §21.3)</td><td class="n">—</td><td class="n">—</td><td class="n">3.5%</td><td class="n">—</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-table);margin-right:6px"></i>Pair table</td><td>All |F|(|F|+1)/2 pair sums, folded by negation or by ⟨σ, −1⟩; on the ladder counted inside the factor base</td><td>|F|² / (4t) stored pairs, t the fold</td><td class="n">—</td><td class="n">—</td><td class="n">12.1%</td><td class="n">—</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-relations);margin-right:6px"></i>Relations (PDP)</td><td>Draw a target, ask the PDP oracle whether it is a sum of m base points, keep verified hits</td><td>trials ≈ (K+1) / ceiling; per trial one table probe (m = 2) or |F| (m = 3)</td><td class="n">0.418</td><td class="n">0.528</td><td class="n">49.7%</td><td class="n">68.1%</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-linear_algebra);margin-right:6px"></i>Linear algebra</td><td>Relations as rows over Z/rZ; dense Gauss–Jordan (ladder) or filter + block Wiedemann (Koblitz)</td><td>dense K³, sparse ~K·weight</td><td class="n">0.262</td><td class="n">0.205</td><td class="n">0.5%</td><td class="n">0.4%</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-descent);margin-right:6px"></i>Descent</td><td>Each target decomposed over the logged base: an m = 2 or 3 whole-base scan</td><td>≈ 2r / |F|² probes per target; does not amortise over targets</td><td class="n">—</td><td class="n">—</td><td class="n">19.9%</td><td class="n">—</td></tr>
+<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--ph-verify);margin-right:6px"></i>Verification</td><td>Re-add every relation; check [d]G = Q for every target</td><td>one scalar multiplication per target</td><td class="n">—</td><td class="n">—</td><td class="n">1.8%</td><td class="n">1.4%</td></tr>
+<tr><td><strong>Whole method</strong></td><td>all of the above, cold</td><td>family optimum S ∝ r<sup>1/6</sup></td><td class="n"><strong>0.447</strong></td><td class="n"><strong>0.538</strong></td><td class="n">100%</td><td class="n">100%</td></tr><tr><td>Matched rho</td><td>negation-map r-adding walk, distinguished points</td><td>√(πr/2A)</td><td class="n">0.372</td><td class="n">0.392</td><td class="n">—</td><td class="n">—</td></tr>
+</tbody></table></div><p>At the Koblitz batch headline (§22) the pipeline stored 265,680 pairs, collected 86 relations from 2,017,897 scanned summands, reduced 86 rows to a Wiedemann core of dimension 12, and spent 24,134 descent trials per target. Koblitz top-end exponent, ratio·√n against r over the four largest sizes: β = 0.137 [-0.0592, 0.332], against the law's 1/6 and the model's 0.141; it cannot yet tell them apart. The ladder's rho fits sit under ½ because set-up still shows at these sizes (ledger §18.5).</p></section>
+<section class="panel" id="pdp"><h2>The point decomposition problem, per target</h2><p>Every oracle answers the same question on the same Semaev systems: is this target a sum of m base points? Cost is group-addition equivalents per target, found and refuted averaged; FFD is the first fall degree of the Weil-restricted system. The pair table answers in 0–25 units where F4 needs 10<sup>2</sup>–10<sup>6</sup> and SAT more, which is why the board's recipes use it. Zero disagreements on every cell.</p><div class="scroll"><table><thead><tr><th>curve</th><th class="n">n</th><th class="n">m</th><th class="n">ℓ</th><th class="n">unknowns</th><th class="n">FFD</th><th class="n">hit rate</th><th class="n">enumerate</th><th class="n">pair table</th><th class="n">matrix F4</th><th class="n">CDCL SAT</th><th class="n">S4 pairs-and-solve</th></tr></thead><tbody>
+<tr><td><span class="slug">icv1-f2m9-t5-81e744be</span></td><td class="n">9</td><td class="n">2</td><td class="n">6</td><td class="n">12</td><td class="n">2</td><td class="n">1.00</td>
+<td class="n">5.75</td>
+<td class="n">1.02</td>
+<td class="n">167</td>
+<td class="n">4,134</td>
+<td class="n">—</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m9-t5-81e744be</span></td><td class="n">9</td><td class="n">3</td><td class="n">6</td><td class="n">27</td><td class="n">3</td><td class="n">1.00</td>
+<td class="n">5</td>
+<td class="n">2.02</td>
+<td class="n">3,803</td>
+<td class="n">78,376</td>
+<td class="n">284</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m11-t67-05f5aa36</span></td><td class="n">11</td><td class="n">2</td><td class="n">10</td><td class="n">20</td><td class="n">2</td><td class="n">1.00</td>
+<td class="n">1</td>
+<td class="n">1.02</td>
+<td class="n">1,254</td>
+<td class="n">14,886</td>
+<td class="n">—</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m13-t181-515ee569</span></td><td class="n">13</td><td class="n">2</td><td class="n">12</td><td class="n">24</td><td class="n">2</td><td class="n">1.00</td>
+<td class="n">1</td>
+<td class="n">1.02</td>
+<td class="n">4,165</td>
+<td class="n">24,408</td>
+<td class="n">—</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m13-t181-515ee569</span></td><td class="n">13</td><td class="n">3</td><td class="n">12</td><td class="n">49</td><td class="n">—</td><td class="n">1.00</td>
+<td class="n">2</td>
+<td class="n">2.02</td>
+<td class="n">—</td>
+<td class="n">—</td>
+<td class="n">24,709</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m15-tm275-2d22ff5d</span></td><td class="n">15</td><td class="n">2</td><td class="n">5</td><td class="n">10</td><td class="n">2–3</td><td class="n">0.00</td>
+<td class="n">33</td>
+<td class="n">0.011</td>
+<td class="n">20.8</td>
+<td class="n">1,499</td>
+<td class="n">—</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m15-tm275-2d22ff5d</span></td><td class="n">15</td><td class="n">3</td><td class="n">5</td><td class="n">30</td><td class="n">3</td><td class="n">0.38</td>
+<td class="n">466</td>
+<td class="n">24.7</td>
+<td class="n">872,580</td>
+<td class="n muted">no answer</td>
+<td class="n">1,106</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m17-tm101-00378d4e</span></td><td class="n">17</td><td class="n">2</td><td class="n">8</td><td class="n">16</td><td class="n">2</td><td class="n">0.25</td>
+<td class="n">183</td>
+<td class="n">0.261</td>
+<td class="n">4,470</td>
+<td class="n">71,422</td>
+<td class="n">—</td>
+</tr>
+<tr><td><span class="slug">icv1-f2m23-tm5197-1f85e9e1</span></td><td class="n">23</td><td class="n">2</td><td class="n">11</td><td class="n">22</td><td class="n">2</td><td class="n">0.50</td>
+<td class="n">1,310</td>
+<td class="n">0.511</td>
+<td class="n">88,405</td>
+<td class="n">13,466,289</td>
+<td class="n">—</td>
+</tr>
+</tbody></table></div><p class="muted">Source: <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>, a stage diagnostic: one phase priced alone is not a speed (AGENTS.md §2).</p></section>
+<section class="panel" id="curves"><h2>Every curve the repository names</h2><p>From the curve registry. The slug is the curve's name in text; the EC1 alias identifies the exact representation measured (subgroup and generator included) for comparisons across repositories. Legacy spellings are what older notes and frozen reports called the curve.</p>
+<details open><summary>koblitz · 53 curves · 11 on the board</summary><div class="scroll"><table><thead><tr><th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th><th>also called</th><th>board</th></tr></thead><tbody>
+<tr><td><span class="slug">icv1-f2m7-t13-616700dd</span></td><td>GF(2^7)</td><td>a = 0, b = 1</td><td class="n">7</td><td><code>EC1N7Ce0hb6d297a2ca08</code></td><td>k0n7, K_0 / GF(2^7), K_0/2^7, K_0/F_2^7</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m7-tm13-ac10a42c</span></td><td>GF(2^7)</td><td>a = 1, b = 1</td><td class="n">8</td><td><code>EC1N7Ce1hec93ae9acdf0</code></td><td>k1n7, K_1 / GF(2^7), K_1/2^7, K_1/F_2^7</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m9-t5-81e744be</span></td><td>GF(2^9)</td><td>a = 0, b = 1</td><td class="n">9</td><td><code>EC1N9Ce0h56c2643982af</code></td><td>k0n9, K_0 / GF(2^9), K_0/2^9, K_0/F_2^9</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m9-tm5-4a3ea183</span></td><td>GF(2^9)</td><td>a = 1, b = 1</td><td class="n">10</td><td><code>EC1N9Ce1h57c40465dbe3</code></td><td>k1n9, K_1 / GF(2^9), K_1/2^9, K_1/F_2^9</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m11-tm67-f393fc83</span></td><td>GF(2^11)</td><td>a = 0, b = 1</td><td class="n">12</td><td><code></code><span class="muted">KoblitzCurve::new(0, 11) finds no usable prime-order subgroup, so the repository has built no generator on it</span></td><td>k0n11, K_0 / GF(2^11), K_0/2^11, K_0/F_2^11</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m11-t67-05f5aa36</span></td><td>GF(2^11)</td><td>a = 1, b = 1</td><td class="n">11</td><td><code>EC1N11Ce1hdb35b3c53d5e</code></td><td>k1n11, K_1 / GF(2^11), K_1/2^11, K_1/F_2^11</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-t181-515ee569</span></td><td>GF(2^13)</td><td>a = 0, b = 1</td><td class="n">13</td><td><code>EC1N13Ce0h1dfa32cdf623</code></td><td>k0n13, K_0 / GF(2^13), K_0/2^13, K_0/F_2^13</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-tm181-25e736d2</span></td><td>GF(2^13)</td><td>a = 1, b = 1</td><td class="n">14</td><td><code></code><span class="muted">KoblitzCurve::new(1, 13) finds no usable prime-order subgroup, so the repository has built no generator on it</span></td><td>k1n13, K_1 / GF(2^13), K_1/2^13, K_1/F_2^13</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-tm275-2d22ff5d</span></td><td>GF(2^15)</td><td>a = 0, b = 1</td><td class="n">16</td><td><code>EC1N15Ce0hf0a769285cc9</code></td><td>k0n15, K_0 / GF(2^15), K_0/2^15, K_0/F_2^15</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-t275-b7f03703</span></td><td>GF(2^15)</td><td>a = 1, b = 1</td><td class="n">15</td><td><code>EC1N15Ce1h33cd37a1308e</code></td><td>k1n15, K_1 / GF(2^15), K_1/2^15, K_1/F_2^15</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m17-t101-e6c4b64d</span></td><td>GF(2^17)</td><td>a = 0, b = 1</td><td class="n">17</td><td><code></code><span class="muted">KoblitzCurve::new(0, 17) finds no usable prime-order subgroup, so the repository has built no generator on it</span></td><td>k0n17, K_0 / GF(2^17), K_0/2^17, K_0/F_2^17</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m17-tm101-00378d4e</span></td><td>GF(2^17)</td><td>a = 1, b = 1</td><td class="n">18</td><td><code>EC1N17Ce1hdfbf24105ef5</code></td><td>k1n17, K_1 / GF(2^17), K_1/2^17, K_1/F_2^17</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m19-t797-b6cf2467</span></td><td>GF(2^19)</td><td>a = 0, b = 1</td><td class="n">19</td><td><code>EC1N19Ce0h1e2a8f558313</code></td><td>k0n19, K_0 / GF(2^19), K_0/2^19, K_0/F_2^19</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m19-tm797-9c54981b</span></td><td>GF(2^19)</td><td>a = 1, b = 1</td><td class="n">20</td><td><code>EC1N19Ce1h7e63aa468dcc</code></td><td>k1n19, K_1 / GF(2^19), K_1/2^19, K_1/F_2^19</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m21-t2795-26779965</span></td><td>GF(2^21)</td><td>a = 1, b = 1</td><td class="n">21</td><td><code></code><span class="muted">KoblitzCurve::new(1, 21) finds no usable prime-order subgroup, so the repository has built no generator on it</span></td><td>k1n21, K_1 / GF(2^21), K_1/2^21, K_1/F_2^21</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m23-t5197-69e76b73</span></td><td>GF(2^23)</td><td>a = 0, b = 1</td><td class="n">23</td><td><code>EC1N23Ce0h27a979171a13</code></td><td>k0n23, K_0 / GF(2^23), K_0/2^23, K_0/F_2^23</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m23-tm5197-1f85e9e1</span></td><td>GF(2^23)</td><td>a = 1, b = 1</td><td class="n">24</td><td><code>EC1N23Ce1heec6a3619e3f</code></td><td>k1n23, K_1 / GF(2^23), K_1/2^23, K_1/F_2^23</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m29-tm40309-30c52b96</span></td><td>GF(2^29)</td><td>a = 1, b = 1</td><td class="n">30</td><td><code>EC1N29Ce1hdb15aefa6764</code></td><td>k1n29, K_1 / GF(2^29), K_1/2^29, K_1/F_2^29</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m31-tm90707-c95f16f5</span></td><td>GF(2^31)</td><td>a = 0, b = 1</td><td class="n">32</td><td><code>EC1N31Ce0h3e9d0f84f702</code></td><td>k0n31, K_0 / GF(2^31), K_0/2^31, K_0/F_2^31</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m31-t90707-8fd18741</span></td><td>GF(2^31)</td><td>a = 1, b = 1</td><td class="n">31</td><td><code></code><span class="muted">KoblitzCurve::new(1, 31) finds no usable prime-order subgroup, so the repository has built no generator on it</span></td><td>k1n31, K_1 / GF(2^31), K_1/2^31, K_1/F_2^31</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m37-tm534059-32aad96b</span></td><td>GF(2^37)</td><td>a = 0, b = 1</td><td class="n">38</td><td><code>EC1N37Ce0h0c51aa4aa7c3</code></td><td>k0n37, K_0 / GF(2^37), K_0/2^37, K_0/F_2^37</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m39-t1481485-829ef1d1</span></td><td>GF(2^39)</td><td>a = 0, b = 1</td><td class="n">39</td><td><code>EC1N39Ce0h14be48e4173e</code></td><td>k0n39, K_0 / GF(2^39), K_0/2^39, K_0/F_2^39</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m41-tm2308219-7f48b14a</span></td><td>GF(2^41)</td><td>a = 0, b = 1</td><td class="n">42</td><td><code>EC1N41Ce0he09550ab560a</code></td><td>k0n41, K_0 / GF(2^41), K_0/2^41, K_0/F_2^41</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m43-tm998717-e2e742b0</span></td><td>GF(2^43)</td><td>a = 1, b = 1</td><td class="n">44</td><td><code>EC1N43Ce1h7d34f0f22c70</code></td><td>k1n43, K_1 / GF(2^43), K_1/2^43, K_1/F_2^43</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m45-tm6236725-40939294</span></td><td>GF(2^45)</td><td>a = 1, b = 1</td><td class="n">46</td><td><code>EC1N45Ce1h97bc367649de</code></td><td>k1n45, K_1 / GF(2^45), K_1/2^45, K_1/F_2^45</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m47-t22705043-f4e44623</span></td><td>GF(2^47)</td><td>a = 1, b = 1</td><td class="n">47</td><td><code>EC1N47Ce1h9669b6d5105b</code></td><td>k1n47, K_1 / GF(2^47), K_1/2^47, K_1/F_2^47</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m53-tm56619371-dac20a85</span></td><td>GF(2^53)</td><td>a = 0, b = 1</td><td class="n">54</td><td><code>EC1N53Ce0hb097de99be9a</code></td><td>k0n53, K_0 / GF(2^53), K_0/2^53, K_0/F_2^53</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m57-tm747311035-c1f545af</span></td><td>GF(2^57)</td><td>a = 0, b = 1</td><td class="n">58</td><td><code>EC1N57Ce0hb5884395c7f2</code></td><td>k0n57, K_0 / GF(2^57), K_0/2^57, K_0/F_2^57</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m59-tm943548413-98844ecc</span></td><td>GF(2^59)</td><td>a = 1, b = 1</td><td class="n">60</td><td><code>EC1N59Ce1h20858f64459b</code></td><td>k1n59, K_1 / GF(2^59), K_1/2^59, K_1/F_2^59</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m61-t158598901-ab42b6c5</span></td><td>GF(2^61)</td><td>a = 0, b = 1</td><td class="n">61</td><td><code>EC1N61Ce0hd8c15448081e</code></td><td>k0n61, K_0 / GF(2^61), K_0/2^61, K_0/F_2^61</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m67-tm19346764963-82c84cca</span></td><td>GF(2^67)</td><td>a = 0, b = 1</td><td class="n">68</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n67, K_0 / GF(2^67), K_0/2^67, K_0/F_2^67</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m67-t19346764963-e760df38</span></td><td>GF(2^67)</td><td>a = 1, b = 1</td><td class="n">67</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k1n67, K_1 / GF(2^67), K_1/2^67, K_1/F_2^67</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m71-t48653080717-2cafaea3</span></td><td>GF(2^71)</td><td>a = 0, b = 1</td><td class="n">71</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n71, K_0 / GF(2^71), K_0/2^71, K_0/F_2^71</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m71-tm48653080717-f25c4638</span></td><td>GF(2^71)</td><td>a = 1, b = 1</td><td class="n">72</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k1n71, K_1 / GF(2^71), K_1/2^71, K_1/F_2^71</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m73-tm184271214331-9d25cc67</span></td><td>GF(2^73)</td><td>a = 0, b = 1</td><td class="n">74</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n73, K_0 / GF(2^73), K_0/2^73, K_0/F_2^73</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m79-tm420247971347-2a24b892</span></td><td>GF(2^79)</td><td>a = 0, b = 1</td><td class="n">80</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n79, K_0 / GF(2^79), K_0/2^79, K_0/F_2^79</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m83-tm6151469093347-debefd74</span></td><td>GF(2^83)</td><td>a = 0, b = 1</td><td class="n">84</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n83, K_0 / GF(2^83), K_0/2^83, K_0/F_2^83</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m83-t6151469093347-cdcc5432</span></td><td>GF(2^83)</td><td>a = 1, b = 1</td><td class="n">83</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k1n83, K_1 / GF(2^83), K_1/2^83, K_1/F_2^83</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m97-t378251973071909-f27192f3</span></td><td>GF(2^97)</td><td>a = 0, b = 1</td><td class="n">97</td><td><code>EC1N97Cecc2k95ha8ab2ab9a360</code></td><td>ECC2K-95, ECC2K-95, k0n97, K_0 / GF(2^97), K_0/2^97</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m127-t24589614856193402413-a00e5890</span></td><td>GF(2^127)</td><td>a = 0, b = 1</td><td class="n">127</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n127, K_0 / GF(2^127), K_0/2^127, K_0/F_2^127</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m131-tm22283658519494248867-115e0dc5</span></td><td>GF(2^131)</td><td>a = 0, b = 1</td><td class="n">132</td><td><code></code><span class="muted">the challenge&#x27;s normal-basis points are not imported (src/bin/ic/params.rs)</span></td><td>ECC2K-130, ECC2K-130, k0n131, K_0 / GF(2^131), K_0/2^131</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m137-t574016314927011818501-11ceb4d6</span></td><td>GF(2^137)</td><td>a = 0, b = 1</td><td class="n">137</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n137, K_0 / GF(2^137), K_0/2^137, K_0/F_2^137</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m151-tm97937651335354183120307-ee31df7e</span></td><td>GF(2^151)</td><td>a = 0, b = 1</td><td class="n">152</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n151, K_0 / GF(2^151), K_0/2^151, K_0/F_2^151</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m157-t158060339213695215877259-816eafb2</span></td><td>GF(2^157)</td><td>a = 1, b = 1</td><td class="n">157</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k1n157, K_1 / GF(2^157), K_1/2^157, K_1/F_2^157</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m163-tm4845466632539410776804317-e15e581e</span></td><td>GF(2^163)</td><td>a = 1, b = 1</td><td class="n">164</td><td><code>EC1N163Csect163k1h38cbcc381b09</code></td><td>sect163k1, k1n163, K_1 / GF(2^163), K_1/2^163, K_1/F_2^163</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m173-tm67870783603944754053042229-ddf2de63</span></td><td>GF(2^173)</td><td>a = 1, b = 1</td><td class="n">174</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k1n173, K_1 / GF(2^173), K_1/2^173, K_1/F_2^173</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m179-t1681527843948629186391379613-d1b73c24</span></td><td>GF(2^179)</td><td>a = 0, b = 1</td><td class="n">179</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n179, K_0 / GF(2^179), K_0/2^179, K_0/F_2^179</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m233-tm137381546011108235394987299651366779-08b072d7</span></td><td>GF(2^233)</td><td>a = 0, b = 1</td><td class="n">234</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>sect233k1, k0n233, K_0 / GF(2^233), K_0/2^233, K_0/F_2^233</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m239-tm1879124296849029916489117776215138963-fe13c2c6</span></td><td>GF(2^239)</td><td>a = 0, b = 1</td><td class="n">240</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>sect239k1, k0n239, K_0 / GF(2^239), K_0/2^239, K_0/F_2^239</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m283-t7777244870872830999287791970962823977569917-ddd7db8c</span></td><td>GF(2^283)</td><td>a = 0, b = 1</td><td class="n">283</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>sect283k1, k0n283, K_0 / GF(2^283), K_0/2^283, K_0/F_2^283</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m409-t10457288737315625927447685387048320737638796957687575791173829-87b3ee45</span></td><td>GF(2^409)</td><td>a = 0, b = 1</td><td class="n">409</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>sect409k1, k0n409, K_0 / GF(2^409), K_0/2^409, K_0/F_2^409</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m571-tm148380926981691413899619140297051490364542574180493936232912339534208516828973111459843-3b150b80</span></td><td>GF(2^571)</td><td>a = 0, b = 1</td><td class="n">572</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>sect571k1, k0n571, K_0 / GF(2^571), K_0/2^571, K_0/F_2^571</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562</span></td><td>GF(2^577)</td><td>a = 0, b = 1</td><td class="n">578</td><td><code></code><span class="muted">no generator recorded; KoblitzCurve covers n &lt;= 63 and no tracked record carries this model&#x27;s subgroup and generator</span></td><td>k0n577, K_0 / GF(2^577), K_0/2^577, K_0/F_2^577</td><td></td></tr>
+</tbody></table></div></details>
+<details ><summary>subfield · 4 curves · 0 on the board</summary><div class="scroll"><table><thead><tr><th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th><th>also called</th><th>board</th></tr></thead><tbody>
+<tr><td><span class="slug">icv1-f2m6-tm11-a69b70b8</span></td><td>GF(2^6)</td><td>a = 0x0, b = 0x3a</td><td class="n">7</td><td><code>EC1N6Csfha880db1fd242</code></td><td>E_{0,2}/GF(2^2) over GF(2^6)</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m10-t61-31ce0e65</span></td><td>GF(2^10)</td><td>a = 0x0, b = 0xec</td><td class="n">10</td><td><code>EC1N10Csfh6e9d8ba543f9</code></td><td>E_{0,2}/GF(2^2) over GF(2^10)</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m14-tm251-b69e8b8b</span></td><td>GF(2^14)</td><td>a = 0x0, b = 0x13f2</td><td class="n">15</td><td><code>EC1N14Csfh6b81ed8d7f99</code></td><td>E_{0,2}/GF(2^2) over GF(2^14)</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m18-t999-40751283</span></td><td>GF(2^18)</td><td>a = 0x9208, b = 0x1</td><td class="n">18</td><td><code>EC1N18Csfhdf1531a744a0</code></td><td>E_{2,1}/GF(2^2) over GF(2^18)</td><td></td></tr>
+</tbody></table></div></details>
+<details ><summary>binary · 30 curves · 5 on the board</summary><div class="scroll"><table><thead><tr><th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th><th>also called</th><th>board</th></tr></thead><tbody>
+<tr><td><span class="slug">icv1-f2m13-t11-f036dc01</span></td><td>GF(2^13)</td><td>a = 0x1, b = 0x1503</td><td class="n">13</td><td><code>EC1N13Crbh9962b3791b22</code></td><td>random-binary-n13-b1503</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-t11-f12dc95f</span></td><td>GF(2^13)</td><td>a = 0x1, b = 0x16da</td><td class="n">13</td><td><code>EC1N13Crbh63ef50b99ec2</code></td><td>random-binary-n13-b16da</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-t79-00b3392a</span></td><td>GF(2^13)</td><td>a = 0x1, b = 0xa3f</td><td class="n">13</td><td><code>EC1N13Crbh921c74ac540e</code></td><td>random-binary-n13-ba3f</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-tm83-b76daa24</span></td><td>GF(2^13)</td><td>a = 0x0, b = 0x1c1b</td><td class="n">14</td><td><code>EC1N13Crbh1ba4387eeab8</code></td><td>random-binary-n13-b1c1b</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m13-tm9-6863a838</span></td><td>GF(2^13)</td><td>a = 0x1, b = 0x168f</td><td class="n">14</td><td><code>EC1N13Crbh0c098414e7ed</code></td><td>random-binary-n13-b168f</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-t131-ed7256f0</span></td><td>GF(2^15)</td><td>a = 0x1, b = 0x524b</td><td class="n">15</td><td><code>EC1N15Crbhe4e02575ec1c</code></td><td>random-binary-n15-b524b</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m15-t5-d9fb183e</span></td><td>GF(2^15)</td><td>a = 0x0, b = 0x2493</td><td class="n">15</td><td><code>EC1N15Crbhe279d04e9cf2</code></td><td>random-binary-n15-b2493</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-tm185-565c1669</span></td><td>GF(2^15)</td><td>a = 0x1, b = 0x702a</td><td class="n">16</td><td><code>EC1N15Crbh5fd471220f50</code></td><td>random-binary-n15-b702a</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-tm217-f2f901c1</span></td><td>GF(2^15)</td><td>a = 0x1, b = 0x3c06</td><td class="n">16</td><td><code>EC1N15Crbh9daeb60eee3f</code></td><td>random-binary-n15-b3c06</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-tm237-34b47a4a</span></td><td>GF(2^15)</td><td>a = 0x1, b = 0x3ecf</td><td class="n">16</td><td><code>EC1N15Crbh4a9c1a57e41a</code></td><td>random-binary-n15-b3ecf</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m15-tm65-37237277</span></td><td>GF(2^15)</td><td>a = 0x1, b = 0x157a</td><td class="n">16</td><td><code>EC1N15Crbh0e3d29cd2200</code></td><td>random-binary-n15-b157a</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m17-t455-60048e6d</span></td><td>GF(2^17)</td><td>a = 0x1, b = 0x1ad26</td><td class="n">17</td><td><code>EC1N17Crbh63476ca30af3</code></td><td>random-binary-n17-b1ad26</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m17-t531-2048fb7c</span></td><td>GF(2^17)</td><td>a = 0x1, b = 0x10103</td><td class="n">17</td><td><code>EC1N17Crbh3cdcb8daf23f</code></td><td>random-binary-n17-b10103</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m17-tm185-c9e2dceb</span></td><td>GF(2^17)</td><td>a = 0x1, b = 0xbe86</td><td class="n">18</td><td><code>EC1N17Crbhbdb8f3c01154</code></td><td>random-binary-n17-bbe86</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m18-t393-d2c04152</span></td><td>GF(2^18)</td><td>a = 0x0, b = 0x6507</td><td class="n">18</td><td><code>EC1N18Crbhe731503070c0</code></td><td>random-binary-n18-b6507</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m19-tm353-a68ceb24</span></td><td>GF(2^19)</td><td>a = 0x1, b = 0x5f57e</td><td class="n">20</td><td><code>EC1N19Crbh80613f5e134a</code></td><td>random-binary-n19-b5f57e</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m19-tm649-a9133fe6</span></td><td>GF(2^19)</td><td>a = 0x1, b = 0x770f7</td><td class="n">20</td><td><code>EC1N19Crbh2aaf751f753f</code></td><td>random-binary-n19-b770f7</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m21-t2591-de54d72e</span></td><td>GF(2^21)</td><td>a = 0x1, b = 0x1b6f3b</td><td class="n">21</td><td><code>EC1N21Crbh30df0435638d</code></td><td>random-binary-n21-b1b6f3b</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m21-t2845-e2683765</span></td><td>GF(2^21)</td><td>a = 0x0, b = 0x10cc7b</td><td class="n">21</td><td><code>EC1N21Crbh1b5b9dc27361</code></td><td>random-binary-n21-b10cc7b</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m21-tm1495-8bd9aa74</span></td><td>GF(2^21)</td><td>a = 0x0, b = 0x968e</td><td class="n">22</td><td><code>EC1N21Crbhf79d600f26b1</code></td><td>random-binary-n21-b968e</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m23-tm1957-8891f5a2</span></td><td>GF(2^23)</td><td>a = 0x1, b = 0x3a296b</td><td class="n">24</td><td><code>EC1N23Crbha19c0076d0c6</code></td><td>random-binary-n23-b3a296b</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m23-tm4129-45500fce</span></td><td>GF(2^23)</td><td>a = 0x1, b = 0x480f9a</td><td class="n">24</td><td><code>EC1N23Crbhb45509ab90a4</code></td><td>random-binary-n23-b480f9a</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m24-t1545-54539071</span></td><td>GF(2^24)</td><td>a = 0x1, b = 0xf19f6f</td><td class="n">24</td><td><code>EC1N24Crbh12ef3d10eaf4</code></td><td>random-binary-n24-bf19f6f</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m24-tm3047-2d0c0e8c</span></td><td>GF(2^24)</td><td>a = 0x0, b = 0x5fc9da</td><td class="n">25</td><td><code>EC1N24Crbh1d71c3dc9cbc</code></td><td>random-binary-n24-b5fc9da</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m25-t4775-4830dca7</span></td><td>GF(2^25)</td><td>a = 0x1, b = 0x1448ace</td><td class="n">25</td><td><code>EC1N25Crbh9a603bf43b52</code></td><td>random-binary-n25-b1448ace</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m25-tm489-c50a8fb9</span></td><td>GF(2^25)</td><td>a = 0x1, b = 0x1a9b772</td><td class="n">26</td><td><code>EC1N25Crbhad8a17aa0fce</code></td><td>random-binary-n25-b1a9b772</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m27-t12543-569dca8b</span></td><td>GF(2^27)</td><td>a = 0x1, b = 0x845462</td><td class="n">27</td><td><code>EC1N27Crbh9ce93808c7a5</code></td><td>random-binary-n27-b845462</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-f2m27-t20811-3d0fd5a1</span></td><td>GF(2^27)</td><td>a = 0x1, b = 0x3bfa9c2</td><td class="n">27</td><td><code>EC1N27Crbh4c78d5777581</code></td><td>random-binary-n27-b3bfa9c2</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m27-t6931-1834c541</span></td><td>GF(2^27)</td><td>a = 0x1, b = 0x7ade7fe</td><td class="n">27</td><td><code>EC1N27Crbhf5a1455bae8d</code></td><td>random-binary-n27-b7ade7fe</td><td></td></tr>
+<tr><td><span class="slug">icv1-f2m27-tm20293-ca4ad8af</span></td><td>GF(2^27)</td><td>a = 0x1, b = 0x227199e</td><td class="n">28</td><td><code>EC1N27Crbhb0097f5ebc1e</code></td><td>random-binary-n27-b227199e</td><td></td></tr>
+</tbody></table></div></details>
+<details ><summary>prime · 24 curves · 8 on the board</summary><div class="scroll"><table><thead><tr><th>slug</th><th>field</th><th>coefficients</th><th class="n">#E bits</th><th>EC1</th><th>also called</th><th>board</th></tr></thead><tbody>
+<tr><td><span class="slug">icv1-fp6-tm7-fc20da94</span></td><td>GF(p), p = 59</td><td>a = 1, b = 13</td><td class="n">7</td><td><code></code><span class="muted">roster_prime_instance(8) builds no instance on this roster curve</span></td><td>bench-8bit</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp10-t5-192cb216</span></td><td>GF(p), p = 827</td><td>a = 1, b = 15</td><td class="n">10</td><td><code>EC1P10Cfphcf15d87ab724</code></td><td>bench-10bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp12-tm53-6c9ff4bb</span></td><td>GF(p), p = 3529</td><td>a = 2574, b = 2980</td><td class="n">12</td><td><code>EC1P12Cfph1590cdd205e7</code></td><td>generated-12bit-3529</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp12-t19-d4a315df</span></td><td>GF(p), p = 3907</td><td>a = 1, b = 3</td><td class="n">12</td><td><code>EC1P12Cfphe249b36f57ee</code></td><td>bench-12bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp14-tm143-dec4cf6b</span></td><td>GF(p), p = 14389</td><td>a = 7150, b = 684</td><td class="n">14</td><td><code>EC1P14Cfph711fbb93cc89</code></td><td>generated-14bit-14389</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp14-tm43-158b6914</span></td><td>GF(p), p = 16187</td><td>a = 1, b = 12</td><td class="n">14</td><td><code>EC1P14Cfph4f360f746508</code></td><td>bench-14bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp16-t295-8d3c3165</span></td><td>GF(p), p = 53411</td><td>a = 4589, b = 186</td><td class="n">16</td><td><code>EC1P16Cfph38c70ce62cf6</code></td><td>generated-16bit-53411</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp16-t351-d433f24e</span></td><td>GF(p), p = 65353</td><td>a = 1, b = 16</td><td class="n">16</td><td><code>EC1P16Cfph25cb80ed53b2</code></td><td>bench-16bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp18-tm337-d28d5e09</span></td><td>GF(p), p = 212099</td><td>a = 188885, b = 173081</td><td class="n">18</td><td><code>EC1P18Cfpha51e440d70cd</code></td><td>generated-18bit-212099</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp18-t175-45770ebc</span></td><td>GF(p), p = 261847</td><td>a = 3, b = 2</td><td class="n">18</td><td><code>EC1P18Cfphf3346c488da6</code></td><td>bench-18bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp20-t727-cd198a38</span></td><td>GF(p), p = 563153</td><td>a = 51142, b = 548946</td><td class="n">20</td><td><code>EC1P20Cfphd19e740ea95d</code></td><td>generated-20bit-563153</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp20-t1293-3c2999ba</span></td><td>GF(p), p = 1048291</td><td>a = 1, b = 11</td><td class="n">20</td><td><code>EC1P20Cfphbc31d4165da7</code></td><td>bench-20bit</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp22-tm1385-475dcb5f</span></td><td>GF(p), p = 2434423</td><td>a = 620112, b = 1810598</td><td class="n">22</td><td><code>EC1P22Cfph4c21f5ae2576</code></td><td>generated-22bit-2434423</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp22-t411-86337907</span></td><td>GF(p), p = 2987209</td><td>a = 1396968, b = 179708</td><td class="n">22</td><td><code>EC1P22Cfph8ca71c184f09</code></td><td>generated-22bit-2987209</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp22-tm1267-a5acaf6d</span></td><td>GF(p), p = 3290411</td><td>a = 2224215, b = 1791205</td><td class="n">22</td><td><code>EC1P22Cfph3a2d8d148cc5</code></td><td>generated-22bit-3290411</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp22-t3019-0c6101de</span></td><td>GF(p), p = 3914087</td><td>a = 2309743, b = 2364262</td><td class="n">22</td><td><code>EC1P22Cfpha6136a7e3f8a</code></td><td>generated-22bit-3914087</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp24-t1577-77336155</span></td><td>GF(p), p = 10935329</td><td>a = 5320418, b = 8535318</td><td class="n">24</td><td><code>EC1P24Cfpha08989ff9bd9</code></td><td>generated-24bit-10935329</td><td>✓</td></tr>
+<tr><td><span class="slug">icv1-fp24-t1465-0b7163ca</span></td><td>GF(p), p = 11921101</td><td>a = 10159782, b = 6800760</td><td class="n">24</td><td><code>EC1P24Cfph7b37262391b0</code></td><td>generated-24bit-11921101</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp24-t991-def56de7</span></td><td>GF(p), p = 12832957</td><td>a = 10182707, b = 8165260</td><td class="n">24</td><td><code>EC1P24Cfph53010113692b</code></td><td>generated-24bit-12832957</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp24-t1059-6df599df</span></td><td>GF(p), p = 16483309</td><td>a = 8820674, b = 11008593</td><td class="n">24</td><td><code>EC1P24Cfph77faea3c4974</code></td><td>generated-24bit-16483309</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp26-tm9263-8a144943</span></td><td>GF(p), p = 38313677</td><td>a = 13006379, b = 18418303</td><td class="n">26</td><td><code>EC1P26Cfph74a5ec8d234a</code></td><td>generated-26bit-38313677</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp26-tm1775-7e8fb6df</span></td><td>GF(p), p = 42652151</td><td>a = 26623966, b = 14210560</td><td class="n">26</td><td><code>EC1P26Cfph73708d649015</code></td><td>generated-26bit-42652151</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp256-t89188191154553853111372247798585809583-f188c491</span></td><td>GF(p), 256-bit p</td><td>standard coefficients</td><td class="n">256</td><td><code>EC1P256Cp256h0523b774e066</code></td><td>P-256, P-256</td><td></td></tr>
+<tr><td><span class="slug">icv1-fp256-t432420386565659656852420866390673177327-76dadd18</span></td><td>GF(p), 256-bit p</td><td>standard coefficients</td><td class="n">256</td><td><code>EC1P256Csecp256k1ha8dc9f115a15</code></td><td>secp256k1, secp256k1</td><td></td></tr>
+</tbody></table></div></details>
+</section>
+<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row here was measured for this page, and nothing is a speedup. Records kept in other units, wall-clock panels and batched producers awaiting independent replay, are in <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the <a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p><p>Built by <code>scripts/build_ic_leaderboard.py</code> from: <code>docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json</code> (28aadc91af9e), <code>research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json</code> (c810d351d86e), <code>research/ic_rho_reference_20260923/analysis.json</code> (6fd61dd71a33), <code>research/ic_exponent_20260926/analysis.json</code> (744fd51ea01f), <code>research/ic_constructions_20260926/analysis.json</code> (e0758400806d), <code>research/ic_descent_20260930/analysis-isolated.json</code> (060359c266e7), <code>research/ic_single_target_20260930/analysis.json</code> (109326d7c288), <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code> (2271c4aa5236), <code>docs/curves/registry.json</code> (ac96fc4a4e9c). Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+name: ic programme harness
+
+# The ic tool programme's native harness (IC_TOOL_PROGRAM.md §10a): the
+# `icprog` and `isolated_bench` binaries.  Each port is held to the frozen
+# outputs of the script it replaces; `tests/icprog.rs` reproduces R03's
+# analysis.json from R03's runs, R02's callgrind phase splits from R02's
+# raw profiles, and ledger §23's claims, manifests and analysis from its run
+# tree, byte for byte.  It runs no experiment.
+
+on:
+  pull_request:
+    paths:
+      - 'src/bin/icprog.rs'
+      - 'src/bin/icprog/**'
+      - 'src/bin/isolated_bench.rs'
+      - 'src/bin/isolated_bench/**'
+      - 'tests/icprog.rs'
+      - 'research/ic_tool_program/rounds/**'
+      - 'research/ic_tool_program/suite/**'
+      - 'research/ic_tool_program/baselines.json'
+      - 'docs/curves/registry.json'
+      - 'src/cryptanalysis/curve_aliases.json'
+      - 'research/ic_single_target_20260930/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
+      - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
+      - 'docs/ic/boundary_targets.json'
+      - 'Cargo.toml'
+      - '.github/workflows/ic-programme-harness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/bin/icprog.rs'
+      - 'src/bin/icprog/**'
+      - 'src/bin/isolated_bench.rs'
+      - 'src/bin/isolated_bench/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
+      - 'tests/icprog.rs'
+      - '.github/workflows/ic-programme-harness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install valgrind, for callgrind_annotate
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: Fetch ledger §23's build commit, whose sources its claims hash
+        run: git fetch --no-tags --depth=1 origin 0bf67f169f0762c8bd225760196803379cabdcb9
+      - name: Build the harness
+        run: cargo build --release --bin icprog --bin isolated_bench
+      - name: Unit tests, and every frozen output a port reproduces byte for byte
+        run: cargo test --release --bin icprog --bin isolated_bench --test icprog -- --include-ignored
+      - name: The isolation tool's busy mode passes the command's status through
+        run: |
+          set +e
+          target/release/isolated_bench busy --lock "$RUNNER_TEMP/bench.lock" -- sh -c 'exit 3'
+          test $? -eq 3
+
+  disclosed-sat-replay:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Bootstrap native build serialization
+        run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
+      - name: Resolve and retain the ignored development lockfile before replay builds
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- cargo generate-lockfile
+          rustc --version --verbose > "$RUNNER_TEMP/native-sat-rustc.txt"
+      - name: Replay disclosed source and preparation, with mutation controls
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench
+          target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
+          target/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: disclosed-native-sat-replay-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/native-sat-replay.json
+            ${{ runner.temp }}/native-sat-rustc.txt
+            Cargo.lock
+          if-no-files-found: error

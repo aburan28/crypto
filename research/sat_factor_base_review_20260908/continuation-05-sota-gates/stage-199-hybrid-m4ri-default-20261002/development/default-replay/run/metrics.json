@@ -1,0 +1,33 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=12",
+    "PQ_F4_X1_BATCH=512",
+    "F4_F2_DENSE_PAIR_SELECT=1",
+    "F4_F2_DISABLE_INNER_BUILD_PARALLEL=1",
+    "F4_F2_MATRIX_PROFILE=0",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/Volumes/SSD990/kic-stage199-target-75e6eaa1b/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+    "300"
+  ],
+  "environment": {},
+  "pid": 76834,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 360,
+  "wall_seconds": 25.936151458,
+  "user_seconds": 150.135866,
+  "system_seconds": 3.689695,
+  "total_core_seconds": 153.825561,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 3270033408
+}

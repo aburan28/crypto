@@ -1,0 +1,90 @@
+name: Boolean F5 graded-reuse ceiling
+
+on:
+  push:
+    paths:
+      - 'research/boolean_f5_amortized_ceiling_20261002/**'
+      - '.github/workflows/boolean-f5-amortized-ceiling.yml'
+  pull_request:
+    paths:
+      - 'research/boolean_f5_amortized_ceiling_20261002/**'
+      - '.github/workflows/boolean-f5-amortized-ceiling.yml'
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Qualified ceiling phase
+        required: true
+        default: discovery
+        type: choice
+        options: [discovery, holdout]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: boolean-f5-ceiling-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  KIC_F5_DIRECT_PACK: '1'
+  KIC_F5_UNPACK_DIRECT: '1'
+  KIC_GF2_TABLES: '4'
+  KIC_F5_AVX512_UNPACK: '0'
+  KIC_GF2_REUSE_TABLE: '0'
+  RAYON_NUM_THREADS: '1'
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native mathematical and verifier tests
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_amortized_ceiling_20261002/Cargo.toml -- --test-threads=1
+      - name: Rust formatting
+        run: cargo fmt --manifest-path research/boolean_f5_amortized_ceiling_20261002/Cargo.toml --check
+      - name: Development route and small F4 controls
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo build --locked --release --manifest-path research/boolean_f5_amortized_ceiling_20261002/Cargo.toml
+          research/boolean_f5_amortized_ceiling_20261002/target/release/boolean-f5-amortized-ceiling --cell development 12 17 independent_affine 2 1 > /tmp/f5-ceiling-dev-n12.jsonl
+          research/boolean_f5_amortized_ceiling_20261002/target/release/boolean-f5-amortized-ceiling --cell development 16 19 walk_affine 2 1 > /tmp/f5-ceiling-dev-n16.jsonl
+      - name: Replay retained discovery when present
+        run: |
+          if test -f research/boolean_f5_amortized_ceiling_20261002/qualified_discovery_01/manifest.json; then
+            research/boolean_f5_amortized_ceiling_20261002/target/release/boolean-f5-amortized-ceiling --verify-bundle research/boolean_f5_amortized_ceiling_20261002/qualified_discovery_01
+          fi
+  qualified-discovery:
+    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery'
+    needs: correctness
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native frozen complete-call ceiling and resource replay
+        run: bash research/boolean_f5_amortized_ceiling_20261002/run.sh discovery research/boolean_f5_amortized_ceiling_20261002/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boolean-f5-ceiling-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_f5_amortized_ceiling_20261002/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error
+  qualified-holdout:
+    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'holdout'
+    needs: correctness
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native fresh holdout bound to passing discovery
+        run: bash research/boolean_f5_amortized_ceiling_20261002/run.sh holdout research/boolean_f5_amortized_ceiling_20261002/ci_holdout_${{ github.run_id }}_${{ github.run_attempt }} research/boolean_f5_amortized_ceiling_20261002/qualified_discovery_01
+      - name: Preserve successful or failed execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boolean-f5-ceiling-holdout-${{ github.run_id }}-${{ github.run_attempt }}
+          path: research/boolean_f5_amortized_ceiling_20261002/ci_holdout_${{ github.run_id }}_${{ github.run_attempt }}/
+          if-no-files-found: error

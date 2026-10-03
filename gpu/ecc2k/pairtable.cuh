@@ -230,7 +230,8 @@ G2_HD uint64_t pt_canon(const pt2k &P, const uint64_t *tables, int canon_bytes, 
  *
  *     bucket  = pt_filter_hash(key) >> bucket_shift
  *     word    = (orbit << 16) | (pt_filter_hash(key) & 0xffff)
- *     present : bit  pt_filter_hash(key) & present_mask
+ *     present : bits pt_filter_bits_of(h) of word (h & present_mask) >> 6,
+ *               h = pt_filter_hash(key)
  *
  * `orbit` is the row's signed orbit, which a summand of the sum really
  * lies in; it is what lets the CPU recover a hit's summands by walking
@@ -286,11 +287,19 @@ G2_HD int pt_folded_bucket_bits(uint64_t pairs, int degree) {
     return bits;
 }
 
-/* Presence-filter width from the *actual* stored count, about four bits
- * per word, clamped to `[6, 32]` as the CPU clamps it. */
+/* Presence-filter width from the *actual* stored count, eight bits per
+ * word before rounding up, clamped to `[6, 32]`: `filter_bits_for` in
+ * `koblitz_index_calculus.rs`. */
 G2_HD int pt_filter_bits(uint64_t total) {
-    int bits = pt_bitlen((total ? total : 1) * 4);
+    int bits = pt_bitlen((total ? total : 1) * 8);
     return bits < 6 ? 6 : (bits > 32 ? 32 : bits);
+}
+
+/* A key's filter bits, all in word `(h & present_mask) >> 6`: the bit
+ * the hash's low six bits name and two from its top twelve, which the
+ * word index never reaches.  `filter_slot` with three probes. */
+G2_HD uint64_t pt_filter_bits_of(uint64_t h) {
+    return (1ull << (h & 63)) | (1ull << ((h >> 52) & 63)) | (1ull << (h >> 58));
 }
 
 struct PtFoldGeometry {
@@ -390,8 +399,7 @@ inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t en
     for (uint64_t e = 0; e < entries; e++) {
         const uint64_t h = pt_filter_hash(keys[e]);
         words[cursor[h >> g.bucket_shift]++] = pt_tagged_word(keys[e], tags[e]);
-        const uint64_t bit = h & present_mask;
-        present[bit >> 6] |= 1ull << (bit & 63);
+        present[(h & present_mask) >> 6] |= pt_filter_bits_of(h);
     }
 }
 
@@ -514,8 +522,7 @@ struct PtFoldFill {
         const uint64_t h = pt_filter_hash(key);
         const uint32_t slot = pt_atomic_add(&cursor[h >> bucket_shift], 1u);
         words[slot] = pt_tagged_word(key, orbit);
-        const uint64_t bit = h & present_mask;
-        pt_atomic_or(&present[bit >> 6], 1ull << (bit & 63));
+        pt_atomic_or(&present[(h & present_mask) >> 6], pt_filter_bits_of(h));
     }
 };
 

@@ -2,15 +2,16 @@
 use super::params::{self, Field, Fixture, Parameters};
 use clap::{Args, ValueEnum};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::cryptanalysis::curve_id;
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, individual_log,
-    koblitz_index_calculus_dlp_with_factor_base_and_progress, order_of_2_mod_n,
-    solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
-    LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
+    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, find_irreducible_sparse,
+    individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
+    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    LinearAlgebra, LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
 };
 use crypto_lib::cryptanalysis::koblitz_sparse_la::{BlockWiedemannOptions, SparseSolveOptions};
 use num_bigint::BigUint;
@@ -81,13 +82,28 @@ pub fn field_degree(value: &str) -> Result<u32, String> {
     }
     Ok(n)
 }
-/// Label of a synthetic curve from its parameters, before it is built.
+/// Name of a synthetic curve from its parameters: its ICV1 slug
+/// (`docs/curves/ICV1.md`).  A Koblitz curve (`k = 1`) is named from the
+/// field's modulus and the trace recurrence without being built; a
+/// subfield curve is built to be named, and one the constructor refuses
+/// has no identity, so it is described by its parameters instead.
 pub(crate) fn curve_label(n: u32, a: u8, k: u32, b: u64) -> String {
     if k == 1 {
-        format!("K_{a} / GF(2^{n})")
-    } else {
-        format!("E_{{{a},{b}}}/GF(2^{k}) over GF(2^{n})")
+        let id = find_irreducible_sparse(n).and_then(|f| {
+            curve_id::koblitz(
+                a,
+                n,
+                &curve_id::modulus_integer(&f),
+                &koblitz_point_count(a, n),
+            )
+        });
+        if let Some(id) = id {
+            return id.slug;
+        }
+    } else if let Some(c) = KoblitzCurve::subfield(k, n, u64::from(a), b) {
+        return c.label();
     }
+    format!("the curve with k = {k}, n = {n}, a-index {a}, b-index {b}")
 }
 fn one_u32() -> u32 {
     1

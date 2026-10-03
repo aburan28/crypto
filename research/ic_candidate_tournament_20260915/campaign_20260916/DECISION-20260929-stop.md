@@ -88,3 +88,31 @@ under the isolated runner and a registration made before the run:
 
 The reopening item "a rho stronger than the lean rho at small `n`" is met for the time lead. The
 sized rho is now the reference rho at `n ≤ 23` for any reopened round.
+
+## Addendum 2, 2026-10-02: the two symmetry items and the Riemann–Roch route
+
+This addendum records what the 2026-09-30 shortlist's remaining leads measured. It changes no
+decision.
+
+- **"A symmetry not tested here."** Both halves are now settled for `m = 3` ladders.
+  Frobenius-orbit coordinates are closed by structure
+  ([NOTE-20260930-frobenius-orbit-coordinates.md](NOTE-20260930-frobenius-orbit-coordinates.md)):
+  Frobenius moves the target, so it is no per-target symmetry, and the stable-subspace fold
+  is survey §3.4's constant. The symmetric-group action is measured by the Riemann–Roch norm
+  form, which is fully symmetric in the summands:
+  [ic_rr_norm_ladder_20260930](../../ic_rr_norm_ladder_20260930/RESULTS.md) reads
+  `s̄ = 1.167`, a constant lever like the torsion one (`s̄ = 1.033`). Item 3 above stays
+  stopped: no symmetry measured flattens the degree.
+- **"A decomposition that is not a table and not the chained `S₃`."** The Nagao /
+  Riemann–Roch encoding, survey §3.3, is closed for the exponent at these sizes in each of
+  its algebraic readings: the search form by the pair-table ceiling (RR panel §8, Shoup); the
+  support form by its system degree rising 2 per unit `ℓ`
+  ([support-degree.txt](../../ic_rr_norm_ladder_20260930/support-degree.txt)); the norm form
+  by the ladder above. The norm form is a cheaper presentation (`3ℓ + 1` unknowns at `m = 3`,
+  2–3 degrees below the direct `S₄`), which is engineering. What remains of §3.3 is Nagao's
+  first-fall-degree claim on the incidence form, owned by the SEMBIN lane.
+
+Open after this: Nagao's first-fall-degree claim (SEMBIN), and the SEMBIN lane's typed-system
+cost, which would make the conjugate-coset reading of Frobenius-orbit coordinates worth
+building. Nothing here reopens items 1–3.
+

@@ -38,6 +38,7 @@ companion as much as a working library.
 | `research/notes/` | every research note, grouped by theme; start at [`research/notes/README.md`](research/notes/README.md) |
 | `research/<topic>_<date>/` | frozen experiment directories (harness, contract, results) that the notes cite |
 | `experiments/`, `figures/` | older frozen run outputs and plots referenced by the notes |
+| `isolab/` | standalone experiment execution environment: NATS hub, Linux workers with enforced measurement fidelity, MCP server; see [`isolab/README.md`](isolab/README.md) |
 | `docs/` | published pages (`index-calculus-scoreboard.html`, `algorithm-lab.html`, the ECC2K-130 status site), guides and primers in `docs/guides/`, the roadmap in `docs/DEFERRED.md` |
 | `ecc2k130/`, `gpu/`, `hdl/` | the ECC2K-130 rho campaign: fleet tooling, GPU kernels, FPGA cost models |
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |

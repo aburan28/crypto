@@ -1,0 +1,53 @@
+{
+ "schema_version": 2,
+ "name": "C050: a curve over GF(1009^3)",
+ "field": {
+  "kind": "prime_extension",
+  "p": "1009",
+  "degree": 3,
+  "modulus": [
+   "776",
+   "595",
+   "960"
+  ]
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": [
+   "670",
+   "300",
+   "374"
+  ],
+  "b": [
+   "47",
+   "257",
+   "560"
+  ]
+ },
+ "subgroup": {
+  "order": "674017",
+  "cofactor": "1524",
+  "generator": {
+   "x": [
+    "179",
+    "892",
+    "250"
+   ],
+   "y": [
+    "146",
+    "197",
+    "22"
+   ]
+  }
+ },
+ "target": {
+  "known_log": "554837"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

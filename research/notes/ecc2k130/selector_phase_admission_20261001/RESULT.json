@@ -1,0 +1,162 @@
+{
+  "analysis_sha256": "0e4726635a402731a0b513cf3f30e26828d87f34c8e5558243d572b1ab6f9614",
+  "assumption": "within-compact elapsed-phase fractions proxy charged CPU fractions; one extra full index costs the observed index fraction; other selector costs are zero",
+  "cells": {
+    "n41_L1024": {
+      "K": 255,
+      "L": 1024,
+      "blocks": [
+        {
+          "block": 0,
+          "index_elapsed_share": 0.352694311881,
+          "paired_ic_over_rho_cpu": 1.315295496338,
+          "rank_plus_targets_elapsed_share": 0.632279676521,
+          "second_full_index_required_variable_saving_fraction": 0.936941207202,
+          "zero_score_extra_required_variable_saving_fraction": 0.379127434314
+        },
+        {
+          "block": 1,
+          "index_elapsed_share": 0.353954325426,
+          "paired_ic_over_rho_cpu": 1.313704779587,
+          "rank_plus_targets_elapsed_share": 0.630780354032,
+          "second_full_index_required_variable_saving_fraction": 0.939706336019,
+          "zero_score_extra_required_variable_saving_fraction": 0.378569130075
+        },
+        {
+          "block": 2,
+          "index_elapsed_share": 0.350524492922,
+          "paired_ic_over_rho_cpu": 1.375032219549,
+          "rank_plus_targets_elapsed_share": 0.634771710827,
+          "second_full_index_required_variable_saving_fraction": 0.98187867601,
+          "zero_score_extra_required_variable_saving_fraction": 0.429673076826
+        },
+        {
+          "block": 3,
+          "index_elapsed_share": 0.357122448308,
+          "paired_ic_over_rho_cpu": 1.306961367989,
+          "rank_plus_targets_elapsed_share": 0.627687436917,
+          "second_full_index_required_variable_saving_fraction": 0.943126876147,
+          "zero_score_extra_required_variable_saving_fraction": 0.374177384244
+        },
+        {
+          "block": 4,
+          "index_elapsed_share": 0.351335239044,
+          "paired_ic_over_rho_cpu": 1.305730378413,
+          "rank_plus_targets_elapsed_share": 0.633737234985,
+          "second_full_index_required_variable_saving_fraction": 0.92385347293,
+          "zero_score_extra_required_variable_saving_fraction": 0.369467175821
+        }
+      ],
+      "cell": "n41_L1024",
+      "five_block_summary": {
+        "index_elapsed_share": {
+          "max": 0.357122448308,
+          "median": 0.352694311881,
+          "min": 0.350524492922
+        },
+        "paired_ic_over_rho_cpu": {
+          "max": 1.375032219549,
+          "median": 1.313704779587,
+          "min": 1.305730378413
+        },
+        "rank_plus_targets_elapsed_share": {
+          "max": 0.634771710827,
+          "median": 0.632279676521,
+          "min": 0.627687436917
+        },
+        "second_full_index_required_variable_saving_fraction": {
+          "max": 0.98187867601,
+          "median": 0.939706336019,
+          "min": 0.92385347293
+        },
+        "zero_score_extra_required_variable_saving_fraction": {
+          "max": 0.429673076826,
+          "median": 0.378569130075,
+          "min": 0.369467175821
+        }
+      },
+      "raw_sha256": "261b5f3e7b209c2163d807dc78554b96b80873eda052405156b1178b29dce4a4",
+      "source_head": "38c173072e16f580237447c93b085634275ba048"
+    },
+    "n53_L1024": {
+      "K": 440,
+      "L": 1024,
+      "blocks": [
+        {
+          "block": 0,
+          "index_elapsed_share": 0.289660040027,
+          "paired_ic_over_rho_cpu": 1.60535976592,
+          "rank_plus_targets_elapsed_share": 0.700220508398,
+          "second_full_index_required_variable_saving_fraction": 0.952195344978,
+          "zero_score_extra_required_variable_saving_fraction": 0.53852559873
+        },
+        {
+          "block": 1,
+          "index_elapsed_share": 0.283970890133,
+          "paired_ic_over_rho_cpu": 1.578541437505,
+          "rank_plus_targets_elapsed_share": 0.706109564505,
+          "second_full_index_required_variable_saving_fraction": 0.921209291342,
+          "zero_score_extra_required_variable_saving_fraction": 0.519046646326
+        },
+        {
+          "block": 2,
+          "index_elapsed_share": 0.288530335547,
+          "paired_ic_over_rho_cpu": 1.579293123149,
+          "rank_plus_targets_elapsed_share": 0.701356563956,
+          "second_full_index_required_variable_saving_fraction": 0.934383010858,
+          "zero_score_extra_required_variable_saving_fraction": 0.522994067808
+        },
+        {
+          "block": 3,
+          "index_elapsed_share": 0.282322628916,
+          "paired_ic_over_rho_cpu": 1.667488004455,
+          "rank_plus_targets_elapsed_share": 0.707855200544,
+          "second_full_index_required_variable_saving_fraction": 0.964347177721,
+          "zero_score_extra_required_variable_saving_fraction": 0.565504831575
+        },
+        {
+          "block": 4,
+          "index_elapsed_share": 0.275530008885,
+          "paired_ic_over_rho_cpu": 1.64729865389,
+          "rank_plus_targets_elapsed_share": 0.714662905596,
+          "second_full_index_required_variable_saving_fraction": 0.935371824242,
+          "zero_score_extra_required_variable_saving_fraction": 0.549833402243
+        }
+      ],
+      "cell": "n53_L1024",
+      "five_block_summary": {
+        "index_elapsed_share": {
+          "max": 0.289660040027,
+          "median": 0.283970890133,
+          "min": 0.275530008885
+        },
+        "paired_ic_over_rho_cpu": {
+          "max": 1.667488004455,
+          "median": 1.60535976592,
+          "min": 1.578541437505
+        },
+        "rank_plus_targets_elapsed_share": {
+          "max": 0.714662905596,
+          "median": 0.706109564505,
+          "min": 0.700220508398
+        },
+        "second_full_index_required_variable_saving_fraction": {
+          "max": 0.964347177721,
+          "median": 0.935371824242,
+          "min": 0.921209291342
+        },
+        "zero_score_extra_required_variable_saving_fraction": {
+          "max": 0.565504831575,
+          "median": 0.53852559873,
+          "min": 0.519046646326
+        }
+      },
+      "raw_sha256": "018925d6e805aa61a68b749b511d0524a5f02aaf350c7356fd03af23316a03af",
+      "source_head": "38c173072e16f580237447c93b085634275ba048"
+    }
+  },
+  "classification": "counterfactual planning diagnostic, not measured selector cost",
+  "manifest_sha256": "350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97",
+  "schema": "ecc2k130-selector-phase-admission-v1",
+  "source_sha256": "588ef4c35288f87ab1d5cb54d9d1fd48ff8d38abbe35a531ef60ff8472d105de"
+}

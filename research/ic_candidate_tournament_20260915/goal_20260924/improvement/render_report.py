@@ -56,6 +56,13 @@ def tables(rows, unit, caption):
     return '\n'.join(md),'\n'.join(markup)
 
 
+# One-line summary shown under each panel title while the panel is collapsed.
+SUMMARY={
+    1:'Challenger stop6 loses on online time at 1.06476 of the IC reference, the incumbent is retained, and all 3243/3243 pairs verify on the synthetic toy panel, engineering only.',
+    2:'Challenger stop5_word runs at 1.09365 of the IC online reference on confirmation, the incumbent is retained, and all 3480/3480 pairs verify, engineering and accounting only.',
+    3:'Challenger stop7_word reaches 0.973335 of the online reference but only 0.990182 of cold instructions, so the incumbent is retained with every pair verified, engineering and accounting only.',
+}
+
 def render(data):
     n=data['round'];d=data['decision'];challenger=d['provisional_challenger'];status=d['status']
     url=f'https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round{n}'
@@ -73,7 +80,7 @@ def render(data):
         references if versioned else 'The IC reference is the qualified `pairinv` source. `rho` is the separately qualified cold-instruction reference; `rho_online` is the separately qualified online-time reference. Ratios to rho are descriptive. The K-instruction floor applies only to this full-rank collector; it is not a generic IC lower bound.', '',
         'The class column labels engineering experiments and accounting controls. No asymptotic advance is claimed. Variant names are readable aliases; the machine-readable export retains every canonical candidate, workload and run ID. `stop3` uses the legacy adaptive orbit bound, which is not a universal three-column guarantee. Actual admitted bases and columns below are authoritative.', '']
     markup=[f'<!-- BEGIN ic-bounded-round-{n}-20260925 -->',f'<section class="panel" id="ic-bounded-round-{n}-20260925">',
-        f'<h2>Bounded IC round {n}: {html.escape(status)}</h2>',f'<p>{html.escape(opening)}</p>',
+        f'<h2>Bounded IC round {n}: {html.escape(status)}</h2>',f'<p class="panel-summary">{SUMMARY[n]}</p>',f'<p>{html.escape(opening)}</p>',
         '<p>Primary metric: single-target online native time, reusable preparation excluded and scalar replay included. Cold cost remains an additional acceptance gate. Engineering/accounting only; no global-optimum or asymptotic claim. '+
         f'<a href="{url}/README.md">Full report</a> · <a href="{url}/EVIDENCE.md">Provenance and reproduction</a> · <a href="{url}/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="{url}/RUNS.csv">Every run, including failures</a>.</p>']
     for stage in ('confirmation','replay','development','smoke','selection','aa'):
