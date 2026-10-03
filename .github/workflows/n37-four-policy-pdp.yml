@@ -1,0 +1,98 @@
+name: n37 four-policy PDP replay
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/n37-four-policy-pdp.yml'
+      - 'examples/n37_four_policy_pdp.rs'
+      - 'examples/n37_four_policy_pdp_replay.rs'
+      - 'examples/support/n37_policy_common.rs'
+      - 'research/notes/ecc2k130/n37_four_policy_pdp_20261003/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz'
+      - 'research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl'
+      - 'research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl'
+      - 'research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json'
+      - 'research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz'
+      - 'src/cryptanalysis/binary_field_basis.rs'
+      - 'src/cryptanalysis/binary_velu.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'src/cryptanalysis/koblitz_relation_solver.rs'
+      - 'docs/index-calculus-scoreboard.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            src
+            examples/n37_four_policy_pdp.rs
+            examples/n37_four_policy_pdp_replay.rs
+            examples/support/n37_policy_common.rs
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock
+            research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json
+            research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz
+            research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
+            research/notes/ecc2k130/n37_four_policy_pdp_20261003
+      - name: Use frozen lockfile
+        run: cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+      - name: Check source hashes and Rust formatting
+        run: |
+          printf '%s  %s\n' \
+            'e7e4e1e86c1d199c978b9141490e54c59e5df6c2bdd3a771ddd9017583bc4a03' examples/n37_four_policy_pdp.rs \
+            '88a228144a08db897b63aa9ae7615c6e0f386288828ecfa2374722aec934fd45' examples/n37_four_policy_pdp_replay.rs \
+            | sha256sum --check
+          rustfmt --edition 2021 --check examples/n37_four_policy_pdp.rs examples/n37_four_policy_pdp_replay.rs
+      - name: Build native producer and independent replay
+        run: cargo build --release --locked --example n37_four_policy_pdp --example n37_four_policy_pdp_replay
+      - name: Inflate and verify both preserved raw runs
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_pdp_20261003
+          printf '%s  %s\n' \
+            'dd042dee66e6320f324ab561eebf176a56ad552cbda4181f4705fe06b270f8ec' "$note/RESULT_INITIAL.json.gz" \
+            'b29dde2eea2338370481d4b319f1dd54dc5d9a062ef24cc23e04b3d4b0585fbf' "$note/RESULT.json.gz" \
+            | sha256sum --check
+          gzip -cd "$note/RESULT_INITIAL.json.gz" > "$RUNNER_TEMP/initial.json"
+          gzip -cd "$note/RESULT.json.gz" > "$RUNNER_TEMP/final.json"
+          printf '%s  %s\n' \
+            '35d66af11e9854eb8ca7b3004b9cbb4d25f9514abe493622380ce29c7731468c' "$RUNNER_TEMP/initial.json" \
+            '5efc8fd85e974456ee25a84ce47e373a6cea5cee4b73dc3dbfd998aa6ed8f799' "$RUNNER_TEMP/final.json" \
+            | sha256sum --check
+          jq -Sc 'del(.host,.peak_rss_before_output_bytes,.total_ms_descriptive,.shared_input_ms_descriptive) | .policies |= map(del(.phase_ms_descriptive))' "$RUNNER_TEMP/initial.json" > "$RUNNER_TEMP/initial.canonical"
+          jq -Sc 'del(.host,.peak_rss_before_output_bytes,.total_ms_descriptive,.shared_input_ms_descriptive) | .policies |= map(del(.phase_ms_descriptive))' "$RUNNER_TEMP/final.json" > "$RUNNER_TEMP/final.canonical"
+          cmp "$RUNNER_TEMP/initial.canonical" "$RUNNER_TEMP/final.canonical"
+          printf '%s  %s\n' \
+            '5f8f00f7e9ca5ddbed87d88e0a1d04a55b11436bf52e52d6cae6ba798dd07b00' "$RUNNER_TEMP/final.canonical" \
+            | sha256sum --check
+      - name: Independently replay every target, rank row and recovered log
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_pdp_20261003
+          target/release/examples/n37_four_policy_pdp_replay "$RUNNER_TEMP/initial.json" "$RUNNER_TEMP/initial.replay.json"
+          cmp "$RUNNER_TEMP/initial.replay.json" "$note/REPLAY_INITIAL.json"
+          target/release/examples/n37_four_policy_pdp_replay "$RUNNER_TEMP/final.json" "$RUNNER_TEMP/final.replay.json"
+          cmp "$RUNNER_TEMP/final.replay.json" "$note/REPLAY.json"
+      - name: Retain Linux replay receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n37-four-policy-pdp-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/initial.replay.json
+            ${{ runner.temp }}/final.replay.json
+          if-no-files-found: warn
+          retention-days: 30
