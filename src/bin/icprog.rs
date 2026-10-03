@@ -41,6 +41,8 @@ mod f5_target;
 mod identity;
 #[path = "icprog/oracle.rs"]
 mod oracle;
+#[path = "icprog/ordinary_preparation.rs"]
+mod ordinary_preparation;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
@@ -105,6 +107,13 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Independently audit target-free synthetic n17 preparation data; no solver execution.
+    OrdinaryPreparationAudit {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Replay full published F5 capsule custody as data, without execution.
     F5ControlReplayCustody {
         #[arg(long)]
@@ -616,6 +625,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::OrdinaryPreparationAudit { input, out } => ordinary_preparation::run(&input, &out),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,

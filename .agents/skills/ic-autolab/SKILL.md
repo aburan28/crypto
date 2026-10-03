@@ -83,6 +83,15 @@ full archive. Replay requires the external registration seal, reads every
 archived member as data, and admits no execution. Publish the accepted actual
 registration and custody archive before its sole scientific invocation.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
+The [ordinary preparation mathematical gate](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/PROTOCOL.md)
+adds `icprog ordinary-preparation-audit --input INPUT.json --out NEWFILE` for
+strict target-free n17 transcripts. It independently reconstructs the whole
+geometric base, input law, exact negatives, projected rows, rank and logs,
+preserving failed attempts and incomplete panels. It executes no solver and
+admits neither source-bound production nor new natural yield or performance.
+Native target-free F5 and external CryptoMiniSat producers, their own one-use
+registrations and per-attempt costs remain pending. Never use the worker's Rust
+CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
