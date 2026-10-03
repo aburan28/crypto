@@ -177,6 +177,21 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(walker.nested, [])
         self.assertGreater(walker.panels, 200)
 
+    def test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all(self):
+        # Every panel carries a one-line summary under its title and an id, and
+        # the current-state page's panel index is the generated listing of them
+        # (scripts/site/panel_index.py), so it cannot drift from the ledger.
+        import panel_index
+
+        items = panel_index.panels(read(os.path.join(ROOT, "docs", "index-calculus-scoreboard.html")))
+        self.assertGreater(len(items), 200)
+        self.assertEqual([p["title"] for p in items if not p["id"]], [])
+        self.assertEqual([p["id"] for p in items if not p["summary"]], [])
+        ids = [p["id"] for p in items]
+        self.assertEqual(sorted(set(ids)), sorted(ids))
+        page = read(os.path.join(ROOT, "docs", "ic-current-state.html"))
+        self.assertEqual(panel_index.splice(page, panel_index.render(items)), page)
+
     def test_measurement_standard_page_is_a_copy_of_the_generated_file(self):
         # scripts/build_ic_measurement.py writes the canonical file; the site
         # republishes it byte for byte, like the scoreboard.
