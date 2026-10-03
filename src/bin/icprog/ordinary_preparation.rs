@@ -50,6 +50,7 @@ struct Attempt {
     trial: usize,
     scalar: u64,
     outcome: Outcome,
+    #[serde(deserialize_with = "required_nullable")]
     indices: Option<[usize; 3]>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -62,7 +63,18 @@ struct Document {
     geometric_base: Vec<[u64; 2]>,
     attempts: Vec<Attempt>,
     stop: Stop,
+    #[serde(deserialize_with = "required_nullable")]
     claimed_column_logs: Option<Vec<u64>>,
+}
+
+// Nullable fields must still be present. Serde otherwise treats a missing
+// Option as null, erasing whether the producer retained its explicit claim.
+fn required_nullable<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    Option::<T>::deserialize(deserializer)
 }
 
 /// Reproduce the collector's keyed rand-0.8 StdRng without calling its sampler.
@@ -524,5 +536,14 @@ mod tests {
             value.pointer_mut(pointer).unwrap()["unknown"] = json!(true);
             assert!(audit(&value).is_err());
         }
+        let mut value = retained();
+        value.as_object_mut().unwrap().remove("claimed_column_logs");
+        assert!(audit(&value).is_err());
+        let mut value = retained();
+        value["attempts"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("indices");
+        assert!(audit(&value).is_err());
     }
 }
