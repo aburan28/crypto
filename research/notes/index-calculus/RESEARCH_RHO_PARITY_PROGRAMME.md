@@ -317,7 +317,9 @@ measured size are both outside this harness:
   extrapolating to parity near `2^{67}` — on the weak class only, with the
   isogeny walk unpriced; the one route here that closes by a polynomial and
   crosses inside an extrapolation, and a reproduction of a published
-  algorithm, not an advance.
+  algorithm, not an advance.  Stopping F4 at the Bézout staircase (that
+  note's §10, engineering) makes the test `3.2·10⁶` and `S / rho` `5–6×` at
+  `2^{58}`, the exponent unchanged and the extrapolated parity `2^{65}`.
 
 Either is a new harness, not a lever on this one.  What this note settles
 is that the levers on this one — the automorphism quotient, the canonical
@@ -351,12 +353,12 @@ printed by `scripts/parity_ledger.py` (sections A to E).
 | `k = 5`, plain symmetrisation | `C″ = 3.0·10¹⁰` per test | `n^{−1/10}` | `2^{302}` *extrapolated* | stage diagnostic |
 | `k = 5`, 2-torsion (Edwards `y`) | `C″ = 7.3·10⁷` per test | residual rate `1/(192p)`, counted exactly | `2^{233}` *extrapolated* | stage diagnostic |
 | `k = 5`, saturated by the rational 4-torsion point | `C″ = 1.46·10⁸` per test | `2×` on the rate, `2.01×` on the test | `2^{233}`: a wash | engineering; the registered `4–10×` lever retracted |
-| **cover and decomposition, weak class over `F_{p⁶}`** | **`8.1×` and `10.2×` at `2^{57.9}`** | `S/rho ∝ p^{−1.92 ± 0.12}`, `C_cov = 5.2·10⁶` | **`2^{67}` *extrapolated*** | reproduction of a published route |
+| **cover and decomposition, weak class over `F_{p⁶}`** | **`8.1×` and `10.2×` at `2^{57.9}`** (`5.1×` and `6.3×` with F4 stopped at the Bézout staircase) | `S/rho ∝ p^{−1.92 ± 0.12}`, `C_cov = 5.2·10⁶` (`3.2·10⁶` stopped) | **`2^{67}` *extrapolated*** (`2^{65}` stopped) | reproduction of a published route; the stop is engineering |
 
 **The boundary.**
 
 1. **On the generic curves of this harness, no measured route reaches parity at a size below `2^{150}`.**  The `k = 3` routes are bounded by exponents, `k = 4` Joux–Vitse by a constant (`6,945×`), and the two that close do so only past `2^{151}` (`k = 4` full) and `2^{233}` (`k = 5`, 2-torsion) on measured constants.  The `k = 5` route's one lever left (a trace-driven elimination, `3–10×`) cannot bring it below `2^{200}`; the `k = 5` torsion lever the programme registered (4-torsion) does not exist on a curve not defined over `F_p`, and the variant that does was a wash.
-2. **The one route that closes by a polynomial is the cover, and only on a weak class.**  On `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}` the measured `S / rho` falls as `n^{−0.32}` (derived `−1/3`) to about `9×` at `ℓ = 2^{58}`, with parity extrapolated at `ℓ ≈ 2^{67}` (`p ≈ 3,000`), above the harness's 64-bit range.  At a cryptographic size the extrapolation goes far past parity: `S / rho ≈ 10^{−6}` at `ℓ = 2^{128}` *extrapolated* on the measured constant and exponent, which says that curves of this form must be avoided, and agrees with the published break of a 149-bit instance by the same method (Joux–Vitse 2012, cited and not reproduced here).  Two costs stand outside that figure: the isogeny walk to a weak curve (`≈ p²` steps for a generic curve of suitable order, cited and conjectural), and the `p/2`-column linear algebra's memory.
+2. **The one route that closes by a polynomial is the cover, and only on a weak class.**  On `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}` the measured `S / rho` falls as `n^{−0.32}` (derived `−1/3`) to about `9×` at `ℓ = 2^{58}` (`5–6×` once F4 is stopped at the Bézout staircase, a `1.61×` constant on the test and nothing on the exponent), with parity extrapolated at `ℓ ≈ 2^{67}` (`p ≈ 3,000`; `2^{65}`, `p ≈ 2,300`, with the stop), above the harness's 64-bit range.  At a cryptographic size the extrapolation goes far past parity: `S / rho ≈ 10^{−6}` at `ℓ = 2^{128}` *extrapolated* on the measured constant and exponent, which says that curves of this form must be avoided, and agrees with the published break of a 149-bit instance by the same method (Joux–Vitse 2012, cited and not reproduced here).  Two costs stand outside that figure: the isogeny walk to a weak curve (`≈ p²` steps for a generic curve of suitable order, cited and conjectural), and the `p/2`-column linear algebra's memory.
 3. **What the harness did not do, so that nothing above is read as more:** price the isogeny walk; build the sieving variant (cited `960×` per relation); run any size at which a route crosses (the largest end-to-end run is `ℓ = 2^{58}`); or touch prime-field curves, curves of prime order outside the weak form, or any deployed curve.
 
 **Class.**  Accounting, engineering and measurement throughout; the programme produced no new algorithm.  What it produced is the boundary above, in one unit (`F_p` multiplications over `√n` additions), with every constant and exponent behind it recorded, two registered predictions falsified in the open (the `k = 5` 2-torsion `C″` with its crossover, and the 4-torsion lever), one accounting error corrected (the Edwards residual rate, `1/(192p)` and not `1/(24p)`), and four defects in the cover module found and kept as superseded runs.

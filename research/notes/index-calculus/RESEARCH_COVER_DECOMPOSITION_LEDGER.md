@@ -150,7 +150,7 @@ None of the four touched the group arithmetic or the transfer, which the tests c
 
 ---
 
-## 10. Engineering after the fact: F4 stopped at the Bézout staircase (2026-10-04)
+## 10. Engineering after the fact: F4 stopped at the Bézout staircase (2026-10-03)
 
 §6 found `90 %` of a test in F4, which ran to degree `10` on a `768 × 724`
 matrix to *certify* a Gröbner basis it had in hand at degree `7`.  Six
@@ -192,10 +192,30 @@ polynomial is what decides whether the system has an `F_p`-point at all,
 and `719` systems in `720` have none.  So the next constant is not here;
 F4 is `83 %` of the test as it stands.
 
-**What it is.**  A constant: `1.61×` on the test and so on `S / rho`, with
-the route's exponent untouched.  The crossover the ledger extrapolates from
-the measured constants moves from `p* ≈ 2,940` to `≈ 2,310`, i.e. from
-`2^{67}` to `2^{65}` in the subgroup's order, still above the harness's
-range; the end-to-end rows below say what was actually measured.  Class:
+**End to end** (`31_jv_cover_stop_dlp*.json`, the same curves, seeds,
+residual streams and rho references as §6, every phase priced; ledger
+section E.2).  The stopped solver found the same relations from the same
+residuals at every size (the pooled rate is §6's `1919` in `1,516,656`,
+the linear algebra is unchanged), every one of the ten logarithms was
+recovered and checked, and `S / rho` fell by the test's ratio and nothing
+else:
+
+| `p` | `ℓ` | `S / rho`, §6 (seeds 1, 2) | `S / rho`, F4 stopped | ratio |
+|--:|:--|--:|--:|--:|
+| 53 | `2^{32.4}` | `2,638`, `1,622` | `1,618`, `998` | `1.63×` |
+| 101 | `2^{37.9}` | `836`, `1,303` | `516`, `804` | `1.62×` |
+| 251 | `2^{45.8}` | `106`, `186` | `65.6`, `115` | `1.61×` |
+| 503 | `2^{51.8}` | `45.7`, `25.8` | `28.4`, `16.1` | `1.61×` |
+| 1009 | `2^{57.9}` | `10.2`, `8.1` | `6.3`, `5.1` | `1.60×` |
+
+The fitted exponent is `−1.913 ± 0.116` (§6: `−1.918 ± 0.116`): the same
+line, `1.6×` lower.  The crossover the ledger extrapolates from the measured
+constants (`C_cov = 3.19·10⁶`, `c_add = 331`, rho `S = 1.3`) moves from
+`p* ≈ 2,940` to `≈ 2,310`, from `2^{67}` to `2^{65}` in the subgroup's order,
+still above the harness's 64-bit range; nothing was measured there.
+
+**What it is.**  A constant: `1.61×` on the test and so `1.6×` on `S / rho`
+at every size, with the route's exponent untouched.  Class:
 **engineering**.  Nothing in §9 changes: the weak class, the unpriced
-isogeny walk and the unbuilt sieve are as they were.
+isogeny walk and the unbuilt sieve are as they were, and the extrapolated
+`2^{65}` is an extrapolation on a toy range exactly as `2^{67}` was.
