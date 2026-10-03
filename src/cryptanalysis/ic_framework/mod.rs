@@ -73,7 +73,7 @@ use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
     collect_and_solve_with_completion, price_phase, Calibration, CompletionRule, CountedGroup,
-    GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
+    FactorBase, GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
 };
 use crate::cryptanalysis::ic_measurement as measurement;
 use linalg::matrix_by_name;
@@ -91,7 +91,8 @@ pub struct PipelineSpec {
     pub solver_params: Params,
     pub targets: Targets,
     /// The matrix and stop rule: `incremental-gauss`,
-    /// `incremental-gauss-full-rank`, or `structured-gauss`.
+    /// `incremental-gauss-full-rank`, its `-checked` variant, or
+    /// `structured-gauss`.
     pub linalg: String,
     /// Cap on targets drawn before the run gives up.
     pub max_trials: u64,
@@ -242,6 +243,46 @@ pub struct RunReport {
     pub exhausted: bool,
 }
 
+/// Certify the solved logarithm of one nonzero-coefficient point in each
+/// factor-base column. A relation uses `coef_of[i] * x_col` for point `P_i`;
+/// after cofactor projection its full-point identity must be
+/// `[coef_of[i] * x_col]G = [h]P_i`. Both scalar multiplications are charged.
+/// This is independent of the relation matrix's assertion that it has rank.
+fn check_full_rank_base_columns<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    fb: &FactorBase<G::Elt>,
+    matrix: &dyn RelationSolver,
+    cost: &mut PhaseCost,
+) -> bool {
+    let started = Instant::now();
+    let mut representative = vec![None; fb.columns];
+    for (i, (&col, &coef)) in fb.col_of.iter().zip(&fb.coef_of).enumerate() {
+        if col < fb.columns && coef % ctx.r != 0 && representative[col].is_none() {
+            representative[col] = Some(i);
+        }
+    }
+    let mut valid = true;
+    for (col, index) in representative.into_iter().enumerate() {
+        let Some((i, x)) = index.zip(matrix.pinned(col)) else {
+            cost.count("base_log_missing_columns", 1);
+            valid = false;
+            continue;
+        };
+        let exponent = ((fb.coef_of[i] as u128 * x as u128) % ctx.r as u128) as u64;
+        let expected = ctx.group.mul(&mut cost.group_ops, ctx.generator, exponent);
+        let projected = ctx
+            .group
+            .mul(&mut cost.group_ops, fb.points[i], ctx.cofactor);
+        cost.count("base_log_columns_checked", 1);
+        if expected != projected {
+            cost.count("base_log_verification_failures", 1);
+            valid = false;
+        }
+    }
+    cost.wall_ns += started.elapsed().as_nanos() as u64;
+    valid
+}
+
 /// Run one configuration end to end.
 ///
 /// `planted` is the logarithm the runner checks the answer against.  No
@@ -305,12 +346,13 @@ pub fn run_pipeline<G: CountedGroup>(
         Targets::Walk => TargetSource::Walk,
     };
     measurement::begin_online(measurement::Phase::TargetQuery);
-    let completion = if linalg_name == "incremental-gauss-full-rank" {
+    let checked_full_rank = linalg_name == "incremental-gauss-full-rank-checked";
+    let completion = if linalg_name == "incremental-gauss-full-rank" || checked_full_rank {
         CompletionRule::FullRank
     } else {
         CompletionRule::TargetPinned
     };
-    let outcome: PipelineOutcome = collect_and_solve_with_completion(
+    let mut outcome: PipelineOutcome = collect_and_solve_with_completion(
         ctx.group,
         ctx.generator,
         ctx.target,
@@ -325,6 +367,14 @@ pub fn run_pipeline<G: CountedGroup>(
         completion,
         |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
     );
+    // Kept opt-in so the previously recorded full-rank sessions retain
+    // byte-identical replay and charging. A checked run cannot claim a
+    // verified full-rank solution solely from the target-point check.
+    if checked_full_rank && outcome.verified {
+        measurement::mark(measurement::Phase::RecoveryCheck);
+        outcome.verified =
+            check_full_rank_base_columns(ctx, &fb, matrix.as_ref(), &mut outcome.verify);
+    }
     measurement::end_online();
 
     // ── The report ─────────────────────────────────────────────────
@@ -1135,6 +1185,130 @@ mod tests {
         );
         assert_eq!(result.linear_algebra.cost.get("full_rank_reached"), 1);
         assert!(result.linear_algebra.cost.get("first_target_pinned_rank") > 0);
+        assert_eq!(result.verify.get("base_log_columns_checked"), 0);
+    }
+
+    #[test]
+    fn checked_full_rank_point_checks_each_column_without_changing_the_relation_stream() {
+        let inst = roster_prime_instance(16).unwrap();
+        let (ctx, planted) = ctx_and_planted(&inst);
+        let base = PrimeAbscissaBase { instance: &inst };
+        let mut spec = PipelineSpec {
+            factor_base: "prime-abscissa".into(),
+            oracle: "mitm".into(),
+            targets: Targets::Walk,
+            max_trials: 2_000_000,
+            seed: 7,
+            linalg: "incremental-gauss-full-rank".into(),
+            ..Default::default()
+        };
+        spec.factor_base_params.set("size", "24");
+        spec.oracle_params.set("negation_folded", "1");
+        let control = run_pipeline(
+            &ctx,
+            &spec,
+            &base,
+            &mut MitmOracle::new(2),
+            planted,
+            &Calibration::default(),
+            None,
+        )
+        .unwrap();
+        spec.linalg = "incremental-gauss-full-rank-checked".into();
+        let checked = run_pipeline(
+            &ctx,
+            &spec,
+            &base,
+            &mut MitmOracle::new(2),
+            planted,
+            &Calibration::default(),
+            None,
+        )
+        .unwrap();
+        assert!(control.verified && checked.verified);
+        assert_eq!(checked.recovered, control.recovered);
+        assert_eq!(
+            checked.decomposition.targets_tried,
+            control.decomposition.targets_tried
+        );
+        assert_eq!(checked.linear_algebra.rank, control.linear_algebra.rank);
+        assert_eq!(
+            checked.decomposition.cost.group_ops,
+            control.decomposition.cost.group_ops
+        );
+        assert_eq!(checked.verify.get("base_log_columns_checked"), 24);
+        assert_eq!(checked.verify.get("base_log_missing_columns"), 0);
+        assert_eq!(checked.verify.get("base_log_verification_failures"), 0);
+        assert_eq!(
+            checked.verify.group_ops.scalar_mults,
+            control.verify.group_ops.scalar_mults + 48
+        );
+    }
+
+    #[test]
+    fn checked_full_rank_rejects_a_false_column_log() {
+        use crate::cryptanalysis::ic_boundary::{FactorBase, IncrementalGauss, RowStatus};
+
+        let inst = roster_prime_instance(16).unwrap();
+        let (ctx, _) = ctx_and_planted(&inst);
+        let neg = ctx.group.neg(ctx.generator);
+        let fb = FactorBase::from_column_map(
+            "one signed column".into(),
+            vec![ctx.generator, neg],
+            vec![0, 0],
+            vec![1, ctx.r - 1],
+            1,
+            |p| ctx.group.key(p),
+            |p| ctx.group.key(&ctx.group.neg(*p)),
+            |p| p.x,
+        )
+        .unwrap();
+        let mut matrix = IncrementalGauss::new(2, ctx.r);
+        assert_eq!(
+            matrix.add_row(vec![1, 0], ctx.cofactor % ctx.r),
+            RowStatus::Independent
+        );
+        assert_eq!(matrix.add_row(vec![0, 1], 1), RowStatus::Independent);
+        let mut valid_cost = PhaseCost::default();
+        assert!(check_full_rank_base_columns(
+            &ctx,
+            &fb,
+            &matrix,
+            &mut valid_cost
+        ));
+        assert_eq!(valid_cost.get("base_log_columns_checked"), 1);
+
+        let mut false_matrix = IncrementalGauss::new(2, ctx.r);
+        false_matrix.add_row(vec![1, 0], (ctx.cofactor + 1) % ctx.r);
+        false_matrix.add_row(vec![0, 1], 1);
+        let mut invalid_cost = PhaseCost::default();
+        assert!(!check_full_rank_base_columns(
+            &ctx,
+            &fb,
+            &false_matrix,
+            &mut invalid_cost
+        ));
+        assert_eq!(invalid_cost.get("base_log_verification_failures"), 1);
+
+        let incomplete_map = FactorBase::from_column_map(
+            "declared column with no representative".into(),
+            vec![ctx.generator, neg],
+            vec![0, 0],
+            vec![1, ctx.r - 1],
+            2,
+            |p| ctx.group.key(p),
+            |p| ctx.group.key(&ctx.group.neg(*p)),
+            |p| p.x,
+        )
+        .unwrap();
+        let mut missing_cost = PhaseCost::default();
+        assert!(!check_full_rank_base_columns(
+            &ctx,
+            &incomplete_map,
+            &matrix,
+            &mut missing_cost,
+        ));
+        assert_eq!(missing_cost.get("base_log_missing_columns"), 1);
     }
 
     /// **The torsion-symmetrised configuration is a complete index

@@ -514,7 +514,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 
 <section class="dash-section" id="lab-next" aria-labelledby="next-title"><div class="dash-section-head"><div><p class="dash-kicker">05 / Tournament design</p><h2 id="next-title">A local win is a candidate, not a final answer.</h2></div></div><div class="tournament-flow" aria-label="Proposed tournament flow"><article><span class="flow-number">01 / EXPLORE</span><strong>Keep diverse candidates</strong><p>Different bases, solver families and stage combinations. Preserve alternatives with different resource tradeoffs.</p></article><article><span class="flow-number">02 / ADMIT</span><strong>Pass correctness gates</strong><p>Source identity, natural yield, failed attempts, complete costs and verified recovered answers.</p></article><article><span class="flow-number">03 / COMPARE</span><strong>Pair frozen workloads</strong><p>Same fresh point, resources and reference. Screening and untouched confirmation have separate roles.</p></article><article><span class="flow-number">04 / DECIDE</span><strong>Promote or retain</strong><p>Apply the declared uncertainty gate. Keep negative outcomes and useful alternatives for later combinations.</p></article></div><div class="next-callout"><span class="status pending">Next gate</span><div><strong>Finish the native F5 control and both natural-yield records.</strong><p>Then freeze new target exclusions, calibrated resources and strong references before a fresh paired tournament. The three historical confirmation sets remain closed.</p></div></div><p class="dash-footnote">This diagram describes the proposed process. It does not claim that a fresh F5/SAT tournament has run, or that any implementation is globally fastest.</p></section>
 
-<section class="dash-library-intro" id="evidence-search" aria-labelledby="library-title"><p class="dash-kicker">06 / Evidence</p><h2 id="library-title">Open the detail you need.</h2><p>The historical ledger contains other curves, cost units and questions. Its reports are preserved; they are not a combined leaderboard.</p><label for="evidence-query">Search historical reports</label><input id="evidence-query" type="search" placeholder="Frobenius, F5, rho, factor base…" autocomplete="off" aria-controls="evidence-results"><p id="evidence-count" aria-live="polite"></p><ul id="evidence-results"></ul><noscript><p>Open the full ledger below and use your browser’s Find command.</p></noscript></section><details class="dash-details" id="historical-regimes"><summary>Historical best results by regime · different workloads and accounting</summary><div class="dash-detail-body"><section class="dash-section" id="lab-best" aria-labelledby="best-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Best of all findings / Index calculus</p><h2 id="best-title">The best result in each regime, and what it earns.</h2></div><span class="status neutral">Ranked · every phase counted</span></div>
+<section class="dash-library-intro" id="evidence-search" aria-labelledby="library-title"><p class="dash-kicker">06 / Evidence</p><h2 id="library-title">Open the detail you need.</h2><p>The historical ledger contains other curves, cost units and questions. Its reports are preserved; they are not a combined leaderboard.</p><label for="evidence-query">Search historical reports</label><input id="evidence-query" type="search" placeholder="Frobenius, F5, rho, factor base…" autocomplete="off" aria-controls="evidence-results"><p id="evidence-count" aria-live="polite"></p><ul id="evidence-results"></ul><noscript><p>Open the full ledger below and use your browser’s Find command.</p></noscript></section><details class="dash-details" id="historical-regimes"><summary>Historical best results by regime · different workloads and accounting</summary><div class="dash-detail-body"><section class="dash-section" id="lab-best" aria-labelledby="best-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Best of all findings / Index calculus</p><h2 id="best-title">The best result in each regime, and what it earns.</h2>
+<p class="panel-summary">Ranks the best verified figure in each regime by how much of the attack it prices, finding no elliptic-curve whole-method row below matched rho and the only below-rho result hyperelliptic.</p></div><span class="status neutral">Ranked · every phase counted</span></div>
 <p class="dash-section-intro">One row per kind of measurement, each the best figure this repository has verified in that regime, with the class the repository&rsquo;s own rule assigns it. The page&rsquo;s standard for &ldquo;faster than rho&rdquo; is the first row: a whole cold method, one unseen target, against a matched rho, below one at growing size. Nothing on an elliptic curve has met it. The rows below it are what has been achieved short of that, each with the boundary it did not cross.</p>
 <div class="dash-detail-body" style="padding:0"><table>
 <caption>IC over matched rho; below 1 means index calculus is cheaper. Every figure is quoted from the frozen result it links. Updated 3 October 2026.</caption>
@@ -530,7 +531,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <p class="dash-footnote">Ranking rule: a row ranks by how much of the attack its ratio prices. A cold whole-method ratio outranks any online-only or multi-target figure however small the latter, because that is the repository&rsquo;s definition of speed (AGENTS.md &sect;2, &sect;8). The one measured below-rho result is not on an elliptic curve; the one falling ratio is on a weak class; the largest elliptic-curve lead excludes its own set-up. Superseded figures stay as &ldquo;was&rdquo;.</p>
 </section></div></details>
 <details class="dash-details"><summary>Historical compact-orbit cold-cost panel</summary><div class="dash-detail-body"><section class="dash-section" id="cold-compact-orbit-20261003" aria-labelledby="cold-compact-title">
-    <div class="dash-section-head"><div><p class="dash-kicker">Fresh cold target gate · 3 October 2026</p><h2 id="cold-compact-title">The n37 folded table recovers targets, but misses full rank.</h2></div><span class="status pending">Accounting · full-rank gate failed</span></div>
+    <div class="dash-section-head"><div><p class="dash-kicker">Fresh cold target gate · 3 October 2026</p><h2 id="cold-compact-title">The n37 folded table recovers targets, but misses full rank.</h2>
+<p class="panel-summary">Finds the eager 42-orbit table pins each of eight public targets at rank 19 to 38 of 43 unknowns, so the preregistered full-rank IC/rho verdict is withheld, classed accounting.</p></div><span class="status pending">Accounting · full-rank gate failed</span></div>
     <p class="dash-section-intro">A deterministic 42-orbit source base and eager Frobenius pair table were run on eight registered public Q in two measured rounds. All 48 measured answers, including the strong-rho reference, verified and replayed identically. The IC matrix pinned each target at rank 19–38 of 43 unknowns; it did not solve every factor-base log, so the preregistered full-rank IC/rho verdict is withheld.</p>
     <div class="table-scroll"><table>
       <caption>Cold lower-bound group-addition equivalents per √r on <code>icv1-f2m37-tm534059-32aad96b</code>; 16 measured single-target solves per arm, L0 operation counts.</caption>
@@ -544,7 +546,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     <p class="dash-footnote">The counted and legacy IC arms had identical answers, factor bases, relation and group-operation traces; native table setup adds 8,210.631 GAE. Its 66,822 group additions alone exceed the largest measured strong-rho GAE (7,640.494) on these Q. Missing native prices make all S rows lower bounds; L0 wall times are descriptive. This n37 single-target table says nothing about shared-setup batches, n41/n53 or ECC2K-130 at n131. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/cold_compact_orbit_ic_20261003/RESULT.md">Result and decision</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/cold_compact_orbit_ic_20261003/PAIRED.json">Every paired Q</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/cold_compact_orbit_ic_20261003/AUDIT.json">Replay receipt</a></p>
   </section></div></details>
 <details class="dash-details"><summary>Historical compact-orbit full-rank panel</summary><div class="dash-detail-body"><section class="dash-section" id="full-rank-compact-orbit-20261003" aria-labelledby="full-rank-compact-title">
-    <div class="dash-section-head"><div><p class="dash-kicker">Fresh full-rank continuation · 3 October 2026</p><h2 id="full-rank-compact-title">n37 rank reaches 43/43; this cold eager table remains costly.</h2></div><span class="status neutral">Rank gate passed · cost bounded</span></div>
+    <div class="dash-section-head"><div><p class="dash-kicker">Fresh full-rank continuation · 3 October 2026</p><h2 id="full-rank-compact-title">n37 rank reaches 43/43; this cold eager table remains costly.</h2>
+<p class="panel-summary">Reaches rank 43/43 on eight new public targets with every scalar verified, but the cold charged IC lower bound sits 22.600x the same-Q strong rho, a bounded accounting result.</p></div><span class="status neutral">Rank gate passed · cost bounded</span></div>
     <p class="dash-section-intro">On eight new public Q in two measured rounds, the counted 42-orbit base and folded three-summand table recovered and independently verified every scalar. The early-pin control stopped at rank 24&ndash;39; the new mode continued the same seeded relation stream to rank 43/43 in all 16 measured runs. Its first-pin checkpoint, target scalar and base identity matched the control in every pair. All 48 measured IC/rho records replayed identically.</p>
     <div class="table-scroll"><table>
       <caption>Cold charged lower-bound GAE per &radic;r on <code>icv1-f2m37-tm534059-32aad96b</code>; 16 measured single-target solves per arm, L0 operation counts. The rho and IC rows each retain unpriced native work.</caption>
@@ -557,7 +560,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     </table></div>
     <p class="dash-footnote">The full-rank continuation cost 1.0387&times; the early-pin control in the charged unit. Its smallest charge was 84,323.502 GAE, 15.722&times; the largest sampled strong-rho charge; the eager table alone builds 66,822 pair additions. Even with IC setup removed, each full-rank online charge exceeds its paired whole-rho charge by 1.060&ndash;2.673&times; in this bounded accounting. L0 wall time is descriptive. Matrix rank uniquely determines the base logs, but this run explicitly extracted and point-checked only the target scalar. The next gate must share rank as well as cold table setup against actual batched rho, with native work and memory charged; this single-target n37 result does not transfer to n131. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/RESULT.md">Protocol and decision</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/PAIRED.json">Every paired Q</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/AUDIT.json">Replay receipt</a>.</p>
   </section></div></details>
-<details class="dash-details"><summary>Cross-method evidence · every measured candidate</summary><div class="dash-detail-body"><section class="dash-section" id="lab-ecbench-all" aria-labelledby="ecbench-all-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Every candidate, one harness / 3 October 2026</p><h2 id="ecbench-all-title">Every ECDLP method this repository has, measured cold in one unit on the same targets.</h2></div><span class="status neutral">Baseline &middot; no method changed</span></div>
+<details class="dash-details"><summary>Cross-method evidence · every measured candidate</summary><div class="dash-detail-body"><section class="dash-section" id="lab-ecbench-all" aria-labelledby="ecbench-all-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Every candidate, one harness / 3 October 2026</p><h2 id="ecbench-all-title">Every ECDLP method this repository has, measured cold in one unit on the same targets.</h2>
+<p class="panel-summary">Records a cold one-unit baseline of every rho, BSGS, kangaroo and index-calculus arm on eight curves, with no index-calculus arm below its matched rho and the gap widening with subgroup size.</p></div><span class="status neutral">Baseline &middot; no method changed</span></div>
 <p class="dash-section-intro">Every rho variant, every BSGS variant, the kangaroo and every applicable <code>ic.pipeline</code> configuration, run by the native <code>ecbench</code> harness on four prime-field and four Koblitz curves, eight unseen targets each, three interleaved rounds, with every phase charged in group-addition equivalents. <strong>No index-calculus arm is below its matched rho on any curve, and the gap widens with the subgroup size.</strong> The protocols and predictions were committed before the sessions ran; two predictions failed as written and are scored so. Every figure below is quoted from the frozen tables; the page computes nothing.</p>
 <div class="dash-detail-body" style="padding:0"><table>
 <caption>Mean <code>S</code> = group-addition equivalents / &radic;r over 24 runs per cell, and the ratio to the session&rsquo;s reference (<code>rho.negation</code> on prime curves, <code>rho.signed_frobenius_strong</code> on Koblitz curves). Below 1 is cheaper than the reference. Index-calculus rows shaded.</caption>
@@ -573,7 +577,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 </tbody></table></div>
 <p class="dash-footnote">The orbit base has no invariant subspace on <code>icv1-f2m19-t797-b6cf2467</code> and <code>icv1-f2m29-tm40309-30c52b96</code> (192 error records, kept). A preregistered follow-up ran those two curves with the <code>binary-subspace</code> base: dimension 8 verifies everywhere at 37.0&times; (n = 19) and 103.5&times; (n = 29) the reference under MITM, 204&times; and 8 081&times; under <code>subtract</code>; dimension 6 solves n = 19 at 6.98&times; and exhausts its 10<sup>6</sup>-trial budget on every n = 29 target. Read the Koblitz column with care: at r &le; 2<sup>21</sup> the strong reference&rsquo;s fixed setup is three to four times its search, so it sits above the lean walk and every BSGS, and every IC ratio against it is flattering by 1.4&ndash;4.3&times;. Host: 4-vCPU Intel Xeon VM, Linux x86-64; counts stand at every isolation level, wall time admitted only on the L2 pairs and descriptive at these sizes. Three complete sessions, 3 136 of 3 392 executions verified, the rest errors or exhaustions with their own status; 36 of 36 audit replays identical. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_all_candidates_20261003/README.md">Protocols, sessions, audit receipts, tables, saved comparisons and the scored predictions</a>. Class: none (AGENTS.md &sect;3); nothing here is a method change, and the best-of table above is unchanged by it.</p>
 </section></div></details>
-<details class="dash-details"><summary>Research progress over time · separate regimes and references</summary><div class="dash-detail-body"><section class="dash-section" id="lab-progress" aria-labelledby="progress-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Progress over time / The rho barrier</p><h2 id="progress-title">Where index calculus stands against rho, by the day each result landed.</h2></div><span class="status neutral">Log scale &middot; rho = 1</span></div>
+<details class="dash-details"><summary>Research progress over time · separate regimes and references</summary><div class="dash-detail-body"><section class="dash-section" id="lab-progress" aria-labelledby="progress-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Progress over time / The rho barrier</p><h2 id="progress-title">Where index calculus stands against rho, by the day each result landed.</h2>
+<p class="panel-summary">Plots the best verified IC over rho ratio in each regime by the day it landed, with early below-one points hollow because their rho later proved unmatched, citing frozen timeline data.</p></div><span class="status neutral">Log scale &middot; rho = 1</span></div>
 <p class="dash-section-intro">Every point is the best verified ratio of index-calculus cost to matched Pollard rho in its regime on the day it landed on <code>main</code>; below the line, index calculus is cheaper. The heavy series is the one that counts under this repository&rsquo;s rule &mdash; the whole method, cold, one unseen target, against a matched rho. Its early points sit below the line only because they were measured against a rho that later proved unmatched; they are kept hollow, as &ldquo;was&rdquo;. The grey series are the other things that have been measured, each short of that test in a stated way.</p>
 <figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 3 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
 <div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; the online-only and genus-4 series stay below one; the batch and cover series stay above."></div>
@@ -733,7 +738,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 })();
 </script>
 </section></div></details>
-<details class="dash-details"><summary>How new results update this dashboard</summary><div class="dash-detail-body"><section class="dash-section" id="lab-currency" aria-labelledby="currency-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">How this page stays current / AGENTS.md &sect;7a</p><h2 id="currency-title">Every result lands here in the pull request that produces it.</h2></div><span class="status neutral">Rule since 3 October 2026 &middot; checked in CI</span></div>
+<details class="dash-details"><summary>How new results update this dashboard</summary><div class="dash-detail-body"><section class="dash-section" id="lab-currency" aria-labelledby="currency-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">How this page stays current / AGENTS.md &sect;7a</p><h2 id="currency-title">Every result lands here in the pull request that produces it.</h2>
+<p class="panel-summary">States the rule since 3 October 2026: a pull request landing a measurement, reclassification, corrected reference or withdrawn claim updates every panel citing that kind of result before it merges.</p></div><span class="status neutral">Rule since 3 October 2026 &middot; checked in CI</span></div>
 <p class="dash-section-intro">This dashboard is the first thing a reader opens, so a stale panel is worse than none. Since 3 October 2026 the repository&rsquo;s agent rules (<a href="https://github.com/aburan28/crypto/blob/main/AGENTS.md#7a-every-result-lands-on-the-dashboard-in-the-same-pr">AGENTS.md &sect;7a</a>) make the update part of the result: a pull request that lands a new measurement, a reclassification, a corrected reference or a withdrawn claim must update every panel that cites that kind of result before it merges, and the finish-and-merge authorization does not cover a pull request that skips this.</p>
 <div class="dash-detail-body" style="padding:0"><table>
 <caption>Which panels a result owes, by kind. The newest verified figure in each regime is shown; the figure it supersedes stays as &ldquo;was&rdquo;.</caption>
@@ -1657,7 +1663,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 
   <!-- ============ LEDGER EXPONENTS + ORACLES ============ -->
   <div class="duo">
-    <div class="panel">
+    <div class="panel" id="exponents-per-regime">
       <div class="panel-head">
         <h2>The exponents, per regime</h2>
   <p class="panel-summary">Lists fitted cost exponents for every variant on each ladder against rho's one half, with the matched rho reference reading 0.39 on binary and 0.37 on prime curves.</p>
@@ -1708,7 +1714,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="oracle-cost-per-target">
       <div class="panel-head">
         <h2>What one target costs each decomposition oracle</h2>
   <p class="panel-summary">Prices every decomposition oracle per target on the same Koblitz Semaev systems, with meet in the middle cheapest and the best algebraic engine still 3x enumeration and 60x meet in the middle.</p>
@@ -1776,7 +1782,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     </div>
     <!-- hamming-ideal-pdp:end -->
 
-    <div class="panel">
+    <div class="panel" id="solver-inside-s">
       <div class="panel-head">
         <h2>The solver inside S: one base, four oracles, whole runs <span class="chip">accounting</span></h2>
   <p class="panel-summary">Measures four oracles inside whole verified runs on one subspace base, finding the pair table cheapest and the algebraic engines costing from 23.9x to 194,235x it.</p>
@@ -2005,7 +2011,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   <!-- ============ TWO PANELS ============ -->
   <div class="duo">
 
-    <div class="panel">
+    <div class="panel" id="tuning-ledger">
       <div class="panel-head">
         <h2>What tuning actually bought</h2>
   <p class="panel-summary">Records four tuning steps on the three-unknown solve's multiplications per residual, one accounting and three engineering, worth 5.5x total with the border basis not adopted.</p>
@@ -2052,7 +2058,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="exponents-that-decide">
       <div class="panel-head">
         <h2>The exponents that decide it</h2>
   <p class="panel-summary">Lists fitted growth exponents over four sizes against rho's one half, with the linear algebra at 0.68 for Wiedemann and 0.85 dense deciding the method loses as curves grow.</p>
@@ -2398,7 +2404,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   </div>
 
   <!-- ============ SOLVING-DEGREE LEVERS ============ -->
-  <div class="panel">
+  <div class="panel" id="solving-degree-levers">
     <div class="panel-head">
       <h2>The solving-degree levers, classified</h2>
   <p class="panel-summary">Classifies solving-degree levers in a second unit against the Nullstellensatz floor, finding none reaches a full logarithm and the selected-curve lever killed because its holdout score was 2^+1.13 worse.</p>
@@ -10669,6 +10675,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-native-m6-mitm-20261002 -->
 <section class="panel" id="n37-native-m6-mitm-20261002">
 <div class="panel-head"><h2>Degree-73 descendant-native n37 six-sum: rank 42, direct batch misses 107 targets <span class="chip">scoped support no-go</span></h2>
+<p class="panel-summary">Finds the fixed 42-column native base supports 917 of 1,024 frozen targets with at most six factors and misses 107 outright, a scoped support no-go with no speed ratio.</p>
 <p>A preregistered Rust 3+3 oracle used the fixed 42-column descendant-native base and the frozen n37/L1,024 public Q block. It built 102,391 distinct half sums from all signed multisets of at most three factors. Forty-two independent, full-point-verified relations came from 49 target-blind probes. A separate source-curve reachability implementation independently checked every hit and complete miss, solved the 42 base logs, and verified each recovered Q scalar against both the public point and the published fixture.</p></div>
 <div class="table-scroll"><table>
 <caption>Exact fixed-base support on one frozen 1,024-target block. Wilson intervals describe this sample, not a full-method speed ratio; the five-sum 16.10084% bound is for a uniform target population.</caption>
@@ -10682,6 +10689,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-native-residual-20261002 -->
 <section class="panel" id="n37-native-residual-20261002">
 <div class="panel-head"><h2>Degree-73 descendant-native n37 residual search: complete on disjoint b01 Q <span class="chip">batch correctness pass</span></h2>
+<p class="panel-summary">Recovers all 1,024 logarithms on the disjoint b01 block after 85 shifted recoveries, a batch correctness pass with matched rho, common-unit S and speedup unset.</p>
 <p>A preregistered Rust runner kept the fixed 42-column native base and exact signed 3+3 oracle, then tried a direct query followed only on a complete miss by at most 16 target-independent shifts. On the untouched orbit-disjoint b01 block, it rebuilt rank 42 from 49 target-blind probes and independently verified all 1,024 public-target logarithms. Source-curve replay checked every direct and shifted hit or complete miss, solved the base logs independently, verified each scalar, and compared with the published fixture only afterward.</p></div>
 <div class="table-scroll"><table>
 <caption>Support and attempt counts on frozen public Q. The b00 and b01 blocks differ; these are correctness diagnostics, not matched runtime or IC/rho speed ratios.</caption>
@@ -10695,6 +10703,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-native-one-target-20261003 -->
 <section class="panel" id="n37-native-one-target-20261003">
 <div class="panel-head"><h2>Degree-73 descendant-native n37 versus one-target rho on disjoint b02 Q <span class="chip">accounting</span></h2>
+<p class="panel-summary">Solves 32 unseen public Q per arm with every pair replayed, but the IC and rho addition counters use different kernels, so the complete-cost S and rho ratio stay unset, classed accounting.</p>
 <p>Each of 32 previously unseen public Q was solved from a fresh process by both the fixed 42-column signed 3+3 IC arm and the rung-3 signed-Frobenius rho arm, with five interleaved repetitions per Q. Independent source-curve replay checked all 160 pairs, including every IC support/miss decision, both recovered scalars, fixture equality, and exact online phase sums. IC recovered 27 Q directly and five with frozen shifts: 39 queries total, at most four for one Q.</p></div>
 <div class="table-scroll"><table>
 <caption>Median per-Q instrumented explicit point-addition requests; these counters use different arithmetic kernels and omit scalar multiplication internals and some isogeny work, so their ratio is not a speed ratio. Cold IC setup is rebuilt for each Q; rho uses no cross-target table.</caption>
@@ -10708,6 +10717,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-four-policy-support-20261003 -->
 <section class="panel" id="n37-four-policy-support-20261003">
 <div class="panel-head"><h2>Degree-73 n37 four-policy base: equal useful support admitted <span class="chip">input gate</span></h2>
+<p class="panel-summary">Admits all four base policies at equal useful support, 1,554 signed classes and 3,108 physical points each, an input gate that prices no PDP yield, rank or IC/rho comparison.</p>
 <p>The preregistered native Rust census uses the exact frozen 42-column compact source base and 42 target-blind descendant-native seeds. Closing each seed under its available, explicitly costed action gives every original, transported, descendant-native and pullback policy 1,554 distinct signed subgroup classes and 3,108 physical points. A separate general-law replay verified all 12,432 full points, 6,216 forward/sign map pairs, 42 exact pullback seeds and 1,554 native scalar-action identities; infinity and 2-torsion passed separate controls.</p></div>
 <div class="table-scroll"><table>
 <caption>Useful-support admission at n37, not PDP yield or an IC/rho speed comparison. Construction actions exclude archived source/leaf selection costs; all native field and scalar internals remain unpriced.</caption>
@@ -10723,6 +10733,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-four-policy-pdp-20261003 -->
 <section class="panel" id="n37-four-policy-pdp-20261003">
 <div class="panel-head"><h2>Equal-support n37 four-policy PDP: three-summand yield saturated <span class="chip">scoped negative</span></h2>
+<p class="panel-summary">Finds every policy decomposes all 2,048 frozen targets with at most three summands and reaches full rank, so no yield selector opportunity exists at n37, a scoped negative with costs unset.</p>
 <p>The preregistered complete native oracle tested 2,048 frozen point-only b03/b04 public targets per policy. All four 42-column policies found and independently replayed an at-most-three-summand witness for every target, reached full rank on the same fixed probe stream, and verified every recovered logarithm. Original/transported and native/pullback witness and rank traces agree exactly under degree-73 transport. This fixed n37 sample therefore has no three-summand yield selector opportunity.</p></div>
 <div class="table-scroll"><table>
 <caption>Exact fixed-block stage results, not cold attack costs. Each policy has 1,554 signed support classes and a complete 4,834,495-candidate identity/singleton/pair table. The two-summand control is a separate low-coverage diagnostic.</caption>
@@ -10738,6 +10749,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-complete-table-floor-20261003 -->
 <section class="panel" id="n37-complete-table-floor-20261003">
 <div class="panel-head"><h2>n37 complete three-summand table: cold setup floor rejects this oracle <span class="chip">scoped cost gate</span></h2>
+<p class="panel-summary">Rejects the eager complete pair table because its 4,831,386 setup additions exceed every sampled rho solve by at least 854.735x, above the frozen 100x threshold, a scoped cost gate.</p>
 <p>The preregistered Rust counter replayed every pair sum for the four equal-support n37 policies through the same counted group unit as native <code>ecbench</code>. Each policy needs 4,831,386 additions to construct its complete pair table. Eight new public targets were independently recovered and verified by the strong signed-Frobenius rho reference in two measured rounds; all 16 measured rho records replayed identically. The largest rho charge was 5,652.494 GAE, so table setup alone exceeds every sampled rho solve by at least 854.735&times; in charged operations, above the frozen 100&times; rejection threshold.</p></div>
 <div class="table-scroll"><table>
 <caption>One target on the n37 prime subgroup, r=230,603,167. The IC entries are mandatory setup floors for the exact eager table, not complete IC costs or runtime speedups. The rho row is a verified whole-solve charged-GAE measurement on 16 runs; native work remains unpriced.</caption>
@@ -10769,6 +10781,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <!-- BEGIN n37-frobenius-fold-gate-20261003 -->
 <section class="panel" id="n37-frobenius-fold-gate-20261003">
 <div class="panel-head"><h2>n37 signed-Frobenius table: 72.3&times; fewer setup additions on fixed source supports <span class="chip">stage diagnostic</span></h2>
+<p class="panel-summary">Builds the folded signed-Frobenius pair table with 66,822 additions against 4,831,386 for the complete table while reproducing every decision, a stage diagnostic that establishes no IC/rho speedup.</p>
 <p>The preregistered native gate built the exact folded pair table on both 42-column, 3,108-point source supports. It used 66,822 counted pair-addition requests per support against 4,831,386 for the complete pair table. A separate replay using the general curve law and a different orbit key reproduced all 8,192 two- and three-summand decisions on the historical b03/b04 point-only controls, every witness, row, table size and query count. Four deliberate result/input mutations were rejected. Independent Linux replay is tracked in the PR.</p></div>
 <div class="table-scroll"><table><caption>Fixed-support stage counts only. Native canonicalisation, field work, base selection, rank, log recovery and rho are not completely charged.</caption>
 <thead><tr><th>Source support</th><th>Folded unique sums</th><th>Build additions</th><th>m&le;2 hits / 2,048</th><th>m&le;3 hits / 2,048</th><th>m&le;3 query additions</th></tr></thead><tbody>
