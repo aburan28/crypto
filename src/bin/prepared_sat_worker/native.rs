@@ -517,6 +517,39 @@ pub fn enforce_hardware() -> Result<(), String> {
 }
 
 /// Called inside a helper that cannot execute until its durable PID handshake completes.
+fn launch_context(capsule: &Path, attempt: &Path, parent: u32) -> Result<(), String> {
+    let seal = load(&capsule.join("seal.json"))?;
+    let claim = load(&capsule.join("consumed.json"))?;
+    let execution = PathBuf::from(
+        claim["execution"]
+            .as_str()
+            .ok_or("native helper lacks execution claim")?,
+    );
+    let started = load(&execution.join("worker-started.json"))?;
+    require(
+        parent > 1
+            && started["pid"] == parent
+            && started["registration_sha256"] == seal["registration_sha256"]
+            && claim["registration_sha256"] == seal["registration_sha256"],
+        "native helper is not a child of the claimed producer",
+    )?;
+    let trial = load(&attempt.join("query.json"))?["trial"]
+        .as_u64()
+        .ok_or("native helper lacks query index")?;
+    let cfg = config(capsule)?;
+    require(
+        trial < cfg.max_queries as u64,
+        "native helper query exceeds registered cap",
+    )?;
+    require(
+        attempt.canonicalize().map_err(|e| e.to_string())?
+            == execution
+                .join(format!("query-{trial:02}"))
+                .canonicalize()
+                .map_err(|e| e.to_string())?,
+        "native helper query is outside claimed execution",
+    )
+}
 pub fn helper(capsule: &Path, attempt: &Path, role: &str) -> Result<(), String> {
     enforce_hardware()?;
     let mut handshake = String::new();
@@ -525,6 +558,8 @@ pub fn helper(capsule: &Path, attempt: &Path, role: &str) -> Result<(), String> 
         .read_to_string(&mut handshake)
         .map_err(|e| e.to_string())?;
     require(handshake == "GO\n", "missing durable launch handshake")?;
+    #[cfg(unix)]
+    launch_context(capsule, attempt, unsafe { libc::getppid() } as u32)?;
     #[cfg(unix)]
     require(
         unsafe { libc::setpgid(0, 0) } == 0,
@@ -640,6 +675,46 @@ mod tests {
         let dir=root.join("research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check");
         validate_exports(&dir, [62577, 27783]).unwrap();
         assert!(validate_exports(&dir, [62577, 27784]).is_err());
+    }
+    #[test]
+    fn helper_requires_consumed_execution_parent_and_query_cap() {
+        let p = temp("context");
+        let execution = p.join("execution");
+        fs::create_dir(&execution).unwrap();
+        let attempt = execution.join("query-00");
+        fs::create_dir(&attempt).unwrap();
+        save(
+            &p.join("seal.json"),
+            &json!({"registration_sha256":"control"}),
+        )
+        .unwrap();
+        save(&p.join("config.json"),&json!({"schema_version":1,"question":"native-prepared-known-input-control-v1","target":[52411,72106],
+            "descent_query_seed":1,"export_nonce":2,"conflict_budget":100_000,"max_queries":1,"exporter_timeout_ms":30_000,"solver_timeout_ms":60_000,"controller_timeout_ms":180_000})).unwrap();
+        save(
+            &attempt.join("query.json"),
+            &json!({"trial":0,"point":[62577,27783]}),
+        )
+        .unwrap();
+        assert!(launch_context(&p, &attempt, 42).is_err());
+        save(
+            &p.join("consumed.json"),
+            &json!({"execution":execution,"registration_sha256":"control"}),
+        )
+        .unwrap();
+        save(
+            &execution.join("worker-started.json"),
+            &json!({"pid":42,"registration_sha256":"control"}),
+        )
+        .unwrap();
+        launch_context(&p, &attempt, 42).unwrap();
+        assert!(launch_context(&p, &attempt, 43).is_err());
+        let other = p.join("other");
+        fs::create_dir(&other).unwrap();
+        save(&other.join("query.json"), &json!({"trial":0})).unwrap();
+        assert!(launch_context(&p, &other, 42).is_err());
+        fs::write(attempt.join("query.json"), b"{\"trial\":1}").unwrap();
+        assert!(launch_context(&p, &attempt, 42).is_err());
+        fs::remove_dir_all(p).unwrap();
     }
     #[test]
     fn accepted_archive_custody_extracts_without_executing_binaries() {

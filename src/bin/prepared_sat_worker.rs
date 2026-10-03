@@ -137,7 +137,7 @@ fn run(capsule: &Path, execution: &Path) -> Result<(), String> {
     )?;
     native::save(
         &execution.join("worker-started.json"),
-        &json!({"registration_sha256":producer::canonical_sha(&registration)?}),
+        &json!({"registration_sha256":producer::canonical_sha(&registration)?,"pid":std::process::id()}),
     )?;
     let worker = std::env::current_exe().map_err(|e| e.to_string())?;
     native::require(

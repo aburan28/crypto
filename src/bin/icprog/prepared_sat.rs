@@ -42,7 +42,10 @@ fn power(mut value: u64, mut exponent: u64, modulus: u64) -> u64 {
 
 type Projection = Vec<Option<(usize, u64)>>;
 
-pub fn projected_columns(curve: &Curve, base: &[Point]) -> Result<(Vec<Point>, Projection), String> {
+pub fn projected_columns(
+    curve: &Curve,
+    base: &[Point],
+) -> Result<(Vec<Point>, Projection), String> {
     let images = base
         .iter()
         .map(|&p| curve.mul(p, curve.h as u128))
@@ -102,7 +105,12 @@ pub fn pair_sums(curve: &Curve, base: &[Point]) -> BTreeSet<Point> {
     sums
 }
 
-pub fn has_three_sum(curve: &Curve, base: &[Point], pairs: &BTreeSet<Point>, target: Point) -> bool {
+pub fn has_three_sum(
+    curve: &Curve,
+    base: &[Point],
+    pairs: &BTreeSet<Point>,
+    target: Point,
+) -> bool {
     base.iter()
         .any(|&p| pairs.contains(&curve.add(target, curve.neg(p))))
 }

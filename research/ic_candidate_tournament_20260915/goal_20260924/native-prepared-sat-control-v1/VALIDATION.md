@@ -47,7 +47,7 @@ The next source-freeze validation completed from a clean native snapshot:
 5,957 immutable files, including 152 MiB of offline vendor sources, producer
 and checker binaries, accepted native assets and all build receipts. That
 capsule is unexecuted and remains build validation; its source revision predates
-the final portable test correction. Freeze and publish the final accepted
+the final portable test and launch/admission guards. Freeze and publish the final accepted
 registration separately before a scientific dispatch.
 
 The first Linux CI pass reached the new watchdog test, where `/bin/sh` was a
@@ -55,6 +55,13 @@ symlink and the regular-file source gate correctly rejected it. The test now
 canonicalizes that ordinary shell fixture; the scientific executable gate
 still rejects symlinks. The complete first failing Linux/harness logs are
 retained. This is a test portability correction, not a solver result.
+Final native launch controls require the consumed execution, live producer
+parent, worker-start marker and registered query cap before a helper can exec
+a role binary. The source-bound audit wrapper explicitly rejects labelled mock
+receipts; mock controls still exercise its arithmetic verifier without admitting
+execution. These launch-context and complete-auditor controls pass locally.
+The changed preparation helper signatures were also formatted after the CI
+formatter flagged them; unrelated recursively visited files remain unchanged.
 
 The CI workflow runs these native controls on Linux x86-64 and macOS ARM64,
 plus the existing independent preparation and source replay tests and harness

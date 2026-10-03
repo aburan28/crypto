@@ -329,6 +329,10 @@ pub fn audit(capsule: &Path, execution: &Path, out: &Path) -> Result<String, Str
         "controller descendants did not drain",
     )?;
     let report = load(&producer_path)?;
+    require(
+        !contains_mock_receipt(&report),
+        "mock process receipts cannot admit scientific execution",
+    )?;
     let cfg = native::config(capsule)?;
     let (recovered, audited, total) =
         verify_report(&prep, &cfg, &report, execution, &registration)?;
@@ -354,6 +358,17 @@ pub fn audit(capsule: &Path, execution: &Path, out: &Path) -> Result<String, Str
         "fresh_paired_qualification":false,"headline_eligible":false,"promotion_eligible":false,"online_speedup":null});
     save(out, &admitted)?;
     serde_json::to_string_pretty(&admitted).map_err(|e| e.to_string())
+}
+
+fn contains_mock_receipt(value: &Value) -> bool {
+    match value {
+        Value::Object(map) => {
+            map.get("test_fixture") == Some(&Value::Bool(true))
+                || map.values().any(contains_mock_receipt)
+        }
+        Value::Array(values) => values.iter().any(contains_mock_receipt),
+        _ => false,
+    }
 }
 
 fn verify_report(
@@ -771,6 +786,7 @@ mod tests {
             execution: execution.clone(),
         };
         let report = producer::solve(&prep, &cfg, &mut fixture).unwrap();
+        assert!(contains_mock_receipt(&report));
         let (scalar, rows, _) =
             verify_report(&prep, &cfg, &report, &execution, &registration).unwrap();
         assert_eq!(scalar, Some(24886));
