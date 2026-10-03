@@ -19,7 +19,8 @@ and existing selective echelon and selected-column forms unchanged.
 
 Before timing, release tests must cover an independent mixed-degree
 matrix, a dependent matrix that takes the fallback, zero/partial-word
-rows, and unchanged existing GF(2) and matrix-F5 tests. Use the seven
+rows, and unchanged existing GF(2) and matrix-F5 tests. Use the native
+`examples/f5_support_split_pair.rs` runner with the seven
 `examples/f4_f2_bench.rs` F5 cases and seed XORs `0`, `badc0de1`,
 `5eed2026`, `f5c02a28`. Compare selective echelon (form 2) with the
 support-split form in separate processes of one release binary, one
@@ -32,7 +33,8 @@ and term count, but must match rank, canonical row space, F5 criterion,
 built/pruned counts and columns. Smaller cases must match every output
 and route field of selective echelon except the requested form label.
 
-The Apple ARM64 local screen is nonpromoting. Advance to the isolated
+The Apple ARM64 local screen is nonpromoting. Run the native runner under
+`tools/isolated_bench.py reserve` on qualified Linux hosts. Advance to the isolated
 Linux gate if all cases and seeds are exact, the support route certifies
 the primary on all four seeds, and its counted reduction work is at most
 55% of the corresponding selective-echelon reference on all four.
