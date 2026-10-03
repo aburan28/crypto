@@ -234,6 +234,7 @@ pub mod pq_groebner_f2;
 pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
+pub mod prepared_sat_control;
 pub mod preprocessing_rho;
 pub mod q_curve;
 pub mod quantum_estimator;

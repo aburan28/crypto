@@ -1,0 +1,44 @@
+# Native controller implementation controls
+
+The implementation is tested on the already retained synthetic n17 preparation,
+ANF/CNF exports and disclosed model. No test launches the SAT exporter or
+CryptoMiniSat. Test processes exercise transport deadlines with ordinary shell
+processes only. Model substitution is a correctness control, not solver search.
+
+Local controls on macOS ARM64 with Homebrew Rust 1.93.1:
+
+- Six producer controls pass: complete retained-model recovery without a scalar
+  input, preservation of the earlier inconclusive attempt, all 767 individual
+  expanded-model bit corruptions rejected, invalid model retained as a failure,
+  partial/duplicate/unterminated/oversized model rejection, native status/exit
+  consistency, preparation/config/source-layout gates and exact exclusive
+  phase summation.
+- The independent query sampler matches native rand 0.8 on 128 scalars for
+  each of five seeds, including zero and `u64::MAX`. The retained trial-one
+  coefficient pair is `(32326,42888)`.
+- The native custody/transport controls check create-only output, immutable
+  tree mutation rejection, retained source metadata, exit preservation,
+  process-group timeout cleanup and accepted archive extraction of all fourteen
+  files without executing those binaries.
+- The complete independent-auditor control reconstructs the producer's
+  query sequence, checks source model and group relation, derives the scalar
+  and rejects changed query coefficients, scalar, witness, model validity/hash,
+  timing, outcome, source file and attempted promotion. It uses explicitly
+  labelled mock process receipts and does not enter the source-bound admission
+  wrapper. A passing mock control cannot admit scientific runtime execution.
+
+The first archive extraction control failed on its checksum-header parsing;
+[the retained failure](first-custody-test-failure.txt) records the cause and
+correction. The corrected five custody/full-auditor controls pass. Neither that
+failure nor its rerun consumed a scientific invocation.
+
+The CI workflow runs these native controls on Linux x86-64 and macOS ARM64,
+plus the existing independent preparation and source replay tests and harness
+output regressions. Actual solver hardware admission remains macOS ARM64 only.
+CI tests no solver search, native yield or timing claim. Exact-head CI results
+must be checked before merging; the protocol's actual frozen build/registration,
+sole dispatch and independent admission are still pending.
+
+The full F4/F5-plus-SAT goal remains active. This implementation control does
+not complete either the fresh paired comparison or the globally best pipeline
+search, and it makes no cross-method speedup claim.
