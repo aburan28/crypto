@@ -1,0 +1,41 @@
+name: IC dashboard presentation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/index-calculus-scoreboard.html'
+      - 'docs/ic/dashboard-overview*'
+      - 'tools/*ic_dashboard*.mjs'
+      - '.github/workflows/ic-dashboard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/index-calculus-scoreboard.html'
+      - 'docs/ic/dashboard-overview*'
+      - 'tools/*ic_dashboard*.mjs'
+      - '.github/workflows/ic-dashboard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  overview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check frozen evidence pins and generated overview
+        run: node tools/render_ic_dashboard.mjs --check
+      - name: Check actual desktop and mobile rendering
+        env:
+          IC_DASHBOARD_SCREENSHOTS: /tmp/ic-dashboard-screenshots
+        run: node tools/check_ic_dashboard_browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ic-dashboard-browser
+          path: /tmp/ic-dashboard-screenshots
