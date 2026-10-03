@@ -164,7 +164,12 @@ fn rank_row_basis_with_config(
         return 0;
     }
     debug_assert!(matrix.iter().all(|row| row.len() >= words));
-    let bits = table_bits(rows);
+    let max_bits = std::env::var("KIC_GF2_ROW_BASIS_BITS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .filter(|&value| (5..=MAX_TABLE_BITS).contains(&value))
+        .unwrap_or(MAX_TABLE_BITS);
+    let bits = table_bits(rows).min(max_bits);
     let block_cap = bits * config.tables.clamp(1, 8);
     let simd = simd_kind(config.simd);
     let reuse_table = std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1");
