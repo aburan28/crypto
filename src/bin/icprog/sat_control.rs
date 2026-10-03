@@ -16,7 +16,7 @@ pub(super) mod native;
 use native::{load, read, require, save};
 const PREP:&str="research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/sat-preparation.json";
 const ASSETS:&str="research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/native-inputs-macos-arm64";
-fn native_step(
+pub(super) fn native_step(
     program: &Path,
     args: &[String],
     cwd: &Path,

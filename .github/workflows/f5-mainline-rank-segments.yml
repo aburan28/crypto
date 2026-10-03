@@ -1,0 +1,80 @@
+name: Matrix-F5 mainline row-basis x86 qualification
+
+on:
+  # Archived after the physical Linux further-2x gate failed. Preserve the
+  # workflow for explicit replay and the result in research/f5_mainline_port_20261002.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        threads: [1, 2]
+    env:
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Require x86-64 AVX2 and BMI2 runner
+        run: |
+          python3 - <<'PY'
+          import platform
+          from pathlib import Path
+          flags = set()
+          for line in Path('/proc/cpuinfo').read_text().splitlines():
+              if line.startswith('flags'):
+                  flags.update(line.split(':', 1)[1].split())
+          assert platform.machine() == 'x86_64', platform.machine()
+          assert {'avx2', 'bmi2'} <= flags, sorted({'avx2', 'bmi2'} - flags)
+          print('x86-64 AVX2 BMI2 runner verified')
+          PY
+      - name: Validate harness and rank kernel
+        run: |
+          python3 -m py_compile research/f5_mainline_port_20261002/confirm_local.py research/f5_mainline_port_20261002/analyze_segments.py research/f5_mainline_port_20261002/run_segments.py
+          python3 research/f5_mainline_port_20261002/test_run_segments.py
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-mainline-rank-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-mainline-rank-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build F5 stage benchmark
+        run: python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-mainline-rank-bench.lock" -- cargo build --release --example f4_f2_bench
+      - name: Choose reservable CPUs
+        id: cpus
+        run: |
+          python3 research/f5_mainline_port_20261002/choose_isolated_cpus.py \
+            ${{ matrix.threads }} \
+            research/f5_mainline_port_20261002/segment-cpu-choice-t${{ matrix.threads }}.json \
+            >> "$GITHUB_OUTPUT"
+      - name: Replay four seed blocks with first-clean selection
+        run: |
+          python3 research/f5_mainline_port_20261002/run_segments.py \
+            target/release/examples/f4_f2_bench \
+            research/f5_mainline_port_20261002/segments-t${{ matrix.threads }} \
+            --threads ${{ matrix.threads }} \
+            --reserve '${{ steps.cpus.outputs.reserve }}' \
+            --pin '${{ steps.cpus.outputs.pin }}'
+      - name: Apply frozen further-2x gate
+        run: |
+          python3 research/f5_mainline_port_20261002/analyze_segments.py \
+            research/f5_mainline_port_20261002/segments-t${{ matrix.threads }} \
+            --threads ${{ matrix.threads }}
+      - name: Preserve every qualified and failed attempt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-mainline-rank-segments-t${{ matrix.threads }}-${{ github.sha }}
+          path: |
+            research/f5_mainline_port_20261002/segment-cpu-choice-t${{ matrix.threads }}.json
+            research/f5_mainline_port_20261002/segments-t${{ matrix.threads }}/
+          if-no-files-found: warn

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "--build-identity"
+  ],
+  "cwd": "/private/tmp/ic-native-f5-build-validation-20261003",
+  "environment": [
+    [
+      "LC_ALL",
+      "C"
+    ],
+    [
+      "RAYON_NUM_THREADS",
+      "1"
+    ],
+    [
+      "IC_ARTIFACT_CACHE",
+      "off"
+    ],
+    [
+      "IC_F2_BACKEND",
+      "cpu"
+    ]
+  ],
+  "exit_code": 0,
+  "log_sha256": "876035d55e000e2e30b0f95163db8549c637bafe920b4142d9ae2e4177c01a21",
+  "program": "/private/tmp/ic-native-f5-build-validation-20261003/immutable/bin/ic_tournament_worker",
+  "program_sha256_after": "6646824bac684ce688e4e4d19a4444280e12bc872edfb422f1f681e8e2ae51b6",
+  "program_sha256_before": "6646824bac684ce688e4e4d19a4444280e12bc872edfb422f1f681e8e2ae51b6",
+  "wall_ns": "964289833"
+}
