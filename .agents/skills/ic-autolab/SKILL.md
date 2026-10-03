@@ -53,6 +53,12 @@ retains two exact negatives, the source model/group witness, scalar and passing
 frozen audit. Never dispatch, retry or resume it or an archive restoration.
 Use `icprog sat-control-replay-publication` for portable postexecution data/math
 replay; it launches no search and does not replace the original frozen audit.
+For the retained F5 ordinary preparation, use `icprog f5-preparation-replay`
+with a new `--out` path. Its [native protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/PROTOCOL.md)
+requires the original external seal and independently reconstructs all 216
+ordinary attempts, negatives, rank and logs. It starts no solver and does not
+admit a complete native F5 runtime or establish new natural yield. The complete
+F5 controller needs a separately frozen registration; old controls stay closed.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.

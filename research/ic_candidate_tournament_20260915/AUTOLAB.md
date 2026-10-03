@@ -10,6 +10,10 @@ retains the final executable capsule and is consumed and closed. The
 has three audited target attempts, two exact negatives and verified scalar
 recovery. Portable publication replay launches no search. New natural ordinary
 yield, fresh comparison and tournament promotion remain unestablished.
+The [native F5 preparation replay](goal_20260924/native-f5-preparation-v1/PROTOCOL.md)
+reconstructs the retained ordinary matrix and all logs without opening the old
+archive or dispatching a solver. It keeps original Python provenance; complete
+native F5 controller admission and new ordinary-yield production remain pending.
 New cross-method comparisons use native `ecbench`, whose merged online-window
 extension is available for review and integration. Public unplanted targets,
 IC1 identity and prepared solver admission remain open. The Python entry points below are
