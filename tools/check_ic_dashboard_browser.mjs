@@ -80,8 +80,9 @@ try {
   assert.equal(visible.length,2); assert.ok(visible.every(graph=>graph.height>0&&!graph.hidden), 'Overview charts collapsed');
   assert.equal(await evaluate("document.querySelectorAll('#ic-overview .ic-toggle').length"),0,'Ledger handler reached overview');
   assert.equal(await evaluate("document.querySelectorAll('#evidence-results li').length"),0,'Unrequested evidence results clutter overview');
-  assert.equal(await evaluate("document.querySelectorAll('#lab-readiness .status.good').length"),5);
+  assert.equal(await evaluate("document.querySelectorAll('#lab-readiness .status.good').length"),6);
   assert.ok(await evaluate("document.querySelector('#lab-readiness tbody tr:last-child').textContent.includes('Source-bound, audited')"));
+  assert.ok(await evaluate("document.querySelector('#lab-readiness tbody tr:nth-child(2)').textContent.includes('Source-bound, audited')"));
   assert.equal(await evaluate("document.getElementById('historical-regimes').open"),false);
   assert.equal(await evaluate("document.getElementById('evidence-library').open"),false);
   await screenshot('desktop-overview');
