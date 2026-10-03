@@ -48,10 +48,20 @@ jobs:
         run: rustfmt --edition 2021 --check examples/n37_four_policy_support.rs examples/n37_four_policy_support_replay.rs examples/support/n37_policy_common.rs
       - name: Build native producer and independent replay
         run: cargo build --release --locked --example n37_four_policy_support --example n37_four_policy_support_replay
+      - name: Inflate and verify the committed manifest
+        run: |
+          printf '%s  %s\n' \
+            '8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5' \
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz | sha256sum --check
+          gzip -cd research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz \
+            > "$RUNNER_TEMP/n37-four-policy-result.json"
+          printf '%s  %s\n' \
+            '05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af' \
+            "$RUNNER_TEMP/n37-four-policy-result.json" | sha256sum --check
       - name: Recompute every point, label, action and exceptional control
         run: |
           target/release/examples/n37_four_policy_support_replay \
-            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json \
+            "$RUNNER_TEMP/n37-four-policy-result.json" \
             "$RUNNER_TEMP/n37-four-policy-replay.json"
           cmp "$RUNNER_TEMP/n37-four-policy-replay.json" \
             research/notes/ecc2k130/n37_four_policy_support_20261003/REPLAY.json

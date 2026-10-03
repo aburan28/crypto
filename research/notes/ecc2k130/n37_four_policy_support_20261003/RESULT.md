@@ -43,7 +43,10 @@ producer's point or label arrays. Infinity and the rational 2-torsion point
 passed forward and inverse exception controls and are excluded from all
 bases.
 
-The final [`RESULT.json`](RESULT.json) is 2,611,829 bytes, SHA-256
+The final raw manifest is committed as [`RESULT.json.gz`](RESULT.json.gz),
+207,435 bytes with SHA-256
+`8eac2ae4b8d8f0fc452b7cd7c8edbd3183558e55454abbd67349665bd64610d5`.
+It expands to 2,611,829 bytes with SHA-256
 `05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af`.
 The replay receipt is SHA-256
 `758159afc85d989d2cb95008c8b0c0e2ac4c411ca9ae14cfed0105b40dc80dd2`.
@@ -89,8 +92,13 @@ inputs and frozen lockfile:
 ```sh
 cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
 cargo build --release --locked --example n37_four_policy_support --example n37_four_policy_support_replay
+gzip -cd research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz \
+  > /tmp/n37-four-policy-result.json
+printf '%s  %s\n' \
+  '05664103a6dab090a8b4298f34c0964e6f253f625cd73d661562d85a2fce87af' \
+  /tmp/n37-four-policy-result.json | shasum -a 256 -c
 target/release/examples/n37_four_policy_support_replay \
-  research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json \
+  /tmp/n37-four-policy-result.json \
   /tmp/n37-four-policy-replay-fresh.json
 cmp /tmp/n37-four-policy-replay-fresh.json \
   research/notes/ecc2k130/n37_four_policy_support_20261003/REPLAY.json
@@ -99,6 +107,6 @@ cmp /tmp/n37-four-policy-replay-fresh.json \
 The [CI workflow](../../../../.github/workflows/n37-four-policy-support.yml)
 performs that replay on Linux. To rerun the producer, give it a new output
 path; it refuses overwrites. The policy array digest can be checked with
-`jq -c '.policies' RESULT.json | shasum -a 256` from this directory. Its
+`gzip -cd RESULT.json.gz | jq -c '.policies' | shasum -a 256` from this directory. Its
 phase times and host field will differ across runs, while point arrays and
 labels must agree exactly.
