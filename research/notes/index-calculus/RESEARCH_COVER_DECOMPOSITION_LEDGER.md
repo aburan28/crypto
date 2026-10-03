@@ -181,8 +181,16 @@ and residual counts as §6; ledger section E.2):
 | unverified relations | `0` | `0` | |
 
 `C_cov` stays flat in `p` (`3.10·10⁶` at `p = 53` to `3.32·10⁶` at `1511`).
-The solver's own `5.3·10⁵` is now `17 %` of a test and the next thing to
-look at; the Weil restriction is `0.1 %`.
+The solver's own `5.3·10⁵` is now `17 %` of a test; the Weil restriction is
+`0.1 %`.  Counted on one `64 × 64` matrix at `p = 1009`, the solver's share
+is the characteristic polynomial (`2.6·10⁵`, Hessenberg, `≈ δ³`), the roots
+of the degree-64 polynomial (`7.1·10⁴`, growing with `log p`), the linear
+form (`2.5·10⁴`), and `1.3·10⁵` per `F_p`-rational root and per retry for
+the eigenvector (the spread from `3.4·10⁵` to `2.7·10⁶` across tests).
+Those are the floor of an exact method at `δ = 64`: the characteristic
+polynomial is what decides whether the system has an `F_p`-point at all,
+and `719` systems in `720` have none.  So the next constant is not here;
+F4 is `83 %` of the test as it stands.
 
 **What it is.**  A constant: `1.61×` on the test and so on `S / rho`, with
 the route's exponent untouched.  The crossover the ledger extrapolates from
