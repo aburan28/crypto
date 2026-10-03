@@ -1,8 +1,8 @@
 {
   "schema_version": "ic-progress-timeline/1",
   "updated": "2026-10-03",
-  "question": "Best verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
-  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, or isolated CPU time where marked). Only the direction against 1 is comparable across points; no value on this page is computed from another.",
+  "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
+  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Only the direction against 1 is comparable across points; no value on this page is computed from another.",
   "series": [
     {
       "id": "ec-cold",
@@ -39,7 +39,8 @@
       "role": "context",
       "note": "Starts the clock after a reusable set-up. Not a cold result; the same set-up spent as a generic precomputation would speed rho up too.",
       "points": [
-        {"date": "2026-09-28", "value": 0.134, "reference": "qualified", "label": "Bounded autolab round 3, pair-table incumbent, six toy cells", "detail": "Paired IC/rho online cost 0.134x, descriptive 95% 0.125-0.144; the qualified rho online reference took 7.45x the incumbent's online time. 216/216 verified. Ledger section 23 (2026-10-01) reads 8.8-17.5x faster online at 2^36.6-2^47.2 on the Koblitz descent, and 4.9-31.6x slower once its set-up is charged.", "class": "engineering", "anchor": "#rho-results-title", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md"}
+        {"date": "2026-09-28", "value": 0.134, "reference": "qualified", "label": "Bounded autolab round 3, pair-table incumbent, six toy cells", "detail": "Paired IC/rho online cost 0.134x, descriptive 95% 0.125-0.144; the qualified rho online reference took 7.45x the incumbent's online time. 216/216 verified. Ledger section 23 (2026-10-01) reads 8.8-17.5x faster online at 2^36.6-2^47.2 on the Koblitz descent, and 4.9-31.6x slower once its set-up is charged.", "class": "engineering", "anchor": "#rho-results-title", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md"},
+        {"date": "2026-10-03", "value": 9104.845, "reference": "matched", "unit": "online wall time", "label": "n17 prepared inherited-F4 development target, same-point rho", "detail": "Median paired IC/rho online cost 9,105x across three clean verified repetitions on one new n17 public point. The inherited-F4 solver family is 227x faster than production F5 on the same point, but this is not a win against rho and does not price the n53 PDP4root path.", "class": "accounting", "anchor": "#ic-f5-inherited-f4-online-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_solver_online_20261003/confirmation/RESULT.md"}
       ]
     },
     {
