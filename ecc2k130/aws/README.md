@@ -492,6 +492,18 @@ every boot after it.
   republishes the ingest host's `status.json` from the status bucket
   instead of leaving Pages on the last successful hop. It does not open
   RDS to the internet.
+* **A cairn node's dashboard.** With `ECC_CAIRN_NODE` and
+  `ECC_CAIRN_OBJECTIVE` set (or `cairnNode` / `cairnObjective` in
+  `campaign.json`), each supervisor also posts a heartbeat to that node's
+  `POST /progress` on its 60 s tick -- iterations and rate from the client's
+  progress line, points found, uploaded and spooled, the GPU's name and walk
+  count -- and the node's reader shows the fleet at `/ui/task?id=<objective>`
+  beside what its log has actually paid each worker (`docs/serving.md` in
+  cairn). `ECC_CAIRN_WORKER` is the name on that page: set it to the
+  pseudonym the orbits are submitted under so the settled and reported halves
+  share a row (default `slot-NNNNN`). A heartbeat is not a record and pays
+  nothing; a node that is down or refuses costs one bounded request a minute
+  and a log line, never the lease (`test_worker_cairn.py`).
 * `status.py` sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
   fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
