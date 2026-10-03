@@ -1,0 +1,101 @@
+name: n37 Frobenius-folded pair-table gate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/n37-frobenius-fold-gate.yml'
+      - 'examples/n37_frobenius_fold_gate.rs'
+      - 'examples/n37_frobenius_fold_replay.rs'
+      - 'research/notes/ecc2k130/n37_frobenius_fold_gate_20261003/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz'
+      - 'research/notes/ecc2k130/n37_four_policy_pdp_20261003/RESULT_CI_FIXED.json.gz'
+      - 'research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl'
+      - 'research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl'
+      - 'src/cryptanalysis/ic_boundary.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
+      - 'src/binary_ecc/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            src
+            examples/n37_frobenius_fold_gate.rs
+            examples/n37_frobenius_fold_replay.rs
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz
+            research/notes/ecc2k130/n37_four_policy_pdp_20261003/RESULT_CI_FIXED.json.gz
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
+            research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
+            research/notes/ecc2k130/n37_frobenius_fold_gate_20261003
+      - name: Use frozen lockfile
+        run: cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+      - name: Check frozen source hashes and formatting
+        run: |
+          printf '%s  %s\n' \
+            'ed66c80bc96eb576e006fb220eb914b4aae73e56348fb9c13b2df2a8005bffd2' examples/n37_frobenius_fold_gate.rs \
+            '792a118ae3fb5a86ea6c1657c50f59013679307bf65f96c75b72f0b24f3eec93' examples/n37_frobenius_fold_replay.rs \
+            'b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365' Cargo.lock \
+            | sha256sum --check
+          rustfmt --edition 2021 --check examples/n37_frobenius_fold_gate.rs examples/n37_frobenius_fold_replay.rs
+      - name: Build native producer and independent replay
+        run: cargo build --release --locked --example n37_frobenius_fold_gate --example n37_frobenius_fold_replay
+      - name: Verify preserved raw runs and deterministic projection
+        run: |
+          note=research/notes/ecc2k130/n37_frobenius_fold_gate_20261003
+          printf '%s  %s\n' \
+            'b1ba2093452ae74effd152ad6f15af2ce3957828820213918b7c896c42175c5c' "$note/RESULT_A.json.gz" \
+            '7ff327b23e4d84c703e10386049047a84f6856b04c74e656b0f19e1a73d19b50' "$note/RESULT_B.json.gz" \
+            '6f801aece08ab7c62d5d64883f3f84f4d7700929ece97c06cacc9a87aff900e6' "$note/REPLAY_A.json" \
+            '40b9f85f537ae9c16bc355a561cf3961a8b0a68fc4259a4ad3d3627736aca837' "$note/REPLAY_B.json" \
+            | sha256sum --check
+          gzip -cd "$note/RESULT_A.json.gz" > "$RUNNER_TEMP/A.json"
+          gzip -cd "$note/RESULT_B.json.gz" > "$RUNNER_TEMP/B.json"
+          printf '%s  %s\n' \
+            'f1bcf4fcea33a90b6b2d9d3becf2eab96c16484a9114a06d03137c7f5ba50d75' "$RUNNER_TEMP/A.json" \
+            '251aee18844a30765f02049c87c858bfd0549fb28941ee12ac04e3814040e83e' "$RUNNER_TEMP/B.json" \
+            | sha256sum --check
+          jq -Sc 'del(.policies[].table.build_wall_ns_descriptive, .policies[].summary.query_wall_ns_descriptive)' "$RUNNER_TEMP/A.json" > "$RUNNER_TEMP/A.canonical"
+          jq -Sc 'del(.policies[].table.build_wall_ns_descriptive, .policies[].summary.query_wall_ns_descriptive)' "$RUNNER_TEMP/B.json" > "$RUNNER_TEMP/B.canonical"
+          cmp "$RUNNER_TEMP/A.canonical" "$RUNNER_TEMP/B.canonical"
+          printf '%s  %s\n' \
+            '3cfb28e21dfcb32a252b32bb96619a4e72bb0a5997a4128e019fc0afde494e6b' "$RUNNER_TEMP/A.canonical" \
+            | sha256sum --check
+      - name: Independently replay all tables, decisions, counts and witnesses
+        run: |
+          note=research/notes/ecc2k130/n37_frobenius_fold_gate_20261003
+          target/release/examples/n37_frobenius_fold_replay "$RUNNER_TEMP/A.json" "$RUNNER_TEMP/A.replay.json"
+          target/release/examples/n37_frobenius_fold_replay "$RUNNER_TEMP/B.json" "$RUNNER_TEMP/B.replay.json"
+          cmp "$RUNNER_TEMP/A.replay.json" "$note/REPLAY_A.json"
+          cmp "$RUNNER_TEMP/B.replay.json" "$note/REPLAY_B.json"
+      - name: Reproduce non-timing evidence on Linux
+        run: |
+          target/release/examples/n37_frobenius_fold_gate "$RUNNER_TEMP/Linux.json"
+          jq -Sc 'del(.policies[].table.build_wall_ns_descriptive, .policies[].summary.query_wall_ns_descriptive)' "$RUNNER_TEMP/Linux.json" > "$RUNNER_TEMP/Linux.canonical"
+          cmp "$RUNNER_TEMP/Linux.canonical" "$RUNNER_TEMP/A.canonical"
+          target/release/examples/n37_frobenius_fold_replay "$RUNNER_TEMP/Linux.json" "$RUNNER_TEMP/Linux.replay.json"
+      - name: Retain Linux receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n37-frobenius-fold-gate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/Linux.json
+            ${{ runner.temp }}/Linux.replay.json
+          if-no-files-found: warn
+          retention-days: 30
