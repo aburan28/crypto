@@ -29,7 +29,7 @@ const receipts = [], errors = [], network = [];
 try {
   while (!/DevTools listening on (ws:\/\/[^\s]+)/.test(chromeLog)) {
     assert.ok(child.exitCode === null, 'Chrome failed to start: ' + chromeLog);
-    assert.ok(Date.now() < deadline, 'Chrome launch deadline exceeded');
+    assert.ok(Date.now() < deadline, 'Chrome launch deadline exceeded: ' + chromeLog);
     await sleep(50);
   }
   const debuggerUrl = new URL(chromeLog.match(/DevTools listening on (ws:\/\/[^\s]+)/)[1]);
@@ -99,6 +99,8 @@ try {
   await evaluate("location.hash='lab-progress'; true"); await frame();
   assert.ok(await evaluate("document.getElementById('lab-progress').closest('details').open"),'Progress history deep link did not open');
   assert.ok(await evaluate("document.querySelector('#lab-progress svg').getBoundingClientRect().height > 0"),'Preserved progress chart did not render');
+  await evaluate("location.hash='control-title'; true"); await frame();
+  assert.ok(await evaluate("document.getElementById('control-title').closest('details').open"),'Old control deep link did not open');
   receipts.push('desktop: visible graphs, correct readiness, quiet evidence, search, retained fragment links');
   await evaluate("document.getElementById('evidence-library').open=false; document.getElementById('historical-regimes').open=false; location.hash='ic-overview'; true");
   for (const width of [390,320]) {

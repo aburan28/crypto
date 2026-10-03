@@ -27,9 +27,21 @@ Use Node.js 22 or later; no dependencies are required:
 
 ```sh
 node tools/render_ic_dashboard.mjs
+python3 scripts/site/panel_index.py
 node tools/render_ic_dashboard.mjs --check
+python3 scripts/site/panel_index.py --check
 node tools/check_ic_dashboard_browser.mjs
 ```
+
+The existing site navigation index also needs regeneration when panel titles,
+summaries or layout change. Its Python HTML parser lists links on
+`docs/ic-current-state.html`; it performs no research or result calculation.
+Every overview section supplies a summary, and the site's existing 45 tests
+check the complete generated index and page structure. The first stale-index
+CI failure is retained in `dashboard-panel-index-ci-failure-20261003.txt`.
+One local sandboxed Chrome launch also exceeded its 20-second deadline before
+connecting to DevTools. The isolated-profile check subsequently passed with
+the sandbox restriction lifted; no timeout or assertion was relaxed.
 
 The browser check uses an installed Chrome or Chromium with a fresh temporary
 profile. It checks chart visibility, the admitted SAT status, quiet evidence
