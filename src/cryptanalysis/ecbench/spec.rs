@@ -15,7 +15,7 @@ use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, short_id};
 use crate::cryptanalysis::ecbench::methods::{decl, resolve, Applies, MethodSpec, ResolvedMethod};
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Instance, Workload};
+use crate::cryptanalysis::ecbench::workload::{CurveSpec, Instance, TargetKind, Workload};
 
 pub const SPEC_SCHEMA: &str = "ecbench.spec/v1";
 
@@ -48,6 +48,12 @@ pub struct WorkloadPlan {
     /// row; they are never pooled into a multi-target run.
     pub targets_per_curve: u64,
     pub target_seed: u64,
+    /// `planted` (the default: `Q = [k]G`, checked against `k`) or
+    /// `public` (`Q` hashed to the subgroup, checked by `[d]G = Q`): what a
+    /// `vs_rho` claim needs.  Not serialised when planted, so a spec
+    /// written before the field keeps its id.
+    #[serde(default, skip_serializing_if = "TargetKind::is_planted")]
+    pub target_kind: TargetKind,
 }
 
 /// Order of the arms inside a round.
@@ -237,7 +243,13 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
         // candidate, so building per target would multiply that.
         let inst = c.build()?;
         for i in 0..spec.workloads.targets_per_curve {
-            let w = Workload::on(c, &inst, spec.workloads.target_seed, i)?;
+            let w = Workload::on(
+                c,
+                &inst,
+                spec.workloads.target_seed,
+                i,
+                spec.workloads.target_kind,
+            )?;
             for a in &arms {
                 let d = decl(&a.method.id).expect("resolved");
                 if d.applies == Applies::KoblitzOnly && w.curve.family != "koblitz" {

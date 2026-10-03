@@ -553,6 +553,13 @@ workloads, under the same isolation, into the same sealed records.
 - **Sessions are evidence.** Commit them under `research/<topic>_<date>/
   sessions/`; CI re-audits them with replays on another host and never
   lets one be edited.  The SQLite database is an index rebuilt from them.
+- **A `vs_rho` claim is one IC run against one strong-rho run on one
+  public target.** `ecbench claim build` assembles it from a session with
+  `target_kind: public`, names the candidate by the tournament's IC1
+  identity, and runs the ledger's checker (`ecbench claim check`, the
+  native `boundary_autolab.py claim-check --stage vs_rho`).  It passes
+  only with an audit receipt from another host class that replayed both
+  runs; without one it fails on that and says so.
 - **Skills:** `ecbench-measure`, `ecbench-independent-runner` and
   `ecbench-extend` under `.agents/skills/`.
 

@@ -105,6 +105,10 @@ pub struct AuditReport {
     /// SHA-256 of every file the audit read.
     pub files: BTreeMap<String, String>,
     pub auditor_binary_sha256: Option<String>,
+    /// The host class the audit ran on: a replay on a class other than
+    /// the session's is an independent one.
+    #[serde(default)]
+    pub auditor_env_class_id: Option<String>,
     pub audited_unix_ms: u128,
 }
 
@@ -318,11 +322,11 @@ pub fn audit_with(
         let inst = p.instance(ex.workload);
         let rec: Option<u64> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
         let target_ok = rec.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
-        let planted_ok = rec.map(|k| k == w.planted);
+        let planted_ok = w.planted.and_then(|p| rec.map(|k| k == p));
         if target_ok != r.outcome.matches_target || planted_ok != r.outcome.matches_planted {
             record_problems.push(format!("{tag}: verification does not reproduce"));
         }
-        let should_verify = target_ok == Some(true) && planted_ok == Some(true);
+        let should_verify = target_ok == Some(true) && planted_ok != Some(false);
         if (r.outcome.status == "verified") != should_verify {
             record_problems.push(format!(
                 "{tag}: status `{}` contradicts the check",
@@ -401,6 +405,7 @@ pub fn audit_with(
                     .unwrap_or_else(|| w.curve_spec.clone()),
                 target_seed: w.target_seed,
                 target_index: w.target_index,
+                target_kind: w.kind(),
                 expected_workload_id: w.workload_id.clone(),
                 method: MethodSpec {
                     id: r.method.id.clone(),
@@ -503,6 +508,9 @@ pub fn audit_with(
         replays,
         files,
         auditor_binary_sha256,
+        auditor_env_class_id: crate::cryptanalysis::ecbench::host::capture()
+            .ok()
+            .map(|c| c.env_class_id),
         audited_unix_ms: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_millis())

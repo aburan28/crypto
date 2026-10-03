@@ -317,21 +317,102 @@ impl Instance {
     }
 }
 
-/// How targets are drawn.  One law today; it is named so a second one
-/// (an interval, a structured scalar) cannot be confused with it.
+impl Instance {
+    /// A public target: for `counter = 0, 1, …`, an abscissa derived from
+    /// `(model, r, seed, index, counter)` by SHA-256, lifted to a point
+    /// (the ordinate's choice also hashed), times the cofactor; the first
+    /// that is not the identity.  When `r ∤ h` (so `r² ∤ #E`, which
+    /// `Workload::on` checks) the r-torsion is cyclic and that point lies
+    /// in `⟨G⟩`.
+    pub fn hash_to_subgroup(
+        &self,
+        curve: &CurveFacts,
+        seed: u64,
+        index: u64,
+    ) -> Option<([String; 2], u64)> {
+        let model = model_hash(curve);
+        let mut scratch = GroupOps::default();
+        for counter in 0..10_000u64 {
+            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, curve.r, seed, index, counter]);
+            let flip = (h >> 63) & 1 == 1;
+            match self {
+                Instance::Prime(i) => {
+                    let c = &i.curve;
+                    let x = h % c.p;
+                    let Some(y) = c.sqrt(c.rhs(x)) else { continue };
+                    let y = if flip && y != 0 { c.p - y } else { y };
+                    let p = PrimePoint::affine(x, y);
+                    if !c.is_on_curve(p) {
+                        continue;
+                    }
+                    let q = c.mul(&mut scratch, p, i.cofactor);
+                    if !q.infinity {
+                        return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
+                    }
+                }
+                Instance::Binary(i) => {
+                    let mask = if i.n >= 64 {
+                        u64::MAX
+                    } else {
+                        (1u64 << i.n) - 1
+                    };
+                    let pts = i.points_with_x(h & mask);
+                    let Some(&p) = pts.get(usize::from(flip && pts.len() > 1)) else {
+                        continue;
+                    };
+                    let g = BinaryGroup(&i.fast);
+                    let q = g.mul(&mut scratch, p, i.cofactor);
+                    if !q.infinity {
+                        return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+/// ICV1's last field: the first 12 hex digits of the model hash.
+fn model_hash(curve: &CurveFacts) -> u64 {
+    curve
+        .icv1
+        .rsplit(':')
+        .next()
+        .and_then(|h| u64::from_str_radix(h, 16).ok())
+        .unwrap_or(0)
+}
+
+/// How planted targets are drawn: a scalar derived by SHA-256, `Q = [k]G`.
 pub const TARGET_LAW: &str = "uniform_scalar_sha256_v1";
+
+/// How public targets are drawn: an abscissa derived by SHA-256, lifted to
+/// a point, the cofactor cleared.  Nobody ever knows the logarithm, which
+/// is what the IC claim rules ask of a target ("previously unseen public
+/// target"; `identity.py` refuses a planted workload).
+pub const PUBLIC_TARGET_LAW: &str = "hash_to_subgroup_v1";
+
+/// Whether a workload's target was built from a known scalar.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TargetKind {
+    /// `Q = [k]G` for a derived `k`, kept to check the answer against.
+    #[default]
+    Planted,
+    /// `Q` hashed to the subgroup; the answer is checked by `[d]G = Q`.
+    Public,
+}
+
+impl TargetKind {
+    pub fn is_planted(&self) -> bool {
+        *self == TargetKind::Planted
+    }
+}
 
 /// `k ∈ [1, r−1]` for target `index` under `target_seed`.
 pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u64 {
     // The curve's model hash and subgroup enter the derivation, so the
     // same seed on two curves gives unrelated scalars.
-    // ICV1's last field is the first 12 hex digits of the model hash.
-    let model = curve
-        .icv1
-        .rsplit(':')
-        .next()
-        .and_then(|h| u64::from_str_radix(h, 16).ok())
-        .unwrap_or(0);
+    let model = model_hash(curve);
     1 + derive_u64(TARGET_LAW, &[model, curve.r, target_seed, index]) % (curve.r - 1)
 }
 
@@ -347,11 +428,15 @@ pub struct Workload {
     pub target_law: String,
     pub target_seed: u64,
     pub target_index: u64,
-    /// `Q = [k]G`, hex.
+    /// `Q`, hex.
     pub target: [String; 2],
-    /// The planted `k`.  Not in the identity (the target point is) and
-    /// never passed to a solver.
-    pub planted: u64,
+    /// The planted `k` with `Q = [k]G`, for a planted target.  Not in the
+    /// identity (the target point is) and never passed to a solver.
+    /// `None` for a public target, whose logarithm nobody knows.
+    pub planted: Option<u64>,
+    /// The hash counter that landed a public target in the subgroup.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_counter: Option<u64>,
 }
 
 impl Workload {
@@ -363,9 +448,10 @@ impl Workload {
         spec: &CurveSpec,
         target_seed: u64,
         index: u64,
+        kind: TargetKind,
     ) -> Result<(Workload, Instance), String> {
         let inst = spec.build()?;
-        let w = Self::on(spec, &inst, target_seed, index)?;
+        let w = Self::on(spec, &inst, target_seed, index, kind)?;
         Ok((w, inst))
     }
 
@@ -376,6 +462,7 @@ impl Workload {
         inst: &Instance,
         target_seed: u64,
         index: u64,
+        kind: TargetKind,
     ) -> Result<Workload, String> {
         let curve = inst.facts(spec);
         if curve.r < 5 {
@@ -384,25 +471,54 @@ impl Workload {
                 curve.r
             ));
         }
-        let planted = planted_scalar(&curve, target_seed, index);
-        let target = inst
-            .mul_generator_hex(planted)
-            .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
+        let (law, target, planted, counter) = match kind {
+            TargetKind::Planted => {
+                let k = planted_scalar(&curve, target_seed, index);
+                let q = inst
+                    .mul_generator_hex(k)
+                    .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
+                (TARGET_LAW, q, Some(k), None)
+            }
+            TargetKind::Public => {
+                // With r | h the r-torsion can be Z/r × Z/r, and a cleared
+                // point need not lie in <G>.
+                if curve.cofactor % curve.r == 0 {
+                    return Err(format!(
+                        "r = {} divides the cofactor {}: a hashed target need not lie in <G>",
+                        curve.r, curve.cofactor
+                    ));
+                }
+                let (q, c) = inst
+                    .hash_to_subgroup(&curve, target_seed, index)
+                    .ok_or("no public target found in 10 000 hash attempts")?;
+                (PUBLIC_TARGET_LAW, q, None, Some(c))
+            }
+        };
         let (workload_id, workload_sha256) = bare_id(
             "W",
-            &Self::identity_view(&curve, target_seed, index, &target),
+            &Self::identity_view(&curve, law, target_seed, index, &target),
         )?;
         Ok(Workload {
             workload_id,
             workload_sha256,
             curve_spec: spec.clone(),
             curve,
-            target_law: TARGET_LAW.into(),
+            target_law: law.into(),
             target_seed,
             target_index: index,
             target,
             planted,
+            target_counter: counter,
         })
+    }
+
+    /// The target's kind, from its law.
+    pub fn kind(&self) -> TargetKind {
+        if self.target_law == PUBLIC_TARGET_LAW {
+            TargetKind::Public
+        } else {
+            TargetKind::Planted
+        }
     }
 
     /// What the workload id is a hash of: the exact curve model, the
@@ -410,6 +526,7 @@ impl Workload {
     /// drew it.  One target, cold.
     fn identity_view(
         curve: &CurveFacts,
+        law: &str,
         target_seed: u64,
         index: u64,
         target: &[String; 2],
@@ -421,7 +538,7 @@ impl Workload {
             "cofactor": curve.cofactor.to_string(),
             "generator": curve.generator,
             "target": target,
-            "target_law": TARGET_LAW,
+            "target_law": law,
             "target_seed": target_seed.to_string(),
             "target_index": index.to_string(),
             "target_count": 1,
@@ -435,6 +552,7 @@ impl Workload {
             "W",
             &Self::identity_view(
                 &self.curve,
+                &self.target_law,
                 self.target_seed,
                 self.target_index,
                 &self.target,
@@ -454,7 +572,7 @@ mod tests {
             bits: 20,
             seed: 59297,
         };
-        let (w, _) = Workload::build(&spec, 1, 0).unwrap();
+        let (w, _) = Workload::build(&spec, 1, 0, TargetKind::Planted).unwrap();
         assert_eq!(w.curve.slug, "icv1-fp20-t727-cd198a38");
         assert!(w.curve.registered);
         assert_eq!(w.curve.ec1.as_deref(), Some("EC1P20Cfphd19e740ea95d"));
@@ -465,13 +583,40 @@ mod tests {
     #[test]
     fn targets_differ_by_index_and_are_stable() {
         let spec = CurveSpec::Koblitz { a: 0, n: 13 };
-        let (a, _) = Workload::build(&spec, 7, 0).unwrap();
-        let (b, _) = Workload::build(&spec, 7, 1).unwrap();
-        let (a2, _) = Workload::build(&spec, 7, 0).unwrap();
+        let (a, _) = Workload::build(&spec, 7, 0, TargetKind::Planted).unwrap();
+        let (b, _) = Workload::build(&spec, 7, 1, TargetKind::Planted).unwrap();
+        let (a2, _) = Workload::build(&spec, 7, 0, TargetKind::Planted).unwrap();
         assert_ne!(a.workload_id, b.workload_id);
         assert_eq!(a, a2);
         assert_eq!(a.curve.family, "koblitz");
         assert_eq!(a.curve.automorphisms_available, 26);
+    }
+
+    #[test]
+    fn public_targets_lie_in_the_subgroup_and_have_no_planted_answer() {
+        for spec in [
+            CurveSpec::Koblitz { a: 0, n: 13 },
+            CurveSpec::PrimeSearch {
+                bits: 16,
+                seed: 59297,
+            },
+        ] {
+            let (w, inst) = Workload::build(&spec, 7, 0, TargetKind::Public).unwrap();
+            let (w1, _) = Workload::build(&spec, 7, 1, TargetKind::Public).unwrap();
+            let (p, _) = Workload::build(&spec, 7, 0, TargetKind::Planted).unwrap();
+            assert_eq!(w.target_law, PUBLIC_TARGET_LAW);
+            assert_eq!(w.kind(), TargetKind::Public);
+            assert!(w.planted.is_none() && w.target_counter.is_some());
+            assert_ne!(w.workload_id, w1.workload_id);
+            assert_ne!(w.workload_id, p.workload_id);
+            assert_eq!(w.recompute_id().unwrap(), w.workload_id);
+            assert_eq!(
+                Workload::build(&spec, 7, 0, TargetKind::Public).unwrap().0,
+                w
+            );
+            // In <G>, by exhaustion on a subgroup this small.
+            assert!((1..w.curve.r).any(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target)));
+        }
     }
 
     #[test]
@@ -480,9 +625,9 @@ mod tests {
             bits: 16,
             seed: 59297,
         };
-        let (w, inst) = Workload::build(&spec, 3, 2).unwrap();
+        let (w, inst) = Workload::build(&spec, 3, 2, TargetKind::Planted).unwrap();
         let ex = CurveSpec::explicit(&inst).unwrap();
-        let (w2, _) = Workload::build(&ex, 3, 2).unwrap();
+        let (w2, _) = Workload::build(&ex, 3, 2, TargetKind::Planted).unwrap();
         assert_eq!(w.workload_id, w2.workload_id);
         assert_eq!(w.planted, w2.planted);
         let CurveSpec::PrimeExplicit {
@@ -515,7 +660,13 @@ mod tests {
         // and the mean distance |k − r/2| / r against its 0.25.  The draw
         // is deterministic, so this is a fixed check of the derivation,
         // not a flaky statistical test.
-        let (w, _) = Workload::build(&CurveSpec::Koblitz { a: 0, n: 13 }, 0, 0).unwrap();
+        let (w, _) = Workload::build(
+            &CurveSpec::Koblitz { a: 0, n: 13 },
+            0,
+            0,
+            TargetKind::Planted,
+        )
+        .unwrap();
         let n = 20_000u64;
         let mut xs: Vec<f64> = (0..n)
             .map(|i| planted_scalar(&w.curve, 20261002, i) as f64 / w.curve.r as f64)

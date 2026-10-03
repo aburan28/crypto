@@ -68,7 +68,8 @@ cargo build --release --bin ecbench
 ```
 
 `ecbench methods` lists every method and its parameters; `ecbench host`
-prints the host capsule. On Linux `run` reserves a whole core by default
+prints the host capsule; `ecbench claim build` turns an IC run and a
+strong-rho run on a public target into a checked `vs_rho` claim (§9). On Linux `run` reserves a whole core by default
 (`--cpus auto`); on macOS there is no affinity control, so it records
 every run at L0 and says so. Operation counts are unaffected.
 
@@ -128,6 +129,14 @@ unseen target**, cold, with every phase charged, verified.
   verify is a row with status `wrong_answer`, `exhausted`, `error`,
   `timeout` or `crashed`. It is kept, never dropped, and it makes any
   comparison involving it `incomplete`.
+- **Planted or public targets.** By default a target is `Q = [k]G` for a
+  derived `k` (`uniform_scalar_sha256_v1`), kept for the check above. With
+  `"target_kind": "public"` a target is hashed to the subgroup
+  (`hash_to_subgroup_v1`: an abscissa from SHA-256, lifted, the cofactor
+  cleared), so nobody knows its logarithm and `[k]G = Q` is the only
+  check. That is what the IC claim rules mean by a previously unseen
+  public target, and `ecbench claim` accepts nothing else. The law is in
+  the workload id, so the two kinds never share one.
 
 ### Boundaries
 
@@ -156,11 +165,16 @@ identity, and two objects that hash alike are the same object.
 | record | `ECR1h` + 12 hex | the exact record line, with the id empty |
 | run | `<method_id><workload_id>R<n>` | the repository's `{candidate}W{workload}R{number}` convention; `n ≥ 1` counts executions of the pair in the session |
 | comparison | `ECC1h` + 12 hex | both arms' sessions and methods, the resampling request |
+| claim candidate | IC1 label `IC1N…C…fb…PDP…RC…LA…TD…ISO0h` + 12 hex | the tournament's candidate record (`research/ic_candidate_tournament_20260915/identity.py`): the curve, the factor base's audited inventory, every IC stage resolved, the IC sources' hashes |
+| claim workload | 12 hex | the tournament's workload record: EC1 curve id, the target point, its law and seed, the algorithm seed, the resource envelope |
 
 Canonical JSON is sorted, compact and ASCII-escaped, as
 `docs/curve-identities.md` hashes it. Floats never enter an identity. The
 host-class prefix is deliberately not ICMS's `ENV1h`: the two hash
-different fact sets.
+different fact sets. The two claim identities are hashed the way
+`identity.py` hashes them (UTF-8, not ASCII-escaped) and are pinned
+against its values in `claim.rs`'s tests, so a claim built here and a
+tournament candidate with the same inputs carry the same id.
 
 ## 5. Confounders, and how each one is controlled
 
@@ -364,6 +378,62 @@ worker. The session comes back as hashed artifacts.
   needs network. The job labels this, and every record still carries the
   binary hash a comparison checks.
 
+### Claims
+
+A **`vs_rho` claim** is the report `docs/ic/boundary_targets.json`
+defines for the primary IC question: one index-calculus run against one
+strong-rho run (`rho.signed_frobenius_strong`) on one public target,
+compared on their one-target online windows (§3), keyed by
+`(candidate_id, workload_id, run_id)` in the repository's IC1 convention.
+
+```bash
+./target/release/ecbench claim build --dir SESSION --ic ic --rho rho-strong --workload W... --out claim.json --exit-code
+```
+
+```bash
+./target/release/ecbench claim check --report claim.json
+```
+
+`build` takes the IC and rho records of one workload and round (by
+default the first measured round both arms ran) and assembles every
+field the schema requires, from the session's own files:
+
+- **The candidate identity** is the tournament's
+  (`identity.py`, ported in `claim.rs` and pinned against its values):
+  the curve record and EC1 id, the factor base rebuilt and inventoried
+  under the cofactor convention (usable base `[h]B` without the identity,
+  columns its sign-and-Frobenius orbits), every stage of the method
+  resolved, and the IC sources hashed into the binary at compile time. A
+  claim is therefore built only by the binary that measured the session.
+  `ecbench`'s Koblitz bases fold the raw lifted points, so a raw orbit
+  whose cofactor image is the identity (the 2-torsion point above
+  `x = 0`) is a column with logarithm zero; the record discloses such
+  columns under `factor_base.construction.solver_columns` rather than
+  counting them.
+- **The workload identity** needs a public target: a planted one is
+  refused, as `identity.py` refuses it.
+- **The windows** are the records' online windows, the IC one split into
+  the five exclusive phases, both arms' start and stop events named.
+- **The envelope** is the session's (binary, host class, CPU, NUMA node,
+  one thread, timeout), identical for both arms by construction.
+- **Independence.** The schema requires `independent_validation` and a
+  replay certificate for each arm. The certificate is the SHA-256 of an
+  `ecbench verify --replay-all` receipt made on a host of another class
+  that reproduced both runs; `--independent-receipt FILE --pointer WHERE`
+  supplies it, and a receipt from the session's own class, for other
+  bytes, or that did not reproduce both runs is refused. Without one the
+  claim is built with null certificates, the checker fails it on exactly
+  those fields, and the verdict says it is not yet a claim.
+- **Admissibility.** The verdict states the speedup `rho / IC` only when
+  both runs earned the spec's isolation level; otherwise it is marked
+  descriptive. The levels are in the report either way.
+
+`check` is `boundary_autolab.py claim-check --stage vs_rho` natively: the
+same required fields and aliases, the same validations in the same order,
+the same output object. CI builds a claim from
+`docs/ecbench/specs/claim-koblitz.json` and requires the two checkers to
+agree on it.
+
 ## 10. The database
 
 [`schema.sql`](schema.sql) is the schema, compiled into the binary.
@@ -372,8 +442,9 @@ worker. The session comes back as hashed artifacts.
 ./target/release/ecbench db sql research/ecbench_smoke_20261002/sessions/* | sqlite3 -bail ecbench.db
 ```
 
-The database is an **index**, rebuilt from session directories; it is
-never the record of a measurement. Loading is idempotent in one way only:
+The database is an **index**, rebuilt from session directories,
+comparison files, factor-base dumps and claim files; it is never the
+record of a measurement. Loading is idempotent in one way only:
 an insert tolerates a conflict on its table's primary key when it is the
 same row again, and nothing else. A second row claiming an existing run
 id is a UNIQUE error. A key arriving with a different identity (a curve
@@ -389,6 +460,7 @@ on another hash) is stopped by the schema's identity triggers.
 | `hosts`, `sessions`, `arms` | the host class and capsule, the session's build and reservation, its arms |
 | `runs`, `phases`, `run_counters`, `isolation_blockers` | one row per execution, its phases, its counters, and why it did not reach a higher level |
 | `comparisons` | every saved comparison |
+| `claims` | every loaded `vs_rho` claim, keyed by its IC1 `run_id`, with the checker's status at load time; a claim rebuilt with an independent receipt replaces its earlier form |
 
 Views: `arm_workload_summary` (the AGENTS.md §2 table, per workload),
 `method_by_curve` (each method's mean `S` and ratio to the floor per curve,
@@ -420,11 +492,14 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
 
 Stated so that nothing here is read as more than it is:
 
-- **The online window is measured, but no `vs_rho` claim is produced
-  yet.** Every record carries the one-target online window with its
-  exclusive phases (§3), and the strong rho reference the claim rules
-  require is a method. A claim also needs public (unplanted) targets and
-  the IC1 candidate identity, which `ecbench` does not produce yet.
+- **A claim's identity covers Koblitz curves with `5 ≤ n ≤ 61`.** The IC1
+  candidate identity is the tournament's (`identity.py`), whose adapter
+  admits those curves and no others; a prime-curve IC run has an online
+  window and no claim. A claim's independence rests on the receipt's
+  recorded host class and file hashes: `ecbench` checks that the receipt
+  is a passing audit of these exact files, run elsewhere, that
+  reproduced both runs, and a reader checks the receipt itself at the
+  pointer the claim cites.
 - **Word-size curves only.** The counted group types hold `GF(p)` with
   `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
   (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run

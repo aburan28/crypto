@@ -42,6 +42,12 @@ Rust only (AGENTS.md).
    uses it. CI replays every committed run, and the change would fail them. That
    is the point: a changed algorithm is a new id (`kangaroo.vow2`), and the old id
    keeps its evidence.
+7. **An IC change changes the candidate identity.** A `vs_rho` claim's IC1
+   `candidate_id` binds the SHA-256 of `ic_framework/{mod,plugins,solvers,linalg}.rs`,
+   `ic_boundary.rs` and `ecbench/methods.rs` at compile time (`claim.rs`,
+   `Implementation::this_binary`). Editing any of them gives a new candidate,
+   as it should; the pinned identities in `claim.rs`'s tests use placeholder
+   hashes and do not move.
 
 ## A curve construction
 

@@ -470,6 +470,195 @@ fn online_windows_split_into_exclusive_claim_phases() {
         "--exit-code",
     ]);
     assert!(ok, "{err}");
+    // These targets are planted: no claim can be built from them.
+    let w = first_workload(&dir.join("spec.json"));
+    let (ok, _, err) = ecbench(&[
+        "claim",
+        "build",
+        "--dir",
+        out.to_str().unwrap(),
+        "--ic",
+        "ic",
+        "--rho",
+        "rho-strong",
+        "--workload",
+        &w,
+    ]);
+    assert!(!ok && err.contains("planted"), "{err}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+fn first_workload(spec: &Path) -> String {
+    let (ok, out, err) = ecbench(&["plan", "--spec", spec.to_str().unwrap(), "--json"]);
+    assert!(ok, "{err}");
+    let plan: Value = serde_json::from_str(&out).unwrap();
+    plan["workloads"][0]["workload_id"]
+        .as_str()
+        .unwrap()
+        .to_string()
+}
+
+#[test]
+fn a_public_target_session_yields_a_checked_vs_rho_claim() {
+    // One public target, the strong rho reference, an IC pipeline and the
+    // plain signed-Frobenius rho: the claim builds from the IC and strong
+    // rho runs, the checker fails it on the independent replay alone, a
+    // receipt from the session's own host class is refused, and a receipt
+    // from another host class (simulated by its recorded class) passes.
+    let dir = scratch("claim");
+    let spec = r#"{
+      "schema": "ecbench.spec/v1",
+      "label": "claim test",
+      "workloads": {"curves": [{"kind": "koblitz", "a": 1, "n": 17}],
+                    "targets_per_curve": 1, "target_seed": 11, "target_kind": "public"},
+      "arms": [
+        {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+        {"name": "rho", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+        {"name": "ic", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm-frobenius:m=2"}}}
+      ],
+      "measurement": {"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 120}
+    }"#;
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let w = first_workload(&dir.join("spec.json"));
+    let s = out.to_str().unwrap();
+    let claim_path = dir.join("claim.json");
+    let build = |rho: &str, extra: &[&str]| {
+        let mut args = vec![
+            "claim",
+            "build",
+            "--dir",
+            s,
+            "--ic",
+            "ic",
+            "--rho",
+            rho,
+            "--workload",
+            &w,
+            "--out",
+            claim_path.to_str().unwrap(),
+        ];
+        args.extend_from_slice(extra);
+        ecbench(&args)
+    };
+    let check = || {
+        let (ok, out, err) = ecbench(&["claim", "check", "--report", claim_path.to_str().unwrap()]);
+        (ok, serde_json::from_str::<Value>(&out).unwrap(), err)
+    };
+
+    // The plain walk is not the strong reference.
+    let (ok, _, err) = build("rho", &[]);
+    assert!(
+        !ok && err.contains("strong single-target reference"),
+        "{err}"
+    );
+
+    // Without an independent replay: built, and failed on exactly that.
+    let (ok, _, err) = build("rho-strong", &[]);
+    assert!(ok, "{err}");
+    let claim: Value =
+        serde_json::from_str(&std::fs::read_to_string(&claim_path).unwrap()).unwrap();
+    assert!(claim["candidate_id"]
+        .as_str()
+        .unwrap()
+        .starts_with("IC1N17Ckb1fb442PDP2mitmfrobeniusRCwalkLAincrementalgaussTDjointISO0h"));
+    assert_eq!(claim["target_count"], 1);
+    assert_eq!(claim["ic_target_hash"], claim["rho_target_hash"]);
+    assert_eq!(
+        claim["ic_resource_envelope"],
+        claim["rho_resource_envelope"]
+    );
+    let (ok, c, _) = check();
+    assert!(!ok);
+    assert_eq!(c["status"], "FAIL");
+    assert_eq!(
+        c["validation_errors"],
+        serde_json::json!([
+            "independent_validation must be true",
+            "ic_replay_certificate_sha256 must be a full lowercase SHA-256 digest",
+            "rho_replay_certificate_sha256 must be a full lowercase SHA-256 digest"
+        ])
+    );
+    assert_eq!(
+        c["missing_stage_fields"],
+        serde_json::json!([
+            "ic_replay_certificate_sha256",
+            "rho_replay_certificate_sha256"
+        ])
+    );
+    assert_eq!(c["missing_global_provenance"], serde_json::json!([]));
+
+    // A replay on the session's own host class is not independent.
+    let receipt = dir.join("receipt.json");
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        s,
+        "--replay-all",
+        "--exit-code",
+        "--out",
+        receipt.to_str().unwrap(),
+    ]);
+    assert!(ok, "{err}");
+    let (ok, _, err) = build(
+        "rho-strong",
+        &[
+            "--independent-receipt",
+            receipt.to_str().unwrap(),
+            "--pointer",
+            "test",
+        ],
+    );
+    assert!(!ok && err.contains("own host class"), "{err}");
+
+    // The same receipt as another host class would record it.  The
+    // receipt is the auditor's word: a claim cites its digest and pointer
+    // so a reader can fetch it and rerun the audit.
+    let mut r: Value = serde_json::from_str(&std::fs::read_to_string(&receipt).unwrap()).unwrap();
+    r["auditor_env_class_id"] = Value::from("ECBENV2h000000000000");
+    let elsewhere = dir.join("receipt-elsewhere.json");
+    std::fs::write(&elsewhere, serde_json::to_string_pretty(&r).unwrap()).unwrap();
+    let (ok, _, err) = build(
+        "rho-strong",
+        &[
+            "--independent-receipt",
+            elsewhere.to_str().unwrap(),
+            "--pointer",
+            "test",
+            "--exit-code",
+        ],
+    );
+    assert!(ok, "{err}");
+    let (ok, c, err) = check();
+    assert!(ok, "{c} {err}");
+    assert_eq!(c["status"], "PASS");
+
+    // The claim loads into the database beside its session, checked again.
+    let (ok, sql, err) = ecbench(&["db", "sql", s, claim_path.to_str().unwrap()]);
+    assert!(ok, "{err}");
+    assert!(
+        sql.contains("INSERT OR REPLACE INTO claims VALUES ("),
+        "{sql}"
+    );
+    assert!(sql.contains("'PASS'"));
+
+    // A receipt for other bytes is refused.
+    let mut r2 = r.clone();
+    r2["files"]["records.jsonl"] = Value::from("0".repeat(64));
+    std::fs::write(&elsewhere, serde_json::to_string_pretty(&r2).unwrap()).unwrap();
+    let (ok, _, err) = build(
+        "rho-strong",
+        &[
+            "--independent-receipt",
+            elsewhere.to_str().unwrap(),
+            "--pointer",
+            "test",
+        ],
+    );
+    assert!(!ok && err.contains("records.jsonl"), "{err}");
     let _ = std::fs::remove_dir_all(&dir);
 }
 

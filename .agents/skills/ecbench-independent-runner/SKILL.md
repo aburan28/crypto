@@ -60,6 +60,12 @@ machine can therefore check them:
   different commit is a different method unless the replays still match.
 - `identical` on every replay means the figure is reproduced. Cite the receipt's
   SHA-256 as the independent replay certificate.
+- For a `vs_rho` claim, run it with `--replay-all` on a host whose class
+  (`ecbench host`, `env_class_id`) differs from the session's, keep the receipt
+  somewhere durable, and hand `ecbench claim build` the file and its location
+  (`--independent-receipt`, `--pointer`). The receipt records the auditor's host
+  class and the hash of every session file; the claim builder refuses one from
+  the session's own class, for other bytes, or that did not reproduce both runs.
 - Wall time does not reproduce across hosts, and nothing in this check claims it
   does. To confirm a wall-clock result, rerun the spec as a new session on a host
   of the same class (`env_class_id`) at the required level and compare the two

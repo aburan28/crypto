@@ -9,6 +9,8 @@
 //! ecbench compare --dir D --a X --b Y  paired ratio with a bootstrap interval
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
 //! ecbench fb --curve C --factor-base F a factor base with its points
+//! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
+//! ecbench claim check --report R       the vs_rho checker
 //! ecbench db sql PATHS... | sqlite3 ecbench.db
 //! ecbench isolab-job --spec S --binary B    an isolab.job/v1 for an independent runner
 //! ```
@@ -22,8 +24,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, compare, db, host, isolab, isolation, methods, record, runner, signals, spec, stats,
-    workload,
+    audit, canonical, claim, compare, db, host, isolab, isolation, methods, record, runner,
+    signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -149,6 +151,12 @@ enum Cmd {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+    /// `vs_rho` claims: one IC run against the strong rho run on one
+    /// public target, in the report `docs/ic/boundary_targets.json` defines.
+    Claim {
+        #[command(subcommand)]
+        cmd: ClaimCmd,
+    },
     /// The database.
     Db {
         #[command(subcommand)]
@@ -182,6 +190,49 @@ enum Cmd {
 }
 
 #[derive(Subcommand)]
+enum ClaimCmd {
+    /// Assemble the claim for one workload and round of a session, and
+    /// check it.  Run it with the binary that measured the session.
+    Build {
+        #[arg(long)]
+        dir: PathBuf,
+        /// The index-calculus arm.
+        #[arg(long)]
+        ic: String,
+        /// The `rho.signed_frobenius_strong` arm.
+        #[arg(long)]
+        rho: String,
+        /// The ecbench workload id (`W` + 12 hex).
+        #[arg(long)]
+        workload: String,
+        /// The round, counted from 0 with warm-ups included (default: the
+        /// first measured round both arms ran).
+        #[arg(long)]
+        round: Option<u32>,
+        /// An audit receipt (`ecbench verify --replay-all --out`) made on
+        /// another host class that reproduced both runs.
+        #[arg(long, requires = "pointer")]
+        independent_receipt: Option<PathBuf>,
+        /// Where that receipt is durably stored.
+        #[arg(long, requires = "independent_receipt")]
+        pointer: Option<String>,
+        /// Write the claim here (it is printed otherwise).
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Exit 1 when the checker finds a problem.
+        #[arg(long)]
+        exit_code: bool,
+    },
+    /// Check a report against the `vs_rho` schema, as
+    /// `boundary_autolab.py claim-check --stage vs_rho` does; exit 1 on
+    /// any problem.
+    Check {
+        #[arg(long)]
+        report: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
 enum DbCmd {
     /// Print the schema.
     Schema,
@@ -204,6 +255,17 @@ fn main() -> ExitCode {
 
 fn read(p: &Path) -> Result<String, String> {
     std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))
+}
+
+fn report_problems(problems: &[String]) {
+    if problems.is_empty() {
+        eprintln!("vs_rho check: passes");
+    } else {
+        eprintln!("vs_rho check: {} problem(s)", problems.len());
+        for p in problems {
+            eprintln!("  - {p}");
+        }
+    }
 }
 
 fn print_json(v: &impl serde::Serialize) -> Result<(), String> {
@@ -431,10 +493,7 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             let text = serde_json::to_string_pretty(&rep).map_err(|e| e.to_string())? + "\n";
             if let Some(o) = out {
                 std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
-                eprintln!(
-                    "receipt sha256 {}",
-                    crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex(text.as_bytes())
-                );
+                eprintln!("receipt sha256 {}", canonical::sha256_hex(text.as_bytes()));
             }
             print!("{text}");
             eprintln!(
@@ -534,6 +593,63 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 None => print!("{text}"),
             }
         }
+        Cmd::Claim { cmd } => match cmd {
+            ClaimCmd::Build {
+                dir,
+                ic,
+                rho,
+                workload,
+                round,
+                independent_receipt,
+                pointer,
+                out,
+                exit_code,
+            } => {
+                let independent = match (independent_receipt, pointer) {
+                    (Some(p), Some(pointer)) => {
+                        let bytes =
+                            std::fs::read(&p).map_err(|e| format!("{}: {e}", p.display()))?;
+                        Some(claim::Independent {
+                            receipt: serde_json::from_slice(&bytes)
+                                .map_err(|e| format!("{}: {e}", p.display()))?,
+                            receipt_sha256: canonical::sha256_hex(&bytes),
+                            pointer,
+                        })
+                    }
+                    _ => None,
+                };
+                let report = claim::build(&dir, &ic, &rho, &workload, round, independent.as_ref())?;
+                let problems = claim::check_problems(&claim::check_vs_rho(&report)?);
+                let text = serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n";
+                match out {
+                    Some(o) => {
+                        std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
+                        eprintln!(
+                            "claim {} sha256 {}",
+                            o.display(),
+                            canonical::sha256_hex(text.as_bytes())
+                        );
+                    }
+                    None => print!("{text}"),
+                }
+                eprintln!("{}", report["verdict"].as_str().unwrap_or(""));
+                report_problems(&problems);
+                if exit_code && !problems.is_empty() {
+                    return Ok(ExitCode::from(1));
+                }
+            }
+            ClaimCmd::Check { report } => {
+                let v: serde_json::Value = serde_json::from_str(&read(&report)?)
+                    .map_err(|e| format!("{}: {e}", report.display()))?;
+                let check = claim::check_vs_rho(&v)?;
+                print_json(&check)?;
+                let problems = claim::check_problems(&check);
+                report_problems(&problems);
+                if !problems.is_empty() {
+                    return Ok(ExitCode::from(1));
+                }
+            }
+        },
         Cmd::Db { cmd } => match cmd {
             DbCmd::Schema => print!("{}", db::SCHEMA_SQL),
             DbCmd::Sql { paths } => {

@@ -19,6 +19,7 @@
 //! | [`runner`] | sessions: interleaved measured children, sealed append-only records |
 //! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
+//! | [`claim`] | `vs_rho` claims: the IC1 identity, the claim report, the native checker |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
 //! | [`isolab`] | an `isolab.job/v1` that runs a spec on an independent lab worker |
@@ -27,6 +28,7 @@
 
 pub mod audit;
 pub mod canonical;
+pub mod claim;
 pub mod compare;
 pub mod db;
 pub mod generic;

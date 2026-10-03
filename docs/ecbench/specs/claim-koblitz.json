@@ -1,0 +1,18 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "vs_rho claim smoke: one public target on a Koblitz curve",
+  "description": "The shape a vs_rho claim needs: public targets (nobody knows the logarithm; the answer is checked by [d]G = Q), the strong single-target rho reference, the plain signed-Frobenius rho as the operations baseline, and an ic.pipeline candidate. Each workload is one target; ecbench claim build takes one IC run and one strong-rho run of it. Small enough for CI; a claim worth making uses a larger curve, more targets and the spec's L2.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 1, "n": 17}],
+    "targets_per_curve": 2,
+    "target_seed": 11,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm-frobenius:m=2"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 1, "seed": 5, "isolation_required": "L2", "timeout_seconds": 120}
+}
