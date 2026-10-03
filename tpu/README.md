@@ -48,7 +48,10 @@ tpu/
     pairtable.py   STAGE 1: pair-table build + m=3 relation collection
     linalg.py      STAGE 2: GF(2) matmul / elimination / solve / nullspace
     pallas_kernels.py   the bit-matmul-mod-2 Pallas kernel (TPU + interpret)
-  tests/           49 CPU self-checks (oracle agreement, end-to-end, contract)
+  rho/             prime-field ECDLP: batched Pollard rho with int8-matmul
+                   Barrett modmul, tree batch inversion, distinguished points
+                   (see rho/README.md; same no-device, no-speed-claim standard)
+  tests/           CPU self-checks (oracle agreement, end-to-end, contract)
   protocol/RESEARCH_TPU_IC.md   the preregistered, honest protocol
   requirements.txt  run_selftest.sh
 ```
