@@ -45,6 +45,8 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/prepared_sat.rs"]
+mod prepared_sat;
 #[path = "icprog/pyrandom.rs"]
 mod pyrandom;
 #[path = "icprog/rounds.rs"]
@@ -53,6 +55,8 @@ mod rounds;
 mod rule;
 #[path = "icprog/runs.rs"]
 mod runs;
+#[path = "icprog/sat_source.rs"]
+mod sat_source;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
@@ -89,6 +93,14 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Independently replay the retained disclosed n17 SAT source witness; no solver or new target.
+    SatSourceReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// Create an immutable report; refuses to overwrite any existing file.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// A round's figures and decision, from its run tree only, as JSON.
     Analyse {
         round: Round,
@@ -457,6 +469,7 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
         Command::Analyse { round, root, runs } => analyse(round, root, runs),
+        Command::SatSourceReplay { root, out } => sat_source::run(&root, out.as_deref()),
         Command::Baseline {
             analysis,
             runs,

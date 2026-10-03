@@ -14,7 +14,31 @@ do not create a parallel scoreboard or redefine historical protocols.
 
 ## Begin or resume
 
-Run `python3.12 research/ic_candidate_tournament_20260915/autolab.py doctor`.
+**The current `AGENTS.md` requires native research execution and verification.**
+The Python scripts named later in this skill describe historical evidence and
+mathematical contracts; do not execute or extend them for new research. Port the
+relevant execution path to Rust before continuing comparisons. Preserve the
+frozen sources, identities, failures and Python provenance.
+
+For the disclosed n17 SAT source/preparation control, use the existing native
+harness:
+
+```sh
+rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o /tmp/ic-native-busy
+/tmp/ic-native-busy busy -- cargo build --locked --bin icprog --bin isolated_bench
+target/debug/icprog sat-source-replay --root . --out /tmp/ic-native-sat-replay.json
+```
+
+Use a new output path: replay refuses to overwrite evidence. This command checks
+the retained source witness, ordinary rows, exact geometric negatives, rank and
+logs. It launches no solver and establishes neither new yield nor performance.
+The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
+separate this replay from the pending native controller and fresh comparison.
+On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
+the historical wrapper; macOS supports busy only. Timed affinity/reservation
+still requires the Linux implementation. Do not infer a quiet measurement host
+from a successful busy lock.
+
 Inspect the latest local round's contract, source identity, summary and failures.
 Archived winners must be restored and identified by their candidate's
 `source_directory` and configuration, not assumed to be `round/source`.
@@ -31,6 +55,9 @@ algorithmic failure. The separate Crypto Autoresearcher Coordinator harness is
 not required by this repository-local runner.
 
 ## Quality and accounting first
+
+The following historical adapters and commands remain retained documentation.
+Their invocation instructions are superseded by the native requirement above.
 
 Historical static SAT registrations replay through
 [`frozen_sat_runtime.py`](../../../research/ic_candidate_tournament_20260915/frozen_sat_runtime.py)

@@ -868,7 +868,17 @@ fn main() -> std::process::ExitCode {
     }
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(unix)]
+#[path = "isolated_bench/busy_unix.rs"]
+#[allow(dead_code)]
+mod busy_unix;
+
+#[cfg(all(unix, not(target_os = "linux")))]
+fn main() -> std::process::ExitCode {
+    busy_unix::cli()
+}
+
+#[cfg(not(unix))]
 fn main() -> std::process::ExitCode {
     eprintln!("isolated_bench runs on Linux only: it reads /proc and PSI and sets other threads' CPU affinity");
     std::process::ExitCode::FAILURE
