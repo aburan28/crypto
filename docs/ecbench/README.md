@@ -136,7 +136,7 @@ identity, and two objects that hash alike are the same object.
 | method | `ECM1h` + 12 hex | registry id and every parameter, defaults written out |
 | factor base | `FB1h` + 12 hex | curve slug, family, parameters, column count, point count, SHA-256 of the sorted point keys |
 | spec | `ECS1h` + 12 hex | the spec without its label and description |
-| host class | `ECBENV1h` + 12 hex | the stable host facts (§5) |
+| host class | `ECBENV2h` + 12 hex (`ECBENV1h` before version 2) | the stable host facts (§5): topology shape, memory in whole GiB, so a reboot keeps the class |
 | session | `ECBS1h` + 12 hex | spec, host and plan hashes, start time |
 | record | `ECR1h` + 12 hex | the exact record line, with the id empty |
 | run | `<method_id><workload_id>R<n>` | the repository's `{candidate}W{workload}R{number}` convention; `n ≥ 1` counts executions of the pair in the session |
@@ -166,7 +166,7 @@ a run that fails the check loses its isolation level), or **recorded**
 | SMT sibling | a neighbour on the sibling shares the pipeline and caches | a CPU is reserved only with all its siblings; the idle siblings' busy ticks are checked per run | gated (L2) |
 | CPU 0 | the kernel's housekeeping and many IRQs land there | `auto` never picks CPU 0's core; a run on it loses L1 | gated (L1) |
 | Migration | a process moved mid-run pays cold caches | pinned between fork and exec; the child reads its own mask back and reports the CPU it started and ended on | gated (L1) |
-| NUMA | memory on the far node costs every miss | memory is bound to the run CPU's node with `set_mempolicy(MPOL_BIND)` in the child; `Mems_allowed_list` is read back | gated (L1, multi-node hosts) |
+| NUMA | memory on the far node costs every miss | memory is bound to the run CPU's node with `set_mempolicy(MPOL_BIND)` in the child; the child reads the policy back with `get_mempolicy` and counts its anonymous pages per node in `/proc/self/numa_maps` after the solve | gated (L1, multi-node hosts) |
 | Run-queue delay | time runnable but not running is not the method's | the child's `/proc/self/schedstat` across the solve; above 0.5 % of the solve, L2 is lost | gated (L2) |
 | Preemption | each one costs cache and branch state | involuntary context switches per second from `wait4` | gated (L2) |
 | Hypervisor steal | invisible to a process tick count | per-CPU steal ticks from `/proc/stat` around every run | gated (L2) |
@@ -194,18 +194,26 @@ a bare label.
 | level | requires |
 |---|---|
 | **L0 recorded** | the run executed under a saved host capsule. Enough for operation counts, which do not depend on contention |
-| **L1 pinned** | a reservation (`--cpus` not `none`); a release build; the child's own affinity read back as exactly the run CPU, and the run CPU at its start and end; the run CPU not on CPU 0's core; the runner off the reservation; no user thread left unmovable on the reserved CPUs (a non-root run usually fails this); child CPU time over wall ≤ 1.05; on a multi-node host, memory bound to the run CPU's node |
+| **L1 pinned** | a reservation (`--cpus` not `none`); a release build; the child's own affinity read back as exactly the run CPU, and the run CPU at its start and end; the run CPU not on CPU 0's core; the runner off the reservation; no user thread left unmovable on the reserved CPUs (a non-root run usually fails this); child CPU time over wall ≤ 1.05; on a multi-node host, the memory policy read back as `bind:<node>` of the run CPU and at least 99 % of the solve's anonymous pages on that node |
 | **L2 quiet** | L1, and: a quiet preflight; zero steal ticks on the run CPU; foreign busy time on the run CPU within max(2 ticks, 1 % of wall); idle siblings within 2 ticks; run-queue delay ≤ 0.5 % of the solve; ≤ 50 preemptions per second; memory stall ≤ 0.5 % of wall |
 | **L3 isolated** | L2, and the host configured for measurement: run CPU in `isolcpus` or `nohz_full`; `performance` governor; turbo known off; bare metal known |
 
 A spec's `isolation_required` (default L2) is the level a **wall-clock**
 figure needs to be admitted. Operation counts never need one.
 
-What hosts earn, as recorded so far: macOS, L0 (no affinity control). A
-GitHub-hosted Linux runner run as root, L1 (it is a VM; steal and
-frequency are outside its control). See the CI summary of
-`.github/workflows/ecbench.yml` for the current blocker counts. L2 and L3
-need a lab host. `isolab` prepares one (§9).
+What hosts earn, as recorded so far:
+
+- **macOS:** L0, because there is no affinity control.
+- **A two-node QEMU guest** (Ubuntu 6.8 kernel, 2 sockets × 2 cores × 2
+  threads, [`research/ecbench_numa_vm_20261002`](../../research/ecbench_numa_vm_20261002/README.md)):
+  L2 on about 80 % of runs, the rest stopped at L1 by run-queue delay.
+  Pinning and NUMA binding were confirmed there, with policy `bind:<node>`
+  and every anonymous page on the bound node. An emulated guest reports
+  no steal by construction, so its L2 does not certify quiet hardware.
+- **A GitHub-hosted Linux runner, run as root:** see the summary of
+  `.github/workflows/ecbench.yml`. It is a VM, so L3 is out of reach.
+
+L3 needs a lab host, which `isolab` prepares (§9).
 
 ## 7. The unit, and what each method is charged
 
@@ -375,10 +383,12 @@ Stated so that nothing here is read as more than it is:
   `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
   (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
   it.
-- **NUMA binding has not met a multi-node host yet.** The binding and its
-  read-back are implemented and the single-node path runs in CI. The
-  first multi-node session (an isolab worker or a two-node VM) is the
-  test of that path, and until then a multi-node L1 is unconfirmed.
+- **NUMA binding has met a two-node kernel, not two-socket hardware.** In
+  a two-node QEMU guest the policy read back as `bind:<node>` and every
+  anonymous page sat on the bound node, and that test found and fixed a
+  wrong read-back (`research/ecbench_numa_vm_20261002`). Remote-memory
+  latency, the confounder the binding exists for, is not emulated, so a
+  two-socket host remains the test of its effect.
 - **No hardware counters.** Instructions retired would be a third,
   host-robust measure beside operations and wall time. `perf_event_open`
   is not wired in.

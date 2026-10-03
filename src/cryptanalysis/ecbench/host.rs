@@ -9,9 +9,10 @@
 //! is recorded beside the class but not in it: a baseline and a
 //! candidate are different binaries on the same host class.
 //!
-//! The class id here is `ECBENV1h…`, not ICMS's `ENV1h…`: the two hash
-//! different fact sets, and a shared prefix would invite a join that
-//! means nothing.
+//! The class id here is `ECBENV2h…` (`ECBENV1h…` for capsules captured
+//! before version 2, which still recompute under their own definition),
+//! not ICMS's `ENV1h…`: the two hash different fact sets, and a shared
+//! prefix would invite a join that means nothing.
 
 use std::collections::BTreeMap;
 use std::process::Command;
@@ -362,7 +363,11 @@ fn build_facts() -> BuildFacts {
 
 /// The stable facts that define the class.  Topology enters as its
 /// shape (CPU → core, package, node, siblings), settings as values.
-fn class_view(s: &StableFacts) -> Value {
+/// Version 1 of the class, kept so that `ECBENV1h…` ids recorded before
+/// version 2 still recompute.  It hashed each NUMA node's `MemTotal`,
+/// which moves between boots of one machine (the kernel's reservations
+/// land differently), so one host could get a new class per reboot.
+fn class_view_v1(s: &StableFacts) -> Value {
     json!({
         "schema": "ecbench.env_class/v1",
         "os": s.os,
@@ -387,12 +392,59 @@ fn class_view(s: &StableFacts) -> Value {
     })
 }
 
+/// Memory rounded to the nearest GiB: what a machine has, without the
+/// few megabytes a boot reserves differently.
+fn gib(kib: Option<u64>) -> Option<u64> {
+    kib.map(|k| (k + (1 << 19)) >> 20)
+}
+
+/// The class, version 2: the topology's shape (CPU to core, package,
+/// node and siblings; node to CPUs and distances) and memory in whole
+/// GiB, so the class survives a reboot.  Every fact is an integer or a
+/// string, so the view hashes as it stands.
+fn class_view_v2(s: &StableFacts) -> Value {
+    let cpus: Vec<Value> = s
+        .topology
+        .cpus
+        .iter()
+        .map(|c| json!([c.cpu, c.core_id, c.package, c.node, c.siblings]))
+        .collect();
+    let nodes: Vec<Value> = s
+        .topology
+        .nodes
+        .iter()
+        .map(|n| json!([n.node, n.cpus, n.distances, gib(n.mem_total_kib)]))
+        .collect();
+    json!({
+        "schema": "ecbench.env_class/v2",
+        "os": s.os,
+        "arch": s.arch,
+        "kernel_release": s.kernel_release,
+        "cpu_vendor": s.cpu_vendor,
+        "cpu_model": s.cpu_model,
+        "cpu_signature": s.cpu_signature,
+        "microcode": s.microcode,
+        "features": s.features,
+        "flags_sha256": s.flags_sha256,
+        "logical_cpus": s.logical_cpus,
+        "physical_cores": s.physical_cores,
+        "packages": s.packages,
+        "numa_nodes": s.numa_nodes,
+        "cpus": cpus,
+        "nodes": nodes,
+        "mem_total_gib": gib(s.mem_total_kib),
+        "perf_levels": serde_json::to_value(&s.perf_levels).unwrap_or(Value::Null),
+        "cpu_settings": serde_json::to_value(&s.cpu_settings).unwrap_or(Value::Null),
+        "transparent_hugepages": s.transparent_hugepages,
+        "virtualization": s.virtualization,
+        "rustc_vv": s.rustc_vv,
+    })
+}
+
 /// Capture the capsule now.
 pub fn capture() -> Result<HostCapsule, String> {
     let stable = stable_facts();
-    // NUMA distances and memory sizes are integers; the topology carries
-    // no float, so the class view is hashable as is.
-    let (env_class_id, env_class_sha256) = short_id("ECBENV1", &class_view(&stable))?;
+    let (env_class_id, env_class_sha256) = short_id("ECBENV2", &class_view_v2(&stable))?;
     Ok(HostCapsule {
         schema: "ecbench.host/v1".into(),
         env_class_id,
@@ -410,7 +462,12 @@ pub fn capture() -> Result<HostCapsule, String> {
 /// Recompute the class id from a capsule's stable facts; an audit
 /// compares it with the stored one.
 pub fn recompute_class(c: &HostCapsule) -> Result<String, String> {
-    Ok(short_id("ECBENV1", &class_view(&c.stable))?.0)
+    // Each id recomputes under the definition it was made with.
+    if c.env_class_id.starts_with("ECBENV1h") {
+        Ok(short_id("ECBENV1", &class_view_v1(&c.stable))?.0)
+    } else {
+        Ok(short_id("ECBENV2", &class_view_v2(&c.stable))?.0)
+    }
 }
 
 #[cfg(test)]
@@ -418,9 +475,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn class_ignores_boot_to_boot_memory_jitter() {
+        let mut a = capture().unwrap();
+        a.stable.mem_total_kib = Some(16 * 1024 * 1024 - 300_000);
+        let mut b = a.clone();
+        b.stable.mem_total_kib = Some(16 * 1024 * 1024 - 260_000);
+        assert_eq!(
+            short_id("ECBENV2", &class_view_v2(&a.stable)).unwrap(),
+            short_id("ECBENV2", &class_view_v2(&b.stable)).unwrap()
+        );
+        b.stable.mem_total_kib = Some(32 * 1024 * 1024);
+        assert_ne!(
+            short_id("ECBENV2", &class_view_v2(&a.stable)).unwrap(),
+            short_id("ECBENV2", &class_view_v2(&b.stable)).unwrap()
+        );
+    }
+
+    #[test]
     fn capsule_class_is_stable_and_recomputable() {
         let a = capture().unwrap();
-        assert!(a.env_class_id.starts_with("ECBENV1h"));
+        assert!(a.env_class_id.starts_with("ECBENV2h"));
         assert_eq!(recompute_class(&a).unwrap(), a.env_class_id);
         assert!(!a.stable.os.is_empty());
     }

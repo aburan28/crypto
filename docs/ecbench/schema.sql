@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS factor_base_points (
 -- ── Where and how ────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS hosts (
-  env_class_id     TEXT PRIMARY KEY,                  -- ECBENV1h + 12 hex of the stable facts
+  env_class_id     TEXT PRIMARY KEY,                  -- ECBENV2h (or v1 ECBENV1h) + 12 hex of the stable facts
   env_class_sha256 TEXT NOT NULL UNIQUE,
   os               TEXT NOT NULL,
   arch             TEXT NOT NULL,
