@@ -43,6 +43,18 @@ cache. The [complete log](first-freeze-vendor.log) and
 original inputs. The failed capsule remains unregistered and unexecuted.
 Prepare the locked package cache before offline freeze; use a new output
 directory. This is a build/setup failure, not a new solver outcome or retry.
+The next source-freeze validation completed from a clean native snapshot:
+5,957 immutable files, including 152 MiB of offline vendor sources, producer
+and checker binaries, accepted native assets and all build receipts. That
+capsule is unexecuted and remains build validation; its source revision predates
+the final portable test correction. Freeze and publish the final accepted
+registration separately before a scientific dispatch.
+
+The first Linux CI pass reached the new watchdog test, where `/bin/sh` was a
+symlink and the regular-file source gate correctly rejected it. The test now
+canonicalizes that ordinary shell fixture; the scientific executable gate
+still rejects symlinks. The complete first failing Linux/harness logs are
+retained. This is a test portability correction, not a solver result.
 
 The CI workflow runs these native controls on Linux x86-64 and macOS ARM64,
 plus the existing independent preparation and source replay tests and harness

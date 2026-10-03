@@ -654,8 +654,11 @@ mod tests {
     #[test]
     fn watchdog_preserves_exit_and_kills_a_timed_out_group() {
         let p = temp("watchdog");
+        // Linux /bin/sh is often a symlink. Resolve only this non-scientific fixture;
+        // registered executables must remain bounded regular files with their fixed pins.
+        let shell = Path::new("/bin/sh").canonicalize().unwrap();
         let out = measured_child(
-            Path::new("/bin/sh"),
+            &shell,
             &["-c".into(), "exit 3".into()],
             &p,
             &p.join("exit"),
@@ -667,7 +670,7 @@ mod tests {
         assert_eq!(out.exit_code, Some(3));
         assert!(!out.timed_out);
         let out = measured_child(
-            Path::new("/bin/sh"),
+            &shell,
             &["-c".into(), "sleep 30 & wait".into()],
             &p,
             &p.join("timeout"),
