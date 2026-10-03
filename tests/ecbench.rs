@@ -393,6 +393,86 @@ fn the_database_refuses_a_slug_with_another_identity() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
+#[test]
+fn online_windows_split_into_exclusive_claim_phases() {
+    // The strong single-target reference and an index-calculus pipeline on
+    // a registered Koblitz curve: every run verifies, every record carries
+    // an online window whose exclusive phases sum to its wall time under
+    // the claim schema's names, and the hardware counts are recorded or
+    // their absence explained.
+    let dir = scratch("online");
+    let spec = r#"{
+      "schema": "ecbench.spec/v1",
+      "label": "online window test",
+      "workloads": {"curves": [{"kind": "koblitz", "a": 1, "n": 17}],
+                    "targets_per_curve": 2, "target_seed": 11},
+      "arms": [
+        {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+        {"name": "ic", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm-frobenius:m=2"}}}
+      ],
+      "measurement": {"rounds": 2, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 120}
+    }"#;
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut saw_ic = false;
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        let w = &r["online"];
+        assert!(w.is_object(), "no online window: {line}");
+        let wall = w["wall_ns"].as_u64().unwrap();
+        let sum: u64 = w["phases_ns"]
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|v| v.as_u64().unwrap())
+            .sum();
+        assert_eq!(sum, wall, "exclusive phases must sum to the window");
+        let stages: Vec<&str> = w["included_stages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_str().unwrap())
+            .collect();
+        if r["arm"] == "ic" {
+            saw_ic = true;
+            for s in [
+                "target_query",
+                "target_PDP",
+                "target_relation_check",
+                "target_descent",
+                "target_recovery_check",
+            ] {
+                assert!(stages.contains(&s), "{s} missing from {stages:?}");
+                assert!(w["phases_ns"][s].is_u64(), "{s} has no time");
+            }
+            assert!(w["phases_ns"]["target_PDP"].as_u64().unwrap() > 0);
+        } else {
+            assert_eq!(stages, ["walk", "collision", "recovery_check"]);
+            assert_eq!(r["method"]["id"], "rho.signed_frobenius_strong");
+        }
+        let hw = &r["time"]["hw_solve"];
+        assert!(
+            hw["instructions"].is_u64() || hw["error"].is_string(),
+            "hardware counts neither read nor explained: {hw}"
+        );
+    }
+    assert!(saw_ic);
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "{err}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     std::fs::create_dir_all(to).unwrap();
     for e in std::fs::read_dir(from).unwrap() {

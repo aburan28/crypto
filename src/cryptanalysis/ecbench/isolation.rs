@@ -1106,3 +1106,124 @@ mod tests {
         assert!(plan_cpus(&CpuRequest::Auto, &t, Some(&[1, 2])).is_err());
     }
 }
+
+// ── Hardware counters ──────────────────────────────────────────────
+
+/// What the CPU's own counters saw across a solve: user-space
+/// instructions retired and cycles.  Instructions are the third measure
+/// beside operations and wall time: nearly host-independent for one
+/// binary, and untouched by frequency scaling.  Absent (`None`, with the
+/// reason) where the kernel offers no hardware PMU (macOS, most VMs, a
+/// `perf_event_paranoid` that forbids it).
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HwCounts {
+    pub instructions: Option<u64>,
+    pub cycles: Option<u64>,
+    pub error: Option<String>,
+}
+
+/// Two `perf_event_open` counters on the calling process, user space only.
+pub struct HwCounters {
+    #[cfg(target_os = "linux")]
+    fds: Vec<(libc::c_int, u64)>,
+    error: Option<String>,
+}
+
+#[cfg(target_os = "linux")]
+fn perf_open(config: u64) -> Result<libc::c_int, String> {
+    // struct perf_event_attr, PERF_ATTR_SIZE_VER5 (112 bytes): type at 0,
+    // size at 4, config at 8, flags at 40 (disabled bit 0, exclude_kernel
+    // bit 5, exclude_hv bit 6).  The rest stays zero.
+    let mut attr = [0u8; 112];
+    attr[0..4].copy_from_slice(&0u32.to_ne_bytes()); // PERF_TYPE_HARDWARE
+    attr[4..8].copy_from_slice(&112u32.to_ne_bytes());
+    attr[8..16].copy_from_slice(&config.to_ne_bytes());
+    let flags: u64 = 1 | (1 << 5) | (1 << 6);
+    attr[40..48].copy_from_slice(&flags.to_ne_bytes());
+    // SAFETY: a valid attr buffer of the size it declares; pid 0 = this
+    // process, cpu -1 = any, no group, close on exec.
+    let fd = unsafe {
+        libc::syscall(
+            libc::SYS_perf_event_open,
+            attr.as_ptr(),
+            0 as libc::pid_t,
+            -1 as libc::c_int,
+            -1 as libc::c_int,
+            8 as libc::c_ulong, // PERF_FLAG_FD_CLOEXEC
+        )
+    };
+    if fd < 0 {
+        return Err(format!(
+            "perf_event_open: {}",
+            std::io::Error::last_os_error()
+        ));
+    }
+    Ok(fd as libc::c_int)
+}
+
+impl HwCounters {
+    /// Open the counters, disabled.  Never fails: a counter that cannot
+    /// open records why.
+    pub fn open() -> Self {
+        #[cfg(target_os = "linux")]
+        {
+            let mut fds = Vec::new();
+            let mut error = None;
+            // PERF_COUNT_HW_INSTRUCTIONS = 1, PERF_COUNT_HW_CPU_CYCLES = 0.
+            for config in [1u64, 0u64] {
+                match perf_open(config) {
+                    Ok(fd) => fds.push((fd, config)),
+                    Err(e) => error = Some(e),
+                }
+            }
+            Self { fds, error }
+        }
+        #[cfg(not(target_os = "linux"))]
+        {
+            Self {
+                error: Some("no perf_event_open on this OS".into()),
+            }
+        }
+    }
+
+    /// Reset and enable.
+    pub fn start(&self) {
+        #[cfg(target_os = "linux")]
+        for (fd, _) in &self.fds {
+            // SAFETY: an open perf fd; RESET = 0x2403, ENABLE = 0x2400.
+            unsafe {
+                libc::ioctl(*fd, 0x2403, 0);
+                libc::ioctl(*fd, 0x2400, 0);
+            }
+        }
+    }
+
+    /// Disable and read.
+    pub fn stop(self) -> HwCounts {
+        #[allow(unused_mut)]
+        let mut out = HwCounts {
+            error: self.error.clone(),
+            ..Default::default()
+        };
+        #[cfg(target_os = "linux")]
+        for (fd, config) in &self.fds {
+            let mut value = 0u64;
+            // SAFETY: an open perf fd; DISABLE = 0x2401; an 8-byte read.
+            let n = unsafe {
+                libc::ioctl(*fd, 0x2401, 0);
+                libc::read(*fd, &mut value as *mut u64 as *mut libc::c_void, 8)
+            };
+            if n == 8 {
+                match config {
+                    1 => out.instructions = Some(value),
+                    _ => out.cycles = Some(value),
+                }
+            }
+            // SAFETY: closing the fd this struct owns.
+            unsafe {
+                libc::close(*fd);
+            }
+        }
+        out
+    }
+}

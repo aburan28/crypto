@@ -102,11 +102,26 @@ unseen target**, cold, with every phase charged, verified.
 - **Cold.** Each execution is a fresh process. Nothing a method builds
   (a jump table, a baby-step table, a factor base, a pair table)
   survives to the next execution, so its cost is inside every row.
-- **The window is `cold_end_to_end`.** `S` covers set-up, search,
-  relation collection, linear algebra and the method's own internal
-  verification. For index calculus that window is the right one for
-  `S`, but it is not the IC online window (AGENTS.md "IC measurements"),
-  which `ecbench` does not split out yet (§12).
+- **Two windows.** `S` is `cold_end_to_end`: set-up, search, relation
+  collection, linear algebra and the method's own internal verification,
+  all charged. Beside it every record carries the **one-target online
+  window** of the IC measurement rules (AGENTS.md "IC measurements"):
+  from the first target-dependent computation to the verified recovery,
+  with reusable target-independent set-up outside it.
+  - For index calculus the window opens after the factor base and the
+    oracle's tables. It splits into the five exclusive phases the
+    `vs_rho` claim schema names: `target_query`, `target_PDP`,
+    `target_relation_check`, `target_descent` and
+    `target_recovery_check`, measured by the repository's phase clock
+    (`ic_measurement`) and summing exactly to the window. A phase the
+    method never enters is zero with a recorded reason. For example, the
+    oracles return exact decompositions, so the classic pipeline has no
+    separate relation check.
+  - For rho the window is the target-dependent solve. For the strong
+    reference (`rho.signed_frobenius_strong`), whose jump table `[a]G` is
+    target-independent, the window starts at the first walk start
+    `[c]G + Q`. The stages it includes are `walk`, `collision` and
+    `recovery_check`.
 - **Verified, by someone else.** No solver receives the planted scalar.
   The runner checks `[k]G = Q` and `k = planted` in its own process, and
   `ecbench verify` checks it again from the files. A run that does not
@@ -173,6 +188,7 @@ a run that fails the check loses its isolation level), or **recorded**
 | Memory pressure | reclaim stalls a run | PSI memory `some` total around every run | gated (L2) |
 | A busy host at start | everything above, before the first run | a settle-window preflight (busy ticks per reserved CPU, PSI); refused unless `--allow-busy`, which records it and caps runs below L2 | gated (L2) |
 | Frequency and turbo | the clock is the denominator of wall time | governor, `no_turbo`, `boost`, `isolcpus`, `nohz_full` and SMT control recorded per CPU; required for L3 | recorded, gated (L3) |
+| Instruction count | wall time moves with frequency and contention, instructions retired barely do | user-space instructions and cycles across the solve from the CPU's counters (`perf_event_open`), where the host exposes a PMU; elsewhere the record says why not | recorded |
 | Virtualisation | a guest cannot see or control most of the above | CPU `hypervisor` flag, DMI, `systemd-detect-virt`, `kern.hv_vmm_present` recorded; bare metal required for L3 | recorded, gated (L3) |
 | Heterogeneous cores | Apple P and E cores differ by about 2× | performance levels recorded; with no affinity control the runs are L0 | recorded |
 | Threads | four Rayon threads on one pinned CPU wait on each other | `RAYON_NUM_THREADS=1`, `OMP_NUM_THREADS=1`; child CPU time over wall above 1.05 loses L1 | controlled, gated (L1) |
@@ -233,6 +249,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | family | charged | counted, not charged (`*_uncharged`) |
 |---|---|---|
 | `rho.*` | jump-table set-up, walk starts, every step, cycle escapes, look-ahead additions, internal verification | canonicalisations (negation, signed Frobenius), Frobenius maps |
+| `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
@@ -403,11 +420,11 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
 
 Stated so that nothing here is read as more than it is:
 
-- **The IC online window is not split out.** `ic.pipeline` reports the
-  cold end-to-end window with five phases. The one-target online window
-  of the IC measurement rules (five exclusive target-dependent phases) is
-  not produced yet, so an `ecbench` IC row is not eligible for the
-  `vs_rho` claim checker.
+- **The online window is measured, but no `vs_rho` claim is produced
+  yet.** Every record carries the one-target online window with its
+  exclusive phases (§3), and the strong rho reference the claim rules
+  require is a method. A claim also needs public (unplanted) targets and
+  the IC1 candidate identity, which `ecbench` does not produce yet.
 - **Word-size curves only.** The counted group types hold `GF(p)` with
   `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
   (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
@@ -418,9 +435,10 @@ Stated so that nothing here is read as more than it is:
   wrong read-back (`research/ecbench_numa_vm_20261002`). Remote-memory
   latency, the confounder the binding exists for, is not emulated, so a
   two-socket host remains the test of its effect.
-- **No hardware counters.** Instructions retired would be a third,
-  host-robust measure beside operations and wall time. `perf_event_open`
-  is not wired in.
+- **Hardware counters need a PMU.** Instructions and cycles are read
+  through `perf_event_open` on Linux. macOS, the QEMU guest and most cloud
+  VMs expose no hardware counters, and their records carry the reason
+  instead of a count.
 - **Rho's distinguished-point table is not counted.** Its stores happen
   once per distinguished point, a vanishing fraction of steps. BSGS and
   the kangaroo count their table operations.

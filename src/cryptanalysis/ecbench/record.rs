@@ -15,10 +15,10 @@ use crate::cryptanalysis::ecbench::canonical::sha256_hex;
 use crate::cryptanalysis::ecbench::host::{is_virtual, HostCapsule};
 use crate::cryptanalysis::ecbench::isolation::{
     anon_pages_by_node, current_cpu, mempolicy, mems_allowed, own_affinity, Conditions, CpuPlan,
-    EvictionSummary, Preflight, SelfPlacement, Thresholds,
+    EvictionSummary, HwCounters, HwCounts, Preflight, SelfPlacement, Thresholds,
 };
 use crate::cryptanalysis::ecbench::methods::{
-    resolve, FactorBaseFacts, MethodSpec, PhaseRecord, ResolvedMethod, SolveReport,
+    resolve, FactorBaseFacts, MethodSpec, OnlineWindow, PhaseRecord, ResolvedMethod, SolveReport,
 };
 use crate::cryptanalysis::ecbench::spec::Level;
 use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
@@ -91,6 +91,9 @@ pub struct ChildOutput {
     pub placement: SelfPlacement,
     /// Scheduler statistics across the solve alone.
     pub schedstat_solve: Option<SchedStat>,
+    /// Hardware counters across the solve alone.
+    #[serde(default)]
+    pub hw_solve: Option<HwCounts>,
 }
 
 /// The measured child's whole job: rebuild the workload, check its
@@ -113,6 +116,7 @@ pub fn child_main(input: &str) -> ChildOutput {
         error: None,
         placement: placement.clone(),
         schedstat_solve: None,
+        hw_solve: None,
     };
     let job: ChildInput = match serde_json::from_str(input) {
         Ok(j) => j,
@@ -121,7 +125,7 @@ pub fn child_main(input: &str) -> ChildOutput {
             return out;
         }
     };
-    let result = (|| -> Result<(SolveReport, Option<SchedStat>), String> {
+    let result = (|| -> Result<(SolveReport, Option<SchedStat>, HwCounts), String> {
         if job.schema != CHILD_INPUT_SCHEMA {
             return Err(format!("child input schema `{}`", job.schema));
         }
@@ -139,7 +143,9 @@ pub fn child_main(input: &str) -> ChildOutput {
                 m.method_id, job.expected_method_id
             ));
         }
+        let counters = HwCounters::open();
         let before = schedstat();
+        counters.start();
         let report = crate::cryptanalysis::ecbench::methods::solve(
             &m,
             &inst,
@@ -147,6 +153,7 @@ pub fn child_main(input: &str) -> ChildOutput {
             &w.target,
             job.algorithm_seed,
         )?;
+        let hw = counters.stop();
         let after = schedstat();
         let delta = match (before, after) {
             (Some(a), Some(b)) => Some(SchedStat {
@@ -158,16 +165,17 @@ pub fn child_main(input: &str) -> ChildOutput {
         };
         out.workload_id = Some(w.workload_id);
         out.method_id = Some(m.method_id);
-        Ok((report, delta))
+        Ok((report, delta, hw))
     })();
     placement.cpu_at_end = current_cpu();
     // Where the solve's memory landed, read after it ran.
     placement.anon_pages_by_node = anon_pages_by_node();
     out.placement = placement;
     match result {
-        Ok((r, s)) => {
+        Ok((r, s, hw)) => {
             out.report = Some(r);
             out.schedstat_solve = s;
+            out.hw_solve = Some(hw);
         }
         Err(e) => out.error = Some(e),
     }
@@ -232,6 +240,10 @@ pub struct Timing {
     pub voluntary_switches: u64,
     pub involuntary_switches: u64,
     pub schedstat_solve: Option<SchedStat>,
+    /// User-space instructions and cycles across the solve, where the
+    /// host has a hardware PMU.
+    #[serde(default)]
+    pub hw_solve: Option<HwCounts>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -278,6 +290,9 @@ pub struct Record {
     pub counters: BTreeMap<String, u64>,
     pub factor_base: Option<FactorBaseFacts>,
     pub detail: Value,
+    /// The one-target online window (AGENTS.md "IC measurements").
+    #[serde(default)]
+    pub online: Option<OnlineWindow>,
     pub time: Timing,
     pub isolation: IsolationRecord,
     pub env_class_id: String,

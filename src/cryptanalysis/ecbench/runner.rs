@@ -330,6 +330,7 @@ fn run_child(
     };
     if let Some(o) = &output {
         timing.schedstat_solve = o.schedstat_solve;
+        timing.hw_solve = o.hw_solve.clone();
         timing.solve_wall_ns = o.report.as_ref().map(|r| r.solve_wall_ns);
     }
     Ok(Reaped {
@@ -790,6 +791,7 @@ fn assemble(
             .as_ref()
             .map(|r| r.detail.clone())
             .unwrap_or(serde_json::Value::Null),
+        online: report.as_ref().and_then(|r| r.online.clone()),
         time: reaped.timing.clone(),
         isolation: IsolationRecord {
             level: g.level,

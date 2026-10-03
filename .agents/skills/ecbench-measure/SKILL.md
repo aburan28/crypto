@@ -16,8 +16,10 @@ and ICMS evidence keeps its own protocols.
 Write, in the note or PR that will carry the result:
 
 - the **boundary**: the curve's generic floor `√(π/2A)` in `S` (ecbench records it per
-  run) and the **reference** arm (`rho.negation` on a prime curve,
-  `rho.signed_frobenius` on a Koblitz curve);
+  run) and the **reference** arm (`rho.negation` on a prime curve; on a Koblitz
+  curve `rho.signed_frobenius_strong`, the strong single-target reference the IC
+  claim rules require since 2026-10-01, or `rho.signed_frobenius` for an
+  operations-only comparison);
 - the **hypothesis**, the success and stop conditions, and what is inadmissible
   (changing the workloads, seeds, unit or accounting after seeing results);
 - the **sizes**: at least four curve sizes if any claim is about scaling (§5).
