@@ -67,7 +67,8 @@ The strict JSON input contains exactly:
 * `stop: "panel_complete"` exactly when the planned count is retained, otherwise
   `"interrupted"`, and `claimed_column_logs` (integer list or null).
 
-Unknown fields and JSON floats are rejected. The family is a declaration, not
+Unknown fields, missing nullable claims, duplicate document/plan/attempt keys
+and JSON floats are rejected. The family is a declaration, not
 source admission. Per trial, reconstruct the production collector's keyed
 rand-0.8 StdRng law with an independent PCG seed expansion/ChaCha12/rejection
 sampler. The audit never calls the producer sampler or its curve arithmetic.
@@ -102,7 +103,9 @@ sampler across seeds/trials; replay the retained 216-attempt F5 certificate
 (61 witnesses, 155 exact negatives, 32 dependent rows, rank 29); reject changed
 laws, chronology, geometry, targets, witnesses, negatives and logs; preserve a
 partial full-rank panel and timeout; distinguish duplicate and dependent rows;
-reject inconsistent equations, unknown fields and floats. This is replay of
+reject inconsistent equations, unknown fields and floats.
+The CLI control also rejects duplicate struct keys and preserves an existing
+audit output byte for byte instead of overwriting it. This is replay of
 existing disclosed data, not new natural yield. Keep validation failures and
 their fixes in the PR record.
 

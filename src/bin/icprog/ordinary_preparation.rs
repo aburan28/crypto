@@ -400,6 +400,9 @@ pub fn audit(value: &Value) -> Result<Value, String> {
 
 pub fn run(input: &Path, out: &Path) -> Result<String, String> {
     let before = native::read(input, 8 * 1024 * 1024)?;
+    // Deserialize the original bytes as well as the Value. The struct parser
+    // rejects duplicate document/plan/attempt keys before Value can erase them.
+    let _: Document = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
     let value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
     let result = audit(&value)?;
     native::require(
@@ -545,5 +548,31 @@ mod tests {
             .unwrap()
             .remove("indices");
         assert!(audit(&value).is_err());
+    }
+
+    #[test]
+    fn cli_preserves_output_and_rejects_duplicate_struct_keys() {
+        let root = std::env::temp_dir().join(format!(
+            "ic-ordinary-preparation-cli-{}",
+            std::process::id()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        let input = root.join("input.json");
+        let out = root.join("audit.json");
+        let value = retained();
+        std::fs::write(&input, serde_json::to_vec(&value).unwrap()).unwrap();
+        run(&input, &out).unwrap();
+        let saved = std::fs::read(&out).unwrap();
+        assert!(run(&input, &out).is_err());
+        assert_eq!(std::fs::read(&out).unwrap(), saved);
+        let duplicate = format!(
+            "{{\"schema_version\":1,{}",
+            &serde_json::to_string(&value).unwrap()[1..]
+        );
+        std::fs::write(&input, duplicate).unwrap();
+        let next = root.join("invalid.json");
+        assert!(run(&input, &next).unwrap_err().contains("duplicate field"));
+        assert!(!next.exists());
+        std::fs::remove_dir_all(&root).unwrap();
     }
 }
