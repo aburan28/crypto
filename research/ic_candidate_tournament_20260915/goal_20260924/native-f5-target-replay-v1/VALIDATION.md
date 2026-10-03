@@ -14,10 +14,14 @@ busy lock:
 - Two added transport controls cover exact 256 KiB job delivery with declared
   environment and a nonreading child given a 1 MiB job under a 30 ms deadline.
   The latter retains partial-delivery and confirmed process-group drain.
-- The local CLI receipt in `local-macos-arm64-replay.json` reports
+- The final local CLI receipt in `local-macos-arm64-replay-v2.json` reports
   `PASS_NATIVE_PREPARED_F5_TARGET_MATHEMATICS`, all three historical target
   attempts and independently verified scalar 24886. It executes no child.
 - `git diff --check` passed. Existing unrelated library warnings remain.
+- Local Clippy found one unnecessary temporary vector in the new verifier;
+  it was replaced with a borrowed single-element slice before final validation.
+  `local-macos-arm64-replay.json` preserves the original pre-lint checker
+  receipt. Both receipts replay the same unchanged producer data and scalar.
 
 The local receipt identifies the actual checker binary and source. Linux/macOS
 CI receipts identify their own builds; binary hashes need not match across

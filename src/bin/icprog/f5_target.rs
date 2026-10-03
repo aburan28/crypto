@@ -119,7 +119,7 @@ pub fn verify(prep: &Value, seed: u64, cap: u64, report: &Value) -> Result<Value
         .ok_or("missing state logs")?
         .iter()
         .map(|item| Ok(
-            json!({"point":string_points(&vec![item["point"].clone()])?[0],
+            json!({"point":string_points(std::slice::from_ref(&item["point"]))?[0],
             "log":number(&item["log"])?.to_string()})
         ))
         .collect::<Result<Vec<Value>, String>>()?);
