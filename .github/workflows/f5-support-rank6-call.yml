@@ -1,0 +1,83 @@
+name: Matrix-F5 cut-19 rank-width-6 complete call
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/matrix_f5_f2.rs'
+      - 'src/cryptanalysis/gf2_elim.rs'
+      - 'examples/f4_f2_bench.rs'
+      - 'examples/f5_support_cut19_*.rs'
+      - 'examples/f5_support_split_cpus.rs'
+      - 'research/f5_support_cut19_call_20261002/**'
+      - 'research/f5_support_rank_bits_20261002/**'
+      - '.github/workflows/f5-support-rank6-call.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        threads: [1, 2]
+    env:
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Require x86-64 AVX2 and BMI2 runner
+        run: |
+          test "$(uname -m)" = x86_64
+          rg -m 1 '^flags.*avx2.*bmi2|^flags.*bmi2.*avx2' /proc/cpuinfo
+      - name: Validate exact rank kernels
+        run: |
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-rank6-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-rank6-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build native benchmark and gate
+        run: |
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-rank6-bench.lock" -- cargo build --release --example f4_f2_bench --example f5_support_cut19_pair --example f5_support_split_cpus --example f5_support_cut19_analyze
+      - name: Choose reservable CPUs
+        id: cpus
+        run: |
+          target/release/examples/f5_support_split_cpus \
+            ${{ matrix.threads }} \
+            research/f5_support_rank_bits_20261002/cpu-choice-t${{ matrix.threads }}.json \
+            >> "$GITHUB_OUTPUT"
+      - name: Replay four frozen seed blocks
+        id: run
+        continue-on-error: true
+        run: |
+          bash research/f5_support_cut19_call_20261002/run_linux.sh \
+            ${{ matrix.threads }} \
+            '${{ steps.cpus.outputs.reserve }}' \
+            '${{ steps.cpus.outputs.pin }}' \
+            research/f5_support_rank_bits_20261002/linux-t${{ matrix.threads }} \
+            6
+      - name: Apply frozen complete-call gate
+        run: |
+          target/release/examples/f5_support_cut19_analyze \
+            research/f5_support_rank_bits_20261002/linux-t${{ matrix.threads }} \
+            ${{ matrix.threads }} \
+            research/f5_support_rank_bits_20261002/analysis-t${{ matrix.threads }}.json \
+            6
+      - name: Preserve every qualified and failed attempt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-support-rank6-t${{ matrix.threads }}-${{ github.sha }}
+          path: |
+            research/f5_support_rank_bits_20261002/cpu-choice-t${{ matrix.threads }}.json
+            research/f5_support_rank_bits_20261002/analysis-t${{ matrix.threads }}.json
+            research/f5_support_rank_bits_20261002/linux-t${{ matrix.threads }}/
+          if-no-files-found: warn

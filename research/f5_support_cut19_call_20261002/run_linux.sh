@@ -2,14 +2,19 @@
 # Thin Linux orchestration: the paired benchmark and analysis are native Rust.
 set -u
 
-if [ "$#" -ne 4 ]; then
-  echo 'usage: run_linux.sh THREADS RESERVE_CPUS PIN_CPUS OUTPUT_DIR' >&2
+if [ "$#" -lt 4 ] || [ "$#" -gt 5 ]; then
+  echo 'usage: run_linux.sh THREADS RESERVE_CPUS PIN_CPUS OUTPUT_DIR [CANDIDATE_RANK_BITS]' >&2
   exit 2
 fi
 threads="$1"
 reserve="$2"
 pin="$3"
 root="$4"
+rank_bits="${5:-8}"
+if [ "$rank_bits" != 6 ] && [ "$rank_bits" != 8 ]; then
+  echo 'candidate rank bits must be 6 or 8' >&2
+  exit 2
+fi
 lock="$RUNNER_TEMP/f5-support-cut19-bench.lock"
 overall=0
 for seed in frozen holdout_a holdout_b holdout_c; do
@@ -25,10 +30,10 @@ for seed in frozen holdout_a holdout_b holdout_c; do
       python3 tools/isolated_bench.py reserve \
       --lock "$lock" --cpus "$reserve" \
       --out "$directory/isolation.jsonl" --settle 10 --period 2 \
-      --label "f5-support-cut19-t$threads-$seed-attempt$attempt" \
+      --label "f5-support-cut19-b$rank_bits-t$threads-$seed-attempt$attempt" \
       -- taskset -c "$pin" target/release/examples/f5_support_cut19_pair \
       target/release/examples/f4_f2_bench "$directory/paired.json" \
-      "$seed" "$threads" >"$directory/stdout.txt" 2>"$directory/stderr.txt"
+      "$seed" "$threads" "$rank_bits" >"$directory/stdout.txt" 2>"$directory/stderr.txt"
     code=$?
     printf '{"exit_code":%s}\n' "$code" >"$directory/exit.json"
     if [ "$code" -eq 0 ] \

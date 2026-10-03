@@ -67,6 +67,7 @@ fn run_one(
     seed: u64,
     threads: usize,
     mode: u8,
+    candidate_rank_bits: u8,
     phase: &str,
     pair: usize,
     position: usize,
@@ -89,6 +90,10 @@ fn run_one(
         .env("KIC_GF2_AVX2_TABLE_BUILD", "0")
         .env("KIC_GF2_BRANCHLESS_STRIP", "1")
         .env("KIC_GF2_ROW_BASIS_RANK", if mode == 1 { "1" } else { "0" })
+        .env(
+            "KIC_GF2_ROW_BASIS_BITS",
+            if mode == 1 { candidate_rank_bits } else { 8 }.to_string(),
+        )
         .env(
             "KIC_GF2_ROW_BASIS_TABLES",
             if mode == 1 { "8" } else { "4" },
@@ -114,6 +119,7 @@ fn run_one(
     let mut record = json!({
         "phase": phase, "workload": workload, "seed_xor_hex": format!("{seed:016x}"),
         "pair": pair, "position": position, "mode": mode,
+        "rank_table_bits_cap": if mode == 1 { candidate_rank_bits } else { 8 },
         "row_basis_rank_tables": if mode == 1 { 8 } else { 4 },
         "rayon_threads": threads, "process_wall_ms": start.elapsed().as_secs_f64() * 1000.0,
         "exit_code": output.status.code(), "stdout": stdout, "stderr": stderr,
@@ -279,22 +285,24 @@ fn summary(runs: &[Value]) -> Value {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(
-        args.len(),
-        5,
-        "usage: f5_support_cut19_pair BINARY OUTPUT WORKLOAD THREADS"
+    assert!(
+        args.len() == 5 || args.len() == 6,
+        "usage: f5_support_cut19_pair BINARY OUTPUT WORKLOAD THREADS [CANDIDATE_RANK_BITS]"
     );
     let binary = fs::canonicalize(&args[1]).unwrap();
     let output = PathBuf::from(&args[2]);
     let workload = &args[3];
     let threads: usize = args[4].parse().unwrap();
     assert!(threads == 1 || threads == 2);
+    let candidate_rank_bits: u8 = args.get(5).map_or(8, |value| value.parse().unwrap());
+    assert!(candidate_rank_bits == 6 || candidate_rank_bits == 8);
     let seed = seed_for(workload);
     fs::create_dir_all(output.parent().unwrap()).unwrap();
     let mut receipt = json!({
         "status": "running", "primary_case": PRIMARY, "workload": workload,
         "seed_xor_hex": format!("{seed:016x}"), "pairs_per_phase": 5,
-        "rayon_threads": threads, "binary_sha256": hash_file(&binary),
+        "rayon_threads": threads, "candidate_rank_bits_cap": candidate_rank_bits,
+        "binary_sha256": hash_file(&binary),
         "benchmark_source_sha256": hash_file("examples/f4_f2_bench.rs"),
         "harness_source_sha256": hash_file("examples/f5_support_cut19_pair.rs"),
         "f5_source_sha256": hash_file("src/cryptanalysis/matrix_f5_f2.rs"),
@@ -328,7 +336,15 @@ fn main() {
     }
     for (phase, pair, position, mode) in sequence {
         let mut record = run_one(
-            &binary, workload, seed, threads, mode, phase, pair, position,
+            &binary,
+            workload,
+            seed,
+            threads,
+            mode,
+            candidate_rank_bits,
+            phase,
+            pair,
+            position,
         );
         if record["status"] == "ok" {
             let signature: BTreeMap<String, Value> = CASES

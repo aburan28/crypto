@@ -35,14 +35,15 @@ fn qualified(dir: &Path) -> Option<(Value, Value)> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    assert_eq!(
-        args.len(),
-        4,
-        "usage: f5_support_cut19_analyze ROOT THREADS REPORT"
+    assert!(
+        args.len() == 4 || args.len() == 5,
+        "usage: f5_support_cut19_analyze ROOT THREADS REPORT [CANDIDATE_RANK_BITS]"
     );
     let root = PathBuf::from(&args[1]);
     let threads: usize = args[2].parse().unwrap();
     assert!(threads == 1 || threads == 2);
+    let candidate_rank_bits: u8 = args.get(4).map_or(8, |value| value.parse().unwrap());
+    assert!(candidate_rank_bits == 6 || candidate_rank_bits == 8);
     let mut all_pass = true;
     let mut rows = Vec::new();
     let mut sources: Option<Value> = None;
@@ -89,6 +90,11 @@ fn main() {
             .unwrap_or(0);
         let work_ratio = candidate_ops as f64 / reference_ops as f64;
         let mut errors: Vec<String> = Vec::new();
+        if paired["candidate_rank_bits_cap"].as_u64() != Some(candidate_rank_bits as u64)
+            || paired["runs"][1]["rank_table_bits_cap"].as_u64() != Some(candidate_rank_bits as u64)
+        {
+            errors.push("candidate rank-table cap mismatch".to_owned());
+        }
         if paired["host"]["os"] != "linux" || paired["host"]["arch"] != "x86_64" {
             errors.push("not a Linux x86-64 host".to_owned());
         }
@@ -128,7 +134,8 @@ fn main() {
         }));
     }
     let report = json!({"status":if all_pass {"pass"} else {"fail"},
-        "threads":threads, "selected_sources":sources, "rows":rows});
+        "threads":threads, "candidate_rank_bits_cap":candidate_rank_bits,
+        "selected_sources":sources, "rows":rows});
     fs::write(
         &args[3],
         format!("{}\n", serde_json::to_string_pretty(&report).unwrap()),
