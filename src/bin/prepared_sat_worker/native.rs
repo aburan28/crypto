@@ -6,6 +6,7 @@ use serde_json::{json, Value};
 #[cfg(unix)]
 use std::os::unix::{
     fs::{OpenOptionsExt, PermissionsExt},
+    io::AsRawFd,
     process::CommandExt,
 };
 use std::{
@@ -397,7 +398,63 @@ pub fn measured_child(
     ledger: &Path,
     helper: bool,
 ) -> Result<NativeOutput, String> {
+    let environment = [("LC_ALL".into(), "C".into())];
+    measured_child_request(ChildRequest {
+        program,
+        args,
+        cwd,
+        stem,
+        deadline_ms,
+        ledger,
+        helper,
+        input: None,
+        environment: &environment,
+    })
+}
+
+/// Explicit launch policy for a frozen worker. The caller must bind the exact
+/// input bytes and environment in its registration and independent audit.
+pub struct ChildRequest<'a> {
+    pub program: &'a Path,
+    pub args: &'a [String],
+    pub cwd: &'a Path,
+    pub stem: &'a Path,
+    pub deadline_ms: u64,
+    pub ledger: &'a Path,
+    pub helper: bool,
+    pub input: Option<&'a [u8]>,
+    pub environment: &'a [(String, String)],
+}
+
+pub fn measured_child_request(request: ChildRequest<'_>) -> Result<NativeOutput, String> {
+    let ChildRequest {
+        program,
+        args,
+        cwd,
+        stem,
+        deadline_ms,
+        ledger,
+        helper,
+        input,
+        environment,
+    } = request;
     require(cfg!(unix), "native process watchdog requires Unix")?;
+    require(
+        !helper || input.is_none(),
+        "helper handshake cannot also receive a job",
+    )?;
+    require(
+        input.is_none_or(|bytes| bytes.len() <= 1_048_576),
+        "worker job exceeds stdin limit",
+    )?;
+    let env_record = environment
+        .iter()
+        .cloned()
+        .collect::<std::collections::BTreeMap<_, _>>();
+    require(
+        env_record.len() == environment.len(),
+        "duplicate launch environment key",
+    )?;
     let before = sha256(&read(program, 128 * 1024 * 1024)?);
     let stdout_path = stem.with_extension("stdout");
     let stderr_path = stem.with_extension("stderr");
@@ -416,8 +473,8 @@ pub fn measured_child(
         .args(args)
         .current_dir(cwd)
         .env_clear()
-        .env("LC_ALL", "C")
-        .stdin(if helper {
+        .envs(environment.iter().map(|(key, value)| (key, value)))
+        .stdin(if helper || input.is_some() {
             Stdio::piped()
         } else {
             Stdio::null()
@@ -439,39 +496,99 @@ pub fn measured_child(
         let mut stdin = guard.child.stdin.take().ok_or("missing helper handshake")?;
         stdin.write_all(b"GO\n").map_err(|e| e.to_string())?;
     }
+    // Deliver registered jobs inside the watchdog loop. A blocking write here
+    // would let a worker which never reads stdin evade its deadline.
+    let mut job_pipe = if input.is_some() {
+        let pipe = guard
+            .child
+            .stdin
+            .take()
+            .ok_or("missing registered job pipe")?;
+        #[cfg(unix)]
+        {
+            let fd = pipe.as_raw_fd();
+            let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
+            require(flags >= 0, "cannot inspect registered job pipe")?;
+            require(
+                unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } >= 0,
+                "cannot make registered job pipe nonblocking",
+            )?;
+        }
+        Some(pipe)
+    } else {
+        None
+    };
+    let mut input_written = 0;
+    let mut input_error: Option<String> = None;
     let mut timed_out = false;
     let mut output_limit = false;
     let status = loop {
+        if let (Some(bytes), Some(pipe)) = (input, job_pipe.as_mut()) {
+            if input_written < bytes.len() {
+                let end = bytes.len().min(input_written + 65_536);
+                match pipe.write(&bytes[input_written..end]) {
+                    Ok(0) => input_error = Some("registered job pipe made no progress".into()),
+                    Ok(n) => input_written += n,
+                    Err(e)
+                        if matches!(
+                            e.kind(),
+                            std::io::ErrorKind::WouldBlock | std::io::ErrorKind::Interrupted
+                        ) => {}
+                    Err(e) => input_error = Some(e.to_string()),
+                }
+            }
+            if input_written == bytes.len() || input_error.is_some() {
+                job_pipe.take(); // EOF is part of the worker's input protocol.
+            }
+        }
         if let Some(status) = guard.child.try_wait().map_err(|e| e.to_string())? {
             break status;
         }
         output_limit = [&stdout_path, &stderr_path]
             .iter()
             .any(|p| fs::metadata(p).map_or(true, |m| m.len() > 8 * 1024 * 1024));
-        if started.elapsed() >= Duration::from_millis(deadline_ms) || output_limit {
-            timed_out = !output_limit;
+        if started.elapsed() >= Duration::from_millis(deadline_ms)
+            || output_limit
+            || input_error.is_some()
+        {
+            timed_out = !output_limit && input_error.is_none();
             kill_group(pid);
             guard.child.kill().map_err(|e| e.to_string())?;
             break guard.child.wait().map_err(|e| e.to_string())?;
         }
         std::thread::sleep(Duration::from_millis(5));
     };
+    job_pipe.take();
+    if input.is_some_and(|bytes| input_written != bytes.len()) && input_error.is_none() {
+        input_error =
+            Some("worker stopped before the complete registered job was delivered".into());
+    }
     let wall_ns = started.elapsed().as_nanos() as u64;
     // Always terminate descendants, including those retained after a normal parent exit.
     let drained = confirm_drain(pid);
     let after = sha256(&read(program, 128 * 1024 * 1024)?);
     let out = read(&stdout_path, 8 * 1024 * 1024)?;
     let err = read(&stderr_path, 8 * 1024 * 1024)?;
-    let receipt = json!({"argv":std::iter::once(program.to_string_lossy().into_owned()).chain(args.iter().cloned()).collect::<Vec<_>>(),
+    let mut receipt = json!({"argv":std::iter::once(program.to_string_lossy().into_owned()).chain(args.iter().cloned()).collect::<Vec<_>>(),
         "cwd":cwd,"pid":pid,"deadline_ms":deadline_ms,"child_wall_ns":wall_ns,"exit_code":status.code(),
         "timed_out":timed_out,"output_limit":output_limit,"executable_sha256_before":before,"executable_sha256_after":after,
         "stdout_bytes":out.len(),"stdout_sha256":sha256(&out),"stderr_bytes":err.len(),"stderr_sha256":sha256(&err),
-        "environment":{"LC_ALL":"C"},"process_group_drain_requested":true,"process_group_drain_confirmed":drained});
+        "environment":env_record,"process_group_drain_requested":true,"process_group_drain_confirmed":drained});
+    if let Some(bytes) = input {
+        receipt["stdin_bytes"] = json!(bytes.len());
+        receipt["stdin_sha256"] = json!(sha256(bytes));
+        receipt["stdin_written_bytes"] = json!(input_written);
+        receipt["stdin_write_error"] = json!(input_error);
+    }
     save(&stem.with_extension("receipt.json"), &receipt)?;
     require(before == after, "child executable changed during execution")?;
     require(
         drained,
         "child process group did not drain; receipt retained",
+    )?;
+    require(
+        input_error.is_none(),
+        "registered job delivery failed; receipt retained",
     )?;
     Ok(NativeOutput {
         exit_code: status.code(),
@@ -723,6 +840,73 @@ mod tests {
         let report=extract_assets(&root.join("research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/native-inputs-macos-arm64"),&p.join("assets")).unwrap();
         assert_eq!(report["files"].as_object().unwrap().len(), 14);
         assert_eq!(report["archive_sha256"], ARCHIVE_SHA);
+        fs::remove_dir_all(p).unwrap();
+    }
+    #[cfg(unix)]
+    #[test]
+    fn registered_job_preserves_exact_input_and_environment() {
+        let p = temp("job-input");
+        let shell = Path::new("/bin/sh").canonicalize().unwrap();
+        let bytes = vec![b'x'; 262_144]; // Exceeds a pipe's capacity.
+        let environment = [
+            ("LC_ALL".into(), "C".into()),
+            ("CONTROL_VALUE".into(), "sealed".into()),
+        ];
+        let out = measured_child_request(ChildRequest {
+            program: &shell,
+            args: &[
+                "-c".into(),
+                "test \"$CONTROL_VALUE\" = sealed && cat".into(),
+            ],
+            cwd: &p,
+            stem: &p.join("job"),
+            deadline_ms: 5000,
+            ledger: &p.join("pids"),
+            helper: false,
+            input: Some(&bytes),
+            environment: &environment,
+        })
+        .unwrap();
+        assert_eq!(out.exit_code, Some(0));
+        assert_eq!(out.stdout.as_bytes(), bytes);
+        assert_eq!(out.receipt["stdin_sha256"], sha256(&bytes));
+        assert_eq!(out.receipt["stdin_written_bytes"], bytes.len());
+        assert!(out.receipt["stdin_write_error"].is_null());
+        assert_eq!(
+            out.receipt["environment"],
+            json!({"LC_ALL":"C", "CONTROL_VALUE":"sealed"})
+        );
+        assert_eq!(out.receipt["process_group_drain_confirmed"], true);
+        drain_ledger(&p.join("pids")).unwrap();
+        fs::remove_dir_all(p).unwrap();
+    }
+    #[cfg(unix)]
+    #[test]
+    fn nonreading_worker_cannot_block_registered_job_deadline() {
+        let p = temp("job-timeout");
+        let shell = Path::new("/bin/sh").canonicalize().unwrap();
+        let bytes = vec![b'x'; 1_048_576];
+        let start = Instant::now();
+        let result = measured_child_request(ChildRequest {
+            program: &shell,
+            args: &["-c".into(), "sleep 30 & wait".into()],
+            cwd: &p,
+            stem: &p.join("job"),
+            deadline_ms: 30,
+            ledger: &p.join("pids"),
+            helper: false,
+            input: Some(&bytes),
+            environment: &[],
+        });
+        assert!(result.unwrap_err().contains("job delivery failed"));
+        assert!(start.elapsed() < Duration::from_secs(5));
+        let receipt = load(&p.join("job.receipt.json")).unwrap();
+        assert_eq!(receipt["timed_out"], true);
+        assert_eq!(receipt["stdin_bytes"], bytes.len());
+        assert!(receipt["stdin_written_bytes"].as_u64().unwrap() < bytes.len() as u64);
+        assert!(receipt["stdin_write_error"].is_string());
+        assert_eq!(receipt["process_group_drain_confirmed"], true);
+        drain_ledger(&p.join("pids")).unwrap();
         fs::remove_dir_all(p).unwrap();
     }
     #[cfg(unix)]
