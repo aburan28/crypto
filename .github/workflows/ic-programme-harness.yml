@@ -27,6 +27,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
       - 'docs/ic/boundary_targets.json'
@@ -45,6 +46,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'tests/icprog.rs'
       - '.github/workflows/ic-programme-harness.yml'
@@ -88,6 +90,7 @@ jobs:
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
       - name: Resolve and retain the ignored development lockfile before replay builds
         run: |
+          git ls-files --error-unmatch research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1/data/Cargo.lock
           "$RUNNER_TEMP/native-busy" busy -- cargo generate-lockfile
           rustc --version --verbose > "$RUNNER_TEMP/native-sat-rustc.txt"
       - name: Replay disclosed source and preparation, with mutation controls
@@ -96,6 +99,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
@@ -105,6 +109,10 @@ jobs:
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-control-replay-validation \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1 \
+            --validation-registration-sha256 421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf \
+            --out "$RUNNER_TEMP/native-f5-build-validation-replay.json"
           target/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true
       - uses: actions/upload-artifact@v4
         with:
@@ -113,6 +121,7 @@ jobs:
             ${{ runner.temp }}/native-sat-replay.json
             ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-f5-target-replay.json
+            ${{ runner.temp }}/native-f5-build-validation-replay.json
             ${{ runner.temp }}/native-sat-rustc.txt
             Cargo.lock
           if-no-files-found: error
