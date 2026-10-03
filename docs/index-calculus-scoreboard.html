@@ -10299,6 +10299,19 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>The combined five-plus-six diagnostic process took 4.07 s wall on macOS arm64 and has no matched same-host rho denominator. The 2.929 s six-sum query phase and logical-add counts are stage measurements; no complete native IC/rho speedup, n41/n53 result, n131 transfer, or Certicom attack follows. The next gate is a preregistered, fully charged residual-offset policy on new disjoint Q, then same-Q strong batch rho and the other factor-base policies. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_m6_mitm_20261002/RESULT.md">Protocol, raw result, independent replay and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1254">PR #1254</a>.</p>
 </section>
 <!-- END n37-native-m6-mitm-20261002 -->
+<!-- BEGIN n37-native-residual-20261002 -->
+<section class="panel" id="n37-native-residual-20261002">
+<div class="panel-head"><h2>Degree-73 descendant-native n37 residual search: complete on disjoint b01 Q <span class="chip">batch correctness pass</span></h2>
+<p>A preregistered Rust runner kept the fixed 42-column native base and exact signed 3+3 oracle, then tried a direct query followed only on a complete miss by at most 16 target-independent shifts. On the untouched orbit-disjoint b01 block, it rebuilt rank 42 from 49 target-blind probes and independently verified all 1,024 public-target logarithms. Source-curve replay checked every direct and shifted hit or complete miss, solved the base logs independently, verified each scalar, and compared with the published fixture only afterward.</p></div>
+<div class="table-scroll"><table>
+<caption>Support and attempt counts on frozen public Q. The b00 and b01 blocks differ; these are correctness diagnostics, not matched runtime or IC/rho speed ratios.</caption>
+<thead><tr><th>Arm / Q block</th><th>Direct hits / 1,024</th><th>Shifted recoveries</th><th>Total oracle queries</th><th>Verified logs</th><th>Decision</th></tr></thead><tbody>
+<tr><td>b00 bare direct 3+3, PR #1254</td><td>917</td><td>not attempted</td><td>1,024</td><td>917</td><td>107 complete misses</td></tr>
+<tr><td>b01 direct + frozen shifts, PR #1261</td><td>939</td><td>85 (79 on first shift, six on second)</td><td>1,115</td><td>1,024</td><td>complete on this block</td></tr>
+</tbody></table></div>
+<p>The one diagnostic b01 process took 2.37 s wall on macOS arm64 and counted 33,647,429 logical addition requests plus 4,289 explicit scalar multiplications; scalar internals and isogeny arithmetic are not converted to a common unit. Matched same-host rho, common-unit S, one-target online cost, speedup, n41/n53 transfer and Certicom-scale conclusions remain unset. The next gate is a fully charged matched b01 batch rho comparison followed by the required one-target same-Q comparison. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_20261002/RESULT.md">Protocol, raw archive, replay receipt, timing and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1261">PR #1261</a>.</p>
+</section>
+<!-- END n37-native-residual-20261002 -->
 <!-- BEGIN base-window-screen-outcome-20261001 -->
 <section class="panel" id="base-window-screen-outcome-20261001">
 <div class="panel-head"><h2>Equal-size n41 factor-base windows: no measured selector opportunity <span class="chip">scoped negative</span></h2>
