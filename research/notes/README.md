@@ -21,6 +21,7 @@ its old name still identify it.
 | [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
 | [`RESEARCH_P256_RHO_ARITHMETIC.md`](ecdlp-general/RESEARCH_P256_RHO_ARITHMETIC.md) | Pre-registered P-256 rho engineering matrix: fused Solinas reduction, weak reduction, invariant partitioning, table sweeps, batched affine inversion, DP batching, and CPU/GPU/FPGA ablations |
+| [`RESEARCH_NZMS_AMS_AUSTMS_2024_IDEAS.md`](ecdlp-general/RESEARCH_NZMS_AMS_AUSTMS_2024_IDEAS.md) | The 2024 NZMS–AMS–AustMS programme screened for ECDLP ideas under R1–R5: no new licensing datum; six closures derived (CM pairings keep `k`, `Z[τ]`-net zero lattice is 2-D BSGS, point counts carry nothing, character-sum certificates need `\|F\| > √r`, noncommutative relaxations are weaker than the linear certificate, far-from-uniform rotation-invariant matroids need a Singer degree); one live lever — support-complex (Stanley–Reisner) factor bases — preregistered as stage diagnostic `H_Δ` on the 2-primitive ladder 13/19/37/53 with a stop rule against the pair-table null. No measurement |
 
 ## index-calculus — Semaev decomposition, factor bases, Gröbner, first-fall degree
 
