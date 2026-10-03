@@ -10309,9 +10309,22 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <tr><td>b00 bare direct 3+3, PR #1254</td><td>917</td><td>not attempted</td><td>1,024</td><td>917</td><td>107 complete misses</td></tr>
 <tr><td>b01 direct + frozen shifts, PR #1261</td><td>939</td><td>85 (79 on first shift, six on second)</td><td>1,115</td><td>1,024</td><td>complete on this block</td></tr>
 </tbody></table></div>
-<p>The one diagnostic b01 process took 2.37 s wall on macOS arm64 and counted 33,647,429 logical addition requests plus 4,289 explicit scalar multiplications; scalar internals and isogeny arithmetic are not converted to a common unit. Matched same-host rho, common-unit S, one-target online cost, speedup, n41/n53 transfer and Certicom-scale conclusions remain unset. The next gate is a fully charged matched b01 batch rho comparison followed by the required one-target same-Q comparison. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_20261002/RESULT.md">Protocol, raw archive, replay receipt, timing and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1261">PR #1261</a>.</p>
+<p>The one diagnostic b01 process took 2.37 s wall on macOS arm64 and counted 33,647,429 logical addition requests plus 4,289 explicit scalar multiplications; scalar internals and isogeny arithmetic are not converted to a common unit. Matched b01 batch rho, common-unit S, speedup, n41/n53 transfer and Certicom-scale conclusions remain unset. The b02 one-target same-Q gate is reported separately below. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_20261002/RESULT.md">Protocol, raw archive, replay receipt, timing and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1261">PR #1261</a>.</p>
 </section>
 <!-- END n37-native-residual-20261002 -->
+<!-- BEGIN n37-native-one-target-20261003 -->
+<section class="panel" id="n37-native-one-target-20261003">
+<div class="panel-head"><h2>Degree-73 descendant-native n37 versus one-target rho on disjoint b02 Q <span class="chip">accounting</span></h2>
+<p>Each of 32 previously unseen public Q was solved from a fresh process by both the fixed 42-column signed 3+3 IC arm and the rung-3 signed-Frobenius rho arm, with five interleaved repetitions per Q. Independent source-curve replay checked all 160 pairs, including every IC support/miss decision, both recovered scalars, fixture equality, and exact online phase sums. IC recovered 27 Q directly and five with frozen shifts: 39 queries total, at most four for one Q.</p></div>
+<div class="table-scroll"><table>
+<caption>Median per-Q instrumented explicit point-addition requests; these counters use different arithmetic kernels and omit scalar multiplication internals and some isogeny work, so their ratio is not a speed ratio. Cold IC setup is rebuilt for each Q; rho uses no cross-target table.</caption>
+<thead><tr><th>One-target arm</th><th>Explicit addition requests</th><th>Explicit scalar multiplications</th><th>Verified Q</th><th>Complete-cost S / rho ratio</th></tr></thead><tbody>
+<tr><td>Descendant-native K42 + fixed shifts</td><td>1,634,155</td><td>197</td><td>32/32</td><td>unset</td></tr>
+<tr><td>Rung-3 signed-Frobenius rho</td><td>5,155</td><td>35</td><td>32/32</td><td>unset</td></tr>
+</tbody></table></div>
+<p>The rho scalar-multiplication counter omits one public-point subgroup check done before online timing, so its corrected cold count is at least 36. Five same-command A/A pairs on this macOS host had maximum online-time spreads of 188.3% for IC and 76.0% for rho, with no isolated core. Wall times are descriptive only. The next cost gate is a calibrated common operation unit plus uncontended same-host runs; the next scaling gate is the same one-target protocol at n41/n53 and then m=83. No ECC2K-130 attack-speed or transfer claim follows. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_one_target_20261003/RESULT.md">Frozen protocol, raw archive, analysis, replay and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1263">PR #1263</a>.</p>
+</section>
+<!-- END n37-native-one-target-20261003 -->
 <!-- BEGIN base-window-screen-outcome-20261001 -->
 <section class="panel" id="base-window-screen-outcome-20261001">
 <div class="panel-head"><h2>Equal-size n41 factor-base windows: no measured selector opportunity <span class="chip">scoped negative</span></h2>

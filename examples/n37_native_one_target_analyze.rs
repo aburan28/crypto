@@ -64,6 +64,7 @@ fn run(output: &Path) -> Result<(), String> {
         "rho":digest(&read(Path::new("examples/koblitz_rho_batch_ks_strong_online.rs"))?),
         "replay":digest(&read(Path::new("examples/n37_native_m6_one_target_replay.rs"))?),
         "runner":digest(&read(&root.join("run_panel.sh"))?),
+        "aa_runner":digest(&read(&root.join("run_aa.sh"))?),
         "host":digest(&read(&root.join("HOST.json"))?),
         "protocol":digest(&read(&root.join("PROTOCOL.md"))?)
     });
@@ -81,9 +82,12 @@ fn run(output: &Path) -> Result<(), String> {
     for index in 0..32usize {
         let mut answer: Option<u64> = None;
         let mut frozen_ic: Option<Value> = None;
+        let mut ic_counts: Option<Value> = None;
         let mut ic_times = Vec::new();
         let mut rho_times = Vec::new();
         let mut rho_steps = Vec::new();
+        let mut rho_adds = Vec::new();
+        let mut rho_scalar_muls = Vec::new();
         let mut ic_real = Vec::new();
         let mut rho_real = Vec::new();
         for repeat in 0..5usize {
@@ -176,6 +180,34 @@ fn run(output: &Path) -> Result<(), String> {
                     "residual_oracle_counts":ic["residual_oracle_counts"],
                     "scalar_multiplications":ic["scalar_multiplications"]
                 }));
+                let ic_build_adds = required_u64(&ic["build_counts"], "build_adds")?;
+                let ic_relation_adds = required_u64(&ic["relation_oracle_counts"], "query_adds")?;
+                let ic_direct_adds = required_u64(&ic["direct_oracle_counts"], "query_adds")?;
+                let ic_residual_adds = required_u64(&ic["residual_oracle_counts"], "query_adds")?;
+                let witness_adds = [
+                    &ic["relation_oracle_counts"],
+                    &ic["direct_oracle_counts"],
+                    &ic["residual_oracle_counts"],
+                ]
+                .iter()
+                .map(|counts| required_u64(counts, "witness_adds"))
+                .sum::<Result<u64, _>>()?;
+                let external_adds = required_u64(&ic, "external_witness_replay_adds")?;
+                let shift_adds = required_u64(&ic, "residual_shift_adds")?;
+                ic_counts = Some(json!({
+                    "build_adds":ic_build_adds,
+                    "relation_query_adds":ic_relation_adds,
+                    "direct_query_adds":ic_direct_adds,
+                    "residual_query_adds":ic_residual_adds,
+                    "oracle_witness_adds":witness_adds,
+                    "external_witness_replay_adds":external_adds,
+                    "residual_shift_adds":shift_adds,
+                    "instrumented_explicit_add_subtotal":ic_build_adds+ic_relation_adds
+                        +ic_direct_adds+ic_residual_adds+witness_adds+external_adds+shift_adds,
+                    "explicit_scalar_multiplications":ic["scalar_multiplications"]["total"],
+                    "degree_73_transport_calls":ic["degree_73_transport_calls"],
+                    "half_table_distinct_sums":ic["build_counts"]["distinct_half_sums"]
+                }));
                 direct += ic["direct_hits"].as_u64().unwrap_or(0) as usize;
                 shifted += ic["shifted_hits"].as_u64().unwrap_or(0) as usize;
                 let attempts = required_u64(&ic, "total_target_attempts")? as usize;
@@ -187,6 +219,11 @@ fn run(output: &Path) -> Result<(), String> {
             ic_times.push(ic_online);
             rho_times.push(rho_online);
             rho_steps.push(required_u64(rho, "walk_steps")?);
+            rho_adds.push(required_u64(&rho_summary["charges"], "group_additions")?);
+            rho_scalar_muls.push(required_u64(
+                &rho_summary["charges"],
+                "scalar_multiplications",
+            )?);
             ic_real.push(ic_real_s);
             rho_real.push(rho_real_s);
             min_ic_online = min_ic_online.min(ic_online);
@@ -210,6 +247,9 @@ fn run(output: &Path) -> Result<(), String> {
             "ic_online_ns_median":median(&ic_times),
             "rho_online_ns_median":median(&rho_times),
             "rho_walk_steps_median":median(&rho_steps),
+            "rho_explicit_group_additions_median":median(&rho_adds),
+            "rho_explicit_scalar_multiplications_median":median(&rho_scalar_muls),
+            "ic_counted_work":ic_counts,
             "ic_online_ns_by_repeat":ic_times,
             "rho_online_ns_by_repeat":rho_times,
             "ic_process_real_s_by_repeat":ic_real,
@@ -218,6 +258,65 @@ fn run(output: &Path) -> Result<(), String> {
     }
     if direct + shifted != 32 || rows.len() != 160 {
         return Err("incomplete frozen panel".into());
+    }
+    let mut aa_rows = Vec::new();
+    let mut ic_aa_max_relative = 0.0f64;
+    let mut rho_aa_max_relative = 0.0f64;
+    for repeat in 0..5usize {
+        let mut copies = Vec::new();
+        for copy in ['a', 'b'] {
+            let prefix = root.join("aa").join(format!("q00_r{repeat}_{copy}"));
+            let (ic, ic_sha) = parse(&prefix.with_extension("ic.json"))?;
+            let (replay, _) = parse(&prefix.with_extension("replay.json"))?;
+            let rho_bytes = read(&prefix.with_extension("rho.jsonl"))?;
+            let rho_sha = digest(&rho_bytes);
+            let rho_text =
+                String::from_utf8(rho_bytes).map_err(|error| format!("A/A rho text: {error}"))?;
+            let rho_rows: Vec<Value> = rho_text
+                .lines()
+                .map(|line| serde_json::from_str(line).map_err(|error| error.to_string()))
+                .collect::<Result<_, _>>()?;
+            if rho_rows.len() != 2
+                || replay["raw_result_sha256"] != ic_sha
+                || replay["rho_result_sha256"] != rho_sha
+                || replay["complete_one_target"] != true
+                || replay["rho_source_scalar_verified"] != true
+                || ic["target_index"] != 0
+                || rho_rows[0]["recovered_fixture_scalar"] != ic["target"]["recovered_log"]
+                || rho_rows[1]["batch_seed"] != 2026100110102u64
+            {
+                return Err(format!("A/A round {repeat} copy {copy} failed replay"));
+            }
+            copies.push(json!({
+                "copy":copy.to_string(),
+                "ic_online_ns":required_u64(&ic,"online_ns")?,
+                "rho_online_ns":required_u64(&rho_rows[0],"online_ns")?,
+                "ic_process_real_s":real_time(&prefix.with_extension("ic.stderr"))?,
+                "rho_process_real_s":real_time(&prefix.with_extension("rho.stderr"))?,
+                "ic_answer":ic["target"]["recovered_log"],
+                "ic_attempts":ic["target"]["attempts"],
+                "rho_walk_steps":rho_rows[0]["walk_steps"]
+            }));
+        }
+        if copies[0]["ic_answer"] != copies[1]["ic_answer"]
+            || copies[0]["ic_attempts"] != copies[1]["ic_attempts"]
+            || copies[0]["rho_walk_steps"] != copies[1]["rho_walk_steps"]
+        {
+            return Err(format!("A/A round {repeat} changed deterministic output"));
+        }
+        let ic_a = required_u64(&copies[0], "ic_online_ns")? as f64;
+        let ic_b = required_u64(&copies[1], "ic_online_ns")? as f64;
+        let rho_a = required_u64(&copies[0], "rho_online_ns")? as f64;
+        let rho_b = required_u64(&copies[1], "rho_online_ns")? as f64;
+        let ic_spread = (ic_a - ic_b).abs() / ((ic_a + ic_b) / 2.0);
+        let rho_spread = (rho_a - rho_b).abs() / ((rho_a + rho_b) / 2.0);
+        ic_aa_max_relative = ic_aa_max_relative.max(ic_spread);
+        rho_aa_max_relative = rho_aa_max_relative.max(rho_spread);
+        aa_rows.push(json!({
+            "round":repeat,"copies":copies,
+            "ic_online_relative_spread":ic_spread,
+            "rho_online_relative_spread":rho_spread
+        }));
     }
     let report = json!({
         "schema":"n37-native-one-target-panel-analysis-v1",
@@ -231,6 +330,12 @@ fn run(output: &Path) -> Result<(), String> {
         "direct_points":direct,"shifted_points":shifted,
         "total_queries_first_repetition":all_attempts,
         "maximum_queries_per_point":max_attempts,
+        "aa_same_command_control":{
+            "rounds":5,"all_replays_pass":true,
+            "max_ic_online_relative_spread":ic_aa_max_relative,
+            "max_rho_online_relative_spread":rho_aa_max_relative,
+            "rows":aa_rows
+        },
         "online_ns_range_all_runs":{
             "ic":[min_ic_online,max_ic_online],"rho":[min_rho_online,max_rho_online]
         },
