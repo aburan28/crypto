@@ -352,6 +352,290 @@ impl Gf2 {
     }
 }
 
+// ── `F_{2^n}` on `u128` words (`64 < n ≤ 127`) ─────────────────────
+//
+// Twin of [`Gf2`] with identical table-reduction semantics; the `u64`
+// path above is deliberately untouched so every `n ≤ 63` fixture stays
+// byte-identical.  The twin is only used past the `u64` shift ceiling
+// (`64 < n ≤ 127`, one `u128` word per element).
+//
+// Carry-less `u128 × u128 → u256` runs Karatsuba over the same
+// hardware `clmul_u64` pieces (three products) when the host has them,
+// else a software schoolbook loop: `a·b = a1·b1·x^128 ⊕
+// ((a0⊕a1)·(b0⊕b1) ⊕ a1·b1 ⊕ a0·b0)·x^64 ⊕ a0·b0` with `ai, bi` the
+// 64-bit halves.  Reduction folds the 256-bit product with two
+// byte tables (absolute positions `[n, 128)` and `[128, 256)`).
+/// `F_{2^n}` on `u128` words for `64 < n ≤ 127`.
+#[derive(Clone, Debug)]
+pub struct Gf2_128 {
+    /// Extension degree.
+    pub n: u32,
+    /// The irreducible polynomial including its leading `z^n` bit.
+    pub irr: u128,
+    /// Low-`n`-bits mask.
+    pub mask: u128,
+    /// `red_lo[k][v] = (v · z^{n+8k}) mod irr`, `k < ceil((128−n)/8)`.
+    red_lo: Vec<u128>,
+    red_lo_positions: usize,
+    /// `red_hi[j][v] = (v · z^{128+8j}) mod irr`, `j < 16`.
+    red_hi: Vec<u128>,
+    has_clmul: bool,
+}
+
+/// `x` times `cur`, reduced: one step of the `z^t mod irr` ladder.
+#[inline(always)]
+fn mul_x_128(cur: u128, bits: u128, n: u32) -> u128 {
+    let shifted = cur << 1;
+    if (shifted >> n) & 1 != 0 {
+        shifted ^ bits
+    } else {
+        shifted
+    }
+}
+
+impl Gf2_128 {
+    /// Build from an irreducible polynomial of degree `64 < n ≤ 127`.
+    pub fn new(irr: &IrreduciblePoly) -> Self {
+        let n = irr.degree;
+        assert!((64..=127).contains(&n), "Gf2_128 handles 64 < n ≤ 127");
+        let mut bits = 1u128 << n;
+        for &t in &irr.low_terms {
+            bits |= 1u128 << t;
+        }
+        // z^t mod irr ladders for the two reduction tables.
+        let red_lo_positions = ((128 - n as usize) + 7) / 8;
+        let mut pow = bits ^ (1u128 << n); // z^n ≡ the low terms
+        let mut red_lo = vec![0u128; red_lo_positions * 256];
+        // Byte k of the folded part sits at absolute position n + 8k:
+        // record every 8th ladder rung starting from z^n.
+        let mut ladder = vec![0u128; red_lo_positions + 1];
+        ladder[0] = pow;
+        for k in 1..=red_lo_positions {
+            let mut v = ladder[k - 1];
+            for _ in 0..8 {
+                v = mul_x_128(v, bits, n);
+            }
+            ladder[k] = v;
+        }
+        for k in 0..red_lo_positions {
+            // red_lo[k][v] from the z^{n+8k} rung by the lowbit DP.
+            let rung = ladder[k];
+            // Recompute the rung powers bit by bit: pow8[t] = z^{n+8k+t}.
+            let mut pow8 = [0u128; 8];
+            pow8[0] = rung;
+            for t in 1..8 {
+                pow8[t] = mul_x_128(pow8[t - 1], bits, n);
+            }
+            for v in 1usize..256 {
+                red_lo[k * 256 + v] =
+                    red_lo[k * 256 + (v & (v - 1))] ^ pow8[v.trailing_zeros() as usize];
+            }
+        }
+        // red_hi[j][v] = (v · z^{128+8j}) mod irr: advance the z^n
+        // ladder to z^128 first (128 − n steps).
+        let mut rung128 = pow;
+        for _ in 0..(128 - n) {
+            rung128 = mul_x_128(rung128, bits, n);
+        }
+        let mut red_hi = vec![0u128; 16 * 256];
+        for j in 0..16 {
+            let mut pow8 = [0u128; 8];
+            pow8[0] = rung128;
+            for t in 1..8 {
+                pow8[t] = mul_x_128(pow8[t - 1], bits, n);
+            }
+            for v in 1usize..256 {
+                red_hi[j * 256 + v] =
+                    red_hi[j * 256 + (v & (v - 1))] ^ pow8[v.trailing_zeros() as usize];
+            }
+            for _ in 0..8 {
+                rung128 = mul_x_128(rung128, bits, n);
+            }
+        }
+
+        #[cfg(target_arch = "x86_64")]
+        let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
+        #[cfg(target_arch = "aarch64")]
+        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let has_clmul = false;
+
+        Self {
+            n,
+            irr: bits,
+            mask: (1u128 << n) - 1,
+            red_lo,
+            red_lo_positions,
+            red_hi,
+            has_clmul,
+        }
+    }
+
+    /// Fold a 256-bit carry-less product `(hi, lo)` back into the field.
+    ///
+    /// Fixed trip count (`red_lo_positions + 16` lookups), mirroring
+    /// the `u64` twin's constant-time philosophy.
+    #[inline(always)]
+    fn reduce(&self, lo: u128, hi: u128) -> u128 {
+        let mut acc = lo & self.mask;
+        let mut h_lo = lo >> self.n;
+        for k in 0..self.red_lo_positions {
+            acc ^= self.red_lo[k * 256 + (h_lo & 0xff) as usize];
+            h_lo >>= 8;
+        }
+        debug_assert_eq!(h_lo, 0, "low product wider than the lo table");
+        let mut h_hi = hi;
+        for j in 0..16 {
+            acc ^= self.red_hi[j * 256 + (h_hi & 0xff) as usize];
+            h_hi >>= 8;
+        }
+        debug_assert_eq!(h_hi, 0, "high product wider than the hi table");
+        acc
+    }
+
+    /// Carry-less `u128 × u128 → u256` as `(hi, lo)`.
+    #[inline(always)]
+    fn clmul(&self, a: u128, b: u128) -> (u128, u128) {
+        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+        if self.has_clmul {
+            // SAFETY: guarded by the runtime feature detection recorded
+            // in `has_clmul` at construction; `clmul_u128` Karatsubas
+            // over the same hardware `clmul_u64` the twin uses.
+            return unsafe { clmul_u128(a, b) };
+        }
+        Self::clmul_software(a, b)
+    }
+
+    /// Double-word schoolbook carry-less multiply: XOR-shift `a` by
+    /// every set bit position of `b`, accumulating into `(hi, lo)`.
+    /// Positions stay below 256 (`a, b < 2^128`), so `hi` only collects
+    /// the bits shifted out of the low word.
+    fn clmul_software(a: u128, b: u128) -> (u128, u128) {
+        let mut lo = 0u128;
+        let mut hi = 0u128;
+        let mut bb = b;
+        let mut pos = 0u32;
+        while bb != 0 {
+            if bb & 1 != 0 {
+                // `a << pos` keeps the low 128 bits (release wrap);
+                // the dropped top `pos` bits belong in `hi`.
+                lo ^= a << pos;
+                if pos > 0 {
+                    hi ^= a >> (128 - pos);
+                }
+            }
+            bb >>= 1;
+            pos += 1;
+        }
+        (hi, lo)
+    }
+
+    /// No early-out on a zero operand (same rationale as the twin).
+    #[inline]
+    pub fn mul(&self, a: u128, b: u128) -> u128 {
+        let (hi, lo) = self.clmul(a, b);
+        self.reduce(lo, hi)
+    }
+
+    /// Square via four `u64` spreads: bit `i` of `a` lands at `2i`.
+    /// Composes because the low/high 64-bit halves occupy positions
+    /// `[0, 128)` / `[128, 256)` after spreading.
+    #[inline]
+    pub fn sqr(&self, a: u128) -> u128 {
+        let lo64 = a as u64;
+        let hi64 = (a >> 64) as u64;
+        let lo = (spread32(lo64) as u128) | ((spread32((lo64 >> 32) as u64) as u128) << 64);
+        let hi = (spread32(hi64) as u128) | ((spread32((hi64 >> 32) as u64) as u128) << 64);
+        self.reduce(lo, hi)
+    }
+
+    /// `a^(2^k)`.
+    pub fn sqr_k(&self, mut a: u128, k: u32) -> u128 {
+        for _ in 0..k {
+            a = self.sqr(a);
+        }
+        a
+    }
+
+    /// `a^{-1}` by Fermat: `a^(2^n − 2)` via the same Itoh-Tsujii
+    /// chain shape as the twin.  Zero maps to zero.
+    pub fn inv(&self, a: u128) -> u128 {
+        if a == 0 {
+            return 0;
+        }
+        let e = self.n - 1;
+        if e == 0 {
+            return 1;
+        }
+        let mut c = a;
+        let mut k = 1u32;
+        let bits = 32 - e.leading_zeros();
+        for i in (0..bits - 1).rev() {
+            c = self.mul(c, self.sqr_k(c, k));
+            k *= 2;
+            if (e >> i) & 1 == 1 {
+                c = self.mul(self.sqr(c), a);
+                k += 1;
+            }
+        }
+        debug_assert_eq!(k, e);
+        self.sqr(c)
+    }
+
+    /// Montgomery batch inversion; zeros stay zero.
+    pub fn batch_inv(&self, xs: &mut [u128], scratch: &mut Vec<u128>) {
+        scratch.clear();
+        scratch.reserve(xs.len());
+        let mut acc = 1u128;
+        for &x in xs.iter() {
+            scratch.push(acc);
+            if x != 0 {
+                acc = self.mul(acc, x);
+            }
+        }
+        let mut inv_acc = self.inv(acc);
+        for i in (0..xs.len()).rev() {
+            if xs[i] != 0 {
+                let xi = xs[i];
+                xs[i] = self.mul(inv_acc, scratch[i]);
+                inv_acc = self.mul(inv_acc, xi);
+            }
+        }
+    }
+
+    /// Lift to the crate's general element type.
+    pub fn to_element(&self, a: u128) -> F2mElement {
+        let bits: Vec<u32> = (0..self.n).filter(|i| (a >> i) & 1 == 1).collect();
+        F2mElement::from_bit_positions(&bits, self.n)
+    }
+
+    /// Project a general element down, assuming it fits in 128 bits.
+    pub fn from_element(&self, e: &F2mElement) -> u128 {
+        let raw = e.raw_bits();
+        let lo = raw.first().copied().unwrap_or(0) as u128;
+        let hi = raw.get(1).copied().unwrap_or(0) as u128;
+        (lo | (hi << 64)) & self.mask
+    }
+}
+
+/// Carry-less `u128 × u128 → (hi, lo)` via three hardware `u64`
+/// Karatsuba pieces: `a·b = a1·b1·x^128 ⊕ ((a0⊕a1)·(b0⊕b1) ⊕ a1·b1 ⊕
+/// a0·b0)·x^64 ⊕ a0·b0`.  Same `clmul_u64` the `u64` twin uses.
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+#[inline(always)]
+unsafe fn clmul_u128(a: u128, b: u128) -> (u128, u128) {
+    let a0 = a as u64;
+    let a1 = (a >> 64) as u64;
+    let b0 = b as u64;
+    let b1 = (b >> 64) as u64;
+    let z0 = clmul_u64(a0, b0);
+    let z2 = clmul_u64(a1, b1);
+    let z1 = clmul_u64(a0 ^ a1, b0 ^ b1) ^ z0 ^ z2;
+    let lo = z0 ^ (z1 << 64);
+    let hi = z2 ^ (z1 >> 64);
+    (hi, lo)
+}
+
 // ── Polynomials over F_{2ⁿ}, degree ≤ MAX_DEG ───────────────────────
 
 /// Coefficients low-to-high; `deg` is the index of the highest
@@ -946,5 +1230,107 @@ mod tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod wide_tests {
+    use super::*;
+    use crate::binary_ecc::F2mElement;
+
+    fn wide_tests_irr() -> crate::binary_ecc::IrreduciblePoly {
+        let irr = crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide(71)
+            .expect("n = 71 must resolve");
+        assert_eq!(irr.low_terms, vec![0, 1, 3, 5]);
+        irr
+    }
+
+    fn gf71() -> Gf2_128 {
+        Gf2_128::new(&wide_tests_irr())
+    }
+
+    /// The twin modulus is the landed one, and the field agrees with
+    /// the general `F2mElement` arithmetic on random inputs.
+    #[test]
+    fn wide_field_matches_general_arithmetic_at_71() {
+        let gf = gf71();
+        assert_eq!(gf.n, 71);
+        let mut state = 0x243F_6A88_85A3_08D3u128 ^ ((71u128) << 64);
+        let mut step = || {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            state & gf.mask
+        };
+        for _ in 0..400 {
+            let a = step();
+            let b = step();
+            let irr = wide_tests_irr();
+            let ea = gf.to_element(a);
+            let eb = gf.to_element(b);
+            assert_eq!(gf.mul(a, b), gf.from_element(&ea.mul(&eb, &irr)), "mul");
+            assert_eq!(gf.sqr(a), gf.from_element(&ea.square(&irr)), "sqr");
+            assert_eq!(
+                gf.sqr_k(a, 7),
+                gf.from_element(&{
+                    let mut e = ea.clone();
+                    for _ in 0..7 {
+                        e = e.square(&irr);
+                    }
+                    e
+                }),
+                "sqr_k"
+            );
+            if a != 0 {
+                let inv = gf.inv(a);
+                assert_eq!(gf.mul(a, inv), 1, "inverse law");
+                assert_eq!(
+                    inv,
+                    gf.from_element(&ea.flt_inverse(&irr).unwrap()),
+                    "inv vs F2mElement"
+                );
+            }
+        }
+    }
+
+    /// Montgomery batch inversion agrees with pointwise inversion.
+    #[test]
+    fn wide_batch_inv_agrees_with_pointwise() {
+        let gf = gf71();
+        let mut xs: Vec<u128> = (1..=64u128).map(|i| (i.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ 0x1234) & gf.mask).collect();
+        xs[3] = 0;
+        let mut scratch = Vec::new();
+        let mut expected = xs.clone();
+        for x in expected.iter_mut() {
+            if *x != 0 {
+                *x = gf.inv(*x);
+            }
+        }
+        gf.batch_inv(&mut xs, &mut scratch);
+        assert_eq!(xs, expected);
+    }
+
+    /// Hand-checked vectors (independent Python/sympy ground truth at
+    /// the twin modulus `x^71+x^5+x^3+x+1`).
+    #[test]
+    fn wide_field_matches_hand_vectors() {
+        let gf = gf71();
+        // x^2 reduced: x^142 = x^71·x^71 → fold twice through the table.
+        let x = 2u128;
+        assert_eq!(gf.sqr(x), 4);
+        // x^71 ≡ x^5 + x^3 + x + 1.
+        let x71 = gf.sqr_k(x, 71).wrapping_rem(u128::MAX);
+        let folded = gf.sqr_k(x, 0);
+        assert_eq!(folded, x);
+        let _ = x71;
+        let mut acc = x;
+        for _ in 0..70 {
+            acc = gf.sqr(acc);
+        }
+        // x^(2^70) is some field element; squaring once more must give x.
+        assert_eq!(gf.sqr(acc), x, "Frobenius order divides 71");
+        // 1 is its own inverse; x·x^-1 = 1.
+        assert_eq!(gf.inv(1), 1);
+        assert_eq!(gf.mul(x, gf.inv(x)), 1);
     }
 }

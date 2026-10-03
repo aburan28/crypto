@@ -324,7 +324,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Beyond-63 multi-word field arithmetic rung: extend the packing to u128 and land n=71, a=0 (prime degree; r=5513228015079457 ~ 2^52.3, cofactor 428276) on the same frozen public point contract with the compact-orbit domain (no explicit pair table, peak RSS under the common cap). The n=61 compact-orbit record (fresh reproduction 124.85x online, four Python-replayed runs, zero pair-table entries) is the rung to beat; it is the u64-packing ceiling for this family \u2014 the n=63 attempt is closed as mathematically non-viable (n=62/63 admit no usable subgroup on either K_a; documented in experiments/koblitz-single-target-n63-20261002/). The extension must keep every n<=63 fixture byte-identical."
+      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed \u2014 the landed u128 producers already admit n=73."
     },
     {
       "rank": 2,

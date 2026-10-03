@@ -151,16 +151,17 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.  Field elements are packed in a `u64`, so the
-/// absolute limit is `n < 64`.  Past `n ≈ 24` the generator is found
-/// by deterministic sampling rather than a full abscissa sweep; point
-/// counting still uses the closed Koblitz recurrence (no `2^n` scan).
+/// the mathematics.  Field elements are packed in a `u64` word through
+/// `n = 63` and in a `u128` word past it, so the absolute limit is
+/// `n < 128`.  Past `n ≈ 24` the generator is found by deterministic
+/// sampling rather than a full abscissa sweep; point counting still
+/// uses the closed Koblitz recurrence (no `2^n` scan).
 /// Curve construction costs trial division to `√#E ≈ 2^{n/2}` and a
 /// sparse irreducible search; both are still cheap at the
 /// boundary-ledger rungs through `n = 53`.  What actually bounds a run
 /// is the `2^dim` factor base and, for the meet-in-the-middle oracle,
 /// its `|F|²` pair table.
-pub const MAX_N: u32 = 63;
+pub const MAX_N: u32 = 127;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -335,6 +336,126 @@ pub fn find_irreducible_sparse(n: u32) -> Option<IrreduciblePoly> {
     None
 }
 
+// ── F_2[x] helpers on `u128` bitmasks (degrees 64..=127) ──────────
+//
+// Twin of the `u64` helpers above with identical Rabin semantics; the
+// `u64` path is deliberately untouched so every `n ≤ 63` fixture stays
+// byte-identical.  The twin is only used past the `u64` shift ceiling
+// (`1u64 << n` wraps for `n ≥ 64`, which is why the narrow search
+// returns `None` there).  A 256-bit carry-less product never arises
+// here: every intermediate is reduced to degree `< 128` before it can
+// overflow the word.
+fn poly_deg_wide(f: u128) -> Option<u32> {
+    if f == 0 {
+        None
+    } else {
+        Some(127 - f.leading_zeros())
+    }
+}
+
+fn poly_rem_wide(mut a: u128, f: u128) -> u128 {
+    let df = match poly_deg_wide(f) {
+        Some(d) => d,
+        None => return a,
+    };
+    while let Some(da) = poly_deg_wide(a) {
+        if da < df {
+            break;
+        }
+        a ^= f << (da - df);
+    }
+    a
+}
+
+fn poly_mulmod_wide(a: u128, b: u128, f: u128) -> u128 {
+    let mut acc = 0u128;
+    let mut a = poly_rem_wide(a, f);
+    let mut b = b;
+    while b != 0 {
+        if b & 1 == 1 {
+            acc ^= a;
+        }
+        b >>= 1;
+        a <<= 1;
+        a = poly_rem_wide(a, f);
+    }
+    poly_rem_wide(acc, f)
+}
+
+fn poly_gcd_wide(mut a: u128, mut b: u128) -> u128 {
+    while b != 0 {
+        let r = poly_rem_wide(a, b);
+        a = b;
+        b = r;
+    }
+    a
+}
+
+fn poly_x_pow_2k_wide(k: u32, f: u128) -> u128 {
+    let mut acc = poly_rem_wide(0b10, f);
+    for _ in 0..k {
+        acc = poly_mulmod_wide(acc, acc, f);
+    }
+    acc
+}
+
+/// Rabin's irreducibility test for a degree-`d` polynomial of `F_2[x]`
+/// held in a `u128` bitmask (`64 ≤ d ≤ 127`): `f` is irreducible iff
+/// `x^(2^d) ≡ x (mod f)` and `gcd(x^(2^(d/p)) − x, f) = 1` for every
+/// prime `p | d`.  Same mathematics as [`is_irreducible_f2`].
+pub fn is_irreducible_f2_wide(f: u128) -> bool {
+    let d = match poly_deg_wide(f) {
+        Some(d) if d >= 1 => d,
+        _ => return false,
+    };
+    if f & 1 == 0 && d > 1 {
+        return false;
+    }
+    if poly_x_pow_2k_wide(d, f) != poly_rem_wide(0b10, f) {
+        return false;
+    }
+    for p in prime_divisors(d) {
+        let t = poly_x_pow_2k_wide(d / p, f) ^ 0b10;
+        if poly_deg_wide(poly_gcd_wide(poly_rem_wide(t, f), f)) != Some(0) {
+            return false;
+        }
+    }
+    true
+}
+
+/// **Sparse irreducible search on `u128` masks**: the smallest-mask
+/// irreducible polynomial of degree `n` over `F_2` among trinomials
+/// and pentanomials, for `64 ≤ n ≤ 127`.  Same ascending-mask order
+/// as [`find_irreducible_sparse`]; at `n = 71` this is
+/// `x^71 + x^5 + x^3 + x + 1` (independent sympy check agrees).
+pub fn find_irreducible_sparse_wide(n: u32) -> Option<IrreduciblePoly> {
+    if n <= 63 || n > 127 {
+        return None;
+    }
+    let mut candidates: Vec<u128> = Vec::new();
+    candidates.push(1);
+    for i in 1..n {
+        candidates.push(1 | (1u128 << i));
+        for j in (i + 1)..n {
+            candidates.push(1 | (1u128 << i) | (1u128 << j));
+            for k in (j + 1)..n {
+                candidates.push(1 | (1u128 << i) | (1u128 << j) | (1u128 << k));
+            }
+        }
+    }
+    candidates.sort_unstable();
+    let hi = 1u128 << n;
+    for low in candidates {
+        if is_irreducible_f2_wide(hi | low) {
+            return Some(IrreduciblePoly {
+                degree: n,
+                low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
+            });
+        }
+    }
+    None
+}
+
 /// The `index`-th Frobenius-invariant subspace of `F_{2^n}`, as an
 /// `F_2`-basis — the factor base's `x`-coordinate support, without
 /// building the curve, counting its points, or materialising `F`.
@@ -485,7 +606,18 @@ pub fn koblitz_point_count(a: u8, n: u32) -> BigUint {
 
 /// Trial-division factorisation into `(prime, exponent)` pairs.  Only
 /// ever called on `#E` for toy `n`.
+///
+/// When the value fits in 128 bits (every admitted `n ≤ 127`: group
+/// orders are `≈ 2^n`), the trial loop runs natively with no
+/// allocations.  The factor list is identical to the [`BigUint`] loop
+/// below, so every `n ≤ 63` fixture is unaffected.
 fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
+    if let Some(small) = biguint_to_u128(&v) {
+        return factorise_u128(small)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
     while &d * &d <= v {
@@ -500,6 +632,37 @@ fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
         d += BigUint::one();
     }
     if v > BigUint::one() {
+        out.push((v, 1));
+    }
+    out
+}
+
+/// `Some(v)` as a native word when the [`BigUint`] fits in 128 bits.
+fn biguint_to_u128(v: &BigUint) -> Option<u128> {
+    let limbs = v.to_u64_digits();
+    if limbs.len() > 2 {
+        return None;
+    }
+    Some(limbs[0] as u128 | ((limbs.get(1).copied().unwrap_or(0) as u128) << 64))
+}
+
+/// Native-word trial division: same factor list as [`factorise`], no
+/// allocations.  `d * d` cannot overflow: `d ≤ √v < 2^64`.
+fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
+    let mut out: Vec<(u128, u32)> = Vec::new();
+    let mut d = 2u128;
+    while d * d <= v {
+        let mut e = 0;
+        while v % d == 0 {
+            v /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d, e));
+        }
+        d += 1;
+    }
+    if v > 1 {
         out.push((v, 1));
     }
     out
@@ -521,8 +684,14 @@ impl KoblitzCurve {
         // are defined (a test pins that for every n ≤ 24) and far
         // cheaper past it, where the exhaustive scan would touch 2^n
         // masks: the sparse (trinomial/pentanomial) search is what
-        // reaches the boundary-ledger rungs at n = 37 / n = 41.
-        let irreducible = find_irreducible_sparse(n)?;
+        // reaches the boundary-ledger rungs at n = 37 / n = 41, and
+        // its `u128` twin reaches the wide rungs past the `u64` shift
+        // ceiling (`1u64 << n` wraps for `n ≥ 64`).
+        let irreducible = if n <= 63 {
+            find_irreducible_sparse(n)?
+        } else {
+            find_irreducible_sparse_wide(n)?
+        };
         let a_fe = if a == 0 {
             F2mElement::zero(n)
         } else {
@@ -4479,6 +4648,79 @@ mod tests {
             }
             assert!(is_irreducible_f2(mask), "n = {n}");
         }
+    }
+
+    #[test]
+    fn wide_rabin_matches_sympy_vectors_at_71() {
+        // x^71 + x^5 + x^3 + x + 1 is irreducible (independent sympy
+        // check agrees); x^71 + 1 and x^71 + x + 1 are reducible.
+        let good = (1u128 << 71) | (1 << 5) | (1 << 3) | (1 << 1) | 1;
+        assert!(is_irreducible_f2_wide(good));
+        assert!(!is_irreducible_f2_wide((1u128 << 71) | 1));
+        assert!(!is_irreducible_f2_wide((1u128 << 71) | (1 << 1) | 1));
+    }
+
+    #[test]
+    fn wide_rabin_agrees_with_narrow_on_small_inputs() {
+        // The wide twin must give the same answers as the narrow
+        // implementation wherever both are defined, so the `n ≤ 63`
+        // path (which keeps using the narrow one) cannot drift.
+        let masks: [u64; 6] = [
+            0b111,
+            0b10011,
+            0b1001,
+            (1 << 41) | (1 << 3) | 1,
+            (1 << 53) | (1 << 6) | (1 << 2) | (1 << 1) | 1,
+            (1 << 61) | (1 << 5) | (1 << 2) | (1 << 1) | 1,
+        ];
+        for mask in masks {
+            assert_eq!(
+                is_irreducible_f2(mask),
+                is_irreducible_f2_wide(mask as u128),
+                "mask = {mask:#x}"
+            );
+        }
+    }
+
+    #[test]
+    fn wide_sparse_search_finds_71_pentanomial() {
+        // Smallest-mask irreducible at degree 71 (same ascending
+        // order as the narrow search; sympy check agrees).
+        let irr = find_irreducible_sparse_wide(71).expect("n = 71 must resolve");
+        assert_eq!(irr.degree, 71);
+        assert_eq!(irr.low_terms, vec![0, 1, 3, 5]);
+        // The wide search only handles the past-`u64` degrees.
+        assert!(find_irreducible_sparse_wide(63).is_none());
+        assert!(find_irreducible_sparse_wide(128).is_none());
+    }
+
+    #[test]
+    fn factorise_fast_path_keeps_factor_lists() {
+        // The native-word loop must return the same lists as the
+        // BigUint loop; the n = 71 order exercises it past 64 bits.
+        let order = koblitz_point_count(0, 71);
+        let factors = factorise(order);
+        let last = factors.last().cloned().unwrap();
+        assert_eq!(last.1, 1);
+        assert_eq!(last.0, BigUint::from(5_513_228_015_079_457u64));
+        let cofactor: BigUint = factors
+            .iter()
+            .take(factors.len() - 1)
+            .map(|(p, e)| p.pow(*e))
+            .product();
+        assert_eq!(cofactor, BigUint::from(428_276u32));
+    }
+
+    #[test]
+    fn constructs_n71_a0_with_expected_subgroup() {
+        let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
+        assert_eq!(curve.n, 71);
+        assert_eq!(curve.subgroup_order, BigUint::from(5_513_228_015_079_457u64));
+        assert_eq!(curve.cofactor, BigUint::from(428_276u32));
+        assert_eq!(
+            scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
+            BinaryPoint::Infinity
+        );
     }
 
     #[test]
