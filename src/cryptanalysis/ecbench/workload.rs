@@ -482,7 +482,7 @@ impl Workload {
             TargetKind::Public => {
                 // With r | h the r-torsion can be Z/r × Z/r, and a cleared
                 // point need not lie in <G>.
-                if curve.cofactor % curve.r == 0 {
+                if curve.cofactor.is_multiple_of(curve.r) {
                     return Err(format!(
                         "r = {} divides the cofactor {}: a hashed target need not lie in <G>",
                         curve.r, curve.cofactor

@@ -131,7 +131,7 @@ impl<'a> Kb<'a> {
             .ok_or("a claim's IC1 identity covers Koblitz curves only")?;
         let n = inst.n;
         // identity.py's adapter (oracle.Curve) admits odd degrees 5..=61.
-        if !(5..=61).contains(&n) || n % 2 == 0 {
+        if !(5..=61).contains(&n) || n.is_multiple_of(2) {
             return Err(format!(
                 "the IC1 identity admits odd field degrees 5 to 61, not {n}"
             ));
