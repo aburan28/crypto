@@ -105,6 +105,13 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Publish compact receipts of a non-executable F5 build-validation capsule.
+    F5ControlPublishValidation {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Freeze a disclosed n17 F5 controller/worker/auditor; builds only, no job.
     F5ControlFreeze {
         #[arg(long, default_value = ".")]
@@ -580,6 +587,9 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5ControlPublishValidation { capsule, out } => {
+            f5_control::publish_validation(&capsule, &out)
+        }
         Command::F5ControlFreeze {
             root,
             out,

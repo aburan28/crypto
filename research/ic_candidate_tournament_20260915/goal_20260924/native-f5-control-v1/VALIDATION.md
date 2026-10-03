@@ -24,3 +24,21 @@ The implementation is not a scientific execution, ordinary yield result or
 new native F5 runtime admission. Actual source freeze, durable preregistration,
 sole invocation and frozen independent audit are separately pending. The local
 template is not an executable registration. No old registration is resumed.
+
+## Offline build validation
+
+The first validation-only freeze completed from committed source
+`92b24110d49de660c8e4451f907a58b5c49a09bd`. Its validation seal is
+`421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf`.
+It inventories 5,953 immutable files. Both worker and checker were built from
+the retained offline source/dependency tree, and the worker's compiled source
+and build identity matched its descriptor. The only worker call supplied
+`--build-identity`, with no job input. No scientific solver ran.
+
+`build-validation-v1` retains the exact original config, mathematical-only job,
+preparation, host context, registration/seal, Cargo.lock and all build/identity
+logs and receipts. Its compact publication checks the original capsule and
+identity-only receipt before copying. This build evidence does not publish the
+complete capsule archive or establish archive custody of an actual scientific
+registration. The full local capsule remains non-executable. Actual durable
+preregistration and sole scientific dispatch remain separate pending gates.

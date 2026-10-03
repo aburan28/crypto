@@ -52,6 +52,69 @@ fn require_executable_registration(registration: &Value) -> Result<(), String> {
         "F5 build-validation capsule cannot dispatch or admit a scientific job",
     )
 }
+
+/// Retain the exact build/input receipts from a non-executable validation capsule.
+/// This is compact build evidence, not publication or custody of an actual run.
+pub fn publish_validation(capsule: &Path, out: &Path) -> Result<String, String> {
+    let registration = check_capsule(capsule)?;
+    require(
+        registration["validation_only"] == true
+            && !capsule
+                .join("consumed.json")
+                .try_exists()
+                .map_err(|e| e.to_string())?,
+        "only unconsumed build-validation capsules may use this publication path",
+    )?;
+    let identity_bytes = read(
+        &capsule.join("immutable/build-receipts/worker-identity.log"),
+        64 * 1024,
+    )?;
+    let identity: Value = serde_json::from_slice(&identity_bytes).map_err(|e| e.to_string())?;
+    let identity_receipt =
+        load(&capsule.join("immutable/build-receipts/worker-identity.receipt.json"))?;
+    require(
+        identity == registration["worker_build_identity"]
+            && identity_receipt["argv"] == json!(["--build-identity"])
+            && identity_receipt["exit_code"] == 0
+            && identity_receipt["program_sha256_before"] == registration["worker_sha256"]
+            && identity_receipt["program_sha256_after"] == registration["worker_sha256"]
+            && identity_receipt["log_sha256"] == sha256(&identity_bytes),
+        "validation lacks its exact build-identity-only worker receipt",
+    )?;
+    fs::create_dir(out).map_err(|e| e.to_string())?;
+    let data = out.join("data");
+    fs::create_dir(&data).map_err(|e| e.to_string())?;
+    for name in FILES.into_iter().chain(["registration.json", "seal.json"]) {
+        native::create(
+            &data.join(name),
+            &read(&capsule.join(name), 16 * 1024 * 1024)?,
+        )?;
+    }
+    native::copy_tree(
+        &capsule.join("immutable/build-receipts"),
+        &data.join("build-receipts"),
+    )?;
+    native::create(
+        &data.join("Cargo.lock"),
+        &read(&capsule.join("immutable/source/Cargo.lock"), 1024 * 1024)?,
+    )?;
+    require(
+        check_capsule(capsule)? == registration,
+        "validation capsule changed during publication",
+    )?;
+    let report = json!({"schema_version":1,"status":"PASS_NATIVE_F5_OFFLINE_FREEZE_BUILD_VALIDATION",
+        "validation_registration_sha256":canonical_sha(&registration)?,"source_commit":registration["source_commit"],
+        "files":native::inventory(&data)?,"immutable_file_count":registration["immutable_files"].as_object().ok_or("missing source inventory")?.len(),
+        "worker_sha256":registration["worker_sha256"],"checker_sha256":registration["auditor_sha256"],
+        "worker_build_identity":registration["worker_build_identity"],"validation_only":true,
+        "build_identity_only_worker_calls":1,"scientific_worker_calls":0,"ordinary_queries_executed":0,
+        "actual_scientific_registration":false,"full_capsule_archive_custody_established_by_this_bundle":false,
+        "source_reconstruction":"committed source revision, exact Cargo.lock, offline dependency inventory and original build receipts retained; no archived binary executes",
+        "native_f5_runtime_admitted":false,"fresh_paired_qualification":false,"headline_eligible":false,
+        "promotion_eligible":false,"full_goal_complete":false,"online_wall_ns":null,"online_speedup":null});
+    save(&out.join("build-validation.json"), &report)?;
+    serde_json::to_string_pretty(&report).map_err(|e| e.to_string())
+}
 fn environment() -> Vec<(String, String)> {
     [
         ("LC_ALL", "C"),
