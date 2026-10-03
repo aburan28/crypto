@@ -50,7 +50,7 @@ status mix, rank, base size, folded columns, wall time, operations and RSS
   `exclusive_phases=true`, one Rayon worker. The only arm difference is
   `config.solver`: `f5` versus `inherited_f4`.
 - Rho uses the same point and one worker, signed-Frobenius policy, seed
-  `20261003032`, `rho_parallel_walks=1`, `max_trials=1000000`; the other
+  `20261003032`, `rho_parallel_walks=1`, `max_trials=65536`; the other
   config fields remain valid defaults. One rho observation accompanies each
   IC repetition.
 - Three fresh processes per arm, in order F5, inherited F4, rho;
