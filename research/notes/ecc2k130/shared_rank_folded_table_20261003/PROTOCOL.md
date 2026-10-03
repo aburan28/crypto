@@ -1,4 +1,8 @@
-# Target-blind shared-rank folded-table gate (preregistered; outcome pending)
+# Target-blind shared-rank folded-table gate (preregistered)
+
+This protocol was committed as `5d13c68ea7d9ac89df91d44e2f418a32ccdcc7f7`
+before either n37 producer run. The preserved outcome and the later
+base-wall-timer correction are in [RESULT.md](RESULT.md).
 
 This is a bounded native Rust correctness and cost-accounting gate for the
 shared setup required by a future many-target n37 index-calculus comparison.
