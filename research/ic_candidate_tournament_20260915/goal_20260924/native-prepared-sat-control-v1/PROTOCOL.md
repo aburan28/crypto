@@ -23,7 +23,10 @@ absent from producer inputs. The committed `control-template.json` fixes the
 proposed query seed, exporter nonce, limits and point. **This template is not an
 executable registration.** The [actual separately frozen registration](../native-sat-control-registration-v1/README.md)
 now retains the final source/dependency/build capsule. No native SAT search has
-run under this protocol at the preregistration stage.
+run under this protocol at the preregistration stage. Its later sole execution
+is now consumed and closed: [the terminal result](../native-sat-control-registration-v1/RESULT.md)
+retains three target attempts and passing frozen native admission. Never retry
+or resume that registration. The commands below document the historical lifecycle.
 
 The accepted target-independent SAT preparation has whole-certificate SHA-256
 `91856ab78550436d3f668367f9aebd9e2c0604bd64b1472d9d19ec318e2b144e` and mathematical
@@ -156,7 +159,8 @@ Publish the original terminal outcome and independent report in a follow-on PR,
 including failures. The template and implementation controls do not satisfy this
 execution gate.
 
-Remaining full-goal gates: sole native SAT control execution and audit; complete
+Actual native SAT disclosed-input execution/audit is closed complete. Remaining
+full-goal gates: complete
 native F4/F5 control path and new ordinary-yield evidence; reconciled exposure
 union; a new candidate/workload protocol; frozen strongest compatible rho and
 incumbent sources; hardware rebuild, calibration and resource/order registration;

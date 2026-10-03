@@ -12,7 +12,7 @@ use std::{
 };
 #[path = "../prepared_sat_worker/native.rs"]
 #[allow(dead_code)] // The common transport is also compiled into the producer.
-mod native;
+pub(super) mod native;
 use native::{load, read, require, save};
 const PREP:&str="research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/sat-preparation.json";
 const ASSETS:&str="research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/native-inputs-macos-arm64";
@@ -376,7 +376,7 @@ fn contains_mock_receipt(value: &Value) -> bool {
     }
 }
 
-fn verify_report(
+pub(super) fn verify_report(
     prep: &Value,
     cfg: &ControlConfig,
     report: &Value,

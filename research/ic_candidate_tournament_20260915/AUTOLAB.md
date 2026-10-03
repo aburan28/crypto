@@ -5,8 +5,11 @@ New research execution and verification must be native under `AGENTS.md`.
 The [native prepared SAT controller](goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
 provides source freeze, one-use execution and independent audit for a disclosed
 synthetic n17 development control. Its [actual native registration](goal_20260924/native-sat-control-registration-v1/README.md)
-now retains the final executable capsule; the sole invocation remains pending.
-Implementation and custody controls do not establish new solver yield or a win.
+retains the final executable capsule and is consumed and closed. The
+[native result](goal_20260924/native-sat-control-registration-v1/RESULT.md)
+has three audited target attempts, two exact negatives and verified scalar
+recovery. Portable publication replay launches no search. New natural ordinary
+yield, fresh comparison and tournament promotion remain unestablished.
 New cross-method comparisons use native `ecbench`, whose merged online-window
 extension is available for review and integration. Public unplanted targets,
 IC1 identity and prepared solver admission remain open. The Python entry points below are

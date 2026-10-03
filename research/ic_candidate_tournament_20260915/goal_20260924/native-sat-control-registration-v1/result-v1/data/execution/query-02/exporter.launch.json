@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "17",
+    "6",
+    "standard",
+    "2026100303",
+    "1000000",
+    "instance",
+    "1",
+    "0",
+    "--target-x",
+    "59775",
+    "--target-y",
+    "2910",
+    "--blind-instance-id",
+    "native-control-02",
+    "--export-only"
+  ],
+  "binary_sha256_before_exec": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+  "config_sha256": "c67d7463489cfcb9a8e967da76aa92138491db8be360bcb1ba715d9a3df69966",
+  "cwd": "/private/tmp/ic-native-sat-control-20261003-execution-v1/query-02",
+  "environment": {
+    "LC_ALL": "C"
+  },
+  "pid": 12477,
+  "program": "/private/tmp/ic-native-sat-control-20261003-final/immutable/assets/bin/exporter",
+  "query_sha256": "f3fbd70ce7032df639da7087799f66c826b0baa5b2a2e28db90b8fa7d35fc672",
+  "role": "exporter"
+}
