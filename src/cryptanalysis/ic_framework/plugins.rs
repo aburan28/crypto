@@ -260,7 +260,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
         let columns =
             usize::try_from(params.u64("columns")?).map_err(|_| "columns does not fit in usize")?;
         let raw_x_cap = params.u64("raw_x_cap")?;
-        if columns == 0 || raw_x_cap == 0 || inst.n == 0 || inst.n >= 64 || inst.n % 2 == 0 {
+        if columns == 0 || raw_x_cap == 0 || inst.n == 0 || inst.n >= 64 || inst.n.is_multiple_of(2)
+        {
             return Err(
                 "compact-orbit-scan requires positive columns and cap and odd degree < 64".into(),
             );

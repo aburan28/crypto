@@ -32,6 +32,7 @@ failure and source-order repair are retained in [PARITY_FAILURE.md](PARITY_FAILU
 | Host | macOS aarch64, 14 logical CPUs, rustc 1.93.1, environment class `ECBENV2hd82681268e96`; all runs L0 |
 | Session | [`ECBS1hc08f177f1f05`](sessions/n37_cold_v1/session.json), 72/72 verified including 24 warmups |
 | Audit | [receipt](AUDIT.json), SHA-256 `7538c5af482b9528d67ed4a45cd038fa60eb90d6c3f12edc9db453480c69c479`; `ok=true`, 48/48 measured replays identical, zero problems |
+| Post-lint replay | [second receipt](AUDIT_POST_LINT.json), SHA-256 `4755f70d7f532cd3081d35235e0c1f09ba99b4162c7f18fd387729bb79043cad`, auditor binary SHA-256 `f41c4c2db7498d4df5319bc3b62aad6176b04502256300f95c1f82cc850cb368`; 48/48 identical after the semantics-preserving Rust 1.98 `is_multiple_of` lint fix |
 
 The two IC arms recovered the same scalar on all 16 measured (Q, round)
 pairs. Each pair had the same factor-base identity, relation and matrix
