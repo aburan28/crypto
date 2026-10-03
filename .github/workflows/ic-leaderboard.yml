@@ -1,0 +1,66 @@
+name: ic-leaderboard
+
+# AGENTS.md §7b: docs/ic-leaderboard.html is current in every pull request
+# that changes what it shows.  --check fails when an output is stale against
+# the frozen files the builder reads, and when the boundary ledger has a
+# section later than the one the page is current through.  It runs no
+# experiment.
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/build_ic_leaderboard.py'
+      - 'scripts/curve_id.py'
+      - 'docs/ic-leaderboard.html'
+      - 'docs/ic/LEADERBOARD.md'
+      - 'docs/ic/leaderboard.json'
+      - 'research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md'
+      - 'docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json'
+      - 'research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json'
+      - 'research/ic_rho_reference_20260923/analysis.json'
+      - 'research/ic_exponent_20260926/analysis.json'
+      - 'research/ic_constructions_20260926/analysis.json'
+      - 'research/ic_descent_20260930/analysis-isolated.json'
+      - 'research/ic_single_target_20260930/analysis.json'
+      - 'docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json'
+      - 'docs/curves/registry.json'
+      - 'research/ic_descent_20260930/runs-isolated/main/**'
+      - 'research/ic_single_target_20260930/runs/**'
+      - '.github/workflows/ic-leaderboard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build_ic_leaderboard.py'
+      - 'scripts/curve_id.py'
+      - 'docs/ic-leaderboard.html'
+      - 'docs/ic/LEADERBOARD.md'
+      - 'docs/ic/leaderboard.json'
+      - 'research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md'
+      - 'docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json'
+      - 'research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json'
+      - 'research/ic_rho_reference_20260923/analysis.json'
+      - 'research/ic_exponent_20260926/analysis.json'
+      - 'research/ic_constructions_20260926/analysis.json'
+      - 'research/ic_descent_20260930/analysis-isolated.json'
+      - 'research/ic_single_target_20260930/analysis.json'
+      - 'docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json'
+      - 'docs/curves/registry.json'
+      - 'research/ic_descent_20260930/runs-isolated/main/**'
+      - 'research/ic_single_target_20260930/runs/**'
+      - '.github/workflows/ic-leaderboard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: The leaderboard is current with its sources and the ledger
+        run: python3 scripts/build_ic_leaderboard.py --check
