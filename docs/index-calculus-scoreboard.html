@@ -10286,6 +10286,19 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>A replay of all five n41/L1,024 and n53/L1,024 block phase receipts found that index construction consumes median 35.27% and 28.40% of compact elapsed time. Under an explicitly conditional elapsed-share-to-CPU scenario, a per-instance selector that builds a second full index would need about 94% lower combined rank-and-target cost to reach matched-rho parity, even with free scoring; a zero-overhead single-index policy needs 37.86% and 53.85% lower rank-and-target cost. This is a planning threshold, not a measured selector or method no-go. The next trial is a target-blind, pre-index score with one selected index at n41/K255 on new Q, charged cold. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/selector_phase_admission_20261001/DECISION.md">Archived calculation and assumptions</a>.</p>
 </section>
 <!-- END disjoint-cold-v2-outcome-20261001 -->
+<!-- BEGIN n37-native-m6-mitm-20261002 -->
+<section class="panel" id="n37-native-m6-mitm-20261002">
+<div class="panel-head"><h2>Degree-73 descendant-native n37 six-sum: rank 42, direct batch misses 107 targets <span class="chip">scoped support no-go</span></h2>
+<p>A preregistered Rust 3+3 oracle used the fixed 42-column descendant-native base and the frozen n37/L1,024 public Q block. It built 102,391 distinct half sums from all signed multisets of at most three factors. Forty-two independent, full-point-verified relations came from 49 target-blind probes. A separate source-curve reachability implementation independently checked every hit and complete miss, solved the 42 base logs, and verified each recovered Q scalar against both the public point and the published fixture.</p></div>
+<div class="table-scroll"><table>
+<caption>Exact fixed-base support on one frozen 1,024-target block. Wilson intervals describe this sample, not a full-method speed ratio; the five-sum 16.10084% bound is for a uniform target population.</caption>
+<thead><tr><th>Native signed arm</th><th>Formal capacity V/r</th><th>Q supported</th><th>95% Wilson interval</th><th>Verified logs</th><th>Decision</th></tr></thead><tbody>
+<tr><td>At most 5 factors</td><td>0.161008</td><td>146 / 1,024 (14.26%)</td><td>12.25&ndash;16.53%</td><td>diagnostic</td><td>consistent with counting ceiling</td></tr>
+<tr><td>At most 6 factors</td><td>2.288827</td><td>917 / 1,024 (89.55%)</td><td>87.53&ndash;91.28%</td><td>917 full-point checked</td><td>107 complete misses; bare direct batch fails</td></tr>
+</tbody></table></div>
+<p>The combined five-plus-six diagnostic process took 4.07 s wall on macOS arm64 and has no matched same-host rho denominator. The 2.929 s six-sum query phase and logical-add counts are stage measurements; no complete native IC/rho speedup, n41/n53 result, n131 transfer, or Certicom attack follows. The next gate is a preregistered, fully charged residual-offset policy on new disjoint Q, then same-Q strong batch rho and the other factor-base policies. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_m6_mitm_20261002/RESULT.md">Protocol, raw result, independent replay and decision</a>; <a href="https://github.com/aburan28/crypto/pull/1254">PR #1254</a>.</p>
+</section>
+<!-- END n37-native-m6-mitm-20261002 -->
 <!-- BEGIN base-window-screen-outcome-20261001 -->
 <section class="panel" id="base-window-screen-outcome-20261001">
 <div class="panel-head"><h2>Equal-size n41 factor-base windows: no measured selector opportunity <span class="chip">scoped negative</span></h2>
