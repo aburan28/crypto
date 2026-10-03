@@ -7,6 +7,13 @@ The executed native implementation is the source tree committed as
 executable and checker/oracle/preparation source hashes. This is a correctness
 replay, with no compiler optimization or performance claim.
 
+The strengthened executable gate also passed, with a separate immutable
+[`native-replay-macos-arm64-v2.json`](native-replay-macos-arm64-v2.json) from
+source commit `ad0e1f5dce000be80ad27b23e25b63637d3da6c4`. It binds the checker
+before arithmetic and rejects a changed executable at the end. Seven source
+controls and the focused CLI evidence-preservation test passed again after
+this change. The earlier receipt is preserved with its original source binding.
+
 Native tests passed locally:
 
 - 41 `icprog` unit tests, including preparation reconstruction and exact
