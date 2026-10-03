@@ -52,6 +52,12 @@ fn require_executable_registration(registration: &Value) -> Result<(), String> {
         "F5 build-validation capsule cannot dispatch or admit a scientific job",
     )
 }
+fn require_external_seal(registration: &Value, expected: &str) -> Result<(), String> {
+    require(
+        canonical_sha(registration)? == expected,
+        "F5 control lacks the exact external registration seal",
+    )
+}
 
 /// Retain the exact build/input receipts from a non-executable validation capsule.
 /// This is compact build evidence, not publication or custody of an actual run.
@@ -114,6 +120,133 @@ pub fn publish_validation(capsule: &Path, out: &Path) -> Result<String, String> 
         "promotion_eligible":false,"full_goal_complete":false,"online_wall_ns":null,"online_speedup":null});
     save(&out.join("build-validation.json"), &report)?;
     serde_json::to_string_pretty(&report).map_err(|e| e.to_string())
+}
+
+/// Portable replay of compact build data. No archived executable is opened for
+/// execution, and the missing full archive cannot become scientific custody.
+fn verify_validation_data(root: &Path, expected: &str) -> Result<Value, String> {
+    let report = load(&root.join("build-validation.json"))?;
+    require(
+        report["schema_version"] == 1
+            && report["status"] == "PASS_NATIVE_F5_OFFLINE_FREEZE_BUILD_VALIDATION"
+            && report["validation_registration_sha256"] == expected
+            && report["validation_only"] == true
+            && report["scientific_worker_calls"] == 0
+            && report["ordinary_queries_executed"] == 0
+            && report["build_identity_only_worker_calls"] == 1
+            && report["actual_scientific_registration"] == false
+            && report["full_capsule_archive_custody_established_by_this_bundle"] == false
+            && report["native_f5_runtime_admitted"] == false
+            && report["fresh_paired_qualification"] == false
+            && report["headline_eligible"] == false
+            && report["promotion_eligible"] == false
+            && report["full_goal_complete"] == false
+            && report["online_wall_ns"].is_null()
+            && report["online_speedup"].is_null(),
+        "compact build validation changes its scope or claims",
+    )?;
+    let data = root.join("data");
+    native::check_tree(&data, &report["files"])?;
+    let registration = load(&data.join("registration.json"))?;
+    require(
+        canonical_sha(&registration)? == expected
+            && load(&data.join("seal.json"))?["registration_sha256"] == expected
+            && registration["schema_version"] == 1
+            && registration["scope"] == SCOPE
+            && registration["validation_only"] == true
+            && registration["source_commit"] == report["source_commit"]
+            && registration["runtime_environment"] == json!(environment())
+            && registration["worker_sha256"] == report["worker_sha256"]
+            && registration["auditor_sha256"] == report["checker_sha256"]
+            && registration["worker_build_identity"] == report["worker_build_identity"],
+        "compact validation external seal or identity differs",
+    )?;
+    let cfg: Control =
+        serde_json::from_value(load(&data.join("config.json"))?).map_err(|e| e.to_string())?;
+    cfg.validate()?;
+    let prep = load(&data.join("preparation.json"))?;
+    require(
+        load(&data.join("job.json"))? == mathematical_job(&prep, &cfg)?
+            && registration["preparation_admission"] == prepared_f5::verify(&prep)?,
+        "compact validation worker inputs differ",
+    )?;
+    for name in FILES {
+        require(
+            registration[name] == sha256(&read(&data.join(name), 16 * 1024 * 1024)?),
+            "compact validation input hash differs",
+        )?;
+    }
+    let immutable = registration["immutable_files"]
+        .as_object()
+        .ok_or("missing immutable build inventory")?;
+    require(
+        report["immutable_file_count"] == immutable.len(),
+        "compact build inventory count differs",
+    )?;
+    let original_receipts = immutable
+        .iter()
+        .filter_map(|(name, descriptor)| {
+            name.strip_prefix("build-receipts/")
+                .map(|name| (name, descriptor))
+        })
+        .collect::<std::collections::BTreeMap<_, _>>();
+    require(
+        native::inventory(&data.join("build-receipts"))? == json!(original_receipts),
+        "original build receipt changed or is missing",
+    )?;
+    let lock = read(&data.join("Cargo.lock"), 1024 * 1024)?;
+    require(
+        immutable.get("source/Cargo.lock")
+            == Some(&json!({"bytes":lock.len(), "sha256":sha256(&lock)})),
+        "retained dependency lockfile changed",
+    )?;
+    let source = immutable
+        .iter()
+        .filter_map(|(name, descriptor)| {
+            name.strip_prefix("source/").map(|name| (name, descriptor))
+        })
+        .collect::<std::collections::BTreeMap<_, _>>();
+    let build = load(&data.join("build-receipts/build-identity.json"))?;
+    let identity = &registration["worker_build_identity"];
+    require(
+        canonical_sha(&json!(source))? == identity["source_manifest_sha256"]
+            && build["source_manifest_sha256"] == identity["source_manifest_sha256"]
+            && canonical_sha(&build)? == identity["build_sha256"]
+            && load(&data.join("build-receipts/worker-identity.log"))? == *identity,
+        "frozen source/build/worker identities differ",
+    )?;
+    let receipt = load(&data.join("build-receipts/worker-identity.receipt.json"))?;
+    require(
+        receipt["argv"] == json!(["--build-identity"])
+            && receipt["exit_code"] == 0
+            && receipt["program_sha256_before"] == registration["worker_sha256"]
+            && receipt["program_sha256_after"] == registration["worker_sha256"]
+            && receipt["log_sha256"]
+                == sha256(&read(
+                    &data.join("build-receipts/worker-identity.log"),
+                    64 * 1024,
+                )?),
+        "compact validation lacks its identity-only worker call",
+    )?;
+    native::check_tree(&data, &report["files"])?;
+    require(
+        load(&root.join("build-validation.json"))? == report,
+        "compact validation changed during replay",
+    )?;
+    Ok(
+        json!({"schema_version":1,"status":"PASS_COMPACT_NATIVE_F5_BUILD_VALIDATION_REPLAY",
+        "validation_registration_sha256":expected,"source_commit":registration["source_commit"],
+        "immutable_file_count":immutable.len(),"preparation_admission":registration["preparation_admission"],
+        "validation_only":true,"scientific_worker_calls":0,"archived_binaries_executed":0,
+        "full_capsule_archive_custody_established":false,"native_f5_runtime_admitted":false,
+        "fresh_paired_qualification":false,"headline_eligible":false,"promotion_eligible":false,
+        "full_goal_complete":false,"online_wall_ns":null,"online_speedup":null}),
+    )
+}
+pub fn replay_validation(root: &Path, expected: &str, out: &Path) -> Result<String, String> {
+    let result = verify_validation_data(root, expected)?;
+    save(out, &result)?;
+    serde_json::to_string_pretty(&result).map_err(|e| e.to_string())
 }
 fn environment() -> Vec<(String, String)> {
     [
@@ -438,10 +571,7 @@ pub fn execute(capsule: &Path, execution: &Path, expected: &str) -> Result<Strin
     let registration = check_capsule(&capsule)?;
     require_executable_registration(&registration)?;
     let registration_sha = canonical_sha(&registration)?;
-    require(
-        registration_sha == expected,
-        "F5 dispatch lacks the exact external registration seal",
-    )?;
+    require_external_seal(&registration, expected)?;
     let own = std::env::current_exe().map_err(|e| e.to_string())?;
     require(
         registration["auditor_sha256"] == sha256(&read(&own, 128 * 1024 * 1024)?),
@@ -563,12 +693,18 @@ fn verify_transport(
 
 /// Frozen independent checker: sources, transport, every target attempt and scalar.
 /// No solver or archived producer is ever called by this entry point.
-pub fn audit(capsule: &Path, execution: &Path, out: &Path) -> Result<String, String> {
+pub fn audit(
+    capsule: &Path,
+    execution: &Path,
+    expected: &str,
+    out: &Path,
+) -> Result<String, String> {
     let started = Instant::now();
     let capsule = capsule.canonicalize().map_err(|e| e.to_string())?;
     let execution = execution.canonicalize().map_err(|e| e.to_string())?;
     let registration = check_capsule(&capsule)?;
     require_executable_registration(&registration)?;
+    require_external_seal(&registration, expected)?;
     let own = std::env::current_exe().map_err(|e| e.to_string())?;
     let before = sha256(&read(&own, 128 * 1024 * 1024)?);
     require(
@@ -620,6 +756,11 @@ pub fn audit(capsule: &Path, execution: &Path, out: &Path) -> Result<String, Str
 #[cfg(test)]
 mod tests {
     use super::*;
+    const VALIDATION_SEAL: &str =
+        "421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf";
+    fn validation_bundle() -> std::path::PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1")
+    }
     fn cfg() -> Control {
         Control {
             schema_version: 1,
@@ -644,6 +785,88 @@ mod tests {
         path
     }
     #[test]
+    fn compact_build_replay_binds_external_seal_and_creates_receipt_once() {
+        let p = temp("build-replay");
+        let out = p.join("replay.json");
+        assert!(replay_validation(&validation_bundle(), "wrong", &out).is_err());
+        assert!(!out.exists());
+        replay_validation(&validation_bundle(), VALIDATION_SEAL, &out).unwrap();
+        let bytes = fs::read(&out).unwrap();
+        let receipt = load(&out).unwrap();
+        assert_eq!(receipt["immutable_file_count"], 5953);
+        assert_eq!(receipt["archived_binaries_executed"], 0);
+        assert_eq!(receipt["full_capsule_archive_custody_established"], false);
+        assert_eq!(receipt["native_f5_runtime_admitted"], false);
+        assert!(receipt["online_speedup"].is_null());
+        assert!(replay_validation(&validation_bundle(), VALIDATION_SEAL, &out).is_err());
+        assert_eq!(fs::read(&out).unwrap(), bytes);
+        fs::remove_dir_all(p).unwrap();
+    }
+    #[test]
+    fn compact_build_replay_rejects_resealed_missing_receipt_and_changed_inputs() {
+        for (name, replacement) in [
+            ("build-receipts/build.log", None),
+            ("job.json", Some(b"{}".as_slice())),
+            ("Cargo.lock", Some(b"changed".as_slice())),
+            (
+                "build-receipts/worker-identity.receipt.json",
+                Some(b"{}".as_slice()),
+            ),
+        ] {
+            let p = temp("build-corruption");
+            native::copy_tree(&validation_bundle(), &p.join("bundle")).unwrap();
+            let root = p.join("bundle");
+            let data = root.join("data");
+            match replacement {
+                Some(bytes) => fs::write(data.join(name), bytes).unwrap(),
+                None => fs::remove_file(data.join(name)).unwrap(),
+            }
+            // Regenerating the outer file list cannot replace the original seal.
+            let mut header = load(&root.join("build-validation.json")).unwrap();
+            header["files"] = native::inventory(&data).unwrap();
+            fs::write(
+                root.join("build-validation.json"),
+                serde_json::to_vec(&header).unwrap(),
+            )
+            .unwrap();
+            assert!(
+                verify_validation_data(&root, VALIDATION_SEAL).is_err(),
+                "accepted {name}"
+            );
+            fs::remove_dir_all(p).unwrap();
+        }
+    }
+    #[test]
+    fn compact_build_replay_rejects_runtime_and_performance_claims() {
+        let p = temp("build-claims");
+        native::copy_tree(&validation_bundle(), &p.join("bundle")).unwrap();
+        let root = p.join("bundle");
+        let original = load(&root.join("build-validation.json")).unwrap();
+        for (key, value) in [
+            ("scientific_worker_calls", json!(1)),
+            ("ordinary_queries_executed", json!(1)),
+            ("native_f5_runtime_admitted", json!(true)),
+            (
+                "full_capsule_archive_custody_established_by_this_bundle",
+                json!(true),
+            ),
+            ("online_speedup", json!(2)),
+        ] {
+            let mut changed = original.clone();
+            changed[key] = value;
+            fs::write(
+                root.join("build-validation.json"),
+                serde_json::to_vec(&changed).unwrap(),
+            )
+            .unwrap();
+            assert!(
+                verify_validation_data(&root, VALIDATION_SEAL).is_err(),
+                "accepted {key}"
+            );
+        }
+        fs::remove_dir_all(p).unwrap();
+    }
+    #[test]
     fn validation_capsules_cannot_dispatch_or_admit_scientific_jobs() {
         require_executable_registration(&json!({"validation_only":false})).unwrap();
         for document in [
@@ -653,6 +876,15 @@ mod tests {
         ] {
             assert!(require_executable_registration(&document).is_err());
         }
+    }
+    #[test]
+    fn original_audit_and_dispatch_require_the_external_registration_seal() {
+        let registration = json!({"validation_only":false,"source_commit":"original"});
+        let published = canonical_sha(&registration).unwrap();
+        require_external_seal(&registration, &published).unwrap();
+        assert!(require_external_seal(&registration, "").is_err());
+        let changed = json!({"validation_only":false,"source_commit":"replacement"});
+        assert!(require_external_seal(&changed, &published).is_err());
     }
     #[test]
     fn strict_control_rejects_other_targets_budgets_questions_and_unknown_fields() {

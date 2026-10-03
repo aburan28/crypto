@@ -42,3 +42,27 @@ identity-only receipt before copying. This build evidence does not publish the
 complete capsule archive or establish archive custody of an actual scientific
 registration. The full local capsule remains non-executable. Actual durable
 preregistration and sole scientific dispatch remain separate pending gates.
+
+The portable data replay checks the external registration seal, all retained
+inputs, the complete original build-receipt set, dependency lockfile and compiled
+source/build identity. It never executes an archived binary and does not verify
+custody of the omitted full archive. Linux and macOS CI run this same replay and
+retain their own receipt:
+
+```sh
+/tmp/ic-native-busy busy -- target/debug/icprog f5-control-replay-validation \
+  --publication research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1 \
+  --validation-registration-sha256 421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf \
+  --out /tmp/native-f5-build-validation-replay-NEW.json
+```
+
+Use a new receipt path. The replay rejects a wrong external seal, modified
+inputs or original receipts, omitted receipts despite a regenerated outer
+inventory, and runtime/performance claims added to this build-only record.
+
+After adding portable replay and the explicit external-seal requirement for
+original audit, all 73 local `icprog` tests passed, including nine controller
+controls. The built CLI also replayed the committed bundle successfully;
+`local-macos-arm64-build-validation-replay-v1.json` retains that data-only result.
+Formatting and diff checks passed, and local Clippy found no new implementation
+warning. Cross-platform final-head CI remains the publication acceptance gate.

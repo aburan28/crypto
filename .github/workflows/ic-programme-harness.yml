@@ -108,6 +108,10 @@ jobs:
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-control-replay-validation \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1 \
+            --validation-registration-sha256 421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf \
+            --out "$RUNNER_TEMP/native-f5-build-validation-replay.json"
           target/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true
       - uses: actions/upload-artifact@v4
         with:
@@ -116,6 +120,7 @@ jobs:
             ${{ runner.temp }}/native-sat-replay.json
             ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-f5-target-replay.json
+            ${{ runner.temp }}/native-f5-build-validation-replay.json
             ${{ runner.temp }}/native-sat-rustc.txt
             Cargo.lock
           if-no-files-found: error

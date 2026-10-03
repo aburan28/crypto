@@ -73,6 +73,10 @@ actual executable registration and custody archive separately before its sole
 claim-consuming execution. Use its frozen checker for admission. The committed
 template is not an actual registration; no new native F5 control is completed
 by the implementation alone. Old registrations and confirmation sets stay closed.
+Use `icprog f5-control-replay-validation` with the external validation seal for
+portable replay of the [compact offline build evidence](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/VALIDATION.md).
+This data-only replay launches no archived executable and cannot establish
+custody of the omitted full capsule or admit a scientific run.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.

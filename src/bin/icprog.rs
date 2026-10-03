@@ -105,6 +105,15 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Portable data replay of a validation-only F5 build; no archive execution/custody.
+    F5ControlReplayValidation {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Publish compact receipts of a non-executable F5 build-validation capsule.
     F5ControlPublishValidation {
         #[arg(long)]
@@ -144,6 +153,8 @@ enum Command {
         capsule: PathBuf,
         #[arg(long)]
         execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
         #[arg(long)]
         out: PathBuf,
     },
@@ -587,6 +598,11 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5ControlReplayValidation {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_control::replay_validation(&publication, &validation_registration_sha256, &out),
         Command::F5ControlPublishValidation { capsule, out } => {
             f5_control::publish_validation(&capsule, &out)
         }
@@ -615,8 +631,9 @@ fn main() -> ExitCode {
         Command::F5ControlAudit {
             capsule,
             execution,
+            registration_sha256,
             out,
-        } => f5_control::audit(&capsule, &execution, &out),
+        } => f5_control::audit(&capsule, &execution, &registration_sha256, &out),
         Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
         Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
         Command::SatControlPublish {

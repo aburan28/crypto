@@ -92,6 +92,8 @@ The terminal record preserves transport and source-gate failures.
 ## Independent audit and timing
 
 Only the preexecution-frozen checker can perform original admission. It checks
+the exact externally published registration digest, independently of the local
+seal file, before admitting any execution. It then checks
 the immutable source tree, inputs, claim, sole PID ledger, exact argv/environment,
 stdin hash and complete delivery, stdout/stderr hashes, executable identities,
 timeout/output-limit/drain flags, exit status and compiled producer build identity.
@@ -131,7 +133,8 @@ placeholders for a future accepted, separately published registration.
 /tmp/ic-native-busy busy -- NEW_CAPSULE/immutable/bin/icprog f5-control-execute \
   --capsule NEW_CAPSULE --execution NEW_EXECUTION --registration-sha256 PUBLISHED_SEAL
 /tmp/ic-native-busy busy -- NEW_CAPSULE/immutable/bin/icprog f5-control-audit \
-  --capsule NEW_CAPSULE --execution NEW_EXECUTION --out NEW_AUDIT_JSON
+  --capsule NEW_CAPSULE --execution NEW_EXECUTION \
+  --registration-sha256 PUBLISHED_SEAL --out NEW_AUDIT_JSON
 ```
 
 The host JSON identifies OS/architecture, model, CPU/memory, OS/kernel versions
