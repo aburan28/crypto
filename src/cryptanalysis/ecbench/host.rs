@@ -99,6 +99,15 @@ pub struct HostCapsule {
     pub captured_unix_ms: u128,
 }
 
+/// Stdout of a probe that reports through its exit status as well
+/// (`systemd-detect-virt` prints `none` and exits 1 on bare metal).
+#[cfg(target_os = "linux")]
+fn run_any(cmd: &str, args: &[&str]) -> Option<String> {
+    let out = Command::new(cmd).args(args).output().ok()?;
+    let text = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (!text.is_empty()).then_some(text)
+}
+
 fn run(cmd: &str, args: &[&str]) -> Option<String> {
     let out = Command::new(cmd).args(args).output().ok()?;
     out.status
@@ -281,7 +290,7 @@ fn stable_facts() -> StableFacts {
                 virtualization.insert(k.into(), v.trim().into());
             }
         }
-        if let Some(v) = run("systemd-detect-virt", &["--vm"]) {
+        if let Some(v) = run_any("systemd-detect-virt", &["--vm"]) {
             virtualization.insert("systemd_detect_virt_vm".into(), v);
         }
     }
@@ -336,9 +345,20 @@ fn build_facts() -> BuildFacts {
         .as_ref()
         .and_then(|p| std::fs::read(p).ok())
         .map(|b| sha256_hex(&b));
-    let git_commit = run("git", &["rev-parse", "HEAD"]);
-    let git_dirty =
-        run("git", &["status", "--porcelain", "--untracked-files=no"]).map(|s| !s.is_empty());
+    // The commit of the worktree the binary sits in (target/release/…),
+    // not of whatever directory the session was started from.
+    let repo = exe
+        .as_ref()
+        .and_then(|p| p.parent())
+        .map(|d| d.display().to_string());
+    let git = |args: &[&str]| -> Option<String> {
+        let dir = repo.as_deref()?;
+        let mut full = vec!["-C", dir];
+        full.extend_from_slice(args);
+        run("git", &full)
+    };
+    let git_commit = git(&["rev-parse", "HEAD"]);
+    let git_dirty = git(&["status", "--porcelain", "--untracked-files=no"]).map(|s| !s.is_empty());
     let build_env = [
         "RUSTFLAGS",
         "CARGO_ENCODED_RUSTFLAGS",

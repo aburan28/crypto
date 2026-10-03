@@ -61,8 +61,10 @@ cargo build --release --bin ecbench
   own heavy work in `python3 tools/isolated_bench.py busy -- CMD`, which takes the
   same lock.
 - A busy host is refused. Wait, or pass `--allow-busy` and accept runs below L2.
-- `OUT_DIR` must not exist. Never delete or edit a session. An interrupted session
-  stays as evidence; start a new directory.
+- `OUT_DIR` must not exist; it is claimed atomically under the lock. Never delete
+  or edit a session. Ctrl-C or a SIGTERM stops a session cleanly: the child is
+  killed, evicted threads are restored and the session is marked `interrupted`. An
+  interrupted session stays as evidence; start a new directory.
 
 ## 4. Audit
 
@@ -70,8 +72,11 @@ cargo build --release --bin ecbench
 ./target/release/ecbench verify --dir OUT_DIR --replay 12 --out OUT_DIR.audit.json
 ```
 
-The audit must be `OK`, with every replay `identical`. Cite the receipt's SHA-256
-(printed) as the replay certificate. A failed audit means no result: find out why.
+The audit must be `OK`, with every replay `identical`. Use `--replay-all` for a
+claim: every deterministic run is re-executed, every derived figure is recomputed
+from its counts, and a session graded under the current rules is regraded. Cite
+the receipt's SHA-256 (printed) as the replay certificate. A failed audit means no
+result: find out why.
 
 ## 5. Compare and tabulate
 
@@ -85,9 +90,14 @@ The audit must be `OK`, with every replay `identical`. Cite the receipt's SHA-25
 
 Read it honestly:
 
-- `ops (ok)` with an interval excluding 1 is a measured difference in `S` on these
-  curves. `incomplete` (a measured run did not verify) is not admissible. `bounded`
-  means unpriced work: say so.
+- The ratio is `Σ S_B / Σ S_A` over (workload, round) pairs, the totals ratio of
+  AGENTS.md §8. `ops (ok)` with an interval excluding 1 is a measured difference in
+  `S` on these curves. `incomplete` (a measured run did not verify) is not
+  admissible. `partial` (runs without a partner) needs explaining. `bounded` means
+  unpriced work: say so.
+- For a baseline binary against a candidate binary, run the same spec into two
+  sessions and pass `--b-dir`. Pairs then share seeds (`same_seeds: true`), and
+  wall time is refused across sessions by design.
 - Read the **per-curve** rows. A pooled ratio across sizes is not a scaling claim.
 - `ci_method: within` (one workload) says nothing about other targets.
 - Wall time is a result only when `admitted`, and it means something only when

@@ -38,6 +38,10 @@ Rust only (AGENTS.md).
 5. **Document the charge** in the README §7 table: what is charged and what is
    counted but not charged. If the method trades memory for operations, say so
    beside the table.
+6. **Never change what a registered method counts** once a committed session
+   uses it. CI replays every committed run, and the change would fail them. That
+   is the point: a changed algorithm is a new id (`kangaroo.vow2`), and the old id
+   keeps its evidence.
 
 ## A curve construction
 

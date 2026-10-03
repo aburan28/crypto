@@ -247,6 +247,15 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
                     ));
                 }
             }
+            if workloads
+                .iter()
+                .any(|x: &Workload| x.workload_id == w.workload_id)
+            {
+                return Err(format!(
+                    "workload {} ({}, target {}) appears twice: a curve is listed more than once with the same target seed",
+                    w.workload_id, w.curve.slug, w.target_index
+                ));
+            }
             workloads.push(w);
             curve_of.push(instances.len());
         }
@@ -349,6 +358,15 @@ mod tests {
         let mut s = spec(&[("a", "rho.plain")]);
         s.label = "other".into();
         assert_eq!(plan(s).unwrap().spec_id, a.spec_id);
+    }
+
+    #[test]
+    fn a_curve_listed_twice_is_refused() {
+        let mut s = spec(&[("a", "rho.plain")]);
+        let c = s.workloads.curves[0].clone();
+        s.workloads.curves.push(c);
+        let err = plan(s).err().unwrap();
+        assert!(err.contains("appears twice"), "{err}");
     }
 
     #[test]

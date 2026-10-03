@@ -1,25 +1,34 @@
 //! Comparing two arms.
 //!
-//! **Operations** are the metric (AGENTS.md §2, §6).  For each workload
-//! the mean `S` of each arm's verified measured runs is taken, and the
-//! ratio `B / A` is the geometric mean of the per-workload ratios, with a
-//! stratified bootstrap interval.  Within one session the runs are paired
-//! by round (both arms ran under the same algorithm seed) and resampled
-//! as pairs.  The mean, not the median, is the statistic: the expected
-//! cost `√(πr/2A)` the floor is stated in is a mean.
+//! **Operations** are the metric (AGENTS.md §2, §6).  Runs are matched by
+//! `(workload, round)`: within one session the two arms of a round ran
+//! the same workload under the same algorithm seed, and across two
+//! sessions of one spec they did too.  The ratio is
+//!
+//! ```text
+//!   B / A  =  Σ S_B / Σ S_A        over the matched, verified pairs
+//! ```
+//!
+//! which is AGENTS.md §8's `baseline_total / candidate_total` in `S`: a
+//! ratio of totals, never a mean of ratios, which is biased whenever the
+//! arms spread differently (rho's cost varies with its seed, BSGS's does
+//! not).  Its interval is a two-stage bootstrap of the same statistic:
+//! workloads resampled, then pairs within each.  With one workload only
+//! the second stage exists and the comparison says so.
 //!
 //! **Wall time** is a practicality note.  It is compared only inside one
 //! session (same host class, interleaved), only over pairs where both
 //! runs earned the spec's `isolation_required`, only with at least five
-//! such rounds, and it is set beside the A/A interval of the session's
-//! control arm when there is one.  Anything less is printed as
-//! descriptive and is never a result.
+//! such pairs, and it is set beside the A/A interval of the session's two
+//! arms that run one method, when it has five admitted pairs too.
+//! Anything less is printed as descriptive and is never a result.
 //!
 //! A comparison is refused, not qualified, when the arms ran different
-//! workloads or units.  It is reported `incomplete` when any measured run
-//! of either arm did not verify, and `bounded` when either arm left work
-//! unpriced.  Classifying a change as advance, engineering, relabelling
-//! or accounting (AGENTS.md §3) stays with the author.
+//! workloads or units.  It is `incomplete` when a measured run of either
+//! arm did not verify, `partial` when some runs have no partner, and
+//! `bounded` when either arm left work unpriced.  Classifying a change as
+//! advance, engineering, relabelling or accounting (AGENTS.md §3) stays
+//! with the author.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -31,11 +40,12 @@ use crate::cryptanalysis::ecbench::canonical::short_id;
 use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session};
 use crate::cryptanalysis::ecbench::spec::{Level, Spec};
-use crate::cryptanalysis::ecbench::stats::{
-    bootstrap_ci, cluster_bootstrap_ci, geomean, mean, median,
-};
+use crate::cryptanalysis::ecbench::stats::{bootstrap_ci, cluster_bootstrap_ci, mean, median};
 
 pub const COMPARISON_SCHEMA: &str = "ecbench.comparison/v1";
+
+/// Wall-time and A/A figures need at least this many admitted pairs.
+pub const MIN_WALL_PAIRS: usize = 5;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ArmSummary {
@@ -58,10 +68,11 @@ pub struct WorkloadRow {
     pub slug: String,
     pub r: u64,
     pub floor_s: f64,
-    pub a_runs: u64,
-    pub b_runs: u64,
+    /// Matched, verified pairs on this workload.
+    pub pairs: u64,
     pub a_mean_s: Option<f64>,
     pub b_mean_s: Option<f64>,
+    /// `Σ S_B / Σ S_A` over the pairs.
     pub ratio_b_over_a: Option<f64>,
 }
 
@@ -71,6 +82,7 @@ pub struct CurveRatio {
     pub slug: String,
     pub log2_r: f64,
     pub workloads: u64,
+    pub pairs: u64,
     pub ratio_b_over_a: Option<f64>,
     pub ci95: Option<(f64, f64)>,
     pub ci_method: String,
@@ -78,17 +90,23 @@ pub struct CurveRatio {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpsResult {
-    /// `ok`, `incomplete` (a measured run did not verify) or `empty`.
+    /// `ok`; `incomplete` (a measured run did not verify); `partial`
+    /// (some verified runs have no partner); or `empty`.
     pub status: String,
     pub unit: String,
-    /// Geometric mean over workloads of mean-S ratios.
+    /// `Σ S_B / Σ S_A` over every matched pair, all curves pooled.
     pub ratio_b_over_a: Option<f64>,
     pub ci95: Option<(f64, f64)>,
-    /// `cluster` (workloads and runs resampled, the default with two or
-    /// more workloads) or `within` (runs only: one workload, so the
-    /// interval says nothing about other targets).
+    /// `cluster` (workloads, then pairs, resampled; two or more
+    /// workloads) or `within` (pairs only: one workload, so the interval
+    /// says nothing about other targets).
     pub ci_method: String,
-    pub paired: bool,
+    pub pairs: u64,
+    /// Verified measured runs of either arm with no partner.
+    pub unpaired_runs: u64,
+    /// The pairs ran under the same algorithm seeds.
+    pub same_seeds: bool,
+    pub same_session: bool,
     /// Pooled over curves of different sizes; read `curves` for scaling.
     pub pooled_curves: u64,
     /// Either arm left work unpriced: the ratio is between bounds.
@@ -108,8 +126,10 @@ pub struct WallResult {
     pub median_ratio: Option<f64>,
     pub ci95: Option<(f64, f64)>,
     /// The same statistic between the session's two arms that run the
-    /// same method, when it has them: the noise floor.
+    /// same method, when it has at least five admitted pairs: the noise
+    /// floor.
     pub aa_arms: Option<(String, String)>,
+    pub aa_pairs: u64,
     pub aa_median_ratio: Option<f64>,
     pub aa_ci95: Option<(f64, f64)>,
     /// The B/A interval excludes 1 and does not overlap the A/A interval.
@@ -162,8 +182,82 @@ fn measured<'a>(recs: &'a [Record], arm: &str) -> Vec<&'a Record> {
     recs.iter().filter(|r| r.arm == arm && !r.warmup).collect()
 }
 
-/// Compare arm `b` against arm `a`.  `b_dir` names a second session for
-/// a cross-session operations comparison; wall time is then refused.
+/// `Σ b / Σ a` over pairs, `None` when undefined.
+fn ratio_of_sums(pairs: impl Iterator<Item = (f64, f64)>) -> Option<f64> {
+    let (mut sa, mut sb, mut n) = (0.0, 0.0, 0usize);
+    for (a, b) in pairs {
+        sa += a;
+        sb += b;
+        n += 1;
+    }
+    (n > 0 && sa > 0.0).then(|| sb / sa)
+}
+
+/// Matched pairs `(S_A, S_B)` per workload, with the seeds' agreement.
+struct Matched {
+    by_workload: BTreeMap<String, Vec<(f64, f64)>>,
+    unpaired: u64,
+    same_seeds: bool,
+}
+
+fn match_pairs(ma: &[&Record], mb: &[&Record]) -> Matched {
+    let key = |r: &Record| (r.workload.workload_id.clone(), r.round);
+    let a: BTreeMap<(String, u32), &Record> = ma
+        .iter()
+        .filter(|r| r.counts() && r.cost.s.is_some())
+        .map(|r| (key(r), *r))
+        .collect();
+    let b: BTreeMap<(String, u32), &Record> = mb
+        .iter()
+        .filter(|r| r.counts() && r.cost.s.is_some())
+        .map(|r| (key(r), *r))
+        .collect();
+    let mut by_workload: BTreeMap<String, Vec<(f64, f64)>> = BTreeMap::new();
+    let mut same_seeds = true;
+    for (k, ra) in &a {
+        if let Some(rb) = b.get(k) {
+            same_seeds &= ra.algorithm_seed == rb.algorithm_seed;
+            by_workload
+                .entry(k.0.clone())
+                .or_default()
+                .push((ra.cost.s.unwrap_or(0.0), rb.cost.s.unwrap_or(0.0)));
+        }
+    }
+    let paired: usize = by_workload.values().map(|v| v.len()).sum();
+    let unpaired = (a.len() - paired) as u64 + (b.len() - paired) as u64;
+    Matched {
+        by_workload,
+        unpaired,
+        same_seeds,
+    }
+}
+
+/// The ratio of sums over `strata` with its interval: two-stage when
+/// there are two or more strata, within-stratum otherwise.
+fn ratio_with_interval(
+    strata: &[Vec<(f64, f64)>],
+    resamples: usize,
+    seed: u64,
+) -> (Option<f64>, Option<(f64, f64)>, String) {
+    let stat = |s: &[Vec<(f64, f64)>]| ratio_of_sums(s.iter().flatten().copied());
+    let ratio = stat(strata);
+    if strata.len() >= 2 {
+        (
+            ratio,
+            cluster_bootstrap_ci(strata, resamples, seed, stat),
+            "cluster".into(),
+        )
+    } else {
+        (
+            ratio,
+            bootstrap_ci(strata, resamples, seed, stat),
+            "within".into(),
+        )
+    }
+}
+
+/// Compare arm `b` against arm `a`.  `b_dir` names a second session (a
+/// candidate binary's run of the same spec); wall time is then refused.
 pub fn compare(
     a_dir: &Path,
     a_arm: &str,
@@ -205,151 +299,70 @@ pub fn compare(
         return Err("the arms report different units".into());
     }
 
-    // Operations, per workload.
-    let mut rows = Vec::new();
-    let mut strata_pairs: Vec<Vec<(f64, f64)>> = Vec::new();
-    let mut strata_a: Vec<Vec<f64>> = Vec::new();
-    let mut strata_b: Vec<Vec<f64>> = Vec::new();
-    for wid in &wa {
-        let sa_runs: Vec<&&Record> = ma
-            .iter()
-            .filter(|r| r.workload.workload_id == *wid && r.counts())
-            .collect();
-        let sb_runs: Vec<&&Record> = mb
-            .iter()
-            .filter(|r| r.workload.workload_id == *wid && r.counts())
-            .collect();
-        let xa: Vec<f64> = sa_runs.iter().filter_map(|r| r.cost.s).collect();
-        let xb: Vec<f64> = sb_runs.iter().filter_map(|r| r.cost.s).collect();
-        let any = ma
-            .iter()
-            .find(|r| r.workload.workload_id == *wid)
-            .expect("workload is in a");
-        let (am, bm) = (mean(&xa), mean(&xb));
-        rows.push(WorkloadRow {
-            workload_id: wid.to_string(),
-            slug: any.workload.curve.slug.clone(),
-            r: any.workload.curve.r,
-            floor_s: any.boundaries.floor_s,
-            a_runs: xa.len() as u64,
-            b_runs: xb.len() as u64,
-            a_mean_s: am,
-            b_mean_s: bm,
-            ratio_b_over_a: match (am, bm) {
-                (Some(a), Some(b)) if a > 0.0 => Some(b / a),
-                _ => None,
-            },
-        });
-        if same_session {
-            let by_round_a: BTreeMap<u32, f64> = sa_runs
-                .iter()
-                .filter_map(|r| Some((r.round, r.cost.s?)))
-                .collect();
-            let pairs: Vec<(f64, f64)> = sb_runs
-                .iter()
-                .filter_map(|r| Some((*by_round_a.get(&r.round)?, r.cost.s?)))
-                .collect();
-            strata_pairs.push(pairs);
-        }
-        strata_a.push(xa);
-        strata_b.push(xb);
-    }
-    let ratios: Vec<f64> = rows.iter().filter_map(|r| r.ratio_b_over_a).collect();
-    let ratio = if ratios.len() == rows.len() {
-        geomean(&ratios)
-    } else {
-        None
-    };
-    // One stratum per workload: (a, b) pairs by round in one session,
-    // tagged runs of either arm across sessions.
-    let strata: Vec<Vec<(u8, f64, f64)>> = if same_session {
-        strata_pairs
-            .iter()
-            .map(|p| p.iter().map(|(x, y)| (2u8, *x, *y)).collect())
-            .collect()
-    } else {
-        strata_a
-            .iter()
-            .zip(&strata_b)
-            .map(|(x, y)| {
-                x.iter()
-                    .map(|v| (0u8, *v, 0.0))
-                    .chain(y.iter().map(|v| (1u8, 0.0, *v)))
-                    .collect()
-            })
-            .collect()
-    };
-    let stat = |s: &[Vec<(u8, f64, f64)>]| -> Option<f64> {
-        let per: Vec<f64> = s
-            .iter()
-            .map(|p| {
-                let a = mean(
-                    &p.iter()
-                        .filter(|x| x.0 != 1)
-                        .map(|x| x.1)
-                        .collect::<Vec<_>>(),
-                )?;
-                let b = mean(
-                    &p.iter()
-                        .filter(|x| x.0 != 0)
-                        .map(|x| x.2)
-                        .collect::<Vec<_>>(),
-                )?;
-                (a > 0.0).then(|| b / a)
-            })
-            .collect::<Option<Vec<f64>>>()?;
-        geomean(&per)
-    };
-    let interval = |idx: &[usize], salt: u64| -> (Option<(f64, f64)>, String) {
-        let sub: Vec<Vec<(u8, f64, f64)>> = idx.iter().map(|&i| strata[i].clone()).collect();
-        if sub.len() >= 2 {
-            (
-                cluster_bootstrap_ci(&sub, resamples, seed ^ salt, stat),
-                "cluster".into(),
-            )
-        } else {
-            (
-                bootstrap_ci(&sub, resamples, seed ^ salt, stat),
-                "within".into(),
-            )
-        }
-    };
-    let all: Vec<usize> = (0..strata.len()).collect();
-    let (ci, ci_method) = interval(&all, 0);
+    let matched = match_pairs(&ma, &mb);
+    let workload_of: BTreeMap<&str, &Record> = ma
+        .iter()
+        .map(|r| (r.workload.workload_id.as_str(), *r))
+        .collect();
+    let empty = Vec::new();
+    let rows: Vec<WorkloadRow> = wa
+        .iter()
+        .map(|wid| {
+            let pairs = matched.by_workload.get(*wid).unwrap_or(&empty);
+            let any = workload_of[wid];
+            WorkloadRow {
+                workload_id: wid.to_string(),
+                slug: any.workload.curve.slug.clone(),
+                r: any.workload.curve.r,
+                floor_s: any.boundaries.floor_s,
+                pairs: pairs.len() as u64,
+                a_mean_s: mean(&pairs.iter().map(|p| p.0).collect::<Vec<_>>()),
+                b_mean_s: mean(&pairs.iter().map(|p| p.1).collect::<Vec<_>>()),
+                ratio_b_over_a: ratio_of_sums(pairs.iter().copied()),
+            }
+        })
+        .collect();
+    let strata: Vec<Vec<(f64, f64)>> = matched
+        .by_workload
+        .values()
+        .filter(|v| !v.is_empty())
+        .cloned()
+        .collect();
+    let (ratio, ci, ci_method) = ratio_with_interval(&strata, resamples, seed);
     let mut slugs: Vec<String> = rows.iter().map(|r| r.slug.clone()).collect();
     slugs.sort();
     slugs.dedup();
     let curves: Vec<CurveRatio> = slugs
         .iter()
         .map(|slug| {
-            let idx: Vec<usize> = rows
+            let mine: Vec<&WorkloadRow> = rows.iter().filter(|r| &r.slug == slug).collect();
+            let strata: Vec<Vec<(f64, f64)>> = mine
                 .iter()
-                .enumerate()
-                .filter(|(_, r)| &r.slug == slug)
-                .map(|(i, _)| i)
+                .filter_map(|r| matched.by_workload.get(&r.workload_id))
+                .filter(|v| !v.is_empty())
+                .cloned()
                 .collect();
-            let rs: Vec<f64> = idx.iter().filter_map(|&i| rows[i].ratio_b_over_a).collect();
-            let (ci95, ci_method) = interval(&idx, 0);
+            let (ratio_b_over_a, ci95, ci_method) = ratio_with_interval(&strata, resamples, seed);
             CurveRatio {
                 slug: slug.clone(),
-                log2_r: (rows[idx[0]].r as f64).log2(),
-                workloads: idx.len() as u64,
-                ratio_b_over_a: if rs.len() == idx.len() {
-                    geomean(&rs)
-                } else {
-                    None
-                },
+                log2_r: (mine[0].r as f64).log2(),
+                workloads: mine.len() as u64,
+                pairs: strata.iter().map(|s| s.len() as u64).sum(),
+                ratio_b_over_a,
                 ci95,
                 ci_method,
             }
         })
         .collect();
+    let pairs: u64 = strata.iter().map(|s| s.len() as u64).sum();
     let incomplete = a.verified < a.measured || b.verified < b.measured;
     let ops = OpsResult {
         status: if ratio.is_none() {
             "empty".into()
         } else if incomplete {
             "incomplete".into()
+        } else if matched.unpaired > 0 {
+            "partial".into()
         } else {
             "ok".into()
         },
@@ -357,7 +370,10 @@ pub fn compare(
         ratio_b_over_a: ratio,
         ci95: ci,
         ci_method,
-        paired: same_session,
+        pairs,
+        unpaired_runs: matched.unpaired,
+        same_seeds: matched.same_seeds,
+        same_session,
         pooled_curves: curves.len() as u64,
         bounded: a.lower_bound || b.lower_bound,
         resamples,
@@ -378,7 +394,7 @@ pub fn compare(
             .unwrap_or_default()
     };
     let verdict = format!(
-        "ops ({}): {} / {} = {}{} ({}) over {} workloads on {} curve(s){}{}; wall: {}{}",
+        "ops ({}): {} / {} = {}{} ({}) over {} pairs on {} workloads, {} curve(s){}{}; wall: {}{}",
         ops.status,
         b_arm,
         a_arm,
@@ -387,6 +403,7 @@ pub fn compare(
             .unwrap_or_else(|| "unknown".into()),
         fmt_ci(ops.ci95),
         ops.ci_method,
+        ops.pairs,
         rows.len(),
         ops.pooled_curves,
         if ops.bounded {
@@ -394,10 +411,10 @@ pub fn compare(
         } else {
             ""
         },
-        if incomplete {
-            ", NOT admissible: a measured run did not verify"
-        } else {
-            ""
+        match ops.status.as_str() {
+            "incomplete" => ", NOT admissible: a measured run did not verify",
+            "partial" => ", partial: some runs have no partner",
+            _ => "",
         },
         wall.status,
         match (wall.status.as_str(), wall.median_ratio) {
@@ -432,8 +449,8 @@ pub fn compare(
 }
 
 /// Per-pair wall ratios `B / A` over (workload, round) where both
-/// verified and both earned `required`; `(ratios by workload, pairs
-/// below level)`.
+/// verified and both earned `required`; `(ratios by workload, pairs,
+/// pairs below level)`.
 fn wall_pairs(recs: &[Record], a: &str, b: &str, required: Level) -> (Vec<Vec<f64>>, u64, u64) {
     let mut by: BTreeMap<(String, u32), (Option<&Record>, Option<&Record>)> = BTreeMap::new();
     for r in recs.iter().filter(|r| r.counts()) {
@@ -483,6 +500,7 @@ fn wall_compare(
         median_ratio: None,
         ci95: None,
         aa_arms: None,
+        aa_pairs: 0,
         aa_median_ratio: None,
         aa_ci95: None,
         outside_noise: None,
@@ -506,16 +524,18 @@ fn wall_compare(
             required.name()
         ));
     }
-    if admitted < 5 {
-        w.reasons
-            .push(format!("{admitted} admitted pairs; at least 5 are needed"));
+    if admitted < MIN_WALL_PAIRS {
+        w.reasons.push(format!(
+            "{admitted} admitted pairs; at least {MIN_WALL_PAIRS} are needed"
+        ));
         w.status = "descriptive".into();
         return w;
     }
     w.median_ratio = med(&strata);
     w.ci95 = bootstrap_ci(&strata, resamples, seed ^ 0xA11, med);
     w.status = "admitted".into();
-    // The noise floor: two arms of the session that run one method.
+    // The noise floor: two arms of the session that run one method, with
+    // enough admitted pairs to have an interval at all.
     let mut arms: BTreeMap<String, String> = BTreeMap::new();
     for r in recs {
         arms.entry(r.arm.clone())
@@ -526,9 +546,17 @@ fn wall_compare(
         for j in (i + 1)..names.len() {
             if names[i].1 == names[j].1 {
                 let (s, _, _) = wall_pairs(recs, names[i].0, names[j].0, required);
+                let n: usize = s.iter().map(|v| v.len()).sum();
                 w.aa_arms = Some((names[i].0.clone(), names[j].0.clone()));
-                w.aa_median_ratio = med(&s);
-                w.aa_ci95 = bootstrap_ci(&s, resamples, seed ^ 0xAA, med);
+                w.aa_pairs = n as u64;
+                if n >= MIN_WALL_PAIRS {
+                    w.aa_median_ratio = med(&s);
+                    w.aa_ci95 = bootstrap_ci(&s, resamples, seed ^ 0xAA, med);
+                } else {
+                    w.reasons.push(format!(
+                        "the A/A arms have {n} admitted pairs; at least {MIN_WALL_PAIRS} are needed for a noise floor"
+                    ));
+                }
                 break 'outer;
             }
         }
@@ -537,4 +565,27 @@ fn wall_compare(
         w.outside_noise = Some((hi < 1.0 || lo > 1.0) && (hi < alo || lo > ahi));
     }
     w
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ratio_of_sums_is_the_totals_ratio() {
+        // Two workloads, unequal spread: the mean of per-workload ratios
+        // (1.5) is not the totals ratio (11/9).
+        let pairs = [(1.0, 2.0), (8.0, 9.0)];
+        assert_eq!(ratio_of_sums(pairs.iter().copied()), Some(11.0 / 9.0));
+        assert_eq!(ratio_of_sums(std::iter::empty()), None);
+    }
+
+    #[test]
+    fn identical_arms_give_a_unit_ratio_and_a_point_interval() {
+        let strata = vec![vec![(1.0, 1.0), (2.0, 2.0)], vec![(3.0, 3.0)]];
+        let (r, ci, method) = ratio_with_interval(&strata, 500, 1);
+        assert_eq!(r, Some(1.0));
+        assert_eq!(ci, Some((1.0, 1.0)));
+        assert_eq!(method, "cluster");
+    }
 }

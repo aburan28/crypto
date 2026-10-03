@@ -15,7 +15,7 @@ use crate::cryptanalysis::ecbench::canonical::sha256_hex;
 use crate::cryptanalysis::ecbench::host::{is_virtual, HostCapsule};
 use crate::cryptanalysis::ecbench::isolation::{
     anon_pages_by_node, current_cpu, mempolicy, mems_allowed, own_affinity, Conditions, CpuPlan,
-    Eviction, Preflight, SelfPlacement, Thresholds,
+    EvictionSummary, Preflight, SelfPlacement, Thresholds,
 };
 use crate::cryptanalysis::ecbench::methods::{
     resolve, FactorBaseFacts, MethodSpec, PhaseRecord, ResolvedMethod, SolveReport,
@@ -24,6 +24,12 @@ use crate::cryptanalysis::ecbench::spec::Level;
 use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
 
 pub const RECORD_SCHEMA: &str = "ecbench.record/v1";
+
+/// The rules [`grade`] applies.  Version 2 added the unreserved-sibling
+/// check, the observed siblings, the policy-and-pages NUMA read-back and
+/// the session's own tick rate.  An audit regrades a session only when it
+/// was graded under the current version.
+pub const GRADING_VERSION: u32 = 2;
 pub const CHILD_INPUT_SCHEMA: &str = "ecbench.child_input/v1";
 pub const CHILD_OUTPUT_SCHEMA: &str = "ecbench.child_output/v1";
 
@@ -333,7 +339,7 @@ pub fn floor_s(automorphisms: u32) -> f64 {
 pub struct GradeInput<'a> {
     pub plan: Option<&'a CpuPlan>,
     pub preflight: Option<&'a Preflight>,
-    pub eviction: Option<&'a Eviction>,
+    pub eviction: Option<&'a EvictionSummary>,
     pub runner_on_run_cpu: bool,
     pub capsule: &'a HostCapsule,
     pub thresholds: &'a Thresholds,
@@ -341,6 +347,8 @@ pub struct GradeInput<'a> {
     pub before: &'a Conditions,
     pub after: &'a Conditions,
     pub timing: &'a Timing,
+    /// Clock ticks per second on the host that recorded the ticks.
+    pub hz: f64,
 }
 
 pub struct Grade {
@@ -358,7 +366,7 @@ pub fn grade(g: &GradeInput) -> Grade {
     let mut foreign = None;
     let mut steal = None;
     let mut sib_busy = None;
-    let hz = crate::cryptanalysis::ecbench::isolation::ticks_per_second() as f64;
+    let hz = g.hz;
     let wall_s = g.timing.process_wall_ns as f64 / 1e9;
     let cpu_s = (g.timing.user_ns + g.timing.sys_ns) as f64 / 1e9;
 
@@ -371,6 +379,12 @@ pub fn grade(g: &GradeInput) -> Grade {
         }
         Some(plan) => {
             let run = plan.run_cpu;
+            if !plan.unreserved_siblings.is_empty() {
+                l1.push(format!(
+                    "the run CPU's SMT siblings {:?} are outside the reservation",
+                    plan.unreserved_siblings
+                ));
+            }
             if g.placement.affinity.as_deref() != Some(&[run][..]) {
                 l1.push(format!(
                     "affinity read back inside the child was {:?}, not [{run}]",
@@ -463,15 +477,17 @@ pub fn grade(g: &GradeInput) -> Grade {
                 }
                 _ => l2.push("no /proc/stat ticks for the run CPU".into()),
             }
+            // Every other observed CPU: the reserved idle siblings, and under
+            // an inherited placement the run CPU's siblings that are not ours.
             let mut sb = 0u64;
-            for &c in plan.reserved.iter().filter(|&&c| c != run) {
+            for c in plan.observed_cpus().into_iter().filter(|&c| c != run) {
                 if let (Some(a), Some(b)) = (tick(g.before, c), tick(g.after, c)) {
                     sb += b.busy.saturating_sub(a.busy);
                 }
             }
             sib_busy = Some(sb);
             if sb > 2 {
-                l2.push(format!("{sb} busy ticks on the reserved idle siblings"));
+                l2.push(format!("{sb} busy ticks on the run CPU's idle siblings and the rest of the reservation"));
             }
             match (g.timing.schedstat_solve, g.timing.solve_wall_ns) {
                 (Some(s), Some(w)) if w > 0 => {
