@@ -68,6 +68,13 @@ Strong rho separately records `canonicalisations_uncharged`,
 `table_queries_uncharged`. These names and their exact counts remain in
 each sealed [record](sessions/n37_cold_v1/records.jsonl); the vector-byte
 count is a memory floor, not an operation to add to GAE.
+The folded table's normal-basis constructor and hash-table allocation do
+not have dedicated operation counters in the current oracle, so the
+recorded setup cost is also a lower bound beyond the listed native units.
+`ecbench` reconstructs the deterministic base once more to report its
+identity after the measured pipeline; that metadata work is excluded from
+algorithmic GAE but appears in process wall time. No wall-time result is
+claimed from this L0 session.
 
 | Arm | Measured answers | Mean S [95% interval] | S / generic floor | S / same-Q rho | Class |
 |---|---:|---:|---:|---:|---|
