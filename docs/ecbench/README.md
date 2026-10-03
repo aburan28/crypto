@@ -268,6 +268,16 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
+`compact-orbit-scan:columns=N,raw_x_cap=M` builds a Koblitz factor base
+from a bounded raw-abscissa scan. Its cofactor projections, subgroup checks
+and Frobenius eigenvalue checks are counted group operations. The factor-base
+phase also records scan, lift, field, hash and vector-storage counters;
+unpinned work keeps the reported `S` a lower bound. The
+`mitm-frobenius-counted:m=3` oracle uses the existing folded table and
+probe but adds canonicalisation, Frobenius-map, lookup, entry and
+representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
+same base as its accounting control.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic

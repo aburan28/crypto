@@ -284,6 +284,7 @@ pub fn run_pipeline<G: CountedGroup>(
     oracle.prepare(ctx, &fb, &spec.oracle_params, &mut prep_ops)?;
     let mut prep_cost = PhaseCost::default();
     prep_cost.group_ops.merge(prep_ops);
+    prep_cost.native = oracle.setup_native();
     prep_cost.wall_ns = prep_started.elapsed().as_nanos() as u64;
 
     // ── Stages 3 and 4: relations, then the matrix ─────────────────

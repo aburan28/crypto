@@ -224,6 +224,12 @@ pub trait DecompositionOracle<G: CountedGroup> {
         Ok(())
     }
 
+    /// Native work performed by `prepare`, charged to the oracle setup
+    /// phase after preparation completes. Existing oracles default to none.
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// Decompose `point`, or decide it does not decompose.
     fn decompose(
         &mut self,
