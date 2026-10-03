@@ -46,8 +46,13 @@ The adapter admits only the disclosed synthetic n17 control on the accepted
 macOS ARM64 native assets. Independent external replay is timed separately;
 this interval cannot establish the primary independently verified online claim.
 The committed control template is not an executable registration or a result.
-All new cross-method measurements use native `ecbench` under AGENTS.md §12;
-its current cold interval must be extended before a primary online comparison.
+The [actual native SAT control registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/README.md)
+binds the final source/dependency snapshot, native assets and both binaries.
+Check its accepted publication, sole claim and terminal result before dispatch;
+an archive restoration never authorizes another invocation.
+All new cross-method measurements use native `ecbench` under AGENTS.md §12.
+Its merged online-window extension is available for integration and review;
+public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

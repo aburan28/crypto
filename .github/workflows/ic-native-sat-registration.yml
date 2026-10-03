@@ -1,0 +1,47 @@
+name: Native SAT registration custody
+
+# Read only: validate the published registration and every archive member.
+# Never run an exporter, SAT solver, dispatcher, or archived executable.
+on:
+  pull_request:
+    paths:
+      - 'examples/prepared_sat_registration_audit.rs'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/**'
+      - '.github/workflows/ic-native-sat-registration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/prepared_sat_registration_audit.rs'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/**'
+      - '.github/workflows/ic-native-sat-registration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  custody:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Bootstrap native build serialization
+        run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
+      - name: Native archive rejection controls
+        run: "$RUNNER_TEMP/native-busy busy -- cargo test --example prepared_sat_registration_audit"
+      - name: Build custody auditor
+        run: "$RUNNER_TEMP/native-busy busy -- cargo build --example prepared_sat_registration_audit"
+      - name: Audit the exact preregistered capsule without executing it
+        run: |
+          target/debug/examples/prepared_sat_registration_audit \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/publication \
+            --registration-sha256 b098ebbe135abd4706e62d6286f513fe1c4f07fad61f7250487bd2d86ad317e4 \
+            --out "$RUNNER_TEMP/registration-custody.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-sat-registration-custody-${{ matrix.os }}
+          path: ${{ runner.temp }}/registration-custody.json
+          if-no-files-found: error

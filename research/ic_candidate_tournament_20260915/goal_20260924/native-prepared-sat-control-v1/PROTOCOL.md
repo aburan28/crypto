@@ -21,7 +21,9 @@ The target is `[52411,72106]`. Its answer was disclosed in the closed F5
 development control. It is a training input, never a holdout. The scalar is
 absent from producer inputs. The committed `control-template.json` fixes the
 proposed query seed, exporter nonce, limits and point. **This template is not an
-executable registration.** No native SAT search has run under this protocol.
+executable registration.** The [actual separately frozen registration](../native-sat-control-registration-v1/README.md)
+now retains the final source/dependency/build capsule. No native SAT search has
+run under this protocol at the preregistration stage.
 
 The accepted target-independent SAT preparation has whole-certificate SHA-256
 `91856ab78550436d3f668367f9aebd9e2c0604bd64b1472d9d19ec318e2b144e` and mathematical
@@ -154,12 +156,13 @@ Publish the original terminal outcome and independent report in a follow-on PR,
 including failures. The template and implementation controls do not satisfy this
 execution gate.
 
-Remaining full-goal gates: actual separately sealed native SAT control; complete
+Remaining full-goal gates: sole native SAT control execution and audit; complete
 native F4/F5 control path and new ordinary-yield evidence; reconciled exposure
 union; a new candidate/workload protocol; frozen strongest compatible rho and
 incumbent sources; hardware rebuild, calibration and resource/order registration;
 fresh paired runs with uncertainty and retained incomplete cells. New cross-method
-measurements must use native `ecbench` (AGENTS.md §12). Its current cold interval
-does not implement the required primary IC online window; add that and complete
-independent verification before any online comparison. Retain diverse complete
+measurements must use native `ecbench` (AGENTS.md §12). The merged online-window
+extension is available; review and integrate it with public unplanted targets,
+IC1 identities, prepared solver admission and complete independent verification
+before any primary online comparison. Retain diverse complete
 pipelines for recombination. Local stage winners are not a global optimum.
