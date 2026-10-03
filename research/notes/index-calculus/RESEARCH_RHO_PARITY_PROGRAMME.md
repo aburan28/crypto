@@ -308,7 +308,14 @@ measured size are both outside this harness:
   measured as a wash (`2×` on the rate, `2.01×` on the test).
 - **A cover** (Joux–Vitse 2012, `E(F_{p⁶})` → genus-`3` hyperelliptic over
   `F_{p²}`; the GHS work elsewhere in this repository): changes the target,
-  not the constant, and belongs to a different ledger.
+  not the constant, and belongs to a different ledger.  **Outcome
+  (2026-10-03, `RESEARCH_COVER_DECOMPOSITION_LEDGER.md`):** registered, built
+  and measured.  One six-point test costs `5.2·10⁶` multiplications, and
+  `S / rho` falls as `p^{−1.92 ± 0.12}` (`n^{−0.32}`) to `8–10×` at `2^{58}`,
+  extrapolating to parity near `2^{67}` — on the weak class only, with the
+  isogeny walk unpriced; the one route here that closes by a polynomial and
+  crosses inside an extrapolation, and a reproduction of a published
+  algorithm, not an advance.
 
 Either is a new harness, not a lever on this one.  What this note settles
 is that the levers on this one — the automorphism quotient, the canonical

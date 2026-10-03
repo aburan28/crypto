@@ -178,6 +178,7 @@ pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
 pub mod isogeny_degree_search;
 pub mod j0_twists;
+pub mod jv_cover;
 pub mod jv_quartic;
 pub mod jv_quintic;
 pub mod jv_quintic_edwards;
