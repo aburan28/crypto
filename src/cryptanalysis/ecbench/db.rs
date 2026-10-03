@@ -114,7 +114,7 @@ fn curve_rows(out: &mut String, w: &crate::cryptanalysis::ecbench::workload::Wor
         ts(&w.target_law),
         ts(&w.target_seed.to_string()),
         w.target_index,
-        ts(&w.planted.to_string()),
+        t(w.planted.map(|k| k.to_string()).as_deref()),
     );
 }
 
@@ -299,6 +299,46 @@ fn comparison_row(out: &mut String, c: &Comparison) {
     );
 }
 
+/// A `vs_rho` claim (`ecbench claim build`), checked again at load time.
+fn claim_row(out: &mut String, c: &Value) -> Result<(), String> {
+    let s = |k: &str| c.get(k).and_then(Value::as_str);
+    let need = |k: &str| s(k).ok_or_else(|| format!("claim without {k}"));
+    let num = |k: &str| {
+        c.get(k)
+            .and_then(Value::as_f64)
+            .ok_or_else(|| format!("claim without {k}"))
+    };
+    let check = crate::cryptanalysis::ecbench::claim::check_vs_rho(c)?;
+    let _ = writeln!(
+        out,
+        "INSERT OR REPLACE INTO claims VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});",
+        ts(need("run_id")?),
+        ts(need("candidate_id")?),
+        ts(need("candidate_manifest_sha256")?),
+        ts(need("workload_id")?),
+        ts(need("workload_manifest_sha256")?),
+        ts(c["ecbench_records"]["session"]
+            .as_str()
+            .ok_or("claim without its session")?),
+        ts(c["ecbench_records"]["ic"]
+            .as_str()
+            .ok_or("claim without its IC record")?),
+        ts(c["ecbench_records"]["rho"]
+            .as_str()
+            .ok_or("claim without its rho record")?),
+        i(c.get("n_or_bits").and_then(Value::as_u64)),
+        f(Some(num("ic_online_wall_ms")?)),
+        f(Some(num("rho_online_wall_ms")?)),
+        f(Some(num("online_speedup")?)),
+        b(c.get("independent_validation") == Some(&Value::Bool(true))),
+        t(s("ic_replay_certificate_sha256")),
+        ts(check["status"].as_str().unwrap_or("FAIL")),
+        ts(need("verdict")?),
+        json_text(c),
+    );
+    Ok(())
+}
+
 fn dump_rows(out: &mut String, d: &FactorBaseDump) {
     let fb = &d.factor_base;
     let c = &d.curve;
@@ -389,6 +429,9 @@ pub fn sql_for_path(path: &Path) -> Result<String, String> {
         Some(crate::cryptanalysis::ecbench::methods::FB_DUMP_SCHEMA) => {
             let d: FactorBaseDump = serde_json::from_value(v).map_err(|e| e.to_string())?;
             dump_rows(&mut out, &d);
+        }
+        Some(crate::cryptanalysis::ecbench::claim::CLAIM_SCHEMA) => {
+            claim_row(&mut out, &v).map_err(|e| format!("{}: {e}", path.display()))?;
         }
         other => {
             return Err(format!(

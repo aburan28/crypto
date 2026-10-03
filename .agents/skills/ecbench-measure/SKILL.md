@@ -108,15 +108,42 @@ Read it honestly:
 - Classify the change (advance, engineering, relabelling, accounting) by AGENTS.md
   §3, from the ratio to the floor and to the reference, not from the headline.
 
+## 5a. A `vs_rho` claim (index calculus against the strong rho)
+
+A claim is one IC run against one `rho.signed_frobenius_strong` run on one
+public target, in the report `docs/ic/boundary_targets.json` defines
+(README §9, "Claims"). It needs a spec with `"target_kind": "public"` (start
+from `docs/ecbench/specs/claim-koblitz.json`), a Koblitz curve with
+`5 ≤ n ≤ 61`, and the binary that measured the session.
+
+```bash
+./target/release/ecbench claim build --dir OUT_DIR --ic IC_ARM --rho STRONG_RHO_ARM --workload W... --out claim.json --exit-code
+```
+
+- Without an independent replay the checker fails the claim on exactly
+  `independent_validation` and the two certificates, and the verdict says so.
+  Get a receipt from a host of another class (`ecbench-independent-runner`,
+  "Reproduce a session on another machine", with `--replay-all`), store it
+  durably, and pass `--independent-receipt RECEIPT --pointer WHERE`. A receipt
+  from the session's own host class, for other bytes, or that did not reproduce
+  both runs is refused.
+- The verdict is admissible only when both runs earned the spec's level. At L0
+  or L1 the speedup is descriptive, and the claim says so.
+- One claim per (workload, round). A panel of targets is a set of claims, never
+  an average (AGENTS.md "IC measurements").
+- `ecbench claim check --report claim.json` reruns the checker on any report;
+  its output is the legacy checker's, field for field.
+
 ## 6. Store
 
 ```bash
-./target/release/ecbench db sql OUT_DIR | sqlite3 -bail ecbench.db
+./target/release/ecbench db sql OUT_DIR claim.json | sqlite3 -bail ecbench.db
 ```
 
-The database is an index rebuilt from sessions. Keep sessions in the PR, not the
-`.db` file. Useful views: `method_by_curve`, `arm_workload_summary`,
-`ic_phase_split`.
+The database is an index rebuilt from sessions, comparisons, factor-base dumps
+and claims. Keep sessions in the PR, not the `.db` file. Useful views:
+`method_by_curve`, `arm_workload_summary`, `ic_phase_split`; claims are keyed by
+their IC1 `run_id`.
 
 ## 7. Land it
 

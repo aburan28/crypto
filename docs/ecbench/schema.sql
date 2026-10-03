@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS workloads (
   target_law      TEXT NOT NULL,
   target_seed     TEXT NOT NULL,
   target_index    INTEGER NOT NULL,
-  planted         TEXT NOT NULL                       -- the known answer
+  planted         TEXT                                -- the known answer; NULL for a public target
 );
 
 -- ── What is measured ─────────────────────────────────────────────────
@@ -243,6 +243,31 @@ CREATE TABLE IF NOT EXISTS comparisons (
   json              TEXT NOT NULL
 );
 
+-- vs_rho claims (ecbench claim build): one IC run against one strong-rho
+-- run on one public target, keyed by the repository's IC1 run id.  A
+-- claim rebuilt with an independent receipt replaces its earlier form;
+-- the identity trigger keeps the run id on one candidate, workload and
+-- session.
+CREATE TABLE IF NOT EXISTS claims (
+  run_id                     TEXT PRIMARY KEY,                -- <candidate_id>W<workload_id>R<n>
+  candidate_id               TEXT NOT NULL,                   -- IC1 label
+  candidate_manifest_sha256  TEXT NOT NULL,
+  claim_workload_id          TEXT NOT NULL,                   -- IC1 workload id (12 hex), not ecbench's W…
+  workload_manifest_sha256   TEXT NOT NULL,
+  session_id                 TEXT NOT NULL,
+  ic_record_id               TEXT NOT NULL,
+  rho_record_id              TEXT NOT NULL,
+  n_or_bits                  INTEGER NOT NULL,
+  ic_online_wall_ms          REAL NOT NULL,
+  rho_online_wall_ms         REAL NOT NULL,
+  online_speedup             REAL NOT NULL,                   -- rho / IC
+  independent_validation     INTEGER NOT NULL,
+  replay_certificate_sha256  TEXT,                            -- NULL until a receipt is cited
+  check_status               TEXT NOT NULL,                   -- PASS | FAIL, the vs_rho checker at load time
+  verdict                    TEXT NOT NULL,
+  json                       TEXT NOT NULL
+);
+
 -- ── Identity guards ──────────────────────────────────────────────────
 --
 -- An insert tolerates a conflict on its primary key only when the row is
@@ -275,6 +300,13 @@ BEGIN SELECT RAISE(ABORT, 'host class id already loaded with a different class h
 CREATE TRIGGER IF NOT EXISTS runs_identity BEFORE INSERT ON runs
 WHEN EXISTS (SELECT 1 FROM runs WHERE record_id = NEW.record_id AND (session_id <> NEW.session_id OR seq <> NEW.seq))
 BEGIN SELECT RAISE(ABORT, 'record id already loaded for a different session or sequence number'); END;
+
+CREATE TRIGGER IF NOT EXISTS claims_identity BEFORE INSERT ON claims
+WHEN EXISTS (SELECT 1 FROM claims WHERE run_id = NEW.run_id
+             AND (candidate_manifest_sha256 <> NEW.candidate_manifest_sha256
+                  OR workload_manifest_sha256 <> NEW.workload_manifest_sha256
+                  OR session_id <> NEW.session_id))
+BEGIN SELECT RAISE(ABORT, 'claim run id already loaded for a different candidate, workload or session'); END;
 
 -- ── Views ────────────────────────────────────────────────────────────
 

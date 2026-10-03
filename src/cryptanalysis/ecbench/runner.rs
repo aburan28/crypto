@@ -562,6 +562,7 @@ fn execute_session(
                 curve: CurveSpec::explicit(inst).unwrap_or_else(|| w.curve_spec.clone()),
                 target_seed: w.target_seed,
                 target_index: w.target_index,
+                target_kind: w.kind(),
                 expected_workload_id: w.workload_id.clone(),
                 method: MethodSpec {
                     id: arm.method.id.clone(),
@@ -694,14 +695,15 @@ fn assemble(
     let recovered = report.as_ref().and_then(|r| r.recovered);
     // Verification in the runner's own process: [k]G against the target.
     let matches_target = recovered.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
-    let matches_planted = recovered.map(|k| k == w.planted);
+    // A public target has no planted answer: [k]G = Q decides alone.
+    let matches_planted = w.planted.and_then(|p| recovered.map(|k| k == p));
     let status = if reaped.timed_out {
         "timeout"
     } else if !exited_cleanly && report.is_none() {
         "crashed"
     } else if child_error.is_some() || report.is_none() {
         "error"
-    } else if matches_target == Some(true) && matches_planted == Some(true) {
+    } else if matches_target == Some(true) && matches_planted != Some(false) {
         "verified"
     } else if recovered.is_some() {
         "wrong_answer"

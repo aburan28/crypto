@@ -21,7 +21,7 @@ use crate::cryptanalysis::ecbench::methods::{
     resolve, FactorBaseFacts, MethodSpec, OnlineWindow, PhaseRecord, ResolvedMethod, SolveReport,
 };
 use crate::cryptanalysis::ecbench::spec::Level;
-use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+use crate::cryptanalysis::ecbench::workload::{CurveSpec, TargetKind, Workload};
 
 pub const RECORD_SCHEMA: &str = "ecbench.record/v1";
 
@@ -47,6 +47,9 @@ pub struct ChildInput {
     pub curve: CurveSpec,
     pub target_seed: u64,
     pub target_index: u64,
+    /// Planted or public; older inputs are planted.
+    #[serde(default, skip_serializing_if = "TargetKind::is_planted")]
+    pub target_kind: TargetKind,
     pub expected_workload_id: String,
     pub method: MethodSpec,
     pub expected_method_id: String,
@@ -129,7 +132,12 @@ pub fn child_main(input: &str) -> ChildOutput {
         if job.schema != CHILD_INPUT_SCHEMA {
             return Err(format!("child input schema `{}`", job.schema));
         }
-        let (w, inst) = Workload::build(&job.curve, job.target_seed, job.target_index)?;
+        let (w, inst) = Workload::build(
+            &job.curve,
+            job.target_seed,
+            job.target_index,
+            job.target_kind,
+        )?;
         if w.workload_id != job.expected_workload_id {
             return Err(format!(
                 "rebuilt workload {} is not the planned {}",
