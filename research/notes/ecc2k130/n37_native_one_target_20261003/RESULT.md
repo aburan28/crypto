@@ -65,7 +65,10 @@ research classification is **accounting/correctness**, not an algorithmic
 advance. The next controlled decision is to calibrate native field,
 batched-addition, scalar-multiplication, and degree-73 transport costs in
 one operation unit, and rerun the same one-target protocol on an isolated
-host. After that, compare equal-useful-size factor-base policies with
+host. The new repository `ecbench` spec/session/audit harness merged after
+this panel was frozen and measured; use it for that follow-on comparison
+and retain this panel as historical correctness and accounting evidence.
+After that, compare equal-useful-size factor-base policies with
 fully charged target-blind relation and table setup. The 49 relation
 probes consumed 1,507,265 IC query-addition requests on every Q, so
 reducing or reusing this cold setup deserves priority over tuning the
