@@ -26,6 +26,8 @@
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
 #                        (default 0; table walk only; ROOFLINE.md)
+#   SIGMA_SQUARE_TABLE  the same exact table for lambda^2 in the sigma-fused
+#                       walk only (default 0; benchmarks/sigma-square-table)
 #   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
 #                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
@@ -100,6 +102,7 @@ PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
 SIGMA_FUSED ?= 0
 SIGMA_FUSED_LATE_Y ?= 0
+SIGMA_SQUARE_TABLE ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
@@ -257,6 +260,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
        -DECC_SIGMA_FUSED=$(SIGMA_FUSED) \
        -DECC_SIGMA_FUSED_LATE_Y=$(SIGMA_FUSED_LATE_Y) \
+       -DECC_SIGMA_SQUARE_TABLE=$(SIGMA_SQUARE_TABLE) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
@@ -504,6 +508,9 @@ test-packed-network:
 	./build/test-packed-network-direct
 	./build/test-packed-network-generated
 	./build/test-packed-network-add
+
+test-sigma-square-table-native:
+	CXX="$(CXX)" /bin/sh benchmarks/sigma-square-table/run-native.sh
 
 test-generated-product:
 	python3 codegen/genpackedproduct.py --check
@@ -1025,7 +1032,7 @@ clean:
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-sigma-square-table-native test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:
