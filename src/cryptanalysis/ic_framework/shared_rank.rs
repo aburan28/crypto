@@ -144,10 +144,12 @@ pub fn run_shared_rank(
     let table_start = Instant::now();
     let mut table_ops = GroupOps::default();
     oracle.prepare(&ctx, &fb, &Params::default(), &mut table_ops)?;
-    let mut table = PhaseCost::default();
-    table.group_ops = table_ops;
-    table.native = oracle.setup_native();
-    table.wall_ns = table_start.elapsed().as_nanos() as u64;
+    let mut table = PhaseCost {
+        group_ops: table_ops,
+        native: oracle.setup_native(),
+        wall_ns: table_start.elapsed().as_nanos() as u64,
+        ..PhaseCost::default()
+    };
 
     let mut matrix = matrix_by_name("incremental-gauss", fb.columns, inst.r)?;
     let mut rng = StdRng::seed_from_u64(spec.rank_seed ^ 0x5348_4152_4544_524b);
