@@ -107,7 +107,10 @@ Two scratch sessions ran during development and are not evidence:
 - A calibration on `icv1-f2m47-t22705043-f4e44623` (24 targets per arm)
   and `n = 61`. On `n = 47`, the mean of queries over expected queries,
   `r/(2nM)`, was 0.994 for `claw-c1` and 0.885 for `claw-pr`, with 24 of
-  24 runs verified in each arm. The early `n = 61` hits were chance.
+  24 runs verified in each arm. The harness stopped the session at 56 of
+  96 runs when the binary was rebuilt. The four `n = 61` runs per arm it
+  finished gave 0.80 (`claw-c1`) and 1.18 (`claw-pr`), so the early
+  smoke hits look like chance.
 
 ## n = 83 is not covered
 
