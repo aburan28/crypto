@@ -4,10 +4,12 @@ The repo skill is [ic-autolab](../../.agents/skills/ic-autolab/SKILL.md).
 New research execution and verification must be native under `AGENTS.md`.
 The [native prepared SAT controller](goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
 provides source freeze, one-use execution and independent audit for a disclosed
-synthetic n17 development control. Its actual sealed invocation remains pending;
-implementation controls do not establish new solver yield or a tournament win.
-New cross-method comparisons use native `ecbench`, whose primary IC online
-window still needs an extension. The Python entry points described below are
+synthetic n17 development control. Its [actual native registration](goal_20260924/native-sat-control-registration-v1/README.md)
+now retains the final executable capsule; the sole invocation remains pending.
+Implementation and custody controls do not establish new solver yield or a win.
+New cross-method comparisons use native `ecbench`, whose merged online-window
+extension is available for review and integration. Public unplanted targets,
+IC1 identity and prepared solver admission remain open. The Python entry points below are
 historical contracts, not commands for new research.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
