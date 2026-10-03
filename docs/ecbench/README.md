@@ -268,6 +268,14 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
+`ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
+target scalar is pinned; the factor-base logs can still be underdetermined.
+`linalg=incremental-gauss-full-rank` uses the same matrix and relation stream
+but reports success only at rank `factor_base.columns + 1`. It records the
+first target-pin rank, trial and relation as well as final rank. A trial-cap
+exit after the early pin is an exhausted full-rank attempt. This distinct
+parameter value changes the method identity and preserves old replays.
+
 `compact-orbit-scan:columns=N,raw_x_cap=M` builds a Koblitz factor base
 from a bounded raw-abscissa scan. Its cofactor projections, subgroup checks
 and Frobenius eigenvalue checks are counted group operations. The factor-base
