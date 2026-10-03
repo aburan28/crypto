@@ -288,6 +288,48 @@ The update rides in the commit or pull request that lands the
 measurement.  It is not a follow-up task, and "the page is out of date"
 is not a state this repository has.
 
+### 7a. Keep the leaderboard current
+
+`docs/ic-leaderboard.html` is the same evidence curve by curve. For every
+curve priced end to end it shows the best recipe, the phase split of `S`,
+the ratio to the matched reference and to the floor, every recipe on every
+curve, the per-phase exponents, the decomposition oracles, and every curve
+the repository names. Its Markdown and data twins are
+`docs/ic/LEADERBOARD.md` and `docs/ic/leaderboard.json`. It is held to §7's
+standard: **a round that changes what the leaderboard shows is not finished
+until the leaderboard shows it**, in the same pull request.
+
+- **When.** Update it in the PR that lands any of these:
+  - a whole-pipeline measurement: a new ledger section, a new ladder or
+    recipe, or a re-run that supersedes a row;
+  - a curve priced end to end for the first time;
+  - a reference re-matched;
+  - a rule change that redefines the primary comparison, as the
+    one-target rule did;
+  - a change to `docs/curves/registry.json`, which the page's roster reads.
+- **How.** The page is generated, never edited by hand.
+  - Point `SOURCES` in `scripts/build_ic_leaderboard.py` at the round's
+    frozen files.
+  - Keep a superseded figure as the row's "before" mark.
+  - Keep batch or legacy figures labelled as diagnostics, never as the
+    headline.
+  - Regenerate with `python3 scripts/build_ic_leaderboard.py` and commit
+    all three outputs.
+  - The builder reads only committed frozen files, so a number that is
+    not in one cannot reach the page.
+- **Agree with the scoreboard.** The leaderboard's headline figures must
+  match the ledger and the verdict on `docs/index-calculus-scoreboard.html`.
+  When they disagree, one of them is stale: fix it in the same PR.
+- **Enforced in CI** (`ic-leaderboard`). `--check` fails when any output is
+  stale against the files the builder reads. It also fails when the ledger
+  has a section later than `LEDGER_COVERED_THROUGH`, because the check
+  cannot otherwise see evidence the builder does not read yet.
+  - When a new section changes the page, point `SOURCES` at it,
+    regenerate, and raise the number.
+  - When it changes nothing on the page (a stage diagnostic, a plan),
+    confirm that, and raise the number.
+- **Published copies** are republishes of the repository file, as in §7.
+
 ### 8. Use the frozen benchmark to establish end-to-end speedups
 
 Every index-calculus performance iteration must use the

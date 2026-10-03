@@ -41,6 +41,13 @@ OUT_JSON = REPO / "docs/ic/leaderboard.json"
 OUT_MD = REPO / "docs/ic/LEADERBOARD.md"
 OUT_HTML = REPO / "docs/ic-leaderboard.html"
 
+# The ledger section the page is current through (AGENTS.md §7a).  A round
+# that adds a later section must update the page, or confirm that the round
+# changes nothing on it, and then raise this number; `--check` fails until it
+# does, because it cannot otherwise see evidence the builder does not read.
+LEDGER = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+LEDGER_COVERED_THROUGH = 23
+
 SOURCES = {
     "round5": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
     "matched_rho": "research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json",
@@ -1000,7 +1007,8 @@ def page(doc: dict, standalone: bool) -> str:
              '<a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
              '<a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced '
              'end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p>'
-             '<p>Built by <code>scripts/build_ic_leaderboard.py</code> from: '
+             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}. Built by '
+             '<code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
              + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
     body = "\n".join(P)
@@ -1022,6 +1030,14 @@ def main() -> int:
     outs = {OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:
+        sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]
+        latest = max(sections, default=0)
+        if latest > LEDGER_COVERED_THROUGH:
+            print(f"{LEDGER} has §{latest}; the leaderboard is current through §{LEDGER_COVERED_THROUGH}. "
+                  "Point SOURCES at the round's frozen files and regenerate, or confirm the round "
+                  "changes nothing on the page; then raise LEDGER_COVERED_THROUGH (AGENTS.md §7a).",
+                  file=sys.stderr)
+            return 1
         stale = [str(p.relative_to(REPO)) for p, t in outs.items()
                  if not p.exists() or p.read_text() != t]
         for s in stale:
