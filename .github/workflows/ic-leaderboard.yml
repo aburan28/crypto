@@ -1,6 +1,6 @@
 name: ic-leaderboard
 
-# AGENTS.md §7a: docs/ic-leaderboard.html is current in every pull request
+# AGENTS.md §7b: docs/ic-leaderboard.html is current in every pull request
 # that changes what it shows.  --check fails when an output is stale against
 # the frozen files the builder reads, and when the boundary ledger has a
 # section later than the one the page is current through.  It runs no

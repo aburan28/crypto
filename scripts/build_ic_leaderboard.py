@@ -41,7 +41,7 @@ OUT_JSON = REPO / "docs/ic/leaderboard.json"
 OUT_MD = REPO / "docs/ic/LEADERBOARD.md"
 OUT_HTML = REPO / "docs/ic-leaderboard.html"
 
-# The ledger section the page is current through (AGENTS.md §7a).  A round
+# The ledger section the page is current through (AGENTS.md §7b).  A round
 # that adds a later section must update the page, or confirm that the round
 # changes nothing on it, and then raise this number; `--check` fails until it
 # does, because it cannot otherwise see evidence the builder does not read.
@@ -683,6 +683,11 @@ details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; co
 details summary:focus-visible, a:focus-visible { outline: 2px solid var(--data); outline-offset: 2px; }
 a { color: var(--data); }
 footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.site-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-block: 2px 10px; border-bottom: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .02em; }
+.site-nav a { color: var(--ink-2); text-decoration: none; padding-block: 4px; }
+.site-nav a:hover { color: var(--data); }
+.site-nav a[aria-current="page"] { color: var(--ink); border-bottom: 2px solid var(--data); }
 footer p { margin: 0; max-width: 90ch; }
 """
 
@@ -740,7 +745,15 @@ def page(doc: dict, standalone: bool) -> str:
     online_hi = max(r["best"]["online_speedup"] for r in kob_rows)
     cold = [r["best"]["ratio_rho"] for r in kob_rows if not r["best"]["construction_artefact"]]
     model = [r["best"]["ic_online_over_precomputation_model"] for r in kob_rows]
-    P.append('<div class="wrap"><header>'
+    site = "https://aburan28.github.io/crypto/"
+    nav = [("Overview", site), ("Scoreboard", site + "scoreboard/"),
+           ("Leaderboard", None), ("Where things stand", site + "scoreboard/ic-current-state.html"),
+           ("Algorithm lab", site + "scoreboard/algorithm-lab.html"), ("Campaign status", site + "status/"),
+           ("Repository", "https://github.com/aburan28/crypto")]
+    P.append('<div class="wrap"><nav class="site-nav" aria-label="Site">' + "".join(
+        f'<a href="#board" aria-current="page">{esc(t)}</a>' if u is None else f'<a href="{esc(u)}">{esc(t)}</a>'
+        for t, u in nav) + '</nav>')
+    P.append('<header>'
              '<span class="eyebrow">ECDLP · index calculus · whole pipeline · accounting view, no new measurement</span>'
              '<h1>Index Calculus Leaderboard</h1>'
              '<p class="verdict">Every curve this repository has priced end to end, with the best index-calculus '
@@ -1035,7 +1048,7 @@ def main() -> int:
         if latest > LEDGER_COVERED_THROUGH:
             print(f"{LEDGER} has §{latest}; the leaderboard is current through §{LEDGER_COVERED_THROUGH}. "
                   "Point SOURCES at the round's frozen files and regenerate, or confirm the round "
-                  "changes nothing on the page; then raise LEDGER_COVERED_THROUGH (AGENTS.md §7a).",
+                  "changes nothing on the page; then raise LEDGER_COVERED_THROUGH (AGENTS.md §7b).",
                   file=sys.stderr)
             return 1
         stale = [str(p.relative_to(REPO)) for p, t in outs.items()
