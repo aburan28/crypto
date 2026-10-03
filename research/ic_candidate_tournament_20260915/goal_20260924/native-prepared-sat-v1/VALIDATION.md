@@ -29,6 +29,15 @@ The existing native harness CI also exercises the full frozen historical output
 suite; added Linux/macOS jobs retain their own replay receipts. Their exact-head
 status is an acceptance gate, not implied by these local results.
 
+The first macOS CI job failed before compiling the checker: this library ignores
+`Cargo.lock`, so a clean checkout has no lockfile for `--locked`. The complete
+job log is retained as `first-ci-macos-failure.log`. The workflow now explicitly
+generates a development lockfile before its locked builds and retains that file,
+the compiler receipt and native replay result together. Matrix fail-fast is
+disabled so either platform can report its actual result independently. This
+development dependency resolution is not a frozen scientific registration; a
+future controller must seal its resolved dependencies before dispatch.
+
 Both source-assignment hashes exactly match the retained independent historical
 substitution. The native matrix snapshot reproduces all ordinary rows and rank
 trajectories, including six incomplete attempts. Historical Python-controller

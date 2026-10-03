@@ -66,6 +66,7 @@ jobs:
 
   disclosed-sat-replay:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -75,6 +76,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Bootstrap native build serialization
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
+      - name: Resolve and retain the ignored development lockfile before replay builds
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- cargo generate-lockfile
+          rustc --version --verbose > "$RUNNER_TEMP/native-sat-rustc.txt"
       - name: Replay disclosed source and preparation, with mutation controls
         run: |
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
@@ -86,5 +91,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: disclosed-native-sat-replay-${{ matrix.os }}
-          path: ${{ runner.temp }}/native-sat-replay.json
+          path: |
+            ${{ runner.temp }}/native-sat-replay.json
+            ${{ runner.temp }}/native-sat-rustc.txt
+            Cargo.lock
           if-no-files-found: error
