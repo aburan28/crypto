@@ -1,0 +1,21 @@
+PR #1301, head 612fdb436e6b799a2790999087fc5a69430ea6e7
+Workflow: ECC2K-130 status pages
+Run: https://github.com/aburan28/crypto/actions/runs/37156319939
+
+The new generation/browser check passed, but the existing website structure
+test rejected six historical panels nested inside the Evidence search section:
+
+FAIL: test_scoreboard_panels_close_and_sit_at_the_top_level
+AssertionError: Lists differ:
+  [('lab-best', ['evidence-search']),
+   ('cold-compact-orbit-20261003', ['evidence-search']),
+   ('full-rank-compact-orbit-20261003', ['evidence-search']),
+   ('lab-ecbench-all', ['evidence-search']),
+   ('lab-progress', ['evidence-search']),
+   ('lab-currency', ['evidence-search'])] != []
+Ran 44 tests; FAILED (failures=1).
+
+Correction: close the Evidence search section before its historical detail
+wrappers. The retained sections now sit at the top level while native details
+still provide progressive disclosure. No test or evidence gate was relaxed.
+The panels, embedded timeline, frozen results and ledger content are unchanged.
