@@ -75,6 +75,7 @@ use crate::cryptanalysis::ic_boundary::{
     collect_and_solve_with, price_phase, Calibration, CountedGroup, GroupOps, PhaseCost,
     PipelineOutcome, RelationSolver, RestartPool, TargetSource,
 };
+use crate::cryptanalysis::ic_measurement as measurement;
 use linalg::matrix_by_name;
 use stages::{DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SystemShape, Targets};
 
@@ -257,6 +258,13 @@ pub fn run_pipeline<G: CountedGroup>(
     let started = Instant::now();
 
     // ── Stage 1: the factor base ───────────────────────────────────
+    //
+    // The phase marks below are no-ops unless the caller holds an
+    // `ic_measurement::Session`; with one, the factor base and the
+    // oracle's tables are target-independent set-up and the online
+    // interval opens at the first target-dependent query (see
+    // `collect_and_solve_with`) and closes after the verified recovery.
+    measurement::mark(measurement::Phase::FactorBase);
     let mut fb_ops = GroupOps::default();
     let fb_started = Instant::now();
     let fb = base_builder.build(ctx, &spec.factor_base_params, &mut fb_ops)?;
@@ -270,6 +278,7 @@ pub fn run_pipeline<G: CountedGroup>(
     // oracle's cost, and charging it to the base made the same base
     // read 1,830 GAE beside a table oracle and 0 beside an algebraic
     // one in the first frozen solver sweep.
+    measurement::mark(measurement::Phase::Precompute);
     let mut prep_ops = GroupOps::default();
     let prep_started = Instant::now();
     oracle.prepare(ctx, &fb, &spec.oracle_params, &mut prep_ops)?;
@@ -293,6 +302,7 @@ pub fn run_pipeline<G: CountedGroup>(
         Targets::Random => TargetSource::Random,
         Targets::Walk => TargetSource::Walk,
     };
+    measurement::begin_online(measurement::Phase::TargetQuery);
     let outcome: PipelineOutcome = collect_and_solve_with(
         ctx.group,
         ctx.generator,
@@ -307,6 +317,7 @@ pub fn run_pipeline<G: CountedGroup>(
         matrix.as_mut(),
         |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
     );
+    measurement::end_online();
 
     // ── The report ─────────────────────────────────────────────────
     let mut fb_phase = fb_cost;

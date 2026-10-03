@@ -20,7 +20,7 @@ use std::time::Instant;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::cryptanalysis::ecbench::canonical::{sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
@@ -39,7 +39,12 @@ use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
 use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec, RunReport};
+use crate::cryptanalysis::ic_measurement::{self as measurement, Phase, Snapshot};
 use crate::cryptanalysis::koblitz_fast::FastPoint;
+use crate::cryptanalysis::koblitz_strong_rho::{
+    RawPoint as StrongPoint, StrongRho, StrongRhoCharges, StrongRhoParams,
+};
+use rand::{rngs::StdRng, SeedableRng};
 
 /// A parameter a method reads.  `default: None` means required: a value
 /// that changes the search is never left to a producer default.
@@ -112,6 +117,30 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "ic_boundary::signed_frobenius_rho_tuned",
             applies: Applies::KoblitzOnly,
             params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong",
+            family: "rho",
+            summary: "the strong single-target reference of the IC measurement rules (docs/ic/boundary_targets.json, since 2026-10-01): lockstep walks with batched inversion on signed Frobenius orbits (A = 2n), Koblitz curves only",
+            entry: "koblitz_strong_rho::StrongRho::solve",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width); the reference measured 32",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the reference measured 4",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
         },
         MethodDecl {
             id: "bsgs.textbook",
@@ -214,7 +243,9 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
     match id {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
-        "rho.signed_frobenius" => Some((PI / (2.0 * a_available.max(1) as f64)).sqrt()),
+        "rho.signed_frobenius" | "rho.signed_frobenius_strong" => {
+            Some((PI / (2.0 * a_available.max(1) as f64)).sqrt())
+        }
         "bsgs.textbook" => Some(1.5),
         "bsgs.interleaved" => Some(4.0 / 3.0),
         "bsgs.negation" => Some(1.0),
@@ -324,6 +355,28 @@ pub struct FactorBaseFacts {
     pub points_sha256: String,
 }
 
+/// The one-target online window: from the first target-dependent
+/// computation to the verified recovery, with its exclusive phases, as the
+/// IC measurement rules define it (AGENTS.md "IC measurements").
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct OnlineWindow {
+    pub wall_ns: u64,
+    /// Exclusive phases inside the window, ns, under the claim schema's
+    /// names: `target_query`, `target_PDP`, `target_relation_check`,
+    /// `target_descent`, `target_recovery_check` for index calculus;
+    /// `rho_solve` (and `recovery_check` where a walk marks it) for a
+    /// generic method.  They sum to `wall_ns`.
+    pub phases_ns: BTreeMap<String, u64>,
+    /// Phases of the window this method never entered, each with the
+    /// reason its cost is zero by construction.
+    pub zero_phases: BTreeMap<String, String>,
+    pub start_event: String,
+    pub stop_event: String,
+    pub included_stages: Vec<String>,
+    /// How the method's work maps onto the stage names.
+    pub mapping: String,
+}
+
 /// What a solve reports.  The runner adds verification and timing.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct SolveReport {
@@ -348,6 +401,11 @@ pub struct SolveReport {
     pub factor_base: Option<FactorBaseFacts>,
     /// Method-specific detail kept whole (the IC report's structure).
     pub detail: Value,
+    /// The one-target online window, when the phase clock produced one.
+    #[serde(default)]
+    pub online: Option<OnlineWindow>,
+    #[serde(default)]
+    pub online_error: Option<String>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -394,6 +452,8 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         solve_wall_ns: wall,
         factor_base: None,
         detail: Value::Null,
+        online: None,
+        online_error: None,
     }
 }
 
@@ -438,6 +498,8 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         solve_wall_ns: wall,
         factor_base: None,
         detail: json!({"method": res.method, "expected_steps": res.expected_steps}),
+        online: None,
+        online_error: None,
     }
 }
 
@@ -452,6 +514,9 @@ fn solve_generic<G: CountedGroup>(
 ) -> Result<SolveReport, String> {
     let cap = || -> Result<u64, String> { Ok(rho_cap(r, param_u64(m, "cap_multiple")? as f64)) };
     let t = Instant::now();
+    // Everything these methods do depends on the target (rho's jump table
+    // is [a]G + [b]Q), so the whole solve is the online window.
+    measurement::begin_online(Phase::RhoSolve);
     let rep = match m.id.as_str() {
         "rho.frozen_reference" => {
             let res = rho_reference(g, gen, target, r, seed, cap()?);
@@ -501,6 +566,7 @@ fn solve_generic<G: CountedGroup>(
         }
         other => return Err(format!("`{other}` is not a generic method")),
     };
+    measurement::end_online();
     Ok(rep)
 }
 
@@ -525,13 +591,38 @@ pub fn solve(
         ));
     }
     let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
+    // The phase clock: the methods open and close the online window, the
+    // session turns it into exclusive phase times.
+    let session = measurement::Session::begin().ok();
+    let mut rep = solve_inner(m, inst, curve, d, tx, ty, seed)?;
+    match session.map(|s| s.finish()) {
+        Some(Ok(snap)) => rep.online = online_window(d.family, &m.id, &snap),
+        Some(Err(e)) => rep.online_error = Some(e.to_string()),
+        None => rep.online_error = Some("a measurement session was already active".into()),
+    }
+    Ok(rep)
+}
+
+fn solve_inner(
+    m: &ResolvedMethod,
+    inst: &Instance,
+    curve: &CurveFacts,
+    d: &MethodDecl,
+    tx: u64,
+    ty: u64,
+    seed: u64,
+) -> Result<SolveReport, String> {
     match (inst, d.family) {
         (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
         (Instance::Binary(i), "ic") => {
             solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
+        (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
+            solve_strong(m, i, FastPoint::affine(tx, ty), seed)
+        }
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius" => {
             let t = Instant::now();
+            measurement::begin_online(Phase::RhoSolve);
             let res = signed_frobenius_rho_tuned(
                 i,
                 FastPoint::affine(tx, ty),
@@ -539,6 +630,7 @@ pub fn solve(
                 rho_cap(i.r, param_u64(m, "cap_multiple")? as f64),
             )
             .ok_or("not a Koblitz instance")?;
+            measurement::end_online();
             Ok(rho_report(res, t.elapsed().as_nanos() as u64))
         }
         (Instance::Prime(i), _) => solve_generic(
@@ -554,6 +646,177 @@ pub fn solve(
             solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
         }
     }
+}
+
+/// The online window from the phase clock's snapshot, mapped to the
+/// claim schema's stage names.
+fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow> {
+    let wall_ns = snap.online_wall_ns?;
+    let get = |name: &str| snap.online_phases_ns.get(name).copied().flatten();
+    let mut w = OnlineWindow {
+        wall_ns,
+        ..Default::default()
+    };
+    if family == "ic" {
+        w.start_event = "first target-dependent query ([a]G + [b]Q, or the walk's first jump), after the factor base and the oracle's tables are built".into();
+        w.stop_event = "[d]G = Q verified inside the pipeline".into();
+        w.mapping = "classic index calculus: every relation carries the target, so query generation is target_query, decomposition attempts are target_PDP, the oracle's own witness checks are target_relation_check, the elimination that pins the target's column is target_descent, and the final [d]G = Q is target_recovery_check".into();
+        for (clock, claim, why) in [
+            ("target_query", "target_query", "no query was drawn"),
+            ("target_pdp", "target_PDP", "no decomposition was attempted"),
+            (
+                "target_relation_check",
+                "target_relation_check",
+                "the oracle returns exact decompositions (pair-table hits on exact point keys, or solutions it checks under its own relation_check scope); this pipeline has no separate relation check, so any checking cost is inside target_PDP",
+            ),
+            ("target_descent", "target_descent", "no relation reached the elimination"),
+            ("recovery_check", "target_recovery_check", "no candidate logarithm was pinned"),
+        ] {
+            match get(clock) {
+                Some(ns) => {
+                    w.phases_ns.insert(claim.into(), ns);
+                }
+                None => {
+                    w.phases_ns.insert(claim.into(), 0);
+                    w.zero_phases.insert(claim.into(), why.into());
+                }
+            }
+            w.included_stages.push(claim.into());
+        }
+    } else {
+        for (name, ns) in &snap.online_phases_ns {
+            if let Some(ns) = ns {
+                w.phases_ns.insert((*name).to_string(), *ns);
+            }
+        }
+        let strong = id == "rho.signed_frobenius_strong";
+        w.start_event = if strong {
+            "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)".into()
+        } else {
+            "first target-dependent operation (the jump table [a]G + [b]Q, or the first table step)"
+                .into()
+        };
+        w.stop_event = "[d]G = Q verified inside the method".into();
+        w.included_stages = match family {
+            "rho" => vec!["walk".into(), "collision".into(), "recovery_check".into()],
+            "kangaroo" => vec!["jumps".into(), "collision".into(), "recovery_check".into()],
+            _ => vec![
+                "baby_steps".into(),
+                "giant_steps".into(),
+                "recovery_check".into(),
+            ],
+        };
+        w.mapping = format!("{family}: the whole target-dependent solve, one exclusive phase");
+    }
+    Some(w)
+}
+
+/// The strong reference: `koblitz_strong_rho` as the admissible fixture
+/// drives it (`examples/koblitz_rho_fixture.rs`, backend `strong`), seeded
+/// from the algorithm seed.  Group additions are exact; each scalar
+/// multiplication is charged `1.5·log₂ r` additions, the convention
+/// `ic_boundary::signed_frobenius_rho` uses.
+fn solve_strong(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let kc = inst.koblitz.as_ref().ok_or("not a Koblitz instance")?;
+    let params = StrongRhoParams {
+        lanes: param_u64(m, "lanes")?.max(1) as usize,
+        dp_bits: param_u64(m, "dp_bits")? as u32,
+        step_cap_factor: param_u64(m, "step_cap_factor")?,
+    };
+    if params.dp_bits >= 32 {
+        return Err("dp_bits must be below 32".into());
+    }
+    let mul_gae = 1.5 * (inst.r as f64).log2();
+    let t = Instant::now();
+    let rho = StrongRho::new(kc);
+    let mut charges = StrongRhoCharges::default();
+    let jump_seed = derive_u64("ecbench.strong_rho.jumps", &[seed]);
+    let jumps = rho.jumps(jump_seed, &mut charges);
+    let setup_mults = charges.scalar_multiplications;
+    let mut start_rng = StdRng::seed_from_u64(seed);
+    let q = StrongPoint::from_binary(&inst.fast.lower(target));
+    measurement::begin_online(Phase::RhoSolve);
+    let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
+    measurement::end_online();
+    let wall = t.elapsed().as_nanos() as u64;
+    let detail = json!({
+        "reference": "koblitz_strong_rho::StrongRho, the single-target reference of docs/ic/boundary_targets.json since 2026-10-01",
+        "lanes": params.lanes,
+        "dp_bits": params.dp_bits,
+        "jump_seed": jump_seed.to_string(),
+        "scalar_multiplication_charge": "1.5·log2(r) additions each (ic_boundary::signed_frobenius_rho's convention)",
+    });
+    let Some(o) = outcome else {
+        return Ok(SolveReport {
+            recovered: None,
+            exhausted: true,
+            phases: vec![],
+            total_gae: 0.0,
+            automorphisms_used: 2 * inst.n,
+            counters: BTreeMap::new(),
+            unpriced: vec!["counts_lost_at_the_step_cap_uncharged".into()],
+            deterministic: true,
+            nondeterminism: vec![],
+            solve_wall_ns: wall,
+            factor_base: None,
+            detail,
+            online: None,
+            online_error: None,
+        });
+    };
+    let c = o.charges;
+    let search_mults = c.scalar_multiplications - setup_mults;
+    let setup = PhaseRecord {
+        name: "setup".into(),
+        scalar_mults: setup_mults,
+        gae: setup_mults as f64 * mul_gae,
+        ..Default::default()
+    };
+    let search = PhaseRecord {
+        name: "search".into(),
+        adds: c.group_additions,
+        scalar_mults: search_mults,
+        gae: c.group_additions as f64 + search_mults as f64 * mul_gae,
+        ..Default::default()
+    };
+    let mut counters = BTreeMap::new();
+    for (k, v) in [
+        ("walk_steps", o.walk_steps),
+        ("walks", o.walks),
+        ("fruitless_walks", o.fruitless),
+        ("capped_walks", o.capped),
+        ("wasted_merges", o.wasted_merges),
+        ("table_entries", o.table_entries as u64),
+        ("failed_collisions", c.failed_collisions),
+        ("scalar_multiplications", c.scalar_multiplications),
+        ("canonicalisations_uncharged", c.canonicalizations),
+        ("partition_hashes_uncharged", c.partition_hashes),
+        ("table_queries_uncharged", c.table_queries),
+        ("table_inserts_uncharged", c.table_inserts),
+    ] {
+        counters.insert(k.to_string(), v);
+    }
+    Ok(SolveReport {
+        recovered: Some(o.scalar),
+        exhausted: false,
+        total_gae: setup.gae + search.gae,
+        phases: vec![setup, search],
+        automorphisms_used: o.automorphisms as u32,
+        unpriced: unpriced_of(&counters),
+        counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: wall,
+        factor_base: None,
+        detail,
+        online: None,
+        online_error: None,
+    })
 }
 
 // ── Index calculus ─────────────────────────────────────────────────
@@ -674,6 +937,8 @@ fn ic_report(
         solve_wall_ns: wall,
         factor_base: Some(fb),
         detail,
+        online: None,
+        online_error: None,
     }
 }
 

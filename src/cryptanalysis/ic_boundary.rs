@@ -4889,6 +4889,9 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     }
 
     while trials < max_trials {
+        // Exclusive phase marks (no-ops without an `ic_measurement`
+        // session): drawing the target-dependent query point.
+        measurement::mark(measurement::Phase::TargetQuery);
         let (point, a, b) = match targets {
             TargetSource::Random | TargetSource::RandomUnguarded => {
                 let a = rng.gen_range(1..r);
@@ -4973,10 +4976,15 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
                 continue;
             }
         }
+        measurement::mark(measurement::Phase::TargetPdp);
         let Some(summands) = oracle(&mut rel.group_ops, &mut ctr, point) else {
             continue;
         };
         found += 1;
+        // The relation enters the target's elimination: in this classic
+        // form every relation carries the target, so the solve is the
+        // target's descent.
+        measurement::mark(measurement::Phase::TargetDescent);
         let la_start = Instant::now();
         let mut row = vec![0u64; cols];
         for &i in &summands {
@@ -5013,6 +5021,7 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
         if let Some(d) = matrix.pinned(d_col) {
             pinned_by_repeated_row = repeated;
             la_ns += la_start.elapsed().as_nanos() as u64;
+            measurement::mark(measurement::Phase::RecoveryCheck);
             let v_start = Instant::now();
             let check = g.mul(&mut ver.group_ops, generator, d);
             ver.wall_ns = v_start.elapsed().as_nanos() as u64;
