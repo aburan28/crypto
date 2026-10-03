@@ -162,8 +162,8 @@ a run that fails the check loses its isolation level), or **recorded**
 | Order and drift | heat, a filling page cache, a background job ramping up | arms interleave every round (`alternate` reverses order on odd rounds; `shuffle` permutes by seed); warm-up rounds are run and marked | controlled |
 | One-time costs | page faults, lazy statics, allocator warm-up land on whoever runs first | every execution is a fresh process; nothing is cached across executions | controlled |
 | Another benchmark | two timed jobs on one machine measure each other | the shared lock `/tmp/crypto-bench.lock`, the one `isolated_bench` takes; `--wait` queues | controlled |
-| Other processes on the core | preemption, cache eviction | whole-core reservation; every movable thread moved off; the runner itself leaves the reservation; busy ticks on the run CPU not explained by the child are measured per run | gated (L1, L2) |
-| SMT sibling | a neighbour on the sibling shares the pipeline and caches | a CPU is reserved only with all its siblings; the idle siblings' busy ticks are checked per run | gated (L2) |
+| Other processes on the core | preemption, cache eviction | whole-core reservation; every movable thread moved off, and put back when the session ends however it ends (threads the evicted ones spawned meanwhile included, recycled thread ids excluded); the runner itself leaves the reservation; busy ticks on the run CPU not explained by the child are measured per run | gated (L1, L2) |
+| SMT sibling | a neighbour on the sibling shares the pipeline and caches | a CPU is reserved only with all its siblings; under an inherited placement a sibling outside it costs the run L1; every sibling's busy ticks are checked per run, reserved or not | gated (L1, L2) |
 | CPU 0 | the kernel's housekeeping and many IRQs land there | `auto` never picks CPU 0's core; a run on it loses L1 | gated (L1) |
 | Migration | a process moved mid-run pays cold caches | pinned between fork and exec; the child reads its own mask back and reports the CPU it started and ended on | gated (L1) |
 | NUMA | memory on the far node costs every miss | memory is bound to the run CPU's node with `set_mempolicy(MPOL_BIND)` in the child; the child reads the policy back with `get_mempolicy` and counts its anonymous pages per node in `/proc/self/numa_maps` after the solve | gated (L1, multi-node hosts) |
@@ -177,11 +177,12 @@ a run that fails the check loses its isolation level), or **recorded**
 | Heterogeneous cores | Apple P and E cores differ by about 2× | performance levels recorded; with no affinity control the runs are L0 | recorded |
 | Threads | four Rayon threads on one pinned CPU wait on each other | `RAYON_NUM_THREADS=1`, `OMP_NUM_THREADS=1`; child CPU time over wall above 1.05 loses L1 | controlled, gated (L1) |
 | Environment leakage | an engine knob in the operator's shell changes the search | the child's environment is cleared and rebuilt: `PATH`, `HOME`, a pinned locale and thread counts, nothing else; its hash is in the session | controlled |
-| Build | a debug build or another binary is another experiment | the binary's SHA-256, the commit and whether the tree was dirty, `rustc -Vv`, compiler flags in the environment; a debug build loses L1 | recorded, gated (L1) |
+| Build | a debug build or another binary is another experiment | the binary's SHA-256, the commit and dirty state of the worktree the binary sits in, `rustc -Vv`, compiler flags in the environment; on Linux each child execs `/proc/self/exe`, so a rebuild mid-session cannot swap the code (elsewhere a changed binary stops the session); a debug build loses L1 | recorded, gated (L1) |
 | Host | the same binary differs by 17–20 % across hosts | the host capsule's stable facts hash to the class id; wall-clock ratios are formed only inside one session | recorded, controlled |
 | What each method counts | one tool counts additions, another wall time, another instructions | one `CountedGroup` ledger for every method; native work the unit does not charge is counted as `*_uncharged` and makes the total a lower bound (§7) | controlled |
 | Pricing drift | per-run measured ratios repriced identical runs by up to 8 % | IC native work is priced only at the repository's pinned ratios (`docs/ic/calibration.json`); a unit without one stays unpriced, never host-measured; an algebraic solver's wall-priced work is taken back out | controlled |
-| Selective reporting | dropping a failure, rerunning until it looks good | every execution writes a sealed record before the next starts; output directories are never overwritten; an interrupted session is marked, never deleted | controlled |
+| Selective reporting | dropping a failure, rerunning until it looks good | every execution writes a sealed record before the next starts; the output directory is claimed with an atomic `mkdir` under the lock, so a session queued for a used directory fails instead of writing over it; an interrupted session is marked, never deleted | controlled |
+| Interruption | a killed runner leaves narrowed masks behind and a child solving on an unprotected core | SIGINT, SIGTERM, SIGHUP and SIGQUIT are taken by one thread, which kills the child's process group; the session is marked `interrupted`, the eviction restored, and the runner exits `128 + signal`; the child dies with the runner (`PR_SET_PDEATHSIG`) | controlled |
 | Tampering and transcription | a figure edited by hand, or copied wrong | every file is hashed into `session.json`; `verify` re-derives identities, the plan, the answers and the seals, and replays runs | controlled |
 
 ## 6. Isolation levels
@@ -194,8 +195,8 @@ a bare label.
 | level | requires |
 |---|---|
 | **L0 recorded** | the run executed under a saved host capsule. Enough for operation counts, which do not depend on contention |
-| **L1 pinned** | a reservation (`--cpus` not `none`); a release build; the child's own affinity read back as exactly the run CPU, and the run CPU at its start and end; the run CPU not on CPU 0's core; the runner off the reservation; no user thread left unmovable on the reserved CPUs (a non-root run usually fails this); child CPU time over wall ≤ 1.05; on a multi-node host, the memory policy read back as `bind:<node>` of the run CPU and at least 99 % of the solve's anonymous pages on that node |
-| **L2 quiet** | L1, and: a quiet preflight; zero steal ticks on the run CPU; foreign busy time on the run CPU within max(2 ticks, 1 % of wall); idle siblings within 2 ticks; run-queue delay ≤ 0.5 % of the solve; ≤ 50 preemptions per second; memory stall ≤ 0.5 % of wall |
+| **L1 pinned** | a reservation (`--cpus` not `none`) inside this process's cpuset; a release build; no SMT sibling of the run CPU outside the reservation; the child's own affinity read back as exactly the run CPU, and the run CPU at its start and end; the run CPU not on CPU 0's core; the runner off the run CPU (under an inherited placement with no other CPU it may sleep on an idle sibling, where the sibling check sees it); no user thread left unmovable on the reserved CPUs (a non-root run usually fails this); child CPU time over wall ≤ 1.05; on a multi-node host, the memory policy read back as `bind:<node>` of the run CPU and at least 99 % of the solve's anonymous pages on that node |
+| **L2 quiet** | L1, and: a quiet preflight; zero steal ticks on the run CPU; foreign busy time on the run CPU within max(2 ticks, 1 % of wall); the run CPU's siblings and the rest of the reservation within 2 ticks; run-queue delay ≤ 0.5 % of the solve; ≤ 50 preemptions per second; memory stall ≤ 0.5 % of wall |
 | **L3 isolated** | L2, and the host configured for measurement: run CPU in `isolcpus` or `nohz_full`; `performance` governor; turbo known off; bare metal known |
 
 A spec's `isolation_required` (default L2) is the level a **wall-clock**
@@ -262,14 +263,21 @@ Two consequences to read every table with:
 
 - **The mean, not the median.** The floor `√(πr/2A)` is an expected
   value, so the comparable statistic is the mean `S`.
-- **Paired.** Within a session, the arms share an algorithm seed per
-  (workload, round) and are resampled as pairs.
+- **Paired, and a ratio of totals.** Runs are matched by (workload,
+  round). Within a session the two arms of a round share an algorithm
+  seed; across two sessions of one spec (a baseline binary and a
+  candidate) they do too, and `same_seeds` says so. The ratio is
+  `Σ S_B / Σ S_A` over the matched verified pairs, AGENTS.md §8's
+  `baseline_total / candidate_total` in `S`. It is never a mean of
+  ratios, which is biased whenever the arms spread differently (rho's
+  cost varies with its seed, BSGS's does not).
 - **Two-stage (cluster) bootstrap.** Intervals resample *workloads*, then
-  rounds within each. This matters: BSGS's cost is fixed by its target,
-  so all its variance is between workloads, and an interval that held
-  the workloads fixed would be a point. With one workload only the
-  within-workload interval exists, and the comparison says
-  `ci_method: within`.
+  pairs within each, and recompute the same ratio of totals. This
+  matters: BSGS's cost is fixed by its target, so all its variance is
+  between workloads, and an interval that held the workloads fixed would
+  be a point. With one workload only the within-workload interval exists,
+  and the comparison says `ci_method: within`. Runs without a partner
+  make the comparison `partial`.
 - **Per curve.** A ratio is reported per curve (one size each) as well as
   pooled. A claim about scaling reads the per-curve rows and fits
   exponents over at least four sizes (AGENTS.md §5).
@@ -281,9 +289,10 @@ Two consequences to read every table with:
 - **Wall time is gated.** It is compared only within one session, only
   over pairs where both runs reached `isolation_required`, only with at
   least five such pairs. It is reported as the median per-pair ratio with
-  a bootstrap interval, set beside the A/A interval, and marked
-  `outside_noise` only when it excludes 1 and does not overlap the A/A
-  interval. Anything less prints as `descriptive`, never as a result.
+  a bootstrap interval, set beside the A/A interval (which needs five
+  admitted pairs of its own), and marked `outside_noise` only when it
+  excludes 1 and does not overlap the A/A interval. Anything less prints
+  as `descriptive`, never as a result.
 
 A speedup in the sense of AGENTS.md §8 is still
 `baseline_total_operations / candidate_total_operations`, over the whole
@@ -295,12 +304,25 @@ stays with the author.
 
 **Exact replay.** Operation counts depend only on the code, the workload
 and the seed, never on the host. `ecbench verify --replay N` re-executes
-N measured runs and requires the same answer, total, phase counts,
-counters and factor base, bit for bit. Run on another machine, it is an
-independent check of the figure. The audit receipt names every file by
-SHA-256, and its own SHA-256 is the replay certificate a claim cites.
-CI re-audits every committed session under `research/ecbench_*/sessions`
-on a Linux x86-64 runner with replays.
+N measured runs (`--replay-all`, every deterministic one) and requires
+the same answer, total, phase counts, counters, unpriced work and factor
+base, bit for bit. Run on another machine, it is an independent check of
+the figure. The audit also recomputes every derived figure from the
+record's own counts (`S = total/√r`, the floor, the ratio, the
+lower-bound flag) and, for a session graded under the current rules,
+regrades every run from its recorded observations. A figure edited by
+hand and resealed is caught. The receipt names every file by SHA-256,
+and its own SHA-256 is the replay certificate a claim cites. CI
+re-audits every committed session under `research/ecbench_*/sessions`
+on a Linux x86-64 runner with every run replayed.
+
+**A method's counts are frozen by its id.** Changing what a registered
+method counts breaks the replay of every committed session that used it,
+and CI fails. That is by design: register a new method id
+(`kangaroo.vow2`) instead. The records' hashes are unkeyed, so someone
+who rewrites every observation and reseals every hash could forge a
+quieter run. Git history and the replay on another host are the
+witnesses against that, as with ICMS.
 
 **Independent runner (isolab).** `ecbench isolab-job` writes an
 `isolab.job/v1` that runs a spec on a lab worker:
@@ -335,9 +357,11 @@ worker. The session comes back as hashed artifacts.
 
 The database is an **index**, rebuilt from session directories; it is
 never the record of a measurement. Loading is idempotent in one way only:
-an insert tolerates a conflict on its table's primary key (the same row
-loaded again) and nothing else. A second row claiming an existing run id,
-or a curve slug with a different ICV1 string, is an error.
+an insert tolerates a conflict on its table's primary key when it is the
+same row again, and nothing else. A second row claiming an existing run
+id is a UNIQUE error. A key arriving with a different identity (a curve
+slug on another ICV1 string, a workload, method, factor-base or host id
+on another hash) is stopped by the schema's identity triggers.
 
 | table | holds |
 |---|---|
@@ -362,7 +386,8 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
 ## 11. Adding a method, a curve family or a factor base
 
 - **A method:** an entry in `methods::registry()` and an arm in
-  `methods::solve`. Charge every group operation through `CountedGroup`,
+  `methods::solve`. Once a session that uses it is committed, its counts
+  are frozen (§9). A changed algorithm is a new id. Charge every group operation through `CountedGroup`,
   count everything else under a name ending `_uncharged`, never read the
   planted scalar, and return the recovered value unverified. Give it a
   unit test that recovers known logarithms on a prime and a Koblitz curve.

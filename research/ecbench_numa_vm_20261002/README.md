@@ -59,6 +59,34 @@ console in [`vm/console-summary.txt`](vm/console-summary.txt):
 - **Caveat.** TCG reports zero steal by construction, so these L2 grades
   certify the guest kernel's view and nothing about the host underneath.
 
+## Rerun after the review fixes, with an interruption test
+
+An independent review of the harness found fourteen defects, fixed in
+`0082acc57`. The guest was rerun with that commit's binary
+(SHA-256 `5111ebc20d5471ec1188e93e1a0541b6c1cba36b0538eeafd0817ce49df10291`)
+and [`vm/init-v2`](vm/init-v2), which adds two tests: a second session
+into an existing directory, and a session interrupted mid-run. Console:
+[`vm/console-summary-v2.txt`](vm/console-summary-v2.txt).
+
+| session | run CPU | node | policy | anonymous pages | levels | audit |
+|---|---:|---:|---|---|---|---|
+| [`v2-auto`](sessions/v2-auto) | 6 | 1 | `bind:1` | all on node 1 | L2 ×39, L1 ×25 | OK, 48 of 48 replayed, every run regraded (in the guest and on macOS) |
+| [`v2-node0`](sessions/v2-node0) | 2 | 0 | `bind:0` | all on node 0 | L2 ×50, L1 ×14 | OK, 48 of 48 replayed, every run regraded (in the guest and on macOS) |
+| [`v2-interrupted`](sessions/v2-interrupted) | 2 | 0 | | | | consistent but interrupted: with `--allow-interrupted`, 0 problems and 19 of 19 replays; without it, the audit fails |
+
+- **A second session into `/out/auto`** was refused ("exists; a session
+  never overwrites another", exit 2). The first session still audits.
+- **Interruption.** A background `sleep` had affinity mask `3f` (CPUs
+  0–5; 6 and 7 isolated). While a `--cpus 2,3` session ran, its mask was
+  `33`: evicted from CPUs 2 and 3. Init then sent the runner SIGTERM.
+  The runner exited 143 (128 + 15). The session was marked
+  `interrupted`, with 36 sealed records. The sleeper's mask was back to
+  `3f`. The last record shows its measured child ended by `signal 9`
+  with "session interrupted by signal 15", so the runner killed it
+  rather than leaving it to run on the unprotected core.
+- The runner moved itself to CPUs 0–5. The eviction moved 16 threads,
+  and 37 per-CPU kernel threads could not move, as expected.
+
 ## The attempts that failed, kept
 
 1. **Alpine `virt` kernel 6.6**
@@ -111,5 +139,5 @@ research/ecbench_numa_vm_20261002/vm/run-vm.sh target/x86_64-unknown-linux-musl/
 Audit the committed sessions anywhere:
 
 ```bash
-./target/release/ecbench verify --dir research/ecbench_numa_vm_20261002/sessions/auto --replay 12 --exit-code
+./target/release/ecbench verify --dir research/ecbench_numa_vm_20261002/sessions/v2-auto --replay-all --exit-code
 ```

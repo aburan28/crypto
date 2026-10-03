@@ -7,12 +7,15 @@
 //! linked: the output is plain SQL with every literal escaped here.
 //!
 //! Every statement is idempotent, and only in the one way intended: an
-//! insert tolerates a conflict on its table's *primary key* (the same
-//! row loaded again) and nothing else, so a second row claiming an
-//! existing run id, a curve slug on a different ICV1 string, or a failed
-//! CHECK is an error, never a silently dropped row.  A session row is
-//! upserted, so a session loaded while running and again once complete
-//! ends up complete.  Load with `sqlite3 -bail` to stop at the first error.
+//! insert tolerates a conflict on its table's *primary key* when the row
+//! is the same row again, and nothing else.  A second row claiming an
+//! existing run id is a UNIQUE error; a key arriving with a different
+//! identity (a curve slug on another ICV1 string, a workload, method,
+//! factor-base or host id on another hash) is stopped by the schema's
+//! identity triggers; a failed CHECK is an error.  None is a silently
+//! dropped row.  A session row is upserted, so a session loaded while
+//! running and again once complete ends up complete.  Load with
+//! `sqlite3 -bail` to stop at the first error.
 
 use std::fmt::Write as _;
 use std::path::Path;

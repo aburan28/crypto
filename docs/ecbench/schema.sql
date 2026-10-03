@@ -243,6 +243,39 @@ CREATE TABLE IF NOT EXISTS comparisons (
   json              TEXT NOT NULL
 );
 
+-- ── Identity guards ──────────────────────────────────────────────────
+--
+-- An insert tolerates a conflict on its primary key only when the row is
+-- the same row again.  These triggers turn a key that arrives with a
+-- different identity (a slug on another ICV1 string, a workload id on
+-- another target, a method id on other parameters) into an error instead
+-- of a silently kept first row.  They fire before conflict resolution, so
+-- a true duplicate still passes to `ON CONFLICT ... DO NOTHING`.
+
+CREATE TRIGGER IF NOT EXISTS curves_identity BEFORE INSERT ON curves
+WHEN EXISTS (SELECT 1 FROM curves WHERE slug = NEW.slug AND icv1 <> NEW.icv1)
+BEGIN SELECT RAISE(ABORT, 'curve slug already loaded with a different ICV1 string'); END;
+
+CREATE TRIGGER IF NOT EXISTS workloads_identity BEFORE INSERT ON workloads
+WHEN EXISTS (SELECT 1 FROM workloads WHERE workload_id = NEW.workload_id AND workload_sha256 <> NEW.workload_sha256)
+BEGIN SELECT RAISE(ABORT, 'workload id already loaded with a different workload hash'); END;
+
+CREATE TRIGGER IF NOT EXISTS algorithms_identity BEFORE INSERT ON algorithms
+WHEN EXISTS (SELECT 1 FROM algorithms WHERE method_id = NEW.method_id AND method_sha256 <> NEW.method_sha256)
+BEGIN SELECT RAISE(ABORT, 'method id already loaded with a different method hash'); END;
+
+CREATE TRIGGER IF NOT EXISTS factor_bases_identity BEFORE INSERT ON factor_bases
+WHEN EXISTS (SELECT 1 FROM factor_bases WHERE fb_id = NEW.fb_id AND fb_sha256 <> NEW.fb_sha256)
+BEGIN SELECT RAISE(ABORT, 'factor base id already loaded with a different factor-base hash'); END;
+
+CREATE TRIGGER IF NOT EXISTS hosts_identity BEFORE INSERT ON hosts
+WHEN EXISTS (SELECT 1 FROM hosts WHERE env_class_id = NEW.env_class_id AND env_class_sha256 <> NEW.env_class_sha256)
+BEGIN SELECT RAISE(ABORT, 'host class id already loaded with a different class hash'); END;
+
+CREATE TRIGGER IF NOT EXISTS runs_identity BEFORE INSERT ON runs
+WHEN EXISTS (SELECT 1 FROM runs WHERE record_id = NEW.record_id AND (session_id <> NEW.session_id OR seq <> NEW.seq))
+BEGIN SELECT RAISE(ABORT, 'record id already loaded for a different session or sequence number'); END;
+
 -- ── Views ────────────────────────────────────────────────────────────
 
 -- Every arm on every workload: the table AGENTS.md §2 asks for, one unit.
