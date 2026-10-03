@@ -31,6 +31,11 @@ The first archive extraction control failed on its checksum-header parsing;
 [the retained failure](first-custody-test-failure.txt) records the cause and
 correction. The corrected five custody/full-auditor controls pass. Neither that
 failure nor its rerun consumed a scientific invocation.
+The first full local harness run passed 47 harness and four worker unit tests,
+then hit the unchanged R05 regression's Linux `/bin/true` placeholder on macOS.
+That test now selects macOS `/usr/bin/true` for its preflight; frozen outputs
+still prevent any binary invocation, and its expected pin remains unchanged.
+The original failure is retained alongside the archive-parser failure.
 
 The CI workflow runs these native controls on Linux x86-64 and macOS ARM64,
 plus the existing independent preparation and source replay tests and harness

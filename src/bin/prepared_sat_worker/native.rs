@@ -381,7 +381,9 @@ impl Drop for Guard {
         kill_group(self.child.id());
         let _ = self.child.kill();
         let _ = self.child.wait();
-        let _ = record_pid(&self.ledger, self.child.id(), "done");
+        if group_absent(self.child.id()) {
+            let _ = record_pid(&self.ledger, self.child.id(), "done");
+        }
     }
 }
 

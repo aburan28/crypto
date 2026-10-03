@@ -130,6 +130,12 @@ fn icprog_reproduces_r05s_committed_analysis_byte_for_byte() {
 /// there).
 #[test]
 fn icprog_reproduces_r05s_pin_byte_for_byte() {
+    // This is only a preflight placeholder: frozen outputs prevent any binary run.
+    let true_bin = if cfg!(target_os = "macos") {
+        "/usr/bin/true"
+    } else {
+        "/bin/true"
+    };
     let dir = unpack(&round("R05-presence-filter"), "r05-pin");
     let pin = dir.join("runs/pin/pin.json");
     let frozen = std::fs::read(&pin).unwrap();
@@ -139,8 +145,8 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
         .arg(root())
         .arg("--runs")
         .arg(dir.join("runs"))
-        .args(["--base", "/bin/true", "--cand", "/bin/true"])
-        .args(["--isolate", "/bin/true"])
+        .args(["--base", true_bin, "--cand", true_bin])
+        .args(["--isolate", true_bin])
         .output()
         .expect("icprog runs");
     assert!(

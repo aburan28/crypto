@@ -216,7 +216,7 @@ pub fn freeze(
     let seal = json!({"registration_sha256":canonical_sha(&registration)?});
     save(&out.join("seal.json"), &seal)?;
     native::check_capsule(&out)?;
-    Ok(serde_json::to_string_pretty(&seal).map_err(|e| e.to_string())?)
+    serde_json::to_string_pretty(&seal).map_err(|e| e.to_string())
 }
 pub fn execute(
     capsule: &Path,
@@ -257,18 +257,18 @@ pub fn execute(
         false,
     );
     // Outer kill reaches inherited helpers; the durable ledger reaches children that escaped.
-    native::drain_ledger(&execution.join("child-pids"))?;
+    let child_drain = native::drain_ledger(&execution.join("child-pids"));
     let source_gate = native::check_capsule(&capsule);
     let terminal = match result {
         Ok(child) => {
-            json!({"schema_version":1,"registration_sha256":registration_sha,"controller":child,"source_gate_passed":source_gate.is_ok(),"source_gate_error":source_gate.err()})
+            json!({"schema_version":1,"registration_sha256":registration_sha,"controller":child,"source_gate_passed":source_gate.is_ok(),"source_gate_error":source_gate.err(),"child_drain_passed":child_drain.is_ok(),"child_drain_error":child_drain.err()})
         }
         Err(e) => {
-            json!({"schema_version":1,"registration_sha256":registration_sha,"controller_transport_error":e,"source_gate_passed":source_gate.is_ok(),"source_gate_error":source_gate.err()})
+            json!({"schema_version":1,"registration_sha256":registration_sha,"controller_transport_error":e,"source_gate_passed":source_gate.is_ok(),"source_gate_error":source_gate.err(),"child_drain_passed":child_drain.is_ok(),"child_drain_error":child_drain.err()})
         }
     };
     save(&execution.join("terminal.json"), &terminal)?;
-    Ok(serde_json::to_string_pretty(&terminal).map_err(|e| e.to_string())?)
+    serde_json::to_string_pretty(&terminal).map_err(|e| e.to_string())
 }
 fn number(v: &Value) -> Result<u64, String> {
     v.as_u64()
@@ -300,7 +300,8 @@ pub fn audit(capsule: &Path, execution: &Path, out: &Path) -> Result<String, Str
     let terminal = load(&execution.join("terminal.json"))?;
     require(
         terminal["registration_sha256"] == canonical_sha(&registration)?
-            && terminal["source_gate_passed"] == true,
+            && terminal["source_gate_passed"] == true
+            && terminal["child_drain_passed"] == true,
         "terminal source gate failed",
     )?;
     let claim = load(&capsule.join("consumed.json"))?;
