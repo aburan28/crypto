@@ -105,6 +105,24 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Replay full published F5 capsule custody as data, without execution.
+    F5ControlReplayCustody {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish exact sidecars for an unconsumed F5 capsule and verify its archive.
+    F5ControlPublishCustody {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Portable data replay of a validation-only F5 build; no archive execution/custody.
     F5ControlReplayValidation {
         #[arg(long)]
@@ -598,6 +616,16 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5ControlReplayCustody {
+            publication,
+            registration_sha256,
+            out,
+        } => f5_control::replay_custody(&publication, &registration_sha256, &out),
+        Command::F5ControlPublishCustody {
+            capsule,
+            publication,
+            out,
+        } => f5_control::publish_custody(&capsule, &publication, &out),
         Command::F5ControlReplayValidation {
             publication,
             validation_registration_sha256,
