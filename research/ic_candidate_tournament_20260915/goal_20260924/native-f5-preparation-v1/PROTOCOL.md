@@ -14,7 +14,8 @@ reference is the retained certificate, not a timing or matched-rho arm:
 - Whole canonical certificate: `d8c5d6679fe89561606154785fdfba763835bf261dceb08fae193eff9f5636ae`.
 - Ordinary input seal: `6678815b78b9414d81f94b595d3e10ab38f388511fa3a6831891f685e96f833d`.
 - Mathematical state: `edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107`.
-- Exact curve representation: `EC1N17Ckb1hbbe2b5b6b1e6`, field modulus 131081,
+- Curve model `icv1-f2m17-tm101-00378d4e`; exact representation alias
+  `EC1N17Ckb1hbbe2b5b6b1e6`, field modulus 131081,
   subgroup order 65587, cofactor 2, generator `[43693,23339]`.
 
 Success requires all 216 original ordinary queries in order, 61 group-verified
