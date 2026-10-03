@@ -45,6 +45,8 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/prepared_sat.rs"]
+mod prepared_sat;
 #[path = "icprog/pyrandom.rs"]
 mod pyrandom;
 #[path = "icprog/rounds.rs"]
@@ -53,6 +55,12 @@ mod rounds;
 mod rule;
 #[path = "icprog/runs.rs"]
 mod runs;
+#[path = "icprog/sat_control.rs"]
+mod sat_control;
+#[path = "icprog/sat_query_law.rs"]
+mod sat_query_law;
+#[path = "icprog/sat_source.rs"]
+mod sat_source;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
@@ -89,6 +97,45 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Freeze disclosed n17 native-control sources, dependencies and binaries; no search.
+    SatControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+    },
+    /// Consume one frozen disclosed n17 registration before its sole native execution.
+    SatControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Independently audit a consumed control; must use its frozen checker binary.
+    SatControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently replay the retained disclosed n17 SAT source witness; no solver or new target.
+    SatSourceReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// Create an immutable report; refuses to overwrite any existing file.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// A round's figures and decision, from its run tree only, as JSON.
     Analyse {
         round: Round,
@@ -456,7 +503,25 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::SatControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+        } => sat_control::freeze(&root, &out, &config, &cargo, &rustc),
+        Command::SatControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => sat_control::execute(&capsule, &execution, &registration_sha256),
+        Command::SatControlAudit {
+            capsule,
+            execution,
+            out,
+        } => sat_control::audit(&capsule, &execution, &out),
         Command::Analyse { round, root, runs } => analyse(round, root, runs),
+        Command::SatSourceReplay { root, out } => sat_source::run(&root, out.as_deref()),
         Command::Baseline {
             analysis,
             runs,

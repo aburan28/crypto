@@ -9,6 +9,56 @@ fn root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
 }
 
+#[test]
+fn disclosed_sat_cli_writes_verified_evidence_once_and_preserves_it_on_rejection() {
+    let dir = std::env::temp_dir().join(format!(
+        "icprog-native-sat-cli-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir(&dir).unwrap();
+    let report = dir.join("report.json");
+    let run = || {
+        Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .args(["sat-source-replay", "--root"])
+            .arg(root())
+            .arg("--out")
+            .arg(&report)
+            .output()
+            .unwrap()
+    };
+    let first = run();
+    assert!(
+        first.status.success(),
+        "{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    let bytes = std::fs::read(&report).unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(value["status"], "PASS_NATIVE_RETAINED_SAT_SOURCE_REPLAY");
+    assert_eq!(value["preparation_admission"]["rank"], 29);
+    assert_eq!(value["native_solvers_executed"], 0);
+    assert!(value["online_speedup"].is_null());
+    let second = run();
+    assert!(!second.status.success());
+    assert!(String::from_utf8_lossy(&second.stderr).contains("create immutable"));
+    assert_eq!(std::fs::read(&report).unwrap(), bytes);
+    let rejected = dir.join("rejected.json");
+    let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .args(["sat-source-replay", "--root"])
+        .arg(&dir)
+        .arg("--out")
+        .arg(&rejected)
+        .output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert!(!rejected.exists());
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
 fn round(dir: &str) -> PathBuf {
     root().join("research/ic_tool_program/rounds").join(dir)
 }
@@ -80,6 +130,12 @@ fn icprog_reproduces_r05s_committed_analysis_byte_for_byte() {
 /// there).
 #[test]
 fn icprog_reproduces_r05s_pin_byte_for_byte() {
+    // This is only a preflight placeholder: frozen outputs prevent any binary run.
+    let true_bin = if cfg!(target_os = "macos") {
+        "/usr/bin/true"
+    } else {
+        "/bin/true"
+    };
     let dir = unpack(&round("R05-presence-filter"), "r05-pin");
     let pin = dir.join("runs/pin/pin.json");
     let frozen = std::fs::read(&pin).unwrap();
@@ -89,8 +145,8 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
         .arg(root())
         .arg("--runs")
         .arg(dir.join("runs"))
-        .args(["--base", "/bin/true", "--cand", "/bin/true"])
-        .args(["--isolate", "/bin/true"])
+        .args(["--base", true_bin, "--cand", true_bin])
+        .args(["--isolate", true_bin])
         .output()
         .expect("icprog runs");
     assert!(

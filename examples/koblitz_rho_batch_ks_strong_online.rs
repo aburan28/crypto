@@ -32,8 +32,10 @@
 //! distinguished-point collision returns a logarithm checked as `[d]G = Q`
 //! (`recovery_check_true`). Building Q, from a known scalar or from a public
 //! point, is timed separately and excluded. The `[d]G = Q` checks (one per
-//! candidate collision, so rare) are timed as `recovery_check_ms`; the rest of
-//! the interval is `walk_and_collision_ms`. `total_ms` keeps the frozen file's
+//! candidate collision, so rare) are timed as `recovery_check_ms`. Calls to
+//! the distinguished-point resolver are timed separately; subtracting their
+//! recovery checks yields the exclusive `collision_ms`, and the remaining
+//! online interval is `walk_ms`. `total_ms` keeps the frozen file's
 //! meaning (it includes building Q).
 //!
 //! Environment: `KIC_RHO_RUNG` (default 3), `KIC_RHO_LANES` (default 32, rung 3
@@ -859,6 +861,7 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
         let target_generation_ms = started.elapsed().as_secs_f64() * 1000.0;
         let online_started = Instant::now();
         let mut recovery_check = Duration::ZERO;
+        let mut collision_total = Duration::ZERO;
         let table_before = table.len();
         let stride_a = rng.gen_range(1..modulus);
         let stride = scalar_mul(&f, generator, stride_a);
@@ -920,7 +923,8 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                     previous = [state.point, previous[0], previous[1], previous[2]];
                     state = next;
                 }
-                if let Some((scalar, via)) = resolve_distinguished_point(
+                let collision_started = Instant::now();
+                let resolved = resolve_distinguished_point(
                     &f,
                     &mut table,
                     &solved,
@@ -932,7 +936,9 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                     &mut charges,
                     &mut wasted_merges,
                     &mut recovery_check,
-                ) {
+                );
+                collision_total += collision_started.elapsed();
+                if let Some((scalar, via)) = resolved {
                     online_stopped = Some(Instant::now());
                     recovered = Some(scalar);
                     via_target = Some(via);
@@ -984,7 +990,8 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                 for lane in lanes.iter_mut() {
                     if lane.live && dp_hash(lane.state.point) & dp_mask == 0 {
                         lane.live = false;
-                        if let Some((scalar, via)) = resolve_distinguished_point(
+                        let collision_started = Instant::now();
+                        let resolved = resolve_distinguished_point(
                             &f,
                             &mut table,
                             &solved,
@@ -996,7 +1003,9 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                             &mut charges,
                             &mut wasted_merges,
                             &mut recovery_check,
-                        ) {
+                        );
+                        collision_total += collision_started.elapsed();
+                        if let Some((scalar, via)) = resolved {
                             online_stopped = Some(Instant::now());
                             recovered = Some(scalar);
                             via_target = Some(via);
@@ -1068,8 +1077,15 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
         let recovered = recovered.expect("batched rho exceeded the per-target step cap");
         let online =
             online_stopped.expect("a recovered scalar has a stop instant") - online_started;
-        let online_ms = online.as_secs_f64() * 1000.0;
-        let recovery_check_ms = recovery_check.as_secs_f64() * 1000.0;
+        let online_ns = online.as_nanos() as u64;
+        let collision_total_ns = collision_total.as_nanos() as u64;
+        let recovery_check_ns = recovery_check.as_nanos() as u64;
+        assert!(collision_total_ns >= recovery_check_ns && online_ns >= collision_total_ns);
+        let collision_ns = collision_total_ns - recovery_check_ns;
+        let walk_ns = online_ns - collision_total_ns;
+        assert_eq!(walk_ns + collision_ns + recovery_check_ns, online_ns);
+        let online_ms = online_ns as f64 / 1_000_000.0;
+        let recovery_check_ms = recovery_check_ns as f64 / 1_000_000.0;
         let known_answer = cfg.target_point.is_none();
         if known_answer {
             assert_eq!(recovered, generated_d0, "recovered scalar is wrong");
@@ -1102,8 +1118,14 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
             "online_stop_event":"recovery_check_true",
             "online_start_ns":(online_started - process_started).as_nanos() as u64,
             "online_stop_ns":(online_started + online - process_started).as_nanos() as u64,
+            "online_ns":online_ns,
             "online_ms":online_ms,
             "walk_and_collision_ms":online_ms - recovery_check_ms,
+            "walk_ns":walk_ns,
+            "collision_ns":collision_ns,
+            "recovery_check_ns":recovery_check_ns,
+            "walk_ms":walk_ns as f64 / 1_000_000.0,
+            "collision_ms":collision_ns as f64 / 1_000_000.0,
             "recovery_check_ms":recovery_check_ms,
             "ideal_independent_steps":ideal_single,
         }));
@@ -1469,7 +1491,7 @@ mod tests {
 
     /// A public point with no known scalar is solved: the recovered scalar
     /// maps G to the point, the online interval excludes building the target
-    /// and its two phases sum to it.
+    /// and its three exclusive phases sum exactly to it.
     #[test]
     fn public_point_target_is_solved_inside_the_online_interval() {
         let mut ran = 0;
@@ -1506,8 +1528,14 @@ mod tests {
             let online = fixture["online_ms"].as_f64().unwrap();
             let parts = fixture["walk_and_collision_ms"].as_f64().unwrap()
                 + fixture["recovery_check_ms"].as_f64().unwrap();
+            let online_ns = fixture["online_ns"].as_u64().unwrap();
+            let phase_ns = fixture["walk_ns"].as_u64().unwrap()
+                + fixture["collision_ns"].as_u64().unwrap()
+                + fixture["recovery_check_ns"].as_u64().unwrap();
             assert!(
-                (online - parts).abs() < 1e-9 && online <= fixture["total_ms"].as_f64().unwrap()
+                (online - parts).abs() < 1e-9
+                    && online_ns == phase_ns
+                    && online <= fixture["total_ms"].as_f64().unwrap()
             );
         });
         assert!(ran >= 2, "public-point test exercised only {ran} curves");

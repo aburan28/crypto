@@ -12,7 +12,11 @@ on:
     paths:
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/**'
+      - 'src/bin/prepared_sat_worker.rs'
+      - 'src/bin/prepared_sat_worker/**'
+      - 'src/cryptanalysis/prepared_sat_control.rs'
       - 'src/bin/isolated_bench.rs'
+      - 'src/bin/isolated_bench/**'
       - 'tests/icprog.rs'
       - 'research/ic_tool_program/rounds/**'
       - 'research/ic_tool_program/suite/**'
@@ -20,6 +24,8 @@ on:
       - 'docs/curves/registry.json'
       - 'src/cryptanalysis/curve_aliases.json'
       - 'research/ic_single_target_20260930/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
       - 'docs/ic/boundary_targets.json'
       - 'Cargo.toml'
@@ -29,7 +35,13 @@ on:
     paths:
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/**'
+      - 'src/bin/prepared_sat_worker.rs'
+      - 'src/bin/prepared_sat_worker/**'
+      - 'src/cryptanalysis/prepared_sat_control.rs'
       - 'src/bin/isolated_bench.rs'
+      - 'src/bin/isolated_bench/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'tests/icprog.rs'
       - '.github/workflows/ic-programme-harness.yml'
   workflow_dispatch:
@@ -49,11 +61,48 @@ jobs:
       - name: Fetch ledger §23's build commit, whose sources its claims hash
         run: git fetch --no-tags --depth=1 origin 0bf67f169f0762c8bd225760196803379cabdcb9
       - name: Build the harness
-        run: cargo build --release --bin icprog --bin isolated_bench
+        run: cargo build --release --bin icprog --bin isolated_bench --bin prepared_sat_worker
       - name: Unit tests, and every frozen output a port reproduces byte for byte
-        run: cargo test --release --bin icprog --bin isolated_bench --test icprog -- --include-ignored
+        run: cargo test --release --bin icprog --bin isolated_bench --bin prepared_sat_worker --test icprog -- --include-ignored
       - name: The isolation tool's busy mode passes the command's status through
         run: |
           set +e
           target/release/isolated_bench busy --lock "$RUNNER_TEMP/bench.lock" -- sh -c 'exit 3'
           test $? -eq 3
+
+  disclosed-sat-replay:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Bootstrap native build serialization
+        run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
+      - name: Resolve and retain the ignored development lockfile before replay builds
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- cargo generate-lockfile
+          rustc --version --verbose > "$RUNNER_TEMP/native-sat-rustc.txt"
+      - name: Replay disclosed source and preparation, with mutation controls
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_sat_worker -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker
+          target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
+          target/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: disclosed-native-sat-replay-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/native-sat-replay.json
+            ${{ runner.temp }}/native-sat-rustc.txt
+            Cargo.lock
+          if-no-files-found: error

@@ -1,0 +1,30 @@
+{
+  "base_logs_verified": 42,
+  "complete_batch": true,
+  "direct_hits": 939,
+  "independent_rank": 42,
+  "input_sha256": {
+    "base": "bd4bd8af982bcc65234ae1fae1ad52eb0ed41a1c203bf4d2556fd8e87f788a4c",
+    "fixture": "3453995c0423e4911ad4a6afa7cfe50ec1d6b0e6c67a771bda590f1d6ed680df",
+    "frozen": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+    "points": "78553fdff5ae66521d3a1052978962258e78d48c92285df6e1df962034b43717"
+  },
+  "maximum_target_attempts": 3,
+  "method": "Iterative source-curve reachable sets through 3 factors; exact 3+3 membership for every direct and frozen-shift query; full source pullback witness replay; independent dense modular solve; source scalar checks and post-solve fixture equality",
+  "raw_result_sha256": "0ef64b4f965cc316ae2abd59fbdcb949655321bf9a584297dec0aa1bfca7263c",
+  "reachable_source_sums_at_most": [
+    1,
+    85,
+    3613,
+    102391
+  ],
+  "relation_misses": 7,
+  "relation_probes": 49,
+  "schema": "n37-native-m6-residual-source-replay-v1",
+  "shift_cap": 16,
+  "shift_seed": "0x6e33375f72657331",
+  "shifted_hits": 85,
+  "total_target_attempts": 1115,
+  "unresolved_targets": 0,
+  "verified_target_logs": 1024
+}

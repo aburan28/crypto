@@ -1,0 +1,99 @@
+{
+  "anf_equations": 50,
+  "auxiliary_and_definitions": 716,
+  "candidate_id": null,
+  "checker_binary_sha256": "9d2d25bdce284e76fbb38de491142810730e9360ab68a118af4bc1d26fea0e4e",
+  "checker_source_sha256": "a605979f09220e402de87966a28c65aa623f504e4553ed205a6bd408d32e2032",
+  "cnf_clauses": 2364,
+  "expanded_assignment_sha256": "bac1e84db816e7547c555eaa2ac60a79d55769d8bfe8661149fc67f122409dc2",
+  "fresh_targets_generated": 0,
+  "group_replay": true,
+  "historical_archive_reopened": false,
+  "historical_archive_sha256": "c94aba5c67afbe60b5109169d2d57c1c44ce89b218c63d7b023ed023bdb64b24",
+  "historical_execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+  "host_architecture": "aarch64",
+  "host_os": "macos",
+  "implementation": "Rust icprog; independent shift-and-add curve checker",
+  "native_solvers_executed": 0,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "oracle_source_sha256": "501aa3a868bff0863f150682353cfa2fa9425e577e82b00f3473ec5e5d6ae70a",
+  "original_ic_target_complete": false,
+  "original_native_outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+  "preparation_admission": {
+    "accounting": "historical preparation only; original Python controller provenance retained; no native timings measured",
+    "dependent_relations": 8,
+    "duplicate_relations": 0,
+    "folded_columns": 29,
+    "fresh_targets_generated": 0,
+    "geometric_points": 63,
+    "independently_proved_ordinary_negatives": 106,
+    "native_solvers_executed": 0,
+    "new_queries": 0,
+    "ordinary_outcome_mix": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+      "SOURCE_UNSAT": 106,
+      "VALID_POINT_WITNESS": 37
+    },
+    "ordinary_queries": 149,
+    "preparation_source_sha256": "9819bccccaa4929cf5060303a02d104f85715d05c8d257f21a6588756159de7c",
+    "rank": 29,
+    "rank_trajectory_sha256": "4d70c17bef5eb3758f3b4f9c405bdd8c1ec4efc6b417afaf9f34c25dd55409c0",
+    "rows_sha256": "aa34d1e619c5c54c7a3e644b944cc86e2294730fdfbd786a589707b22a6b3d9e",
+    "status": "PASS_NATIVE_PREPARED_SAT_MATHEMATICS",
+    "usable_points": 62,
+    "verified_column_logs": 29,
+    "verified_relations": 37
+  },
+  "preparation_sha256": "91856ab78550436d3f668367f9aebd9e2c0604bd64b1472d9d19ec318e2b144e",
+  "promotion_eligible": false,
+  "query_point": [
+    62577,
+    27783
+  ],
+  "schema_version": 1,
+  "scope": "native postexecution substitution of one disclosed witness; no solver search or natural-yield estimate",
+  "source_assignment_sha256": "054d401221bdfc267c17817d5faad7a1cebc9c6d9ea26214695ec57c3a98e650",
+  "source_bound_scientific_runtime_admitted": false,
+  "source_custody": "committed byte-exact copies checked against accepted pins; original archive is not reopened",
+  "source_files": {
+    "instance.anf": {
+      "bytes": 28877,
+      "sha256": "e5d49feddef960a0ea8a74836f517563a4f63f987abfc45defbe36a337c83057"
+    },
+    "instance.magma": {
+      "bytes": 46815,
+      "sha256": "30c623c4366c36bea854ab4ac08ff0deed0da4c37347395a3c442f525f1e4803"
+    },
+    "instance.xor.cnf": {
+      "bytes": 39608,
+      "sha256": "d46c9d1edea83cb1ea2d09ce6cab4f42ff15bce99263b676430e61f4930ab3a0"
+    },
+    "manifest.json": {
+      "bytes": 4034,
+      "sha256": "9f516b3b6e1600a63ae42bd6e06342c3a8539c8f84d5bccc86b62d11c500822b"
+    }
+  },
+  "source_variables": 51,
+  "status": "PASS_NATIVE_RETAINED_SAT_SOURCE_REPLAY",
+  "witness_indices": [
+    29,
+    51,
+    2
+  ],
+  "witness_points": [
+    [
+      33,
+      16320
+    ],
+    [
+      57,
+      96968
+    ],
+    [
+      3,
+      95627
+    ]
+  ],
+  "xor_rows": 50
+}
