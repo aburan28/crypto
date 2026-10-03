@@ -59,8 +59,12 @@ minimum retained bytes, canonicalisations, Frobenius maps and lookups.
 The latter operations and field work must be reported as **unpriced native
 work** until a matched calibration charges them.
 
-Use `decompose_mitm_frobenius` with `m=2` and `m=3` on each source target,
-without consulting the historical manifest during search. Count query
+For an at-most-`m` decision, test the identity and direct factor-base lookup
+first; for `m=2` then call `decompose_mitm_frobenius` with `m=2`; for `m=3`
+try the same at-most-two path before calling it with `m=3`. This handles
+zero, one and two summands explicitly, including identity pair sums omitted
+from the folded table. Do not consult the historical manifest during search.
+Count query
 group additions, canonicalisations, lookups and mismatch counters separately
 by support and arity. A returned witness must contain at most `m` indices,
 sum to the target under the general source group law, and yield a relation
