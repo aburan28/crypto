@@ -1,0 +1,80 @@
+name: n37 complete-table floor replay
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/n37-complete-table-floor.yml'
+      - 'examples/n37_complete_table_floor.rs'
+      - 'examples/n37_complete_table_floor_analyze.rs'
+      - 'examples/support/n37_policy_common.rs'
+      - 'research/notes/ecc2k130/n37_complete_table_floor_20261003/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl'
+      - 'research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json'
+      - 'research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ic_boundary.rs'
+      - 'src/cryptanalysis/binary_velu.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'docs/index-calculus-scoreboard.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            src
+            examples/n37_complete_table_floor.rs
+            examples/n37_complete_table_floor_analyze.rs
+            examples/support/n37_policy_common.rs
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
+            docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock
+            research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json
+            research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz
+            research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl
+            research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz
+            research/notes/ecc2k130/n37_complete_table_floor_20261003
+      - name: Use frozen lockfile and check Rust formatting
+        run: |
+          cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+          rustfmt --edition 2021 --check examples/n37_complete_table_floor.rs examples/n37_complete_table_floor_analyze.rs
+      - name: Build native counter, decision auditor, and ecbench
+        run: cargo build --release --locked --example n37_complete_table_floor --example n37_complete_table_floor_analyze --bin ecbench
+      - name: Recompute all four pair-sum streams and the decision
+        run: |
+          note=research/notes/ecc2k130/n37_complete_table_floor_20261003
+          target/release/examples/n37_complete_table_floor "$RUNNER_TEMP/count-linux.json"
+          cmp "$RUNNER_TEMP/count-linux.json" "$note/COUNT_A.json"
+          cmp "$note/COUNT_A.json" "$note/COUNT_B.json"
+          target/release/examples/n37_complete_table_floor_analyze \
+            "$note/COUNT_A.json" "$note/COUNT_B.json" \
+            "$note/sessions/strong-rho-e1" "$note/AUDIT.json" \
+            "$RUNNER_TEMP/decision-linux.json"
+          cmp "$RUNNER_TEMP/decision-linux.json" "$note/DECISION.json"
+      - name: Re-audit the sealed rho session on Linux with every measured run replayed
+        run: |
+          note=research/notes/ecc2k130/n37_complete_table_floor_20261003
+          target/release/ecbench verify --dir "$note/sessions/strong-rho-e1" \
+            --replay-all --exit-code --out "$RUNNER_TEMP/rho-linux-audit.json" > /dev/null
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: n37-complete-table-floor-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/count-linux.json
+            ${{ runner.temp }}/decision-linux.json
+            ${{ runner.temp }}/rho-linux-audit.json
+          if-no-files-found: ignore
+          retention-days: 30
