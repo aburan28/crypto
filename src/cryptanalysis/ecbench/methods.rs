@@ -31,8 +31,8 @@ use crate::cryptanalysis::ic_boundary::{
     PrimePoint, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
-    KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
+    GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
 };
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
@@ -184,12 +184,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M",
                 },
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius or descent-algebraic, with :m=2|3",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3",
                 },
                 ParamDecl {
                     name: "solver",
@@ -904,6 +904,13 @@ fn ic_report(
             }
         }
     }
+    for phase in &phases {
+        for (name, &count) in &phase.native {
+            if count > 0 && name.ends_with("_uncharged") && !unpriced.contains(name) {
+                unpriced.push(name.clone());
+            }
+        }
+    }
     let mut counters = BTreeMap::new();
     counters.insert("targets_tried".into(), rep.decomposition.targets_tried);
     counters.insert("relations_found".into(), rep.decomposition.relations_found);
@@ -1075,9 +1082,11 @@ fn solve_ic_binary(
     let g = BinaryGroup(&inst.fast);
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
+    let compact = CompactOrbitScanBase { instance: inst };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
+        "compact-orbit-scan" => &compact,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a binary curve"
@@ -1088,6 +1097,7 @@ fn solve_ic_binary(
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
+    let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
             let name = spec
@@ -1110,6 +1120,7 @@ fn solve_ic_binary(
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
         "mitm-frobenius" => &mut frob,
+        "mitm-frobenius-counted" => &mut frob_counted,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
         other => return Err(format!("oracle `{other}` does not run on a binary curve")),
     };
@@ -1250,9 +1261,11 @@ pub fn dump_factor_base(
             let g = BinaryGroup(&i.fast);
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
+            let compact = CompactOrbitScanBase { instance: i };
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
+                "compact-orbit-scan" => &compact,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a binary curve"
