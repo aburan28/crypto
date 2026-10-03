@@ -1169,6 +1169,8 @@ pub struct ZeroDimStats {
     pub f4_ms: f64,
     /// Wall time of everything after F4 in the solver.
     pub lin_ms: f64,
+    /// F4 stopped early at this staircase (`F4Options::stop_staircase`).
+    pub stopped_at: Option<usize>,
 }
 
 /// All solutions over `F_p` of a system whose ideal is zero-dimensional: F4 to
@@ -1191,6 +1193,7 @@ pub fn solve_zero_dim(
     st.max_rows = r.max_rows;
     st.max_cols = r.max_cols;
     st.f4_ms = r.ms;
+    st.stopped_at = r.staircase_at_stop;
     if r.timed_out {
         st.timed_out = true;
         return (Vec::new(), st);
@@ -1667,6 +1670,7 @@ pub struct NagaoCost {
     pub timed_out: bool,
     pub degenerate: bool,
     pub nonseparating: usize,
+    pub stopped_at: Option<usize>,
     /// Solutions over `F_p` of the six quadrics, and those whose sextic
     /// splits into six distinct roots with admissible ordinates.
     pub fp_solutions: usize,
@@ -1683,6 +1687,25 @@ impl NagaoCost {
 pub fn jv_options(max_degree: u32, budget_secs: f64) -> F4Options {
     F4Options::new(F4Ordering::Grevlex, max_degree)
         .with_budget(std::time::Duration::from_secs_f64(budget_secs))
+}
+
+/// [`jv_options`] with F4 stopped as soon as the leading monomials found so
+/// far leave at most `staircase` standard monomials.  Six quadrics in six
+/// unknowns have Bézout degree `2⁶ = 64`: once a partial basis's staircase
+/// is `64`, it generates a subideal `J ⊆ I` with `dim R/J ≤ 64 ≤ dim R/I`,
+/// so `J = I` and the partial basis is a Gröbner basis of `I`; every
+/// further F4 step would only certify that.  A system whose ideal has
+/// degree below `64` stops at a strict superideal's staircase, which the
+/// solver's final check of every candidate against the input covers.
+pub fn jv_options_stopped(max_degree: u32, budget_secs: f64, staircase: usize) -> F4Options {
+    jv_options(max_degree, budget_secs).stopping_below(staircase)
+}
+
+fn opts_for(max_degree: u32, budget_secs: f64, stop: Option<usize>) -> F4Options {
+    match stop {
+        Some(k) => jv_options_stopped(max_degree, budget_secs, k),
+        None => jv_options(max_degree, budget_secs),
+    }
 }
 
 /// Every six-point decomposition of the reduced divisor `r` over the base, by
@@ -1723,6 +1746,7 @@ pub fn nagao_decompose(
     cost.incomplete = st.incomplete;
     cost.timed_out = st.timed_out;
     cost.nonseparating = st.nonseparating;
+    cost.stopped_at = st.stopped_at;
     cost.fp_solutions = sols.len();
     let m1 = f.muls();
     let ring = PolyRing::new(p);
@@ -2017,6 +2041,9 @@ pub struct CcovReport {
     pub c_add_j: f64,
     pub max_degree: u32,
     pub budget_secs: f64,
+    /// F4 stopped at this staircase, or run to a certified basis.
+    pub stop_staircase: Option<usize>,
+    pub stopped: usize,
     pub random_residuals: usize,
     pub constructed_residuals: usize,
     pub random_decomposable: usize,
@@ -2076,6 +2103,7 @@ fn planted(jac: &Hyp<Fq>, base: &[BaseEl], rng: &mut StdRng) -> (Div<E2>, Dec6) 
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn run_cover_ccov(
     p: u64,
     seed: u64,
@@ -2084,6 +2112,7 @@ pub fn run_cover_ccov(
     max_degree: u32,
     budget_secs: f64,
     oracle_up_to_base: usize,
+    stop: Option<usize>,
 ) -> CcovReport {
     let start = Instant::now();
     let spec = generate_spec(p, seed);
@@ -2104,6 +2133,7 @@ pub fn run_cover_ccov(
         c_add_j: c_j,
         max_degree,
         budget_secs,
+        stop_staircase: stop,
         random_residuals: random,
         constructed_residuals: constructed,
         expected_rate: 1.0 / 720.0,
@@ -2130,7 +2160,7 @@ pub fn run_cover_ccov(
         .map(|(k, (r, want))| {
             let mut lrng =
                 StdRng::seed_from_u64(seed ^ (k as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15));
-            let opts = jv_options(max_degree, budget_secs);
+            let opts = opts_for(max_degree, budget_secs, stop);
             let (found, cost) = nagao_decompose(&ctx, &base, &by_x, r, &opts, &mut lrng);
             let verified = found.iter().all(|d| verify_dec(&jac, &base, r, d));
             let planted_ok = want.as_ref().map(|w| found.contains(w));
@@ -2161,6 +2191,9 @@ pub fn run_cover_ccov(
             rep.timed_out += 1;
         }
         rep.nonseparating += cost.nonseparating;
+        if cost.stopped_at.is_some() {
+            rep.stopped += 1;
+        }
         if k < random {
             if !found.is_empty() {
                 rep.random_decomposable += 1;
@@ -2207,6 +2240,8 @@ pub struct CoverDlpReport {
     pub base: usize,
     pub c_add_e: f64,
     pub c_add_j: f64,
+    pub stop_staircase: Option<usize>,
+    pub stopped: u64,
     pub residuals: u64,
     pub decompositions: u64,
     pub decomposition_rate: f64,
@@ -2264,6 +2299,7 @@ pub fn run_cover_dlp(
     rho_runs: usize,
     check_every: u64,
     rho_s_ref: f64,
+    stop: Option<usize>,
 ) -> CoverDlpReport {
     let start = Instant::now();
     let spec = generate_spec(p, seed);
@@ -2300,6 +2336,7 @@ pub fn run_cover_dlp(
         base: small,
         c_add_e: c_e,
         c_add_j: c_j,
+        stop_staircase: stop,
         expected_rate: 1.0 / 720.0,
         floor_residuals: unknowns as f64 * 720.0,
         base_muls,
@@ -2328,7 +2365,7 @@ pub fn run_cover_dlp(
                 || Ctx::new(&spec),
                 |c, (a, b, r, idx)| {
                     // the deadline is absolute: one budget per test, not per run
-                    let opts = jv_options(24, 600.0);
+                    let opts = opts_for(24, 600.0, stop);
                     let mut lrng =
                         StdRng::seed_from_u64(seed ^ idx.wrapping_mul(0x9E37_79B9_7F4A_7C15));
                     let (decs, cost) = nagao_decompose(c, &base, &by_x, r, &opts, &mut lrng);
@@ -2364,6 +2401,9 @@ pub fn run_cover_dlp(
             }
             if cost.timed_out {
                 rep.timed_out += 1;
+            }
+            if cost.stopped_at.is_some() {
+                rep.stopped += 1;
             }
             if was_checked {
                 rep.cross_checked += 1;
@@ -2816,5 +2856,42 @@ mod tests {
             }
         }
         assert_eq!(missed, 0, "unflagged misses (flagged: {flagged})");
+    }
+
+    #[test]
+    fn stopped_f4_agrees_with_the_full_solver_and_the_oracle() {
+        let (spec, ctx, base, by_x, mut rng) = small_ctx(53, 7);
+        let jac = ctx.jac();
+        let t = table3(&jac, &base);
+        let full = jv_options(24, 120.0);
+        let stop = jv_options_stopped(24, 120.0, 64);
+        let (mut stopped, mut cheaper, mut n) = (0, 0, 0);
+        for k in 0..30 {
+            let r = if k % 2 == 0 {
+                planted(&jac, &base, &mut rng).0
+            } else {
+                let a = rng.gen_range(0..spec.l);
+                jac.add(&jac.mul(&spec.gj, a as u128), &spec.qj)
+            };
+            let (fa, ca) = nagao_decompose(&ctx, &base, &by_x, &r, &full, &mut rng);
+            let (fb, cb) = nagao_decompose(&ctx, &base, &by_x, &r, &stop, &mut rng);
+            if ca.degenerate || ca.incomplete || cb.incomplete {
+                continue;
+            }
+            n += 1;
+            let oracle = mitm6(&jac, &t, &r);
+            assert_eq!(fa, oracle, "full solver vs oracle, residual {k}");
+            assert_eq!(fb, oracle, "stopped solver vs oracle, residual {k}");
+            assert!(fb.iter().all(|d| verify_dec(&jac, &base, &r, d)));
+            if cb.stopped_at == Some(64) {
+                stopped += 1;
+            }
+            if cb.f4_muls < ca.f4_muls {
+                cheaper += 1;
+            }
+        }
+        assert!(n >= 25, "{n}");
+        assert_eq!(stopped, n, "every system stops at the Bézout staircase");
+        assert_eq!(cheaper, n);
     }
 }
