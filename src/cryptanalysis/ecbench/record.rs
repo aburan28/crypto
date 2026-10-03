@@ -14,8 +14,8 @@ use serde_json::Value;
 use crate::cryptanalysis::ecbench::canonical::sha256_hex;
 use crate::cryptanalysis::ecbench::host::{is_virtual, HostCapsule};
 use crate::cryptanalysis::ecbench::isolation::{
-    current_cpu, mems_allowed, own_affinity, Conditions, CpuPlan, Eviction, Preflight,
-    SelfPlacement, Thresholds,
+    anon_pages_by_node, current_cpu, mempolicy, mems_allowed, own_affinity, Conditions, CpuPlan,
+    Eviction, Preflight, SelfPlacement, Thresholds,
 };
 use crate::cryptanalysis::ecbench::methods::{
     resolve, FactorBaseFacts, MethodSpec, PhaseRecord, ResolvedMethod, SolveReport,
@@ -96,6 +96,8 @@ pub fn child_main(input: &str) -> ChildOutput {
         cpu_at_start: current_cpu(),
         cpu_at_end: None,
         mems_allowed: mems_allowed(),
+        mempolicy: mempolicy(),
+        anon_pages_by_node: None,
     };
     let mut out = ChildOutput {
         schema: CHILD_OUTPUT_SCHEMA.into(),
@@ -153,6 +155,8 @@ pub fn child_main(input: &str) -> ChildOutput {
         Ok((report, delta))
     })();
     placement.cpu_at_end = current_cpu();
+    // Where the solve's memory landed, read after it ran.
+    placement.anon_pages_by_node = anon_pages_by_node();
     out.placement = placement;
     match result {
         Ok((r, s)) => {
@@ -407,11 +411,28 @@ pub fn grade(g: &GradeInput) -> Grade {
             }
             if g.capsule.stable.numa_nodes > 1 {
                 if let Some(node) = plan.node {
-                    if g.placement.mems_allowed.as_deref() != Some(&node.to_string()[..]) {
+                    // The policy read back inside the child, and where its
+                    // anonymous pages actually are.  `Mems_allowed` is the
+                    // cpuset's permission, not the policy, and is not used.
+                    let want = format!("bind:{node}");
+                    if g.placement.mempolicy.as_deref() != Some(&want[..]) {
                         l1.push(format!(
-                            "memory allowed on {:?}, not bound to node {node}",
-                            g.placement.mems_allowed
+                            "memory policy read back as {:?}, not {want}",
+                            g.placement.mempolicy
                         ));
+                    }
+                    match &g.placement.anon_pages_by_node {
+                        Some(pages) => {
+                            let total: u64 = pages.values().sum();
+                            let local = pages.get(&node).copied().unwrap_or(0);
+                            if total > 0 && (local as f64) < 0.99 * total as f64 {
+                                l1.push(format!(
+                                    "{} of {total} anonymous pages on node {node}",
+                                    local
+                                ));
+                            }
+                        }
+                        None => l1.push("no /proc/self/numa_maps to confirm page placement".into()),
                     }
                 }
             }

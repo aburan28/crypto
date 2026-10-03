@@ -711,8 +711,17 @@ pub struct SelfPlacement {
     pub affinity: Option<Vec<u32>>,
     pub cpu_at_start: Option<u32>,
     pub cpu_at_end: Option<u32>,
-    /// `/proc/self/status` `Mems_allowed_list`.
+    /// `/proc/self/status` `Mems_allowed_list`: the nodes the cpuset
+    /// permits.  Context only; it does not show the task's policy.
     pub mems_allowed: Option<String>,
+    /// The task's memory policy as `get_mempolicy` reads it back, e.g.
+    /// `bind:1` or `default`.
+    #[serde(default)]
+    pub mempolicy: Option<String>,
+    /// Anonymous pages per NUMA node from `/proc/self/numa_maps`, read at
+    /// the end of the solve: where the method's memory actually landed.
+    #[serde(default)]
+    pub anon_pages_by_node: Option<BTreeMap<u32, u64>>,
 }
 
 /// The CPU this thread is running on.
@@ -726,6 +735,74 @@ pub fn current_cpu() -> Option<u32> {
         }
     }
     None
+}
+
+/// The calling thread's memory policy: `<mode>:<nodes>` (`bind:1`,
+/// `interleave:0-1`) or `default`.
+pub fn mempolicy() -> Option<String> {
+    #[cfg(target_os = "linux")]
+    {
+        let mut mode: libc::c_int = 0;
+        let mut mask = [0u64; 16];
+        // SAFETY: `mode` and a 1024-bit mask, sized as passed.
+        let rc = unsafe {
+            libc::syscall(
+                libc::SYS_get_mempolicy,
+                &mut mode as *mut libc::c_int,
+                mask.as_mut_ptr(),
+                1024u64,
+                0usize,
+                0u64,
+            )
+        };
+        if rc != 0 {
+            return None;
+        }
+        // Mode flags (static, relative, numa balancing) sit in bits 13-15.
+        let name = match mode & !(0b111 << 13) {
+            0 => return Some("default".into()),
+            1 => "preferred",
+            2 => "bind",
+            3 => "interleave",
+            4 => return Some("local".into()),
+            5 => "preferred_many",
+            6 => "weighted_interleave",
+            other => return Some(format!("mode{other}")),
+        };
+        let nodes: Vec<String> = (0..1024u32)
+            .filter(|n| (mask[(n / 64) as usize] >> (n % 64)) & 1 == 1)
+            .map(|n| n.to_string())
+            .collect();
+        Some(format!("{name}:{}", nodes.join(",")))
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        None
+    }
+}
+
+/// Anonymous pages per node, summed over the mappings `/proc/self/numa_maps`
+/// marks `anon=`: `N<node>=<pages>` fields.
+pub fn anon_pages_by_node() -> Option<BTreeMap<u32, u64>> {
+    #[cfg(target_os = "linux")]
+    {
+        let text = std::fs::read_to_string("/proc/self/numa_maps").ok()?;
+        let mut out: BTreeMap<u32, u64> = BTreeMap::new();
+        for line in text.lines().filter(|l| l.contains(" anon=")) {
+            for tok in line.split_whitespace() {
+                if let Some((k, v)) = tok.strip_prefix('N').and_then(|t| t.split_once('=')) {
+                    if let (Ok(node), Ok(pages)) = (k.parse::<u32>(), v.parse::<u64>()) {
+                        *out.entry(node).or_insert(0) += pages;
+                    }
+                }
+            }
+        }
+        Some(out)
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        None
+    }
 }
 
 pub fn mems_allowed() -> Option<String> {

@@ -46,6 +46,9 @@ pub struct StableFacts {
     pub features: Vec<String>,
     /// SHA-256 of the full sorted flag list (`/proc/cpuinfo`), Linux only.
     pub flags_sha256: Option<String>,
+    /// Online logical CPUs: the topology's count on Linux, whatever this
+    /// process may use (`isolcpus`, a cpuset or `taskset` narrow that,
+    /// and it is recorded apart as [`HostCapsule::process_affinity`]).
     pub logical_cpus: u32,
     pub physical_cores: Option<u32>,
     pub packages: Option<u32>,
@@ -88,6 +91,10 @@ pub struct HostCapsule {
     pub env_class_sha256: String,
     pub stable: StableFacts,
     pub build: BuildFacts,
+    /// The CPUs the capturing process was allowed, when the OS says.  It
+    /// depends on how the process was launched, so it is not in the class.
+    #[serde(default)]
+    pub process_affinity: Option<Vec<u32>>,
     pub captured_unix_ms: u128,
 }
 
@@ -186,9 +193,15 @@ fn cpuinfo() -> BTreeMap<String, String> {
 
 fn stable_facts() -> StableFacts {
     let topo = topology();
-    let logical = std::thread::available_parallelism()
-        .map(|n| n.get() as u32)
-        .unwrap_or(1);
+    // The online count, not `available_parallelism`, which follows this
+    // process's affinity and would make the class depend on `taskset`.
+    let logical = if topo.cpus.is_empty() {
+        std::thread::available_parallelism()
+            .map(|n| n.get() as u32)
+            .unwrap_or(1)
+    } else {
+        topo.cpus.len() as u32
+    };
     let mut virtualization = BTreeMap::new();
     #[allow(unused_mut)]
     let mut perf_levels = Vec::new();
@@ -386,6 +399,7 @@ pub fn capture() -> Result<HostCapsule, String> {
         env_class_sha256,
         stable,
         build: build_facts(),
+        process_affinity: crate::cryptanalysis::ecbench::isolation::own_affinity(),
         captured_unix_ms: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_millis())
