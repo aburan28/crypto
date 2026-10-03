@@ -1,6 +1,6 @@
 # Replay rejection controls
 
-Every control below used the final expanded `RESULT.json` with SHA-256
+Every control below used the preserved pre-Clippy expanded `RESULT.json` with SHA-256
 `5efc8fd85e974456ee25a84ce47e373a6cea5cee4b73dc3dbfd998aa6ed8f799`.
 The changed result files were scratch files under `/private/tmp`; only their
 small failure receipts are retained here. Regenerate a control by expanding

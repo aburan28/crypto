@@ -51,19 +51,23 @@ every rank row, verified each source witness with the general binary-curve
 group law, checked every reported source logarithm with the general scalar
 law, and checked the two paired leaf arms through the full-point isogeny.
 
-The committed final raw manifest is [`RESULT.json.gz`](RESULT.json.gz),
-222,589 bytes with SHA-256
-`b29dde2eea2338370481d4b319f1dd54dc5d9a062ef24cc23e04b3d4b0585fbf`.
-It expands to 5,104,454 bytes with SHA-256
-`5efc8fd85e974456ee25a84ce47e373a6cea5cee4b73dc3dbfd998aa6ed8f799`.
-The independent [`REPLAY.json`](REPLAY.json) has SHA-256
-`89a71ba48ecdbf77d19977e312fa314a69e06d50ab3e3b1503db80ab01bd0588`.
-The earlier PASS run is retained as [`RESULT_INITIAL.json.gz`](RESULT_INITIAL.json.gz)
-with its own replay receipt, but the final run alone supports this decision:
-the initial producer source digest was not retained. Both runs' canonical
-non-timing JSON projections have the same SHA-256,
+The source-matched final raw manifest is
+[`RESULT_CI_FIXED.json.gz`](RESULT_CI_FIXED.json.gz), 222,574 bytes with
+SHA-256 `c84066a521137cfa61a2f490ed18a3a957b79da6e27f587ad1579b350cb9764a`.
+It expands to 5,104,424 bytes with SHA-256
+`2c8f2cc0767e177d21b3a0c62fbd50a40992150d1dd3bee7c07f9e629c647ea1`.
+The independent [`REPLAY_CI_FIXED.json`](REPLAY_CI_FIXED.json) has SHA-256
+`7b79fd455401c36ffaa4b115593f6c820af7e43de58b886d3ba6ce71e3d9f2cd`.
+CI exposed unused shared helper items under strict Clippy. The source-only
+revision scoped a dead-code allowance to these standalone examples and removed
+one needless borrow; it changed no search or decision logic. The prior PASS
+[`RESULT.json.gz`](RESULT.json.gz) and
+[`RESULT_INITIAL.json.gz`](RESULT_INITIAL.json.gz) are retained with their
+own replay receipts. All three canonical non-timing JSON projections have
+the same SHA-256,
 `5f8f00f7e9ca5ddbed87d88e0a1d04a55b11436bf52e52d6cae6ba798dd07b00`.
-All input, output, code, mutation and lockfile hashes are in
+The initial producer source digest was not retained, so the source-matched
+post-lint run is decisive. All input, output, code, mutation and lockfile hashes are in
 [`EVIDENCE.json`](EVIDENCE.json).
 
 Replay failed as required when a scratch result changed one witness index,
@@ -75,9 +79,9 @@ failure receipts are retained beside the PASS receipts.
 
 Each policy's table construction used 4,831,386 full-point additions. The
 source-selected table retained at least 77,401,664 bytes in its point/code
-arrays; the final producer's peak RSS before JSON output was 135,282,688
-bytes. On this [L0 macOS host](HOST.json), the four-arm diagnostic took
-21.82 seconds, including the intentionally expensive two-summand control.
+arrays; the post-lint producer's peak RSS before JSON output was 135,331,840
+bytes. On this [L0 macOS host](HOST.json), its four-arm diagnostic took
+15.32 descriptive seconds, including the intentionally expensive two-summand control.
 The source-selected m≤3 queries made 99,917 table lookups across 2,048
 targets; native-selected queries made 102,767. These are stage counts and
 descriptive wall times. The archived support excludes a fresh source-base
@@ -101,15 +105,15 @@ Reproduce the decisive replay from a checkout with the frozen inputs:
 ```sh
 cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
 cargo build --release --locked --example n37_four_policy_pdp --example n37_four_policy_pdp_replay
-gzip -cd research/notes/ecc2k130/n37_four_policy_pdp_20261003/RESULT.json.gz \
+gzip -cd research/notes/ecc2k130/n37_four_policy_pdp_20261003/RESULT_CI_FIXED.json.gz \
   > /tmp/n37-four-policy-pdp-result.json
 printf '%s  %s\n' \
-  '5efc8fd85e974456ee25a84ce47e373a6cea5cee4b73dc3dbfd998aa6ed8f799' \
+  '2c8f2cc0767e177d21b3a0c62fbd50a40992150d1dd3bee7c07f9e629c647ea1' \
   /tmp/n37-four-policy-pdp-result.json | shasum -a 256 -c
 target/release/examples/n37_four_policy_pdp_replay \
   /tmp/n37-four-policy-pdp-result.json /tmp/n37-four-policy-pdp-replay-fresh.json
 cmp /tmp/n37-four-policy-pdp-replay-fresh.json \
-  research/notes/ecc2k130/n37_four_policy_pdp_20261003/REPLAY.json
+  research/notes/ecc2k130/n37_four_policy_pdp_20261003/REPLAY_CI_FIXED.json
 ```
 
 The [CI workflow](../../../../.github/workflows/n37-four-policy-pdp.yml)

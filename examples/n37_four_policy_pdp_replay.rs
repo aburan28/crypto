@@ -6,6 +6,7 @@
 #![recursion_limit = "256"]
 
 #[path = "support/n37_policy_common.rs"]
+#[allow(dead_code)]
 mod common;
 
 use common::{point_from_value, Context, K, N, R};

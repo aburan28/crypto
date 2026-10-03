@@ -5,6 +5,7 @@
 #![recursion_limit = "256"]
 
 #[path = "support/n37_policy_common.rs"]
+#[allow(dead_code)]
 mod common;
 
 use common::{point_from_value, Context, K, N, R};
@@ -372,7 +373,7 @@ fn load_inputs(ctx: &Context) -> Result<Inputs, String> {
             return Err(format!("support transport pairing failed at {index}"));
         }
     }
-    let source_generator = ctx.control.fast.lift(&ctx.kc.generator());
+    let source_generator = ctx.control.fast.lift(ctx.kc.generator());
     let leaf_generator = map_to_leaf(ctx, source_generator)?;
     map_calls += 1;
     if !ctx.control.fast.mul_u64(source_generator, R).infinity

@@ -14,10 +14,15 @@
     "frozen_cargo_lock": "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365"
   },
   "final_source_sha256": {
-    "producer": "e7e4e1e86c1d199c978b9141490e54c59e5df6c2bdd3a771ddd9017583bc4a03",
-    "independent_replay": "88a228144a08db897b63aa9ae7615c6e0f386288828ecfa2374722aec934fd45",
+    "producer": "35d8197555e5c1fcf58010ff54bc5fa8ed730febf1790c7ccf70ea7b8792d5dc",
+    "independent_replay": "e6ce0814fe4444c6e4f9df86524fa9967ef2cbe4ec61b60225be270fb3258790",
     "shared_frozen_input_parser": "ffe89798e42c70e28075094db9541ca8bc79f92d73d9780aec4112cfe8adb99b"
   },
+  "prior_final_run_source_sha256": {
+    "producer": "e7e4e1e86c1d199c978b9141490e54c59e5df6c2bdd3a771ddd9017583bc4a03",
+    "independent_replay": "88a228144a08db897b63aa9ae7615c6e0f386288828ecfa2374722aec934fd45"
+  },
+  "prior_final_run_commit": "f234a1a0c198e42808e87480b61beb0baa2a5304",
   "runs": [
     {
       "name": "initial",
@@ -37,9 +42,21 @@
       "replay_sha256": "89a71ba48ecdbf77d19977e312fa314a69e06d50ab3e3b1503db80ab01bd0588",
       "replay_bytes": 514,
       "canonical_nontiming_json_sha256": "5f8f00f7e9ca5ddbed87d88e0a1d04a55b11436bf52e52d6cae6ba798dd07b00",
-      "status": "PASS; used for the decision"
+      "status": "PASS; retained as the pre-Clippy source run with the same canonical non-timing result"
+    },
+    {
+      "name": "ci_fixed",
+      "producer_expanded_sha256": "2c8f2cc0767e177d21b3a0c62fbd50a40992150d1dd3bee7c07f9e629c647ea1",
+      "producer_expanded_bytes": 5104424,
+      "producer_gzip_sha256": "c84066a521137cfa61a2f490ed18a3a957b79da6e27f587ad1579b350cb9764a",
+      "producer_gzip_bytes": 222574,
+      "replay_sha256": "7b79fd455401c36ffaa4b115593f6c820af7e43de58b886d3ba6ce71e3d9f2cd",
+      "replay_bytes": 514,
+      "canonical_nontiming_json_sha256": "5f8f00f7e9ca5ddbed87d88e0a1d04a55b11436bf52e52d6cae6ba798dd07b00",
+      "status": "PASS; source-matched run used for the decision"
     }
   ],
+  "latest_run_name": "ci_fixed",
   "mutation_replay_receipts_sha256": {
     "unpaired_witness": "f197dd3d69efa280047a031ba82cef7ecccb37efe84ded3220390f514a644b87",
     "paired_witness": "ea4d4814c3ba75dc4dcf3126bc29e532258ec1d9802e1277259af325be5a71fb",
