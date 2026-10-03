@@ -1,0 +1,389 @@
+{
+  "audit_sha256": "346345851722800f53d3448b85b8a0cebf7d9e3adf6efc1b1813e87ca1e4a273",
+  "count_receipt_sha256": "f895700386ef5280fba175699c0f257a0702f377a779bdc00b4ad6b39c67a3c8",
+  "decision": "REJECT_COMPLETE_TABLE_COLD_N37",
+  "measured_failures": 0,
+  "measured_runs": 16,
+  "minimum_table_floor_over_rho_gae": 854.735280622751,
+  "preregistered_threshold": 100.0,
+  "public_workloads": 8,
+  "rho_gae_max": 5652.493946991288,
+  "rho_gae_sum": 63526.903151860584,
+  "rows": [
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h501191328020",
+      "rho_s": 0.3468737308956131,
+      "rho_total_gae": 5267.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07Wb043680bd4f7R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 917.2076985033109,
+      "target": [
+        "0x1c302b87ae",
+        "0x1c260b0177"
+      ],
+      "target_index": 0,
+      "workload_id": "Wb043680bd4f7"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1he5b37b570ae0",
+      "rho_s": 0.27107835869800534,
+      "rho_total_gae": 4116.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07Wa620556289faR2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1173.665274919503,
+      "target": [
+        "0xdabe8a7b3",
+        "0x1a299625f7"
+      ],
+      "target_index": 1,
+      "workload_id": "Wa620556289fa"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h40f14096fea9",
+      "rho_s": 0.3195452517800551,
+      "rho_total_gae": 4852.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07W78997bc24f38R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 995.6500827776662,
+      "target": [
+        "0x139d42348e",
+        "0x903decb5d"
+      ],
+      "target_index": 2,
+      "workload_id": "W78997bc24f38"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h7f49a136d705",
+      "rho_s": 0.15096475410336016,
+      "rho_total_gae": 2292.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07Wede8433210cbR2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 2107.4803736519357,
+      "target": [
+        "0x151498bca2",
+        "0x10c152a4bb"
+      ],
+      "target_index": 3,
+      "workload_id": "Wede8433210cb"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h2192f030faa2",
+      "rho_s": 0.34068366574654696,
+      "rho_total_gae": 5173.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07W6d3e2cae6d73R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 933.8729395459629,
+      "target": [
+        "0xc213a1920",
+        "0x29adff643"
+      ],
+      "target_index": 4,
+      "workload_id": "W6d3e2cae6d73"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h99d9232cfe77",
+      "rho_s": 0.2415767716045837,
+      "rho_total_gae": 3668.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07Wab8fee2bdd98R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1316.9944041920683,
+      "target": [
+        "0x1691ab6cdc",
+        "0x94f931d5"
+      ],
+      "target_index": 5,
+      "workload_id": "Wab8fee2bdd98"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hfd6894aecdcd",
+      "rho_s": 0.23538670645551757,
+      "rho_total_gae": 3574.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07W208d94993d02R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1351.6279707416093,
+      "target": [
+        "0xa51497e37",
+        "0x1111127e78"
+      ],
+      "target_index": 6,
+      "workload_id": "W208d94993d02"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h834bf76ab881",
+      "rho_s": 0.279573235338745,
+      "rho_total_gae": 4245.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 1,
+      "run_id": "ECM1hb6123afffc07W3dfea1231a56R2",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1138.0032713093194,
+      "target": [
+        "0x784ecb1fe",
+        "0x106d3cab35"
+      ],
+      "target_index": 7,
+      "workload_id": "W3dfea1231a56"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hdb470947fd63",
+      "rho_s": 0.20786067206924472,
+      "rho_total_gae": 3156.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07Wb043680bd4f7R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1530.6178567537531,
+      "target": [
+        "0x1c302b87ae",
+        "0x1c260b0177"
+      ],
+      "target_index": 0,
+      "workload_id": "Wb043680bd4f7"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h0dc3b137accd",
+      "rho_s": 0.34904683887347676,
+      "rho_total_gae": 5300.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07Wa620556289faR3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 911.4973148384469,
+      "target": [
+        "0xdabe8a7b3",
+        "0x1a299625f7"
+      ],
+      "target_index": 1,
+      "workload_id": "Wa620556289fa"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hf3aebc59f134",
+      "rho_s": 0.17829323321891816,
+      "rho_total_gae": 2707.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07W78997bc24f38R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1784.449418758219,
+      "target": [
+        "0x139d42348e",
+        "0x903decb5d"
+      ],
+      "target_index": 2,
+      "workload_id": "W78997bc24f38"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hc7a9b9e22894",
+      "rho_s": 0.3722266573040222,
+      "rho_total_gae": 5652.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07Wede8433210cbR3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 854.735280622751,
+      "target": [
+        "0x151498bca2",
+        "0x10c152a4bb"
+      ],
+      "target_index": 3,
+      "workload_id": "Wede8433210cb"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hb5a948807069",
+      "rho_s": 0.3237597642219725,
+      "rho_total_gae": 4916.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07W6d3e2cae6d73R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 982.6893009716058,
+      "target": [
+        "0xc213a1920",
+        "0x29adff643"
+      ],
+      "target_index": 4,
+      "workload_id": "W6d3e2cae6d73"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1hd26ff663d852",
+      "rho_s": 0.23097463874288532,
+      "rho_total_gae": 3507.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07Wab8fee2bdd98R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1377.4467106762481,
+      "target": [
+        "0x1691ab6cdc",
+        "0x94f931d5"
+      ],
+      "target_index": 5,
+      "workload_id": "Wab8fee2bdd98"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h266c2b1363c8",
+      "rho_s": 0.2014730516494637,
+      "rho_total_gae": 3059.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07W208d94993d02R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 1579.1454677500487,
+      "target": [
+        "0xa51497e37",
+        "0x1111127e78"
+      ],
+      "target_index": 6,
+      "workload_id": "W208d94993d02"
+    },
+    {
+      "isolation": "L0",
+      "matches_target": true,
+      "record_id": "ECR1h71fed0d774f3",
+      "rho_s": 0.13404085257878573,
+      "rho_total_gae": 2035.493946991288,
+      "rho_unpriced": [
+        "canonicalisations_uncharged",
+        "partition_hashes_uncharged",
+        "table_inserts_uncharged",
+        "table_queries_uncharged"
+      ],
+      "round": 2,
+      "run_id": "ECM1hb6123afffc07W3dfea1231a56R3",
+      "status": "verified",
+      "table_setup_floor_over_rho_gae": 2373.5693280451096,
+      "target": [
+        "0x784ecb1fe",
+        "0x106d3cab35"
+      ],
+      "target_index": 7,
+      "workload_id": "W3dfea1231a56"
+    }
+  ],
+  "schema": "n37-complete-table-floor-decision/v1",
+  "scope": "charged-GAE necessary-cost gate for the fixed complete m<=3 pair-table oracle at n37; no runtime speedup, full IC cost, scaling claim, or general IC no-go",
+  "session_id": "ECBS1h509a4a823bd8",
+  "session_records_sha256": "4678b123907d33af3eb4964841347ff6a317db7f5383a78f278bc8cab4070932",
+  "spec_id": "ECS1h999d25a394f1",
+  "table_setup_floor_gae_each": 4831386,
+  "table_setup_floor_s_each": 318.1552563860221
+}
