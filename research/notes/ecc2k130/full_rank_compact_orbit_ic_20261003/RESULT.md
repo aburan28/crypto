@@ -77,6 +77,13 @@ the extra relation search, not elimination, drove this increment. The
 66,822 eager-table setup additions alone exceed the maximum sampled rho
 charge by 12.459×. The minimum full-rank IC charge exceeds that rho
 maximum by 15.722×; per-Q/round IC/rho ratios range 15.852–34.242.
+Even after removing the entire factor-base and table setup from the IC
+side, its full-rank **online** charged cost exceeds rho's whole charged
+record on every one of these 16 pairs (1.060–2.673×; ratio of panel means
+1.679×). Thus amortising only the table cannot make independently
+repeated full-rank solves win in this charged panel. A batch construction
+would need to share the rank solve or materially change per-target PDP
+work as well; the actual batch economics have not been measured.
 
 The prior [cold-source result](../cold_compact_orbit_ic_20261003/RESULT.md)
 listed the same IC unpriced counters: inversions in the base constructor,
@@ -98,8 +105,10 @@ the preregistered charged accounting: carrying the matrix to full rank
 raises cold cost by only 3.87%, while the eager table setup is still much
 larger than the sampled one-target rho charge. This narrows the immediate
 engineering question. Further single-target tuning of elimination cannot
-remove the 66,822-addition setup floor; the next informative gate is a
-**shared cold table and full-rank batch recovery** against actual
+remove the 66,822-addition setup floor, and table-only amortisation still
+leaves the observed per-target full-rank online charge above sampled rho.
+The next informative gate is a **shared cold table and shared-rank batch
+recovery** against actual
 automorphism-aware batched rho on new disjoint public Q. It must freeze
 the batch size, charge base/table construction once, separately account
 for each online descent, peak memory and unpriced native work, and verify

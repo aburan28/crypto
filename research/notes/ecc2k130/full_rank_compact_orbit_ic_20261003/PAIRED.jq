@@ -47,6 +47,9 @@ def arm_record:
         full: $full,
         full_over_rho: ($full.gae / $rho.gae),
         full_over_early: ($full.gae / $early.gae),
+        full_online_over_rho: (
+          ($full.relations_gae + $full.linalg_gae + $full.verify_gae) / $rho.gae
+        ),
         checkpoint_agrees: (
           $full.algorithm_seed == $early.algorithm_seed
           and $full.scalar == $early.scalar
