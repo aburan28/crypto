@@ -1,11 +1,13 @@
 //! Frozen, one-use execution of the disclosed synthetic prepared F5 control.
 //! Fresh sampling, ordinary collection and cross-method claims are excluded.
 use super::{f5_target, prepared_f5, sat_control::native};
+use crypto_lib::cryptanalysis::prepared_control_archive::{safe_path, verify_tar_inventory};
 use crypto_lib::cryptanalysis::prepared_sat_control::{canonical_sha, sha256};
+use flate2::read::MultiGzDecoder;
 use native::{load, read, require, save};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::{fs, path::Path, process::Command, time::Instant};
+use std::{fs, io::Read, path::Path, process::Command, time::Instant};
 
 const PREPARATION: &str = "research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json";
 const SCOPE: &str = "disclosed-n17-native-prepared-f5-control-v1";
@@ -57,6 +59,168 @@ fn require_external_seal(registration: &Value, expected: &str) -> Result<(), Str
         canonical_sha(registration)? == expected,
         "F5 control lacks the exact external registration seal",
     )
+}
+fn descriptor(bytes: &[u8]) -> Value {
+    json!({"bytes":bytes.len(), "sha256":sha256(bytes)})
+}
+/// Verify every original archive byte against a published external registration.
+/// Custody is independent of scientific execution and never launches a binary.
+fn verify_custody(publication: &Path, expected: &str) -> Result<Value, String> {
+    let header = load(&publication.join("PUBLICATION.json"))?;
+    require(
+        header["schema_version"] == 1
+            && header["stage"] == "preregistered-not-dispatched"
+            && header["scope"] == SCOPE
+            && header["registration_sha256"] == expected
+            && header["scientific_worker_calls"] == 0
+            && header["execution_admitted"] == false
+            && header["fresh_paired_qualification"] == false
+            && header["headline_eligible"] == false
+            && header["promotion_eligible"] == false
+            && header["online_speedup"].is_null(),
+        "F5 custody publication changes its scope or claims",
+    )?;
+    let mut archive_files = serde_json::Map::new();
+    let mut sidecars = serde_json::Map::new();
+    for name in FILES.into_iter().chain(["registration.json", "seal.json"]) {
+        let bytes = read(&publication.join(name), 16 * 1024 * 1024)?;
+        let desc = descriptor(&bytes);
+        require(header["files"][name] == desc, "F5 custody sidecar changed")?;
+        archive_files.insert(name.into(), desc);
+        sidecars.insert(
+            name.into(),
+            serde_json::from_slice::<Value>(&bytes).map_err(|e| e.to_string())?,
+        );
+    }
+    require(
+        header["files"] == json!(archive_files),
+        "F5 custody sidecar set differs",
+    )?;
+    let reg = &sidecars["registration.json"];
+    require_external_seal(reg, expected)?;
+    require_executable_registration(reg)?;
+    require(
+        sidecars["seal.json"]["registration_sha256"] == expected
+            && reg["schema_version"] == 1
+            && reg["scope"] == SCOPE
+            && reg["status"] == "registered-not-dispatched"
+            && reg["hardware"] == json!({"os":"macos","architecture":"aarch64"})
+            && reg["source_commit"] == header["source_commit"]
+            && reg["runtime_environment"] == json!(environment())
+            && reg["ordinary_queries_executed"] == 0
+            && reg["fresh_paired_qualification"] == false
+            && reg["headline_eligible"] == false
+            && reg["promotion_eligible"] == false
+            && reg["online_speedup"].is_null(),
+        "F5 custody registration scope differs",
+    )?;
+    let cfg: Control =
+        serde_json::from_value(sidecars["config.json"].clone()).map_err(|e| e.to_string())?;
+    cfg.validate()?;
+    require(
+        mathematical_job(&sidecars["preparation.json"], &cfg)? == sidecars["job.json"]
+            && prepared_f5::verify(&sidecars["preparation.json"])? == reg["preparation_admission"],
+        "F5 custody preparation or mathematical-only input differs",
+    )?;
+    for name in FILES {
+        require(
+            reg[name] == archive_files[name]["sha256"],
+            "F5 custody input hash differs",
+        )?;
+    }
+    let immutable = reg["immutable_files"]
+        .as_object()
+        .ok_or("missing F5 immutable inventory")?;
+    require(
+        header["immutable_file_count"] == immutable.len(),
+        "F5 custody file count differs",
+    )?;
+    for (name, desc) in immutable {
+        require(safe_path(name), "unsafe F5 immutable path")?;
+        archive_files.insert(format!("immutable/{name}"), desc.clone());
+    }
+    for (key, name) in [
+        ("worker_sha256", format!("bin/{WORKER}")),
+        ("auditor_sha256", "bin/icprog".into()),
+    ] {
+        require(
+            immutable.get(&name).and_then(|v| v.get("sha256")) == Some(&reg[key])
+                && header[key] == reg[key],
+            "F5 custody executable binding differs",
+        )?;
+    }
+    require(
+        header["archive"]["path"] == "capsule.tar.gz",
+        "F5 custody archive path differs",
+    )?;
+    let archive = read(&publication.join("capsule.tar.gz"), 96 * 1024 * 1024)?;
+    require(
+        descriptor(&archive)
+            == json!({"bytes":header["archive"]["bytes"], "sha256":header["archive"]["sha256"]}),
+        "F5 custody archive bytes differ",
+    )?;
+    let mut tar = Vec::new();
+    MultiGzDecoder::new(archive.as_slice())
+        .take(320 * 1024 * 1024 + 1)
+        .read_to_end(&mut tar)
+        .map_err(|e| e.to_string())?;
+    require(
+        tar.len() <= 320 * 1024 * 1024,
+        "F5 custody decompression limit exceeded",
+    )?;
+    let count = verify_tar_inventory(&tar, &Value::Object(archive_files))?;
+    Ok(
+        json!({"schema_version":1,"status":"PASS_NATIVE_F5_REGISTRATION_PUBLICATION_CUSTODY",
+        "registration_sha256":expected,"source_commit":reg["source_commit"], "archive_sha256":sha256(&archive),
+        "archive_regular_files":count,"immutable_file_count":immutable.len(),
+        "worker_sha256":reg["worker_sha256"],"auditor_sha256":reg["auditor_sha256"],
+        "complete_published_capsule_bytes_verified":true,"archived_binaries_executed":0,
+        "scientific_worker_calls":0,"execution_admitted":false,"native_f5_runtime_admitted":false,
+        "fresh_paired_qualification":false,"headline_eligible":false,"promotion_eligible":false,
+        "full_goal_complete":false,"online_wall_ns":null,"online_speedup":null}),
+    )
+}
+pub fn replay_custody(publication: &Path, expected: &str, out: &Path) -> Result<String, String> {
+    let receipt = verify_custody(publication, expected)?;
+    save(out, &receipt)?;
+    serde_json::to_string_pretty(&receipt).map_err(|e| e.to_string())
+}
+/// Thin shell creates a plain USTAR gzip archive in a new publication directory.
+/// Copy exact sidecars, check the full archive and preserve a create-only receipt.
+pub fn publish_custody(capsule: &Path, publication: &Path, out: &Path) -> Result<String, String> {
+    let reg = check_capsule(capsule)?;
+    require_executable_registration(&reg)?;
+    require(
+        !capsule
+            .join("consumed.json")
+            .try_exists()
+            .map_err(|e| e.to_string())?,
+        "F5 capsule already consumed",
+    )?;
+    let mut files = serde_json::Map::new();
+    for name in FILES.into_iter().chain(["registration.json", "seal.json"]) {
+        let bytes = read(&capsule.join(name), 16 * 1024 * 1024)?;
+        files.insert(name.into(), descriptor(&bytes));
+        native::create(&publication.join(name), &bytes)?;
+    }
+    let archive = read(&publication.join("capsule.tar.gz"), 96 * 1024 * 1024)?;
+    let header = json!({"schema_version":1,"stage":"preregistered-not-dispatched", "scope":SCOPE,
+        "registration_sha256":canonical_sha(&reg)?,"source_commit":reg["source_commit"],
+        "immutable_file_count":reg["immutable_files"].as_object().ok_or("missing F5 immutable inventory")?.len(),
+        "worker_sha256":reg["worker_sha256"],"auditor_sha256":reg["auditor_sha256"],"files":files,
+        "archive":{"path":"capsule.tar.gz","bytes":archive.len(),"sha256":sha256(&archive)},
+        "scientific_worker_calls":0,"execution_admitted":false,"fresh_paired_qualification":false,
+        "headline_eligible":false,"promotion_eligible":false,"online_speedup":null});
+    save(&publication.join("PUBLICATION.json"), &header)?;
+    require(
+        check_capsule(capsule)? == reg
+            && !capsule
+                .join("consumed.json")
+                .try_exists()
+                .map_err(|e| e.to_string())?,
+        "F5 capsule changed during publication",
+    )?;
+    replay_custody(publication, &canonical_sha(&reg)?, out)
 }
 
 /// Retain the exact build/input receipts from a non-executable validation capsule.
@@ -783,6 +947,136 @@ mod tests {
         ));
         fs::create_dir(&path).unwrap();
         path
+    }
+    fn custody_fixture(root: &Path) -> String {
+        use std::{collections::BTreeMap, io::Write};
+        // Placeholder bytes establish only archive custody; they never execute.
+        let mut files = BTreeMap::<String, Vec<u8>>::new();
+        let prep = prep();
+        for (name, value) in [
+            ("config.json", json!(cfg())),
+            ("preparation.json", prep.clone()),
+            ("job.json", mathematical_job(&prep, &cfg()).unwrap()),
+            ("host-context.json", json!({"test_fixture":true})),
+        ] {
+            files.insert(name.into(), serde_json::to_vec(&value).unwrap());
+        }
+        let worker = b"placeholder worker never executed".to_vec();
+        let checker = b"placeholder checker never executed".to_vec();
+        let immutable =
+            json!({format!("bin/{WORKER}"):descriptor(&worker), "bin/icprog":descriptor(&checker)});
+        let mut registration = json!({"schema_version":1,"scope":SCOPE,"validation_only":false,
+            "test_fixture":true,"status":"registered-not-dispatched","source_commit":"test-fixture-never-executed",
+            "hardware":{"os":"macos","architecture":"aarch64"},"runtime_environment":environment(),
+            "immutable_files":immutable,"worker_sha256":sha256(&worker),"auditor_sha256":sha256(&checker),
+            "preparation_admission":prepared_f5::verify(&prep).unwrap(),"ordinary_queries_executed":0,
+            "fresh_paired_qualification":false,"headline_eligible":false,"promotion_eligible":false,"online_speedup":null});
+        for name in FILES {
+            registration[name] = json!(sha256(&files[name]));
+        }
+        let seal = canonical_sha(&registration).unwrap();
+        files.insert(
+            "registration.json".into(),
+            serde_json::to_vec(&registration).unwrap(),
+        );
+        files.insert(
+            "seal.json".into(),
+            serde_json::to_vec(&json!({"registration_sha256":seal})).unwrap(),
+        );
+        let mut sidecars = serde_json::Map::new();
+        for (name, bytes) in &files {
+            native::create(&root.join(name), bytes).unwrap();
+            sidecars.insert(name.clone(), descriptor(bytes));
+        }
+        files.insert(format!("immutable/bin/{WORKER}"), worker);
+        files.insert("immutable/bin/icprog".into(), checker);
+        let mut tar = Vec::new();
+        for (name, bytes) in files {
+            let mut h = vec![0; 512];
+            h[..name.len()].copy_from_slice(name.as_bytes());
+            h[124..136].copy_from_slice(format!("{:011o}\0", bytes.len()).as_bytes());
+            h[156] = b'0';
+            h[257..265].copy_from_slice(b"ustar\x0000");
+            let sum: usize = h
+                .iter()
+                .enumerate()
+                .map(|(i, &b)| {
+                    if (148..156).contains(&i) {
+                        32
+                    } else {
+                        b as usize
+                    }
+                })
+                .sum();
+            h[148..156].copy_from_slice(format!("{sum:06o}\0 ").as_bytes());
+            tar.extend(h);
+            tar.extend(bytes);
+            tar.resize(tar.len().div_ceil(512) * 512, 0);
+        }
+        tar.extend(vec![0; 1024]);
+        let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
+        encoder.write_all(&tar).unwrap();
+        let archive = encoder.finish().unwrap();
+        native::create(&root.join("capsule.tar.gz"), &archive).unwrap();
+        save(&root.join("PUBLICATION.json"), &json!({"schema_version":1,"stage":"preregistered-not-dispatched","scope":SCOPE,
+            "registration_sha256":seal,"source_commit":registration["source_commit"],"immutable_file_count":2,
+            "worker_sha256":registration["worker_sha256"],"auditor_sha256":registration["auditor_sha256"],"files":sidecars,
+            "archive":{"path":"capsule.tar.gz","bytes":archive.len(),"sha256":sha256(&archive)},
+            "scientific_worker_calls":0,"execution_admitted":false,"fresh_paired_qualification":false,
+            "headline_eligible":false,"promotion_eligible":false,"online_speedup":null})).unwrap();
+        seal
+    }
+    #[test]
+    fn full_capsule_custody_is_data_only_external_sealed_and_create_only() {
+        let p = temp("custody");
+        let seal = custody_fixture(&p);
+        let out = p.join("custody.json");
+        assert!(replay_custody(&p, "wrong", &out).is_err());
+        assert!(!out.exists());
+        replay_custody(&p, &seal, &out).unwrap();
+        let before = fs::read(&out).unwrap();
+        let receipt = load(&out).unwrap();
+        assert_eq!(receipt["archive_regular_files"], 8);
+        assert_eq!(receipt["archived_binaries_executed"], 0);
+        assert_eq!(receipt["execution_admitted"], false);
+        assert_eq!(receipt["native_f5_runtime_admitted"], false);
+        assert!(receipt["online_speedup"].is_null());
+        assert!(replay_custody(&p, &seal, &out).is_err());
+        assert_eq!(fs::read(&out).unwrap(), before);
+        fs::remove_dir_all(p).unwrap();
+    }
+    #[test]
+    fn full_custody_rejects_resealed_sidecars_archives_and_promoted_claims() {
+        for mutation in ["input", "archive", "claim", "missing"] {
+            let p = temp("custody-corruption");
+            let seal = custody_fixture(&p);
+            let mut header = load(&p.join("PUBLICATION.json")).unwrap();
+            match mutation {
+                "input" => {
+                    fs::write(p.join("job.json"), b"{}").unwrap();
+                    header["files"]["job.json"] = descriptor(b"{}");
+                }
+                "archive" => {
+                    let mut bytes = fs::read(p.join("capsule.tar.gz")).unwrap();
+                    bytes.truncate(bytes.len() / 2);
+                    fs::write(p.join("capsule.tar.gz"), &bytes).unwrap();
+                    header["archive"]["bytes"] = json!(bytes.len());
+                    header["archive"]["sha256"] = json!(sha256(&bytes));
+                }
+                "claim" => header["execution_admitted"] = json!(true),
+                "missing" => {
+                    fs::remove_file(p.join("preparation.json")).unwrap();
+                }
+                _ => unreachable!(),
+            }
+            fs::write(
+                p.join("PUBLICATION.json"),
+                serde_json::to_vec(&header).unwrap(),
+            )
+            .unwrap();
+            assert!(verify_custody(&p, &seal).is_err(), "accepted {mutation}");
+            fs::remove_dir_all(p).unwrap();
+        }
     }
     #[test]
     fn compact_build_replay_binds_external_seal_and_creates_receipt_once() {

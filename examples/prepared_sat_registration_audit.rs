@@ -1,10 +1,13 @@
 //! Verify a published prepared SAT registration and archive as data; never execute it.
+use crypto_lib::cryptanalysis::prepared_control_archive::{
+    safe_path, verify_tar_inventory as inventory,
+};
 use crypto_lib::cryptanalysis::prepared_sat_control::{
     canonical_sha, sha256, ControlConfig, PREPARATION_SHA256,
 };
 use flate2::read::MultiGzDecoder;
 use serde_json::{json, Value};
-use std::{collections::BTreeSet, fs, io::Read, path::Path, process::ExitCode};
+use std::{fs, io::Read, path::Path, process::ExitCode};
 
 fn require(ok: bool, message: &str) -> Result<(), String> {
     if ok {
@@ -43,107 +46,6 @@ fn read(path: &Path, limit: usize) -> Result<Vec<u8>, String> {
 }
 fn desc(bytes: &[u8]) -> Value {
     json!({"bytes":bytes.len(),"sha256":sha256(bytes)})
-}
-fn text(bytes: &[u8]) -> Result<String, String> {
-    let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
-    require(
-        bytes[end..].iter().all(|&b| b == 0 || b == b' '),
-        "invalid tar header text",
-    )?;
-    Ok(std::str::from_utf8(&bytes[..end])
-        .map_err(|e| e.to_string())?
-        .trim_end()
-        .into())
-}
-fn octal(bytes: &[u8]) -> Result<usize, String> {
-    let value = std::str::from_utf8(bytes)
-        .map_err(|e| e.to_string())?
-        .trim_matches(['\0', ' ']);
-    require(
-        !value.is_empty() && value.bytes().all(|b| (b'0'..=b'7').contains(&b)),
-        "invalid tar octal field",
-    )?;
-    usize::from_str_radix(value, 8).map_err(|e| e.to_string())
-}
-fn safe_path(name: &str) -> bool {
-    !name.is_empty()
-        && !name.starts_with('/')
-        && !name.contains('\\')
-        && name
-            .trim_end_matches('/')
-            .split('/')
-            .all(|c| !c.is_empty() && c != "." && c != "..")
-}
-fn inventory(tar: &[u8], expected: &Value) -> Result<usize, String> {
-    let expected = expected.as_object().ok_or("missing archive inventory")?;
-    let mut seen = BTreeSet::new();
-    let mut offset = 0;
-    while offset + 512 <= tar.len() {
-        let h = &tar[offset..offset + 512];
-        if h.iter().all(|&b| b == 0) {
-            require(
-                tar.len() - offset >= 1024
-                    && (tar.len() - offset).is_multiple_of(512)
-                    && tar[offset..].iter().all(|&b| b == 0),
-                "invalid tar terminal blocks",
-            )?;
-            require(
-                seen.len() == expected.len(),
-                "archive omits registered files",
-            )?;
-            return Ok(seen.len());
-        }
-        let sum: usize = h
-            .iter()
-            .enumerate()
-            .map(|(i, &b)| {
-                if (148..156).contains(&i) {
-                    32
-                } else {
-                    b as usize
-                }
-            })
-            .sum();
-        require(sum == octal(&h[148..156])?, "tar checksum differs")?;
-        require(&h[257..265] == b"ustar\x0000", "archive is not plain USTAR")?;
-        let name = text(&h[..100])?;
-        let prefix = text(&h[345..500])?;
-        let name = if prefix.is_empty() {
-            name
-        } else {
-            format!("{prefix}/{name}")
-        };
-        require(safe_path(&name), "unsafe archive path")?;
-        let size = octal(&h[124..136])?;
-        offset += 512;
-        let end = offset.checked_add(size).ok_or("archive size overflow")?;
-        require(end <= tar.len(), "truncated archive member")?;
-        match h[156] {
-            b'5' => {
-                require(
-                    size == 0 && name.ends_with('/'),
-                    "invalid archive directory",
-                )?;
-                require(
-                    expected.keys().any(|k| k.starts_with(&name)),
-                    "unregistered archive directory",
-                )?;
-            }
-            0 | b'0' => {
-                require(seen.insert(name.clone()), "duplicate archive member")?;
-                require(
-                    expected.get(&name) == Some(&desc(&tar[offset..end])),
-                    "archive file differs or is unregistered",
-                )?;
-            }
-            _ => return Err("archive contains a link or special member".into()),
-        }
-        offset = end
-            .checked_add((512 - size % 512) % 512)
-            .ok_or("archive padding overflow")?;
-        require(offset <= tar.len(), "truncated archive padding")?;
-    }
-    Err("archive has no terminal blocks".into())
 }
 
 fn audit(dir: &Path, expected_seal: &str) -> Result<Value, String> {

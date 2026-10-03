@@ -77,6 +77,11 @@ Use `icprog f5-control-replay-validation` with the external validation seal for
 portable replay of the [compact offline build evidence](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/VALIDATION.md).
 This data-only replay launches no archived executable and cannot establish
 custody of the omitted full capsule or admit a scientific run.
+The [full F5 custody protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/PROTOCOL.md)
+adds `f5-control-publish-custody` and `f5-control-replay-custody` for the actual
+full archive. Replay requires the external registration seal, reads every
+archived member as data, and admits no execution. Publish the accepted actual
+registration and custody archive before its sole scientific invocation.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.

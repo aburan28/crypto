@@ -15,6 +15,7 @@ on:
       - 'src/bin/prepared_sat_worker.rs'
       - 'src/bin/prepared_sat_worker/**'
       - 'src/cryptanalysis/prepared_sat_control.rs'
+      - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/isolated_bench.rs'
       - 'src/bin/isolated_bench/**'
       - 'tests/icprog.rs'
@@ -28,6 +29,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
       - 'docs/ic/boundary_targets.json'
@@ -41,12 +43,14 @@ on:
       - 'src/bin/prepared_sat_worker.rs'
       - 'src/bin/prepared_sat_worker/**'
       - 'src/cryptanalysis/prepared_sat_control.rs'
+      - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/isolated_bench.rs'
       - 'src/bin/isolated_bench/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'tests/icprog.rs'
       - '.github/workflows/ic-programme-harness.yml'
@@ -101,6 +105,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_sat_worker -- --test-threads=1
