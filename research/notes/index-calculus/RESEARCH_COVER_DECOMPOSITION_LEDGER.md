@@ -1,9 +1,9 @@
 # The cover-and-decomposition route on `E(F_{p⁶})`: registered before it is built
 
-**Status:** registration, 2026-09-30.  Nothing in this file has been measured; §5 is filled in after the runs and §3's predictions are not edited afterwards.
+**Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9).  §3's predictions were not edited after the runs.
 **Literature:** Joux and Vitse, *Cover and decomposition index calculus on elliptic curves made practical* (Eurocrypt 2012, ePrint 2011/020), cited below as **[JV12]**.  Every figure marked *cited* is theirs, from their Magma and C runs on other hardware, and is here only to set the registered range; none of it is a measurement of this repository.
 **Ledger:** `RESEARCH_RHO_PARITY_PROGRAMME.md` (the routes on generic curves, all of which stay bounded away from `S / rho = 1` at machine size: `k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^200`); `RESEARCH_K5_TORSION_JOUX_VITSE.md` (the last of them).
-**Code (to be written):** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`, frozen data `experiments/30_jv_cover_*`.
+**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; **tables:** `python3 scripts/parity_ledger.py`, section E (every number in §6 is printed by it).
 
 ## 1. Why this route is a different kind of entry
 
@@ -64,3 +64,86 @@ Charging the cover, the pair table, the residual stream or the linear algebra to
 ## 5. Class (registered)
 
 Reproduction and measurement of a published route inside the harness, at sizes the literature does not report: **accounting and engineering**.  It is not an advance: the algorithm is [JV12]'s.  What the harness adds, if the predictions hold, is the crossover in its own unit, which fixes the boundary statement: *on the weak class over `F_{p⁶}`, `S / rho` falls as `p^{-2}` and crosses one at `p*`, `n*`; on every generic curve of the ledger it does not.*
+
+---
+
+## 6. Measured
+
+One Nagao test on Jac_H(F_{p²}), genus 3: six quadrics in six unknowns over F_p (Weil restriction of a monic sextic over F_{p²}), F4 and a zero-dimensional solver, every hit verified in the group; oracle = meet in the middle over the three-point sums.
+
+| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |
+|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|
+| 53 | 2^32.4 | 2 | 31 | 331 | 2121 | 5.055e+06 | 2,730 | 4.551e+06 | 4.998e+05 | 1,551 | 64 | 10.0 | 767 × 723 | 23.0 | 25.8 | 600 / 2 | 120/120 | 720 / 0 | 0 / 1 / 0 |
+| 61 | 2^33.6 | 2 | 28 | 331 | 2122 | 5.055e+06 | 2,730 | 4.565e+06 | 4.862e+05 | 1,525 | 64 | 10.0 | 766 × 722 | 22.8 | 25.6 | 600 / 0 | 120/120 | 720 / 0 | 0 / 0 / 0 |
+| 71 | 2^34.9 | 2 | 36 | 331 | 2121 | 5.079e+06 | 2,730 | 4.580e+06 | 4.953e+05 | 1,509 | 64 | 10.0 | 766 × 722 | 22.8 | 25.6 | 600 / 0 | 120/120 | 720 / 0 | 0 / 0 / 0 |
+| 101 | 2^37.9 | 2 | 50 | 331 | 2122 | 5.123e+06 | 2,730 | 4.614e+06 | 5.045e+05 | 1,565 | 64 | 10.0 | 766 × 722 | 23.0 | 25.9 | 200 / 0 | 40/40 | 0 / 0 | 0 / 0 / 0 |
+| 251 | 2^45.8 | 2 | 126 | 331 | 2122 | 5.196e+06 | 2,730 | 4.660e+06 | 5.308e+05 | 2,186 | 64 | 10.0 | 767 × 723 | 23.0 | 25.9 | 200 / 0 | 40/40 | 0 / 0 | 0 / 0 / 0 |
+| 503 | 2^51.8 | 2 | 250 | 331 | 2122 | 5.209e+06 | 2,730 | 4.672e+06 | 5.319e+05 | 2,192 | 64 | 10.0 | 768 × 724 | 23.6 | 26.5 | 200 / 0 | 40/40 | 0 / 0 | 0 / 0 / 0 |
+| 1009 | 2^57.9 | 2 | 498 | 331 | 2122 | 5.223e+06 | 2,730 | 4.681e+06 | 5.372e+05 | 2,180 | 64 | 10.0 | 768 × 724 | 22.2 | 25.1 | 200 / 0 | 40/40 | 0 / 0 | 0 / 0 / 0 |
+| 1511 | 2^61.4 | 2 | 754 | 331 | 2122 | 5.273e+06 | 2,730 | 4.684e+06 | 5.836e+05 | 2,878 | 64 | 10.0 | 768 × 724 | 22.1 | 25.1 | 200 / 0 | 40/40 | 0 / 0 | 0 / 0 / 0 |
+
+The method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:
+
+| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |
+|---:|--:|:--|--:|--:|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|--:|
+| 53 | 1 | 2^32.4 | 30 | 19,020 | 31 | 0.00163 | 0.00171 | 1.05 | 331 | 5.039e+06 | 25,235 (26.3) | 3.892e+03 | 2859.799 | 1.476 / 2637.564 | 2637.553 + 0.0111 | 2717.400 | True / True | 0 |
+| 53 | 2 | 2^32.4 | 32 | 8,486 | 33 | 0.00389 | 0.00262 | 0.67 | 331 | 5.062e+06 | 28,579 (26.2) | 1.744e+03 | 1281.752 | 1.076 / 1621.621 | 1621.604 + 0.0173 | 1904.039 | True / True | 0 |
+| 101 | 1 | 2^37.9 | 52 | 40,100 | 53 | 0.00132 | 0.00123 | 0.93 | 331 | 5.100e+06 | 70,721 (26.2) | 1.200e+03 | 881.750 | 1.436 / 835.819 | 835.814 + 0.0046 | 949.064 | True / True | 0 |
+| 101 | 2 | 2^37.9 | 49 | 65,422 | 50 | 0.00076 | 0.00084 | 1.10 | 331 | 5.093e+06 | 65,401 (26.2) | 1.955e+03 | 1436.570 | 1.501 / 1302.841 | 1302.837 + 0.0041 | 1301.710 | True / True | 0 |
+| 251 | 1 | 2^45.8 | 129 | 82,263 | 130 | 0.00158 | 0.00146 | 0.92 | 331 | 5.166e+06 | 433,699 (26.1) | 1.624e+02 | 119.361 | 1.537 / 105.705 | 105.703 + 0.0017 | 129.512 | True / True | 0 |
+| 251 | 2 | 2^45.8 | 123 | 95,284 | 124 | 0.00130 | 0.00109 | 0.84 | 331 | 5.158e+06 | 387,961 (26.1) | 1.879e+02 | 138.054 | 1.009 / 186.123 | 186.120 + 0.0023 | 165.122 | True / True | 0 |
+| 503 | 1 | 2^51.8 | 238 | 252,255 | 239 | 0.00095 | 0.00094 | 0.99 | 331 | 5.185e+06 | 1,389,235 (26.0) | 6.212e+01 | 45.650 | 1.361* / 45.650 | 45.649 + 0.0008 | 46.185 | True / True | 0 |
+| 503 | 2 | 2^51.8 | 262 | 142,150 | 263 | 0.00185 | 0.00168 | 0.91 | 331 | 5.199e+06 | 1,732,729 (26.0) | 3.510e+01 | 25.794 | 1.361* / 25.794 | 25.793 + 0.0010 | 28.467 | True / True | 0 |
+| 1009 | 1 | 2^57.9 | 484 | 450,841 | 485 | 0.00108 | 0.00105 | 0.98 | 331 | 5.210e+06 | 5,919,571 (26.0) | 1.382e+01 | 10.156 | 1.361* / 10.156 | 10.156 + 0.0004 | 10.405 | True / True | 0 |
+| 1009 | 2 | 2^57.9 | 511 | 360,835 | 511 | 0.00142 | 0.00146 | 1.03 | 331 | 5.217e+06 | 6,348,889 (26.0) | 1.108e+01 | 8.140 | 1.361* / 8.140 | 8.140 + 0.0004 | 7.928 | True / True | 0 |
+
+Pooled rho S over 72 walks: 1.361 ± 0.070.
+
+Pooled decomposition rate: 1919 relations in 1,516,656 residuals = 0.911/720 (1/720 predicts 2106 ± 46); the exact count 16·C(|F|,6)/ℓ predicts 1855.6 ± 43.1.
+Fitted exponent of S/rho in p over 5 sizes: -1.918 ± 0.116 (registered P4: −2 ± 0.2; derivation: −2).
+
+Crossover implied by the measured constants (mean C_cov = 5.152e+06, c_add = 331, rho S = 1.3, extrapolated on S/rho ∝ p^{−2}): p* = 2,936, subgroup order n* ≈ p*⁶/4 = 2^67; C_cov/c_add = 15,564 (registered P5: ≥ 10³).
+At the largest end-to-end size (p = 1009, ℓ = 2^57.9): S/rho = 8.140.
+
+Reading it:
+
+- **One test costs `C_cov = 5.2·10⁶` `F_p` multiplications, flat in `p`** (`5.05·10⁶` at `p = 53` to `5.27·10⁶` at `p = 1511`, `+4 %`: F4 `+3 %`, the matrix solver `+17 %`).  `90 %` is F4 (`4.7·10⁶`), `10 %` the multiplication-matrix solver (`5.3·10⁵`), the Weil restriction `2,730` (`0.05 %`).  The ideal has degree `64 = 2⁶`, as six generic quadrics give; F4 has solving degree `7` (as registered) and runs to degree `10` on a `768 × 724` matrix to certify the basis the solver needs.  `c_add = 331` for an affine addition in `E(F_{p⁶})` (one inversion through the norm to `F_{p²}`, nine products in the cubic tower); `2,122` on `Jac_H(F_{p²})` by Cantor.  `C_cov / c_add = 15,600`.
+- **The test is exact where it can be checked.**  `2,160` residuals at `p ∈ {53, 61, 71}` (all of them, planted and random) agree with the meet-in-the-middle oracle over the three-point sums, `0` disagreements; every planted six-sum was found at every size (`360/360` with the oracle, `200/200` at `p = 101 … 1511`); every relation in every end-to-end run was verified in the group before it was used (`0` unverified); all `10` end-to-end logarithms were recovered and match the planted one.  About `1` test in `700` returns a positive-dimensional ideal (no pure power of a variable among the leading monomials); the solver reports it as `incomplete` and the test is not counted as a decomposition test (`0` to `7` per end-to-end run).
+- **The rate is the exact count, not `1/720`.**  `1,919` relations in `1,516,656` residuals; `1/720` predicts `2,106 ± 46`, the exact count `16·C(|F|, 6)/ℓ` over the actual `|F| = 30 … 511` classes predicts `1,856 ± 43` (`+1.5σ`).  `|F| ≈ p/2` only asymptotically: `C(|F|, 6) = |F|⁶/720 · (1 − 15/|F| + …)`, `−3 %` at `|F| = 500`, `−30 %` at `|F| = 50`.  The columns are `p/2` (`484` and `511` at `p = 1009`, against `504.5`): `x ∈ F_p` with `f_H(x)` a square in `F_{p²}`, which is half of `F_p` on average.
+- **`S / rho` falls as `p^{−1.92 ± 0.12}`** over five sizes (registered `−2 ± 0.2`), i.e. `n^{−0.32 ± 0.02}` in the subgroup order `ℓ ≈ p⁶/4` (derived `−1/3`), from `~2,100×` at `p = 53` (`ℓ = 2^{32}`) to **`10.2×` and `8.1×` at `p = 1009` (`ℓ = 2^{57.9}`)**, against rho run on the same group (pooled `ρ_S = 1.36 ± 0.07` over `72` walks to `ℓ = 2^{45.8}`; its table does not fit above that, so `p ≥ 503` use the pooled value, marked `*`).  The relation phase is `99.99 %` of it; the linear algebra is `0.04 %` of rho at `p = 1009` (`26.0 u²` multiplications modulo `ℓ` for `u` unknowns, Wiedemann).
+- **The crossover is an extrapolation and is above what was run.**  On the measured constants (`C_cov = 5.15·10⁶`, `c_add = 331`, `ρ_S = 1.3`): parity at `p* ≈ 2,940`, `ℓ ≈ p*⁶/4 = 2^{67}`.  The same exponent through the `p = 1009` rows (mean `9.15`) gives `p* ≈ 3,050`, `2^{67.4}`.  `ℓ > 2^{63}` does not fit the harness's 64-bit group orders, so no run crosses.
+
+## 7. Outcome against the registration
+
+| | registered (§3) | measured | verdict |
+|:--|:--|:--|:--|
+| P1 rate | `1/720` within `[1/900, 1/580]` | `0.911/720 = 1/790`; exact count `+1.5σ` | holds; the exact count is the right predictor |
+| P2 exactness | every residual at `p ≤ 100`, every `256`-th above, `0` disagreements | falsified twice during the build (§8), then `0` of `2,160` at `p ≤ 71`; **not run above `p = 71`** (the pair-sum table is `O(|F|³)` and does not fit beyond `|F| ≈ 40`); at `p ≥ 101` the evidence is planted-sum recovery (`200/200`), group verification (`0` unverified) and the correct logarithm | **partly tested**, as stated |
+| P3 constants | `C_cov ∈ [10⁶, 10⁸]`, `c_add ∈ [200, 600]` | `5.2·10⁶`, `331` | holds |
+| P4 crossover | `S/rho > 1` at `p = 1009`; exponent in `[−2.2, −1.8]`; `n* ∈ [2^{58}, 2^{80}]` | `8.1` and `10.2`; `−1.92 ± 0.12`; `2^{67}` | holds |
+| P5 ratio | `C_cov / c_add ≥ 10³` (Magma's `18` is not the harness's unit) | `15,600` (`860×` Magma's) | holds |
+| P6 sieve | priced from the literature, not built | not built | as registered |
+
+## 8. What building it found
+
+Four defects.  The first two were caught by the oracle comparison the registration had named (P2), the third by an end-to-end row that contradicted P1 by five orders of magnitude, the fourth by reading the report fields.  Each earlier run is kept as a frozen file under its own name, not overwritten:
+
+1. **A Krylov vector missed a root, and a linear form did not separate the points** (first oracle run, `*_first_run_defective.*`): `3` of `120` planted six-sums were missed at `p = 53` and `16` of `719` tests had a non-separating form.  Both are `O(1/p)`: the solver now takes the exact characteristic polynomial (Hessenberg) and redraws the form, with a Cayley–Hamilton test.
+2. **`µ(x) = u(x) = A(x) = 0`** (second run, `*_second_run_superseded.*`): when the reduced divisor itself contains a point over a planted abscissa, `y = −A/µ` is `0/0`; both signs are now tried and the group decides.  `1,500` planted sums at `p = 61` (ignored test, `40 s`): no unflagged miss.
+3. **A deadline built once** (third run, `*_third_run_superseded.*`): F4's deadline is absolute and the end-to-end driver built it before the loop, so after `600 s` every test returned at once; the `p = 251` rows (`3.7·10⁷` "residuals", all but a few timed out) were invalid.  The budget is now made per test, and all end-to-end rows were rerun.
+4. **`cross_checked` was never incremented** in the end-to-end report; it prints `0` in the rows of record.  It is fixed in the code; the oracle evidence of record is the `ccov` oracle run of §6, not these counters.
+
+None of the four touched the group arithmetic or the transfer, which the tests check independently (cover map lands on `E`; transfer is a homomorphism into `Jac_H(F_q)`; instance transfers the DLP, `Φ(G)` of order `ℓ` and `Φ(Q) = d·Φ(G)`).
+
+## 9. What this is, and is not
+
+**Class:** reproduction and measurement of a published route inside the harness: **accounting and engineering, no advance** (the algorithm is [JV12]'s).  What the harness adds is the crossover in its own unit.
+
+**The boundary statement.**  On the weak class `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}`, `S / rho` was measured falling as `n^{−0.32}` to `≈ 9×` at `ℓ = 2^{58}` and extrapolates to parity near `ℓ = 2^{67}`; on every generic curve of the ledger it does not (`k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^{200}`).  The route's cost is `720·p/2` tests of `5·10⁶` multiplications against rho's `p³/2` additions of `331`: parity is where `p² ≈ 720·C_cov/(ρ_S·c_add)`.
+
+**Not measured, and not to be read into the numbers:**
+
+- The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.
+- Any size at which the crossover itself occurs (`ℓ ≈ 2^{67}`, above the harness's range), and any curve outside `F_{p⁶}`.
+- The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C, which would move `p*` down by `≈ √960`; cited, not built, and not a measurement of this repository.
+- Anything about a deployed curve: prime-field curves and extension-field curves of prime order outside this form are untouched, and nothing here is a claim about them.
