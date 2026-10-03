@@ -1,0 +1,64 @@
+{
+  "schema_version": "ic-progress-timeline/1",
+  "updated": "2026-10-03",
+  "question": "Best verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
+  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, or isolated CPU time where marked). Only the direction against 1 is comparable across points; no value on this page is computed from another.",
+  "series": [
+    {
+      "id": "ec-cold",
+      "label": "Elliptic curve, whole method, cold, one target",
+      "role": "emphasis",
+      "barrier_test": true,
+      "note": "The repository's own definition of faster than rho (AGENTS.md section 2). Hollow markers were later shown to be measured against an unmatched rho and are kept as 'was'.",
+      "points": [
+        {"date": "2026-09-16", "value": 0.7376, "reference": "unmatched", "label": "Tournament round 0007, five Koblitz cells", "detail": "0.7376 of the worker rho's instructions, 95% 0.7066-0.7644. That rho named Frobenius classes by squaring; the control of 2026-09-23 showed it was not a matched reference.", "class": "engineering", "anchor": "#ic-tournament-round-0007", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0007/REPORT.md"},
+        {"date": "2026-09-21", "value": 0.6751, "reference": "unmatched", "label": "Tournament round 0019, eight cells, strict win promoted", "detail": "0.6751 [0.6298, 0.7265] of the worker rho's instructions on all eight cells; replicated by round 0020 at 0.6629. Same unmatched reference.", "class": "engineering", "anchor": "#ic-tournament-round-0019", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0019/REPORT.md"},
+        {"date": "2026-09-23", "value": 1.192, "reference": "matched", "label": "Control: rho given the IC arm's orbit naming", "detail": "The IC arm is above that rho at every cell measured, 1.19x (n59a0) to 2.88x (n43a1). Triple collector with counted sizing, five cells. Class accounting: what the ratios were counted against changed.", "class": "accounting", "anchor": "#ic-triple-counted-20260923", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md"},
+        {"date": "2026-09-28", "value": 0.609, "reference": "matched", "label": "Tournament round 0024, matched rho, best cell n17a1", "detail": "Six of eight panel cells 0.61-0.82 of the matched rho; the strict gate fails at n23a1 (1.126); the whole twelve-cell panel reads 1.380 [0.847, 2.387]. Best cell plotted.", "class": "accounting", "anchor": "#ic-tournament-round-0024", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md"},
+        {"date": "2026-09-29", "value": 1.356, "reference": "matched", "label": "Tournament round 0025, lean rho, best cell n19a0", "detail": "The matched walk run in the IC arm's own single-word arithmetic. Above rho in instructions at every one of twelve cells: 1.36-2.56x on the panel, up to 13.7x past the crossing. The line was stopped on 2026-09-29.", "class": "accounting", "anchor": "#ic-tournament-round-0025", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md"},
+        {"date": "2026-10-01", "value": 2.0, "reference": "matched", "label": "Koblitz descent, one target cold, best size 2^38.0", "detail": "Ledger section 23: with the reusable set-up charged, the method is 4.9-31.6x slower than rho cold across six sizes 2^36.6-2^47.2; 2.0x at 2^38.0 where both arms pay a slow curve construction. Online only it is 8.8-17.5x faster (see the online series).", "class": "accounting", "anchor": "#koblitz-descent-20260930", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930"},
+        {"date": "2026-10-01", "value": 1.314, "reference": "matched", "unit": "isolated CPU time", "label": "Orbit-disjoint cold CPU panel, closest cell n41/L1,024", "detail": "Six cells timing-eligible on reserved cores, every paired compact/rho CPU interval above one; the closest, n41/L1,024, reads 1.314 [1.288, 1.359] and would need 23.9% less CPU to match rho. Isolated CPU time, not a counted unit; S unset.", "class": "accounting", "anchor": "#disjoint-cold-v2-outcome-20261001", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#disjoint-cold-v2-outcome-20261001"}
+      ]
+    },
+    {
+      "id": "ec-batch",
+      "label": "Elliptic curve, 32 targets together (historical diagnostic)",
+      "role": "context",
+      "note": "Per target against batch rho on the same 32 targets, 39-bit Koblitz subgroup. Under the one-target rule this is a historical multi-target diagnostic.",
+      "points": [
+        {"date": "2026-09-23", "value": 6.5, "reference": "matched", "label": "Ledger section 19: reference matched to the batch", "detail": "Had read 1.17x against rho solving one target; against batch rho on the same 32 targets it is 6.5x, 6.4x priced by time on both sides.", "class": "accounting", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-26", "value": 12.5, "reference": "matched", "label": "Ledger section 20: every phase on the clock", "detail": "Re-priced on current main with the descent's 748,180-unit scan and the workflow's constructions charged: 12.5x. Best recipe swept at nine sizes reaches 4.9x at 2^39 and no lower.", "class": "accounting", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-26", "value": 4.3, "reference": "matched", "label": "Ledger section 21: constructions built once per base", "detail": "Whole pipeline 1.04-2.25x faster with every count unchanged; the row reads 4.3x.", "class": "engineering", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-30", "value": 3.6, "reference": "matched", "label": "Ledger section 22: descent fixed cost cut", "detail": "1.35-1.39x at the small end in isolated runs; the row reads 3.6x. The closest any elliptic-curve pipeline gets end to end, and it is a batch figure.", "class": "engineering", "anchor": "#koblitz-descent-20260930", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930"}
+      ]
+    },
+    {
+      "id": "ec-online",
+      "label": "Elliptic curve, online phase only (reusable set-up excluded)",
+      "role": "context",
+      "note": "Starts the clock after a reusable set-up. Not a cold result; the same set-up spent as a generic precomputation would speed rho up too.",
+      "points": [
+        {"date": "2026-09-28", "value": 0.134, "reference": "qualified", "label": "Bounded autolab round 3, pair-table incumbent, six toy cells", "detail": "Paired IC/rho online cost 0.134x, descriptive 95% 0.125-0.144; the qualified rho online reference took 7.45x the incumbent's online time. 216/216 verified. Ledger section 23 (2026-10-01) reads 8.8-17.5x faster online at 2^36.6-2^47.2 on the Koblitz descent, and 4.9-31.6x slower once its set-up is charged.", "class": "engineering", "anchor": "#rho-results-title", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md"}
+      ]
+    },
+    {
+      "id": "genus4",
+      "label": "Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size",
+      "role": "context",
+      "note": "p <= 251, N = 2^24, conservative accounting against a distinguished-point rho. The only end-to-end measurement below rho on the page; no deployed system is hyperelliptic.",
+      "points": [
+        {"date": "2026-09-19", "value": 0.21, "reference": "matched", "label": "Genus-4 crossover exponent", "detail": "0.21 at N = 2^24 on the conservative accounting; fitted exponent -0.275 against rho.", "class": "advance, exponent", "anchor": "#genus-crossover", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover"},
+        {"date": "2026-09-30", "value": 0.24, "reference": "matched", "label": "Round seven: sparse solve priced, genus-3 claim withdrawn", "detail": "The solve became 5.1x cheaper and the linear algebra was priced; genus 4 reads 0.24 at N = 2^24 (was 0.21) with exponent -0.29 [-0.42, -0.16]; genus 3's exponent claim was withdrawn.", "class": "accounting", "anchor": "#genus-crossover", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover"}
+      ]
+    },
+    {
+      "id": "cover-fp6",
+      "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
+      "role": "context",
+      "note": "Joux-Vitse 2012 reproduced on a genus-3 GHS cover. The ratio falls as p^-1.92 and extrapolates to parity near 2^67 on this weak class; the isogeny walk to reach it is unpriced.",
+      "points": [
+        {"date": "2026-10-03", "value": 8.1, "reference": "matched", "label": "Cover and decomposition, p = 1009 (subgroup 2^57.9), best of two seeds", "detail": "S/rho 8.1x and 10.2x at p = 1009, falling as p^-1.92 +/- 0.12 over five sizes; parity extrapolated near 2^67 (p* about 2,900-3,050), above the harness's 64-bit range. All 10 logarithms recovered.", "class": "accounting", "anchor": "#rho-parity-ledger", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"}
+      ]
+    }
+  ]
+}
