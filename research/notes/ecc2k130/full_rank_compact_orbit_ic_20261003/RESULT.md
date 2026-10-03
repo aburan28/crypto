@@ -38,6 +38,11 @@ after target outcomes were seen.
 | Audit | [receipt](AUDIT.json), SHA-256 `95e9eba91b95b3799011fe4d0e81790a03b9ce0be729c7afc5b1a0b7a799f166`; `ok=true`, 48/48 measured replays identical, zero problems |
 | Historical compatibility | New binary also replayed all 48 measured records of the preceding early-pin session identically; [receipt](LEGACY_AUDIT.json) SHA-256 `808d93574f07598f93aa9581f9fc9e19b662504cf14ec64a91903d001d77f402` |
 
+The `ecbench` CI workflow now covers both n37 note sessions for immutable
+file checks and full measured-record replay on Linux. Its check must pass
+on this PR head before the result merges; the local receipts above remain
+the exact records of the macOS measurement and replay.
+
 The full-rank arm records the first target-pin rank, trial and relation.
 All 16 checkpoints exactly match the paired early-pin arm's final rank,
 trial and relation count. The algorithm seed, recovered scalar, factor-base
