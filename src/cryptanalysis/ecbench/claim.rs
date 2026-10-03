@@ -1377,7 +1377,7 @@ mod tests {
         envelope: Value,
     }
 
-    fn k1n17() -> Fixture {
+    fn cross_check_fixture() -> Fixture {
         let inst = koblitz_instance(1, 17).unwrap();
         let kb = Kb::of(&inst).unwrap();
         let kc = inst.koblitz.as_ref().unwrap();
@@ -1468,7 +1468,7 @@ mod tests {
     /// before repinning.
     #[test]
     fn identities_match_identity_py() {
-        let f = k1n17();
+        let f = cross_check_fixture();
         assert_eq!(f.curve_id, "EC1N17Ckb1hbbe2b5b6b1e6");
         // The base holds (0, 1), the 2-torsion point above x = 0, whose
         // image under [2] is the identity: one dead raw column.
@@ -1536,7 +1536,7 @@ mod tests {
     #[test]
     #[ignore]
     fn print_identity_inputs() {
-        let f = k1n17();
+        let f = cross_check_fixture();
         println!(
             "IDENTITY_INPUTS {}",
             json!({"fixture": f.fixture, "report": f.report, "method": f.method,
