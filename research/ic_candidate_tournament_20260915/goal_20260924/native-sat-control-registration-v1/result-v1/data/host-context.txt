@@ -1,0 +1,28 @@
+Physical host facts recorded before any execution claim, 2026-10-03.
+This is an uncalibrated disclosed-input correctness/source control.
+The native busy lock provides serialization only; no L2 timing claim is made.
+
+sw_vers:
+ProductName: macOS
+ProductVersion: 26.6
+BuildVersion: 25G70
+
+uname -smr:
+Darwin 25.6.0 arm64
+
+sysctl -n hw.model hw.ncpu hw.memsize machdep.cpu.brand_string:
+Mac16,7
+14
+51539607552
+Apple M4 Pro
+
+Frozen build compiler: Homebrew rustc 1.93.1, aarch64-apple-darwin,
+commit 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf, LLVM 21.1.8.
+Compiler/Cargo binary digests, exact build environments/commands and
+before/after identities remain in immutable/build-receipts in the capsule.
+
+Registered CPU solver: one CryptoMiniSat thread; no GPU backend selected.
+Configured limits: 8 queries, 1,000,000 conflicts/query; exporter 30,000 ms,
+solver 60,000 ms, controller 900,000 ms. A memory ceiling is unknown.
+Registration: b098ebbe135abd4706e62d6286f513fe1c4f07fad61f7250487bd2d86ad317e4.
+Known target [52411,72106]; no fresh-target or speedup claim.

@@ -57,6 +57,8 @@ mod rule;
 mod runs;
 #[path = "icprog/sat_control.rs"]
 mod sat_control;
+#[path = "icprog/sat_control_publication.rs"]
+mod sat_control_publication;
 #[path = "icprog/sat_query_law.rs"]
 mod sat_query_law;
 #[path = "icprog/sat_source.rs"]
@@ -97,6 +99,26 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Publish the exact consumed native SAT control; creates a new immutable tree.
+    SatControlPublish {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        audit: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable postexecution data/math replay; executes no archived binary or solver.
+    SatControlReplayPublication {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Freeze disclosed n17 native-control sources, dependencies and binaries; no search.
     SatControlFreeze {
         #[arg(long, default_value = ".")]
@@ -503,6 +525,16 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::SatControlPublish {
+            capsule,
+            execution,
+            audit,
+            host_context,
+            out,
+        } => sat_control_publication::publish(&capsule, &execution, &audit, &host_context, &out),
+        Command::SatControlReplayPublication { publication, out } => {
+            sat_control_publication::replay_to(&publication, &out)
+        }
         Command::SatControlFreeze {
             root,
             out,

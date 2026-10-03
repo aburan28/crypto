@@ -1,5 +1,11 @@
 # Native prepared SAT control registration
 
+**Terminal status: consumed and closed.** [RESULT.md](RESULT.md) records the
+sole native execution, two independently proved negatives, source-verified
+witness, recovered scalar and original frozen audit. The preregistration
+description and commands below remain historical evidence; never execute,
+retry, resume or extend this registration, including an archive restoration.
+
 This is the executable preregistration for the bounded disclosed-input control
 specified in [the accepted protocol](../native-prepared-sat-control-v1/PROTOCOL.md).
 The native controller was accepted in [PR #1267](https://github.com/aburan28/crypto/pull/1267).

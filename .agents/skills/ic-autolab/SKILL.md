@@ -48,8 +48,11 @@ this interval cannot establish the primary independently verified online claim.
 The committed control template is not an executable registration or a result.
 The [actual native SAT control registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/README.md)
 binds the final source/dependency snapshot, native assets and both binaries.
-Check its accepted publication, sole claim and terminal result before dispatch;
-an archive restoration never authorizes another invocation.
+It is consumed and closed: the [native result](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/RESULT.md)
+retains two exact negatives, the source model/group witness, scalar and passing
+frozen audit. Never dispatch, retry or resume it or an archive restoration.
+Use `icprog sat-control-replay-publication` for portable postexecution data/math
+replay; it launches no search and does not replace the original frozen audit.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
