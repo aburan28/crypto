@@ -3,7 +3,7 @@
 **Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9).  §3's predictions were not edited after the runs.
 **Literature:** Joux and Vitse, *Cover and decomposition index calculus on elliptic curves made practical* (Eurocrypt 2012, ePrint 2011/020), cited below as **[JV12]**.  Every figure marked *cited* is theirs, from their Magma and C runs on other hardware, and is here only to set the registered range; none of it is a measurement of this repository.
 **Ledger:** `RESEARCH_RHO_PARITY_PROGRAMME.md` (the routes on generic curves, all of which stay bounded away from `S / rho = 1` at machine size: `k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^200`); `RESEARCH_K5_TORSION_JOUX_VITSE.md` (the last of them).
-**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; **tables:** `python3 scripts/parity_ledger.py`, section E (every number in §6 is printed by it).
+**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}` for §10 (F4 stopped at the Bézout staircase, 2026-10-04); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
 
 ## 1. Why this route is a different kind of entry
 
@@ -147,3 +147,55 @@ None of the four touched the group arithmetic or the transfer, which the tests c
 - Any size at which the crossover itself occurs (`ℓ ≈ 2^{67}`, above the harness's range), and any curve outside `F_{p⁶}`.
 - The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C, which would move `p*` down by `≈ √960`; cited, not built, and not a measurement of this repository.
 - Anything about a deployed curve: prime-field curves and extension-field curves of prime order outside this form are untouched, and nothing here is a claim about them.
+
+---
+
+## 10. Engineering after the fact: F4 stopped at the Bézout staircase (2026-10-04)
+
+§6 found `90 %` of a test in F4, which ran to degree `10` on a `768 × 724`
+matrix to *certify* a Gröbner basis it had in hand at degree `7`.  Six
+quadrics in six unknowns have Bézout degree `2⁶ = 64`, and every system of
+§6 had ideal degree exactly `64`.  So F4 may stop as soon as the leading
+monomials found so far leave `64` standard monomials: the partial basis
+then generates a subideal `J ⊆ I` with `dim R/J ≤ 64 ≤ dim R/I`, which
+forces `J = I` and makes the partial basis a Gröbner basis of `I`; the
+multiplication matrices of §2.3's solver are built on it unchanged.  A
+system whose ideal has degree below `64` (none was seen in `3,360` tests;
+the one `incomplete` is the positive-dimensional case of §6) would stop
+at a strict superideal's staircase, which the solver's final check of every
+candidate against the input covers.  The engine already had the hook
+(`F4Options::stop_staircase`); the change is to use it (`--stop 64`) and to
+record it in every report (`stop_staircase`, `stopped`).
+
+**Measured** (`31_jv_cover_stop_ccov{_oracle,}.json`, the same sizes, seeds
+and residual counts as §6; ledger section E.2):
+
+| | §6, F4 to a certified basis | F4 stopped at `64` | ratio |
+|:--|--:|--:|--:|
+| F4 per test (mean over the eight sizes) | `4.63·10⁶` | `2.67·10⁶` | `1.73×` |
+| `C_cov` per test | `5.15·10⁶` | `3.19·10⁶` | `1.61×` |
+| F4 degree reached, matrix | `10`, `768 × 724` | `7`, `556 × 507` | |
+| tests stopped at the staircase | | `3,359` of `3,360` | |
+| oracle disagreements at `p ≤ 71` (`2,160` residuals) | `0` | `0` | |
+| planted sums found | `360/360`, `200/200` | `360/360`, `200/200` | |
+| unverified relations | `0` | `0` | |
+
+`C_cov` stays flat in `p` (`3.10·10⁶` at `p = 53` to `3.32·10⁶` at `1511`).
+The solver's own `5.3·10⁵` is now `17 %` of a test; the Weil restriction is
+`0.1 %`.  Counted on one `64 × 64` matrix at `p = 1009`, the solver's share
+is the characteristic polynomial (`2.6·10⁵`, Hessenberg, `≈ δ³`), the roots
+of the degree-64 polynomial (`7.1·10⁴`, growing with `log p`), the linear
+form (`2.5·10⁴`), and `1.3·10⁵` per `F_p`-rational root and per retry for
+the eigenvector (the spread from `3.4·10⁵` to `2.7·10⁶` across tests).
+Those are the floor of an exact method at `δ = 64`: the characteristic
+polynomial is what decides whether the system has an `F_p`-point at all,
+and `719` systems in `720` have none.  So the next constant is not here;
+F4 is `83 %` of the test as it stands.
+
+**What it is.**  A constant: `1.61×` on the test and so on `S / rho`, with
+the route's exponent untouched.  The crossover the ledger extrapolates from
+the measured constants moves from `p* ≈ 2,940` to `≈ 2,310`, i.e. from
+`2^{67}` to `2^{65}` in the subgroup's order, still above the harness's
+range; the end-to-end rows below say what was actually measured.  Class:
+**engineering**.  Nothing in §9 changes: the weak class, the unpriced
+isogeny walk and the unbuilt sieve are as they were.

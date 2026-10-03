@@ -337,13 +337,14 @@
 @media(prefers-color-scheme:dark){body{background:#171e1a;color:#e4ebe6}:root{--dash-green-soft:#203d2c}.dash-nav,.dash-section,.dash-library-intro{border-color:#35473a}.dash-brand,.dash-explanation strong{color:#e4ebe6!important}.dash a{color:#9bcbae}.dash-lead,.dash-explanation,.dash-metrics p,.dash-section-intro,.dash-control-grid p:not(.control-number),.next-list p,.dash-library-intro>p{color:#a5b9ab}.dash-metrics article,.dash-chart,.dash input{background:#202a23;border-color:#35473a;color:#e4ebe6}.dash-kicker,.dash .dash-footnote,.dash-chart-note,.dash-chart figcaption span{color:#a1b6a7}.dash-chart svg text{fill:#b6c5bc}.dash-chart svg .chart-bold{fill:#e4ebe6}.overall-dot{fill:#e4ebe6}.interval{stroke:#e4ebe6}.faster{fill:#91c4a2}.slower{fill:#dfa187}.dash-details,.pipeline-zone{background:#232e25;border-color:#35473a}.online-zone{background:#20372a}.pipeline span,.pipeline-zone-label span{color:#b3c5b8}.pipeline b{background:#2e4134;color:#a6d3b5;border-color:#57735e}.dash-control-ledger div,.next-list li,.dash #evidence-results li{border-color:#35473a}.dash-library{border-color:#35473a}.dash-detail-body td,.dash-detail-body th{border-color:#35473a}}
 #lab-best table{font-size:13px;min-width:760px}#lab-best td,#lab-best th{vertical-align:top}#lab-best .best-row td{background:var(--dash-green-soft)}#lab-best td.n{white-space:normal;font-variant-numeric:tabular-nums}#lab-best small{display:block;font-size:11px;opacity:.75}@media(prefers-color-scheme:dark){#lab-best .best-row td{background:#203d2c}}
 #lab-ecbench-all table{font-size:13px;min-width:760px}#lab-ecbench-all td,#lab-ecbench-all th{vertical-align:top}#lab-ecbench-all td.n{font-variant-numeric:tabular-nums;white-space:nowrap}#lab-ecbench-all tr.ic-row td{background:var(--dash-amber-soft,#fff7e6)}#lab-ecbench-all small{display:block;font-size:11px;opacity:.75}@media(prefers-color-scheme:dark){#lab-ecbench-all tr.ic-row td{background:#3d3220}}
+#lab-progress .progress-svg{width:100%;min-width:640px;height:auto;display:block;background:transparent}#lab-progress #progress-chart{overflow-x:auto}#lab-progress .grid{stroke:#d8ded5;stroke-width:1}#lab-progress .barrier{stroke:#232c28;stroke-width:1.5}#lab-progress .barrier-label,#lab-progress .tick{font-size:11px;fill:#566257;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}#lab-progress .barrier-label{fill:#232c28;font-weight:600}#lab-progress .line{fill:none;stroke-width:2;stroke-linejoin:round}#lab-progress .line.emph{stroke:#2a78d6}#lab-progress .line.ctx{stroke:#8a8f85}#lab-progress .pt .hit{fill:transparent}#lab-progress .pt .dot{stroke:#f5f5f0;stroke-width:2}#lab-progress .pt.emph .dot{fill:#2a78d6}#lab-progress .pt.ctx .dot{fill:#8a8f85}#lab-progress .pt.hollow .dot{fill:#f5f5f0;stroke:#2a78d6;stroke-width:2.5}#lab-progress .pt{cursor:pointer;outline:none}#lab-progress .pt.on .dot,#lab-progress .pt:focus-visible .dot{r:7.5}#lab-progress .pt:focus-visible .hit{stroke:#2a78d6;stroke-width:1.5}#lab-progress .dlabel{font-size:11.5px;fill:#232c28}#lab-progress .dlabel.ctx{fill:#566257}#lab-progress #progress-chart{position:relative}#lab-progress .dash-chart{position:relative}.progress-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:#566257;padding:8px 0 0}.progress-legend .lg{display:inline-flex;align-items:center;gap:7px}.progress-legend .lg i{display:inline-block;width:18px;height:0;border-top:2px solid #8a8f85}.progress-legend .lg.emph i{border-color:#2a78d6}.progress-legend .lg.hollow i{width:10px;height:10px;border:2.5px solid #2a78d6;border-radius:50%}.progress-tip{position:absolute;z-index:5;pointer-events:none;max-width:290px;background:#232c28;color:#f5f5f0;padding:9px 11px;border-radius:4px;font-size:12px;line-height:1.45;box-shadow:0 6px 20px -8px rgba(0,0,0,.5)}.progress-tip b{display:block;font-size:13px;margin-bottom:3px}.progress-tip span{display:block;margin-top:2px}.progress-tip .muted{opacity:.75}.progress-tip a{color:#9bcbae;display:inline-block;margin-top:5px}@media(prefers-color-scheme:dark){#lab-progress .grid{stroke:#35473a}#lab-progress .barrier{stroke:#e4ebe6}#lab-progress .barrier-label,#lab-progress .dlabel{fill:#e4ebe6}#lab-progress .tick,#lab-progress .dlabel.ctx{fill:#b6c0b8}#lab-progress .line.emph,#lab-progress .pt.emph .dot{stroke:#3987e5;fill:#3987e5}#lab-progress .line.emph{fill:none}#lab-progress .pt .dot{stroke:#171e1a}#lab-progress .pt.emph .dot{stroke:#171e1a}#lab-progress .pt.hollow .dot{fill:#171e1a;stroke:#3987e5}#lab-progress .line.ctx,#lab-progress .pt.ctx .dot{stroke:#a3a9a0}#lab-progress .pt.ctx .dot{fill:#a3a9a0;stroke:#171e1a}.progress-legend .lg.emph i,.progress-legend .lg.hollow i{border-color:#3987e5}.progress-tip{background:#e4ebe6;color:#171e1a}.progress-tip a{color:#23664d}}
 /* END IC OVERVIEW STYLES */
 </style>
 </head>
 <body>
 <!-- BEGIN IC DASHBOARD OVERVIEW -->
 <main class="dash" id="ic-overview">
-  <nav class="dash-nav" aria-label="Dashboard"><a class="dash-brand" href="#ic-overview"><span class="brand-mark">IC</span> Research lab</a><div><a href="#lab-results">Results</a><a href="#lab-best">Best results</a><a href="#lab-ecbench-all">All candidates</a><a href="#lab-pipeline">Pipeline</a><a href="#lab-next">Next experiment</a><a href="#evidence-search">Evidence</a></div></nav>
+  <nav class="dash-nav" aria-label="Dashboard"><a class="dash-brand" href="#ic-overview"><span class="brand-mark">IC</span> Research lab</a><div><a href="#lab-results">Results</a><a href="#lab-best">Best results</a><a href="#lab-progress">Progress</a><a href="#lab-ecbench-all">All candidates</a><a href="#lab-pipeline">Pipeline</a><a href="#lab-next">Next experiment</a><a href="#evidence-search">Evidence</a></div></nav>
   <header class="dash-hero"><p class="dash-kicker">Index calculus · bounded autolab · updated 3 October 2026</p><h1>What works.<br>What still needs proof.</h1><p class="dash-lead">The tournament has kept its incumbent. F5 now completes a source-bound prepared control; SAT still needs that gate. A fresh comparison of these solver families has not run.</p><a class="dash-primary" href="#lab-results">See the measured results <span aria-hidden="true">↓</span></a></header>
   <div class="dash-metrics" aria-label="Current status">
     <article><span class="status neutral">Tournament</span><h2>Incumbent retained</h2><p>Three closed improvement rounds. No challenger passed promotion.</p><a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md">Last round →</a></article>
@@ -399,6 +400,162 @@
 <tr><td>A/A control (reference repeated)</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td></tr>
 </tbody></table></div>
 <p class="dash-footnote">The orbit base has no invariant subspace on <code>icv1-f2m19-t797-b6cf2467</code> and <code>icv1-f2m29-tm40309-30c52b96</code> (192 error records, kept). A preregistered follow-up ran those two curves with the <code>binary-subspace</code> base: dimension 8 verifies everywhere at 37.0&times; (n = 19) and 103.5&times; (n = 29) the reference under MITM, 204&times; and 8 081&times; under <code>subtract</code>; dimension 6 solves n = 19 at 6.98&times; and exhausts its 10<sup>6</sup>-trial budget on every n = 29 target. Read the Koblitz column with care: at r &le; 2<sup>21</sup> the strong reference&rsquo;s fixed setup is three to four times its search, so it sits above the lean walk and every BSGS, and every IC ratio against it is flattering by 1.4&ndash;4.3&times;. Host: 4-vCPU Intel Xeon VM, Linux x86-64; counts stand at every isolation level, wall time admitted only on the L2 pairs and descriptive at these sizes. Three complete sessions, 3 136 of 3 392 executions verified, the rest errors or exhaustions with their own status; 36 of 36 audit replays identical. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_all_candidates_20261003/README.md">Protocols, sessions, audit receipts, tables, saved comparisons and the scored predictions</a>. Class: none (AGENTS.md &sect;3); nothing here is a method change, and the best-of table above is unchanged by it.</p>
+</section>
+  <section class="dash-section" id="lab-progress" aria-labelledby="progress-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Progress over time / The rho barrier</p><h2 id="progress-title">Where index calculus stands against rho, by the day each result landed.</h2></div><span class="status neutral">Log scale &middot; rho = 1</span></div>
+<p class="dash-section-intro">Every point is the best verified ratio of index-calculus cost to matched Pollard rho in its regime on the day it landed on <code>main</code>; below the line, index calculus is cheaper. The heavy series is the one that counts under this repository&rsquo;s rule &mdash; the whole method, cold, one unseen target, against a matched rho. Its early points sit below the line only because they were measured against a rho that later proved unmatched; they are kept hollow, as &ldquo;was&rdquo;. The grey series are the other things that have been measured, each short of that test in a stated way.</p>
+<figure class="dash-chart" id="progress-figure"><figcaption><strong>IC / rho on a log axis, 14 September to 3 October 2026</strong><span>Hover or focus a point for the figure, its interval and its source &middot; filled = matched or qualified reference, hollow = later shown unmatched</span></figcaption>
+<div id="progress-chart" role="img" aria-label="Index calculus over rho by date: the whole-method cold series rises above one once the reference is matched; the online-only and genus-4 series stay below one; the batch and cover series stay above."></div>
+<div id="progress-legend" class="progress-legend" aria-hidden="true"></div>
+<div id="progress-tip" class="progress-tip" role="tooltip" hidden></div>
+<p class="dash-chart-note">Each point is quoted in its own result&rsquo;s unit (instructions, <code>S</code>, counted operations, or isolated CPU time where marked); the page cites and never computes, so only the direction against 1 is comparable across points. Frozen data: <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/progress-timeline.json"><code>docs/ic/progress-timeline.json</code></a>.</p></figure>
+<details class="dash-details"><summary>Every plotted point as a table</summary><div class="dash-detail-body"><table><caption>IC over rho by date, with reference quality, class and sources</caption><thead><tr><th>Date</th><th>Series</th><th>Result</th><th>IC / rho</th><th>Reference</th><th>Class</th><th>Links</th></tr></thead><tbody>
+<tr><td>2026-09-16</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0007, five Koblitz cells</td><td class="n">0.7376&times;</td><td>unmatched</td><td><span class="chip">engineering</span></td><td><a href="#ic-tournament-round-0007">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0007/REPORT.md">source</a></td></tr>
+<tr><td>2026-09-21</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0019, eight cells, strict win promoted</td><td class="n">0.6751&times;</td><td>unmatched</td><td><span class="chip">engineering</span></td><td><a href="#ic-tournament-round-0019">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0019/REPORT.md">source</a></td></tr>
+<tr><td>2026-09-23</td><td>Elliptic curve, whole method, cold, one target</td><td>Control: rho given the IC arm&#x27;s orbit naming</td><td class="n">1.192&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-triple-counted-20260923">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">source</a></td></tr>
+<tr><td>2026-09-28</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0024, matched rho, best cell n17a1</td><td class="n">0.609&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-tournament-round-0024">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md">source</a></td></tr>
+<tr><td>2026-09-29</td><td>Elliptic curve, whole method, cold, one target</td><td>Tournament round 0025, lean rho, best cell n19a0</td><td class="n">1.356&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#ic-tournament-round-0025">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md">source</a></td></tr>
+<tr><td>2026-10-01</td><td>Elliptic curve, whole method, cold, one target</td><td>Koblitz descent, one target cold, best size 2^38.0</td><td class="n">2.0&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#koblitz-descent-20260930">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930">source</a></td></tr>
+<tr><td>2026-10-01</td><td>Elliptic curve, whole method, cold, one target</td><td>Orbit-disjoint cold CPU panel, closest cell n41/L1,024</td><td class="n">1.314&times; <small>isolated CPU time</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#disjoint-cold-v2-outcome-20261001">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#disjoint-cold-v2-outcome-20261001">source</a></td></tr>
+<tr><td>2026-09-23</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 19: reference matched to the batch</td><td class="n">6.5&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#plain-reading">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading">source</a></td></tr>
+<tr><td>2026-09-26</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 20: every phase on the clock</td><td class="n">12.5&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#plain-reading">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading">source</a></td></tr>
+<tr><td>2026-09-26</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 21: constructions built once per base</td><td class="n">4.3&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#plain-reading">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading">source</a></td></tr>
+<tr><td>2026-09-30</td><td>Elliptic curve, 32 targets together (historical diagnostic)</td><td>Ledger section 22: descent fixed cost cut</td><td class="n">3.6&times;</td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#koblitz-descent-20260930">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930">source</a></td></tr>
+<tr><td>2026-09-28</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>Bounded autolab round 3, pair-table incumbent, six toy cells</td><td class="n">0.134&times;</td><td>qualified</td><td><span class="chip">engineering</span></td><td><a href="#rho-results-title">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md">source</a></td></tr>
+<tr><td>2026-09-19</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Genus-4 crossover exponent</td><td class="n">0.21&times;</td><td>matched</td><td><span class="chip">advance, exponent</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
+<tr><td>2026-09-30</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Round seven: sparse solve priced, genus-3 claim withdrawn</td><td class="n">0.24&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
+<tr><td>2026-10-03</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Cover and decomposition, p = 1009 (subgroup 2^57.9), best of two seeds</td><td class="n">8.1&times;</td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a></td></tr>
+</tbody></table></div></details>
+<noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
+<p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
+<script type="application/json" id="progress-data">{
+  "schema_version": "ic-progress-timeline/1",
+  "updated": "2026-10-03",
+  "question": "Best verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
+  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, or isolated CPU time where marked). Only the direction against 1 is comparable across points; no value on this page is computed from another.",
+  "series": [
+    {
+      "id": "ec-cold",
+      "label": "Elliptic curve, whole method, cold, one target",
+      "role": "emphasis",
+      "barrier_test": true,
+      "note": "The repository's own definition of faster than rho (AGENTS.md section 2). Hollow markers were later shown to be measured against an unmatched rho and are kept as 'was'.",
+      "points": [
+        {"date": "2026-09-16", "value": 0.7376, "reference": "unmatched", "label": "Tournament round 0007, five Koblitz cells", "detail": "0.7376 of the worker rho's instructions, 95% 0.7066-0.7644. That rho named Frobenius classes by squaring; the control of 2026-09-23 showed it was not a matched reference.", "class": "engineering", "anchor": "#ic-tournament-round-0007", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0007/REPORT.md"},
+        {"date": "2026-09-21", "value": 0.6751, "reference": "unmatched", "label": "Tournament round 0019, eight cells, strict win promoted", "detail": "0.6751 [0.6298, 0.7265] of the worker rho's instructions on all eight cells; replicated by round 0020 at 0.6629. Same unmatched reference.", "class": "engineering", "anchor": "#ic-tournament-round-0019", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0019/REPORT.md"},
+        {"date": "2026-09-23", "value": 1.192, "reference": "matched", "label": "Control: rho given the IC arm's orbit naming", "detail": "The IC arm is above that rho at every cell measured, 1.19x (n59a0) to 2.88x (n43a1). Triple collector with counted sizing, five cells. Class accounting: what the ratios were counted against changed.", "class": "accounting", "anchor": "#ic-triple-counted-20260923", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md"},
+        {"date": "2026-09-28", "value": 0.609, "reference": "matched", "label": "Tournament round 0024, matched rho, best cell n17a1", "detail": "Six of eight panel cells 0.61-0.82 of the matched rho; the strict gate fails at n23a1 (1.126); the whole twelve-cell panel reads 1.380 [0.847, 2.387]. Best cell plotted.", "class": "accounting", "anchor": "#ic-tournament-round-0024", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md"},
+        {"date": "2026-09-29", "value": 1.356, "reference": "matched", "label": "Tournament round 0025, lean rho, best cell n19a0", "detail": "The matched walk run in the IC arm's own single-word arithmetic. Above rho in instructions at every one of twelve cells: 1.36-2.56x on the panel, up to 13.7x past the crossing. The line was stopped on 2026-09-29.", "class": "accounting", "anchor": "#ic-tournament-round-0025", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md"},
+        {"date": "2026-10-01", "value": 2.0, "reference": "matched", "label": "Koblitz descent, one target cold, best size 2^38.0", "detail": "Ledger section 23: with the reusable set-up charged, the method is 4.9-31.6x slower than rho cold across six sizes 2^36.6-2^47.2; 2.0x at 2^38.0 where both arms pay a slow curve construction. Online only it is 8.8-17.5x faster (see the online series).", "class": "accounting", "anchor": "#koblitz-descent-20260930", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930"},
+        {"date": "2026-10-01", "value": 1.314, "reference": "matched", "unit": "isolated CPU time", "label": "Orbit-disjoint cold CPU panel, closest cell n41/L1,024", "detail": "Six cells timing-eligible on reserved cores, every paired compact/rho CPU interval above one; the closest, n41/L1,024, reads 1.314 [1.288, 1.359] and would need 23.9% less CPU to match rho. Isolated CPU time, not a counted unit; S unset.", "class": "accounting", "anchor": "#disjoint-cold-v2-outcome-20261001", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#disjoint-cold-v2-outcome-20261001"}
+      ]
+    },
+    {
+      "id": "ec-batch",
+      "label": "Elliptic curve, 32 targets together (historical diagnostic)",
+      "role": "context",
+      "note": "Per target against batch rho on the same 32 targets, 39-bit Koblitz subgroup. Under the one-target rule this is a historical multi-target diagnostic.",
+      "points": [
+        {"date": "2026-09-23", "value": 6.5, "reference": "matched", "label": "Ledger section 19: reference matched to the batch", "detail": "Had read 1.17x against rho solving one target; against batch rho on the same 32 targets it is 6.5x, 6.4x priced by time on both sides.", "class": "accounting", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-26", "value": 12.5, "reference": "matched", "label": "Ledger section 20: every phase on the clock", "detail": "Re-priced on current main with the descent's 748,180-unit scan and the workflow's constructions charged: 12.5x. Best recipe swept at nine sizes reaches 4.9x at 2^39 and no lower.", "class": "accounting", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-26", "value": 4.3, "reference": "matched", "label": "Ledger section 21: constructions built once per base", "detail": "Whole pipeline 1.04-2.25x faster with every count unchanged; the row reads 4.3x.", "class": "engineering", "anchor": "#plain-reading", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#plain-reading"},
+        {"date": "2026-09-30", "value": 3.6, "reference": "matched", "label": "Ledger section 22: descent fixed cost cut", "detail": "1.35-1.39x at the small end in isolated runs; the row reads 3.6x. The closest any elliptic-curve pipeline gets end to end, and it is a batch figure.", "class": "engineering", "anchor": "#koblitz-descent-20260930", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#koblitz-descent-20260930"}
+      ]
+    },
+    {
+      "id": "ec-online",
+      "label": "Elliptic curve, online phase only (reusable set-up excluded)",
+      "role": "context",
+      "note": "Starts the clock after a reusable set-up. Not a cold result; the same set-up spent as a generic precomputation would speed rho up too.",
+      "points": [
+        {"date": "2026-09-28", "value": 0.134, "reference": "qualified", "label": "Bounded autolab round 3, pair-table incumbent, six toy cells", "detail": "Paired IC/rho online cost 0.134x, descriptive 95% 0.125-0.144; the qualified rho online reference took 7.45x the incumbent's online time. 216/216 verified. Ledger section 23 (2026-10-01) reads 8.8-17.5x faster online at 2^36.6-2^47.2 on the Koblitz descent, and 4.9-31.6x slower once its set-up is charged.", "class": "engineering", "anchor": "#rho-results-title", "source": "https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md"}
+      ]
+    },
+    {
+      "id": "genus4",
+      "label": "Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size",
+      "role": "context",
+      "note": "p <= 251, N = 2^24, conservative accounting against a distinguished-point rho. The only end-to-end measurement below rho on the page; no deployed system is hyperelliptic.",
+      "points": [
+        {"date": "2026-09-19", "value": 0.21, "reference": "matched", "label": "Genus-4 crossover exponent", "detail": "0.21 at N = 2^24 on the conservative accounting; fitted exponent -0.275 against rho.", "class": "advance, exponent", "anchor": "#genus-crossover", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover"},
+        {"date": "2026-09-30", "value": 0.24, "reference": "matched", "label": "Round seven: sparse solve priced, genus-3 claim withdrawn", "detail": "The solve became 5.1x cheaper and the linear algebra was priced; genus 4 reads 0.24 at N = 2^24 (was 0.21) with exponent -0.29 [-0.42, -0.16]; genus 3's exponent claim was withdrawn.", "class": "accounting", "anchor": "#genus-crossover", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover"}
+      ]
+    },
+    {
+      "id": "cover-fp6",
+      "label": "Weak elliptic class: cover and decomposition on E(F_p^6)",
+      "role": "context",
+      "note": "Joux-Vitse 2012 reproduced on a genus-3 GHS cover. The ratio falls as p^-1.92 and extrapolates to parity near 2^67 on this weak class; the isogeny walk to reach it is unpriced.",
+      "points": [
+        {"date": "2026-10-03", "value": 8.1, "reference": "matched", "label": "Cover and decomposition, p = 1009 (subgroup 2^57.9), best of two seeds", "detail": "S/rho 8.1x and 10.2x at p = 1009, falling as p^-1.92 +/- 0.12 over five sizes; parity extrapolated near 2^67 (p* about 2,900-3,050), above the harness's 64-bit range. All 10 logarithms recovered.", "class": "accounting", "anchor": "#rho-parity-ledger", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md"}
+      ]
+    }
+  ]
+}
+</script>
+<script>
+(function () {
+  var el = document.getElementById('progress-chart'); if (!el) return;
+  var raw = document.getElementById('progress-data'); if (!raw) return;
+  var D; try { D = JSON.parse(raw.textContent); } catch (e) { return; }
+  var tip = document.getElementById('progress-tip'), legend = document.getElementById('progress-legend');
+  var NS = 'http://www.w3.org/2000/svg';
+  function mk(n, a, parent) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (parent) parent.appendChild(e); return e; }
+  function day(s) { return Date.UTC(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10)) / 864e5; }
+  var t0 = day('2026-09-14'), t1 = day('2026-10-05');
+  var W = 760, Hh = 360, L = 52, R = 18, T = 14, B = 44;
+  var yMin = Math.log10(0.08), yMax = Math.log10(40);
+  function X(t) { return L + (t - t0) / (t1 - t0) * (W - L - R); }
+  function Y(v) { return T + (yMax - Math.log10(v)) / (yMax - yMin) * (Hh - T - B); }
+  var svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + Hh, 'class': 'progress-svg', 'aria-hidden': 'true' }, el);
+  [0.1, 0.3, 1, 3, 10, 30].forEach(function (v) {
+    mk('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), 'class': v === 1 ? 'barrier' : 'grid' }, svg);
+    var tx = mk('text', { x: L - 8, y: Y(v) + 4, 'class': 'tick', 'text-anchor': 'end' }, svg); tx.textContent = v + '×';
+  });
+  var bl = mk('text', { x: L + 6, y: Y(1) - 7, 'class': 'barrier-label', 'text-anchor': 'start' }, svg); bl.textContent = 'rho, matched reference = 1';
+  ['2026-09-14','2026-09-21','2026-09-28','2026-10-05'].forEach(function (s) {
+    var x = X(day(s)); mk('line', { x1: x, x2: x, y1: Hh - B, y2: Hh - B + 5, 'class': 'grid' }, svg);
+    var tx = mk('text', { x: x, y: Hh - B + 18, 'class': 'tick', 'text-anchor': 'middle' }, svg); tx.textContent = s.slice(5).replace('-', ' ').replace('09 ', 'Sep ').replace('10 ', 'Oct ');
+  });
+  var yl = mk('text', { x: L - 40, y: T + 6, 'class': 'tick', 'text-anchor': 'start' }, svg); yl.textContent = 'IC / rho';
+  var all = [];
+  D.series.forEach(function (ser) {
+    var pts = ser.points.slice().sort(function (a, b) { return day(a.date) - day(b.date) || a.value - b.value; });
+    var cls = ser.role === 'emphasis' ? 'emph' : 'ctx';
+    if (pts.length > 1) mk('polyline', { points: pts.map(function (p) { return X(day(p.date)) + ',' + Y(p.value); }).join(' '), 'class': 'line ' + cls }, svg);
+    pts.forEach(function (p) {
+      var hollow = p.reference === 'unmatched';
+      var g = mk('g', { 'class': 'pt ' + cls + (hollow ? ' hollow' : ''), tabindex: '0', role: 'button' }, svg);
+      mk('circle', { cx: X(day(p.date)), cy: Y(p.value), r: 14, 'class': 'hit' }, g);
+      mk('circle', { cx: X(day(p.date)), cy: Y(p.value), r: 5.5, 'class': 'dot' }, g);
+      var item = { g: g, p: p, ser: ser, x: X(day(p.date)), y: Y(p.value) }; all.push(item);
+      function show() {
+        var vt = p.value + '×' + (p.unit ? ' (' + p.unit + ')' : '');
+        tip.textContent = ''; var b = document.createElement('b'); b.textContent = vt + ' · ' + p.date; tip.appendChild(b);
+        var s1 = document.createElement('span'); s1.textContent = p.label; tip.appendChild(s1);
+        var s2 = document.createElement('span'); s2.className = 'muted'; s2.textContent = ser.label + ' · reference ' + p.reference + ' · ' + p.class; tip.appendChild(s2);
+        var s3 = document.createElement('span'); s3.textContent = p.detail; tip.appendChild(s3);
+        var a = document.createElement('span'); a.className = 'muted'; a.textContent = 'Click or press Enter to open the panel.'; tip.appendChild(a);
+        tip.hidden = false; var r = g.getBoundingClientRect(); var pr = tip.offsetParent.getBoundingClientRect();
+        tip.style.left = Math.max(0, Math.min(r.left - pr.left + r.width / 2 - 140, pr.width - 290)) + 'px';
+        tip.style.top = (r.top - pr.top + r.height + 6) + 'px';
+        all.forEach(function (o) { o.g.classList.toggle('on', o === item); });
+      }
+      function hide() { tip.hidden = true; g.classList.remove('on'); }
+      g.addEventListener('pointerenter', show); g.addEventListener('focus', show);
+      g.addEventListener('pointerleave', hide); g.addEventListener('blur', hide);
+      g.addEventListener('click', function () { location.hash = p.anchor; });
+      g.addEventListener('keydown', function (e) { if (e.key === 'Enter') location.hash = p.anchor; });
+    });
+    // direct label at the last point of each series
+    var last = pts[pts.length - 1];
+    var lx = X(day(last.date)), flip = lx > W - R - 110;
+    var lab = mk('text', { x: flip ? lx - 10 : lx + 9, y: Y(last.value) + 4, 'class': 'dlabel ' + cls, 'text-anchor': flip ? 'end' : 'start' }, svg);
+    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
+    var li = document.createElement('span'); li.className = 'lg ' + cls; var sw = document.createElement('i'); li.appendChild(sw); li.appendChild(document.createTextNode(ser.label)); legend.appendChild(li);
+  });
+  var hol = document.createElement('span'); hol.className = 'lg emph hollow'; var sw2 = document.createElement('i'); hol.appendChild(sw2); hol.appendChild(document.createTextNode('hollow: later shown measured against an unmatched rho')); legend.appendChild(hol);
+})();
+</script>
 </section>
   <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">02 / How it works</p><h2 id="pipeline-title">A complete pipeline, not a fast fragment.</h2></div></div><p class="dash-section-intro">Build reusable knowledge first. Then time everything needed to recover one previously unseen target. A fast solver call alone cannot win the tournament.</p>
     <div class="pipeline-zone"><div class="pipeline-zone-label">Reusable preparation <span>reported separately</span></div><ol class="pipeline"><li><b>1</b><strong>Choose a factor base</strong><span>Exact points, subgroup filtering, sign &amp; Frobenius orbits.</span></li><li><b>2</b><strong>Collect relations</strong><span>Generate ordinary queries. Solve PDP with F4/F5, SAT or other candidates; verify each relation.</span></li><li><b>3</b><strong>Solve the matrix</strong><span>Recover factor logs over the subgroup modulus. Check rank and every log.</span></li></ol></div>
