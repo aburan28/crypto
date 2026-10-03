@@ -36,6 +36,13 @@ then hit the unchanged R05 regression's Linux `/bin/true` placeholder on macOS.
 That test now selects macOS `/usr/bin/true` for its preflight; frozen outputs
 still prevent any binary invocation, and its expected pin remains unchanged.
 The original failure is retained alongside the archive-parser failure.
+Source-freeze validation also stopped before registration when offline Cargo
+vendoring tried to unpack locked `openssl-probe 0.2.1` into the restricted user
+cache. The [complete log](first-freeze-vendor.log) and
+[build-step receipt](first-freeze-vendor.receipt.json) retain exit 101 and the
+original inputs. The failed capsule remains unregistered and unexecuted.
+Prepare the locked package cache before offline freeze; use a new output
+directory. This is a build/setup failure, not a new solver outcome or retry.
 
 The CI workflow runs these native controls on Linux x86-64 and macOS ARM64,
 plus the existing independent preparation and source replay tests and harness

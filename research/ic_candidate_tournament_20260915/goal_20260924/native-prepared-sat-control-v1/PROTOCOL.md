@@ -144,6 +144,8 @@ rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o /tmp/ic-native-busy
 
 After the implementation is accepted, freeze with `icprog sat-control-freeze`
 using this template, explicit Cargo/rustc paths and a new capsule directory.
+Prepare the exact locked dependency cache with native `cargo fetch --locked`
+first; offline vendoring includes optional and other-platform packages too.
 Commit/publish its **actual** source inventory, build receipts and registration
 seal before dispatch. Use the frozen `immutable/bin/icprog sat-control-execute`
 with that exact `--registration-sha256` and a new execution directory. Then use
