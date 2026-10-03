@@ -66,3 +66,16 @@ controls. The built CLI also replayed the committed bundle successfully;
 `local-macos-arm64-build-validation-replay-v1.json` retains that data-only result.
 Formatting and diff checks passed, and local Clippy found no new implementation
 warning. Cross-platform final-head CI remains the publication acceptance gate.
+
+The first portable CI attempt at head `09a8578d2fd4814e614b326d1976b1d6febd6dbf`
+failed the positive compact replay: its retained lockfile existed locally but
+the repository's `Cargo.lock` ignore rule excluded it from the commit. Eight
+other controller controls passed in the Linux disclosed replay job; the broad
+harness also failed. `first-publication-ci-failure.txt` preserves the original
+failure excerpt. The exact original lockfile is now tracked with a narrowly
+scoped ignore exception; its raw SHA-256 remains
+`7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627`.
+The registration seal and all original build records remain unchanged. CI
+checks that this retained evidence is tracked before generating its separate
+development lockfile. A clean Git export replay is the local publication check;
+new final-head cross-platform CI must pass before acceptance.

@@ -90,6 +90,7 @@ jobs:
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
       - name: Resolve and retain the ignored development lockfile before replay builds
         run: |
+          git ls-files --error-unmatch research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/build-validation-v1/data/Cargo.lock
           "$RUNNER_TEMP/native-busy" busy -- cargo generate-lockfile
           rustc --version --verbose > "$RUNNER_TEMP/native-sat-rustc.txt"
       - name: Replay disclosed source and preparation, with mutation controls
