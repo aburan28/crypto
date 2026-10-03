@@ -18,8 +18,9 @@
 //! F(x, s) = A₀(x)² + ω s² A₁′(x)² − s·Re(B²h)(x)      (quadratic in s).
 //! ```
 //!
-//! The sieve walks `x` over the factor base's abscissae, solves the quadratic
-//! for `s` and increments a counter at each root; a counter at `m` is a
+//! The sieve walks `x` over the factor base's abscissae, computes the two
+//! roots in `s` (the discriminant is `N(B²h)(x)`, a square on every base
+//! abscissa) and increments a counter at each; a counter at `m` is a
 //! relation `Σ_i (Q_i) − m·∞ ∼ 0` among `m` factor-base points, verified in
 //! the Jacobian before it is used.  Everything is counted in `F_p`
 //! multiplications (the ledger's unit), and the additions and table lookups
@@ -35,7 +36,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 
 use super::f4_fp;
-use super::gaudry_cubic::{am, mm, sm, square_core, wiedemann_u64, SparseRel};
+use super::gaudry_cubic::{am, mm, sm, wiedemann_u64, SparseRel};
 use super::jv_cover::{
     factor_base, generate_spec, nagao_decompose, opts_for, peval, pmul, rho_e, unit_costs,
     verify_dec, BaseEl, Ctx, Div, Fld, Fq, RhoRunE, Spec, E2,
@@ -52,6 +53,7 @@ const INV_COST: u64 = 16;
 pub struct FpRing {
     pub p: u64,
     muls: Cell<u64>,
+    adds: Cell<u64>,
 }
 
 pub type FpPoly = Vec<u64>;
@@ -72,6 +74,7 @@ impl FpRing {
         FpRing {
             p,
             muls: Cell::new(0),
+            adds: Cell::new(0),
         }
     }
     fn count(&self, k: u64) {
@@ -80,8 +83,13 @@ impl FpRing {
     pub fn muls(&self) -> u64 {
         self.muls.get()
     }
+    /// Additions of the evaluation-based root search ([`FpRing::roots_by_table`]).
+    pub fn adds(&self) -> u64 {
+        self.adds.get()
+    }
     pub fn reset(&self) {
         self.muls.set(0);
+        self.adds.set(0);
     }
     pub fn inv(&self, a: u64) -> u64 {
         self.count(INV_COST);
@@ -268,34 +276,72 @@ impl FpRing {
         }
         out
     }
+    /// `x^{p^k} mod z` for `k = 1, 2, …`: `x^p` by repeated squaring, then
+    /// each next power by the Frobenius matrix (`(Σ c_i x^i)^p = Σ c_i x^{ip}`,
+    /// `n²` multiplications a step instead of a composition).
+    fn frobenius_powers(&self, z: &[u64], upto: usize) -> Vec<FpPoly> {
+        let n = fdeg(z) as usize;
+        let x = vec![0u64, 1];
+        let xp = self.powmod(&x, self.p as u128, z);
+        let mut out = vec![xp.clone()];
+        if upto < 2 || n < 2 {
+            return out;
+        }
+        // column i: x^{ip} mod z
+        let mut cols: Vec<FpPoly> = Vec::with_capacity(n);
+        let mut cur = vec![1u64];
+        for _ in 0..n {
+            cols.push(cur.clone());
+            cur = self.mulmod(&cur, &xp, z);
+        }
+        for _ in 1..upto {
+            let prev = out.last().unwrap();
+            let mut next = vec![0u64; n];
+            for (i, &c) in prev.iter().enumerate() {
+                if c == 0 {
+                    continue;
+                }
+                for (j, &v) in cols[i].iter().enumerate() {
+                    next[j] = am(next[j], mm(c, v, self.p), self.p);
+                }
+            }
+            self.count((n * n) as u64);
+            out.push(trim(next));
+        }
+        out
+    }
     /// Distinct-degree factorisation of a monic squarefree `z`: pairs
     /// `(g_d, d)`, `g_d` the product of the irreducible factors of degree `d`.
     pub fn ddf(&self, z: &[u64]) -> Vec<(FpPoly, usize)> {
-        let mut z = self.monic(z);
+        self.ddf_from(z, 1)
+    }
+    /// [`FpRing::ddf`] for a `z` known to have no irreducible factor of
+    /// degree below `from`.
+    pub fn ddf_from(&self, z: &[u64], from: usize) -> Vec<(FpPoly, usize)> {
+        let z0 = self.monic(z);
+        let mut z = z0.clone();
         let mut out = Vec::new();
         if fdeg(&z) <= 0 {
             return out;
         }
         let x = vec![0u64, 1];
-        let mut xp = self.powmod(&x, self.p as u128, &z);
-        let mut cur = xp.clone();
-        let mut d = 1usize;
-        while fdeg(&z) >= 2 * d as isize {
-            let g = self.gcd(&z, &self.sub(&cur, &x));
+        let n = fdeg(&z) as usize;
+        let powers = self.frobenius_powers(&z0, n / 2);
+        for (d, xpd) in powers.iter().enumerate().map(|(i, v)| (i + 1, v)) {
+            if d < from {
+                continue;
+            }
+            if fdeg(&z) < 2 * d as isize {
+                break;
+            }
+            let g = self.gcd(&z, &self.sub(&self.rem(xpd, &z), &x));
             if fdeg(&g) > 0 {
                 out.push((g.clone(), d));
                 z = self.exact_div(&z, &g);
                 if fdeg(&z) <= 0 {
                     break;
                 }
-                cur = self.rem(&cur, &z);
-                xp = self.rem(&xp, &z);
             }
-            d += 1;
-            if fdeg(&z) < 2 * d as isize {
-                break;
-            }
-            cur = self.compose_mod(&cur, &xp, &z);
         }
         if fdeg(&z) > 0 {
             out.push((z.clone(), fdeg(&z) as usize));
@@ -329,11 +375,58 @@ impl FpRing {
             }
         }
     }
-    /// Monic irreducible factors with multiplicities of a non-zero `a`.
+    /// The distinct roots in `F_p` of `a` by evaluating it at every `x`
+    /// with forward differences: `deg a · p` additions and no
+    /// multiplication beyond the table's `deg²`.
+    pub fn roots_by_table(&self, a: &[u64]) -> Vec<u64> {
+        let p = self.p;
+        let d = a.len().max(1) - 1;
+        if d == 0 {
+            return Vec::new();
+        }
+        let mut v: Vec<u64> = (0..=d as u64).map(|x| self.eval(a, x)).collect();
+        let mut t = Vec::with_capacity(d + 1);
+        for k in 0..=d {
+            t.push(v[0]);
+            for i in 0..(d - k) {
+                v[i] = sm(v[i + 1], v[i], p);
+            }
+        }
+        self.adds.set(self.adds.get() + (d * (d + 1) / 2) as u64);
+        let mut out = Vec::new();
+        for x in 0..p {
+            if t[0] == 0 {
+                out.push(x);
+            }
+            for k in 0..d {
+                t[k] = am(t[k], t[k + 1], p);
+            }
+        }
+        self.adds.set(self.adds.get() + d as u64 * p);
+        out
+    }
+    /// Monic irreducible factors with multiplicities of a non-zero `a`:
+    /// squarefree decomposition, the linear factors by evaluation, then
+    /// distinct-degree and Cantor–Zassenhaus on the root-free cofactor.
     pub fn factor(&self, a: &[u64], rng: &mut StdRng) -> Vec<(FpPoly, usize)> {
         let mut out = Vec::new();
         for (sq, mult) in self.squarefree(a) {
-            for (gd, d) in self.ddf(&sq) {
+            let mut rest = sq;
+            for r in self.roots_by_table(&rest) {
+                let lin = vec![(self.p - r) % self.p, 1];
+                rest = self.exact_div(&rest, &lin);
+                out.push((lin, mult));
+            }
+            let dr = fdeg(&rest);
+            if dr <= 0 {
+                continue;
+            }
+            if dr <= 3 {
+                // no root and degree 2 or 3: irreducible
+                out.push((rest, mult));
+                continue;
+            }
+            for (gd, d) in self.ddf_from(&rest, 2) {
                 for f in self.edf(&gd, d, rng) {
                     out.push((f, mult));
                 }
@@ -415,6 +508,9 @@ pub struct SieveSetup {
     pub in_base: Vec<bool>,
     /// `sqrt[a]`: a square root of `a` in `F_p`, or `u64::MAX`.
     pub sqrt: Vec<u64>,
+    /// `rho[x] = √N(h(x))` for a base abscissa `x` (`N(h(x))` is a square in
+    /// `F_p` exactly when `h(x)` is a square in `F_q`), `0` elsewhere.
+    pub rho: Vec<u64>,
     /// `F_p` multiplications spent on the tables.
     pub table_muls: u64,
 }
@@ -433,6 +529,19 @@ pub fn sieve_setup(fq: &Fq, h: &[E2], base: &[BaseEl], m: usize) -> SieveSetup {
             sqrt[sq] = x;
         }
     }
+    let h0: FpPoly = trim(h.iter().map(|c| c.0[0]).collect());
+    let h1: FpPoly = trim(h.iter().map(|c| c.0[1]).collect());
+    let ring = FpRing::new(p);
+    let mut rho = vec![0u64; p as usize];
+    for b in base {
+        let x = b.x;
+        let (a, c) = (ring.eval(&h0, x), ring.eval(&h1, x));
+        let nrm = sm(mm(a, a, p), mm(fq.w % p, mm(c, c, p), p), p);
+        ring.count(4);
+        let r = sqrt[nrm as usize];
+        assert!(r != u64::MAX, "N(h(x)) is a square on a base abscissa");
+        rho[x as usize] = r;
+    }
     SieveSetup {
         p,
         w: fq.w,
@@ -441,11 +550,12 @@ pub fn sieve_setup(fq: &Fq, h: &[E2], base: &[BaseEl], m: usize) -> SieveSetup {
         m1: m / 2,
         m2: (m - 7) / 2,
         h: h.to_vec(),
-        h0: trim(h.iter().map(|c| c.0[0]).collect()),
-        h1: trim(h.iter().map(|c| c.0[1]).collect()),
+        h0,
+        h1,
         in_base,
         sqrt,
-        table_muls: p + INV_COST,
+        rho,
+        table_muls: p + INV_COST + ring.muls(),
     }
 }
 
@@ -475,29 +585,68 @@ pub struct Line {
     pub p2: FpPoly,
     /// `Re(B²h)`.
     pub p3: FpPoly,
+    /// `N(B) = B₀² − ωB₁²`, whose value at a base abscissa `x` times
+    /// `√N(h(x))` is the square root of the discriminant in `s`.
+    pub p4: FpPoly,
 }
 
-/// The `k`-th `B` in the run's order: a bijection of `[0, p^{2c})` onto the
-/// coefficient vectors (`c = m₂` lower coefficients for `m` odd, `B` monic;
-/// `c = m₂ + 1` for `m` even), scrambled by an affine map coprime to `p`.
+/// The number of `B`'s the run can enumerate for this `m`.  For `m` odd, `B`
+/// is monic of degree `m₂` with `m₂` free coefficients in `F_q`.  For `m`
+/// even, `B` has degree `m₂` exactly and its leading coefficient runs over
+/// representatives of `F_q^× / (F_p^× ∪ t·F_p^×)` (`(p + 1)/2` of them):
+/// `B` and `c·B` with `c² ∈ F_p` give the same line, so this is the one `B`
+/// per line.
 pub fn b_space(setup: &SieveSetup) -> u128 {
-    let c = if setup.m % 2 == 1 {
-        setup.m2
+    let p = setup.p as u128;
+    if setup.m % 2 == 1 {
+        p.pow(2 * setup.m2 as u32)
     } else {
-        setup.m2 + 1
-    };
-    (setup.p as u128).pow(2 * c as u32)
+        ((p + 1) / 2) * p.pow(2 * setup.m2 as u32)
+    }
 }
 
+/// The representatives of `F_q^× / (F_p^× ∪ t·F_p^×)`: `1`, and `u + t` for
+/// the `u ∈ F_p^×` that are the smaller of the pair `{u, ω/u}`.
+pub fn lead_reps(p: u64, w: u64) -> Vec<E2> {
+    let mut out = vec![E2::ONE];
+    for u in 1..p {
+        let v = mm(w % p, inv_mod(u, p), p);
+        if u < v {
+            out.push(E2([u, 1]));
+        }
+    }
+    out
+}
+
+/// A multiplier coprime to `n` for the enumeration's affine scramble (so that
+/// `k ↦ (k·c + c/7) mod n` is a bijection).
+pub fn coprime_scramble(n: u128, rng: &mut StdRng) -> u128 {
+    fn gcd(mut a: u128, mut b: u128) -> u128 {
+        while b != 0 {
+            let t = a % b;
+            a = b;
+            b = t;
+        }
+        a
+    }
+    if n <= 2 {
+        return 1;
+    }
+    loop {
+        let c = rng.gen_range(2..n.min(1 << 40));
+        if gcd(c, n) == 1 {
+            return c;
+        }
+    }
+}
+
+/// The `k`-th `B` in the run's order: a bijection of `[0, b_space)` onto the
+/// coefficient vectors, scrambled by an affine map coprime to `p`.
 pub fn b_from_index(setup: &SieveSetup, k: u128, scramble: u128) -> Vec<E2> {
     let p = setup.p as u128;
     let n = b_space(setup);
     let mut idx = (k.wrapping_mul(scramble) + scramble / 7) % n;
-    let c = if setup.m % 2 == 1 {
-        setup.m2
-    } else {
-        setup.m2 + 1
-    };
+    let c = setup.m2;
     let mut b: Vec<E2> = Vec::with_capacity(c + 1);
     for _ in 0..c {
         let lo = (idx % p) as u64;
@@ -508,9 +657,9 @@ pub fn b_from_index(setup: &SieveSetup, k: u128, scramble: u128) -> Vec<E2> {
     }
     if setup.m % 2 == 1 {
         b.push(E2::ONE);
-    }
-    while b.last() == Some(&E2::ZERO) {
-        b.pop();
+    } else {
+        let reps = lead_reps(setup.p, setup.w);
+        b.push(reps[(idx % reps.len() as u128) as usize]);
     }
     b
 }
@@ -546,12 +695,26 @@ pub fn lines_for_b(
     }
     let factors = ring.factor(&g, rng);
     let half = ring.inv(2);
+    let b0: FpPoly = trim(b.iter().map(|c| c.0[0]).collect());
+    let b1: FpPoly = trim(b.iter().map(|c| c.0[1]).collect());
+    let nb = ring.sub(
+        &ring.mul(&b0, &b0),
+        &ring.scale(&ring.mul(&b1, &b1), setup.w % p),
+    );
     let mut out = Vec::new();
     for k in lo..=hi.min(dg) {
         for a0 in ring.divisors_of_degree(&factors, k) {
             let a1 = ring.scale(&ring.exact_div(&g, &a0), half);
             if setup.m % 2 == 0 && fdeg(&a1) >= setup.m1 as isize {
                 continue;
+            }
+            if setup.m % 2 == 1 {
+                // the identity 2A₀A₁′ = G is symmetric: (A₁′/lc, lc·A₀) is the
+                // same line up to the scalar t/(ωsc), so keep one of the pair
+                let a1m = ring.monic(&a1);
+                if (a0.len(), &a0) > (a1m.len(), &a1m) {
+                    continue;
+                }
             }
             let p1 = ring.mul(&a0, &a0);
             let p2 = ring.scale(&ring.mul(&a1, &a1), setup.w % p);
@@ -562,6 +725,7 @@ pub fn lines_for_b(
                 p1,
                 p2,
                 p3: re.clone(),
+                p4: nb.clone(),
             });
         }
     }
@@ -590,10 +754,11 @@ impl Counters {
 pub struct SieveCost {
     /// `x` visited (the whole of `F_p`, the differences must advance).
     pub steps: u64,
-    /// `x` in the factor base (the quadratic was solved).
+    /// `x` in the factor base (the two roots in `s` computed).
     pub base_steps: u64,
     pub muls: u64,
     pub adds: u64,
+    /// Counter updates (one per root).
     pub lookups: u64,
     pub roots: u64,
 }
@@ -635,11 +800,16 @@ pub fn sieve_line(
     }
     let id = ctr.id;
     let m0 = ring.muls();
-    let mut t1 = difference_table(ring, &line.p1, &mut cost.adds);
+    // F(x, s) = a s² − Re s + c with a = ω A₁′(x)², c = A₀(x)²: on a base
+    // abscissa the discriminant is Re² − 4ac = N(B²h)(x) = (N(B)(x)·√N(h(x)))²,
+    // a square always, so every base step has its two roots
+    //   s = (Re(x) ± N(B)(x)·ρ(x)) / (2a)
+    // and the tables advanced are P₂ = ωA₁′², P₃ = Re(B²h), P₄ = N(B).
     let mut t2 = difference_table(ring, &line.p2, &mut cost.adds);
     let mut t3 = difference_table(ring, &line.p3, &mut cost.adds);
+    let mut t4 = difference_table(ring, &line.p4, &mut cost.adds);
     let mut hits: Vec<u64> = Vec::new();
-    // (b, r, 2a) of the x whose discriminant is a square, inverted in batches
+    // (Re, r, 2a) of the base steps, inverted in batches
     let mut pending: Vec<(u64, u64, u64)> = Vec::with_capacity(256);
     let bump = |s: u64, ctr: &mut Counters, hits: &mut Vec<u64>, cost: &mut SieveCost| {
         if s == 0 {
@@ -675,15 +845,14 @@ pub fn sieve_line(
         let mut inv = inv_mod(acc, p);
         cost.muls += 3 * (n as u64 - 1) + INV_COST;
         for i in (0..n).rev() {
-            let (b, r, a2) = pending[i];
+            let (re, r, a2) = pending[i];
             let inv_a2 = mm(inv, pre[i], p);
             inv = mm(inv, a2, p);
-            let nb = (p - b) % p;
-            let s1 = mm(am(nb, r, p), inv_a2, p);
+            let s1 = mm(am(re, r, p), inv_a2, p);
             cost.muls += 1;
             bump(s1, ctr, hits, cost);
             if r != 0 {
-                let s2 = mm(sm(nb, r, p), inv_a2, p);
+                let s2 = mm(sm(re, r, p), inv_a2, p);
                 cost.muls += 1;
                 bump(s2, ctr, hits, cost);
             }
@@ -694,35 +863,36 @@ pub fn sieve_line(
         cost.steps += 1;
         if setup.in_base[x as usize] {
             cost.base_steps += 1;
-            let c = t1[0];
             let a = t2[0];
-            let b = (p - t3[0]) % p;
+            let re = t3[0];
+            let r = mm(t4[0], setup.rho[x as usize], p);
+            cost.muls += 1;
             if a == 0 {
-                if b != 0 {
-                    // linear: s = −c/b
-                    let s = mm((p - c) % p, inv_mod(b, p), p);
-                    cost.muls += INV_COST + 1;
+                if re != 0 {
+                    // A₁′(x) = 0: F is linear in s, s = A₀(x)²/Re(x)
+                    let c = ring.eval(&line.a0, x);
+                    let s = mm(mm(c, c, p), inv_mod(re, p), p);
+                    cost.muls += INV_COST + 2;
                     bump(s, &mut *ctr, &mut hits, &mut cost);
                 }
             } else {
-                // Δ = b² − 4ac
-                let ac = mm(a, c, p);
-                let ac4 = am(am(ac, ac, p), am(ac, ac, p), p);
-                let disc = sm(mm(b, b, p), ac4, p);
-                cost.muls += 2;
-                cost.adds += 3;
-                cost.lookups += 1;
-                let r = setup.sqrt[disc as usize];
-                if r != u64::MAX {
-                    pending.push((b, r, am(a, a, p)));
-                    if pending.len() == 256 {
-                        flush(&mut pending, &mut *ctr, &mut hits, &mut cost);
-                    }
+                debug_assert_eq!(
+                    mm(r, r, p),
+                    sm(
+                        mm(re, re, p),
+                        mm(4 % p, mm(a, ring.eval(&line.p1, x), p), p),
+                        p
+                    ),
+                    "the discriminant is N(B²h)(x)"
+                );
+                pending.push((re, r, am(a, a, p)));
+                if pending.len() == 256 {
+                    flush(&mut pending, &mut *ctr, &mut hits, &mut cost);
                 }
             }
         }
-        // advance the three difference tables to x + 1
-        for t in [&mut t1, &mut t2, &mut t3] {
+        // advance the difference tables to x + 1
+        for t in [&mut t2, &mut t3, &mut t4] {
             let d = t.len() - 1;
             for k in 0..d {
                 t[k] = am(t[k], t[k + 1], p);
@@ -830,6 +1000,56 @@ pub fn verify_rel(jac: &super::jv_cover::Hyp<Fq>, base: &[BaseEl], rel: &SieveRe
     jac.is_identity(&acc)
 }
 
+/// The square core of homogeneous rows over `ncols` columns: singleton
+/// columns eliminated to a fixed point, then the surplus trimmed by the
+/// rule of [`square_core`] (the relation touching the fewest weight-2
+/// columns goes first).  `None` while the rows do not cover their columns.
+pub fn sieve_core(rels: &[SparseRel], ncols: usize) -> Option<super::gaudry_cubic::SquareCore> {
+    let mut alive = vec![true; rels.len()];
+    let weights = |alive: &[bool]| -> Vec<usize> {
+        let mut w = vec![0usize; ncols];
+        for (i, r) in rels.iter().enumerate() {
+            if alive[i] {
+                for &(c, _) in &r.cols {
+                    w[c] += 1;
+                }
+            }
+        }
+        w
+    };
+    loop {
+        loop {
+            let w = weights(&alive);
+            let mut dropped = false;
+            for (i, r) in rels.iter().enumerate() {
+                if alive[i] && r.cols.iter().any(|&(c, _)| w[c] == 1) {
+                    alive[i] = false;
+                    dropped = true;
+                }
+            }
+            if !dropped {
+                break;
+            }
+        }
+        let w = weights(&alive);
+        let n_rows = alive.iter().filter(|&&a| a).count();
+        let n_cols = w.iter().filter(|&&x| x > 0).count();
+        if n_rows == 0 || n_rows < n_cols {
+            return None;
+        }
+        if n_rows == n_cols {
+            return Some(super::gaudry_cubic::SquareCore {
+                rows: (0..rels.len()).filter(|&i| alive[i]).collect(),
+                columns: (0..ncols).map(|c| w[c] > 0).collect(),
+            });
+        }
+        let victim = (0..rels.len())
+            .filter(|&i| alive[i])
+            .min_by_key(|&i| rels[i].cols.iter().filter(|&&(c, _)| w[c] == 2).count())?;
+        alive[victim] = false;
+    }
+}
+
 // ── The method end to end ────────────────────────────────────────────────
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -866,6 +1086,8 @@ pub struct SieveDlpReport {
     pub base_muls: u64,
     pub table_muls: u64,
     pub enum_muls: u64,
+    /// Additions of the enumeration's root search by evaluation.
+    pub enum_adds: u64,
     pub sieve_muls: u64,
     pub sieve_adds: u64,
     pub sieve_lookups: u64,
@@ -888,6 +1110,8 @@ pub struct SieveDlpReport {
     pub descent_stopped: u64,
     pub descent_incomplete: u64,
     pub descent_timed_out: u64,
+    /// Descent rows found but outside the core's columns at the solve.
+    pub descent_rejected: u64,
     pub unknowns: usize,
     pub filtered_out: usize,
     pub row_weight: f64,
@@ -922,6 +1146,7 @@ struct BatchOut {
     hits: u64,
     false_hits: u64,
     enum_muls: u64,
+    enum_adds: u64,
     extract_muls: u64,
     verify_muls: u64,
     verified: u64,
@@ -952,6 +1177,7 @@ fn sieve_batch(
         hits: 0,
         false_hits: 0,
         enum_muls: 0,
+        enum_adds: 0,
         extract_muls: 0,
         verify_muls: 0,
         verified: 0,
@@ -966,6 +1192,7 @@ fn sieve_batch(
         ring.reset();
         let lines = lines_for_b(&ring, fq, &setup, &b, &mut rng);
         out.enum_muls += fq.muls() + ring.muls();
+        out.enum_adds += ring.adds();
         for line in &lines {
             out.lines += 1;
             let (hits, cost) = sieve_line(&ring, &setup, line, &mut ctr, None);
@@ -1046,7 +1273,7 @@ pub fn run_cover_sieve_dlp(
         base_muls,
         ..Default::default()
     };
-    // ── the descent: two residuals R = aG′ + bQ′ decomposed by the six-point test
+    // ── the residual stream for the descent: R = aG′ + bQ′, R₀ + i·M
     ctx.f.reset_muls();
     let (al, be) = (rng.gen_range(1..l), rng.gen_range(1..l));
     let step = jac.add(
@@ -1058,9 +1285,92 @@ pub fn run_cover_sieve_dlp(
     let mut r = jac.add(&jac.mul(&spec.gj, a as u128), &jac.mul(&spec.qj, b as u128));
     rep.setup_muls = ctx.f.muls() + spec.transfer_muls;
     ctx.f.reset_muls();
+    // ── the relation phase: the sieve over the lines, in the run's order of B
+    let setup = sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m);
+    rep.table_muls = setup.table_muls;
+    let scramble_for = |m: usize| -> u128 {
+        let mut s = StdRng::seed_from_u64(seed ^ ((m as u64) << 32));
+        let n = b_space(&sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m));
+        coprime_scramble(n, &mut s)
+    };
+    let mut scramble = scramble_for(m);
+    let mut space = b_space(&setup);
+    let mut next_k: u128 = 0;
+    let mut sieve_rows: Vec<SparseRel> = Vec::new();
+    let mut sieve_rels: Vec<SieveRel> = Vec::new();
+    let threads = rayon::current_num_threads().max(1);
+    // about 4·10⁶ sieve steps per thread and round
+    let chunk: u128 = (4_000_000 / p as u128).max(64);
+    // sieve one round of batches; false when every m up to 16 is exhausted
+    let mut sieve_round = |rep: &mut SieveDlpReport,
+                           sieve_rows: &mut Vec<SparseRel>,
+                           sieve_rels: &mut Vec<SieveRel>|
+     -> bool {
+        if next_k >= space {
+            // the lines of this m are exhausted: continue with m + 1 (the rule
+            // registered in §11.3), the relations found so far kept
+            if m >= 16 {
+                return false;
+            }
+            m += 1;
+            rep.m_final = m;
+            scramble = scramble_for(m);
+            space = b_space(&sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m));
+            next_k = 0;
+        }
+        let ranges: Vec<std::ops::Range<u128>> = (0..threads as u128)
+            .map(|t| {
+                let lo = (next_k + t * chunk).min(space);
+                let hi = (lo + chunk).min(space);
+                lo..hi
+            })
+            .filter(|r| r.start < r.end)
+            .collect();
+        next_k = ranges.last().map(|r| r.end).unwrap_or(space);
+        let outs: Vec<BatchOut> = ranges
+            .into_par_iter()
+            .map(|ks| sieve_batch(&spec, &base, &by_x, m, scramble, ks, seed))
+            .collect();
+        for o in outs {
+            rep.bs += o.bs;
+            rep.lines += o.lines;
+            rep.sieve_steps += o.cost.steps;
+            rep.base_steps += o.cost.base_steps;
+            rep.sieve_muls += o.cost.muls;
+            rep.sieve_adds += o.cost.adds;
+            rep.sieve_lookups += o.cost.lookups;
+            rep.roots += o.cost.roots;
+            rep.hits += o.hits;
+            rep.false_hits += o.false_hits;
+            rep.enum_muls += o.enum_muls;
+            rep.enum_adds += o.enum_adds;
+            rep.extract_muls += o.extract_muls;
+            rep.verify_muls += o.verify_muls;
+            rep.rels_verified += o.verified;
+            rep.rels_failed_verify += o.failed;
+            for rel in o.rels {
+                let cols: Vec<(usize, u64)> = rel
+                    .terms
+                    .iter()
+                    .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
+                    .collect();
+                sieve_rows.push(SparseRel { cols, rhs: 0 });
+                sieve_rels.push(rel);
+            }
+        }
+        rep.relations = sieve_rels.len();
+        if std::env::var_os("JV_SIEVE_PROGRESS").is_some() {
+            eprintln!(
+                "  [sieve p={p} m={m}] B's {} lines {} hits {} relations {} (need ≈ {}) enum {:.2e} sieve {:.2e} muls",
+                rep.bs, rep.lines, rep.hits, rep.relations, small, rep.enum_muls as f64, rep.sieve_muls as f64
+            );
+        }
+        true
+    };
+    // ── the descent: residuals decomposed by the six-point test until two
+    // rows lie inside the core's columns
     let mut descent_rows: Vec<SparseRel> = Vec::new();
-    let cap = 400u64 * 720 * 4;
-    while descent_rows.len() < 2 && rep.descent_residuals < cap {
+    let mut descend_round = |rep: &mut SieveDlpReport, descent_rows: &mut Vec<SparseRel>| {
         let mut batch: Vec<(u64, u64, Div<E2>, u64)> = Vec::with_capacity(64);
         for _ in 0..64 {
             let idx = rep.descent_residuals + batch.len() as u64;
@@ -1093,6 +1403,13 @@ pub fn run_cover_sieve_dlp(
             )
             .collect();
         rep.descent_f4_muls += f4_fp::field_ops_total() - f4_before;
+        if std::env::var_os("JV_SIEVE_PROGRESS").is_some() {
+            eprintln!(
+                "  [descent p={p}] residuals {} successes {}",
+                rep.descent_residuals + 64,
+                rep.descent_successes
+            );
+        }
         for (a, b, decs, cost, vm) in found {
             rep.descent_residuals += 1;
             rep.descent_weil_muls += cost.weil_muls;
@@ -1109,22 +1426,82 @@ pub fn run_cover_sieve_dlp(
                 rep.descent_stopped += 1;
             }
             if let Some(d) = decs.first() {
-                if descent_rows.len() < 2 {
-                    rep.descent_successes += 1;
-                    let mut cols: Vec<(usize, u64)> = d
-                        .terms
-                        .iter()
-                        .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
-                        .collect();
-                    cols.push((small, (l - b) % l));
-                    cols.sort_unstable();
-                    descent_rows.push(SparseRel { cols, rhs: a });
-                }
+                rep.descent_successes += 1;
+                let mut cols: Vec<(usize, u64)> = d
+                    .terms
+                    .iter()
+                    .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
+                    .collect();
+                cols.push((small, (l - b) % l));
+                cols.sort_unstable();
+                descent_rows.push(SparseRel { cols, rhs: a });
             }
         }
+    };
+    let mut la_ops = 0u64;
+    let mut next_attempt = small;
+    let descent_cap = 400u64 * 720 * 4;
+    'collect: loop {
+        if !sieve_round(&mut rep, &mut sieve_rows, &mut sieve_rels) {
+            rep.exhausted = true;
+            break 'collect;
+        }
+        if sieve_rows.len() < next_attempt {
+            continue;
+        }
+        let Some(core) = sieve_core(&sieve_rows, unknowns) else {
+            next_attempt = sieve_rows.len() + (small / 20).max(1);
+            continue;
+        };
+        // two descent rows inside the core's columns, decomposing more
+        // residuals until there are (a row outside the core is counted and
+        // kept for a later, larger core)
+        let fits = |row: &SparseRel| row.cols.iter().all(|&(c, _)| c == small || core.columns[c]);
+        while descent_rows.iter().filter(|r| fits(r)).count() < 2
+            && rep.descent_residuals < descent_cap
+        {
+            descend_round(&mut rep, &mut descent_rows);
+        }
+        let usable: Vec<&SparseRel> = descent_rows.iter().filter(|r| fits(r)).take(2).collect();
+        if usable.len() < 2 {
+            break 'collect;
+        }
+        rep.descent_rejected = descent_rows.len() as u64 - 2;
+        rep.la_attempts += 1;
+        let mut map = vec![usize::MAX; unknowns];
+        let mut k = 0;
+        for c in 0..unknowns {
+            if core.columns[c] {
+                map[c] = k;
+                k += 1;
+            }
+        }
+        map[small] = k;
+        let mapped = |row: &SparseRel| SparseRel {
+            cols: row.cols.iter().map(|&(c, v)| (map[c], v)).collect(),
+            rhs: row.rhs,
+        };
+        // the core minus one sieve row, plus the two descent rows: square
+        let mut sel: Vec<SparseRel> = core.rows[..core.rows.len() - 1]
+            .iter()
+            .map(|&i| mapped(&sieve_rows[i]))
+            .collect();
+        sel.extend(usable.iter().map(|r| mapped(r)));
+        let before = la_ops;
+        let x = wiedemann_u64(&sel, sel.len(), l, &mut rng, &mut la_ops);
+        let dd = x.map(|x| x[k]);
+        let ec = super::jv_cover::EllE::new(&ctx.f, &spec.alpha);
+        if dd.is_some_and(|dd| ec.mul(&spec.g, dd) == spec.q) {
+            rep.solved = true;
+            rep.correct = dd == Some(spec.d);
+            rep.unknowns = sel.len();
+            rep.filtered_out = sieve_rows.len() + 1 - core.rows.len();
+            rep.la_ops_last = la_ops - before;
+            break 'collect;
+        }
+        next_attempt = sieve_rows.len() + (small / 20).max(1);
     }
-    rep.descent_stream_muls += ctx.f.muls();
-    ctx.f.reset_muls();
+    let full_rels = sieve_rows;
     rep.descent_muls = rep.descent_weil_muls
         + rep.descent_f4_muls
         + rep.descent_lin_muls
@@ -1138,129 +1515,6 @@ pub fn run_cover_sieve_dlp(
         / rep.descent_residuals.max(1) as f64;
     rep.descent_tests_per_success =
         rep.descent_residuals as f64 / rep.descent_successes.max(1) as f64;
-    // ── the relation phase: the sieve over the lines, in the run's order of B
-    let setup = sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m);
-    rep.table_muls = setup.table_muls;
-    let scramble_for = |m: usize| -> u128 {
-        let mut s = StdRng::seed_from_u64(seed ^ (m as u64) << 32);
-        let n = b_space(&sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m));
-        loop {
-            let c = s.gen_range(1..p as u128);
-            if c % (p as u128) != 0 && n > 1 {
-                break c;
-            }
-            if n <= 1 {
-                break 1;
-            }
-        }
-    };
-    let mut scramble = scramble_for(m);
-    let mut space = b_space(&setup);
-    let mut next_k: u128 = 0;
-    let mut full_rels: Vec<SparseRel> = Vec::new();
-    let mut sieve_rels: Vec<SieveRel> = Vec::new();
-    let mut next_attempt = unknowns;
-    let mut la_ops = 0u64;
-    let threads = rayon::current_num_threads().max(1);
-    let chunk: u128 = ((p as u128) / 8).clamp(1, 64);
-    'collect: loop {
-        if next_k >= space {
-            // the lines of this m are exhausted: continue with m + 1 (the rule
-            // registered in §11.3), the relations found so far kept
-            if m >= 16 {
-                rep.exhausted = true;
-                break 'collect;
-            }
-            m += 1;
-            rep.m_final = m;
-            scramble = scramble_for(m);
-            space = b_space(&sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m));
-            next_k = 0;
-            continue;
-        }
-        let ranges: Vec<std::ops::Range<u128>> = (0..threads as u128)
-            .map(|t| {
-                let lo = (next_k + t * chunk).min(space);
-                let hi = (lo + chunk).min(space);
-                lo..hi
-            })
-            .filter(|r| r.start < r.end)
-            .collect();
-        next_k = ranges.last().map(|r| r.end).unwrap_or(space);
-        let outs: Vec<BatchOut> = ranges
-            .into_par_iter()
-            .map(|ks| sieve_batch(&spec, &base, &by_x, m, scramble, ks, seed))
-            .collect();
-        for o in outs {
-            rep.bs += o.bs;
-            rep.lines += o.lines;
-            rep.sieve_steps += o.cost.steps;
-            rep.base_steps += o.cost.base_steps;
-            rep.sieve_muls += o.cost.muls;
-            rep.sieve_adds += o.cost.adds;
-            rep.sieve_lookups += o.cost.lookups;
-            rep.roots += o.cost.roots;
-            rep.hits += o.hits;
-            rep.false_hits += o.false_hits;
-            rep.enum_muls += o.enum_muls;
-            rep.extract_muls += o.extract_muls;
-            rep.verify_muls += o.verify_muls;
-            rep.rels_verified += o.verified;
-            rep.rels_failed_verify += o.failed;
-            for rel in o.rels {
-                let cols: Vec<(usize, u64)> = rel
-                    .terms
-                    .iter()
-                    .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
-                    .collect();
-                full_rels.push(SparseRel { cols, rhs: 0 });
-                sieve_rels.push(rel);
-            }
-        }
-        rep.relations = sieve_rels.len();
-        if descent_rows.len() == 2 && full_rels.len() + 2 >= next_attempt {
-            let mut rels = full_rels.clone();
-            rels.extend(descent_rows.iter().cloned());
-            if let Some(core) = square_core(&rels, small) {
-                rep.la_attempts += 1;
-                let mut map = vec![usize::MAX; unknowns];
-                let mut k = 0;
-                for c in 0..unknowns {
-                    if core.columns.get(c).copied().unwrap_or(false) {
-                        map[c] = k;
-                        k += 1;
-                    }
-                }
-                let sel: Vec<SparseRel> = core
-                    .rows
-                    .iter()
-                    .map(|&i| SparseRel {
-                        cols: rels[i].cols.iter().map(|&(c, v)| (map[c], v)).collect(),
-                        rhs: rels[i].rhs,
-                    })
-                    .collect();
-                let before = la_ops;
-                let x = wiedemann_u64(&sel, sel.len(), l, &mut rng, &mut la_ops);
-                let dd = if map[small] != usize::MAX {
-                    x.map(|x| x[map[small]])
-                } else {
-                    None
-                };
-                let ec = super::jv_cover::EllE::new(&ctx.f, &spec.alpha);
-                if dd.is_some_and(|dd| ec.mul(&spec.g, dd) == spec.q) {
-                    rep.solved = true;
-                    rep.correct = dd == Some(spec.d);
-                    rep.unknowns = sel.len();
-                    rep.filtered_out = rels.len() - sel.len();
-                    rep.la_ops_last = la_ops - before;
-                    break 'collect;
-                }
-                next_attempt = full_rels.len() + 2 + (sel.len() / 20).max(1);
-            } else {
-                next_attempt = full_rels.len() + 2 + (unknowns / 20).max(1);
-            }
-        }
-    }
     rep.relations = sieve_rels.len();
     rep.expected_rels_per_line = p as f64 / fact(rep.m_final);
     rep.rels_per_line = rep.relations as f64 / rep.lines.max(1) as f64;
@@ -1274,7 +1528,7 @@ pub fn run_cover_sieve_dlp(
         / full_rels.len().max(1) as f64;
     rep.total_muls =
         rep.setup_muls + rep.base_muls + rep.relation_muls + rep.descent_muls + rep.la_muls;
-    rep.total_plus = rep.total_muls + rep.sieve_adds + rep.sieve_lookups;
+    rep.total_plus = rep.total_muls + rep.sieve_adds + rep.sieve_lookups + rep.enum_adds;
     let sqrt_l = (l as f64).sqrt();
     rep.s = rep.total_muls as f64 / (c_e * sqrt_l);
     rep.s_plus = rep.total_plus as f64 / (c_e * sqrt_l);
@@ -1397,7 +1651,7 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(11);
         for m in [9usize, 10] {
             let setup = sieve_setup(fq, &ctx.cov.hx, &base, m);
-            let scramble = 12345u128;
+            let scramble = coprime_scramble(b_space(&setup), &mut rng);
             let mut lines_seen = 0;
             for k in 0..200u128 {
                 let b = b_from_index(&setup, k, scramble);
@@ -1448,9 +1702,10 @@ mod tests {
             let mut rng = StdRng::seed_from_u64(9);
             let setup = sieve_setup(fq, &ctx.cov.hx, &base, m);
             let mut ctr = Counters::new(p);
+            let scr = coprime_scramble(b_space(&setup), &mut rng);
             let mut lines_seen = 0;
             for k in 0..60u128 {
-                let b = b_from_index(&setup, k, 777);
+                let b = b_from_index(&setup, k, scr);
                 for line in lines_for_b(&ring, fq, &setup, &b, &mut rng) {
                     lines_seen += 1;
                     let mut counts = Vec::new();
@@ -1488,11 +1743,12 @@ mod tests {
         let ring = FpRing::new(spec.p);
         let mut rng = StdRng::seed_from_u64(4);
         let setup = sieve_setup(fq, &ctx.cov.hx, &base, 9);
+        let scr = coprime_scramble(b_space(&setup), &mut rng);
         let mut ctr = Counters::new(spec.p);
         let (mut rels, mut false_hits, mut lines) = (0, 0, 0u64);
         let mut k = 0u128;
         while rels < 4 && k < 200_000 {
-            let b = b_from_index(&setup, k, 4242);
+            let b = b_from_index(&setup, k, scr);
             k += 1;
             for line in lines_for_b(&ring, fq, &setup, &b, &mut rng) {
                 lines += 1;
@@ -1535,5 +1791,277 @@ mod tests {
         assert!(r.solved && r.correct, "{r:?}");
         assert_eq!(r.m_final, 11);
         assert_eq!(r.rels_failed_verify, 0);
+    }
+}
+#[cfg(test)]
+mod la_diag {
+    use super::*;
+    trait Pipe: Sized {
+        fn pipe<T>(self, f: impl FnOnce(Self) -> T) -> T {
+            f(self)
+        }
+    }
+    impl<T> Pipe for T {}
+    fn rank_mod(rows: &[Vec<u64>], l: u64) -> usize {
+        let mut m: Vec<Vec<u64>> = rows.to_vec();
+        let n = m.first().map(|r| r.len()).unwrap_or(0);
+        let mut rank = 0;
+        for c in 0..n {
+            let Some(piv) = (rank..m.len()).find(|&i| m[i][c] != 0) else {
+                continue;
+            };
+            m.swap(rank, piv);
+            let inv = inv_mod(m[rank][c], l);
+            for j in 0..n {
+                m[rank][j] = ((m[rank][j] as u128 * inv as u128) % l as u128) as u64;
+            }
+            for i in 0..m.len() {
+                if i != rank && m[i][c] != 0 {
+                    let f = m[i][c];
+                    for j in 0..n {
+                        m[i][j] = ((m[i][j] as u128 + (l as u128 - f as u128) * m[rank][j] as u128)
+                            % l as u128) as u64;
+                    }
+                }
+            }
+            rank += 1;
+        }
+        rank
+    }
+    #[test]
+    #[ignore]
+    fn tmp_la_diagnostic() {
+        let p: u64 = std::env::var("DIAG_P")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(251);
+        let m: usize = std::env::var("DIAG_M")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(10);
+        let seed = 1u64;
+        let spec = generate_spec(p, seed);
+        let ctx = Ctx::new(&spec);
+        let l = spec.l;
+        let mut rng = StdRng::seed_from_u64(seed);
+        let base = factor_base(&ctx, &mut rng);
+        let by_x: HashMap<u64, usize> = base.iter().enumerate().map(|(i, b)| (b.x, i)).collect();
+        let small = base.len();
+        let mut rels: Vec<SieveRel> = Vec::new();
+        let scr = {
+            let setup = sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m);
+            coprime_scramble(b_space(&setup), &mut rng)
+        };
+        let mut k = 0u128;
+        let chunk = 20000u128;
+        while rels.len() < small + 20 {
+            let outs: Vec<BatchOut> = (0..4u128)
+                .into_par_iter()
+                .map(|t| {
+                    sieve_batch(
+                        &spec,
+                        &base,
+                        &by_x,
+                        m,
+                        scr,
+                        (k + t * chunk)..(k + (t + 1) * chunk),
+                        seed,
+                    )
+                })
+                .collect();
+            k += 4 * chunk;
+            for o in outs {
+                rels.extend(o.rels);
+            }
+            eprintln!("B's {} relations {}", k, rels.len());
+        }
+        {
+            let dump: Vec<serde_json::Value> =
+                rels.iter().map(|r| serde_json::json!(r.terms)).collect();
+            let meta = serde_json::json!({"p": p, "l": l, "base_x": base.iter().map(|b| b.x).collect::<Vec<_>>(), "base_y": base.iter().map(|b| b.y.0).collect::<Vec<_>>(), "rels": dump});
+            std::fs::write("/tmp/claude-0/-home-user/df489a89-77a8-5643-9875-0a345fb3f77d/scratchpad/rels_251.json", meta.to_string()).unwrap();
+        }
+        let rows: Vec<SparseRel> = rels
+            .iter()
+            .map(|r| SparseRel {
+                cols: r
+                    .terms
+                    .iter()
+                    .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
+                    .collect(),
+                rhs: 0,
+            })
+            .collect();
+        let dense: Vec<Vec<u64>> = rows
+            .iter()
+            .map(|r| {
+                let mut v = vec![0u64; small];
+                for &(c, a) in &r.cols {
+                    v[c] = a;
+                }
+                v
+            })
+            .collect();
+        eprintln!(
+            "sieve rows {} columns {} rank {}",
+            rows.len(),
+            small,
+            rank_mod(&dense, l)
+        );
+        let core = sieve_core(&rows, small + 1).expect("core");
+        let ncol = core.columns.iter().filter(|&&b| b).count();
+        let cd: Vec<Vec<u64>> = core.rows.iter().map(|&i| dense[i].clone()).collect();
+        eprintln!(
+            "core rows {} cols {} rank {}",
+            core.rows.len(),
+            ncol,
+            rank_mod(&cd, l)
+        );
+        // kernel vector of the full row set: solve via dense elimination with one column normalised
+        // (check the relations against a known solution: planted logs are not available, so check consistency instead)
+        let ker_dim = small - rank_mod(&dense, l);
+        eprintln!("kernel dimension {}", ker_dim);
+        let mut uniq: Vec<Vec<(usize, i8)>> = rels.iter().map(|r| r.terms.clone()).collect();
+        let before = uniq.len();
+        uniq.sort();
+        uniq.dedup();
+        let mut negs = 0;
+        for r in &uniq {
+            let neg: Vec<(usize, i8)> = r.iter().map(|&(i, e)| (i, -e)).collect();
+            if uniq.binary_search(&neg).is_ok() {
+                negs += 1;
+            }
+        }
+        eprintln!(
+            "distinct relations {} of {} (negated pairs {})",
+            uniq.len(),
+            before,
+            negs / 2
+        );
+        let mut w = vec![0usize; small];
+        for r in &rows {
+            for &(c, _) in &r.cols {
+                w[c] += 1;
+            }
+        }
+        let zero: Vec<usize> = (0..small).filter(|&c| w[c] == 0).collect();
+        let one: Vec<usize> = (0..small).filter(|&c| w[c] == 1).collect();
+        eprintln!(
+            "weight-0 columns {:?} (x = {:?}); weight-1 columns {:?}; min weight {}",
+            zero,
+            zero.iter().map(|&c| base[c].x).collect::<Vec<_>>(),
+            one,
+            w.iter().min().unwrap()
+        );
+        // nullspace basis by elimination over the covered columns
+        let cov: Vec<usize> = (0..small).filter(|&c| w[c] > 0).collect();
+        let mut mtx: Vec<Vec<u64>> = dense
+            .iter()
+            .map(|r| cov.iter().map(|&c| r[c]).collect())
+            .collect();
+        let n = cov.len();
+        let mut pivcol = Vec::new();
+        let mut rank = 0;
+        for c in 0..n {
+            let Some(piv) = (rank..mtx.len()).find(|&i| mtx[i][c] != 0) else {
+                continue;
+            };
+            mtx.swap(rank, piv);
+            let inv = inv_mod(mtx[rank][c], l);
+            for j in 0..n {
+                mtx[rank][j] = ((mtx[rank][j] as u128 * inv as u128) % l as u128) as u64;
+            }
+            for i in 0..mtx.len() {
+                if i != rank && mtx[i][c] != 0 {
+                    let f = mtx[i][c];
+                    for j in 0..n {
+                        mtx[i][j] = ((mtx[i][j] as u128
+                            + (l as u128 - f as u128) * mtx[rank][j] as u128)
+                            % l as u128) as u64;
+                    }
+                }
+            }
+            pivcol.push(c);
+            rank += 1;
+        }
+        let free: Vec<usize> = (0..n).filter(|c| !pivcol.contains(c)).collect();
+        eprintln!(
+            "covered columns {} rank {} free columns {:?} (x = {:?})",
+            n,
+            rank,
+            free,
+            free.iter().map(|&c| base[cov[c]].x).collect::<Vec<_>>()
+        );
+        for &fc in &free {
+            // kernel vector with 1 at fc
+            let mut v = vec![0u64; n];
+            v[fc] = 1;
+            for (r, &pc) in pivcol.iter().enumerate() {
+                v[pc] = (l - mtx[r][fc]) % l;
+            }
+            let supp: Vec<usize> = (0..n)
+                .filter(|&c| v[c] != 0)
+                .count()
+                .min(9999)
+                .pipe(|k| (0..k).collect());
+            let nz = (0..n).filter(|&c| v[c] != 0).count();
+            let distinct: std::collections::BTreeSet<u64> =
+                (0..n).filter(|&c| v[c] != 0).map(|c| v[c]).collect();
+            eprintln!("kernel vector from free column {} (x={}): support {} of {}, distinct values {} (first {:?})", fc, base[cov[fc]].x, nz, n, distinct.len(), distinct.iter().take(6).collect::<Vec<_>>());
+            let _ = supp;
+        }
+    }
+}
+#[cfg(test)]
+mod order_diag {
+    use super::*;
+    #[test]
+    #[ignore]
+    fn tmp_order_of_base_points() {
+        for p in [53u64, 101, 251] {
+            let spec = generate_spec(p, 1);
+            let ctx = Ctx::new(&spec);
+            let jac = ctx.jac();
+            let mut rng = StdRng::seed_from_u64(1);
+            let base = factor_base(&ctx, &mut rng);
+            let l = spec.l as u128;
+            let mut killed_4l = 0;
+            let mut killed_l = 0;
+            let mut killed_8l = 0;
+            let mut killed_16l = 0;
+            for b in base.iter().take(40) {
+                if jac.is_identity(&jac.mul(&b.d, 4 * l)) {
+                    killed_4l += 1;
+                }
+                if jac.is_identity(&jac.mul(&b.d, l)) {
+                    killed_l += 1;
+                }
+                if jac.is_identity(&jac.mul(&b.d, 8 * l)) {
+                    killed_8l += 1;
+                }
+                if jac.is_identity(&jac.mul(&b.d, 16 * l)) {
+                    killed_16l += 1;
+                }
+            }
+            println!("p={p} l={l}: of 40 base points, killed by l: {killed_l}, by 4l: {killed_4l}, by 8l: {killed_8l}, by 16l: {killed_16l}");
+            // and by l * small cofactors up to 64, and l^2
+            let mut byl2 = 0;
+            for b in base.iter().take(10) {
+                if jac.is_identity(&jac.mul(&b.d, l * l)) {
+                    byl2 += 1;
+                }
+            }
+            println!("   killed by l²: {byl2} of 10");
+            for c in [2u128, 3, 5, 6, 7, 9, 12, 16, 24, 32, 48, 64, 128, 256] {
+                let k = base
+                    .iter()
+                    .take(10)
+                    .filter(|b| jac.is_identity(&jac.mul(&b.d, c * l)))
+                    .count();
+                if k > 0 {
+                    println!("   killed by {c}·l: {k} of 10");
+                }
+            }
+        }
     }
 }
