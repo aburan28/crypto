@@ -210,8 +210,12 @@ What hosts earn, as recorded so far:
   Pinning and NUMA binding were confirmed there, with policy `bind:<node>`
   and every anonymous page on the bound node. An emulated guest reports
   no steal by construction, so its L2 does not certify quiet hardware.
-- **A GitHub-hosted Linux runner, run as root:** see the summary of
-  `.github/workflows/ecbench.yml`. It is a VM, so L3 is out of reach.
+- **A GitHub-hosted Linux runner, run as root** (AMD EPYC 9V74, Azure VM,
+  4 vCPUs as 2 cores × 2 threads): L1 on 72 of 72 runs of the CI session,
+  with every child's affinity read back as its run CPU. Its operation
+  counts matched the macOS session of the same spec to the last digit, IC
+  included. It is a VM, so L3 is out of reach. Each CI run's summary
+  carries the current level and blocker counts.
 
 L3 needs a lab host, which `isolab` prepares (§9).
 
