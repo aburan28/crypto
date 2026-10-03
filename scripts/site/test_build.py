@@ -816,9 +816,11 @@ class BuildTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("build_lab_browser", os.path.join(ROOT, "scripts", "build_lab_browser.py"))
         builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(builder)
-        fresh = builder.render(builder.build())
+        fresh = builder.build()
         committed = read(os.path.join(ROOT, "docs", "browser", "data.json"))
-        self.assertEqual(committed, fresh, "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
+        # Mention statistics are volatile (see builder.comparable); the rest
+        # must match a fresh build exactly.
+        self.assertEqual(builder.comparable(json.loads(committed)), builder.comparable(fresh), "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
 
         data = json.loads(committed)
         registry = json.loads(read(os.path.join(ROOT, "docs", "curves", "registry.json")))

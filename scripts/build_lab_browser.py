@@ -352,7 +352,7 @@ def tournament_rounds(curves: list[dict]) -> list[dict]:
 def candidate_identities() -> list[dict]:
     found = defaultdict(lambda: {"count": 0, "files": Counter()})
     for pattern in IC1_SCAN_GLOBS:
-        for path in glob.glob(os.path.join(ROOT, pattern), recursive=True):
+        for path in sorted(glob.glob(os.path.join(ROOT, pattern), recursive=True)):
             if not os.path.isfile(path) or os.path.getsize(path) > MAX_SCAN_BYTES:
                 continue
             with open(path, encoding="utf-8", errors="replace") as fh:
@@ -377,7 +377,7 @@ def candidate_identities() -> list[dict]:
                 "isogeny": int(m.group(9)),
                 "record_sha12": m.group(10),
             }
-        top = info["files"].most_common(6)
+        top = sorted(info["files"].items(), key=lambda kv: (-kv[1], kv[0]))[:6]
         rows.append({"candidate_id": ident, **parts, "mentions": info["count"], "files": len(info["files"]), "where": [p for p, _ in top]})
     rows.sort(key=lambda r: (r.get("n") or 0, r.get("curve_tag") or "", r["candidate_id"]))
     return rows
@@ -422,18 +422,41 @@ def render(data: dict) -> str:
     return json.dumps(data, indent=1, ensure_ascii=False, sort_keys=False) + "\n"
 
 
+def comparable(data: dict) -> dict:
+    """The index without its volatile parts, for the staleness check.
+
+    How many files mention a candidate identity, and which, changes
+    whenever any PR adds a report or a note that writes one, so a check on
+    those counts would go red on a merge commit for reasons unrelated to the
+    PR under test.  They are informational and refresh on the next
+    regeneration; everything else (curves, methods, factor bases, rounds,
+    sessions, the identities themselves and their decoded fields) is
+    compared exactly.
+    """
+    out = json.loads(json.dumps(data))
+    for cand in out.get("candidates", []):
+        for key in ("mentions", "files", "where"):
+            cand.pop(key, None)
+    return out
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 if docs/browser/data.json is stale")
     parser.add_argument("--out", default=OUT)
     args = parser.parse_args(argv)
-    text = render(build())
+    fresh = build()
+    text = render(fresh)
     if args.check:
         current = ""
         if os.path.exists(args.out):
             with open(args.out, encoding="utf-8") as fh:
                 current = fh.read()
-        if current != text:
+        try:
+            same = comparable(json.loads(current)) == comparable(fresh)
+        except ValueError:
+            same = False
+        if not same:
             print(f"{rel(args.out)} is stale; run python3 scripts/build_lab_browser.py", file=sys.stderr)
             return 1
         print(f"{rel(args.out)} is current")

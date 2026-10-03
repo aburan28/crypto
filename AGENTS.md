@@ -403,7 +403,9 @@ algorithm and evidence behind it.
   new `ecbench` session, a new tournament round, a new candidate identity,
   or a leaderboard change. CI (`ic-leaderboard`, `--check`) fails when the
   file is stale, and the site build test fails when a cross-reference in
-  it does not resolve.
+  it does not resolve. The check ignores how many files mention each
+  candidate identity, and which: those counts change with any report that
+  writes one and refresh on the next regeneration.
 - **Every identity is a link.** A curve page links to the leaderboard
   rows, sessions, factor bases, rounds and candidates that cite it; a
   session, method, factor base or round links back to its curves. A new
