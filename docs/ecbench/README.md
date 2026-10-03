@@ -275,6 +275,12 @@ but reports success only at rank `factor_base.columns + 1`. It records the
 first target-pin rank, trial and relation as well as final rank. A trial-cap
 exit after the early pin is an exhausted full-rank attempt. This distinct
 parameter value changes the method identity and preserves old replays.
+`linalg=incremental-gauss-full-rank-checked` follows the same relation
+stream and stop rule, then verifies one nonzero-coefficient point per base
+column by checking `[coefficient × column_log]G = [cofactor]P`. It charges
+both scalar multiplications and records checked, missing and failing
+columns in the verification phase. The existing full-rank mode keeps its
+historical accounting and replay identity.
 
 `compact-orbit-scan:columns=N,raw_x_cap=M` builds a Koblitz factor base
 from a bounded raw-abscissa scan. Its cofactor projections, subgroup checks
