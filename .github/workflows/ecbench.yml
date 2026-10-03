@@ -12,8 +12,9 @@ name: ecbench
 # outside a guest's control); the job checks the machinery, never the
 # numbers.
 #
-# Committed evidence sessions (research/ecbench_*/sessions) are re-audited
-# on this runner with every measured run replayed: their operation counts
+# Committed evidence sessions (research/ecbench_*/sessions and the n37
+# compact-orbit note sessions below) are re-audited on this runner with
+# every measured run replayed: their operation counts
 # were recorded on another host and architecture and must reproduce here
 # bit for bit, so a change that alters what a registered method counts
 # fails here.  They are evidence and are never edited.
@@ -21,10 +22,14 @@ on:
   pull_request:
     paths:
       - "src/cryptanalysis/ecbench/**"
+      - "src/cryptanalysis/ic_boundary.rs"
+      - "src/cryptanalysis/ic_framework/**"
       - "src/bin/ecbench.rs"
       - "tests/ecbench.rs"
       - "docs/ecbench/**"
       - "research/ecbench_*/**"
+      - "research/notes/ecc2k130/cold_compact_orbit_ic_20261003/**"
+      - "research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/**"
       - ".github/workflows/ecbench.yml"
   workflow_dispatch:
 permissions:
@@ -46,7 +51,10 @@ jobs:
       - name: Committed sessions are evidence and are never edited
         if: github.event_name == 'pull_request'
         run: |
-          changed=$(git diff --name-only --diff-filter=MDRT "origin/${{ github.base_ref }}...HEAD" -- 'research/ecbench_*/sessions')
+          changed=$(git diff --name-only --diff-filter=MDRT "origin/${{ github.base_ref }}...HEAD" -- \
+            'research/ecbench_*/sessions' \
+            'research/notes/ecc2k130/cold_compact_orbit_ic_20261003/sessions' \
+            'research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/sessions')
           if [ -n "$changed" ]; then
             echo "these committed session files were modified, renamed or deleted; add a new session instead:" >&2
             echo "$changed" >&2
@@ -118,7 +126,9 @@ jobs:
       - name: Committed evidence reproduces on this host
         run: |
           shopt -s nullglob
-          for d in research/ecbench_*/sessions/*/; do
+          for d in research/ecbench_*/sessions/*/ \
+            research/notes/ecc2k130/cold_compact_orbit_ic_20261003/sessions/*/ \
+            research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/sessions/*/; do
             echo "auditing $d"
             # An interrupted session is evidence of the interruption: every
             # integrity check applies to it, only completeness does not.

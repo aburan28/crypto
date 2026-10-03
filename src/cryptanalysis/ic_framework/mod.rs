@@ -72,8 +72,8 @@ use std::time::Instant;
 use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
-    collect_and_solve_with, price_phase, Calibration, CountedGroup, GroupOps, PhaseCost,
-    PipelineOutcome, RelationSolver, RestartPool, TargetSource,
+    collect_and_solve_with_completion, price_phase, Calibration, CompletionRule, CountedGroup,
+    GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
 };
 use crate::cryptanalysis::ic_measurement as measurement;
 use linalg::matrix_by_name;
@@ -90,7 +90,8 @@ pub struct PipelineSpec {
     pub solver: Option<String>,
     pub solver_params: Params,
     pub targets: Targets,
-    /// The relation matrix: `incremental-gauss` or `structured-gauss`.
+    /// The matrix and stop rule: `incremental-gauss`,
+    /// `incremental-gauss-full-rank`, or `structured-gauss`.
     pub linalg: String,
     /// Cap on targets drawn before the run gives up.
     pub max_trials: u64,
@@ -304,7 +305,12 @@ pub fn run_pipeline<G: CountedGroup>(
         Targets::Walk => TargetSource::Walk,
     };
     measurement::begin_online(measurement::Phase::TargetQuery);
-    let outcome: PipelineOutcome = collect_and_solve_with(
+    let completion = if linalg_name == "incremental-gauss-full-rank" {
+        CompletionRule::FullRank
+    } else {
+        CompletionRule::TargetPinned
+    };
+    let outcome: PipelineOutcome = collect_and_solve_with_completion(
         ctx.group,
         ctx.generator,
         ctx.target,
@@ -316,6 +322,7 @@ pub fn run_pipeline<G: CountedGroup>(
         source,
         RestartPool::Lazy,
         matrix.as_mut(),
+        completion,
         |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
     );
     measurement::end_online();
@@ -1092,6 +1099,44 @@ mod tests {
             "the matrix must not change what the oracle did"
         );
     }
+
+    #[test]
+    fn full_rank_matrix_name_reaches_every_column_end_to_end() {
+        let inst = roster_prime_instance(16).unwrap();
+        let (ctx, planted) = ctx_and_planted(&inst);
+        let base = PrimeAbscissaBase { instance: &inst };
+        let mut spec = PipelineSpec {
+            factor_base: "prime-abscissa".into(),
+            oracle: "mitm".into(),
+            targets: Targets::Walk,
+            max_trials: 2_000_000,
+            seed: 7,
+            linalg: "incremental-gauss-full-rank".into(),
+            ..Default::default()
+        };
+        spec.factor_base_params.set("size", "24");
+        spec.oracle_params.set("negation_folded", "1");
+        let mut oracle = MitmOracle::new(2);
+        let result = run_pipeline(
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
+        )
+        .unwrap();
+        assert!(result.verified);
+        assert!(!result.exhausted);
+        assert_eq!(
+            result.linear_algebra.rank,
+            result.factor_base.columns as u64 + 1
+        );
+        assert_eq!(result.linear_algebra.cost.get("full_rank_reached"), 1);
+        assert!(result.linear_algebra.cost.get("first_target_pinned_rank") > 0);
+    }
+
     /// **The torsion-symmetrised configuration is a complete index
     /// calculus.**  On `K_1 / F_{2^17}` the `u`-frame base is closed
     /// under translation by the rational 2-torsion point `T = (0, 1)`

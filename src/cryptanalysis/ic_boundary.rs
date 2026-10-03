@@ -4680,6 +4680,15 @@ pub enum RestartPool {
     Eager,
 }
 
+/// Which relation-matrix condition admits a recovered target logarithm.
+/// The historical pipeline stops when the target column alone is pinned;
+/// a full factor-base solve needs every base column and the target column.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CompletionRule {
+    TargetPinned,
+    FullRank,
+}
+
 /// Sixteen jumps `[a]G + [b]Q` with their coefficients, charged to `ops`.
 fn draw_jumps<G: CountedGroup>(
     g: &G,
@@ -4775,6 +4784,41 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     targets: TargetSource,
     pool_mode: RestartPool,
     matrix: &mut L,
+    oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
+) -> PipelineOutcome {
+    collect_and_solve_with_completion(
+        g,
+        generator,
+        target,
+        r,
+        h,
+        fb,
+        seed,
+        max_trials,
+        targets,
+        pool_mode,
+        matrix,
+        CompletionRule::TargetPinned,
+        oracle,
+    )
+}
+
+/// The shared relation loop with an explicit completion rule. The
+/// `TargetPinned` wrapper above preserves historical run semantics.
+#[allow(clippy::too_many_arguments)]
+pub fn collect_and_solve_with_completion<G: CountedGroup, L: RelationSolver + ?Sized>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    h: u64,
+    fb: &FactorBase<G::Elt>,
+    seed: u64,
+    max_trials: u64,
+    targets: TargetSource,
+    pool_mode: RestartPool,
+    matrix: &mut L,
+    completion: CompletionRule,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
@@ -4788,6 +4832,7 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     let mut found = 0u64;
     let mut recovered = None;
     let mut verified = false;
+    let mut first_target_pin = None;
     let rel_start = Instant::now();
     let mut la_ns = 0u64;
     let h_mod = h % r;
@@ -5018,7 +5063,19 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
             RowStatus::Dependent => {}
             RowStatus::Independent => {}
         }
-        if let Some(d) = matrix.pinned(d_col) {
+        let pinned = matrix.pinned(d_col);
+        if completion == CompletionRule::FullRank && first_target_pin.is_none() && pinned.is_some()
+        {
+            first_target_pin = Some((matrix.rank() as u64, trials, found));
+        }
+        if completion == CompletionRule::FullRank && matrix.rank() == cols && pinned.is_none() {
+            la_ns += la_start.elapsed().as_nanos() as u64;
+            la.count("full_rank_unpinned", 1);
+            break;
+        }
+        if let Some(d) =
+            pinned.filter(|_| completion == CompletionRule::TargetPinned || matrix.rank() == cols)
+        {
             pinned_by_repeated_row = repeated;
             la_ns += la_start.elapsed().as_nanos() as u64;
             measurement::mark(measurement::Phase::RecoveryCheck);
@@ -5068,6 +5125,13 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     la.count("pinned_by_repeated_row", u64::from(pinned_by_repeated_row));
     la.count("columns", cols as u64);
     la.count("rank", matrix.rank() as u64);
+    if completion == CompletionRule::FullRank {
+        let (rank, trial, relation) = first_target_pin.unwrap_or((0, 0, 0));
+        la.count("first_target_pinned_rank", rank);
+        la.count("first_target_pinned_trial", trial);
+        la.count("first_target_pinned_relation", relation);
+        la.count("full_rank_reached", u64::from(matrix.rank() == cols));
+    }
     PipelineOutcome {
         relations: rel,
         linear_algebra: la,
@@ -7977,6 +8041,94 @@ mod tests {
         fn key(&self, p: &u64) -> u64 {
             *p
         }
+    }
+
+    #[test]
+    fn full_rank_continues_after_target_pin_and_exhausts_at_the_frozen_cap() {
+        // Two representatives per base column in Z/101. Their labels
+        // encode 1, 2 and 3, 6 respectively, so every returned row is
+        // an exact relation to the query point, with no planted scalar
+        // passed to the loop.
+        let group = Cyclic(101);
+        let mut fb = FactorBase::empty("two cyclic columns".into());
+        fb.points = vec![1, 2, 3, 6];
+        fb.col_of = vec![0, 0, 1, 1];
+        fb.coef_of = vec![1, 2, 1, 2];
+        fb.columns = 2;
+        let oracle = |_: &mut GroupOps, _: &mut OracleCounters, p: u64| {
+            fb.points.iter().position(|&q| q == p).map(|i| vec![i])
+        };
+
+        // Find a deterministic stream where two rows for one column
+        // pin d before the other column appears. This is the state the
+        // n37 control reached; here it is cheap to exercise exactly.
+        let (seed, early) = (1..=128)
+            .find_map(|seed| {
+                let mut matrix = IncrementalGauss::new(3, 101);
+                let out = collect_and_solve_with_completion(
+                    &group,
+                    1,
+                    37,
+                    101,
+                    1,
+                    &fb,
+                    seed,
+                    1000,
+                    TargetSource::Random,
+                    RestartPool::Lazy,
+                    &mut matrix,
+                    CompletionRule::TargetPinned,
+                    oracle,
+                );
+                (out.recovered == Some(37) && out.rank == 2).then_some((seed, out))
+            })
+            .expect("a deterministic stream should pin the target at rank two");
+        assert!(early.verified);
+        assert!(!early
+            .linear_algebra
+            .native
+            .contains_key("first_target_pinned_rank"));
+
+        let run_full = |max_trials| {
+            let mut matrix = IncrementalGauss::new(3, 101);
+            collect_and_solve_with_completion(
+                &group,
+                1,
+                37,
+                101,
+                1,
+                &fb,
+                seed,
+                max_trials,
+                TargetSource::Random,
+                RestartPool::Lazy,
+                &mut matrix,
+                CompletionRule::FullRank,
+                oracle,
+            )
+        };
+        let full = run_full(1000);
+        assert_eq!(full.recovered, early.recovered);
+        assert!(full.verified);
+        assert_eq!(full.rank, 3);
+        assert_eq!(full.linear_algebra.get("first_target_pinned_rank"), 2);
+        assert_eq!(
+            full.linear_algebra.get("first_target_pinned_trial"),
+            early.trials
+        );
+        assert_eq!(
+            full.linear_algebra.get("first_target_pinned_relation"),
+            early.relations_found
+        );
+        assert_eq!(full.linear_algebra.get("full_rank_reached"), 1);
+
+        let capped = run_full(early.trials);
+        assert_eq!(capped.rank, early.rank);
+        assert_eq!(capped.trials, early.trials);
+        assert_eq!(capped.recovered, None);
+        assert!(!capped.verified);
+        assert_eq!(capped.linear_algebra.get("first_target_pinned_rank"), 2);
+        assert_eq!(capped.linear_algebra.get("full_rank_reached"), 0);
     }
 
     #[test]

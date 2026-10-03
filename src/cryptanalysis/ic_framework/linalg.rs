@@ -7,6 +7,7 @@
 //! | name | method | storage | pivot | work unit |
 //! |:--|:--|:--|:--|:--|
 //! | `incremental-gauss` | dense reduced row echelon, maintained as rows arrive | `rank × |F|` entries | leftmost non-zero | `row_ops` |
+//! | `incremental-gauss-full-rank` | same dense matrix, continue after target pin until every column is independent | `rank × |F|` entries | leftmost non-zero | `row_ops` |
 //! | `structured-gauss` | sparse reduced row echelon, maintained as rows arrive | the non-zeros | lightest column (Markowitz) | `row_ops` |
 //!
 //! Both count a multiply-subtract on a **non-zero** entry as one
@@ -249,15 +250,25 @@ pub const MATRIX_NAMES: &[(&str, &str)] = &[
         "dense reduced row echelon maintained as rows arrive, pivot on the leftmost non-zero; one row_op per non-zero multiply-subtract",
     ),
     (
+        "incremental-gauss-full-rank",
+        "same dense incremental matrix, but collect until every factor-base column and the target column are independent",
+    ),
+    (
         "structured-gauss",
         "sparse reduced row echelon maintained as rows arrive, pivot on the lightest column; one row_op per non-zero multiply-subtract, so the two are comparable",
     ),
 ];
 
 /// Build one by name, for a matrix with `cols` columns over `Z/rZ`.
-pub fn matrix_by_name(name: &str, cols: usize, modulus: u64) -> Result<Box<dyn RelationSolver>, String> {
+pub fn matrix_by_name(
+    name: &str,
+    cols: usize,
+    modulus: u64,
+) -> Result<Box<dyn RelationSolver>, String> {
     match name {
-        "incremental-gauss" => Ok(Box::new(IncrementalGauss::new(cols, modulus))),
+        "incremental-gauss" | "incremental-gauss-full-rank" => {
+            Ok(Box::new(IncrementalGauss::new(cols, modulus)))
+        }
         "structured-gauss" => Ok(Box::new(StructuredGauss::new(cols, modulus))),
         other => Err(format!(
             "unknown relation matrix `{other}`; known: {}",
@@ -299,10 +310,9 @@ mod tests {
                 row[rng.gen_range(0..cols)] = rng.gen_range(1..modulus);
             }
             row[target] = rng.gen_range(1..modulus);
-            let rhs = row
-                .iter()
-                .zip(&x)
-                .fold(0u64, |acc, (&a, &b)| addmod(acc, mulmod(a, b, modulus), modulus));
+            let rhs = row.iter().zip(&x).fold(0u64, |acc, (&a, &b)| {
+                addmod(acc, mulmod(a, b, modulus), modulus)
+            });
             let a = dense.add_row(row.clone(), rhs);
             let b = sparse.add_row(row, rhs);
             assert_eq!(
@@ -310,7 +320,11 @@ mod tests {
                 std::mem::discriminant(&b),
                 "row {row_no}: the two matrices classified it differently"
             );
-            assert_eq!(dense.rank(), RelationSolver::rank(&sparse), "row {row_no}: rank");
+            assert_eq!(
+                dense.rank(),
+                RelationSolver::rank(&sparse),
+                "row {row_no}: rank"
+            );
             let pd = dense.pinned(target);
             let ps = sparse.pinned(target);
             assert_eq!(pd, ps, "row {row_no}: pinned value");
@@ -319,7 +333,10 @@ mod tests {
                 pinned_at.get_or_insert(row_no);
             }
         }
-        assert!(pinned_at.is_some(), "forty rows on twelve columns must pin the target");
+        assert!(
+            pinned_at.is_some(),
+            "forty rows on twelve columns must pin the target"
+        );
         // And the structure must have bought something: fewer
         // multiply-subtracts than the dense walk over every column.
         assert!(
@@ -335,9 +352,15 @@ mod tests {
     fn an_inconsistent_row_is_reported() {
         let modulus = 101u64;
         let mut m = StructuredGauss::new(3, modulus);
-        assert!(matches!(m.add_row(vec![1, 0, 0], 5), RowStatus::Independent));
+        assert!(matches!(
+            m.add_row(vec![1, 0, 0], 5),
+            RowStatus::Independent
+        ));
         assert!(matches!(m.add_row(vec![1, 0, 0], 5), RowStatus::Dependent));
-        assert!(matches!(m.add_row(vec![2, 0, 0], 11), RowStatus::Inconsistent));
+        assert!(matches!(
+            m.add_row(vec![2, 0, 0], 11),
+            RowStatus::Inconsistent
+        ));
         assert_eq!(m.pinned(0), Some(5));
     }
 

@@ -199,7 +199,7 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "linalg",
                     default: Some("incremental-gauss"),
-                    help: "incremental-gauss or structured-gauss",
+                    help: "incremental-gauss (stop at target pin), incremental-gauss-full-rank (all base logs and target), or structured-gauss",
                 },
                 ParamDecl {
                     name: "targets",
