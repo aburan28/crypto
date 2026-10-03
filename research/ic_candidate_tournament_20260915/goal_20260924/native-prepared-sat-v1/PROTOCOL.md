@@ -49,7 +49,8 @@ unterminated/truncated rows and incomplete/duplicate auxiliary definitions.
 
 Output creation uses `create_new`; existing evidence is never overwritten.
 Source inputs must be bounded regular files; Unix leaf symlinks are refused.
-The checker retains its executable and checker-source digests and host OS/CPU
+The checker binds its executable before arithmetic, rejects a changed executable
+at the end, and retains checker-source digests and host OS/CPU
 architecture. These identify this replay, not a complete scientific runtime.
 No elapsed time, speedup, candidate ID or family-promotion claim is produced.
 

@@ -260,6 +260,10 @@ fn verify_cnf(rows: &[Row], model: &[bool]) -> Result<(usize, usize), String> {
 
 /// Substitute the accepted witness; never consume a registration or invoke a solver.
 pub fn replay(root: &Path) -> Result<Value, String> {
+    // Bind before arithmetic, and reject a rebuild/replacement during replay.
+    // This is a local executable gate, not full scientific-runtime admission.
+    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
+    let binary_sha256 = identity::sha256_hex(&fs::read(&executable).map_err(|e| e.to_string())?);
     let preparation_bytes = read_regular(&root.join(PREPARATION), 2_000_000)?;
     let prep_text = std::str::from_utf8(&preparation_bytes).map_err(|e| e.to_string())?;
     let prep = records::parse(prep_text)?;
@@ -351,12 +355,17 @@ pub fn replay(root: &Path) -> Result<Value, String> {
     let digest_bits = |bits: &[bool]| {
         identity::sha256_hex(&bits.iter().map(|&b| u8::from(b)).collect::<Vec<_>>())
     };
+    require(
+        identity::sha256_hex(&fs::read(&executable).map_err(|e| e.to_string())?) == binary_sha256,
+        "checker executable changed during replay",
+    )?;
     Ok(json!({
         "schema_version":1,"status":"PASS_NATIVE_RETAINED_SAT_SOURCE_REPLAY",
         "implementation":"Rust icprog; independent shift-and-add curve checker",
         "checker_source_sha256":identity::sha256_hex(include_bytes!("sat_source.rs")),
         "oracle_source_sha256":identity::sha256_hex(include_bytes!("oracle.rs")),
-        "checker_binary_sha256":identity::sha256_hex(&fs::read(std::env::current_exe().map_err(|e|e.to_string())?).map_err(|e|e.to_string())?),
+        "checker_binary_sha256":binary_sha256,
+        "checker_binary_unchanged_before_after":true,
         "host_architecture":std::env::consts::ARCH,"host_os":std::env::consts::OS,
         "preparation_sha256":PREPARATION_SHA,
         "preparation_admission":preparation_admission,
