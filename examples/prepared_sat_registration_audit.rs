@@ -105,7 +105,7 @@ fn inventory(tar: &[u8], expected: &Value) -> Result<usize, String> {
             })
             .sum();
         require(sum == octal(&h[148..156])?, "tar checksum differs")?;
-        require(&h[257..265] == b"ustar\000", "archive is not plain USTAR")?;
+        require(&h[257..265] == b"ustar\x0000", "archive is not plain USTAR")?;
         let name = text(&h[..100])?;
         let prefix = text(&h[345..500])?;
         let name = if prefix.is_empty() {
@@ -344,7 +344,7 @@ mod tests {
         h[..name.len()].copy_from_slice(name.as_bytes());
         h[124..136].copy_from_slice(format!("{:011o}\0", bytes.len()).as_bytes());
         h[156] = kind;
-        h[257..265].copy_from_slice(b"ustar\000");
+        h[257..265].copy_from_slice(b"ustar\x0000");
         let sum: usize = h
             .iter()
             .enumerate()
@@ -370,7 +370,7 @@ mod tests {
         let mut bad = good.clone();
         bad[512] ^= 1;
         assert!(inventory(&bad, &expected).is_err());
-        assert!(inventory(&vec![0; 1024], &expected).is_err());
+        assert!(inventory(&[0; 1024], &expected).is_err());
         let mut duplicate = good[..1024].to_vec();
         duplicate.extend(&good);
         assert!(inventory(&duplicate, &expected).is_err());
