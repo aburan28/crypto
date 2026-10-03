@@ -109,8 +109,21 @@ Mutation controls must reject a replaced original audit/claim, changed output,
 thread policy, extra PID, altered acceptance response and fresh promotion even
 when a copied publication inventory is resealed. Result replay on another
 platform establishes portable data/math checks, not native Mac-binary execution
-on that platform. Actual CI results remain pending until this PR's exact head
-passes; local results are retained separately.
+on that platform. Exact-head CI acceptance remains a separate gate: inspect this
+publication PR's Ubuntu and macOS custody/replay jobs. The local validation
+below establishes neither physical Linux execution nor a cross-platform speedup.
+
+[The retained local native test log](local-native-result-tests-20261003.txt)
+records all 78 `icprog` tests passing, including publication mutations and
+create-only output controls. [The local Clippy log](local-native-result-clippy-20261003.txt)
+records exit zero with existing library/older-toolchain warnings, no new
+publication warning. These checks used Rust 1.93.1 on physical macOS ARM64,
+after integration commit `fc92f27e473e47252ccef2e43a6af0b324789dde`, serialized
+through the shared native busy lock. Changed Rust files also pass `rustfmt`.
+The dashboard now reads the original F5 audit by its frozen SHA-256, shows both
+native admissions, retains historical diagnostics and unknown speedup, and
+passes all 45 site tests plus the isolated Chrome desktop/mobile/dark/JS-off
+checks. The browser receipt and preview images are retained under `docs/ic/`.
 
 The full goal remains active. Both native disclosed-input target controls now
 have original source-bound admission. New native natural-yield evidence for
