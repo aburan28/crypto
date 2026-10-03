@@ -45,6 +45,8 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/prepared_f5.rs"]
+mod prepared_f5;
 #[path = "icprog/prepared_sat.rs"]
 mod prepared_sat;
 #[path = "icprog/pyrandom.rs"]
@@ -99,6 +101,13 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Reconstruct retained F5 ordinary preparation natively; no search or new timing.
+    F5PreparationReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Publish the exact consumed native SAT control; creates a new immutable tree.
     SatControlPublish {
         #[arg(long)]
@@ -525,6 +534,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
         Command::SatControlPublish {
             capsule,
             execution,

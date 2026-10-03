@@ -25,6 +25,7 @@ on:
       - 'src/cryptanalysis/curve_aliases.json'
       - 'research/ic_single_target_20260930/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
       - 'docs/ic/boundary_targets.json'
@@ -41,6 +42,7 @@ on:
       - 'src/bin/isolated_bench.rs'
       - 'src/bin/isolated_bench/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'tests/icprog.rs'
       - '.github/workflows/ic-programme-harness.yml'
@@ -90,6 +92,7 @@ jobs:
         run: |
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
@@ -97,12 +100,14 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           target/debug/isolated_bench busy --lock "$RUNNER_TEMP/portable-busy.lock" -- true
       - uses: actions/upload-artifact@v4
         with:
           name: disclosed-native-sat-replay-${{ matrix.os }}
           path: |
             ${{ runner.temp }}/native-sat-replay.json
+            ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-sat-rustc.txt
             Cargo.lock
           if-no-files-found: error
