@@ -96,6 +96,10 @@ enum Cmd {
         /// Re-execute every measured deterministic run.
         #[arg(long)]
         replay_all: bool,
+        /// Accept a session marked `interrupted`: every integrity check
+        /// still applies, but not "every planned execution recorded".
+        #[arg(long)]
+        allow_interrupted: bool,
         /// Write the receipt here (it is also printed).
         #[arg(long)]
         out: Option<PathBuf>,
@@ -410,17 +414,19 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             dir,
             replay,
             replay_all,
+            allow_interrupted,
             out,
             exit_code,
         } => {
             let dir = PathBuf::from(isolab::expand_env(&dir)?);
-            let rep = audit::audit(
+            let rep = audit::audit_with(
                 &dir,
                 if replay_all {
                     audit::REPLAY_ALL
                 } else {
                     replay
                 },
+                allow_interrupted,
             )?;
             let text = serde_json::to_string_pretty(&rep).map_err(|e| e.to_string())? + "\n";
             if let Some(o) = out {

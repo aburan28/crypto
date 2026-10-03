@@ -88,6 +88,10 @@ pub struct Replay {
 pub struct AuditReport {
     pub schema: String,
     pub session_id: String,
+    /// The session's own status: `complete`, or `interrupted` when that
+    /// was accepted.
+    #[serde(default)]
+    pub session_status: String,
     pub ok: bool,
     pub problems: Vec<String>,
     pub checks: BTreeMap<String, bool>,
@@ -114,6 +118,19 @@ fn file_sha(dir: &Path, name: &str, files: &mut BTreeMap<String, String>) -> Opt
 /// Audit `dir`; replay up to `replay` deterministic measured runs
 /// ([`REPLAY_ALL`] for every one).
 pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
+    audit_with(dir, replay, false)
+}
+
+/// [`audit`], optionally accepting an `interrupted` session: it is held
+/// to every integrity check (hashes, seals, plan, answers, derived
+/// figures), with "every planned execution recorded" replaced by "every
+/// record it says it wrote".  A session that claims `complete` gets no
+/// such relaxation.
+pub fn audit_with(
+    dir: &Path,
+    replay: usize,
+    allow_interrupted: bool,
+) -> Result<AuditReport, String> {
     let mut problems: Vec<String> = Vec::new();
     let mut checks: BTreeMap<String, bool> = BTreeMap::new();
     let mut files = BTreeMap::new();
@@ -145,15 +162,16 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     );
     let rec_sha = file_sha(dir, "records.jsonl", &mut files);
     let complete = session.status == "complete";
+    let accepted_interruption = allow_interrupted && session.status == "interrupted";
     check(
         "records_hash",
-        !complete || rec_sha == session.records_sha256,
+        !(complete || accepted_interruption) || rec_sha == session.records_sha256,
         "records.jsonl does not hash to session.records_sha256".into(),
         &mut problems,
     );
     check(
         "session_complete",
-        complete,
+        complete || accepted_interruption,
         format!("session status is `{}`", session.status),
         &mut problems,
     );
@@ -223,9 +241,11 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     let records: Vec<Record> = lines.iter().map(|(_, r)| r.clone()).collect();
     check(
         "record_count",
-        !complete
-            || (records.len() as u64 == session.records_written
-                && records.len() == p.executions.len()),
+        if complete {
+            records.len() as u64 == session.records_written && records.len() == p.executions.len()
+        } else {
+            records.len() as u64 == session.records_written && records.len() <= p.executions.len()
+        },
         format!(
             "{} records, {} written, {} planned",
             records.len(),
@@ -472,6 +492,7 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
         .map(|b| sha256_hex(&b));
     Ok(AuditReport {
         schema: AUDIT_SCHEMA.into(),
+        session_status: session.status.clone(),
         session_id: session.session_id,
         ok: problems.is_empty(),
         problems,

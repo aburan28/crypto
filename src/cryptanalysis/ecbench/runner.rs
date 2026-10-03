@@ -191,6 +191,8 @@ fn run_child(
     #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;
+        // `ps` shows `ecbench exec`, not `/proc/self/exe exec`.
+        cmd.arg0("ecbench");
         let pin = plan.map(|p| (p.run_cpu, p.node));
         let multi_node = topology().nodes.len() > 1;
         let parent = std::process::id();

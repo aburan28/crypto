@@ -99,7 +99,9 @@ jobs:
           shopt -s nullglob
           for d in research/ecbench_*/sessions/*/; do
             echo "auditing $d"
-            ./target/release/ecbench verify --dir "$d" --replay-all --exit-code > /dev/null
+            # An interrupted session is evidence of the interruption: every
+            # integrity check applies to it, only completeness does not.
+            ./target/release/ecbench verify --dir "$d" --replay-all --allow-interrupted --exit-code > /dev/null
           done
       - uses: actions/upload-artifact@v4
         if: always()
