@@ -25,6 +25,7 @@ harness:
 
 ```sh
 rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o /tmp/ic-native-busy
+/tmp/ic-native-busy busy -- cargo generate-lockfile
 /tmp/ic-native-busy busy -- cargo build --locked --bin icprog --bin isolated_bench
 target/debug/icprog sat-source-replay --root . --out /tmp/ic-native-sat-replay.json
 ```
@@ -34,6 +35,19 @@ the retained source witness, ordinary rows, exact geometric negatives, rank and
 logs. It launches no solver and establishes neither new yield nor performance.
 The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
 separate this replay from the pending native controller and fresh comparison.
+The [native controller protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
+describes `icprog sat-control-freeze`, `sat-control-execute`, and
+`sat-control-audit`. Freeze builds the producer and independent checker from
+retained Rust sources and vendored dependencies; it executes no solver. Commit
+and publish the actual registration seal before its sole dispatch. Execute
+requires that exact seal, consumes the registration before launch, and never
+resumes it. Audit must use the frozen checker binary and launches no search.
+The adapter admits only the disclosed synthetic n17 control on the accepted
+macOS ARM64 native assets. Independent external replay is timed separately;
+this interval cannot establish the primary independently verified online claim.
+The committed control template is not an executable registration or a result.
+All new cross-method measurements use native `ecbench` under AGENTS.md §12;
+its current cold interval must be extended before a primary online comparison.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

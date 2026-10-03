@@ -62,6 +62,11 @@ All three historical tournament confirmation sets remain closed.
 
 ## Native execution gates still pending
 
+The follow-on [native controller implementation](../native-prepared-sat-control-v1/PROTOCOL.md)
+now provides the register/execute/audit code and retained-input controls. The
+actual separately published registration and sole execution are still pending.
+No test model substitution is a native solver search or fresh paired result.
+
 This document is a migration contract, **not an executable registration**.
 No new solver budget or dispatch is frozen here.
 

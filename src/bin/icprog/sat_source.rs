@@ -258,6 +258,48 @@ fn verify_cnf(rows: &[Row], model: &[bool]) -> Result<(usize, usize), String> {
     Ok((cnf, xor))
 }
 
+/// Independently validate an expanded native result; no shared producer parser.
+pub fn verify_native_model(anf: &str, cnf: &str, stdout: &str) -> Result<Vec<bool>, String> {
+    let (variables, rows) = parse_cnf(cnf)?;
+    require(
+        variables >= 51,
+        "expanded source is narrower than n17 model",
+    )?;
+    let mut model = vec![None; variables];
+    let mut terminated = false;
+    for line in stdout.lines().filter_map(|line| line.strip_prefix("v ")) {
+        for token in line.split_whitespace() {
+            require(!terminated, "model continues after terminator")?;
+            let number = token
+                .parse::<i32>()
+                .map_err(|_| "bad native model literal")?;
+            if number == 0 {
+                terminated = true;
+                continue;
+            }
+            let index = number.unsigned_abs() as usize;
+            require(
+                index > 0 && index <= variables,
+                "model literal outside source",
+            )?;
+            require(model[index - 1].is_none(), "model repeats a variable")?;
+            model[index - 1] = Some(number > 0);
+        }
+    }
+    require(terminated, "native model lacks terminator")?;
+    let model = model
+        .into_iter()
+        .map(|v| v.ok_or("native model is incomplete".into()))
+        .collect::<Result<Vec<_>, String>>()?;
+    require(
+        verify_anf(anf, &model[..51])? == 50,
+        "source ANF equation count differs",
+    )?;
+    let (_, xor) = verify_cnf(&rows, &model)?;
+    require(xor == 50, "source XOR equation count differs")?;
+    Ok(model)
+}
+
 /// Substitute the accepted witness; never consume a registration or invoke a solver.
 pub fn replay(root: &Path) -> Result<Value, String> {
     // Bind before arithmetic, and reject a rebuild/replacement during replay.
