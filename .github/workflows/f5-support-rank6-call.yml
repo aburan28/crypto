@@ -39,7 +39,7 @@ jobs:
       - name: Require x86-64 AVX2 and BMI2 runner
         run: |
           test "$(uname -m)" = x86_64
-          rg -m 1 '^flags.*avx2.*bmi2|^flags.*bmi2.*avx2' /proc/cpuinfo
+          grep -m 1 -Eq '^flags.*(avx2.*bmi2|bmi2.*avx2)' /proc/cpuinfo
       - name: Validate exact rank kernels
         run: |
           python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-rank6-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
