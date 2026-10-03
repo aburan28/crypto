@@ -231,6 +231,11 @@ pub fn execute(
         registration_sha == expected_registration,
         "dispatch registration is not the explicitly frozen seal",
     )?;
+    let dispatcher = std::env::current_exe().map_err(|e| e.to_string())?;
+    require(
+        registration["auditor_sha256"] == sha256(&read(&dispatcher, 128 * 1024 * 1024)?),
+        "dispatch must use the frozen controller/checker binary",
+    )?;
     let prep = load(&capsule.join("preparation.json"))?;
     prepared_sat::verify(&records::parse(&prep.to_string())?)?;
     fs::create_dir(execution).map_err(|e| e.to_string())?;
