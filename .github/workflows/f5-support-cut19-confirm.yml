@@ -54,7 +54,7 @@ jobs:
             ${{ matrix.threads }} \
             research/f5_support_cut19_confirm_20261003/cpu-choice-t${{ matrix.threads }}.json \
             >> "$GITHUB_OUTPUT"
-      - name: Replay four frozen seed blocks
+      - name: Replay four fresh seed blocks
         id: run
         continue-on-error: true
         run: |

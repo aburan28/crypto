@@ -1,13 +1,8 @@
 name: Matrix-F5 mainline row-basis x86 qualification
 
 on:
-  pull_request:
-    paths:
-      - 'src/cryptanalysis/matrix_f5_f2.rs'
-      - 'src/cryptanalysis/gf2_elim.rs'
-      - 'examples/f4_f2_bench.rs'
-      - 'research/f5_mainline_port_20261002/**'
-      - '.github/workflows/f5-mainline-rank-segments.yml'
+  # Archived after the physical Linux further-2x gate failed. Preserve the
+  # workflow for explicit replay and the result in research/f5_mainline_port_20261002.
   workflow_dispatch:
 
 permissions:

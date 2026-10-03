@@ -261,9 +261,7 @@ fn summary(runs: &[Value]) -> Value {
                         .filter(|r| r["phase"] == phase && r["pair"] == pair)
                         .collect();
                     assert_eq!(group.len(), 2);
-                    let (a, b) = if phase == "aa" {
-                        (&group[0], &group[1])
-                    } else if group[0]["mode"] == 0 {
+                    let (a, b) = if phase == "aa" || group[0]["mode"] == 0 {
                         (&group[0], &group[1])
                     } else {
                         (&group[1], &group[0])
