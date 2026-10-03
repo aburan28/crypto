@@ -476,6 +476,8 @@ pub struct F5Timings {
     pub support_split_inner_rows: usize,
     /// Degree-4 rows assigned to the outer support group.
     pub support_split_outer_rows: usize,
+    /// Number of variables used for the inner degree-4 support block.
+    pub support_split_inner_vars: usize,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
 }
@@ -921,10 +923,11 @@ pub fn matrix_f5_f2_with_form_timed(
         && cols.len() >= 8192;
     let rank = if support_split {
         timings.support_split_attempted = true;
+        timings.support_split_inner_vars = 19;
         let (rank, used, inner_rows, outer_rows) = certify_support_split_or_echelon(
             &mut matrix,
             &cols,
-            20,
+            19,
             &mut word_ops,
         );
         timings.support_split_original_used = used;

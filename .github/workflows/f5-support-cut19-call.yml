@@ -1,4 +1,4 @@
-name: Matrix-F5 support-separated complete call
+name: Matrix-F5 fixed cut-19 complete call
 
 on:
   pull_request:
@@ -6,9 +6,10 @@ on:
       - 'src/cryptanalysis/matrix_f5_f2.rs'
       - 'src/cryptanalysis/gf2_elim.rs'
       - 'examples/f4_f2_bench.rs'
-      - 'examples/f5_support_split_*.rs'
-      - 'research/f5_support_split_call_20261002/**'
-      - '.github/workflows/f5-support-split-call.yml'
+      - 'examples/f5_support_cut19_*.rs'
+      - 'examples/f5_support_split_cpus.rs'
+      - 'research/f5_support_cut19_call_20261002/**'
+      - '.github/workflows/f5-support-cut19-call.yml'
   workflow_dispatch:
 
 permissions:
@@ -40,40 +41,40 @@ jobs:
           rg -m 1 '^flags.*avx2.*bmi2|^flags.*bmi2.*avx2' /proc/cpuinfo
       - name: Validate exact rank kernels
         run: |
-          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-split-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
-          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-split-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-cut19-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-cut19-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
       - name: Build native benchmark and gate
         run: |
-          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-split-bench.lock" -- cargo build --release --example f4_f2_bench --example f5_support_split_pair --example f5_support_split_cpus --example f5_support_split_analyze
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-cut19-bench.lock" -- cargo build --release --example f4_f2_bench --example f5_support_cut19_pair --example f5_support_split_cpus --example f5_support_cut19_analyze
       - name: Choose reservable CPUs
         id: cpus
         run: |
           target/release/examples/f5_support_split_cpus \
             ${{ matrix.threads }} \
-            research/f5_support_split_call_20261002/cpu-choice-t${{ matrix.threads }}.json \
+            research/f5_support_cut19_call_20261002/cpu-choice-t${{ matrix.threads }}.json \
             >> "$GITHUB_OUTPUT"
       - name: Replay four frozen seed blocks
         id: run
         continue-on-error: true
         run: |
-          bash research/f5_support_split_call_20261002/run_linux.sh \
+          bash research/f5_support_cut19_call_20261002/run_linux.sh \
             ${{ matrix.threads }} \
             '${{ steps.cpus.outputs.reserve }}' \
             '${{ steps.cpus.outputs.pin }}' \
-            research/f5_support_split_call_20261002/linux-t${{ matrix.threads }}
+            research/f5_support_cut19_call_20261002/linux-t${{ matrix.threads }}
       - name: Apply frozen complete-call gate
         run: |
-          target/release/examples/f5_support_split_analyze \
-            research/f5_support_split_call_20261002/linux-t${{ matrix.threads }} \
+          target/release/examples/f5_support_cut19_analyze \
+            research/f5_support_cut19_call_20261002/linux-t${{ matrix.threads }} \
             ${{ matrix.threads }} \
-            research/f5_support_split_call_20261002/analysis-t${{ matrix.threads }}.json
+            research/f5_support_cut19_call_20261002/analysis-t${{ matrix.threads }}.json
       - name: Preserve every qualified and failed attempt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: f5-support-split-t${{ matrix.threads }}-${{ github.sha }}
+          name: f5-support-cut19-t${{ matrix.threads }}-${{ github.sha }}
           path: |
-            research/f5_support_split_call_20261002/cpu-choice-t${{ matrix.threads }}.json
-            research/f5_support_split_call_20261002/analysis-t${{ matrix.threads }}.json
-            research/f5_support_split_call_20261002/linux-t${{ matrix.threads }}/
+            research/f5_support_cut19_call_20261002/cpu-choice-t${{ matrix.threads }}.json
+            research/f5_support_cut19_call_20261002/analysis-t${{ matrix.threads }}.json
+            research/f5_support_cut19_call_20261002/linux-t${{ matrix.threads }}/
           if-no-files-found: warn

@@ -232,6 +232,7 @@ fn main() {
                 "support_split_original_used": phases.support_split_original_used,
                 "support_split_inner_rows": phases.support_split_inner_rows,
                 "support_split_outer_rows": phases.support_split_outer_rows,
+                "support_split_inner_vars": phases.support_split_inner_vars,
                 "direct_unpack_used": phases.direct_unpack_used,
                 "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
