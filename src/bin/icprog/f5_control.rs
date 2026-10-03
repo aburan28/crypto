@@ -1289,7 +1289,10 @@ mod tests {
     fn simulated_transport_rejects_modified_environment_input_output_claim_and_drain() {
         // Data fixture only: neither this placeholder worker nor any solver runs.
         // Public audit separately requires the actual frozen checker/source tree.
-        let p = temp("transport-fixture");
+        // The live audit canonicalizes its capsule before checking argv. On
+        // macOS, TMPDIR may reach /private/var through a /var symlink; model
+        // the live invocation instead of constructing an unresolved argv.
+        let p = temp("transport-fixture").canonicalize().unwrap();
         let execution = p.join("execution");
         fs::create_dir(&execution).unwrap();
         let execution = execution.canonicalize().unwrap();

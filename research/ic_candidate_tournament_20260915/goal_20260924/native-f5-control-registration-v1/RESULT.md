@@ -125,6 +125,17 @@ native admissions, retains historical diagnostics and unknown speedup, and
 passes all 45 site tests plus the isolated Chrome desktop/mobile/dark/JS-off
 checks. The browser receipt and preview images are retained under `docs/ic/`.
 
+The first result-PR CI head passed original F5 publication replay on Ubuntu and
+macOS, but two other macOS jobs rejected the simulated transport fixture. Their
+failed logs are retained in [custody](first-macos-custody-ci-failure-20261003.txt)
+and [SAT replay](first-macos-sat-replay-ci-failure-20261003.txt). macOS may expose
+TMPDIR through `/var` while its canonical path is `/private/var`. The fixture
+constructed unresolved argv, whereas the live audit canonicalizes its capsule
+before checking the invocation. Canonicalize that fixture directory before
+constructing the receipt. The production receipt predicates and original frozen
+checker remain unchanged. Focused local checks include a symlinked `/tmp`
+TMPDIR; their completion and the corrected head's CI remain separate gates.
+
 The full goal remains active. Both native disclosed-input target controls now
 have original source-bound admission. New native natural-yield evidence for
 the exact F5 and CryptoMiniSat pipelines, failed-attempt accounting, complete
