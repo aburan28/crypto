@@ -17,6 +17,7 @@
 //! | [`isolation`] | CPU reservation, eviction, pinning, NUMA binding, kernel counters |
 //! | [`record`] | the record, the child protocol, isolation grading |
 //! | [`runner`] | sessions: interleaved measured children, sealed append-only records |
+//! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
@@ -35,6 +36,7 @@ pub mod isolation;
 pub mod methods;
 pub mod record;
 pub mod runner;
+pub mod signals;
 pub mod spec;
 pub mod stats;
 pub mod workload;

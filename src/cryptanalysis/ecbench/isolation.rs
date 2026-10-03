@@ -199,6 +199,26 @@ pub struct CpuPlan {
     pub node: Option<u32>,
     /// How the plan was chosen.
     pub request: CpuRequest,
+    /// The run CPU's SMT siblings that are *not* reserved.  Only an
+    /// inherited placement can have any (an explicit list must name every
+    /// sibling); each one costs the run its L1.
+    #[serde(default)]
+    pub unreserved_siblings: Vec<u32>,
+    /// The CPUs whose ticks are read around every run: the reservation
+    /// and the run CPU's siblings, reserved or not.
+    #[serde(default)]
+    pub observed: Vec<u32>,
+}
+
+impl CpuPlan {
+    /// The CPUs read around every run (older plans: the reservation).
+    pub fn observed_cpus(&self) -> Vec<u32> {
+        if self.observed.is_empty() {
+            self.reserved.clone()
+        } else {
+            self.observed.clone()
+        }
+    }
 }
 
 /// The CPUs this process may run on.
@@ -224,10 +244,61 @@ pub fn own_affinity() -> Option<Vec<u32>> {
     }
 }
 
+/// The CPUs a placement may use: the cgroup v2 cpuset's effective CPUs
+/// when readable, otherwise this process's affinity together with the
+/// `isolcpus` CPUs (which the default affinity leaves out but which a
+/// child may still be pinned to).  `None` off Linux.
+pub fn allowed_cpus() -> Option<Vec<u32>> {
+    #[cfg(target_os = "linux")]
+    {
+        if let Some(v) = cgroup_cpuset_effective() {
+            return Some(v);
+        }
+        let mut v = own_affinity()?;
+        if let Some(iso) = read_trim("/sys/devices/system/cpu/isolated") {
+            v.extend(parse_cpulist(&iso));
+        }
+        v.sort_unstable();
+        v.dedup();
+        Some(v)
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        None
+    }
+}
+
+/// `cpuset.cpus.effective` of this process's cgroup (v2), from its own
+/// directory up to the root, the first that reads.
+#[cfg(target_os = "linux")]
+fn cgroup_cpuset_effective() -> Option<Vec<u32>> {
+    let cg = std::fs::read_to_string("/proc/self/cgroup").ok()?;
+    let rel = cg.lines().find_map(|l| l.strip_prefix("0::"))?.trim();
+    let root = std::path::Path::new("/sys/fs/cgroup");
+    let mut dir = root.join(rel.trim_start_matches('/'));
+    loop {
+        if let Some(v) = read_trim(&dir.join("cpuset.cpus.effective").display().to_string())
+            .map(|s| parse_cpulist(&s))
+            .filter(|v| !v.is_empty())
+        {
+            return Some(v);
+        }
+        if dir == root || !dir.pop() {
+            return None;
+        }
+    }
+}
+
 /// Decide which CPUs to hold.  Refuses what would make the measurement
 /// meaningless: a sibling left to a neighbour, every CPU, CPU 0's core
-/// (where the kernel's housekeeping lands) unless explicitly listed.
-pub fn plan_cpus(req: &CpuRequest, topo: &Topology) -> Result<Option<CpuPlan>, String> {
+/// (where the kernel's housekeeping lands) unless explicitly listed, and
+/// any CPU outside `allowed` (this process's cpuset), where the child
+/// could not be pinned.
+pub fn plan_cpus(
+    req: &CpuRequest,
+    topo: &Topology,
+    allowed: Option<&[u32]>,
+) -> Result<Option<CpuPlan>, String> {
     if *req == CpuRequest::None {
         return Ok(None);
     }
@@ -243,29 +314,42 @@ pub fn plan_cpus(req: &CpuRequest, topo: &Topology) -> Result<Option<CpuPlan>, S
             .map(|p| p.siblings.clone())
             .unwrap_or_else(|| vec![cpu])
     };
-    let reserved = match req {
+    let permitted = |c: &u32| allowed.map(|a| a.contains(c)).unwrap_or(true);
+    let (reserved, run_cpu) = match req {
         CpuRequest::Auto => {
             let zero_core = siblings_of(0);
-            let mut best: Option<Vec<u32>> = None;
-            for c in all.iter().rev() {
-                let sib = siblings_of(*c);
-                if sib.iter().any(|s| zero_core.contains(s)) {
-                    continue;
-                }
-                best = Some(sib);
-                break;
-            }
-            best.ok_or("no core other than CPU 0's is online")?
+            let best = all.iter().rev().map(|c| siblings_of(*c)).find(|sib| {
+                !sib.iter().any(|s| zero_core.contains(s)) && sib.iter().all(permitted)
+            });
+            let sib = best.ok_or(
+                "no whole core other than CPU 0's is inside this process's cpuset; pass --cpus inherit or a list",
+            )?;
+            let run = sib[0];
+            (sib, run)
         }
         CpuRequest::Inherit => {
             let mut own = own_affinity().ok_or("cannot read this process's affinity")?;
             own.sort_unstable();
-            own
+            // Run on a CPU whose whole core was inherited, the highest such;
+            // failing that on the first, and say which siblings are not ours.
+            let run = own
+                .iter()
+                .rev()
+                .copied()
+                .find(|c| siblings_of(*c).iter().all(|s| own.contains(s)))
+                .or_else(|| own.first().copied())
+                .ok_or("this process may run on no CPU")?;
+            (own, run)
         }
         CpuRequest::Explicit(list) => {
             for c in list {
                 if !all.contains(c) {
                     return Err(format!("CPU {c} is not online"));
+                }
+                if !permitted(c) {
+                    return Err(format!(
+                        "CPU {c} is outside this process's cpuset, so the child could not be pinned to it"
+                    ));
                 }
                 for s in siblings_of(*c) {
                     if !list.contains(&s) {
@@ -275,7 +359,7 @@ pub fn plan_cpus(req: &CpuRequest, topo: &Topology) -> Result<Option<CpuPlan>, S
                     }
                 }
             }
-            list.clone()
+            (list.clone(), list[0])
         }
         CpuRequest::None => unreachable!(),
     };
@@ -285,12 +369,22 @@ pub fn plan_cpus(req: &CpuRequest, topo: &Topology) -> Result<Option<CpuPlan>, S
     if *req != CpuRequest::Inherit && reserved.len() >= all.len() {
         return Err("reserving every CPU leaves nowhere to move the rest of the system".into());
     }
-    let run_cpu = reserved[0];
+    let sib = siblings_of(run_cpu);
+    let unreserved_siblings: Vec<u32> = sib
+        .iter()
+        .copied()
+        .filter(|s| !reserved.contains(s))
+        .collect();
+    let mut observed: Vec<u32> = reserved.iter().chain(sib.iter()).copied().collect();
+    observed.sort_unstable();
+    observed.dedup();
     Ok(Some(CpuPlan {
         run_cpu,
         node: topo.place(run_cpu).and_then(|p| p.node),
         reserved,
         request: req.clone(),
+        unreserved_siblings,
+        observed,
     }))
 }
 
@@ -317,12 +411,23 @@ impl BenchLock {
         #[cfg(unix)]
         {
             use std::os::unix::io::AsRawFd;
-            let op = libc::LOCK_EX | if wait { 0 } else { libc::LOCK_NB };
-            // SAFETY: a valid descriptor owned by `file`.
-            if unsafe { libc::flock(file.as_raw_fd(), op) } != 0 {
-                return Err(format!(
-                    "another benchmark holds {path}; pass --wait to queue behind it"
-                ));
+            // Non-blocking tries, so a queued session stays interruptible.
+            loop {
+                // SAFETY: a valid descriptor owned by `file`.
+                if unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0 {
+                    break;
+                }
+                if !wait {
+                    return Err(format!(
+                        "another benchmark holds {path}; pass --wait to queue behind it"
+                    ));
+                }
+                if let Some(sig) = crate::cryptanalysis::ecbench::signals::interrupted() {
+                    return Err(format!(
+                        "interrupted by signal {sig} while waiting for {path}"
+                    ));
+                }
+                std::thread::sleep(std::time::Duration::from_millis(200));
             }
         }
         Ok(Self {
@@ -434,7 +539,8 @@ pub struct Conditions {
     pub psi_cpu_some_total_us: Option<u64>,
     pub psi_memory_some_avg10: Option<f64>,
     pub psi_memory_some_total_us: Option<u64>,
-    /// `/proc/stat` ticks of the reserved CPUs.
+    /// `/proc/stat` ticks of the observed CPUs: the reservation and the
+    /// run CPU's siblings (the field keeps its first name).
     pub reserved_ticks: BTreeMap<u32, CpuTicks>,
 }
 
@@ -500,13 +606,14 @@ pub struct Preflight {
 /// Watch the reserved CPUs for the settle window; quiet when none was
 /// busy past the threshold and PSI is below its ceiling.
 pub fn preflight(plan: &CpuPlan, th: &Thresholds) -> Preflight {
-    let before = conditions(&plan.reserved);
+    let observed = plan.observed_cpus();
+    let before = conditions(&observed);
     std::thread::sleep(std::time::Duration::from_secs_f64(th.settle_seconds));
-    let after = conditions(&plan.reserved);
+    let after = conditions(&observed);
     let hz = ticks_per_second() as f64;
     let mut reasons = Vec::new();
     let mut busy = BTreeMap::new();
-    for c in &plan.reserved {
+    for c in &observed {
         match (before.reserved_ticks.get(c), after.reserved_ticks.get(c)) {
             (Some(a), Some(b)) => {
                 let s = b.busy.saturating_sub(a.busy) as f64 / hz;
@@ -545,18 +652,85 @@ pub fn preflight(plan: &CpuPlan, th: &Thresholds) -> Preflight {
 
 // ── Eviction ───────────────────────────────────────────────────────
 
-/// Threads moved off the reserved CPUs, to be put back.
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct Eviction {
-    /// `(tid, original mask)`.
-    #[serde(skip)]
-    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
-    moved: Vec<(i32, Vec<u32>)>,
+/// What an eviction did, as `session.json` records it.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EvictionSummary {
     pub moved_count: u64,
     /// Threads whose mask could not be changed (another user's, a
     /// per-CPU kernel thread).
     pub failed_user_threads: u64,
     pub failed_kernel_threads: u64,
+}
+
+/// Threads moved off the reserved CPUs, put back when this is dropped
+/// (or by [`Eviction::restore`]), so a failing or panicking session still
+/// restores the host.  Deliberately not `Clone`: a copy would restore a
+/// second time.
+#[derive(Debug, Default)]
+pub struct Eviction {
+    /// `(tid, start time in ticks since boot, original mask)`.  The start
+    /// time keeps a recycled thread id from receiving another thread's mask.
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    moved: Vec<(i32, u64, Vec<u32>)>,
+    /// Boot-relative ticks when the eviction began: threads started after
+    /// it, with a mask the eviction produced, inherited that mask from an
+    /// evicted parent and are restored too.
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    started_ticks: u64,
+    /// Each narrowed mask the eviction set, and the original it came from.
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    narrowed: BTreeMap<Vec<u32>, Vec<u32>>,
+    pub summary: EvictionSummary,
+}
+
+/// A thread's start time in clock ticks since boot (`stat` field 22).
+#[cfg(target_os = "linux")]
+fn thread_start_ticks(pid: i32, tid: i32) -> Option<u64> {
+    let stat = std::fs::read_to_string(format!("/proc/{pid}/task/{tid}/stat")).ok()?;
+    // Fields after the parenthesised name; starttime is the 20th of them.
+    let rest = stat.rsplit_once(')')?.1;
+    rest.split_whitespace().nth(19)?.parse().ok()
+}
+
+/// Clock ticks since boot, now.
+#[cfg(target_os = "linux")]
+fn uptime_ticks() -> u64 {
+    std::fs::read_to_string("/proc/uptime")
+        .ok()
+        .and_then(|s| s.split_whitespace().next()?.parse::<f64>().ok())
+        .map(|secs| (secs * ticks_per_second() as f64) as u64)
+        .unwrap_or(0)
+}
+
+/// Every `(pid, tid)` on the host but this process's.
+#[cfg(target_os = "linux")]
+fn other_threads() -> Vec<(i32, i32, bool)> {
+    let me = std::process::id() as i32;
+    let mut out = Vec::new();
+    let Ok(procs) = std::fs::read_dir("/proc") else {
+        return out;
+    };
+    for p in procs.filter_map(|e| e.ok()) {
+        let Some(pid) = p.file_name().to_str().and_then(|s| s.parse::<i32>().ok()) else {
+            continue;
+        };
+        if pid == me {
+            continue;
+        }
+        let kernel = std::fs::read_link(format!("/proc/{pid}/exe")).is_err()
+            && std::fs::read_to_string(format!("/proc/{pid}/cmdline"))
+                .map(|c| c.is_empty())
+                .unwrap_or(true);
+        let Ok(tasks) = std::fs::read_dir(format!("/proc/{pid}/task")) else {
+            continue;
+        };
+        for t in tasks.filter_map(|e| e.ok()) {
+            if let Some(tid) = t.file_name().to_str().and_then(|s| s.parse::<i32>().ok()) {
+                out.push((pid, tid, kernel));
+            }
+        }
+    }
+    out
 }
 
 #[cfg(target_os = "linux")]
@@ -594,47 +768,28 @@ pub fn evict(reserved: &[u32]) -> Eviction {
     let mut ev = Eviction::default();
     #[cfg(target_os = "linux")]
     {
-        let me = std::process::id() as i32;
-        let Ok(procs) = std::fs::read_dir("/proc") else {
-            return ev;
-        };
-        for p in procs.filter_map(|e| e.ok()) {
-            let Some(pid) = p.file_name().to_str().and_then(|s| s.parse::<i32>().ok()) else {
+        ev.started_ticks = uptime_ticks();
+        for (pid, tid, kernel) in other_threads() {
+            let Some(mask) = affinity_of(tid) else {
                 continue;
             };
-            if pid == me {
+            if !mask.iter().any(|c| reserved.contains(c)) {
                 continue;
             }
-            let kernel = std::fs::read_link(format!("/proc/{pid}/exe")).is_err()
-                && std::fs::read_to_string(format!("/proc/{pid}/cmdline"))
-                    .map(|c| c.is_empty())
-                    .unwrap_or(true);
-            let Ok(tasks) = std::fs::read_dir(format!("/proc/{pid}/task")) else {
-                continue;
-            };
-            for t in tasks.filter_map(|e| e.ok()) {
-                let Some(tid) = t.file_name().to_str().and_then(|s| s.parse::<i32>().ok()) else {
-                    continue;
-                };
-                let Some(mask) = affinity_of(tid) else {
-                    continue;
-                };
-                if !mask.iter().any(|c| reserved.contains(c)) {
-                    continue;
-                }
-                let rest: Vec<u32> = mask
-                    .iter()
-                    .copied()
-                    .filter(|c| !reserved.contains(c))
-                    .collect();
-                if !rest.is_empty() && set_affinity(tid, &rest) {
-                    ev.moved.push((tid, mask));
-                    ev.moved_count += 1;
-                } else if kernel {
-                    ev.failed_kernel_threads += 1;
-                } else {
-                    ev.failed_user_threads += 1;
-                }
+            let rest: Vec<u32> = mask
+                .iter()
+                .copied()
+                .filter(|c| !reserved.contains(c))
+                .collect();
+            if !rest.is_empty() && set_affinity(tid, &rest) {
+                let start = thread_start_ticks(pid, tid).unwrap_or(0);
+                ev.narrowed.entry(rest).or_insert_with(|| mask.clone());
+                ev.moved.push((tid, start, mask));
+                ev.summary.moved_count += 1;
+            } else if kernel {
+                ev.summary.failed_kernel_threads += 1;
+            } else {
+                ev.summary.failed_user_threads += 1;
             }
         }
     }
@@ -646,18 +801,48 @@ pub fn evict(reserved: &[u32]) -> Eviction {
 }
 
 impl Eviction {
-    /// Put every moved thread's mask back (threads that exited are gone).
+    /// Put the host back: every moved thread that is still the same
+    /// thread gets its mask back, and every thread started since the
+    /// eviction whose mask is one the eviction produced (it inherited it
+    /// from an evicted parent) gets that mask's original.  Idempotent.
     pub fn restore(&mut self) {
         #[cfg(target_os = "linux")]
-        for (tid, mask) in self.moved.drain(..) {
-            let _ = set_affinity(tid, &mask);
+        {
+            let moved: std::collections::BTreeSet<i32> =
+                self.moved.iter().map(|(t, _, _)| *t).collect();
+            let starts: BTreeMap<i32, u64> = other_threads()
+                .into_iter()
+                .filter_map(|(pid, tid, _)| Some((tid, thread_start_ticks(pid, tid)?)))
+                .collect();
+            for (tid, start, mask) in self.moved.drain(..) {
+                if starts.get(&tid) == Some(&start) {
+                    let _ = set_affinity(tid, &mask);
+                }
+            }
+            if !self.narrowed.is_empty() {
+                for (tid, start) in &starts {
+                    if moved.contains(tid) || *start < self.started_ticks {
+                        continue;
+                    }
+                    if let Some(original) = affinity_of(*tid).and_then(|m| self.narrowed.get(&m)) {
+                        let _ = set_affinity(*tid, original);
+                    }
+                }
+                self.narrowed.clear();
+            }
         }
+    }
+}
+
+impl Drop for Eviction {
+    fn drop(&mut self) {
+        self.restore();
     }
 }
 
 /// Keep this (the runner) process off the reserved CPUs, so polling and
 /// record writing never land on the measured core.
-pub fn leave_reserved(reserved: &[u32]) -> Result<(), String> {
+pub fn leave_reserved(reserved: &[u32]) -> Result<Vec<u32>, String> {
     #[cfg(target_os = "linux")]
     {
         let own = own_affinity().ok_or("cannot read own affinity")?;
@@ -668,7 +853,7 @@ pub fn leave_reserved(reserved: &[u32]) -> Result<(), String> {
         if !set_affinity(0, &rest) {
             return Err("sched_setaffinity on the runner failed".into());
         }
-        Ok(())
+        Ok(rest)
     }
     #[cfg(not(target_os = "linux"))]
     {
@@ -886,20 +1071,38 @@ mod tests {
 
     #[test]
     fn auto_takes_a_whole_core_away_from_cpu0() {
-        let plan = plan_cpus(&CpuRequest::Auto, &two_node_smt())
+        let plan = plan_cpus(&CpuRequest::Auto, &two_node_smt(), None)
             .unwrap()
             .unwrap();
         assert_eq!(plan.reserved, vec![3, 7]);
         assert_eq!(plan.run_cpu, 3);
         assert_eq!(plan.node, Some(1));
+        assert!(plan.unreserved_siblings.is_empty());
+        assert_eq!(plan.observed, vec![3, 7]);
     }
 
     #[test]
     fn a_lone_sibling_and_every_cpu_are_refused() {
         let t = two_node_smt();
-        assert!(plan_cpus(&CpuRequest::Explicit(vec![2]), &t).is_err());
-        assert!(plan_cpus(&CpuRequest::Explicit((0..8).collect()), &t).is_err());
-        assert!(plan_cpus(&CpuRequest::Explicit(vec![2, 6]), &t).is_ok());
-        assert_eq!(plan_cpus(&CpuRequest::None, &t).unwrap(), None);
+        assert!(plan_cpus(&CpuRequest::Explicit(vec![2]), &t, None).is_err());
+        assert!(plan_cpus(&CpuRequest::Explicit((0..8).collect()), &t, None).is_err());
+        assert!(plan_cpus(&CpuRequest::Explicit(vec![2, 6]), &t, None).is_ok());
+        assert_eq!(plan_cpus(&CpuRequest::None, &t, None).unwrap(), None);
+    }
+
+    #[test]
+    fn placements_stay_inside_the_cpuset() {
+        let t = two_node_smt();
+        // A cpuset holding only cores 1 and 2 (CPUs 1, 2, 5, 6): auto takes
+        // the highest whole core inside it, an explicit core outside it is
+        // refused, and a cpuset with no whole core leaves auto nothing.
+        let allowed = [1, 2, 5, 6];
+        let plan = plan_cpus(&CpuRequest::Auto, &t, Some(&allowed))
+            .unwrap()
+            .unwrap();
+        assert_eq!(plan.reserved, vec![2, 6]);
+        assert!(plan_cpus(&CpuRequest::Explicit(vec![3, 7]), &t, Some(&allowed)).is_err());
+        assert!(plan_cpus(&CpuRequest::Explicit(vec![1, 5]), &t, Some(&allowed)).is_ok());
+        assert!(plan_cpus(&CpuRequest::Auto, &t, Some(&[1, 2])).is_err());
     }
 }

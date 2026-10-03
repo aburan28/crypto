@@ -15,13 +15,15 @@
 //!
 //! The standard is `docs/ecbench/README.md`.
 
+use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, compare, db, host, isolab, isolation, methods, record, runner, spec, stats, workload,
+    audit, compare, db, host, isolab, isolation, methods, record, runner, signals, spec, stats,
+    workload,
 };
 
 #[derive(Parser)]
@@ -91,6 +93,13 @@ enum Cmd {
         /// Re-execute this many measured runs and require identical counts.
         #[arg(long, default_value_t = 0)]
         replay: usize,
+        /// Re-execute every measured deterministic run.
+        #[arg(long)]
+        replay_all: bool,
+        /// Accept a session marked `interrupted`: every integrity check
+        /// still applies, but not "every planned execution recorded".
+        #[arg(long)]
+        allow_interrupted: bool,
         /// Write the receipt here (it is also printed).
         #[arg(long)]
         out: Option<PathBuf>,
@@ -358,14 +367,31 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     max_psi,
                     ..Default::default()
                 },
-                exe: std::env::current_exe().map_err(|e| e.to_string())?,
+                // On Linux each child execs this very binary through
+                // /proc/self/exe, so a rebuild mid-session cannot swap it.
+                exe: if cfg!(target_os = "linux") {
+                    PathBuf::from("/proc/self/exe")
+                } else {
+                    std::env::current_exe().map_err(|e| e.to_string())?
+                },
             };
-            let s = runner::run_session(&text, &out, opts, |line| {
+            let result = runner::run_session(&text, &out, opts, |line| {
                 if !quiet {
-                    eprintln!("{line}");
+                    // A closed stderr must not panic a running session.
+                    let _ = writeln!(std::io::stderr(), "{line}");
                 }
-            })?;
-            eprintln!(
+            });
+            let s = match result {
+                Ok(s) => s,
+                Err(e) => {
+                    let _ = writeln!(std::io::stderr(), "ecbench: {e}");
+                    // 128 + signal, the shell's convention, when interrupted.
+                    let code = signals::interrupted().map(|sig| 128 + sig).unwrap_or(2);
+                    return Ok(ExitCode::from(code.clamp(1, 255) as u8));
+                }
+            };
+            let _ = writeln!(
+                std::io::stderr(),
                 "session {} {} -> {} ({} records: {:?})",
                 s.session_id,
                 s.status,
@@ -387,11 +413,21 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         Cmd::Verify {
             dir,
             replay,
+            replay_all,
+            allow_interrupted,
             out,
             exit_code,
         } => {
             let dir = PathBuf::from(isolab::expand_env(&dir)?);
-            let rep = audit::audit(&dir, replay)?;
+            let rep = audit::audit_with(
+                &dir,
+                if replay_all {
+                    audit::REPLAY_ALL
+                } else {
+                    replay
+                },
+                allow_interrupted,
+            )?;
             let text = serde_json::to_string_pretty(&rep).map_err(|e| e.to_string())? + "\n";
             if let Some(o) = out {
                 std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
@@ -601,13 +637,27 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                 let theory = any.and_then(|r| {
                     methods::expected_s(&arm.method.id, r.boundaries.automorphisms_available)
                 });
-                let refm = ref_arm.as_ref().and_then(|ra| {
-                    let v: Vec<f64> = recs
+                // S / reference over matched (workload, round) pairs, both
+                // verified: a ratio of sums, as `compare` forms it.
+                let ref_ratio = ref_arm.as_ref().and_then(|ra| {
+                    let refs: std::collections::BTreeMap<(&str, u32), f64> = recs
                         .iter()
                         .filter(|r| r.counts() && &r.arm == ra && r.workload.curve.slug == *slug)
-                        .filter_map(|r| r.cost.s)
+                        .filter_map(|r| {
+                            Some(((r.workload.workload_id.as_str(), r.round), r.cost.s?))
+                        })
                         .collect();
-                    stats::mean(&v)
+                    let (mut sa, mut sb) = (0.0, 0.0);
+                    for r in mine.iter().filter(|r| r.counts()) {
+                        if let (Some(v), Some(rv)) = (
+                            r.cost.s,
+                            refs.get(&(r.workload.workload_id.as_str(), r.round)),
+                        ) {
+                            sa += rv;
+                            sb += v;
+                        }
+                    }
+                    (sa > 0.0).then(|| sb / sa)
                 });
                 let mut levels: std::collections::BTreeMap<&str, u32> =
                     std::collections::BTreeMap::new();
@@ -634,10 +684,7 @@ fn table(dirs: &[PathBuf], reference: Option<&str>) -> Result<(), String> {
                         _ => None,
                     }),
                     o(mean.map(|m| m / floor)),
-                    o(match (mean, refm) {
-                        (Some(m), Some(r)) if r > 0.0 => Some(m / r),
-                        _ => None,
-                    }),
+                    o(ref_ratio),
                     if mine.iter().any(|r| r.cost.lower_bound) {
                         "yes"
                     } else {

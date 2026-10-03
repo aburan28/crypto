@@ -28,11 +28,51 @@ use crate::cryptanalysis::ecbench::canonical::sha256_hex;
 use crate::cryptanalysis::ecbench::host::{recompute_class, HostCapsule};
 use crate::cryptanalysis::ecbench::methods::MethodSpec;
 use crate::cryptanalysis::ecbench::record::{
-    check_line_seal, child_main, json_roundtrip, ChildInput, Record, CHILD_INPUT_SCHEMA,
+    check_line_seal, child_main, floor_s, grade, json_roundtrip, ChildInput, GradeInput, Record,
+    CHILD_INPUT_SCHEMA, GRADING_VERSION,
 };
 use crate::cryptanalysis::ecbench::runner::{read_record_lines, read_session, PlanDoc};
-use crate::cryptanalysis::ecbench::spec::{plan, Spec};
-use crate::cryptanalysis::ecbench::workload::CurveSpec;
+use crate::cryptanalysis::ecbench::spec::{plan, Arm, Spec};
+use crate::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
+
+/// Replay every measured deterministic run.
+pub const REPLAY_ALL: usize = usize::MAX;
+
+/// What makes a workload the workload: its id and every field the id is
+/// a hash of, plus the planted answer.  The registry-derived facts
+/// (`registered`, `ec1`, `curve_uid`) and the constructor's text are not
+/// in it, so registering a curve later never breaks an honest session.
+fn workload_identity(w: &Workload) -> impl PartialEq + std::fmt::Debug + '_ {
+    (
+        (&w.workload_id, &w.workload_sha256, &w.target, w.planted),
+        (
+            &w.curve.icv1,
+            w.curve.r,
+            w.curve.cofactor,
+            &w.curve.generator,
+        ),
+        (&w.target_law, w.target_seed, w.target_index),
+    )
+}
+
+/// What makes an arm the arm: its name, role and method identity, not the
+/// method's descriptive `entry` text.
+fn arm_identity(a: &Arm) -> impl PartialEq + std::fmt::Debug + '_ {
+    (
+        &a.name,
+        a.role,
+        &a.method.id,
+        &a.method.params,
+        &a.method.method_id,
+        &a.method.method_sha256,
+    )
+}
+
+/// Equal to within a few ulps of a parsed float (records are parsed with a
+/// float reader that is not always correctly rounded).
+fn close(a: f64, b: f64) -> bool {
+    a == b || (a - b).abs() <= 1e-12 * a.abs().max(b.abs())
+}
 
 pub const AUDIT_SCHEMA: &str = "ecbench.audit/v1";
 
@@ -48,11 +88,19 @@ pub struct Replay {
 pub struct AuditReport {
     pub schema: String,
     pub session_id: String,
+    /// The session's own status: `complete`, or `interrupted` when that
+    /// was accepted.
+    #[serde(default)]
+    pub session_status: String,
     pub ok: bool,
     pub problems: Vec<String>,
     pub checks: BTreeMap<String, bool>,
     pub records: u64,
     pub verified_records: u64,
+    /// Every run's level was recomputed from its observations (the
+    /// session was graded under this binary's rules).
+    #[serde(default)]
+    pub regraded: bool,
     pub replays: Vec<Replay>,
     /// SHA-256 of every file the audit read.
     pub files: BTreeMap<String, String>,
@@ -67,8 +115,22 @@ fn file_sha(dir: &Path, name: &str, files: &mut BTreeMap<String, String>) -> Opt
     Some(h)
 }
 
-/// Audit `dir`; replay up to `replay` deterministic measured runs.
+/// Audit `dir`; replay up to `replay` deterministic measured runs
+/// ([`REPLAY_ALL`] for every one).
 pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
+    audit_with(dir, replay, false)
+}
+
+/// [`audit`], optionally accepting an `interrupted` session: it is held
+/// to every integrity check (hashes, seals, plan, answers, derived
+/// figures), with "every planned execution recorded" replaced by "every
+/// record it says it wrote".  A session that claims `complete` gets no
+/// such relaxation.
+pub fn audit_with(
+    dir: &Path,
+    replay: usize,
+    allow_interrupted: bool,
+) -> Result<AuditReport, String> {
     let mut problems: Vec<String> = Vec::new();
     let mut checks: BTreeMap<String, bool> = BTreeMap::new();
     let mut files = BTreeMap::new();
@@ -100,15 +162,16 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     );
     let rec_sha = file_sha(dir, "records.jsonl", &mut files);
     let complete = session.status == "complete";
+    let accepted_interruption = allow_interrupted && session.status == "interrupted";
     check(
         "records_hash",
-        !complete || rec_sha == session.records_sha256,
+        !(complete || accepted_interruption) || rec_sha == session.records_sha256,
         "records.jsonl does not hash to session.records_sha256".into(),
         &mut problems,
     );
     check(
         "session_complete",
-        complete,
+        complete || accepted_interruption,
         format!("session status is `{}`", session.status),
         &mut problems,
     );
@@ -144,8 +207,16 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     );
     check(
         "workloads",
-        p.workloads == doc.workloads,
-        "the spec rebuilds different workloads".into(),
+        p.workloads.len() == doc.workloads.len()
+            && p.workloads
+                .iter()
+                .zip(&doc.workloads)
+                .all(|(a, b)| workload_identity(a) == workload_identity(b))
+            && doc
+                .workloads
+                .iter()
+                .all(|w| w.recompute_id().ok().as_ref() == Some(&w.workload_id)),
+        "the spec rebuilds different workloads, or a workload id does not recompute".into(),
         &mut problems,
     );
     check(
@@ -156,7 +227,11 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     );
     check(
         "arms",
-        p.arms == doc.arms,
+        p.arms.len() == doc.arms.len()
+            && p.arms
+                .iter()
+                .zip(&doc.arms)
+                .all(|(a, b)| arm_identity(a) == arm_identity(b)),
         "the spec resolves to different methods".into(),
         &mut problems,
     );
@@ -166,9 +241,11 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
     let records: Vec<Record> = lines.iter().map(|(_, r)| r.clone()).collect();
     check(
         "record_count",
-        !complete
-            || (records.len() as u64 == session.records_written
-                && records.len() == p.executions.len()),
+        if complete {
+            records.len() as u64 == session.records_written && records.len() == p.executions.len()
+        } else {
+            records.len() as u64 == session.records_written && records.len() <= p.executions.len()
+        },
         format!(
             "{} records, {} written, {} planned",
             records.len(),
@@ -207,11 +284,35 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
                 "{tag}: round, warm-up or seed differs from the plan"
             ));
         }
-        if r.arm != arm.name || r.method != arm.method {
+        if r.arm != arm.name
+            || r.method.method_id != arm.method.method_id
+            || r.method.method_sha256 != arm.method.method_sha256
+        {
             record_problems.push(format!("{tag}: arm or method differs from the plan"));
         }
-        if &r.workload != w {
+        if workload_identity(&r.workload) != workload_identity(w) {
             record_problems.push(format!("{tag}: workload differs from the plan"));
+        }
+        // Every derived figure must follow from the record's own counts:
+        // a hand-edited S, ratio or flag fails here even if resealed.
+        let floor = floor_s(r.boundaries.automorphisms_available);
+        let sqrt_r = (w.curve.r as f64).sqrt();
+        let derived_ok = r.boundaries.automorphisms_available == w.curve.automorphisms_available
+            && close(r.boundaries.floor_s, floor)
+            && match (r.cost.total_gae, r.cost.s, r.boundaries.ratio_to_floor) {
+                (Some(t), Some(sv), Some(q)) => close(sv, t / sqrt_r) && close(q, sv / floor),
+                (None, None, None) => true,
+                _ => false,
+            }
+            && r.cost.lower_bound == !r.cost.unpriced.is_empty()
+            && (r.cost.total_gae.is_none()
+                || r.cost.deterministic == r.cost.nondeterminism.is_empty())
+            && r.run_id
+                .starts_with(&format!("{}{}R", r.method.method_id, w.workload_id));
+        if !derived_ok {
+            record_problems.push(format!(
+                "{tag}: S, floor, ratio, lower-bound flag or run id does not follow from the record"
+            ));
         }
         // Re-check the answer here.
         let inst = p.instance(ex.workload);
@@ -235,6 +336,36 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
             let name = format!("exec/{:06}.stderr", r.seq);
             if file_sha(dir, &name, &mut files).as_deref() != Some(h) {
                 record_problems.push(format!("{tag}: {name} missing or altered"));
+            }
+        }
+    }
+    // Regrade every run from its own observations, when the session was
+    // graded under the rules this binary applies.
+    let regraded = session.grading_version == GRADING_VERSION;
+    if regraded {
+        for r in &records {
+            let g = grade(&GradeInput {
+                plan: session.cpu_plan.as_ref(),
+                preflight: session.preflight.as_ref(),
+                eviction: session.eviction.as_ref(),
+                runner_on_run_cpu: session.runner_on_run_cpu,
+                capsule: &host,
+                thresholds: &session.options.thresholds,
+                placement: &r.isolation.placement,
+                before: &r.isolation.before,
+                after: &r.isolation.after,
+                timing: &r.time,
+                hz: session.ticks_per_second as f64,
+            });
+            if g.level != r.isolation.level || g.blockers != r.isolation.blockers {
+                record_problems.push(format!(
+                    "record seq {}: graded {} with {} blockers, its observations give {} with {}",
+                    r.seq,
+                    r.isolation.level.name(),
+                    r.isolation.blockers.len(),
+                    g.level.name(),
+                    g.blockers.len()
+                ));
             }
         }
     }
@@ -326,6 +457,12 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
                     if rep.factor_base != r.factor_base {
                         diffs.push("factor_base");
                     }
+                    if rep.unpriced != r.cost.unpriced
+                        || rep.deterministic != r.cost.deterministic
+                        || Some(rep.automorphisms_used) != r.boundaries.automorphisms_used
+                    {
+                        diffs.push("unpriced, determinism or automorphisms");
+                    }
                     (
                         diffs.is_empty(),
                         if diffs.is_empty() {
@@ -355,12 +492,14 @@ pub fn audit(dir: &Path, replay: usize) -> Result<AuditReport, String> {
         .map(|b| sha256_hex(&b));
     Ok(AuditReport {
         schema: AUDIT_SCHEMA.into(),
+        session_status: session.status.clone(),
         session_id: session.session_id,
         ok: problems.is_empty(),
         problems,
         checks,
         records: records.len() as u64,
         verified_records: verified,
+        regraded,
         replays,
         files,
         auditor_binary_sha256,

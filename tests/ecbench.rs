@@ -216,6 +216,183 @@ fn a_factor_base_dump_carries_its_points() {
         .starts_with("FB1h"));
 }
 
+fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
+    let spec = dir.join("spec.json");
+    if !spec.exists() {
+        std::fs::write(&spec, SPEC).unwrap();
+    }
+    let mut args = vec![
+        "run",
+        "--spec",
+        spec.to_str().unwrap(),
+        "--out",
+        out.to_str().unwrap(),
+        "--cpus",
+        "none",
+        "--lock",
+        Box::leak(lock(dir).into_boxed_str()),
+        "--quiet",
+    ];
+    args.extend_from_slice(extra);
+    let (ok, _, err) = ecbench(&args);
+    (ok, err)
+}
+
+#[test]
+fn two_sessions_queued_for_one_directory_cannot_both_write_it() {
+    // Both start before either holds the lock; the second waits, then must
+    // fail on the atomic mkdir instead of writing over the first.
+    let dir = scratch("race");
+    std::fs::write(dir.join("spec.json"), SPEC).unwrap();
+    let out = dir.join("s");
+    let spawn = || {
+        Command::new(exe())
+            .args([
+                "run",
+                "--spec",
+                dir.join("spec.json").to_str().unwrap(),
+                "--out",
+                out.to_str().unwrap(),
+                "--cpus",
+                "none",
+                "--lock",
+                &lock(&dir),
+                "--wait",
+                "--quiet",
+            ])
+            .spawn()
+            .unwrap()
+    };
+    let (mut a, mut b) = (spawn(), spawn());
+    let (sa, sb) = (a.wait().unwrap(), b.wait().unwrap());
+    assert!(
+        sa.success() != sb.success(),
+        "exactly one of the two queued sessions may succeed"
+    );
+    let (ok, stdout, err) = ecbench(&["verify", "--dir", out.to_str().unwrap(), "--exit-code"]);
+    assert!(ok, "the surviving session must audit clean: {err} {stdout}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_candidate_session_compares_against_a_baseline_session() {
+    // Two sessions of one spec (a baseline and a candidate binary, here
+    // the same one): pairs match by (workload, round) across sessions, the
+    // ratio is exactly 1 and the interval exists.
+    let dir = scratch("cross");
+    let (a, b) = (dir.join("a"), dir.join("b"));
+    assert!(run_spec(&dir, &a, &[]).0);
+    assert!(run_spec(&dir, &b, &[]).0);
+    let (ok, stdout, err) = ecbench(&[
+        "compare",
+        "--dir",
+        a.to_str().unwrap(),
+        "--a",
+        "bsgs",
+        "--b-dir",
+        b.to_str().unwrap(),
+        "--b",
+        "bsgs",
+        "--json",
+    ]);
+    assert!(ok, "{err}");
+    let c: Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(c["ops"]["ratio_b_over_a"], 1.0);
+    assert_eq!(c["ops"]["ci95"], serde_json::json!([1.0, 1.0]));
+    assert_eq!(c["ops"]["same_seeds"], true);
+    assert_eq!(c["ops"]["status"], "ok");
+    assert_eq!(c["wall"]["status"], "refused");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_resealed_hand_edited_figure_is_caught() {
+    use crypto_lib::cryptanalysis::ecbench::canonical::sha256_hex;
+    use crypto_lib::cryptanalysis::ecbench::record::Record;
+    use crypto_lib::cryptanalysis::ecbench::runner::Session;
+    let dir = scratch("forge");
+    let out = dir.join("s");
+    assert!(run_spec(&dir, &out, &[]).0);
+    // Halve one verified run's S, reseal the record and rehash the file:
+    // every hash agrees, but S no longer follows from the counts.
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut lines: Vec<String> = text.lines().map(String::from).collect();
+    let i = lines
+        .iter()
+        .position(|l| l.contains("\"warmup\":false") && l.contains("\"status\":\"verified\""))
+        .unwrap();
+    let mut rec: Record = serde_json::from_str(&lines[i]).unwrap();
+    rec.cost.s = rec.cost.s.map(|s| s / 2.0);
+    lines[i] = rec.seal();
+    let body = lines.join("\n") + "\n";
+    std::fs::write(out.join("records.jsonl"), &body).unwrap();
+    let mut session: Session =
+        serde_json::from_str(&std::fs::read_to_string(out.join("session.json")).unwrap()).unwrap();
+    session.records_sha256 = Some(sha256_hex(body.as_bytes()));
+    std::fs::write(
+        out.join("session.json"),
+        serde_json::to_string_pretty(&session).unwrap() + "\n",
+    )
+    .unwrap();
+    let (ok, stdout, _) = ecbench(&["verify", "--dir", out.to_str().unwrap(), "--exit-code"]);
+    assert!(!ok);
+    assert!(
+        stdout.contains("does not follow from the record"),
+        "{stdout}"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn the_database_refuses_a_slug_with_another_identity() {
+    let Ok(probe) = Command::new("sqlite3").arg("-version").output() else {
+        eprintln!("sqlite3 not installed; skipped");
+        return;
+    };
+    if !probe.status.success() {
+        return;
+    }
+    let dir = scratch("db");
+    let out = dir.join("s");
+    assert!(run_spec(&dir, &out, &[]).0);
+    let (ok, sql, err) = ecbench(&["db", "sql", out.to_str().unwrap()]);
+    assert!(ok, "{err}");
+    let db = dir.join("t.db");
+    let load = |sql: &str| {
+        let mut child = Command::new("sqlite3")
+            .args(["-bail", db.to_str().unwrap()])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        use std::io::Write;
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(sql.as_bytes())
+            .unwrap();
+        child.wait_with_output().unwrap().status.success()
+    };
+    assert!(load(&sql), "the first load must succeed");
+    assert!(
+        load(&sql),
+        "loading the same session again must change nothing and succeed"
+    );
+    // The same slug arriving on another ICV1 string must be an error.
+    let slug = "icv1-fp16-t295-8d3c3165";
+    assert!(sql.contains(slug));
+    let forged = format!(
+        "INSERT INTO curves VALUES ('{slug}', 'ICV1:forged', 'prime', NULL, 16, '1', '1', '1', 1.0, 2, 1.0, 1) ON CONFLICT (slug) DO NOTHING;"
+    );
+    assert!(
+        !load(&forged),
+        "a conflicting identity must not be silently dropped"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 fn copy_dir(from: &Path, to: &Path) {
     std::fs::create_dir_all(to).unwrap();
     for e in std::fs::read_dir(from).unwrap() {
