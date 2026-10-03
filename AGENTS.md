@@ -288,6 +288,56 @@ The update rides in the commit or pull request that lands the
 measurement.  It is not a follow-up task, and "the page is out of date"
 is not a state this repository has.
 
+#### 7a. Every result lands on the dashboard, in the same PR
+
+The scoreboard is a dashboard with several panels that each carry a
+view of the latest results, and a result that reaches one panel and not
+the others leaves the page contradicting itself.  **Any PR that lands a
+new measurement, a reclassification, a corrected reference or a
+withdrawn claim updates every panel that cites that kind of result,
+before it merges.**  "Latest results" means the newest verified figure
+in each regime, with the figure it supersedes kept as "was".
+
+Which panels a result owes, by kind:
+
+| result kind | panels that must change |
+|:--|:--|
+| any IC/rho ratio, cold or online, elliptic or not | the progress chart (`#lab-progress`): a new point in its series, dated the day the PR merges, with reference quality, class, anchor and source |
+| a new best in any regime of the best-of table (`#lab-best`) | that row, the old figure kept as "was"; a new regime is a new row |
+| a cross-method `ecbench` session (§12) | the every-candidate panel (`#lab-ecbench-all`) or a new panel in its unit, and a progress-chart point for its best cold one-target IC cell |
+| a tournament or autolab round | the round's own panel, the reference-history table where the reference changed, and the chart |
+| a boundary, exponent or phase priced for the first time | the exponent panel and the boundary facts (§7 above) |
+| a verdict change | the sentence at the top of the page and the best-of table's first row |
+
+Rules that make this checkable:
+
+- **The chart's data is one file.** `docs/ic/progress-timeline.json` is
+  canonical for the progress chart; the copy embedded in the page
+  (`<script id="progress-data">`) and the "every plotted point" table
+  are regenerated from it, never edited on their own.  CI
+  (`scripts/site/test_build.py`) fails the build when the embedded copy
+  differs from the file or a point in the file is missing from the
+  table.  Add a point to the file, re-embed, add its row.
+- **A point per result, not per PR.** A PR that lands two results in two
+  regimes adds two points.  A PR that only re-prices an existing figure
+  adds a point with the `accounting` class and keeps the old point.
+- **Dates are merge dates.** The chart shows when a figure landed on
+  `main`, so a point's date is the day its PR merges, and the file's
+  `updated` field is never older than its newest point.
+- **The page is republished when it changes.** GitHub Pages republishes
+  `/scoreboard/` from `main` on every merge, automatically.  Any other
+  published copy (a claude.ai artifact, a snapshot sent to someone) is
+  republished from the canonical file in the same task that changed it,
+  or it is named as stale where it is linked.
+- **Reviewing a PR means reading the dashboard diff.** A reviewer, human
+  or agent, checks the scoreboard change against the result's own
+  frozen files before approving: the number on the page is the number in
+  the session, table or report it links to, and nothing on the page is
+  computed from another number on the page.
+
+A PR that lands a result without its dashboard update is incomplete, and
+the finish-and-merge authorization above does not cover merging it.
+
 ### 8. Use the frozen benchmark to establish end-to-end speedups
 
 Every index-calculus performance iteration must use the
