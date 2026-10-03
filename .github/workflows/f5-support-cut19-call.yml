@@ -1,15 +1,8 @@
 name: Matrix-F5 fixed cut-19 complete call
 
 on:
-  pull_request:
-    paths:
-      - 'src/cryptanalysis/matrix_f5_f2.rs'
-      - 'src/cryptanalysis/gf2_elim.rs'
-      - 'examples/f4_f2_bench.rs'
-      - 'examples/f5_support_cut19_*.rs'
-      - 'examples/f5_support_split_cpus.rs'
-      - 'research/f5_support_cut19_call_20261002/**'
-      - '.github/workflows/f5-support-cut19-call.yml'
+  # Archived preregistered gate; its failing physical result and receipts are
+  # in research/f5_support_cut19_call_20261002/LINUX_RESULT.md.
   workflow_dispatch:
 
 permissions:

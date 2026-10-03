@@ -564,7 +564,9 @@ fn certify_support_split_or_echelon(
         (rank, false, inner, outer)
     };
     if inner_variables > 63
-        || cols.windows(2).any(|pair| pair[0].count_ones() < pair[1].count_ones())
+        || cols
+            .windows(2)
+            .any(|pair| pair[0].count_ones() < pair[1].count_ones())
     {
         return fallback(matrix, word_ops, 0, 0);
     }
@@ -924,12 +926,8 @@ pub fn matrix_f5_f2_with_form_timed(
     let rank = if support_split {
         timings.support_split_attempted = true;
         timings.support_split_inner_vars = 19;
-        let (rank, used, inner_rows, outer_rows) = certify_support_split_or_echelon(
-            &mut matrix,
-            &cols,
-            19,
-            &mut word_ops,
-        );
+        let (rank, used, inner_rows, outer_rows) =
+            certify_support_split_or_echelon(&mut matrix, &cols, 19, &mut word_ops);
         timings.support_split_original_used = used;
         timings.support_split_inner_rows = inner_rows;
         timings.support_split_outer_rows = outer_rows;
@@ -1040,7 +1038,12 @@ mod tests {
         // Degree-descending columns, with the first degree-4 monomial
         // wholly inside variables 0..4 and the other two outside.
         let cols = [0b00_1111, 0b01_0111, 0b01_1011, 0b00_0111, 0b00_0011];
-        let independent = vec![vec![0b0_0011], vec![0b0_0010], vec![0b0_1000], vec![0b1_0000]];
+        let independent = vec![
+            vec![0b0_0011],
+            vec![0b0_0010],
+            vec![0b0_1000],
+            vec![0b1_0000],
+        ];
         let mut got = independent.clone();
         let mut ops = 0;
         let (rank, used, inner, outer) =
@@ -1052,13 +1055,18 @@ mod tests {
         dependent.push(independent[0].clone());
         let mut got = dependent.clone();
         let mut ops = 0;
-        let (rank, used, _, _) =
-            certify_support_split_or_echelon(&mut got, &cols, 4, &mut ops);
+        let (rank, used, _, _) = certify_support_split_or_echelon(&mut got, &cols, 4, &mut ops);
         assert_eq!((rank, used), (4, false));
         let mut want = dependent;
         let mut ignored = 0;
-        assert_eq!(crate::cryptanalysis::gf2_elim::rref_counted(&mut want, cols.len(), &mut ignored), rank);
-        assert_eq!(crate::cryptanalysis::gf2_elim::rref_counted(&mut got, cols.len(), &mut ignored), rank);
+        assert_eq!(
+            crate::cryptanalysis::gf2_elim::rref_counted(&mut want, cols.len(), &mut ignored),
+            rank
+        );
+        assert_eq!(
+            crate::cryptanalysis::gf2_elim::rref_counted(&mut got, cols.len(), &mut ignored),
+            rank
+        );
         assert_eq!(got, want);
 
         // A zero row also forces the exact fallback.
@@ -1085,8 +1093,14 @@ mod tests {
         }
         cols.sort_unstable();
         assert_eq!(cols.len(), 70);
-        let inner = cols.iter().position(|&mask| mask & !((1 << 6) - 1) == 0).unwrap();
-        let outer = cols.iter().rposition(|&mask| mask & !((1 << 6) - 1) != 0).unwrap();
+        let inner = cols
+            .iter()
+            .position(|&mask| mask & !((1 << 6) - 1) == 0)
+            .unwrap();
+        let outer = cols
+            .iter()
+            .rposition(|&mask| mask & !((1 << 6) - 1) != 0)
+            .unwrap();
         let mut matrix = vec![vec![0u64; 2]; 2];
         matrix[0][inner / 64] = 1u64 << (inner % 64);
         matrix[1][outer / 64] = 1u64 << (outer % 64);

@@ -1,16 +1,8 @@
 name: Matrix-F5 cut-19 rank-width-6 complete call
 
 on:
-  pull_request:
-    paths:
-      - 'src/cryptanalysis/matrix_f5_f2.rs'
-      - 'src/cryptanalysis/gf2_elim.rs'
-      - 'examples/f4_f2_bench.rs'
-      - 'examples/f5_support_cut19_*.rs'
-      - 'examples/f5_support_split_cpus.rs'
-      - 'research/f5_support_cut19_call_20261002/**'
-      - 'research/f5_support_rank_bits_20261002/**'
-      - '.github/workflows/f5-support-rank6-call.yml'
+  # Archived preregistered gate; its failing physical result and receipts are
+  # in research/f5_support_rank_bits_20261002/LINUX_RESULT.md.
   workflow_dispatch:
 
 permissions:

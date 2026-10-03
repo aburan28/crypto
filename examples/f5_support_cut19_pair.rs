@@ -57,6 +57,10 @@ fn seed_for(workload: &str) -> u64 {
         "holdout_a" => 0xbadc_0de1,
         "holdout_b" => 0x5eed_2026,
         "holdout_c" => 0xf5c0_2a28,
+        "confirm_a" => 0xc0d4_1ab3_8b87_2c0d,
+        "confirm_b" => 0xae05_fd63_76bf_7a39,
+        "confirm_c" => 0x467a_3257_c4d7_8bba,
+        "confirm_d" => 0xff83_e4df_6657_b12f,
         _ => panic!("unknown workload: {workload}"),
     }
 }
