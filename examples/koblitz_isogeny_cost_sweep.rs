@@ -188,6 +188,8 @@ fn main() {
             yield_probes: env_usize("KOBLITZ_SWEEP_YIELD_PROBES", defaults.yield_probes),
             // A class named by the walk has `#E` certified on every edge.
             known_order: (census.scanned == 0).then_some(census.target_order as u64),
+            cofactor_tolerant: std::env::var("KOBLITZ_SWEEP_COFACTOR_TOLERANT")
+                .is_ok_and(|v| v == "1"),
             ..defaults
         };
         let t1 = Instant::now();
@@ -209,11 +211,22 @@ fn main() {
                 let mut rest: Vec<u64> =
                     census.members.iter().copied().filter(|&a| a != 1).collect();
                 rest.sort_by_key(|&a| mix(a));
-                let mut pick: Vec<u64> = std::iter::once(1)
-                    .filter(|_| census.members.contains(&1))
-                    .chain(rest)
-                    .take(k)
-                    .collect();
+                // `KOBLITZ_SWEEP_SAMPLE_OFFSET=o` takes ranks o..o+k of the
+                // same ranking instead, without forcing the Koblitz curve in:
+                // a hold-out sample disjoint from the offset-0 one.
+                let offset: usize = std::env::var("KOBLITZ_SWEEP_SAMPLE_OFFSET")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(0);
+                let mut pick: Vec<u64> = if offset == 0 {
+                    std::iter::once(1)
+                        .filter(|_| census.members.contains(&1))
+                        .chain(rest)
+                        .take(k)
+                        .collect()
+                } else {
+                    rest.into_iter().skip(offset).take(k).collect()
+                };
                 pick.sort_unstable();
                 println!(
                     "   sampled {} of {} members (KOBLITZ_SWEEP_SAMPLE)",
@@ -226,9 +239,14 @@ fn main() {
         };
         let (rows, summary) = match std::env::var_os("KOBLITZ_SWEEP_CHECKPOINT") {
             Some(dir) => {
+                let off = std::env::var("KOBLITZ_SWEEP_SAMPLE_OFFSET").unwrap_or_default();
+                let ct = if opts.cofactor_tolerant { "_ct" } else { "" };
                 let tag = match sample {
-                    Some(k) => format!("sweep_{n}_{a2}_l{l}_s{k}.jsonl"),
-                    None => format!("sweep_{n}_{a2}.jsonl"),
+                    Some(k) => format!(
+                        "sweep_{n}_{a2}_l{l}_s{k}{}{off}{ct}.jsonl",
+                        if off.is_empty() { "" } else { "_o" }
+                    ),
+                    None => format!("sweep_{n}_{a2}{ct}.jsonl"),
                 };
                 let path = std::path::PathBuf::from(dir).join(tag);
                 sweep_with_checkpoint(n, &irr, a2, &measured_members, &opts, &path)
