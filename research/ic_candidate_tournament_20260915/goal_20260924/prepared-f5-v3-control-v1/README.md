@@ -43,3 +43,10 @@ query evidence stays attached to the accepted preparation; there are zero new
 ordinary queries in this job. Headline admissibility, fresh target qualification,
 matched incumbent/rho speedup, promotion and full goal completion remain false
 or unknown. All older registrations and all three confirmation sets stay closed.
+
+## Terminal execution
+
+The preregistration was accepted in PR #1159. Its one invocation is now consumed
+and closed: [RESULT.md](RESULT.md) records complete source-bound recovery, the
+original failed target attempts and exact frozen archive replay. Do not execute
+this registration again. Fresh comparison and the full goal remain pending.

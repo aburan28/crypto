@@ -14,7 +14,31 @@ do not create a parallel scoreboard or redefine historical protocols.
 
 ## Begin or resume
 
-Run `python3.12 research/ic_candidate_tournament_20260915/autolab.py doctor`.
+**The current `AGENTS.md` requires native research execution and verification.**
+The Python scripts named later in this skill describe historical evidence and
+mathematical contracts; do not execute or extend them for new research. Port the
+relevant execution path to Rust before continuing comparisons. Preserve the
+frozen sources, identities, failures and Python provenance.
+
+For the disclosed n17 SAT source/preparation control, use the existing native
+harness:
+
+```sh
+rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o /tmp/ic-native-busy
+/tmp/ic-native-busy busy -- cargo build --locked --bin icprog --bin isolated_bench
+target/debug/icprog sat-source-replay --root . --out /tmp/ic-native-sat-replay.json
+```
+
+Use a new output path: replay refuses to overwrite evidence. This command checks
+the retained source witness, ordinary rows, exact geometric negatives, rank and
+logs. It launches no solver and establishes neither new yield nor performance.
+The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
+separate this replay from the pending native controller and fresh comparison.
+On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
+the historical wrapper; macOS supports busy only. Timed affinity/reservation
+still requires the Linux implementation. Do not infer a quiet measurement host
+from a successful busy lock.
+
 Inspect the latest local round's contract, source identity, summary and failures.
 Archived winners must be restored and identified by their candidate's
 `source_directory` and configuration, not assumed to be `round/source`.
@@ -31,6 +55,9 @@ algorithmic failure. The separate Crypto Autoresearcher Coordinator harness is
 not required by this repository-local runner.
 
 ## Quality and accounting first
+
+The following historical adapters and commands remain retained documentation.
+Their invocation instructions are superseded by the native requirement above.
 
 Historical static SAT registrations replay through
 [`frozen_sat_runtime.py`](../../../research/ic_candidate_tournament_20260915/frozen_sat_runtime.py)
@@ -181,8 +208,8 @@ adds native input v2, runtime v3 and frozen transport v2. Its retained corrected
 worker includes all root and registry source bytes; it cannot enter the immutable
 old input gate. The new helper must have been frozen before execution. Import,
 relocation and mocked native controls are implementation evidence only. This
-implementation has no scientific native invocation; publish a separate new frozen
-protocol and external execution seal before any actual solve. Never substitute
+implementation now has one consumed, complete disclosed native control in
+[the v3 result](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md). Its known target/seed and three attempts independently replay with its own frozen helper. Never execute that registration again; its original failed attempts remain charged. Publish a separately frozen protocol and external execution seal before any later solve. Never substitute
 these assets or helper into old registrations. Fresh paired gates remain pending.
 
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.

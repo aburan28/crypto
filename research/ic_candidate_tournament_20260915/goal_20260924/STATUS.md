@@ -469,3 +469,13 @@ and cross-version rejection pass, together with 36 focused old/new runtime and
 transport controls. Actual isolated imports and synthetic transport children
 execute no native solver. A newly frozen native scientific control is still
 required; its complete result and fresh paired qualification are not established.
+
+The [corrected prepared F5 disclosed control](prepared-f5-v3-control-v1/RESULT.md)
+now completes under its source-bound runtime and own preexecution-frozen helper.
+PR #1159 accepted its external registration before its one invocation. Three
+target attempts, two exact negatives and scalar 24886 independently replay;
+all original bytes restore and audit identically. This known target/seed control
+is consumed and closed, not fresh qualification or a measured speedup. The raw
+11,955,969,917 ns interval includes every failed attempt and scalar replay;
+calibration and matched reference are absent. SAT and fresh paired gates remain
+open, and all historical registrations/confirmation sets remain closed.
