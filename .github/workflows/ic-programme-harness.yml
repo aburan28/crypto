@@ -27,6 +27,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'research/sat_factor_base_review_20260908/autolab/protocol.json'
       - 'docs/ic/boundary_targets.json'
@@ -45,6 +46,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/**'
       - 'tests/icprog.rs'
       - '.github/workflows/ic-programme-harness.yml'
@@ -96,6 +98,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
