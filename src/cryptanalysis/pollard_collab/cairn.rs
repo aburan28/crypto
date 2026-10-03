@@ -397,6 +397,75 @@ pub struct CairnStats {
     /// verification here.
     pub log_dps: u64,
     pub log_rejected: u64,
+    /// Heartbeats the node accepted for its dashboard. See
+    /// [`CairnTransport::heartbeat`].
+    pub heartbeats: u64,
+}
+
+/// Seconds between heartbeats. The node lists a worker as live for 180 s
+/// after its last one, so this leaves room for a missed tick or two, and
+/// a post every half minute is nothing next to a `GET /log`.
+pub const HEARTBEAT_SECS: u64 = 30;
+
+/// What a heartbeat names as its client, so a dashboard can tell this
+/// transport from the GPU fleet or the Python reference loop.
+const CLIENT: &str = concat!("crypto rho-collab/", env!("CARGO_PKG_VERSION"));
+
+/// What this process has walked since it started, for the heartbeat it
+/// posts to the node's dashboard (`POST /progress` on cairn).
+///
+/// Counted from this process's own lanes as their check-ins pass through
+/// [`CairnTransport::publish`], never from the merged state: the dashboard
+/// puts a worker's heartbeat beside what the log paid *that worker*, and a
+/// figure that summed every peer's steps would be neither. A unit's
+/// `steps` in a check-in is what the lane walked on it since it took it,
+/// so the latest report per unit is this session's total for that unit.
+#[derive(Clone, Debug, Default)]
+struct Session {
+    unit_steps: BTreeMap<u64, u64>,
+    unit_dps: BTreeMap<u64, u64>,
+    unit_dead: BTreeMap<u64, u64>,
+    last_unit: Option<u64>,
+    /// `(at, steps)` of recent heartbeats, oldest first, for the rate.
+    samples: Vec<(u64, u64)>,
+    last_heartbeat_at: Option<u64>,
+    /// The node answered 404 for `/progress`: it predates the dashboard,
+    /// and asking again every half minute would only fill its log.
+    unsupported: bool,
+}
+
+impl Session {
+    fn observe(&mut self, ci: &CheckIn) {
+        for u in &ci.units {
+            let bump = |m: &mut BTreeMap<u64, u64>, v: u64| {
+                let e = m.entry(u.unit).or_insert(0);
+                *e = (*e).max(v);
+            };
+            bump(&mut self.unit_steps, u.steps);
+            bump(&mut self.unit_dps, u.dps);
+            bump(&mut self.unit_dead, u.dead_trails);
+            self.last_unit = Some(u.unit);
+        }
+    }
+
+    fn steps(&self) -> u64 {
+        self.unit_steps.values().sum()
+    }
+
+    /// Steps per second over the samples of the last hour, or nothing
+    /// until two of them are at least [`HEARTBEAT_SECS`] apart.
+    fn rate(&self, now: u64) -> Option<u64> {
+        let (last_at, last_steps) = *self.samples.last()?;
+        let base = self
+            .samples
+            .iter()
+            .find(|(at, _)| now.saturating_sub(*at) <= 3600)?;
+        let span = last_at.saturating_sub(base.0);
+        if span < HEARTBEAT_SECS || last_steps < base.1 {
+            return None;
+        }
+        Some((last_steps - base.1) / span)
+    }
 }
 
 /// One node's view of the objective, plus its outbox.
@@ -408,6 +477,7 @@ pub struct CairnTransport {
     /// DP keys the log already holds an accepted claim for.
     log_keys: HashSet<String>,
     stats: CairnStats,
+    session: Session,
 }
 
 /// What one publish did.
@@ -450,6 +520,7 @@ impl CairnTransport {
             revealed,
             log_keys: HashSet::new(),
             stats: CairnStats::default(),
+            session: Session::default(),
         })
     }
 
@@ -478,6 +549,7 @@ impl CairnTransport {
     /// Commit every new distinguished point in a check-in (and the
     /// solution, when an answer objective is configured).
     pub fn publish(&mut self, ctx: &JobContext, ci: &CheckIn) -> Result<PublishReport, String> {
+        self.session.observe(ci);
         let mut rep = PublishReport::default();
         for rec in &ci.dps {
             let artifact = canonical_artifact(ctx, rec)?;
@@ -498,6 +570,79 @@ impl CairnTransport {
             }
         }
         Ok(rep)
+    }
+
+    /// Tell the node what this process is doing, for the dashboard its
+    /// reader shows at `/ui/task?id=<objective>`.
+    ///
+    /// Rate-limited to one post per [`HEARTBEAT_SECS`]: call it every tick
+    /// and it decides. Returns `Ok(false)` when nothing was sent -- not
+    /// due yet, or the node has no `/progress` route (one built before the
+    /// dashboard), which it remembers rather than asking again.
+    ///
+    /// A heartbeat is **not a record**. cairn holds it in memory, labels it
+    /// unverified, never writes it to the log, and pays nothing for it; the
+    /// settled half of the same page comes from the claims this transport
+    /// commits and reveals. So the fields are this process's own counters,
+    /// honestly scoped: `steps`, `trails` and `capped` are what its lanes
+    /// walked this session; `units_pending` is commitments waiting on the
+    /// epoch to turn, since a point here is committed the moment a lane
+    /// reports it; `units_submitted` is reveals. There is no `units` slice,
+    /// because this protocol leases units among its own peers
+    /// ([`SharedState::next_unit`]) rather than taking a slice from the
+    /// node, and no `trail_bits`, because a version 1 job has no seed
+    /// layout to bin by.
+    pub fn heartbeat(&mut self) -> Result<bool, String> {
+        let now = (self.cfg.clock)();
+        if self.session.unsupported {
+            return Ok(false);
+        }
+        if let Some(last) = self.session.last_heartbeat_at {
+            if now.saturating_sub(last) < HEARTBEAT_SECS {
+                return Ok(false);
+            }
+        }
+        // Stamped before the post, so a node that is down is retried on the
+        // heartbeat cadence rather than on every tick.
+        self.session.last_heartbeat_at = Some(now);
+        let steps = self.session.steps();
+        self.session.samples.push((now, steps));
+        if self.session.samples.len() > 64 {
+            self.session.samples.remove(0);
+        }
+        let mut body = json!({
+            "objective_id": self.cfg.objective_id,
+            "worker": self.cfg.submitter.name(),
+            "epoch": epoch_of(now, self.cfg.epoch_secs),
+            "steps": steps,
+            "trails": self.session.unit_dps.values().sum::<u64>(),
+            "capped": self.session.unit_dead.values().sum::<u64>(),
+            "units_pending": self.st.pending.len(),
+            "units_submitted": self.stats.revealed,
+            "client": CLIENT,
+        });
+        if let Some(unit) = self.session.last_unit {
+            body["unit"] = json!(unit);
+        }
+        if let Some(rate) = self.session.rate(now) {
+            body["steps_per_second"] = json!(rate);
+        }
+        let (status, text) = self.post("/progress", &body)?;
+        match status {
+            202 => {
+                self.stats.heartbeats += 1;
+                Ok(true)
+            }
+            404 => {
+                self.session.unsupported = true;
+                eprintln!(
+                    "[cairn] this node has no POST /progress (built before the dashboard); \
+                     heartbeats off, claims unaffected"
+                );
+                Ok(false)
+            }
+            _ => Err(format!("heartbeat refused ({status}): {text}")),
+        }
     }
 
     /// Commit `k` for the answer objective, if the state holds a solution
@@ -1019,27 +1164,48 @@ mod tests {
         addr: String,
         spool: Arc<Mutex<Vec<Json>>>,
         log: Arc<Mutex<Vec<Json>>>,
+        /// Heartbeats taken at `POST /progress`, as a node holds them.
+        progress: Arc<Mutex<Vec<Json>>>,
+        /// A node from before the dashboard: `/progress` is a 404.
+        no_progress: bool,
     }
 
     impl FakeCairn {
         fn start() -> Self {
+            Self::start_with(false)
+        }
+
+        fn start_without_progress() -> Self {
+            Self::start_with(true)
+        }
+
+        fn start_with(no_progress: bool) -> Self {
             let listener = TcpListener::bind("127.0.0.1:0").unwrap();
             let addr = format!("http://{}", listener.local_addr().unwrap());
             let spool = Arc::new(Mutex::new(Vec::new()));
             let log = Arc::new(Mutex::new(Vec::new()));
-            let (s2, l2) = (Arc::clone(&spool), Arc::clone(&log));
+            let progress = Arc::new(Mutex::new(Vec::new()));
+            let (s2, l2, p2) = (Arc::clone(&spool), Arc::clone(&log), Arc::clone(&progress));
             std::thread::spawn(move || {
                 for stream in listener.incoming().flatten() {
-                    let _ = Self::handle(stream, &s2, &l2);
+                    let _ = Self::handle(stream, &s2, &l2, &p2, no_progress);
                 }
             });
-            Self { addr, spool, log }
+            Self {
+                addr,
+                spool,
+                log,
+                progress,
+                no_progress,
+            }
         }
 
         fn handle(
             stream: TcpStream,
             spool: &Mutex<Vec<Json>>,
             log: &Mutex<Vec<Json>>,
+            progress: &Mutex<Vec<Json>>,
+            no_progress: bool,
         ) -> std::io::Result<()> {
             let mut writer = stream.try_clone()?;
             let mut reader = BufReader::new(stream);
@@ -1079,6 +1245,25 @@ mod tests {
                     }
                     Err(why) => (400, json!({"error": why}).to_string()),
                 },
+                // The node's own shape: a JSON object naming an objective,
+                // a worker and a step count is kept and answered 202;
+                // nothing is written to the log.
+                ("POST", "/progress") if !no_progress => {
+                    match serde_json::from_slice::<Json>(&body) {
+                        Ok(hb)
+                            if hb.get("objective_id").is_some()
+                                && hb.get("worker").is_some()
+                                && hb.get("steps").and_then(Json::as_u64).is_some() =>
+                        {
+                            progress.lock().unwrap().push(hb);
+                            (202, json!({"recorded": true, "status": "live"}).to_string())
+                        }
+                        _ => (
+                            400,
+                            json!({"error": "heartbeat is missing a field"}).to_string(),
+                        ),
+                    }
+                }
                 _ => (404, "{}".to_string()),
             };
             let reason = match status {
@@ -1481,5 +1666,100 @@ mod tests {
         let (status, _) = http_request(&fake.addr, "GET", "/nope", None).unwrap();
         assert_eq!(status, 404);
         assert!(http_request("https://x", "GET", "/", None).is_err());
+    }
+
+    // ── heartbeats ────────────────────────────────────────────────────
+
+    fn report(unit: u64, steps: u64, dps: u64, dead: u64) -> super::super::state::UnitReport {
+        super::super::state::UnitReport {
+            unit,
+            walkers_done: 0,
+            steps,
+            dps,
+            dead_trails: dead,
+            completed: false,
+        }
+    }
+
+    fn checkin(ctx: &JobContext, seq: u64, units: Vec<super::super::state::UnitReport>) -> CheckIn {
+        CheckIn {
+            version: PROTOCOL_VERSION,
+            job_id: ctx.job_id.clone(),
+            peer: "alice.0".into(),
+            seq,
+            time: 0,
+            units,
+            dps: Vec::new(),
+            solution: None,
+        }
+    }
+
+    /// The heartbeat carries this process's own counters, read off its
+    /// lanes' check-ins, and the node's rate is measured from them.
+    #[test]
+    fn heartbeats_carry_the_sessions_own_counters_at_the_cadence() {
+        let fake = FakeCairn::start();
+        let ctx = job("demo-small", 0x1a2b, 2, false);
+        let clock = Arc::new(AtomicU64::new(1_785_196_800));
+        let mut c = transport(&fake, Submitter::Nickname("alice".into()), &clock, None);
+
+        // Nothing walked yet: a heartbeat still says the worker is here.
+        assert!(c.heartbeat().unwrap());
+        assert!(!c.heartbeat().unwrap(), "one per HEARTBEAT_SECS");
+
+        c.publish(
+            &ctx,
+            &checkin(&ctx, 1, vec![report(3, 100, 2, 1), report(4, 50, 0, 0)]),
+        )
+        .unwrap();
+        // The same unit again with a higher count replaces, never adds.
+        c.publish(&ctx, &checkin(&ctx, 2, vec![report(3, 1_600, 5, 1)]))
+            .unwrap();
+        clock.fetch_add(HEARTBEAT_SECS, Ordering::Relaxed);
+        assert!(c.heartbeat().unwrap());
+
+        let posted = fake.progress.lock().unwrap().clone();
+        assert_eq!(posted.len(), 2);
+        let hb = &posted[1];
+        assert_eq!(hb["objective_id"], "sha256:objective");
+        assert_eq!(hb["worker"], "alice");
+        assert_eq!(hb["steps"], 1_650);
+        assert_eq!(hb["trails"], 5);
+        assert_eq!(hb["capped"], 1);
+        assert_eq!(hb["unit"], 3);
+        assert_eq!(hb["units_pending"], 0);
+        assert_eq!(hb["units_submitted"], 0);
+        assert_eq!(hb["epoch"], epoch_of(1_785_196_800 + HEARTBEAT_SECS, 10));
+        // (1650 - 0) / 30 s, from the counter and the clock.
+        assert_eq!(hb["steps_per_second"], 1_650 / HEARTBEAT_SECS);
+        assert!(hb["client"]
+            .as_str()
+            .unwrap()
+            .starts_with("crypto rho-collab/"));
+        assert!(
+            hb.get("units").is_none(),
+            "no slice: this protocol leases units itself"
+        );
+        assert!(
+            hb.get("trail_bits").is_none(),
+            "a version 1 job has no seed layout"
+        );
+        assert_eq!(c.stats().heartbeats, 2);
+        assert!(fake.log().is_empty(), "a heartbeat is not a record");
+    }
+
+    /// A node from before the dashboard answers 404; the transport says so
+    /// once and stops asking, and the claims path is untouched.
+    #[test]
+    fn an_older_node_without_progress_turns_heartbeats_off_quietly() {
+        let fake = FakeCairn::start_without_progress();
+        assert!(fake.no_progress);
+        let clock = Arc::new(AtomicU64::new(1_785_196_800));
+        let mut c = transport(&fake, Submitter::Nickname("alice".into()), &clock, None);
+        assert!(!c.heartbeat().unwrap());
+        clock.fetch_add(10 * HEARTBEAT_SECS, Ordering::Relaxed);
+        assert!(!c.heartbeat().unwrap(), "remembered, not retried");
+        assert_eq!(c.stats().heartbeats, 0);
+        assert!(fake.progress.lock().unwrap().is_empty());
     }
 }

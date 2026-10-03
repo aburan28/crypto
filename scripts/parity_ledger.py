@@ -284,19 +284,19 @@ def k5_c_needed(bits, c_add, m, columns_per_p, rho_s=1.3, cofactor=1):
 
 # ── The cover-and-decomposition route on E(F_{p^6}) (30_jv_cover_*.json) ──
 
-def cover():
+def cover(ccov_prefix="30_jv_cover_ccov", dlp_prefix="30_jv_cover_dlp"):
     """Per size: C_cov, the cost of one Nagao test on the genus-3 Jacobian,
     from the cost runs (the oracle run and the sizes run pooled), and the
     end-to-end rows; the registered formula S/rho = 720 C_cov / (rho_S c_add p^2)
     + r, the pooled decomposition rate against 1/720, the fitted exponent of
     S/rho in p, and the crossover the measured constants give."""
-    ccov = (load("30_jv_cover_ccov_oracle.json") or []) + (load("30_jv_cover_ccov.json") or [])
+    ccov = (load(ccov_prefix + "_oracle.json") or []) + (load(ccov_prefix + ".json") or [])
     dlp = []
     # every end-to-end file of record; the files of defective or superseded runs
     # stay in the repository under their own names and are not read
     names = sorted(
         n for n in os.listdir(EXP)
-        if n.startswith("30_jv_cover_dlp") and n.endswith(".json")
+        if n.startswith(dlp_prefix) and n.endswith(".json")
         and "superseded" not in n and "defective" not in n
     )
     for name in names:
@@ -318,7 +318,8 @@ def cover():
             constructed=sum(r["constructed_residuals"] for r in g), planted=sum(r["planted_found"] for r in g),
             oracle=sum(r["oracle_checked"] for r in g), mismatches=sum(r["mismatches"] for r in g),
             unverified=sum(r["unverified"] for r in g), incomplete=sum(r["incomplete"] for r in g),
-            timed_out=sum(r["timed_out"] for r in g))
+            timed_out=sum(r["timed_out"] for r in g), stopped=sum(r.get("stopped", 0) for r in g),
+            stop=g[0].get("stop_staircase"))
     return dict(sizes=sizes, dlp=dlp)
 
 
@@ -346,6 +347,56 @@ def two_term_minimum(sizes, rel, la, rho_s, c_add):
     n_min = (-al * A / (be * B)) ** (1.0 / (be - al))
     s_min = (A * n_min ** al + B * n_min ** be) / c_add
     return s_min / rho_s, math.log2(n_min), a, b
+
+
+def print_cover(cv, title, label):
+    print(f"\n## {title}\n")
+    if True:
+        if cv["sizes"]:
+            print(label + "\n")
+            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |")
+            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|")
+            for p, x in cv["sizes"].items():
+                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |")
+        if cv["dlp"]:
+            print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:\n")
+            print("| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |")
+            print("|---:|--:|:--|--:|--:|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|--:|")
+            rows = sorted(cv["dlp"], key=lambda r: (r["p"], r["seed"]))
+            walks = [w["s"] for r in rows for w in r["rho"]]
+            rho_pool = mean(walks) if walks else 1.3
+            for r in rows:
+                star = "*" if not r["rho"] else ""
+                ex = 16.0 * math.comb(r["base"], 6) / r["l"]
+                need = (r["base"] + 1) / ex
+                sqrt_l = math.sqrt(r["l"])
+                s_pool = r["total_muls"] / (rho_pool * sqrt_l * r["c_add_e"]) if "total_muls" in r else r["s_over_rho"]
+                pred = need * r["c_cov"] / (rho_pool * sqrt_l * r["c_add_e"]) + r["r"] * r["rho_s_mean"] / rho_pool
+                print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['residuals']:,} | {r['relations']} | {r['decomposition_rate']:.5f} | {ex:.5f} | {r['residuals']/need:.2f} | {r['c_add_e']:.0f} | {r['c_cov']:.3e} | {r['la_ops']:,} ({r['wiedemann_constant']:.1f}) | {r['s']:.3e} | {s_pool:.3f} | {r['rho_s_mean']:.3f}{star} / {r['s_over_rho']:.3f} | {r['relation_over_rho']:.3f} + {r['r']:.4f} | {pred:.3f} | {r['solved']} / {r['correct']} | {r['mismatches']} |")
+            print(f"\nPooled rho S over {len(walks)} walks: {rho_pool:.3f} ± {statistics.stdev(walks) / math.sqrt(len(walks)):.3f}." if len(walks) > 1 else "")
+            tot_res = sum(r["residuals"] for r in rows)
+            tot_rel = sum(r["relations"] for r in rows)
+            exp = tot_res / 720.0
+            exact = sum(r["residuals"] * 16.0 * math.comb(r["base"], 6) / r["l"] for r in rows)
+            print(f"\nPooled decomposition rate: {tot_rel} relations in {tot_res:,} residuals = {tot_rel/tot_res*720:.3f}/720 (1/720 predicts {exp:.0f} ± {math.sqrt(exp):.0f}); the exact count 16·C(|F|,6)/ℓ predicts {exact:.1f} ± {math.sqrt(exact):.1f}.")
+            g = by_size([r for r in rows if r["solved"]], lambda r: r["p"])
+            if len(g) >= 3:
+                ps = list(g)
+                ys = [mean([r["s_over_rho"] for r in v]) for v in g.values()]
+                ys = [mean([r["total_muls"] / (rho_pool * math.sqrt(r["l"]) * r["c_add_e"]) for r in v]) for v in g.values()]
+                slope, se = fit(ps, ys)
+                print(f"Fitted exponent of S/rho in p over {len(ps)} sizes: {slope:.3f} ± {se:.3f} (registered P4: −2 ± 0.2; derivation: −2).")
+        if cv["sizes"]:
+            top = list(cv["sizes"].values())[-1]
+            cs = mean([x["c_cov"] for x in cv["sizes"].values()])
+            ce = mean([x["c_add_e"] for x in cv["sizes"].values()])
+            p_star, bits = cover_crossover(cs, ce)
+            print(f"\nCrossover implied by the measured constants (mean C_cov = {cs:.3e}, c_add = {ce:.0f}, rho S = 1.3, extrapolated on S/rho ∝ p^{{−2}}): p* = {p_star:,.0f}, subgroup order n* ≈ p*⁶/4 = 2^{bits:.0f}; C_cov/c_add = {cs/ce:,.0f} (registered P5: ≥ 10³).")
+            if cv["dlp"]:
+                last = sorted(cv["dlp"], key=lambda r: (r["p"], r["seed"]))[-1]
+                print(f"At the largest end-to-end size (p = {last['p']}, ℓ = 2^{last['bits']:.1f}): S/rho = {last['s_over_rho']:.3f}.")
+
+
 
 
 def main():
@@ -471,51 +522,19 @@ def main():
 
     cv = cover()
     if cv:
-        print("\n## E. The cover-and-decomposition route on E(F_{p⁶}) (30_jv_cover_*.json)\n")
-        if cv["sizes"]:
-            print("One Nagao test on Jac_H(F_{p²}), genus 3: six quadrics in six unknowns over F_p (Weil restriction of a monic sextic over F_{p²}), F4 and a zero-dimensional solver, every hit verified in the group; oracle = meet in the middle over the three-point sums.\n")
-            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |")
-            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|")
-            for p, x in cv["sizes"].items():
-                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |")
-        if cv["dlp"]:
-            print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:\n")
-            print("| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |")
-            print("|---:|--:|:--|--:|--:|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|--:|")
-            rows = sorted(cv["dlp"], key=lambda r: (r["p"], r["seed"]))
-            walks = [w["s"] for r in rows for w in r["rho"]]
-            rho_pool = mean(walks) if walks else 1.3
-            for r in rows:
-                star = "*" if not r["rho"] else ""
-                ex = 16.0 * math.comb(r["base"], 6) / r["l"]
-                need = (r["base"] + 1) / ex
-                sqrt_l = math.sqrt(r["l"])
-                s_pool = r["total_muls"] / (rho_pool * sqrt_l * r["c_add_e"]) if "total_muls" in r else r["s_over_rho"]
-                pred = need * r["c_cov"] / (rho_pool * sqrt_l * r["c_add_e"]) + r["r"] * r["rho_s_mean"] / rho_pool
-                print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['residuals']:,} | {r['relations']} | {r['decomposition_rate']:.5f} | {ex:.5f} | {r['residuals']/need:.2f} | {r['c_add_e']:.0f} | {r['c_cov']:.3e} | {r['la_ops']:,} ({r['wiedemann_constant']:.1f}) | {r['s']:.3e} | {s_pool:.3f} | {r['rho_s_mean']:.3f}{star} / {r['s_over_rho']:.3f} | {r['relation_over_rho']:.3f} + {r['r']:.4f} | {pred:.3f} | {r['solved']} / {r['correct']} | {r['mismatches']} |")
-            print(f"\nPooled rho S over {len(walks)} walks: {rho_pool:.3f} ± {statistics.stdev(walks) / math.sqrt(len(walks)):.3f}." if len(walks) > 1 else "")
-            tot_res = sum(r["residuals"] for r in rows)
-            tot_rel = sum(r["relations"] for r in rows)
-            exp = tot_res / 720.0
-            exact = sum(r["residuals"] * 16.0 * math.comb(r["base"], 6) / r["l"] for r in rows)
-            print(f"\nPooled decomposition rate: {tot_rel} relations in {tot_res:,} residuals = {tot_rel/tot_res*720:.3f}/720 (1/720 predicts {exp:.0f} ± {math.sqrt(exp):.0f}); the exact count 16·C(|F|,6)/ℓ predicts {exact:.1f} ± {math.sqrt(exact):.1f}.")
-            g = by_size([r for r in rows if r["solved"]], lambda r: r["p"])
-            if len(g) >= 3:
-                ps = list(g)
-                ys = [mean([r["s_over_rho"] for r in v]) for v in g.values()]
-                ys = [mean([r["total_muls"] / (rho_pool * math.sqrt(r["l"]) * r["c_add_e"]) for r in v]) for v in g.values()]
-                slope, se = fit(ps, ys)
-                print(f"Fitted exponent of S/rho in p over {len(ps)} sizes: {slope:.3f} ± {se:.3f} (registered P4: −2 ± 0.2; derivation: −2).")
-        if cv["sizes"]:
-            top = list(cv["sizes"].values())[-1]
-            cs = mean([x["c_cov"] for x in cv["sizes"].values()])
-            ce = mean([x["c_add_e"] for x in cv["sizes"].values()])
-            p_star, bits = cover_crossover(cs, ce)
-            print(f"\nCrossover implied by the measured constants (mean C_cov = {cs:.3e}, c_add = {ce:.0f}, rho S = 1.3, extrapolated on S/rho ∝ p^{{−2}}): p* = {p_star:,.0f}, subgroup order n* ≈ p*⁶/4 = 2^{bits:.0f}; C_cov/c_add = {cs/ce:,.0f} (registered P5: ≥ 10³).")
-            if cv["dlp"]:
-                last = sorted(cv["dlp"], key=lambda r: (r["p"], r["seed"]))[-1]
-                print(f"At the largest end-to-end size (p = {last['p']}, ℓ = 2^{last['bits']:.1f}): S/rho = {last['s_over_rho']:.3f}.")
-
+        print_cover(cv, "E. The cover-and-decomposition route on E(F_{p⁶}) (30_jv_cover_*.json)",
+                    "One Nagao test on Jac_H(F_{p²}), genus 3: six quadrics in six unknowns over F_p (Weil restriction of a monic sextic over F_{p²}), F4 and a zero-dimensional solver, every hit verified in the group; oracle = meet in the middle over the three-point sums.")
+    cvs = cover("31_jv_cover_stop_ccov", "31_jv_cover_stop_dlp")
+    if cvs:
+        print_cover(cvs, "E.2 The same route with F4 stopped at the Bézout staircase (31_jv_cover_stop_*.json)",
+                    "Identical to E except that F4 stops as soon as the leading monomials found leave 64 standard monomials (the Bézout count of six quadrics in six unknowns), at which point the partial basis is already a Gröbner basis and the remaining steps only certify it; `stopped` counts the tests that stopped there.")
+        if cv and cv["sizes"] and cvs["sizes"]:
+            common = [p for p in cv["sizes"] if p in cvs["sizes"]]
+            if common:
+                a = mean([cv["sizes"][p]["c_cov"] for p in common]); b = mean([cvs["sizes"][p]["c_cov"] for p in common])
+                fa = mean([cv["sizes"][p]["f4"] for p in common]); fb = mean([cvs["sizes"][p]["f4"] for p in common])
+                stopped = sum(cvs["sizes"][p]["stopped"] for p in common); tests = sum(cvs["sizes"][p]["random"] + cvs["sizes"][p]["constructed"] for p in common)
+                print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {stopped} of {tests} tests stopped at the staircase.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
     print("\n## C. What parity needs, per route\n")
     if k4:
         for bits in (80, 128, 160):

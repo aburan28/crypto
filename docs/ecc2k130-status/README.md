@@ -69,6 +69,13 @@ posted tranche and the audit that a witness still needs. When the kernel
 learns to carry those counters, this section is what has to change with
 it.
 
+A worker that is also on cairn appears on that node's own dashboard
+(`/ui/task?id=<objective>`), which shows the paid orbits beside the
+heartbeats `ecc2k130/aws/worker.py` posts when `ECC_CAIRN_NODE` and
+`ECC_CAIRN_OBJECTIVE` are set. The two pages count different things -- this
+one the campaign corpus, that one what cairn's log settled -- and neither
+is derived from the other.
+
 Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely
 on the published site.

@@ -5,6 +5,7 @@
 //! ```text
 //! cargo run --release --example jv_cover -- --exp ccov --sizes 53,101,251,503,1009 --seeds 2 --residuals 200 --constructed 40 --max-degree 24 --budget 300 --json experiments/30_jv_cover_ccov.json
 //! cargo run --release --example jv_cover -- --exp dlp --sizes 53,101,251 --seeds 2 --rho-runs 16 --check-every 64 --json experiments/30_jv_cover_dlp.json
+//! cargo run --release --example jv_cover -- --exp ccov --stop 64 --sizes 53,61,71 --seeds 2 --residuals 300 --constructed 60 --oracle-base 45 --json experiments/31_jv_cover_stop_ccov_oracle.json
 //! cargo run --release --example jv_cover -- --exp dlp --sizes 503 --seeds 1 --rho-runs 0 --rho-ref <pooled S_rho of the smaller sizes> --json experiments/30_jv_cover_dlp_503.json
 //! ```
 
@@ -38,6 +39,7 @@ fn main() {
     let mut check_every = 0u64;
     let mut oracle_base = 40usize;
     let mut rho_ref = 1.3f64;
+    let mut stop = 0usize;
     let mut json: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
@@ -62,6 +64,7 @@ fn main() {
             "--rho-runs" => rho_runs = next(&mut i).parse().expect("--rho-runs"),
             "--check-every" => check_every = next(&mut i).parse().expect("--check-every"),
             "--rho-ref" => rho_ref = next(&mut i).parse().expect("--rho-ref"),
+            "--stop" => stop = next(&mut i).parse().expect("--stop"),
             "--oracle-base" => oracle_base = next(&mut i).parse().expect("--oracle-base"),
             "--json" => json = Some(next(&mut i)),
             other => panic!("unknown argument {other}"),
@@ -81,10 +84,11 @@ fn main() {
                         max_degree,
                         budget,
                         oracle_base,
+                        (stop > 0).then_some(stop),
                     );
                     println!(
-                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} | random {} decomposable {} (1/720 = {:.5}) | planted {}/{} | oracle {} mismatches {} unverified {} incomplete {} timed out {} | C_cov {:.3e} [{:.2e}, {:.2e}] = weil {:.0} + f4 {:.3e} + lin {:.3e} + post {:.0} | delta {:.0} F4 degree {:.1} rows {:.0} cols {:.0} {:.1} ms + lin {:.1} ms = {:.1} ms | decomposable C_cov {:.3e} | {:.0} s",
-                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.random_residuals, r.random_decomposable,
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) | random {} decomposable {} (1/720 = {:.5}) | planted {}/{} | oracle {} mismatches {} unverified {} incomplete {} timed out {} | C_cov {:.3e} [{:.2e}, {:.2e}] = weil {:.0} + f4 {:.3e} + lin {:.3e} + post {:.0} | delta {:.0} F4 degree {:.1} rows {:.0} cols {:.0} {:.1} ms + lin {:.1} ms = {:.1} ms | decomposable C_cov {:.3e} | {:.0} s",
+                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.random_residuals, r.random_decomposable,
                         r.expected_rate, r.planted_found, r.constructed_residuals, r.oracle_checked, r.mismatches,
                         r.unverified, r.incomplete, r.timed_out, r.c_cov.mean, r.c_cov.min as f64, r.c_cov.max as f64,
                         r.weil_muls.mean, r.f4_muls.mean, r.lin_muls.mean, r.post_muls.mean, r.delta.mean,
@@ -94,10 +98,17 @@ fn main() {
                     rows.push(Row::Ccov(r));
                 }
                 "dlp" => {
-                    let r = run_cover_dlp(p, seed, rho_runs, check_every, rho_ref);
+                    let r = run_cover_dlp(
+                        p,
+                        seed,
+                        rho_runs,
+                        check_every,
+                        rho_ref,
+                        (stop > 0).then_some(stop),
+                    );
                     println!(
-                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} | residuals {} decomposable {} ({:.5} vs 1/720 {:.5}) relations {} (floor {:.0}, ratio {:.2}) | incomplete {} timed out {} cross-checked {} mismatches {} | C_cov {:.3e} | unknowns {} (filtered {}) phi {:.2} row {:.1} LA attempts {} ops {} ({:.1}·u²) | solved {} correct {} | S {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.3} = relation {:.3} + la {:.4} (last {:.4}) | predicted {:.3} | {:.0} s",
-                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.residuals, r.decompositions,
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) | residuals {} decomposable {} ({:.5} vs 1/720 {:.5}) relations {} (floor {:.0}, ratio {:.2}) | incomplete {} timed out {} cross-checked {} mismatches {} | C_cov {:.3e} | unknowns {} (filtered {}) phi {:.2} row {:.1} LA attempts {} ops {} ({:.1}·u²) | solved {} correct {} | S {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.3} = relation {:.3} + la {:.4} (last {:.4}) | predicted {:.3} | {:.0} s",
+                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.residuals, r.decompositions,
                         r.decomposition_rate, r.expected_rate, r.relations, r.floor_residuals, r.residual_ratio,
                         r.incomplete, r.timed_out, r.cross_checked, r.mismatches, r.c_cov, r.unknowns, r.filtered_out,
                         r.phi, r.row_weight, r.la_attempts, r.la_ops, r.wiedemann_constant, r.solved, r.correct, r.s,
