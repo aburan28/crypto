@@ -126,6 +126,15 @@ fn replay(args: &[String]) -> Result<Value, String> {
         .subgroup_order
         .to_u64()
         .ok_or("subgroup order outside u64")?;
+    if trace.len() < 2
+        || trace[0]["kind"] != "compact_orbit_rank_header"
+        || number(&trace[0], "n")? != n as u64
+        || number(&trace[0], "a")? != a as u64
+        || number(&trace[0], "subgroup_order")? != modulus
+        || trace[0]["base_hash"] != base["base_hash"]
+    {
+        return Err("rank trace header differs from the frozen base".into());
+    }
     let columns = number(&base, "orbit_columns")? as usize;
     let coordinates = base["factor_base_point_coordinates"]
         .as_array()
@@ -177,6 +186,9 @@ fn replay(args: &[String]) -> Result<Value, String> {
         }
         let scalar = number(attempt, "scalar")?;
         let pivot = number(attempt, "pivotless_column")? as usize;
+        if pivot >= columns || scalar == 0 || scalar >= modulus {
+            return Err(format!("rank query {index} outside frozen group or base"));
+        }
         let expected = point_add(
             &curve.curve,
             &scalar_mul(&curve.curve, generator, &BigUint::from(scalar)),
@@ -235,6 +247,8 @@ fn replay(args: &[String]) -> Result<Value, String> {
         || number(solution, "rank")? as usize != rank
         || number(solution, "attempts")? as usize != verified_relations + failures
         || number(&summary, "rank_attempts")? as usize != verified_relations + failures
+        || number(&summary, "rank_relations")? as usize != verified_relations
+        || number(&summary, "rank_failures")? as usize != failures
     {
         return Err("independent matrix solution or counts differ".into());
     }
@@ -254,6 +268,11 @@ fn replay(args: &[String]) -> Result<Value, String> {
     let q = point(&target_input, n)?;
     if q != point(&ic["target"], n)?
         || q != point(&rho["published_q"], n)?
+        || number(&ic, "n")? != n as u64
+        || number(&ic, "a")? != a as u64
+        || number(&rho, "n")? != n as u64
+        || number(&rho, "a")? != a as u64
+        || number(&rho, "subgroup_order")? != modulus
         || ic["published_fixture_scalar"] != Value::Null
         || rho["published_fixture_scalar"] != Value::Null
         || rho["reference_grade"] != "strong"
