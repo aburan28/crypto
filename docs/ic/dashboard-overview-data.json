@@ -57,6 +57,10 @@
     {
       "path": "research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json",
       "sha256": "efb14a5cb1c60291accc4d28518178f6a7d7ed5305178459936252b346b94029"
+    },
+    {
+      "path": "research/ecbench_callgrind_solve_20261004/DECISION.json",
+      "sha256": "c4bd4b3b8e1e95520bca5507706b2434eb8bdfb7d7281fdfd6998a71b18dd3aa"
     }
   ],
   "confirmation_online": {
@@ -796,6 +800,103 @@
     "status": "independently_replayed_l0_bounded_diagnostic",
     "target_count": 8
   },
+  "n37_callgrind": {
+    "aa_max_absolute_relative_deviation": 0.000013947254335233694,
+    "all_archived_and_profiled_scalars_verified": true,
+    "archived_records_sha256": "82c8b31640074b2f829d88e546bf487ee4b598edf4ef26f779984d625ed7de3c",
+    "arms": [
+      {
+        "arm": "ic-k16",
+        "max_ir": 42654021,
+        "mean_ir": 41711016.125,
+        "min_ir": 41348160,
+        "runs": 8,
+        "s_ir_per_target": 2746.7436941223236
+      },
+      {
+        "arm": "ic-k42",
+        "max_ir": 113695320,
+        "mean_ir": 113616994.875,
+        "min_ir": 113559687,
+        "runs": 8,
+        "s_ir_per_target": 7481.878726780468
+      },
+      {
+        "arm": "ic-k42-control",
+        "max_ir": 113696524,
+        "mean_ir": 113617054.625,
+        "min_ir": 113559422,
+        "runs": 8,
+        "s_ir_per_target": 7481.882661422944
+      },
+      {
+        "arm": "rho-strong",
+        "max_ir": 13616457,
+        "mean_ir": 9351186.875,
+        "min_ir": 5201718,
+        "runs": 8,
+        "s_ir_per_target": 615.7920848653429
+      }
+    ],
+    "census_sha256": "e09fefcdaff8373c0f25f79b2b2f78a35cc3092caf2e134914c50481a1a08415",
+    "claim_limit": "same-binary Callgrind user-space instruction diagnostic; no isolated native wall speedup or cross-unit floor ratio",
+    "comparisons": [
+      {
+        "bootstrap_95": [
+          0.36481129605278056,
+          0.3700593537681517
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 20261004,
+        "denominator": "ic-k42",
+        "numerator": "ic-k16",
+        "paired_ratio_range": [
+          0.3640185484991741,
+          0.3753344990865976
+        ],
+        "ratio_of_sums": 0.36711951562255224
+      },
+      {
+        "bootstrap_95": [
+          3.754214785519472,
+          5.4537173725932035
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 20261004,
+        "denominator": "rho-strong",
+        "numerator": "ic-k16",
+        "paired_ratio_range": [
+          3.1325344764794543,
+          7.976920894212259
+        ],
+        "ratio_of_sums": 4.460505033485388
+      },
+      {
+        "bootstrap_95": [
+          0.9999952514794641,
+          1.0000044371625152
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 20261004,
+        "denominator": "ic-k42-control",
+        "numerator": "ic-k42",
+        "paired_ratio_range": [
+          0.9999894104062496,
+          1.0000139472543352
+        ],
+        "ratio_of_sums": 0.9999994741106413
+      }
+    ],
+    "decision": "retain_k16_instruction_lead",
+    "jobs_sha256": "443fb76cb30670dc9cb22fbfb7a9a497d09a387543d00995a26913bbf5b47fe0",
+    "normalised_unit": "crypto.S.callgrind_ir",
+    "profiles": 32,
+    "provenance_sha256": "9316d3774461085216e8b687c20d1f61bbd77045baf6d324cf78cdd3bf7d5ed8",
+    "schema": "ecbench.callgrind_decision/v1",
+    "subgroup_order": 230603167,
+    "unit": "callgrind.Ir",
+    "workloads": 8
+  },
   "n37_rank_columns_independent_replay": {
     "session_id": "ECBS1h9a1d373bbe54",
     "auditor_env_class_id": "ECBENV2hda64b23436f4",
@@ -839,7 +940,7 @@
       "scheduled": 216
     }
   ],
-  "historical_ledger_sha256": "a62c44a8c25bdba7670952fedeff901bc6564e3f9b63750a635019cef5264027",
+  "historical_ledger_sha256": "2b18aae6f6d16e9d96540dfb5a8e8500babf8744fb54c2440044d584d457838e",
   "historical_regime_summary_sha256": "7cad709e2e940cbc127639b2415d52d4ba280c534bb7d237cca324a01a9603f8",
   "historical_overview_panels": [
     {
