@@ -30,8 +30,9 @@ claim. The frozen [analysis](../RESULT_FINAL.json) keeps aggregate
 `online_speedup: null`. The hosted VM audit did not repeat or isolate the
 Mac wall timing, and both algorithms still leave native work unpriced. No
 speedup claim or n131 transfer follows. The next measurement requires a
-host-level isolation receipt for a same-point Linux session, common
-native-work pricing, and a separately frozen new-target panel.
+host-level isolation receipt (for example, isolab strict tier A plus ecbench
+L3) for a same-point Linux session, common native-work pricing, and a
+separately frozen new-target panel.
 
 To regenerate the attached report, build the current source and run:
 

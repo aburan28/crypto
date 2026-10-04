@@ -73,8 +73,10 @@ and modular combination remain incompletely priced. The claim file's numeric
 raw ratio is explicitly labelled descriptive by its verdict and is not an
 accepted speedup; the frozen aggregate speedup remains null.
 
-The next decision is to run this exact candidate and strong rho on a Linux
-host that actually earns L2 and price native work in a common unit. Freeze a
+The next decision is to run this exact candidate and strong rho on a physical
+Linux host with an auditable host-level isolation receipt (for example,
+isolab strict tier A plus ecbench L3), and price native work in a common
+unit. An ecbench L2 label inside a shared VM is insufficient. Freeze a
 separate panel of at least eight new one-target workloads before
 generalizing to targets.
 The current point says nothing about n41/n53 scaling, the m83 confidence
