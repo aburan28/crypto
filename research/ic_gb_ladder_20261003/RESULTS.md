@@ -30,9 +30,9 @@ for `x4`. What did resolve is exact, on every draw, and on the side of growth:
 | 3 | 5 5 5 5 | 8 8 8 8 | 1 | pinned at 6 (two), ≥13 |
 | 4 | 6 6 6 6 | 9 9 9 9 | 2 | pinned at 7 (one), ≥13 |
 | 5 | 8 8 8 (one `triv`) | **10 10 10 10** | **3** | ≥ 8 |
-| 6 (`n = 19`, both curves) | ≥ 8 (one draw each), ≥ 7 | ≥ 9 / ≥ 10 | ≥ 2 | ≥ 6 |
-| 7 (`n = 23`) | L7RR | L7X4 | | ≥ 6 |
-| 8 (`n = 29, 31`) | L8RR | L8X4 | | ≥ 6 |
+| 6 (`n = 19`, both curves) | ≥ 8 (one draw each), ≥ 7 | ≥ 9 | ≥ 2 | ≥ 6 |
+| 7 (`n = 23`) | ≥ 7 | ≥ 9 (one draw), ≥ 8 | ≥ 1 | ≥ 6 |
+| 8 (`n = 29, 31`) | ≥ 7 (one draw each), ≥ 6 | ≥ 8 | ≥ 1 | ≥ 6 |
 
 Slopes of the exact medians on `K₁/2¹⁷`: `rr` 1.30 over `ℓ = 2…5`, `x4` 1.60 over
 `ℓ = 2…5`. Paired on the 11 draws exact on both arms, `rr − x4` is −2.55 (range −3 to −1).
@@ -43,8 +43,9 @@ Slopes of the exact medians on `K₁/2¹⁷`: `rr` 1.30 over `ℓ = 2…5`, `x4`
    in-tree reading is above its floor, the two engines agree on every one. `x4` at `ℓ = 2`
    reads 5 on three of four draws (the in-tree floor of 6 hid it).
 2. **P2, growth of `x4`: holds at `ℓ = 5`, unresolved at `ℓ = 6`.** 10 on all four draws;
-   excess 3 over the sharp first-fall bound. At `ℓ = 6` the one draw retried at 12 GB
-   reads `≥ 10` on `K₀/2¹⁹` L6X4NOTE.
+   excess 3 over the sharp first-fall bound. At `ℓ = 6` the one draw retried at 12 GB on
+   each curve dies at degree 9 after 30 minutes: `≥ 9`, consistent with the law's 11 and
+   with nothing below 9.
 3. **P3, growth of `rr`: holds at `ℓ = 5`, unresolved at `ℓ = 6`.** 8 on every genuine
    draw; at `ℓ = 6`, `≥ 8` on the one retried draw of each curve, consistent with 8 or 9
    and with nothing lower.
@@ -63,7 +64,8 @@ Advisory wall seconds per process (Singular's own clock agrees within 3%):
 | `K₁/2¹⁷ ℓ = 5`, `x4` 9 (unrefuted) / 10 (refuted) | 150 / 430 | > 4.5 GB at 10, < 12 GB |
 | `n = 19 ℓ = 6`, `rr` 7 (unrefuted) / 8 | 500 / dies | > 4.5 GB at 7, > 12 GB at 8 |
 | `n = 19 ℓ = 6`, `x4` 9 | dies in 50 s | > 4.5 GB |
-| `n = 23 ℓ = 7`, `rr` 7 | L7COST | |
+| `n = 23 ℓ = 7`, `rr` 7 / `x4` 8 (unrefuted) / `x4` 9 | dies in 120 s / 310 / dies in 305 s | > 12 GB / < 12 GB / > 12 GB |
+| `n = 29, 31 ℓ = 8`, `rr` 6 (unrefuted) / 7 | 370–500 / dies | < 12 GB / > 12 GB |
 
 Against the in-tree sparse Macaulay scan, which did not resolve `ℓ = 5` `rr` in 6,000 s and
 never scanned `x4` past 9, this engine resolved `ℓ = 5` on both arms in minutes. It is
@@ -85,8 +87,7 @@ was registered.
   rate (8 at `ℓ = 5`; `≥ 8` at `ℓ = 6`), as the earlier ladder read: a constant, not a
   slope.
 - **No saturation signal.** Nothing read equal or lower across a rung; the `ℓ = 6` bounds
-  are consistent with the law and inconsistent with any reading below 8 (`rr`) or 10 (`x4`,
-  on `K₀`).
+  are consistent with the law and inconsistent with any reading below 8 (`rr`) or 9 (`x4`).
 - **The next rung is an engine question.** By §6, the step after an inconclusive verdict is
   reach, not mathematics: degree 8 in 19 Boolean unknowns needs more than 12 GB in this
   engine's truncated-basis representation. A dense Macaulay elimination at that size is
