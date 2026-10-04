@@ -187,6 +187,7 @@ pub mod jv_sieve;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
+pub mod f6_wide_geometry;
 pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
