@@ -121,6 +121,23 @@ jobs:
           test "$(wc -l < "$out/rows.jsonl")" -eq 64
           jq -s -e 'all(.[]; .status == "verified" and (.solve_ir | type) == "number")' \
             "$out/rows.jsonl" > /dev/null
+      - name: Independently replay the committed raw archive and decision
+        run: |
+          dir=research/ecbench_n37_k8_k16_20261004
+          test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
+            4e0d602d7770deb9c7216137778c11ef0614cb2330c9dd95f74003a47ceb3000
+          replay="$RUNNER_TEMP/ecbench-k8-k16-archive-replay"
+          mkdir -p "$replay"
+          unzip -q "$dir/RAW-CALLGRIND.zip" -d "$replay"
+          cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
+          cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
+          cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
+          cargo build --release --example ecbench_k8_k16_analyze
+          target/release/examples/ecbench_k8_k16_analyze \
+            "$replay" "$dir/JOBS.json" \
+            "$dir/sessions/mac_arm64_l0_01/records.jsonl" \
+            "$RUNNER_TEMP/ecbench-k8-k16-decision.json"
+          cmp "$RUNNER_TEMP/ecbench-k8-k16-decision.json" "$dir/DECISION.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

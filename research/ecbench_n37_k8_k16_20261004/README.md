@@ -25,11 +25,19 @@ The saved counted-operation comparisons report K16/K8 = 1.0175
 [0.973, 1.059], K8/rho = 4.5501 [4.110, 5.040], and K16/rho = 4.6298
 [4.209, 5.095] on 80 pairs per arm. These are **incomplete cold counted-cost
 diagnostics**. Every macOS run earned L0, so its wall measurements are
-descriptive only. Independent Linux replay, whole-solve Callgrind profiling,
-the predeclared K8/K16 decision, and the canonical scoreboard update remain
-pending; no base is selected from this local result.
+descriptive only. The local counted data alone did not select a base.
 
 The first Linux profile attempt, [run 37191621092](https://github.com/aburan28/crypto/actions/runs/37191621092),
 failed before profiling because `Cargo.lock` is untracked and `--locked`
 prevented its creation. The [protocol amendment](PROTOCOL.md#build-only-amendment-before-profiling)
 records the corrected workflow; this failure is not a data row.
+
+The [result and claim limits](RESULT.md) now select K8 for the cold
+whole-solve instruction route, with K16 retained for the primary online
+comparison. The [raw archive](RAW-CALLGRIND.zip), [census](CENSUS.json),
+[independent Linux receipt](independent_validation/RECEIPT.json),
+[decision](DECISION.json), and [native analyzer](../../examples/ecbench_k8_k16_analyze.rs)
+allow the decision to be checked without trusting the compact table. The
+[32 one-target IC1 claims](candidate_claims) retain the exact candidate,
+workload, and run IDs for every first-round K8/rho and K16/rho pair; each is
+correctness-checked but remains L0 descriptive timing.

@@ -29,7 +29,18 @@
       "barrier_test": false,
       "note": "A ratio between two operation lower bounds does not bound true IC/rho cost. These paired, verified points show implementation accounting only and cannot cross the rho speed barrier.",
       "points": [
-        {"date": "2026-10-04", "value": 5.034403533221078, "reference": "matched", "unit": "counted GAE lower-bound diagnostic", "label": "n37 shared-rank K16, eight one-target workloads, strong rho", "detail": "K16 uses 1,184 usable points and 16 folded columns. Across 40 paired verified runs on eight public points, counted cold IC/rho is 5.0344 [4.3462, 5.8664]; K16/K42 is 0.349 [0.343, 0.359]. Both IC and rho omit native costs, so their lower-bound quotient does not bound true speed. macOS L0 wall speedup remains unknown; independent Linux replay 320/320.", "class": "accounting", "anchor": "#n37-rank-columns-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.md"}
+        {"date": "2026-10-04", "value": 5.034403533221078, "reference": "matched", "unit": "counted GAE lower-bound diagnostic", "label": "n37 shared-rank K16, eight one-target workloads, strong rho", "detail": "K16 uses 1,184 usable points and 16 folded columns. Across 40 paired verified runs on eight public points, counted cold IC/rho is 5.0344 [4.3462, 5.8664]; K16/K42 is 0.349 [0.343, 0.359]. Both IC and rho omit native costs, so their lower-bound quotient does not bound true speed. macOS L0 wall speedup remains unknown; independent Linux replay 320/320.", "class": "accounting", "anchor": "#n37-rank-columns-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.md"},
+        {"date": "2026-10-04", "value": 4.550110158256505, "reference": "matched", "unit": "counted GAE lower-bound diagnostic", "label": "n37 shared-rank K8, 16 untouched one-target workloads, strong rho", "detail": "K8 has 592 usable points and eight folded columns. Across 80 paired verified runs on 16 new public points, incomplete cold counted IC/rho is 4.5501 [4.110, 5.040]; K16/K8 on the same points is 1.0175 [0.973, 1.059]. This apparent change from the earlier K16 panel is not a paired improvement across panels. Both methods leave native work unpriced; independent Linux replay 320/320 and macOS L0 wall speedup remains unknown.", "class": "accounting", "anchor": "#n37-k8-k16-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_k8_k16_20261004/RESULT.md"}
+      ]
+    },
+    {
+      "id": "ec-callgrind-diagnostics",
+      "label": "Elliptic curve, complete method-solve simulated instructions",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Callgrind counts user-space instructions inside the solve boundary, including reusable setup. It is neither isolated native wall time nor the primary online target interval.",
+      "points": [
+        {"date": "2026-10-04", "value": 3.6445922113828733, "reference": "matched", "unit": "Callgrind Ir diagnostic", "label": "n37 shared-rank K8 vs strong rho, 16 untouched public points", "detail": "All 64 profiles recovered the archived logarithms; K8/rho whole-solve Callgrind Ir is 3.6446 [3.2353, 4.1360], with K16/K8 1.1903 [1.1584, 1.2218]. The identical K16 A/A maximum deviation was 0.0042%. The native session replayed 320/320 records on a different host class. This does not establish an isolated online wall speedup; K16 remains a target-only candidate.", "class": "accounting", "anchor": "#n37-k8-k16-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_k8_k16_20261004/RESULT.md"}
       ]
     },
     {

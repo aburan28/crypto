@@ -15,7 +15,7 @@ const SESSION_ID: &str = "ECBS1hdebde0f96835";
 const ORIGINAL_ENV_CLASS: &str = "ECBENV2hd82681268e96";
 const R: f64 = 230_603_167.0;
 const BOOTSTRAP_SAMPLES: usize = 20_000;
-const BOOTSTRAP_SEED: u64 = 20_261_004_4084;
+const BOOTSTRAP_SEED: u64 = 202_610_044_084;
 const ARMS: [&str; 4] = ["ic-k8", "ic-k16", "ic-k16-control", "rho-strong"];
 
 #[derive(Deserialize)]
@@ -262,6 +262,10 @@ fn run() -> Result<(), String> {
     if seen.len() != 64 || groups.len() != 16 {
         return Err("missing job or workload".into());
     }
+    let per_target: Vec<Value> = groups
+        .iter()
+        .map(|(workload_id, counts)| json!({"workload_id": workload_id, "ir": counts}))
+        .collect();
     let groups: Vec<BTreeMap<String, u64>> = groups.into_values().collect();
     if groups
         .iter()
@@ -324,6 +328,7 @@ fn run() -> Result<(), String> {
         "independent_auditor_env_class_id": field(&independent, "auditor_env_class_id")?,
         "all_archived_and_profiled_scalars_verified": true,
         "arms": summaries,
+        "per_target": per_target,
         "comparisons": [k16_k8, k8_rho, k16_rho, aa],
         "aa_max_absolute_relative_deviation": max_aa_deviation,
         "decision": decision,

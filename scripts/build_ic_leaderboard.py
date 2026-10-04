@@ -58,6 +58,7 @@ SOURCES = {
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+    "n37_k8_k16": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -516,6 +517,33 @@ def build() -> dict:
         "online_speedup": None,
         "fully_priced_cold_speedup": None,
     }
+    k8_decision = load(SOURCES["n37_k8_k16"])
+    if (k8_decision["schema"] != "ecbench.k8_k16_callgrind_decision/v1"
+            or k8_decision["decision"] != "select_k8_for_larger_field_gate"
+            or k8_decision["workloads"] != 16
+            or k8_decision["profiles"] != 64
+            or not k8_decision["all_archived_and_profiled_scalars_verified"]
+            or k8_decision["comparisons"][0]["numerator"] != "ic-k16"
+            or k8_decision["comparisons"][0]["denominator"] != "ic-k8"
+            or k8_decision["comparisons"][1]["denominator"] != "rho-strong"):
+        raise SystemExit("review the untouched K8/K16 instruction result before updating the leaderboard")
+    k8_prior = next(c for c in rank_columns["candidates"] if c["folded_columns"] == 8)
+    k8_confirmation = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_k8_k16"],
+        "candidate_id": k8_prior["candidate_id"],
+        "usable_points": k8_prior["usable_points"],
+        "folded_columns": k8_prior["folded_columns"],
+        "workloads": k8_decision["workloads"],
+        "profiles": k8_decision["profiles"],
+        "decision": k8_decision["decision"],
+        "k16_over_k8_ir": k8_decision["comparisons"][0]["ratio_of_sums"],
+        "k16_over_k8_ir_ci95": k8_decision["comparisons"][0]["bootstrap_95"],
+        "k8_over_rho_ir": k8_decision["comparisons"][1]["ratio_of_sums"],
+        "k8_over_rho_ir_ci95": k8_decision["comparisons"][1]["bootstrap_95"],
+        "online_speedup": None,
+        "cold_wall_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -549,6 +577,7 @@ def build() -> dict:
         "families": families(board),
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
         "bounded_diagnostics": [bounded_diagnostic],
+        "n37_k8_k16_confirmation": k8_confirmation,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -640,6 +669,17 @@ def markdown(doc: dict) -> str:
           "for both arms, and L0 timing cannot establish an online speedup. "
           "This row is intentionally outside the three fully priced unit families; "
           f"read the [frozen decision](../../{d['source']}).", ""]
+    c = doc["n37_k8_k16_confirmation"]
+    L += [f"The untouched {c['workloads']}-target K8/K16 confirmation selected "
+          f"`{c['candidate_id']}` for the cold implementation route: K16/K8 "
+          f"whole-solve Callgrind Ir is {c['k16_over_k8_ir']:.3f} "
+          f"[{c['k16_over_k8_ir_ci95'][0]:.3f}, {c['k16_over_k8_ir_ci95'][1]:.3f}], "
+          f"and K8/rho is {c['k8_over_rho_ir']:.3f} "
+          f"[{c['k8_over_rho_ir_ci95'][0]:.3f}, {c['k8_over_rho_ir_ci95'][1]:.3f}]. "
+          "All 64 profiles and 320 independent measured replays verified. "
+          "The unit is simulated whole-solve instructions, not isolated online "
+          "wall time; K16 remains a target-only candidate. "
+          f"Read the [raw instruction decision](../../{c['source']}).", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -834,6 +874,18 @@ def page(doc: dict, standalone: bool) -> str:
              'A separate whole-solve Callgrind census finds K16/K42 = 0.367 and K16/rho = 4.461 '
              'in simulated instructions on eight paired points; native wall and online speed remain unknown. '
              '<a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Raw instruction replay</a>.</p></section>')
+    c = doc["n37_k8_k16_confirmation"]
+    P.append(f'<section class="card" id="bounded-n37-k8-confirmation"><h2>Untouched n37 K8/K16 instruction confirmation</h2>'
+             f'<p>On <code>{esc(c["curve"])}</code>, K8 has {c["usable_points"]:,} usable points '
+             f'and {c["folded_columns"]} folded columns. Across {c["workloads"]} new same-point '
+             f'public workloads, K16/K8 whole-solve Callgrind Ir is {c["k16_over_k8_ir"]:.3f} '
+             f'[{c["k16_over_k8_ir_ci95"][0]:.3f}, {c["k16_over_k8_ir_ci95"][1]:.3f}], '
+             f'selecting K8 for the cold implementation route. K8/rho is '
+             f'{c["k8_over_rho_ir"]:.3f} [{c["k8_over_rho_ir_ci95"][0]:.3f}, '
+             f'{c["k8_over_rho_ir_ci95"][1]:.3f}] in the same instruction unit. '
+             'All 64 profiles and 320 independently replayed measured records verified. '
+             'This is not isolated online wall speed; K16 remains a target-only candidate. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(c["source"])}">Frozen decision</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
