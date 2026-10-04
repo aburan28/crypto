@@ -74,7 +74,8 @@ The [replay receipt](REPLAY_INITIAL.json) has SHA-256
 Paired witness, rank-row and hit-flag mutations, a changed decision, and a
 changed target file all failed replay as intended. [EVIDENCE.json](EVIDENCE.json)
 pins source, input, binary, result and mutation receipt hashes and the
-non-isolated host boundary. Linux CI independently rebuilds, replays and
+non-isolated host boundary. The measured [Cargo.lock](Cargo.lock) is archived
+because the repository root lockfile is ignored by Git. Linux CI independently rebuilds, replays and
 reproduces the canonical non-timing result before this PR can merge.
 
 This K16 result resolves the K42 saturation without finding a stable

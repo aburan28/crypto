@@ -25,7 +25,6 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
-            Cargo.lock
             src
             examples/n37_four_policy_sparse16_prepare.rs
             examples/n37_four_policy_sparse16_inputs_replay.rs
@@ -43,6 +42,8 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+      - name: Restore the measured Cargo lockfile
+        run: cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/Cargo.lock Cargo.lock
       - name: Check source lock and formatting
         run: |
           note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
