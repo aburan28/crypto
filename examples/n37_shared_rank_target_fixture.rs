@@ -87,7 +87,10 @@ fn run(points_path: &Path, fixture_path: &Path) -> Result<(), String> {
             .and_then(|name| name.to_str())
             .is_some_and(|name| name.starts_with("n37_"));
         let mut rows = 0usize;
-        for line in bytes.split(|&byte| byte == b'\n').filter(|line| !line.is_empty()) {
+        for line in bytes
+            .split(|&byte| byte == b'\n')
+            .filter(|line| !line.is_empty())
+        {
             rows += 1;
             if is_n37 {
                 let value: Value = serde_json::from_slice(line)
@@ -129,9 +132,8 @@ fn run(points_path: &Path, fixture_path: &Path) -> Result<(), String> {
         )?);
     }
     let excluded_before_selection = excluded.len();
-    let inventory_sha256 = sha256_hex(
-        &serde_json::to_vec(&json!(&inventory)).map_err(|error| error.to_string())?,
-    );
+    let inventory_sha256 =
+        sha256_hex(&serde_json::to_vec(&json!(&inventory)).map_err(|error| error.to_string())?);
     let mut targets = Vec::with_capacity(COUNT);
     let mut zero_rejections = 0u64;
     let mut orbit_rejections = 0u64;
@@ -190,7 +192,9 @@ fn run(points_path: &Path, fixture_path: &Path) -> Result<(), String> {
 
 fn main() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
-    let points = args.next().ok_or("usage: n37_shared_rank_target_fixture POINTS FIXTURE")?;
+    let points = args
+        .next()
+        .ok_or("usage: n37_shared_rank_target_fixture POINTS FIXTURE")?;
     let fixture = args.next().ok_or("missing FIXTURE output")?;
     if args.next().is_some() {
         return Err("too many arguments".into());
