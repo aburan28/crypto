@@ -43,6 +43,8 @@ mod f5_target;
 mod identity;
 #[path = "icprog/oracle.rs"]
 mod oracle;
+#[path = "icprog/ordinary_control.rs"]
+mod ordinary_control;
 #[path = "icprog/ordinary_preparation.rs"]
 mod ordinary_preparation;
 #[path = "icprog/report.rs"]
@@ -109,6 +111,54 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Freeze new target-free native preparation sources/binaries; builds only.
+    OrdinaryControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Consume one new target-free registration; no resume or retry.
+    OrdinaryControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Inspect a retained ordinary panel/prefix; does not admit runtime custody.
+    OrdinaryControlInspect {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently audit new ordinary source/runtime, outcomes, rank and clocks.
+    OrdinaryControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Independently audit target-free synthetic n17 preparation data; no solver execution.
     OrdinaryPreparationAudit {
         #[arg(long)]
@@ -647,6 +697,40 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::OrdinaryControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => ordinary_control::freeze(
+            &root,
+            &out,
+            &config,
+            &cargo,
+            &rustc,
+            &host_context,
+            validation_only,
+        ),
+        Command::OrdinaryControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => ordinary_control::execute(&capsule, &execution, &registration_sha256),
+        Command::OrdinaryControlInspect {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => ordinary_control::inspect(&capsule, &execution, &registration_sha256, &out),
+        Command::OrdinaryControlAudit {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => ordinary_control::audit(&capsule, &execution, &registration_sha256, &out),
         Command::OrdinaryPreparationAudit { input, out } => ordinary_preparation::run(&input, &out),
         Command::F5ControlReplayCustody {
             publication,

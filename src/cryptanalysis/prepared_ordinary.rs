@@ -264,7 +264,12 @@ fn sat_frontend(
         indices,
         fatal: matches!(outcome, "invalid_model" | "transport_failure"),
         evidence: json!({"public_point":public,"native_status":status,"reason":reason,
-            "native":output.native,"manifest":output.manifest,"anf":output.anf,"cnf":output.cnf,
+            "native":{"exit_code":output.native.exit_code,"timed_out":output.native.timed_out,
+                "stdout_bytes":output.native.stdout.len(),"stdout_sha256":sat::sha256(output.native.stdout.as_bytes()),
+                "receipt":output.native.receipt},"manifest":output.manifest,
+            "anf_sha256":sat::sha256(output.anf.as_bytes()),"anf_bytes":output.anf.len(),
+            "cnf_sha256":sat::sha256(output.cnf.as_bytes()),"cnf_bytes":output.cnf.len(),
+            "source_payload_policy":"hashes; native executor must retain original files",
             "source_receipt":output.source_receipt}),
     })
 }
@@ -760,6 +765,10 @@ mod tests {
         let good = sat_frontend(&context, 1, scalar, &mut SourceControl { flip: false }).unwrap();
         assert_eq!(good.outcome, "witness");
         assert!(good.indices.is_some());
+        assert!(good.evidence["anf"].is_null());
+        assert!(good.evidence["native"]["stdout"].is_null());
+        assert!(good.evidence["anf_bytes"].as_u64().unwrap() > 0);
+        assert_eq!(good.evidence["anf_sha256"], sat::sha256(include_str!("../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.anf").as_bytes()));
         let bad = sat_frontend(&context, 1, scalar, &mut SourceControl { flip: true }).unwrap();
         assert_eq!(bad.outcome, "invalid_model");
         assert!(bad.indices.is_none());

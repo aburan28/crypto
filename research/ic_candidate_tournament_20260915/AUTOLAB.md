@@ -51,8 +51,14 @@ ordinary panel or fresh qualification.
 The [ordinary-query native worker contract](goal_20260924/native-ordinary-executor-v1/PROTOCOL.md)
 binds a new capsule scope, compiled source/build identity, one-use claim,
 single-thread environment, chronological durable records and accepted external
-native roles. Its source controls execute no panel; the frozen controller,
-registration/publication and independent runtime audit remain pending.
+native roles. Its source controls execute no panel. The [ordinary controller](goal_20260924/native-ordinary-controller-v1/PROTOCOL.md)
+now implements source freeze, claim-consuming dispatch, diagnostic prefix
+inspection and independent full execution audit. The audit binds build/worker/
+role receipts and original model files, compares exact matrix rows with the
+independent mathematical reconstruction, and requires complete exclusive phase
+costs. Its bounded validation controls launch no scientific queries. Actual
+source freeze, registration/publication, panel execution and frozen runtime
+acceptance remain pending.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
