@@ -315,7 +315,11 @@ fn replay(args: &[String]) -> Result<Value, String> {
         .as_f64()
         .ok_or("IC phase sum missing")?;
     let rss = number(&summary, "peak_rss_bytes")?;
-    if (online_ms - phases_ms).abs() > 0.000001 || rss > 16 * 1024 * 1024 * 1024 {
+    let rho_rss = number(&rho, "peak_rss_bytes")?;
+    if (online_ms - phases_ms).abs() > 0.000001
+        || rss > 16 * 1024 * 1024 * 1024
+        || rho_rss > 16 * 1024 * 1024 * 1024
+    {
         return Err("online phase sum or memory acceptance gate failed".into());
     }
     Ok(json!({
@@ -335,7 +339,8 @@ fn replay(args: &[String]) -> Result<Value, String> {
         "ic_online_ms":online_ms,
         "rho_online_ms":rho["walk_ms"].as_f64().ok_or("rho walk time missing")?
             + rho["validation_ms"].as_f64().ok_or("rho validation time missing")?,
-        "peak_rss_bytes":rss
+        "peak_rss_bytes":rss,
+        "rho_peak_rss_bytes":rho_rss
     }))
 }
 
