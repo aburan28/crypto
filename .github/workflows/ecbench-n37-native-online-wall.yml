@@ -1,0 +1,105 @@
+name: ecbench n37 native online wall screen
+
+on:
+  pull_request:
+    paths:
+      - 'research/ecbench_n37_native_online_wall_20261004/**'
+      - '.github/workflows/ecbench-n37-native-online-wall.yml'
+      - 'src/bin/ecbench.rs'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ic_framework/shared_rank.rs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the preregistered source and target freeze
+        run: |
+          dir=research/ecbench_n37_native_online_wall_20261004
+          test "$(sha256sum "$dir/SPEC.json" | cut -d' ' -f1)" = \
+            "$(jq -r .spec_file_sha256 "$dir/FREEZE.json")"
+          test "$(sha256sum "$dir/PLAN.json" | cut -d' ' -f1)" = \
+            "$(jq -r .plan_file_sha256 "$dir/FREEZE.json")"
+          cargo build --release --bin ecbench
+          ./target/release/ecbench plan --spec "$dir/SPEC.json" --json \
+            > "$RUNNER_TEMP/n37-native-plan.json"
+          cmp "$RUNNER_TEMP/n37-native-plan.json" "$dir/PLAN.json"
+          test "$(jq '.workloads | length' "$dir/PLAN.json")" = 16
+          test "$(jq .executions "$dir/PLAN.json")" = 384
+          comm -12 \
+            <(jq -r '.workloads[].target | join(":")' "$dir/PLAN.json" | sort) \
+            <(jq -r '.workloads[].target | join(":")' \
+              research/ecbench_n37_k8_k16_20261004/PLAN.json \
+              research/ecbench_n37_online_ir_20261004/PLAN.json | sort -u) \
+            > "$RUNNER_TEMP/n37-target-overlap.txt"
+          test ! -s "$RUNNER_TEMP/n37-target-overlap.txt"
+          git diff --exit-code 9e15353bf83b15e4cb8332519d8515613ac4dfea -- \
+            Cargo.toml src/cryptanalysis/ecbench src/cryptanalysis/ic_framework/shared_rank.rs \
+            src/bin/ecbench.rs
+      - name: Run the frozen native panel on a hosted Linux VM
+        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        run: |
+          out="$RUNNER_TEMP/ecbench-n37-native-wall"
+          mkdir -p "$out"
+          {
+            git rev-parse HEAD
+            git status --short
+            rustc -Vv
+            cargo -V
+            uname -a
+            lscpu
+            sha256sum target/release/ecbench Cargo.lock \
+              research/ecbench_n37_native_online_wall_20261004/{SPEC,PLAN,FREEZE}.json
+          } > "$out/PROVENANCE.txt"
+          cp Cargo.lock "$out/Cargo.lock"
+          ./target/release/ecbench host > "$out/HOST.txt"
+          set +e
+          # The caller owns the output directory.
+          # shellcheck disable=SC2024
+          sudo timeout --signal=INT --kill-after=10s 55m \
+            ./target/release/ecbench run \
+            --spec research/ecbench_n37_native_online_wall_20261004/SPEC.json \
+            --out "$out/session" --cpus auto --allow-busy --settle 0.25 --quiet \
+            > "$out/RUN.stdout" 2> "$out/RUN.stderr"
+          status=$?
+          set -e
+          sudo chown -R "$(id -u):$(id -g)" "$out"
+          printf '%s\n' "$status" > "$out/RUN.exit"
+          test "$status" -eq 0
+          ./target/release/ecbench verify --dir "$out/session" --replay-all \
+            --exit-code --out "$out/LOCAL-AUDIT.json" \
+            > "$out/LOCAL-AUDIT.stdout" 2> "$out/LOCAL-AUDIT.stderr"
+          jq -e '.ok == true and .records == 384 and .verified_records == 384
+            and (.replays | length) == 320
+            and all(.replays[]; .reproduced)' "$out/LOCAL-AUDIT.json" > /dev/null
+          test "$(wc -l < "$out/session/records.jsonl")" -eq 384
+          (
+            cd "$out"
+            find session -type f -print0 | sort -z | xargs -0 sha256sum
+            sha256sum PROVENANCE.txt Cargo.lock HOST.txt LOCAL-AUDIT.json RUN.exit
+          ) > "$out/SHA256SUMS"
+      - name: Re-audit committed native evidence
+        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') != '' }}
+        run: |
+          dir=research/ecbench_n37_native_online_wall_20261004
+          ./target/release/ecbench verify \
+            --dir "$dir/sessions/hosted_ubuntu_01" --replay-all --exit-code \
+            --out "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
+          jq -e '.ok == true and .records == 384 and .verified_records == 384
+            and (.replays | length) == 320
+            and all(.replays[]; .reproduced)' \
+            "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        with:
+          name: ecbench-n37-native-wall
+          path: ${{ runner.temp }}/ecbench-n37-native-wall
+          if-no-files-found: error
