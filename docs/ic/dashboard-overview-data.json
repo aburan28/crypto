@@ -35,12 +35,20 @@
       "sha256": "cabeb087e0991580831434ba35c688ace9072e346cd7ceeb0522aeb5c0578ede"
     },
     {
-      "path": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/rho-strong__ic-shared.json",
-      "sha256": "28f375249d4277b44ebc1920691acd0b242dbf8a1c4dd8a69ec352b31d4fe810"
-    },
-    {
       "path": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/ic-shared__ic-control.json",
       "sha256": "d5277601068a516d72131ebef5f024d2d305cfbe577cd577ce7b06370742573d"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json",
+      "sha256": "bc2e2ebf42f248d55d81691ffb87d337eb0063c3c8e9bd516bd654bbde56729f"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CLAIM_INDEPENDENT_DIAGNOSTIC.json",
+      "sha256": "adabcd19c30e81c6f3967377a13e8ef2acd23ade02eb26ca77b5fa2312d8ab5c"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CHECK.json",
+      "sha256": "06a4356519163ec6d8d62f90fdce64fcba509693fd924cc98ab00dec80e3e482"
     }
   ],
   "confirmation_online": {
@@ -455,6 +463,13 @@
     "status": "verified_bounded_l0_diagnostic",
     "target_count": 1,
     "workload_id": "bad0afc30d3a"
+  },
+  "shared_rank_independent_replay": {
+    "session_id": "ECBS1h33c3e5e4f75d",
+    "auditor_env_class_id": "ECBENV2hda64b23436f4",
+    "replays": 15,
+    "receipt_sha256": "bc2e2ebf42f248d55d81691ffb87d337eb0063c3c8e9bd516bd654bbde56729f",
+    "claim_check_status": "PASS"
   },
   "rho_online_table": [
     {

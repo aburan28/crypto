@@ -64,15 +64,19 @@ The earlier session `ECBS1h774f0e722ea2` is preserved because it ran before
 the metadata-only change that embedded manifest records; the final binary
 also [replayed it identically](AUDIT_FIRST_FINAL_BINARY.json). The
 [claim check](CHECK_FINAL.json) correctly refuses promotion without an
-independent other-host certificate. The final session is L0 in every arm,
-and its native field arithmetic, hashing, allocation and modular combination
-remain incompletely priced. The claim file's numeric raw ratio is explicitly
-labelled descriptive by its verdict and is not an accepted speedup.
+independent other-host certificate. A separate
+[Linux x86-64 replay](independent_validation_20261004/RESULT.md) now
+reproduces all 15 measured records under another host class, and its
+attached diagnostic report passes the claim schema. The final session is
+still L0 in every arm, and its native field arithmetic, hashing, allocation
+and modular combination remain incompletely priced. The claim file's numeric
+raw ratio is explicitly labelled descriptive by its verdict and is not an
+accepted speedup; the frozen aggregate speedup remains null.
 
 The next decision is to run this exact candidate and strong rho on a Linux
-host that actually earns L2, obtain a durable other-class all-run replay
-receipt, and price native work in a common unit. Freeze a separate panel of
-at least eight new one-target workloads before generalizing to targets.
+host that actually earns L2 and price native work in a common unit. Freeze a
+separate panel of at least eight new one-target workloads before
+generalizing to targets.
 The current point says nothing about n41/n53 scaling, the m83 confidence
 gate, degree-263 descent, or ECC2K-130 at m131. A separately frozen batch
 may then ask when reusable rank preparation amortizes; it does not replace
