@@ -59,7 +59,7 @@ solve, not as a controlled crossover claim.
 | Mean complete cold solve wall (ms) | 10.210 | 10.278 |
 | Maximum recorded RSS (KiB) | 8,248 | 8,612 |
 
-The [sealed session](session) retains all 384 records, raw failures (none),
+The [sealed session](sessions/hosted_ubuntu_01) retains all 384 records, raw failures (none),
 phase timings, complete resource envelopes, target seeds, source and binary
 hashes, point and scalar checks, and the CPU isolation record. The hosted
 [local audit](LOCAL-AUDIT.json) reproduced all 320 measured children. The
@@ -78,7 +78,7 @@ cd ../..
 cargo build --release --example ecbench_n37_native_online_wall_analyze
 target/release/examples/ecbench_n37_native_online_wall_analyze \
   research/ecbench_n37_native_online_wall_20261004 \
-  research/ecbench_n37_native_online_wall_20261004/session \
+  research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01 \
   research/ecbench_n37_native_online_wall_20261004/INDEPENDENT-AUDIT-MAC.json \
   /tmp/n37-native-wall-decision.json
 cmp /tmp/n37-native-wall-decision.json \
