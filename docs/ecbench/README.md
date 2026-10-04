@@ -348,6 +348,10 @@ Two consequences to read every table with:
   admitted pairs of its own), and marked `outside_noise` only when it
   excludes 1 and does not overlap the A/A interval. Anything less prints
   as `descriptive`, never as a result.
+  This `compare` wall field uses the whole solve, including IC's reusable
+  setup. For the primary one-target IC question, read the separate online
+  windows and `ecbench claim`'s same-point interval; a cold wall ratio is
+  never an online speedup.
 
 A speedup in the sense of AGENTS.md §8 is still
 `baseline_total_operations / candidate_total_operations`, over the whole
@@ -429,6 +433,8 @@ field the schema requires, from the session's own files:
   columns its sign-and-Frobenius orbits), every stage of the method
   resolved, and the IC sources hashed into the binary at compile time. A
   claim is therefore built only by the binary that measured the session.
+  The claim also carries the complete canonical candidate and workload
+  records beside their hashes, so a reader can audit the compact IDs.
   `ecbench`'s Koblitz bases fold the raw lifted points, so a raw orbit
   whose cofactor image is the identity (the 2-torsion point above
   `x = 0`) is a column with logarithm zero; the record discloses such

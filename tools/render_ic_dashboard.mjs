@@ -81,6 +81,35 @@ assert.equal(sharedTargets.counts.direct_three_summand_hits, 16);
 assert.equal(sharedTargets.gae_lower_bound.cold_total, 197454);
 assert.equal(sharedTargets.rho_ratio, null);
 const sharedTargetsPin = {path: sharedTargetsPath, sha256: sharedTargetsSha};
+const sharedEcbenchPath = 'research/ecbench_n37_shared_rank_20261004/RESULT_FINAL.json';
+const sharedEcbenchBytes = readFileSync(resolve(ROOT, sharedEcbenchPath));
+const sharedEcbenchSha = 'cabeb087e0991580831434ba35c688ace9072e346cd7ceeb0522aeb5c0578ede';
+assert.equal(sha(sharedEcbenchBytes), sharedEcbenchSha, 'One-target ecbench result changed; review the decision before refreshing its pin.');
+const sharedEcbench = JSON.parse(sharedEcbenchBytes);
+assert.equal(sharedEcbench.status, 'verified_bounded_l0_diagnostic');
+assert.equal(sharedEcbench.all_measured_verified, true);
+assert.equal(sharedEcbench.target_count, 1);
+assert.equal(sharedEcbench.measured_rounds, 5);
+assert.equal(sharedEcbench.online_speedup, null);
+assert.equal(sharedEcbench.cold_counted_ic_over_rho_bounded, 13.590881825669284);
+const sharedEcbenchPin = {path: sharedEcbenchPath, sha256: sharedEcbenchSha};
+const sharedComparisonPath = 'research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/rho-strong__ic-shared.json';
+const sharedComparisonBytes = readFileSync(resolve(ROOT, sharedComparisonPath));
+const sharedComparisonSha = '28f375249d4277b44ebc1920691acd0b242dbf8a1c4dd8a69ec352b31d4fe810';
+assert.equal(sha(sharedComparisonBytes), sharedComparisonSha, 'Shared-rank comparison changed; review before refreshing its pin.');
+const sharedComparison = JSON.parse(sharedComparisonBytes);
+assert.equal(sharedComparison.ops.bounded, true);
+assert.equal(sharedComparison.ops.pairs, 5);
+assert.equal(sharedComparison.wall.status, 'descriptive');
+assert.equal(sharedComparison.ops.ratio_b_over_a, sharedEcbench.cold_counted_ic_over_rho_bounded);
+const sharedComparisonPin = {path: sharedComparisonPath, sha256: sharedComparisonSha};
+const sharedControlPath = 'research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/ic-shared__ic-control.json';
+const sharedControlBytes = readFileSync(resolve(ROOT, sharedControlPath));
+const sharedControlSha = 'd5277601068a516d72131ebef5f024d2d305cfbe577cd577ce7b06370742573d';
+assert.equal(sha(sharedControlBytes), sharedControlSha, 'Shared-rank A/A comparison changed; review before refreshing its pin.');
+const sharedControl = JSON.parse(sharedControlBytes);
+assert.equal(sharedControl.ops.ratio_b_over_a, 1);
+const sharedControlPin = {path: sharedControlPath, sha256: sharedControlSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -149,7 +178,14 @@ const front = `
 <div class="dash-section-head"><div><p class="dash-kicker">n37 reusable setup / Stage diagnostic</p><h2 id="shared-rank-folded-title">A target-blind rank database now checks all 42 base logs.</h2></div><span class="status neutral">Correctness passed · no rho ratio</span></div>
 <p class="dash-section-intro panel-summary">The frozen compact-orbit source base and signed-Frobenius three-summand table used 55 seeded <code>[a]G</code> probes, with no public Q, to collect 42 independent rows and 13 dependent rows. A separate general-curve-law verifier replayed every relation and checked all 42 solved column logs as full points. Two final producer runs have identical non-timing evidence.</p>
 <div class="table-scroll"><table><caption>One target-independent n37 setup, counted group-addition equivalents. Field, hash, allocation and full memory costs remain unpriced; target descent and rho were not measured in this gate.</caption><thead><tr><th>Base</th><th>Folded table</th><th>Rank search</th><th>Elimination</th><th>Checks</th><th>Shared total</th></tr></thead><tbody><tr><td>4,260</td><td>178,710</td><td>8,498</td><td>1,110</td><td>2,248</td><td><strong>194,826</strong></td></tr></tbody></table></div>
-<p class="dash-footnote">The table built 64,467 retained entries with 66,822 additions and accounts for 91.7% of the charged setup. A separately frozen follow-up recovered and independently replayed 16/16 new point-only Q directly, at a 197,454 counted cold GAE lower bound for the setup plus all 16 targets. Native work, memory and a strong same-Q rho arm remain unpriced; no speedup or n131 transfer follows. The next primary gate is a fresh one-target online comparison before a separately frozen batch. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/shared_rank_folded_table_20261003/RESULT.md">Rank evidence</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_shared_rank_targets_20261003/RESULT.md">Point-only target evidence →</a></p>
+<p class="dash-footnote">The table built 64,467 retained entries with 66,822 additions and accounts for 91.7% of the charged setup. A separately frozen follow-up recovered and independently replayed 16/16 new point-only Q directly, at a 197,454 counted cold GAE lower bound for the setup plus all 16 targets. Native work and memory remain unpriced. The separate one-target ecbench gate below pairs a fresh Q with strong rho under a new calibration; its counts are not directly subtracted from these historical counts. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/shared_rank_folded_table_20261003/RESULT.md">Rank evidence</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_shared_rank_targets_20261003/RESULT.md">Point-only target evidence →</a></p>
+</section>
+
+<section class="dash-section" id="n37-shared-rank-ecbench-20261004" aria-labelledby="shared-ecbench-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 one public point / paired ecbench</p><h2 id="shared-ecbench-title">The shared rank solves Q; the speed claim stays open.</h2></div><span class="status neutral">Accounting · L0 diagnostic</span></div>
+<p class="dash-section-intro panel-summary">A fresh orbit-disjoint Q was solved by the 3,108-point, 42-column shared-rank IC and by single-target strong signed-Frobenius rho in all five measured rounds. The target-independent table and 42 verified base logs were built before each IC online clock; each target was a direct m3 hit. Both arms have unpriced native work.</p>
+<div class="table-scroll"><table><caption>Same Q, five verified one-target repetitions. Every S and ratio is a lower-bound or bounded cold diagnostic; online times are L0 observations, not an accepted speedup.</caption><thead><tr><th>Variant</th><th>Verified</th><th>Mean cold S</th><th>S / floor</th><th>S / rho</th><th>Median target online</th></tr></thead><tbody><tr><td>Strong signed-Frobenius rho</td><td>5/5</td><td>${f(sharedComparison.a.mean_s,3)}</td><td>${f(sharedComparison.a.mean_ratio_to_floor,3)}</td><td>1.000</td><td>${f(sharedEcbench.rho_online_ns.median_ns/1000,3)} µs</td></tr><tr><td>Shared-rank IC</td><td>5/5</td><td>${f(sharedComparison.b.mean_s,3)}</td><td>${f(sharedComparison.b.mean_ratio_to_floor,3)}</td><td>${f(sharedComparison.ops.ratio_b_over_a,3)}</td><td>${f(sharedEcbench.ic_online_ns.median_ns/1000,3)} µs</td></tr><tr><td>Shared-rank IC A/A control</td><td>5/5</td><td>${f(sharedControl.b.mean_s,3)}</td><td>${f(sharedControl.b.mean_ratio_to_floor,3)}</td><td>${f(sharedComparison.ops.ratio_b_over_a,3)}</td><td>${f(sharedEcbench.control_online_ns.median_ns/1000,3)} µs</td></tr></tbody></table></div>
+<p class="dash-footnote">Five repeats on one Q quantify run noise, not target variation. The A/A IC online ratio ranged 0.833–1.287. The next measurement needs an L2 Linux run, a durable other-class replay receipt and common native-work pricing; a new target panel is required before generalization. No n131 transfer follows. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/README.md">Protocol, session, audit and decision</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/RESULT_FINAL.json">Native analysis →</a></p>
 </section>
 
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
@@ -176,10 +212,11 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedComparisonPin,sharedControlPin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
+  shared_rank_ecbench: sharedEcbench,
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
   historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),
   historical_overview_panels: retainedPanels.map(panel=>({section_id:panel.id,sha256:sha(panel.html)})),
