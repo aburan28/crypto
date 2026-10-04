@@ -122,10 +122,48 @@ jobs:
             research/ecbench_n37_rank_columns_20261004/RESULT.json
       - name: Attach the independent receipt without changing the frozen claim
         run: |
+          # The claim binds the measuring binary's source hashes. Build its
+          # pre-instrumentation source snapshot for this historical attachment;
+          # the current binary remains responsible for the subsequent checker.
+          frozen="$RUNNER_TEMP/ecbench-frozen-source"
+          git worktree add --detach --no-checkout "$frozen" 1d1b1fb7206aa3cfd4be9dd1953fb57d3c79b439
+          git -C "$frozen" sparse-checkout set --no-cone \
+            '/Cargo.toml' '/Cargo.lock' '/src/**' '/docs/ic/**' \
+            '/docs/ecbench/**' '/docs/curves/**' '/.cargo/**'
+          git -C "$frozen" checkout HEAD
+          python3 - "$frozen" research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+
+          root = pathlib.Path(sys.argv[1])
+          claim = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          expected = {
+              item["role"]: item["sha256"]
+              for item in claim["candidate_manifest"]["implementation"]["components"]
+          }
+          paths = {
+              "ic_pipeline": "src/cryptanalysis/ic_framework/mod.rs",
+              "ic_plugins": "src/cryptanalysis/ic_framework/plugins.rs",
+              "ic_solvers": "src/cryptanalysis/ic_framework/solvers.rs",
+              "ic_linalg": "src/cryptanalysis/ic_framework/linalg.rs",
+              "relation_loop": "src/cryptanalysis/ic_boundary.rs",
+              "harness": "src/cryptanalysis/ecbench/methods.rs",
+              "shared_rank": "src/cryptanalysis/ic_framework/shared_rank.rs",
+          }
+          assert set(expected) == set(paths), "unexpected frozen claim source roles"
+          for role, path in paths.items():
+              actual = hashlib.sha256((root / path).read_bytes()).hexdigest()
+              assert actual == expected[role], f"{role} source differs from frozen claim"
+          PY
+          CARGO_TARGET_DIR="$RUNNER_TEMP/ecbench-frozen-target" \
+            cargo build --release --locked --manifest-path "$frozen/Cargo.toml" --bin ecbench
+          frozen_ecbench="$RUNNER_TEMP/ecbench-frozen-target/release/ecbench"
           receipt=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json
           report=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CLAIM_INDEPENDENT_DIAGNOSTIC.json
           check=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CHECK.json
-          attach=(./target/release/ecbench claim attach
+          attach=("$frozen_ecbench" claim attach
             --dir research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02
             --ic ic-shared --rho rho-strong --workload W157bda94ea05
             --independent-receipt "$receipt"
