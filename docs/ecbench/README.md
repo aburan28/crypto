@@ -348,6 +348,10 @@ Two consequences to read every table with:
   admitted pairs of its own), and marked `outside_noise` only when it
   excludes 1 and does not overlap the A/A interval. Anything less prints
   as `descriptive`, never as a result.
+  This `compare` wall field uses the whole solve, including IC's reusable
+  setup. For the primary one-target IC question, read the separate online
+  windows and `ecbench claim`'s same-point interval; a cold wall ratio is
+  never an online speedup.
 
 A speedup in the sense of AGENTS.md §8 is still
 `baseline_total_operations / candidate_total_operations`, over the whole
