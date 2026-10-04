@@ -19,8 +19,11 @@ to materialize the public point `Q` and its independently recovered scalar.
 The IC input is the resulting `[x,y]` point only. The IC producer is
 `koblitz_orbit_dlp_fast_online construct:37:0:7 <point-file> 3737001
 <target-output>`; no known scalar enters it. Both are built from the same
-commit and release profile. A 15-minute wall cap and 16 GiB memory ceiling
-apply to each arm; record a timeout or failure as a result, never as a win.
+commit and release profile. A 15-minute wall cap applies to each arm; a run
+whose reported peak RSS exceeds 16 GiB fails the memory acceptance gate.
+macOS rejected `ulimit -v`, so this is a post-run acceptance gate rather than
+an enforced OS memory limit. Record a timeout or failure as a result, never
+as a win.
 
 The IC online interval starts with the first target-dependent query-hash
 operation after base/index/rank/log setup and ends after scalar replay. Its
