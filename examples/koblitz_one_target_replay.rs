@@ -146,12 +146,17 @@ fn replay(args: &[String]) -> Result<Value, String> {
         .as_array()
         .ok_or("missing factor-base representatives")?;
     if number(&base, "subgroup_order")? != modulus
+        || base["field_modulus_low_terms"] != json!(curve.curve.irreducible.low_terms)
+        || rho["field_modulus_low_terms"] != base["field_modulus_low_terms"]
         || representatives.len() != columns
         || coordinates.len() != labels.len()
         || number(&base, "factor_base_points")? as usize != coordinates.len()
         || number(&summary, "rank")? as usize != columns
         || number(&summary, "factor_base_points")? as usize != coordinates.len()
         || number(&summary, "orbit_columns")? as usize != columns
+        || number(&summary, "targets")? != 1
+        || number(&summary, "targets_solved")? != 1
+        || number(&summary, "targets_failed")? != 0
         || summary["base_hash"] != base["base_hash"]
     {
         return Err("curve, base, or final-rank metadata differs".into());
@@ -276,6 +281,9 @@ fn replay(args: &[String]) -> Result<Value, String> {
         || ic["published_fixture_scalar"] != Value::Null
         || rho["published_fixture_scalar"] != Value::Null
         || rho["reference_grade"] != "strong"
+        || rho["quotient_mode"] != "signed_frobenius"
+        || rho["target_kind"] != "public_hash_to_curve_cofactor"
+        || number(&rho, "public_hash_seed")? != 370413
         || ic["group_verified"] != true
         || rho["verified"] != true
     {
