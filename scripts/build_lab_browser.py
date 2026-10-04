@@ -41,6 +41,8 @@ IC1_SCAN_GLOBS = (
     "docs/ic/**/*.md",
     "research/ic_candidate_tournament_20260915/**/*.json",
     "research/ic_candidate_tournament_20260915/**/*.md",
+    "research/f6_ic_geometric_closure_20261003/**/*.json",
+    "research/f6_ic_geometric_closure_20261003/**/*.md",
     "research/notes/ecc2k130/**/*.json",
     "research/notes/ecc2k130/**/*.md",
 )
