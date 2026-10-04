@@ -480,7 +480,7 @@ fn mathematical_job(prep: &Value, cfg: &Control) -> Result<Value, String> {
         "prepared":{"mathematical_state_sha256":STATE,"factor_base":geometry,"columns":columns}}),
     )
 }
-fn check_capsule(capsule: &Path) -> Result<Value, String> {
+pub(super) fn check_capsule(capsule: &Path) -> Result<Value, String> {
     let registration = load(&capsule.join("registration.json"))?;
     let seal = load(&capsule.join("seal.json"))?;
     require(
@@ -782,7 +782,17 @@ fn verify_transport(
     capsule: &Path,
     execution: &Path,
     terminal: &Value,
+    retained_locations: Option<(&Path, &Path)>,
 ) -> Result<Value, String> {
+    // Publication reads copied data but compares the original invocation paths.
+    // Live admission still canonicalizes its actual capsule/execution directories.
+    let (original_capsule, original_execution) = match retained_locations {
+        Some((capsule, execution)) => (capsule.to_path_buf(), execution.to_path_buf()),
+        None => (
+            capsule.canonicalize().map_err(|e| e.to_string())?,
+            execution.canonicalize().map_err(|e| e.to_string())?,
+        ),
+    };
     require(
         terminal["schema_version"] == 1
             && terminal["registration_sha256"] == canonical_sha(registration)?
@@ -794,7 +804,7 @@ fn verify_transport(
     require(
         claim["registration_sha256"] == canonical_sha(registration)?
             && claim["status"] == "consumed-before-launch"
-            && claim["execution"] == json!(execution.canonicalize().map_err(|e| e.to_string())?),
+            && claim["execution"] == json!(original_execution),
         "F5 audit differs from the one-use claim",
     )?;
     let receipt = load(&execution.join("worker.receipt.json"))?;
@@ -805,8 +815,8 @@ fn verify_transport(
         .into_iter()
         .collect::<std::collections::BTreeMap<_, _>>();
     require(
-        receipt["argv"] == json!([capsule.join("immutable/bin").join(WORKER)])
-            && receipt["cwd"] == json!(execution.canonicalize().map_err(|e| e.to_string())?)
+        receipt["argv"] == json!([original_capsule.join("immutable/bin").join(WORKER)])
+            && receipt["cwd"] == json!(original_execution)
             && receipt["deadline_ms"] == cfg.controller_timeout_ms
             && receipt["environment"] == json!(env)
             && receipt["executable_sha256_before"] == registration["worker_sha256"]
@@ -855,6 +865,41 @@ fn verify_transport(
     Ok(report)
 }
 
+/// Data-only postexecution replay; never source-bound live execution admission.
+pub(super) fn verify_retained(
+    data: &Path,
+    original_capsule: &Path,
+    original_execution: &Path,
+) -> Result<Value, String> {
+    let cfg = config(data)?;
+    let execution = data.join("execution");
+    let registration = load(&data.join("registration.json"))?;
+    let terminal = load(&execution.join("terminal.json"))?;
+    let report = verify_transport(
+        &registration,
+        &cfg,
+        data,
+        &execution,
+        &terminal,
+        Some((original_capsule, original_execution)),
+    )?;
+    require(
+        report["online_wall_ns"]
+            .as_u64()
+            .ok_or("missing producer clock")?
+            <= terminal["worker"]["receipt"]["child_wall_ns"]
+                .as_u64()
+                .ok_or("missing child clock")?,
+        "F5 producer interval exceeds retained child interval",
+    )?;
+    f5_target::verify(
+        &load(&data.join("preparation.json"))?,
+        cfg.algorithm_seed,
+        cfg.max_queries,
+        &report,
+    )
+}
+
 /// Frozen independent checker: sources, transport, every target attempt and scalar.
 /// No solver or archived producer is ever called by this entry point.
 pub fn audit(
@@ -877,8 +922,8 @@ pub fn audit(
     )?;
     let cfg = config(&capsule)?;
     let terminal = load(&execution.join("terminal.json"))?;
-    let result =
-        verify_transport(&registration, &cfg, &capsule, &execution, &terminal).and_then(|report| {
+    let result = verify_transport(&registration, &cfg, &capsule, &execution, &terminal, None)
+        .and_then(|report| {
             f5_target::verify(
                 &load(&capsule.join("preparation.json"))?,
                 cfg.algorithm_seed,
@@ -1244,7 +1289,10 @@ mod tests {
     fn simulated_transport_rejects_modified_environment_input_output_claim_and_drain() {
         // Data fixture only: neither this placeholder worker nor any solver runs.
         // Public audit separately requires the actual frozen checker/source tree.
-        let p = temp("transport-fixture");
+        // The live audit canonicalizes its capsule before checking argv. On
+        // macOS, TMPDIR may reach /private/var through a /var symlink; model
+        // the live invocation instead of constructing an unresolved argv.
+        let p = temp("transport-fixture").canonicalize().unwrap();
         let execution = p.join("execution");
         fs::create_dir(&execution).unwrap();
         let execution = execution.canonicalize().unwrap();
@@ -1274,7 +1322,7 @@ mod tests {
         let terminal = json!({"schema_version":1,"registration_sha256":canonical_sha(&registration).unwrap(),
             "source_gate_passed":true,"child_drain_passed":true,"worker":{"exit_code":0,"timed_out":false,"receipt":receipt}});
         assert_eq!(
-            verify_transport(&registration, &cfg, &p, &execution, &terminal).unwrap(),
+            verify_transport(&registration, &cfg, &p, &execution, &terminal, None).unwrap(),
             old
         );
         // The subsequent mathematics gate rejects this old seed under the new config.
@@ -1298,7 +1346,7 @@ mod tests {
             let mut forged = terminal.clone();
             forged["worker"]["receipt"] = changed;
             assert!(
-                verify_transport(&registration, &cfg, &p, &execution, &forged).is_err(),
+                verify_transport(&registration, &cfg, &p, &execution, &forged, None).is_err(),
                 "accepted {pointer}"
             );
         }
@@ -1308,7 +1356,7 @@ mod tests {
         )
         .unwrap();
         fs::write(p.join("consumed.json"), b"{}").unwrap();
-        assert!(verify_transport(&registration, &cfg, &p, &execution, &terminal).is_err());
+        assert!(verify_transport(&registration, &cfg, &p, &execution, &terminal, None).is_err());
         fs::remove_dir_all(p).unwrap();
     }
 }

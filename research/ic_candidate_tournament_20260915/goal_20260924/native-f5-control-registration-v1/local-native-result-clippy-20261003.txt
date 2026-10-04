@@ -1,0 +1,101 @@
+Local tooling transcript; trailing blank lines removed.
+Original transcript SHA-256: 95f00d1bb74e394e59e7338ef2f806815adfe3536a2a8a64603e479a9e834903
+
+warning[E0602]: unknown lint: `clippy::chunks_exact_to_as_chunks`
+  |
+  = note: requested on the command line with `-A clippy::chunks_exact_to_as_chunks`
+  = note: `#[warn(unknown_lints)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: this `else { if .. }` block can be collapsed
+   --> src/binary_ecc/f2m.rs:663:16
+    |
+663 |           } else {
+    |  ________________^
+664 | |             if bit_at == 0 {
+665 | |                 high.push(bits[i]);
+666 | |             } else {
+...   |
+673 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#collapsible_else_if
+    = note: `#[warn(clippy::collapsible_else_if)]` on by default
+help: collapse nested if block
+    |
+663 ~         } else if bit_at == 0 {
+664 +             high.push(bits[i]);
+665 +         } else {
+666 +             // bits[i] contributes to high at offset (i - word_at).
+667 +             if let Some(last) = high.last_mut() {
+668 +                 *last ^= bits[i] << (64 - bit_at);
+669 +             }
+670 +             high.push(bits[i] >> bit_at);
+671 +         }
+    |
+
+warning: this boolean expression can be simplified
+   --> src/cryptanalysis/ecbench/audit.rs:311:16
+    |
+311 |             && r.cost.lower_bound == !r.cost.unpriced.is_empty()
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `r.cost.lower_bound != r.cost.unpriced.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#nonminimal_bool
+    = note: `#[warn(clippy::nonminimal_bool)]` on by default
+
+warning: this boolean expression can be simplified
+    --> src/cryptanalysis/ecbench/claim.rs:1205:12
+     |
+1205 |         if !v.is_some_and(|o| !o.is_empty()) {
+     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `v.is_none_or(|o| o.is_empty())`
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#nonminimal_bool
+
+For more information about this error, try `rustc --explain E0602`.
+warning: `crypto` (lib) generated 8 warnings (run `cargo clippy --fix --lib -p crypto` to apply 5 suggestions)
+warning: `crypto` (bin "icprog") generated 1 warning (1 duplicate)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.06s

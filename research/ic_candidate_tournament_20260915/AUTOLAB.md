@@ -12,16 +12,26 @@ recovery. Portable publication replay launches no search. New natural ordinary
 yield, fresh comparison and tournament promotion remain unestablished.
 The [native F5 preparation replay](goal_20260924/native-f5-preparation-v1/PROTOCOL.md)
 reconstructs the retained ordinary matrix and all logs without opening the old
-archive or dispatching a solver. It keeps original Python provenance; complete
-native F5 controller admission and new ordinary-yield production remain pending.
+archive or dispatching a solver. It keeps original Python provenance and does
+not establish new ordinary yield.
 The [native F5 target replay](goal_20260924/native-f5-target-replay-v1/PROTOCOL.md)
 also reconstructs the retained failed target attempts, geometric negatives,
 witness and scalar. It shares bounded stdin/environment transport with the
 watchdog; it launches no scientific worker and leaves runtime admission pending.
 The [native F5 controller](goal_20260924/native-f5-control-v1/PROTOCOL.md)
-now provides the bounded freeze/claim/execute/audit implementation. Its template
-still needs an actually frozen and separately published registration, sole
-scientific invocation and frozen independent audit before runtime admission.
+has now completed its [actual registered disclosed-input control](goal_20260924/native-f5-control-registration-v1/RESULT.md).
+The registration was accepted on main in PR #1294 before its sole invocation.
+Its original frozen audit admits source-bound execution, two exact negatives,
+the third-query witness and verified scalar recovery. It is consumed and closed:
+never dispatch, retry, resume or execute a restored capsule. Use the native
+`f5-control-replay-result` command with a new output path for portable data/math
+replay; it executes no archived binary and does not replace the original audit.
+The result publication is an unmerged follow-up until its own PR passes.
+The 500 ns producer clock discrepancy is retained as a diagnostic limitation;
+no primary online time, speedup or fresh qualification is admitted. Both native
+target controls are complete, but neither supplies new natural yield. New native
+ordinary-query evidence must use each exact pipeline: the worker's built-in Rust
+SAT engine cannot qualify the separately bound CryptoMiniSat pipeline.
 New cross-method comparisons use native `ecbench`, whose merged online-window
 extension is available for review and integration. Public unplanted targets,
 IC1 identity and prepared solver admission remain open. The Python entry points below are
