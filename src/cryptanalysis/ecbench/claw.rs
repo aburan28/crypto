@@ -95,7 +95,7 @@ fn addmod(a: u64, b: u64, m: u64) -> u64 {
 }
 
 fn negmod(a: u64, m: u64) -> u64 {
-    if a % m == 0 {
+    if a.is_multiple_of(m) {
         0
     } else {
         m - a % m
