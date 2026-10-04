@@ -1036,7 +1036,13 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       <code>&#8467;</code>
       (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_rr_norm_ladder_20260930/RESULTS.md">constant lever</a>);
       the Riemann&ndash;Roch route is closed for the exponent at these sizes in each of its algebraic
-      forms. The <code>m</code>&thinsp;=&thinsp;4 algebraic
+      forms. An independent Gr&ouml;bner engine (Singular&rsquo;s degree-truncated <code>slimgb</code>)
+      confirmed every in-tree reading of that ladder and extended it one rung: the direct
+      <code>S<sub>4</sub></code> descent refutes at degree 10 at <code>&#8467;</code>&thinsp;=&thinsp;5,
+      three above the sharp first-fall bound and still rising one per rung, and the next rung is out of
+      memory at 12&thinsp;GB
+      (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_gb_ladder_20261003/RESULTS.md">external-engine ladder</a>).
+      The <code>m</code>&thinsp;=&thinsp;4 algebraic
       audits read <code>&ccirc;</code>&thinsp;&asymp;&thinsp;1.0 against the 0.25 needed, on both
       engines. The derived exponent lies inside that range &mdash; but at a factor base measurably not
       where the same derivation puts it, so the agreement is not yet confirmation of the model. Carried

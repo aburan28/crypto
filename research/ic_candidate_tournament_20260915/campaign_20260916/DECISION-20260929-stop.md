@@ -116,3 +116,28 @@ Open after this: Nagao's first-fall-degree claim (SEMBIN), and the SEMBIN lane's
 cost, which would make the conjugate-coset reading of Frobenius-orbit coordinates worth
 building. Nothing here reopens items 1–3.
 
+
+## Addendum 3, 2026-10-04: the `m = 3` ladder re-read and extended by an external engine
+
+This addendum records what
+[ic_gb_ladder_20261003](../../ic_gb_ladder_20261003/RESULTS.md) measured. It changes no
+decision.
+
+- **The in-tree readings are confirmed by an independent engine.** Singular's degree-truncated
+  `slimgb` on the homogenisation, which spans exactly the Macaulay row space, agrees with the
+  sparse scan on every shared draw above the scan's floor (20 of 20). Below that floor it
+  found two things the scan could not: the direct `S₄` descent at `ℓ = 2` refutes at 5, and
+  the "degree-4 refutations at `ℓ = 5`" of the earlier ladder were draws containing a constant
+  equation (Erratum 1 of that ladder).
+- **One rung further, still rising.** At `ℓ = 5` on `K₁/2¹⁷` the direct `S₄` descent refutes
+  at degree 10 on all four draws, three above the sharp first-fall bound 7
+  (Kousidis–Wiemers), and the symmetric norm form at 8 on every genuine draw. Slopes over
+  `ℓ = 2…5`: 1.6 and 1.3. No reading at any rung is equal to or below the one before it.
+- **`ℓ = 6` is beyond this engine on this host.** Both `n = 19` curves die at 12 GB at degree
+  8 (`rr`) and degree 9 (`x4`); the readings there are `≥ 8` and `≥ 9`. The registered
+  verdict is therefore *inconclusive at `ℓ ≥ 6`*, with growth confirmed at `ℓ = 5`.
+- **What it leaves.** Item 3 stays stopped: the measured solving degree is 3 above the
+  first-fall bound and rising at the largest size any engine here resolves. The reopening
+  item "a published degree bound for Weil-descended systems" is unchanged. The next rung is
+  an engine and memory question (about 21 GB for a dense elimination at `ℓ = 6`, more for
+  this engine's truncated basis), not a mathematical one.
