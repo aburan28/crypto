@@ -429,6 +429,8 @@ field the schema requires, from the session's own files:
   columns its sign-and-Frobenius orbits), every stage of the method
   resolved, and the IC sources hashed into the binary at compile time. A
   claim is therefore built only by the binary that measured the session.
+  The claim also carries the complete canonical candidate and workload
+  records beside their hashes, so a reader can audit the compact IDs.
   `ecbench`'s Koblitz bases fold the raw lifted points, so a raw orbit
   whose cofactor image is the identity (the 2-torsion point above
   `x = 0`) is a column with logarithm zero; the record discloses such

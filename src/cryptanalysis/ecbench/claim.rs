@@ -838,7 +838,8 @@ pub fn build(
     let (inventory, columns) = factor_base_inventory(&kb, &points, fbf.columns)?;
     let imp = Implementation::for_method(&ic.method.id);
     let method = method_record(&ic.method, &kb, fbf, &columns, &imp)?;
-    let (candidate_id, candidate_sha, _) = candidate_manifest(&kb, method, inventory)?;
+    let (candidate_id, candidate_sha, candidate_record) =
+        candidate_manifest(&kb, method, inventory)?;
 
     // One resource envelope: the session's, identical for both arms.
     let plan_cpu = session.cpu_plan.as_ref();
@@ -857,7 +858,7 @@ pub fn build(
         .algorithm_seed
         .parse()
         .map_err(|_| "bad algorithm seed")?;
-    let (wid, wsha, _) = workload_manifest(
+    let (wid, wsha, workload_record) = workload_manifest(
         &curve_id,
         target,
         target_seed.clone(),
@@ -919,8 +920,10 @@ pub fn build(
     put("n_or_bits", json!(kb.n));
     put("candidate_id", json!(candidate_id));
     put("candidate_manifest_sha256", json!(candidate_sha));
+    put("candidate_manifest", candidate_record);
     put("workload_id", json!(wid));
     put("workload_manifest_sha256", json!(wsha));
+    put("workload_manifest", workload_record);
     put("run_id", json!(run_id));
     put("target_count", json!(1));
     put("ic_target_hash", json!(target_hash));
