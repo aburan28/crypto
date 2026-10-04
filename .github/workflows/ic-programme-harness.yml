@@ -27,6 +27,7 @@ on:
       - 'research/ic_single_target_20260930/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -48,6 +49,7 @@ on:
       - 'src/bin/isolated_bench/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-preparation-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -102,6 +104,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_source -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_sat -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog ordinary_preparation -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
