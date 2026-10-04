@@ -22,6 +22,14 @@ seed and, once Q exists, check that it is absent from the named prior panels;
 an accidental duplicate is a retained failed eligibility check, not grounds
 to choose another seed after measurement.
 
+This producer-specific panel is an **exploratory diagnostic** of the existing
+compact S3-root-index implementation. It does not run through `ecbench`, so
+the paired ratios below cannot be promoted to the repository's formal
+cross-method `vs_rho` claim. An `ecbench` adapter with a sealed session,
+operation-unit calibration and independent host audit is a separate gate for
+that claim. This panel can still decide whether the current fixed `K` values
+deserve further method work by exposing verified cold and online costs.
+
 For each cell take exactly **six** fresh-process pairs on the one frozen Q.
 Pair 1 runs rho then IC to create the point file; pair 2 runs IC then rho,
 alternating through pair 6. Both programs use release binaries built from
