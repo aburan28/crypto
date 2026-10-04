@@ -2255,7 +2255,7 @@ mod tests {
                     acc[3] += ring.muls();
                     ring.reset();
                     let powers = ring.frobenius_powers(&z0, dr as usize / 2);
-                    acc[4] += ring.muls() - 0;
+                    acc[4] += ring.muls();
                     // frobenius_powers recomputes x^p: subtract it
                     acc[4] -= {
                         ring.reset();
