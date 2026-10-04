@@ -65,7 +65,11 @@ fn main() {
     }
 
     let dir = std::env::var("KOBLITZ_PRES_CHECKPOINT").unwrap_or_else(|_| "experiments".into());
-    let path = std::path::PathBuf::from(dir).join(format!("pres_{n}_{a2}_l{l}.jsonl"));
+    // `KOBLITZ_PRES_GEOMETRIC=1`: V_s = θ_s·⟨1, g_s, …⟩ (cheap, varied) instead
+    // of a random basis; written to a separate `_geom` file.
+    let geometric = std::env::var("KOBLITZ_PRES_GEOMETRIC").is_ok_and(|v| v == "1");
+    let suffix = if geometric { "_geom" } else { "" };
+    let path = std::path::PathBuf::from(dir).join(format!("pres_{n}_{a2}_l{l}{suffix}.jsonl"));
     let done: HashSet<(u64, u64)> = std::fs::read_to_string(&path)
         .unwrap_or_default()
         .lines()
@@ -117,11 +121,12 @@ fn main() {
             known_order: Some(order),
             full_group_probes: true,
             basis_seed: Some(seed),
+            geometric_basis: geometric,
             ..Default::default()
         };
         let line = match measure_member(n, &irr, a2, a6, &opts) {
             Ok(r) => serde_json::json!({
-                "n": n, "a2": a2, "l": l, "a6": a6, "basis_seed": seed, "depth": depth[&a6],
+                "n": n, "a2": a2, "l": l, "a6": a6, "basis_seed": seed, "geometric": geometric, "depth": depth[&a6],
                 "probes": r.trials, "relations": r.relations, "factor_base_points": r.factor_base_points,
                 "unknowns": r.unknowns, "groebner_ns": r.groebner_ns, "groebner_calls": r.groebner_calls,
                 "reductions": r.reductions, "first_fall_hist": r.first_fall_hist,
