@@ -245,7 +245,11 @@ pub fn freeze(
     save(&out.join("registration.json"), &json!(registration))?;
     let seal = json!({"registration_sha256":canonical_sha(&json!(registration))?});
     save(&out.join("seal.json"), &seal)?;
-    capsule::check_capsule(&out)?;
+    let (record, _) = capsule::check_capsule(&out)?;
+    verify_build(&out, &record)?;
+    if cfg.plan.family == Family::Cryptominisat {
+        verify_native_assets(&out)?;
+    }
     serde_json::to_string_pretty(&seal).map_err(|e| e.to_string())
 }
 fn expected_seal(record: &capsule::Registration, hash: &str, expected: &str) -> Result<(), String> {
