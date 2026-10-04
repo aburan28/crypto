@@ -6,6 +6,7 @@ on:
       - 'src/bin/ecbench.rs'
       - 'src/cryptanalysis/ecbench/**'
       - 'src/cryptanalysis/ic_measurement.rs'
+      - 'examples/ecbench_callgrind_analyze.rs'
       - 'research/ecbench_callgrind_solve_20261004/**'
       - '.github/workflows/ecbench-callgrind-solve.yml'
   workflow_dispatch:
@@ -98,6 +99,19 @@ jobs:
           test "$(wc -l < "$out/rows.jsonl")" -eq 32
           jq -s -e 'all(.[]; .status == "verified" and (.solve_ir | type) == "number")' \
             "$out/rows.jsonl" > /dev/null
+      - name: Independently replay the committed raw archive and decision
+        run: |
+          dir=research/ecbench_callgrind_solve_20261004
+          test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
+            809f19a0b784e7ecf08f74c372a16d8a6afe4aff817eb1d2d8168ce676901420
+          mkdir -p "$RUNNER_TEMP/ecbench-archive-replay"
+          unzip -q "$dir/RAW-CALLGRIND.zip" -d "$RUNNER_TEMP/ecbench-archive-replay"
+          cargo build --release --example ecbench_callgrind_analyze
+          target/release/examples/ecbench_callgrind_analyze \
+            "$RUNNER_TEMP/ecbench-archive-replay" "$dir/JOBS.json" \
+            research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl \
+            "$RUNNER_TEMP/ecbench-archive-decision.json"
+          cmp "$RUNNER_TEMP/ecbench-archive-decision.json" "$dir/DECISION.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
