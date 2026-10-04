@@ -72,11 +72,21 @@ fn main() {
         .filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
         .map(|r| (r["a6"].as_u64().unwrap(), r["basis_seed"].as_u64().unwrap()))
         .collect();
-    let cells: Vec<(u64, u64)> = members
+    // Cells run in a seeded random order, so slow drift in machine speed
+    // cannot line up with curves (each curve's subspaces would otherwise run
+    // back to back and share whatever load the machine had then).
+    let mut cells: Vec<(u64, u64)> = members
         .iter()
         .flat_map(|&m| seeds.iter().map(move |&s| (m, s)))
         .filter(|c| !done.contains(c))
         .collect();
+    {
+        use rand::seq::SliceRandom;
+        use rand::SeedableRng;
+        cells.shuffle(&mut rand::rngs::StdRng::seed_from_u64(
+            DEFAULT_SEED ^ n as u64,
+        ));
+    }
     eprintln!(
         "n={n} a2={a2} l={l}: {} members x {} V, {} cells left",
         members.len(),
@@ -96,7 +106,7 @@ fn main() {
     let finished = std::sync::atomic::AtomicUsize::new(0);
     let total = cells.len();
     let t0 = std::time::Instant::now();
-    cells.par_iter().for_each(|&(a6, seed)| {
+    cells.par_iter().with_max_len(1).for_each(|&(a6, seed)| {
         let opts = IcCostOptions {
             l,
             m: 2,
