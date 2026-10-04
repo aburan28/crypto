@@ -8,11 +8,11 @@
   "factor_bases": 16,
   "candidates": 244,
   "rounds": 30,
-  "sessions": 20
+  "sessions": 21
  },
  "sources": {
   "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
-  "docs/ic/leaderboard.json": "1ca1174e883d56dec7e018351b0f0117aee51daed904ee61842390bc1fb46408",
+  "docs/ic/leaderboard.json": "a649e1f28aa2c152b305cf263ea456db61843949688d2c7a2cdb4d51c04924a5",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -22,6 +22,7 @@
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
   "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
+  "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/records.jsonl": "d7cddb33e59f86460acbe77e87d3e68ce0cfbf4c6fb46c0647bd9643072303fd",
   "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
   "research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl": "82c8b31640074b2f829d88e546bf487ee4b598edf4ef26f779984d625ed7de3c",
   "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01/records.jsonl": "04ff51c137aee7368de8fff16f8c22f47c9ed741cb533244f76715dbaf3297e3",
@@ -4410,6 +4411,46 @@
      "verified": 40,
      "mean_s": 0.4194,
      "mean_ratio_to_floor": 2.878
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1104,
+     "mean_ratio_to_floor": 14.485
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1104,
+     "mean_ratio_to_floor": 14.485
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1817,
+     "mean_ratio_to_floor": 14.975
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.4545,
+     "mean_ratio_to_floor": 3.119
     },
     {
      "session_id": "ECBS1hdebde0f96835",
@@ -11000,14 +11041,15 @@
    },
    "sessions": [
     "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
     "ECBS1hdebde0f96835",
     "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 432,
-   "verified": 432
+   "runs": 624,
+   "verified": 624
   },
   {
    "method_id": "ECM1h90d7515e0e7a",
@@ -11022,14 +11064,15 @@
    },
    "sessions": [
     "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
     "ECBS1hdebde0f96835",
     "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 240,
-   "verified": 240
+   "runs": 336,
+   "verified": 336
   },
   {
    "method_id": "ECM1ha10cd743c1f5",
@@ -11302,14 +11345,15 @@
     "ECBS1h33c3e5e4f75d",
     "ECBS1h774f0e722ea2",
     "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
     "ECBS1hdebde0f96835",
     "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 252,
-   "verified": 252
+   "runs": 348,
+   "verified": 348
   },
   {
    "method_id": "ECM1hb6123afffc07",
@@ -11498,6 +11542,7 @@
    "curve": "icv1-f2m37-tm534059-32aad96b",
    "sessions": [
     "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
     "ECBS1hdebde0f96835",
     "ECBS1he4e70185e6e2"
    ],
@@ -11522,6 +11567,7 @@
    "curve": "icv1-f2m37-tm534059-32aad96b",
    "sessions": [
     "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
     "ECBS1hdebde0f96835",
     "ECBS1he4e70185e6e2"
    ],
@@ -15944,11 +15990,12 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "bbfdf029e5a2",
-   "mentions": 2,
-   "files": 2,
+   "mentions": 5,
+   "files": 3,
    "where": [
-    "docs/ic/LEADERBOARD.md",
-    "docs/ic/leaderboard.json"
+    "docs/ic/dashboard-overview-data.json",
+    "docs/ic/leaderboard.json",
+    "docs/ic/LEADERBOARD.md"
    ],
    "slug": "icv1-f2m37-tm534059-32aad96b"
   },
@@ -16175,10 +16222,11 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "d7ebd078ae0c",
-   "mentions": 1,
-   "files": 1,
+   "mentions": 3,
+   "files": 2,
    "where": [
-    "docs/ic/leaderboard.json"
+    "docs/ic/leaderboard.json",
+    "docs/ic/dashboard-overview-data.json"
    ],
    "slug": "icv1-f2m37-tm534059-32aad96b"
   },
@@ -21510,6 +21558,50 @@
     "verified": 384
    },
    "started_unix_ms": 1791105060214,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k16-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha7df223815ae",
+   "dir": "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01",
+   "label": "n37 fresh-target native online wall screen for K8 and K16",
+   "status": "complete",
+   "spec_id": "ECS1h9435fa31639d",
+   "env_class_id": "ECBENV2h16db53a20dcf",
+   "binary_sha256": "032ac5773acff726375bb5cbc990cac269391bf2c6ef7870599e17503dec565e",
+   "git_commit": "e2f1d73278d435ae5c51a8881bc8aedbeade3a8b",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791116313878,
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],

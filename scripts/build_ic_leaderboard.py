@@ -62,6 +62,8 @@ SOURCES = {
     "n37_online_ir": "research/ecbench_n37_online_ir_20261004/DECISION.json",
     "n37_online_k8_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
     "n37_online_k16_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+    "n37_native_wall": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+    "n37_native_wall_evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -585,6 +587,40 @@ def build() -> dict:
         "k8_over_k16_cold_ir": online_ir_decision["complete_solve"]["comparisons"][0]["ratio_of_sums"],
         "online_wall_speedup": None,
     }
+    native_wall_decision = load(SOURCES["n37_native_wall"])
+    native_wall_evidence = load(SOURCES["n37_native_wall_evidence"])
+    if (native_wall_decision["schema"] != "ecbench.native_online_wall_decision/v1"
+            or native_wall_decision["status"] != "complete_exploratory_hosted"
+            or native_wall_decision["decision"] != "carry_both_host_noise_exceeds_gate"
+            or native_wall_decision["measured_verified_runs"] != 320
+            or native_wall_decision["same_target_paired_rounds"] != 80
+            or native_wall_decision["isolation_levels"] != {"L1": 320}
+            or native_wall_decision["all_measured_L2"]
+            or native_wall_decision["online_speedup"] is not None
+            or native_wall_decision["k16_aa_max_relative_deviation"] <= .05
+            or native_wall_decision["primary_one_target"]["target_index"] != 0
+            or native_wall_decision["candidate_ids"]["ic-k8"] != online_k8_claim["candidate_id"]
+            or native_wall_decision["candidate_ids"]["ic-k16"] != online_k16_claim["candidate_id"]
+            or native_wall_evidence["decision_sha256"] != sha256(SOURCES["n37_native_wall"])
+            or native_wall_evidence["records_sha256"] != native_wall_decision["records_sha256"]
+            or native_wall_evidence["independent_receipt_sha256"] != native_wall_decision["independent_receipt_sha256"]):
+        raise SystemExit("review the L1 native wall decision before updating the leaderboard")
+    native_wall_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_native_wall"],
+        "evidence": SOURCES["n37_native_wall_evidence"],
+        "k8_candidate_id": native_wall_decision["candidate_ids"]["ic-k8"],
+        "k16_candidate_id": native_wall_decision["candidate_ids"]["ic-k16"],
+        "primary_workload_id": native_wall_decision["primary_one_target"]["workload_id"],
+        "measured_verified_runs": native_wall_decision["measured_verified_runs"],
+        "isolation_levels": native_wall_decision["isolation_levels"],
+        "decision": native_wall_decision["decision"],
+        "aa_max_relative_deviation": native_wall_decision["k16_aa_max_relative_deviation"],
+        "primary_rho_over_k16_online_wall": native_wall_decision["primary_one_target"]["descriptive_rho_over_k16"],
+        "panel_k8_over_k16_online_wall": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["ratio_of_sums"],
+        "panel_k8_over_k16_online_wall_ci95": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["target_block_bootstrap_95"],
+        "admitted_online_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -620,6 +656,7 @@ def build() -> dict:
         "bounded_diagnostics": [bounded_diagnostic],
         "n37_k8_k16_confirmation": k8_confirmation,
         "n37_online_ir_diagnostic": online_ir_diagnostic,
+        "n37_native_wall_diagnostic": native_wall_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -738,6 +775,20 @@ def markdown(doc: dict) -> str:
           "Mac L0 timing leaves the primary online wall speedup unknown; both "
           "bases remain live at n41/n53. "
           f"Read the [raw target-only decision](../../{q['source']}).", ""]
+    w = doc["n37_native_wall_diagnostic"]
+    L += [f"The next native hosted n37 screen independently replayed "
+          f"{w['measured_verified_runs']}/{w['measured_verified_runs']} measured executions. "
+          f"For preregistered one-target workload `{w['primary_workload_id']}`, "
+          f"descriptive rho/K16 online wall is {w['primary_rho_over_k16_online_wall']:.3f}. "
+          f"The separate 16-target panel has K8/K16 online wall "
+          f"{w['panel_k8_over_k16_online_wall']:.3f} "
+          f"[{w['panel_k8_over_k16_online_wall_ci95'][0]:.3f}, "
+          f"{w['panel_k8_over_k16_online_wall_ci95'][1]:.3f}]. "
+          f"All measured rows earned L1 and the identical K16 A/A maximum "
+          f"deviation was {100*w['aa_max_relative_deviation']:.2f}%, above "
+          "the frozen 5% gate. The admitted online speedup remains unknown; "
+          "both K8 and K16 carry to the L2 host gate and n41/n53. "
+          f"Read the [sealed native decision](../../{w['source']}).", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -959,6 +1010,19 @@ def page(doc: dict, standalone: bool) -> str:
              'Callgrind Ir is simulated instruction work, not isolated wall '
              'speed; n41/n53 and ECC2K-130 transfer stay open. '
              f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(q["source"])}">Frozen decision and raw replay</a>.</p></section>')
+    w = doc["n37_native_wall_diagnostic"]
+    P.append(f'<section class="card" id="bounded-n37-native-wall"><h2>Hosted n37 native wall screen: L1 diagnostic</h2>'
+             f'<p>On <code>{esc(w["curve"])}</code>, all {w["measured_verified_runs"]} measured '
+             f'executions replayed on another host class. For preregistered one-target workload '
+             f'<code>{esc(w["primary_workload_id"])}</code>, descriptive rho/K16 online wall is '
+             f'{w["primary_rho_over_k16_online_wall"]:.3f}. Across the separate 16-target panel, '
+             f'K8/K16 online wall is {w["panel_k8_over_k16_online_wall"]:.3f} '
+             f'[{w["panel_k8_over_k16_online_wall_ci95"][0]:.3f}, '
+             f'{w["panel_k8_over_k16_online_wall_ci95"][1]:.3f}]. '
+             f'All rows earned L1, and the identical K16 A/A maximum deviation was '
+             f'{100*w["aa_max_relative_deviation"]:.2f}%, above the frozen 5% gate. '
+             'No online speedup is admitted; carry K8 and K16 to an L2 host and n41/n53. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(w["source"])}">Frozen decision</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

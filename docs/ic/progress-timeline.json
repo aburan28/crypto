@@ -56,6 +56,17 @@
       ]
     },
     {
+      "id": "ec-hosted-native-wall",
+      "label": "Elliptic curve, hosted L1 native wall diagnostics",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Same-point one-target native intervals on a contended hosted VM. L1 and the failed A/A noise gate make these descriptive ratios, not admitted online or cold speedups.",
+      "points": [
+        {"date": "2026-10-04", "value": 9.009441291840432, "reference": "matched", "unit": "hosted L1 cold wall diagnostic", "label": "n37 K8 cold solve versus strong rho, frozen target zero", "detail": "Five paired verified rounds on the preregistered public point give K8/rho cold solve wall 9.0094; K16/rho is 9.2675. All 320 measured children replayed on another host class. Host isolation stayed L1, so neither ratio is an admitted cold crossover.", "class": "accounting", "anchor": "#n37-native-online-wall-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_native_online_wall_20261004/RESULT.md"},
+        {"date": "2026-10-04", "value": 0.13931577090627645, "reference": "matched", "unit": "hosted L1 online wall diagnostic", "label": "n37 K16 online versus strong rho, frozen target zero", "detail": "Five paired verified rounds on the preregistered public point give descriptive K16/rho online wall 0.13932 (rho/K16 7.17794). The 16-point secondary panel gives K8/K16 7.1103 [3.6693, 16.9818]. A/A maximum deviation 12.85% exceeded the frozen 5% gate, and the host earned L1; admitted speedup remains unknown.", "class": "accounting", "anchor": "#n37-native-online-wall-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_native_online_wall_20261004/RESULT.md"}
+      ]
+    },
+    {
       "id": "ec-batch",
       "label": "Elliptic curve, 32 targets together (historical diagnostic)",
       "role": "context",

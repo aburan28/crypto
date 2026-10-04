@@ -222,6 +222,34 @@ assert.equal(onlineIrReceipt.replays.length, 320);
 assert.ok(onlineIrReceipt.replays.every(row => row.reproduced));
 assert.equal(onlineIrReceiptSha, onlineIr.independent_audit_sha256);
 const onlineIrReceiptPin = {path:onlineIrReceiptPath, sha256:onlineIrReceiptSha};
+const nativeWallPath = 'research/ecbench_n37_native_online_wall_20261004/DECISION.json';
+const nativeWallBytes = readFileSync(resolve(ROOT, nativeWallPath));
+const nativeWallSha = 'eebbe2eef9524c7f45a5bfd1c0a2b312d72063a3a8865140a6e25200235c21e2';
+assert.equal(sha(nativeWallBytes), nativeWallSha, 'n37 native wall decision changed.');
+const nativeWall = JSON.parse(nativeWallBytes);
+assert.equal(nativeWall.schema, 'ecbench.native_online_wall_decision/v1');
+assert.equal(nativeWall.status, 'complete_exploratory_hosted');
+assert.equal(nativeWall.decision, 'carry_both_host_noise_exceeds_gate');
+assert.equal(nativeWall.measured_verified_runs, 320);
+assert.equal(nativeWall.same_target_paired_rounds, 80);
+assert.deepEqual(nativeWall.isolation_levels, {L1: 320});
+assert.equal(nativeWall.all_measured_L2, false);
+assert.equal(nativeWall.online_speedup, null);
+assert.ok(nativeWall.k16_aa_max_relative_deviation > .05);
+assert.equal(nativeWall.primary_one_target.target_index, 0);
+const nativeWallPin = {path:nativeWallPath, sha256:nativeWallSha};
+const nativeWallEvidencePath = 'research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json';
+const nativeWallEvidenceBytes = readFileSync(resolve(ROOT, nativeWallEvidencePath));
+const nativeWallEvidenceSha = 'bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422';
+assert.equal(sha(nativeWallEvidenceBytes), nativeWallEvidenceSha, 'n37 native wall evidence changed.');
+const nativeWallEvidence = JSON.parse(nativeWallEvidenceBytes);
+assert.equal(nativeWallEvidence.decision_sha256, nativeWallSha);
+assert.equal(nativeWallEvidence.records_sha256, nativeWall.records_sha256);
+assert.equal(nativeWallEvidence.independent_receipt_sha256, nativeWall.independent_receipt_sha256);
+assert.equal(sha(readFileSync(resolve(ROOT, 'research/ecbench_n37_native_online_wall_20261004/SHA256SUMS'))), nativeWallEvidence.raw_sha256s_sha256);
+assert.equal(sha(readFileSync(resolve(ROOT, 'research/ecbench_n37_native_online_wall_20261004/SOURCE-ARTIFACT-SHA256SUMS'))), nativeWallEvidence.source_artifact_sha256s_sha256);
+assert.equal(nativeWallEvidence.admitted_online_speedup, null);
+const nativeWallEvidencePin = {path:nativeWallEvidencePath, sha256:nativeWallEvidenceSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -337,6 +365,15 @@ ${[['rho-strong','Strong signed-Frobenius rho','—','—'],['ic-k8','K8','592',
 <p class="dash-footnote">The cold choice reverses: K8/K16 complete-solve Ir is ${f(onlineIr.complete_solve.comparisons[0].ratio_of_sums)} [${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[0])}, ${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[1])}], as K16's larger base and pair table cost more reusable work. The target-only K16 A/A difference is exactly zero. Both bases stay in the n41/n53 study; no ECC2K-130 transfer follows from n37. The Mac wall session earned L0, so the primary online speedup stays unknown. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md">Decision, raw archive, exact IC1 claims, and limits →</a></p>
 </section>
 
+<section class="dash-section" id="n37-native-online-wall-20261004" aria-labelledby="n37-native-online-wall-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 new public one-target workloads / native wall screen</p><h2 id="n37-native-online-wall-title">K16's native online lead remains exploratory.</h2></div><span class="status neutral">L1 · 320/320 independent replays · noise gate failed</span></div>
+<p class="dash-section-intro panel-summary">All 384 executions recovered and verified their public-point logarithms. The frozen primary target, <code>${escape(nativeWall.primary_one_target.workload_id)}</code>, has descriptive rho/K16 online wall ${f(nativeWall.primary_one_target.descriptive_rho_over_k16)}×, but no admitted speedup: all measured rows earned L1, and the identical K16 A/A maximum deviation was ${f(100*nativeWall.k16_aa_max_relative_deviation,2)}%, above the frozen 5% gate.</p>
+<div class="table-scroll"><table><caption>Primary target-zero mean of five paired one-target rounds; hosted wall milliseconds are exploratory.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Online wall, ms</th><th>Cold solve wall, ms (16-target panel)</th></tr></thead><tbody>
+${[['rho-strong','Strong signed-Frobenius rho','—','—'],['ic-k8','K8','592','8'],['ic-k16','K16','1,184','16'],['ic-k16-control','Identical K16 control','1,184','16']].map(([arm,label,points,columns])=>`<tr><td>${label}</td><td>${points}</td><td>${columns}</td><td>${f(nativeWall.primary_one_target.online_ns_totals[arm]/5e6,6)}</td><td>${f(nativeWall.arm_stage_totals[arm].cold_solve_ns_total/80e6,6)}</td></tr>`).join('\n')}
+</tbody></table></div>
+<p class="dash-footnote">Across the 16 separate one-target workloads, the secondary descriptive K8/K16 online ratio is ${f(nativeWall.panel_descriptive_ratios.k8_over_k16.ratio_of_sums)} [${f(nativeWall.panel_descriptive_ratios.k8_over_k16.target_block_bootstrap_95[0])}, ${f(nativeWall.panel_descriptive_ratios.k8_over_k16.target_block_bootstrap_95[1])}]. The frozen decision is <code>${escape(nativeWall.decision)}</code>: carry both bases to an auditable L2 host; retain K8 and K16 at n41/n53. The page's primary rho/IC online speedup remains unknown, and this n37 screen supplies no ECC2K-130 transfer. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_native_online_wall_20261004/RESULT.md">Raw records, independent replay, exact IC1 identities and decision →</a></p>
+</section>
+
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
 <div class="pipeline-zone"><div class="pipeline-zone-label">Reusable preparation <span>Cost and memory reported separately</span></div><ol class="pipeline"><li><b>1</b><strong>Build the factor base</strong><span>Choose exact subgroup points and declare sign / Frobenius orbit folding.</span></li><li><b>2</b><strong>Find and verify relations</strong><span>Ordinary queries → point decomposition → verified, useful matrix rows.</span></li><li><b>3</b><strong>Solve the relation matrix</strong><span>Check rank and recover verified factor-base logarithms.</span></li></ol></div>
 <div class="pipeline-zone online-zone"><div class="pipeline-zone-label">One target · primary online clock <span>Start at target-dependent work → stop after independent verification</span></div><ol class="pipeline"><li><b>4</b><strong>Decompose the target</strong><span>Generate queries, encode and solve. Charge failed and timed-out attempts.</span></li><li><b>5</b><strong>Recover its logarithm</strong><span>Check the relation, perform target descent and combine the known factor logs.</span></li><li><b>6</b><strong>Verify the answer</strong><span>Independently check that the recovered scalar maps the generator to this target.</span></li></ol></div>
@@ -361,7 +398,7 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin,k8ConfirmPin,onlineIrPin,onlineIrReceiptPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin,k8ConfirmPin,onlineIrPin,onlineIrReceiptPin,nativeWallPin,nativeWallEvidencePin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
@@ -372,6 +409,8 @@ const data = {
   n37_k8_k16_callgrind: k8Confirm,
   n37_online_ir: onlineIr,
   n37_online_ir_independent_replay: {session_id:onlineIrReceipt.session_id, auditor_env_class_id:onlineIrReceipt.auditor_env_class_id, replays:onlineIrReceipt.replays.length, receipt_sha256:onlineIrReceiptSha},
+  n37_native_online_wall: nativeWall,
+  n37_native_online_wall_evidence: nativeWallEvidence,
   n37_rank_columns_independent_replay: {session_id:rankColumnsAudit.session_id, auditor_env_class_id:rankColumnsAudit.auditor_env_class_id, replays:rankColumnsAudit.replays.length, receipt_sha256:rankColumnsAuditSha},
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
   historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),
