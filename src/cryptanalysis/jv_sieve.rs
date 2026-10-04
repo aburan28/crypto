@@ -1114,6 +1114,9 @@ pub struct SieveDlpReport {
     pub descent_stopped: u64,
     pub descent_incomplete: u64,
     pub descent_timed_out: u64,
+    pub trace: bool,
+    pub descent_replayed: u64,
+    pub descent_trace_mismatches: u64,
     /// Descent rows found but outside the core's columns at the solve.
     pub descent_rejected: u64,
     pub unknowns: usize,
@@ -1249,6 +1252,7 @@ pub fn run_cover_sieve_dlp(
     stop: Option<usize>,
     margin: f64,
     m_override: Option<usize>,
+    trace: bool,
 ) -> SieveDlpReport {
     let start = Instant::now();
     let spec = generate_spec(p, seed);
@@ -1277,6 +1281,7 @@ pub fn run_cover_sieve_dlp(
         m_rule,
         m_final: m,
         margin,
+        trace,
         relations_available: (p as f64).powi(m as i32 - 6) / fact(m),
         base_muls,
         ..Default::default()
@@ -1409,7 +1414,7 @@ pub fn run_cover_sieve_dlp(
         let found: Vec<_> = batch
             .par_iter()
             .map_init(
-                || Ctx::new(&spec),
+                || Ctx::with_trace(&spec, trace),
                 |c, (a, b, r, idx)| {
                     let opts = opts_for(24, 600.0, stop);
                     let mut lrng =
@@ -1448,6 +1453,12 @@ pub fn run_cover_sieve_dlp(
             }
             if cost.stopped_at.is_some() {
                 rep.descent_stopped += 1;
+            }
+            if cost.replayed {
+                rep.descent_replayed += 1;
+            }
+            if cost.trace_mismatch {
+                rep.descent_trace_mismatches += 1;
             }
             if let Some(d) = decs.first() {
                 rep.descent_successes += 1;
@@ -1811,7 +1822,7 @@ mod tests {
     #[test]
     #[ignore]
     fn end_to_end_at_p101_solves_the_logarithm() {
-        let r = run_cover_sieve_dlp(101, 1, 4, 1.3, Some(64), 1.25, None);
+        let r = run_cover_sieve_dlp(101, 1, 4, 1.3, Some(64), 1.25, None, false);
         assert!(r.solved && r.correct, "{r:?}");
         assert_eq!(r.m_final, 11);
         assert_eq!(r.rels_failed_verify, 0);
