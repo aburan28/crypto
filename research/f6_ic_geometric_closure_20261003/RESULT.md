@@ -1,4 +1,4 @@
-# F6-IC geometric closure: four frozen one-target pilots
+# F6-IC geometric closure: four pilots and one matched three-way diagnostic
 
 F6-IC is a new **IC-specific hybrid solver design**: it lets exact usable
 factor-base geometry refute or close branches inside an inherited Boolean F4
@@ -22,8 +22,15 @@ version-to-version speedup. Each row has three process repetitions; the raw
 receipts retain all statuses and attempts. All 24 processes completed,
 recovered the matching scalar within each workload, and passed replay.
 
+A [matched F4/F5/F6-IC diagnostic](three_way/RESULT.md) used one new target
+for all three arms. Its exploratory median complete online times were
+32.134 ms for F4, 6295.054 ms for F5, and 20.906 ms for F6-IC. F6 beat
+both on that target, yet missed the preregistered 2× F4 gate in every
+repetition. Its corrected stage-source manifests have new candidate IDs
+even though the F4/F6 executable is the same as v3.
+
 The CPU host was not isolated. All wall times are exploratory; no controlled
-speedup is established. These IC-variant pilots did not run rho. The primary
+speedup is established. These IC-variant comparisons did not run rho. The primary
 IC-versus-rho online ratio, operation-normalized `S`, natural relation yield,
 and any effect on the n53 `PDP4root` path remain **unknown**. The existing
 strong-rho crossover cannot be inferred from a faster prepared n17 PDP.

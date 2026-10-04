@@ -6,7 +6,7 @@
   "curves": 111,
   "methods": 24,
   "factor_bases": 11,
-  "candidates": 244,
+  "candidates": 247,
   "rounds": 30,
   "sessions": 17
  },
@@ -12241,6 +12241,25 @@
    "slug": "icv1-f2m17-tm101-00378d4e"
   },
   {
+   "candidate_id": "IC1N17Ckb1fb62PDP3f4RCsampleLAgaussTDpdpISO0hb1a6951540e1",
+   "n": 17,
+   "curve_tag": "kb1",
+   "factor_base_points": 62,
+   "summands": 3,
+   "solver": "f4",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "b1a6951540e1",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/three_way/inherited_f4-candidate.json"
+   ],
+   "slug": "icv1-f2m17-tm101-00378d4e"
+  },
+  {
    "candidate_id": "IC1N17Ckb1fb62PDP3f4RCsampleLAgaussTDpdpISO0hc8dc6fe5f84f",
    "n": 17,
    "curve_tag": "kb1",
@@ -12294,6 +12313,25 @@
    "files": 1,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
+   ],
+   "slug": "icv1-f2m17-tm101-00378d4e"
+  },
+  {
+   "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h50b072bea277",
+   "n": 17,
+   "curve_tag": "kb1",
+   "factor_base_points": 62,
+   "summands": 3,
+   "solver": "f5",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "50b072bea277",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/three_way/f5-candidate.json"
    ],
    "slug": "icv1-f2m17-tm101-00378d4e"
   },
@@ -12433,6 +12471,25 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/results-20260930/FAILURE.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/results-20260930/TRANSPORT-REPLAY.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/results-20260930/receipt.json"
+   ],
+   "slug": "icv1-f2m17-tm101-00378d4e"
+  },
+  {
+   "candidate_id": "IC1N17Ckb1fb62PDP3f6RCsampleLAgaussTDpdpISO0h15f9c2712c0e",
+   "n": 17,
+   "curve_tag": "kb1",
+   "factor_base_points": 62,
+   "summands": 3,
+   "solver": "f6",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "15f9c2712c0e",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/three_way/f6_ic-candidate.json"
    ],
    "slug": "icv1-f2m17-tm101-00378d4e"
   },
