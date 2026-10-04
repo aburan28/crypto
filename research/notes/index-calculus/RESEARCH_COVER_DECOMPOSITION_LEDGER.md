@@ -556,3 +556,102 @@ this round sampled a whole isogeny class.*  Nothing about a generic or
 deployed curve follows: a curve of order divisible by `4` is in the walk's
 reach only through its class, and the class's weak members are `3/q` of its
 full-2-torsion curves.
+
+## 14. Engineering after the fact: the sieve's line enumeration, registered before it is built (2026-10-04)
+
+§11.5 found the enumeration of the lines — factoring `Im(B²h)` for every
+`B` — to be `70–80 %` of the relation phase at `m = 9`, the sieve's own
+steps `15–25 %`.  Measured before building (`probe_enumeration_breakdown`,
+`3,000` `B`'s at `p = 1009` and `1511`, seed 1, `m = 9`), the multiplications
+per `B` go as follows:
+
+| step | `p = 1009` | `p = 1511` | note |
+|:--|--:|--:|:--|
+| `B²h` over `F_q` | `140` | `140` | |
+| squarefree decomposition (Yun) | `300` | `300` | the polynomial is squarefree for every `B` seen |
+| linear factors by evaluation | `86` | `87` | plus `8,100` / `12,100` additions |
+| `x^p mod G` (right-to-left square-and-multiply) | `1,181` | `1,282` | |
+| Frobenius columns and powers | `765` | `757` | |
+| distinct-degree gcds | `341` | `344` | |
+| Cantor–Zassenhaus (EDF) | `1,120` | `1,195` | runs on `19 % / 17 %` of the `B`'s, `≈ 6,500` per run |
+| divisors and line polynomials | `132` | `131` | |
+| **total** (`lines_for_b`) | **`4,207`** | **`4,387`** | `0.50 / 0.48` lines per `B`; `34 % / 32 %` of the `B`'s have a line |
+
+Three things are avoidable without changing a single line that is sieved:
+
+- **EDF is run on groups that no line needs.**  A degree-`m₁` divisor uses a
+  strict sub-multiple of a distinct-degree group (`j` of its `k` irreducibles
+  of degree `d`, `0 < j < k`) on only `8 % / 7 %` of the `B`'s; on the other
+  `11 % / 10 %` the group is used whole or not at all and its product is
+  all the enumeration needs.  Splitting a group only when a reachability
+  pass over the other factors' degrees says a line needs it removes more
+  than half of the EDF runs.
+- **EDF recomputes the Frobenius it already has.**  The group `g` divides
+  the root-free cofactor `z`, so `x^{p^i} mod g` is `x^{p^i} mod z` reduced
+  mod `g`, which the distinct-degree step has; with it, the Frobenius trace
+  `r + r^p + ⋯ + r^{p^{d−1}}` of a random `r` costs `(d − 1)·deg(g)²`
+  multiplications and the exponent falls from `(p^d − 1)/2` to `(p − 1)/2`:
+  `d×` fewer modular squarings.
+- **`x^p mod z` multiplies by `x`.**  Left-to-right binary exponentiation
+  squares the accumulator and multiplies it by `x`, a shift and one
+  reduction (`deg z` multiplications) instead of a product with a full
+  polynomial; squaring itself costs `deg(deg + 1)/2` cross products rather
+  than `deg²`.
+
+And one thing about the run's policy, not its cost per `B`: §11.5's rule
+for `m` (`p^{m−6}/m! ≥ 1.25·|F|`) over-counts what a `B`-space yields (it
+assumes one line per `B` and the full rate `p/m!`; the measured values are
+`0.5` lines per `B` for `m` odd, `1.0` for `m` even, and a rate of `0.45–1.4`
+times `p/m!` by instance, `0.9` on average), so at `p = 503` it started at
+`m = 9` and found that space short, and at `p = 251` and `101` it started at
+`m = 10` and `11`, skipping the `m = 9` and `m = 10` lines, which exist at
+every size and are the cheapest relations there are.  The honest policy is
+to **climb from `m = 9`**: sieve every line of the smallest `m`, then the
+next, until the count is reached.  The rule's estimate stays in the report
+as a prediction (`relations_estimate`, with the measured constants) and no
+longer sets where the run starts.
+
+### 14.1 Predictions and falsification lines
+
+**P12.  Enumeration per `B`.**  With the three changes the enumeration
+costs `2,600–3,100` multiplications per `B` at `p = 1009–1511` (`1.4–1.6×`
+below the table), the lines found for every `B` being *the same set*
+(`A₀`, `A₁′`, `B`) as before, bit for bit.  *Falsified if* the per-`B` cost is
+above `3,300` or below `2,300`, or any `B` of a `10,000`-`B` sample yields a
+different set of lines.
+
+**P13.  `C_rel` and `S / rho`.**  `C_rel` at `m = 9` falls by `1.25–1.45×`
+(`p = 1009, 1511`), `S / rho` at `p = 1511` by `8–15 %` and at `p = 1009` by
+`10–20 %` (the relation phase is `27–47 %` of `S` with the descent replaying
+§12's trace), and the measured crossover stays in `[400, 460]`.  *Falsified
+if* `C_rel` at `m = 9` falls by less than `1.15×` or more than `1.6×`, or
+`S / rho` rises at any size.
+
+**P14.  Climbing from `m = 9`.**  At `p ≥ 1009` nothing changes (`m = 9`
+suffices).  At `p = 503` the run is the same as §11.5's fallback.  At
+`p = 251` the `m = 9` and `m = 10` lines supply `≈ 20` and `≈ 100` of the
+`≈ 160` relations at `≈ 10×` and `1×` below the `m = 10`-only cost, so the
+relation phase falls by `10–25 %`; at `p = 101` (`m = 9, 10, 11`) by
+`5–20 %`.  The lower-`m` lines cost at most their `B`-space times the
+per-`B` cost above, `< 5 %` of the phase at every size.  *Falsified if* the
+relation phase at `p = 251` rises, or falls by more than `40 %`.
+
+**P15.  The estimate (accounting).**  `relations_estimate = |B-space(m)| ·
+lines_per_B(m) · 0.9·p/m!` is within `[0.5, 2]×` of the relations the run
+finds at every `m` it exhausts.  *Falsified if* outside that band at any
+`(p, m)` with at least `50` relations found at that `m`.
+
+### 14.2 Inadmissible moves
+
+Dropping a line because its group would need splitting; changing the
+counting unit (a squaring is `d(d + 1)/2` multiplications, a reduction
+`deg` per step, an inversion `16`, as everywhere in this note); changing
+the sieve, the descent, the linear algebra or the rho reference; choosing
+the instance.
+
+### 14.3 Class (registered)
+
+**Engineering**: a constant on the enumeration and a policy that sieves the
+cheapest lines first.  The exponent, the class and §9 are untouched; the
+measured crossover of §11.5 may move within its registered band and no
+further.

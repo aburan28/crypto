@@ -1819,6 +1819,140 @@ mod tests {
         }
     }
 
+    /// Where the enumeration's multiplications go: the factoring of
+    /// `Im(B²h)` step by step over a sample of `B`'s (ignored; run with
+    /// `--nocapture` to read the breakdown; note §14).
+    #[test]
+    #[ignore]
+    fn probe_enumeration_breakdown() {
+        for &p in &[1009u64, 1511] {
+            let spec = generate_spec(p, 1);
+            let ctx = Ctx::new(&spec);
+            let fq = &ctx.f.f;
+            let mut rng = StdRng::seed_from_u64(3);
+            let base = factor_base(&ctx, &mut rng);
+            let m = choose_m(p, base.len(), 1.25);
+            let setup = sieve_setup(fq, &ctx.cov.hx, &base, m);
+            let ring = FpRing::new(p);
+            let scramble = coprime_scramble(b_space(&setup), &mut rng);
+            let n = 3000u128;
+            let mut acc = [0u64; 9];
+            let mut adds = 0u64;
+            let (mut with_lines, mut lines, mut edf_runs, mut edf_needed) = (0u64, 0u64, 0u64, 0u64);
+            let mut rest_deg = [0u64; 9];
+            for k in 0..n {
+                let b = b_from_index(&setup, k, scramble);
+                fq.reset_muls();
+                let b2h = pmul(fq, &pmul(fq, &b, &b), &setup.h);
+                acc[0] += fq.muls();
+                let g: FpPoly = trim(b2h.iter().map(|c| c.0[1]).collect());
+                ring.reset();
+                let sq = ring.squarefree(&g);
+                acc[1] += ring.muls();
+                let mut factors: Vec<(FpPoly, usize)> = Vec::new();
+                for (sqf, mult) in sq {
+                    ring.reset();
+                    let mut rest = sqf;
+                    let roots = ring.roots_by_table(&rest);
+                    for r in &roots {
+                        let lin = vec![(p - r) % p, 1];
+                        rest = ring.exact_div(&rest, &lin);
+                        factors.push((lin, mult));
+                    }
+                    acc[2] += ring.muls();
+                    adds += ring.adds();
+                    let dr = fdeg(&rest);
+                    if dr <= 0 {
+                        continue;
+                    }
+                    rest_deg[dr as usize] += 1;
+                    if dr <= 3 {
+                        factors.push((rest, mult));
+                        continue;
+                    }
+                    // the Frobenius: x^p, then the columns and powers, then the gcds
+                    let z0 = ring.monic(&rest);
+                    ring.reset();
+                    let x = vec![0u64, 1];
+                    let xp = ring.powmod(&x, p as u128, &z0);
+                    acc[3] += ring.muls();
+                    ring.reset();
+                    let powers = ring.frobenius_powers(&z0, dr as usize / 2);
+                    acc[4] += ring.muls() - 0;
+                    // frobenius_powers recomputes x^p: subtract it
+                    acc[4] -= {
+                        ring.reset();
+                        ring.powmod(&x, p as u128, &z0);
+                        ring.muls()
+                    };
+                    let _ = (xp, powers);
+                    ring.reset();
+                    let groups = ring.ddf_from(&rest, 2);
+                    let ddf_total = ring.muls();
+                    // ddf_from includes frobenius_powers (x^p + columns); charge only the gcd part
+                    ring.reset();
+                    ring.frobenius_powers(&z0, dr as usize / 2);
+                    let fp_total = ring.muls();
+                    acc[5] += ddf_total - fp_total;
+                    let mut need = false;
+                    for (gd, d) in &groups {
+                        let cnt = fdeg(gd) as usize / d;
+                        if cnt >= 2 {
+                            // a degree-m1 divisor using a strict sub-multiple of this group?
+                            let others: Vec<usize> = factors.iter().map(|(f, _)| fdeg(f) as usize).collect();
+                            let other_groups: Vec<(usize, usize)> = groups.iter().filter(|(g2, _)| g2 != gd).map(|(g2, d2)| (fdeg(g2) as usize, *d2)).collect();
+                            for j in 1..cnt {
+                                let want = setup.m1 as isize - (j * d) as isize;
+                                if want < 0 { continue; }
+                                // subset sum over the other atoms (linear factors + whole other groups, which may also split)
+                                let mut atoms: Vec<usize> = others.clone();
+                                for (dg, d2) in &other_groups { for _ in 0..(dg / d2) { atoms.push(*d2); } }
+                                let mut reach = vec![false; setup.m1 + 1];
+                                reach[0] = true;
+                                for a in atoms { for t in (a..=setup.m1).rev() { if reach[t - a] { reach[t] = true; } } }
+                                if reach[want as usize] { need = true; }
+                            }
+                        }
+                    }
+                    if need { edf_needed += 1; }
+                    ring.reset();
+                    for (gd, d) in groups {
+                        if fdeg(&gd) as usize > d { edf_runs += 1; }
+                        for f in ring.edf(&gd, d, &mut rng) {
+                            factors.push((f, mult));
+                        }
+                    }
+                    acc[6] += ring.muls();
+                }
+                ring.reset();
+                let dg = fdeg(&g) as usize;
+                let lo = dg.saturating_sub(setup.m1);
+                let mut nl = 0u64;
+                for kk in lo..=setup.m1.min(dg) {
+                    for a0 in ring.divisors_of_degree(&factors, kk) {
+                        let a1 = ring.exact_div(&g, &a0);
+                        let a1m = ring.monic(&a1);
+                        if (a0.len(), &a0) > (a1m.len(), &a1m) { continue; }
+                        let _ = (ring.mul(&a0, &a0), ring.mul(&a1, &a1));
+                        nl += 1;
+                    }
+                }
+                acc[7] += ring.muls();
+                if nl > 0 { with_lines += 1; }
+                lines += nl;
+                ring.reset();
+                let full = lines_for_b(&ring, fq, &setup, &b, &mut rng);
+                acc[8] += ring.muls() + fq.muls();
+                assert_eq!(full.len() as u64, nl, "probe and lines_for_b agree on the line count");
+            }
+            let nf = n as f64;
+            eprintln!(
+                "p={p} m={m} |F|={} B's={n}: per B: b2h {:.0} squarefree {:.0} roots {:.0} (+{:.0} adds) x^p {:.0} frob-cols+powers {:.0} ddf-gcds {:.0} edf {:.0} divisors+lines {:.0} | lines_for_b total {:.0} | lines/B {:.3} B's with lines {:.3} edf runs/B {:.3} edf needed/B {:.3} | rest degree histogram {:?}",
+                base.len(), acc[0] as f64 / nf, acc[1] as f64 / nf, acc[2] as f64 / nf, adds as f64 / nf, acc[3] as f64 / nf, acc[4] as f64 / nf, acc[5] as f64 / nf, acc[6] as f64 / nf, acc[7] as f64 / nf, acc[8] as f64 / nf, lines as f64 / nf, with_lines as f64 / nf, edf_runs as f64 / nf, edf_needed as f64 / nf, rest_deg
+            );
+        }
+    }
+
     #[test]
     #[ignore]
     fn end_to_end_at_p101_solves_the_logarithm() {
