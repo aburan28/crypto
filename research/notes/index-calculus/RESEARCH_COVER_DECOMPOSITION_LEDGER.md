@@ -316,6 +316,7 @@ comparison):
 
 | `p` | `ℓ` | `m` (rule → run) | relations / lines | `C_rel` | `S / rho` (two seeds) | `S⁺ / rho` | §10 (F4 stopped) | descent share |
 |--:|:--|:--|--:|--:|--:|--:|--:|--:|
+| 53 | `2^{32.4}` | 12 → 13 | ≥ 7 / 3.3·10⁸ ‡ | — | `> 67,000` ‡ | — | `1,618`, `998` | — |
 | 101 | `2^{37.9}` | 11, 11 → 12 | 52 / 4.7·10⁷, ≥ 23 / 2.4·10⁸ † | `9.3·10⁹`, — | `1,977`, `> 7,560` † | `2,902`, — | `516`, `804` | 0.4 %, — |
 | 251 | `2^{45.8}` | 10 | 131, 125 / 2.2·10⁶, 3.0·10⁶ | `8.7·10⁷`, `1.3·10⁸` | `3.19`, `8.50` | `7.3`, `17.0` | `65.6`, `115` | 11 %, 29 % |
 | 503 | `2^{51.8}` | 9 → 10 | 238, 263 / 2.4·10⁶, 2.0·10⁵ | `6.8·10⁷`, `6.0·10⁶` | `1.05`, `0.114` | `2.32`, `0.231` | `28.4`, `16.1` | 46 %, 50 % |
@@ -336,7 +337,17 @@ only `p` in the number of `B`'s).  The multiplications spent, `1.85·10¹²`,
 are `S ≥ 10,850`, i.e. `S / rho ≥ 7,560` against seed 1's rho mean (`1.436`);
 a linear completion to `49` relations at the `m = 12` rate would read about
 `16,000`.  The row is a lower bound and is excluded from the exponent fit.
-`p = 53` PENDING53.
+
+‡ `p = 53`, seed 1 (`32_jv_cover_sieve_dlp_53.log`, no JSON, the same 90-minute
+budget): the rule gives `m = 12` (`53⁶/12! = 46 ≥ 1.25·30`); its `2.1·10⁸`
+`B`'s were exhausted at `7` of the `30` relations needed, and `m = 13` added
+none in a further `1.1·10¹²` multiplications.  The `2.45·10¹²` spent are
+`S ≥ 99,000`, `S / rho ≥ 67,000` against §10's rho mean at this size
+(`1.476`), where §10 reads `1,618` and `998` and §12 `883` and `548`: at
+`p = 53` the sieve is at least `40×` behind the Nagao route, as P10
+predicted in direction (it said `≈ 300×` behind at `p ≤ 101`; the loss is
+larger, because `|F| ≈ 30` points give too few lines at any admissible
+`m`).  Seed 2 was not reached within the budget.
 
 **Against the registration (§11.2):**
 
@@ -346,7 +357,7 @@ a linear completion to `49` relations at the `m = 12` rate would read about
 | P8 `C_rel` | `m!·(c_x/2 + c_B/p)`, `c_x ≤ 6`, `c_B ≤ 6·10³`; `1.5–3·10⁶` at `m = 9` | `c_x = 6.3–7.6`, `c_B = 4.1–6.5·10³`; `3.0–5.9·10⁶` at `m = 9` | within the band `[5·10⁵, 10⁷]`; the constants `1.3–1.5×` over |
 | P9 crossover | between `251` and `503`, `p* = 340 ± 60` | between `251` (`5.8`, two seeds pooled) and `503` (`0.58`); `p* ≈ 430` (`ℓ ≈ 2^{50}`) | the bracket holds; the point misses the band by `10` |
 | P9 descent | more than half of `S` above the crossover | `46–86 %` from `p = 503` up | holds from `1009`; half at `503` |
-| P10 `p ≤ 101` | the sieve loses to §10 | `1,977` against `516–804` at `101` | holds (predicted `≈ 300`: the loss is `6×` larger) |
+| P10 `p ≤ 101` | the sieve loses to §10 | `1,977` against `516–804` at `101`; `> 67,000` against `998–1,618` at `53` | holds (predicted `≈ 300`: the loss is `6×` larger at `101`, `≥ 40×` at `53`) |
 | P11 vs [JV12] | `10³` within `3×` at `m = 9` | `720·C_cov / C_rel = 566` | holds |
 
 Three things the numbers say that the registration did not.  First, the
