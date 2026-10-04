@@ -172,3 +172,25 @@ observable is the Macaulay refutation degree of one presentation of the ideal; i
 stage diagnostic (AGENTS.md §2, §5): no end-to-end cost, no yield, nothing at `n ≈ 83` or
 131, and nothing asymptotic. At `m = 3` no reading can tie rho even with a free oracle
 (survey §2); the reading bears on `m ≥ 4` only through the assumption's fate.
+
+## Amendment 1 (2026-10-04, written while the first `ℓ = 6` retry is still running): CPU budget of the retry phase
+
+Phase 1 is complete: every `ℓ ≥ 6` run and every `ℓ = 5` `x4` run was censored by the 4.5 GB
+lane limit. In phase 2 (12 GB) the four `ℓ = 5` `x4` draws resolved (10, 10, 10, 10), and
+`K₀/2¹⁹ ℓ = 6` draw 0 `rr` finished degree 7 unrefuted in 535 s and has been running degree 8
+for 52 minutes against the 3,600 CPU-s limit. The limit that binds the decisive rung is now
+CPU time, which was set with the in-tree engine's costs in mind, not this one's. This
+amendment is written before that process ends and before any `ℓ = 6` reading exists.
+
+- **Change.** Phase-2 retries of the `rr` and `x4` arms at `ℓ ≤ 6` run under 14,400 CPU-s
+  per process (four hours), still at 12 GB and still once per draw. A phase-2 process that
+  was already killed by the 3,600 s limit on one of those arms is re-run once under the new
+  limit (`PHASE=3` in `run.sh`); every other limit, cell, arm and rule is unchanged. The
+  controls and the `ℓ ≥ 7` cells keep 3,600 s.
+- **Why it cannot bias the reading.** A CPU budget decides only whether a process finishes;
+  the refutation degree is a property of the system and the engine's truncation, so a larger
+  budget can turn `≥ 8` into an exact reading, never move an exact reading.
+- **Order.** Retries run `rr` at every `ℓ`, then `x4`, then the controls, smallest `ℓ`
+  first (the first phase-2 launch was ordered by `ℓ` and had reached an `ℓ = 5` control,
+  which was taking 17 minutes per degree; it was stopped during that control's degree-8 run
+  with no line written, and re-ordered; that run is repeated from degree 8 when its turn comes).

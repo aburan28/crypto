@@ -26,6 +26,11 @@ dump_cell() {  # a n ell
   fi
 }
 
+cpu_limit() {  # cell arm -> CPU seconds (Amendment 1: rr/x4 at ell <= 6 get 14,400 s in phase 3)
+  local ell=${1##*l}
+  if [ "${PHASE:-1}" = 3 ] && [ "$ell" -le 6 ] && { [ "$2" = rr ] || [ "$2" = x4 ]; }; then echo 14400; else echo "$CPU_LIMIT"; fi
+}
+
 measure() {  # cpu cell draw arm file
   local cpu=$1 cell=$2 draw=$3 arm=$4 file=$5 log="$OUT/$2.jsonl"
   local d
@@ -33,7 +38,8 @@ measure() {  # cpu cell draw arm file
     if grep -q "\"cell\":\"$cell\",\"draw\":$draw,\"arm\":\"$arm\",\"dmax\":$d," "$log" 2>/dev/null; then
       local prev; prev=$(grep "\"cell\":\"$cell\",\"draw\":$draw,\"arm\":\"$arm\",\"dmax\":$d," "$log" | tail -1)
       case "$prev" in
-        *'"kind":"killed","reason":"memory","phase":1,'*) if [ "${PHASE:-1}" = 2 ]; then :; else return; fi;;
+        *'"kind":"killed","reason":"memory","phase":1,'*) if [ "${PHASE:-1}" = 2 ] || [ "${PHASE:-1}" = 3 ]; then :; else return; fi;;
+        *'"kind":"killed","reason":"cpu","phase":2,'*) if [ "${PHASE:-1}" = 3 ] && [ "$(cpu_limit "$cell" "$arm")" = 14400 ]; then :; else return; fi;;
         *'"kind":"killed"'*) return;;
         *'"refuted_at":0,"pinned":'*) if [[ "$prev" =~ \"pinned\":([0-9]+),\"n_vars\":([0-9]+) ]] && [ "${BASH_REMATCH[1]}" = "${BASH_REMATCH[2]}" ]; then return; fi; continue;;
         *) return;;
@@ -42,7 +48,7 @@ measure() {  # cpu cell draw arm file
     local s res code
     s=$(date +%s.%N)
     local full
-    full=$( (ulimit -t "$CPU_LIMIT" -v "$MEM_LIMIT"; taskset -c "$cpu" Singular -q -c "string SINGFILE=\"$file\"; int DMAX=$d;" "$HERE/refute.sing" 2>&1) )
+    full=$( (ulimit -t "$(cpu_limit "$cell" "$arm")" -v "$MEM_LIMIT"; taskset -c "$cpu" Singular -q -c "string SINGFILE=\"$file\"; int DMAX=$d;" "$HERE/refute.sing" 2>&1) )
     res=$(printf '%s\n' "$full" | grep '^RESULT')
     code=$?
     local wall; wall=$(printf "%.3f" "$(echo "$(date +%s.%N) - $s" | bc)")
@@ -78,16 +84,16 @@ lane() {  # cpu "a n ell" ...
   done
 }
 
-if [ "${PHASE:-1}" = 2 ]; then  # §3 phase 2: memory-killed draws retried once, alone, at 12 GB
+if [ "${PHASE:-1}" = 2 ] || [ "${PHASE:-1}" = 3 ]; then  # §3 phase 2: memory-killed draws retried once, alone, at 12 GB; Amendment 1: phase 3
   MEM_LIMIT=12000000
   # every rr draw first (smallest ℓ first), then every x4, then every control, so the
   # decisive arms get the memory before the controls, which are the costliest arm
-  grep -h '"kind":"killed","reason":"memory","phase":1,' "$OUT"/K*.jsonl | sed -E 's/.*"cell":"([^"]+)","draw":([0-9]+),"arm":"([^"]+)".*/\1 \2 \3/' | sort -u |
+  grep -h -e '"kind":"killed","reason":"memory","phase":1,' -e '"kind":"killed","reason":"cpu","phase":2,' "$OUT"/K*.jsonl | sed -E 's/.*"cell":"([^"]+)","draw":([0-9]+),"arm":"([^"]+)".*/\1 \2 \3/' | sort -u |
   awk '{ split($1, c, "l"); a = ($3 == "rr") ? 0 : ($3 == "x4") ? 1 : 2; print a, c[2], $0 }' | sort -k1,1n -k2,2n -k3 | cut -d" " -f3- |
   while read -r cell draw arm; do
     measure 1 "$cell" "$draw" "$arm" "$OUT/dump/$cell-d$draw-$arm.sing"
   done
-  echo "$(date -u +%FT%TZ) phase 2 done" >> "$OUT/progress.txt"
+  echo "$(date -u +%FT%TZ) phase ${PHASE} done" >> "$OUT/progress.txt"
   exit 0
 fi
 
