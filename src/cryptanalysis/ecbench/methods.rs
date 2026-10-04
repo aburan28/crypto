@@ -484,7 +484,8 @@ impl SolverStats {
                 .semi_regular_degree
                 .or_else(|| system.and_then(|s| s.semi_regular_degree)),
             solving_degree_mean: solver.solving_degree_mean,
-            solving_degree_max: (solver.solving_degree_max > 0).then_some(solver.solving_degree_max),
+            solving_degree_max: (solver.solving_degree_max > 0)
+                .then_some(solver.solving_degree_max),
             degree_over_bound: solver.degree_over_bound,
             macaulay_rows: get(&["matrix_rows_max", "macaulay_rows"]),
             macaulay_columns: get(&["matrix_cols_max", "macaulay_cols"]),
@@ -585,7 +586,7 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         detail: Value::Null,
         online: None,
         online_error: None,
-    solver: None,
+        solver: None,
     }
 }
 
@@ -632,7 +633,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         detail: json!({"method": res.method, "expected_steps": res.expected_steps}),
         online: None,
         online_error: None,
-    solver: None,
+        solver: None,
     }
 }
 
@@ -913,7 +914,7 @@ fn solve_strong(
             detail,
             online: None,
             online_error: None,
-        solver: None,
+            solver: None,
         });
     };
     let c = o.charges;
@@ -963,7 +964,7 @@ fn solve_strong(
         detail,
         online: None,
         online_error: None,
-    solver: None,
+        solver: None,
     })
 }
 
@@ -1476,7 +1477,7 @@ fn solve_shared_rank(
         detail: serde_json::to_value(&report).map_err(|e| e.to_string())?,
         online: Some(online),
         online_error: None,
-    solver: None,
+        solver: None,
     })
 }
 
@@ -1723,7 +1724,10 @@ mod tests {
         assert_eq!(s.sat_variables, Some(132));
         assert_eq!(s.sat_clauses, Some(2157));
         assert_eq!(s.sat_decisions, Some(53_360));
-        assert_eq!((s.n_vars, s.n_equations, s.semi_regular_degree), (Some(10), Some(13), Some(3)));
+        assert_eq!(
+            (s.n_vars, s.n_equations, s.semi_regular_degree),
+            (Some(10), Some(13), Some(3))
+        );
         assert_eq!(s.macaulay_rows, None);
         // A round trip through the record's JSON keeps every field.
         let back: SolverStats = serde_json::from_str(&serde_json::to_string(&s).unwrap()).unwrap();
@@ -1743,7 +1747,10 @@ mod tests {
             ..Default::default()
         };
         let s = SolverStats::from_report(&f4, None);
-        assert_eq!((s.macaulay_rows, s.macaulay_columns, s.macaulay_degree), (Some(4096), Some(8192), Some(4)));
+        assert_eq!(
+            (s.macaulay_rows, s.macaulay_columns, s.macaulay_degree),
+            (Some(4096), Some(8192), Some(4))
+        );
         assert_eq!(s.sat_conflicts, None);
         assert_eq!(s.n_vars, None);
     }
