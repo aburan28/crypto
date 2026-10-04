@@ -1,4 +1,4 @@
-# F6-IC geometric closure: four pilots and one matched three-way diagnostic
+# F6-IC geometric closure: prepared panel and full small-curve control
 
 F6-IC is a new **IC-specific hybrid solver design**: it lets exact usable
 factor-base geometry refute or close branches inside an inherited Boolean F4
@@ -29,15 +29,32 @@ both on that target, yet missed the preregistered 2× F4 gate in every
 repetition. Its corrected stage-source manifests have new candidate IDs
 even though the F4/F6 executable is the same as v3.
 
+The [eight-target panel](eight_target/RESULT.md) froze eight more public
+points. All 40 process runs verified. Across targets, the exploratory
+complete online F4/F6 ratio ranged **1.291–1.583×** (median **1.502×**),
+and F5/F6 ranged **287.921–536.449×** (median **375.898×**). F6 won on
+every target, but none met the 2× F4 gate. These are observed sample ranges,
+not asymptotic or controlled CPU bounds.
+
+The [full cold n9 control](small_cold/RESULT.md) built its own 14-point
+usable base, collected and checked eight ordinary relations, solved both
+folded matrix columns, and recovered a new public logarithm with F4, F5
+and F6. Independent native replay checked all relations, column logs and
+the target. On that one tiny curve the exploratory inside-worker cold
+intervals were **4.707, 61.937 and 3.150 ms**, respectively; the online
+intervals were **0.372, 3.118 and 0.272 ms**. No prepared log table was
+imported in this control.
+
 The CPU host was not isolated. All wall times are exploratory; no controlled
 speedup is established. These IC-variant comparisons did not run rho. The primary
-IC-versus-rho online ratio, operation-normalized `S`, natural relation yield,
+IC-versus-rho online ratio, operation-normalized `S`, general natural relation yield,
 and any effect on the n53 `PDP4root` path remain **unknown**. The existing
 strong-rho crossover cannot be inferred from a faster prepared n17 PDP.
 
 The branch reached a clear decision under its preregistered gate: geometric
-closure can cut the inherited F4 search by more than half on these targets,
-but its own group work kept the complete call short of 2x. The next research
-step should target F4/F5 matrix arithmetic and measure its contribution to
-one-target IC, using an isolated CPU receipt for promoted timing claims and
-`ecbench` for any new cross-method comparison.
+closure consistently reduced the prepared call, but its own group work kept
+the complete F4/F6 ratio short of 2x. The cold n9 control shows the algorithm
+can run through relation collection and final LA, without implying that
+this tiny instance predicts larger curves. Next work should expose F6 in
+the native `ecbench` pipeline, then use isolated-host receipts and a
+same-target strong-rho arm before any attack-level speed claim.

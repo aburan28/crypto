@@ -6,7 +6,7 @@
   "curves": 111,
   "methods": 24,
   "factor_bases": 11,
-  "candidates": 247,
+  "candidates": 250,
   "rounds": 30,
   "sessions": 17
  },
@@ -11301,6 +11301,63 @@
   }
  ],
  "candidates": [
+  {
+   "candidate_id": "IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d",
+   "n": 9,
+   "curve_tag": "kb1",
+   "factor_base_points": 14,
+   "summands": 3,
+   "solver": "f4",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "09c74e3fcd1d",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/small_cold/inherited_f4-candidate.json"
+   ],
+   "slug": "icv1-f2m9-tm5-4a3ea183"
+  },
+  {
+   "candidate_id": "IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5",
+   "n": 9,
+   "curve_tag": "kb1",
+   "factor_base_points": 14,
+   "summands": 3,
+   "solver": "f5",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "69071b8309b5",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/small_cold/f5-candidate.json"
+   ],
+   "slug": "icv1-f2m9-tm5-4a3ea183"
+  },
+  {
+   "candidate_id": "IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2",
+   "n": 9,
+   "curve_tag": "kb1",
+   "factor_base_points": 14,
+   "summands": 3,
+   "solver": "f6",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "efe256e276f2",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "research/f6_ic_geometric_closure_20261003/small_cold/f6_ic-candidate.json"
+   ],
+   "slug": "icv1-f2m9-tm5-4a3ea183"
+  },
   {
    "candidate_id": "IC1N13Ckb0fb182PDP3pairRCsampleLAbwTDpdpISO0h514b17a111ca",
    "n": 13,

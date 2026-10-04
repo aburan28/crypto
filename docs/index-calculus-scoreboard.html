@@ -1148,8 +1148,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 
   <div class="panel" id="ic-f6-geometric-20261003">
     <div class="panel-head">
-      <h2>F6-IC beats F4 and F5 on one matched prepared target, misses its 2&times; gate <span class="chip">engineering</span></h2>
-      <p class="panel-summary">Four frozen n17 prepared-target pilots tested exact factor-base branch closure. A subsequent matched three-way target measured median complete online calls of 20.906 ms for F6-IC, 32.134 ms for F4 and 6295.054 ms for F5. The unisolated Mac timings are exploratory; the preregistered 2&times; F4 gate failed.</p>
+      <h2>F6-IC wins eight prepared targets and completes cold n9 IC, misses 2&times; <span class="chip">engineering</span></h2>
+      <p class="panel-summary">On eight new n17 public targets F6-IC beat inherited F4 by an observed 1.291–1.583&times; online and matrix F5 by 287.921–536.449&times;. A separate n9 cold run collected its own relations and recovered one public logarithm with all three solvers. Mac timings are exploratory and the 2&times; F4 gate failed.</p>
       <p>Each row below uses a different previously unseen public point, the same certified 62-point usable base and 29 folded columns, and three paired process repetitions. Both arms recovered and verified the same scalar within each row, kept all failed target-query attempts, and closed the five exclusive online phases. Absolute times across rows are not a version-to-version comparison.</p>
     </div>
     <div class="table-scroll"><table>
@@ -1171,7 +1171,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         <tr><td>F6-IC v3</td><td>20.906</td><td>20.779–21.483</td><td>1.537&times;</td><td>32917</td></tr>
       </tbody>
     </table></div>
-    <div class="panel-head"><p>All nine calls closed their five exclusive online phases and verified the same scalar. F6-IC is an IC-specific hybrid of exact factor-base geometry and inherited Boolean F4, not a new Faugère algorithm or complexity bound. The unisolated CPU timings are exploratory. Operation-normalized <code>S</code>, natural relation yield, same-target IC-versus-strong-rho cost and an effect on the n53 <code>PDP4root</code> incumbent are unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/three_way/RESULT.md">matched three-way result</a> retains the frozen manifests, raw runs and failed 2&times; decision.</p></div>
+    <div class="panel-head"><p>The <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/eight_target/RESULT.md">eight-target panel</a> kept all 40 process receipts: F6 won against both solvers on every target, while F4/F6 ranged 1.291–1.583&times; (median 1.502&times;) and F5/F6 ranged 287.921–536.449&times; (median 375.898&times;). Its two F4 process repetitions per target varied by 0.96–7.34%; these are observed ranges, not controlled bounds or scaling claims.</p></div>
+    <div class="table-scroll"><table>
+      <caption>Distinct n9 public target, full inside-worker cold IC and separately clocked online target interval, milliseconds; one exploratory process per arm</caption>
+      <thead><tr><th>Full IC arm</th><th>Cold ms</th><th>Online ms</th><th>Cold F4 / arm</th><th>Verified log</th></tr></thead>
+      <tbody>
+        <tr><td>Inherited F4</td><td>4.707</td><td>0.372</td><td>1.000&times;</td><td>4</td></tr>
+        <tr><td>F6-IC</td><td>3.150</td><td>0.272</td><td>1.495&times;</td><td>4</td></tr>
+        <tr><td>Matrix F5</td><td>61.937</td><td>3.118</td><td>0.076&times;</td><td>4</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>The <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/small_cold/RESULT.md">cold n9 control</a> built 14 usable projected base points, checked eight ordinary relations, solved two folded columns and independently replayed all three target logs and certificates. F6-IC is an IC-specific hybrid of exact factor-base geometry and inherited Boolean F4, not a new Faugère algorithm or complexity bound. All Mac wall ratios are exploratory. No same-target strong-rho <code>ecbench</code> session exists for F6, so operation-normalized <code>S</code>, IC/rho speedup, and an effect on the n53 <code>PDP4root</code> incumbent remain unknown.</p></div>
   </div>
 
   <div class="panel" id="ic-sat-v3-full-development-20260930">
