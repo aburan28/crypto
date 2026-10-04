@@ -4332,6 +4332,9 @@ pub struct SolveStats {
     /// Residual lookups using the validated packed single-word curve path.
     #[serde(default)]
     pub geometric_fast_residual_lookups: u64,
+    /// Nonempty packed batched-addition calls made by the IC node oracle.
+    #[serde(default)]
+    pub geometric_batch_groups: u64,
     /// Group additions, including independent witness replay, performed by
     /// the IC node oracle.
     #[serde(default)]

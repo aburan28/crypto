@@ -5725,10 +5725,12 @@ struct F6GeometricGate<'a> {
     encoder: F6CoordinateEncoder,
     by_x: HashMap<BigUint, Vec<usize>>,
     fast: Option<F6FastGeometry>,
+    batch_fast: bool,
     witness: Option<Vec<usize>>,
     support_checks: u64,
     residual_lookups: u64,
     fast_residual_lookups: u64,
+    batch_groups: u64,
     group_additions: u64,
 }
 
@@ -5807,10 +5809,12 @@ impl<'a> F6GeometricGate<'a> {
             encoder,
             by_x,
             fast,
+            batch_fast: true,
             witness: None,
             support_checks: 0,
             residual_lookups: 0,
             fast_residual_lookups: 0,
+            batch_groups: 0,
             group_additions: 0,
         })
     }
@@ -5868,7 +5872,12 @@ impl<'a> F6GeometricGate<'a> {
         defined_mask: u64,
     ) -> bool {
         if self.fast.is_some() {
-            match self.close_one_fixed_fast(fixed, assignment, defined_mask) {
+            let packed = if self.batch_fast {
+                self.close_one_fixed_fast_batched(fixed, assignment, defined_mask)
+            } else {
+                self.close_one_fixed_fast_scalar(fixed, assignment, defined_mask)
+            };
+            match packed {
                 Some(chosen) if self.verify_witness(&chosen) => return true,
                 Some(_) => {} // A mismatched packed witness gets a general replay/search.
                 None => return false,
@@ -5909,7 +5918,7 @@ impl<'a> F6GeometricGate<'a> {
     /// The exact single-word representation uses the same point choices as
     /// the general path. Conversion and the packed map are rebuilt inside
     /// each target PDP attempt and are therefore charged online.
-    fn close_one_fixed_fast(
+    fn close_one_fixed_fast_scalar(
         &mut self,
         fixed: &(usize, BigUint),
         assignment: &[Option<bool>],
@@ -5951,6 +5960,80 @@ impl<'a> F6GeometricGate<'a> {
                 ) {
                     continue;
                 }
+                chosen[third] = third_index;
+                return Some(chosen);
+            }
+        }
+        None
+    }
+
+    /// Two inversion batches per fixed point: all first-plus-second sums,
+    /// then all target-minus-sum residuals. The logical point-addition and
+    /// lookup counters remain identical to the scalar packed loop.
+    fn close_one_fixed_fast_batched(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut eligible_indices = Vec::with_capacity(fast.points.len());
+        let mut eligible_points = Vec::with_capacity(fast.points.len());
+        for (index, &point) in fast.points.iter().enumerate() {
+            if Self::code_matches(
+                &self.vars[second],
+                fast.codes[index],
+                assignment,
+                defined_mask,
+            ) {
+                eligible_indices.push(index);
+                eligible_points.push(point);
+            }
+        }
+        if eligible_points.is_empty() {
+            return None;
+        }
+        let mut scratch = BatchScratch::default();
+        let mut sums = Vec::with_capacity(eligible_points.len());
+        let mut neg_sums = Vec::with_capacity(eligible_points.len());
+        let mut residuals = Vec::with_capacity(eligible_points.len());
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            sums.clear();
+            fast.curve.add_many(
+                fast.points[first_index],
+                &eligible_points,
+                &mut sums,
+                &mut scratch,
+            );
+            self.group_additions += eligible_points.len() as u64;
+            self.batch_groups += 1;
+            neg_sums.clear();
+            neg_sums.extend(sums.iter().map(|&p| fast.curve.neg(p)));
+            residuals.clear();
+            fast.curve
+                .add_many(fast.target, &neg_sums, &mut residuals, &mut scratch);
+            self.group_additions += eligible_points.len() as u64;
+            self.batch_groups += 1;
+            for (j, &residual) in residuals.iter().enumerate() {
+                self.residual_lookups += 1;
+                self.fast_residual_lookups += 1;
+                let Some(&third_index) = fast.index_of.get(&residual) else {
+                    continue;
+                };
+                if !Self::code_matches(
+                    &self.vars[third],
+                    fast.codes[third_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[second] = eligible_indices[j];
                 chosen[third] = third_index;
                 return Some(chosen);
             }
@@ -6198,6 +6281,7 @@ fn groebner_decompose_with_geometry(
             stats.geometric_support_checks = gate.support_checks;
             stats.geometric_residual_lookups = gate.residual_lookups;
             stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
+            stats.geometric_batch_groups = gate.batch_groups;
             stats.geometric_group_additions = gate.group_additions;
             return (gate.witness.or(found), stats);
         }
@@ -16409,6 +16493,7 @@ mod tests {
         let mut witnessed = 0;
         let mut refuted = 0;
         let mut packed_lookups = 0;
+        let mut batch_groups = 0;
         for scalar in 1..=32u32 {
             let target = kc.mul(kc.generator(), &BigUint::from(scalar));
             for code in 0..(1u64 << ell) {
@@ -16445,6 +16530,11 @@ mod tests {
                     assert!(gate.fast.is_some());
                     let decision = gate.decide(&assignment, 0);
                     packed_lookups += gate.fast_residual_lookups;
+                    batch_groups += gate.batch_groups;
+                    let mut scalar =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    scalar.batch_fast = false;
+                    assert_eq!(decision, scalar.decide(&assignment, 0));
                     let mut general =
                         F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
                     general.fast = None;
@@ -16470,6 +16560,7 @@ mod tests {
             "witnessed={witnessed}, refuted={refuted}"
         );
         assert!(packed_lookups > 0);
+        assert!(batch_groups > 0);
     }
 
     #[test]
