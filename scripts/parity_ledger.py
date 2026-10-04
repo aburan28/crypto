@@ -398,6 +398,84 @@ def print_cover(cv, title, label):
 
 
 
+def sieve(prefix="32_jv_cover_sieve"):
+    """The sieving variant (note §11): every end-to-end row of record, the
+    registered P7–P11 checks, and the measured crossover."""
+    rows = []
+    names = sorted(
+        n for n in os.listdir(EXP)
+        if n.startswith(prefix) and n.endswith(".json")
+        and "superseded" not in n and "defective" not in n
+    )
+    for name in names:
+        rows += load(name) or []
+    if not rows:
+        return None
+    return sorted(rows, key=lambda r: (r["p"], r["seed"]))
+
+
+def print_sieve(rows, title):
+    print(f"\n## {title}\n")
+    print("Relations among factor-base points by the sieve of the note's §11 (sums of m points, F(x, s) quadratic in s along a line), the two residuals' descent by the six-point test of §10, Wiedemann mod ℓ, rho on the same group (`*` = pooled reference).  `S` counts F_p multiplications (the ledger's unit); `S⁺` also charges every addition and table lookup of the sieve as a multiplication.  `rate` is relations per line against the registered p/m! (P7); `C_rel` the multiplications per relation, enumeration (the B's factored) + sieve + extraction + verification (P8).\n")
+    print("| p | seed | ℓ | columns | m (rule) | available | B's | lines | relations | rate / (p/m!) | C_rel | enum / sieve / extract / verify per relation | mults per base step | descent tests (per success) | C_cov | S | S⁺ | rho S | S / rho | S⁺ / rho | relation + descent + LA | solved / correct | failed verify |")
+    print("|---:|--:|:--|--:|:--|--:|--:|--:|--:|--:|--:|:--|--:|:--|--:|--:|--:|:--|--:|--:|:--|:--|--:|")
+    for r in rows:
+        star = "*" if not r["rho"] else ""
+        n = max(r["relations"], 1)
+        per = lambda k: r[k] / n
+        print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['m_rule']}{' → ' + str(r['m_final']) if r['m_final'] != r['m_rule'] else ''} | {r['relations_available']:,.0f} | {r['bs']:,} | {r['lines']:,} | {r['relations']} | {r['rate_ratio']:.2f} | {r['c_rel']:.3e} | {per('enum_muls'):.2e} / {per('sieve_muls'):.2e} / {per('extract_muls'):.2e} / {per('verify_muls'):.2e} | {r['sieve_muls'] / max(r['base_steps'], 1):.2f} | {r['descent_residuals']:,} ({r['descent_tests_per_success']:.0f}) | {r['descent_c_cov']:.3e} | {r['s']:.3e} | {r['s_plus']:.3e} | {r['rho_s_mean']:.3f}{star} | {r['s_over_rho']:.4f} | {r['s_plus_over_rho']:.4f} | {r['relation_over_rho']:.4f} + {r['descent_over_rho']:.4f} + {r['la_over_rho']:.5f} | {r['solved']} / {r['correct']} | {r['rels_failed_verify']} |")
+    solved = [r for r in rows if r["solved"]]
+    # rate per m, from the rows' per-m bookkeeping where present, else from
+    # the rows that stayed on one m
+    per_m = {}
+    for r in rows:
+        if r.get("per_m"):
+            for m, bs, lines, rel, hits in r["per_m"]:
+                e = per_m.setdefault(m, [0, 0, 0, 0.0])
+                e[0] += bs; e[1] += lines; e[2] += rel; e[3] += lines * r["p"] / math.factorial(m)
+        elif r["m_final"] == r["m_rule"]:
+            e = per_m.setdefault(r["m_final"], [0, 0, 0, 0.0])
+            e[0] += r["bs"]; e[1] += r["lines"]; e[2] += r["relations"]; e[3] += r["lines"] * r["p"] / math.factorial(r["m_final"])
+    if per_m:
+        print("\nRate by m (relations against lines · p/m!, P7), lines per B: " + "; ".join(f"m = {m}: {e[2]} / {e[3]:.1f} = {e[2] / e[3]:.2f}, {e[1] / max(e[0], 1):.2f} lines per B" for m, e in sorted(per_m.items())) + ".  Rows whose m rose during the run (the registered fallback) are marked `→`.")
+    g = by_size(solved, lambda r: r["p"])
+    if len(g) >= 2:
+        ps = list(g)
+        ys = [mean([r["s_over_rho"] for r in v]) for v in g.values()]
+        yp = [mean([r["s_plus_over_rho"] for r in v]) for v in g.values()]
+        below = [p for p, y in zip(ps, ys) if y < 1]
+        above = [p for p, y in zip(ps, ys) if y >= 1]
+        if below and above and max(above) < min(below):
+            p0, p1 = max(above), min(below)
+            y0, y1 = ys[ps.index(p0)], ys[ps.index(p1)]
+            # log-log interpolation between the two sizes that bracket parity
+            t = math.log(y0) / (math.log(y0) - math.log(y1))
+            p_star = math.exp(math.log(p0) + t * (math.log(p1) - math.log(p0)))
+            y0p, y1p = yp[ps.index(p0)], yp[ps.index(p1)]
+            if y0p >= 1 > y1p:
+                tp = math.log(y0p) / (math.log(y0p) - math.log(y1p))
+                p_plus = math.exp(math.log(p0) + tp * (math.log(p1) - math.log(p0)))
+                plus = f"; on S⁺: p* ≈ {p_plus:,.0f} (2^{6 * math.log2(p_plus) - 2:.0f})"
+            else:
+                plus = ""
+            print(f"\nMeasured crossover: S / rho ≥ 1 at p = {p0} ({y0:.3f}) and < 1 at p = {p1} ({y1:.3f}); log-log interpolation between them gives p* ≈ {p_star:,.0f}, subgroup order ≈ 2^{6 * math.log2(p_star) - 2:.0f} (registered P9: p* = 340 ± 60, [280, 420]){plus}.")
+        elif below and not above:
+            print(f"\nS / rho < 1 at every measured size ({ps[0]}–{ps[-1]}).")
+        else:
+            print(f"\nNo measured size below parity; the smallest S / rho is {min(ys):.3f} at p = {ps[ys.index(min(ys))]}.")
+        m9 = [r for r in solved if r["m_final"] == 9]
+        if m9:
+            c = mean([r["c_rel"] for r in m9])
+            cc = mean([r["descent_c_cov"] for r in m9]) * 720
+            print(f"At m = 9 (p = {sorted(set(r['p'] for r in m9))}): C_rel = {c:.3e} per relation against 720 · C_cov = {cc:.3e} per Nagao relation, a ratio of {cc / c:,.0f} (registered P11: 10³ within 3×; P8: C_rel in [5·10⁵, 10⁷]).")
+        ratios = [r["rate_ratio"] for r in solved if r["m_final"] == r["m_rule"]]
+        if ratios:
+            print(f"Rate against p/m! over the solved rows that stayed on one m: {min(ratios):.2f}–{max(ratios):.2f} (registered P7: [0.5, 2]); relations failing the group check: {sum(r['rels_failed_verify'] for r in rows)}; false hits: {sum(r['false_hits'] for r in rows)}; duplicates found and dropped: {sum(r.get('duplicates', 0) for r in rows)}.")
+        desc = [r["descent_over_rho"] / r["s_over_rho"] for r in solved if r["s_over_rho"] < 1]
+        if desc:
+            print(f"Share of the descent in S below parity: {min(desc):.2f}–{max(desc):.2f} (registered P9: more than half).")
+
+
 
 def main():
     print("# The parity ledger (printed by scripts/parity_ledger.py)\n")
@@ -535,6 +613,9 @@ def main():
                 fa = mean([cv["sizes"][p]["f4"] for p in common]); fb = mean([cvs["sizes"][p]["f4"] for p in common])
                 stopped = sum(cvs["sizes"][p]["stopped"] for p in common); tests = sum(cvs["sizes"][p]["random"] + cvs["sizes"][p]["constructed"] for p in common)
                 print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {stopped} of {tests} tests stopped at the staircase.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
+    sv = sieve()
+    if sv:
+        print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
     print("\n## C. What parity needs, per route\n")
     if k4:
         for bits in (80, 128, 160):
