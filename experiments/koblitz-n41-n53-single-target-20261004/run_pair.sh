@@ -26,26 +26,19 @@ if [ -e "$out" ]; then
     echo "refusing to overwrite $out" >&2
     exit 1
 fi
-if [ "$repeat" -eq 1 ]; then
-    if [ -e "$target" ]; then
-        echo "refusing to replace frozen target $target" >&2
-        exit 1
-    fi
-else
-    if [ ! -s "$target" ]; then
-        echo "frozen target is missing: $target" >&2
-        exit 1
-    fi
+if [ "$repeat" -ne 1 ] && [ ! -s "$target" ]; then
+    echo "frozen target is missing: $target" >&2
+    exit 1
 fi
 mkdir -p "$out" "$(dirname "$target")"
 timeout_bin=${TIMEOUT_BIN:-gtimeout}
 export RAYON_NUM_THREADS=1 OMP_NUM_THREADS=1 LC_ALL=C
 
 run_rho() {
-    /usr/bin/time -l "$timeout_bin" 900 "$bin_dir/koblitz_rho_fixture" \
+    /usr/bin/time "$timeout_bin" 900 "$bin_dir/koblitz_rho_fixture" \
         "$n" 0 signed_frobenius 1 strong "$rho_seed" "hash:$hash_seed" \
         > "$out/rho.jsonl" 2> "$out/rho.stderr"
-    if [ "$repeat" -eq 1 ]; then
+    if [ ! -e "$target" ]; then
         jq -c .published_q "$out/rho.jsonl" > "$target"
     else
         jq -c .published_q "$out/rho.jsonl" | cmp - "$target"
@@ -54,7 +47,7 @@ run_rho() {
 
 run_ic() {
     KIC_DUMP_BASE="$out/base.jsonl" KIC_DUMP_RANK="$out/rank.jsonl" \
-        /usr/bin/time -l "$timeout_bin" 900 "$bin_dir/koblitz_orbit_dlp_fast_online" \
+        /usr/bin/time "$timeout_bin" 900 "$bin_dir/koblitz_orbit_dlp_fast_online" \
         "construct:$n:0:$columns" "$target" "$rank_seed" "$out/ic_targets.jsonl" \
         > "$out/ic_summary.jsonl" 2> "$out/ic.stderr"
 }

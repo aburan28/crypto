@@ -20,7 +20,13 @@ LLVM 21.1.8). The host does **not** provide an auditable exclusive CPU
 partition, fixed frequency, IRQ routing or a host-level noise receipt.
 Its wall times can only be exploratory. `RAYON_NUM_THREADS=1` and
 `OMP_NUM_THREADS=1` are set for each run. The time wrapper archives process
-wall/CPU/RSS separately from the producer's charged in-process intervals.
+wall/CPU separately from the producer's charged in-process intervals; the
+producer records peak RSS with `getrusage`. An initial n41 rho solve under
+`/usr/bin/time -l` succeeded but the wrapper itself exited one after sandboxed
+`sysctl kern.clockrate` failed. Its raw output is retained under
+`runs/n41/preflight_time_l_failure/`, and its exact Q is retained as
+`targets/n41.jsonl`. Later n41 runs reuse that Q without substitution. The
+runner now uses `/usr/bin/time` without `-l`.
 
 Before target generation, the new producer and verifier were built with
 `--locked`, the archived n37 result replayed successfully, and the new cold
