@@ -95,6 +95,10 @@ if [ "${PHASE:-1}" = 2 ] || [ "${PHASE:-1}" = 3 ]; then  # §3 phase 2: memory-k
     if [ "${PHASE:-1}" = 3 ] && grep -q "\"cell\":\"$cell\",\"draw\":[0-9]*,\"arm\":\"$arm\",.*\"kind\":\"killed\",\"reason\":\"memory\",\"phase\":3," "$OUT/$cell.jsonl"; then
       continue
     fi
+    # Amendment 3: for the controls, a death of either kind ends the cell's control retries
+    if [ "${PHASE:-1}" = 3 ] && [ "$arm" = ctrl ] && grep -q "\"cell\":\"$cell\",\"draw\":[0-9]*,\"arm\":\"ctrl\",.*\"kind\":\"killed\",.*\"phase\":3," "$OUT/$cell.jsonl"; then
+      continue
+    fi
     measure 1 "$cell" "$draw" "$arm" "$OUT/dump/$cell-d$draw-$arm.sing"
   done
   echo "$(date -u +%FT%TZ) phase ${PHASE} done" >> "$OUT/progress.txt"

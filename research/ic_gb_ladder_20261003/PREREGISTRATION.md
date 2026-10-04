@@ -209,3 +209,19 @@ death after about an hour each, adding at most one degree to a lower bound (`≥
 - **Why it cannot bias.** A skipped retry leaves a censored reading censored. It can
   neither create nor move an exact reading, and the medians are formed by the registered
   rule from the bounds that exist.
+
+## Amendment 3 (2026-10-04, after the second `ℓ = 6` retry): the controls' retries
+
+`K₁/2¹⁹ ℓ = 6` draw 0 `rr` died at 12 GB at degree 8 after 44 minutes, as `K₀/2¹⁹`'s had;
+the `ℓ = 6` rung is beyond this engine on this host for both curves. What remains of the
+retry phase is dominated by the four `ℓ = 5` controls, which keep the 3,600 s limit and take
+about 17 minutes per degree each, and which can only add bounds (a control is informative
+only through P4, "not refuted below `rr`", and `rr` at `ℓ = 5` is 8 while every control
+there already reads `≥ 8`).
+
+- **Change.** Amendment 2's one-death rule is extended, for the control arm only, to a death
+  of either kind (memory or CPU): after the first retried control draw of a cell dies, that
+  cell's other control retries are skipped and keep their phase-1 bound. The `rr` and `x4`
+  arms are unchanged (Amendment 2 already governs them).
+- **Why it cannot bias.** As in Amendment 2: skipped retries stay censored; no exact reading
+  is created or moved, and P4 is evaluated on the bounds that exist.
