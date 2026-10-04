@@ -70,6 +70,14 @@
    "path": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
    "sha256": "bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422"
   },
+  "f6_small_cold_rows": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+   "sha256": "b65613c68d68d744fd2e3c26251b8f33d2c8fdd2b86c486551ac376e00e274eb"
+  },
+  "f6_small_cold_replay": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+   "sha256": "307f02ce84e5cb463257c5bfc9a572aed8508a90f8c9b58e1c3d550589bb0d90"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "341792fbfc9f18a4a4c95d0b42bf26c77727f080315530b37ed6c39ff07d31a8"
@@ -5181,6 +5189,39 @@
    16.981811137190903
   ],
   "admitted_online_speedup": null
+ },
+ "f6_small_cold_diagnostic": {
+  "curve": "icv1-f2m9-tm5-4a3ea183",
+  "source": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+  "replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+  "workload_id": "f6d79f6dd9f2",
+  "target": [
+   305,
+   466
+  ],
+  "usable_points": 14,
+  "folded_columns": 2,
+  "verified_relations": 8,
+  "arms": {
+   "inherited_f4": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d",
+    "cold_inside_worker_ns": 4707375,
+    "online_wall_ns": 371666
+   },
+   "f6_ic": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2",
+    "cold_inside_worker_ns": 3149750,
+    "online_wall_ns": 272125
+   },
+   "f5": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5",
+    "cold_inside_worker_ns": 61936875,
+    "online_wall_ns": 3117833
+   }
+  },
+  "rho_online_ms": null,
+  "online_speedup": null,
+  "cpu_isolation": "L0-unverified-mac"
  },
  "exponents": {
   "prime": {
