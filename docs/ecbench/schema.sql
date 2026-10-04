@@ -217,6 +217,34 @@ CREATE TABLE IF NOT EXISTS run_counters (
   PRIMARY KEY (record_id, name)
 );
 
+-- The decomposition solver's statistics for an algebraic or SAT
+-- index-calculus run (the record's `solver` block; ICMS pdp_metrics).
+-- Absent for table oracles and generic methods.
+CREATE TABLE IF NOT EXISTS run_solver (
+  record_id            TEXT PRIMARY KEY REFERENCES runs(record_id),
+  name                 TEXT NOT NULL,
+  calls                INTEGER NOT NULL,
+  ops                  INTEGER NOT NULL,
+  op_unit              TEXT NOT NULL,
+  wall_ns              INTEGER NOT NULL,
+  budget_exceeded      INTEGER NOT NULL,
+  n_vars               INTEGER,
+  n_equations          INTEGER,
+  semi_regular_degree  INTEGER,
+  solving_degree_mean  REAL,
+  solving_degree_max   INTEGER,
+  macaulay_rows        INTEGER,
+  macaulay_columns     INTEGER,
+  macaulay_degree      INTEGER,
+  macaulay_rank        INTEGER,
+  sat_variables        INTEGER,
+  sat_clauses          INTEGER,
+  sat_conflicts        INTEGER,
+  sat_decisions        INTEGER,
+  sat_propagations     INTEGER,
+  extra_json           TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS isolation_blockers (
   record_id TEXT NOT NULL REFERENCES runs(record_id),
   ord       INTEGER NOT NULL,
@@ -355,4 +383,36 @@ JOIN workloads w ON w.workload_id = r.workload_id
 LEFT JOIN factor_bases f ON f.fb_id = r.fb_id
 WHERE r.fb_id IS NOT NULL;
 
-INSERT OR REPLACE INTO schema_info (key, value) VALUES ('ecbench_schema_version', '1');
+-- The yield ledger: what each index-calculus run yielded on one target,
+-- with its base, oracle, matrix rank and solver statistics.  `yield` is
+-- relations per trial.  ic.pipeline writes `relations`, ic.shared_rank
+-- writes `hits`; the view reads either.
+CREATE VIEW IF NOT EXISTS ic_yield AS
+SELECT r.record_id, r.session_id, r.arm, r.round, r.status, r.run_id,
+       w.curve_slug, w.target_index, r.fb_id, f.family AS fb_family, f.columns AS fb_columns,
+       f.signed_points AS fb_signed_points, a.method AS method,
+       json_extract(a.params_json, '$.oracle') AS oracle,
+       json_extract(a.params_json, '$.solver') AS solver_param,
+       json_extract(p.native_json, '$.trials') AS trials,
+       COALESCE(json_extract(p.native_json, '$.relations'), json_extract(p.native_json, '$.hits')) AS relations,
+       CAST(COALESCE(json_extract(p.native_json, '$.relations'), json_extract(p.native_json, '$.hits')) AS REAL)
+         / NULLIF(json_extract(p.native_json, '$.trials'), 0) AS yield,
+       json_extract(p.native_json, '$.lookups') AS lookups,
+       json_extract(p.native_json, '$.lift_failures') AS lift_failures,
+       json_extract(l.native_json, '$.rows') AS matrix_rows,
+       json_extract(l.native_json, '$.rank') AS matrix_rank,
+       p.gae AS relations_gae, r.total_gae, r.s, r.deterministic,
+       s.name AS solver, s.calls AS solver_calls, s.ops AS solver_ops, s.op_unit AS solver_op_unit,
+       s.budget_exceeded, s.n_vars, s.n_equations, s.semi_regular_degree, s.solving_degree_max,
+       s.macaulay_rows, s.macaulay_columns, s.macaulay_degree, s.macaulay_rank,
+       s.sat_variables, s.sat_clauses, s.sat_conflicts, s.sat_decisions, s.sat_propagations
+FROM runs r
+JOIN algorithms a ON a.method_id = r.method_id
+JOIN workloads w ON w.workload_id = r.workload_id
+LEFT JOIN factor_bases f ON f.fb_id = r.fb_id
+LEFT JOIN phases p ON p.record_id = r.record_id AND p.phase = 'relations'
+LEFT JOIN phases l ON l.record_id = r.record_id AND l.phase = 'linear_algebra'
+LEFT JOIN run_solver s ON s.record_id = r.record_id
+WHERE a.family = 'ic' AND r.warmup = 0;
+
+INSERT OR REPLACE INTO schema_info (key, value) VALUES ('ecbench_schema_version', '2');
