@@ -85,6 +85,41 @@ jobs:
              and .files["records.jsonl"] == $records_sha
              and (.replays | length) == 15
              and all(.replays[]; .reproduced)' "$receipt" > /dev/null
+      - name: Independent all-run replay of the n37 column sweep
+        run: |
+          receipt="$RUNNER_TEMP/ecbench-independent/n37-rank-columns.json"
+          ./target/release/ecbench verify \
+            --dir research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01 \
+            --replay-all --exit-code --out "$receipt" > /dev/null
+          jq -e \
+            --arg session 'ECBS1h9a1d373bbe54' \
+            --arg original_class 'ECBENV2hd82681268e96' \
+            --arg records_sha '82c8b31640074b2f829d88e546bf487ee4b598edf4ef26f779984d625ed7de3c' \
+            '.ok == true and .session_id == $session
+             and .session_status == "complete"
+             and .auditor_env_class_id != null
+             and .auditor_env_class_id != $original_class
+             and .files["records.jsonl"] == $records_sha
+             and .records == 384 and .verified_records == 384
+             and (.replays | length) == 320
+             and all(.replays[]; .reproduced)' "$receipt" > /dev/null
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecbench-n37-rank-columns-independent-receipt
+          path: ${{ runner.temp }}/ecbench-independent/n37-rank-columns.json
+          if-no-files-found: error
+      - name: Recompute the frozen n37 column decision
+        run: |
+          cargo build --release --locked --example n37_rank_columns_analyze
+          ./target/release/examples/n37_rank_columns_analyze \
+            research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01 \
+            research/ecbench_n37_rank_columns_20261004/candidate_claims \
+            research/ecbench_n37_rank_columns_20261004/AUDIT.json \
+            research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json \
+            "$RUNNER_TEMP/ecbench-independent/n37-rank-columns-result.json"
+          cmp "$RUNNER_TEMP/ecbench-independent/n37-rank-columns-result.json" \
+            research/ecbench_n37_rank_columns_20261004/RESULT.json
       - name: Attach the independent receipt without changing the frozen claim
         run: |
           receipt=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json

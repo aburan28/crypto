@@ -102,6 +102,11 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 | C | `icv1-f2m53-tm56619371-dac20a85` | — | 6.6% | 2.2% | 2.5% | 23.4% | 56.3% | 0.2% | 7.8% | 0.9% |
 | C | `icv1-f2m61-t158598901-ab42b6c5` | — | 3.4% | 0.6% | 0.7% | 7.5% | 78.8% | 0.1% | 8.7% | 0.2% |
 
+## Bounded n37 diagnostic outside tables A–C
+
+The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candidate (`IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772`) has 1,184 usable points and 16 folded columns. Across 40 verified one-target runs, its mean cold counted `S` lower bound is 2.111; its counted IC/rho quotient is 5.034 and K16/K42 is 0.349. Native work is unpriced for both arms, and L0 timing cannot establish an online speedup. This row is intentionally outside the three fully priced unit families; read the [frozen decision](../../research/ecbench_n37_rank_columns_20261004/RESULT.json).
+
+
 ## Sources
 
 - `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` — sha256 `28aadc91af9e4c0b…`
@@ -112,4 +117,5 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 - `research/ic_descent_20260930/analysis-isolated.json` — sha256 `060359c266e779db…`
 - `research/ic_single_target_20260930/analysis.json` — sha256 `109326d7c2882b71…`
 - `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json` — sha256 `2271c4aa5236e2bd…`
+- `research/ecbench_n37_rank_columns_20261004/RESULT.json` — sha256 `9d3ba4708f70e279…`
 - `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`
