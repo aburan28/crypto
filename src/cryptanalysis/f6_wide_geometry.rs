@@ -95,7 +95,9 @@ pub struct F6WidePairIndex {
     curve: BinaryCurve,
     points: Vec<BinaryPoint>,
     sums: Vec<(BinaryPoint, (usize, usize))>,
-    lookup: HashMap<PointKey, Vec<(usize, usize)>>,
+    // A group sum determines the residual exactly. One representative pair
+    // per sum suffices because repeated factor-base points are allowed.
+    lookup: HashMap<PointKey, (usize, usize)>,
 }
 
 impl F6WidePairIndex {
@@ -108,12 +110,12 @@ impl F6WidePairIndex {
             return None;
         }
         let mut sums = Vec::with_capacity(pair_count);
-        let mut lookup: HashMap<PointKey, Vec<(usize, usize)>> = HashMap::new();
+        let mut lookup: HashMap<PointKey, (usize, usize)> = HashMap::with_capacity(pair_count);
         for i in 0..points.len() {
             let row = batch_add_fixed(curve, &points[i], &points[i..]);
             for (offset, sum) in row.into_iter().enumerate() {
                 let pair = (i, i + offset);
-                lookup.entry(key(&sum)?).or_default().push(pair);
+                lookup.entry(key(&sum)?).or_insert(pair);
                 sums.push((sum, pair));
             }
         }
@@ -157,15 +159,13 @@ impl F6WidePairIndex {
                     .collect()
             };
             for (residual, (_, (i, j))) in residuals.iter().zip(chunk) {
-                if let Some(pairs) = self.lookup.get(&key(residual)?) {
-                    for &(k, l) in pairs {
-                        let indices = [*i, *j, k, l];
-                        let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
-                            point_add(&self.curve, &acc, &self.points[index])
-                        });
-                        if sum == *target {
-                            return Some(indices);
-                        }
+                if let Some(&(k, l)) = self.lookup.get(&key(residual)?) {
+                    let indices = [*i, *j, k, l];
+                    let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                        point_add(&self.curve, &acc, &self.points[index])
+                    });
+                    if sum == *target {
+                        return Some(indices);
                     }
                 }
             }

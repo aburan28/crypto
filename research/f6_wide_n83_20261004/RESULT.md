@@ -148,3 +148,60 @@ have 8,219,485 pairs, and its optimistic coverage ceiling remains
 `6306f4453a59f09d461123c88703086deca75eff3e3c2e37cde537dfc3ef26ef`,
 and `K0_STAGE_PROTOCOL.md` SHA-256
 `4287d2dc6b4e6bdd5fe308eccba8a7a1f40b0e60a02fb82c901ebb2a47b1c658`.
+
+## K_0 pair-index representation
+
+The [index protocol](INDEX_PROTOCOL.md) compared the original vector of
+pairs per distinct sum with one representative pair per sum. For exact
+four-summand search with repetitions allowed, either pair represents the
+same group element. The probe built the complete pair index for each actual
+base and queried public T001. All baseline and candidate runs passed their
+point and subgroup checks, returned the same exact no-witness result, and
+had the same pair counts. Three observations per arm, after one warmup, are
+preserved in [baseline](index_baseline.jsonl) and
+[candidate](index_candidate.jsonl) raw files.
+
+| Usable points | Pairs | Index build baseline / candidate median | Build ratio | No-witness query baseline / candidate median | Query ratio |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 258 | 33,411 | 20.634 / 19.627 ms | 1.05× | 16.077 / 15.780 ms | 1.02× |
+| 1,048 | 549,676 | 358.010 / 300.099 ms | 1.19× | 277.368 / 279.922 ms | 0.99× |
+
+The build medians satisfy the registered no-more-than-10%-regression gate,
+so the simpler exact representation is retained. Query time is effectively
+unchanged at this sample size. The baseline was commit `7ea5f6470`, with
+`f6_wide_geometry.rs` SHA-256
+`7d5a9aece64f31fab027612ca004e310fa93f5797cca1ce7e6c1655600f7b762`.
+The candidate file's SHA-256 is
+`a8a88887e925b0416a0995a07c0e24c18d24807f80ee6bcd415418eb8b92c2f7`;
+the probe SHA-256 is
+`263a0b043c23f890a695370e66aaebbcd8ecd6a053c9413ed821201f5a2c5f39`;
+the protocol SHA-256 is
+`e7a5f4e2a7395830e7d56a7e98dbc802489a4374ee9cb4f4f6e4b72c303fed5d`.
+Both arms used Rust 1.93.1 on the same unisolated arm64 macOS host. These
+are exploratory component timings, not controlled CPU speedup claims or a
+complete n=83 F6, F4/F5, or one-target IC comparison.
+
+## K_0 preallocated pair lookup
+
+The [capacity protocol](INDEX_CAPACITY_PROTOCOL.md) tested reserving hash
+lookup space for the known maximum pair count. All outcomes and pair counts
+matched the one-representative baseline. The [baseline](capacity_baseline.jsonl)
+and [candidate](capacity_candidate.jsonl) files retain all three builds and
+queries per base after warmup.
+
+| Usable points | Build baseline / candidate median | Build ratio | Query baseline / candidate median | Query ratio |
+| ---: | ---: | ---: | ---: | ---: |
+| 258 | 19.996 / 18.385 ms | 1.09× | 16.194 / 16.026 ms | 1.01× |
+| 1,048 | 306.919 / 294.729 ms | 1.04× | 282.504 / 278.408 ms | 1.01× |
+
+The preallocation meets the registered retention gate and is kept. It
+allocates the lookup capacity at construction start; actual peak memory was
+not measured, so the memory tradeoff remains unknown. The baseline source
+SHA-256 was
+`a8a88887e925b0416a0995a07c0e24c18d24807f80ee6bcd415418eb8b92c2f7`,
+the candidate source SHA-256 is
+`7cae9b6c9610bfe17cb0c16e053b616971fdff3a91748e1fc6a41c12b2499a60`,
+and the capacity protocol SHA-256 is
+`29a52195325552e6e2d8c547e8ae37eaea5e568c5d78ffd41e0f298e8d7d4b00`.
+The probe and compiler were the same as above on the same unisolated host;
+these are exploratory stage timings only.
