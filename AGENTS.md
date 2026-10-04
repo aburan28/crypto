@@ -724,6 +724,13 @@ immutable historical names and never infer exact identity from field degree alon
 Within this repository the text name is the ICV1 slug (§11); the curve
 registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
 slug to the EC1 identities of its recorded representations.
+The [IC curve crosswalk](docs/curves/ic/README.md) mirrors cryptanalysis's
+exact curve records and links them to ICV1 only when the model match is
+established. Keep unknown traits and unsupported models as `null` with status.
+Large factor bases remain content-addressed archives, while the browser's
+FB1 entries are session summaries; link them only after exact curve and
+point-set identities, encoding and quotient rules agree. An isogenous curve
+has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
 
 # Agent rules for IC measurements
 
