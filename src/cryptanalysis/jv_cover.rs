@@ -713,6 +713,21 @@ impl<'a> EllE<'a> {
     pub fn sub(&self, p: &PtE6, q: &PtE6) -> PtE6 {
         self.add(p, &self.neg(q))
     }
+    /// [`EllE::mul`] for a scalar above 2⁶⁴ (the group order itself).
+    pub fn mul_u128(&self, pt: &PtE6, mut k: u128) -> PtE6 {
+        let mut acc = PtE6::INF;
+        let mut base = *pt;
+        while k > 0 {
+            if k & 1 == 1 {
+                acc = self.add(&acc, &base);
+            }
+            k >>= 1;
+            if k > 0 {
+                base = self.add(&base, &base);
+            }
+        }
+        acc
+    }
     pub fn mul(&self, pt: &PtE6, mut k: u64) -> PtE6 {
         let mut acc = PtE6::INF;
         let mut base = *pt;
@@ -739,29 +754,21 @@ impl<'a> EllE<'a> {
     }
 }
 
-fn isqrt(n: u64) -> u64 {
-    let mut r = (n as f64).sqrt() as u64;
-    while r * r > n {
-        r -= 1;
-    }
-    while (r + 1) * (r + 1) <= n {
-        r += 1;
-    }
-    r
-}
-
 /// `#E(F_{q³})` by baby-step giant-step on a random point, accepted when it
 /// is four times a prime (the group is then `Z/2 × Z/2ℓ` and the DLP lives
 /// in the subgroup of order `ℓ`).
 fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
-    let p = ec.f.f.p;
+    // returns ℓ = #E/4 when #E = 4ℓ with ℓ prime;
+    // the order is near p⁶, which passes 2⁶⁴ at p = 1,622 while ℓ = #E/4 stays
+    // below it up to p = 2,039: the search runs in u128 (note §16)
+    let p = ec.f.f.p as u128;
     let q3 = p.pow(6);
-    let two_sqrt = 2 * isqrt(q3) + 2;
+    let two_sqrt = 2 * isqrt128(q3) + 2;
     let lo = q3 + 1 - two_sqrt;
     let width = 2 * two_sqrt;
     let pt = ec.random_point(rng);
-    let steps = isqrt(width) + 1;
-    let mut table: HashMap<PtE6, u64> = HashMap::new();
+    let steps = isqrt128(width) + 1;
+    let mut table: HashMap<PtE6, u128> = HashMap::new();
     let mut jp = PtE6::INF;
     for j in 0..steps {
         if !jp.inf {
@@ -769,9 +776,9 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         }
         jp = ec.add(&jp, &pt);
     }
-    let giant = ec.mul(&pt, steps);
-    let mut t = ec.mul(&pt, lo);
-    let mut i = 0u64;
+    let giant = ec.mul_u128(&pt, steps);
+    let mut t = ec.mul_u128(&pt, lo);
+    let mut i = 0u128;
     let mut found = None;
     while i * steps <= width + steps {
         let m = if t.inf {
@@ -787,11 +794,22 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         i += 1;
     }
     let m = found?;
-    if m % 4 != 0 || !is_prime_u64(m / 4) {
+    if m % 4 != 0 || m / 4 > u64::MAX as u128 || !is_prime_u64((m / 4) as u64) {
         return None;
     }
     let other = ec.random_point(rng);
-    ec.mul(&other, m).inf.then_some(m)
+    ec.mul_u128(&other, m).inf.then_some((m / 4) as u64)
+}
+
+fn isqrt128(n: u128) -> u128 {
+    let mut r = (n as f64).sqrt() as u128;
+    while r * r > n {
+        r -= 1;
+    }
+    while (r + 1) * (r + 1) <= n {
+        r += 1;
+    }
+    r
 }
 
 // ── The genus-3 cover H : y² = F(x)·N(x) over F_q ─────────────────────────
@@ -1654,10 +1672,9 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             continue;
         }
         let ec = EllE::new(&f, &alpha);
-        let Some(m) = group_order_4_prime(&ec, &mut rng) else {
+        let Some(l) = group_order_4_prime(&ec, &mut rng) else {
             continue;
         };
-        let l = m / 4;
         let Some(cov) = Cover::new(&f, &alpha) else {
             continue;
         };
