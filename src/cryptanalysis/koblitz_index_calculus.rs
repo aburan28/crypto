@@ -5794,6 +5794,63 @@ impl<'a> F6GeometricGate<'a> {
         })
     }
 
+    fn verify_witness(&mut self, chosen: &[usize]) -> bool {
+        let _check = measurement::relation_check_scope();
+        let mut sum = BinaryPoint::Infinity;
+        for &index in chosen {
+            self.group_additions += 1;
+            sum = self.kc.add(&sum, &self.fb.points[index]);
+        }
+        if sum != *self.target {
+            return false;
+        }
+        let mut indices = chosen.to_vec();
+        indices.sort_unstable();
+        self.witness = Some(indices);
+        true
+    }
+
+    /// For three summands, one fixed x-coordinate is already enough for an
+    /// exact branch decision: try its usable point lifts against every
+    /// second base point, then look up the uniquely determined third point.
+    fn close_one_fixed(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            for second_index in 0..self.fb.points.len() {
+                let second_point = &self.fb.points[second_index];
+                if !self.partial_residual_matches(second, second_point, assignment, defined_mask) {
+                    continue;
+                }
+                chosen[second] = second_index;
+                self.group_additions += 1;
+                let sum = self.kc.add(&self.fb.points[first_index], second_point);
+                self.group_additions += 1;
+                let residual = self.kc.add(self.target, &point_neg(&sum));
+                self.residual_lookups += 1;
+                let Some(&third_index) = self.index_of.get(&point_key(&residual)) else {
+                    continue;
+                };
+                if !self.partial_residual_matches(third, &residual, assignment, defined_mask) {
+                    continue;
+                }
+                chosen[third] = third_index;
+                if self.verify_witness(&chosen) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     fn close_residual(
         &mut self,
         positions: &[(usize, BigUint)],
@@ -5815,19 +5872,7 @@ impl<'a> F6GeometricGate<'a> {
                 return false;
             }
             chosen[remaining] = last;
-            let _check = measurement::relation_check_scope();
-            let mut check = BinaryPoint::Infinity;
-            for &index in chosen.iter() {
-                self.group_additions += 1;
-                check = self.kc.add(&check, &self.fb.points[index]);
-            }
-            if check == *self.target {
-                let mut indices = chosen.to_vec();
-                indices.sort_unstable();
-                self.witness = Some(indices);
-                return true;
-            }
-            return false;
+            return self.verify_witness(chosen);
         }
         let (summand, x) = &positions[depth];
         let choices = self.by_x.get(x).cloned().unwrap_or_default();
@@ -5877,6 +5922,13 @@ impl<'a> F6GeometricGate<'a> {
                 }
                 fixed.push((i, key));
             }
+        }
+        if self.vars.len() == 3 && fixed.len() == 1 && self.fb.points.len() <= 256 {
+            return if self.close_one_fixed(&fixed[0], assignment, defined_mask) {
+                NodeOracleDecision::Witness
+            } else {
+                NodeOracleDecision::Refute
+            };
         }
         if fixed.len() < self.vars.len() - 1 {
             return NodeOracleDecision::Continue;
@@ -16236,6 +16288,71 @@ mod tests {
         assert!(
             checked_nonlift,
             "no filtered nonlifting S3 root was exercised (s3_roots={s3_roots})"
+        );
+    }
+
+    #[test]
+    fn f6_ic_one_fixed_coordinate_closure_matches_exact_enumeration() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let encoder = F6CoordinateEncoder::new(&fb.subspace_basis).unwrap();
+        let ell = fb.subspace_basis.len();
+        let mut witnessed = 0;
+        let mut refuted = 0;
+        for scalar in 1..=32u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            for code in 0..(1u64 << ell) {
+                let mut fixed_x = F2mElement::zero(kc.n);
+                for (j, basis) in fb.subspace_basis.iter().enumerate() {
+                    if code & (1 << j) != 0 {
+                        fixed_x.add_assign(basis);
+                    }
+                }
+                for second_bit in [false, true] {
+                    let mut assignment = vec![None; 3 * ell];
+                    for j in 0..ell {
+                        assignment[j] = Some(code & (1 << j) != 0);
+                    }
+                    assignment[ell] = Some(second_bit);
+                    let expected = fb.points.iter().any(|first| {
+                        matches!(first, BinaryPoint::Affine { x, .. } if x == &fixed_x)
+                            && fb.points.iter().any(|second| {
+                                let BinaryPoint::Affine { x, .. } = second else {
+                                    return false;
+                                };
+                                encoder
+                                    .encode(x)
+                                    .is_some_and(|c| ((c & 1) != 0) == second_bit)
+                                    && {
+                                        let sum = kc.add(first, second);
+                                        let third = kc.add(&target, &point_neg(&sum));
+                                        index_of.contains_key(&point_key(&third))
+                                    }
+                            })
+                    });
+                    let mut gate =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    let decision = gate.decide(&assignment, 0);
+                    assert_eq!(decision == NodeOracleDecision::Witness, expected);
+                    if expected {
+                        witnessed += 1;
+                        let sum = gate
+                            .witness
+                            .unwrap()
+                            .iter()
+                            .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                        assert_eq!(sum, target);
+                    } else {
+                        assert_eq!(decision, NodeOracleDecision::Refute);
+                        refuted += 1;
+                    }
+                }
+            }
+        }
+        assert!(
+            witnessed > 0 && refuted > 0,
+            "witnessed={witnessed}, refuted={refuted}"
         );
     }
 
