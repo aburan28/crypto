@@ -91,6 +91,10 @@ if [ "${PHASE:-1}" = 2 ] || [ "${PHASE:-1}" = 3 ]; then  # §3 phase 2: memory-k
   grep -h -e '"kind":"killed","reason":"memory","phase":1,' -e '"kind":"killed","reason":"cpu","phase":2,' "$OUT"/K*.jsonl | sed -E 's/.*"cell":"([^"]+)","draw":([0-9]+),"arm":"([^"]+)".*/\1 \2 \3/' | sort -u |
   awk '{ split($1, c, "l"); a = ($3 == "rr") ? 0 : ($3 == "x4") ? 1 : 2; print a, c[2], $0 }' | sort -k1,1n -k2,2n -k3 | cut -d" " -f3- |
   while read -r cell draw arm; do
+    # Amendment 2: after one memory death at 12 GB, the (cell, arm)'s other retries are skipped
+    if [ "${PHASE:-1}" = 3 ] && grep -q "\"cell\":\"$cell\",\"draw\":[0-9]*,\"arm\":\"$arm\",.*\"kind\":\"killed\",\"reason\":\"memory\",\"phase\":3," "$OUT/$cell.jsonl"; then
+      continue
+    fi
     measure 1 "$cell" "$draw" "$arm" "$OUT/dump/$cell-d$draw-$arm.sing"
   done
   echo "$(date -u +%FT%TZ) phase ${PHASE} done" >> "$OUT/progress.txt"

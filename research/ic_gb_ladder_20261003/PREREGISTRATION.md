@@ -194,3 +194,18 @@ amendment is written before that process ends and before any `ℓ = 6` reading e
   first (the first phase-2 launch was ordered by `ℓ` and had reached an `ℓ = 5` control,
   which was taking 17 minutes per degree; it was stopped during that control's degree-8 run
   with no line written, and re-ordered; that run is repeated from degree 8 when its turn comes).
+
+## Amendment 2 (2026-10-04, after the first `ℓ = 6` retry): one memory death per cell and arm
+
+`K₀/2¹⁹ ℓ = 6` draw 0 `rr` ran degree 8 for 55 minutes under Amendment 1 and died at the
+12 GB limit. The remaining memory-killed draws of that cell and arm would repeat the same
+death after about an hour each, adding at most one degree to a lower bound (`≥ 8` for
+`≥ 7`) and no exact reading.
+
+- **Change.** Within phase 3, once a retried draw of a (cell, arm) dies by memory at 12 GB,
+  the remaining retries of that same (cell, arm) are not run; those draws keep their
+  phase-1 bound. Every (cell, arm) still gets at least one retry at 12 GB, so each rung
+  and arm is tested once at the larger limit. Nothing else changes.
+- **Why it cannot bias.** A skipped retry leaves a censored reading censored. It can
+  neither create nor move an exact reading, and the medians are formed by the registered
+  rule from the bounds that exist.
