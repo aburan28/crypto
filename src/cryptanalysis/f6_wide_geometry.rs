@@ -265,4 +265,19 @@ mod tests {
         });
         assert_eq!(replay, planted);
     }
+
+    #[test]
+    fn n83_k0_confidence_gate_generator_and_frobenius_match() {
+        let kc = KoblitzCurve::known_n83_k0().unwrap();
+        assert_eq!(kc.label(), "icv1-f2m83-tm6151469093347-debefd74");
+        assert_eq!(kc.cofactor, BigUint::from(4u32));
+        assert_eq!(
+            kc.mul(kc.generator(), &kc.subgroup_order),
+            BinaryPoint::Infinity
+        );
+        assert_eq!(
+            kc.frobenius(kc.generator()),
+            kc.mul(kc.generator(), &kc.lambda)
+        );
+    }
 }

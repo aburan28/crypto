@@ -83,3 +83,68 @@ its factor-base counts or timings to K_0. The inventory used
 `2ceb4ec04708782a7f17a2432acaf066c334bfe9398f0ac00c219c4a2be44528`,
 and `BASE_PROTOCOL.md` SHA-256
 `7a929d602fa4b75dd4cd0ed440ff3ae8aef5b9b5dc5c123885f73cdd7f7b904e`.
+
+## Actual K_0 confidence-gate base inventory
+
+The [separate K_0 protocol](K0_BASE_PROTOCOL.md) used the public generator
+in `gate-m83-T001.json`. Its 81-bit subgroup order and K_1's 53-bit order
+both passed exact Sage `is_prime(proof=True)` through the repository's
+checked launcher; see [script](prime_check.sage), [output](prime-check.txt),
+and [runtime receipt](sage-runtime-info.json). The Rust constructor also
+checked the point, generator order, registry curve ID, and Frobenius
+eigenvalue. This is the confidence-gate **curve**, distinct from K_1 above.
+
+| Dimension | Curve points | Usable projected points `B` | Signed columns | Four-summand coverage ceiling | Pair entries |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 8 | 261 | 258 | 129 | 7.814×10⁻¹⁷ | 33,411 |
+| 10 | 1,051 | 1,048 | 524 | 2.091×10⁻¹⁴ | 549,676 |
+| 12 | 4,057 | 4,054 | 2,027 | 4.662×10⁻¹² | 8,219,485 |
+
+The [raw K_0 inventory](k0_base_inventory.jsonl) preserves the counts.
+At the largest actual base, an independently uniform target requires at
+least **2.145×10¹¹ queries in expectation** for a four-summand hit even
+under the most optimistic collision-free mapping. This is a mathematical
+lower bound from the coverage ceiling, not a measured run time. At `B=4,054`,
+the same ceiling is 0.1484% for seven summands and 75.36% for eight;
+the nine-summand count exceeds the group size and gives no nontrivial
+coverage guarantee. Actual yield can be lower at every arity. The direct
+Semaev chain would need 594 Boolean variables at eight summands or 689 at
+nine (`m·12+(m−2)·83`), far beyond the 128-variable backend. A faster
+four-summand tail cannot by itself solve the n=83 gate.
+
+The K_0 inventory used `koblitz_index_calculus.rs` SHA-256
+`a183fad6ea71841c2dcba6a1f05885101e21590f5dff55664e1bda5eda1f0746`,
+`f6_wide_n83_k0_base_inventory.rs` SHA-256
+`4471f57411a03c54b6db7d02bd0a1a7befce31fa8740ee2183f77aecba9049d1`,
+and `K0_BASE_PROTOCOL.md` SHA-256
+`58f03fa4634d37e65ef15224f2a91e91508ff9f0c5d5a89fde90e5ff12480cd0`.
+
+## K_0 paired arithmetic on T001
+
+The [separately frozen K_0 stage protocol](K0_STAGE_PROTOCOL.md) used the
+first 64 subgroup-usable points of the actual dimension-8 base and the
+public T001 point. The target passed on-curve and subgroup checks. All 2,080
+pair sums matched reference addition exactly. Both query methods completed
+and agreed that T001 has no four-summand expression in this fixed 64-point
+subset. This says nothing about the full 258-point dimension-8 base or
+larger bases.
+
+| K_0 component | Scalar median | Batched median | Median ratio | Three paired ratios |
+| --- | ---: | ---: | ---: | --- |
+| 2,080 pair sums | 8.917 ms | 1.312 ms | 6.80× | 6.56×, 6.95×, 4.02× |
+| Exact no-witness query | 8.475 ms | 1.058 ms | 8.01× | 8.01×, 8.42×, 8.44× |
+
+The third batched pair run was slower than the other two; all observations
+are preserved in [k0_stage_raw.jsonl](k0_stage_raw.jsonl). This host has no
+isolation receipt. The ratios are exploratory component diagnostics and do
+not imply faster complete F6, F4/F5, index calculus, or rho on K_0. A full
+four-summand query against the actual 4,054-point dimension-12 base would
+have 8,219,485 pairs, and its optimistic coverage ceiling remains
+4.662×10⁻¹². The stage probe used `f6_wide_geometry.rs` SHA-256
+`7d5a9aece64f31fab027612ca004e310fa93f5797cca1ce7e6c1655600f7b762`,
+`koblitz_index_calculus.rs` SHA-256
+`1c98b492fafe80ae3a9dbea5400e7fceb114dec7b9a548e4d98f33a691f05b5d`,
+`f6_wide_n83_k0_stage_probe.rs` SHA-256
+`6306f4453a59f09d461123c88703086deca75eff3e3c2e37cde537dfc3ef26ef`,
+and `K0_STAGE_PROTOCOL.md` SHA-256
+`4287d2dc6b4e6bdd5fe308eccba8a7a1f40b0e60a02fb82c901ebb2a47b1c658`.

@@ -644,21 +644,53 @@ impl KoblitzCurve {
     }
 
     /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
-    /// gate. Its modulus, subgroup order, cofactor, and generator are the
-    /// C082 public parameters. The generic constructor remains capped at
-    /// [`MAX_N`] because its factorisation and normal-basis helpers use
-    /// single-word polynomials.
+    /// gate. Its parameters are the C082 public fixture.
     pub fn known_n83_k1() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            1,
+            "8569786107849059",
+            "1128547018",
+            "68a212cfe19a809fe0598",
+            "244a245ea0b17d8cc8297",
+        )
+    }
+
+    /// The pinned K_0 n=83 confidence-gate model and public subgroup
+    /// generator from `gate-m83-T001.json`. Its 81-bit subgroup order was
+    /// independently proved prime with the checked Sage launcher; the
+    /// certificate is in `research/f6_wide_n83_20261004/prime-check.txt`.
+    /// The generic constructor remains capped at [`MAX_N`] because its
+    /// factorisation and normal-basis helpers use single-word polynomials.
+    pub fn known_n83_k0() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            0,
+            "2417851639230796216685689",
+            "4",
+            "477f77103dfad59850800",
+            "2fa5e737d542c4e4fd5c3",
+        )
+    }
+
+    fn known_n83_from_fixture(
+        a: u8,
+        order: &str,
+        cofactor: &str,
+        gx: &str,
+        gy: &str,
+    ) -> Option<Self> {
         let n = 83;
-        let r = BigUint::from(8_569_786_107_849_059u64);
-        let cofactor = BigUint::from(1_128_547_018u64);
-        let group_order = koblitz_point_count(1, n);
-        if group_order != &r * &cofactor || !is_prime_u64(r.to_u64()?) {
+        let r = BigUint::parse_bytes(order.as_bytes(), 10)?;
+        let cofactor = BigUint::parse_bytes(cofactor.as_bytes(), 10)?;
+        let group_order = koblitz_point_count(a, n);
+        if group_order != &r * &cofactor
+            || r <= cofactor
+            || r.to_u64().is_some_and(|small| !is_prime_u64(small))
+        {
             return None;
         }
         let generator = BinaryPoint::Affine {
-            x: F2mElement::from_hex("68a212cfe19a809fe0598", n),
-            y: F2mElement::from_hex("244a245ea0b17d8cc8297", n),
+            x: F2mElement::from_hex(gx, n),
+            y: F2mElement::from_hex(gy, n),
         };
         let curve = BinaryCurve {
             m: n,
@@ -666,7 +698,11 @@ impl KoblitzCurve {
                 degree: n,
                 low_terms: vec![0, 1, 2, 45],
             },
-            a: F2mElement::one(n),
+            a: if a == 0 {
+                F2mElement::zero(n)
+            } else {
+                F2mElement::one(n)
+            },
             b: F2mElement::one(n),
             generator: generator.clone(),
             order: r.clone(),
@@ -677,19 +713,20 @@ impl KoblitzCurve {
         {
             return None;
         }
-        let lambda = frobenius_eigenvalue(&curve, 1, &r)?;
+        let trace = if a == 0 { -1 } else { 1 };
+        let lambda = frobenius_eigenvalue(&curve, trace, &r)?;
         Some(Self {
-            a: 1,
+            a,
             n,
             curve,
-            trace: 1,
+            trace,
             group_order,
             subgroup_order: r,
             cofactor,
             lambda,
             k: 1,
             q: 2,
-            a_index: 1,
+            a_index: u64::from(a),
             b_index: 1,
             subfield_basis: vec![F2mElement::one(n)],
         })
@@ -5717,7 +5754,7 @@ pub(crate) fn lift_candidate(
 /// pivot row retains its expression in the original basis so a residual
 /// point can be checked against a partially assigned summand code.
 struct F6CoordinateEncoder {
-    rows: Vec<(u32, u64, u64)>,
+    rows: Vec<(u32, u128, u64)>,
 }
 
 struct F6FastGeometry {
@@ -5729,16 +5766,24 @@ struct F6FastGeometry {
 }
 
 impl F6CoordinateEncoder {
+    fn field_word(element: &F2mElement) -> Option<u128> {
+        let bits = element.raw_bits();
+        if bits.is_empty() || bits.len() > 2 {
+            return None;
+        }
+        Some(u128::from(bits[0]) | (u128::from(*bits.get(1).unwrap_or(&0)) << 64))
+    }
+
     fn new(basis: &[F2mElement]) -> Option<Self> {
         if basis.len() >= 64 {
             return None;
         }
-        let mut rows: Vec<(u32, u64, u64)> = Vec::with_capacity(basis.len());
+        let mut rows: Vec<(u32, u128, u64)> = Vec::with_capacity(basis.len());
         for (j, element) in basis.iter().enumerate() {
-            let mut value = *element.raw_bits().first()?;
+            let mut value = Self::field_word(element)?;
             let mut code = 1u64 << j;
             for &(pivot, row, row_code) in &rows {
-                if value & (1u64 << pivot) != 0 {
+                if value & (1u128 << pivot) != 0 {
                     value ^= row;
                     code ^= row_code;
                 }
@@ -5746,17 +5791,17 @@ impl F6CoordinateEncoder {
             if value == 0 {
                 return None;
             }
-            rows.push((63 - value.leading_zeros(), value, code));
+            rows.push((127 - value.leading_zeros(), value, code));
             rows.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         }
         Some(Self { rows })
     }
 
     fn encode(&self, element: &F2mElement) -> Option<u64> {
-        let mut value = *element.raw_bits().first()?;
+        let mut value = Self::field_word(element)?;
         let mut code = 0u64;
         for &(pivot, row, row_code) in &self.rows {
-            if value & (1u64 << pivot) != 0 {
+            if value & (1u128 << pivot) != 0 {
                 value ^= row;
                 code ^= row_code;
             }
@@ -16683,6 +16728,29 @@ mod tests {
         }
         assert_eq!(
             encoder.encode(&F2mElement::from_bit_positions(&[8], 9)),
+            None
+        );
+    }
+
+    #[test]
+    fn f6_coordinate_encoder_keeps_n83_high_words() {
+        let basis = [
+            F2mElement::from_bit_positions(&[70], 83),
+            F2mElement::from_bit_positions(&[5, 70], 83),
+            F2mElement::from_bit_positions(&[82, 2], 83),
+        ];
+        let encoder = F6CoordinateEncoder::new(&basis).unwrap();
+        for code in 0..8u64 {
+            let mut x = F2mElement::zero(83);
+            for (j, item) in basis.iter().enumerate() {
+                if code & (1u64 << j) != 0 {
+                    x.add_assign(item);
+                }
+            }
+            assert_eq!(encoder.encode(&x), Some(code));
+        }
+        assert_eq!(
+            encoder.encode(&F2mElement::from_bit_positions(&[71], 83)),
             None
         );
     }
