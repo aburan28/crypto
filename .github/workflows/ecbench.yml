@@ -128,9 +128,10 @@ jobs:
           frozen="$RUNNER_TEMP/ecbench-frozen-source"
           git worktree add --detach --no-checkout "$frozen" 1d1b1fb7206aa3cfd4be9dd1953fb57d3c79b439
           git -C "$frozen" sparse-checkout set --no-cone \
-            '/Cargo.toml' '/Cargo.lock' '/src/**' '/docs/ic/**' \
+            '/Cargo.toml' '/src/**' '/docs/ic/**' \
             '/docs/ecbench/**' '/docs/curves/**' '/.cargo/**'
           git -C "$frozen" checkout HEAD
+          cp Cargo.lock "$frozen/Cargo.lock"
           python3 - "$frozen" research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json <<'PY'
           import hashlib
           import json
