@@ -1179,8 +1179,9 @@ fn f4_with_arithmetic(
             replay_step += 1;
             d = step.degree;
             degree_reached = degree_reached.max(d);
-            // pairs of degree ≤ d are the ones this step replaces; keep the rest
-            pairs.retain(|pr| pr.degree > d);
+            // the pairs stay as `add` accumulates them: a replay that diverges
+            // (or ends off the recorded staircase) finishes as a full run
+            // over all of them
             for (idx, m) in &step.rows {
                 if *idx >= basis.len() {
                     let mut r = report(
