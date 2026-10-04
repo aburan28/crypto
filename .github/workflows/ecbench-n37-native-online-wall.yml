@@ -8,6 +8,7 @@ on:
       - 'src/bin/ecbench.rs'
       - 'src/cryptanalysis/ecbench/**'
       - 'src/cryptanalysis/ic_framework/shared_rank.rs'
+      - 'examples/ecbench_n37_native_online_wall_analyze.rs'
   workflow_dispatch:
 
 permissions:
@@ -45,7 +46,7 @@ jobs:
             Cargo.toml src/cryptanalysis/ecbench src/cryptanalysis/ic_framework/shared_rank.rs \
             src/bin/ecbench.rs
       - name: Run the frozen native panel on a hosted Linux VM
-        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/session/session.json') == '' }}
         run: |
           out="$RUNNER_TEMP/ecbench-n37-native-wall"
           mkdir -p "$out"
@@ -87,18 +88,29 @@ jobs:
             sha256sum PROVENANCE.txt Cargo.lock HOST.txt LOCAL-AUDIT.json RUN.exit
           ) > "$out/SHA256SUMS"
       - name: Re-audit committed native evidence
-        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') != '' }}
+        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/session/session.json') != '' }}
         run: |
           dir=research/ecbench_n37_native_online_wall_20261004
+          (cd "$dir" && sha256sum --check SHA256SUMS)
           ./target/release/ecbench verify \
-            --dir "$dir/sessions/hosted_ubuntu_01" --replay-all --exit-code \
+            --dir "$dir/session" --replay-all --exit-code \
             --out "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
           jq -e '.ok == true and .records == 384 and .verified_records == 384
             and (.replays | length) == 320
             and all(.replays[]; .reproduced)' \
             "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
+          cargo build --release --example ecbench_n37_native_online_wall_analyze
+          target/release/examples/ecbench_n37_native_online_wall_analyze \
+            "$dir" "$dir/session" "$dir/INDEPENDENT-AUDIT-MAC.json" \
+            "$RUNNER_TEMP/n37-native-wall-decision.json"
+          cmp "$RUNNER_TEMP/n37-native-wall-decision.json" "$dir/DECISION.json"
+          jq -e '.status == "complete_exploratory_hosted"
+            and .measured_verified_runs == 320
+            and .same_target_paired_rounds == 80
+            and .online_speedup == null and .all_measured_L2 == false' \
+            "$dir/DECISION.json" > /dev/null
       - uses: actions/upload-artifact@v4
-        if: ${{ always() && hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        if: ${{ always() && hashFiles('research/ecbench_n37_native_online_wall_20261004/session/session.json') == '' }}
         with:
           name: ecbench-n37-native-wall
           path: ${{ runner.temp }}/ecbench-n37-native-wall

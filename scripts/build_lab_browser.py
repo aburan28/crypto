@@ -35,7 +35,10 @@ OUT = os.path.join(ROOT, "docs", "browser", "data.json")
 REGISTRY = "docs/curves/registry.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
-ECBENCH_SESSIONS_GLOB = "research/ecbench_*/sessions/*"
+ECBENCH_SESSIONS_GLOBS = (
+    "research/ecbench_*/sessions/*",
+    "research/ecbench_*/session",  # sealed hosted archives retain this raw layout
+)
 IC1_SCAN_GLOBS = (
     "docs/ic/**/*.json",
     "docs/ic/**/*.md",
@@ -195,7 +198,9 @@ def curve_rows(registry: dict, leaderboard: dict) -> list[dict]:
 def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list[dict]]:
     sessions, methods, fbs = [], {}, {}
     per_curve_arm = defaultdict(lambda: {"n": 0, "verified": 0, "s_sum": 0.0, "floor_sum": 0.0})
-    for sdir in sorted(glob.glob(os.path.join(ROOT, ECBENCH_SESSIONS_GLOB))):
+    session_dirs = sorted({sdir for pattern in ECBENCH_SESSIONS_GLOBS
+                           for sdir in glob.glob(os.path.join(ROOT, pattern))})
+    for sdir in session_dirs:
         session_path = os.path.join(sdir, "session.json")
         records_path = os.path.join(sdir, "records.jsonl")
         if not (os.path.exists(session_path) and os.path.exists(records_path)):
