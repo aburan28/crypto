@@ -7,6 +7,7 @@
 //! cargo run --release --example jv_cover -- --exp dlp --sizes 53,101,251 --seeds 2 --rho-runs 16 --check-every 64 --json experiments/30_jv_cover_dlp.json
 //! cargo run --release --example jv_cover -- --exp ccov --stop 64 --sizes 53,61,71 --seeds 2 --residuals 300 --constructed 60 --oracle-base 45 --json experiments/31_jv_cover_stop_ccov_oracle.json
 //! cargo run --release --example jv_cover -- --exp dlp --sizes 503 --seeds 1 --rho-runs 0 --rho-ref <pooled S_rho of the smaller sizes> --json experiments/30_jv_cover_dlp_503.json
+//! cargo run --release --example jv_cover -- --exp sieve --stop 64 --sizes 251,503 --seeds 2 --rho-runs 4 --json experiments/32_jv_cover_sieve_dlp.json
 //! ```
 
 use std::env;
@@ -15,6 +16,7 @@ use std::fs;
 use crypto_lib::cryptanalysis::jv_cover::{
     run_cover_ccov, run_cover_dlp, CcovReport, CoverDlpReport,
 };
+use crypto_lib::cryptanalysis::jv_sieve::{run_cover_sieve_dlp, SieveDlpReport};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -23,6 +25,7 @@ use serde::Serialize;
 enum Row {
     Ccov(CcovReport),
     Dlp(CoverDlpReport),
+    Sieve(SieveDlpReport),
 }
 
 fn main() {
@@ -40,6 +43,9 @@ fn main() {
     let mut oracle_base = 40usize;
     let mut rho_ref = 1.3f64;
     let mut stop = 0usize;
+    let mut margin = 1.25f64;
+    let mut m_override = 0usize;
+    let mut trace = false;
     let mut json: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
@@ -65,6 +71,9 @@ fn main() {
             "--check-every" => check_every = next(&mut i).parse().expect("--check-every"),
             "--rho-ref" => rho_ref = next(&mut i).parse().expect("--rho-ref"),
             "--stop" => stop = next(&mut i).parse().expect("--stop"),
+            "--margin" => margin = next(&mut i).parse().expect("--margin"),
+            "--m" => m_override = next(&mut i).parse().expect("--m"),
+            "--trace" => trace = true,
             "--oracle-base" => oracle_base = next(&mut i).parse().expect("--oracle-base"),
             "--json" => json = Some(next(&mut i)),
             other => panic!("unknown argument {other}"),
@@ -85,10 +94,11 @@ fn main() {
                         budget,
                         oracle_base,
                         (stop > 0).then_some(stop),
+                        trace,
                     );
                     println!(
-                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) | random {} decomposable {} (1/720 = {:.5}) | planted {}/{} | oracle {} mismatches {} unverified {} incomplete {} timed out {} | C_cov {:.3e} [{:.2e}, {:.2e}] = weil {:.0} + f4 {:.3e} + lin {:.3e} + post {:.0} | delta {:.0} F4 degree {:.1} rows {:.0} cols {:.0} {:.1} ms + lin {:.1} ms = {:.1} ms | decomposable C_cov {:.3e} | {:.0} s",
-                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.random_residuals, r.random_decomposable,
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) trace {} ({} replayed, {} mismatches) | random {} decomposable {} (1/720 = {:.5}) | planted {}/{} | oracle {} mismatches {} unverified {} incomplete {} timed out {} | C_cov {:.3e} [{:.2e}, {:.2e}] = weil {:.0} + f4 {:.3e} + lin {:.3e} + post {:.0} | delta {:.0} F4 degree {:.1} rows {:.0} cols {:.0} {:.1} ms + lin {:.1} ms = {:.1} ms | decomposable C_cov {:.3e} | {:.0} s",
+                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.trace, r.replayed, r.trace_mismatches, r.random_residuals, r.random_decomposable,
                         r.expected_rate, r.planted_found, r.constructed_residuals, r.oracle_checked, r.mismatches,
                         r.unverified, r.incomplete, r.timed_out, r.c_cov.mean, r.c_cov.min as f64, r.c_cov.max as f64,
                         r.weil_muls.mean, r.f4_muls.mean, r.lin_muls.mean, r.post_muls.mean, r.delta.mean,
@@ -105,10 +115,11 @@ fn main() {
                         check_every,
                         rho_ref,
                         (stop > 0).then_some(stop),
+                        trace,
                     );
                     println!(
-                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) | residuals {} decomposable {} ({:.5} vs 1/720 {:.5}) relations {} (floor {:.0}, ratio {:.2}) | incomplete {} timed out {} cross-checked {} mismatches {} | C_cov {:.3e} | unknowns {} (filtered {}) phi {:.2} row {:.1} LA attempts {} ops {} ({:.1}·u²) | solved {} correct {} | S {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.3} = relation {:.3} + la {:.4} (last {:.4}) | predicted {:.3} | {:.0} s",
-                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.residuals, r.decompositions,
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} stop {:?} ({} stopped) trace {} ({} replayed, {} mismatches) | residuals {} decomposable {} ({:.5} vs 1/720 {:.5}) relations {} (floor {:.0}, ratio {:.2}) | incomplete {} timed out {} cross-checked {} mismatches {} | C_cov {:.3e} | unknowns {} (filtered {}) phi {:.2} row {:.1} LA attempts {} ops {} ({:.1}·u²) | solved {} correct {} | S {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.3} = relation {:.3} + la {:.4} (last {:.4}) | predicted {:.3} | {:.0} s",
+                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.stop_staircase, r.stopped, r.trace, r.replayed, r.trace_mismatches, r.residuals, r.decompositions,
                         r.decomposition_rate, r.expected_rate, r.relations, r.floor_residuals, r.residual_ratio,
                         r.incomplete, r.timed_out, r.cross_checked, r.mismatches, r.c_cov, r.unknowns, r.filtered_out,
                         r.phi, r.row_weight, r.la_attempts, r.la_ops, r.wiedemann_constant, r.solved, r.correct, r.s,
@@ -116,6 +127,33 @@ fn main() {
                         r.predicted_s_over_rho, r.wall_ms / 1e3
                     );
                     rows.push(Row::Dlp(r));
+                }
+                "sieve" => {
+                    let r = run_cover_sieve_dlp(
+                        p,
+                        seed,
+                        rho_runs,
+                        rho_ref,
+                        (stop > 0).then_some(stop),
+                        margin,
+                        (m_override > 0).then_some(m_override),
+                        trace,
+                    );
+                    println!(
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} m {} (rule {}, {:.0} available) | B's {} lines {} steps {} (base {}) roots {} hits {} false {} | relations {} ({:.3e}/line vs p/m! {:.3e}: ratio {:.2}) verified {} failed {} duplicates {} per-m {:?} | C_rel {:.3e} = enum {:.3e} + sieve {:.3e} + extract {:.3e} + verify {:.3e} (per relation) | adds {:.3e} lookups {:.3e} | descent: residuals {} successes {} ({:.0}/success) C_cov {:.3e} muls {:.3e} stopped {} incomplete {} timed out {} trace {} (replayed {} mismatches {}) | unknowns {} (filtered {}) row {:.1} LA attempts {} ops {} | solved {} correct {} exhausted {} | S {:.3e} S+ {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.4} (S+/rho {:.4}) = relation {:.4} + descent {:.4} + la {:.4} | {:.0} s",
+                        r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.m_final, r.m_rule, r.relations_available,
+                        r.bs, r.lines, r.sieve_steps, r.base_steps, r.roots, r.hits, r.false_hits,
+                        r.relations, r.rels_per_line, r.expected_rels_per_line, r.rate_ratio, r.rels_verified, r.rels_failed_verify, r.duplicates, r.per_m,
+                        r.c_rel, r.enum_muls as f64 / r.relations.max(1) as f64, r.sieve_muls as f64 / r.relations.max(1) as f64,
+                        r.extract_muls as f64 / r.relations.max(1) as f64, r.verify_muls as f64 / r.relations.max(1) as f64,
+                        r.sieve_adds as f64, r.sieve_lookups as f64,
+                        r.descent_residuals, r.descent_successes, r.descent_tests_per_success, r.descent_c_cov, r.descent_muls as f64,
+                        r.descent_stopped, r.descent_incomplete, r.descent_timed_out, r.trace, r.descent_replayed, r.descent_trace_mismatches,
+                        r.unknowns, r.filtered_out, r.row_weight, r.la_attempts, r.la_ops, r.solved, r.correct, r.exhausted,
+                        r.s, r.s_plus, r.rho_s_mean, r.rho_s_sd, r.rho.len(), r.s_over_rho, r.s_plus_over_rho,
+                        r.relation_over_rho, r.descent_over_rho, r.la_over_rho, r.wall_ms / 1e3
+                    );
+                    rows.push(Row::Sieve(r));
                 }
                 other => panic!("unknown experiment {other}"),
             }

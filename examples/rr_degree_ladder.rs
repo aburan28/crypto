@@ -344,6 +344,34 @@ fn measure(
     }
 }
 
+/// Write `polys` as a Singular ideal over `GF(2)[x(1..n_vars)]` (field equations are
+/// added by the driver script).  Variable `i` (bit `i` of a term's mask) is `x(i+1)`.
+fn dump_singular(path: &std::path::Path, polys: &[F2BoolPoly], n_vars: usize) {
+    let mut s = format!("ring R = 2, x(1..{n_vars}), dp;\nideal I =\n");
+    for (i, p) in polys.iter().enumerate() {
+        let mut mons: Vec<String> = p
+            .terms
+            .iter()
+            .map(|t| {
+                if t.mask == 0 {
+                    "1".to_string()
+                } else {
+                    (0..n_vars)
+                        .filter(|&b| t.mask >> b & 1 == 1)
+                        .map(|b| format!("x({})", b + 1))
+                        .collect::<Vec<_>>()
+                        .join("*")
+                }
+            })
+            .collect();
+        mons.sort();
+        s.push_str("  ");
+        s.push_str(&mons.join("+"));
+        s.push_str(if i + 1 == polys.len() { ";\n" } else { ",\n" });
+    }
+    std::fs::write(path, s).expect("write dump");
+}
+
 fn put(out: &mut Option<std::fs::File>, line: &str) {
     match out.as_mut() {
         Some(f) => {
@@ -432,6 +460,9 @@ fn main() {
     let seed = num("--seed", 20260930);
     let check = args.iter().any(|s| s == "--check");
     let resume = args.iter().any(|s| s == "--resume");
+    // `--dump-dir DIR`: write every arm's system as a Singular ideal file instead of
+    // measuring it (the builders and the draw sequence are unchanged).
+    let dump_dir = get("--dump-dir");
     assert!((2..=8).contains(&ell), "need 2 ≤ ℓ ≤ 8");
     // `--resume`: an existing `--out` is read for the draws whose `rr` (and `ctrl`) have a
     // final line; those are replayed through the generator without measuring, and the
@@ -539,6 +570,38 @@ fn main() {
             assert_eq!(x4_roots, x4_brute, "x4 root count");
         }
         let head = draw_head(&cell, a, n, ell, seed, draw, &basis, x_r, k, base.len());
+        if let Some(dir) = &dump_dir {
+            for (arm, polys, n_vars, roots) in [
+                ("x4", &x4, x4_vars, x4_roots),
+                ("rr", &rr, rr_vars, rr_roots),
+            ] {
+                let file = format!("{cell}-d{draw}-{arm}.sing");
+                dump_singular(&std::path::Path::new(dir).join(&file), polys, n_vars);
+                put(
+                    &mut out,
+                    &format!(
+                        r#"{{{head},"arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{},"roots":{roots},"dump":"{file}"}}"#,
+                        polys.len(),
+                        system_degree(polys),
+                        terms_per_eq(polys)
+                    ),
+                );
+            }
+            if rr_roots == 0 {
+                pending_ctrl.push((
+                    draw,
+                    head,
+                    rr_vars,
+                    rr.len(),
+                    system_degree(&rr),
+                    terms_per_eq(&rr),
+                ));
+                unsat += 1;
+            } else {
+                sat += 1;
+            }
+            continue;
+        }
         // x4 then rr for this draw; every control comes after the cell's last draw
         // (amendment 2), so a cut cell has its rr and x4 complete.
         emit_line(
@@ -574,6 +637,17 @@ fn main() {
             terms,
             cell_seed ^ 0x0C01_7201_u64.wrapping_mul(u64::from(draw) + 1),
         );
+        if let Some(dir) = &dump_dir {
+            let file = format!("{cell}-d{draw}-ctrl.sing");
+            dump_singular(&std::path::Path::new(dir).join(&file), &ctrl, n_vars);
+            put(
+                &mut out,
+                &format!(
+                    r#"{{{head},"arm":"ctrl","n_vars":{n_vars},"n_eqs":{n_eqs},"degree":{degree},"terms_per_eq":{terms},"dump":"{file}"}}"#
+                ),
+            );
+            continue;
+        }
         emit_line(&mut out, &head, "ctrl", &ctrl, n_vars, None, d_max);
     }
     eprintln!(

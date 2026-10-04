@@ -1,0 +1,175 @@
+name: ecbench n37 target-only instruction profile
+
+on:
+  pull_request:
+    paths:
+      - 'research/ecbench_n37_online_ir_20261004/**'
+      - '.github/workflows/ecbench-n37-online-ir.yml'
+      - 'src/bin/ecbench.rs'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ic_framework/shared_rank.rs'
+      - 'examples/ecbench_n37_online_ir_analyze.rs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install frozen profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Build frozen ecbench and check the independent analyzer
+        run: |
+          cargo test --release --lib cryptanalysis::ecbench::callgrind
+          cargo build --release --bin ecbench
+          cargo check --release --example ecbench_n37_online_ir_analyze
+      - name: Independently replay all measured native executions
+        run: |
+          out="$RUNNER_TEMP/ecbench-n37-online-ir"
+          mkdir -p "$out"
+          ./target/release/ecbench verify \
+            --dir research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01 \
+            --replay-all --exit-code --out "$out/INDEPENDENT-AUDIT.json" \
+            > "$out/independent-audit.log"
+          jq -e --arg original 'ECBENV2hd82681268e96' \
+            '.ok == true and .session_id == "ECBS1he4e70185e6e2"
+             and .records == 384 and .verified_records == 384
+             and (.replays | length) == 320
+             and all(.replays[]; .reproduced and .detail == "identical")
+             and .auditor_env_class_id != $original' \
+            "$out/INDEPENDENT-AUDIT.json" > /dev/null
+      - name: Profile all 64 frozen first-round one-target solves
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
+        env:
+          RAYON_NUM_THREADS: '1'
+        run: |
+          out="$RUNNER_TEMP/ecbench-n37-online-ir"
+          spec=research/ecbench_n37_online_ir_20261004/SPEC.json
+          jobs=research/ecbench_n37_online_ir_20261004/JOBS.json
+          test "$(jq 'length' "$jobs")" = 64
+          jq -e '([.[].seq] == [range(64;128)])
+            and ([.[].workload_id] | unique | length) == 16
+            and all(.[]; .archived_status == "verified")' "$jobs" > /dev/null
+          {
+            git rev-parse HEAD
+            git status --short
+            rustc -Vv
+            cargo -V
+            valgrind --version
+            uname -a
+            lscpu
+            sha256sum Cargo.lock
+            sha256sum target/release/ecbench "$spec" "$jobs" \
+              research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl
+          } > "$out/PROVENANCE.txt"
+          cp Cargo.lock "$out/Cargo.lock"
+          cp "$jobs" "$out/JOBS.json"
+          : > "$out/rows.jsonl"
+          while IFS=$'\t' read -r seq arm workload seed method expected; do
+            dir="$out/seq-$seq"
+            mkdir -p "$dir"
+            ./target/release/ecbench profile-input --spec "$spec" --seq "$seq" \
+              > "$dir/input.json"
+            jq -e --arg w "$workload" --arg s "$seed" --arg m "$method" \
+              '.expected_workload_id == $w and (.algorithm_seed | tostring) == $s
+               and .expected_method_id == $m' "$dir/input.json" > /dev/null
+            status=verified
+            if ECBENCH_CALLGRIND_SOLVE=1 ECBENCH_CALLGRIND_TARGET=1 \
+              timeout 120s valgrind --tool=callgrind \
+              --cache-sim=no --branch-sim=no \
+              --callgrind-out-file="$dir/profile" \
+              ./target/release/ecbench exec < "$dir/input.json" \
+              > "$dir/child.json" 2> "$dir/valgrind.log"; then
+              if ! ./target/release/ecbench callgrind-online-ir --prefix "$dir/profile" \
+                > "$dir/ir.tmp" 2> "$dir/ir.err"; then
+                status=profile_error
+              else
+                mv "$dir/ir.tmp" "$dir/ir.json"
+              fi
+              if ! jq -e --arg w "$workload" --arg m "$method" --arg k "$expected" \
+                '.error == null and .workload_id == $w and .method_id == $m
+                 and .report.exhausted == false
+                 and (.report.recovered | tostring) == $k' \
+                "$dir/child.json" > /dev/null; then
+                status=wrong_or_unverified_answer
+              fi
+            else
+              status=execution_error
+            fi
+            if [ -f "$dir/ir.json" ]; then
+              pre=$(jq -r '.pre_online_ir' "$dir/ir.json")
+              online=$(jq -r '.online_ir' "$dir/ir.json")
+              post=$(jq -r '.post_online_ir' "$dir/ir.json")
+              solve=$(jq -r '.solve_ir' "$dir/ir.json")
+            else
+              pre=null
+              online=null
+              post=null
+              solve=null
+            fi
+            jq -cn --argjson seq "$seq" --arg arm "$arm" \
+              --arg workload_id "$workload" --arg algorithm_seed "$seed" \
+              --arg expected_method_id "$method" --arg expected_recovered "$expected" \
+              --arg status "$status" --argjson pre_online_ir "$pre" \
+              --argjson online_ir "$online" --argjson post_online_ir "$post" \
+              --argjson solve_ir "$solve" \
+              '{seq:$seq,arm:$arm,workload_id:$workload_id,
+                algorithm_seed:$algorithm_seed,expected_method_id:$expected_method_id,
+                expected_recovered:$expected_recovered,status:$status,
+                pre_online_ir:$pre_online_ir,online_ir:$online_ir,
+                post_online_ir:$post_online_ir,solve_ir:$solve_ir}' \
+              >> "$out/rows.jsonl"
+            sha256sum "$dir"/* > "$dir/SHA256SUMS"
+            echo "seq $seq $arm $status online_Ir=$online solve_Ir=$solve"
+          done < <(jq -r '.[] | [.seq,.arm,.workload_id,.algorithm_seed,
+                             .expected_method_id,.expected_recovered] | @tsv' "$jobs")
+          jq -s '{schema:"ecbench.callgrind_online_census/v1",
+            unit:"callgrind.Ir",rows:.}' "$out/rows.jsonl" > "$out/CENSUS.json"
+          test "$(wc -l < "$out/rows.jsonl")" -eq 64
+          jq -s -e 'all(.[]; .status == "verified"
+            and (.pre_online_ir | type) == "number"
+            and (.online_ir | type) == "number"
+            and (.post_online_ir | type) == "number"
+            and (.solve_ir | type) == "number"
+            and .pre_online_ir + .online_ir + .post_online_ir == .solve_ir)' \
+            "$out/rows.jsonl" > /dev/null
+      - name: Reparse the committed raw archive and reproduce the decision
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') != '' }}
+        run: |
+          dir=research/ecbench_n37_online_ir_20261004
+          test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
+            4adb5b41eef61161c80ef30618c6dcb3abb2dedef702730b659c0daece337c60
+          git diff --exit-code 170becb5bc485507cd9b2accce3863e85ba8c3d1 -- \
+            Cargo.toml build.rs src .cargo
+          replay="$RUNNER_TEMP/ecbench-n37-online-ir-archive-replay"
+          mkdir -p "$replay"
+          unzip -q "$dir/RAW-CALLGRIND.zip" -d "$replay"
+          cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
+          cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
+          cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
+          cmp "$replay/Cargo.lock" Cargo.lock
+          cargo build --release --example ecbench_n37_online_ir_analyze
+          target/release/examples/ecbench_n37_online_ir_analyze \
+            "$replay" "$dir/JOBS.json" \
+            "$dir/sessions/mac_arm64_l0_01/records.jsonl" \
+            "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json"
+          cmp "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json" "$dir/DECISION.json"
+          test "$(find "$dir/candidate_claims" -name '*.json' -type f | wc -l)" -eq 32
+          for claim in "$dir"/candidate_claims/*.json; do
+            target/release/ecbench claim check --report "$claim"
+          done
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
+        with:
+          name: ecbench-n37-online-ir-profiles
+          path: ${{ runner.temp }}/ecbench-n37-online-ir
+          if-no-files-found: error

@@ -4,15 +4,15 @@
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
   "curves": 111,
-  "methods": 24,
-  "factor_bases": 10,
-  "candidates": 235,
+  "methods": 32,
+  "factor_bases": 16,
+  "candidates": 244,
   "rounds": 30,
-  "sessions": 16
+  "sessions": 22
  },
  "sources": {
   "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
-  "docs/ic/leaderboard.json": "d3a86447d34221fbeeda544c5d586d8386653e0c0bd9c7a7266386de03aefee3",
+  "docs/ic/leaderboard.json": "a649e1f28aa2c152b305cf263ea456db61843949688d2c7a2cdb4d51c04924a5",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -21,6 +21,12 @@
   "research/ecbench_calibration_20261002/sessions/followup-prime/records.jsonl": "87a60d048f8cb81bd302e560ae5dd4de197fb649599c214a1fb33fc3c0ef8c56",
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
+  "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
+  "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/records.jsonl": "d7cddb33e59f86460acbe77e87d3e68ce0cfbf4c6fb46c0647bd9643072303fd",
+  "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
+  "research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl": "82c8b31640074b2f829d88e546bf487ee4b598edf4ef26f779984d625ed7de3c",
+  "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01/records.jsonl": "04ff51c137aee7368de8fff16f8c22f47c9ed741cb533244f76715dbaf3297e3",
+  "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/records.jsonl": "8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693",
   "research/ecbench_numa_vm_20261002/sessions/auto/records.jsonl": "89a7b3d9819f48be1981295f3ce268d8613e7abd2b55f44926188f49481f0456",
   "research/ecbench_numa_vm_20261002/sessions/before-fix-auto/records.jsonl": "32d293ed730a962b4480c296d31d7b69ac12f6cb88fc2d5ab57ea1c533878234",
   "research/ecbench_numa_vm_20261002/sessions/before-fix-node0/records.jsonl": "8a71a6c3dc9e79b2855941d434494d031faaaef703a2b65181abce8b84bdb936",
@@ -4208,6 +4214,36 @@
    ],
    "ecbench": [
     {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "ic-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "ic-shared",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 0.4229,
+     "mean_ratio_to_floor": 2.903
+    },
+    {
      "session_id": "ECBS1h73210d525d59",
      "arm": "bsgs-il",
      "method": "bsgs.interleaved",
@@ -4266,9 +4302,246 @@
      "verified": 24,
      "mean_s": 1.5186,
      "mean_ratio_to_floor": 10.423
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "ic-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "ic-shared",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 0.4229,
+     "mean_ratio_to_floor": 2.903
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k12",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1hf2624f6fcc41",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 2.2012,
+     "mean_ratio_to_floor": 15.109
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 2.1113,
+     "mean_ratio_to_floor": 14.491
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k24",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h01e45ceeef65",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 2.3865,
+     "mean_ratio_to_floor": 16.38
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k4",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1hdecc12b555f6",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 4.1989,
+     "mean_ratio_to_floor": 28.82
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k42",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha8377d778896",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 6.0498,
+     "mean_ratio_to_floor": 41.524
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k42-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha8377d778896",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 6.0498,
+     "mean_ratio_to_floor": 41.524
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 2.1333,
+     "mean_ratio_to_floor": 14.642
+    },
+    {
+     "session_id": "ECBS1h9a1d373bbe54",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 40,
+     "verified": 40,
+     "mean_s": 0.4194,
+     "mean_ratio_to_floor": 2.878
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1104,
+     "mean_ratio_to_floor": 14.485
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1104,
+     "mean_ratio_to_floor": 14.485
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1817,
+     "mean_ratio_to_floor": 14.975
+    },
+    {
+     "session_id": "ECBS1ha7df223815ae",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.4545,
+     "mean_ratio_to_floor": 3.119
+    },
+    {
+     "session_id": "ECBS1hdebde0f96835",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.0934,
+     "mean_ratio_to_floor": 14.368
+    },
+    {
+     "session_id": "ECBS1hdebde0f96835",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.0934,
+     "mean_ratio_to_floor": 14.368
+    },
+    {
+     "session_id": "ECBS1hdebde0f96835",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.0574,
+     "mean_ratio_to_floor": 14.121
+    },
+    {
+     "session_id": "ECBS1hdebde0f96835",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.4522,
+     "mean_ratio_to_floor": 3.104
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1539,
+     "mean_ratio_to_floor": 14.783
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1539,
+     "mean_ratio_to_floor": 14.783
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.112,
+     "mean_ratio_to_floor": 14.496
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.4431,
+     "mean_ratio_to_floor": 3.042
     }
    ],
-   "factor_bases": [],
+   "factor_bases": [
+    "FB1h8a0c8a2892c2",
+    "FB1h4dbbb8c436f3",
+    "FB1h91125318d8f9",
+    "FB1h15b34fe65378",
+    "FB1h0e28d2b42fc3",
+    "FB1h8dbe08ce02c8"
+   ],
    "tournament_cells": [
     {
      "round": "round-0023",
@@ -11094,6 +11367,153 @@
    "verified": 128
   },
   {
+   "method_id": "ECM1h01e45ceeef65",
+   "method_sha256": "01e45ceeef65d2843a6f74df5d723230c1c8167977bdf3c5619aed3de6412a3a",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=24,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 48,
+   "verified": 48
+  },
+  {
+   "method_id": "ECM1h670d3d9b99a0",
+   "method_sha256": "670d3d9b99a028a2e251893cb6387c59718b01f887b6120df6b737dba669697e",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 624,
+   "verified": 624
+  },
+  {
+   "method_id": "ECM1h90d7515e0e7a",
+   "method_sha256": "90d7515e0e7aa5f1d2d887507a16536f7836c301f9fae44949c7d6ade311c89b",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 336,
+   "verified": 336
+  },
+  {
+   "method_id": "ECM1ha10cd743c1f5",
+   "method_sha256": "a10cd743c1f56e07ac883bb4d139b4dad106428215b48d5bb67492f39666a98a",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+    "rank_max_trials": "1000000",
+    "rank_seed": "202610031137",
+    "target_max_attempts": "64"
+   },
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 24,
+   "verified": 24
+  },
+  {
+   "method_id": "ECM1ha8377d778896",
+   "method_sha256": "a8377d7788965ff5e2c617515c478789d743a70610300e21c8c32628a24387ab",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 96,
+   "verified": 96
+  },
+  {
+   "method_id": "ECM1hdecc12b555f6",
+   "method_sha256": "decc12b555f6b88335abd7bb972df343e42c8bdd83fba566ec73315c4ba029ed",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=4,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 48,
+   "verified": 48
+  },
+  {
+   "method_id": "ECM1hf2624f6fcc41",
+   "method_sha256": "f2624f6fcc41bebdc008e6c174f27dddc871584e6a106541d95500bfe83bfd6a",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=12,raw_x_cap=1000000",
+    "rank_max_trials": "100000",
+    "rank_seed": "202610042032",
+    "target_max_attempts": "512"
+   },
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 48,
+   "verified": 48
+  },
+  {
    "method_id": "ECM1h05c1dc19c164",
    "method_sha256": "05c1dc19c1647df021dba133b42941fc6416deb47519bc871b6f6cfcaa93bf74",
    "method": "kangaroo.vow",
@@ -11270,6 +11690,30 @@
    "verified": 479
   },
   {
+   "method_id": "ECM1h1d9961ee4601",
+   "method_sha256": "1d9961ee460186dae7494675dca4f4a4138e1d918777e2ec68386a43f716c758",
+   "method": "rho.signed_frobenius_strong",
+   "family": "rho",
+   "params": {
+    "dp_bits": "8",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2",
+    "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 348,
+   "verified": 348
+  },
+  {
    "method_id": "ECM1hb6123afffc07",
    "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
    "method": "rho.signed_frobenius_strong",
@@ -11400,6 +11844,147 @@
     "ECM1hab99147a7fb3",
     "ECM1hb95b75751359",
     "ECM1hdfada545e44f"
+   ]
+  },
+  {
+   "fb_id": "FB1h0e28d2b42fc3",
+   "fb_sha256": "0e28d2b42fc3c6cee2558d25c3b88641314e84e08db1aeee7555aaf65b418a91",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "24",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 24 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 1776,
+   "abscissae": 888,
+   "columns": 24,
+   "dimension": null,
+   "points_sha256": "019b941eccf877463ba23b985537adcb9b2cf12e28ef47e55d2d3cfe0f643d5c",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "methods": [
+    "ECM1h01e45ceeef65"
+   ]
+  },
+  {
+   "fb_id": "FB1h15b34fe65378",
+   "fb_sha256": "15b34fe65378e459168d274406ebd442b67d49a23286041a927946d15a019518",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "12",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 12 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 888,
+   "abscissae": 444,
+   "columns": 12,
+   "dimension": null,
+   "points_sha256": "26eb19b9d8dc4a55b464104dfe3c0690d61583d9a1852938536242e3a7bd1095",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "methods": [
+    "ECM1hf2624f6fcc41"
+   ]
+  },
+  {
+   "fb_id": "FB1h4dbbb8c436f3",
+   "fb_sha256": "4dbbb8c436f34319fc5971b31245063bfbbca619a29254e64afc75e924e74b4f",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "16",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 16 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 1184,
+   "abscissae": 592,
+   "columns": 16,
+   "dimension": null,
+   "points_sha256": "5c12a878cea8ca8cc1651527d25e36adb728f80d8669654c12c4f175d9f68817",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
+   ],
+   "methods": [
+    "ECM1h670d3d9b99a0"
+   ]
+  },
+  {
+   "fb_id": "FB1h8a0c8a2892c2",
+   "fb_sha256": "8a0c8a2892c2579002215083812ae57ba536bf8eaf1a243b18a1152ecd317dbf",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "8",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 8 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 592,
+   "abscissae": 296,
+   "columns": 8,
+   "dimension": null,
+   "points_sha256": "b2a820ffe083fc8bb4064d44b05c31154c98b80f1a428b3593eaf7780f9ab978",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h9a1d373bbe54",
+    "ECBS1ha7df223815ae",
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
+   ],
+   "methods": [
+    "ECM1h90d7515e0e7a"
+   ]
+  },
+  {
+   "fb_id": "FB1h8dbe08ce02c8",
+   "fb_sha256": "8dbe08ce02c8ea6641733d0bcd5e773b054427e1cd6a662e1cd940c0f7020f87",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "42",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 42 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 3108,
+   "abscissae": 1554,
+   "columns": 42,
+   "dimension": null,
+   "points_sha256": "3eb19ae6a24ade483e4011b4025aa13081642eb3e01e052eca8da043ff379013",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2",
+    "ECBS1h9a1d373bbe54"
+   ],
+   "methods": [
+    "ECM1ha10cd743c1f5",
+    "ECM1ha8377d778896"
+   ]
+  },
+  {
+   "fb_id": "FB1h91125318d8f9",
+   "fb_sha256": "91125318d8f961942106dd72cfd5e11e935c689b3c236367e69d733c2e32626d",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "4",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 4 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 296,
+   "abscissae": 148,
+   "columns": 4,
+   "dimension": null,
+   "points_sha256": "283e922dc2e934bbcbfb7d6d17bf26c91038ab35d1604fffe6ce2037ebcbaae7",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h9a1d373bbe54"
+   ],
+   "methods": [
+    "ECM1hdecc12b555f6"
    ]
   },
   {
@@ -15738,6 +16323,48 @@
    "slug": "icv1-f2m31-tm90707-c95f16f5"
   },
   {
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 1184,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "44f5af6dc772",
+   "mentions": 4,
+   "files": 3,
+   "where": [
+    "docs/ic/dashboard-overview-data.json",
+    "docs/ic/LEADERBOARD.md",
+    "docs/ic/leaderboard.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 1184,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "bbfdf029e5a2",
+   "mentions": 5,
+   "files": 3,
+   "where": [
+    "docs/ic/dashboard-overview-data.json",
+    "docs/ic/leaderboard.json",
+    "docs/ic/LEADERBOARD.md"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
    "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h2cf7c9307467",
    "n": 37,
    "curve_tag": "kb0",
@@ -15848,6 +16475,142 @@
    "files": 1,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/scaled.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb1776PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hee6b4aa404e0",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 1776,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "ee6b4aa404e0",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb296PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h8c518049f8e6",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 296,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "8c518049f8e6",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857fa",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 3108,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "a48bfcf857fa",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0he8d240ba37b3",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 3108,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "e8d240ba37b3",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 592,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "0eb4fc2e0d54",
+   "mentions": 3,
+   "files": 3,
+   "where": [
+    "docs/ic/LEADERBOARD.md",
+    "docs/ic/dashboard-overview-data.json",
+    "docs/ic/leaderboard.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 592,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "d7ebd078ae0c",
+   "mentions": 3,
+   "files": 2,
+   "where": [
+    "docs/ic/leaderboard.json",
+    "docs/ic/dashboard-overview-data.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb888PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h72768aeb8c2f",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 888,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "72768aeb8c2f",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
    ],
    "slug": "icv1-f2m37-tm534059-32aad96b"
   },
@@ -21143,6 +21906,282 @@
      "role": "baseline",
      "method": "rho.plain",
      "method_id": "ECM1hb367476fce6c"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1hdebde0f96835",
+   "dir": "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 untouched K8 versus K16 one-target confirmation",
+   "status": "complete",
+   "spec_id": "ECS1hffb616feec1a",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "356f0cfc7f53763bf9b4e4e0bf898f4a4fe860bbd267d9fca80d5ffe4cbd01e3",
+   "git_commit": "f3a493f55242a73f18f0cd961fb89fe89c9aff42",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791105060214,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k16-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha7df223815ae",
+   "dir": "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01",
+   "label": "n37 fresh-target native online wall screen for K8 and K16",
+   "status": "complete",
+   "spec_id": "ECS1h9435fa31639d",
+   "env_class_id": "ECBENV2h16db53a20dcf",
+   "binary_sha256": "032ac5773acff726375bb5cbc990cac269391bf2c6ef7870599e17503dec565e",
+   "git_commit": "e2f1d73278d435ae5c51a8881bc8aedbeade3a8b",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791116313878,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k16-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1he4e70185e6e2",
+   "dir": "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 K8 versus K16 one-target online instruction attribution",
+   "status": "complete",
+   "spec_id": "ECS1h58bbb248d78e",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "1a21947f0501585e4e3784bc43e3ac635cb78abe8b15a4dacbecf9e5c5166922",
+   "git_commit": "5e5cbbedef70840668a62815221ca7196901eb29",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791110203063,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k16-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h9a1d373bbe54",
+   "dir": "research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 shared-rank cold factor-base column sweep",
+   "status": "complete",
+   "spec_id": "ECS1h76742ce139b5",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "5f44420ad64b772ec287d52281a838dc4b04f0af27a1e95b1a926a84c21c71e6",
+   "git_commit": "5508af3ac5977a4f5825e0ebbf0a99aca2a3eadc",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791094999842,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k12",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1hf2624f6fcc41"
+    },
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k24",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h01e45ceeef65"
+    },
+    {
+     "arm": "ic-k4",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1hdecc12b555f6"
+    },
+    {
+     "arm": "ic-k42",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha8377d778896"
+    },
+    {
+     "arm": "ic-k42-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha8377d778896"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h774f0e722ea2",
+   "dir": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 shared-rank one-public-target versus strong signed-Frobenius rho",
+   "status": "complete",
+   "spec_id": "ECS1h7421a101192f",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+   "git_commit": "c63a11438251fcb8008cec7c2146caa5e69b2193",
+   "records": 18,
+   "status_counts": {
+    "verified": 18
+   },
+   "started_unix_ms": 1791079940889,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "ic-shared",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h33c3e5e4f75d",
+   "dir": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02",
+   "label": "n37 shared-rank one-public-target versus strong signed-Frobenius rho",
+   "status": "complete",
+   "spec_id": "ECS1h7421a101192f",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "b008ca9e130cec37aed09d160a06c401bc69e5f647ac7f6d6789a04b4cd8302d",
+   "git_commit": "2da691940907c56ccd705fbf450336e71fbb0ee4",
+   "records": 18,
+   "status_counts": {
+    "verified": 18
+   },
+   "started_unix_ms": 1791080413627,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "ic-shared",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
     }
    ]
   },
