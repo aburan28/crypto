@@ -42,6 +42,10 @@
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
+  "n37_rank_columns": {
+   "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
@@ -5072,6 +5076,22 @@
      "inconclusive": 0
     }
    }
+  }
+ ],
+ "bounded_diagnostics": [
+  {
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "source": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772",
+   "usable_points": 1184,
+   "folded_columns": 16,
+   "measured_runs": 40,
+   "mean_cold_s_lower_bound": 2.1112608814666936,
+   "cold_counted_over_rho_diagnostic": 5.034403533221078,
+   "cold_counted_over_k42_diagnostic": 0.3489815492255774,
+   "online_speedup": null,
+   "fully_priced_cold_speedup": null
   }
  ],
  "exponents": {

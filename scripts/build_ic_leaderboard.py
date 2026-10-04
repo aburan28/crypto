@@ -57,6 +57,7 @@ SOURCES = {
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+    "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -493,6 +494,28 @@ def families(board: list[dict]) -> dict:
 
 def build() -> dict:
     names = Names()
+    rank_columns = load(SOURCES["n37_rank_columns"])
+    if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
+            or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
+            or rank_columns["selection"]["selected_k"] != 16
+            or rank_columns["online_speedup"] is not None
+            or rank_columns["fully_priced_cold_speedup"] is not None):
+        raise SystemExit("review the n37 bounded result before updating the leaderboard")
+    selected = next(c for c in rank_columns["candidates"] if c["folded_columns"] == 16)
+    bounded_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_rank_columns"],
+        "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+        "candidate_id": selected["candidate_id"],
+        "usable_points": selected["usable_points"],
+        "folded_columns": selected["folded_columns"],
+        "measured_runs": selected["measured_runs"],
+        "mean_cold_s_lower_bound": selected["mean_cold_s_lower_bound"],
+        "cold_counted_over_rho_diagnostic": selected["cold_counted_over_rho_diagnostic"],
+        "cold_counted_over_k42_diagnostic": selected["cold_counted_over_k42_diagnostic"],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -525,6 +548,7 @@ def build() -> dict:
         "sources": {k: {"path": v, "sha256": sha256(v)} for k, v in SOURCES.items()},
         "families": families(board),
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
+        "bounded_diagnostics": [bounded_diagnostic],
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -604,6 +628,18 @@ def markdown(doc: dict) -> str:
             ph, s = r["best"]["phases_s"], r["best"]["s"]
             L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
                 (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+    d = doc["bounded_diagnostics"][0]
+    L += ["", "## Bounded n37 diagnostic outside tables A–C", "",
+          f"The separately calibrated `{d['curve']}` shared-rank K16 candidate "
+          f"(`{d['candidate_id']}`) has {d['usable_points']:,} usable points and "
+          f"{d['folded_columns']} folded columns. Across {d['measured_runs']} verified "
+          f"one-target runs, its mean cold counted `S` lower bound is "
+          f"{d['mean_cold_s_lower_bound']:.3f}; its counted IC/rho quotient is "
+          f"{d['cold_counted_over_rho_diagnostic']:.3f} and K16/K42 is "
+          f"{d['cold_counted_over_k42_diagnostic']:.3f}. Native work is unpriced "
+          "for both arms, and L0 timing cannot establish an online speedup. "
+          "This row is intentionally outside the three fully priced unit families; "
+          f"read the [frozen decision](../../{d['source']}).", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -785,6 +821,16 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    d = doc["bounded_diagnostics"][0]
+    P.append(f'<section class="card" id="bounded-n37-diagnostic"><h2>New n37 counted diagnostic, outside the priced tables</h2>'
+             f'<p>On <code>{esc(d["curve"])}</code>, shared-rank K16 has {d["usable_points"]:,} actual usable '
+             f'points and {d["folded_columns"]} folded columns. In {d["measured_runs"]} verified '
+             f'one-target runs, mean cold counted S is {d["mean_cold_s_lower_bound"]:.3f} as a lower '
+             f'bound; its counted IC/rho quotient is {d["cold_counted_over_rho_diagnostic"]:.3f}, '
+             f'and K16/K42 is {d["cold_counted_over_k42_diagnostic"]:.3f}. Both arms leave native '
+             'work unpriced, and L0 timing gives no admitted online speedup. These figures are not '
+             'comparable to tables A–C. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(d["source"])}">Frozen decision</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

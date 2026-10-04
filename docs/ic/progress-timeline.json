@@ -2,7 +2,7 @@
   "schema_version": "ic-progress-timeline/1",
   "updated": "2026-10-04",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
-  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Only the direction against 1 is comparable across points; no value on this page is computed from another.",
+  "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
     {
       "id": "ec-cold",
@@ -20,6 +20,16 @@
         {"date": "2026-10-01", "value": 1.314, "reference": "matched", "unit": "isolated CPU time", "label": "Orbit-disjoint cold CPU panel, closest cell n41/L1,024", "detail": "Six cells timing-eligible on reserved cores, every paired compact/rho CPU interval above one; the closest, n41/L1,024, reads 1.314 [1.288, 1.359] and would need 23.9% less CPU to match rho. Isolated CPU time, not a counted unit; S unset.", "class": "accounting", "anchor": "#disjoint-cold-v2-outcome-20261001", "source": "https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#disjoint-cold-v2-outcome-20261001"},
         {"date": "2026-10-03", "value": 4.3, "reference": "matched", "unit": "S", "label": "ecbench baseline, every candidate: best cell icv1-f2m17-tm101-00378d4e (r = 2^16)", "detail": "Every ic.pipeline configuration run cold through ecbench against the strong signed-Frobenius rho on the same targets, every phase charged in one unit: 4.30x at r = 2^16 (orbit base, Frobenius MITM m = 2), 129x at r = 2^21; on prime curves 7.70x at 18 bits rising to 40.5x at 24 bits. The reference is 18.5x its floor at this size because its fixed setup dominates, so the ratio flatters the candidate. No method changed; a baseline, not a round.", "class": "accounting", "anchor": "#lab-ecbench-all", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_all_candidates_20261003/README.md"},
         {"date": "2026-10-03", "value": 74.8, "reference": "matched", "unit": "isolated wall time", "label": "n61 compact orbit, one target cold, 256 workloads, hosted isolated", "detail": "Cold IC/rho median 74.8 (95% 70.0-80.0) against strong rho rung 3 on 256 public one-target workloads, a pinned reserved core on a hosted AMD EPYC 7763 runner with 0 contended samples: the IC process spends a median 22.0 s on reusable setup against rho's 0.30 s. Online only, IC is 14.67x faster (online series). Same-runner replay 256/256; PENDING_INDEPENDENT_VALIDATION.", "class": "accounting", "anchor": "#n61-compact-orbit-hosted-20261003", "source": "https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md"}
+      ]
+    },
+    {
+      "id": "ec-bounded-counts",
+      "label": "Elliptic curve, cold counted-work diagnostics with unpriced native work",
+      "role": "context",
+      "barrier_test": false,
+      "note": "A ratio between two operation lower bounds does not bound true IC/rho cost. These paired, verified points show implementation accounting only and cannot cross the rho speed barrier.",
+      "points": [
+        {"date": "2026-10-04", "value": 5.034403533221078, "reference": "matched", "unit": "counted GAE lower-bound diagnostic", "label": "n37 shared-rank K16, eight one-target workloads, strong rho", "detail": "K16 uses 1,184 usable points and 16 folded columns. Across 40 paired verified runs on eight public points, counted cold IC/rho is 5.0344 [4.3462, 5.8664]; K16/K42 is 0.349 [0.343, 0.359]. Both IC and rho omit native costs, so their lower-bound quotient does not bound true speed. macOS L0 wall speedup remains unknown; independent Linux replay 320/320.", "class": "accounting", "anchor": "#n37-rank-columns-20261004", "source": "https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.md"}
       ]
     },
     {
