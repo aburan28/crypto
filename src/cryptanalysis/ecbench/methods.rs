@@ -434,6 +434,102 @@ pub struct OnlineWindow {
     pub mapping: String,
 }
 
+/// What an algebraic or SAT decomposition oracle's solver did over a
+/// run: the shape of the system it solved, the work it counted in its
+/// own unit, and the matrix and search statistics the ICMS registry
+/// names (`docs/ic/measurement/registry.json`, `pdp_metrics`).
+///
+/// Informational: nothing here is priced into `S` beyond what the
+/// relations phase already carries as `solver_*` counters, and the audit
+/// replay does not compare it (a budgeted solver is nondeterministic by
+/// construction, and the block records exactly that).  A table oracle
+/// has no solver and the record's block is `null`.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct SolverStats {
+    pub name: String,
+    pub calls: u64,
+    pub ops: u64,
+    pub op_unit: String,
+    pub wall_ns: u64,
+    pub peak_bytes: u64,
+    /// Calls that ran out of budget, counted apart from refutations.
+    pub budget_exceeded: u64,
+    /// The system every call solved on this base: variables, equations,
+    /// their degrees, and the semi-regular degree such a system reaches
+    /// without exploitable structure.
+    pub n_vars: Option<u64>,
+    pub n_equations: Option<u64>,
+    pub degrees: Vec<u32>,
+    pub semi_regular_degree: Option<u32>,
+    pub solving_degree_mean: Option<f64>,
+    pub solving_degree_max: Option<u32>,
+    /// Mean solving degree over the semi-regular bound.
+    pub degree_over_bound: Option<f64>,
+    /// Macaulay (or F4/F5) matrix figures, the maximum over calls where
+    /// the solver reports a maximum and the sum where it reports a sum.
+    pub macaulay_rows: Option<u64>,
+    pub macaulay_columns: Option<u64>,
+    pub macaulay_degree: Option<u32>,
+    pub macaulay_rank: Option<u64>,
+    /// SAT figures: variables and clauses are the maximum over calls,
+    /// conflicts, decisions, propagations, restarts and learnt clauses
+    /// are totals over the run.
+    pub sat_variables: Option<u64>,
+    pub sat_clauses: Option<u64>,
+    pub sat_conflicts: Option<u64>,
+    pub sat_decisions: Option<u64>,
+    pub sat_propagations: Option<u64>,
+    pub sat_restarts: Option<u64>,
+    pub sat_learnt_clauses: Option<u64>,
+    /// Every solver-specific counter, verbatim.
+    pub extra: BTreeMap<String, u64>,
+}
+
+impl SolverStats {
+    /// Build the block from the framework's run report.
+    pub fn from_report(
+        solver: &crate::cryptanalysis::ic_framework::SolverReport,
+        system: Option<&crate::cryptanalysis::ic_framework::stages::SystemShape>,
+    ) -> Self {
+        let x = &solver.extra;
+        let get = |keys: &[&str]| keys.iter().find_map(|k| x.get(*k).copied());
+        let sat = solver.op_unit == "conflicts";
+        SolverStats {
+            name: solver.name.clone(),
+            calls: solver.calls,
+            ops: solver.ops,
+            op_unit: solver.op_unit.clone(),
+            wall_ns: solver.wall_ns,
+            peak_bytes: solver.peak_bytes,
+            budget_exceeded: solver.budget_exceeded,
+            n_vars: system.map(|s| s.n_vars as u64),
+            n_equations: system.map(|s| s.n_equations as u64),
+            degrees: system.map(|s| s.degrees.clone()).unwrap_or_default(),
+            semi_regular_degree: solver
+                .semi_regular_degree
+                .or_else(|| system.and_then(|s| s.semi_regular_degree)),
+            solving_degree_mean: solver.solving_degree_mean,
+            solving_degree_max: (solver.solving_degree_max > 0)
+                .then_some(solver.solving_degree_max),
+            degree_over_bound: solver.degree_over_bound,
+            macaulay_rows: get(&["matrix_rows_max", "macaulay_rows"]),
+            macaulay_columns: get(&["matrix_cols_max", "macaulay_cols"]),
+            macaulay_degree: get(&["max_degree", "max_poly_degree"])
+                .map(|d| d as u32)
+                .or((solver.solving_degree_max > 0).then_some(solver.solving_degree_max)),
+            macaulay_rank: get(&["matrix_rank_max", "macaulay_rank"]),
+            sat_variables: if sat { get(&["variables_max"]) } else { None },
+            sat_clauses: if sat { get(&["clauses_max"]) } else { None },
+            sat_conflicts: sat.then_some(solver.ops),
+            sat_decisions: if sat { get(&["decisions"]) } else { None },
+            sat_propagations: if sat { get(&["propagations"]) } else { None },
+            sat_restarts: if sat { get(&["restarts"]) } else { None },
+            sat_learnt_clauses: if sat { get(&["learnt_clauses"]) } else { None },
+            extra: x.clone(),
+        }
+    }
+}
+
 /// What a solve reports.  The runner adds verification and timing.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct SolveReport {
@@ -463,6 +559,10 @@ pub struct SolveReport {
     pub online: Option<OnlineWindow>,
     #[serde(default)]
     pub online_error: Option<String>,
+    /// The decomposition solver's statistics, for algebraic and SAT
+    /// oracles; `None` for table oracles and generic methods.
+    #[serde(default)]
+    pub solver: Option<SolverStats>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -511,6 +611,7 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         detail: Value::Null,
         online: None,
         online_error: None,
+        solver: None,
     }
 }
 
@@ -557,6 +658,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         detail: json!({"method": res.method, "expected_steps": res.expected_steps}),
         online: None,
         online_error: None,
+        solver: None,
     }
 }
 
@@ -832,6 +934,7 @@ fn solve_claw(
         detail,
         online: None,
         online_error: None,
+        solver: None,
     })
 }
 
@@ -898,6 +1001,7 @@ fn solve_strong(
             detail,
             online: None,
             online_error: None,
+            solver: None,
         });
     };
     let c = o.charges;
@@ -947,6 +1051,7 @@ fn solve_strong(
         detail,
         online: None,
         online_error: None,
+        solver: None,
     })
 }
 
@@ -1049,6 +1154,11 @@ fn ic_report(
     counters.insert("matrix_rank".into(), rep.linear_algebra.rank);
     counters.insert("matrix_dependent".into(), rep.linear_algebra.dependent);
     counters.insert("matrix_work".into(), rep.linear_algebra.work);
+    let solver = rep
+        .decomposition
+        .solver
+        .as_ref()
+        .map(|sr| SolverStats::from_report(sr, rep.decomposition.system.as_ref()));
     let detail = json!({
         "label": rep.label,
         "decomposition": {
@@ -1077,6 +1187,7 @@ fn ic_report(
         detail,
         online: None,
         online_error: None,
+        solver,
     }
 }
 
@@ -1453,6 +1564,7 @@ fn solve_shared_rank(
         detail: serde_json::to_value(&report).map_err(|e| e.to_string())?,
         online: Some(online),
         online_error: None,
+        solver: None,
     })
 }
 
@@ -1669,6 +1781,65 @@ mod tests {
         .unwrap();
         assert_eq!(a.method_id, b.method_id);
         assert!(a.method_id.starts_with("ECM1h"));
+    }
+
+    #[test]
+    fn solver_stats_read_the_sat_and_macaulay_figures_by_their_names() {
+        use crate::cryptanalysis::ic_framework::stages::SystemShape;
+        use crate::cryptanalysis::ic_framework::SolverReport;
+        let shape = SystemShape {
+            n_vars: 10,
+            n_equations: 13,
+            degrees: vec![2; 13],
+            semi_regular_degree: Some(3),
+        };
+        let mut extra = BTreeMap::new();
+        extra.insert("variables_max".to_string(), 132);
+        extra.insert("clauses_max".to_string(), 2157);
+        extra.insert("decisions".to_string(), 53_360);
+        extra.insert("propagations".to_string(), 2_214_306);
+        let sat = SolverReport {
+            name: "sat-cdcl".into(),
+            calls: 179,
+            ops: 48_872,
+            op_unit: "conflicts".into(),
+            extra,
+            ..Default::default()
+        };
+        let s = SolverStats::from_report(&sat, Some(&shape));
+        assert_eq!(s.sat_conflicts, Some(48_872));
+        assert_eq!(s.sat_variables, Some(132));
+        assert_eq!(s.sat_clauses, Some(2157));
+        assert_eq!(s.sat_decisions, Some(53_360));
+        assert_eq!(
+            (s.n_vars, s.n_equations, s.semi_regular_degree),
+            (Some(10), Some(13), Some(3))
+        );
+        assert_eq!(s.macaulay_rows, None);
+        // A round trip through the record's JSON keeps every field.
+        let back: SolverStats = serde_json::from_str(&serde_json::to_string(&s).unwrap()).unwrap();
+        assert_eq!(back, s);
+
+        let mut extra = BTreeMap::new();
+        extra.insert("matrix_rows_max".to_string(), 4096);
+        extra.insert("matrix_cols_max".to_string(), 8192);
+        extra.insert("max_poly_degree".to_string(), 4);
+        let f4 = SolverReport {
+            name: "f4-f2".into(),
+            calls: 3,
+            ops: 10,
+            op_unit: "word XORs".into(),
+            solving_degree_max: 3,
+            extra,
+            ..Default::default()
+        };
+        let s = SolverStats::from_report(&f4, None);
+        assert_eq!(
+            (s.macaulay_rows, s.macaulay_columns, s.macaulay_degree),
+            (Some(4096), Some(8192), Some(4))
+        );
+        assert_eq!(s.sat_conflicts, None);
+        assert_eq!(s.n_vars, None);
     }
 
     #[test]

@@ -532,13 +532,28 @@ on another hash) is stopped by the schema's identity triggers.
 | `factor_bases`, `factor_base_points` | every factor base a run used, by `FB1h…`; with its points when an `ecbench fb` dump is loaded |
 | `hosts`, `sessions`, `arms` | the host class and capsule, the session's build and reservation, its arms |
 | `runs`, `phases`, `run_counters`, `isolation_blockers` | one row per execution, its phases, its counters, and why it did not reach a higher level |
+| `run_solver` | the decomposition solver's statistics for an algebraic or SAT IC run (the record's `solver` block): the system's variables, equations and semi-regular degree, the solving degree reached, Macaulay rows, columns, degree and rank where the solver reports them, SAT variables, clauses, conflicts, decisions and propagations, and every solver-specific counter verbatim. Absent for table oracles. Informational: outside `S` beyond the relations phase's `solver_*` counters, and outside the replay comparison |
 | `comparisons` | every saved comparison |
 | `claims` | every loaded `vs_rho` claim, keyed by its IC1 `run_id`, with the checker's status at load time; a claim rebuilt with an independent receipt replaces its earlier form |
 
 Views: `arm_workload_summary` (the AGENTS.md §2 table, per workload),
 `method_by_curve` (each method's mean `S` and ratio to the floor per curve,
 across sessions), `ic_phase_split` (each IC run's phase shares with its
-factor base).
+factor base), `ic_yield` (the yield ledger: one row per IC run with its
+curve, target, factor base, oracle, trials, relations, `yield` =
+relations / trials, lookups, lift failures, matrix rank and rows, and the
+`run_solver` statistics; `ic.pipeline`'s `relations` and
+`ic.shared_rank`'s `hits` are read as the same count).
+
+```sql
+SELECT fb_family, oracle, count(*), round(avg(yield), 4), round(avg(lookups * 1.0 / relations), 1)
+FROM ic_yield WHERE status = 'verified' GROUP BY fb_family, oracle ORDER BY avg(yield) DESC;
+```
+
+The same ledger, joined with the curve registry and the tournament's
+rounds, is the Yield view of the lab browser (`docs/browser/`,
+AGENTS.md §7c). A yield is a stage diagnostic: it ranks bases and oracles
+on the same targets, and only the whole-pipeline `S` decides speed.
 
 ```sql
 SELECT method, curve_slug, verified_runs, round(mean_s, 3), round(mean_ratio_to_floor, 2)

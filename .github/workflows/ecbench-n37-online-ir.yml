@@ -148,11 +148,11 @@ jobs:
           dir=research/ecbench_n37_online_ir_20261004
           test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
             4adb5b41eef61161c80ef30618c6dcb3abb2dedef702730b659c0daece337c60
-          # The analyzer is built from the frozen source in its own checkout,
-          # so the decision is reproduced by the code that made it while
-          # later PRs remain free to change src/.
-          frozen="$RUNNER_TEMP/ecbench-n37-online-ir-frozen-src"
-          git worktree add --detach "$frozen" 170becb5bc485507cd9b2accce3863e85ba8c3d1
+          # The archive was profiled from the preregistered source. Once it is
+          # committed, that source must be in this history, and the replay step
+          # above re-establishes with the current binary that every measured
+          # execution still reproduces; the tree itself may move on.
+          git merge-base --is-ancestor 170becb5bc485507cd9b2accce3863e85ba8c3d1 HEAD
           replay="$RUNNER_TEMP/ecbench-n37-online-ir-archive-replay"
           mkdir -p "$replay"
           unzip -q "$dir/RAW-CALLGRIND.zip" -d "$replay"
@@ -160,10 +160,8 @@ jobs:
           cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
           cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
           cmp "$replay/Cargo.lock" Cargo.lock
-          cp "$replay/Cargo.lock" "$frozen/Cargo.lock"
-          cargo build --release --locked --manifest-path "$frozen/Cargo.toml" \
-            --example ecbench_n37_online_ir_analyze
-          "$frozen/target/release/examples/ecbench_n37_online_ir_analyze" \
+          cargo build --release --example ecbench_n37_online_ir_analyze
+          target/release/examples/ecbench_n37_online_ir_analyze \
             "$replay" "$dir/JOBS.json" \
             "$dir/sessions/mac_arm64_l0_01/records.jsonl" \
             "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json"

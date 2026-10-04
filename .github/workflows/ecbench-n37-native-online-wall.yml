@@ -42,15 +42,20 @@ jobs:
               research/ecbench_n37_online_ir_20261004/PLAN.json | sort -u) \
             > "$RUNNER_TEMP/n37-target-overlap.txt"
           test ! -s "$RUNNER_TEMP/n37-target-overlap.txt"
-      # The source freeze guards the run until its session is sealed. After
-      # that, the committed session is protected by ecbench.yml's replay
-      # audit, and an unrelated ecbench change must not fail this screen.
-      - name: Check the frozen source while the run is pending
-        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
-        run: |
-          git diff --exit-code 9e15353bf83b15e4cb8332519d8515613ac4dfea -- \
-            Cargo.toml src/cryptanalysis/ecbench src/cryptanalysis/ic_framework/shared_rank.rs \
-            src/bin/ecbench.rs
+          # While the panel is pending, the harness source must be the one the
+          # freeze preregistered. Once the session is committed, the freeze's
+          # source commit must be in this history, and the re-audit below
+          # re-establishes with the current binary that every measured
+          # execution still reproduces; the tree may move on.
+          frozen="$(jq -r .source_commit "$dir/FREEZE.json")"
+          test "$frozen" = 9e15353bf83b15e4cb8332519d8515613ac4dfea
+          if [ -f "$dir/sessions/hosted_ubuntu_01/session.json" ]; then
+            git merge-base --is-ancestor "$frozen" HEAD
+          else
+            git diff --exit-code "$frozen" -- \
+              Cargo.toml src/cryptanalysis/ecbench src/cryptanalysis/ic_framework/shared_rank.rs \
+              src/bin/ecbench.rs
+          fi
       - name: Run the frozen native panel on a hosted Linux VM
         if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
         run: |
