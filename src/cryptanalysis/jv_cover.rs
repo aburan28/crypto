@@ -3014,13 +3014,20 @@ mod tests {
             if cb.stopped_at == Some(64) {
                 stopped += 1;
             }
-            if cb.f4_muls < ca.f4_muls {
+            // "cheaper" by the F4 degree and matrix the stop saves, which are
+            // per-run facts; `f4_muls` is a difference of the process-wide
+            // counter and interleaves with other tests' F4 runs under
+            // `cargo test`'s parallelism.
+            if cb.degree_reached < ca.degree_reached && cb.max_rows < ca.max_rows {
                 cheaper += 1;
             }
         }
         assert!(n >= 25, "{n}");
         assert_eq!(stopped, n, "every system stops at the Bézout staircase");
-        assert_eq!(cheaper, n);
+        assert_eq!(
+            cheaper, n,
+            "every stopped run ends at a lower degree with a smaller matrix"
+        );
     }
 
     #[test]
@@ -3052,7 +3059,10 @@ mod tests {
             assert_eq!(cb.stopped_at, Some(64));
             if cb.replayed {
                 replayed += 1;
-                if cb.f4_muls < ca.f4_muls {
+                // the replay keeps only the rows that produced a pivot, so its
+                // matrices are smaller at the same degree (per-run facts; the
+                // multiplication counter interleaves with other tests' runs)
+                if cb.max_rows < ca.max_rows && cb.degree_reached <= ca.degree_reached {
                     cheaper += 1;
                 }
                 if replayed <= 3 {

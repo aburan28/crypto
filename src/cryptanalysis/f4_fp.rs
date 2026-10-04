@@ -1481,10 +1481,7 @@ fn f4_with_arithmetic(
                 useful = rows.iter().map(|r| r.iter().any(|&v| v != 0)).collect();
                 rows.retain(|r| r.iter().any(|&v| v != 0));
                 if recording {
-                    rec_rows = rows
-                        .iter()
-                        .map(|r| r.iter().map(|&v| v as u64).collect())
-                        .collect();
+                    rec_rows = rows.iter().map(|r| r.to_vec()).collect();
                 }
                 let piv = match &block_classes {
                     Some(cls) => rref_blocked(&mut rows, cls, |b| rref(b, fp, deadline)),

@@ -661,6 +661,9 @@ def main():
     sv = sieve()
     if sv:
         print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
+    svt = sieve("33_jv_cover_trace_sieve")
+    if svt:
+        print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
     wk = walk("34_jv_isogeny_walk.json")
     wk2 = walk("34_jv_isogeny_walk_two_only.json") or []
     if wk:

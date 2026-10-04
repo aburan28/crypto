@@ -1,9 +1,9 @@
 # The cover-and-decomposition route on `E(F_{p⁶})`: registered before it is built
 
-**Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9).  §3's predictions were not edited after the runs.
+**Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9); F4 stopped at the staircase (§10) and replaying a recorded trace (§12) measured 2026-10-03 and 2026-10-04.  §3's predictions were not edited after the runs.
 **Literature:** Joux and Vitse, *Cover and decomposition index calculus on elliptic curves made practical* (Eurocrypt 2012, ePrint 2011/020), cited below as **[JV12]**.  Every figure marked *cited* is theirs, from their Magma and C runs on other hardware, and is here only to set the registered range; none of it is a measurement of this repository.
 **Ledger:** `RESEARCH_RHO_PARITY_PROGRAMME.md` (the routes on generic curves, all of which stay bounded away from `S / rho = 1` at machine size: `k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^200`); `RESEARCH_K5_TORSION_JOUX_VITSE.md` (the last of them).
-**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}` for §10 (F4 stopped at the Bézout staircase, 2026-10-03); `experiments/32_jv_cover_sieve_*.{json,log}` for §11 (the sieve); `experiments/34_jv_isogeny_walk*.{json,log}` for §13 (the isogeny walk, priced, 2026-10-04; ledger section G); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
+**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}`; the trace replay `experiments/33_jv_cover_trace_*.{json,log}` (superseded and defective runs under their own names) for §10 (F4 stopped at the Bézout staircase, 2026-10-03); `experiments/32_jv_cover_sieve_*.{json,log}` for §11 (the sieve); `experiments/34_jv_isogeny_walk*.{json,log}` for §13 (the isogeny walk, priced, 2026-10-04; ledger section G); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
 
 ## 1. Why this route is a different kind of entry
 
@@ -281,6 +281,97 @@ As §4: no relation accepted without the group check; no `m` chosen after seeing
 ### 11.4 Class (registered)
 
 **Reproduction of a published route** ([JV12] §3.2) inside the harness — accounting and engineering, no advance: the one algorithmic idea (the bilinear structure of `Im(F)` over a quadratic extension) is theirs, the choice of `m` by size and the `S⁺` unit are bookkeeping.  Nothing in §9 changes: the class is the weak class, the isogeny walk is unpriced, and no statement about a generic or deployed curve follows from a measured crossover on `y² = h(x)(x − α)(x − σα)`.
+## 12. Engineering after the fact: F4 replaying a recorded trace (2026-10-04)
+
+§10 left F4 at `83 %` of a six-point test.  Every residual's system has the
+same shape — six quadrics in the same six unknowns with the same monomial
+support — and F4's work on it is the same sequence of steps: the same
+degrees, the same pair rows, the same new leading monomials, step after
+step, system after system.  Joux and Vitse's variant of F4 (*A variant of
+the F4 algorithm*, 2011) records that sequence once and replays it, keeping
+only the rows that produced something; here the engine records, on the
+first system of a `p`, for every step **the pair rows every new pivot is a
+combination of** (a tracked echelon form on the step's reduced rows, done
+once), and replays those rows on the later systems with the symbolic
+preprocessing, the reductions and the staircase stop as before — no pair
+selection, no row that reduces to zero.  A replay checks the new leading
+monomials against the recorded ones at every step; where they differ (a
+system of another shape, `≈ 15 %` at `p ≈ 53`, `≈ 1 %` at `p ≥ 503`), it
+keeps what the step found (it is in the ideal) and finishes as a full F4
+over every pair the basis has accumulated, which costs the replayed prefix
+plus a full run.  A trace that diverges three times and more often than it
+holds is dropped and the next full run records a new one (the first
+system of a size is sometimes of the rarer shape).  Soundness is as in §10:
+the staircase argument needs no Gröbner basis of anything but the stopped
+partial basis, and the solver's final check against the input covers the
+rest; the oracle is the test of it.
+
+**Measured** (`33_jv_cover_trace_ccov{_oracle,}.json`, the same sizes,
+seeds and residual counts as §6 and §10; ledger section E.3):
+
+| | §10, F4 stopped | F4 stopped and replayed | ratio |
+|:--|--:|--:|--:|
+| F4 per test (mean over the eight sizes) | `2.67·10⁶` | `1.09·10⁶` | `2.44×` |
+| `C_cov` per test | `3.19·10⁶` | `1.62·10⁶` | `1.97×` |
+| F4 matrix (rows × columns) | `556 × 507` | `≈ 460 × 498` | |
+| tests that replayed a trace / diverged and ran in full | | `3,008` / `343` of `3,360` | |
+| oracle disagreements at `p ≤ 71` (`2,160` residuals) | `0` | `0` | |
+| planted sums found | all | all (`360/360`, `200/200`) | |
+| incomplete | `1` | `1` (the same positive-dimensional residual) | |
+
+Against §6's `5.15·10⁶`, the test now costs `3.2×` less, with the solver's
+own `5.3·10⁵` (§10) now a third of it.  Three defects were found and kept
+under their own names (`*_first_run_superseded`, `*_second_run_defective`,
+`*_third_run_defective`): a trace recorded on a rare shape at `p = 71`
+diverged on `355` of `360` systems (the re-recording rule above); a
+diverging replay dropped the pairs the trace had replaced and finished a
+"full" run that was not one (`41` incomplete and `8` planted sums missed
+at `p = 53`); a system whose input leading monomials differed from the
+trace's returned the inputs as its basis.  The oracle and the planted
+residuals caught all three.
+
+**End to end** (`33_jv_cover_trace_dlp*.json`, the same sizes, seeds and
+rho references as §10; ledger section E.3):
+
+| `p` | `ℓ` | `S / rho`, §10 (F4 stopped) | `S / rho`, §12 (stopped and replayed) | ratio | `C_cov` as paid | replayed / diverged |
+|--:|:--|--:|--:|--:|--:|--:|
+| 53 | `2^{32.4}` | `1,618`, `998` | `883`, `548` | `1.83`, `1.82` | `1.69·10⁶`, `1.71·10⁶` | 15,867 / 3,142; 7,069 / 1,414 |
+| 101 | `2^{37.9}` | `516`, `804` | `259`, `402` | `1.99`, `2.00` | `1.58·10⁶`, `1.57·10⁶` | 36,655 / 3,437; 59,771 / 5,645 |
+| 251 | `2^{45.8}` | `65.6`, `115` | `31.6`, `55.4` | `2.08`, `2.08` | `1.54·10⁶`, `1.53·10⁶` | 79,317 / 2,941; 91,962 / 3,320 |
+| 503 | `2^{51.8}` | `28.4`, `16.1` | `13.4`, `7.63` | `2.12`, `2.11` | `1.52·10⁶`, `1.54·10⁶` | 247,828 / 4,423; 139,622 / 2,528 |
+| 1009 | `2^{57.9}` | `6.33`, `5.08` | `2.98`, `2.40` | `2.12`, `2.12` | `1.53·10⁶`, `1.53·10⁶` | 446,926 / 3,911; 357,646 / 3,189 |
+
+All ten logarithms recovered and checked; `0` relations failed the group
+check; the fitted exponent of `S / rho` in `p` over the five sizes is
+`−1.96 ± 0.11` (§10: `−1.91 ± 0.12`; the derivation: `−2`), and the crossover
+the measured constants give moves from `p* ≈ 2,300` (`2^{65}`) to
+`p* ≈ 1,650` (`2^{62}`) — still above the harness's range, still an
+extrapolation.  The ratio to §10 grows from `1.8×` at `p = 53` to `2.1×`
+from `p = 503` up, as the share of systems of another shape (which replay
+their prefix and then run in full) falls from `17 %` to `1 %`.
+
+**The sieve route's descent** (`33_jv_cover_trace_sieve_*.json`, the same
+seeds as §11.5; ledger section F.2).  §11.5 found the descent — two
+six-point successes, `≈ 1,100–2,100` tests each — to be `46–86 %` of `S`
+from `p = 503` up; with its F4 replaying the trace:
+
+| `p` | `S / rho`, §11.5 | `S / rho`, descent replayed | descent share, §11.5 → §12 | replayed / diverged |
+|--:|--:|--:|:--|--:|
+| 503 | `1.05`, `0.114` | `0.792`, `0.0838` | 46 %, 50 % → 29 %, 32 % | 4,216 / 68; 504 / 8 |
+| 1009 | `0.039`, `0.069` | `0.0253`, `0.0375` | 67 %, 86 % → 49 %, 75 % | 1,828 / 24; 4,193 / 31 |
+| 1511 | `0.0122`, `0.0137` | `0.0075`, `0.0086` | 73 %, 71 % → 56 %, 53 % | 2,100 / 8; 2,287 / 17 |
+
+`1.3–1.8×` on the whole, the relation phase (which the trace does not
+touch) now the larger term at `p = 503`; the measured crossover of §11.5
+stays between `p = 251` and `p = 503` (the `p = 251` rows were not rerun:
+their descent share was `11–29 %`, so the trace moves them by `≤ 1.2×`).
+
+**What it is.**  A constant on the test, `2×` on top of §10's `1.6×`, and so
+on `S / rho`; the route's exponent is untouched and nothing in §9 changes.
+The same replay serves the descent of §11's sieve route (its two six-point
+successes are `≈ 1,400` tests of this kind), where the descent was the
+larger term above the crossover.  Class: **engineering**.
+
 ## 13. The isogeny walk, priced (2026-10-04; `experiments/34_jv_isogeny_walk*.json`, ledger section G)
 
 §9's one unpriced item: [JV12] §4.1 estimate the walk from a curve of
@@ -367,61 +458,3 @@ reach only through its class, and the class's weak members are `3/q` of its
 full-2-torsion curves.
 
 ---
-
-## 12. Engineering after the fact: F4 replaying a recorded trace (2026-10-04)
-
-§10 left F4 at `83 %` of a six-point test.  Every residual's system has the
-same shape — six quadrics in the same six unknowns with the same monomial
-support — and F4's work on it is the same sequence of steps: the same
-degrees, the same pair rows, the same new leading monomials, step after
-step, system after system.  Joux and Vitse's variant of F4 (*A variant of
-the F4 algorithm*, 2011) records that sequence once and replays it, keeping
-only the rows that produced something; here the engine records, on the
-first system of a `p`, for every step **the pair rows every new pivot is a
-combination of** (a tracked echelon form on the step's reduced rows, done
-once), and replays those rows on the later systems with the symbolic
-preprocessing, the reductions and the staircase stop as before — no pair
-selection, no row that reduces to zero.  A replay checks the new leading
-monomials against the recorded ones at every step; where they differ (a
-system of another shape, `≈ 15 %` at `p ≈ 53`, `≈ 1 %` at `p ≥ 503`), it
-keeps what the step found (it is in the ideal) and finishes as a full F4
-over every pair the basis has accumulated, which costs the replayed prefix
-plus a full run.  A trace that diverges three times and more often than it
-holds is dropped and the next full run records a new one (the first
-system of a size is sometimes of the rarer shape).  Soundness is as in §10:
-the staircase argument needs no Gröbner basis of anything but the stopped
-partial basis, and the solver's final check against the input covers the
-rest; the oracle is the test of it.
-
-**Measured** (`33_jv_cover_trace_ccov{_oracle,}.json`, the same sizes,
-seeds and residual counts as §6 and §10; ledger section E.3):
-
-| | §10, F4 stopped | F4 stopped and replayed | ratio |
-|:--|--:|--:|--:|
-| F4 per test (mean over the eight sizes) | `2.67·10⁶` | `1.09·10⁶` | `2.44×` |
-| `C_cov` per test | `3.19·10⁶` | `1.62·10⁶` | `1.97×` |
-| F4 matrix (rows × columns) | `556 × 507` | `≈ 460 × 498` | |
-| tests that replayed a trace / diverged and ran in full | | `3,008` / `343` of `3,360` | |
-| oracle disagreements at `p ≤ 71` (`2,160` residuals) | `0` | `0` | |
-| planted sums found | all | all (`360/360`, `200/200`) | |
-| incomplete | `1` | `1` (the same positive-dimensional residual) | |
-
-Against §6's `5.15·10⁶`, the test now costs `3.2×` less, with the solver's
-own `5.3·10⁵` (§10) now a third of it.  Three defects were found and kept
-under their own names (`*_first_run_superseded`, `*_second_run_defective`,
-`*_third_run_defective`): a trace recorded on a rare shape at `p = 71`
-diverged on `355` of `360` systems (the re-recording rule above); a
-diverging replay dropped the pairs the trace had replaced and finished a
-"full" run that was not one (`41` incomplete and `8` planted sums missed
-at `p = 53`); a system whose input leading monomials differed from the
-trace's returned the inputs as its basis.  The oracle and the planted
-residuals caught all three.
-
-**End to end** (`33_jv_cover_trace_dlp*.json`): END_TO_END_PENDING
-
-**What it is.**  A constant on the test, `2×` on top of §10's `1.6×`, and so
-on `S / rho`; the route's exponent is untouched and nothing in §9 changes.
-The same replay serves the descent of §11's sieve route (its two six-point
-successes are `≈ 1,400` tests of this kind), where the descent was the
-larger term above the crossover.  Class: **engineering**.
-
