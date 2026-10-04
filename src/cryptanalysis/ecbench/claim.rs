@@ -360,6 +360,19 @@ impl Implementation {
         }
     }
 
+    /// Bind the additional target-blind rank source only for that method.
+    /// The shared harness source hash still changes when this file changes.
+    pub fn for_method(id: &str) -> Self {
+        let mut imp = Self::this_binary();
+        if id == "ic.shared_rank" {
+            imp.components.push((
+                "shared_rank".into(),
+                sha256_hex(include_bytes!("../ic_framework/shared_rank.rs")),
+            ));
+        }
+        imp
+    }
+
     fn sha(&self, role: &str) -> String {
         self.components
             .iter()
@@ -395,6 +408,9 @@ fn method_record(
     columns: &ColumnMap,
     imp: &Implementation,
 ) -> Result<Value, String> {
+    if m.id == "ic.shared_rank" {
+        return shared_rank_method_record(m, kb, fb, columns, imp);
+    }
     let p = &m.params;
     let (oracle, oparams) = p
         .get("oracle")
@@ -474,6 +490,83 @@ fn method_record(
             "success_rule": "[d]G = Q",
             "stop_rule": "first pinned target column",
             "source_sha256": imp.sha("ic_pipeline"),
+        },
+        "implementation": {
+            "source_manifest_sha256": manifest,
+            "components": imp.json(),
+            "flags": {"ecbench_method_id": m.method_id, "params": p},
+        },
+    }))
+}
+
+/// The candidate identity for the target-blind rank table followed by a
+/// point-only m3 target descent.  It is intentionally distinct from the
+/// classic pipeline, whose relation matrix includes the target column.
+fn shared_rank_method_record(
+    m: &ResolvedMethod,
+    kb: &Kb,
+    fb: &FactorBaseFacts,
+    columns: &ColumnMap,
+    imp: &Implementation,
+) -> Result<Value, String> {
+    if fb.family != "compact-orbit-scan" || imp.sha("shared_rank").is_empty() {
+        return Err("ic.shared_rank needs its compact-orbit base and source hash".into());
+    }
+    let p = &m.params;
+    let manifest = id_sha256(&imp.json())?;
+    Ok(json!({
+        "isogeny": "none",
+        "endomorphism": {"order_conductor": null, "frobenius_order_conductor": null, "volcano_levels": []},
+        "factor_base": {
+            "construction": {
+                "family": fb.family,
+                "params": fb.params,
+                "builder": "ic_framework::plugins::CompactOrbitScanBase",
+                "points_sha256": fb.points_sha256,
+                "solver_columns": columns.json(),
+            },
+            "nominal_bound": fb.signed_points,
+        },
+        "point_decomposition": {
+            "summands": 3,
+            "solver": "mitmfrobeniuscounted",
+            "summation_polynomial": "none: exact point-sum table lookup",
+            "encoding": "counted signed-Frobenius m3 pair table",
+            "equation_order": "not applicable",
+            "monomial_order": "not applicable",
+            "internal_matrix_kernel": "not applicable",
+            "limits": format!("target_max_attempts={}", p["target_max_attempts"]),
+            "cache_policy": "target-independent table built once per process before the online target",
+            "source_sha256": imp.sha("ic_plugins"),
+        },
+        "relation_collection": {
+            "collector": "sample",
+            "query_distribution": "uniform nonzero [a]G; public target excluded",
+            "query_rule": format!("StdRng seed=(rank_seed XOR 0x534841524544524b), rank_seed={}, rank_max_trials={}", p["rank_seed"], p["rank_max_trials"]),
+            "filtering": "exact m3 witnesses and full-point relation checks",
+            "verification": "each accepted point sum checked; every full-rank column log checked as a point",
+            "duplicates": "dependent rows retained in transcript",
+            "dependencies": "incremental elimination tracks independent rank",
+            "stop_rule": "all configured factor-base columns at full rank, else trial cap",
+            "source_sha256": imp.sha("shared_rank"),
+        },
+        "relation_linear_algebra": {
+            "solver": "gauss",
+            "modulus": kb.r,
+            "matrix_construction": "one target-blind row per verified [a]G relation over folded base columns",
+            "orbit_quotient": "sign-and-Frobenius",
+            "rank_criterion": "all factor-base columns pinned and independently point checked",
+            "block_parameters": "none",
+            "preconditioner": "none",
+            "source_sha256": imp.sha("ic_linalg"),
+        },
+        "target_descent": {
+            "method": "pdp",
+            "policy": "point-only Q first, then run-seeded Q+[a]G residuals; combine verified column logs",
+            "recursive_solvers": "none",
+            "success_rule": "exact witness sum and [d]G = Q",
+            "stop_rule": "first verified m3 decomposition or target attempt cap",
+            "source_sha256": imp.sha("shared_rank"),
         },
         "implementation": {
             "source_manifest_sha256": manifest,
@@ -743,7 +836,7 @@ pub fn build(
         .map(|p| Ok((hex(&p.x)?, hex(&p.y)?)))
         .collect::<Result<_, String>>()?;
     let (inventory, columns) = factor_base_inventory(&kb, &points, fbf.columns)?;
-    let imp = Implementation::this_binary();
+    let imp = Implementation::for_method(&ic.method.id);
     let method = method_record(&ic.method, &kb, fbf, &columns, &imp)?;
     let (candidate_id, candidate_sha, _) = candidate_manifest(&kb, method, inventory)?;
 
@@ -802,7 +895,12 @@ pub fn build(
     let setup_ns: u64 = ic
         .phases
         .iter()
-        .filter(|p| p.name == "factor_base" || p.name == "oracle_setup")
+        .filter(|p| {
+            p.name == "factor_base"
+                || p.name == "oracle_setup"
+                || (ic.method.id == "ic.shared_rank"
+                    && matches!(p.name.as_str(), "relations" | "linear_algebra" | "verify"))
+        })
         .filter_map(|p| p.wall_ns)
         .sum();
     let table_entries = rho.counters.get("table_entries").copied().unwrap_or(0);
