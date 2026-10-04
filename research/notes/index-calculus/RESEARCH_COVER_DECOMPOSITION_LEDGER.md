@@ -139,13 +139,13 @@ None of the four touched the group arithmetic or the transfer, which the tests c
 
 **Class:** reproduction and measurement of a published route inside the harness: **accounting and engineering, no advance** (the algorithm is [JV12]'s).  What the harness adds is the crossover in its own unit.
 
-**The boundary statement.**  On the weak class `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}`, `S / rho` was measured falling as `n^{−0.32}` to `≈ 9×` at `ℓ = 2^{58}` and extrapolates to parity near `ℓ = 2^{67}`; on every generic curve of the ledger it does not (`k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^{200}`).  The route's cost is `720·p/2` tests of `5·10⁶` multiplications against rho's `p³/2` additions of `331`: parity is where `p² ≈ 720·C_cov/(ρ_S·c_add)`.
+**The boundary statement** (as first written, 2026-10-03; amended 2026-10-04).  On the weak class `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}`, `S / rho` was measured falling as `n^{−0.32}` to `≈ 9×` at `ℓ = 2^{58}` and extrapolated to parity near `ℓ = 2^{67}`; on every generic curve of the ledger it does not (`k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^{200}`).  The route's cost is `720·p/2` tests of `5·10⁶` multiplications against rho's `p³/2` additions of `331`: parity is where `p² ≈ 720·C_cov/(ρ_S·c_add)`.  **Since then:** the test costs `1.6·10⁶` (§§10, 12; `2.4–3.0×` at `2^{58}`, parity extrapolated near `2^{62}`), and with the sieved relation phase of §11 the crossover is *measured* at `p ≈ 430` (`ℓ ≈ 2^{50}`), the route reading `0.012–0.014×` rho at `ℓ = 2^{61.4}`; §13 prices the walk that reaches the class at more than rho below `p ≈ 8,000`.
 
 **Not measured, and not to be read into the numbers:**
 
 - The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.  **Priced in §13 (2026-10-04):** the class is `3/q` of the curves with full 2-torsion (a cross-ratio of norm one), a 2,3-isogeny step costs `3–7·10⁵` multiplications, and a walk of `q/3` steps is above rho below `p ≈ 8,000`; no walk of that round sampled a whole class.
-- Any size at which the crossover itself occurs (`ℓ ≈ 2^{67}`, above the harness's range), and any curve outside `F_{p⁶}`.
-- The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C, which would move `p*` down by `≈ √960`; cited, not built, and not a measurement of this repository.
+- Any size above `ℓ = 2^{61.4}` (the crossover of the Nagao-relation route, extrapolated near `2^{62}`, was not run; the sieved route's crossover at `ℓ ≈ 2^{50}` was), and any curve outside `F_{p⁶}`.
+- The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C.  **Built and measured in §11 (2026-10-04):** `720·C_cov / C_rel = 566` in this unit, the crossover with rho measured at `p ≈ 430`; a reproduction, not a measurement of theirs.
 - Anything about a deployed curve: prime-field curves and extension-field curves of prime order outside this form are untouched, and nothing here is a claim about them.
 
 ---

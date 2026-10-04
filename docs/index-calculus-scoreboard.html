@@ -2442,7 +2442,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   <div class="panel" id="rho-parity-ledger">
     <div class="panel-head">
       <h2>The rho-parity ledger: every measured route, its exponent, and what parity would need <span class="chip">measurement</span></h2>
-  <p class="panel-summary">Fits each measured route's exponents against parity with rho, finding every end-to-end route far from it and the Joux-Vitse three-point decomposition size-independent at 6,945x, with parity sizes extrapolated.</p>
+  <p class="panel-summary">Fits each measured route's exponents against parity with rho, finding every route on a generic curve far from it (the Joux-Vitse three-point decomposition size-independent at 6,945x, parity sizes extrapolated) and the cover route on a weak class crossing it at p about 430, measured, with the walk that reaches the class priced above rho below p about 8,000.</p>
       <p>Frozen source: <code>experiments/22_glv_quotient_seeds6.json</code>, <code>21_gaudry_cubic_la.json</code>,
         <code>24_gaudry_quartic_c4.json</code>, <code>25_gaudry_quartic_la.json</code> and the new
         <code>26_jv_quartic_{cprime,dlp}.json</code>, tables by <code>scripts/parity_ledger.py</code>
