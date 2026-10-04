@@ -72,7 +72,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
+   "sha256": "341792fbfc9f18a4a4c95d0b42bf26c77727f080315530b37ed6c39ff07d31a8"
   }
  },
  "families": {
@@ -6910,6 +6910,18 @@
    "on_board": true
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "family": "prime",
+   "field": "GF(p), p = 11617",
+   "coefficients": "a = 3797, b = 2081",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "family": "prime",
    "field": "GF(p), p = 14389",
@@ -6940,6 +6952,18 @@
     "bench-14bit"
    ],
    "on_board": true
+  },
+  {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "family": "prime",
+   "field": "GF(p), p = 53197",
+   "coefficients": "a = 40230, b = 5",
+   "order_bits": 16,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
   },
   {
    "slug": "icv1-fp16-t295-8d3c3165",
@@ -7194,6 +7218,24 @@
    "ec1_unresolved": null,
    "legacy": [
     "generated-26bit-42652151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "family": "prime",
+   "field": "GF(p), 224-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 224,
+   "standard": [
+    "P-224"
+   ],
+   "ec1": [
+    "EC1P224Cp224h8e110c585480"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-224"
    ],
    "on_board": false
   },
