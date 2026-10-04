@@ -655,3 +655,60 @@ the instance.
 cheapest lines first.  The exponent, the class and §9 are untouched; the
 measured crossover of §11.5 may move within its registered band and no
 further.
+
+### 14.4 Measured (2026-10-04; `experiments/35_jv_cover_sieve_enum_*.json`, ledger section F.3)
+
+Built as registered, in `jv_sieve.rs`: `FpRing::factor_lazy` (the
+distinct-degree groups of the root-free cofactor, a group split by
+`edf_frob` — Cantor–Zassenhaus on the Frobenius columns the distinct-degree
+step computed, the trace by `d − 1` matrix products and one exponent
+`(p − 1)/2` — only when the reachability pass over the other factors'
+degrees finds a line that would use part of it), `powmod_x` (left to right,
+a squaring at `n(n + 1)/2` and a shift), and the run climbing from `m = 9`.
+The lines are the same: over `4,000` `B`'s at `p = 1009` (`m = 9` and `10`)
+the lazy and the full factorisation give the same `(A₀, A₁′)` sets, and
+every end-to-end run below found the same relation count from the same
+`B`'s as §11.5's.  The same seeds, sizes and rho references as §11.5, the
+descent replaying §12's trace:
+
+| `p` | seed | `m` climbed | relations by `m` | enum per `B`, §11.5 → §14 | `C_rel`, §11.5 → §14 | relation phase, §11.5 → §14 | `S / rho`, §12 → §14 |
+|--:|--:|:--|:--|:--|:--|:--|:--|
+| 251 | 1 | 9 → 10 | 24 at 9, 106 at 10 | `4,251 → 3,084` | `8.7·10⁷ → 5.4·10⁷` (`1.61×`) | `1.14·10¹⁰ → 7.0·10⁹` (`1.63×`) | `3.19`† → `1.91` |
+| 251 | 2 | 9 → 10 | 12 at 9, 112 at 10 | `4,278 → 3,112` | `1.27·10⁸ → 8.9·10⁷` (`1.43×`) | `1.59·10¹⁰ → 1.10·10¹⁰` (`1.44×`) | `8.50`† → `5.36` |
+| 503 | 1 | 9 → 10 | 78 at 9, 160 at 10 | `4,570 → 3,216` | `6.8·10⁷ → 5.3·10⁷` (`1.29×`) | `1.61·10¹⁰ → 1.25·10¹⁰` (`1.29×`) | `0.792 → 0.666` (`1.19×`) |
+| 503 | 2 | 9 → 10 | 250 at 9, 13 at 10 | `3,877 → 2,625` | `6.0·10⁶ → 4.5·10⁶` (`1.33×`) | `1.59·10⁹ → 1.19·10⁹` (`1.33×`) | `0.0838 → 0.0700` (`1.20×`) |
+| 1009 | 1 | 9 | 488 | `4,002 → 2,572` | `5.9·10⁶ → 4.4·10⁶` (`1.35×`) | `2.88·10⁹ → 2.14·10⁹` (`1.35×`) | `0.0253 → 0.0221` (`1.15×`) |
+| 1009 | 2 | 9 | 528 | `3,953 → 2,549` | `3.9·10⁶ → 2.9·10⁶` (`1.33×`) | `2.06·10⁹ → 1.55·10⁹` (`1.33×`) | `0.0375 → 0.0353` (`1.06×`) |
+| 1511 | 1 | 9 | 770 | `4,154 → 2,631` | `3.0·10⁶ → 2.3·10⁶` (`1.30×`) | `2.31·10⁹ → 1.78·10⁹` (`1.30×`) | `0.0075 → 0.0068` (`1.10×`) |
+| 1511 | 2 | 9 | 757 | `4,197 → 2,645` | `3.7·10⁶ → 2.9·10⁶` (`1.31×`) | `2.84·10⁹ → 2.16·10⁹` (`1.31×`) | `0.0086 → 0.0077` (`1.11×`) |
+
+† §11.5's own rows (`p = 251` was not rerun with the traced descent in
+§12).  All eight logarithms recovered and checked, `0` relations failing
+the group check, `0` duplicates; the descent replayed the trace on
+`98–99 %` of its tests.
+
+**Against the registration (§14.1):**
+
+| | registered | measured | |
+|:--|:--|:--|:--|
+| P12 enum per `B` | `2,600–3,100`, the same lines | `2,550–2,650` at `m = 9`; `3,080–3,220` on the runs that climbed to `m = 10` (the lazy pass saves less there: a degree-`5` divisor of a degree-`9` cofactor needs its groups split more often); the same lines, the same relation counts | holds (band `[2,300, 3,300]`) |
+| P13 `C_rel` at `m = 9` | `1.25–1.45×` | `1.30–1.35×` | holds |
+| P13 `S / rho` at `1511` | `8–15 %` lower | `10 %`, `11 %` | holds |
+| P13 `S / rho` at `1009` | `10–20 %` lower | `13 %`, **`6 %`** (seed 2: the descent is `75 %` of its `S`) | **misses on one seed** (not a falsification line) |
+| P13 crossover | stays in `[400, 460]` | **`p* ≈ 371`** (`ℓ ≈ 2^{49}`; `3.64` pooled at `251`, `0.368` at `503`) | **misses**: the registered band took §11.5's rows at `251`, whose descent was not yet traced; the traced descent and the climb move `251` by `1.6–1.7×` together, and the crossover with them |
+| P14 relation phase at `251` | `10–25 %` lower; falsified above `40 %` | `39 %`, `31 %` lower (`24` and `12` relations from the `m = 9` lines at `≈ 10×` below the `m = 10` cost, then the enumeration's `1.3×` on the rest) | holds, at the edge: the two effects were registered as if the climb alone moved the phase |
+| P15 the estimate | within `[0.5, 2]×` of what each exhausted `m` yielded | `1.22`, `0.61` at `251`; `1.58`, **`0.49`** at `503` | **misses by `0.01`** on the instance whose rate is `0.47` of `p/m!` (§11.5's instance effect, unexplained) |
+
+Four of the registered lines hold, two miss: the crossover band, because it
+was set on rows whose descent §12 later halved, and the estimate's band,
+by the width of the instance effect.  Neither moves the class.
+
+**What it is.**  A `1.6×` constant on the enumeration of the lines, `1.3×`
+on `C_rel`, `6–20 %` on `S / rho` where the descent dominates and
+`1.6–1.7×` at `p = 251` together with the traced descent; the measured
+crossover is now `p* ≈ 371` (`ℓ ≈ 2^{49}`), inside §11.2's registered band
+`[280, 420]` where §11.5's `427` was just outside it.  The sieve's own steps
+(`6.3` multiplications a base step, `≈ 1.1·10⁶` per relation at `m = 9`)
+are now `45–50 %` of `C_rel` and the floor of this design.  Class:
+**engineering**; §9 is untouched.  The `p = 101` runs of P14 were still
+running when this section was written and are added below when they land.
