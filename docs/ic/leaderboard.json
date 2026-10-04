@@ -46,6 +46,10 @@
    "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
    "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
   },
+  "n37_k8_k16": {
+   "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+   "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
@@ -5094,6 +5098,28 @@
    "fully_priced_cold_speedup": null
   }
  ],
+ "n37_k8_k16_confirmation": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+  "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54",
+  "usable_points": 592,
+  "folded_columns": 8,
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "select_k8_for_larger_field_gate",
+  "k16_over_k8_ir": 1.1902596062530095,
+  "k16_over_k8_ir_ci95": [
+   1.1584168328385342,
+   1.2217540127906004
+  ],
+  "k8_over_rho_ir": 3.6445922113828733,
+  "k8_over_rho_ir_ci95": [
+   3.2353443778426585,
+   4.136017279722061
+  ],
+  "online_speedup": null,
+  "cold_wall_speedup": null
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",
