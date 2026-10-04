@@ -225,3 +225,18 @@ there already reads `≥ 8`).
   arms are unchanged (Amendment 2 already governs them).
 - **Why it cannot bias.** As in Amendment 2: skipped retries stay censored; no exact reading
   is created or moved, and P4 is evaluated on the bounds that exist.
+
+## Amendment 4 (2026-10-04, after the first `ℓ = 5` control retry): the controls' degree cap
+
+`K₁/2¹⁷ ℓ = 5` control draw 0 scanned to the registered cap of 12 under 12 GB without
+dying: it pins 15 of its 16 variables from degree 8 on and never the last one, at about 20
+minutes per degree. Amendment 3 ends a cell's control retries only on a death, so the other
+three `ℓ = 5` controls would each spend two hours producing the same `≥ 13`.
+
+- **Change.** In the retry phase, a control is scanned only up to degree 7 (one process per
+  retried draw). Degree 7 is the degree below `rr`'s reading in every cell where `rr`
+  resolved (8 at `ℓ = 5`), so an unrefuted degree-7 run is exactly what P4 needs
+  ("not refuted below `rr`"), and nothing higher is used by any prediction or rule.
+- **Why it cannot bias.** The controls enter the verdict only through P4, which asks for the
+  absence of a refutation below `rr`'s degree; a cap at 7 tests exactly that and leaves the
+  reading censored above it.

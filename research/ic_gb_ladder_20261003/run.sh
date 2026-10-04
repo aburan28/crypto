@@ -17,7 +17,9 @@ MEM_LIMIT=${MEM_LIMIT:-4500000}   # KB of address space per Singular process
 mkdir -p "$OUT/dump"
 # arm: first degree tried, degree cap
 d0() { case $1 in rr) echo 3;; x4) echo 4;; ctrl) echo 3;; esac; }
-dcap() { case $1 in rr) echo 12;; x4) echo 14;; ctrl) echo 12;; esac; }
+dcap() {  # Amendment 4: control retries scan to degree 7 only
+  case $1 in rr) echo 12;; x4) echo 14;; ctrl) if [ "${PHASE:-1}" = 3 ]; then echo 7; else echo 12; fi;; esac
+}
 
 dump_cell() {  # a n ell
   local cell="K$1n$2l$3" cat="$OUT/dump/K$1n$2l$3.catalogue.jsonl"
