@@ -3,6 +3,7 @@
   "date": "2026-10-04",
   "status": "PASS",
   "classification": "correctness_and_storage",
+  "protocol_amendment": "PROTOCOL_STANDALONE.md",
   "curve": {
     "slug": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
     "ec1": "EC1P256Cp256h0523b774e066",
@@ -32,14 +33,20 @@
     "schema": "ecbench.factor_base_dump/v1-wide",
     "bytes": 66020135,
     "sha256": "2c35ed7db8b5c774101c1667dbe7b643f7f6c212799e63c48fc0bc45ca762279",
-    "source_sha256": "c8bf22bb46bd7de23f32faa587328f053bc790a69b4b7762e641ca99ce23f13a",
-    "release_binary_sha256": "fbca2da0ed4ffafc0482bcf75437ca4176234c40e08333633a5efac96de8f3e8",
+    "library_source_sha256": "c44d0d95e1d6ccb68c6bbc456a52091d98081b8704fe19e15affadd9a03f6f40",
+    "cli_source_sha256": "1cda9ac323a697c74a0c5776374c36b81d8b469b79093122fa4b9a1620228e76",
+    "release_binary_sha256": "c7d7fb9a1db48ba3b0ef021dd33ad3894394bbf51c6d8f6ecb141bae5722408e",
     "committed": false,
     "disposition": "deterministic derived data; regenerate with RESULT.md command"
   },
+  "sql_manifest": {
+    "bytes": 77212627,
+    "sha256": "f84c90287838ecd70e4c85c2aa0f15c9d39cc831dafb9fe06574064b5ca841b3"
+  },
   "database": {
     "factor_bases": 1,
-    "factor_base_points": 262478
+    "factor_base_points": 262478,
+    "frozen_ecbench_source_changed": false
   },
   "claims": {
     "f4_degree_measured": false,
