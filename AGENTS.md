@@ -390,9 +390,15 @@ endomorphism discriminant) and identities (ICV1, EC1, curve UID, retired
 names), every `ecbench` method (`ECM1`) and factor base (`FB1`) a
 committed session ran, every tournament candidate identity (`IC1`) the
 repository writes, every tournament round, every committed `ecbench`
-session, and the vocabulary of oracles, solvers and factor-base families.
-It is how a reader gets from a number on the scoreboard to the curve,
-algorithm and evidence behind it.
+session, the vocabulary of oracles, solvers and factor-base families,
+and the **yield ledger**: one row per index-calculus run with its curve,
+target, factor base, oracle, solver, trials, relations, yield, lookups,
+matrix rank and the record's `solver` block (the ICMS `pdp_metrics`:
+system shape, solving degree, Macaulay and SAT figures), which the
+`ecbench` database exposes as the `ic_yield` view. It is how a reader
+gets from a number on the scoreboard to the curve, algorithm and
+evidence behind it, and how a candidate combination is informed: a
+yield is a stage diagnostic, and only a whole-pipeline `S` decides speed.
 
 - **Generated, never edited.** `docs/browser/data.json` is written by
   `python3 scripts/build_lab_browser.py` from committed files only (the
