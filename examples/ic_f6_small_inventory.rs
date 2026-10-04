@@ -1,11 +1,11 @@
 //! Read-only inventory for the n9 F6-IC cold-solve control.
 //! This is not part of the timed worker. It exposes actual usable points
 //! after cofactor projection so candidate IDs never use a nominal bound.
+use crypto_lib::binary_ecc::BinaryPoint;
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     cofactor_project_factor_base, projected_signed_orbit_count, KoblitzCurve,
 };
-use crypto_lib::binary_ecc::BinaryPoint;
 use serde_json::json;
 
 fn main() {
@@ -13,8 +13,8 @@ fn main() {
     let geometric = FactorBaseSpec::StandardSubspace { dimension: 4 }
         .materialize(&curve)
         .expect("standard subspace base");
-    let usable = cofactor_project_factor_base(&curve, &geometric)
-        .expect("nonempty subgroup-usable base");
+    let usable =
+        cofactor_project_factor_base(&curve, &geometric).expect("nonempty subgroup-usable base");
     let identity_images = geometric
         .points
         .iter()

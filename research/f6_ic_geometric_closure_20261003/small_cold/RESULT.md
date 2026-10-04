@@ -9,6 +9,9 @@ points, 14 distinct nonidentity subgroup-usable points, two folded
 columns, three candidate IDs and input hashes are in the [freeze
 receipt](freeze.txt). The three candidates differ in their PDP solver;
 each uses native ordinary relation collection and dense final relation LA.
+The frozen inventory-helper hash names the pre-run source at the recorded
+source commit. A later rustfmt-only edit changed that helper's file bytes;
+it did not change the frozen worker binary, inputs, or measurements.
 
 | IC arm | Inside-worker cold ms | One-target online ms | Cold F4 / arm | Online F4 / arm | Verified log |
 | --- | ---: | ---: | ---: | ---: | ---: |

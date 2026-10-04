@@ -32,8 +32,8 @@ fn main() {
     let curve = KoblitzCurve::new(1, 9).expect("frozen n9 curve");
     let mut rows = Vec::new();
     for path in std::env::args().skip(1) {
-        let raw: Value = serde_json::from_slice(&std::fs::read(&path).expect("run file"))
-            .expect("valid JSON");
+        let raw: Value =
+            serde_json::from_slice(&std::fs::read(&path).expect("run file")).expect("valid JSON");
         let target = point(&raw["fixture"]["targets"][0]);
         let generator = point(&raw["fixture"]["generator"]);
         let scalar = decimal(&raw["solutions"][0]["recovered"]);
@@ -46,8 +46,8 @@ fn main() {
         let phase_closure = phase_sum(&timing["online_phases_ns"]) == online_ns
             && phase_sum(&timing["phases_ns"])
                 == timing["observed_wall_ns"].as_u64().expect("cold interval");
-        let relation_certified = raw["log_table_report"]["verified"] == true
-            && raw["rejected_relations"] == 0;
+        let relation_certified =
+            raw["log_table_report"]["verified"] == true && raw["rejected_relations"] == 0;
         let base: Vec<_> = raw["factor_base"]
             .as_array()
             .expect("factor base")
@@ -75,7 +75,10 @@ fn main() {
                 curve.mul(&generator, &decimal(&column["log"])) == point(&column["point"])
             });
         assert!(
-            group_replay && phase_closure && relation_certified && relations_replayed
+            group_replay
+                && phase_closure
+                && relation_certified
+                && relations_replayed
                 && column_logs_replayed,
             "{path}"
         );
@@ -93,5 +96,8 @@ fn main() {
         }));
     }
     assert_eq!(rows.len(), 3, "three frozen arms");
-    println!("{}", json!({"schema_version":1,"status":"verified","runs":rows}));
+    println!(
+        "{}",
+        json!({"schema_version":1,"status":"verified","runs":rows})
+    );
 }
