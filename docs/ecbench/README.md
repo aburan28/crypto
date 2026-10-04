@@ -552,6 +552,19 @@ Stated so that nothing here is read as more than it is:
   through `perf_event_open` on Linux. macOS, the QEMU guest and most cloud
   VMs expose no hardware counters, and their records carry the reason
   instead of a count.
+- **A separate Callgrind solve count is available on Linux x86-64.** Export
+  a frozen child input with `ecbench profile-input --spec SPEC --seq N`, run
+  `ECBENCH_CALLGRIND_SOLVE=1 valgrind --tool=callgrind --cache-sim=no
+  --branch-sim=no --callgrind-out-file=PREFIX ecbench exec < INPUT.json`,
+  then read it with `ecbench callgrind-ir --prefix PREFIX`. The parser counts
+  every numbered part after the pre-solve reset through the post-solve reset,
+  including internal phase dumps, and rejects missing markers. This is a
+  complete user-space **implementation** instruction count for the one solve;
+  it has its own `callgrind.Ir` unit. It is not a PMU count or an isolated
+  native wall-time result. Keep its binary, Valgrind version, CPU feature
+  dispatch, input, child output, and raw parts together. The
+  [n37 protocol](../../research/ecbench_callgrind_solve_20261004/PROTOCOL.md)
+  freezes a same-target IC/rho census using this path.
 - **Rho's distinguished-point table is not counted.** Its stores happen
   once per distinguished point, a vanishing fraction of steps. BSGS and
   the kangaroo count their table operations.

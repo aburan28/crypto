@@ -165,6 +165,20 @@ assert.equal(rankColumnsAudit.replays.length, 320);
 assert.ok(rankColumnsAudit.replays.every(row => row.reproduced));
 assert.equal(rankColumns.independent_audit_sha256, rankColumnsAuditSha);
 const rankColumnsAuditPin = {path:rankColumnsAuditPath, sha256:rankColumnsAuditSha};
+const callgrindPath = 'research/ecbench_callgrind_solve_20261004/DECISION.json';
+const callgrindBytes = readFileSync(resolve(ROOT, callgrindPath));
+const callgrindSha = 'c4bd4b3b8e1e95520bca5507706b2434eb8bdfb7d7281fdfd6998a71b18dd3aa';
+assert.equal(sha(callgrindBytes), callgrindSha, 'n37 whole-solve instruction decision changed.');
+const callgrind = JSON.parse(callgrindBytes);
+assert.equal(callgrind.unit, 'callgrind.Ir');
+assert.equal(callgrind.workloads, 8);
+assert.equal(callgrind.profiles, 32);
+assert.equal(callgrind.all_archived_and_profiled_scalars_verified, true);
+assert.equal(callgrind.decision, 'retain_k16_instruction_lead');
+assert.equal(callgrind.comparisons[0].numerator, 'ic-k16');
+assert.equal(callgrind.comparisons[0].denominator, 'ic-k42');
+assert.equal(callgrind.comparisons[1].denominator, 'rho-strong');
+const callgrindPin = {path:callgrindPath, sha256:callgrindSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -250,12 +264,13 @@ const front = `
 
 <section class="dash-section" id="n37-rank-columns-20261004" aria-labelledby="rank-columns-title">
 <div class="dash-section-head"><div><p class="dash-kicker">n37 / eight one-target workloads / factor-base sweep</p><h2 id="rank-columns-title">16 folded columns cut counted cold work; rho remains ahead in this diagnostic.</h2></div><span class="status neutral">Independent replay · L0 counts</span></div>
-<p class="dash-section-intro panel-summary">The preregistered K={4,8,12,16,24,42} sweep solved the same eight public points with each base and strong signed-Frobenius rho, five times per point. All 320 measured executions verified and replayed exactly on another host class. K16 has 1,184 actual usable points and rank 16/16. Its cold counted GAE is 0.349 of K42, 95% interval [0.343, 0.359], passing the frozen engineering gate; K8 is statistically close. These are incomplete cost lower bounds, not an accepted attack speedup.</p>
+<p class="dash-section-intro panel-summary">The preregistered K={4,8,12,16,24,42} sweep solved the same eight public points with each base and strong signed-Frobenius rho, five times per point. All 320 measured executions verified and replayed exactly on another host class. K16 has 1,184 actual usable points and rank 16/16. Its cold counted GAE is 0.349 of K42, 95% interval [0.343, 0.359], passing the frozen engineering gate; K8 is statistically close. A separate whole-solve Callgrind census confirms K16/K42 at ${f(callgrind.comparisons[0].ratio_of_sums)} [${f(callgrind.comparisons[0].bootstrap_95[0])}, ${f(callgrind.comparisons[0].bootstrap_95[1])}] but finds K16/rho at ${f(callgrind.comparisons[1].ratio_of_sums)} [${f(callgrind.comparisons[1].bootstrap_95[0])}, ${f(callgrind.comparisons[1].bootstrap_95[1])}] in that separate instruction unit. Isolated online wall speed remains unknown.</p>
 <div class="table-scroll"><table><caption>Cold counted GAE lower-bound S per √r; 40 verified one-target runs per arm on the same Q panel. The IC/rho quotient is a ratio of incomplete cost estimates and does not bound true speed.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Mean cold S</th><th>Counted IC / rho diagnostic</th></tr></thead><tbody>
 <tr><td>Strong signed-Frobenius rho</td><td>—</td><td>—</td><td>${f(rankColumns.reference.mean_cold_s_lower_bound,3)}</td><td>1.000</td></tr>
 ${rankColumns.candidates.map(row => `<tr><td>${escape(row.arm)}</td><td>${row.usable_points.toLocaleString('en-US')}</td><td>${row.folded_columns}</td><td>${f(row.mean_cold_s_lower_bound,3)}</td><td>${f(row.cold_counted_over_rho_diagnostic,3)}</td></tr>`).join('\n')}
 </tbody></table></div>
 <p class="dash-footnote">K16's counted preparation mean is 31,312.49 GAE and its target-dependent mean is 748.32 GAE; K42 is 91,712.76 plus 156.89. K16/K8 is 0.990 [0.927, 1.057], so a fresh confirmation should test both. The identical K42 control had a counted A/A ratio of 1.000. The Mac producer is L0 and field arithmetic, hashing, allocation and modular combination are unpriced in both methods; online wall speedup and fully priced cold speedup remain unset. The independent Linux receipt reproduces ${rankColumnsAudit.replays.length}/${rankColumnsAudit.replays.length} measured records, not an isolated producer timing. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.md">Decision and limitations</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.json">Native analysis</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/independent_validation/README.md">Replay evidence →</a></p>
+<p class="dash-footnote">A follow-on whole-solve Callgrind census on the same eight public points counts field, hash, allocation and other user-space work inside the implementation: K16/K42 is ${f(callgrind.comparisons[0].ratio_of_sums)} [${f(callgrind.comparisons[0].bootstrap_95[0])}, ${f(callgrind.comparisons[0].bootstrap_95[1])}], but K16 still costs ${f(callgrind.comparisons[1].ratio_of_sums)} [${f(callgrind.comparisons[1].bootstrap_95[0])}, ${f(callgrind.comparisons[1].bootstrap_95[1])}] times strong rho in this separate instruction unit. All ${callgrind.profiles} profiles reproduced the archived logs and the K42 A/A maximum difference was ${(100*callgrind.aa_max_absolute_relative_deviation).toFixed(4)}%. This is neither native wall time nor the primary online speed metric; K8 remains unprofiled. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Frozen instruction decision and raw replay →</a></p>
 </section>
 
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
@@ -282,13 +297,14 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
   shared_rank_ecbench: sharedEcbench,
   shared_rank_independent_replay: {session_id:sharedIndependent.session_id, auditor_env_class_id:sharedIndependent.auditor_env_class_id, replays:sharedIndependent.replays.length, receipt_sha256:sharedIndependentSha, claim_check_status:sharedIndependentCheck.status},
   n37_rank_columns: rankColumns,
+  n37_callgrind: callgrind,
   n37_rank_columns_independent_replay: {session_id:rankColumnsAudit.session_id, auditor_env_class_id:rankColumnsAudit.auditor_env_class_id, replays:rankColumnsAudit.replays.length, receipt_sha256:rankColumnsAuditSha},
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
   historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),

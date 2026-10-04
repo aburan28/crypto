@@ -830,7 +830,10 @@ def page(doc: dict, standalone: bool) -> str:
              f'and K16/K42 is {d["cold_counted_over_k42_diagnostic"]:.3f}. Both arms leave native '
              'work unpriced, and L0 timing gives no admitted online speedup. These figures are not '
              'comparable to tables A–C. '
-             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(d["source"])}">Frozen decision</a>.</p></section>')
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(d["source"])}">Frozen decision</a>. '
+             'A separate whole-solve Callgrind census finds K16/K42 = 0.367 and K16/rho = 4.461 '
+             'in simulated instructions on eight paired points; native wall and online speed remain unknown. '
+             '<a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Raw instruction replay</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

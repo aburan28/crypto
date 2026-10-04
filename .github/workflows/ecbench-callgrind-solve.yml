@@ -1,0 +1,120 @@
+name: ecbench Callgrind solve census
+
+on:
+  pull_request:
+    paths:
+      - 'src/bin/ecbench.rs'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ic_measurement.rs'
+      - 'examples/ecbench_callgrind_analyze.rs'
+      - 'research/ecbench_callgrind_solve_20261004/**'
+      - '.github/workflows/ecbench-callgrind-solve.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install frozen profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Build and test the native boundary/parser
+        run: |
+          cargo test --release --lib cryptanalysis::ecbench::callgrind
+          cargo build --release --bin ecbench
+      - name: Profile the frozen 32 one-target jobs
+        run: |
+          out="$RUNNER_TEMP/ecbench-callgrind-solve"
+          mkdir -p "$out"
+          spec=research/ecbench_n37_rank_columns_20261004/SPEC.json
+          jobs=research/ecbench_callgrind_solve_20261004/JOBS.json
+          {
+            git rev-parse HEAD
+            git status --short
+            rustc -Vv
+            cargo -V
+            valgrind --version
+            uname -a
+            lscpu
+            sha256sum target/release/ecbench "$spec" "$jobs" \
+              research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl
+          } > "$out/PROVENANCE.txt"
+          test "$(jq 'length' "$jobs")" = 32
+          : > "$out/rows.jsonl"
+          while IFS=$'\t' read -r seq arm workload seed expected; do
+            dir="$out/seq-$seq"
+            mkdir -p "$dir"
+            ./target/release/ecbench profile-input --spec "$spec" --seq "$seq" > "$dir/input.json"
+            jq -e --arg w "$workload" --arg seed "$seed" \
+              '.expected_workload_id == $w and (.algorithm_seed | tostring) == $seed' \
+              "$dir/input.json" > /dev/null
+            status=verified
+            if ECBENCH_CALLGRIND_SOLVE=1 timeout 120s valgrind \
+              --tool=callgrind --cache-sim=no --branch-sim=no \
+              --callgrind-out-file="$dir/profile" \
+              ./target/release/ecbench exec < "$dir/input.json" \
+              > "$dir/child.json" 2> "$dir/valgrind.log"; then
+              if ! ./target/release/ecbench callgrind-ir --prefix "$dir/profile" \
+                > "$dir/ir.tmp" 2> "$dir/ir.err"; then
+                status=profile_error
+              else
+                mv "$dir/ir.tmp" "$dir/ir.json"
+              fi
+              method=$(jq -r '.expected_method_id' "$dir/input.json")
+              if ! jq -e --arg w "$workload" --arg m "$method" --arg k "$expected" \
+                '.error == null and .workload_id == $w and .method_id == $m
+                 and .report.exhausted == false
+                 and (.report.recovered | tostring) == $k' \
+                "$dir/child.json" > /dev/null; then
+                status=wrong_or_unverified_answer
+              fi
+            else
+              status=execution_error
+            fi
+            if [ -f "$dir/ir.json" ]; then
+              ir=$(jq -r '.solve_ir' "$dir/ir.json")
+            else
+              ir=null
+            fi
+            jq -cn --argjson seq "$seq" --arg arm "$arm" \
+              --arg workload_id "$workload" --arg algorithm_seed "$seed" \
+              --arg expected_recovered "$expected" --arg status "$status" \
+              --argjson solve_ir "$ir" \
+              '{seq:$seq,arm:$arm,workload_id:$workload_id,
+                algorithm_seed:$algorithm_seed,expected_recovered:$expected_recovered,
+                status:$status,solve_ir:$solve_ir}' \
+              >> "$out/rows.jsonl"
+            sha256sum "$dir"/* > "$dir/SHA256SUMS"
+            echo "seq $seq $arm $status Ir=$ir"
+          done < <(jq -r '.[] | [.seq,.arm,.workload_id,.algorithm_seed,.expected_recovered] | @tsv' "$jobs")
+          jq -s '{schema:"ecbench.callgrind_census/v1",unit:"callgrind.Ir",rows:.}' \
+            "$out/rows.jsonl" > "$out/CENSUS.json"
+          test "$(wc -l < "$out/rows.jsonl")" -eq 32
+          jq -s -e 'all(.[]; .status == "verified" and (.solve_ir | type) == "number")' \
+            "$out/rows.jsonl" > /dev/null
+      - name: Independently replay the committed raw archive and decision
+        run: |
+          dir=research/ecbench_callgrind_solve_20261004
+          test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
+            809f19a0b784e7ecf08f74c372a16d8a6afe4aff817eb1d2d8168ce676901420
+          mkdir -p "$RUNNER_TEMP/ecbench-archive-replay"
+          unzip -q "$dir/RAW-CALLGRIND.zip" -d "$RUNNER_TEMP/ecbench-archive-replay"
+          cargo build --release --example ecbench_callgrind_analyze
+          target/release/examples/ecbench_callgrind_analyze \
+            "$RUNNER_TEMP/ecbench-archive-replay" "$dir/JOBS.json" \
+            research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl \
+            "$RUNNER_TEMP/ecbench-archive-decision.json"
+          cmp "$RUNNER_TEMP/ecbench-archive-decision.json" "$dir/DECISION.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecbench-callgrind-solve-census
+          path: ${{ runner.temp }}/ecbench-callgrind-solve
+          if-no-files-found: error
