@@ -67,6 +67,25 @@ cargo build --release --bin ecbench
 ./target/release/ecbench db sql /tmp/ecbench/smoke-1 | sqlite3 -bail ecbench.db
 ```
 
+Wide registered curves whose coordinates do not fit the measured harness's
+`u64` group types can still carry canonical factor-base inventories.  The
+native P-256 Dickson builder writes the same object layout and FB1 preimage,
+with its unavoidable wide integers labelled explicitly:
+
+```bash
+./target/release/p256_factor_base \
+  --curve icv1-fp256-t89188191154553853111372247798585809583-f188c491 \
+  --factor-base dickson-torus:depth=18 \
+  --out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.json \
+  --sql-out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.sql \
+  --relation-length 17 \
+  --verify
+```
+
+The standalone builder keeps the sealed `ecbench` measurement path unchanged.
+Its `ecbench.factor_base_dump/v1-wide` inventory and SQL companion use the
+same factor-base tables, but neither is an `ic.pipeline` measurement.
+
 `ecbench methods` lists every method and its parameters; `ecbench host`
 prints the host capsule; `ecbench claim build` turns an IC run and a
 strong-rho run on a public target into a checked `vs_rho` claim (§9). On Linux `run` reserves a whole core by default
@@ -175,6 +194,14 @@ different fact sets. The two claim identities are hashed the way
 `identity.py` hashes them (UTF-8, not ASCII-escaped) and are pinned
 against its values in `claim.rs`'s tests, so a claim built here and a
 tournament candidate with the same inputs carry the same id.
+
+Ordinary factor-base dumps encode group keys as eight-byte big-endian
+integers and coefficients as `u64`.  `factor_base_dump/v1-wide` preserves the
+table and identity layout but stores curve integers and coefficients as
+decimal strings.  Its family declares its fixed-width key encoding as an
+identity-bound parameter; the P-256 Dickson family uses 33-byte big-endian
+`((x+1)<<1)|sign` keys.  A wide dump may use an FB1 identity because the FB1
+preimage is unchanged; it may not claim the ordinary v1 dump schema.
 
 ## 5. Confounders, and how each one is controlled
 
@@ -541,7 +568,9 @@ Stated so that nothing here is read as more than it is:
 - **Word-size curves only.** The counted group types hold `GF(p)` with
   `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
   (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it.
+  it. `p256_factor_base` only constructs and inventories a factor base on the
+  registered wide curve; it does not make that curve runnable by
+  `ic.pipeline` and produces no operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a
