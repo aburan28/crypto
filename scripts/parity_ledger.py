@@ -398,6 +398,37 @@ def print_cover(cv, title, label):
 
 
 
+def walk(name):
+    """The isogeny walk to a weak curve (note §13): per size, the weak
+    fraction among curves with full 2-torsion, the walks' outcomes, the
+    steps when a weak curve was reached, and the cost per step."""
+    return load(name)
+
+
+def print_walk(rows, rows2, title):
+    print(f"\n## {title}\n")
+    print("A curve over F_{q³} with full 2-torsion is in the weak class exactly when one of its three cross-ratios (e₃ − e₁)/(e₂ − e₁) has norm one down to F_q (note §13): `weak × q` is the sampled fraction times q (the derivation says 3).  Walks start from a random full-2-torsion curve and step by uniformly chosen rational 2- and 3-isogenies (`2+3`) or 2-isogenies alone (`2`); `found` reached a weak curve, `exhausted` saw no new j for 50·(distinct j) steps, `capped` hit the step cap; `steps` are over the walks that found one.  Cost in F_p multiplications; the last columns price a walk of q/3 steps (the expectation if the walk sampled the class) against rho on the 2^{bits} subgroup the route would attack at that p.\n")
+    print("| p | q | weak × q (sampled) | isogenies | walks found / exhausted / capped | steps median / mean (q/3) | distinct j mean | muls per step | muls per walk mean | (q/3)·step cost | rho at p | ratio |")
+    print("|---:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|")
+    for r, lab in [(x, "2+3") for x in rows] + [(x, "2") for x in rows2]:
+        p = r["p"]; q = r["q"]
+        rho = 1.3 * math.sqrt(p ** 6 / 4) * 331
+        walk_cost = r["q_over_3"] * r["mean_muls_per_step"]
+        print(f"| {p} | {q} | {r['weak_fraction_times_q']:.2f} ({r['sampled']:,}) | {lab} | {r['found']} / {r['exhausted']} / {r['capped']} | {r['median_steps']:.0f} / {r['mean_steps']:.0f} ({r['q_over_3']:.0f}) | {r['mean_distinct']:.1f} | {r['mean_muls_per_step']:,.0f} | {r['mean_muls']:.3e} | {walk_cost:.3e} | {rho:.3e} | {walk_cost / rho:.3f} |")
+    for rows_, lab in [(rows, "2+3"), (rows2, "2")]:
+        if len(rows_) >= 3:
+            ps = [r["p"] for r in rows_]
+            cs = [r["mean_muls_per_step"] for r in rows_]
+            a, se = fit(ps, cs)
+            top = rows_[-1]
+            # (q/3)·c(p) = 1.3·(p³/2)·331  ⇒  p = c(p)·(2/3)/(1.3·331) with c(p) ∝ p^a from the top size
+            c_top = top["mean_muls_per_step"]; p_top = top["p"]
+            # solve p^(1−a) = c_top·p_top^(−a)·2/(3·1.3·331)
+            k = c_top * p_top ** (-a) * 2.0 / (3.0 * 1.3 * 331)
+            p_star = k ** (1.0 / (1.0 - a)) if a < 1 else float("inf")
+            print(f"\n{lab}: step cost ∝ p^{a:.2f} ± {se:.2f}; a walk of q/3 steps costs rho's at p* ≈ {p_star:,.0f} (subgroup ≈ 2^{6 * math.log2(p_star) - 2:.0f}) on this extrapolation, below rho above it.")
+
+
 
 def main():
     print("# The parity ledger (printed by scripts/parity_ledger.py)\n")
@@ -535,6 +566,10 @@ def main():
                 fa = mean([cv["sizes"][p]["f4"] for p in common]); fb = mean([cvs["sizes"][p]["f4"] for p in common])
                 stopped = sum(cvs["sizes"][p]["stopped"] for p in common); tests = sum(cvs["sizes"][p]["random"] + cvs["sizes"][p]["constructed"] for p in common)
                 print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {stopped} of {tests} tests stopped at the staircase.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
+    wk = walk("34_jv_isogeny_walk.json")
+    wk2 = walk("34_jv_isogeny_walk_two_only.json") or []
+    if wk:
+        print_walk(wk, wk2, "G. The isogeny walk to a weak curve (34_jv_isogeny_walk*.json; note §13)")
     print("\n## C. What parity needs, per route\n")
     if k4:
         for bits in (80, 128, 160):

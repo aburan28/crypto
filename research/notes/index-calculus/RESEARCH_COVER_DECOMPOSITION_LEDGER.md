@@ -3,7 +3,7 @@
 **Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9).  §3's predictions were not edited after the runs.
 **Literature:** Joux and Vitse, *Cover and decomposition index calculus on elliptic curves made practical* (Eurocrypt 2012, ePrint 2011/020), cited below as **[JV12]**.  Every figure marked *cited* is theirs, from their Magma and C runs on other hardware, and is here only to set the registered range; none of it is a measurement of this repository.
 **Ledger:** `RESEARCH_RHO_PARITY_PROGRAMME.md` (the routes on generic curves, all of which stay bounded away from `S / rho = 1` at machine size: `k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^200`); `RESEARCH_K5_TORSION_JOUX_VITSE.md` (the last of them).
-**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}` for §10 (F4 stopped at the Bézout staircase, 2026-10-04); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
+**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}` for §10 (F4 stopped at the Bézout staircase, 2026-10-03); `experiments/32_jv_cover_sieve_*.{json,log}` for §11 (the sieve); `experiments/34_jv_isogeny_walk*.{json,log}` for §13 (the isogeny walk, priced, 2026-10-04; ledger section G); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
 
 ## 1. Why this route is a different kind of entry
 
@@ -143,7 +143,7 @@ None of the four touched the group arithmetic or the transfer, which the tests c
 
 **Not measured, and not to be read into the numbers:**
 
-- The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.
+- The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.  **Priced in §13 (2026-10-04):** the class is `3/q` of the curves with full 2-torsion (a cross-ratio of norm one), a 2,3-isogeny step costs `3–7·10⁵` multiplications, and a walk of `q/3` steps is above rho below `p ≈ 8,000`; no walk of that round sampled a whole class.
 - Any size at which the crossover itself occurs (`ℓ ≈ 2^{67}`, above the harness's range), and any curve outside `F_{p⁶}`.
 - The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C, which would move `p*` down by `≈ √960`; cited, not built, and not a measurement of this repository.
 - Anything about a deployed curve: prime-field curves and extension-field curves of prime order outside this form are untouched, and nothing here is a claim about them.
@@ -219,3 +219,91 @@ at every size, with the route's exponent untouched.  Class:
 **engineering**.  Nothing in §9 changes: the weak class, the unpriced
 isogeny walk and the unbuilt sieve are as they were, and the extrapolated
 `2^{65}` is an extrapolation on a toy range exactly as `2^{67}` was.
+
+---
+
+## 13. The isogeny walk, priced (2026-10-04; `experiments/34_jv_isogeny_walk*.json`, ledger section G)
+
+§9's one unpriced item: [JV12] §4.1 estimate the walk from a curve of
+order divisible by `4` to a weak isogenous one at `≈ q = p²` low-degree
+isogeny steps, "the dominating phase", cited and conjectural.  Two things
+were needed to price it: a test of the weak class that does not go through
+the cover, and a walk.
+
+**The test** (`src/cryptanalysis/jv_isogeny_walk.rs`).  A curve with full
+rational 2-torsion, `y² = (x − e₁)(x − e₂)(x − e₃)` over `F_{q³}`, has a model
+of the weak form with `e₁ ↦ ρ ∈ F_q` and `e₂, e₃ ↦ α, σ(α)` exactly when an
+`F_{q³}`-affine `φ(x) = (x − r)/v` sends `e₁` into `F_q` and `e₃` to the
+`σ`-conjugate of `φ(e₂)`.  Eliminating `r` and `v`: with `a = φ(e₂)` and
+`c = (e₃ − e₁)/(e₂ − e₁)`, `σ(a) − ρ = c·(a − ρ)`, whose only solution is
+the degenerate `a = ρ` unless the `F_q`-linear map `a ↦ σ(a) − c·a` is
+singular, i.e. **`N_{F_{q³}/F_q}(c) = 1`**.  So the weak class is the curves
+with full 2-torsion one of whose three cross-ratios has norm one: an
+isomorphism invariant, one `F_q`-condition, `3/q` of the curves with full
+2-torsion.  The instances of §6 all pass it (and their images under
+`x ↦ u²x + r`); random full-2-torsion curves pass at `2.78–3.16/q` over
+`40,000` samples at each of seven sizes.  A brute-force search over every
+`r ∈ F_{q³}` at `p = 5, 7, 11` found the same curves weak and the same
+`q` models for each (the choice of `ρ`).
+
+**The walk.**  From a random curve with full 2-torsion, uniformly chosen
+rational 2-isogenies (Vélu on a 2-torsion point; the target keeps full
+2-torsion when the product of the other two roots is a square) and
+3-isogenies (Vélu on a root of the 3-division polynomial, found over
+`F_{q³}`), until a weak curve, or until `50·(distinct j)` steps pass without a
+new `j`-invariant (the reachable component is exhausted), or a cap.  Forty
+walks at each of `p = 7, 11, 13, 17, 23, 31, 53`, with 2- and 3-isogenies
+and with 2-isogenies alone:
+
+| `p` | `q` | isogenies | found / exhausted / capped | steps (median, found) | `q/3` | distinct `j` (mean) | `F_p` muls per step | a walk of `q/3` steps / rho at `p` |
+|--:|--:|:--|:--|--:|--:|--:|--:|--:|
+| 7 | 49 | 2+3 | 21 / 19 / 0 | 5 | 16 | 8.5 | `2.6·10⁵` | `57` |
+| 13 | 169 | 2+3 | 13 / 26 / 1 | 17 | 56 | 55 | `4.2·10⁵` | `50` |
+| 23 | 529 | 2+3 | 15 / 25 / 0 | 29 | 176 | 21 | `3.8·10⁵` | `26` |
+| 31 | 961 | 2+3 | 14 / 24 / 2 | 580 | 320 | 180 | `5.0·10⁵` | `25` |
+| 53 | 2809 | 2+3 | 6 / 33 / 1 | 4,549 | 936 | 115 | `6.8·10⁵` | `20` |
+| 53 | 2809 | 2 only | 4 / 36 / 0 | 2,315 | 936 | 18 | `4.1·10⁴` | `1.2` |
+
+(the full table with `p = 11, 17` and every 2-only row is section G.)
+
+**What it says.**  Three things, in the order of their weight.
+
+1. **The reachable components are small.**  With 2- and 3-isogenies a walk
+   sees `9–180` distinct `j`-invariants before it exhausts its component;
+   with 2-isogenies alone `5–77`.  An isogeny class over `F_{q³}` has
+   `≈ q^{3/2}` curves (`150,000` at `p = 53`), so the 2,3-graph reaches a
+   small fraction of it, and `60–90 %` of the walks end in a component with
+   no weak curve.  [JV12]'s `≈ q` is for a walk that samples the class;
+   making one needs larger isogeny degrees (`5, 7, …`, each a root-finding
+   over `F_{q³}` and a Vélu formula), which this round did not build.  The
+   figure "`q` steps" is therefore **neither confirmed nor refuted** here:
+   where a walk found a weak curve it did so in `q/3 ± 10×` steps (medians
+   from `0.3·q/3` at `p = 7` to `4.9·q/3` at `p = 53`), consistent with a
+   density `3/q` seen through small components.
+2. **The density is measured: `3/q`, not `1/q`.**  Three cross-ratios, one
+   condition each.  With a walk that did sample the class the expectation
+   would be `q/3` steps, a third of [JV12]'s estimate.
+3. **The step is not cheap, and it is the walk's whole price.**  A 2,3-step
+   costs `2.6·10⁵` to `6.8·10⁵` `F_p` multiplications (`∝ p^{0.40 ± 0.08}`;
+   the 3-division polynomial's roots over `F_{q³}` are most of it), a
+   2-step `1.9–4.1·10⁴`.  A walk of `q/3` such steps costs **more than rho
+   itself** at every size the harness reaches: `57×` rho at `p = 7` down to
+   `20×` at `p = 53` with 2,3-steps (`1.2×` at `53` with 2-steps), and on the
+   measured step-cost slope it crosses below rho at `p ≈ 8,000`
+   (`≈ 2^{76}`) with 2,3-steps, `p ≈ 70` with 2-steps.  The walk's cost grows
+   as `p^{2.4}` against rho's `p³`, so it is eventually negligible, as
+   [JV12] say of their sizes (`p ≈ 2^{25}`); at the sizes where this ledger
+   measured the route it is the largest term of all — larger than the
+   descent and the sieve together at `p = 1009` by an order of magnitude.
+
+**Class: accounting.**  The weak-class test is a derivation of an
+isomorphism invariant (one line of algebra, checked against brute force),
+the walk is Vélu's formulas and root finding, the numbers are measurements
+at toy sizes, and the one cited figure is left as cited.  §9's "unpriced"
+becomes: *priced at `≈ (q/3) · c_step` with `c_step` measured, above rho
+below `p ≈ 8,000` with 2,3-isogenies, and with the caveat that no walk of
+this round sampled a whole isogeny class.*  Nothing about a generic or
+deployed curve follows: a curve of order divisible by `4` is in the walk's
+reach only through its class, and the class's weak members are `3/q` of its
+full-2-torsion curves.
+
