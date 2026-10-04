@@ -240,3 +240,15 @@ three `ℓ = 5` controls would each spend two hours producing the same `≥ 13`.
 - **Why it cannot bias.** The controls enter the verdict only through P4, which asks for the
   absence of a refutation below `rr`'s degree; a cap at 7 tests exactly that and leaves the
   reading censored above it.
+
+## Amendment 5 (2026-10-04, at the end of the retry phase): no control retries at `ℓ ≥ 7`
+
+Every `rr` and `x4` retry has run, every `ℓ ≤ 6` control has had its retry, and the phase
+had reached the `ℓ = 7` control, which was 31 minutes into degree 6 under 12 GB. The `ℓ ≥ 7`
+cells have no exact `rr` reading, so P4 ("not refuted below `rr`") has nothing to compare a
+control against there, and no other rule reads a control.
+
+- **Change.** The `ℓ ≥ 7` controls are not retried; they keep their phase-1 bound (`≥ 6`).
+  The `ℓ = 7` control's degree-6 process was stopped without a line being written.
+- **Why it cannot bias.** As in Amendments 2–4: a censored control stays censored, and no
+  prediction or rule at `ℓ ≥ 7` uses one.
