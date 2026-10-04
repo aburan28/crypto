@@ -19,6 +19,11 @@ verified relations, with zero failed rank attempts and zero target failures.
 | r7 | 0.132875 | 0.144500 | 1.0875 | pass |
 | Median | 0.136063 | 0.144334 | **1.0780** (paired median) | 6/6 pass |
 
+The separately calculated median of the six paired **IC/rho** ratios is
+`0.9276907676250028` (shown as `0.927691` on the progress chart). With an
+even number of pairs, that is not exactly the reciprocal of the displayed
+median rho/IC ratio.
+
 The paired ratio spans **0.6433–1.1420** on this unisolated Apple M4 Pro
 (14 cores, 48 GB RAM; Darwin 25.6.0). It changes direction between pairs.
 These sub-millisecond wall times are **exploratory**: there is no exclusive
