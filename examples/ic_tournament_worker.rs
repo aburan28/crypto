@@ -198,7 +198,7 @@ fn run(job: &Job) -> Result<Value, String> {
             || !job.exclusive_phases
             || job.degree != 17
             || job.curve_a != 1
-            || !matches!(job.config.solver.as_str(), "f4" | "f5")
+            || !matches!(job.config.solver.as_str(), "f4" | "f5" | "inherited_f4")
             || job.config.summands != 3
             || job.config.groebner_degree != 3
             || job.config.linear_algebra != "dense")
