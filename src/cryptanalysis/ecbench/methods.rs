@@ -34,6 +34,9 @@ use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
     GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
 };
+use crate::cryptanalysis::ic_framework::shared_rank::{
+    run_shared_rank_targets, SharedRankSpec, SharedTargetSpec,
+};
 use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
 use crate::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
@@ -215,6 +218,35 @@ pub fn registry() -> &'static [MethodDecl] {
                     name: "solver_budget_seconds",
                     default: Some("0"),
                     help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
+                },
+            ],
+        },
+        MethodDecl {
+            id: "ic.shared_rank",
+            family: "ic",
+            summary: "target-blind full-rank Koblitz relation log followed by point-only signed-Frobenius m3 target descent; native work remains visible and unpriced",
+            entry: "ic_framework::shared_rank::run_shared_rank_targets",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "factor_base",
+                    default: None,
+                    help: "compact-orbit-scan:columns=N,raw_x_cap=M; exact base construction",
+                },
+                ParamDecl {
+                    name: "rank_seed",
+                    default: None,
+                    help: "seed of the target-blind relation search",
+                },
+                ParamDecl {
+                    name: "rank_max_trials",
+                    default: None,
+                    help: "target-blind relation trial cap",
+                },
+                ParamDecl {
+                    name: "target_max_attempts",
+                    default: None,
+                    help: "direct Q query followed by at most this many total residual attempts",
                 },
             ],
         },
@@ -596,7 +628,10 @@ pub fn solve(
     let session = measurement::Session::begin().ok();
     let mut rep = solve_inner(m, inst, curve, d, tx, ty, seed)?;
     match session.map(|s| s.finish()) {
-        Some(Ok(snap)) => rep.online = online_window(d.family, &m.id, &snap),
+        Some(Ok(snap)) if rep.online.is_none() => {
+            rep.online = online_window(d.family, &m.id, &snap)
+        }
+        Some(Ok(_)) => {} // A method with its own five-phase online clock supplied the window.
         Some(Err(e)) => rep.online_error = Some(e.to_string()),
         None => rep.online_error = Some("a measurement session was already active".into()),
     }
@@ -613,6 +648,9 @@ fn solve_inner(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match (inst, d.family) {
+        (Instance::Binary(i), _) if m.id == "ic.shared_rank" => {
+            solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
         (Instance::Prime(i), "ic") => solve_ic_prime(m, i, curve, PrimePoint::affine(tx, ty), seed),
         (Instance::Binary(i), "ic") => {
             solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
@@ -722,6 +760,7 @@ fn solve_strong(
     target: FastPoint,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    let profile_online = std::env::var("ECBENCH_CALLGRIND_TARGET").as_deref() == Ok("1");
     let kc = inst.koblitz.as_ref().ok_or("not a Koblitz instance")?;
     let params = StrongRhoParams {
         lanes: param_u64(m, "lanes")?.max(1) as usize,
@@ -740,9 +779,15 @@ fn solve_strong(
     let setup_mults = charges.scalar_multiplications;
     let mut start_rng = StdRng::seed_from_u64(seed);
     let q = StrongPoint::from_binary(&inst.fast.lower(target));
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_before_online\0");
+    }
     measurement::begin_online(Phase::RhoSolve);
     let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
     measurement::end_online();
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_online\0");
+    }
     let wall = t.elapsed().as_nanos() as u64;
     let detail = json!({
         "reference": "koblitz_strong_rho::StrongRho, the single-target reference of docs/ic/boundary_targets.json since 2026-10-01",
@@ -1158,6 +1203,222 @@ fn solve_ic_binary(
         2
     };
     Ok(ic_report(m, rep, &calib, facts, wall, a))
+}
+
+/// The reusable, target-blind rank variant.  The library owns its exclusive
+/// five-phase target clock; `ecbench` retains that clock instead of trying to
+/// infer the online interval from the whole (mostly setup) process.
+fn solve_shared_rank(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    curve: &CurveFacts,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    if inst.koblitz.is_none() {
+        return Err("ic.shared_rank needs a Koblitz instance".into());
+    }
+    let (name, params) = Params::parse_spec(&m.params["factor_base"])?;
+    if name != "compact-orbit-scan"
+        || params.0.len() != 2
+        || !params.0.contains_key("columns")
+        || !params.0.contains_key("raw_x_cap")
+    {
+        return Err("ic.shared_rank needs exactly compact-orbit-scan:columns=N,raw_x_cap=M".into());
+    }
+    let rank_spec = SharedRankSpec {
+        columns: usize::try_from(params.u64("columns")?).map_err(|_| "columns do not fit usize")?,
+        raw_x_cap: params.u64("raw_x_cap")?,
+        rank_seed: param_u64(m, "rank_seed")?,
+        max_trials: param_u64(m, "rank_max_trials")?,
+    };
+    let target_spec = SharedTargetSpec {
+        residual_seed: seed,
+        max_attempts: u32::try_from(param_u64(m, "target_max_attempts")?)
+            .map_err(|_| "target_max_attempts do not fit u32")?,
+    };
+    let calib = pinned_only_calibration("koblitz", &curve.slug);
+    let mut point_bytes = b"ecbench-shared-rank-point-v1\0".to_vec();
+    point_bytes.extend_from_slice(&target.x.to_le_bytes());
+    point_bytes.extend_from_slice(&target.y.to_le_bytes());
+    let started = Instant::now();
+    let report = run_shared_rank_targets(
+        inst,
+        &rank_spec,
+        &target_spec,
+        &[target],
+        sha256_hex(&point_bytes),
+        &calib,
+    )?;
+    let wall = started.elapsed().as_nanos() as u64;
+    let row = report
+        .targets
+        .first()
+        .ok_or("shared rank returned no target")?;
+    let recovered = row.recovered_log;
+    let phases = vec![
+        phase_of("factor_base", &report.rank.base),
+        phase_of("oracle_setup", &report.rank.table),
+        phase_of("relations", &report.rank.rank_search),
+        phase_of("linear_algebra", &report.rank.linear_algebra),
+        phase_of("verify", &report.rank.verification),
+        phase_of("target_query", &row.query),
+        phase_of("target_PDP", &row.pdp),
+        phase_of("target_relation_check", &row.relation_check),
+        phase_of("target_descent", &row.descent),
+        phase_of("target_recovery_check", &row.recovery_check),
+    ];
+    let mut counters = BTreeMap::new();
+    counters.insert("rank_trials".into(), report.rank.trials);
+    counters.insert("rank_hits".into(), report.rank.hits);
+    counters.insert("matrix_rank".into(), report.rank.rank as u64);
+    counters.insert("target_attempts".into(), row.attempts.len() as u64);
+    let mut unpriced = Vec::new();
+    for phase in &phases {
+        for (name, &count) in &phase.native {
+            if count == 0 {
+                continue;
+            }
+            let priced = PRICED_NATIVE
+                .iter()
+                .find(|(counter, _)| *counter == name)
+                .is_some_and(|(_, unit)| calib.is_pinned(unit));
+            if !priced {
+                let label = if name.ends_with("_uncharged") {
+                    name.clone()
+                } else {
+                    format!("{name}_uncharged")
+                };
+                *counters.entry(label.clone()).or_insert(0) += count;
+                unpriced.push(label);
+            }
+        }
+    }
+    // The current group-addition-equivalent calibration does not account
+    // for these operations, even if every named native counter is pinned.
+    unpriced.extend([
+        "field_arithmetic_uncharged".into(),
+        "hash_and_allocation_uncharged".into(),
+        "modular_combination_uncharged".into(),
+    ]);
+    unpriced.sort();
+    unpriced.dedup();
+    let builder = CompactOrbitScanBase { instance: inst };
+    let group = BinaryGroup(&inst.fast);
+    let ctx = InstanceCtx {
+        group: &group,
+        generator: inst.generator,
+        target: group.identity(),
+        r: inst.r,
+        cofactor: inst.cofactor,
+        group_order: inst.group_order,
+        name: curve.slug.clone(),
+        field_degree: Some(inst.n),
+    };
+    let mut scratch = GroupOps::default();
+    let fb = builder.build(&ctx, &params, &mut scratch)?;
+    let facts = factor_base_facts(&curve.slug, &m.params["factor_base"], &params, &fb, |p| {
+        group.key(p)
+    })?;
+    if facts.columns != report.rank.columns as u64
+        || facts.signed_points != report.rank.signed_points as u64
+    {
+        return Err("shared rank factor-base inventory differs from solver setup".into());
+    }
+    let online_names = [
+        ("target_query", row.query.wall_ns),
+        ("target_PDP", row.pdp.wall_ns),
+        ("target_relation_check", row.relation_check.wall_ns),
+        ("target_descent", row.descent.wall_ns),
+        ("target_recovery_check", row.recovery_check.wall_ns),
+    ];
+    let online = OnlineWindow {
+        wall_ns: row.online_wall_ns,
+        phases_ns: online_names
+            .iter()
+            .map(|(name, ns)| ((*name).into(), *ns))
+            .collect(),
+        zero_phases: online_names
+            .iter()
+            .filter(|(_, ns)| *ns == 0)
+            .map(|(name, _)| ((*name).into(), "phase performed no work".into()))
+            .collect(),
+        start_event: "Q subgroup validation after target-blind base, table and rank logs are ready"
+            .into(),
+        stop_event: "[d]G = Q verified by full-point scalar replay".into(),
+        included_stages: online_names.iter().map(|(name, _)| (*name).into()).collect(),
+        mapping: "direct Q, then run-seeded Q+[a]G residuals; exact m3 folded-table PDP, full-point witness check, column-log combination and full-point scalar replay".into(),
+    };
+    if online.phases_ns.values().sum::<u64>() != online.wall_ns {
+        return Err("shared rank online phases do not sum to online wall interval".into());
+    }
+    Ok(SolveReport {
+        recovered,
+        exhausted: !report.verified,
+        phases,
+        total_gae: report.total_gae,
+        automorphisms_used: 2 * inst.n,
+        counters,
+        unpriced,
+        deterministic: true,
+        nondeterminism: Vec::new(),
+        solve_wall_ns: wall,
+        factor_base: Some(facts),
+        detail: serde_json::to_value(&report).map_err(|e| e.to_string())?,
+        online: Some(online),
+        online_error: None,
+    })
+}
+
+#[cfg(test)]
+mod shared_rank_tests {
+    use super::*;
+    use crate::cryptanalysis::ecbench::workload::CurveSpec;
+
+    #[test]
+    fn shared_rank_adapter_keeps_the_one_target_window_and_inventory() {
+        let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Binary(binary) = &inst else {
+            unreachable!()
+        };
+        let target = binary.fast.mul_u64(binary.generator, 113);
+        let method = resolve(&MethodSpec {
+            id: "ic.shared_rank".into(),
+            params: [
+                (
+                    "factor_base".into(),
+                    "compact-orbit-scan:columns=4,raw_x_cap=10000".into(),
+                ),
+                ("rank_seed".into(), "7".into()),
+                ("rank_max_trials".into(), "10000".into()),
+                ("target_max_attempts".into(), "64".into()),
+            ]
+            .into_iter()
+            .collect(),
+        })
+        .unwrap();
+        let report = solve(
+            &method,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            19,
+        )
+        .unwrap();
+        assert_eq!(report.recovered, Some(113 % binary.r));
+        assert_eq!(report.factor_base.as_ref().unwrap().columns, 4);
+        assert!(report
+            .unpriced
+            .contains(&"field_arithmetic_uncharged".into()));
+        let online = report
+            .online
+            .expect("library online clock survives ecbench");
+        assert!(online.wall_ns > 0);
+        assert_eq!(online.phases_ns.len(), 5);
+        assert_eq!(online.phases_ns.values().sum::<u64>(), online.wall_ns);
+    }
 }
 
 // ── Factor-base dumps ──────────────────────────────────────────────
