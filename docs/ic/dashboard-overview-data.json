@@ -61,6 +61,10 @@
     {
       "path": "research/ecbench_callgrind_solve_20261004/DECISION.json",
       "sha256": "c4bd4b3b8e1e95520bca5507706b2434eb8bdfb7d7281fdfd6998a71b18dd3aa"
+    },
+    {
+      "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+      "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
     }
   ],
   "confirmation_online": {
@@ -897,6 +901,266 @@
     "unit": "callgrind.Ir",
     "workloads": 8
   },
+  "n37_k8_k16_callgrind": {
+    "aa_max_absolute_relative_deviation": 0.000041546930887426115,
+    "all_archived_and_profiled_scalars_verified": true,
+    "archived_records_sha256": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
+    "arms": [
+      {
+        "arm": "ic-k8",
+        "max_ir": 38199133,
+        "mean_ir": 35088007.875,
+        "min_ir": 32836646,
+        "runs": 16,
+        "s_ir_per_target": 2310.606964863786
+      },
+      {
+        "arm": "ic-k16",
+        "max_ir": 45197988,
+        "mean_ir": 41763838.4375,
+        "min_ir": 41336166,
+        "runs": 16,
+        "s_ir_per_target": 2750.2221362042314
+      },
+      {
+        "arm": "ic-k16-control",
+        "max_ir": 45197083,
+        "mean_ir": 41763766.625,
+        "min_ir": 41336188,
+        "runs": 16,
+        "s_ir_per_target": 2750.2174072249386
+      },
+      {
+        "arm": "rho-strong",
+        "max_ir": 13680703,
+        "mean_ir": 9627416.6875,
+        "min_ir": 5115991,
+        "runs": 16,
+        "s_ir_per_target": 633.9823033279953
+      }
+    ],
+    "census_sha256": "3e04bd86ee012550870676737a9f65e1f1856e2c7b69d45f9ee43dd690ccf182",
+    "claim_limit": "same-binary whole-solve Callgrind user-space instruction diagnostic; no isolated native online wall speedup or n41/n53 transfer",
+    "comparisons": [
+      {
+        "bootstrap_95": [
+          1.1584168328385342,
+          1.2217540127906004
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 202610044084,
+        "denominator": "ic-k8",
+        "numerator": "ic-k16",
+        "paired_ratio_range": [
+          1.0869980740138787,
+          1.2720265421841352
+        ],
+        "ratio_of_sums": 1.1902596062530095
+      },
+      {
+        "bootstrap_95": [
+          3.2353443778426585,
+          4.136017279722061
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 202610044084,
+        "denominator": "rho-strong",
+        "numerator": "ic-k8",
+        "paired_ratio_range": [
+          2.4775326369702846,
+          6.803116541839108
+        ],
+        "ratio_of_sums": 3.6445922113828733
+      },
+      {
+        "bootstrap_95": [
+          3.845232009541246,
+          4.950961188094426
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 202610044084,
+        "denominator": "rho-strong",
+        "numerator": "ic-k16",
+        "paired_ratio_range": [
+          3.035723675895895,
+          8.192502097834026
+        ],
+        "ratio_of_sums": 4.338010890473364
+      },
+      {
+        "bootstrap_95": [
+          0.9999927920192819,
+          1.00001077458549
+        ],
+        "bootstrap_samples": 20000,
+        "bootstrap_seed": 202610044084,
+        "denominator": "ic-k16-control",
+        "numerator": "ic-k16",
+        "paired_ratio_range": [
+          0.9999668409240703,
+          1.0000415469308874
+        ],
+        "ratio_of_sums": 1.0000017194928954
+      }
+    ],
+    "decision": "select_k8_for_larger_field_gate",
+    "independent_audit_sha256": "8a5f8683c8b3aea4c1e8343242d4d6319f4938fb8f6ae4a342c9c4ad3dad5baa",
+    "independent_auditor_env_class_id": "ECBENV2hda64b23436f4",
+    "jobs_sha256": "36b15b44eb464957d3a1fd820a4522f314de61c05e1522605a912b5f72368b79",
+    "normalised_unit": "crypto.S.callgrind_ir",
+    "per_target": [
+      {
+        "ir": {
+          "ic-k16": 41371379,
+          "ic-k16-control": 41370172,
+          "ic-k8": 32992834,
+          "rho-strong": 11067277
+        },
+        "workload_id": "W18663df2c22a"
+      },
+      {
+        "ir": {
+          "ic-k16": 41613762,
+          "ic-k16-control": 41613950,
+          "ic-k8": 37617519,
+          "rho-strong": 9304665
+        },
+        "workload_id": "W1ac26122c991"
+      },
+      {
+        "ir": {
+          "ic-k16": 41367321,
+          "ic-k16-control": 41367487,
+          "ic-k8": 35342884,
+          "rho-strong": 8594424
+        },
+        "workload_id": "W1d9083322d3d"
+      },
+      {
+        "ir": {
+          "ic-k16": 41522384,
+          "ic-k16-control": 41523439,
+          "ic-k8": 38199133,
+          "rho-strong": 10322096
+        },
+        "workload_id": "W37f9e83e00be"
+      },
+      {
+        "ir": {
+          "ic-k16": 41464822,
+          "ic-k16-control": 41464864,
+          "ic-k8": 34110769,
+          "rho-strong": 8817860
+        },
+        "workload_id": "W451784caf070"
+      },
+      {
+        "ir": {
+          "ic-k16": 41530834,
+          "ic-k16-control": 41531422,
+          "ic-k8": 37701619,
+          "rho-strong": 13680703
+        },
+        "workload_id": "W61b750292dc4"
+      },
+      {
+        "ir": {
+          "ic-k16": 41336166,
+          "ic-k16-control": 41336188,
+          "ic-k8": 32836646,
+          "rho-strong": 9163093
+        },
+        "workload_id": "W72581b236ff0"
+      },
+      {
+        "ir": {
+          "ic-k16": 41912767,
+          "ic-k16-control": 41913114,
+          "ic-k8": 34804683,
+          "rho-strong": 5115991
+        },
+        "workload_id": "W812d9400b204"
+      },
+      {
+        "ir": {
+          "ic-k16": 41474830,
+          "ic-k16-control": 41474129,
+          "ic-k8": 36617548,
+          "rho-strong": 10022254
+        },
+        "workload_id": "W83d80c30fc5b"
+      },
+      {
+        "ir": {
+          "ic-k16": 45197988,
+          "ic-k16-control": 45197083,
+          "ic-k8": 35532268,
+          "rho-strong": 6366527
+        },
+        "workload_id": "W86311fcc6d86"
+      },
+      {
+        "ir": {
+          "ic-k16": 41647286,
+          "ic-k16-control": 41647610,
+          "ic-k8": 37261105,
+          "rho-strong": 7802766
+        },
+        "workload_id": "Wb6eaf5080853"
+      },
+      {
+        "ir": {
+          "ic-k16": 41354101,
+          "ic-k16-control": 41353968,
+          "ic-k8": 32839040,
+          "rho-strong": 8131996
+        },
+        "workload_id": "Wc122152a40e7"
+      },
+      {
+        "ir": {
+          "ic-k16": 41384710,
+          "ic-k16-control": 41384398,
+          "ic-k8": 32876736,
+          "rho-strong": 7511549
+        },
+        "workload_id": "Wc9d3deec0942"
+      },
+      {
+        "ir": {
+          "ic-k16": 41472897,
+          "ic-k16-control": 41471174,
+          "ic-k8": 34738954,
+          "rho-strong": 11195254
+        },
+        "workload_id": "Wcbe23bc06a7c"
+      },
+      {
+        "ir": {
+          "ic-k16": 41797125,
+          "ic-k16-control": 41798511,
+          "ic-k8": 34191675,
+          "rho-strong": 13321922
+        },
+        "workload_id": "Wdcb70dc023e0"
+      },
+      {
+        "ir": {
+          "ic-k16": 41773043,
+          "ic-k16-control": 41772757,
+          "ic-k8": 33744713,
+          "rho-strong": 13620290
+        },
+        "workload_id": "Wfb0d65e624ca"
+      }
+    ],
+    "profiles": 64,
+    "provenance_sha256": "8983f4c6c1a7689e9a44cc70d696a1e619a640c0a98a75cce355938fc4f7757e",
+    "schema": "ecbench.k8_k16_callgrind_decision/v1",
+    "subgroup_order": 230603167,
+    "unit": "callgrind.Ir",
+    "workloads": 16
+  },
   "n37_rank_columns_independent_replay": {
     "session_id": "ECBS1h9a1d373bbe54",
     "auditor_env_class_id": "ECBENV2hda64b23436f4",
@@ -940,8 +1204,8 @@
       "scheduled": 216
     }
   ],
-  "historical_ledger_sha256": "f826916a810596c7c9767d3d34b2df1eee8169e1674a099189575a8affed4ad7",
-  "historical_regime_summary_sha256": "ba1e8f8c903f1cf9f6b81733f760f5ba55fa73b30334a6eb5fc4beff6b5752db",
+  "historical_ledger_sha256": "012ead29950347392504144e9411b5ce36c18cf6ed897d0ba08186647a535ec7",
+  "historical_regime_summary_sha256": "95e4d00c0b0b2773c4a46f8cd22a5cdc9b4fb7906774d5a6a0ec75a0e24c6034",
   "historical_overview_panels": [
     {
       "section_id": "cold-compact-orbit-20261003",
@@ -961,12 +1225,12 @@
     },
     {
       "section_id": "lab-progress",
-      "sha256": "77e58e2f27699e1ad93cf4fafec82e3d90fceaddfa770b56d61428e765032d2c"
+      "sha256": "e4bf03ea1fad27e320dd3ed7d9c2e52af6777c0896a3c36e313a87144e3c3571"
     },
     {
       "section_id": "lab-currency",
       "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
   ],
-  "progress_timeline_sha256": "75d3536d4d74a73a394f6083ad3d1343183cb72769b6dd67cde6f0375ffe08ef"
+  "progress_timeline_sha256": "7e9cd7e04372c741003bc7deff3bfaa5763d847cba0ccc140b4bbcf02fae358e"
 }
