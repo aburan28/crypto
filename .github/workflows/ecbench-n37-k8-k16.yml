@@ -25,8 +25,9 @@ jobs:
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Build the frozen native ecbench path
         run: |
-          cargo test --release --locked --lib cryptanalysis::ecbench::callgrind
-          cargo build --release --locked --bin ecbench
+          cargo test --release --lib cryptanalysis::ecbench::callgrind
+          cargo build --release --bin ecbench
+          cargo check --release --example ecbench_k8_k16_analyze
       - name: Independently replay the sealed Mac session
         run: |
           out="$RUNNER_TEMP/ecbench-n37-k8-k16"
@@ -61,9 +62,11 @@ jobs:
             valgrind --version
             uname -a
             lscpu
+            sha256sum Cargo.lock
             sha256sum target/release/ecbench "$spec" "$jobs" \
               research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl
           } > "$out/PROVENANCE.txt"
+          cp Cargo.lock "$out/Cargo.lock"
           cp "$jobs" "$out/JOBS.json"
           : > "$out/rows.jsonl"
           while IFS=$'\t' read -r seq arm workload seed method expected; do

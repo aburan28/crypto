@@ -28,3 +28,8 @@ diagnostics**. Every macOS run earned L0, so its wall measurements are
 descriptive only. Independent Linux replay, whole-solve Callgrind profiling,
 the predeclared K8/K16 decision, and the canonical scoreboard update remain
 pending; no base is selected from this local result.
+
+The first Linux profile attempt, [run 37191621092](https://github.com/aburan28/crypto/actions/runs/37191621092),
+failed before profiling because `Cargo.lock` is untracked and `--locked`
+prevented its creation. The [protocol amendment](PROTOCOL.md#build-only-amendment-before-profiling)
+records the corrected workflow; this failure is not a data row.

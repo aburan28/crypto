@@ -63,7 +63,8 @@ not native wall time or a hardware-counter value.
 ## Predeclared decision
 
 The primary base-choice diagnostic is K16/K8 ratio of sums in Callgrind Ir
-over the 16 point pairs, with a fixed-seed 20,000-sample target-block
+over the 16 point pairs, with a 20,000-sample target-block bootstrap using
+seed 202610044084 and a
 bootstrap 95% percentile interval. Report all per-target counts, the K16
 duplicate A/A maximum relative deviation, and K8/rho and K16/rho in the same
 unit. Require all 64 verified profiles and an A/A maximum deviation at most
@@ -79,3 +80,13 @@ replace the primary physically isolated, same-point, one-target online
 IC-versus-rho measurement. No n41, n53, n83, or ECC2K-130 transfer follows
 from an n37 base choice alone. The next larger-field round must carry both
 bases if this decision is inconclusive.
+
+## Build-only amendment before profiling
+
+[CI run 37191621092](https://github.com/aburan28/crypto/actions/runs/37191621092)
+stopped at `cargo test --locked` because this repository does not track
+`Cargo.lock`; it produced no profile. The corrected Linux workflow builds
+without `--locked` and archives its generated lockfile and SHA-256 with the
+binary provenance. This amendment also writes the bootstrap seed explicitly
+before any Callgrind result is observed. The frozen targets, jobs, method
+parameters, cost boundary, and selection thresholds above are unchanged.
