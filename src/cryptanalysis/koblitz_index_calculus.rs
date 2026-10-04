@@ -151,8 +151,8 @@ use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
-    solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions, SolveStats,
-    SolverEngine,
+    solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
+    FieldStructure, NodeOracleDecision, SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -5661,6 +5661,247 @@ pub(crate) fn lift_candidate(
     }
 }
 
+/// Exact coordinates of an x-value in the factor-base's binary basis. A
+/// pivot row retains its expression in the original basis so a residual
+/// point can be checked against a partially assigned summand code.
+struct F6CoordinateEncoder {
+    rows: Vec<(u32, u64, u64)>,
+}
+
+impl F6CoordinateEncoder {
+    fn new(basis: &[F2mElement]) -> Option<Self> {
+        if basis.len() >= 64 {
+            return None;
+        }
+        let mut rows: Vec<(u32, u64, u64)> = Vec::with_capacity(basis.len());
+        for (j, element) in basis.iter().enumerate() {
+            let mut value = *element.raw_bits().first()?;
+            let mut code = 1u64 << j;
+            for &(pivot, row, row_code) in &rows {
+                if value & (1u64 << pivot) != 0 {
+                    value ^= row;
+                    code ^= row_code;
+                }
+            }
+            if value == 0 {
+                return None;
+            }
+            rows.push((63 - value.leading_zeros(), value, code));
+            rows.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        }
+        Some(Self { rows })
+    }
+
+    fn encode(&self, element: &F2mElement) -> Option<u64> {
+        let mut value = *element.raw_bits().first()?;
+        let mut code = 0u64;
+        for &(pivot, row, row_code) in &self.rows {
+            if value & (1u64 << pivot) != 0 {
+                value ^= row;
+                code ^= row_code;
+            }
+        }
+        (value == 0).then_some(code)
+    }
+}
+
+/// F6-IC's target-specific geometric branch oracle. It may close a branch
+/// only against the exact enumerated base, or return a group-verified
+/// relation; it never treats an x-only Semaev root as a relation.
+struct F6GeometricGate<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    index_of: &'a HashMap<(BigUint, BigUint), usize>,
+    target: &'a BinaryPoint,
+    vars: Vec<Vec<usize>>,
+    encoder: F6CoordinateEncoder,
+    by_x: HashMap<BigUint, Vec<usize>>,
+    witness: Option<Vec<usize>>,
+    support_checks: u64,
+    residual_lookups: u64,
+    group_additions: u64,
+}
+
+impl<'a> F6GeometricGate<'a> {
+    fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        index_of: &'a HashMap<(BigUint, BigUint), usize>,
+        target: &'a BinaryPoint,
+        m: usize,
+        perm: Option<&[u32]>,
+    ) -> Option<Self> {
+        let ell = fb.subspace_basis.len();
+        if m < 2 || m.checked_mul(ell)? > 64 {
+            return None;
+        }
+        if index_of.len() != fb.points.len() {
+            return None;
+        }
+        let encoder = F6CoordinateEncoder::new(&fb.subspace_basis)?;
+        let mut by_x: HashMap<BigUint, Vec<usize>> = HashMap::new();
+        for (index, point) in fb.points.iter().enumerate() {
+            if index_of.get(&point_key(point)) != Some(&index) {
+                return None;
+            }
+            let BinaryPoint::Affine { x, .. } = point else {
+                continue;
+            };
+            encoder.encode(x)?;
+            by_x.entry(x.to_biguint()).or_default().push(index);
+        }
+        let vars = (0..m)
+            .map(|i| {
+                (0..ell)
+                    .map(|j| {
+                        let old = i * ell + j;
+                        perm.map_or(old, |p| p[old] as usize)
+                    })
+                    .collect()
+            })
+            .collect();
+        Some(Self {
+            kc,
+            fb,
+            index_of,
+            target,
+            vars,
+            encoder,
+            by_x,
+            witness: None,
+            support_checks: 0,
+            residual_lookups: 0,
+            group_additions: 0,
+        })
+    }
+
+    fn partial_residual_matches(
+        &self,
+        remaining: usize,
+        residual: &BinaryPoint,
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        let BinaryPoint::Affine { x, .. } = residual else {
+            return false;
+        };
+        let Some(code) = self.encoder.encode(x) else {
+            return false;
+        };
+        self.vars[remaining].iter().enumerate().all(|(j, &var)| {
+            defined_mask & (1u64 << var) != 0
+                || assignment[var].is_none_or(|value| value == ((code >> j) & 1 != 0))
+        })
+    }
+
+    fn close_residual(
+        &mut self,
+        positions: &[(usize, BigUint)],
+        remaining: usize,
+        depth: usize,
+        sum: &BinaryPoint,
+        chosen: &mut [usize],
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if depth == positions.len() {
+            self.group_additions += 1;
+            let residual = self.kc.add(self.target, &point_neg(sum));
+            self.residual_lookups += 1;
+            let Some(&last) = self.index_of.get(&point_key(&residual)) else {
+                return false;
+            };
+            if !self.partial_residual_matches(remaining, &residual, assignment, defined_mask) {
+                return false;
+            }
+            chosen[remaining] = last;
+            let _check = measurement::relation_check_scope();
+            let mut check = BinaryPoint::Infinity;
+            for &index in chosen.iter() {
+                self.group_additions += 1;
+                check = self.kc.add(&check, &self.fb.points[index]);
+            }
+            if check == *self.target {
+                let mut indices = chosen.to_vec();
+                indices.sort_unstable();
+                self.witness = Some(indices);
+                return true;
+            }
+            return false;
+        }
+        let (summand, x) = &positions[depth];
+        let choices = self.by_x.get(x).cloned().unwrap_or_default();
+        for index in choices {
+            chosen[*summand] = index;
+            self.group_additions += 1;
+            let next = self.kc.add(sum, &self.fb.points[index]);
+            if self.close_residual(
+                positions,
+                remaining,
+                depth + 1,
+                &next,
+                chosen,
+                assignment,
+                defined_mask,
+            ) {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn decide(&mut self, assignment: &[Option<bool>], defined_mask: u64) -> NodeOracleDecision {
+        let mut fixed = Vec::with_capacity(self.vars.len());
+        for (i, vars) in self.vars.iter().enumerate() {
+            let mut x = F2mElement::zero(self.kc.n);
+            let mut complete = true;
+            for (j, &var) in vars.iter().enumerate() {
+                if defined_mask & (1u64 << var) != 0 {
+                    complete = false;
+                    break;
+                }
+                match assignment[var] {
+                    Some(true) => x.add_assign(&self.fb.subspace_basis[j]),
+                    Some(false) => {}
+                    None => {
+                        complete = false;
+                        break;
+                    }
+                }
+            }
+            if complete {
+                self.support_checks += 1;
+                let key = x.to_biguint();
+                if !self.by_x.contains_key(&key) {
+                    return NodeOracleDecision::Refute;
+                }
+                fixed.push((i, key));
+            }
+        }
+        if fixed.len() < self.vars.len() - 1 {
+            return NodeOracleDecision::Continue;
+        }
+        let remaining = (0..self.vars.len())
+            .find(|i| fixed.iter().all(|(j, _)| i != j))
+            .unwrap_or(self.vars.len() - 1);
+        let positions: Vec<_> = fixed.into_iter().filter(|(i, _)| *i != remaining).collect();
+        let mut chosen = vec![usize::MAX; self.vars.len()];
+        if self.close_residual(
+            &positions,
+            remaining,
+            0,
+            &BinaryPoint::Infinity,
+            &mut chosen,
+            assignment,
+            defined_mask,
+        ) {
+            NodeOracleDecision::Witness
+        } else {
+            NodeOracleDecision::Refute
+        }
+    }
+}
+
 /// **Algebraic decomposition**: solve the Semaev system for
 /// `R = P_1 + … + P_m` over the factor base.
 ///
@@ -5679,6 +5920,48 @@ pub fn groebner_decompose(
     m: usize,
     engine: SolverEngine,
     node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    groebner_decompose_with_geometry(kc, fb, index_of, st, target, m, engine, node_budget, false)
+}
+
+/// F6-IC: inherited F4 with exact factor-base support pruning and residual
+/// group closure inside the Boolean splitting tree. A completed no-relation
+/// result is about usable factor-base decompositions, not all x-only roots.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(kc, fb, index_of, st, target, m, engine, node_budget, true)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn groebner_decompose_with_geometry(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+    f6_ic: bool,
 ) -> (Option<Vec<usize>>, SolveStats) {
     let unsupported = || SolveStats {
         exhausted: true,
@@ -5728,7 +6011,7 @@ pub fn groebner_decompose(
         None => &sys.equations,
     };
     let back = order.as_deref().map(invert_permutation);
-    let (_, stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, |root| {
+    let mut accept_root = |root| {
         let root = back
             .as_deref()
             .map_or(root, |inverse| permute_mask(root, inverse));
@@ -5742,7 +6025,27 @@ pub fn groebner_decompose(
             }
             None => false,
         }
-    });
+    };
+    if f6_ic {
+        if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
+        {
+            let (_, mut stats) = solve_boolean_system_with_node_oracle(
+                equations,
+                sys.n_vars,
+                &opts,
+                &mut accept_root,
+                |assignment, defined_mask| gate.decide(assignment, defined_mask),
+            );
+            stats.geometric_support_checks = gate.support_checks;
+            stats.geometric_residual_lookups = gate.residual_lookups;
+            stats.geometric_group_additions = gate.group_additions;
+            return (gate.witness.or(found), stats);
+        }
+    }
+    let (_, mut stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, accept_root);
+    if f6_ic {
+        stats.geometric_fallbacks = 1;
+    }
     (found, stats)
 }
 
@@ -6825,6 +7128,10 @@ pub struct KoblitzIcOptions {
     /// Which algebraic engine reduces the Semaev system.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub engine: SolverEngine,
+    /// F6-IC exact geometric support pruning and residual closure around
+    /// inherited F4. Only the ordinary Gröbner decomposition path supports
+    /// it; chart plans retain their separate, explicit implementation.
+    pub f6_ic: bool,
     /// Experimental exact S3 decomposition on a validated Frobenius chart
     /// cover. Applies only to two-summand Groebner collection/descent. Plan
     /// construction is caller-owned precomputation and must be charged.
@@ -6902,6 +7209,7 @@ impl Default for KoblitzIcOptions {
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
+            f6_ic: false,
             weil_charts: None,
             node_budget: 4096,
             max_models: 64,
@@ -7448,6 +7756,16 @@ fn koblitz_index_calculus_dlp_observed(
                         .and_then(|table| table.decompose(kc, fb, target, opts.m)),
                 ),
                 DecompositionStrategy::Groebner => {
+                    if opts.f6_ic && opts.weil_charts.is_some() {
+                        return RelationAttemptOutcome::Groebner(
+                            None,
+                            SolveStats {
+                                exhausted: true,
+                                unsupported: true,
+                                ..Default::default()
+                            },
+                        );
+                    }
                     if let Some(plan) = &opts.weil_charts {
                         let options = SolveOptions {
                             engine: opts.engine,
@@ -7460,7 +7778,12 @@ fn koblitz_index_calculus_dlp_observed(
                             .expect("chart cover validated at pipeline entry");
                         return RelationAttemptOutcome::Groebner(idxs, stats.solver);
                     }
-                    let (idxs, stats) = groebner_decompose(
+                    let decompose = if opts.f6_ic {
+                        groebner_decompose_f6_ic
+                    } else {
+                        groebner_decompose
+                    };
+                    let (idxs, stats) = decompose(
                         kc,
                         fb,
                         &index_of,
@@ -9155,6 +9478,9 @@ fn decompose_once(
             attempt
         }
         DecompositionStrategy::Groebner => {
+            if opts.f6_ic && opts.weil_charts.is_some() {
+                return PdpAttempt::bare(None, PdpOutcome::Unsupported);
+            }
             if let Some(plan) = &opts.weil_charts {
                 let options = SolveOptions {
                     engine: opts.engine,
@@ -9174,7 +9500,12 @@ fn decompose_once(
                 };
                 return attempt;
             }
-            let (points, stats) = groebner_decompose(
+            let decompose = if opts.f6_ic {
+                groebner_decompose_f6_ic
+            } else {
+                groebner_decompose
+            };
+            let (points, stats) = decompose(
                 kc,
                 fb,
                 index_of,
@@ -15745,6 +16076,190 @@ mod tests {
             assert!(stats.exhausted && !stats.unsupported);
             assert_eq!(stats.infeasible_branches, 0);
         }
+    }
+
+    #[test]
+    fn f6_ic_geometric_closure_matches_exact_small_base() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let mut refutations = 0usize;
+        let mut witnesses = 0usize;
+        let mut eliminated = 0usize;
+        for m in [2, 3] {
+            for scalar in 1..=24u32 {
+                let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+                let expected = enumerate_decompose(&kc, &fb, &index_of, &target, m);
+                let (baseline, base_stats) =
+                    groebner_decompose(&kc, &fb, &index_of, &st, &target, m, engine, 20_000);
+                let (f6, stats) =
+                    groebner_decompose_f6_ic(&kc, &fb, &index_of, &st, &target, m, engine, 20_000);
+                assert!(
+                    !base_stats.exhausted && !stats.exhausted,
+                    "m={m}, target={scalar}"
+                );
+                assert_eq!(baseline.is_some(), expected.is_some());
+                assert_eq!(f6.is_some(), expected.is_some(), "m={m}, target={scalar}");
+                assert_eq!(stats.geometric_fallbacks, 0);
+                refutations += stats.geometric_refutations;
+                witnesses += stats.geometric_witnesses;
+                eliminated += stats.eliminated;
+                if let Some(indices) = f6 {
+                    let sum = indices
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                    assert_eq!(sum, target);
+                }
+            }
+        }
+        assert!(
+            refutations > 0 && witnesses > 0,
+            "refutations={refutations}, witnesses={witnesses}, eliminated={eliminated}"
+        );
+        assert!(
+            eliminated > 0,
+            "chain control did not exercise affine definitions"
+        );
+    }
+
+    #[test]
+    fn f6_ic_proves_exact_small_base_misses() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 2).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let mut missed = 0;
+        for scalar in 1..=32u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            let expected = enumerate_decompose(&kc, &fb, &index_of, &target, 2);
+            let (f6, stats) =
+                groebner_decompose_f6_ic(&kc, &fb, &index_of, &st, &target, 2, engine, 20_000);
+            assert!(!stats.exhausted && !stats.unsupported, "target={scalar}");
+            assert_eq!(f6.is_some(), expected.is_some(), "target={scalar}");
+            missed += usize::from(expected.is_none());
+        }
+        assert!(missed > 0);
+    }
+
+    #[test]
+    fn f6_ic_refutes_x_only_roots_without_a_usable_point_lift() {
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let xs: Vec<_> = (0..16u64)
+            .map(|code| {
+                let mut x = F2mElement::zero(kc.n);
+                for (j, basis) in fb.subspace_basis.iter().enumerate() {
+                    if code & (1 << j) != 0 {
+                        x.add_assign(basis);
+                    }
+                }
+                x
+            })
+            .collect();
+        let perm = [3u32, 2, 1, 0, 7, 6, 5, 4];
+        let mut checked_nonlift = false;
+        let mut checked_missing_support = false;
+        let mut s3_roots = 0usize;
+        for scalar in 1..=100u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            let BinaryPoint::Affine { x: target_x, .. } = &target else {
+                continue;
+            };
+            for (a, x1) in xs.iter().enumerate() {
+                for (b, x2) in xs.iter().enumerate() {
+                    let codes = [a as u64, b as u64];
+                    let mut assignment = vec![None; 8];
+                    for summand in 0..2 {
+                        for bit in 0..4 {
+                            assignment[perm[4 * summand + bit] as usize] =
+                                Some(codes[summand] & (1 << bit) != 0);
+                        }
+                    }
+                    let mut gate =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 2, Some(&perm)).unwrap();
+                    let missing_support = !gate.by_x.contains_key(&x1.to_biguint())
+                        || !gate.by_x.contains_key(&x2.to_biguint());
+                    if missing_support {
+                        assert_eq!(gate.decide(&assignment, 0), NodeOracleDecision::Refute);
+                        checked_missing_support = true;
+                    }
+                    if binary_semaev_s3(
+                        x1,
+                        x2,
+                        target_x,
+                        &F2mElement::one(kc.n),
+                        &kc.curve.irreducible,
+                    )
+                    .is_zero()
+                    {
+                        s3_roots += 1;
+                        // Usable-point filtering can exclude an x-only root
+                        // while leaving its Semaev equation unchanged.
+                        let mut restricted = fb.clone();
+                        restricted.points.retain(
+                            |point| !matches!(point, BinaryPoint::Affine { x, .. } if x == x1),
+                        );
+                        let restricted_index = restricted.index_map();
+                        assert!(lift_candidate(
+                            &kc,
+                            &restricted,
+                            &restricted_index,
+                            &[x1.clone(), x2.clone()],
+                            &target,
+                        )
+                        .is_none());
+                        let mut restricted_gate = F6GeometricGate::new(
+                            &kc,
+                            &restricted,
+                            &restricted_index,
+                            &target,
+                            2,
+                            Some(&perm),
+                        )
+                        .unwrap();
+                        assert_eq!(
+                            restricted_gate.decide(&assignment, 0),
+                            NodeOracleDecision::Refute
+                        );
+                        checked_nonlift = true;
+                    }
+                }
+            }
+        }
+        assert!(checked_missing_support);
+        assert!(
+            checked_nonlift,
+            "no filtered nonlifting S3 root was exercised (s3_roots={s3_roots})"
+        );
+    }
+
+    #[test]
+    fn f6_coordinate_encoder_reconstructs_nonstandard_basis_codes() {
+        let basis = [
+            F2mElement::from_bit_positions(&[0, 3], 9),
+            F2mElement::from_bit_positions(&[1, 3], 9),
+            F2mElement::from_bit_positions(&[2, 5], 9),
+        ];
+        let encoder = F6CoordinateEncoder::new(&basis).unwrap();
+        for code in 0..8u64 {
+            let mut x = F2mElement::zero(9);
+            for (j, item) in basis.iter().enumerate() {
+                if code & (1u64 << j) != 0 {
+                    x.add_assign(item);
+                }
+            }
+            assert_eq!(encoder.encode(&x), Some(code));
+        }
+        assert_eq!(
+            encoder.encode(&F2mElement::from_bit_positions(&[8], 9)),
+            None
+        );
     }
 
     #[test]
