@@ -68,6 +68,19 @@ assert.deepEqual(sharedRank.gae_lower_bound, {
 });
 assert.equal(sharedRank.rho_ratio, null);
 const sharedRankPin = {path: sharedRankPath, sha256: sharedRankSha};
+const sharedTargetsPath = 'research/notes/ecc2k130/n37_shared_rank_targets_20261003/EVIDENCE.json';
+const sharedTargetsBytes = readFileSync(resolve(ROOT, sharedTargetsPath));
+const sharedTargetsSha = '7b8f9c0d3fce0da4165d482aeaea3d4698c634173df53efaa936f17ce8f25c27';
+assert.equal(sha(sharedTargetsBytes), sharedTargetsSha, 'Shared-target evidence changed; review the claim before refreshing its pin.');
+const sharedTargets = JSON.parse(sharedTargetsBytes);
+assert.equal(sharedTargets.decision, 'SHARED_RANK_TARGET16_RECOVERY_ADMITTED_N37_SOURCE');
+assert.equal(sharedTargets.class, 'accounting');
+assert.equal(sharedTargets.counts.targets, 16);
+assert.equal(sharedTargets.counts.verified_scalar_recoveries, 16);
+assert.equal(sharedTargets.counts.direct_three_summand_hits, 16);
+assert.equal(sharedTargets.gae_lower_bound.cold_total, 197454);
+assert.equal(sharedTargets.rho_ratio, null);
+const sharedTargetsPin = {path: sharedTargetsPath, sha256: sharedTargetsSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -136,7 +149,7 @@ const front = `
 <div class="dash-section-head"><div><p class="dash-kicker">n37 reusable setup / Stage diagnostic</p><h2 id="shared-rank-folded-title">A target-blind rank database now checks all 42 base logs.</h2></div><span class="status neutral">Correctness passed · no rho ratio</span></div>
 <p class="dash-section-intro panel-summary">The frozen compact-orbit source base and signed-Frobenius three-summand table used 55 seeded <code>[a]G</code> probes, with no public Q, to collect 42 independent rows and 13 dependent rows. A separate general-curve-law verifier replayed every relation and checked all 42 solved column logs as full points. Two final producer runs have identical non-timing evidence.</p>
 <div class="table-scroll"><table><caption>One target-independent n37 setup, counted group-addition equivalents. Field, hash, allocation and full memory costs remain unpriced; target descent and rho were not measured in this gate.</caption><thead><tr><th>Base</th><th>Folded table</th><th>Rank search</th><th>Elimination</th><th>Checks</th><th>Shared total</th></tr></thead><tbody><tr><td>4,260</td><td>178,710</td><td>8,498</td><td>1,110</td><td>2,248</td><td><strong>194,826</strong></td></tr></tbody></table></div>
-<p class="dash-footnote">This closes the reusable-rank correctness gate only. The table built 64,467 retained entries with 66,822 additions and accounts for 91.7% of the charged setup. No complete IC cost, matched-rho ratio, boundary exponent, degree-263 claim or n131 transfer follows. The next gate needs new held-out Q, a fixed descent, this setup charged once, native work and memory priced, and strong same-Q batched rho. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/shared_rank_folded_table_20261003/RESULT.md">Frozen protocol, raw runs, replay and decision →</a></p>
+<p class="dash-footnote">The table built 64,467 retained entries with 66,822 additions and accounts for 91.7% of the charged setup. A separately frozen follow-up recovered and independently replayed 16/16 new point-only Q directly, at a 197,454 counted cold GAE lower bound for the setup plus all 16 targets. Native work, memory and a strong same-Q rho arm remain unpriced; no speedup or n131 transfer follows. The next primary gate is a fresh one-target online comparison before a separately frozen batch. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/shared_rank_folded_table_20261003/RESULT.md">Rank evidence</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_shared_rank_targets_20261003/RESULT.md">Point-only target evidence →</a></p>
 </section>
 
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
@@ -163,7 +176,7 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,

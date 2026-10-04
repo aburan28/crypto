@@ -1,0 +1,55 @@
+name: n37 shared-rank point-only target replay
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/ic_framework/shared_rank.rs'
+      - 'examples/n37_shared_rank_target_fixture.rs'
+      - 'examples/n37_shared_rank_targets.rs'
+      - 'examples/n37_shared_rank_target_replay.rs'
+      - 'research/notes/ecc2k130/n37_shared_rank_targets_20261003/**'
+      - 'research/notes/ecc2k130/shared_rank_folded_table_20261003/**'
+      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl'
+      - '.github/workflows/n37-shared-rank-targets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build with the archived dependency lock
+        run: |
+          cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
+          cargo build --release --locked --example n37_shared_rank_targets --example n37_shared_rank_target_replay
+          cargo test --locked --lib shared_rank_recovers_point_only_targets_with_full_point_replay
+      - name: Independently replay frozen inputs and target transcript
+        run: |
+          evidence=research/notes/ecc2k130/n37_shared_rank_targets_20261003
+          target/release/examples/n37_shared_rank_target_replay "$evidence/TARGETS.points.jsonl" "$evidence/FIXTURE.json" /tmp/n37-input-replay.json
+          cmp /tmp/n37-input-replay.json "$evidence/INPUT_REPLAY.json"
+          target/release/examples/n37_shared_rank_target_replay "$evidence/TARGETS.points.jsonl" "$evidence/FIXTURE.json" "$evidence/RAW.json" /tmp/n37-target-replay.json
+          cmp /tmp/n37-target-replay.json "$evidence/REPLAY.json"
+      - name: Regenerate the source-pinned result without timing fields
+        run: |
+          evidence=research/notes/ecc2k130/n37_shared_rank_targets_20261003
+          target/release/examples/n37_shared_rank_targets "$evidence/TARGETS.points.jsonl" /tmp/n37-target-regenerated.json
+          target/release/examples/n37_shared_rank_target_replay "$evidence/TARGETS.points.jsonl" "$evidence/FIXTURE.json" /tmp/n37-target-regenerated.json /tmp/n37-target-regenerated-replay.json
+          jq -e '.status == "PASS" and .target.targets_verified == 16' /tmp/n37-target-regenerated-replay.json
+          jq -S 'walk(if type == "object" then del(.wall_ns, .online_wall_ns) else . end)' "$evidence/RAW.json" > /tmp/n37-target-frozen-normalized.json
+          jq -S 'walk(if type == "object" then del(.wall_ns, .online_wall_ns) else . end)' /tmp/n37-target-regenerated.json > /tmp/n37-target-regenerated-normalized.json
+          cmp /tmp/n37-target-frozen-normalized.json /tmp/n37-target-regenerated-normalized.json
+      - name: Reject altered witness and recovered scalar
+        run: |
+          evidence=research/notes/ecc2k130/n37_shared_rank_targets_20261003
+          jq '.targets[0].attempts[0].witness[0] += 1' "$evidence/RAW.json" > /tmp/n37-target-bad-witness.json
+          if target/release/examples/n37_shared_rank_target_replay "$evidence/TARGETS.points.jsonl" "$evidence/FIXTURE.json" /tmp/n37-target-bad-witness.json /tmp/n37-target-bad-witness-receipt.json; then exit 1; fi
+          jq -e '.status == "FAIL" and .error == "target 0 witness sum or folded row differs"' /tmp/n37-target-bad-witness-receipt.json
+          jq '.targets[0].recovered_log += 1' "$evidence/RAW.json" > /tmp/n37-target-bad-log.json
+          if target/release/examples/n37_shared_rank_target_replay "$evidence/TARGETS.points.jsonl" "$evidence/FIXTURE.json" /tmp/n37-target-bad-log.json /tmp/n37-target-bad-log-receipt.json; then exit 1; fi
+          jq -e '.status == "FAIL" and .error == "target 0 recovered scalar differs"' /tmp/n37-target-bad-log-receipt.json
