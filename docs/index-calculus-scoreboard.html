@@ -481,6 +481,10 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
   .dash #evidence-results { grid-template-columns: 1fr; }
   #legacy-evidence { padding: 12px; }
 }
+@media(max-width: 360px) {
+  .dash-section-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .dash-section-head>.status { max-width: none; }
+}
 @media(prefers-color-scheme: dark) {
   :root { --lab-bg: #101923; --lab-card: #172330; --lab-ink: #e3ebf4; --lab-muted: #adbed1; --lab-line: #34485d; --lab-blue: #91b6ff; --lab-tint: #203452; --lab-green: #8fceae; --lab-green-tint: #1e3b31; --lab-orange: #efb889; --lab-orange-tint: #402f25; }
   .brand-mark { background: #235ec7; }
