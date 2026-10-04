@@ -5668,6 +5668,14 @@ struct F6CoordinateEncoder {
     rows: Vec<(u32, u64, u64)>,
 }
 
+struct F6FastGeometry {
+    curve: FastCurve,
+    points: Vec<FastPoint>,
+    target: FastPoint,
+    index_of: HashMap<FastPoint, usize>,
+    codes: Vec<u64>,
+}
+
 impl F6CoordinateEncoder {
     fn new(basis: &[F2mElement]) -> Option<Self> {
         if basis.len() >= 64 {
@@ -5716,9 +5724,11 @@ struct F6GeometricGate<'a> {
     vars: Vec<Vec<usize>>,
     encoder: F6CoordinateEncoder,
     by_x: HashMap<BigUint, Vec<usize>>,
+    fast: Option<F6FastGeometry>,
     witness: Option<Vec<usize>>,
     support_checks: u64,
     residual_lookups: u64,
+    fast_residual_lookups: u64,
     group_additions: u64,
 }
 
@@ -5750,6 +5760,34 @@ impl<'a> F6GeometricGate<'a> {
             encoder.encode(x)?;
             by_x.entry(x.to_biguint()).or_default().push(index);
         }
+        let fast = FastCurve::new(&kc.curve).and_then(|curve| {
+            let points: Vec<_> = fb.points.iter().map(|p| curve.lift(p)).collect();
+            let target_fast = curve.lift(target);
+            if points
+                .iter()
+                .zip(&fb.points)
+                .any(|(&packed, general)| curve.lower(packed) != *general)
+                || curve.lower(target_fast) != *target
+            {
+                return None;
+            }
+            let codes: Vec<_> = fb
+                .points
+                .iter()
+                .map(|point| match point {
+                    BinaryPoint::Affine { x, .. } => encoder.encode(x),
+                    BinaryPoint::Infinity => None,
+                })
+                .collect::<Option<_>>()?;
+            let index_of: HashMap<_, _> = points.iter().enumerate().map(|(i, &p)| (p, i)).collect();
+            (index_of.len() == points.len()).then_some(F6FastGeometry {
+                curve,
+                points,
+                target: target_fast,
+                index_of,
+                codes,
+            })
+        });
         let vars = (0..m)
             .map(|i| {
                 (0..ell)
@@ -5768,10 +5806,24 @@ impl<'a> F6GeometricGate<'a> {
             vars,
             encoder,
             by_x,
+            fast,
             witness: None,
             support_checks: 0,
             residual_lookups: 0,
+            fast_residual_lookups: 0,
             group_additions: 0,
+        })
+    }
+
+    fn code_matches(
+        vars: &[usize],
+        code: u64,
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        vars.iter().enumerate().all(|(j, &var)| {
+            defined_mask & (1u64 << var) != 0
+                || assignment[var].is_none_or(|value| value == ((code >> j) & 1 != 0))
         })
     }
 
@@ -5785,12 +5837,8 @@ impl<'a> F6GeometricGate<'a> {
         let BinaryPoint::Affine { x, .. } = residual else {
             return false;
         };
-        let Some(code) = self.encoder.encode(x) else {
-            return false;
-        };
-        self.vars[remaining].iter().enumerate().all(|(j, &var)| {
-            defined_mask & (1u64 << var) != 0
-                || assignment[var].is_none_or(|value| value == ((code >> j) & 1 != 0))
+        self.encoder.encode(x).is_some_and(|code| {
+            Self::code_matches(&self.vars[remaining], code, assignment, defined_mask)
         })
     }
 
@@ -5819,6 +5867,13 @@ impl<'a> F6GeometricGate<'a> {
         assignment: &[Option<bool>],
         defined_mask: u64,
     ) -> bool {
+        if self.fast.is_some() {
+            match self.close_one_fixed_fast(fixed, assignment, defined_mask) {
+                Some(chosen) if self.verify_witness(&chosen) => return true,
+                Some(_) => {} // A mismatched packed witness gets a general replay/search.
+                None => return false,
+            }
+        }
         let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
         let (second, third) = (free[0], free[1]);
         let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
@@ -5849,6 +5904,58 @@ impl<'a> F6GeometricGate<'a> {
             }
         }
         false
+    }
+
+    /// The exact single-word representation uses the same point choices as
+    /// the general path. Conversion and the packed map are rebuilt inside
+    /// each target PDP attempt and are therefore charged online.
+    fn close_one_fixed_fast(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1).cloned().unwrap_or_default();
+        let mut chosen = [usize::MAX; 3];
+        for first_index in choices {
+            chosen[fixed.0] = first_index;
+            for second_index in 0..fast.points.len() {
+                if !Self::code_matches(
+                    &self.vars[second],
+                    fast.codes[second_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[second] = second_index;
+                self.group_additions += 1;
+                let sum = fast
+                    .curve
+                    .add(fast.points[first_index], fast.points[second_index]);
+                self.group_additions += 1;
+                let residual = fast.curve.add(fast.target, fast.curve.neg(sum));
+                self.residual_lookups += 1;
+                self.fast_residual_lookups += 1;
+                let Some(&third_index) = fast.index_of.get(&residual) else {
+                    continue;
+                };
+                if !Self::code_matches(
+                    &self.vars[third],
+                    fast.codes[third_index],
+                    assignment,
+                    defined_mask,
+                ) {
+                    continue;
+                }
+                chosen[third] = third_index;
+                return Some(chosen);
+            }
+        }
+        None
     }
 
     fn close_residual(
@@ -6090,6 +6197,7 @@ fn groebner_decompose_with_geometry(
             );
             stats.geometric_support_checks = gate.support_checks;
             stats.geometric_residual_lookups = gate.residual_lookups;
+            stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
             stats.geometric_group_additions = gate.group_additions;
             return (gate.witness.or(found), stats);
         }
@@ -16300,6 +16408,7 @@ mod tests {
         let ell = fb.subspace_basis.len();
         let mut witnessed = 0;
         let mut refuted = 0;
+        let mut packed_lookups = 0;
         for scalar in 1..=32u32 {
             let target = kc.mul(kc.generator(), &BigUint::from(scalar));
             for code in 0..(1u64 << ell) {
@@ -16333,7 +16442,13 @@ mod tests {
                     });
                     let mut gate =
                         F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    assert!(gate.fast.is_some());
                     let decision = gate.decide(&assignment, 0);
+                    packed_lookups += gate.fast_residual_lookups;
+                    let mut general =
+                        F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                    general.fast = None;
+                    assert_eq!(decision, general.decide(&assignment, 0));
                     assert_eq!(decision == NodeOracleDecision::Witness, expected);
                     if expected {
                         witnessed += 1;
@@ -16354,6 +16469,7 @@ mod tests {
             witnessed > 0 && refuted > 0,
             "witnessed={witnessed}, refuted={refuted}"
         );
+        assert!(packed_lookups > 0);
     }
 
     #[test]
