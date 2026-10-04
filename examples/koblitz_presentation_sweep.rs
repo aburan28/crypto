@@ -133,7 +133,7 @@ fn main() {
         };
         writeln!(file.lock().unwrap(), "{line}").unwrap();
         let k = finished.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
-        if k % 32 == 0 || k == total {
+        if k.is_multiple_of(32) || k == total {
             eprintln!("   {k}/{total} cells, {:.0}s", t0.elapsed().as_secs_f64());
         }
     });

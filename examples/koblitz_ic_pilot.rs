@@ -46,7 +46,8 @@ fn main() {
     // factor-base abscissae reaches 2^m signed sums, so about
     // (2|F|)^m / (m!·#E) of the group per probe.
     let fact: f64 = (1..=m).map(|k| k as f64).product();
-    let pred_yield = (2.0 * row.factor_base_points as f64).powi(m as i32) / (fact * known_order as f64);
+    let pred_yield =
+        (2.0 * row.factor_base_points as f64).powi(m as i32) / (fact * known_order as f64);
     let ns_call = row.groebner_ns as f64 / row.groebner_calls.max(1) as f64;
     println!(
         "{}",
