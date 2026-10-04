@@ -147,3 +147,12 @@ their fixes in the PR record.
 
 These six steps remain open. This implementation neither admits a new ordinary
 panel nor completes the broader goal.
+
+CPU wall-time comparisons additionally require the updated host-level isolation
+gate: physical CPU/topology/NUMA, exclusive partition, affinity and memory
+policy, fixed frequency, IRQ routing/quota, source/workload hashes, paired order,
+raw failures, noise telemetry and correctness. Container affinity or a busy
+lock alone does not establish that isolation. Failed or missing receipts keep
+aggregate controlled speedup unknown; ordinary-host correctness and stage
+diagnostics remain explicitly labeled. Re-evaluate earlier timings before
+citing them as controlled speedups.
