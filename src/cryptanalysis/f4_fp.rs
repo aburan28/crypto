@@ -1079,32 +1079,23 @@ fn f4_with_arithmetic(
         );
     }
     let input_lms_now: Vec<Vec<u32>> = basis.iter().map(|f| f[0].0.clone()).collect();
+    let mut input_mismatch = false;
     match &mut trace {
         TraceMode::Record(t) => t.input_lms = input_lms_now,
         TraceMode::Replay(t) => {
+            // other input leading monomials: not this trace's shape, a full run
             if t.input_lms != input_lms_now {
-                let mut r = report(
-                    &basis,
-                    &alive,
-                    false,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    false,
-                    pairs_above_bound,
-                    (0, 0, 0),
-                    0,
-                );
-                r.trace_mismatch = true;
-                return r;
+                input_mismatch = true;
             }
         }
         TraceMode::Off => {}
     }
     let mut replay_step = 0usize;
     let mut mismatch = false;
+    if input_mismatch {
+        mismatch = true;
+        trace = TraceMode::Off;
+    }
     // interreduce the input (tails included) so the first matrix is small
     let mut steps = 0usize;
     let mut max_rows = 0usize;

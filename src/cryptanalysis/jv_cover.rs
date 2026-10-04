@@ -3079,7 +3079,12 @@ mod tests {
             "replayed {replayed} of {n} ({mismatches} mismatches)"
         );
         eprintln!("replayed {replayed} of {n}, cheaper {cheaper}, mismatches {mismatches}");
-        let t = trace_cache().lock().unwrap().get(&53).map(|e| e.trace.clone()).unwrap();
+        let t = trace_cache()
+            .lock()
+            .unwrap()
+            .get(&53)
+            .map(|e| e.trace.clone())
+            .unwrap();
         for (i, st) in t.steps.iter().enumerate() {
             eprintln!(
                 "  trace step {i}: degree {} useful rows {} new lms {}",
