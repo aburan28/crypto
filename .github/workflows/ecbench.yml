@@ -109,6 +109,17 @@ jobs:
           name: ecbench-n37-rank-columns-independent-receipt
           path: ${{ runner.temp }}/ecbench-independent/n37-rank-columns.json
           if-no-files-found: error
+      - name: Recompute the frozen n37 column decision
+        run: |
+          cargo build --release --locked --example n37_rank_columns_analyze
+          ./target/release/examples/n37_rank_columns_analyze \
+            research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01 \
+            research/ecbench_n37_rank_columns_20261004/candidate_claims \
+            research/ecbench_n37_rank_columns_20261004/AUDIT.json \
+            research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json \
+            "$RUNNER_TEMP/ecbench-independent/n37-rank-columns-result.json"
+          cmp "$RUNNER_TEMP/ecbench-independent/n37-rank-columns-result.json" \
+            research/ecbench_n37_rank_columns_20261004/RESULT.json
       - name: Attach the independent receipt without changing the frozen claim
         run: |
           receipt=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json
