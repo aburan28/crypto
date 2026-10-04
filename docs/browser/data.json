@@ -4,11 +4,11 @@
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
   "curves": 114,
-  "methods": 42,
+  "methods": 44,
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 23,
+  "sessions": 24,
   "yields": 1956
  },
  "sources": {
@@ -35,6 +35,7 @@
   "research/ecbench_numa_vm_20261002/sessions/v2-auto/records.jsonl": "126d9bf61729d2043d9ef41f36ae599d0f8601dcd4c990688a6d9d39ad72ea79",
   "research/ecbench_numa_vm_20261002/sessions/v2-interrupted/records.jsonl": "a68ffa3bfef32b38c45113ae6a345d54e0493c890fc574b8b821e7f5a9bc499b",
   "research/ecbench_numa_vm_20261002/sessions/v2-node0/records.jsonl": "6a8cbb87f5a9354470a26d131c43b2d3573a29a99edbc7e4a55a04ebecf71f96",
+  "research/ecbench_pair_claw_20261003/sessions/koblitz/records.jsonl": "4a2ffb331ade66ca0c09d3f0a7617e64070f27824c7c27eca56fbe37ba90effc",
   "research/ecbench_yield_sweep_20261004/sessions/koblitz/records.jsonl": "4aa6203a024ccd00606949a4a2ca454ef6efb5a7a4e3c6d9a365e8fb0723ce69",
   "research/ecbench_yield_sweep_20261004/sessions/prime/records.jsonl": "f77e03fd67ccc344b14c3b04efc5398e30a2d3a5e8cbf6a7941e21c1d2ee8afe"
  },
@@ -5320,6 +5321,56 @@
      "verified": 24,
      "mean_s": 0.9926,
      "mean_ratio_to_floor": 7.172
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9151,
+     "mean_ratio_to_floor": 6.612
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.3467,
+     "mean_ratio_to_floor": 2.505
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 5.7741,
+     "mean_ratio_to_floor": 41.719
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1384,
+     "mean_ratio_to_floor": 1.0
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1384,
+     "mean_ratio_to_floor": 1.0
     }
    ],
    "factor_bases": [],
@@ -5445,6 +5496,56 @@
      "verified": 24,
      "mean_s": 1.3634,
      "mean_ratio_to_floor": 10.088
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9103,
+     "mean_ratio_to_floor": 6.735
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.3381,
+     "mean_ratio_to_floor": 2.502
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.7929,
+     "mean_ratio_to_floor": 35.464
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1829,
+     "mean_ratio_to_floor": 1.354
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1829,
+     "mean_ratio_to_floor": 1.354
     }
    ],
    "factor_bases": [],
@@ -5623,7 +5724,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0207,
+     "mean_ratio_to_floor": 7.896
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.338,
+     "mean_ratio_to_floor": 2.615
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5224,
+     "mean_ratio_to_floor": 34.984
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1636,
+     "mean_ratio_to_floor": 1.265
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1636,
+     "mean_ratio_to_floor": 1.265
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5700,7 +5852,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0564,
+     "mean_ratio_to_floor": 8.678
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.2925,
+     "mean_ratio_to_floor": 2.403
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.3832,
+     "mean_ratio_to_floor": 27.792
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.0989,
+     "mean_ratio_to_floor": 0.813
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.0989,
+     "mean_ratio_to_floor": 0.813
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5829,7 +6032,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9371,
+     "mean_ratio_to_floor": 8.122
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.2358,
+     "mean_ratio_to_floor": 2.044
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.798,
+     "mean_ratio_to_floor": 41.585
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1138,
+     "mean_ratio_to_floor": 0.986
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1138,
+     "mean_ratio_to_floor": 0.986
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5906,7 +6160,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9043,
+     "mean_ratio_to_floor": 7.969
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.258,
+     "mean_ratio_to_floor": 2.274
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.6348,
+     "mean_ratio_to_floor": 32.033
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1266,
+     "mean_ratio_to_floor": 1.115
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1266,
+     "mean_ratio_to_floor": 1.115
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -11534,6 +11839,7 @@
     "ECBS1h498fa819ba21",
     "ECBS1h73210d525d59",
     "ECBS1h923e3eb44444",
+    "ECBS1ha960fa84a3c2",
     "ECBS1haf997766feb9",
     "ECBS1hafb48c7c6d26",
     "ECBS1hc6d15a12b9b6",
@@ -11549,6 +11855,10 @@
     "icv1-f2m37-tm534059-32aad96b",
     "icv1-f2m41-tm2308219-7f48b14a",
     "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5",
     "icv1-fp16-t295-8d3c3165",
     "icv1-fp18-tm337-d28d5e09",
     "icv1-fp20-t727-cd198a38",
@@ -11556,8 +11866,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 649,
-   "verified": 649
+   "runs": 841,
+   "verified": 841
   },
   {
    "method_id": "ECM1h2ee5b13dfb35",
@@ -11584,6 +11894,54 @@
    ],
    "runs": 400,
    "verified": 400
+  },
+  {
+   "method_id": "ECM1h3f1995f505fa",
+   "method_sha256": "3f1995f505fa3767af1cfd6fd89c6e965bbb93324175c33bd6506a994b6b651d",
+   "method": "claw.pair_table",
+   "family": "claw",
+   "params": {
+    "base_scale": "4",
+    "cap_multiple": "64",
+    "table_scale": "1"
+   },
+   "sessions": [
+    "ECBS1ha960fa84a3c2"
+   ],
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 192,
+   "verified": 192
+  },
+  {
+   "method_id": "ECM1hd9f76acb83c0",
+   "method_sha256": "d9f76acb83c0bc0e8d6bc09ed06279658c7fc8142b298d1f89603c933cd857b6",
+   "method": "claw.pair_table",
+   "family": "claw",
+   "params": {
+    "base_scale": "1.06",
+    "cap_multiple": "64",
+    "table_scale": "0.03125"
+   },
+   "sessions": [
+    "ECBS1ha960fa84a3c2"
+   ],
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 192,
+   "verified": 192
   },
   {
    "method_id": "ECM1h1b3ceb861d0c",
@@ -12596,6 +12954,7 @@
    "sessions": [
     "ECBS1h0d1ce1d04e54",
     "ECBS1h6302265165a5",
+    "ECBS1ha960fa84a3c2",
     "ECBS1hb0cb85a662d8",
     "ECBS1hf4c34c2455f9"
    ],
@@ -12604,10 +12963,16 @@
     "icv1-f2m17-tm101-00378d4e",
     "icv1-f2m19-t797-b6cf2467",
     "icv1-f2m23-t5197-69e76b73",
-    "icv1-f2m29-tm40309-30c52b96"
+    "icv1-f2m29-tm40309-30c52b96",
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
    ],
-   "runs": 429,
-   "verified": 429
+   "runs": 813,
+   "verified": 813
   }
  ],
  "factor_bases": [
@@ -23955,6 +24320,61 @@
      "role": "control",
      "method": "rho.negation",
      "method_id": "ECM1hefea4e0ebe79"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha960fa84a3c2",
+   "dir": "research/ecbench_pair_claw_20261003/sessions/koblitz",
+   "label": "pair claw of aburan28/cryptanalysis#175 against the strong signed-Frobenius rho, same targets, six Koblitz curves",
+   "status": "complete",
+   "spec_id": "ECS1h307d73440e6a",
+   "env_class_id": "ECBENV2h59034d4cd61b",
+   "binary_sha256": "0528c4f0321de049c6ac432e2a18340f529224c7f16a9b6c8ad9e88666aa37c6",
+   "git_commit": "1423dfc3403460c3ba4c0ead5774a1c950bd9106",
+   "records": 960,
+   "status_counts": {
+    "verified": 960
+   },
+   "started_unix_ms": 1791069098769,
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "arms": [
+    {
+     "arm": "bsgs-neg",
+     "role": "baseline",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3"
+    },
+    {
+     "arm": "claw-c1",
+     "role": "candidate",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa"
+    },
+    {
+     "arm": "claw-pr",
+     "role": "candidate",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    },
+    {
+     "arm": "rho-strong-aa",
+     "role": "control",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
     }
    ]
   },
