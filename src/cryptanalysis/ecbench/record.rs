@@ -19,6 +19,7 @@ use crate::cryptanalysis::ecbench::isolation::{
 };
 use crate::cryptanalysis::ecbench::methods::{
     resolve, FactorBaseFacts, MethodSpec, OnlineWindow, PhaseRecord, ResolvedMethod, SolveReport,
+    SolverStats,
 };
 use crate::cryptanalysis::ecbench::spec::Level;
 use crate::cryptanalysis::ecbench::workload::{CurveSpec, TargetKind, Workload};
@@ -314,6 +315,11 @@ pub struct Record {
     /// The one-target online window (AGENTS.md "IC measurements").
     #[serde(default)]
     pub online: Option<OnlineWindow>,
+    /// The decomposition solver's statistics for an algebraic or SAT
+    /// index-calculus run; `null` otherwise.  Informational, outside the
+    /// replay comparison.
+    #[serde(default)]
+    pub solver: Option<SolverStats>,
     pub time: Timing,
     pub isolation: IsolationRecord,
     pub env_class_id: String,
