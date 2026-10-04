@@ -80,9 +80,10 @@ lane() {  # cpu "a n ell" ...
 
 if [ "${PHASE:-1}" = 2 ]; then  # §3 phase 2: memory-killed draws retried once, alone, at 12 GB
   MEM_LIMIT=12000000
-  # smallest ℓ first, rr before x4 before ctrl, so the decisive rungs get the memory first
+  # every rr draw first (smallest ℓ first), then every x4, then every control, so the
+  # decisive arms get the memory before the controls, which are the costliest arm
   grep -h '"kind":"killed","reason":"memory","phase":1,' "$OUT"/K*.jsonl | sed -E 's/.*"cell":"([^"]+)","draw":([0-9]+),"arm":"([^"]+)".*/\1 \2 \3/' | sort -u |
-  awk '{ split($1, c, "l"); a = ($3 == "rr") ? 0 : ($3 == "x4") ? 1 : 2; print c[2], a, $0 }' | sort -k1,1n -k2,2n -k3 | cut -d" " -f3- |
+  awk '{ split($1, c, "l"); a = ($3 == "rr") ? 0 : ($3 == "x4") ? 1 : 2; print a, c[2], $0 }' | sort -k1,1n -k2,2n -k3 | cut -d" " -f3- |
   while read -r cell draw arm; do
     measure 1 "$cell" "$draw" "$arm" "$OUT/dump/$cell-d$draw-$arm.sing"
   done
