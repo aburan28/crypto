@@ -369,6 +369,17 @@ pub struct IcCostOptions {
     /// is that pairs whose cofactor components do not cancel are no longer
     /// thrown away.  `false` reproduces every committed run.
     pub cofactor_tolerant: bool,
+    /// Draw probe targets from the **full group**: `R = aG + bQ + T` with `T`
+    /// uniform cofactor torsion.  The recorded relation is `[c]`-projected,
+    /// and `[c]T = O`, so it stays sound; what changes is that every root
+    /// pair of `S_{m+1}` is a relation, so yield no longer depends on how the
+    /// factor base meets the cofactor cosets.  `false` reproduces every
+    /// committed run.
+    pub full_group_probes: bool,
+    /// Factor-base subspace `V`: `None` is `⟨1, z, …, z^{l−1}⟩`; `Some(s)`
+    /// draws `l` linearly independent elements of `F_{2^n}` from seed `s`,
+    /// so the presentation can be varied independently of the curve.
+    pub basis_seed: Option<u64>,
 }
 
 impl Default for IcCostOptions {
@@ -386,6 +397,8 @@ impl Default for IcCostOptions {
             seed: DEFAULT_SEED,
             known_order: None,
             cofactor_tolerant: false,
+            full_group_probes: false,
+            basis_seed: None,
         }
     }
 }
@@ -804,7 +817,7 @@ pub fn measure_member(
     let mut rng = StdRng::seed_from_u64(opts.seed ^ (a6 << 1) ^ ((n as u64) << 40));
 
     // ── the factor base: abscissae in V, folded by cofactor projection ──
-    let basis: Vec<F2mElement> = (0..opts.l).map(|i| to_element(1u64 << i, n)).collect();
+    let basis: Vec<F2mElement> = factor_base_basis(n, opts.l, opts.basis_seed);
     let st = FieldStructure::new(n, &me.irr);
 
     let mut entry_of: HashMap<u64, BaseEntry> = HashMap::new();
@@ -1022,7 +1035,17 @@ fn probe_once(
     let b = rng.gen_range(1..me.r);
     let ag = group.mul(ops, me.generator, a);
     let bq = group.mul(ops, q_point, b);
-    let target = group.add(ops, ag, bq);
+    let mut target = group.add(ops, ag, bq);
+    if opts.full_group_probes && me.cofactor > 1 {
+        // uniform cofactor torsion: [r]X for a random point X
+        let t = loop {
+            let x = rng.gen::<u64>() & ((1u64 << n) - 1);
+            if let Some(&p) = me.points_with_x(x).first() {
+                break group.mul(ops, p, me.r);
+            }
+        };
+        target = group.add(ops, target, t);
+    }
     if target.infinity {
         // `[a]G + [b]Q = O` gives `d = -a/b` without the relation matrix.
         // Counted and skipped so the benchmark measures index calculus
@@ -1090,6 +1113,32 @@ fn probe_once(
             false
         }
     }
+}
+
+/// `l` linearly independent elements of `F_{2^n}`: the monomials
+/// `1, z, …, z^{l−1}` when `seed` is `None`, otherwise drawn from `seed`
+/// and kept only if they raise the rank (elimination on bit masks).
+pub fn factor_base_basis(n: u32, l: u32, seed: Option<u64>) -> Vec<F2mElement> {
+    let Some(seed) = seed else {
+        return (0..l).map(|i| to_element(1u64 << i, n)).collect();
+    };
+    let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 48) ^ ((l as u64) << 40));
+    let mask = (1u64 << n) - 1;
+    let mut echelon: Vec<u64> = Vec::new();
+    let mut out = Vec::new();
+    while out.len() < l as usize {
+        let v = rng.gen::<u64>() & mask;
+        let mut red = v;
+        for &e in &echelon {
+            red = red.min(red ^ e);
+        }
+        if red != 0 {
+            echelon.push(red);
+            echelon.sort_unstable_by(|a, b| b.cmp(a));
+            out.push(to_element(v, n));
+        }
+    }
+    out
 }
 
 /// The `F_2`-span value of a coefficient mask over `basis`.
@@ -1668,6 +1717,36 @@ mod tests {
             census.members.contains(&1),
             "a6 = 1 is K_0 itself and must be in the class"
         );
+    }
+
+    #[test]
+    fn full_group_probes_over_a_random_subspace_still_solve_soundly() {
+        // Cofactor-torsion targets and a random F2-basis for V: every relation
+        // must still be consistent and the secret must still be recovered.
+        let n = 13;
+        let irr = field_for(n).expect("field");
+        let (a2, _, h) = preferred_family(n).expect("family");
+        assert!(h > 1, "the test needs a nontrivial cofactor");
+        let opts = IcCostOptions {
+            l: 5,
+            m: 2,
+            max_trials: 4_000,
+            ffd_targets: 4,
+            full_group_probes: true,
+            basis_seed: Some(11),
+            ..Default::default()
+        };
+        let row = measure_member(n, &irr, a2, 1, &opts).expect("K_a carries the experiment");
+        assert_eq!(
+            row.inconsistent_relations, 0,
+            "a wrong relation was admitted"
+        );
+        assert!(
+            row.verified,
+            "IC and BSGS disagreed under full-group probes"
+        );
+        let b = factor_base_basis(n, 5, Some(11));
+        assert_eq!(b.len(), 5);
     }
 
     #[test]
