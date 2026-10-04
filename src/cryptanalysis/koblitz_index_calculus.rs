@@ -5695,7 +5695,7 @@ impl F6CoordinateEncoder {
                 return None;
             }
             rows.push((63 - value.leading_zeros(), value, code));
-            rows.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+            rows.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         }
         Some(Self { rows })
     }
@@ -6163,7 +6163,40 @@ pub fn groebner_decompose(
     engine: SolverEngine,
     node_budget: usize,
 ) -> (Option<Vec<usize>>, SolveStats) {
-    groebner_decompose_with_geometry(kc, fb, index_of, st, target, m, engine, node_budget, false)
+    // Keep the generic frontend's unsupported-input contract explicit: the
+    // archived admission replay checks this entry point. Pass the built
+    // system onward so the F4 path does not build it twice.
+    let unsupported = || SolveStats {
+        exhausted: true,
+        unsupported: true,
+        ..Default::default()
+    };
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return (None, unsupported()),
+    };
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
+        Some(sys) => sys,
+        None => return (None, unsupported()),
+    };
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        false,
+        Some(sys),
+    )
 }
 
 /// F6-IC: inherited F4 with exact factor-base support pruning and residual
@@ -6190,7 +6223,18 @@ pub fn groebner_decompose_f6_ic(
             },
         );
     }
-    groebner_decompose_with_geometry(kc, fb, index_of, st, target, m, engine, node_budget, true)
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        None,
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -6204,25 +6248,30 @@ fn groebner_decompose_with_geometry(
     engine: SolverEngine,
     node_budget: usize,
     f6_ic: bool,
+    prebuilt: Option<crate::cryptanalysis::koblitz_groebner::DecompositionSystem>,
 ) -> (Option<Vec<usize>>, SolveStats) {
     let unsupported = || SolveStats {
         exhausted: true,
         unsupported: true,
         ..Default::default()
     };
-    let x_r = match target {
-        BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return (None, unsupported()),
-    };
-    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
-        &fb.subspace_basis,
-        &x_r,
-        &kc.curve.b,
-        m,
-        st,
-    ) {
-        Some(sys) => sys,
-        None => return (None, unsupported()),
+    let sys = if let Some(sys) = prebuilt {
+        sys
+    } else {
+        let x_r = match target {
+            BinaryPoint::Affine { x, .. } => x.clone(),
+            BinaryPoint::Infinity => return (None, unsupported()),
+        };
+        match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+            &fb.subspace_basis,
+            &x_r,
+            &kc.curve.b,
+            m,
+            st,
+        ) {
+            Some(sys) => sys,
+            None => return (None, unsupported()),
+        }
     };
     // A root of S₃ fixes the summands only up to sign, so some roots do
     // not lift.  Lift each as it is found and stop at the first that

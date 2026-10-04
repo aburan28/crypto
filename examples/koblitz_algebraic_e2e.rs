@@ -301,6 +301,7 @@ fn main() {
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        f6_ic: false,
         weil_charts: None,
         node_budget: 0,
         max_models: 64,
