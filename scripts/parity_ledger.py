@@ -478,6 +478,42 @@ def print_sieve(rows, title):
         desc = [r["descent_over_rho"] / r["s_over_rho"] for r in solved if r["s_over_rho"] < 1]
         if desc:
             print(f"Share of the descent in S below parity: {min(desc):.2f}–{max(desc):.2f} (registered P9: more than half).")
+def print_sieve_comparison(base, traced, new):
+    """Note §14's predictions against the rows: P12/P13 (C_rel at m = 9 and
+    S / rho against §11.5 and against the traced-descent rows of §12), P14
+    (the relation phase at p ≤ 503 against §11.5), P15 (the per-m estimate
+    against what each exhausted m yielded)."""
+    def by(rows):
+        return {(r["p"], r["seed"]): r for r in rows or []}
+    b, t, n = by(base), by(traced), by(new)
+    print("\nAgainst §11.5 and §12 (same p and seed):\n")
+    print("| p | seed | C_rel §11.5 → §14 | ratio | relation muls §11.5 → §14 | ratio | S / rho §12 (traced descent) → §14 | ratio | enum per B §11.5 → §14 |")
+    print("|---:|--:|:--|--:|:--|--:|:--|--:|:--|")
+    for key in sorted(n):
+        r = n[key]
+        rb = b.get(key)
+        rt = t.get(key)
+        if rb is None:
+            continue
+        crel = f"{rb['c_rel']:.3e} → {r['c_rel']:.3e}"
+        rel = f"{rb['relation_muls']:.3e} → {r['relation_muls']:.3e}"
+        sr = f"{rt['s_over_rho']:.4f} → {r['s_over_rho']:.4f}" if rt else f"— → {r['s_over_rho']:.4f}"
+        srr = f"{rt['s_over_rho'] / r['s_over_rho']:.2f}" if rt and r["s_over_rho"] > 0 else "—"
+        eb = f"{rb['enum_muls'] / max(rb['bs'], 1):,.0f} → {r['enum_muls'] / max(r['bs'], 1):,.0f}"
+        print(f"| {key[0]} | {key[1]} | {crel} | {rb['c_rel'] / r['c_rel']:.2f} | {rel} | {rb['relation_muls'] / r['relation_muls']:.2f} | {sr} | {srr} | {eb} |")
+    print("\nP15, the per-m estimate against the exhausted m's (every per-m entry but the last of a run):\n")
+    print("| p | seed | m | estimate | found | found / estimate |")
+    print("|---:|--:|--:|--:|--:|--:|")
+    for key in sorted(n):
+        r = n[key]
+        est = dict((int(k), v) for k, v in (r.get("estimate_by_m") or []))
+        per = r.get("per_m") or []
+        for e in per[:-1]:
+            m, found = e[0], e[3]
+            if m in est and est[m] > 0:
+                print(f"| {key[0]} | {key[1]} | {m} | {est[m]:,.0f} | {found} | {found / est[m]:.2f} |")
+
+
 def walk(name):
     """The isogeny walk to a weak curve (note §13): per size, the weak
     fraction among curves with full 2-torsion, the walks' outcomes, the
@@ -661,6 +697,10 @@ def main():
     sv = sieve()
     if sv:
         print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
+    sve = sieve("35_jv_cover_sieve_enum")
+    if sve:
+        print_sieve(sve, "F.3 The sieving variant with the line enumeration of note §14 (35_jv_cover_sieve_enum_*.json)")
+        print_sieve_comparison(sv, svt, sve)
     svt = sieve("33_jv_cover_trace_sieve")
     if svt:
         print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
