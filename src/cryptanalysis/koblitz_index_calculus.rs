@@ -643,6 +643,58 @@ impl KoblitzCurve {
         Self::subfield(1, n, u64::from(a), 1)
     }
 
+    /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
+    /// gate. Its modulus, subgroup order, cofactor, and generator are the
+    /// C082 public parameters. The generic constructor remains capped at
+    /// [`MAX_N`] because its factorisation and normal-basis helpers use
+    /// single-word polynomials.
+    pub fn known_n83_k1() -> Option<Self> {
+        let n = 83;
+        let r = BigUint::from(8_569_786_107_849_059u64);
+        let cofactor = BigUint::from(1_128_547_018u64);
+        let group_order = koblitz_point_count(1, n);
+        if group_order != &r * &cofactor || !is_prime_u64(r.to_u64()?) {
+            return None;
+        }
+        let generator = BinaryPoint::Affine {
+            x: F2mElement::from_hex("68a212cfe19a809fe0598", n),
+            y: F2mElement::from_hex("244a245ea0b17d8cc8297", n),
+        };
+        let curve = BinaryCurve {
+            m: n,
+            irreducible: IrreduciblePoly {
+                degree: n,
+                low_terms: vec![0, 1, 2, 45],
+            },
+            a: F2mElement::one(n),
+            b: F2mElement::one(n),
+            generator: generator.clone(),
+            order: r.clone(),
+            cofactor: cofactor.clone(),
+        };
+        if !curve.is_on_curve(&generator)
+            || scalar_mul(&curve, &generator, &r) != BinaryPoint::Infinity
+        {
+            return None;
+        }
+        let lambda = frobenius_eigenvalue(&curve, 1, &r)?;
+        Some(Self {
+            a: 1,
+            n,
+            curve,
+            trace: 1,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda,
+            k: 1,
+            q: 2,
+            a_index: 1,
+            b_index: 1,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
+    }
+
     /// **A curve defined over `F_q`, `q = 2^k`, taken over `F_{2^n}`**
     /// with `n = k·e`, `e` odd: `y² + xy = x³ + a x² + b` with
     /// `a, b ∈ F_q` given by their coordinates `a_index` (`< q`) and

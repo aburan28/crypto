@@ -179,6 +179,9 @@ mod tests {
     use super::*;
     use crate::binary_ecc::curve::scalar_mul;
     use crate::binary_ecc::IrreduciblePoly;
+    use crate::cryptanalysis::koblitz_index_calculus::{
+        build_standard_subspace_factor_base, cofactor_project_factor_base, KoblitzCurve,
+    };
     use num_bigint::BigUint;
 
     fn n83_curve() -> BinaryCurve {
@@ -238,5 +241,28 @@ mod tests {
         assert_eq!(sum, target);
         let missing = scalar_mul(&curve, &curve.generator, &BigUint::from(33u32));
         assert!(index.solve4(&missing).is_none());
+    }
+
+    #[test]
+    fn n83_registered_curve_and_subgroup_usable_base_close_exactly() {
+        let kc = KoblitzCurve::known_n83_k1().unwrap();
+        assert_eq!(kc.label(), "icv1-f2m83-t6151469093347-cdcc5432");
+        let parent = build_standard_subspace_factor_base(&kc, 5).unwrap();
+        let base = cofactor_project_factor_base(&kc, &parent).unwrap();
+        assert_eq!(parent.points.len(), 37);
+        assert_eq!(base.points.len(), 36);
+        assert_eq!(base.signed_orbits.len(), 18);
+        for point in &base.points {
+            assert_eq!(kc.mul(point, &kc.subgroup_order), BinaryPoint::Infinity);
+        }
+        let index = F6WidePairIndex::new(&kc.curve, &base.points, 1024).unwrap();
+        let planted = base.points[..4]
+            .iter()
+            .fold(BinaryPoint::Infinity, |sum, point| kc.add(&sum, point));
+        let witness = index.solve4(&planted).unwrap();
+        let replay = witness.iter().fold(BinaryPoint::Infinity, |sum, &i| {
+            kc.add(&sum, &base.points[i])
+        });
+        assert_eq!(replay, planted);
     }
 }
