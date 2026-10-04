@@ -195,7 +195,7 @@ def curve_rows(registry: dict, leaderboard: dict) -> list[dict]:
 
 
 def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list[dict]]:
-    sessions, methods, fbs = [], {}, {}
+    sessions, methods, fbs, yields = [], {}, {}, []
     per_curve_arm = defaultdict(lambda: {"n": 0, "verified": 0, "s_sum": 0.0, "floor_sum": 0.0})
     for sdir in sorted(glob.glob(os.path.join(ROOT, ECBENCH_SESSIONS_GLOB))):
         session_path = os.path.join(sdir, "session.json")
@@ -235,6 +235,8 @@ def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list
                     f["methods"].add(m["method_id"])
                 if r.get("warmup") or not slug:
                     continue
+                if m.get("family") == "ic":
+                    yields.append(yield_row(r, s["session_id"]))
                 key = (slug, s["session_id"], r["arm"])
                 agg = per_curve_arm[key]
                 agg["n"] += 1
@@ -285,7 +287,74 @@ def ecbench_sessions(curves_by_slug: dict) -> tuple[list[dict], list[dict], list
         key=lambda m: (m["family"] or "", m["method"], m["method_id"]),
     )
     fb_rows = sorted(({**f, "sessions": sorted(f["sessions"]), "methods": sorted(f["methods"])} for f in fbs.values()), key=lambda f: (f["family"] or "", f["curve"] or "", f["fb_id"]))
-    return sessions, method_rows, fb_rows
+    yields.sort(key=lambda y: (y["curve"], y["fb_id"] or "", y["oracle"] or "", y["session_id"], y["arm"], y["target_index"] if y["target_index"] is not None else -1, y["round"]))
+    return sessions, method_rows, fb_rows, yields
+
+
+def yield_row(r: dict, session_id: str) -> dict:
+    """One row of the yield ledger: what one IC run yielded on one target.
+
+    Every figure is the run's own counter; `yield` is relations / trials and
+    `lookups_per_relation` is lookups / relations, both left null when the
+    denominator is zero.  The `solver` block is copied from the record when
+    the harness wrote one (algebraic and SAT oracles); older records have
+    none and the column stays null.
+    """
+    phases = {p["name"]: p for p in r.get("phases", [])}
+    rel = (phases.get("relations") or {}).get("native") or {}
+    la = (phases.get("linear_algebra") or {}).get("native") or {}
+    fb = r.get("factor_base") or {}
+    detail = r.get("detail") or {}
+    dec = detail.get("decomposition") or {}
+    params = r["method"].get("params", {})
+    trials = rel.get("trials")
+    # ic.pipeline writes `relations`; ic.shared_rank writes `hits` for the
+    # same count (a decomposition that became a relation-log row).
+    relations = rel.get("relations", rel.get("hits"))
+    lookups = rel.get("lookups")
+    workload = r["workload"]
+    curve = workload.get("curve") or {}
+    phase_gae = {p["name"]: p.get("gae") for p in r.get("phases", [])}
+    return {
+        "run_id": r["run_id"],
+        "record_id": r["record_id"],
+        "session_id": session_id,
+        "arm": r["arm"],
+        "round": r.get("round"),
+        "status": r["outcome"]["status"],
+        "curve": curve.get("slug"),
+        "log2_r": None if curve.get("r") is None else bits(curve.get("r")),
+        "target_index": workload.get("target_index"),
+        "target": workload.get("target"),
+        "method_id": r["method"]["method_id"],
+        "fb_id": fb.get("fb_id"),
+        "fb_family": fb.get("family"),
+        "fb_params": fb.get("params"),
+        "fb_columns": fb.get("columns"),
+        "fb_signed_points": fb.get("signed_points"),
+        "oracle": params.get("oracle") or r["method"]["id"],
+        "solver_name": params.get("solver") or dec.get("solver"),
+        "summands": dec.get("summands"),
+        "hit_rate": dec.get("hit_rate"),
+        "trials": trials,
+        "relations": relations,
+        "yield": (relations / trials) if trials and relations is not None else None,
+        "lookups": lookups,
+        "lookups_per_relation": (lookups / relations) if relations and lookups is not None else None,
+        "walk_steps": rel.get("walk_steps"),
+        "lift_failures": rel.get("lift_failures"),
+        "unliftable_systems": rel.get("unliftable_systems"),
+        "frobfold_mismatches": rel.get("frobfold_mismatches"),
+        "matrix_rows": la.get("rows"),
+        "matrix_columns": la.get("columns"),
+        "matrix_rank": la.get("rank"),
+        "row_ops": la.get("row_ops"),
+        "gae": {k: phase_gae.get(k) for k in ("factor_base", "oracle_setup", "relations", "linear_algebra", "verify")},
+        "total_gae": (r.get("cost") or {}).get("total_gae"),
+        "s": (r.get("cost") or {}).get("s"),
+        "deterministic": (r.get("cost") or {}).get("deterministic"),
+        "solver": r.get("solver"),
+    }
 
 
 def tournament_rounds(curves: list[dict]) -> list[dict]:
@@ -390,7 +459,7 @@ def build() -> dict:
     leaderboard = load(LEADERBOARD)
     curves = curve_rows(registry, leaderboard)
     by_slug = {c["slug"]: c for c in curves}
-    sessions, methods, fbs = ecbench_sessions(by_slug)
+    sessions, methods, fbs, yields = ecbench_sessions(by_slug)
     rounds = tournament_rounds(curves)
     candidates = candidate_identities()
     tag_to_slug = {}
@@ -408,7 +477,7 @@ def build() -> dict:
         "schema_version": "lab-browser/1",
         "generated_by": "scripts/build_lab_browser.py",
         "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
-        "counts": {"curves": len(curves), "methods": len(methods), "factor_bases": len(fbs), "candidates": len(candidates), "rounds": len(rounds), "sessions": len(sessions)},
+        "counts": {"curves": len(curves), "methods": len(methods), "factor_bases": len(fbs), "candidates": len(candidates), "rounds": len(rounds), "sessions": len(sessions), "yields": len(yields)},
         "sources": sources,
         "vocabulary": VOCABULARY,
         "curves": curves,
@@ -417,6 +486,7 @@ def build() -> dict:
         "candidates": candidates,
         "rounds": rounds,
         "sessions": sessions,
+        "yields": yields,
     }
 
 

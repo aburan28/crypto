@@ -390,9 +390,15 @@ endomorphism discriminant) and identities (ICV1, EC1, curve UID, retired
 names), every `ecbench` method (`ECM1`) and factor base (`FB1`) a
 committed session ran, every tournament candidate identity (`IC1`) the
 repository writes, every tournament round, every committed `ecbench`
-session, and the vocabulary of oracles, solvers and factor-base families.
-It is how a reader gets from a number on the scoreboard to the curve,
-algorithm and evidence behind it.
+session, the vocabulary of oracles, solvers and factor-base families,
+and the **yield ledger**: one row per index-calculus run with its curve,
+target, factor base, oracle, solver, trials, relations, yield, lookups,
+matrix rank and the record's `solver` block (the ICMS `pdp_metrics`:
+system shape, solving degree, Macaulay and SAT figures), which the
+`ecbench` database exposes as the `ic_yield` view. It is how a reader
+gets from a number on the scoreboard to the curve, algorithm and
+evidence behind it, and how a candidate combination is informed: a
+yield is a stage diagnostic, and only a whole-pipeline `S` decides speed.
 
 - **Generated, never edited.** `docs/browser/data.json` is written by
   `python3 scripts/build_lab_browser.py` from committed files only (the
@@ -724,6 +730,13 @@ immutable historical names and never infer exact identity from field degree alon
 Within this repository the text name is the ICV1 slug (§11); the curve
 registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
 slug to the EC1 identities of its recorded representations.
+The [IC curve crosswalk](docs/curves/ic/README.md) mirrors cryptanalysis's
+exact curve records and links them to ICV1 only when the model match is
+established. Keep unknown traits and unsupported models as `null` with status.
+Large factor bases remain content-addressed archives, while the browser's
+FB1 entries are session summaries; link them only after exact curve and
+point-set identities, encoding and quotient rules agree. An isogenous curve
+has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
 
 # Agent rules for IC measurements
 
