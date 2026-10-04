@@ -385,12 +385,12 @@ impl Fld for Fq3 {
 
 pub type Poly<E> = Vec<E>;
 
-fn ptrim<F: Fld>(f: &F, p: &mut Poly<F::E>) {
+pub(crate) fn ptrim<F: Fld>(f: &F, p: &mut Poly<F::E>) {
     while p.last().is_some_and(|c| f.is_zero(c)) {
         p.pop();
     }
 }
-fn padd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
+pub(crate) fn padd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     let n = a.len().max(b.len());
     let mut out: Poly<F::E> = (0..n)
         .map(|i| match (a.get(i), b.get(i)) {
@@ -403,7 +403,7 @@ fn padd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     ptrim(f, &mut out);
     out
 }
-fn psub<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
+pub(crate) fn psub<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     let n = a.len().max(b.len());
     let mut out: Poly<F::E> = (0..n)
         .map(|i| match (a.get(i), b.get(i)) {
@@ -416,7 +416,7 @@ fn psub<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     ptrim(f, &mut out);
     out
 }
-fn pmul<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
+pub(crate) fn pmul<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     if a.is_empty() || b.is_empty() {
         return Vec::new();
     }
@@ -432,13 +432,13 @@ fn pmul<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     ptrim(f, &mut out);
     out
 }
-fn pscale<F: Fld>(f: &F, a: &[F::E], k: &F::E) -> Poly<F::E> {
+pub(crate) fn pscale<F: Fld>(f: &F, a: &[F::E], k: &F::E) -> Poly<F::E> {
     let mut out: Poly<F::E> = a.iter().map(|x| f.mul(x, k)).collect();
     ptrim(f, &mut out);
     out
 }
 /// `a = q b + r`, `deg r < deg b`.
-fn pdivrem<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>) {
+pub(crate) fn pdivrem<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>) {
     assert!(!b.is_empty(), "division by the zero polynomial");
     let mut r: Poly<F::E> = a.to_vec();
     ptrim(f, &mut r);
@@ -462,7 +462,7 @@ fn pdivrem<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>) {
     ptrim(f, &mut q);
     (q, r)
 }
-fn pmonic<F: Fld>(f: &F, a: &[F::E]) -> Poly<F::E> {
+pub(crate) fn pmonic<F: Fld>(f: &F, a: &[F::E]) -> Poly<F::E> {
     match a.last() {
         None => Vec::new(),
         Some(lc) => {
@@ -474,7 +474,7 @@ fn pmonic<F: Fld>(f: &F, a: &[F::E]) -> Poly<F::E> {
     }
 }
 /// `(g, s, t)` with `g = s a + t b` monic (or zero).
-fn pxgcd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>, Poly<F::E>) {
+pub(crate) fn pxgcd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>, Poly<F::E>) {
     let (mut r0, mut r1) = (a.to_vec(), b.to_vec());
     let (mut s0, mut s1): (Poly<F::E>, Poly<F::E>) = (vec![f.one()], Vec::new());
     let (mut t0, mut t1): (Poly<F::E>, Poly<F::E>) = (Vec::new(), vec![f.one()]);
@@ -496,13 +496,13 @@ fn pxgcd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> (Poly<F::E>, Poly<F::E>, Poly
         }
     }
 }
-fn peval<F: Fld>(f: &F, a: &[F::E], x: &F::E) -> F::E {
+pub(crate) fn peval<F: Fld>(f: &F, a: &[F::E], x: &F::E) -> F::E {
     a.iter()
         .rev()
         .fold(f.zero(), |acc, c| f.add(&f.mul(&acc, x), c))
 }
 /// `a mod m` (`m ≠ 0`).
-fn pmod<F: Fld>(f: &F, a: &[F::E], m: &[F::E]) -> Poly<F::E> {
+pub(crate) fn pmod<F: Fld>(f: &F, a: &[F::E], m: &[F::E]) -> Poly<F::E> {
     pdivrem(f, a, m).1
 }
 
@@ -1701,7 +1701,7 @@ pub fn jv_options_stopped(max_degree: u32, budget_secs: f64, staircase: usize) -
     jv_options(max_degree, budget_secs).stopping_below(staircase)
 }
 
-fn opts_for(max_degree: u32, budget_secs: f64, stop: Option<usize>) -> F4Options {
+pub(crate) fn opts_for(max_degree: u32, budget_secs: f64, stop: Option<usize>) -> F4Options {
     match stop {
         Some(k) => jv_options_stopped(max_degree, budget_secs, k),
         None => jv_options(max_degree, budget_secs),

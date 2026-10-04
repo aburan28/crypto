@@ -308,6 +308,7 @@ Which panels a result owes, by kind:
 | a tournament or autolab round | the round's own panel, the reference-history table where the reference changed, and the chart |
 | a boundary, exponent or phase priced for the first time | the exponent panel and the boundary facts (§7 above) |
 | a verdict change | the sentence at the top of the page and the best-of table's first row |
+| a whole-pipeline measurement on any curve, a newly priced curve or a re-matched reference | the index-calculus leaderboard, regenerated from the round's frozen files (§7b) |
 
 Rules that make this checkable:
 
@@ -337,6 +338,84 @@ Rules that make this checkable:
 
 A PR that lands a result without its dashboard update is incomplete, and
 the finish-and-merge authorization above does not cover merging it.
+
+#### 7b. Keep the leaderboard current
+
+`docs/ic-leaderboard.html` is the same evidence curve by curve. For every
+curve priced end to end it shows the best recipe, the phase split of `S`,
+the ratio to the matched reference and to the floor, every recipe on every
+curve, the per-phase exponents, the decomposition oracles, and every curve
+the repository names. Its Markdown and data twins are
+`docs/ic/LEADERBOARD.md` and `docs/ic/leaderboard.json`. It is held to §7's
+and §7a's standard: **a round that changes what the leaderboard shows is not finished
+until the leaderboard shows it**, in the same pull request.
+
+- **When.** Update it in the PR that lands any of these:
+  - a whole-pipeline measurement: a new ledger section, a new ladder or
+    recipe, or a re-run that supersedes a row;
+  - a curve priced end to end for the first time;
+  - a reference re-matched;
+  - a rule change that redefines the primary comparison, as the
+    one-target rule did;
+  - a change to `docs/curves/registry.json`, which the page's roster reads.
+- **How.** The page is generated, never edited by hand.
+  - Point `SOURCES` in `scripts/build_ic_leaderboard.py` at the round's
+    frozen files.
+  - Keep a superseded figure as the row's "before" mark.
+  - Keep batch or legacy figures labelled as diagnostics, never as the
+    headline.
+  - Regenerate with `python3 scripts/build_ic_leaderboard.py` and commit
+    all three outputs.
+  - The builder reads only committed frozen files, so a number that is
+    not in one cannot reach the page.
+- **Agree with the scoreboard.** The leaderboard's headline figures must
+  match the ledger and the verdict on `docs/index-calculus-scoreboard.html`.
+  When they disagree, one of them is stale: fix it in the same PR.
+- **Enforced in CI** (`ic-leaderboard`). `--check` fails when any output is
+  stale against the files the builder reads. It also fails when the ledger
+  has a section later than `LEDGER_COVERED_THROUGH`, because the check
+  cannot otherwise see evidence the builder does not read yet.
+  - When a new section changes the page, point `SOURCES` at it,
+    regenerate, and raise the number.
+  - When it changes nothing on the page (a stage diagnostic, a plan),
+    confirm that, and raise the number.
+- **Published copies** are republishes of the repository file, as in §7.
+
+#### 7c. Keep the lab browser current
+
+`docs/browser/` (published at `/browser/`) is the searchable index over
+everything the workstream names: every curve in the ICV1 registry with
+its invariants (family, field, trace, order, subgroup order, cofactor,
+endomorphism discriminant) and identities (ICV1, EC1, curve UID, retired
+names), every `ecbench` method (`ECM1`) and factor base (`FB1`) a
+committed session ran, every tournament candidate identity (`IC1`) the
+repository writes, every tournament round, every committed `ecbench`
+session, and the vocabulary of oracles, solvers and factor-base families.
+It is how a reader gets from a number on the scoreboard to the curve,
+algorithm and evidence behind it.
+
+- **Generated, never edited.** `docs/browser/data.json` is written by
+  `python3 scripts/build_lab_browser.py` from committed files only (the
+  registry, `docs/ic/leaderboard.json`, `research/ecbench_*/sessions/*`,
+  the tournament's `runs/`, and the files that mention IC1 identities).
+  It computes nothing beyond a mean over a session's own verified runs.
+- **Regenerate it in the PR that lands** a new curve in the registry, a
+  new `ecbench` session, a new tournament round, a new candidate identity,
+  or a leaderboard change. CI (`ic-leaderboard`, `--check`) fails when the
+  file is stale, and the site build test fails when a cross-reference in
+  it does not resolve. The check ignores how many files mention each
+  candidate identity, and which: those counts change with any report that
+  writes one and refresh on the next regeneration.
+- **Every identity is a link.** A curve page links to the leaderboard
+  rows, sessions, factor bases, rounds and candidates that cite it; a
+  session, method, factor base or round links back to its curves. A new
+  kind of record gets a view and a join, not a free-text mention.
+- **The page renders data with DOM nodes only**, never `innerHTML`, like
+  the status dashboards; the site test pins that.
+- **Unregistered references stay visible.** A tournament cell or
+  candidate on a curve the registry does not hold is shown as
+  "not in the registry", never dropped or silently mapped; registering
+  the curve (§11) is the fix.
 
 ### 8. Use the frozen benchmark to establish end-to-end speedups
 

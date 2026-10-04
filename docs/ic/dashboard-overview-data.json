@@ -1,5 +1,48 @@
 {
-  "confirmation_familywise_online_upper": 1.0338915916497726,
+  "schema_version": 2,
+  "scope": "bounded IC autolab overview; not all repository research",
+  "sources": [
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json",
+      "sha256": "8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
+      "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
+      "sha256": "9def5e0e4a3c3fd2e47252d08e3509a88205691c39a77912cd315428b7bed2eb"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/independent-audit.json",
+      "sha256": "3570722341b8ca2cd8794d51829cac1a1f3b8c1ff02a07a6af9377a36d2cbab7"
+    },
+    {
+      "path": "research/notes/ecc2k130/shared_rank_folded_table_20261003/EVIDENCE.json",
+      "sha256": "cf61ec46ae7be8eb58559a17a6f90eb91cfc1f1b67dae72beaabcebed6ba2531"
+    },
+    {
+      "path": "research/ic_solver_online_20261003/confirmation/RESULT.md",
+      "sha256": "e4cfed0199e4d3c55731dfcd659a160d0af73773f13f19d06e0813bdfd123ffe"
+    },
+    {
+      "path": "research/notes/ecc2k130/n37_shared_rank_targets_20261003/EVIDENCE.json",
+      "sha256": "7b8f9c0d3fce0da4165d482aeaea3d4698c634173df53efaa936f17ce8f25c27"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/RESULT_FINAL.json",
+      "sha256": "cabeb087e0991580831434ba35c688ace9072e346cd7ceeb0522aeb5c0578ede"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/rho-strong__ic-shared.json",
+      "sha256": "28f375249d4277b44ebc1920691acd0b242dbf8a1c4dd8a69ec352b31d4fe810"
+    },
+    {
+      "path": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/comparisons/ic-shared__ic-control.json",
+      "sha256": "d5277601068a516d72131ebef5f024d2d305cfbe577cd577ce7b06370742573d"
+    }
+  ],
   "confirmation_online": {
     "boundary": "one supplied public point after reusable preparation through scalar replay",
     "candidate_over_baseline": 0.9733345435416899,
@@ -16,6 +59,8 @@
       "n31a0": 1.0505801644881685
     }
   },
+  "confirmation_familywise_online_upper": 1.0338915916497726,
+  "paired_targets": 72,
   "f5_control": {
     "additional_executions_authorized": false,
     "archive_bytes": 25476819,
@@ -62,7 +107,146 @@
     "target_attempt_count": 3,
     "workload_id": "8b3d9065d872"
   },
-  "paired_targets": 72,
+  "native_sat_control": {
+    "audited_attempts": [
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 31409,
+            "sha256": "a7867583d28fe9593fd17dabdf6545d5bf79b0fda08888e5172f051a3d918eda"
+          },
+          "instance.magma": {
+            "bytes": 50707,
+            "sha256": "1e7609332d721678d763b1eb48658b505eae39506b0f6e4d0edff8261595eaab"
+          },
+          "instance.xor.cnf": {
+            "bytes": 40710,
+            "sha256": "05b0913d27231ae82601b44f042765cf9ba2727aeb66543467e92127b3a2d92f"
+          }
+        },
+        "status": "SOURCE_UNSAT",
+        "trial": 0
+      },
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 35760,
+            "sha256": "eab39a019e5298286e92169efcbe0eb381ce77af2d46749748d0ef202e1478ff"
+          },
+          "instance.magma": {
+            "bytes": 57519,
+            "sha256": "c5f7baa8ef80be4d749fb3be5ac6c3d957978166d534826090455378ec6e5d7e"
+          },
+          "instance.xor.cnf": {
+            "bytes": 42662,
+            "sha256": "03a017d1763f5be128f8069f78158723a456b0803757eaa03ffbb647d9c6d960"
+          }
+        },
+        "status": "SOURCE_UNSAT",
+        "trial": 1
+      },
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 36012,
+            "sha256": "1783698ff0fda61fc056b24b19d12e421f895c03ebbbc63fd399390b82def031"
+          },
+          "instance.magma": {
+            "bytes": 58011,
+            "sha256": "958701bb9e154d2bea03b83e8243aa2b5dfc90278f421ddf3e21ac1d88159a0f"
+          },
+          "instance.xor.cnf": {
+            "bytes": 42824,
+            "sha256": "2077d013463e6a58270a38f29752ec0395099d1db0abfcfaadb7f6b8970d784c"
+          }
+        },
+        "status": "VALID_POINT_WITNESS",
+        "trial": 2
+      }
+    ],
+    "auditor_binary_sha256": "c5338662f688c15f52e2b02debf5e7f82ee9c5450a8de7b1ad0961225a27bf41",
+    "fresh_paired_qualification": false,
+    "headline_eligible": false,
+    "independent_replay_inside_online_interval": false,
+    "independent_replay_wall_ns": "6258817750",
+    "native_children_executed_by_auditor": 0,
+    "online_attempt_wall_ns": 56585480167,
+    "online_phases_ns": {
+      "target_descent": 333,
+      "target_pdp": 56585062375,
+      "target_query": 11000,
+      "target_recovery_check": 9542,
+      "target_relation_check": 396917
+    },
+    "online_speedup": null,
+    "online_wall_ns": 56585480167,
+    "preparation_admission": {
+      "accounting": "historical preparation only; original Python controller provenance retained; no native timings measured",
+      "dependent_relations": 8,
+      "duplicate_relations": 0,
+      "folded_columns": 29,
+      "fresh_targets_generated": 0,
+      "geometric_points": 63,
+      "independently_proved_ordinary_negatives": 106,
+      "native_solvers_executed": 0,
+      "new_queries": 0,
+      "ordinary_outcome_mix": {
+        "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+        "SOURCE_UNSAT": 106,
+        "VALID_POINT_WITNESS": 37
+      },
+      "ordinary_queries": 149,
+      "preparation_source_sha256": "e4f75b4ba1e160518cb86827f88af53f101f63071f2729436d3f20fded95c06c",
+      "rank": 29,
+      "rank_trajectory_sha256": "4d70c17bef5eb3758f3b4f9c405bdd8c1ec4efc6b417afaf9f34c25dd55409c0",
+      "rows_sha256": "aa34d1e619c5c54c7a3e644b944cc86e2294730fdfbd786a589707b22a6b3d9e",
+      "status": "PASS_NATIVE_PREPARED_SAT_MATHEMATICS",
+      "usable_points": 62,
+      "verified_column_logs": 29,
+      "verified_relations": 37
+    },
+    "producer_sha256": "f6df7520c6b9151515ea866fc71dbc7cee75e35ed9a0ea14bb7ad8ee38fc734e",
+    "promotion_eligible": false,
+    "recovered_scalar": 24886,
+    "registration_sha256": "b098ebbe135abd4706e62d6286f513fe1c4f07fad61f7250487bd2d86ad317e4",
+    "scalar_verified": true,
+    "schema_version": 1,
+    "source_bound_execution_admitted": true,
+    "status": "PASS_NATIVE_SOURCE_BOUND_CONTROL_AUDIT",
+    "target_complete": true,
+    "target_input": [
+      52411,
+      72106
+    ]
+  },
+  "historical_incomplete_sat_control": {
+    "attempt_count": 8,
+    "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104",
+    "cold_wall_ns": null,
+    "controller_exit_code": 0,
+    "controller_timed_out": false,
+    "exact_geometric_feasible_queries": 1,
+    "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+    "false_negative_claims": 0,
+    "fresh_paired_qualification": false,
+    "headline_online_admissible": false,
+    "native_retry_allowed": false,
+    "native_status_mix": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 8
+    },
+    "online_speedup": null,
+    "original_mathematical_admission": true,
+    "original_transport_status": "PASS_FROZEN_PREPARED_TRANSPORT",
+    "promotion_eligible": false,
+    "recovered_scalar": null,
+    "registration_consumed": true,
+    "rho_online_wall_ns": null,
+    "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104Wb79558c422c7R2026100102",
+    "scalar_verified": false,
+    "status": "ADMITTED_INCOMPLETE_PREPARED_SAT_CONTROL",
+    "verified_online_wall_ns": null,
+    "workload_id": "b79558c422c7"
+  },
   "rho_online_comparison": {
     "boundary": "one supplied public point after reusable preparation through scalar replay",
     "candidate_over_baseline": 0.13428518699194839,
@@ -79,57 +263,263 @@
       "n31a0": 0.13798923853928072
     }
   },
+  "shared_rank_ecbench": {
+    "all_measured_verified": true,
+    "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857fa",
+    "candidate_manifest_sha256": "a48bfcf857fac9eed2d8aa3dfac771001f645ccb59b20905cd0c3be4c323db4b",
+    "cold_counted_ic_over_rho_bounded": 13.590881825669284,
+    "cold_counted_ic_over_rho_ci95_bounded": [
+      10.55312075368819,
+      18.718544322585263
+    ],
+    "comparison_sha256": "28f375249d4277b44ebc1920691acd0b242dbf8a1c4dd8a69ec352b31d4fe810",
+    "control_online_ns": {
+      "max_ns": 101416,
+      "median_ns": 60542,
+      "min_ns": 54500
+    },
+    "control_over_ic_online_ratio_descriptive_median": 0.9777928517208521,
+    "control_over_ic_online_ratio_descriptive_range": [
+      0.8332483621810396,
+      1.287135749822317
+    ],
+    "diagnostic_claim_sha256": "17ef3c59f491ab1268375cc8bad722e1b3656774d1cc1fdd6108214254b190de",
+    "ecbench_workload_id": "W157bda94ea05",
+    "ic_cold_s_lower_bound": [
+      5.748204761975246,
+      5.748204761975246,
+      5.748204761975246,
+      5.748204761975246,
+      5.748204761975246
+    ],
+    "ic_online_gae_lower_bound": [
+      132.043676,
+      132.043676,
+      132.043676,
+      132.043676,
+      132.043676
+    ],
+    "ic_online_ns": {
+      "max_ns": 78792,
+      "median_ns": 61917,
+      "min_ns": 57667
+    },
+    "ic_online_phase_ns": {
+      "target_PDP": {
+        "max_ns": 29875,
+        "median_ns": 23083,
+        "min_ns": 19250
+      },
+      "target_descent": {
+        "max_ns": 334,
+        "median_ns": 292,
+        "min_ns": 291
+      },
+      "target_query": {
+        "max_ns": 32209,
+        "median_ns": 22377,
+        "min_ns": 21792
+      },
+      "target_recovery_check": {
+        "max_ns": 15208,
+        "median_ns": 15084,
+        "min_ns": 15083
+      },
+      "target_relation_check": {
+        "max_ns": 2291,
+        "median_ns": 1167,
+        "min_ns": 958
+      }
+    },
+    "ic_rank_trials": [
+      55,
+      55,
+      55,
+      55,
+      55
+    ],
+    "ic_setup_gae_lower_bound": [
+      87158.03076000001,
+      87158.03076000001,
+      87158.03076000001,
+      87158.03076000001,
+      87158.03076000001
+    ],
+    "ic_target_attempts": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "limits": [
+      "L0 macOS: no CPU isolation",
+      "one target: no target-population interval",
+      "native field, hash, allocation and modular work incompletely priced",
+      "other-host replay receipt not yet attached"
+    ],
+    "measured_rounds": 5,
+    "online_speedup": null,
+    "online_speedup_admissible": false,
+    "public_target": [
+      "0x100e90da4",
+      "0x124043682f"
+    ],
+    "rho_cold_s_lower_bound": [
+      0.40199165142506377,
+      0.5220394042628039,
+      0.3196111035369601,
+      0.6272705117969284,
+      0.2438157313393523
+    ],
+    "rho_online_ns": {
+      "max_ns": 921042,
+      "median_ns": 743750,
+      "min_ns": 283583
+    },
+    "rho_over_ic_online_ratio_descriptive_median": 11.739300007647405,
+    "rho_over_ic_online_ratio_descriptive_range": [
+      3.5991344298913597,
+      12.271174330995064
+    ],
+    "rounds": [
+      {
+        "control_online_ns": 54500,
+        "control_over_ic_online_descriptive": 0.8849701221096389,
+        "control_record": "ECR1h690f5329e2ea",
+        "ic_online_ns": 61584,
+        "ic_record": "ECR1h89f96a1207b6",
+        "ic_target_attempts": 1,
+        "rank_trials": 55,
+        "rho_online_ns": 755708,
+        "rho_over_ic_online_descriptive": 12.271174330995064,
+        "rho_record": "ECR1hd7f1010269af",
+        "round": 1
+      },
+      {
+        "control_online_ns": 60542,
+        "control_over_ic_online_descriptive": 0.9777928517208521,
+        "control_record": "ECR1ha26cc28a1c05",
+        "ic_online_ns": 61917,
+        "ic_record": "ECR1h8f3e736b7937",
+        "ic_target_attempts": 1,
+        "rank_trials": 55,
+        "rho_online_ns": 743750,
+        "rho_over_ic_online_descriptive": 12.012048387357268,
+        "rho_record": "ECR1h39a3a44913ce",
+        "round": 2
+      },
+      {
+        "control_online_ns": 58708,
+        "control_over_ic_online_descriptive": 1.018051918775036,
+        "control_record": "ECR1ha8fbb964f68d",
+        "ic_online_ns": 57667,
+        "ic_record": "ECR1hef80180c8dd4",
+        "ic_target_attempts": 1,
+        "rank_trials": 55,
+        "rho_online_ns": 664417,
+        "rho_over_ic_online_descriptive": 11.521615481991434,
+        "rho_record": "ECR1he6789b2ff7a4",
+        "round": 3
+      },
+      {
+        "control_online_ns": 65375,
+        "control_over_ic_online_descriptive": 0.8332483621810396,
+        "control_record": "ECR1h65618d7b6d51",
+        "ic_online_ns": 78458,
+        "ic_record": "ECR1h5034eed39660",
+        "ic_target_attempts": 1,
+        "rank_trials": 55,
+        "rho_online_ns": 921042,
+        "rho_over_ic_online_descriptive": 11.739300007647405,
+        "rho_record": "ECR1hf1182a4bd129",
+        "round": 4
+      },
+      {
+        "control_online_ns": 101416,
+        "control_over_ic_online_descriptive": 1.287135749822317,
+        "control_record": "ECR1hd2177bde32c6",
+        "ic_online_ns": 78792,
+        "ic_record": "ECR1h4c91ebba2ffc",
+        "ic_target_attempts": 1,
+        "rank_trials": 55,
+        "rho_online_ns": 283583,
+        "rho_over_ic_online_descriptive": 3.5991344298913597,
+        "rho_record": "ECR1hfa421ad78e72",
+        "round": 5
+      }
+    ],
+    "schema": "n37-shared-rank-ecbench-analysis/v1",
+    "session_id": "ECBS1h33c3e5e4f75d",
+    "session_records_sha256": "8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693",
+    "status": "verified_bounded_l0_diagnostic",
+    "target_count": 1,
+    "workload_id": "bad0afc30d3a"
+  },
   "rho_online_table": [
     {
       "alias": "incumbent",
       "online_ms": 0.03392627559359315,
       "rho_online_over_IC_online": 7.44683775180623,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "ic_online",
       "online_ms": 0.03488011051765443,
       "rho_online_over_IC_online": 7.2431957960877815,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "rho",
       "online_ms": 0.2865062747183838,
       "rho_online_over_IC_online": 0.8818078072352278,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "rho_online",
       "online_ms": 0.2526434698685518,
-      "rho_online_over_IC_online": 1.0,
-      "scheduled": 216,
-      "verified": 216
+      "rho_online_over_IC_online": 1,
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "stop7_word",
       "online_ms": 0.03395001644938487,
       "rho_online_over_IC_online": 7.441630263867792,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     }
   ],
-  "schema_version": 1,
-  "scope": "bounded IC autolab overview; not all repository research",
-  "sources": [
+  "historical_ledger_sha256": "5f395771ab4b5b419e952f6817b7212702b32825d5645be7a46f0a7dfbeb910b",
+  "historical_regime_summary_sha256": "7e41f1735e416335baad8c8a687f93b8180bc297a574704c926ee895ce10a708",
+  "historical_overview_panels": [
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json",
-      "sha256": "8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143"
+      "section_id": "cold-compact-orbit-20261003",
+      "sha256": "bff4c17b8e65448df84a9989fac10c395be4dc038d4a2d4b4267fc734f98be95"
     },
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
-      "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+      "section_id": "full-rank-compact-orbit-20261003",
+      "sha256": "2373cd81cd4ab3900679b6479ac702ba8d4debf53a34698c828cb9f6a6743132"
     },
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
-      "sha256": "9def5e0e4a3c3fd2e47252d08e3509a88205691c39a77912cd315428b7bed2eb"
+      "section_id": "n61-compact-orbit-hosted-20261003",
+      "sha256": "76b251de2a0d1b6a3efb103e8b86c774a32e5aa005b7dd9386873857e8fa49af"
+    },
+    {
+      "section_id": "lab-ecbench-all",
+      "sha256": "6f00aede475a66fd2dedbfe5421cf9ac5f749fd94114f5dea485885d95e9ce8c"
+    },
+    {
+      "section_id": "lab-progress",
+      "sha256": "3c027c1c9197d565af7143072d34e7df83238bc774a00b4da75e1ed56b5ef797"
+    },
+    {
+      "section_id": "lab-currency",
+      "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
-  ]
+  ],
+  "progress_timeline_sha256": "1dc4049dd0fcba96493cf581323c86534d347eec720020a873aa8f7f60888f48"
 }

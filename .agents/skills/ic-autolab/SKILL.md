@@ -65,6 +65,23 @@ target queries, geometric negatives, witness, scalar and phase ledger without
 starting a worker. Its shared transport supports bounded explicit stdin and
 environment with nonblocking delivery under the watchdog. This foundation is
 postexecution mathematics, not a native F5 registration or runtime admission.
+The [native F5 controller protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/PROTOCOL.md)
+defines `icprog f5-control-freeze`, `f5-control-execute` and `f5-control-audit`.
+Freeze builds the worker/checker from a committed offline snapshot and starts
+no scientific job. `--validation-only` capsules cannot dispatch. Publish the
+actual executable registration and custody archive separately before its sole
+claim-consuming execution. Use its frozen checker for admission. The committed
+template is not an actual registration; no new native F5 control is completed
+by the implementation alone. Old registrations and confirmation sets stay closed.
+Use `icprog f5-control-replay-validation` with the external validation seal for
+portable replay of the [compact offline build evidence](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/VALIDATION.md).
+This data-only replay launches no archived executable and cannot establish
+custody of the omitted full capsule or admit a scientific run.
+The [full F5 custody protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/PROTOCOL.md)
+adds `f5-control-publish-custody` and `f5-control-replay-custody` for the actual
+full archive. Replay requires the external registration seal, reads every
+archived member as data, and admits no execution. Publish the accepted actual
+registration and custody archive before its sole scientific invocation.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.

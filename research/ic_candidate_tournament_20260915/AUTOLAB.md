@@ -18,6 +18,10 @@ The [native F5 target replay](goal_20260924/native-f5-target-replay-v1/PROTOCOL.
 also reconstructs the retained failed target attempts, geometric negatives,
 witness and scalar. It shares bounded stdin/environment transport with the
 watchdog; it launches no scientific worker and leaves runtime admission pending.
+The [native F5 controller](goal_20260924/native-f5-control-v1/PROTOCOL.md)
+now provides the bounded freeze/claim/execute/audit implementation. Its template
+still needs an actually frozen and separately published registration, sole
+scientific invocation and frozen independent audit before runtime admission.
 New cross-method comparisons use native `ecbench`, whose merged online-window
 extension is available for review and integration. Public unplanted targets,
 IC1 identity and prepared solver admission remain open. The Python entry points below are

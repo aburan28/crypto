@@ -1,0 +1,19 @@
+{
+  "status": "PASS_IC_DASHBOARD_BROWSER",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "checks": [
+    "desktop: visible graphs, correct readiness, quiet evidence, search, retained fragment links",
+    "mobile 390: no page overflow; whole comparison graph fits; readiness scrolls within its panel",
+    "mobile 320: no page overflow; whole comparison graph fits; readiness scrolls within its panel",
+    "dark theme rendered",
+    "JavaScript disabled: static measurements, graphs, diagrams and native details remain available"
+  ],
+  "script_errors": [],
+  "external_requests": [],
+  "viewport_widths": [
+    1280,
+    390,
+    320
+  ],
+  "page_sha256": "8bbe5723c4643e6ace9da8363997423ce1b33c937a712f89105dd981f18fe2bd"
+}

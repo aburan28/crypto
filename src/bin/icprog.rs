@@ -33,6 +33,8 @@ mod autolab;
 mod bench;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/f5_control.rs"]
+mod f5_control;
 #[path = "icprog/f5_target.rs"]
 mod f5_target;
 #[path = "icprog/identity.rs"]
@@ -103,6 +105,77 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Replay full published F5 capsule custody as data, without execution.
+    F5ControlReplayCustody {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish exact sidecars for an unconsumed F5 capsule and verify its archive.
+    F5ControlPublishCustody {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable data replay of a validation-only F5 build; no archive execution/custody.
+    F5ControlReplayValidation {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish compact receipts of a non-executable F5 build-validation capsule.
+    F5ControlPublishValidation {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Freeze a disclosed n17 F5 controller/worker/auditor; builds only, no job.
+    F5ControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Consume the sole invocation of a separately published disclosed F5 seal.
+    F5ControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Audit F5 source, transport and arithmetic using its frozen checker; no search.
+    F5ControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Replay retained disclosed F5 target mathematics; no worker, fresh yield or admission.
     F5TargetReplay {
         #[arg(long, default_value = ".")]
@@ -543,6 +616,52 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5ControlReplayCustody {
+            publication,
+            registration_sha256,
+            out,
+        } => f5_control::replay_custody(&publication, &registration_sha256, &out),
+        Command::F5ControlPublishCustody {
+            capsule,
+            publication,
+            out,
+        } => f5_control::publish_custody(&capsule, &publication, &out),
+        Command::F5ControlReplayValidation {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_control::replay_validation(&publication, &validation_registration_sha256, &out),
+        Command::F5ControlPublishValidation { capsule, out } => {
+            f5_control::publish_validation(&capsule, &out)
+        }
+        Command::F5ControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => f5_control::freeze(
+            &root,
+            &out,
+            &config,
+            &cargo,
+            &rustc,
+            &host_context,
+            validation_only,
+        ),
+        Command::F5ControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => f5_control::execute(&capsule, &execution, &registration_sha256),
+        Command::F5ControlAudit {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => f5_control::audit(&capsule, &execution, &registration_sha256, &out),
         Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
         Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
         Command::SatControlPublish {

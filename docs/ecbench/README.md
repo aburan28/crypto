@@ -275,6 +275,12 @@ but reports success only at rank `factor_base.columns + 1`. It records the
 first target-pin rank, trial and relation as well as final rank. A trial-cap
 exit after the early pin is an exhausted full-rank attempt. This distinct
 parameter value changes the method identity and preserves old replays.
+`linalg=incremental-gauss-full-rank-checked` follows the same relation
+stream and stop rule, then verifies one nonzero-coefficient point per base
+column by checking `[coefficient × column_log]G = [cofactor]P`. It charges
+both scalar multiplications and records checked, missing and failing
+columns in the verification phase. The existing full-rank mode keeps its
+historical accounting and replay identity.
 
 `compact-orbit-scan:columns=N,raw_x_cap=M` builds a Koblitz factor base
 from a bounded raw-abscissa scan. Its cofactor projections, subgroup checks
@@ -342,6 +348,10 @@ Two consequences to read every table with:
   admitted pairs of its own), and marked `outside_noise` only when it
   excludes 1 and does not overlap the A/A interval. Anything less prints
   as `descriptive`, never as a result.
+  This `compare` wall field uses the whole solve, including IC's reusable
+  setup. For the primary one-target IC question, read the separate online
+  windows and `ecbench claim`'s same-point interval; a cold wall ratio is
+  never an online speedup.
 
 A speedup in the sense of AGENTS.md §8 is still
 `baseline_total_operations / candidate_total_operations`, over the whole
@@ -423,6 +433,8 @@ field the schema requires, from the session's own files:
   columns its sign-and-Frobenius orbits), every stage of the method
   resolved, and the IC sources hashed into the binary at compile time. A
   claim is therefore built only by the binary that measured the session.
+  The claim also carries the complete canonical candidate and workload
+  records beside their hashes, so a reader can audit the compact IDs.
   `ecbench`'s Koblitz bases fold the raw lifted points, so a raw orbit
   whose cofactor image is the identity (the 2-torsion point above
   `x = 0`) is a column with logarithm zero; the record discloses such

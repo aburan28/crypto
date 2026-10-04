@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - 'examples/prepared_sat_registration_audit.rs'
+      - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/sat_control_publication.rs'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/**'
@@ -14,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'examples/prepared_sat_registration_audit.rs'
+      - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/sat_control_publication.rs'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/**'

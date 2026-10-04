@@ -8,6 +8,7 @@
 //! |:--|:--|:--|:--|:--|
 //! | `incremental-gauss` | dense reduced row echelon, maintained as rows arrive | `rank × |F|` entries | leftmost non-zero | `row_ops` |
 //! | `incremental-gauss-full-rank` | same dense matrix, continue after target pin until every column is independent | `rank × |F|` entries | leftmost non-zero | `row_ops` |
+//! | `incremental-gauss-full-rank-checked` | same full-rank matrix, then point-check one representative per factor-base column | `rank × |F|` entries | leftmost non-zero | `row_ops` |
 //! | `structured-gauss` | sparse reduced row echelon, maintained as rows arrive | the non-zeros | lightest column (Markowitz) | `row_ops` |
 //!
 //! Both count a multiply-subtract on a **non-zero** entry as one
@@ -254,6 +255,10 @@ pub const MATRIX_NAMES: &[(&str, &str)] = &[
         "same dense incremental matrix, but collect until every factor-base column and the target column are independent",
     ),
     (
+        "incremental-gauss-full-rank-checked",
+        "same full-rank matrix, then charge a full-point logarithm check for one representative of every factor-base column",
+    ),
+    (
         "structured-gauss",
         "sparse reduced row echelon maintained as rows arrive, pivot on the lightest column; one row_op per non-zero multiply-subtract, so the two are comparable",
     ),
@@ -266,7 +271,9 @@ pub fn matrix_by_name(
     modulus: u64,
 ) -> Result<Box<dyn RelationSolver>, String> {
     match name {
-        "incremental-gauss" | "incremental-gauss-full-rank" => {
+        "incremental-gauss"
+        | "incremental-gauss-full-rank"
+        | "incremental-gauss-full-rank-checked" => {
             Ok(Box::new(IncrementalGauss::new(cols, modulus)))
         }
         "structured-gauss" => Ok(Box::new(StructuredGauss::new(cols, modulus))),
