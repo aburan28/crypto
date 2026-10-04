@@ -23,6 +23,9 @@ struct Cli {
     /// Compact raw JSON output; stdout when omitted.
     #[arg(long)]
     out: Option<PathBuf>,
+    /// Comma-separated terminal branch depths; defaults to the round-4 set.
+    #[arg(long, default_value = "0,1,2")]
+    branch_depths: String,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -402,14 +405,21 @@ fn target_set(terminal: u64, a: u64, b: u64, all_points: &[Affine]) -> (Vec<Affi
     (common.iter().copied().take(TARGETS).collect(), common.len())
 }
 
-fn run_terminal(terminal: u64, a: u64, b: u64, all_points: &[Affine]) -> TerminalResult {
+fn run_terminal(
+    terminal: u64,
+    branch_depths: &[u32],
+    a: u64,
+    b: u64,
+    all_points: &[Affine],
+) -> TerminalResult {
     let full_x: Vec<u64> = roots(DEPTH, terminal)
         .into_iter()
         .filter(|&x| !square_roots(curve_rhs(x, a, b)).is_empty())
         .collect();
     let (targets, available) = target_set(terminal, a, b, all_points);
-    let branches = [0, 1, 2]
-        .into_iter()
+    let branches = branch_depths
+        .iter()
+        .copied()
         .map(|branch_depth| {
             let boundaries = roots(branch_depth, terminal);
             let remaining = DEPTH - branch_depth;
@@ -460,6 +470,23 @@ fn run_terminal(terminal: u64, a: u64, b: u64, all_points: &[Affine]) -> Termina
 }
 
 fn run(cli: Cli) -> Result<(), String> {
+    let branch_depths: Vec<u32> = cli
+        .branch_depths
+        .split(',')
+        .map(|value| {
+            value
+                .parse::<u32>()
+                .map_err(|_| format!("invalid branch depth `{value}`"))
+        })
+        .collect::<Result<_, _>>()?;
+    if branch_depths.is_empty()
+        || branch_depths.iter().any(|depth| *depth >= DEPTH)
+        || branch_depths.windows(2).any(|pair| pair[0] >= pair[1])
+    {
+        return Err(format!(
+            "branch depths must be strictly increasing integers in 0..{DEPTH}"
+        ));
+    }
     let p256 = CurveParams::p256();
     let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
     let a = P - 3;
@@ -475,7 +502,7 @@ fn run(cli: Cli) -> Result<(), String> {
         budget_seconds_per_component: BUDGET_SECS,
         terminals: [0, 369]
             .into_iter()
-            .map(|terminal| run_terminal(terminal, a, b, &all_points))
+            .map(|terminal| run_terminal(terminal, &branch_depths, a, b, &all_points))
             .collect(),
     };
     let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
