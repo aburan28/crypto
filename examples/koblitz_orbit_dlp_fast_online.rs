@@ -688,15 +688,27 @@ fn relation_row(base: &Base, relation: &Relation, rhs: u64, r: u64) -> Vec<u64> 
 }
 
 fn peak_rss_bytes() -> Option<u64> {
-    let output = std::process::Command::new("ps")
-        .args(["-o", "rss=", "-p", &std::process::id().to_string()])
-        .output()
-        .ok()?;
-    let kib: u64 = String::from_utf8_lossy(&output.stdout)
-        .trim()
-        .parse()
-        .ok()?;
-    Some(kib * 1024)
+    #[cfg(unix)]
+    {
+        let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+        // SAFETY: getrusage writes the complete rusage value on success.
+        if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } != 0 {
+            return None;
+        }
+        // SAFETY: the successful getrusage call initialized usage above.
+        let rss = unsafe { usage.assume_init() }.ru_maxrss;
+        if rss < 0 {
+            return None;
+        }
+        #[cfg(target_os = "macos")]
+        return Some(rss as u64);
+        #[cfg(not(target_os = "macos"))]
+        return (rss as u64).checked_mul(1024);
+    }
+    #[cfg(not(unix))]
+    {
+        None
+    }
 }
 
 fn main() {
