@@ -68,6 +68,58 @@ jobs:
         run: cargo build --release --bin ecbench
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Independent all-run replay of the n37 shared-rank session
+        run: |
+          mkdir -p "$RUNNER_TEMP/ecbench-independent"
+          receipt="$RUNNER_TEMP/ecbench-independent/n37-shared-rank-final.json"
+          ./target/release/ecbench verify \
+            --dir research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02 \
+            --replay-all --exit-code --out "$receipt" > /dev/null
+          jq -e \
+            --arg session 'ECBS1h33c3e5e4f75d' \
+            --arg original_class 'ECBENV2hd82681268e96' \
+            --arg records_sha '8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693' \
+            '.ok == true and .session_id == $session
+             and .auditor_env_class_id != null
+             and .auditor_env_class_id != $original_class
+             and .files["records.jsonl"] == $records_sha
+             and (.replays | length) == 15
+             and all(.replays[]; .reproduced)' "$receipt" > /dev/null
+      - name: Attach the independent receipt without changing the frozen claim
+        run: |
+          receipt=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json
+          report=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CLAIM_INDEPENDENT_DIAGNOSTIC.json
+          check=research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CHECK.json
+          attach=(./target/release/ecbench claim attach
+            --dir research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02
+            --ic ic-shared --rho rho-strong --workload W157bda94ea05
+            --independent-receipt "$receipt"
+            --pointer research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json)
+          "${attach[@]}" \
+            --base-report research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json \
+            --out "$RUNNER_TEMP/ecbench-independent/claim.json" --exit-code
+          cmp "$RUNNER_TEMP/ecbench-independent/claim.json" "$report"
+          ./target/release/ecbench claim check --report "$report" \
+            > "$RUNNER_TEMP/ecbench-independent/check.json"
+          cmp "$RUNNER_TEMP/ecbench-independent/check.json" "$check"
+          jq -e '.independent_validation == true
+            and .isolation_levels.ic == "L0" and .isolation_levels.rho == "L0"
+            and (.verdict | startswith("descriptive only"))' "$report" > /dev/null
+          jq '.ic_online_wall_ms = 999' \
+            research/ecbench_n37_shared_rank_20261004/CLAIM_FINAL_DIAGNOSTIC.json \
+            > "$RUNNER_TEMP/ecbench-independent/tampered-base.json"
+          if "${attach[@]}" \
+            --base-report "$RUNNER_TEMP/ecbench-independent/tampered-base.json" \
+            --out "$RUNNER_TEMP/ecbench-independent/tampered-claim.json"; then
+            echo 'a tampered original claim was accepted' >&2
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecbench-n37-shared-rank-independent-receipt
+          path: ${{ runner.temp }}/ecbench-independent/n37-shared-rank-final.json
+          if-no-files-found: ignore
       - name: Pinned session as root
         run: |
           sudo git config --global --add safe.directory "$GITHUB_WORKSPACE"

@@ -454,6 +454,14 @@ field the schema requires, from the session's own files:
   bytes, or that did not reproduce both runs is refused. Without one the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
+- **Late receipt attachment.** If the measuring binary is no longer
+  available when the other-host receipt arrives, `ecbench claim attach`
+  reconstructs the entire previously saved diagnostic report from the frozen
+  session and the current claim sources. It requires exact equality before
+  adding the receipt; a changed source, target, time, candidate, or other
+  report field is refused. The new report retains the original binary hash.
+  `claim build` still requires the measuring binary itself. Archive both the
+  original report and the attached one.
 - **Admissibility.** The verdict states the speedup `rho / IC` only when
   both runs earned the spec's isolation level; otherwise it is marked
   descriptive. The levels are in the report either way.
