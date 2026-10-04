@@ -1,0 +1,39 @@
+{
+  "blocks": [
+    {
+      "block": 0,
+      "candidates_scanned": 1026,
+      "label_file": "labels-b0.jsonl",
+      "label_sha256": "ab3bc90d3b789702ccd388906297fab0806bb4575f0e421836685a0c7e89aace",
+      "orbit_rejects": 2,
+      "point_file": "points-b0.jsonl",
+      "point_sha256": "642e5812234ca3d439ea191238d47bdb3561f266b823095607cfc1fa2b968004",
+      "rows": 1024,
+      "zero_rejects": 0
+    },
+    {
+      "block": 1,
+      "candidates_scanned": 1027,
+      "label_file": "labels-b1.jsonl",
+      "label_sha256": "7de577bca854402cbc978358e9344edd487c830591ffcb2954dee11ea7e115b8",
+      "orbit_rejects": 3,
+      "point_file": "points-b1.jsonl",
+      "point_sha256": "05d5c82c0a885edb568a1a8276810b289edd46d1857415b5f60dc9b009e9b3eb",
+      "rows": 1024,
+      "zero_rejects": 0
+    }
+  ],
+  "curve": "n37-koblitz-a0-b1",
+  "generator": [
+    99424589043,
+    35163014771
+  ],
+  "prior_point_sha256": {
+    "b03": "84400a2914f06e4a001d0f113f0195952f692634d4ff8285e23ade2599e2bde2",
+    "b04": "72c5b5361a0b846c9626269ce3928820cb7d420aae479d31dc26f5cbf7e78aa6"
+  },
+  "prior_rows": 2048,
+  "schema": "n37-four-policy-sparse16-input-v1",
+  "status": "FROZEN",
+  "subgroup_order": 230603167
+}
