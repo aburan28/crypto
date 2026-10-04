@@ -565,6 +565,16 @@ Stated so that nothing here is read as more than it is:
   dispatch, input, child output, and raw parts together. The
   [n37 protocol](../../research/ecbench_callgrind_solve_20261004/PROTOCOL.md)
   freezes a same-target IC/rho census using this path.
+- **A target-only Callgrind interval is opt-in for the shared-rank IC and
+  strong signed-Frobenius rho.** Set `ECBENCH_CALLGRIND_TARGET=1` alongside
+  `ECBENCH_CALLGRIND_SOLVE=1`, then run `ecbench callgrind-online-ir
+  --prefix PREFIX`. The parser requires one target interval inside the
+  complete solve and reports pre-online, online and post-online Ir with
+  their sum checked against the complete solve. It rejects profiles
+  missing either boundary. This is simulated instruction attribution,
+  not an isolated online wall claim; the
+  [preregistered n37 gate](../../research/ecbench_n37_online_ir_20261004/PROTOCOL.md)
+  defines its first comparison.
 - **Rho's distinguished-point table is not counted.** Its stores happen
   once per distinguished point, a vanishing fraction of steps. BSGS and
   the kangaroo count their table operations.

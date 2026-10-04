@@ -102,6 +102,12 @@ enum Cmd {
         #[arg(long)]
         prefix: PathBuf,
     },
+    /// Split one profiled solve into reusable, one-target online and tail Ir.
+    CallgrindOnlineIr {
+        /// The value supplied to --callgrind-out-file.
+        #[arg(long)]
+        prefix: PathBuf,
+    },
     /// Audit a session from its own files.
     Verify {
         #[arg(long)]
@@ -576,6 +582,9 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
         }
         Cmd::CallgrindIr { prefix } => {
             print_json(&callgrind::solve_ir(&prefix)?)?;
+        }
+        Cmd::CallgrindOnlineIr { prefix } => {
+            print_json(&callgrind::online_ir(&prefix)?)?;
         }
         Cmd::Verify {
             dir,
