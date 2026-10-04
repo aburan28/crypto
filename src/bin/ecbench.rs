@@ -9,7 +9,6 @@
 //! ecbench compare --dir D --a X --b Y  paired ratio with a bootstrap interval
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
 //! ecbench fb --curve C --factor-base F a factor base with its points
-//! ecbench fb-wide --curve ICV1 --factor-base F  a wide-integer factor-base dump
 //! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
 //! ecbench claim attach --base-report R --independent-receipt A   attach a later replay
 //! ecbench claim check --report R       the vs_rho checker
@@ -29,7 +28,6 @@ use crypto_lib::cryptanalysis::ecbench::{
     audit, callgrind, canonical, claim, compare, db, host, isolab, isolation, methods, record,
     runner, signals, spec, stats, workload,
 };
-use crypto_lib::cryptanalysis::p256_dickson_factor_base;
 
 #[derive(Parser)]
 #[command(
@@ -172,23 +170,6 @@ enum Cmd {
         factor_base: String,
         #[arg(long)]
         out: Option<PathBuf>,
-    },
-    /// Build a wide-integer factor base that ordinary u64 `fb` cannot hold.
-    FbWide {
-        /// Registered ICV1 slug.  Currently the P-256 model only.
-        #[arg(long)]
-        curve: String,
-        /// A factor-base spec, e.g. 'dickson-torus:depth=18'.
-        #[arg(long)]
-        factor_base: String,
-        #[arg(long)]
-        out: Option<PathBuf>,
-        /// Report the exact signed domain and Poisson heuristic at this length.
-        #[arg(long)]
-        relation_length: Option<u32>,
-        /// Reparse and natively rebuild every emitted point row.
-        #[arg(long)]
-        verify: bool,
     },
     /// `vs_rho` claims: one IC run against the strong rho run on one
     /// public target, in the report `docs/ic/boundary_targets.json` defines.
@@ -721,55 +702,6 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         dump.factor_base.signed_points,
                         dump.factor_base.columns,
                         p.display()
-                    );
-                }
-                None => print!("{text}"),
-            }
-        }
-        Cmd::FbWide {
-            curve,
-            factor_base,
-            out,
-            relation_length,
-            verify,
-        } => {
-            if curve != p256_dickson_factor_base::CURVE_SLUG {
-                return Err(format!(
-                    "wide factor-base builder has no registered curve `{curve}`; known: {}",
-                    p256_dickson_factor_base::CURVE_SLUG
-                ));
-            }
-            let built = p256_dickson_factor_base::build(&factor_base)?;
-            if verify {
-                p256_dickson_factor_base::verify(&built.dump)?;
-            }
-            if let Some(length) = relation_length {
-                let metrics = p256_dickson_factor_base::relation_metrics(
-                    built.dump.factor_base.columns,
-                    length,
-                )?;
-                eprintln!(
-                    "relation m={}: signed_domain={}, lambda={:.15}, success={:.12}%, selector ideal regularity <= {}",
-                    metrics.relation_length,
-                    metrics.signed_domain,
-                    metrics.poisson_mean,
-                    100.0 * metrics.poisson_success,
-                    metrics.selector_ideal_regularity_bound,
-                );
-            }
-            let text = serde_json::to_string_pretty(&built.dump).map_err(|e| e.to_string())? + "\n";
-            match out {
-                Some(p) => {
-                    std::fs::write(&p, &text).map_err(|e| e.to_string())?;
-                    eprintln!(
-                        "{} on {}: {} points, {} columns, legacy digest {} -> {}{}",
-                        built.dump.factor_base.fb_id,
-                        built.dump.curve.slug,
-                        built.dump.factor_base.signed_points,
-                        built.dump.factor_base.columns,
-                        built.legacy_enumeration_sha256,
-                        p.display(),
-                        if verify { " (verified)" } else { "" },
                     );
                 }
                 None => print!("{text}"),

@@ -7,6 +7,7 @@
 //! `ecbench.factor_base_dump/v1-wide`, never ordinary v1.
 
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
 
 use num_bigint::BigUint;
 use num_traits::{One, ToPrimitive, Zero};
@@ -442,6 +443,112 @@ pub fn relation_metrics(columns: u64, relation_length: u32) -> Result<RelationMe
     })
 }
 
+fn sql_text(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "''"))
+}
+
+fn sql_optional_int<T: ToString>(value: Option<T>) -> String {
+    value
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| "NULL".into())
+}
+
+fn sql_real(value: f64) -> String {
+    if value.is_finite() {
+        format!("{value:e}")
+    } else {
+        "NULL".into()
+    }
+}
+
+fn sql_bool(value: bool) -> &'static str {
+    if value {
+        "1"
+    } else {
+        "0"
+    }
+}
+
+/// Emit an idempotent SQLite loader using the repository's canonical tables.
+///
+/// The wide builder remains separate from the frozen `ecbench` measurement
+/// binary, but its inventory joins the same curve, factor-base, and point
+/// tables.  A native rebuild is required before any SQL is returned.
+pub fn sql_for_dump(dump: &WideFactorBaseDump) -> Result<String, String> {
+    verify(dump)?;
+    let fb = &dump.factor_base;
+    let curve = &dump.curve;
+    let r = BigUint::parse_bytes(curve.r.as_bytes(), 10)
+        .and_then(|n| n.to_f64())
+        .ok_or_else(|| format!("wide subgroup order is not decimal: {}", curve.r))?;
+    let mut out = String::from(crate::cryptanalysis::ecbench::db::SCHEMA_SQL);
+    if !out.ends_with('\n') {
+        out.push('\n');
+    }
+    let _ = writeln!(
+        out,
+        "INSERT INTO curves VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) ON CONFLICT (slug) DO NOTHING;",
+        sql_text(&curve.slug),
+        sql_text(&curve.icv1),
+        sql_text(&curve.family),
+        sql_optional_int(curve.field_degree),
+        curve.field_bits,
+        sql_text(&curve.group_order),
+        sql_text(&curve.r),
+        sql_text(&curve.cofactor),
+        sql_real(r.log2()),
+        curve.automorphisms_available,
+        sql_real(crate::cryptanalysis::ecbench::record::floor_s(
+            curve.automorphisms_available,
+        )),
+        sql_bool(curve.registered),
+    );
+    let _ = writeln!(
+        out,
+        "INSERT INTO curve_representations VALUES ({}, {}, {}, {}, {}) ON CONFLICT (slug, generator_x, generator_y) DO NOTHING;",
+        sql_text(&curve.slug),
+        sql_text(&curve.generator[0]),
+        sql_text(&curve.generator[1]),
+        sql_text(&curve.ec1),
+        sql_text(&curve.curve_uid),
+    );
+    let _ = writeln!(
+        out,
+        "INSERT INTO curve_constructions VALUES ({}, {}) ON CONFLICT (slug, construction) DO NOTHING;",
+        sql_text(&curve.slug),
+        sql_text(&curve.construction),
+    );
+    let params = serde_json::to_string(&fb.params).map_err(|e| e.to_string())?;
+    let _ = writeln!(
+        out,
+        "INSERT INTO factor_bases VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) ON CONFLICT (fb_id) DO NOTHING;",
+        sql_text(&fb.fb_id),
+        sql_text(&fb.fb_sha256),
+        sql_text(&curve.slug),
+        sql_text(&fb.family),
+        sql_text(&params),
+        sql_text(&fb.description),
+        fb.signed_points,
+        fb.abscissae,
+        fb.columns,
+        sql_optional_int(fb.dimension),
+        sql_text(&fb.points_sha256),
+    );
+    for (index, point) in dump.points.iter().enumerate() {
+        let _ = writeln!(
+            out,
+            "INSERT INTO factor_base_points VALUES ({}, {}, {}, {}, {}, {}) ON CONFLICT (fb_id, idx) DO NOTHING;",
+            sql_text(&fb.fb_id),
+            index,
+            sql_text(&point.x),
+            sql_text(&point.y),
+            point.col,
+            sql_text(&point.coef),
+        );
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -483,5 +590,18 @@ mod tests {
             "{metrics:?}"
         );
         assert_eq!(metrics.selector_ideal_regularity_bound, 18);
+    }
+
+    #[test]
+    fn wide_dump_writes_repository_sql() {
+        let dump = build("dickson-torus:depth=3").unwrap().dump;
+        let sql = sql_for_dump(&dump).unwrap();
+        assert!(sql.starts_with("-- ecbench database schema"));
+        assert!(sql.contains(&dump.factor_base.fb_id));
+        assert!(sql.contains(CURVE_EC1));
+        assert_eq!(
+            sql.matches("INSERT INTO factor_base_points VALUES").count(),
+            dump.points.len()
+        );
     }
 }

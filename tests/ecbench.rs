@@ -216,47 +216,6 @@ fn a_factor_base_dump_carries_its_points() {
         .starts_with("FB1h"));
 }
 
-#[test]
-fn a_wide_p256_factor_base_dump_round_trips_through_sql() {
-    let dir = scratch("wide-fb");
-    let dump = dir.join("p256.factor-base.json");
-    let (ok, _, err) = ecbench(&[
-        "fb-wide",
-        "--curve",
-        "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
-        "--factor-base",
-        "dickson-torus:depth=3",
-        "--out",
-        dump.to_str().unwrap(),
-        "--relation-length",
-        "2",
-        "--verify",
-    ]);
-    assert!(ok, "{err}");
-    assert!(err.contains("(verified)"), "{err}");
-
-    let d: Value = serde_json::from_str(&std::fs::read_to_string(&dump).unwrap()).unwrap();
-    assert_eq!(d["schema"], "ecbench.factor_base_dump/v1-wide");
-    assert_eq!(d["curve"]["ec1"], "EC1P256Cp256h0523b774e066");
-    assert_eq!(
-        d["points"].as_array().unwrap().len() as u64,
-        d["factor_base"]["signed_points"].as_u64().unwrap()
-    );
-    assert!(d["factor_base"]["fb_id"]
-        .as_str()
-        .unwrap()
-        .starts_with("FB1h"));
-
-    let (ok, sql, err) = ecbench(&["db", "sql", dump.to_str().unwrap()]);
-    assert!(ok, "{err}");
-    assert!(sql.contains("INSERT INTO curves VALUES"));
-    assert_eq!(
-        sql.matches("INSERT INTO factor_base_points VALUES").count(),
-        d["factor_base"]["signed_points"].as_u64().unwrap() as usize
-    );
-    let _ = std::fs::remove_dir_all(&dir);
-}
-
 fn run_spec(dir: &Path, out: &Path, extra: &[&str]) -> (bool, String) {
     let spec = dir.join("spec.json");
     if !spec.exists() {

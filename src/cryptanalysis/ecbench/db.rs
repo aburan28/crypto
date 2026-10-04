@@ -20,8 +20,6 @@
 use std::fmt::Write as _;
 use std::path::Path;
 
-use num_bigint::BigUint;
-use num_traits::ToPrimitive;
 use serde_json::Value;
 
 use crate::cryptanalysis::ecbench::compare::Comparison;
@@ -29,7 +27,6 @@ use crate::cryptanalysis::ecbench::host::{is_virtual, HostCapsule};
 use crate::cryptanalysis::ecbench::methods::FactorBaseDump;
 use crate::cryptanalysis::ecbench::record::{floor_s, Record};
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session, PlanDoc, Session};
-use crate::cryptanalysis::p256_dickson_factor_base::WideFactorBaseDump;
 
 pub const SCHEMA_SQL: &str = include_str!("../../../docs/ecbench/schema.sql");
 
@@ -390,58 +387,6 @@ fn dump_rows(out: &mut String, d: &FactorBaseDump) {
     }
 }
 
-fn wide_dump_rows(out: &mut String, d: &WideFactorBaseDump) -> Result<(), String> {
-    let fb = &d.factor_base;
-    let c = &d.curve;
-    let r = BigUint::parse_bytes(c.r.as_bytes(), 10)
-        .and_then(|n| n.to_f64())
-        .ok_or_else(|| format!("wide subgroup order is not decimal: {}", c.r))?;
-    let _ = writeln!(
-        out,
-        "INSERT INTO curves VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) ON CONFLICT (slug) DO NOTHING;",
-        ts(&c.slug),
-        ts(&c.icv1),
-        ts(&c.family),
-        i(c.field_degree),
-        i(Some(c.field_bits)),
-        ts(&c.group_order),
-        ts(&c.r),
-        ts(&c.cofactor),
-        f(Some(r.log2())),
-        c.automorphisms_available,
-        f(Some(floor_s(c.automorphisms_available))),
-        b(c.registered),
-    );
-    let _ = writeln!(
-        out,
-        "INSERT INTO factor_bases VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) ON CONFLICT (fb_id) DO NOTHING;",
-        ts(&fb.fb_id),
-        ts(&fb.fb_sha256),
-        ts(&c.slug),
-        ts(&fb.family),
-        json_text(&fb.params),
-        ts(&fb.description),
-        fb.signed_points,
-        fb.abscissae,
-        fb.columns,
-        i(fb.dimension),
-        ts(&fb.points_sha256),
-    );
-    for (idx, p) in d.points.iter().enumerate() {
-        let _ = writeln!(
-            out,
-            "INSERT INTO factor_base_points VALUES ({}, {}, {}, {}, {}, {}) ON CONFLICT (fb_id, idx) DO NOTHING;",
-            ts(&fb.fb_id),
-            idx,
-            ts(&p.x),
-            ts(&p.y),
-            p.col,
-            ts(&p.coef),
-        );
-    }
-    Ok(())
-}
-
 /// SQL for one path: a session directory, a comparison file or a
 /// factor-base dump, recognised by content.
 pub fn sql_for_path(path: &Path) -> Result<String, String> {
@@ -485,10 +430,6 @@ pub fn sql_for_path(path: &Path) -> Result<String, String> {
             let d: FactorBaseDump = serde_json::from_value(v).map_err(|e| e.to_string())?;
             dump_rows(&mut out, &d);
         }
-        Some(crate::cryptanalysis::p256_dickson_factor_base::DUMP_SCHEMA) => {
-            let d: WideFactorBaseDump = serde_json::from_value(v).map_err(|e| e.to_string())?;
-            wide_dump_rows(&mut out, &d)?;
-        }
         Some(crate::cryptanalysis::ecbench::claim::CLAIM_SCHEMA) => {
             claim_row(&mut out, &v).map_err(|e| format!("{}: {e}", path.display()))?;
         }
@@ -522,20 +463,5 @@ mod tests {
         assert_eq!(ts("it's"), "'it''s'");
         assert_eq!(f(Some(f64::NAN)), "NULL");
         assert_eq!(i::<i64>(None), "NULL");
-    }
-
-    #[test]
-    fn wide_factor_base_dump_loads() {
-        let d = crate::cryptanalysis::p256_dickson_factor_base::build("dickson-torus:depth=3")
-            .unwrap()
-            .dump;
-        let mut sql = String::new();
-        wide_dump_rows(&mut sql, &d).unwrap();
-        assert!(sql.contains(&d.factor_base.fb_id));
-        assert!(sql.contains(&d.curve.slug));
-        assert_eq!(
-            sql.matches("INSERT INTO factor_base_points").count(),
-            d.points.len()
-        );
     }
 }
