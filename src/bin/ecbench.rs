@@ -25,8 +25,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, canonical, claim, compare, db, host, isolab, isolation, methods, record, runner,
-    signals, spec, stats, workload,
+    audit, callgrind, canonical, claim, compare, db, host, isolab, isolation, methods, record,
+    runner, signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -89,6 +89,19 @@ enum Cmd {
     /// The measured child: reads a job on stdin, prints its output.
     #[command(hide = true)]
     Exec,
+    /// Export one exact measured-child input from a frozen spec and sequence.
+    ProfileInput {
+        #[arg(long)]
+        spec: PathBuf,
+        #[arg(long)]
+        seq: u64,
+    },
+    /// Sum the Callgrind Ir parts inside the solve markers.
+    CallgrindIr {
+        /// The value supplied to --callgrind-out-file.
+        #[arg(long)]
+        prefix: PathBuf,
+    },
     /// Audit a session from its own files.
     Verify {
         #[arg(long)]
@@ -532,6 +545,37 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 "{}",
                 serde_json::to_string(&out).map_err(|e| e.to_string())?
             );
+        }
+        Cmd::ProfileInput { spec: path, seq } => {
+            let source =
+                std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+            let p = spec::plan(spec::Spec::from_json(&source)?)?;
+            let ex = p
+                .executions
+                .get(usize::try_from(seq).map_err(|_| "sequence does not fit usize")?)
+                .filter(|ex| ex.seq == seq)
+                .ok_or_else(|| format!("sequence {seq} is not in the plan"))?;
+            let arm = &p.arms[ex.arm];
+            let w = &p.workloads[ex.workload];
+            let input = record::ChildInput {
+                schema: record::CHILD_INPUT_SCHEMA.into(),
+                curve: workload::CurveSpec::explicit(p.instance(ex.workload))
+                    .unwrap_or_else(|| w.curve_spec.clone()),
+                target_seed: w.target_seed,
+                target_index: w.target_index,
+                target_kind: w.kind(),
+                expected_workload_id: w.workload_id.clone(),
+                method: methods::MethodSpec {
+                    id: arm.method.id.clone(),
+                    params: arm.method.params.clone(),
+                },
+                expected_method_id: arm.method.method_id.clone(),
+                algorithm_seed: ex.algorithm_seed,
+            };
+            print_json(&input)?;
+        }
+        Cmd::CallgrindIr { prefix } => {
+            print_json(&callgrind::solve_ir(&prefix)?)?;
         }
         Cmd::Verify {
             dir,
