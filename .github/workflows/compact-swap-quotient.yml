@@ -38,6 +38,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_orbit_dlp_swap.rs

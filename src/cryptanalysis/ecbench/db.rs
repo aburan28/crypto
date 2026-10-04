@@ -265,6 +265,34 @@ fn run_rows(out: &mut String, r: &Record) {
             v
         );
     }
+    if let Some(sv) = &r.solver {
+        let _ = writeln!(
+            out,
+            "INSERT INTO run_solver VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) ON CONFLICT (record_id) DO NOTHING;",
+            ts(&r.record_id),
+            ts(&sv.name),
+            sv.calls,
+            sv.ops,
+            ts(&sv.op_unit),
+            sv.wall_ns,
+            sv.budget_exceeded,
+            i(sv.n_vars),
+            i(sv.n_equations),
+            i(sv.semi_regular_degree),
+            f(sv.solving_degree_mean),
+            i(sv.solving_degree_max),
+            i(sv.macaulay_rows),
+            i(sv.macaulay_columns),
+            i(sv.macaulay_degree),
+            i(sv.macaulay_rank),
+            i(sv.sat_variables),
+            i(sv.sat_clauses),
+            i(sv.sat_conflicts),
+            i(sv.sat_decisions),
+            i(sv.sat_propagations),
+            json_text(&sv.extra),
+        );
+    }
     for (ord, bl) in r.isolation.blockers.iter().enumerate() {
         let _ = writeln!(
             out,

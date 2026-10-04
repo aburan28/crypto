@@ -1,5 +1,9 @@
 # Curves
 
+[IC curve records and cross-repo links](ic/README.md) retain the exact EC1
+representations, optional trait statuses, and the factor-base/isogeny storage
+contract beside this ICV1 model registry.
+
 Every curve this repository names is named by its **ICV1 slug**
 ([`ICV1.md`](ICV1.md), `AGENTS.md` §11).  Each curve in the registry also
 carries the **EC1 identity** of each exact representation the repository
