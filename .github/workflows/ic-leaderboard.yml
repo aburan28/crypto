@@ -4,7 +4,8 @@ name: ic-leaderboard
 # that changes what it shows.  --check fails when an output is stale against
 # the frozen files the builder reads, and when the boundary ledger has a
 # section later than the one the page is current through.  It runs no
-# experiment.
+# experiment.  The lab browser's data file (AGENTS.md §7c) is checked the
+# same way, against every committed session and round it indexes.
 
 on:
   pull_request:
@@ -27,6 +28,12 @@ on:
       - 'research/ic_descent_20260930/runs-isolated/main/**'
       - 'research/ic_single_target_20260930/runs/**'
       - '.github/workflows/ic-leaderboard.yml'
+      - 'scripts/build_lab_browser.py'
+      - 'docs/browser/**'
+      - 'research/ecbench_*/sessions/**'
+      - 'research/ic_candidate_tournament_20260915/runs/**'
+      - 'docs/ic/**'
+      - 'research/notes/ecc2k130/**'
   push:
     branches: [main]
     paths:
@@ -48,6 +55,12 @@ on:
       - 'research/ic_descent_20260930/runs-isolated/main/**'
       - 'research/ic_single_target_20260930/runs/**'
       - '.github/workflows/ic-leaderboard.yml'
+      - 'scripts/build_lab_browser.py'
+      - 'docs/browser/**'
+      - 'research/ecbench_*/sessions/**'
+      - 'research/ic_candidate_tournament_20260915/runs/**'
+      - 'docs/ic/**'
+      - 'research/notes/ecc2k130/**'
   workflow_dispatch:
 
 permissions:
@@ -64,3 +77,5 @@ jobs:
           python-version: '3.11'
       - name: The leaderboard is current with its sources and the ledger
         run: python3 scripts/build_ic_leaderboard.py --check
+      - name: The lab browser's index is current with the registry, sessions and rounds (AGENTS.md §7c)
+        run: python3 scripts/build_lab_browser.py --check

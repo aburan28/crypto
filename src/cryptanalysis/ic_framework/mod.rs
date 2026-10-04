@@ -64,6 +64,7 @@
 
 pub mod linalg;
 pub mod plugins;
+pub mod shared_rank;
 pub mod solvers;
 pub mod stages;
 
