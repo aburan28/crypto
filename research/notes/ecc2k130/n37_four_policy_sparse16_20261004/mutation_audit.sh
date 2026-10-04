@@ -45,7 +45,7 @@ if "$input_replay" "$scratch/inputs" "$scratch/input-replay.json" \
   echo "mutated target input unexpectedly passed" >&2
   exit 1
 fi
-if ! rg -q 'SHA-256 mismatch' "$receipts/target.stderr.txt"; then
+if ! grep -q 'SHA-256 mismatch' "$receipts/target.stderr.txt"; then
   echo "mutated target did not fail the input digest gate" >&2
   exit 1
 fi
