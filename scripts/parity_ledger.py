@@ -319,7 +319,8 @@ def cover(ccov_prefix="30_jv_cover_ccov", dlp_prefix="30_jv_cover_dlp"):
             oracle=sum(r["oracle_checked"] for r in g), mismatches=sum(r["mismatches"] for r in g),
             unverified=sum(r["unverified"] for r in g), incomplete=sum(r["incomplete"] for r in g),
             timed_out=sum(r["timed_out"] for r in g), stopped=sum(r.get("stopped", 0) for r in g),
-            stop=g[0].get("stop_staircase"))
+            stop=g[0].get("stop_staircase"), replayed=sum(r.get("replayed", 0) for r in g),
+            trace_mismatches=sum(r.get("trace_mismatches", 0) for r in g))
     return dict(sizes=sizes, dlp=dlp)
 
 
@@ -354,10 +355,13 @@ def print_cover(cv, title, label):
     if True:
         if cv["sizes"]:
             print(label + "\n")
-            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |")
-            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|")
+            traced = any(x.get("replayed", 0) for x in cv["sizes"].values())
+            extra = " replayed / diverged |" if traced else ""
+            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |" + extra)
+            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|" + (":--|" if traced else ""))
             for p, x in cv["sizes"].items():
-                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |")
+                tail = f" {x.get('replayed', 0)} / {x.get('trace_mismatches', 0)} |" if traced else ""
+                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |" + tail)
         if cv["dlp"]:
             print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:\n")
             print("| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |")
@@ -474,6 +478,71 @@ def print_sieve(rows, title):
         desc = [r["descent_over_rho"] / r["s_over_rho"] for r in solved if r["s_over_rho"] < 1]
         if desc:
             print(f"Share of the descent in S below parity: {min(desc):.2f}–{max(desc):.2f} (registered P9: more than half).")
+def print_sieve_comparison(base, traced, new):
+    """Note §14's predictions against the rows: P12/P13 (C_rel at m = 9 and
+    S / rho against §11.5 and against the traced-descent rows of §12), P14
+    (the relation phase at p ≤ 503 against §11.5), P15 (the per-m estimate
+    against what each exhausted m yielded)."""
+    def by(rows):
+        return {(r["p"], r["seed"]): r for r in rows or []}
+    b, t, n = by(base), by(traced), by(new)
+    print("\nAgainst §11.5 and §12 (same p and seed):\n")
+    print("| p | seed | C_rel §11.5 → §14 | ratio | relation muls §11.5 → §14 | ratio | S / rho §12 (traced descent) → §14 | ratio | enum per B §11.5 → §14 |")
+    print("|---:|--:|:--|--:|:--|--:|:--|--:|:--|")
+    for key in sorted(n):
+        r = n[key]
+        rb = b.get(key)
+        rt = t.get(key)
+        if rb is None:
+            continue
+        crel = f"{rb['c_rel']:.3e} → {r['c_rel']:.3e}"
+        rel = f"{rb['relation_muls']:.3e} → {r['relation_muls']:.3e}"
+        sr = f"{rt['s_over_rho']:.4f} → {r['s_over_rho']:.4f}" if rt else f"— → {r['s_over_rho']:.4f}"
+        srr = f"{rt['s_over_rho'] / r['s_over_rho']:.2f}" if rt and r["s_over_rho"] > 0 else "—"
+        eb = f"{rb['enum_muls'] / max(rb['bs'], 1):,.0f} → {r['enum_muls'] / max(r['bs'], 1):,.0f}"
+        print(f"| {key[0]} | {key[1]} | {crel} | {rb['c_rel'] / r['c_rel']:.2f} | {rel} | {rb['relation_muls'] / r['relation_muls']:.2f} | {sr} | {srr} | {eb} |")
+    print("\nP15, the per-m estimate against the exhausted m's (every per-m entry but the last of a run):\n")
+    print("| p | seed | m | estimate | found | found / estimate |")
+    print("|---:|--:|--:|--:|--:|--:|")
+    for key in sorted(n):
+        r = n[key]
+        est = dict((int(k), v) for k, v in (r.get("estimate_by_m") or []))
+        per = r.get("per_m") or []
+        for e in per[:-1]:
+            m, found = e[0], e[3]
+            if m in est and est[m] > 0:
+                print(f"| {key[0]} | {key[1]} | {m} | {est[m]:,.0f} | {found} | {found / est[m]:.2f} |")
+
+
+def walk(name):
+    """The isogeny walk to a weak curve (note §13): per size, the weak
+    fraction among curves with full 2-torsion, the walks' outcomes, the
+    steps when a weak curve was reached, and the cost per step."""
+    return load(name)
+
+
+def print_walk(rows, rows2, title):
+    print(f"\n## {title}\n")
+    print("A curve over F_{q³} with full 2-torsion is in the weak class exactly when one of its three cross-ratios (e₃ − e₁)/(e₂ − e₁) has norm one down to F_q (note §13): `weak × q` is the sampled fraction times q (the derivation says 3).  Walks start from a random full-2-torsion curve and step by uniformly chosen rational 2- and 3-isogenies (`2+3`) or 2-isogenies alone (`2`); `found` reached a weak curve, `exhausted` saw no new j for 50·(distinct j) steps, `capped` hit the step cap; `steps` are over the walks that found one.  Cost in F_p multiplications; the last columns price a walk of q/3 steps (the expectation if the walk sampled the class) against rho on the 2^{bits} subgroup the route would attack at that p.\n")
+    print("| p | q | weak × q (sampled) | isogenies | walks found / exhausted / capped | steps median / mean (q/3) | distinct j mean | muls per step | muls per walk mean | (q/3)·step cost | rho at p | ratio |")
+    print("|---:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|")
+    for r, lab in [(x, "2+3") for x in rows] + [(x, "2") for x in rows2]:
+        p = r["p"]; q = r["q"]
+        rho = 1.3 * math.sqrt(p ** 6 / 4) * 331
+        walk_cost = r["q_over_3"] * r["mean_muls_per_step"]
+        print(f"| {p} | {q} | {r['weak_fraction_times_q']:.2f} ({r['sampled']:,}) | {lab} | {r['found']} / {r['exhausted']} / {r['capped']} | {r['median_steps']:.0f} / {r['mean_steps']:.0f} ({r['q_over_3']:.0f}) | {r['mean_distinct']:.1f} | {r['mean_muls_per_step']:,.0f} | {r['mean_muls']:.3e} | {walk_cost:.3e} | {rho:.3e} | {walk_cost / rho:.3f} |")
+    for rows_, lab in [(rows, "2+3"), (rows2, "2")]:
+        if len(rows_) >= 3:
+            ps = [r["p"] for r in rows_]
+            cs = [r["mean_muls_per_step"] for r in rows_]
+            a, se = fit(ps, cs)
+            top = rows_[-1]
+            # (q/3)·c(p) = 1.3·(p³/2)·331  ⇒  p = c(p)·(2/3)/(1.3·331) with c(p) ∝ p^a from the top size
+            c_top = top["mean_muls_per_step"]; p_top = top["p"]
+            # solve p^(1−a) = c_top·p_top^(−a)·2/(3·1.3·331)
+            k = c_top * p_top ** (-a) * 2.0 / (3.0 * 1.3 * 331)
+            p_star = k ** (1.0 / (1.0 - a)) if a < 1 else float("inf")
+            print(f"\n{lab}: step cost ∝ p^{a:.2f} ± {se:.2f}; a walk of q/3 steps costs rho's at p* ≈ {p_star:,.0f} (subgroup ≈ 2^{6 * math.log2(p_star) - 2:.0f}) on this extrapolation, below rho above it.")
 
 
 
@@ -613,9 +682,32 @@ def main():
                 fa = mean([cv["sizes"][p]["f4"] for p in common]); fb = mean([cvs["sizes"][p]["f4"] for p in common])
                 stopped = sum(cvs["sizes"][p]["stopped"] for p in common); tests = sum(cvs["sizes"][p]["random"] + cvs["sizes"][p]["constructed"] for p in common)
                 print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {stopped} of {tests} tests stopped at the staircase.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
+    cvt = cover("33_jv_cover_trace_ccov", "33_jv_cover_trace_dlp")
+    if cvt:
+        print_cover(cvt, "E.3 The same route with F4 stopped at the staircase and replaying a recorded trace (33_jv_cover_trace_*.json)",
+                    "Identical to E.2 except that F4 records, on the first system of each p, the pair rows every new pivot is a combination of, and replays them on the later systems (no pair selection, no row that reduces to zero); a replay whose shape diverges finishes as a full run and is counted as a mismatch.  `replayed` / `mismatches` per size:")
+        if cvs:
+            common = [p for p in cvt["sizes"] if p in cvs["sizes"]]
+            if common:
+                a = mean([cvs["sizes"][p]["c_cov"] for p in common]); b = mean([cvt["sizes"][p]["c_cov"] for p in common])
+                fa = mean([cvs["sizes"][p]["f4"] for p in common]); fb = mean([cvt["sizes"][p]["f4"] for p in common])
+                rep = sum(cvt["sizes"][p]["replayed"] for p in common); mis = sum(cvt["sizes"][p]["trace_mismatches"] for p in common)
+                tests = sum(cvt["sizes"][p]["random"] + cvt["sizes"][p]["constructed"] for p in common)
+                print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {rep} of {tests} tests replayed the trace, {mis} diverged and finished as full runs.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
     sv = sieve()
     if sv:
         print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
+    svt = sieve("33_jv_cover_trace_sieve")
+    sve = sieve("35_jv_cover_sieve_enum")
+    if sve:
+        print_sieve(sve, "F.3 The sieving variant with the line enumeration of note §14 (35_jv_cover_sieve_enum_*.json)")
+        print_sieve_comparison(sv, svt, sve)
+    if svt:
+        print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
+    wk = walk("34_jv_isogeny_walk.json")
+    wk2 = walk("34_jv_isogeny_walk_two_only.json") or []
+    if wk:
+        print_walk(wk, wk2, "G. The isogeny walk to a weak curve (34_jv_isogeny_walk*.json; note §13)")
     print("\n## C. What parity needs, per route\n")
     if k4:
         for bits in (80, 128, 160):

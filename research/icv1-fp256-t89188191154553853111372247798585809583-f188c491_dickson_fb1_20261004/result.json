@@ -1,0 +1,57 @@
+{
+  "schema": "p256.dickson_factor_base_result/v1",
+  "date": "2026-10-04",
+  "status": "PASS",
+  "classification": "correctness_and_storage",
+  "protocol_amendment": "PROTOCOL_STANDALONE.md",
+  "curve": {
+    "slug": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "ec1": "EC1P256Cp256h0523b774e066",
+    "curve_uid": "urn:ec-record:1:sha256:0523b774e0666cf37ff4dc9cf452eae024192a7f89bdad10ca226d6e64d4dd70"
+  },
+  "factor_base": {
+    "id": "FB1h2ea06bef7f7a",
+    "sha256": "2ea06bef7f7aa68ce83ad0889116a621885ed03937b5de5481ace9e1dc3626ad",
+    "family": "dickson-torus",
+    "depth": 18,
+    "root_exponent": "0x30000000000000000000",
+    "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "columns": 131239,
+    "signed_points": 262478,
+    "legacy_enumeration_sha256": "e52a7b606604641efc99d5a0ef933bb258457e4b65f3c3112be88d792d9e217e",
+    "points_sha256": "8fa207da35a4426d3992a1b8e9b08ccbfc8795208f450cf76b44bd47d05bd915"
+  },
+  "relation_diagnostic": {
+    "relation_length": 17,
+    "signed_domain": "374163014528376139389697548555821950542279161732309414538616264465591578132480",
+    "poisson_mean": 3.2313348613016615,
+    "poisson_success": 0.9604952697587432,
+    "selector_ideal_regularity_upper_bound": 18,
+    "measured_grobner_degree": null
+  },
+  "dump_manifest": {
+    "schema": "ecbench.factor_base_dump/v1-wide",
+    "bytes": 66020135,
+    "sha256": "2c35ed7db8b5c774101c1667dbe7b643f7f6c212799e63c48fc0bc45ca762279",
+    "library_source_sha256": "c44d0d95e1d6ccb68c6bbc456a52091d98081b8704fe19e15affadd9a03f6f40",
+    "cli_source_sha256": "1cda9ac323a697c74a0c5776374c36b81d8b469b79093122fa4b9a1620228e76",
+    "release_binary_sha256": "c7d7fb9a1db48ba3b0ef021dd33ad3894394bbf51c6d8f6ecb141bae5722408e",
+    "committed": false,
+    "disposition": "deterministic derived data; regenerate with RESULT.md command"
+  },
+  "sql_manifest": {
+    "bytes": 77212627,
+    "sha256": "f84c90287838ecd70e4c85c2aa0f15c9d39cc831dafb9fe06574064b5ca841b3"
+  },
+  "database": {
+    "factor_bases": 1,
+    "factor_base_points": 262478,
+    "frozen_ecbench_source_changed": false
+  },
+  "claims": {
+    "f4_degree_measured": false,
+    "ecdlp_solved": false,
+    "speedup_claimed": false,
+    "exponent_claimed": false
+  }
+}

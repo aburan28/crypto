@@ -111,3 +111,31 @@ Two Koblitz curves, `n` 13–19, `ℓ` 2–6, `m = 3`, four rootless draws per c
 `ℓ = 6`; 9 for `x4`). A refutation degree is a stage diagnostic (AGENTS.md §2, §5): no
 end-to-end cost, no yield, nothing at `n ≈ 83` or 131. The constant it finds is real at
 these sizes and says nothing about any other presentation of the ideal.
+
+## Erratum 1 (2026-10-03): the instrument's floor, and the "degree-4 refutations"
+
+Found while calibrating an external engine on the same systems
+([ic_gb_ladder_20261003](../ic_gb_ladder_20261003/PREREGISTRATION.md), §2). Additive;
+nothing above is edited.
+
+- **The scan has a floor at the system degree.** `measure()` in
+  `examples/rr_degree_ladder.rs` starts at `system_degree(polys)`, so no reading below 4
+  (`rr`) or 6 (`x4`) was possible. A system refuted below its own degree reads as refuted
+  *at* it. Singular's truncated homogeneous basis, which has no such floor, reads the
+  direct `S₄` at `ℓ = 2` on `K₁/2¹⁷` as **5** on three of four draws (6 on the fourth), not
+  the 6 reported above. The `x4` slope quoted above (1.5 over `ℓ = 2…4`) is therefore an
+  underestimate; it does not change the verdict, which rests on `rr`'s slope and on `rr`
+  never falling below the control.
+- **The two "degree-4 refutations at `ℓ = 5`" on `K₁` are not Kosters–Yeo refutations.**
+  `K₁/2¹⁷ ℓ = 5` draw 1 and `K₁/2¹⁹ ℓ = 5` draw 0 contain the **constant equation `1`**:
+  the `rr` form's trace condition `Tr(e₁) = 0` is constant when `V ⊂ ker Tr` and
+  `Tr(x_R) = 1` (probability about `2^{−ℓ−1}` per draw), and such a draw is inconsistent at
+  degree 1 for a reason that has nothing to do with the summation ideal. The floor
+  reported it as 4. The sentence above that reads these as "the 2n + 1 equations alone
+  are inconsistent at degree 4, the Kosters–Yeo regime" is withdrawn. (`K₁/2¹⁷ ℓ = 2`
+  draw 1 is the same kind of draw and read 4 at the floor; the cell's other three draws
+  read 4 genuinely.) The cell medians are unchanged: 4 was never a median. The
+  external-engine ladder reports such draws as `triv` and excludes them from medians.
+- The direct `S₄` descent does not contain that linear condition explicitly; on the same
+  draws `x4` read `≥ 10`. That the norm form exposes the trace obstruction as one linear
+  equation is a (constant-size) feature of the presentation, consistent with the verdict.

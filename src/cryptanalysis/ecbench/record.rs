@@ -22,6 +22,7 @@ use crate::cryptanalysis::ecbench::methods::{
 };
 use crate::cryptanalysis::ecbench::spec::Level;
 use crate::cryptanalysis::ecbench::workload::{CurveSpec, TargetKind, Workload};
+use crate::cryptanalysis::ic_measurement;
 
 pub const RECORD_SCHEMA: &str = "ecbench.record/v1";
 
@@ -153,14 +154,26 @@ pub fn child_main(input: &str) -> ChildOutput {
         }
         let counters = HwCounters::open();
         let before = schedstat();
+        // Profiling is opt-in and the environment lookup is outside both
+        // boundaries. Callgrind's first part is workload/setup prework;
+        // sum every part after that marker through the solve marker, since
+        // ic_measurement may dump additional internal phase parts.
+        let profile_solve = std::env::var("ECBENCH_CALLGRIND_SOLVE").as_deref() == Ok("1");
         counters.start();
+        if profile_solve {
+            ic_measurement::callgrind_dump(b"ecbench_before_solve\0");
+        }
         let report = crate::cryptanalysis::ecbench::methods::solve(
             &m,
             &inst,
             &w.curve,
             &w.target,
             job.algorithm_seed,
-        )?;
+        );
+        if profile_solve {
+            ic_measurement::callgrind_dump(b"ecbench_solve\0");
+        }
+        let report = report?;
         let hw = counters.stop();
         let after = schedstat();
         let delta = match (before, after) {

@@ -110,6 +110,146 @@ assert.equal(sha(sharedControlBytes), sharedControlSha, 'Shared-rank A/A compari
 const sharedControl = JSON.parse(sharedControlBytes);
 assert.equal(sharedControl.ops.ratio_b_over_a, 1);
 const sharedControlPin = {path: sharedControlPath, sha256: sharedControlSha};
+const sharedIndependentPath = 'research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RECEIPT.json';
+const sharedIndependentBytes = readFileSync(resolve(ROOT, sharedIndependentPath));
+const sharedIndependentSha = 'bc2e2ebf42f248d55d81691ffb87d337eb0063c3c8e9bd516bd654bbde56729f';
+assert.equal(sha(sharedIndependentBytes), sharedIndependentSha, 'Shared-rank independent replay changed; review its claim before refreshing the dashboard.');
+const sharedIndependent = JSON.parse(sharedIndependentBytes);
+assert.equal(sharedIndependent.ok, true);
+assert.equal(sharedIndependent.session_id, 'ECBS1h33c3e5e4f75d');
+assert.equal(sharedIndependent.auditor_env_class_id, 'ECBENV2hda64b23436f4');
+assert.equal(sharedIndependent.replays.length, 15);
+assert.ok(sharedIndependent.replays.every(row => row.reproduced));
+assert.equal(sharedIndependent.files['records.jsonl'], '8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693');
+const sharedIndependentPin = {path: sharedIndependentPath, sha256: sharedIndependentSha};
+const sharedIndependentClaimPath = 'research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CLAIM_INDEPENDENT_DIAGNOSTIC.json';
+const sharedIndependentClaimBytes = readFileSync(resolve(ROOT, sharedIndependentClaimPath));
+const sharedIndependentClaimSha = 'adabcd19c30e81c6f3967377a13e8ef2acd23ade02eb26ca77b5fa2312d8ab5c';
+assert.equal(sha(sharedIndependentClaimBytes), sharedIndependentClaimSha, 'Shared-rank attached claim changed; review before refreshing the dashboard.');
+const sharedIndependentClaim = JSON.parse(sharedIndependentClaimBytes);
+assert.equal(sharedIndependentClaim.independent_validation, true);
+assert.equal(sharedIndependentClaim.independent_replay.receipt_sha256, sharedIndependentSha);
+assert.equal(sharedIndependentClaim.isolation_levels.ic, 'L0');
+assert.equal(sharedIndependentClaim.isolation_levels.rho, 'L0');
+assert.equal(sharedEcbench.online_speedup, null);
+const sharedIndependentClaimPin = {path:sharedIndependentClaimPath, sha256:sharedIndependentClaimSha};
+const sharedIndependentCheckPath = 'research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/CHECK.json';
+const sharedIndependentCheckBytes = readFileSync(resolve(ROOT, sharedIndependentCheckPath));
+const sharedIndependentCheckSha = '06a4356519163ec6d8d62f90fdce64fcba509693fd924cc98ab00dec80e3e482';
+assert.equal(sha(sharedIndependentCheckBytes), sharedIndependentCheckSha, 'Shared-rank independent claim check changed; review before refreshing the dashboard.');
+const sharedIndependentCheck = JSON.parse(sharedIndependentCheckBytes);
+assert.equal(sharedIndependentCheck.status, 'PASS');
+const sharedIndependentCheckPin = {path:sharedIndependentCheckPath, sha256:sharedIndependentCheckSha};
+const rankColumnsPath = 'research/ecbench_n37_rank_columns_20261004/RESULT.json';
+const rankColumnsBytes = readFileSync(resolve(ROOT, rankColumnsPath));
+const rankColumnsSha = '9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb';
+assert.equal(sha(rankColumnsBytes), rankColumnsSha, 'n37 column decision changed; review its evidence before refreshing the dashboard.');
+const rankColumns = JSON.parse(rankColumnsBytes);
+assert.equal(rankColumns.status, 'independently_replayed_l0_bounded_diagnostic');
+assert.equal(rankColumns.selection.decision, 'COUNTED_ENGINEERING_LEAD');
+assert.equal(rankColumns.selection.selected_k, 16);
+assert.equal(rankColumns.target_count, 8);
+assert.equal(rankColumns.measured_rounds_per_target, 5);
+assert.equal(rankColumns.candidates.length, 6);
+assert.equal(rankColumns.online_speedup, null);
+assert.equal(rankColumns.fully_priced_cold_speedup, null);
+const rankColumnsPin = {path:rankColumnsPath, sha256:rankColumnsSha};
+const rankColumnsAuditPath = 'research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json';
+const rankColumnsAuditBytes = readFileSync(resolve(ROOT, rankColumnsAuditPath));
+const rankColumnsAuditSha = 'efb14a5cb1c60291accc4d28518178f6a7d7ed5305178459936252b346b94029';
+assert.equal(sha(rankColumnsAuditBytes), rankColumnsAuditSha, 'n37 column independent receipt changed.');
+const rankColumnsAudit = JSON.parse(rankColumnsAuditBytes);
+assert.equal(rankColumnsAudit.ok, true);
+assert.equal(rankColumnsAudit.session_id, rankColumns.session_id);
+assert.equal(rankColumnsAudit.replays.length, 320);
+assert.ok(rankColumnsAudit.replays.every(row => row.reproduced));
+assert.equal(rankColumns.independent_audit_sha256, rankColumnsAuditSha);
+const rankColumnsAuditPin = {path:rankColumnsAuditPath, sha256:rankColumnsAuditSha};
+const callgrindPath = 'research/ecbench_callgrind_solve_20261004/DECISION.json';
+const callgrindBytes = readFileSync(resolve(ROOT, callgrindPath));
+const callgrindSha = 'c4bd4b3b8e1e95520bca5507706b2434eb8bdfb7d7281fdfd6998a71b18dd3aa';
+assert.equal(sha(callgrindBytes), callgrindSha, 'n37 whole-solve instruction decision changed.');
+const callgrind = JSON.parse(callgrindBytes);
+assert.equal(callgrind.unit, 'callgrind.Ir');
+assert.equal(callgrind.workloads, 8);
+assert.equal(callgrind.profiles, 32);
+assert.equal(callgrind.all_archived_and_profiled_scalars_verified, true);
+assert.equal(callgrind.decision, 'retain_k16_instruction_lead');
+assert.equal(callgrind.comparisons[0].numerator, 'ic-k16');
+assert.equal(callgrind.comparisons[0].denominator, 'ic-k42');
+assert.equal(callgrind.comparisons[1].denominator, 'rho-strong');
+const callgrindPin = {path:callgrindPath, sha256:callgrindSha};
+const k8ConfirmPath = 'research/ecbench_n37_k8_k16_20261004/DECISION.json';
+const k8ConfirmBytes = readFileSync(resolve(ROOT, k8ConfirmPath));
+const k8ConfirmSha = 'c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127';
+assert.equal(sha(k8ConfirmBytes), k8ConfirmSha, 'n37 K8/K16 instruction decision changed.');
+const k8Confirm = JSON.parse(k8ConfirmBytes);
+assert.equal(k8Confirm.schema, 'ecbench.k8_k16_callgrind_decision/v1');
+assert.equal(k8Confirm.unit, 'callgrind.Ir');
+assert.equal(k8Confirm.workloads, 16);
+assert.equal(k8Confirm.profiles, 64);
+assert.equal(k8Confirm.all_archived_and_profiled_scalars_verified, true);
+assert.equal(k8Confirm.decision, 'select_k8_for_larger_field_gate');
+assert.equal(k8Confirm.comparisons[0].numerator, 'ic-k16');
+assert.equal(k8Confirm.comparisons[0].denominator, 'ic-k8');
+assert.equal(k8Confirm.comparisons[1].denominator, 'rho-strong');
+const k8ConfirmPin = {path:k8ConfirmPath, sha256:k8ConfirmSha};
+const onlineIrPath = 'research/ecbench_n37_online_ir_20261004/DECISION.json';
+const onlineIrBytes = readFileSync(resolve(ROOT, onlineIrPath));
+const onlineIrSha = 'e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a';
+assert.equal(sha(onlineIrBytes), onlineIrSha, 'n37 target-only instruction decision changed.');
+const onlineIr = JSON.parse(onlineIrBytes);
+assert.equal(onlineIr.schema, 'ecbench.n37_online_ir_decision/v1');
+assert.equal(onlineIr.unit, 'callgrind.Ir');
+assert.equal(onlineIr.workloads, 16);
+assert.equal(onlineIr.profiles, 64);
+assert.equal(onlineIr.all_archived_and_profiled_scalars_verified, true);
+assert.equal(onlineIr.decision, 'prioritize_k16_for_isolated_n37_online_wall_gate');
+assert.equal(onlineIr.online.comparisons[0].numerator, 'ic-k8');
+assert.equal(onlineIr.online.comparisons[0].denominator, 'ic-k16');
+assert.ok(onlineIr.online.comparisons[0].bootstrap_95[0] > 1.10);
+assert.equal(onlineIr.online.aa_max_absolute_relative_deviation, 0);
+const onlineIrPin = {path:onlineIrPath, sha256:onlineIrSha};
+const onlineIrReceiptPath = 'research/ecbench_n37_online_ir_20261004/independent_validation/RECEIPT.json';
+const onlineIrReceiptBytes = readFileSync(resolve(ROOT, onlineIrReceiptPath));
+const onlineIrReceiptSha = 'b75740f1a28dd4a5352c15e0e738a82bf9c8d3402e3f6ea797d129c424e05472';
+assert.equal(sha(onlineIrReceiptBytes), onlineIrReceiptSha, 'n37 target-only independent receipt changed.');
+const onlineIrReceipt = JSON.parse(onlineIrReceiptBytes);
+assert.equal(onlineIrReceipt.ok, true);
+assert.equal(onlineIrReceipt.records, 384);
+assert.equal(onlineIrReceipt.verified_records, 384);
+assert.equal(onlineIrReceipt.replays.length, 320);
+assert.ok(onlineIrReceipt.replays.every(row => row.reproduced));
+assert.equal(onlineIrReceiptSha, onlineIr.independent_audit_sha256);
+const onlineIrReceiptPin = {path:onlineIrReceiptPath, sha256:onlineIrReceiptSha};
+const nativeWallPath = 'research/ecbench_n37_native_online_wall_20261004/DECISION.json';
+const nativeWallBytes = readFileSync(resolve(ROOT, nativeWallPath));
+const nativeWallSha = 'eebbe2eef9524c7f45a5bfd1c0a2b312d72063a3a8865140a6e25200235c21e2';
+assert.equal(sha(nativeWallBytes), nativeWallSha, 'n37 native wall decision changed.');
+const nativeWall = JSON.parse(nativeWallBytes);
+assert.equal(nativeWall.schema, 'ecbench.native_online_wall_decision/v1');
+assert.equal(nativeWall.status, 'complete_exploratory_hosted');
+assert.equal(nativeWall.decision, 'carry_both_host_noise_exceeds_gate');
+assert.equal(nativeWall.measured_verified_runs, 320);
+assert.equal(nativeWall.same_target_paired_rounds, 80);
+assert.deepEqual(nativeWall.isolation_levels, {L1: 320});
+assert.equal(nativeWall.all_measured_L2, false);
+assert.equal(nativeWall.online_speedup, null);
+assert.ok(nativeWall.k16_aa_max_relative_deviation > .05);
+assert.equal(nativeWall.primary_one_target.target_index, 0);
+const nativeWallPin = {path:nativeWallPath, sha256:nativeWallSha};
+const nativeWallEvidencePath = 'research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json';
+const nativeWallEvidenceBytes = readFileSync(resolve(ROOT, nativeWallEvidencePath));
+const nativeWallEvidenceSha = 'bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422';
+assert.equal(sha(nativeWallEvidenceBytes), nativeWallEvidenceSha, 'n37 native wall evidence changed.');
+const nativeWallEvidence = JSON.parse(nativeWallEvidenceBytes);
+assert.equal(nativeWallEvidence.decision_sha256, nativeWallSha);
+assert.equal(nativeWallEvidence.records_sha256, nativeWall.records_sha256);
+assert.equal(nativeWallEvidence.independent_receipt_sha256, nativeWall.independent_receipt_sha256);
+assert.equal(sha(readFileSync(resolve(ROOT, 'research/ecbench_n37_native_online_wall_20261004/SHA256SUMS'))), nativeWallEvidence.raw_sha256s_sha256);
+assert.equal(sha(readFileSync(resolve(ROOT, 'research/ecbench_n37_native_online_wall_20261004/SOURCE-ARTIFACT-SHA256SUMS'))), nativeWallEvidence.source_artifact_sha256s_sha256);
+assert.equal(nativeWallEvidence.admitted_online_speedup, null);
+const nativeWallEvidencePin = {path:nativeWallEvidencePath, sha256:nativeWallEvidenceSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -138,6 +278,7 @@ const rhoGraph = `<div class="rho-plot" data-measurement-chart role="group" aria
 let page = readFileSync(PAGE, 'utf8');
 const oldFront = between(page, START, END);
 const historical = section(oldFront, 'lab-best');
+const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
 const retainedPanels = [
   ['cold-compact-orbit-20261003','Historical compact-orbit cold-cost panel'],
   ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
@@ -145,12 +286,16 @@ const retainedPanels = [
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
   ['lab-progress','Research progress over time · separate regimes and references'],
   ['lab-currency','How new results update this dashboard']
-].map(([id,label])=>({id,label,html:section(oldFront,id)}));
+].map(([id,label])=>{
+  let html = section(oldFront,id);
+  if (id === 'lab-progress') {
+    const marker = /(<script type="application\/json" id="progress-data">)[\s\S]*?(<\/script>)/;
+    assert.ok(marker.test(html), 'Progress panel has no canonical data embed');
+    html = html.replace(marker, (_, start, end) => start + progressRaw.toString('utf8').trim() + end);
+  }
+  return {id,label,html};
+});
 const historicalDetails = retainedPanels.map(panel=>`<details class="dash-details"><summary>${panel.label}</summary><div class="dash-detail-body">${panel.html}</div></details>`).join('\n');
-const progressRaw = readFileSync(resolve(ROOT,'docs/ic/progress-timeline.json'));
-const embedded = oldFront.match(/<script type="application\/json" id="progress-data">([\s\S]*?)<\/script>/);
-assert.ok(embedded, 'Progress timeline evidence must be retained');
-assert.deepEqual(JSON.parse(embedded[1]), JSON.parse(progressRaw), 'Embedded progress timeline differs from canonical data');
 // The legacy collapse handler must not hide the overview's graphs. Its only
 // permitted migration is a selector scope change; all evidence stays verbatim.
 const oldSelector = 'document.querySelectorAll(SEL)';
@@ -183,9 +328,50 @@ const front = `
 
 <section class="dash-section" id="n37-shared-rank-ecbench-20261004" aria-labelledby="shared-ecbench-title">
 <div class="dash-section-head"><div><p class="dash-kicker">n37 one public point / paired ecbench</p><h2 id="shared-ecbench-title">The shared rank solves Q; the speed claim stays open.</h2></div><span class="status neutral">Accounting · L0 diagnostic</span></div>
-<p class="dash-section-intro panel-summary">A fresh orbit-disjoint Q was solved by the 3,108-point, 42-column shared-rank IC and by single-target strong signed-Frobenius rho in all five measured rounds. The target-independent table and 42 verified base logs were built before each IC online clock; each target was a direct m3 hit. Both arms have unpriced native work.</p>
+<p class="dash-section-intro panel-summary">A fresh orbit-disjoint Q was solved by the 3,108-point, 42-column shared-rank IC and by single-target strong signed-Frobenius rho in all five measured rounds. An independent Linux x86-64 auditor reproduced all 15 measured records exactly. The target-independent table and 42 verified base logs were built before each IC online clock; each target was a direct m3 hit. Both arms have unpriced native work, and the Mac wall times remain L0 diagnostics.</p>
 <div class="table-scroll"><table><caption>Same Q, five verified one-target repetitions. Every S and ratio is a lower-bound or bounded cold diagnostic; online times are L0 observations, not an accepted speedup.</caption><thead><tr><th>Variant</th><th>Verified</th><th>Mean cold S</th><th>S / floor</th><th>S / rho</th><th>Median target online</th></tr></thead><tbody><tr><td>Strong signed-Frobenius rho</td><td>5/5</td><td>${f(sharedComparison.a.mean_s,3)}</td><td>${f(sharedComparison.a.mean_ratio_to_floor,3)}</td><td>1.000</td><td>${f(sharedEcbench.rho_online_ns.median_ns/1000,3)} µs</td></tr><tr><td>Shared-rank IC</td><td>5/5</td><td>${f(sharedComparison.b.mean_s,3)}</td><td>${f(sharedComparison.b.mean_ratio_to_floor,3)}</td><td>${f(sharedComparison.ops.ratio_b_over_a,3)}</td><td>${f(sharedEcbench.ic_online_ns.median_ns/1000,3)} µs</td></tr><tr><td>Shared-rank IC A/A control</td><td>5/5</td><td>${f(sharedControl.b.mean_s,3)}</td><td>${f(sharedControl.b.mean_ratio_to_floor,3)}</td><td>${f(sharedComparison.ops.ratio_b_over_a,3)}</td><td>${f(sharedEcbench.control_online_ns.median_ns/1000,3)} µs</td></tr></tbody></table></div>
-<p class="dash-footnote">Five repeats on one Q quantify run noise, not target variation. The A/A IC online ratio ranged 0.833–1.287. The next measurement needs an L2 Linux run, a durable other-class replay receipt and common native-work pricing; a new target panel is required before generalization. No n131 transfer follows. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/README.md">Protocol, session, audit and decision</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/RESULT_FINAL.json">Native analysis →</a></p>
+<p class="dash-footnote">Five repeats on one Q quantify run noise, not target variation. The A/A IC online ratio ranged 0.833–1.287. An independent Linux x86-64 auditor reproduced ${sharedIndependent.replays.length}/${sharedIndependent.replays.length} measured records on another host class; this checks deterministic answers and counts, not the L0 wall times. The eight-point column sweep below addresses target variation in the same n37 method, but still needs isolated timing and common native-work pricing. No n131 transfer follows. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/independent_validation_20261004/RESULT.md">Independent replay</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/README.md">Protocol, session, audit and decision</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_shared_rank_20261004/RESULT_FINAL.json">Native analysis →</a></p>
+</section>
+
+<section class="dash-section" id="n37-rank-columns-20261004" aria-labelledby="rank-columns-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / eight one-target workloads / factor-base sweep</p><h2 id="rank-columns-title">16 folded columns cut counted cold work; rho remains ahead in this diagnostic.</h2></div><span class="status neutral">Independent replay · L0 counts</span></div>
+<p class="dash-section-intro panel-summary">The preregistered K={4,8,12,16,24,42} sweep solved the same eight public points with each base and strong signed-Frobenius rho, five times per point. All 320 measured executions verified and replayed exactly on another host class. K16 has 1,184 actual usable points and rank 16/16. Its cold counted GAE is 0.349 of K42, 95% interval [0.343, 0.359], passing the frozen engineering gate; K8 was statistically close in that incomplete unit. A separate whole-solve Callgrind census confirms K16/K42 at ${f(callgrind.comparisons[0].ratio_of_sums)} [${f(callgrind.comparisons[0].bootstrap_95[0])}, ${f(callgrind.comparisons[0].bootstrap_95[1])}] but finds K16/rho at ${f(callgrind.comparisons[1].ratio_of_sums)} [${f(callgrind.comparisons[1].bootstrap_95[0])}, ${f(callgrind.comparisons[1].bootstrap_95[1])}] in that separate instruction unit. The untouched K8/K16 confirmation follows below; isolated online wall speed remains unknown.</p>
+<div class="table-scroll"><table><caption>Cold counted GAE lower-bound S per √r; 40 verified one-target runs per arm on the same Q panel. The IC/rho quotient is a ratio of incomplete cost estimates and does not bound true speed.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Mean cold S</th><th>Counted IC / rho diagnostic</th></tr></thead><tbody>
+<tr><td>Strong signed-Frobenius rho</td><td>—</td><td>—</td><td>${f(rankColumns.reference.mean_cold_s_lower_bound,3)}</td><td>1.000</td></tr>
+${rankColumns.candidates.map(row => `<tr><td>${escape(row.arm)}</td><td>${row.usable_points.toLocaleString('en-US')}</td><td>${row.folded_columns}</td><td>${f(row.mean_cold_s_lower_bound,3)}</td><td>${f(row.cold_counted_over_rho_diagnostic,3)}</td></tr>`).join('\n')}
+</tbody></table></div>
+<p class="dash-footnote">K16's counted preparation mean is 31,312.49 GAE and its target-dependent mean is 748.32 GAE; K42 is 91,712.76 plus 156.89. The earlier K16/K8 counted ratio was 0.990 [0.927, 1.057]; the fresh confirmation below uses new targets and prices native implementation work. The identical K42 control had a counted A/A ratio of 1.000. The Mac producer is L0 and field arithmetic, hashing, allocation and modular combination are unpriced in both methods; online wall speedup and fully priced cold speedup remain unset. The independent Linux receipt reproduces ${rankColumnsAudit.replays.length}/${rankColumnsAudit.replays.length} measured records, not an isolated producer timing. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.md">Decision and limitations</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/RESULT.json">Native analysis</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_rank_columns_20261004/independent_validation/README.md">Replay evidence →</a></p>
+<p class="dash-footnote">A follow-on whole-solve Callgrind census on the same eight public points counts field, hash, allocation and other user-space work inside the implementation: K16/K42 is ${f(callgrind.comparisons[0].ratio_of_sums)} [${f(callgrind.comparisons[0].bootstrap_95[0])}, ${f(callgrind.comparisons[0].bootstrap_95[1])}], but K16 still costs ${f(callgrind.comparisons[1].ratio_of_sums)} [${f(callgrind.comparisons[1].bootstrap_95[0])}, ${f(callgrind.comparisons[1].bootstrap_95[1])}] times strong rho in this separate instruction unit. All ${callgrind.profiles} profiles reproduced the archived logs and the K42 A/A maximum difference was ${(100*callgrind.aa_max_absolute_relative_deviation).toFixed(4)}%. This is neither native wall time nor the primary online speed metric. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Frozen instruction decision and raw replay →</a></p>
+</section>
+
+<section class="dash-section" id="n37-k8-k16-20261004" aria-labelledby="k8-confirm-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 untouched one-target workloads / complete solve instructions</p><h2 id="k8-confirm-title">K8 wins cold implementation cost; target-only attribution follows.</h2></div><span class="status neutral">Accounting · independent replay · L0</span></div>
+<p class="dash-section-intro panel-summary">The fresh public-point panel verified 384/384 native executions and 64/64 Callgrind profiles, with all 320 measured native rows independently replayed on Linux. K16/K8 whole-solve instructions are ${f(k8Confirm.comparisons[0].ratio_of_sums)} [${f(k8Confirm.comparisons[0].bootstrap_95[0])}, ${f(k8Confirm.comparisons[0].bootstrap_95[1])}], clearing the preregistered 5% K8 cold-route gate. K8/rho remains ${f(k8Confirm.comparisons[1].ratio_of_sums)} [${f(k8Confirm.comparisons[1].bootstrap_95[0])}, ${f(k8Confirm.comparisons[1].bootstrap_95[1])}] in the same simulated instruction unit. The new target-only instruction result appears below; the primary isolated online wall result remains unset.</p>
+<div class="table-scroll"><table><caption>Complete ecbench method-solve Callgrind Ir on the same 16 public points; one profile per arm and target. The cold method-solve boundary includes reusable setup and is not the online interval.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Verified</th><th>Mean solve Ir</th><th>Ir / √r</th></tr></thead><tbody>
+<tr><td>Strong signed-Frobenius rho</td><td>—</td><td>—</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'rho-strong').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'rho-strong').s_ir_per_target,2)}</td></tr>
+<tr><td>K8</td><td>592</td><td>8</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'ic-k8').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'ic-k8').s_ir_per_target,2)}</td></tr>
+<tr><td>K16</td><td>1,184</td><td>16</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'ic-k16').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'ic-k16').s_ir_per_target,2)}</td></tr>
+<tr><td>Identical K16 control</td><td>1,184</td><td>16</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'ic-k16-control').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'ic-k16-control').s_ir_per_target,2)}</td></tr>
+</tbody></table></div>
+<p class="dash-footnote">The older incomplete counted-cost estimate had K16/K8 = 1.0175 [0.973, 1.059] on these new targets and could not choose a base. K8's pair table has 2,344 entries versus K16's 9,412, while K16 averaged 477 counted target GAE versus K8's 3,385. The largest paired K16 A/A deviation was ${(100*k8Confirm.aa_max_absolute_relative_deviation).toFixed(4)}%. These phase counters explain why both bases must remain in the n41/n53 online study: the cold instruction choice cannot settle target-only cost. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_k8_k16_20261004/RESULT.md">Decision, raw profile archive, exact IC1 claims and limits →</a></p>
+</section>
+
+<section class="dash-section" id="n37-online-ir-20261004" aria-labelledby="n37-online-ir-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 new public one-target workloads / target-only instructions</p><h2 id="n37-online-ir-title">K16 cuts target work; an isolated wall test is next.</h2></div><span class="status neutral">Accounting · independent replay · L0</span></div>
+<p class="dash-section-intro panel-summary">The fresh 16-point panel verified ${onlineIr.profiles}/${onlineIr.profiles} Callgrind profiles and independently replayed ${onlineIrReceipt.replays.length}/${onlineIrReceipt.replays.length} measured native executions. K8/K16 target-only instructions are ${f(onlineIr.online.comparisons[0].ratio_of_sums)} [${f(onlineIr.online.comparisons[0].bootstrap_95[0])}, ${f(onlineIr.online.comparisons[0].bootstrap_95[1])}], above the frozen 1.10 K16-priority gate. K16/rho target-only instructions are ${f(onlineIr.online.comparisons[2].ratio_of_sums)} [${f(onlineIr.online.comparisons[2].bootstrap_95[0])}, ${f(onlineIr.online.comparisons[2].bootstrap_95[1])}]. This is simulated instruction attribution, not an isolated online wall speedup.</p>
+<div class="table-scroll"><table><caption>One-target Callgrind Ir from the frozen solve and target interval markers; 16 same-point verified profiles per arm.</caption><thead><tr><th>Arm</th><th>Actual usable points</th><th>Folded columns</th><th>Mean target-only Ir</th><th>Mean complete-solve Ir</th></tr></thead><tbody>
+${[['rho-strong','Strong signed-Frobenius rho','—','—'],['ic-k8','K8','592','8'],['ic-k16','K16','1,184','16'],['ic-k16-control','Identical K16 control','1,184','16']].map(([arm,label,points,columns])=>`<tr><td>${label}</td><td>${points}</td><td>${columns}</td><td>${Math.round(onlineIr.online.arms.find(row=>row.arm===arm).mean_ir).toLocaleString('en-US')}</td><td>${Math.round(onlineIr.complete_solve.arms.find(row=>row.arm===arm).mean_ir).toLocaleString('en-US')}</td></tr>`).join('\n')}
+</tbody></table></div>
+<p class="dash-footnote">The cold choice reverses: K8/K16 complete-solve Ir is ${f(onlineIr.complete_solve.comparisons[0].ratio_of_sums)} [${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[0])}, ${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[1])}], as K16's larger base and pair table cost more reusable work. The target-only K16 A/A difference is exactly zero. Both bases stay in the n41/n53 study; no ECC2K-130 transfer follows from n37. The Mac wall session earned L0, so the primary online speedup stays unknown. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md">Decision, raw archive, exact IC1 claims, and limits →</a></p>
+</section>
+
+<section class="dash-section" id="n37-native-online-wall-20261004" aria-labelledby="n37-native-online-wall-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 new public one-target workloads / native wall screen</p><h2 id="n37-native-online-wall-title">K16's native online lead remains exploratory.</h2></div><span class="status neutral">L1 · 320/320 independent replays · noise gate failed</span></div>
+<p class="dash-section-intro panel-summary">All 384 executions recovered and verified their public-point logarithms. The frozen primary target, <code>${escape(nativeWall.primary_one_target.workload_id)}</code>, has descriptive rho/K16 online wall ${f(nativeWall.primary_one_target.descriptive_rho_over_k16)}×, but no admitted speedup: all measured rows earned L1, and the identical K16 A/A maximum deviation was ${f(100*nativeWall.k16_aa_max_relative_deviation,2)}%, above the frozen 5% gate.</p>
+<div class="table-scroll"><table><caption>Primary target-zero mean of five paired one-target rounds; hosted wall milliseconds are exploratory.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Online wall, ms</th><th>Cold solve wall, ms (16-target panel)</th></tr></thead><tbody>
+${[['rho-strong','Strong signed-Frobenius rho','—','—'],['ic-k8','K8','592','8'],['ic-k16','K16','1,184','16'],['ic-k16-control','Identical K16 control','1,184','16']].map(([arm,label,points,columns])=>`<tr><td>${label}</td><td>${points}</td><td>${columns}</td><td>${f(nativeWall.primary_one_target.online_ns_totals[arm]/5e6,6)}</td><td>${f(nativeWall.arm_stage_totals[arm].cold_solve_ns_total/80e6,6)}</td></tr>`).join('\n')}
+</tbody></table></div>
+<p class="dash-footnote">Across the 16 separate one-target workloads, the secondary descriptive K8/K16 online ratio is ${f(nativeWall.panel_descriptive_ratios.k8_over_k16.ratio_of_sums)} [${f(nativeWall.panel_descriptive_ratios.k8_over_k16.target_block_bootstrap_95[0])}, ${f(nativeWall.panel_descriptive_ratios.k8_over_k16.target_block_bootstrap_95[1])}]. The frozen decision is <code>${escape(nativeWall.decision)}</code>: carry both bases to an auditable L2 host; retain K8 and K16 at n41/n53. The page's primary rho/IC online speedup remains unknown, and this n37 screen supplies no ECC2K-130 transfer. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_native_online_wall_20261004/RESULT.md">Raw records, independent replay, exact IC1 identities and decision →</a></p>
 </section>
 
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
@@ -212,11 +398,20 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedComparisonPin,sharedControlPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin,k8ConfirmPin,onlineIrPin,onlineIrReceiptPin,nativeWallPin,nativeWallEvidencePin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
   shared_rank_ecbench: sharedEcbench,
+  shared_rank_independent_replay: {session_id:sharedIndependent.session_id, auditor_env_class_id:sharedIndependent.auditor_env_class_id, replays:sharedIndependent.replays.length, receipt_sha256:sharedIndependentSha, claim_check_status:sharedIndependentCheck.status},
+  n37_rank_columns: rankColumns,
+  n37_callgrind: callgrind,
+  n37_k8_k16_callgrind: k8Confirm,
+  n37_online_ir: onlineIr,
+  n37_online_ir_independent_replay: {session_id:onlineIrReceipt.session_id, auditor_env_class_id:onlineIrReceipt.auditor_env_class_id, replays:onlineIrReceipt.replays.length, receipt_sha256:onlineIrReceiptSha},
+  n37_native_online_wall: nativeWall,
+  n37_native_online_wall_evidence: nativeWallEvidence,
+  n37_rank_columns_independent_replay: {session_id:rankColumnsAudit.session_id, auditor_env_class_id:rankColumnsAudit.auditor_env_class_id, replays:rankColumnsAudit.replays.length, receipt_sha256:rankColumnsAuditSha},
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
   historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),
   historical_overview_panels: retainedPanels.map(panel=>({section_id:panel.id,sha256:sha(panel.html)})),
