@@ -35,6 +35,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             src
@@ -76,6 +78,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            docs/curves/registry.json
+            docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             src

@@ -1,0 +1,143 @@
+#!/usr/bin/env node
+// Dependency-free browser checks for presentation only. Never dispatch research.
+import { spawn } from 'node:child_process';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import assert from 'node:assert/strict';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const chrome = process.env.IC_DASHBOARD_CHROME || [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'
+].find(existsSync);
+assert.ok(chrome, 'Set IC_DASHBOARD_CHROME to an installed Chrome/Chromium executable');
+const output = process.env.IC_DASHBOARD_SCREENSHOTS;
+if (output) mkdirSync(output, { recursive: true });
+const profile = mkdtempSync(resolve(tmpdir(), 'ic-dashboard-browser-'));
+const child = spawn(chrome, ['--headless=new', '--remote-debugging-port=0',
+  '--remote-debugging-address=127.0.0.1', '--no-first-run', '--no-default-browser-check',
+  '--disable-background-networking', '--disable-component-update',
+  '--disable-extensions', '--user-data-dir=' + profile, 'about:blank'],
+  { stdio: ['ignore','ignore','pipe'] });
+let chromeLog = '', socket;
+child.stderr.on('data', bytes => { chromeLog += bytes; });
+const sleep = ms => new Promise(r => setTimeout(r,ms));
+const deadline = Date.now() + 20000;
+const receipts = [], errors = [], network = [];
+try {
+  while (!/DevTools listening on (ws:\/\/[^\s]+)/.test(chromeLog)) {
+    assert.ok(child.exitCode === null, 'Chrome failed to start: ' + chromeLog);
+    assert.ok(Date.now() < deadline, 'Chrome launch deadline exceeded: ' + chromeLog);
+    await sleep(50);
+  }
+  const debuggerUrl = new URL(chromeLog.match(/DevTools listening on (ws:\/\/[^\s]+)/)[1]);
+  const target = await (await fetch(`http://${debuggerUrl.host}/json/new?about:blank`,
+    { method: 'PUT', signal: AbortSignal.timeout(5000) })).json();
+  socket = new WebSocket(target.webSocketDebuggerUrl);
+  await new Promise((resolve,reject) => { socket.onopen=resolve; socket.onerror=reject; });
+  let nextId = 0;
+  const pending = new Map();
+  socket.onmessage = event => {
+    const data = JSON.parse(event.data);
+    if (data.id) {
+      const call = pending.get(data.id);
+      if (!call) return;
+      pending.delete(data.id); clearTimeout(call.timer);
+      if (data.error) call.reject(new Error(JSON.stringify(data.error))); else call.resolve(data.result);
+    }
+    if (data.method === 'Runtime.exceptionThrown') errors.push(data.params.exceptionDetails);
+    if (data.method === 'Network.requestWillBeSent') network.push(data.params.request.url);
+  };
+  function call(method,params={}) {
+    return new Promise((resolve,reject) => {
+      const id=++nextId;
+      const timer=setTimeout(()=>{pending.delete(id);reject(new Error('CDP deadline: '+method));},10000);
+      pending.set(id,{resolve,reject,timer}); socket.send(JSON.stringify({id,method,params}));
+    });
+  }
+  async function evaluate(expression) {
+    const result=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
+    assert.ok(!result.exceptionDetails, JSON.stringify(result.exceptionDetails));
+    return result.result.value;
+  }
+  async function frame() { await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))'); }
+  async function screenshot(name) {
+    if (!output) return;
+    await frame();
+    const {data}=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+    writeFileSync(resolve(output,name+'.png'),Buffer.from(data,'base64'));
+  }
+  await call('Page.enable'); await call('Runtime.enable'); await call('Network.enable');
+  await call('Emulation.setDeviceMetricsOverride',{width:1280,height:1000,deviceScaleFactor:1,mobile:false});
+  await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:'light'},{name:'prefers-reduced-motion',value:'reduce'}]});
+  const url=pathToFileURL(resolve(root,'docs/index-calculus-scoreboard.html')).href;
+  await call('Page.navigate',{url});
+  for (let i=0;i<100 && !(await evaluate("document.readyState === 'complete' && !!document.getElementById('evidence-count')?.textContent"));i++) await sleep(50);
+  await frame();
+  const visible=await evaluate(`Array.from(document.querySelectorAll('#ic-overview [data-measurement-chart]')).map(el=>({height:el.getBoundingClientRect().height,hidden:!!el.closest('[hidden]')}))`);
+  assert.equal(visible.length,2); assert.ok(visible.every(graph=>graph.height>0&&!graph.hidden), 'Overview charts collapsed');
+  assert.equal(await evaluate("document.querySelectorAll('#ic-overview .ic-toggle').length"),0,'Ledger handler reached overview');
+  assert.equal(await evaluate("document.querySelectorAll('#evidence-results li').length"),0,'Unrequested evidence results clutter overview');
+  assert.equal(await evaluate("document.querySelectorAll('#lab-readiness .status.good').length"),6);
+  assert.ok(await evaluate("document.querySelector('#lab-readiness tbody tr:last-child').textContent.includes('Source-bound, audited')"));
+  assert.equal(await evaluate("document.getElementById('historical-regimes').open"),false);
+  assert.equal(await evaluate("document.getElementById('evidence-library').open"),false);
+  await screenshot('desktop-overview');
+  await evaluate("document.getElementById('lab-readiness').scrollIntoView()");
+  await screenshot('desktop-readiness-pipeline');
+  await evaluate("const q=document.getElementById('evidence-query'); q.value='Frobenius'; q.dispatchEvent(new Event('input')); true");
+  assert.ok(await evaluate("document.querySelectorAll('#evidence-results li').length > 0"));
+  await evaluate("document.querySelector('#evidence-results a').click(); true"); await frame();
+  assert.equal(await evaluate("document.getElementById('evidence-library').open"),true);
+  await evaluate("location.hash='boundary-ledger'; true"); await frame();
+  assert.equal(await evaluate("document.getElementById('evidence-library').open"),true);
+  assert.ok(await evaluate("document.getElementById('boundary-ledger').getBoundingClientRect().height > 100"),'Old evidence panel did not open');
+  await evaluate("location.hash='lab-best'; true"); await frame();
+  assert.equal(await evaluate("document.getElementById('historical-regimes').open"),true);
+  await evaluate("location.hash='lab-progress'; true"); await frame();
+  assert.ok(await evaluate("document.getElementById('lab-progress').closest('details').open"),'Progress history deep link did not open');
+  assert.ok(await evaluate("document.querySelector('#lab-progress svg').getBoundingClientRect().height > 0"),'Preserved progress chart did not render');
+  await evaluate("location.hash='control-title'; true"); await frame();
+  assert.ok(await evaluate("document.getElementById('control-title').closest('details').open"),'Old control deep link did not open');
+  receipts.push('desktop: visible graphs, correct readiness, quiet evidence, search, retained fragment links');
+  await evaluate("document.getElementById('evidence-library').open=false; document.getElementById('historical-regimes').open=false; location.hash='ic-overview'; true");
+  for (const width of [390,320]) {
+    await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:false});
+    await frame();
+    assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'Page overflows at '+width);
+    if (width===390) {
+      await screenshot('mobile-overview');
+      await evaluate("document.getElementById('lab-results').scrollIntoView()");
+      await screenshot('mobile-results');
+    }
+    assert.ok(await evaluate("document.querySelector('.comparison-plot').scrollWidth <= document.querySelector('.comparison-plot').clientWidth + 1"),'Comparison graph clipped at '+width);
+    receipts.push('mobile '+width+': no page overflow; whole comparison graph fits; readiness scrolls within its panel');
+  }
+  await call('Emulation.setDeviceMetricsOverride',{width:1280,height:1000,deviceScaleFactor:1,mobile:false});
+  await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:'dark'}]});
+  await evaluate("document.getElementById('ic-overview').scrollIntoView()");
+  await screenshot('desktop-dark');
+  receipts.push('dark theme rendered');
+  await call('Emulation.setScriptExecutionDisabled',{value:true});
+  await call('Page.navigate',{url});
+  for (let i=0;i<100 && !(await evaluate("document.readyState === 'complete'"));i++) await sleep(50);
+  assert.equal(await evaluate("document.querySelectorAll('[data-measurement-chart]').length"),2);
+  assert.ok(await evaluate("Array.from(document.querySelectorAll('[data-measurement-chart]')).every(el=>el.getBoundingClientRect().height>0)"));
+  receipts.push('JavaScript disabled: static measurements, graphs, diagrams and native details remain available');
+  assert.equal(errors.length,0,'Browser script errors: '+JSON.stringify(errors));
+  assert.equal(network.filter(url=>/^https?:/.test(url)).length,0,'Dashboard made network requests');
+  const summary={status:'PASS_IC_DASHBOARD_BROWSER',chrome,checks:receipts,
+    script_errors:errors,external_requests:[],viewport_widths:[1280,390,320],
+    page_sha256: (await import('node:crypto')).createHash('sha256').update(readFileSync(resolve(root,'docs/index-calculus-scoreboard.html'))).digest('hex')};
+  if(output) writeFileSync(resolve(output,'browser-check.json'),JSON.stringify(summary,null,2)+'\n');
+  console.log(JSON.stringify(summary,null,2));
+} finally {
+  socket?.close();
+  child.kill('SIGTERM');
+  for (let i=0;i<50 && child.exitCode===null && child.signalCode===null;i++) await sleep(100);
+  if(child.exitCode===null && child.signalCode===null) child.kill('SIGKILL');
+  // Only this invocation's fresh browser profile is removed.
+  rmSync(profile,{recursive:true,force:true});
+}

@@ -79,6 +79,7 @@
 use std::collections::{BTreeSet, HashMap};
 
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
+use crate::cryptanalysis::binary_isogeny::find_roots_in_f2m;
 use crate::cryptanalysis::ic_boundary::{
     binary_point_count, ArtinSchreier, BinaryGroup, CountedGroup, GroupOps,
 };
@@ -337,6 +338,76 @@ pub fn velu_point_map(
         .add(&a)
         .add(&z3_sum);
     Some(FastPoint::affine(to_u64(&image_x), to_u64(&image_y)))
+}
+
+/// Pull a rational point back through a coprime-degree isogeny.
+///
+/// If the degree is coprime to `#E(F_q)`, the map is bijective on rational
+/// points. For image abscissa `X`, the numerator of `X - velu_x_map(x)` is
+/// `(X+x)h² + xhh' + x²(h')²`. Find its rational roots, lift both signs on
+/// the domain, and accept only the unique point whose complete forward image
+/// equals `image`. This costs a degree-`ell` root finding per preimage;
+/// callers must charge that work when a pullback base is built.
+pub fn velu_preimage_point(
+    domain: &Curve,
+    iso: &BinaryIsogeny,
+    image: FastPoint,
+) -> Result<FastPoint, String> {
+    if iso.n != domain.n
+        || iso.a2 != domain.a2
+        || iso.a6 != domain.a6
+        || iso.kernel.m != domain.n
+        || iso.ell.is_multiple_of(2)
+        || iso.kernel.degree() != Some(((iso.ell.saturating_sub(1)) / 2) as usize)
+    {
+        return Err("isogeny and domain do not match".into());
+    }
+    if iso.ell == 0 || gcd_u64(domain.order, iso.ell) != 1 {
+        return Err("isogeny degree is not coprime to rational group order".into());
+    }
+    if image.infinity {
+        return Ok(FastPoint::INFINITY);
+    }
+    let n = domain.n;
+    let mask = (1u64 << n) - 1;
+    if (image.x | image.y) & !mask != 0 {
+        return Err("image coordinates are outside the field".into());
+    }
+    let codomain = Curve::with_order(n, &domain.irr, domain.a2, iso.a6_codomain, domain.order)
+        .ok_or("isogeny codomain is unsupported")?;
+    if !codomain.fast.is_on_curve(image) {
+        return Err("image is not on the isogeny codomain".into());
+    }
+    let irr = &domain.irr;
+    let x = F2mPoly::x(n);
+    let h = &iso.kernel;
+    let hp = derivative(h, n);
+    let h2 = h.mul(h, irr);
+    let equation = x
+        .add(&F2mPoly::constant(elt(image.x, n)))
+        .mul(&h2, irr)
+        .add(&x.mul(h, irr).mul(&hp, irr))
+        .add(&x.mul(&x, irr).mul(&hp.mul(&hp, irr), irr));
+    let mut candidates = Vec::new();
+    for root in find_roots_in_f2m(&equation, n, irr) {
+        for point in domain.points_with_x(to_u64(&root)) {
+            if velu_point_map(point, h, n, irr) == Some(image) && !candidates.contains(&point) {
+                candidates.push(point);
+            }
+        }
+    }
+    match candidates.as_slice() {
+        [point] => Ok(*point),
+        [] => Err("no rational point maps to the supplied image".into()),
+        _ => Err("multiple rational preimages despite coprime degree".into()),
+    }
+}
+
+fn gcd_u64(mut a: u64, mut b: u64) -> u64 {
+    while b != 0 {
+        (a, b) = (b, a % b);
+    }
+    a
 }
 
 /// Evaluate a Hasse derivative without constructing a polynomial.  Lucas's
@@ -643,6 +714,7 @@ pub fn transport_instance(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cryptanalysis::binary_field_basis::BinaryFieldBasis;
     use crate::cryptanalysis::binary_isogeny::{find_roots_in_f2m, phi_l_mod2_in_x};
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
     use flate2::read::GzDecoder;
@@ -782,6 +854,7 @@ mod tests {
             let h = F2mPoly::from_coeffs(vec![root, F2mElement::one(n)], n);
             let iso = isogeny_from_kernel(&domain, h, 3);
             let codomain = Curve::new(n, &irr, 0, iso.a6_codomain).expect("codomain");
+            assert!(velu_preimage_point(&domain, &iso, FastPoint::INFINITY).is_err());
             let map = |p| velu_point_map(p, &iso.kernel, n, &irr).expect("defined map");
             assert_eq!(map(FastPoint::INFINITY), FastPoint::INFINITY);
             let points: Vec<_> = (0..(1u64 << n))
@@ -885,8 +958,7 @@ mod tests {
         }
     }
 
-    #[test]
-    fn archived_degree_73_descent_has_oriented_native_point_map() {
+    fn degree_73_archive() -> serde_json::Value {
         let bytes = include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/research/koblitz_isogeny_descent_37_results_20260925/raw.json.gz"
@@ -895,7 +967,12 @@ mod tests {
         GzDecoder::new(&bytes[..])
             .read_to_string(&mut raw)
             .expect("frozen descent archive is gzip JSON");
-        let record: serde_json::Value = serde_json::from_str(&raw).expect("frozen descent JSON");
+        serde_json::from_str(&raw).expect("frozen descent JSON")
+    }
+
+    #[test]
+    fn archived_degree_73_descent_has_oriented_native_point_map() {
+        let record = degree_73_archive();
         let certificate = &record["isogeny_certificate"];
         assert_eq!(certificate["degree"], 73);
         assert_eq!(
@@ -977,5 +1054,192 @@ mod tests {
             codomain.fast.mul_u64(map(p), d),
             "transported target must retain its signed logarithm"
         );
+    }
+
+    #[test]
+    fn frozen_unknown_targets_reach_degree_73_leaf_through_basis_bridge() {
+        let frozen: serde_json::Value = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json"
+        )))
+        .expect("frozen campaign");
+        let spec = &frozen["specs"]["n37_L1024"];
+        let source_modulus = IrreduciblePoly {
+            degree: 37,
+            low_terms: serde_json::from_value(spec["field_modulus_low_terms"].clone())
+                .expect("control modulus"),
+        };
+        let archive_modulus = IrreduciblePoly {
+            degree: 37,
+            low_terms: vec![0, 1, 2, 3, 4, 5],
+        };
+        let bridge = BinaryFieldBasis::from_generator_image(
+            &source_modulus,
+            &archive_modulus,
+            10_156_182_909,
+        )
+        .expect("frozen field-basis bridge");
+        let certificate = degree_73_archive();
+        let certificate = &certificate["isogeny_certificate"];
+        assert_eq!(
+            certificate["field_modulus"],
+            "x^37 + x^5 + x^4 + x^3 + x^2 + x + 1"
+        );
+        let order = 137_439_487_532;
+        let subgroup_order = spec["subgroup_order"].as_u64().expect("subgroup order");
+        let control = Curve::with_order(37, &source_modulus, 0, 1, order).expect("control curve");
+        let archived_source =
+            Curve::with_order(37, &archive_modulus, 0, 1, order).expect("archived source");
+        let kernel = archive_kernel(
+            certificate["kernel_polynomial"]
+                .as_str()
+                .expect("archived kernel"),
+        );
+        let iso = isogeny_from_kernel(&archived_source, kernel, 73);
+        let expected_a6 = archive_field_element(
+            certificate["target_normalized_coefficients"]["a6"]
+                .as_str()
+                .expect("leaf coefficient"),
+        );
+        assert_eq!(iso.a6_codomain, expected_a6);
+        let leaf =
+            Curve::with_order(37, &archive_modulus, 0, expected_a6, order).expect("archived leaf");
+        let transport = |p| {
+            velu_point_map(
+                bridge.map_point(p).expect("basis image"),
+                &iso.kernel,
+                37,
+                &archive_modulus,
+            )
+            .expect("degree-73 image")
+        };
+        let generator_words: [u64; 2] =
+            serde_json::from_value(spec["generator"].clone()).expect("control generator");
+        let generator = FastPoint::affine(generator_words[0], generator_words[1]);
+        let image_generator = transport(generator);
+        assert!(!image_generator.infinity);
+        assert!(leaf.fast.is_on_curve(image_generator));
+        assert!(leaf.fast.mul_u64(image_generator, subgroup_order).infinity);
+        assert_eq!(
+            velu_preimage_point(&archived_source, &iso, image_generator),
+            bridge
+                .map_point(generator)
+                .ok_or("mapped generator".to_string())
+        );
+        assert_eq!(
+            velu_preimage_point(&archived_source, &iso, FastPoint::INFINITY),
+            Ok(FastPoint::INFINITY)
+        );
+        assert!(velu_preimage_point(&archived_source, &iso, FastPoint::affine(0, 0)).is_err());
+        let source_two_torsion = control.points_with_x(0)[0];
+        assert_eq!(
+            velu_preimage_point(&archived_source, &iso, transport(source_two_torsion)),
+            bridge
+                .map_point(source_two_torsion)
+                .ok_or("mapped two-torsion".to_string())
+        );
+
+        let points = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b00.points.jsonl"
+        ));
+        let mut count = 0;
+        for line in points.lines() {
+            let words: [u64; 2] = serde_json::from_str(line).expect("public target");
+            let q = FastPoint::affine(words[0], words[1]);
+            assert!(control.fast.is_on_curve(q));
+            let image = transport(q);
+            assert!(!image.infinity);
+            assert!(leaf.fast.is_on_curve(image));
+            assert!(leaf.fast.mul_u64(image, subgroup_order).infinity);
+            assert_eq!(transport(control.fast.neg(q)), leaf.fast.neg(image));
+            if count < 4 {
+                assert_eq!(
+                    velu_preimage_point(&archived_source, &iso, image),
+                    bridge.map_point(q).ok_or("mapped target".to_string())
+                );
+            }
+            if count < 16 {
+                assert_eq!(
+                    transport(control.fast.add(generator, q)),
+                    leaf.fast.add(image_generator, image)
+                );
+            }
+            count += 1;
+        }
+        assert_eq!(count, 1024);
+
+        // These points are chosen on the descendant itself, before any
+        // source coordinates are known. They exercise the intended native
+        // base -> pullback direction rather than only reversing pushforwards.
+        let mut native_points = Vec::new();
+        let mut manifest_rows = Vec::new();
+        for x in 1..4096 {
+            let Some(point) = leaf.points_with_x(x).into_iter().next() else {
+                continue;
+            };
+            let native = leaf.fast.mul_u64(point, order / subgroup_order);
+            if native.infinity
+                || native_points
+                    .iter()
+                    .any(|point: &FastPoint| point.x == native.x)
+            {
+                continue;
+            }
+            let archived_preimage =
+                velu_preimage_point(&archived_source, &iso, native).expect("native pullback");
+            assert!(archived_source.fast.is_on_curve(archived_preimage));
+            assert!(
+                archived_source
+                    .fast
+                    .mul_u64(archived_preimage, subgroup_order)
+                    .infinity
+            );
+            let control_preimage = bridge
+                .inverse_point(archived_preimage)
+                .expect("control-basis pullback");
+            assert!(control.fast.is_on_curve(control_preimage));
+            assert_eq!(transport(control_preimage), native);
+            manifest_rows.push(serde_json::json!({
+                "index": native_points.len(),
+                "leaf": [native.x, native.y],
+                "archive_pullback": [archived_preimage.x, archived_preimage.y],
+                "control_pullback": [control_preimage.x, control_preimage.y]
+            }));
+            native_points.push(native);
+            if native_points.len() == 42 {
+                break;
+            }
+        }
+        assert_eq!(native_points.len(), 42);
+        let manifest = serde_json::json!({
+            "schema": "n37-native-42-basis-bridge-v1",
+            "control_model": "icv1-f2m37-tm534059-32aad96b",
+            "source_modulus_low_terms": [0, 1, 4, 6],
+            "archive_modulus_low_terms": [0, 1, 2, 3, 4, 5],
+            "source_generator_image": 10_156_182_909u64,
+            "isogeny_degree": 73,
+            "group_order": order,
+            "subgroup_order": subgroup_order,
+            "cofactor": order / subgroup_order,
+            "archive_sha256": "eb4773d556886672e8b80735fc486c16b73765fd5069ff81133100bfc3eafa90",
+            "frozen_sha256": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+            "points_sha256": "187ec04fe50326bbb2f17dadf76056841f04af37a8abb8ff7f502fcd531711ad",
+            "selection": "first 42 distinct sign classes after cofactor 596 of first lift at ascending leaf x",
+            "rows": manifest_rows
+        });
+        if let Ok(path) = std::env::var("N37_NATIVE_BASE_MANIFEST_OUT") {
+            std::fs::write(
+                path,
+                serde_json::to_vec_pretty(&manifest).expect("manifest JSON"),
+            )
+            .expect("write native manifest");
+        }
+        let frozen_manifest: serde_json::Value = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/notes/ecc2k130/n37_native_basis_bridge_20261002/NATIVE42.json"
+        )))
+        .expect("frozen native base manifest");
+        assert_eq!(manifest, frozen_manifest);
     }
 }

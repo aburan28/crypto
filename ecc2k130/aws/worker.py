@@ -42,6 +42,19 @@ Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
+  ECC_CAIRN_NODE, ECC_CAIRN_OBJECTIVE
+                 optional: a cairn node's HTTP address and the piecework
+                 objective this walk is paid under (campaign.json may carry
+                 them as cairnNode / cairnObjective instead).  When both are
+                 set the supervisor also posts a heartbeat to the node's
+                 POST /progress on the 60 s tick, so this GPU appears on the
+                 node's dashboard (/ui/task?id=...).  Never a record, never
+                 paid, never allowed to disturb the campaign loop.
+  ECC_CAIRN_WORKER  the name on that dashboard: the pseudonym the orbits
+                 are submitted to cairn under, so settled and reported land
+                 on one row (default slot-NNNNN)
+  ECC_CAIRN_TRAIL_BITS  the job's seed layout, so the node can bin paid
+                 seeds by unit (default 16, the pinned ecc2k130 job's)
 
 No type hints, camelCase identifiers (project convention).
 """
@@ -59,6 +72,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 import uuid
 
@@ -128,6 +142,11 @@ CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)
 LEASE_SECONDS = 180
 HEARTBEAT_SECONDS = 60
+# The cairn dashboard lists a worker as live for 180 s after its last
+# heartbeat, the same lease as above, so the slot tick is the cairn tick.
+CAIRN_CLIENT = "ecc2k130-aws-worker/1"
+CAIRN_HEARTBEAT_TIMEOUT = 5.0
+CAIRN_DEFAULT_TRAIL_BITS = 16
 GRACE_SECONDS = 600        # the client checkpoints on SIGTERM; give it this long
 MAX_SLOT = 65534           # run id = slot + 1 must fit in 16 bits
 
@@ -738,6 +757,74 @@ class LocalSlots:
 
 
 # ---------------------------------------------------------------------------
+def cairnConfig(cfg, env=None):
+    """Where to send heartbeats, or None when this fleet is not on cairn.
+
+    The environment wins over campaign.json, so one instance can be pointed
+    at a test node without a campaign-wide rollout; campaign.json carries
+    the settings for a fleet that is.  Both the node and the objective are
+    needed: a heartbeat names an objective the node must hold, and one
+    without the other is a misconfiguration worth refusing quietly rather
+    than guessing.
+    """
+    env = os.environ if env is None else env
+    cfg = cfg or {}
+    node = (env.get("ECC_CAIRN_NODE") or cfg.get("cairnNode") or "").strip().rstrip("/")
+    objective = (env.get("ECC_CAIRN_OBJECTIVE") or cfg.get("cairnObjective") or "").strip()
+    if not node or not objective:
+        return None
+    worker = (env.get("ECC_CAIRN_WORKER") or cfg.get("cairnWorker") or "").strip()
+    try:
+        trailBits = int(env.get("ECC_CAIRN_TRAIL_BITS") or cfg.get("cairnTrailBits") or CAIRN_DEFAULT_TRAIL_BITS)
+    except ValueError:
+        trailBits = CAIRN_DEFAULT_TRAIL_BITS
+    return {"node": node, "objective": objective, "worker": worker, "trailBits": trailBits}
+
+
+def cairnHeartbeat(conf, slot, state, last, spoolBytes, recordBytes, device, lanes):
+    """The body cairn's POST /progress takes, from what this supervisor knows.
+
+    Every count is this run's own and the node labels all of it as reported,
+    not verified.  `steps` is the client's own iteration total, which its
+    progress line already multiplies across every walk, and `rate` is the
+    same line's M it/s; `trails` is the distinguished points it found this
+    run; `units_submitted` is what has been uploaded to the campaign store,
+    `units_pending` what waits in the spool.  Fields the supervisor cannot
+    know on a run that has not printed yet are left out rather than zeroed,
+    so a fresh worker reads as "here, nothing yet" and not as idle.
+    """
+    body = {
+        "objective_id": conf["objective"],
+        "worker": conf["worker"] or ("slot-%05d" % slot),
+        "steps": int(last["iters"]) if last else 0,
+        "trails": int(last["dp"]) if last else 0,
+        "units_submitted": int(state.get("dpUploaded", 0)),
+        "units_pending": int(spoolBytes // recordBytes) if recordBytes else 0,
+        "trail_bits": int(conf["trailBits"]),
+        "client": CAIRN_CLIENT,
+    }
+    if last and last.get("rate") is not None:
+        body["steps_per_second"] = int(last["rate"])
+    if device:
+        body["device"] = str(device)[:200]
+    if lanes:
+        body["lanes"] = int(lanes)
+    return body
+
+
+def postCairnHeartbeat(conf, body, timeout=CAIRN_HEARTBEAT_TIMEOUT):
+    """POST the heartbeat.  Returns (status, text); raises on no answer."""
+    data = json.dumps(body, separators=(",", ":")).encode()
+    request = urllib.request.Request(conf["node"] + "/progress", data=data, method="POST",
+                                     headers={"content-type": "application/json",
+                                              "accept": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.status, response.read().decode(errors="replace")
+    except urllib.error.HTTPError as error:
+        return error.code, error.read().decode(errors="replace")
+
+
 class Worker:
     def __init__(self):
         self.root = os.environ.get("ECC_ROOT", os.getcwd())
@@ -776,6 +863,8 @@ class Worker:
         self.contract = None
         self.leaseLost = False
         self.lastBeatSuccess = None
+        self.cairnFailures = 0
+        self.cairnOff = False
         self.streamId = uuid.uuid4().hex
         # Prevent two local supervisors sharing offsets, checkpoint paths or a GPU.
         self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
@@ -1084,6 +1173,45 @@ class Worker:
     def spoolPending(self):
         """True while anything at all sits in the spool, manifest or not."""
         return os.path.isdir(self.spoolDir) and bool(os.listdir(self.spoolDir))
+
+    def cairnBeat(self, slot, last):
+        """Post this GPU's heartbeat to the cairn node, if one is configured.
+
+        Beside the slot heartbeat and subordinate to it: nothing here can
+        stop the client, lose the lease or raise.  A node that is down costs
+        one bounded request a minute and a log line on the first failure and
+        every tenth after it; a node that answers 404 is one from before the
+        dashboard, said once and then left alone.
+        """
+        if self.cairnOff:
+            return
+        conf = cairnConfig(self.cfg)
+        if not conf:
+            return
+        try:
+            _, recordBytes = dpStride(self.dpPath)
+        except Exception:
+            recordBytes = RECORD_BYTES
+        body = cairnHeartbeat(conf, slot, self.state, last, self.spoolBytes(), recordBytes,
+                              self.gpuName, int(self.state.get("walks", 0)))
+        try:
+            status, text = postCairnHeartbeat(conf, body)
+        except Exception as e:
+            self.cairnFailures += 1
+            if self.cairnFailures == 1 or self.cairnFailures % 10 == 0:
+                log("cairn heartbeat failed (%d so far, will retry): %s" % (self.cairnFailures, e))
+            return
+        if status == 202:
+            self.cairnFailures = 0
+            return
+        if status == 404 and "no such objective" not in text:
+            self.cairnOff = True
+            log("cairn node %s has no POST /progress (built before the dashboard); heartbeats off"
+                % conf["node"])
+            return
+        self.cairnFailures += 1
+        if self.cairnFailures == 1 or self.cairnFailures % 10 == 0:
+            log("cairn heartbeat refused (%d, %d so far): %s" % (status, self.cairnFailures, text.strip()[:200]))
 
     def entrySize(self, entry):
         total = 0
@@ -1540,6 +1668,7 @@ class Worker:
                 if self.lastBeatSuccess is None or time.monotonic() - self.lastBeatSuccess >= LEASE_SECONDS:
                     self.leaseLost = True
                     self.stopping = True
+                self.cairnBeat(slot, last)
                 if last:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],

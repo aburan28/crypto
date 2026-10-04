@@ -193,6 +193,9 @@ fn main() {
             let form = match std::env::var("KIC_F5_ECHELON").as_deref() {
                 Ok("1") => F5OutputForm::Echelon,
                 Ok("2") => F5OutputForm::SelectiveEchelon,
+                Ok("3") => F5OutputForm::CertifiedOriginalRows,
+                Ok("4") => F5OutputForm::SelectedColumnCertificate,
+                Ok("5") => F5OutputForm::SupportSeparatedOriginalRows,
                 _ => F5OutputForm::Reduced,
             };
             let r =
@@ -220,6 +223,16 @@ fn main() {
                 "rows_pruned": rep.rows_pruned, "rank": rep.rank, "rows_fp": format!("{:016x}", h.finish()),
                 "output_terms": output_terms,
                 "direct_pack_used": phases.direct_pack_used,
+                "rank_cert_attempted": phases.rank_cert_attempted,
+                "certified_original_used": phases.certified_original_used,
+                "column_cert_attempted": phases.column_cert_attempted,
+                "selected_original_used": phases.selected_original_used,
+                "selected_cols": phases.selected_cols,
+                "support_split_attempted": phases.support_split_attempted,
+                "support_split_original_used": phases.support_split_original_used,
+                "support_split_inner_rows": phases.support_split_inner_rows,
+                "support_split_outer_rows": phases.support_split_outer_rows,
+                "support_split_inner_vars": phases.support_split_inner_vars,
                 "direct_unpack_used": phases.direct_unpack_used,
                 "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,

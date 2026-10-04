@@ -1,0 +1,97 @@
+{
+  "audited_attempts": [
+    {
+      "source_sha256": {
+        "instance.anf": {
+          "bytes": 31409,
+          "sha256": "a7867583d28fe9593fd17dabdf6545d5bf79b0fda08888e5172f051a3d918eda"
+        },
+        "instance.magma": {
+          "bytes": 50707,
+          "sha256": "1e7609332d721678d763b1eb48658b505eae39506b0f6e4d0edff8261595eaab"
+        },
+        "instance.xor.cnf": {
+          "bytes": 40710,
+          "sha256": "05b0913d27231ae82601b44f042765cf9ba2727aeb66543467e92127b3a2d92f"
+        }
+      },
+      "status": "SOURCE_UNSAT",
+      "trial": 0
+    },
+    {
+      "source_sha256": {
+        "instance.anf": {
+          "bytes": 35760,
+          "sha256": "eab39a019e5298286e92169efcbe0eb381ce77af2d46749748d0ef202e1478ff"
+        },
+        "instance.magma": {
+          "bytes": 57519,
+          "sha256": "c5f7baa8ef80be4d749fb3be5ac6c3d957978166d534826090455378ec6e5d7e"
+        },
+        "instance.xor.cnf": {
+          "bytes": 42662,
+          "sha256": "03a017d1763f5be128f8069f78158723a456b0803757eaa03ffbb647d9c6d960"
+        }
+      },
+      "status": "SOURCE_UNSAT",
+      "trial": 1
+    },
+    {
+      "source_sha256": {
+        "instance.anf": {
+          "bytes": 36012,
+          "sha256": "1783698ff0fda61fc056b24b19d12e421f895c03ebbbc63fd399390b82def031"
+        },
+        "instance.magma": {
+          "bytes": 58011,
+          "sha256": "958701bb9e154d2bea03b83e8243aa2b5dfc90278f421ddf3e21ac1d88159a0f"
+        },
+        "instance.xor.cnf": {
+          "bytes": 42824,
+          "sha256": "2077d013463e6a58270a38f29752ec0395099d1db0abfcfaadb7f6b8970d784c"
+        }
+      },
+      "status": "VALID_POINT_WITNESS",
+      "trial": 2
+    }
+  ],
+  "fresh_paired_qualification": false,
+  "headline_eligible": false,
+  "native_children_executed": 0,
+  "online_diagnostic_ns": 56585480167,
+  "online_speedup": null,
+  "original_frozen_audit_sha256": "3570722341b8ca2cd8794d51829cac1a1f3b8c1ff02a07a6af9377a36d2cbab7",
+  "original_source_bound_admission_retained": true,
+  "postexecution_context": true,
+  "preparation_admission": {
+    "accounting": "historical preparation only; original Python controller provenance retained; no native timings measured",
+    "dependent_relations": 8,
+    "duplicate_relations": 0,
+    "folded_columns": 29,
+    "fresh_targets_generated": 0,
+    "geometric_points": 63,
+    "independently_proved_ordinary_negatives": 106,
+    "native_solvers_executed": 0,
+    "new_queries": 0,
+    "ordinary_outcome_mix": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+      "SOURCE_UNSAT": 106,
+      "VALID_POINT_WITNESS": 37
+    },
+    "ordinary_queries": 149,
+    "preparation_source_sha256": "e4f75b4ba1e160518cb86827f88af53f101f63071f2729436d3f20fded95c06c",
+    "rank": 29,
+    "rank_trajectory_sha256": "4d70c17bef5eb3758f3b4f9c405bdd8c1ec4efc6b417afaf9f34c25dd55409c0",
+    "rows_sha256": "aa34d1e619c5c54c7a3e644b944cc86e2294730fdfbd786a589707b22a6b3d9e",
+    "status": "PASS_NATIVE_PREPARED_SAT_MATHEMATICS",
+    "usable_points": 62,
+    "verified_column_logs": 29,
+    "verified_relations": 37
+  },
+  "promotion_eligible": false,
+  "recovered_scalar": 24886,
+  "registration_sha256": "b098ebbe135abd4706e62d6286f513fe1c4f07fad61f7250487bd2d86ad317e4",
+  "scalar_independently_verified": true,
+  "schema_version": 1,
+  "status": "PASS_POSTEXECUTION_NATIVE_SAT_PUBLICATION_REPLAY"
+}

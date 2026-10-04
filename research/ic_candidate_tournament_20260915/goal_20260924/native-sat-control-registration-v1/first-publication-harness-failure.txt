@@ -1,0 +1,28 @@
+Retained excerpt of the broad local native publication harness failure, 2026-10-03.
+Command: cargo test --locked --offline --bin icprog --bin prepared_sat_worker --test icprog
+The scientific invocation was already terminal and independently admitted.
+This test failure launched no exporter or SAT solver and consumed no new claim.
+
+running 56 tests
+test sat_control_publication::native::tests::accepted_archive_custody_extracts_without_executing_binaries ... FAILED
+test sat_control_publication::native::tests::create_only_and_tree_mutation_controls ... FAILED
+test sat_control_publication::native::tests::helper_requires_consumed_execution_parent_and_query_cap ... FAILED
+test sat_control_publication::native::tests::watchdog_preserves_exit_and_kills_a_timed_out_group ... FAILED
+
+Each failing test panicked at src/bin/icprog/../prepared_sat_worker/native.rs:658:28:
+called `Result::unwrap()` on an `Err` value: Os { code: 17, kind: AlreadyExists, message: "File exists" }
+
+failures:
+    sat_control_publication::native::tests::accepted_archive_custody_extracts_without_executing_binaries
+    sat_control_publication::native::tests::create_only_and_tree_mutation_controls
+    sat_control_publication::native::tests::helper_requires_consumed_execution_parent_and_query_cap
+    sat_control_publication::native::tests::watchdog_preserves_exit_and_kills_a_timed_out_group
+
+test result: FAILED. 52 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.31s
+error: test failed, to rerun pass `--bin icprog`
+
+Cause: including the native transport source as a second module duplicated its
+test-local static directory counter. Parallel tests in the two copies generated
+the same process/counter names. The publication module now imports the existing
+sat_control transport module, so its tests and directory counter are shared once.
+Original raw execution, claim, producer and frozen audit are unchanged.

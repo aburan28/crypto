@@ -33,6 +33,10 @@ mod autolab;
 mod bench;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/f5_control.rs"]
+mod f5_control;
+#[path = "icprog/f5_target.rs"]
+mod f5_target;
 #[path = "icprog/identity.rs"]
 mod identity;
 #[path = "icprog/oracle.rs"]
@@ -45,6 +49,10 @@ mod report;
 mod json;
 #[path = "icprog/pin.rs"]
 mod pin;
+#[path = "icprog/prepared_f5.rs"]
+mod prepared_f5;
+#[path = "icprog/prepared_sat.rs"]
+mod prepared_sat;
 #[path = "icprog/pyrandom.rs"]
 mod pyrandom;
 #[path = "icprog/rounds.rs"]
@@ -53,6 +61,14 @@ mod rounds;
 mod rule;
 #[path = "icprog/runs.rs"]
 mod runs;
+#[path = "icprog/sat_control.rs"]
+mod sat_control;
+#[path = "icprog/sat_control_publication.rs"]
+mod sat_control_publication;
+#[path = "icprog/sat_query_law.rs"]
+mod sat_query_law;
+#[path = "icprog/sat_source.rs"]
+mod sat_source;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
@@ -89,6 +105,150 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Replay full published F5 capsule custody as data, without execution.
+    F5ControlReplayCustody {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish exact sidecars for an unconsumed F5 capsule and verify its archive.
+    F5ControlPublishCustody {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable data replay of a validation-only F5 build; no archive execution/custody.
+    F5ControlReplayValidation {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish compact receipts of a non-executable F5 build-validation capsule.
+    F5ControlPublishValidation {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Freeze a disclosed n17 F5 controller/worker/auditor; builds only, no job.
+    F5ControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Consume the sole invocation of a separately published disclosed F5 seal.
+    F5ControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Audit F5 source, transport and arithmetic using its frozen checker; no search.
+    F5ControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay retained disclosed F5 target mathematics; no worker, fresh yield or admission.
+    F5TargetReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Reconstruct retained F5 ordinary preparation natively; no search or new timing.
+    F5PreparationReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish the exact consumed native SAT control; creates a new immutable tree.
+    SatControlPublish {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        audit: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable postexecution data/math replay; executes no archived binary or solver.
+    SatControlReplayPublication {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Freeze disclosed n17 native-control sources, dependencies and binaries; no search.
+    SatControlFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+    },
+    /// Consume one frozen disclosed n17 registration before its sole native execution.
+    SatControlExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Independently audit a consumed control; must use its frozen checker binary.
+    SatControlAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently replay the retained disclosed n17 SAT source witness; no solver or new target.
+    SatSourceReplay {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// Create an immutable report; refuses to overwrite any existing file.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// A round's figures and decision, from its run tree only, as JSON.
     Analyse {
         round: Round,
@@ -456,7 +616,83 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::F5ControlReplayCustody {
+            publication,
+            registration_sha256,
+            out,
+        } => f5_control::replay_custody(&publication, &registration_sha256, &out),
+        Command::F5ControlPublishCustody {
+            capsule,
+            publication,
+            out,
+        } => f5_control::publish_custody(&capsule, &publication, &out),
+        Command::F5ControlReplayValidation {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_control::replay_validation(&publication, &validation_registration_sha256, &out),
+        Command::F5ControlPublishValidation { capsule, out } => {
+            f5_control::publish_validation(&capsule, &out)
+        }
+        Command::F5ControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => f5_control::freeze(
+            &root,
+            &out,
+            &config,
+            &cargo,
+            &rustc,
+            &host_context,
+            validation_only,
+        ),
+        Command::F5ControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => f5_control::execute(&capsule, &execution, &registration_sha256),
+        Command::F5ControlAudit {
+            capsule,
+            execution,
+            registration_sha256,
+            out,
+        } => f5_control::audit(&capsule, &execution, &registration_sha256, &out),
+        Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
+        Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
+        Command::SatControlPublish {
+            capsule,
+            execution,
+            audit,
+            host_context,
+            out,
+        } => sat_control_publication::publish(&capsule, &execution, &audit, &host_context, &out),
+        Command::SatControlReplayPublication { publication, out } => {
+            sat_control_publication::replay_to(&publication, &out)
+        }
+        Command::SatControlFreeze {
+            root,
+            out,
+            config,
+            cargo,
+            rustc,
+        } => sat_control::freeze(&root, &out, &config, &cargo, &rustc),
+        Command::SatControlExecute {
+            capsule,
+            execution,
+            registration_sha256,
+        } => sat_control::execute(&capsule, &execution, &registration_sha256),
+        Command::SatControlAudit {
+            capsule,
+            execution,
+            out,
+        } => sat_control::audit(&capsule, &execution, &out),
         Command::Analyse { round, root, runs } => analyse(round, root, runs),
+        Command::SatSourceReplay { root, out } => sat_source::run(&root, out.as_deref()),
         Command::Baseline {
             analysis,
             runs,

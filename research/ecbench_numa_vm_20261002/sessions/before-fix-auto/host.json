@@ -1,0 +1,241 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV1he85c57801186",
+  "env_class_sha256": "e85c578011861c415de5334661bcaa5f9b2f6f8d020fdf88d1dd6c622048f388",
+  "stable": {
+    "os": "linux",
+    "arch": "x86_64",
+    "kernel_release": "6.8.0-142-generic",
+    "cpu_vendor": "GenuineIntel",
+    "cpu_model": "QEMU TCG CPU version 2.5+",
+    "cpu_signature": "6/6/3",
+    "microcode": "0x1",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "pclmulqdq",
+      "popcnt",
+      "sha",
+      "sse4.2",
+      "vaes"
+    ],
+    "flags_sha256": "40307c7fa8200deb5cb9acd0319c3e70028f44d0b6bc14f23ac7d2038a9b7d6f",
+    "logical_cpus": 8,
+    "physical_cores": 4,
+    "packages": 2,
+    "numa_nodes": 2,
+    "topology": {
+      "cpus": [
+        {
+          "cpu": 0,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0,
+            1
+          ]
+        },
+        {
+          "cpu": 1,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0,
+            1
+          ]
+        },
+        {
+          "cpu": 2,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            2,
+            3
+          ]
+        },
+        {
+          "cpu": 3,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            2,
+            3
+          ]
+        },
+        {
+          "cpu": 4,
+          "core_id": 0,
+          "package": 1,
+          "node": 1,
+          "siblings": [
+            4,
+            5
+          ]
+        },
+        {
+          "cpu": 5,
+          "core_id": 0,
+          "package": 1,
+          "node": 1,
+          "siblings": [
+            4,
+            5
+          ]
+        },
+        {
+          "cpu": 6,
+          "core_id": 1,
+          "package": 1,
+          "node": 1,
+          "siblings": [
+            6,
+            7
+          ]
+        },
+        {
+          "cpu": 7,
+          "core_id": 1,
+          "package": 1,
+          "node": 1,
+          "siblings": [
+            6,
+            7
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "node": 0,
+          "cpus": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "mem_total_kib": 513504,
+          "distances": [
+            10,
+            20
+          ]
+        },
+        {
+          "node": 1,
+          "cpus": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "mem_total_kib": 468948,
+          "distances": [
+            20,
+            10
+          ]
+        }
+      ]
+    },
+    "perf_levels": [],
+    "mem_total_kib": 982452,
+    "cpu_settings": {
+      "0": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "1": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "2": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "3": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "4": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "5": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "6": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": true,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      },
+      "7": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": true,
+        "in_nohz_full": false,
+        "smt_control": "on"
+      }
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "dmi_product": "Standard PC (Q35 + ICH9, 2009)",
+      "dmi_vendor": "QEMU"
+    },
+    "rustc_vv": null
+  },
+  "build": {
+    "binary_path": "/ecbench",
+    "binary_sha256": "a947d480943a0b85850abe5218c6f0c1462aeb711ed278aea4872e8f8c6ddf47",
+    "git_commit": null,
+    "git_dirty": null,
+    "debug_assertions": false,
+    "target_os": "linux",
+    "target_arch": "x86_64",
+    "build_env": {}
+  },
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "captured_unix_ms": 1790986117543
+}

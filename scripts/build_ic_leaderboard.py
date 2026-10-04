@@ -41,6 +41,13 @@ OUT_JSON = REPO / "docs/ic/leaderboard.json"
 OUT_MD = REPO / "docs/ic/LEADERBOARD.md"
 OUT_HTML = REPO / "docs/ic-leaderboard.html"
 
+# The ledger section the page is current through (AGENTS.md §7b).  A round
+# that adds a later section must update the page, or confirm that the round
+# changes nothing on it, and then raise this number; `--check` fails until it
+# does, because it cannot otherwise see evidence the builder does not read.
+LEDGER = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+LEDGER_COVERED_THROUGH = 23
+
 SOURCES = {
     "round5": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
     "matched_rho": "research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json",
@@ -50,6 +57,7 @@ SOURCES = {
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+    "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -486,6 +494,28 @@ def families(board: list[dict]) -> dict:
 
 def build() -> dict:
     names = Names()
+    rank_columns = load(SOURCES["n37_rank_columns"])
+    if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
+            or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
+            or rank_columns["selection"]["selected_k"] != 16
+            or rank_columns["online_speedup"] is not None
+            or rank_columns["fully_priced_cold_speedup"] is not None):
+        raise SystemExit("review the n37 bounded result before updating the leaderboard")
+    selected = next(c for c in rank_columns["candidates"] if c["folded_columns"] == 16)
+    bounded_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_rank_columns"],
+        "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+        "candidate_id": selected["candidate_id"],
+        "usable_points": selected["usable_points"],
+        "folded_columns": selected["folded_columns"],
+        "measured_runs": selected["measured_runs"],
+        "mean_cold_s_lower_bound": selected["mean_cold_s_lower_bound"],
+        "cold_counted_over_rho_diagnostic": selected["cold_counted_over_rho_diagnostic"],
+        "cold_counted_over_k42_diagnostic": selected["cold_counted_over_k42_diagnostic"],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -518,6 +548,7 @@ def build() -> dict:
         "sources": {k: {"path": v, "sha256": sha256(v)} for k, v in SOURCES.items()},
         "families": families(board),
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
+        "bounded_diagnostics": [bounded_diagnostic],
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -597,6 +628,18 @@ def markdown(doc: dict) -> str:
             ph, s = r["best"]["phases_s"], r["best"]["s"]
             L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
                 (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+    d = doc["bounded_diagnostics"][0]
+    L += ["", "## Bounded n37 diagnostic outside tables A–C", "",
+          f"The separately calibrated `{d['curve']}` shared-rank K16 candidate "
+          f"(`{d['candidate_id']}`) has {d['usable_points']:,} usable points and "
+          f"{d['folded_columns']} folded columns. Across {d['measured_runs']} verified "
+          f"one-target runs, its mean cold counted `S` lower bound is "
+          f"{d['mean_cold_s_lower_bound']:.3f}; its counted IC/rho quotient is "
+          f"{d['cold_counted_over_rho_diagnostic']:.3f} and K16/K42 is "
+          f"{d['cold_counted_over_k42_diagnostic']:.3f}. Native work is unpriced "
+          "for both arms, and L0 timing cannot establish an online speedup. "
+          "This row is intentionally outside the three fully priced unit families; "
+          f"read the [frozen decision](../../{d['source']}).", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -676,6 +719,11 @@ details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; co
 details summary:focus-visible, a:focus-visible { outline: 2px solid var(--data); outline-offset: 2px; }
 a { color: var(--data); }
 footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.site-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-block: 2px 10px; border-bottom: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .02em; }
+.site-nav a { color: var(--ink-2); text-decoration: none; padding-block: 4px; }
+.site-nav a:hover { color: var(--data); }
+.site-nav a[aria-current="page"] { color: var(--ink); border-bottom: 2px solid var(--data); }
 footer p { margin: 0; max-width: 90ch; }
 """
 
@@ -733,7 +781,15 @@ def page(doc: dict, standalone: bool) -> str:
     online_hi = max(r["best"]["online_speedup"] for r in kob_rows)
     cold = [r["best"]["ratio_rho"] for r in kob_rows if not r["best"]["construction_artefact"]]
     model = [r["best"]["ic_online_over_precomputation_model"] for r in kob_rows]
-    P.append('<div class="wrap"><header>'
+    site = "https://aburan28.github.io/crypto/"
+    nav = [("Overview", site), ("Scoreboard", site + "scoreboard/"),
+           ("Leaderboard", None), ("Where things stand", site + "scoreboard/ic-current-state.html"),
+           ("Algorithm lab", site + "scoreboard/algorithm-lab.html"), ("Campaign status", site + "status/"),
+           ("Repository", "https://github.com/aburan28/crypto")]
+    P.append('<div class="wrap"><nav class="site-nav" aria-label="Site">' + "".join(
+        f'<a href="#board" aria-current="page">{esc(t)}</a>' if u is None else f'<a href="{esc(u)}">{esc(t)}</a>'
+        for t, u in nav) + '</nav>')
+    P.append('<header>'
              '<span class="eyebrow">ECDLP · index calculus · whole pipeline · accounting view, no new measurement</span>'
              '<h1>Index Calculus Leaderboard</h1>'
              '<p class="verdict">Every curve this repository has priced end to end, with the best index-calculus '
@@ -765,6 +821,19 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    d = doc["bounded_diagnostics"][0]
+    P.append(f'<section class="card" id="bounded-n37-diagnostic"><h2>New n37 counted diagnostic, outside the priced tables</h2>'
+             f'<p>On <code>{esc(d["curve"])}</code>, shared-rank K16 has {d["usable_points"]:,} actual usable '
+             f'points and {d["folded_columns"]} folded columns. In {d["measured_runs"]} verified '
+             f'one-target runs, mean cold counted S is {d["mean_cold_s_lower_bound"]:.3f} as a lower '
+             f'bound; its counted IC/rho quotient is {d["cold_counted_over_rho_diagnostic"]:.3f}, '
+             f'and K16/K42 is {d["cold_counted_over_k42_diagnostic"]:.3f}. Both arms leave native '
+             'work unpriced, and L0 timing gives no admitted online speedup. These figures are not '
+             'comparable to tables A–C. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(d["source"])}">Frozen decision</a>. '
+             'A separate whole-solve Callgrind census finds K16/K42 = 0.367 and K16/rho = 4.461 '
+             'in simulated instructions on eight paired points; native wall and online speed remain unknown. '
+             '<a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Raw instruction replay</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
@@ -1000,7 +1069,8 @@ def page(doc: dict, standalone: bool) -> str:
              '<a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
              '<a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced '
              'end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p>'
-             '<p>Built by <code>scripts/build_ic_leaderboard.py</code> from: '
+             f'<p>Current through ledger §{LEDGER_COVERED_THROUGH}. Built by '
+             '<code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
              + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
     body = "\n".join(P)
@@ -1022,6 +1092,14 @@ def main() -> int:
     outs = {OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:
+        sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]
+        latest = max(sections, default=0)
+        if latest > LEDGER_COVERED_THROUGH:
+            print(f"{LEDGER} has §{latest}; the leaderboard is current through §{LEDGER_COVERED_THROUGH}. "
+                  "Point SOURCES at the round's frozen files and regenerate, or confirm the round "
+                  "changes nothing on the page; then raise LEDGER_COVERED_THROUGH (AGENTS.md §7b).",
+                  file=sys.stderr)
+            return 1
         stale = [str(p.relative_to(REPO)) for p, t in outs.items()
                  if not p.exists() or p.read_text() != t]
         for s in stale:

@@ -1,0 +1,63 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "numa vm: interruption test (long session)",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 563153,
+        "a": 51142,
+        "b": 548946,
+        "group_order": 562427,
+        "r": 562427,
+        "gx": 271792,
+        "gy": 48157
+      },
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 20261002
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "bsgs-neg",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "kangaroo",
+      "role": "candidate",
+      "method": {
+        "id": "kangaroo.vow"
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 12,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 1,
+    "isolation_required": "L1",
+    "timeout_seconds": 300
+  }
+}

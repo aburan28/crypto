@@ -1,8 +1,33 @@
 # IC autolab: development through confirmation
 
 The repo skill is [ic-autolab](../../.agents/skills/ic-autolab/SKILL.md).
+New research execution and verification must be native under `AGENTS.md`.
+The [native prepared SAT controller](goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
+provides source freeze, one-use execution and independent audit for a disclosed
+synthetic n17 development control. Its [actual native registration](goal_20260924/native-sat-control-registration-v1/README.md)
+retains the final executable capsule and is consumed and closed. The
+[native result](goal_20260924/native-sat-control-registration-v1/RESULT.md)
+has three audited target attempts, two exact negatives and verified scalar
+recovery. Portable publication replay launches no search. New natural ordinary
+yield, fresh comparison and tournament promotion remain unestablished.
+The [native F5 preparation replay](goal_20260924/native-f5-preparation-v1/PROTOCOL.md)
+reconstructs the retained ordinary matrix and all logs without opening the old
+archive or dispatching a solver. It keeps original Python provenance; complete
+native F5 controller admission and new ordinary-yield production remain pending.
+The [native F5 target replay](goal_20260924/native-f5-target-replay-v1/PROTOCOL.md)
+also reconstructs the retained failed target attempts, geometric negatives,
+witness and scalar. It shares bounded stdin/environment transport with the
+watchdog; it launches no scientific worker and leaves runtime admission pending.
+The [native F5 controller](goal_20260924/native-f5-control-v1/PROTOCOL.md)
+now provides the bounded freeze/claim/execute/audit implementation. Its template
+still needs an actually frozen and separately published registration, sole
+scientific invocation and frozen independent audit before runtime admission.
+New cross-method comparisons use native `ecbench`, whose merged online-window
+extension is available for review and integration. Public unplanted targets,
+IC1 identity and prepared solver admission remain open. The Python entry points below are
+historical contracts, not commands for new research.
 This extends the existing tournament; its archived rounds keep their original
-evaluators and claims. The portable `autolab.py` is a development entry point.
+evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
 selection, held-out confirmation and replay.
 
