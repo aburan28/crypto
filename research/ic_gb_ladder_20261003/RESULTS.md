@@ -1,8 +1,9 @@
 # The external-engine `m = 3` ladder: results
 
 Written after the run. [PREREGISTRATION.md](PREREGISTRATION.md) is unchanged since its
-registration commit `5f7f088ee`, apart from its three dated, additive amendments (the retry
-phase's CPU budget; one memory death per cell and arm; the controls' retries). The readout
+registration commit `5f7f088ee`, apart from its five dated, additive amendments (the retry
+phase's CPU budget; one memory death per cell and arm; the controls' retries, their degree
+cap, and none at `ℓ ≥ 7`). The readout
 is [runs/registered/readout.txt](runs/registered/readout.txt), printed by
 `examples/gb_ladder_analyze`.
 
@@ -13,7 +14,9 @@ is [runs/registered/readout.txt](runs/registered/readout.txt), printed by
 | engine | Singular 4.3.2 (Ubuntu `1:4.3.2-p10+ds-1.1build1`), `slimgb` on the homogenisation with `degBound = D`, driver [refute.sing](refute.sing) |
 | systems | exported by `examples/rr_degree_ladder.rs --dump-dir` from the unchanged builders, seed 20260930, four rootless draws per cell; `runs/registered/dump/` holds every system and the draw catalogue |
 | phase 1 | 2026-10-03 21:57Z – 2026-10-04 00:07Z, three lanes on CPUs 1–3, 3,600 CPU-s and 4.5 GB per process |
-| phase 2–3 | 2026-10-04 00:08Z – FINISH_TIME, one process at a time at 12 GB (Amendments 1–3) |
+| phase 2–3 | 2026-10-04 00:08Z – 09:27Z, one process at a time at 12 GB (Amendments 1–5) |
+| engine record | [runs/registered/engine.txt](runs/registered/engine.txt): Singular version, sha256 of the driver and of the two binaries |
+| systems | every exported system is hashed in [runs/registered/dump.sha256](runs/registered/dump.sha256); the `.sing` files themselves (280 MB) are not committed and regenerate byte-identically from `rr_degree_ladder --dump-dir` at the recorded binary |
 | cells | nine registered cells, all run; no cell skipped |
 
 ## Registered verdict: inconclusive at `ℓ ≥ 6`, growth confirmed at `ℓ = 5`
@@ -29,13 +32,13 @@ for `x4`. What did resolve is exact, on every draw, and on the side of growth:
 | 2 | 4 4 4 (one `triv`) | 5 5 5 6 | −2 | pinned at 5 (three), ≥13 |
 | 3 | 5 5 5 5 | 8 8 8 8 | 1 | pinned at 6 (two), ≥13 |
 | 4 | 6 6 6 6 | 9 9 9 9 | 2 | pinned at 7 (one), ≥13 |
-| 5 | 8 8 8 (one `triv`) | **10 10 10 10** | **3** | ≥ 8 |
-| 6 (`n = 19`, both curves) | ≥ 8 (one draw each), ≥ 7 | ≥ 9 | ≥ 2 | ≥ 6 |
-| 7 (`n = 23`) | ≥ 7 | ≥ 9 (one draw), ≥ 8 | ≥ 1 | ≥ 6 |
-| 8 (`n = 29, 31`) | ≥ 7 (one draw each), ≥ 6 | ≥ 8 | ≥ 1 | ≥ 6 |
+| 5 | 8 8 8 (one `triv`) | **10 10 10 10** | **3** | ≥ 8 ≥ 8 ≥ 8, ≥ 13 |
+| 6 (`n = 19`, both curves) | ≥ 8 (one draw each), ≥ 7 | ≥ 9 | ≥ 2 | ≥ 7 (one each), ≥ 6 |
+| 7 (`n = 23`) | ≥ 7 | ≥ 9 (one draw), ≥ 8 | ≥ 1 | ≥ 6 (not retried) |
+| 8 (`n = 29, 31`) | ≥ 7 (one draw each), ≥ 6 | ≥ 8 | ≥ 1 | ≥ 6 (not retried) |
 
 Slopes of the exact medians on `K₁/2¹⁷`: `rr` 1.30 over `ℓ = 2…5`, `x4` 1.60 over
-`ℓ = 2…5`. Paired on the 11 draws exact on both arms, `rr − x4` is −2.55 (range −3 to −1).
+`ℓ = 2…5`. Paired on the 14 draws exact on both arms, `rr − x4` is −2.43 (range −3 to −1).
 
 ## Predictions
 
@@ -49,9 +52,12 @@ Slopes of the exact medians on `K₁/2¹⁷`: `rr` 1.30 over `ℓ = 2…5`, `x4`
 3. **P3, growth of `rr`: holds at `ℓ = 5`, unresolved at `ℓ = 6`.** 8 on every genuine
    draw; at `ℓ = 6`, `≥ 8` on the one retried draw of each curve, consistent with 8 or 9
    and with nothing lower.
-4. **P4, control: holds.** No control is refuted at all; every control resolves by pinning
-   (at 5, 6, 7 for `ℓ = 2, 3, 4`) or censors above `rr`'s reading.
-5. **P5, pairs: holds.** `rr` is below `x4` on all 11 paired draws, by 1 to 3.
+4. **P4, control: holds.** No control is refuted at all. At `ℓ = 2, 3, 4` the controls
+   resolve by pinning (5, 6, 7) or scan to the cap unresolved; at `ℓ = 5` all four pass
+   degree 7 unrefuted (`≥ 8`, one scanned to the cap with 15 of 16 variables pinned),
+   so none is below `rr`'s 8. At `ℓ ≥ 6` the controls are censored at or above `rr`'s
+   own bound.
+5. **P5, pairs: holds.** `rr` is below `x4` on all 14 paired draws, by 1 to 3.
 
 ## What the engine reached, and what it cost
 
@@ -63,7 +69,7 @@ Advisory wall seconds per process (Singular's own clock agrees within 3%):
 | `K₁/2¹⁷ ℓ = 5`, `rr` 8 | 60 | < 1 GB |
 | `K₁/2¹⁷ ℓ = 5`, `x4` 9 (unrefuted) / 10 (refuted) | 150 / 430 | > 4.5 GB at 10, < 12 GB |
 | `n = 19 ℓ = 6`, `rr` 7 (unrefuted) / 8 | 500 / dies | > 4.5 GB at 7, > 12 GB at 8 |
-| `n = 19 ℓ = 6`, `x4` 9 | dies in 50 s | > 4.5 GB |
+| `n = 19 ℓ = 6`, `x4` 9 | dies in 50 s at 4.5 GB, in 30 min at 12 GB | > 12 GB |
 | `n = 23 ℓ = 7`, `rr` 7 / `x4` 8 (unrefuted) / `x4` 9 | dies in 120 s / 310 / dies in 305 s | > 12 GB / < 12 GB / > 12 GB |
 | `n = 29, 31 ℓ = 8`, `rr` 6 (unrefuted) / 7 | 370–500 / dies | < 12 GB / > 12 GB |
 
