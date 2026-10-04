@@ -842,7 +842,7 @@ is kept as `38_jv_cover_sieve_2003_defective.log`.
 | 1823 | `2^63.0` | 922 | 933 | `2.06e+06` | `0.0037` | 38 % / 54 % | 1,792 |
 
 Rho measured at `p = 1,777` by distinguished points (§15's method, three
-runs): RHO1777.  All four logarithms recovered and checked.  From `p = 1,009`
+runs): `S = 1.25, 1.48, 0.44`, mean `1.06` against the pooled `1.36`, every run correct; the seed-1 row re-based on it reads `0.0061` (pooled: `0.0047`).  All four logarithms recovered and checked.  From `p = 1,009`
 to `1,823` the ratio keeps falling at the slope the census gives.
 
 ### 16.3 The rest of the parameter space, and why it was not built
