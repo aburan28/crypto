@@ -691,11 +691,16 @@ fn addition_constraint(
     q: &CircuitPoint,
     r: &CircuitPoint,
     lambda: &[NodeId],
+    check_point_validity: bool,
 ) -> NodeId {
-    let p_valid = point_valid(dag, field, p);
-    let q_valid = point_valid(dag, field, q);
-    let r_valid = point_valid(dag, field, r);
-    let validity = dag.all([p_valid, q_valid, r_valid]);
+    let validity = if check_point_validity {
+        let p_valid = point_valid(dag, field, p);
+        let q_valid = point_valid(dag, field, q);
+        let r_valid = point_valid(dag, field, r);
+        dag.all([p_valid, q_valid, r_valid])
+    } else {
+        TRUE
+    };
 
     let not_po = dag.not(p.infinity);
     let not_qo = dag.not(q.infinity);
@@ -806,12 +811,23 @@ pub enum N83TargetKind {
     DeterministicPlanted,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum N83CircuitVariant {
+    /// Every addition edge independently checks both inputs and its result.
+    CompletePerEdgeValidity,
+    /// Check the ten factors once, then derive intermediate validity from the
+    /// complete group law.  Exhaustive small-field tests pin the implication.
+    InductiveFactorValidity,
+}
+
 #[derive(Clone, Debug)]
 pub struct RotatedChain {
     pub dag: BoolDag,
     pub output: NodeId,
     pub target: OnbPoint,
     pub target_kind: N83TargetKind,
+    pub circuit_variant: N83CircuitVariant,
     pub slots: Vec<RotatedSlot>,
     factor_selectors: Vec<Vec<NodeId>>,
     factor_y: Vec<Vec<NodeId>>,
@@ -970,6 +986,18 @@ pub fn build_n83_rotated_chain(
     target_kind: N83TargetKind,
     node_cap: usize,
 ) -> Result<RotatedChain, String> {
+    build_n83_rotated_chain_variant(
+        target_kind,
+        N83CircuitVariant::CompletePerEdgeValidity,
+        node_cap,
+    )
+}
+
+pub fn build_n83_rotated_chain_variant(
+    target_kind: N83TargetKind,
+    circuit_variant: N83CircuitVariant,
+    node_cap: usize,
+) -> Result<RotatedChain, String> {
     let numeric_field = Type2Onb::new(N83)?;
     let curve = OnbCurve::new(numeric_field);
     let slots = n83_rotated_slots();
@@ -1019,7 +1047,14 @@ pub fn build_n83_rotated_chain(
         .collect();
     let target_circuit = point_constant(&field, target);
 
-    let mut edge_outputs = Vec::with_capacity(9);
+    let mut constraints = Vec::with_capacity(19);
+    if circuit_variant == N83CircuitVariant::InductiveFactorValidity {
+        constraints.extend(
+            factors
+                .iter()
+                .map(|factor| point_valid(&mut dag, &field, factor)),
+        );
+    }
     for edge in 0..9 {
         let left = if edge == 0 {
             &factors[0]
@@ -1032,16 +1067,17 @@ pub fn build_n83_rotated_chain(
         } else {
             &intermediate_points[edge]
         };
-        edge_outputs.push(addition_constraint(
+        constraints.push(addition_constraint(
             &mut dag,
             &field,
             left,
             right,
             output,
             &slopes[edge],
+            circuit_variant == N83CircuitVariant::CompletePerEdgeValidity,
         ));
     }
-    let output = dag.all(edge_outputs);
+    let output = dag.all(constraints);
     let expected_inputs = N83 + 10 * N83 + 8 * (2 * N83 + 1) + 9 * N83;
     if dag.input_names.len() != expected_inputs {
         return Err(format!(
@@ -1054,6 +1090,7 @@ pub fn build_n83_rotated_chain(
         output,
         target,
         target_kind,
+        circuit_variant,
         slots,
         factor_selectors,
         factor_y,
@@ -1244,6 +1281,21 @@ fn parse_dimacs_model(path: &Path, variables: usize) -> Result<Vec<bool>, String
 mod tests {
     use super::*;
 
+    fn set_point_inputs(
+        inputs: &mut [bool],
+        by_node: &HashMap<NodeId, usize>,
+        circuit: &CircuitPoint,
+        point: OnbPoint,
+    ) {
+        inputs[by_node[&circuit.infinity]] = point.infinity;
+        for (bit, &node) in circuit.x.iter().enumerate() {
+            inputs[by_node[&node]] = point.x >> bit & 1 == 1;
+        }
+        for (bit, &node) in circuit.y.iter().enumerate() {
+            inputs[by_node[&node]] = point.y >> bit & 1 == 1;
+        }
+    }
+
     #[test]
     fn type2_onb_field_laws_are_exhaustive_at_n3() {
         let field = Type2Onb::new(3).expect("type-II ONB at n3");
@@ -1295,6 +1347,62 @@ mod tests {
     }
 
     #[test]
+    fn validity_free_addition_is_sound_and_complete_for_valid_n3_points() {
+        let numeric = Type2Onb::new(3).expect("n3 ONB");
+        let curve = OnbCurve::new(numeric);
+        let mut points = vec![OnbPoint::INFINITY];
+        for x in 0..8 {
+            for y in 0..8 {
+                let point = OnbPoint::affine(x, y);
+                if curve.is_on_curve(point) {
+                    points.push(point);
+                }
+            }
+        }
+
+        let field = CircuitField::new(3).expect("circuit field");
+        let mut dag = BoolDag::new(100_000);
+        let p = point_input(&mut dag, &field, "p");
+        let q = point_input(&mut dag, &field, "q");
+        let r = point_input(&mut dag, &field, "r");
+        let lambda = field.input(&mut dag, "lambda");
+        let output = addition_constraint(&mut dag, &field, &p, &q, &r, &lambda, false);
+        let by_node: HashMap<_, _> = dag
+            .input_nodes
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(index, node)| (node, index))
+            .collect();
+
+        for &left in &points {
+            for &right in &points {
+                let expected = curve.add(left, right);
+                let mut expected_has_witness = false;
+                for &candidate in &points {
+                    for slope in 0..8u128 {
+                        let mut inputs = vec![false; dag.input_names.len()];
+                        set_point_inputs(&mut inputs, &by_node, &p, left);
+                        set_point_inputs(&mut inputs, &by_node, &q, right);
+                        set_point_inputs(&mut inputs, &by_node, &r, candidate);
+                        for (bit, &node) in lambda.iter().enumerate() {
+                            inputs[by_node[&node]] = slope >> bit & 1 == 1;
+                        }
+                        if dag.evaluate(&inputs).expect("evaluate")[output as usize] {
+                            assert_eq!(candidate, expected);
+                            expected_has_witness = true;
+                        }
+                    }
+                }
+                assert!(
+                    expected_has_witness,
+                    "missing witness for {left:?}+{right:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn planted_chain_has_a_replayable_complete_model() {
         // The n83 chain is intentionally the real circuit.  This catches
         // representation or complete-addition drift before a solver run.
@@ -1303,5 +1411,21 @@ mod tests {
         let values = chain.known_planted_model().expect("known model");
         assert!(values[chain.output as usize]);
         assert!(chain.counts().total_nodes < 8_000_000);
+    }
+
+    #[test]
+    fn inductive_planted_chain_replays_and_is_strictly_smaller() {
+        let complete = build_n83_rotated_chain(N83TargetKind::DeterministicPlanted, 8_000_000)
+            .expect("complete chain");
+        let inductive = build_n83_rotated_chain_variant(
+            N83TargetKind::DeterministicPlanted,
+            N83CircuitVariant::InductiveFactorValidity,
+            8_000_000,
+        )
+        .expect("inductive chain");
+        let values = inductive.known_planted_model().expect("known model");
+        assert!(values[inductive.output as usize]);
+        assert!(inductive.counts().total_nodes < complete.counts().total_nodes);
+        assert!(inductive.counts().and_gates < complete.counts().and_gates);
     }
 }
