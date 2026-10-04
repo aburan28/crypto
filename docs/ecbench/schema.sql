@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS algorithms (
   method_id     TEXT PRIMARY KEY,                     -- ECM1h + 12 hex
   method_sha256 TEXT NOT NULL UNIQUE,
   method        TEXT NOT NULL,                        -- e.g. rho.negation, ic.pipeline
-  family        TEXT NOT NULL CHECK (family IN ('rho', 'bsgs', 'kangaroo', 'ic')),
+  family        TEXT NOT NULL CHECK (family IN ('rho', 'bsgs', 'kangaroo', 'claw', 'ic')),
   params_json   TEXT NOT NULL,
   entry         TEXT NOT NULL                         -- the code path it runs
 );
