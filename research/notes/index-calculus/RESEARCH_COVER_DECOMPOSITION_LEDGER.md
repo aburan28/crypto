@@ -1,9 +1,9 @@
 # The cover-and-decomposition route on `E(F_{p⁶})`: registered before it is built
 
-**Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9).  §3's predictions were not edited after the runs.
+**Status:** registered 2026-09-30 (§§1–5, unchanged since); built and measured 2026-10-01 to 2026-10-03 (§§6–9); F4 stopped at the staircase (§10) and replaying a recorded trace (§12) measured 2026-10-03 and 2026-10-04; the sieving variant registered (§11.1–11.4) and then built and measured 2026-10-04 (§11.5).  §3's predictions were not edited after the runs.
 **Literature:** Joux and Vitse, *Cover and decomposition index calculus on elliptic curves made practical* (Eurocrypt 2012, ePrint 2011/020), cited below as **[JV12]**.  Every figure marked *cited* is theirs, from their Magma and C runs on other hardware, and is here only to set the registered range; none of it is a measurement of this repository.
 **Ledger:** `RESEARCH_RHO_PARITY_PROGRAMME.md` (the routes on generic curves, all of which stay bounded away from `S / rho = 1` at machine size: `k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^200`); `RESEARCH_K5_TORSION_JOUX_VITSE.md` (the last of them).
-**Code:** `src/cryptanalysis/jv_cover.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}` for §10 (F4 stopped at the Bézout staircase, 2026-10-04); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
+**Code:** `src/cryptanalysis/jv_cover.rs`, the sieving variant `src/cryptanalysis/jv_sieve.rs`, bench `examples/jv_cover.rs`; **data:** `experiments/30_jv_cover_{ccov_oracle,ccov,dlp,dlp_251,dlp_503,dlp_503_seed2,dlp_1009_seed1,dlp_1009_seed2}.{json,log}` and the superseded runs of §8 under their own names; `experiments/31_jv_cover_stop_*.{json,log}`; the trace replay `experiments/33_jv_cover_trace_*.{json,log}` (superseded and defective runs under their own names); the sieve `experiments/32_jv_cover_sieve_dlp_*.{json,log}` (the two superseded first runs under their own names) for §10 (F4 stopped at the Bézout staircase, 2026-10-03); `experiments/32_jv_cover_sieve_*.{json,log}` for §11 (the sieve); `experiments/34_jv_isogeny_walk*.{json,log}` for §13 (the isogeny walk, priced, 2026-10-04; ledger section G); **tables:** `python3 scripts/parity_ledger.py`, sections E and E.2 (every number in §6 and §10 is printed by them).
 
 ## 1. Why this route is a different kind of entry
 
@@ -139,13 +139,13 @@ None of the four touched the group arithmetic or the transfer, which the tests c
 
 **Class:** reproduction and measurement of a published route inside the harness: **accounting and engineering, no advance** (the algorithm is [JV12]'s).  What the harness adds is the crossover in its own unit.
 
-**The boundary statement.**  On the weak class `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}`, `S / rho` was measured falling as `n^{−0.32}` to `≈ 9×` at `ℓ = 2^{58}` and extrapolates to parity near `ℓ = 2^{67}`; on every generic curve of the ledger it does not (`k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^{200}`).  The route's cost is `720·p/2` tests of `5·10⁶` multiplications against rho's `p³/2` additions of `331`: parity is where `p² ≈ 720·C_cov/(ρ_S·c_add)`.
+**The boundary statement** (as first written, 2026-10-03; amended 2026-10-04).  On the weak class `y² = h(x)(x − α)(x − σα)` over `F_{p⁶}`, `S / rho` was measured falling as `n^{−0.32}` to `≈ 9×` at `ℓ = 2^{58}` and extrapolated to parity near `ℓ = 2^{67}`; on every generic curve of the ledger it does not (`k = 3` never, `k = 4` Joux–Vitse never, `k = 5` above `2^{200}`).  The route's cost is `720·p/2` tests of `5·10⁶` multiplications against rho's `p³/2` additions of `331`: parity is where `p² ≈ 720·C_cov/(ρ_S·c_add)`.  **Since then:** the test costs `1.6·10⁶` (§§10, 12; `2.4–3.0×` at `2^{58}`, parity extrapolated near `2^{62}`), and with the sieved relation phase of §11 the crossover is *measured* at `p ≈ 430` (`ℓ ≈ 2^{50}`), the route reading `0.012–0.014×` rho at `ℓ = 2^{61.4}`; §13 prices the walk that reaches the class at more than rho below `p ≈ 8,000`.
 
 **Not measured, and not to be read into the numbers:**
 
-- The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.
-- Any size at which the crossover itself occurs (`ℓ ≈ 2^{67}`, above the harness's range), and any curve outside `F_{p⁶}`.
-- The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C, which would move `p*` down by `≈ √960`; cited, not built, and not a measurement of this repository.
+- The isogeny walk to a weak curve.  The class has `Θ(q²)` of `Θ(q³)` curves over `F_{q³}`, all of order divisible by `4`; [JV12] estimate `≈ q = p²` isogeny steps for a generic curve of such order (cited, conjectural) — at `p ≈ 3,000` that is `10⁷` steps, none priced here.  A curve not of the form, of prime order, is not touched.  **Priced in §13 (2026-10-04):** the class is `3/q` of the curves with full 2-torsion (a cross-ratio of norm one), a 2,3-isogeny step costs `3–7·10⁵` multiplications, and a walk of `q/3` steps is above rho below `p ≈ 8,000`; no walk of that round sampled a whole class.
+- Any size above `ℓ = 2^{61.4}` (the crossover of the Nagao-relation route, extrapolated near `2^{62}`, was not run; the sieved route's crossover at `ℓ ≈ 2^{50}` was), and any curve outside `F_{p⁶}`.
+- The sieving variant (P6): [JV12] report `960×` per relation against Nagao tests in their C.  **Built and measured in §11 (2026-10-04):** `720·C_cov / C_rel = 566` in this unit, the crossover with rho measured at `p ≈ 430`; a reproduction, not a measurement of theirs.
 - Anything about a deployed curve: prime-field curves and extension-field curves of prime order outside this form are untouched, and nothing here is a claim about them.
 
 ---
@@ -219,3 +219,510 @@ at every size, with the route's exponent untouched.  Class:
 **engineering**.  Nothing in §9 changes: the weak class, the unpriced
 isogeny walk and the unbuilt sieve are as they were, and the extrapolated
 `2^{65}` is an extrapolation on a toy range exactly as `2^{67}` was.
+
+---
+
+## 11. The sieving variant (P6), registered before it is built (2026-10-03)
+
+§9 left one lever on this route unbuilt: [JV12] §3.1–3.2's relation search by a **sieve**, cited at `960×` per relation against a Nagao test in their C.  This section registers it in the same way §§1–5 registered the route: the construction as it will be built, its accounting, numbered predictions with falsification lines, and the class — fixed before the first line of code, and not edited after the runs (§11.5 is the measured part and says so).
+
+### 11.1 The construction, as it will be built
+
+Instead of decomposing a residual `R = aG′ + bQ′` (a divisor of degree 3, one six-point test per residual, `1/720` of them succeeding), the sieve looks for **relations among factor-base points alone**: functions `f ∈ L(m·∞)` on `H` whose `m` zeros all have abscissae in `F_p`,
+
+```
+f = A(x) + B(x)·y,     F(x) = f·f^ι = A(x)² − B(x)²·h(x)  ∈ F_q[x],   deg F = m,
+```
+
+with `A, B ∈ F_q[x]`, `q = p²`, `deg A = ⌊m/2⌋`, `deg B = ⌊(m − 7)/2⌋` (`A` monic for `m` even, `B` monic for `m` odd; `h = f_H` is monic of degree `7`).  When `F` has `m` distinct roots `x₁, …, x_m ∈ F_p`, the zeros of `f` are the `m` points `Q_i = (x_i, −A(x_i)/B(x_i))` of `H(F_q)`, all in the factor base, and `Σ_i (Q_i) − m·∞ ∼ 0` is a relation with `m` entries `±1`.
+
+*The structure that makes it a sieve* ([JV12] §3.2, their "sieving for quadratic extensions"; here `F_q = F_p(t)`, `t² = ω`).  Write `A = A₀ + tA₁`, `B²h = Re(B²h) + t·Im(B²h)` with `A₀, A₁, Re, Im ∈ F_p[x]`.  `F ∈ F_p[x]` is the single polynomial identity
+
+```
+2·A₀·A₁ = Im(B²h) =: G_B,
+```
+
+bilinear in `(A₀) × (A₁)` for a fixed `B`.  So for a fixed `B`, every monic `A₀ | G_B` of the right degree gives `A₁′ = G_B / (2A₀)`, and the one-parameter family `A = A₀ + t·s·A₁′`, `B ↦ √s·B` (`s ∈ F_p^×`; `√s ∈ F_q` always exists) satisfies the identity for every `s`.  Along such a **line** the polynomial is
+
+```
+F(x, s) = A₀(x)² + ω·s²·A₁′(x)² − s·Re(B²h)(x),      quadratic in s.
+```
+
+The sieve: for each `x` in `X = {x ∈ F_p : h(x) is a square in F_q}` (the factor base's abscissae, `|X| ≈ p/2`), solve the quadratic for `s` (one discriminant, one square-root table lookup, one inversion batched), and increment a counter at each root `s`; a counter that reaches `m` is a relation (`F(·, s)` has `m` distinct roots in `X`, hence splits).  The `(m, p)` bookkeeping: the lines are the pairs `(B, A₀)` with `A₀` a monic divisor of `G_B` (`G_B` has degree `≤ m − 1`, `A₀` degree `⌊m/2⌋`), on average one such divisor per `B`, so `≈ p^{m−7}` lines for `m` odd and `≈ p^{m−7}/2` for `m` even (`B` up to the scaling the line already contains); each line's `p` values of `s` split with probability `1/m!`, so
+
+```
+relations available ≈ p^{m−6} / m!,       relations per line ≈ p / m!,       sieve steps per relation ≈ m!/2.
+```
+
+**The choice of `m` is forced by the size.**  [JV12] take `m = ng + 2 = 8` and assume `p ≥ 8!/2 = 20,160` so that `p²/8!` relations suffice for `p/2` unknowns.  At the harness's sizes that assumption fails everywhere (`p ≤ 1511`), and `m` must grow until `p^{m−6}/m! ≥ |F| + margin`: with `|F| ≈ p/2`, the smallest `m` is `12` at `p = 53` (`46` relations for `27` unknowns), `11` at `101` (`263` for `51`), `10` at `251` (`1,094` for `126`), `9` at `503` (`350` for `252`), `9` at `1009` and `1511`.  The cost per relation, `≈ m!/2` sieve steps, is then **a constant in `p` for fixed `m`** and jumps by `m` each time `m` has to grow: `1.8·10⁵` steps at `m = 9`, `1.8·10⁶` at `10`, `2·10⁷` at `11`, `2.4·10⁸` at `12`.  So the sieve is expected to *lose* to the Nagao test at `p ≤ 101` and to win by three orders of magnitude at `p ≥ 503`; its asymptotic advantage ([JV12]'s `960×`) is reached only where `m = 8` or `9` is affordable.
+
+*Line enumeration.*  `B` is drawn by the run's seed, `G_B = Im(B²h)` is factored over `F_p` (squarefree part, distinct-degree, then Cantor–Zassenhaus where a piece must be split), and its monic divisors of the right degree are the lines.  This is the one part of the relation phase with a cost that does not scale with `p`: a few thousand `F_p` multiplications per `B`, against the `≈ p/2` sieve steps per line, so it is **comparable to the sieve itself at `p ≈ 10³` and dominates below** — and it is counted.
+
+*The descent.*  The relations are homogeneous (they fix the factor base's logarithms up to one scalar).  Two residuals `R_j = a_jG′ + b_jQ′` are decomposed by the existing six-point test of §2 (F4 stopped at the Bézout staircase, §10), `≈ 720` tests each, and the two equations `a_j + b_j·x = c·Σ_i ε_i L_i` fix `x`.  `≈ 1,440 · 3.2·10⁶ ≈ 4.6·10⁹` multiplications, **independent of `p`**; [JV12] call the descent negligible because at their `p ≈ 2^{25}` the sieve dwarfs it; here it is the dominant term above `p ≈ 400` and is reported as its own column.
+
+*The unit.*  `S` counts `F_p` multiplications as everywhere in the ledger.  A sieve step is mostly additions (forward differences of three polynomials in `x`), one table lookup and `≈ 4–6` multiplications; the run also counts the additions and the lookups, and reports `S⁺` with every addition and lookup charged as a multiplication, so that the conclusion does not depend on the unit's blind spot.
+
+### 11.2 Predictions and falsification lines
+
+**P7.  Rate.**  Over every line sieved, the number of counters reaching `m` is `p/m!` per line within Poisson error (`±2σ`), and every one of them is a genuine relation (the `m` points lie on `H(F_q)`, not on its twist, because `√s ∈ F_q` for every `s ∈ F_p`), verified by Cantor arithmetic.  *Falsified if* the measured rate is outside `[0.5, 2]·p/m!`, or any counter at `m` fails the group check.
+
+**P8.  Cost per relation.**  `C_rel = m!·(c_x/2 + c_B/p)` multiplications with `c_x ≤ 6` (per sieve step) and `c_B ≤ 6·10³` (per `B` enumerated, factoring included), i.e. `C_rel ≈ 1.5–3·10⁶` at `m = 9` (`p = 503–1511`), `≈ 5·10⁷` at `m = 10` (`p = 251`), `≈ 1.3·10⁹` at `m = 11` (`p = 101`), `≈ 3·10¹⁰` at `m = 12` (`p = 53`).  Against §10's `720 · 3.2·10⁶ = 2.3·10⁹` per Nagao relation: `≈ 10³×` at `m = 9`, parity at `m = 11`, worse at `m = 12`.  *Falsified if* `C_rel` at `m = 9` is above `10⁷` (then `c_x` or the factoring is not what was estimated) or below `5·10⁵`.
+
+**P9.  End to end.**  With the descent's `≈ 4.6·10⁹` and the linear algebra below `5 %`, `S / rho` is `≈ 2–4` at `p = 251`, `≈ 0.2` at `503`, `≈ 0.02–0.03` at `1009`, `≈ 0.01` at `1511`; the crossover is **measured** between `p = 251` and `503`, at `p* ≈ 340 ± 60` (`ℓ* ≈ 2^{48}`), and the descent is more than half of the total at every size above it.  *Falsified if* `S / rho ≥ 1` at `p = 503` or `≤ 1` at `p = 251`, or the crossover is outside `[280, 420]`.
+
+**P10.  Where it loses.**  At `p = 53` and `101` (`m = 12, 11`) the sieve's `S / rho` is `≥` §10's (`1,000–1,600` and `516–804`): `≈ 2·10⁴` at `53`, `≈ 300` at `101`.  *Falsified if* the sieve beats §10 at `p = 53`.
+
+**P11.  Against the literature.**  The per-relation ratio sieve : Nagao at `m = 9` is `10³` within a factor `3` of [JV12]'s `960×` (their `m = 8`, their C against their Magma-free Nagao); the harness's number is in its own unit and is not a reproduction of theirs.  *Falsified if* the ratio at `m = 9` is below `300` or above `3,000`.
+
+### 11.3 Inadmissible moves
+
+As §4: no relation accepted without the group check; no `m` chosen after seeing the yield (the rule of §11.1 fixes it from `p` alone); the descent's tests counted at the price §10 measured, not re-tuned; rho's `S` from the run (or the pooled reference at `p ≥ 503`, as §6); nothing extrapolated past `p = 1511`.
+
+### 11.4 Class (registered)
+
+**Reproduction of a published route** ([JV12] §3.2) inside the harness — accounting and engineering, no advance: the one algorithmic idea (the bilinear structure of `Im(F)` over a quadratic extension) is theirs, the choice of `m` by size and the `S⁺` unit are bookkeeping.  Nothing in §9 changes: the class is the weak class, the isogeny walk is unpriced, and no statement about a generic or deployed curve follows from a measured crossover on `y² = h(x)(x − α)(x − σα)`.
+### 11.5 Measured (2026-10-04; `experiments/32_jv_cover_sieve_dlp_*.json`, ledger section F)
+
+Built as §11.1 says, in `src/cryptanalysis/jv_sieve.rs`: `F_p[x]` factoring
+for the lines (squarefree decomposition, roots by evaluation over `F_p`,
+distinct-degree by a Frobenius matrix, Cantor–Zassenhaus), the lines of a
+`B` as the monic divisors of `Im(B²h)` of the admissible degree, the sieve
+by forward differences over the factor base's abscissae, and the relation
+read off a counter at `m` and checked in the Jacobian before use.  Two
+things the registration did not foresee came out of building it:
+
+- **Every base abscissa has two roots in `s`.**  The discriminant of
+  `F(x, s)` in `s` is `Re(B²h)(x)² − ω·Im(B²h)(x)² = N(B²h)(x) =
+  (N(B)(x)·√N(h(x)))²`, a square whenever `h(x)` is a square in `F_q`, so
+  the square-root table of §11.1 is not needed and every base step costs
+  the two roots `(Re ± N(B)·√N(h))/(2ωA₁′²)`: `6.3–7.6` multiplications
+  (P8 said `≤ 6`; the difference is the three difference tables' set-up,
+  `≈ 350` multiplications a line).
+- **The lines come with symmetries that must be quotiented.**  For `m`
+  even, `B` and `c·B` with `c² ∈ F_p` give the same line (the scaling the
+  line already contains), so `B`'s leading coefficient runs over the
+  `(p + 1)/2` classes of `F_q^×/(F_p^× ∪ t·F_p^×)`.  For `m` odd the identity
+  `2A₀A₁′ = Im(B²h)` is symmetric, and `(A₁′/lc, lc·A₀)` is the same line
+  up to the scalar `t/(ωsc)`, so one of each pair is kept.  Before both
+  were found, the same relation was found `2(p − 1)` times (even `m`) or
+  twice (odd `m`), the relation matrix had a kernel of dimension `4` where
+  `1` was expected, and no logarithm came out; the duplicates are now
+  dropped and counted (`0` after the fix).
+
+**The rows** (two seeds a size; `S` in the ledger's unit, `S⁺` with every
+addition and counter update of the sieve charged as a multiplication; rho
+from the run below `p = 503`, the pooled `1.361` above; §10's rows for
+comparison):
+
+| `p` | `ℓ` | `m` (rule → run) | relations / lines | `C_rel` | `S / rho` (two seeds) | `S⁺ / rho` | §10 (F4 stopped) | descent share |
+|--:|:--|:--|--:|--:|--:|--:|--:|--:|
+| 53 | `2^{32.4}` | 12 → 13 | ≥ 7 / 3.3·10⁸ ‡ | — | `> 67,000` ‡ | — | `1,618`, `998` | — |
+| 101 | `2^{37.9}` | 11, 11 → 12 | 52 / 4.7·10⁷, ≥ 23 / 2.4·10⁸ † | `9.3·10⁹`, — | `1,977`, `> 7,560` † | `2,902`, — | `516`, `804` | 0.4 %, — |
+| 251 | `2^{45.8}` | 10 | 131, 125 / 2.2·10⁶, 3.0·10⁶ | `8.7·10⁷`, `1.3·10⁸` | `3.19`, `8.50` | `7.3`, `17.0` | `65.6`, `115` | 11 %, 29 % |
+| 503 | `2^{51.8}` | 9 → 10 | 238, 263 / 2.4·10⁶, 2.0·10⁵ | `6.8·10⁷`, `6.0·10⁶` | `1.05`, `0.114` | `2.32`, `0.231` | `28.4`, `16.1` | 46 %, 50 % |
+| 1009 | `2^{57.9}` | 9 | 488, 528 / 2.5·10⁵, 1.9·10⁵ | `5.9·10⁶`, `3.9·10⁶` | `0.039`, `0.069` | `0.079`, `0.098` | `6.3`, `5.1` | 67 %, 86 % |
+| 1511 | `2^{61.4}` | 9 | 770, 757 / 1.8·10⁵, 2.1·10⁵ | `3.0·10⁶`, `3.7·10⁶` | `0.0122`, `0.0137` | `0.0245`, `0.0288` | — | 73 %, 71 % |
+
+Every one of the ten logarithms above `p = 101` was recovered and checked
+against the instance; every relation passed the group check (`0` failures,
+`0` false hits).
+
+† `p = 101`, seed 2 (`32_jv_cover_sieve_dlp_101_seed2.log`, no JSON: the run was
+stopped by its 90-minute budget before the relation count was reached): the
+`m = 11` space of `B`'s was exhausted (`1.04·10⁸` polynomials, `5.1·10⁷` lines)
+at `21` of the `49` relations needed, and the fallback to `m = 12` added two
+relations in a further `1.2·10¹²` multiplications (the hit density falls with
+`m` as `p/m!`, so each step of `m` costs about `p` in rate while gaining
+only `p` in the number of `B`'s).  The multiplications spent, `1.85·10¹²`,
+are `S ≥ 10,850`, i.e. `S / rho ≥ 7,560` against seed 1's rho mean (`1.436`);
+a linear completion to `49` relations at the `m = 12` rate would read about
+`16,000`.  The row is a lower bound and is excluded from the exponent fit.
+
+‡ `p = 53`, seed 1 (`32_jv_cover_sieve_dlp_53.log`, no JSON, the same 90-minute
+budget): the rule gives `m = 12` (`53⁶/12! = 46 ≥ 1.25·30`); its `2.1·10⁸`
+`B`'s were exhausted at `7` of the `30` relations needed, and `m = 13` added
+none in a further `1.1·10¹²` multiplications.  The `2.45·10¹²` spent are
+`S ≥ 99,000`, `S / rho ≥ 67,000` against §10's rho mean at this size
+(`1.476`), where §10 reads `1,618` and `998` and §12 `883` and `548`: at
+`p = 53` the sieve is at least `40×` behind the Nagao route, as P10
+predicted in direction (it said `≈ 300×` behind at `p ≤ 101`; the loss is
+larger, because `|F| ≈ 30` points give too few lines at any admissible
+`m`).  Seed 2 was not reached within the budget.
+
+**Against the registration (§11.2):**
+
+| | registered | measured | |
+|:--|:--|:--|:--|
+| P7 rate | `p/m!` per line within `[0.5, 2]` | `0.90` at `m = 9`, `0.62` at `10`, `0.43` at `11`, falling with `m` | holds at `9` and `10`, misses at `11` |
+| P8 `C_rel` | `m!·(c_x/2 + c_B/p)`, `c_x ≤ 6`, `c_B ≤ 6·10³`; `1.5–3·10⁶` at `m = 9` | `c_x = 6.3–7.6`, `c_B = 4.1–6.5·10³`; `3.0–5.9·10⁶` at `m = 9` | within the band `[5·10⁵, 10⁷]`; the constants `1.3–1.5×` over |
+| P9 crossover | between `251` and `503`, `p* = 340 ± 60` | between `251` (`5.8`, two seeds pooled) and `503` (`0.58`); `p* ≈ 430` (`ℓ ≈ 2^{50}`) | the bracket holds; the point misses the band by `10` |
+| P9 descent | more than half of `S` above the crossover | `46–86 %` from `p = 503` up | holds from `1009`; half at `503` |
+| P10 `p ≤ 101` | the sieve loses to §10 | `1,977` against `516–804` at `101`; `> 67,000` against `998–1,618` at `53` | holds (predicted `≈ 300`: the loss is `6×` larger at `101`, `≥ 40×` at `53`) |
+| P11 vs [JV12] | `10³` within `3×` at `m = 9` | `720·C_cov / C_rel = 566` | holds |
+
+Three things the numbers say that the registration did not.  First, the
+rule for `m` (`p^{m−6}/m! ≥ 1.25·|F|`) under-counts what a size needs: the
+lines are `0.5` a `B` for `m` odd and the rate is `0.6–0.9` of `p/m!`, so at
+`p = 503` the `m = 9` lines ran out (`≈ 210` relations of `238–263`) and the
+registered fallback to `m = 10` finished the collection at ten times the
+cost per relation — seed 1 found most of its relations there (`S / rho`
+`1.05`), seed 2 few (`0.11`); the spread between the seeds at one size is
+the `m` rule, not the sieve.  Second, the descent is the larger term from
+`p = 1009` up and its spread (`2·10³` to `4·10³` six-point tests for two
+successes, against the expected `≈ 1,600`) is most of the spread in
+`S / rho` there.  Third, the enumeration of the lines (factoring
+`Im(B²h)`) is `70–80 %` of the relation phase at every size, not the sieve
+itself; the sieve's own steps are `15–25 %`.
+
+**Class: reproduction of a published route, accounting and engineering, no
+advance**, as registered.  What is new in the ledger is a *measured*
+crossover against rho on the weak class, at `p ≈ 430` (`ℓ ≈ 2^{50}`), where
+§6 could only extrapolate one at `2^{67}`; nothing in §9 changes: the class
+is the weak class, the isogeny walk is priced in §13, and no statement
+about a generic or deployed curve follows.
+
+## 12. Engineering after the fact: F4 replaying a recorded trace (2026-10-04)
+
+§10 left F4 at `83 %` of a six-point test.  Every residual's system has the
+same shape — six quadrics in the same six unknowns with the same monomial
+support — and F4's work on it is the same sequence of steps: the same
+degrees, the same pair rows, the same new leading monomials, step after
+step, system after system.  Joux and Vitse's variant of F4 (*A variant of
+the F4 algorithm*, 2011) records that sequence once and replays it, keeping
+only the rows that produced something; here the engine records, on the
+first system of a `p`, for every step **the pair rows every new pivot is a
+combination of** (a tracked echelon form on the step's reduced rows, done
+once), and replays those rows on the later systems with the symbolic
+preprocessing, the reductions and the staircase stop as before — no pair
+selection, no row that reduces to zero.  A replay checks the new leading
+monomials against the recorded ones at every step; where they differ (a
+system of another shape, `≈ 15 %` at `p ≈ 53`, `≈ 1 %` at `p ≥ 503`), it
+keeps what the step found (it is in the ideal) and finishes as a full F4
+over every pair the basis has accumulated, which costs the replayed prefix
+plus a full run.  A trace that diverges three times and more often than it
+holds is dropped and the next full run records a new one (the first
+system of a size is sometimes of the rarer shape).  Soundness is as in §10:
+the staircase argument needs no Gröbner basis of anything but the stopped
+partial basis, and the solver's final check against the input covers the
+rest; the oracle is the test of it.
+
+**Measured** (`33_jv_cover_trace_ccov{_oracle,}.json`, the same sizes,
+seeds and residual counts as §6 and §10; ledger section E.3):
+
+| | §10, F4 stopped | F4 stopped and replayed | ratio |
+|:--|--:|--:|--:|
+| F4 per test (mean over the eight sizes) | `2.67·10⁶` | `1.09·10⁶` | `2.44×` |
+| `C_cov` per test | `3.19·10⁶` | `1.62·10⁶` | `1.97×` |
+| F4 matrix (rows × columns) | `556 × 507` | `≈ 460 × 498` | |
+| tests that replayed a trace / diverged and ran in full | | `3,008` / `343` of `3,360` | |
+| oracle disagreements at `p ≤ 71` (`2,160` residuals) | `0` | `0` | |
+| planted sums found | all | all (`360/360`, `200/200`) | |
+| incomplete | `1` | `1` (the same positive-dimensional residual) | |
+
+Against §6's `5.15·10⁶`, the test now costs `3.2×` less, with the solver's
+own `5.3·10⁵` (§10) now a third of it.  Three defects were found and kept
+under their own names (`*_first_run_superseded`, `*_second_run_defective`,
+`*_third_run_defective`): a trace recorded on a rare shape at `p = 71`
+diverged on `355` of `360` systems (the re-recording rule above); a
+diverging replay dropped the pairs the trace had replaced and finished a
+"full" run that was not one (`41` incomplete and `8` planted sums missed
+at `p = 53`); a system whose input leading monomials differed from the
+trace's returned the inputs as its basis.  The oracle and the planted
+residuals caught all three.
+
+**End to end** (`33_jv_cover_trace_dlp*.json`, the same sizes, seeds and
+rho references as §10; ledger section E.3):
+
+| `p` | `ℓ` | `S / rho`, §10 (F4 stopped) | `S / rho`, §12 (stopped and replayed) | ratio | `C_cov` as paid | replayed / diverged |
+|--:|:--|--:|--:|--:|--:|--:|
+| 53 | `2^{32.4}` | `1,618`, `998` | `883`, `548` | `1.83`, `1.82` | `1.69·10⁶`, `1.71·10⁶` | 15,867 / 3,142; 7,069 / 1,414 |
+| 101 | `2^{37.9}` | `516`, `804` | `259`, `402` | `1.99`, `2.00` | `1.58·10⁶`, `1.57·10⁶` | 36,655 / 3,437; 59,771 / 5,645 |
+| 251 | `2^{45.8}` | `65.6`, `115` | `31.6`, `55.4` | `2.08`, `2.08` | `1.54·10⁶`, `1.53·10⁶` | 79,317 / 2,941; 91,962 / 3,320 |
+| 503 | `2^{51.8}` | `28.4`, `16.1` | `13.4`, `7.63` | `2.12`, `2.11` | `1.52·10⁶`, `1.54·10⁶` | 247,828 / 4,423; 139,622 / 2,528 |
+| 1009 | `2^{57.9}` | `6.33`, `5.08` | `2.98`, `2.40` | `2.12`, `2.12` | `1.53·10⁶`, `1.53·10⁶` | 446,926 / 3,911; 357,646 / 3,189 |
+
+All ten logarithms recovered and checked; `0` relations failed the group
+check; the fitted exponent of `S / rho` in `p` over the five sizes is
+`−1.96 ± 0.11` (§10: `−1.91 ± 0.12`; the derivation: `−2`), and the crossover
+the measured constants give moves from `p* ≈ 2,300` (`2^{65}`) to
+`p* ≈ 1,650` (`2^{62}`) — still above the harness's range, still an
+extrapolation.  The ratio to §10 grows from `1.8×` at `p = 53` to `2.1×`
+from `p = 503` up, as the share of systems of another shape (which replay
+their prefix and then run in full) falls from `17 %` to `1 %`.
+
+**The sieve route's descent** (`33_jv_cover_trace_sieve_*.json`, the same
+seeds as §11.5; ledger section F.2).  §11.5 found the descent — two
+six-point successes, `≈ 1,100–2,100` tests each — to be `46–86 %` of `S`
+from `p = 503` up; with its F4 replaying the trace:
+
+| `p` | `S / rho`, §11.5 | `S / rho`, descent replayed | descent share, §11.5 → §12 | replayed / diverged |
+|--:|--:|--:|:--|--:|
+| 503 | `1.05`, `0.114` | `0.792`, `0.0838` | 46 %, 50 % → 29 %, 32 % | 4,216 / 68; 504 / 8 |
+| 1009 | `0.039`, `0.069` | `0.0253`, `0.0375` | 67 %, 86 % → 49 %, 75 % | 1,828 / 24; 4,193 / 31 |
+| 1511 | `0.0122`, `0.0137` | `0.0075`, `0.0086` | 73 %, 71 % → 56 %, 53 % | 2,100 / 8; 2,287 / 17 |
+
+`1.3–1.8×` on the whole, the relation phase (which the trace does not
+touch) now the larger term at `p = 503`; the measured crossover of §11.5
+stays between `p = 251` and `p = 503` (the `p = 251` rows were not rerun:
+their descent share was `11–29 %`, so the trace moves them by `≤ 1.2×`).
+
+**What it is.**  A constant on the test, `2×` on top of §10's `1.6×`, and so
+on `S / rho`; the route's exponent is untouched and nothing in §9 changes.
+The same replay serves the descent of §11's sieve route (its two six-point
+successes are `≈ 1,400` tests of this kind), where the descent was the
+larger term above the crossover.  Class: **engineering**.
+
+## 13. The isogeny walk, priced (2026-10-04; `experiments/34_jv_isogeny_walk*.json`, ledger section G)
+
+§9's one unpriced item: [JV12] §4.1 estimate the walk from a curve of
+order divisible by `4` to a weak isogenous one at `≈ q = p²` low-degree
+isogeny steps, "the dominating phase", cited and conjectural.  Two things
+were needed to price it: a test of the weak class that does not go through
+the cover, and a walk.
+
+**The test** (`src/cryptanalysis/jv_isogeny_walk.rs`).  A curve with full
+rational 2-torsion, `y² = (x − e₁)(x − e₂)(x − e₃)` over `F_{q³}`, has a model
+of the weak form with `e₁ ↦ ρ ∈ F_q` and `e₂, e₃ ↦ α, σ(α)` exactly when an
+`F_{q³}`-affine `φ(x) = (x − r)/v` sends `e₁` into `F_q` and `e₃` to the
+`σ`-conjugate of `φ(e₂)`.  Eliminating `r` and `v`: with `a = φ(e₂)` and
+`c = (e₃ − e₁)/(e₂ − e₁)`, `σ(a) − ρ = c·(a − ρ)`, whose only solution is
+the degenerate `a = ρ` unless the `F_q`-linear map `a ↦ σ(a) − c·a` is
+singular, i.e. **`N_{F_{q³}/F_q}(c) = 1`**.  So the weak class is the curves
+with full 2-torsion one of whose three cross-ratios has norm one: an
+isomorphism invariant, one `F_q`-condition, `3/q` of the curves with full
+2-torsion.  The instances of §6 all pass it (and their images under
+`x ↦ u²x + r`); random full-2-torsion curves pass at `2.78–3.16/q` over
+`40,000` samples at each of seven sizes.  A brute-force search over every
+`r ∈ F_{q³}` at `p = 5, 7, 11` found the same curves weak and the same
+`q` models for each (the choice of `ρ`).
+
+**The walk.**  From a random curve with full 2-torsion, uniformly chosen
+rational 2-isogenies (Vélu on a 2-torsion point; the target keeps full
+2-torsion when the product of the other two roots is a square) and
+3-isogenies (Vélu on a root of the 3-division polynomial, found over
+`F_{q³}`), until a weak curve, or until `50·(distinct j)` steps pass without a
+new `j`-invariant (the reachable component is exhausted), or a cap.  Forty
+walks at each of `p = 7, 11, 13, 17, 23, 31, 53`, with 2- and 3-isogenies
+and with 2-isogenies alone:
+
+| `p` | `q` | isogenies | found / exhausted / capped | steps (median, found) | `q/3` | distinct `j` (mean) | `F_p` muls per step | a walk of `q/3` steps / rho at `p` |
+|--:|--:|:--|:--|--:|--:|--:|--:|--:|
+| 7 | 49 | 2+3 | 21 / 19 / 0 | 5 | 16 | 8.5 | `2.6·10⁵` | `57` |
+| 13 | 169 | 2+3 | 13 / 26 / 1 | 17 | 56 | 55 | `4.2·10⁵` | `50` |
+| 23 | 529 | 2+3 | 15 / 25 / 0 | 29 | 176 | 21 | `3.8·10⁵` | `26` |
+| 31 | 961 | 2+3 | 14 / 24 / 2 | 580 | 320 | 180 | `5.0·10⁵` | `25` |
+| 53 | 2809 | 2+3 | 6 / 33 / 1 | 4,549 | 936 | 115 | `6.8·10⁵` | `20` |
+| 53 | 2809 | 2 only | 4 / 36 / 0 | 2,315 | 936 | 18 | `4.1·10⁴` | `1.2` |
+
+(the full table with `p = 11, 17` and every 2-only row is section G.)
+
+**What it says.**  Three things, in the order of their weight.
+
+1. **The reachable components are small.**  With 2- and 3-isogenies a walk
+   sees `9–180` distinct `j`-invariants before it exhausts its component;
+   with 2-isogenies alone `5–77`.  An isogeny class over `F_{q³}` has
+   `≈ q^{3/2}` curves (`150,000` at `p = 53`), so the 2,3-graph reaches a
+   small fraction of it, and `60–90 %` of the walks end in a component with
+   no weak curve.  [JV12]'s `≈ q` is for a walk that samples the class;
+   making one needs larger isogeny degrees (`5, 7, …`, each a root-finding
+   over `F_{q³}` and a Vélu formula), which this round did not build.  The
+   figure "`q` steps" is therefore **neither confirmed nor refuted** here:
+   where a walk found a weak curve it did so in `q/3 ± 10×` steps (medians
+   from `0.3·q/3` at `p = 7` to `4.9·q/3` at `p = 53`), consistent with a
+   density `3/q` seen through small components.
+2. **The density is measured: `3/q`, not `1/q`.**  Three cross-ratios, one
+   condition each.  With a walk that did sample the class the expectation
+   would be `q/3` steps, a third of [JV12]'s estimate.
+3. **The step is not cheap, and it is the walk's whole price.**  A 2,3-step
+   costs `2.6·10⁵` to `6.8·10⁵` `F_p` multiplications (`∝ p^{0.40 ± 0.08}`;
+   the 3-division polynomial's roots over `F_{q³}` are most of it), a
+   2-step `1.9–4.1·10⁴`.  A walk of `q/3` such steps costs **more than rho
+   itself** at every size the harness reaches: `57×` rho at `p = 7` down to
+   `20×` at `p = 53` with 2,3-steps (`1.2×` at `53` with 2-steps), and on the
+   measured step-cost slope it crosses below rho at `p ≈ 8,000`
+   (`≈ 2^{76}`) with 2,3-steps, `p ≈ 70` with 2-steps.  The walk's cost grows
+   as `p^{2.4}` against rho's `p³`, so it is eventually negligible, as
+   [JV12] say of their sizes (`p ≈ 2^{25}`); at the sizes where this ledger
+   measured the route it is the largest term of all — larger than the
+   descent and the sieve together at `p = 1009` by an order of magnitude.
+
+**Class: accounting.**  The weak-class test is a derivation of an
+isomorphism invariant (one line of algebra, checked against brute force),
+the walk is Vélu's formulas and root finding, the numbers are measurements
+at toy sizes, and the one cited figure is left as cited.  §9's "unpriced"
+becomes: *priced at `≈ (q/3) · c_step` with `c_step` measured, above rho
+below `p ≈ 8,000` with 2,3-isogenies, and with the caveat that no walk of
+this round sampled a whole isogeny class.*  Nothing about a generic or
+deployed curve follows: a curve of order divisible by `4` is in the walk's
+reach only through its class, and the class's weak members are `3/q` of its
+full-2-torsion curves.
+
+## 14. Engineering after the fact: the sieve's line enumeration, registered before it is built (2026-10-04)
+
+§11.5 found the enumeration of the lines — factoring `Im(B²h)` for every
+`B` — to be `70–80 %` of the relation phase at `m = 9`, the sieve's own
+steps `15–25 %`.  Measured before building (`probe_enumeration_breakdown`,
+`3,000` `B`'s at `p = 1009` and `1511`, seed 1, `m = 9`), the multiplications
+per `B` go as follows:
+
+| step | `p = 1009` | `p = 1511` | note |
+|:--|--:|--:|:--|
+| `B²h` over `F_q` | `140` | `140` | |
+| squarefree decomposition (Yun) | `300` | `300` | the polynomial is squarefree for every `B` seen |
+| linear factors by evaluation | `86` | `87` | plus `8,100` / `12,100` additions |
+| `x^p mod G` (right-to-left square-and-multiply) | `1,181` | `1,282` | |
+| Frobenius columns and powers | `765` | `757` | |
+| distinct-degree gcds | `341` | `344` | |
+| Cantor–Zassenhaus (EDF) | `1,120` | `1,195` | runs on `19 % / 17 %` of the `B`'s, `≈ 6,500` per run |
+| divisors and line polynomials | `132` | `131` | |
+| **total** (`lines_for_b`) | **`4,207`** | **`4,387`** | `0.50 / 0.48` lines per `B`; `34 % / 32 %` of the `B`'s have a line |
+
+Three things are avoidable without changing a single line that is sieved:
+
+- **EDF is run on groups that no line needs.**  A degree-`m₁` divisor uses a
+  strict sub-multiple of a distinct-degree group (`j` of its `k` irreducibles
+  of degree `d`, `0 < j < k`) on only `8 % / 7 %` of the `B`'s; on the other
+  `11 % / 10 %` the group is used whole or not at all and its product is
+  all the enumeration needs.  Splitting a group only when a reachability
+  pass over the other factors' degrees says a line needs it removes more
+  than half of the EDF runs.
+- **EDF recomputes the Frobenius it already has.**  The group `g` divides
+  the root-free cofactor `z`, so `x^{p^i} mod g` is `x^{p^i} mod z` reduced
+  mod `g`, which the distinct-degree step has; with it, the Frobenius trace
+  `r + r^p + ⋯ + r^{p^{d−1}}` of a random `r` costs `(d − 1)·deg(g)²`
+  multiplications and the exponent falls from `(p^d − 1)/2` to `(p − 1)/2`:
+  `d×` fewer modular squarings.
+- **`x^p mod z` multiplies by `x`.**  Left-to-right binary exponentiation
+  squares the accumulator and multiplies it by `x`, a shift and one
+  reduction (`deg z` multiplications) instead of a product with a full
+  polynomial; squaring itself costs `deg(deg + 1)/2` cross products rather
+  than `deg²`.
+
+And one thing about the run's policy, not its cost per `B`: §11.5's rule
+for `m` (`p^{m−6}/m! ≥ 1.25·|F|`) over-counts what a `B`-space yields (it
+assumes one line per `B` and the full rate `p/m!`; the measured values are
+`0.5` lines per `B` for `m` odd, `1.0` for `m` even, and a rate of `0.45–1.4`
+times `p/m!` by instance, `0.9` on average), so at `p = 503` it started at
+`m = 9` and found that space short, and at `p = 251` and `101` it started at
+`m = 10` and `11`, skipping the `m = 9` and `m = 10` lines, which exist at
+every size and are the cheapest relations there are.  The honest policy is
+to **climb from `m = 9`**: sieve every line of the smallest `m`, then the
+next, until the count is reached.  The rule's estimate stays in the report
+as a prediction (`relations_estimate`, with the measured constants) and no
+longer sets where the run starts.
+
+### 14.1 Predictions and falsification lines
+
+**P12.  Enumeration per `B`.**  With the three changes the enumeration
+costs `2,600–3,100` multiplications per `B` at `p = 1009–1511` (`1.4–1.6×`
+below the table), the lines found for every `B` being *the same set*
+(`A₀`, `A₁′`, `B`) as before, bit for bit.  *Falsified if* the per-`B` cost is
+above `3,300` or below `2,300`, or any `B` of a `10,000`-`B` sample yields a
+different set of lines.
+
+**P13.  `C_rel` and `S / rho`.**  `C_rel` at `m = 9` falls by `1.25–1.45×`
+(`p = 1009, 1511`), `S / rho` at `p = 1511` by `8–15 %` and at `p = 1009` by
+`10–20 %` (the relation phase is `27–47 %` of `S` with the descent replaying
+§12's trace), and the measured crossover stays in `[400, 460]`.  *Falsified
+if* `C_rel` at `m = 9` falls by less than `1.15×` or more than `1.6×`, or
+`S / rho` rises at any size.
+
+**P14.  Climbing from `m = 9`.**  At `p ≥ 1009` nothing changes (`m = 9`
+suffices).  At `p = 503` the run is the same as §11.5's fallback.  At
+`p = 251` the `m = 9` and `m = 10` lines supply `≈ 20` and `≈ 100` of the
+`≈ 160` relations at `≈ 10×` and `1×` below the `m = 10`-only cost, so the
+relation phase falls by `10–25 %`; at `p = 101` (`m = 9, 10, 11`) by
+`5–20 %`.  The lower-`m` lines cost at most their `B`-space times the
+per-`B` cost above, `< 5 %` of the phase at every size.  *Falsified if* the
+relation phase at `p = 251` rises, or falls by more than `40 %`.
+
+**P15.  The estimate (accounting).**  `relations_estimate = |B-space(m)| ·
+lines_per_B(m) · 0.9·p/m!` is within `[0.5, 2]×` of the relations the run
+finds at every `m` it exhausts.  *Falsified if* outside that band at any
+`(p, m)` with at least `50` relations found at that `m`.
+
+### 14.2 Inadmissible moves
+
+Dropping a line because its group would need splitting; changing the
+counting unit (a squaring is `d(d + 1)/2` multiplications, a reduction
+`deg` per step, an inversion `16`, as everywhere in this note); changing
+the sieve, the descent, the linear algebra or the rho reference; choosing
+the instance.
+
+### 14.3 Class (registered)
+
+**Engineering**: a constant on the enumeration and a policy that sieves the
+cheapest lines first.  The exponent, the class and §9 are untouched; the
+measured crossover of §11.5 may move within its registered band and no
+further.
+
+### 14.4 Measured (2026-10-04; `experiments/35_jv_cover_sieve_enum_*.json`, ledger section F.3)
+
+Built as registered, in `jv_sieve.rs`: `FpRing::factor_lazy` (the
+distinct-degree groups of the root-free cofactor, a group split by
+`edf_frob` — Cantor–Zassenhaus on the Frobenius columns the distinct-degree
+step computed, the trace by `d − 1` matrix products and one exponent
+`(p − 1)/2` — only when the reachability pass over the other factors'
+degrees finds a line that would use part of it), `powmod_x` (left to right,
+a squaring at `n(n + 1)/2` and a shift), and the run climbing from `m = 9`.
+The lines are the same: over `4,000` `B`'s at `p = 1009` (`m = 9` and `10`)
+the lazy and the full factorisation give the same `(A₀, A₁′)` sets, and
+every end-to-end run below found the same relation count from the same
+`B`'s as §11.5's.  The same seeds, sizes and rho references as §11.5, the
+descent replaying §12's trace:
+
+| `p` | seed | `m` climbed | relations by `m` | enum per `B`, §11.5 → §14 | `C_rel`, §11.5 → §14 | relation phase, §11.5 → §14 | `S / rho`, §12 → §14 |
+|--:|--:|:--|:--|:--|:--|:--|:--|
+| 251 | 1 | 9 → 10 | 24 at 9, 106 at 10 | `4,251 → 3,084` | `8.7·10⁷ → 5.4·10⁷` (`1.61×`) | `1.14·10¹⁰ → 7.0·10⁹` (`1.63×`) | `3.19`† → `1.91` |
+| 251 | 2 | 9 → 10 | 12 at 9, 112 at 10 | `4,278 → 3,112` | `1.27·10⁸ → 8.9·10⁷` (`1.43×`) | `1.59·10¹⁰ → 1.10·10¹⁰` (`1.44×`) | `8.50`† → `5.36` |
+| 503 | 1 | 9 → 10 | 78 at 9, 160 at 10 | `4,570 → 3,216` | `6.8·10⁷ → 5.3·10⁷` (`1.29×`) | `1.61·10¹⁰ → 1.25·10¹⁰` (`1.29×`) | `0.792 → 0.666` (`1.19×`) |
+| 503 | 2 | 9 → 10 | 250 at 9, 13 at 10 | `3,877 → 2,625` | `6.0·10⁶ → 4.5·10⁶` (`1.33×`) | `1.59·10⁹ → 1.19·10⁹` (`1.33×`) | `0.0838 → 0.0700` (`1.20×`) |
+| 1009 | 1 | 9 | 488 | `4,002 → 2,572` | `5.9·10⁶ → 4.4·10⁶` (`1.35×`) | `2.88·10⁹ → 2.14·10⁹` (`1.35×`) | `0.0253 → 0.0221` (`1.15×`) |
+| 1009 | 2 | 9 | 528 | `3,953 → 2,549` | `3.9·10⁶ → 2.9·10⁶` (`1.33×`) | `2.06·10⁹ → 1.55·10⁹` (`1.33×`) | `0.0375 → 0.0353` (`1.06×`) |
+| 1511 | 1 | 9 | 770 | `4,154 → 2,631` | `3.0·10⁶ → 2.3·10⁶` (`1.30×`) | `2.31·10⁹ → 1.78·10⁹` (`1.30×`) | `0.0075 → 0.0068` (`1.10×`) |
+| 1511 | 2 | 9 | 757 | `4,197 → 2,645` | `3.7·10⁶ → 2.9·10⁶` (`1.31×`) | `2.84·10⁹ → 2.16·10⁹` (`1.31×`) | `0.0086 → 0.0077` (`1.11×`) |
+
+† §11.5's own rows (`p = 251` was not rerun with the traced descent in
+§12).  All eight logarithms recovered and checked, `0` relations failing
+the group check, `0` duplicates; the descent replayed the trace on
+`98–99 %` of its tests.
+
+**Against the registration (§14.1):**
+
+| | registered | measured | |
+|:--|:--|:--|:--|
+| P12 enum per `B` | `2,600–3,100`, the same lines | `2,550–2,650` at `m = 9`; `3,080–3,220` on the runs that climbed to `m = 10` (the lazy pass saves less there: a degree-`5` divisor of a degree-`9` cofactor needs its groups split more often); the same lines, the same relation counts | holds (band `[2,300, 3,300]`) |
+| P13 `C_rel` at `m = 9` | `1.25–1.45×` | `1.30–1.35×` | holds |
+| P13 `S / rho` at `1511` | `8–15 %` lower | `10 %`, `11 %` | holds |
+| P13 `S / rho` at `1009` | `10–20 %` lower | `13 %`, **`6 %`** (seed 2: the descent is `75 %` of its `S`) | **misses on one seed** (not a falsification line) |
+| P13 crossover | stays in `[400, 460]` | **`p* ≈ 371`** (`ℓ ≈ 2^{49}`; `3.64` pooled at `251`, `0.368` at `503`) | **misses**: the registered band took §11.5's rows at `251`, whose descent was not yet traced; the traced descent and the climb move `251` by `1.6–1.7×` together, and the crossover with them |
+| P14 relation phase at `251` | `10–25 %` lower; falsified above `40 %` | `39 %`, `31 %` lower (`24` and `12` relations from the `m = 9` lines at `≈ 10×` below the `m = 10` cost, then the enumeration's `1.3×` on the rest) | holds, at the edge: the two effects were registered as if the climb alone moved the phase |
+| P15 the estimate | within `[0.5, 2]×` of what each exhausted `m` yielded | `1.22`, `0.61` at `251`; `1.58`, **`0.49`** at `503` | **misses by `0.01`** on the instance whose rate is `0.47` of `p/m!` (§11.5's instance effect, unexplained) |
+
+Four of the registered lines hold, two miss: the crossover band, because it
+was set on rows whose descent §12 later halved, and the estimate's band,
+by the width of the instance effect.  Neither moves the class.
+
+**What it is.**  A `1.6×` constant on the enumeration of the lines, `1.3×`
+on `C_rel`, `6–20 %` on `S / rho` where the descent dominates and
+`1.6–1.7×` at `p = 251` together with the traced descent; the measured
+crossover is now `p* ≈ 371` (`ℓ ≈ 2^{49}`), inside §11.2's registered band
+`[280, 420]` where §11.5's `427` was just outside it.  The sieve's own steps
+(`6.3` multiplications a base step, `≈ 1.1·10⁶` per relation at `m = 9`)
+are now `45–50 %` of `C_rel` and the floor of this design.  Class:
+**engineering**; §9 is untouched.
+
+**`p = 101`** (seed 1, `35_jv_cover_sieve_enum_101.json`, rho measured in the
+run): the climb found `0` relations from the `m = 9` lines (`5,354` of them),
+`7` from `m = 10` (`5.4·10⁵` lines) and `45` from `m = 11`; `S / rho` `1,360`
+against §11.5's `1,977` (`S⁺ / rho` `2,183` against `2,902`), the relation phase
+`1.45×` lower where P14 said `5–20 %` — the `m = 10` lines are worth more
+than registered, their `7` relations costing `≈ 10×` less each than `m = 11`'s.
+Seed 2 (`35_jv_cover_sieve_enum_101_seed2.log`, no JSON) hit the same
+90-minute budget as in §11.5, at `38` of `49` relations: `0` from `m = 9`, `6`
+from `m = 10`, `21` from `m = 11` (its `1.05·10⁸` `B`'s exhausted) and `11` from
+`m = 12` in `2.8·10¹²` multiplications; `S / rho ≥ 12,400` against seed 1's rho
+(`1.501`), a lower bound like §11.5's `≥ 7,560` and not comparable to it as a
+cost (both runs are dominated by `m = 12` lines, whose relations cost
+`≈ 10¹¹` each at this size).  The instance's small factor base (`49`
+columns) is the whole story at `p = 101`, as P10 registered.

@@ -1,0 +1,113 @@
+{
+  "schema": "p256.dickson_coset_search/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "family": "dickson-torus",
+  "depth": 18,
+  "derivation_domain": "icv1-fp256-t89188191154553853111372247798585809583-f188c491/dickson-terminal/v1/",
+  "candidates": [
+    {
+      "index": 0,
+      "root_exponent": "0x23e6cba8834be09f5b1d",
+      "terminal": "0x2a3afb2527c193a0a9899f52ca2347baf2139d8880021b218af59c9eee91108d",
+      "fb_id": "FB1h6b7699a7d171",
+      "fb_sha256": "6b7699a7d171cec1a4b204c4bf79d1834654966b781136e16d7518aba8327a2e",
+      "columns": 131343,
+      "signed_points": 262686,
+      "points_sha256": "06ea7505bf8ec4438025008816fba1c78325c680cad8425374bcb9037ecc338b"
+    },
+    {
+      "index": 1,
+      "root_exponent": "0x25ed4362f26d2637b345",
+      "terminal": "0xe51dc30fcf15e63e4d7881fe5a082845b1fcaeffe9af694c26a33b64b0b92ca8",
+      "fb_id": "FB1h085b2065fa5b",
+      "fb_sha256": "085b2065fa5b834a88b7ee9e627a51041c99b7a5aef65143f66f74c6945d934a",
+      "columns": 131034,
+      "signed_points": 262068,
+      "points_sha256": "014bd248218d3ca981c126824c3e232868ff52828510cd950556c2b24620f304"
+    },
+    {
+      "index": 2,
+      "root_exponent": "0x4575da009fcbf9ee1fd",
+      "terminal": "0xd9e4e2889be0ae2404dbabadea51f2d015c133aa20637f19398936a100f35f0a",
+      "fb_id": "FB1h6837e846b36c",
+      "fb_sha256": "6837e846b36c40715c5500b28d6455503208ef9755a2b706c56d5ab15cc3f99d",
+      "columns": 131136,
+      "signed_points": 262272,
+      "points_sha256": "014be3392c8c1928bcb9a866f422308ca8444cbf5b2ed87cc6ab4b26bc0912e0"
+    },
+    {
+      "index": 3,
+      "root_exponent": "0xa8c2d4b6e375f181469",
+      "terminal": "0x053b8604ae3d2efc5bb7eca716e9d0b355e792d6f7bf7cb4a22228239b1bf77d",
+      "fb_id": "FB1h4d26bec094de",
+      "fb_sha256": "4d26bec094de9d8e8cf7c21abeee2880e10f682dffef9bfd28ff0a28eec3bf3a",
+      "columns": 130966,
+      "signed_points": 261932,
+      "points_sha256": "b7ce6f3ef7cfe210aba75652d15cc16af271a1a92f86c17c7cabe108253aeb14"
+    },
+    {
+      "index": 4,
+      "root_exponent": "0x2b6fdc73dc04e7667129",
+      "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+      "fb_id": "FB1h2f8621cda105",
+      "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+      "columns": 131458,
+      "signed_points": 262916,
+      "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1"
+    },
+    {
+      "index": 5,
+      "root_exponent": "0x212c0b7da2df8d57187f",
+      "terminal": "0xbc975ec6341c0232869c3ce5f4fe751a8856cfb84c9fcada5d7429f2ef81f780",
+      "fb_id": "FB1hf3f83ccb1b6b",
+      "fb_sha256": "f3f83ccb1b6b02fc54dedc8404d10a4b637d3a3e812f87bf6369721315a1a28c",
+      "columns": 131201,
+      "signed_points": 262402,
+      "points_sha256": "6351f86046822c4a878c27f7f3b03575b7b3c00263dca6dcba0048232e6f23e1"
+    },
+    {
+      "index": 6,
+      "root_exponent": "0x3f4e18fd61903c9c42bb",
+      "terminal": "0xc1f019c3af8c5d3cdfb2cab7f59ac90a1cfa55d341cfce9288ade910b9ae06ea",
+      "fb_id": "FB1h142ab37c877c",
+      "fb_sha256": "142ab37c877c4b59967070e0167d42b36687929c02d27adfef363aff4b383e0a",
+      "columns": 131123,
+      "signed_points": 262246,
+      "points_sha256": "7078a3cb59cd919df620c0b692d7a0acd8e8e47a0f515d19abb32708e0e9aaf6"
+    },
+    {
+      "index": 7,
+      "root_exponent": "0x2830d05994353952ad75",
+      "terminal": "0x213f2a91a291aa80f7d955ec8c687091e11b85a6ca643c3a9ca324d0d2446c66",
+      "fb_id": "FB1h0a4989de61a1",
+      "fb_sha256": "0a4989de61a15fd1e04deca5594aceb8fd78c968f426c365c0e2469a6cf289b9",
+      "columns": 130955,
+      "signed_points": 261910,
+      "points_sha256": "c8bc177c00bb63d158899bd17f186a12d1496dcdad9b223439e411653bd8ea5f"
+    }
+  ],
+  "selected_index": 4,
+  "selected_fb1_preimage": {
+    "columns": 131458,
+    "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "family": "dickson-torus",
+    "params": {
+      "depth": "18",
+      "point_key_encoding": "prime-affine-x-plus-one-shift-sign/be33/v1",
+      "root_exponent": "0x2b6fdc73dc04e7667129",
+      "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5"
+    },
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "schema": "ecbench.factor_base/v1",
+    "signed_points": 262916
+  },
+  "selected_relation_m17": {
+    "columns": 131458,
+    "relation_length": 17,
+    "signed_domain": "384920856532962495256300684166341665944265504881445783403352657929388540559360",
+    "poisson_mean": 3.3242413981639762,
+    "poisson_success": 0.9640001820745058,
+    "selector_ideal_regularity_bound": 18
+  },
+  "verified": true
+}

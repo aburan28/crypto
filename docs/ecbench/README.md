@@ -67,6 +67,25 @@ cargo build --release --bin ecbench
 ./target/release/ecbench db sql /tmp/ecbench/smoke-1 | sqlite3 -bail ecbench.db
 ```
 
+Wide registered curves whose coordinates do not fit the measured harness's
+`u64` group types can still carry canonical factor-base inventories.  The
+native P-256 Dickson builder writes the same object layout and FB1 preimage,
+with its unavoidable wide integers labelled explicitly:
+
+```bash
+./target/release/p256_factor_base \
+  --curve icv1-fp256-t89188191154553853111372247798585809583-f188c491 \
+  --factor-base dickson-torus:depth=18 \
+  --out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.json \
+  --sql-out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.sql \
+  --relation-length 17 \
+  --verify
+```
+
+The standalone builder keeps the sealed `ecbench` measurement path unchanged.
+Its `ecbench.factor_base_dump/v1-wide` inventory and SQL companion use the
+same factor-base tables, but neither is an `ic.pipeline` measurement.
+
 `ecbench methods` lists every method and its parameters; `ecbench host`
 prints the host capsule; `ecbench claim build` turns an IC run and a
 strong-rho run on a public target into a checked `vs_rho` claim (§9). On Linux `run` reserves a whole core by default
@@ -175,6 +194,14 @@ different fact sets. The two claim identities are hashed the way
 `identity.py` hashes them (UTF-8, not ASCII-escaped) and are pinned
 against its values in `claim.rs`'s tests, so a claim built here and a
 tournament candidate with the same inputs carry the same id.
+
+Ordinary factor-base dumps encode group keys as eight-byte big-endian
+integers and coefficients as `u64`.  `factor_base_dump/v1-wide` preserves the
+table and identity layout but stores curve integers and coefficients as
+decimal strings.  Its family declares its fixed-width key encoding as an
+identity-bound parameter; the P-256 Dickson family uses 33-byte big-endian
+`((x+1)<<1)|sign` keys.  A wide dump may use an FB1 identity because the FB1
+preimage is unchanged; it may not claim the ordinary v1 dump schema.
 
 ## 5. Confounders, and how each one is controlled
 
@@ -348,6 +375,10 @@ Two consequences to read every table with:
   admitted pairs of its own), and marked `outside_noise` only when it
   excludes 1 and does not overlap the A/A interval. Anything less prints
   as `descriptive`, never as a result.
+  This `compare` wall field uses the whole solve, including IC's reusable
+  setup. For the primary one-target IC question, read the separate online
+  windows and `ecbench claim`'s same-point interval; a cold wall ratio is
+  never an online speedup.
 
 A speedup in the sense of AGENTS.md §8 is still
 `baseline_total_operations / candidate_total_operations`, over the whole
@@ -429,6 +460,8 @@ field the schema requires, from the session's own files:
   columns its sign-and-Frobenius orbits), every stage of the method
   resolved, and the IC sources hashed into the binary at compile time. A
   claim is therefore built only by the binary that measured the session.
+  The claim also carries the complete canonical candidate and workload
+  records beside their hashes, so a reader can audit the compact IDs.
   `ecbench`'s Koblitz bases fold the raw lifted points, so a raw orbit
   whose cofactor image is the identity (the 2-torsion point above
   `x = 0`) is a column with logarithm zero; the record discloses such
@@ -448,6 +481,14 @@ field the schema requires, from the session's own files:
   bytes, or that did not reproduce both runs is refused. Without one the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
+- **Late receipt attachment.** If the measuring binary is no longer
+  available when the other-host receipt arrives, `ecbench claim attach`
+  reconstructs the entire previously saved diagnostic report from the frozen
+  session and the current claim sources. It requires exact equality before
+  adding the receipt; a changed source, target, time, candidate, or other
+  report field is refused. The new report retains the original binary hash.
+  `claim build` still requires the measuring binary itself. Archive both the
+  original report and the attached one.
 - **Admissibility.** The verdict states the speedup `rho / IC` only when
   both runs earned the spec's isolation level; otherwise it is marked
   descriptive. The levels are in the report either way.
@@ -527,7 +568,9 @@ Stated so that nothing here is read as more than it is:
 - **Word-size curves only.** The counted group types hold `GF(p)` with
   `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
   (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it.
+  it. `p256_factor_base` only constructs and inventories a factor base on the
+  registered wide curve; it does not make that curve runnable by
+  `ic.pipeline` and produces no operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a
@@ -538,6 +581,29 @@ Stated so that nothing here is read as more than it is:
   through `perf_event_open` on Linux. macOS, the QEMU guest and most cloud
   VMs expose no hardware counters, and their records carry the reason
   instead of a count.
+- **A separate Callgrind solve count is available on Linux x86-64.** Export
+  a frozen child input with `ecbench profile-input --spec SPEC --seq N`, run
+  `ECBENCH_CALLGRIND_SOLVE=1 valgrind --tool=callgrind --cache-sim=no
+  --branch-sim=no --callgrind-out-file=PREFIX ecbench exec < INPUT.json`,
+  then read it with `ecbench callgrind-ir --prefix PREFIX`. The parser counts
+  every numbered part after the pre-solve reset through the post-solve reset,
+  including internal phase dumps, and rejects missing markers. This is a
+  complete user-space **implementation** instruction count for the one solve;
+  it has its own `callgrind.Ir` unit. It is not a PMU count or an isolated
+  native wall-time result. Keep its binary, Valgrind version, CPU feature
+  dispatch, input, child output, and raw parts together. The
+  [n37 protocol](../../research/ecbench_callgrind_solve_20261004/PROTOCOL.md)
+  freezes a same-target IC/rho census using this path.
+- **A target-only Callgrind interval is opt-in for the shared-rank IC and
+  strong signed-Frobenius rho.** Set `ECBENCH_CALLGRIND_TARGET=1` alongside
+  `ECBENCH_CALLGRIND_SOLVE=1`, then run `ecbench callgrind-online-ir
+  --prefix PREFIX`. The parser requires one target interval inside the
+  complete solve and reports pre-online, online and post-online Ir with
+  their sum checked against the complete solve. It rejects profiles
+  missing either boundary. This is simulated instruction attribution,
+  not an isolated online wall claim; the
+  [preregistered n37 gate](../../research/ecbench_n37_online_ir_20261004/PROTOCOL.md)
+  defines its first comparison.
 - **Rho's distinguished-point table is not counted.** Its stores happen
   once per distinguished point, a vanishing fraction of steps. BSGS and
   the kangaroo count their table operations.
