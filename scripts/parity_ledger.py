@@ -697,11 +697,11 @@ def main():
     sv = sieve()
     if sv:
         print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
+    svt = sieve("33_jv_cover_trace_sieve")
     sve = sieve("35_jv_cover_sieve_enum")
     if sve:
         print_sieve(sve, "F.3 The sieving variant with the line enumeration of note §14 (35_jv_cover_sieve_enum_*.json)")
         print_sieve_comparison(sv, svt, sve)
-    svt = sieve("33_jv_cover_trace_sieve")
     if svt:
         print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
     wk = walk("34_jv_isogeny_walk.json")
