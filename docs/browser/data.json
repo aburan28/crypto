@@ -4,11 +4,11 @@
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
   "curves": 111,
-  "methods": 22,
-  "factor_bases": 10,
-  "candidates": 235,
+  "methods": 24,
+  "factor_bases": 11,
+  "candidates": 236,
   "rounds": 30,
-  "sessions": 15
+  "sessions": 17
  },
  "sources": {
   "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
@@ -21,6 +21,8 @@
   "research/ecbench_calibration_20261002/sessions/followup-prime/records.jsonl": "87a60d048f8cb81bd302e560ae5dd4de197fb649599c214a1fb33fc3c0ef8c56",
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
+  "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01/records.jsonl": "04ff51c137aee7368de8fff16f8c22f47c9ed741cb533244f76715dbaf3297e3",
+  "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/records.jsonl": "8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693",
   "research/ecbench_numa_vm_20261002/sessions/auto/records.jsonl": "89a7b3d9819f48be1981295f3ce268d8613e7abd2b55f44926188f49481f0456",
   "research/ecbench_numa_vm_20261002/sessions/before-fix-auto/records.jsonl": "32d293ed730a962b4480c296d31d7b69ac12f6cb88fc2d5ab57ea1c533878234",
   "research/ecbench_numa_vm_20261002/sessions/before-fix-node0/records.jsonl": "8a71a6c3dc9e79b2855941d434494d031faaaef703a2b65181abce8b84bdb936",
@@ -4207,6 +4209,36 @@
    ],
    "ecbench": [
     {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "ic-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "ic-shared",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h33c3e5e4f75d",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 0.4229,
+     "mean_ratio_to_floor": 2.903
+    },
+    {
      "session_id": "ECBS1h73210d525d59",
      "arm": "bsgs-il",
      "method": "bsgs.interleaved",
@@ -4265,9 +4297,41 @@
      "verified": 24,
      "mean_s": 1.5186,
      "mean_ratio_to_floor": 10.423
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "ic-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "ic-shared",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 5.7482,
+     "mean_ratio_to_floor": 39.454
+    },
+    {
+     "session_id": "ECBS1h774f0e722ea2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 5,
+     "verified": 5,
+     "mean_s": 0.4229,
+     "mean_ratio_to_floor": 2.903
     }
    ],
-   "factor_bases": [],
+   "factor_bases": [
+    "FB1h8dbe08ce02c8"
+   ],
    "tournament_cells": [
     {
      "round": "round-0023",
@@ -10736,6 +10800,27 @@
    "verified": 128
   },
   {
+   "method_id": "ECM1ha10cd743c1f5",
+   "method_sha256": "a10cd743c1f56e07ac883bb4d139b4dad106428215b48d5bb67492f39666a98a",
+   "method": "ic.shared_rank",
+   "family": "ic",
+   "params": {
+    "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+    "rank_max_trials": "1000000",
+    "rank_seed": "202610031137",
+    "target_max_attempts": "64"
+   },
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 24,
+   "verified": 24
+  },
+  {
    "method_id": "ECM1h05c1dc19c164",
    "method_sha256": "05c1dc19c1647df021dba133b42941fc6416deb47519bc871b6f6cfcaa93bf74",
    "method": "kangaroo.vow",
@@ -10912,6 +10997,26 @@
    "verified": 479
   },
   {
+   "method_id": "ECM1h1d9961ee4601",
+   "method_sha256": "1d9961ee460186dae7494675dca4f4a4138e1d918777e2ec68386a43f716c758",
+   "method": "rho.signed_frobenius_strong",
+   "family": "rho",
+   "params": {
+    "dp_bits": "8",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2"
+   ],
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "runs": 12,
+   "verified": 12
+  },
+  {
    "method_id": "ECM1hb6123afffc07",
    "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
    "method": "rho.signed_frobenius_strong",
@@ -11035,6 +11140,29 @@
     "ECM1hab99147a7fb3",
     "ECM1hb95b75751359",
     "ECM1hdfada545e44f"
+   ]
+  },
+  {
+   "fb_id": "FB1h8dbe08ce02c8",
+   "fb_sha256": "8dbe08ce02c8ea6641733d0bcd5e773b054427e1cd6a662e1cd940c0f7020f87",
+   "family": "compact-orbit-scan",
+   "params": {
+    "columns": "42",
+    "raw_x_cap": "1000000"
+   },
+   "description": "first 42 projected signed Frobenius orbits, raw x <= 1000000",
+   "signed_points": 3108,
+   "abscissae": 1554,
+   "columns": 42,
+   "dimension": null,
+   "points_sha256": "3eb19ae6a24ade483e4011b4025aa13081642eb3e01e052eca8da043ff379013",
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "sessions": [
+    "ECBS1h33c3e5e4f75d",
+    "ECBS1h774f0e722ea2"
+   ],
+   "methods": [
+    "ECM1ha10cd743c1f5"
    ]
   },
   {
@@ -15483,6 +15611,25 @@
    "files": 1,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/scaled.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857fa",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 3108,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "a48bfcf857fa",
+   "mentions": 1,
+   "files": 1,
+   "where": [
+    "docs/ic/dashboard-overview-data.json"
    ],
    "slug": "icv1-f2m37-tm534059-32aad96b"
   },
@@ -20778,6 +20925,82 @@
      "role": "baseline",
      "method": "rho.plain",
      "method_id": "ECM1hb367476fce6c"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h774f0e722ea2",
+   "dir": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 shared-rank one-public-target versus strong signed-Frobenius rho",
+   "status": "complete",
+   "spec_id": "ECS1h7421a101192f",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+   "git_commit": "c63a11438251fcb8008cec7c2146caa5e69b2193",
+   "records": 18,
+   "status_counts": {
+    "verified": 18
+   },
+   "started_unix_ms": 1791079940889,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "ic-shared",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h33c3e5e4f75d",
+   "dir": "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02",
+   "label": "n37 shared-rank one-public-target versus strong signed-Frobenius rho",
+   "status": "complete",
+   "spec_id": "ECS1h7421a101192f",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "b008ca9e130cec37aed09d160a06c401bc69e5f647ac7f6d6789a04b4cd8302d",
+   "git_commit": "2da691940907c56ccd705fbf450336e71fbb0ee4",
+   "records": 18,
+   "status_counts": {
+    "verified": 18
+   },
+   "started_unix_ms": 1791080413627,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "ic-shared",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1ha10cd743c1f5"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
     }
    ]
   },
