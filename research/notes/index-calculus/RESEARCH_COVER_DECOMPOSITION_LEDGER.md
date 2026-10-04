@@ -726,3 +726,35 @@ from `m = 10`, `21` from `m = 11` (its `1.05·10⁸` `B`'s exhausted) and `11` f
 cost (both runs are dominated by `m = 12` lines, whose relations cost
 `≈ 10¹¹` each at this size).  The instance's small factor base (`49`
 columns) is the whole story at `p = 101`, as P10 registered.
+
+## 15. The rho reference measured at the top sizes (2026-10-04; `experiments/36_jv_cover_rho_dp_*.json`)
+
+Every `S / rho` row above `p = 251` divides by a rho reference pooled from
+the smaller sizes (`1.361 ± 0.070` over `72` walks, the `*` of the ledger's
+tables), because the harness's rho stores its whole walk and the table
+does not fit above `ℓ ≈ 2^{46}`.  A reader asked whether `0.0068×` at
+`p = 1511` was too good to be true, and the pooled reference was the one
+input not measured on that instance.  `rho_e_dp` is the same `r`-adding
+walk without the stored points: four walkers from random starts, a point
+distinguished when `dp_bits` bits of its mixed hash vanish, the
+distinguished points shared; every group operation of every walker is
+charged, the walk's multipliers once per walker.  At `p = 251` it finds
+the logarithm with `S = 2.58, 0.98, 2.09, 2.02` over four runs, inside the stored
+walk's spread on the same instance (`0.81–2.06`).  On the §14 instances
+(seed 1, four runs each, every run correct):
+
+| `p` | `ℓ` | `S` of the four runs | mean ± s.e. | pooled reference | `S / rho` of §14.4, pooled → measured |
+|--:|:--|:--|:--|:--|:--|
+| 1009 | `2^{57.9}` | `1.25, 2.14, 1.04, 1.28` | `1.43 ± 0.24` | `1.36` | `0.0221 → 0.0211` (seed 1; seed 2's instance was not walked) |
+| 1511 | `2^{61.4}` | `1.27, 0.16, 0.95, 0.85` | `0.81 ± 0.23` | `1.36` | `0.0068 → 0.0115` (seed 1) |
+
+The eight new walks together give `1.12 ± 0.19`, compatible with
+the pooled `1.36 ± 0.07`; one lucky walk at `p = 1511` (`0.16`) pulls that
+size's four-run mean to `0.81`, which is why its re-based ratio reads
+`0.012` rather than `0.007`.  Either way the attack is `75–150×`
+below rho at `ℓ = 2^{61.4}` on this instance, and the reference is now
+measured where the headline rows live, not pooled.  Rho's cost per step
+is the harness's own affine addition (`331` multiplications, one inversion);
+a rho with batched inversion and the negation map would be `2–3×` cheaper
+a step, which the ledger's unit does not credit to either side.  Class:
+**accounting**; nothing above changes in kind.

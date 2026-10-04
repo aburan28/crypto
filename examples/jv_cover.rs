@@ -14,7 +14,7 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::jv_cover::{
-    run_cover_ccov, run_cover_dlp, CcovReport, CoverDlpReport,
+    run_cover_ccov, run_cover_dlp, run_rho_dp, CcovReport, CoverDlpReport, RhoDpReport,
 };
 use crypto_lib::cryptanalysis::jv_sieve::{run_cover_sieve_dlp, SieveDlpReport};
 use serde::Serialize;
@@ -26,6 +26,7 @@ enum Row {
     Ccov(CcovReport),
     Dlp(CoverDlpReport),
     Sieve(SieveDlpReport),
+    RhoDp(RhoDpReport),
 }
 
 fn main() {
@@ -46,6 +47,8 @@ fn main() {
     let mut margin = 1.25f64;
     let mut m_override = 0usize;
     let mut trace = false;
+    let mut dp_bits = 16u32;
+    let mut threads = 4usize;
     let mut json: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
@@ -74,6 +77,8 @@ fn main() {
             "--margin" => margin = next(&mut i).parse().expect("--margin"),
             "--m" => m_override = next(&mut i).parse().expect("--m"),
             "--trace" => trace = true,
+            "--dp-bits" => dp_bits = next(&mut i).parse().expect("--dp-bits"),
+            "--threads" => threads = next(&mut i).parse().expect("--threads"),
             "--oracle-base" => oracle_base = next(&mut i).parse().expect("--oracle-base"),
             "--json" => json = Some(next(&mut i)),
             other => panic!("unknown argument {other}"),
@@ -154,6 +159,21 @@ fn main() {
                         r.relation_over_rho, r.descent_over_rho, r.la_over_rho, r.wall_ms / 1e3
                     );
                     rows.push(Row::Sieve(r));
+                }
+                "rhodp" => {
+                    for run in 0..rho_runs as u64 {
+                        let r = run_rho_dp(p, seed, run, dp_bits, threads);
+                        println!(
+                            "p={:>5} seed={} run={} l=2^{:.1} c_add E {:.0} | rho-dp dp_bits {} threads {} steps {:.4e} ({:.3} sqrt l) group ops {:.4e} S {:.4} correct {} | {:.0} s",
+                            r.p, r.seed, r.run, r.bits, r.c_add_e, r.dp_bits, r.threads, r.steps as f64,
+                            r.steps as f64 / (r.l as f64).sqrt(), r.group_ops as f64, r.s, r.correct, r.wall_ms / 1e3
+                        );
+                        rows.push(Row::RhoDp(r));
+                        if let Some(path) = &json {
+                            fs::write(path, serde_json::to_string_pretty(&rows).unwrap())
+                                .expect("write json");
+                        }
+                    }
                 }
                 other => panic!("unknown experiment {other}"),
             }
