@@ -710,5 +710,13 @@ crossover is now `p* ≈ 371` (`ℓ ≈ 2^{49}`), inside §11.2's registered ban
 `[280, 420]` where §11.5's `427` was just outside it.  The sieve's own steps
 (`6.3` multiplications a base step, `≈ 1.1·10⁶` per relation at `m = 9`)
 are now `45–50 %` of `C_rel` and the floor of this design.  Class:
-**engineering**; §9 is untouched.  The `p = 101` runs of P14 were still
-running when this section was written and are added below when they land.
+**engineering**; §9 is untouched.
+
+**`p = 101`** (seed 1, `35_jv_cover_sieve_enum_101.json`, rho measured in the
+run): the climb found `0` relations from the `m = 9` lines (`5,354` of them),
+`7` from `m = 10` (`5.4·10⁵` lines) and `45` from `m = 11`; `S / rho` `1,360`
+against §11.5's `1,977` (`S⁺ / rho` `2,183` against `2,902`), the relation phase
+`1.45×` lower where P14 said `5–20 %` — the `m = 10` lines are worth more
+than registered, their `7` relations costing `≈ 10×` less each than `m = 11`'s.
+Seed 2, which §11.5 could not finish within its budget, is reported when its
+run ends.

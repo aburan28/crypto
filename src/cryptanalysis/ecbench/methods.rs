@@ -760,6 +760,7 @@ fn solve_strong(
     target: FastPoint,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    let profile_online = std::env::var("ECBENCH_CALLGRIND_TARGET").as_deref() == Ok("1");
     let kc = inst.koblitz.as_ref().ok_or("not a Koblitz instance")?;
     let params = StrongRhoParams {
         lanes: param_u64(m, "lanes")?.max(1) as usize,
@@ -778,9 +779,15 @@ fn solve_strong(
     let setup_mults = charges.scalar_multiplications;
     let mut start_rng = StdRng::seed_from_u64(seed);
     let q = StrongPoint::from_binary(&inst.fast.lower(target));
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_before_online\0");
+    }
     measurement::begin_online(Phase::RhoSolve);
     let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
     measurement::end_online();
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_online\0");
+    }
     let wall = t.elapsed().as_nanos() as u64;
     let detail = json!({
         "reference": "koblitz_strong_rho::StrongRho, the single-target reference of docs/ic/boundary_targets.json since 2026-10-01",

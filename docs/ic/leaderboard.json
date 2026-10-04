@@ -46,6 +46,30 @@
    "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
    "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
   },
+  "n37_k8_k16": {
+   "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+   "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
+  },
+  "n37_online_ir": {
+   "path": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+   "sha256": "e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a"
+  },
+  "n37_online_k8_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+   "sha256": "369e99e76d8ba12a376ae3be47445fbc705ff375766421b3e841ed9a0a93942a"
+  },
+  "n37_online_k16_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+   "sha256": "a708e63cb4ccfe36bccb0e81ad69a43e651bec17a11c62412fcce6fa64b2f444"
+  },
+  "n37_native_wall": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+   "sha256": "eebbe2eef9524c7f45a5bfd1c0a2b312d72063a3a8865140a6e25200235c21e2"
+  },
+  "n37_native_wall_evidence": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+   "sha256": "bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
@@ -5094,6 +5118,70 @@
    "fully_priced_cold_speedup": null
   }
  ],
+ "n37_k8_k16_confirmation": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+  "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54",
+  "usable_points": 592,
+  "folded_columns": 8,
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "select_k8_for_larger_field_gate",
+  "k16_over_k8_ir": 1.1902596062530095,
+  "k16_over_k8_ir_ci95": [
+   1.1584168328385342,
+   1.2217540127906004
+  ],
+  "k8_over_rho_ir": 3.6445922113828733,
+  "k8_over_rho_ir_ci95": [
+   3.2353443778426585,
+   4.136017279722061
+  ],
+  "online_speedup": null,
+  "cold_wall_speedup": null
+ },
+ "n37_online_ir_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "prioritize_k16_for_isolated_n37_online_wall_gate",
+  "k8_over_k16_online_ir": 2.8860076532738073,
+  "k8_over_k16_online_ir_ci95": [
+   1.730215437274574,
+   4.601504089537422
+  ],
+  "k16_over_rho_online_ir": 0.15337193605882804,
+  "k16_over_rho_online_ir_ci95": [
+   0.09233888610436006,
+   0.24000314990195315
+  ],
+  "k8_over_k16_cold_ir": 0.8484004913354137,
+  "online_wall_speedup": null
+ },
+ "n37_native_wall_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+  "evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "primary_workload_id": "Wd281dbafa0cb",
+  "measured_verified_runs": 320,
+  "isolation_levels": {
+   "L1": 320
+  },
+  "decision": "carry_both_host_noise_exceeds_gate",
+  "aa_max_relative_deviation": 0.12850955895249527,
+  "primary_rho_over_k16_online_wall": 7.177938244139939,
+  "panel_k8_over_k16_online_wall": 7.110329833407259,
+  "panel_k8_over_k16_online_wall_ci95": [
+   3.669282492389011,
+   16.981811137190903
+  ],
+  "admitted_online_speedup": null
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",

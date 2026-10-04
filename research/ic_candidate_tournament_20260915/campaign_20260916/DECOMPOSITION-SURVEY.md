@@ -624,3 +624,15 @@ Pointers to records written after this survey; the sections above are unchanged.
   unknowns, cubic) is an engineering arm for §5's audit, not an exponent candidate. The
   first-fall-degree claim stays with the SEMBIN lane, as this section already says.
 
+
+## Addendum 3 (2026-10-04): the `m = 3` ladder on an external engine
+
+Pointer only; the sections above are unchanged.
+[ic_gb_ladder_20261003](../../ic_gb_ladder_20261003/RESULTS.md) re-read the `m = 3`
+ladder with Singular's degree-truncated `slimgb` and extended it one rung: the direct `S₄`
+descent (§3.1's object at `m = 3`) refutes at 5, 8, 9, 10 for `ℓ = 2…5` on `K₁/2¹⁷`, three
+above the sharp first-fall bound at `ℓ = 5` and rising one per rung; `ℓ = 6` is out of
+memory at 12 GB on both `n = 19` curves. §3.1's "every measurement on record points
+against `c` being that small" now rests on an independently confirmed ladder one rung
+longer. The `m = 3` `x4` readings quoted in §0 item 3 and §2 from the in-tree scan carry
+that scan's floor (6 at `ℓ = 2` is 5).

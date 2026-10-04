@@ -14,6 +14,8 @@ use serde::Serialize;
 
 const BEFORE: &str = "ecbench_before_solve";
 const AFTER: &str = "ecbench_solve";
+const BEFORE_ONLINE: &str = "ecbench_before_online";
+const AFTER_ONLINE: &str = "ecbench_online";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Part {
@@ -30,6 +32,25 @@ pub struct SolveIr {
     pub prework_ir: u64,
     pub solve_parts: usize,
     pub parts: Vec<Part>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct OnlineIr {
+    pub schema: &'static str,
+    pub unit: &'static str,
+    pub pre_online_ir: u64,
+    pub online_ir: u64,
+    pub post_online_ir: u64,
+    pub solve_ir: u64,
+    pub prework_ir: u64,
+    pub parts: Vec<Part>,
+}
+
+fn sum_ir(parts: &[Part]) -> Result<u64, String> {
+    parts.iter().try_fold(0u64, |sum, part| {
+        sum.checked_add(part.ir)
+            .ok_or_else(|| "Callgrind Ir total overflowed u64".to_string())
+    })
 }
 
 fn parse_part(path: &Path, content: &str) -> Result<Part, String> {
@@ -98,12 +119,7 @@ fn summarize(parts: Vec<Part>) -> Result<SolveIr, String> {
         ));
     }
     let solve_parts = after[0] - before[0];
-    let solve_ir = parts[before[0] + 1..=after[0]]
-        .iter()
-        .try_fold(0u64, |sum, part| {
-            sum.checked_add(part.ir)
-                .ok_or_else(|| "Callgrind Ir total overflowed u64".to_string())
-        })?;
+    let solve_ir = sum_ir(&parts[before[0] + 1..=after[0]])?;
     Ok(SolveIr {
         schema: "ecbench.callgrind_ir/v1",
         unit: "callgrind.Ir",
@@ -111,6 +127,54 @@ fn summarize(parts: Vec<Part>) -> Result<SolveIr, String> {
         prework_ir: parts[before[0]].ir,
         solve_parts,
         parts,
+    })
+}
+
+fn online_from_solve(complete: SolveIr) -> Result<OnlineIr, String> {
+    let parts = &complete.parts;
+    let before: Vec<_> = parts
+        .iter()
+        .enumerate()
+        .filter_map(|(i, part)| (part.trigger == BEFORE_ONLINE).then_some(i))
+        .collect();
+    let after: Vec<_> = parts
+        .iter()
+        .enumerate()
+        .filter_map(|(i, part)| (part.trigger == AFTER_ONLINE).then_some(i))
+        .collect();
+    let solve_end = parts
+        .iter()
+        .position(|part| part.trigger == AFTER)
+        .ok_or("missing outer solve marker")?;
+    if before.len() != 1
+        || after.len() != 1
+        || before[0] == 0
+        || before[0] >= after[0]
+        || after[0] >= solve_end
+    {
+        return Err(format!(
+            "expected exactly one ordered online interval inside the solve; found {before:?}/{after:?}, solve end {solve_end}"
+        ));
+    }
+    let pre_online_ir = sum_ir(&parts[1..=before[0]])?;
+    let online_ir = sum_ir(&parts[before[0] + 1..=after[0]])?;
+    let post_online_ir = sum_ir(&parts[after[0] + 1..=solve_end])?;
+    if pre_online_ir
+        .checked_add(online_ir)
+        .and_then(|sum| sum.checked_add(post_online_ir))
+        != Some(complete.solve_ir)
+    {
+        return Err("online instruction phases do not sum to complete solve".into());
+    }
+    Ok(OnlineIr {
+        schema: "ecbench.callgrind_online_ir/v1",
+        unit: "callgrind.Ir",
+        pre_online_ir,
+        online_ir,
+        post_online_ir,
+        solve_ir: complete.solve_ir,
+        prework_ir: complete.prework_ir,
+        parts: complete.parts,
     })
 }
 
@@ -168,6 +232,12 @@ pub fn solve_ir(prefix: &Path) -> Result<SolveIr, String> {
     summarize(parts)
 }
 
+/// Extract the one-target online interval from a complete solve profile.
+/// Missing, duplicate, reversed or out-of-solve markers are errors.
+pub fn online_ir(prefix: &Path) -> Result<OnlineIr, String> {
+    online_from_solve(solve_ir(prefix)?)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -192,6 +262,52 @@ mod tests {
         assert_eq!(result.prework_ir, 100);
         assert_eq!(result.solve_ir, 31);
         assert_eq!(result.solve_parts, 3);
+    }
+
+    #[test]
+    fn separates_reusable_and_one_target_instructions_without_losing_work() {
+        let complete = summarize(vec![
+            part("p.1", BEFORE, 100),
+            part("p.2", BEFORE_ONLINE, 10),
+            part("p.3", "generic_ic_target_query", 7),
+            part("p.4", AFTER_ONLINE, 13),
+            part("p.5", AFTER, 3),
+        ])
+        .unwrap();
+        let online = online_from_solve(complete).unwrap();
+        assert_eq!(online.pre_online_ir, 10);
+        assert_eq!(online.online_ir, 20);
+        assert_eq!(online.post_online_ir, 3);
+        assert_eq!(online.solve_ir, 33);
+        assert_eq!(online.prework_ir, 100);
+    }
+
+    #[test]
+    fn refuses_missing_duplicate_reversed_or_outside_online_markers() {
+        let base = vec![part("p.1", BEFORE, 1), part("p.2", AFTER, 2)];
+        assert!(online_from_solve(summarize(base).unwrap()).is_err());
+        let reversed = vec![
+            part("p.1", BEFORE, 1),
+            part("p.2", AFTER_ONLINE, 2),
+            part("p.3", BEFORE_ONLINE, 3),
+            part("p.4", AFTER, 4),
+        ];
+        assert!(online_from_solve(summarize(reversed).unwrap()).is_err());
+        let duplicate = vec![
+            part("p.1", BEFORE, 1),
+            part("p.2", BEFORE_ONLINE, 2),
+            part("p.3", BEFORE_ONLINE, 3),
+            part("p.4", AFTER_ONLINE, 4),
+            part("p.5", AFTER, 5),
+        ];
+        assert!(online_from_solve(summarize(duplicate).unwrap()).is_err());
+        let outside = vec![
+            part("p.1", BEFORE, 1),
+            part("p.2", BEFORE_ONLINE, 2),
+            part("p.3", AFTER, 3),
+            part("p.4", AFTER_ONLINE, 4),
+        ];
+        assert!(online_from_solve(summarize(outside).unwrap()).is_err());
     }
 
     #[test]

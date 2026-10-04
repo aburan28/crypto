@@ -106,6 +106,12 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 
 The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candidate (`IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772`) has 1,184 usable points and 16 folded columns. Across 40 verified one-target runs, its mean cold counted `S` lower bound is 2.111; its counted IC/rho quotient is 5.034 and K16/K42 is 0.349. Native work is unpriced for both arms, and L0 timing cannot establish an online speedup. This row is intentionally outside the three fully priced unit families; read the [frozen decision](../../research/ecbench_n37_rank_columns_20261004/RESULT.json).
 
+The untouched 16-target K8/K16 confirmation selected `IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54` for the cold implementation route: K16/K8 whole-solve Callgrind Ir is 1.190 [1.158, 1.222], and K8/rho is 3.645 [3.235, 4.136]. All 64 profiles and 320 independent measured replays verified. The unit is simulated whole-solve instructions, not isolated online wall time; K16 remains a target-only candidate. Read the [raw instruction decision](../../research/ecbench_n37_k8_k16_20261004/DECISION.json).
+
+The fresh 16-target panel reverses the base choice inside the **target-only simulated-instruction** interval: `IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2` is prioritized for an isolated n37 online wall test because K8/K16 target-only Callgrind Ir is 2.886 [1.730, 4.602]. K16/rho is 0.153 [0.092, 0.240] in the same instruction unit, while K8/K16 complete-solve Ir is 0.848. All 64 profile scalars and 320 independent measured replays verified. Mac L0 timing leaves the primary online wall speedup unknown; both bases remain live at n41/n53. Read the [raw target-only decision](../../research/ecbench_n37_online_ir_20261004/DECISION.json).
+
+The next native hosted n37 screen independently replayed 320/320 measured executions. For preregistered one-target workload `Wd281dbafa0cb`, descriptive rho/K16 online wall is 7.178. The separate 16-target panel has K8/K16 online wall 7.110 [3.669, 16.982]. All measured rows earned L1 and the identical K16 A/A maximum deviation was 12.85%, above the frozen 5% gate. The admitted online speedup remains unknown; both K8 and K16 carry to the L2 host gate and n41/n53. Read the [sealed native decision](../../research/ecbench_n37_native_online_wall_20261004/DECISION.json).
+
 
 ## Sources
 
@@ -118,4 +124,10 @@ The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candida
 - `research/ic_single_target_20260930/analysis.json` — sha256 `109326d7c2882b71…`
 - `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json` — sha256 `2271c4aa5236e2bd…`
 - `research/ecbench_n37_rank_columns_20261004/RESULT.json` — sha256 `9d3ba4708f70e279…`
+- `research/ecbench_n37_k8_k16_20261004/DECISION.json` — sha256 `c4a33ffd9045a479…`
+- `research/ecbench_n37_online_ir_20261004/DECISION.json` — sha256 `e711979f64d08ea3…`
+- `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json` — sha256 `369e99e76d8ba12a…`
+- `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json` — sha256 `a708e63cb4ccfe36…`
+- `research/ecbench_n37_native_online_wall_20261004/DECISION.json` — sha256 `eebbe2eef9524c7f…`
+- `research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json` — sha256 `bb4dd48030029d21…`
 - `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`
