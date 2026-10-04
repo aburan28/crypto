@@ -12,7 +12,7 @@
  },
  "sources": {
   "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
-  "docs/ic/leaderboard.json": "a649e1f28aa2c152b305cf263ea456db61843949688d2c7a2cdb4d51c04924a5",
+  "docs/ic/leaderboard.json": "3b60a2e886a45129061a1167ebe73b1170642a351e7f5f5759f97107ac05bbd1",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -11770,9 +11770,10 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "09c74e3fcd1d",
-   "mentions": 1,
-   "files": 1,
+   "mentions": 2,
+   "files": 2,
    "where": [
+    "docs/ic/leaderboard.json",
     "research/f6_ic_geometric_closure_20261003/small_cold/inherited_f4-candidate.json"
    ],
    "slug": "icv1-f2m9-tm5-4a3ea183"
@@ -11789,9 +11790,10 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "69071b8309b5",
-   "mentions": 1,
-   "files": 1,
+   "mentions": 2,
+   "files": 2,
    "where": [
+    "docs/ic/leaderboard.json",
     "research/f6_ic_geometric_closure_20261003/small_cold/f5-candidate.json"
    ],
    "slug": "icv1-f2m9-tm5-4a3ea183"
@@ -11808,9 +11810,10 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "efe256e276f2",
-   "mentions": 1,
-   "files": 1,
+   "mentions": 2,
+   "files": 2,
    "where": [
+    "docs/ic/leaderboard.json",
     "research/f6_ic_geometric_closure_20261003/small_cold/f6_ic-candidate.json"
    ],
    "slug": "icv1-f2m9-tm5-4a3ea183"
