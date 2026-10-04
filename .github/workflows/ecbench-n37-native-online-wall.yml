@@ -42,6 +42,12 @@ jobs:
               research/ecbench_n37_online_ir_20261004/PLAN.json | sort -u) \
             > "$RUNNER_TEMP/n37-target-overlap.txt"
           test ! -s "$RUNNER_TEMP/n37-target-overlap.txt"
+      # The source freeze guards the run until its session is sealed. After
+      # that, the committed session is protected by ecbench.yml's replay
+      # audit, and an unrelated ecbench change must not fail this screen.
+      - name: Check the frozen source while the run is pending
+        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        run: |
           git diff --exit-code 9e15353bf83b15e4cb8332519d8515613ac4dfea -- \
             Cargo.toml src/cryptanalysis/ecbench src/cryptanalysis/ic_framework/shared_rank.rs \
             src/bin/ecbench.rs
