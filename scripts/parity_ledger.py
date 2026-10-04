@@ -319,7 +319,8 @@ def cover(ccov_prefix="30_jv_cover_ccov", dlp_prefix="30_jv_cover_dlp"):
             oracle=sum(r["oracle_checked"] for r in g), mismatches=sum(r["mismatches"] for r in g),
             unverified=sum(r["unverified"] for r in g), incomplete=sum(r["incomplete"] for r in g),
             timed_out=sum(r["timed_out"] for r in g), stopped=sum(r.get("stopped", 0) for r in g),
-            stop=g[0].get("stop_staircase"))
+            stop=g[0].get("stop_staircase"), replayed=sum(r.get("replayed", 0) for r in g),
+            trace_mismatches=sum(r.get("trace_mismatches", 0) for r in g))
     return dict(sizes=sizes, dlp=dlp)
 
 
@@ -354,10 +355,13 @@ def print_cover(cv, title, label):
     if True:
         if cv["sizes"]:
             print(label + "\n")
-            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |")
-            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|")
+            traced = any(x.get("replayed", 0) for x in cv["sizes"].values())
+            extra = " replayed / diverged |" if traced else ""
+            print("| p | ℓ | seeds | columns | c_add E(F_{p⁶}) | c_add Jac | C_cov | Weil | F4 | solver | roots etc. | ideal degree | F4 degree | F4 matrix | F4 ms | test ms | random / decomposable | planted found | oracle checked / mismatches | unverified / incomplete / timed out |" + extra)
+            print("|---:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|:--|:--|:--|" + (":--|" if traced else ""))
             for p, x in cv["sizes"].items():
-                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |")
+                tail = f" {x.get('replayed', 0)} / {x.get('trace_mismatches', 0)} |" if traced else ""
+                print(f"| {p} | 2^{math.log2(x['l']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add_e']:.0f} | {x['c_add_j']:.0f} | {x['c_cov']:.3e} | {x['weil']:,.0f} | {x['f4']:.3e} | {x['lin']:.3e} | {x['post']:,.0f} | {x['delta']:.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['f4_ms']:.1f} | {x['total_ms']:.1f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['oracle']} / {x['mismatches']} | {x['unverified']} / {x['incomplete']} / {x['timed_out']} |" + tail)
         if cv["dlp"]:
             print("\nThe method end to end (every phase in F_p multiplications, rho on the same group; `*` = rho's S taken from the pooled smaller sizes, its table not fitting in memory).  `exact rate` is 16·C(|F|,6)/ℓ, the number of six-sums over the |F| classes landing in the subgroup, divided by its order: it equals 1/720 only as |F| = p/2 grows (C(|F|,6) = |F|⁶/720 · (1 − 15/|F| + …)); `S/rho` is against the pooled rho S of every walk (rho S scatters ±0.5 over 16 walks at ℓ = 2^32), `own rho` against the row's own walks:\n")
             print("| p | seed | ℓ | columns | residuals | relations | rate | exact rate | residuals / (unknowns / exact rate) | c_add E | C_cov as paid | LA ops (·u²) | S | S / rho (pooled rho S) | own rho S / S/rho | relation + LA | predicted (exact rate) | solved / correct | mismatches |")
@@ -642,9 +646,24 @@ def main():
                 fa = mean([cv["sizes"][p]["f4"] for p in common]); fb = mean([cvs["sizes"][p]["f4"] for p in common])
                 stopped = sum(cvs["sizes"][p]["stopped"] for p in common); tests = sum(cvs["sizes"][p]["random"] + cvs["sizes"][p]["constructed"] for p in common)
                 print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {stopped} of {tests} tests stopped at the staircase.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
+    cvt = cover("33_jv_cover_trace_ccov", "33_jv_cover_trace_dlp")
+    if cvt:
+        print_cover(cvt, "E.3 The same route with F4 stopped at the staircase and replaying a recorded trace (33_jv_cover_trace_*.json)",
+                    "Identical to E.2 except that F4 records, on the first system of each p, the pair rows every new pivot is a combination of, and replays them on the later systems (no pair selection, no row that reduces to zero); a replay whose shape diverges finishes as a full run and is counted as a mismatch.  `replayed` / `mismatches` per size:")
+        if cvs:
+            common = [p for p in cvt["sizes"] if p in cvs["sizes"]]
+            if common:
+                a = mean([cvs["sizes"][p]["c_cov"] for p in common]); b = mean([cvt["sizes"][p]["c_cov"] for p in common])
+                fa = mean([cvs["sizes"][p]["f4"] for p in common]); fb = mean([cvt["sizes"][p]["f4"] for p in common])
+                rep = sum(cvt["sizes"][p]["replayed"] for p in common); mis = sum(cvt["sizes"][p]["trace_mismatches"] for p in common)
+                tests = sum(cvt["sizes"][p]["random"] + cvt["sizes"][p]["constructed"] for p in common)
+                print(f"\nOver the {len(common)} common sizes: F4 {fa:.3e} → {fb:.3e} ({fa/fb:.2f}×), C_cov {a:.3e} → {b:.3e} ({a/b:.2f}×); {rep} of {tests} tests replayed the trace, {mis} diverged and finished as full runs.  Class: engineering (a constant on the test; the exponent of S/rho is the route's).")
     sv = sieve()
     if sv:
         print_sieve(sv, "F. The sieving variant of the cover route (32_jv_cover_sieve_*.json; note §11)")
+    svt = sieve("33_jv_cover_trace_sieve")
+    if svt:
+        print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
     wk = walk("34_jv_isogeny_walk.json")
     wk2 = walk("34_jv_isogeny_walk_two_only.json") or []
     if wk:
