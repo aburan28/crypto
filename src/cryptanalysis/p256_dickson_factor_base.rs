@@ -150,7 +150,7 @@ struct Column {
     low_y: BigUint,
 }
 
-fn lower_hex(value: &BigUint) -> String {
+pub(crate) fn lower_hex(value: &BigUint) -> String {
     format!("0x{}", value.to_str_radix(16))
 }
 
@@ -198,7 +198,7 @@ fn parse_spec(spec: &str) -> Result<(u32, Option<BigUint>), String> {
     Ok((depth, root))
 }
 
-fn curve_facts(curve: &CurveParams, id: &curve_id::CurveId) -> WideCurveFacts {
+pub(crate) fn curve_facts(curve: &CurveParams, id: &curve_id::CurveId) -> WideCurveFacts {
     WideCurveFacts {
         slug: id.slug.clone(),
         icv1: id.icv1.clone(),
@@ -233,7 +233,7 @@ fn norm_one_2_primary_generator(p: &BigUint) -> Result<Fp2, String> {
     Ok(g96)
 }
 
-fn curve_y(x: &BigUint, curve: &CurveParams) -> Option<BigUint> {
+pub(crate) fn curve_y(x: &BigUint, curve: &CurveParams) -> Option<BigUint> {
     let p = &curve.p;
     let rhs = (((x * x) % p) * x + &curve.a * x + &curve.b) % p;
     if rhs.is_zero() {
@@ -249,7 +249,10 @@ fn curve_y(x: &BigUint, curve: &CurveParams) -> Option<BigUint> {
     Some(y)
 }
 
-fn point_key_bytes(x: &BigUint, high_sign: bool) -> Result<[u8; POINT_KEY_BYTES], String> {
+pub(crate) fn point_key_bytes(
+    x: &BigUint,
+    high_sign: bool,
+) -> Result<[u8; POINT_KEY_BYTES], String> {
     let key = ((x + BigUint::one()) << 1usize) + BigUint::from(high_sign);
     let raw = key.to_bytes_be();
     if raw.len() > POINT_KEY_BYTES {

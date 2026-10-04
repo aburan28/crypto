@@ -220,6 +220,7 @@ pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod orbit_pair_table;
 pub mod p256_attacks;
+pub mod p256_bitbox_factor_base;
 pub mod p256_dickson_factor_base;
 pub mod p256_isogeny_cover;
 pub mod p256_structural;
