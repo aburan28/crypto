@@ -143,6 +143,64 @@ impl FpRing {
         }
         trim(out)
     }
+    /// `a²`: the `n(n + 1)/2` distinct products, the cross terms doubled by
+    /// an addition.
+    pub fn sqr(&self, a: &[u64]) -> FpPoly {
+        if a.is_empty() {
+            return Vec::new();
+        }
+        let n = a.len();
+        self.count((n * (n + 1) / 2) as u64);
+        let mut out = vec![0u64; 2 * n - 1];
+        for (i, &x) in a.iter().enumerate() {
+            if x == 0 {
+                continue;
+            }
+            out[2 * i] = am(out[2 * i], mm(x, x, self.p), self.p);
+            for (j, &y) in a.iter().enumerate().skip(i + 1) {
+                let t = mm(x, y, self.p);
+                out[i + j] = am(out[i + j], am(t, t, self.p), self.p);
+            }
+        }
+        trim(out)
+    }
+    /// `x·a mod m` for a monic `m` and `deg a < deg m`: a shift and one reduction step
+    /// (`deg m` multiplications when the shift reaches `deg m`).
+    pub fn mulx_mod(&self, a: &[u64], m: &[u64]) -> FpPoly {
+        if a.is_empty() {
+            return Vec::new();
+        }
+        let mut out = Vec::with_capacity(a.len() + 1);
+        out.push(0);
+        out.extend_from_slice(a);
+        let dm = m.len() - 1;
+        if out.len() - 1 == dm {
+            let c = out[dm];
+            self.count(dm as u64);
+            for (i, &mc) in m.iter().enumerate().take(dm) {
+                out[i] = sm(out[i], mm(c, mc, self.p), self.p);
+            }
+            out.truncate(dm);
+        }
+        trim(out)
+    }
+    /// `x^e mod m` for a monic `m` of degree `≥ 1`, left to right: a squaring
+    /// and, on a set bit, a shift ([`FpRing::mulx_mod`]).
+    pub fn powmod_x(&self, e: u128, m: &[u64]) -> FpPoly {
+        let x = self.rem(&[0, 1], m);
+        if e == 0 {
+            return self.rem(&[1], m);
+        }
+        let bits = 128 - e.leading_zeros();
+        let mut acc = x;
+        for i in (0..bits - 1).rev() {
+            acc = self.rem(&self.sqr(&acc), m);
+            if (e >> i) & 1 == 1 {
+                acc = self.mulx_mod(&acc, m);
+            }
+        }
+        acc
+    }
     pub fn monic(&self, a: &[u64]) -> FpPoly {
         match a.last() {
             None => Vec::new(),
@@ -236,7 +294,7 @@ impl FpRing {
             }
             e >>= 1;
             if e > 0 {
-                base = self.mulmod(&base, &base, m);
+                base = self.rem(&self.sqr(&base), m);
             }
         }
         acc
@@ -280,12 +338,16 @@ impl FpRing {
     /// each next power by the Frobenius matrix (`(Σ c_i x^i)^p = Σ c_i x^{ip}`,
     /// `n²` multiplications a step instead of a composition).
     fn frobenius_powers(&self, z: &[u64], upto: usize) -> Vec<FpPoly> {
+        self.frobenius(z, upto).0
+    }
+    /// [`FpRing::frobenius_powers`] together with the Frobenius matrix's
+    /// columns `x^{ip} mod z`, `i < deg z` (empty when `upto < 2`).
+    fn frobenius(&self, z: &[u64], upto: usize) -> (Vec<FpPoly>, Vec<FpPoly>) {
         let n = fdeg(z) as usize;
-        let x = vec![0u64, 1];
-        let xp = self.powmod(&x, self.p as u128, z);
+        let xp = self.powmod_x(self.p as u128, z);
         let mut out = vec![xp.clone()];
         if upto < 2 || n < 2 {
-            return out;
+            return (out, Vec::new());
         }
         // column i: x^{ip} mod z
         let mut cols: Vec<FpPoly> = Vec::with_capacity(n);
@@ -308,7 +370,70 @@ impl FpRing {
             self.count((n * n) as u64);
             out.push(trim(next));
         }
-        out
+        (out, cols)
+    }
+    /// `v^p mod z` from the Frobenius matrix's columns: `(Σ v_i x^i)^p =
+    /// Σ v_i x^{ip}`, `deg(z)²` multiplications.
+    fn frobenius_apply(&self, v: &[u64], cols: &[FpPoly], n: usize) -> FpPoly {
+        let mut next = vec![0u64; n];
+        for (i, &c) in v.iter().enumerate() {
+            if c == 0 {
+                continue;
+            }
+            for (j, &w) in cols[i].iter().enumerate() {
+                next[j] = am(next[j], mm(c, w, self.p), self.p);
+            }
+        }
+        self.count((n * n) as u64);
+        trim(next)
+    }
+    /// Cantor–Zassenhaus on a monic `g` that is a product of distinct
+    /// irreducibles of degree `d`, given the Frobenius columns
+    /// `x^{ip} mod z` of a multiple `z` of `g` (note §14): the Frobenius
+    /// trace `r + r^p + ⋯ + r^{p^{d−1}}` of a random `r` by `d − 1` matrix
+    /// products, then one exponent `(p − 1)/2`.
+    pub fn edf_frob(
+        &self,
+        g: &[u64],
+        d: usize,
+        cols_z: &[FpPoly],
+        rng: &mut StdRng,
+    ) -> Vec<FpPoly> {
+        let g = self.monic(g);
+        let n = fdeg(&g);
+        if n <= 0 {
+            return Vec::new();
+        }
+        let n = n as usize;
+        if n == d {
+            return vec![g];
+        }
+        // the columns reduced mod g (free when g = z)
+        let cols: Vec<FpPoly> = cols_z.iter().take(n).map(|c| self.rem(c, &g)).collect();
+        let e = (self.p as u128 - 1) / 2;
+        loop {
+            let r: FpPoly = trim((0..n).map(|_| rng.gen_range(0..self.p)).collect());
+            if fdeg(&r) < 1 {
+                continue;
+            }
+            let mut t = r.clone();
+            let mut v = r;
+            for _ in 1..d {
+                v = self.frobenius_apply(&v, &cols, n);
+                t = self.add(&t, &v);
+            }
+            if fdeg(&t) < 1 {
+                continue;
+            }
+            let w = self.sub(&self.powmod(&t, e, &g), &[1]);
+            let h = self.gcd(&g, &w);
+            if fdeg(&h) > 0 && (fdeg(&h) as usize) < n {
+                let other = self.exact_div(&g, &h);
+                let mut out = self.edf_frob(&h, d, &cols, rng);
+                out.extend(self.edf_frob(&other, d, &cols, rng));
+                return out;
+            }
+        }
     }
     /// Distinct-degree factorisation of a monic squarefree `z`: pairs
     /// `(g_d, d)`, `g_d` the product of the irreducible factors of degree `d`.
@@ -430,6 +555,110 @@ impl FpRing {
                 for f in self.edf(&gd, d, rng) {
                     out.push((f, mult));
                 }
+            }
+        }
+        out
+    }
+    /// [`FpRing::factor`] for a caller that wants the monic divisors of the
+    /// degrees in `targets` and nothing else (note §14): a distinct-degree
+    /// group (`k` irreducibles of degree `d`) is split only when some
+    /// divisor of a target degree would use a strict sub-multiple of it,
+    /// decided by reachability over the other factors' degrees (the other
+    /// groups counted as splittable, so the decision errs towards
+    /// splitting); otherwise its product stands as one factor.  The
+    /// divisors of the target degrees are the same as from the full
+    /// factorisation.  A non-squarefree `a` takes the full factorisation.
+    pub fn factor_lazy(
+        &self,
+        a: &[u64],
+        targets: &[usize],
+        rng: &mut StdRng,
+    ) -> Vec<(FpPoly, usize)> {
+        let sq = self.squarefree(a);
+        if sq.len() != 1 || sq[0].1 != 1 {
+            return self.factor(a, rng);
+        }
+        let mut out: Vec<(FpPoly, usize)> = Vec::new();
+        let mut rest = sq.into_iter().next().unwrap().0;
+        for r in self.roots_by_table(&rest) {
+            let lin = vec![(self.p - r) % self.p, 1];
+            rest = self.exact_div(&rest, &lin);
+            out.push((lin, 1));
+        }
+        let dr = fdeg(&rest);
+        if dr <= 0 {
+            return out;
+        }
+        if dr <= 3 {
+            out.push((rest, 1));
+            return out;
+        }
+        let z0 = self.monic(&rest);
+        let n = dr as usize;
+        let (powers, cols) = self.frobenius(&z0, n / 2);
+        // the distinct-degree groups of z0 (degrees ≥ 2)
+        let x = vec![0u64, 1];
+        let mut z = z0.clone();
+        let mut groups: Vec<(FpPoly, usize)> = Vec::new();
+        for (d, xpd) in powers.iter().enumerate().map(|(i, v)| (i + 1, v)) {
+            if d < 2 {
+                continue;
+            }
+            if fdeg(&z) < 2 * d as isize {
+                break;
+            }
+            let g = self.gcd(&z, &self.sub(&self.rem(xpd, &z), &x));
+            if fdeg(&g) > 0 {
+                groups.push((g.clone(), d));
+                z = self.exact_div(&z, &g);
+                if fdeg(&z) <= 0 {
+                    break;
+                }
+            }
+        }
+        if fdeg(&z) > 0 {
+            groups.push((z.clone(), fdeg(&z) as usize));
+        }
+        let kmax = targets.iter().copied().max().unwrap_or(0);
+        let fixed: Vec<usize> = out.iter().map(|(f, _)| fdeg(f) as usize).collect();
+        for gi in 0..groups.len() {
+            let (gd, d) = (&groups[gi].0, groups[gi].1);
+            let count = fdeg(gd) as usize / d;
+            let mut need = false;
+            if count >= 2 {
+                // the other atoms: the fixed factors and the other groups' irreducibles
+                let mut atoms = fixed.clone();
+                for (gj, (g2, d2)) in groups.iter().enumerate() {
+                    if gj != gi {
+                        for _ in 0..(fdeg(g2) as usize / d2) {
+                            atoms.push(*d2);
+                        }
+                    }
+                }
+                let mut reach = vec![false; kmax + 1];
+                reach[0] = true;
+                for a in atoms {
+                    for t in (a..=kmax).rev() {
+                        if reach[t - a] {
+                            reach[t] = true;
+                        }
+                    }
+                }
+                'outer: for j in 1..count {
+                    for &k in targets {
+                        if k >= j * d && reach[k - j * d] {
+                            need = true;
+                            break 'outer;
+                        }
+                    }
+                }
+            }
+            if need {
+                for f in self.edf_frob(gd, d, &cols, rng) {
+                    out.push((f, 1));
+                }
+            } else {
+                out.push((gd.clone(), 1));
             }
         }
         out
@@ -572,6 +801,21 @@ pub fn choose_m(p: u64, base_len: usize, margin: f64) -> usize {
     }
 }
 
+/// Note §14: the relations the `B`-space of `m` is expected to yield,
+/// `|B-space| · lines_per_B · 0.9·p/m!` with the measured `0.5` lines per
+/// `B` for `m` odd and `1.0` for `m` even (§11.5).
+pub fn relations_estimate(p: u64, m: usize) -> f64 {
+    let m2 = (m - 7) / 2;
+    let space = if m.is_multiple_of(2) {
+        (p as f64 / 2.0).ceil() * (p as f64).powi(2 * m2 as i32)
+    } else {
+        (p as f64).powi(2 * m2 as i32)
+    };
+    let lines_per_b = if m.is_multiple_of(2) { 1.0 } else { 0.5 };
+    let fact = (1..=m).map(|k| k as f64).product::<f64>();
+    space * lines_per_b * 0.9 * p as f64 / fact
+}
+
 /// One line: `A₀` (monic), `A₁′`, `B`, and the three polynomials of
 /// `F(x, s) = P₁(x) + s² P₂(x) − s P₃(x)`.
 #[derive(Clone, Debug)]
@@ -674,6 +918,20 @@ pub fn lines_for_b(
     b: &[E2],
     rng: &mut StdRng,
 ) -> Vec<Line> {
+    lines_for_b_with(ring, fq, setup, b, rng, true)
+}
+
+/// [`lines_for_b`] with the factoring chosen: `lazy` as note §14 (the
+/// default), or the full factorisation of §11.5 (the reference the test
+/// compares against).
+pub fn lines_for_b_with(
+    ring: &FpRing,
+    fq: &Fq,
+    setup: &SieveSetup,
+    b: &[E2],
+    rng: &mut StdRng,
+    lazy: bool,
+) -> Vec<Line> {
     let p = setup.p;
     if b.is_empty() {
         return Vec::new();
@@ -693,7 +951,12 @@ pub fn lines_for_b(
     if lo > hi || dg < lo {
         return Vec::new();
     }
-    let factors = ring.factor(&g, rng);
+    let factors = if lazy {
+        let targets: Vec<usize> = (lo..=hi.min(dg)).collect();
+        ring.factor_lazy(&g, &targets, rng)
+    } else {
+        ring.factor(&g, rng)
+    };
     let half = ring.inv(2);
     let b0: FpPoly = trim(b.iter().map(|c| c.0[0]).collect());
     let b1: FpPoly = trim(b.iter().map(|c| c.0[1]).collect());
@@ -1063,6 +1326,10 @@ pub struct SieveDlpReport {
     pub c_add_j: f64,
     /// `m` as the rule chose it from `p`, and the `m` the run ended on.
     pub m_rule: usize,
+    /// Note §14: the relations each `m` is expected to yield from the
+    /// measured constants (`0.5` lines per `B` for `m` odd, `1` for `m`
+    /// even, rate `0.9·p/m!`), `m = 9..=13`.
+    pub estimate_by_m: Vec<(usize, f64)>,
     pub m_final: usize,
     pub margin: f64,
     pub relations_available: f64,
@@ -1268,7 +1535,9 @@ pub fn run_cover_sieve_dlp(
     let small = base.len();
     let unknowns = small + 1;
     let m_rule = choose_m(p, small, margin);
-    let mut m = m_override.unwrap_or(m_rule);
+    // note §14: climb from m = 9, the cheapest lines first; the rule's m is
+    // reported and predicts, it no longer sets where the run starts
+    let mut m = m_override.unwrap_or(9);
     let fact = |m: usize| (1..=m).map(|k| k as f64).product::<f64>();
     let mut rep = SieveDlpReport {
         p,
@@ -1282,7 +1551,8 @@ pub fn run_cover_sieve_dlp(
         m_final: m,
         margin,
         trace,
-        relations_available: (p as f64).powi(m as i32 - 6) / fact(m),
+        relations_available: (p as f64).powi(m_rule as i32 - 6) / fact(m_rule),
+        estimate_by_m: (9..=13).map(|mm| (mm, relations_estimate(p, mm))).collect(),
         base_muls,
         ..Default::default()
     };
@@ -1819,6 +2089,111 @@ mod tests {
         }
     }
 
+    #[test]
+    fn squaring_and_shift_powers_agree_with_the_products() {
+        let (ring, mut rng) = ring_and_rng(1511);
+        for _ in 0..50 {
+            let n = 1 + rng.gen_range(0..9usize);
+            let a: FpPoly = trim((0..n).map(|_| rng.gen_range(0..1511)).collect());
+            assert_eq!(ring.sqr(&a), ring.mul(&a, &a));
+            let mut m: FpPoly = (0..8).map(|_| rng.gen_range(0..1511)).collect();
+            m.push(1);
+            for &e in &[1u128, 2, 7, 1511, 1009 * 1009, 1 << 40] {
+                assert_eq!(ring.powmod_x(e, &m), ring.powmod(&[0, 1], e, &m), "e = {e}");
+            }
+            let ar = ring.rem(&a, &m);
+            assert_eq!(ring.mulx_mod(&ar, &m), ring.mulmod(&ar, &[0, 1], &m));
+        }
+    }
+
+    #[test]
+    fn frobenius_edf_splits_like_cantor_zassenhaus() {
+        let (ring, mut rng) = ring_and_rng(1009);
+        let mut done = 0;
+        while done < 30 {
+            // a product of distinct irreducibles of one degree d, times a
+            // cofactor, so that the columns come from a multiple
+            let d = 2 + rng.gen_range(0..3usize);
+            let k = 2 + rng.gen_range(0..2usize);
+            if d * k > 8 {
+                continue;
+            }
+            let mut g = vec![1u64];
+            let mut parts: Vec<FpPoly> = Vec::new();
+            for _ in 0..k {
+                let f = loop {
+                    let mut f: FpPoly = (0..d).map(|_| rng.gen_range(0..1009)).collect();
+                    f.push(1);
+                    let fac = ring.factor(&f, &mut rng);
+                    if fac.len() == 1 && fac[0].1 == 1 && !parts.contains(&f) {
+                        break f;
+                    }
+                };
+                g = ring.mul(&g, &f);
+                parts.push(f);
+            }
+            let mut z = g.clone();
+            if fdeg(&z) < 8 {
+                let mut c: FpPoly = (0..(8 - fdeg(&z) as usize))
+                    .map(|_| rng.gen_range(0..1009))
+                    .collect();
+                c.push(1);
+                z = ring.mul(&z, &c);
+            }
+            let (_, cols) = ring.frobenius(&z, 4);
+            let mut got = ring.edf_frob(&g, d, &cols, &mut rng);
+            got.sort();
+            parts.sort();
+            assert_eq!(got, parts, "d = {d}, k = {k}");
+            done += 1;
+        }
+    }
+
+    #[test]
+    fn lazy_factoring_yields_the_same_lines() {
+        let p = 1009;
+        let spec = generate_spec(p, 1);
+        let ctx = Ctx::new(&spec);
+        let fq = &ctx.f.f;
+        let mut rng = StdRng::seed_from_u64(5);
+        let base = factor_base(&ctx, &mut rng);
+        for m in [9usize, 10] {
+            let setup = sieve_setup(fq, &ctx.cov.hx, &base, m);
+            let ring = FpRing::new(p);
+            let scramble = coprime_scramble(b_space(&setup), &mut rng);
+            let (mut lines, mut full_muls, mut lazy_muls) = (0u64, 0u64, 0u64);
+            for k in 0..2000u128 {
+                let b = b_from_index(&setup, k, scramble);
+                ring.reset();
+                let full = lines_for_b_with(&ring, fq, &setup, &b, &mut rng, false);
+                full_muls += ring.muls();
+                ring.reset();
+                let lazy = lines_for_b_with(&ring, fq, &setup, &b, &mut rng, true);
+                lazy_muls += ring.muls();
+                let key = |l: &Line| (l.a0.clone(), l.a1.clone());
+                let mut fk: Vec<_> = full.iter().map(key).collect();
+                let mut lk: Vec<_> = lazy.iter().map(key).collect();
+                fk.sort();
+                lk.sort();
+                assert_eq!(fk, lk, "B #{k} at m = {m}");
+                lines += lazy.len() as u64;
+            }
+            eprintln!(
+                "m = {m}: {lines} lines over 2000 B's; full {full_muls} lazy {lazy_muls} muls ({:.2}×)",
+                full_muls as f64 / lazy_muls.max(1) as f64
+            );
+            assert!(lazy_muls < full_muls, "the lazy enumeration is cheaper");
+        }
+    }
+
+    #[test]
+    fn the_estimate_is_the_registered_formula() {
+        let e = relations_estimate(503, 9);
+        assert!((e - 503.0f64.powi(2) * 0.5 * 0.9 * 503.0 / 362880.0).abs() < 1e-6);
+        let e = relations_estimate(503, 10);
+        assert!((e - 252.0 * 503.0f64.powi(2) * 0.9 * 503.0 / 3628800.0).abs() < 1e-6);
+    }
+
     /// Where the enumeration's multiplications go: the factoring of
     /// `Im(B²h)` step by step over a sample of `B`'s (ignored; run with
     /// `--nocapture` to read the breakdown; note §14).
@@ -1838,7 +2213,9 @@ mod tests {
             let n = 3000u128;
             let mut acc = [0u64; 9];
             let mut adds = 0u64;
-            let (mut with_lines, mut lines, mut edf_runs, mut edf_needed) = (0u64, 0u64, 0u64, 0u64);
+            let mut lazy_total = 0u64;
+            let (mut with_lines, mut lines, mut edf_runs, mut edf_needed) =
+                (0u64, 0u64, 0u64, 0u64);
             let mut rest_deg = [0u64; 9];
             for k in 0..n {
                 let b = b_from_index(&setup, k, scramble);
@@ -1899,25 +2276,48 @@ mod tests {
                         let cnt = fdeg(gd) as usize / d;
                         if cnt >= 2 {
                             // a degree-m1 divisor using a strict sub-multiple of this group?
-                            let others: Vec<usize> = factors.iter().map(|(f, _)| fdeg(f) as usize).collect();
-                            let other_groups: Vec<(usize, usize)> = groups.iter().filter(|(g2, _)| g2 != gd).map(|(g2, d2)| (fdeg(g2) as usize, *d2)).collect();
+                            let others: Vec<usize> =
+                                factors.iter().map(|(f, _)| fdeg(f) as usize).collect();
+                            let other_groups: Vec<(usize, usize)> = groups
+                                .iter()
+                                .filter(|(g2, _)| g2 != gd)
+                                .map(|(g2, d2)| (fdeg(g2) as usize, *d2))
+                                .collect();
                             for j in 1..cnt {
                                 let want = setup.m1 as isize - (j * d) as isize;
-                                if want < 0 { continue; }
+                                if want < 0 {
+                                    continue;
+                                }
                                 // subset sum over the other atoms (linear factors + whole other groups, which may also split)
                                 let mut atoms: Vec<usize> = others.clone();
-                                for (dg, d2) in &other_groups { for _ in 0..(dg / d2) { atoms.push(*d2); } }
+                                for (dg, d2) in &other_groups {
+                                    for _ in 0..(dg / d2) {
+                                        atoms.push(*d2);
+                                    }
+                                }
                                 let mut reach = vec![false; setup.m1 + 1];
                                 reach[0] = true;
-                                for a in atoms { for t in (a..=setup.m1).rev() { if reach[t - a] { reach[t] = true; } } }
-                                if reach[want as usize] { need = true; }
+                                for a in atoms {
+                                    for t in (a..=setup.m1).rev() {
+                                        if reach[t - a] {
+                                            reach[t] = true;
+                                        }
+                                    }
+                                }
+                                if reach[want as usize] {
+                                    need = true;
+                                }
                             }
                         }
                     }
-                    if need { edf_needed += 1; }
+                    if need {
+                        edf_needed += 1;
+                    }
                     ring.reset();
                     for (gd, d) in groups {
-                        if fdeg(&gd) as usize > d { edf_runs += 1; }
+                        if fdeg(&gd) as usize > d {
+                            edf_runs += 1;
+                        }
                         for f in ring.edf(&gd, d, &mut rng) {
                             factors.push((f, mult));
                         }
@@ -1932,23 +2332,37 @@ mod tests {
                     for a0 in ring.divisors_of_degree(&factors, kk) {
                         let a1 = ring.exact_div(&g, &a0);
                         let a1m = ring.monic(&a1);
-                        if (a0.len(), &a0) > (a1m.len(), &a1m) { continue; }
+                        if (a0.len(), &a0) > (a1m.len(), &a1m) {
+                            continue;
+                        }
                         let _ = (ring.mul(&a0, &a0), ring.mul(&a1, &a1));
                         nl += 1;
                     }
                 }
                 acc[7] += ring.muls();
-                if nl > 0 { with_lines += 1; }
+                if nl > 0 {
+                    with_lines += 1;
+                }
                 lines += nl;
                 ring.reset();
-                let full = lines_for_b(&ring, fq, &setup, &b, &mut rng);
+                fq.reset_muls();
+                let full = lines_for_b_with(&ring, fq, &setup, &b, &mut rng, false);
                 acc[8] += ring.muls() + fq.muls();
-                assert_eq!(full.len() as u64, nl, "probe and lines_for_b agree on the line count");
+                assert_eq!(
+                    full.len() as u64,
+                    nl,
+                    "probe and lines_for_b agree on the line count"
+                );
+                ring.reset();
+                fq.reset_muls();
+                let lazy = lines_for_b_with(&ring, fq, &setup, &b, &mut rng, true);
+                lazy_total += ring.muls() + fq.muls();
+                assert_eq!(lazy.len(), full.len());
             }
             let nf = n as f64;
             eprintln!(
-                "p={p} m={m} |F|={} B's={n}: per B: b2h {:.0} squarefree {:.0} roots {:.0} (+{:.0} adds) x^p {:.0} frob-cols+powers {:.0} ddf-gcds {:.0} edf {:.0} divisors+lines {:.0} | lines_for_b total {:.0} | lines/B {:.3} B's with lines {:.3} edf runs/B {:.3} edf needed/B {:.3} | rest degree histogram {:?}",
-                base.len(), acc[0] as f64 / nf, acc[1] as f64 / nf, acc[2] as f64 / nf, adds as f64 / nf, acc[3] as f64 / nf, acc[4] as f64 / nf, acc[5] as f64 / nf, acc[6] as f64 / nf, acc[7] as f64 / nf, acc[8] as f64 / nf, lines as f64 / nf, with_lines as f64 / nf, edf_runs as f64 / nf, edf_needed as f64 / nf, rest_deg
+                "p={p} m={m} |F|={} B's={n}: per B: b2h {:.0} squarefree {:.0} roots {:.0} (+{:.0} adds) x^p {:.0} frob-cols+powers {:.0} ddf-gcds {:.0} edf {:.0} divisors+lines {:.0} | lines_for_b total {:.0} | lazy (§14) total {:.0} | lines/B {:.3} B's with lines {:.3} edf runs/B {:.3} edf needed/B {:.3} | rest degree histogram {:?}",
+                base.len(), acc[0] as f64 / nf, acc[1] as f64 / nf, acc[2] as f64 / nf, adds as f64 / nf, acc[3] as f64 / nf, acc[4] as f64 / nf, acc[5] as f64 / nf, acc[6] as f64 / nf, acc[7] as f64 / nf, acc[8] as f64 / nf, lazy_total as f64 / nf, lines as f64 / nf, with_lines as f64 / nf, edf_runs as f64 / nf, edf_needed as f64 / nf, rest_deg
             );
         }
     }
