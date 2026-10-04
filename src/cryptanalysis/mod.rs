@@ -193,6 +193,7 @@ pub mod koblitz_index_calculus;
 pub mod koblitz_isogeny_cost;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
+pub mod koblitz_rotated_chain;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
