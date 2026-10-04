@@ -50,6 +50,18 @@
    "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
    "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
   },
+  "n37_online_ir": {
+   "path": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+   "sha256": "e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a"
+  },
+  "n37_online_k8_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+   "sha256": "369e99e76d8ba12a376ae3be47445fbc705ff375766421b3e841ed9a0a93942a"
+  },
+  "n37_online_k16_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+   "sha256": "a708e63cb4ccfe36bccb0e81ad69a43e651bec17a11c62412fcce6fa64b2f444"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
@@ -3745,14 +3757,14 @@
      "s": 4.872889458440391,
      "s_before": 6.783250946324698,
      "phases_s": {
-      "setup": 0.6237339814760797,
-      "constructions": 0.9143040099593411,
-      "factor_base": 0.5715249018442982,
+      "setup": 0.6237339814760795,
+      "constructions": 0.914304009959341,
+      "factor_base": 0.571524901844298,
       "table": 0.5043462314056679,
       "relations": 0.2581727942743142,
-      "linear_algebra": 0.1300231945875359,
+      "linear_algebra": 0.13002319458753586,
       "descent": 0.9139956272233088,
-      "verify": 0.9567887176698457
+      "verify": 0.9567887176698456
      },
      "ratio_rho": 14.896649773263793,
      "ratio_rho_ci": [
@@ -3792,14 +3804,14 @@
     "s": 4.872889458440391,
     "s_before": 6.783250946324698,
     "phases_s": {
-     "setup": 0.6237339814760797,
-     "constructions": 0.9143040099593411,
-     "factor_base": 0.5715249018442982,
+     "setup": 0.6237339814760795,
+     "constructions": 0.914304009959341,
+     "factor_base": 0.571524901844298,
      "table": 0.5043462314056679,
      "relations": 0.2581727942743142,
-     "linear_algebra": 0.1300231945875359,
+     "linear_algebra": 0.13002319458753586,
      "descent": 0.9139956272233088,
-     "verify": 0.9567887176698457
+     "verify": 0.9567887176698456
     },
     "ratio_rho": 14.896649773263793,
     "ratio_rho_ci": [
@@ -3856,7 +3868,7 @@
      "s_before": 1.9765001942778928,
      "phases_s": {
       "setup": 0.16446116776150432,
-      "constructions": 0.28861160085349774,
+      "constructions": 0.2886116008534978,
       "factor_base": 0.1684686994182842,
       "table": 0.13652435255426154,
       "relations": 0.11946648505974385,
@@ -3903,7 +3915,7 @@
     "s_before": 1.9765001942778928,
     "phases_s": {
      "setup": 0.16446116776150432,
-     "constructions": 0.28861160085349774,
+     "constructions": 0.2886116008534978,
      "factor_base": 0.1684686994182842,
      "table": 0.13652435255426154,
      "relations": 0.11946648505974385,
@@ -3970,8 +3982,8 @@
       "factor_base": 0.1300108689672182,
       "table": 0.06965563710625806,
       "relations": 0.04060455824877867,
-      "linear_algebra": 0.012480668153261886,
-      "descent": 0.15063656688310412,
+      "linear_algebra": 0.012480668153261888,
+      "descent": 0.15063656688310414,
       "verify": 0.07960719889983717
      },
      "ratio_rho": 7.190079591360827,
@@ -4017,8 +4029,8 @@
      "factor_base": 0.1300108689672182,
      "table": 0.06965563710625806,
      "relations": 0.04060455824877867,
-     "linear_algebra": 0.012480668153261886,
-     "descent": 0.15063656688310412,
+     "linear_algebra": 0.012480668153261888,
+     "descent": 0.15063656688310414,
      "verify": 0.07960719889983717
     },
     "ratio_rho": 7.190079591360827,
@@ -4078,11 +4090,11 @@
       "setup": 0.07562128195935067,
       "constructions": 0.06214807047463206,
       "factor_base": 0.04114115835264887,
-      "table": 0.02432361136640727,
+      "table": 0.024323611366407268,
       "relations": 0.08316503750296374,
       "linear_algebra": 0.004893805839784593,
       "descent": 0.16189097130470326,
-      "verify": 0.03209683958893579
+      "verify": 0.032096839588935784
      },
      "ratio_rho": 5.260801523504233,
      "ratio_rho_ci": [
@@ -4125,11 +4137,11 @@
      "setup": 0.07562128195935067,
      "constructions": 0.06214807047463206,
      "factor_base": 0.04114115835264887,
-     "table": 0.02432361136640727,
+     "table": 0.024323611366407268,
      "relations": 0.08316503750296374,
      "linear_algebra": 0.004893805839784593,
      "descent": 0.16189097130470326,
-     "verify": 0.03209683958893579
+     "verify": 0.032096839588935784
     },
     "ratio_rho": 5.260801523504233,
     "ratio_rho_ci": [
@@ -4187,10 +4199,10 @@
      "phases_s": {
       "setup": 0.03395506914921843,
       "constructions": 0.023034166887328986,
-      "factor_base": 0.019384788042774333,
-      "table": 0.01416451850857146,
+      "factor_base": 0.019384788042774336,
+      "table": 0.014164518508571462,
       "relations": 0.0971688146840351,
-      "linear_algebra": 0.0019617182033429244,
+      "linear_algebra": 0.001961718203342925,
       "descent": 0.12391483206638415,
       "verify": 0.011249466868672486
      },
@@ -4234,10 +4246,10 @@
     "phases_s": {
      "setup": 0.03395506914921843,
      "constructions": 0.023034166887328986,
-     "factor_base": 0.019384788042774333,
-     "table": 0.01416451850857146,
+     "factor_base": 0.019384788042774336,
+     "table": 0.014164518508571462,
      "relations": 0.0971688146840351,
-     "linear_algebra": 0.0019617182033429244,
+     "linear_algebra": 0.001961718203342925,
      "descent": 0.12391483206638415,
      "verify": 0.011249466868672486
     },
@@ -4297,12 +4309,12 @@
      "phases_s": {
       "setup": 0.022026209336272286,
       "constructions": 0.01568087091378731,
-      "factor_base": 0.01703870257189441,
-      "table": 0.03705563654823103,
+      "factor_base": 0.017038702571894413,
+      "table": 0.03705563654823104,
       "relations": 0.05791232891756848,
-      "linear_algebra": 0.0015295490447882385,
-      "descent": 0.07648273932107356,
-      "verify": 0.006686094296738499
+      "linear_algebra": 0.0015295490447882387,
+      "descent": 0.07648273932107358,
+      "verify": 0.0066860942967385
      },
      "ratio_rho": 3.8928784425876555,
      "ratio_rho_ci": [
@@ -4344,12 +4356,12 @@
     "phases_s": {
      "setup": 0.022026209336272286,
      "constructions": 0.01568087091378731,
-     "factor_base": 0.01703870257189441,
-     "table": 0.03705563654823103,
+     "factor_base": 0.017038702571894413,
+     "table": 0.03705563654823104,
      "relations": 0.05791232891756848,
-     "linear_algebra": 0.0015295490447882385,
-     "descent": 0.07648273932107356,
-     "verify": 0.006686094296738499
+     "linear_algebra": 0.0015295490447882387,
+     "descent": 0.07648273932107358,
+     "verify": 0.0066860942967385
     },
     "ratio_rho": 3.8928784425876555,
     "ratio_rho_ci": [
@@ -4405,13 +4417,13 @@
      "s": 0.24079642651229552,
      "s_before": 0.24982039203317233,
      "phases_s": {
-      "setup": 0.020918427650165213,
-      "constructions": 0.00845148974160727,
-      "factor_base": 0.009389432875206362,
-      "table": 0.029064516010166193,
-      "relations": 0.11961859469647401,
-      "linear_algebra": 0.001103131805338061,
-      "descent": 0.04790804218541379,
+      "setup": 0.02091842765016521,
+      "constructions": 0.008451489741607268,
+      "factor_base": 0.00938943287520636,
+      "table": 0.02906451601016619,
+      "relations": 0.119618594696474,
+      "linear_algebra": 0.0011031318053380608,
+      "descent": 0.047908042185413786,
       "verify": 0.004342791547924642
      },
      "ratio_rho": 3.6156712977275385,
@@ -4452,13 +4464,13 @@
     "s": 0.24079642651229552,
     "s_before": 0.24982039203317233,
     "phases_s": {
-     "setup": 0.020918427650165213,
-     "constructions": 0.00845148974160727,
-     "factor_base": 0.009389432875206362,
-     "table": 0.029064516010166193,
-     "relations": 0.11961859469647401,
-     "linear_algebra": 0.001103131805338061,
-     "descent": 0.04790804218541379,
+     "setup": 0.02091842765016521,
+     "constructions": 0.008451489741607268,
+     "factor_base": 0.00938943287520636,
+     "table": 0.02906451601016619,
+     "relations": 0.119618594696474,
+     "linear_algebra": 0.0011031318053380608,
+     "descent": 0.047908042185413786,
      "verify": 0.004342791547924642
     },
     "ratio_rho": 3.6156712977275385,
@@ -4625,14 +4637,14 @@
      "s": 0.4884575885497573,
      "s_before": 0.48140217766517623,
      "phases_s": {
-      "setup": 0.016734336446242993,
-      "constructions": 0.0029578587093882307,
+      "setup": 0.016734336446242996,
+      "constructions": 0.002957858709388231,
       "factor_base": 0.0035389964287900373,
-      "table": 0.036428805990492114,
+      "table": 0.03642880599049212,
       "relations": 0.3849898071771096,
       "linear_algebra": 0.00025765445893974597,
       "descent": 0.042519478831920324,
-      "verify": 0.001030650506874197
+      "verify": 0.0010306505068741973
      },
      "ratio_rho": 9.202036756044834,
      "ratio_rho_ci": [
@@ -4672,14 +4684,14 @@
     "s": 0.4884575885497573,
     "s_before": 0.48140217766517623,
     "phases_s": {
-     "setup": 0.016734336446242993,
-     "constructions": 0.0029578587093882307,
+     "setup": 0.016734336446242996,
+     "constructions": 0.002957858709388231,
      "factor_base": 0.0035389964287900373,
-     "table": 0.036428805990492114,
+     "table": 0.03642880599049212,
      "relations": 0.3849898071771096,
      "linear_algebra": 0.00025765445893974597,
      "descent": 0.042519478831920324,
-     "verify": 0.001030650506874197
+     "verify": 0.0010306505068741973
     },
     "ratio_rho": 9.202036756044834,
     "ratio_rho_ci": [
@@ -5119,6 +5131,27 @@
   ],
   "online_speedup": null,
   "cold_wall_speedup": null
+ },
+ "n37_online_ir_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "prioritize_k16_for_isolated_n37_online_wall_gate",
+  "k8_over_k16_online_ir": 2.8860076532738073,
+  "k8_over_k16_online_ir_ci95": [
+   1.730215437274574,
+   4.601504089537422
+  ],
+  "k16_over_rho_online_ir": 0.15337193605882804,
+  "k16_over_rho_online_ir_ci95": [
+   0.09233888610436006,
+   0.24000314990195315
+  ],
+  "k8_over_k16_cold_ir": 0.8484004913354137,
+  "online_wall_speedup": null
  },
  "exponents": {
   "prime": {

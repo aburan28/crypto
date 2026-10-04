@@ -26,8 +26,16 @@ SHA-256
 `a2d63e9063c98955e7fdf49b137d1c9baafc9912b903f8aa79cd69a43035a32f`.
 Every Mac run earned L0, so wall ratios from this session are descriptive.
 
-Independent Linux replay, Callgrind profiling, and the decision are pending.
-The
+The [result and claim limits](RESULT.md) now prioritize K16 for an isolated
+n37 online wall test: K8/K16 target-only Callgrind Ir is 2.8860
+[1.7302, 4.6015] on 16 new public points, while K8/K16 complete-solve Ir
+is 0.8484 [0.8186, 0.8837]. All 64 profiles verified and all 320 measured
+native executions replayed exactly on a different Linux environment class.
+The [raw profiles](RAW-CALLGRIND.zip), [census](CENSUS.json),
+[decision](DECISION.json), independent [receipt](independent_validation/RECEIPT.json),
+and [Rust analyzer](../../examples/ecbench_n37_online_ir_analyze.rs) allow
+the split to be rederived. The primary isolated online wall speedup remains
+unknown. The
 [preceding cold-solve result](../ecbench_n37_k8_k16_20261004/RESULT.md)
 selected K8 in complete-solve Ir but left the primary online base choice
 open.

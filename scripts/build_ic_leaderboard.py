@@ -59,6 +59,9 @@ SOURCES = {
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
     "n37_k8_k16": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+    "n37_online_ir": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+    "n37_online_k8_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+    "n37_online_k16_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -544,6 +547,44 @@ def build() -> dict:
         "online_speedup": None,
         "cold_wall_speedup": None,
     }
+    online_ir_decision = load(SOURCES["n37_online_ir"])
+    online_k8_claim = load(SOURCES["n37_online_k8_claim"])
+    online_k16_claim = load(SOURCES["n37_online_k16_claim"])
+    if (online_ir_decision["schema"] != "ecbench.n37_online_ir_decision/v1"
+            or online_ir_decision["decision"] != "prioritize_k16_for_isolated_n37_online_wall_gate"
+            or online_ir_decision["workloads"] != 16
+            or online_ir_decision["profiles"] != 64
+            or not online_ir_decision["all_archived_and_profiled_scalars_verified"]
+            or online_ir_decision["online"]["aa_max_absolute_relative_deviation"] != 0
+            or online_ir_decision["online"]["comparisons"][0]["numerator"] != "ic-k8"
+            or online_ir_decision["online"]["comparisons"][0]["denominator"] != "ic-k16"
+            or online_ir_decision["online"]["comparisons"][2]["denominator"] != "rho-strong"
+            or online_ir_decision["online"]["comparisons"][0]["bootstrap_95"][0] <= 1.10):
+        raise SystemExit("review the target-only n37 instruction decision before updating the leaderboard")
+    for claim, count, columns in [(online_k8_claim, 592, 8), (online_k16_claim, 1184, 16)]:
+        fb = claim["candidate_manifest"]["factor_base"]["inventory"]
+        if (not claim["independent_validation"] or not claim["ic_scalar_verified"]
+                or not claim["rho_scalar_verified"]
+                or claim["isolation_levels"]["ic"] != "L0"
+                or claim["isolation_levels"]["rho"] != "L0"
+                or fb["usable_point_count"] != count
+                or fb["effective_columns"] != columns):
+            raise SystemExit("review the exact n37 IC1 claims before updating the leaderboard")
+    online_ir_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_online_ir"],
+        "k8_candidate_id": online_k8_claim["candidate_id"],
+        "k16_candidate_id": online_k16_claim["candidate_id"],
+        "workloads": online_ir_decision["workloads"],
+        "profiles": online_ir_decision["profiles"],
+        "decision": online_ir_decision["decision"],
+        "k8_over_k16_online_ir": online_ir_decision["online"]["comparisons"][0]["ratio_of_sums"],
+        "k8_over_k16_online_ir_ci95": online_ir_decision["online"]["comparisons"][0]["bootstrap_95"],
+        "k16_over_rho_online_ir": online_ir_decision["online"]["comparisons"][2]["ratio_of_sums"],
+        "k16_over_rho_online_ir_ci95": online_ir_decision["online"]["comparisons"][2]["bootstrap_95"],
+        "k8_over_k16_cold_ir": online_ir_decision["complete_solve"]["comparisons"][0]["ratio_of_sums"],
+        "online_wall_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -578,6 +619,7 @@ def build() -> dict:
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
         "bounded_diagnostics": [bounded_diagnostic],
         "n37_k8_k16_confirmation": k8_confirmation,
+        "n37_online_ir_diagnostic": online_ir_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -680,6 +722,22 @@ def markdown(doc: dict) -> str:
           "The unit is simulated whole-solve instructions, not isolated online "
           "wall time; K16 remains a target-only candidate. "
           f"Read the [raw instruction decision](../../{c['source']}).", ""]
+    q = doc["n37_online_ir_diagnostic"]
+    L += [f"The fresh {q['workloads']}-target panel reverses the base choice inside "
+          "the **target-only simulated-instruction** interval: "
+          f"`{q['k16_candidate_id']}` is prioritized for an isolated n37 online "
+          f"wall test because K8/K16 target-only Callgrind Ir is "
+          f"{q['k8_over_k16_online_ir']:.3f} "
+          f"[{q['k8_over_k16_online_ir_ci95'][0]:.3f}, "
+          f"{q['k8_over_k16_online_ir_ci95'][1]:.3f}]. "
+          f"K16/rho is {q['k16_over_rho_online_ir']:.3f} "
+          f"[{q['k16_over_rho_online_ir_ci95'][0]:.3f}, "
+          f"{q['k16_over_rho_online_ir_ci95'][1]:.3f}] in the same instruction "
+          f"unit, while K8/K16 complete-solve Ir is {q['k8_over_k16_cold_ir']:.3f}. "
+          "All 64 profile scalars and 320 independent measured replays verified. "
+          "Mac L0 timing leaves the primary online wall speedup unknown; both "
+          "bases remain live at n41/n53. "
+          f"Read the [raw target-only decision](../../{q['source']}).", ""]
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -886,6 +944,21 @@ def page(doc: dict, standalone: bool) -> str:
              'All 64 profiles and 320 independently replayed measured records verified. '
              'This is not isolated online wall speed; K16 remains a target-only candidate. '
              f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(c["source"])}">Frozen decision</a>.</p></section>')
+    q = doc["n37_online_ir_diagnostic"]
+    P.append(f'<section class="card" id="bounded-n37-online-ir"><h2>Fresh n37 K8/K16 target-only instruction gate</h2>'
+             f'<p>On <code>{esc(q["curve"])}</code>, K8/K16 target-only Callgrind Ir is '
+             f'{q["k8_over_k16_online_ir"]:.3f} '
+             f'[{q["k8_over_k16_online_ir_ci95"][0]:.3f}, '
+             f'{q["k8_over_k16_online_ir_ci95"][1]:.3f}], so the frozen gate '
+             'prioritizes K16 for an isolated n37 online wall test. K16/rho '
+             f'target-only Ir is {q["k16_over_rho_online_ir"]:.3f} '
+             f'[{q["k16_over_rho_online_ir_ci95"][0]:.3f}, '
+             f'{q["k16_over_rho_online_ir_ci95"][1]:.3f}], but K8/K16 '
+             f'complete-solve Ir is {q["k8_over_k16_cold_ir"]:.3f}. '
+             'All 64 profiles and 320 independent native replays verified. '
+             'Callgrind Ir is simulated instruction work, not isolated wall '
+             'speed; n41/n53 and ECC2K-130 transfer stay open. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(q["source"])}">Frozen decision and raw replay</a>.</p></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

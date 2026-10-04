@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install frozen profiler
         run: |
           sudo apt-get update
@@ -46,6 +48,7 @@ jobs:
              and .auditor_env_class_id != $original' \
             "$out/INDEPENDENT-AUDIT.json" > /dev/null
       - name: Profile all 64 frozen first-round one-target solves
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
         env:
           RAYON_NUM_THREADS: '1'
         run: |
@@ -139,8 +142,33 @@ jobs:
             and (.solve_ir | type) == "number"
             and .pre_online_ir + .online_ir + .post_online_ir == .solve_ir)' \
             "$out/rows.jsonl" > /dev/null
+      - name: Reparse the committed raw archive and reproduce the decision
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') != '' }}
+        run: |
+          dir=research/ecbench_n37_online_ir_20261004
+          test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
+            4adb5b41eef61161c80ef30618c6dcb3abb2dedef702730b659c0daece337c60
+          git diff --exit-code 170becb5bc485507cd9b2accce3863e85ba8c3d1 -- \
+            Cargo.toml build.rs src .cargo
+          replay="$RUNNER_TEMP/ecbench-n37-online-ir-archive-replay"
+          mkdir -p "$replay"
+          unzip -q "$dir/RAW-CALLGRIND.zip" -d "$replay"
+          cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
+          cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
+          cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
+          cmp "$replay/Cargo.lock" Cargo.lock
+          cargo build --release --example ecbench_n37_online_ir_analyze
+          target/release/examples/ecbench_n37_online_ir_analyze \
+            "$replay" "$dir/JOBS.json" \
+            "$dir/sessions/mac_arm64_l0_01/records.jsonl" \
+            "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json"
+          cmp "$RUNNER_TEMP/ecbench-n37-online-ir-decision.json" "$dir/DECISION.json"
+          test "$(find "$dir/candidate_claims" -name '*.json' -type f | wc -l)" -eq 32
+          for claim in "$dir"/candidate_claims/*.json; do
+            target/release/ecbench claim check --report "$claim"
+          done
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') == '' }}
         with:
           name: ecbench-n37-online-ir-profiles
           path: ${{ runner.temp }}/ecbench-n37-online-ir

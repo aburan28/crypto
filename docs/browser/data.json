@@ -6,13 +6,13 @@
   "curves": 111,
   "methods": 30,
   "factor_bases": 16,
-  "candidates": 242,
+  "candidates": 244,
   "rounds": 30,
-  "sessions": 19
+  "sessions": 20
  },
  "sources": {
   "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
-  "docs/ic/leaderboard.json": "40d840ea469d3c43b7460bddc2a2c879ac278998b7414b200151dd9985a57a01",
+  "docs/ic/leaderboard.json": "d43d23d95e059559e7fc62c883d1e6e3b9e2e1f8eafc2b0c050d97eaa0cb2b78",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -22,6 +22,7 @@
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
   "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
+  "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
   "research/ecbench_n37_rank_columns_20261004/sessions/mac_arm64_l0_01/records.jsonl": "82c8b31640074b2f829d88e546bf487ee4b598edf4ef26f779984d625ed7de3c",
   "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_01/records.jsonl": "04ff51c137aee7368de8fff16f8c22f47c9ed741cb533244f76715dbaf3297e3",
   "research/ecbench_n37_shared_rank_20261004/sessions/mac_arm64_l0_02/records.jsonl": "8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693",
@@ -4449,6 +4450,46 @@
      "verified": 80,
      "mean_s": 0.4522,
      "mean_ratio_to_floor": 3.104
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k16",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1539,
+     "mean_ratio_to_floor": 14.783
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k16-control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.1539,
+     "mean_ratio_to_floor": 14.783
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "ic-k8",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 2.112,
+     "mean_ratio_to_floor": 14.496
+    },
+    {
+     "session_id": "ECBS1he4e70185e6e2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601",
+     "runs": 80,
+     "verified": 80,
+     "mean_s": 0.4431,
+     "mean_ratio_to_floor": 3.042
     }
    ],
    "factor_bases": [
@@ -10959,13 +11000,14 @@
    },
    "sessions": [
     "ECBS1h9a1d373bbe54",
-    "ECBS1hdebde0f96835"
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 240,
-   "verified": 240
+   "runs": 432,
+   "verified": 432
   },
   {
    "method_id": "ECM1h90d7515e0e7a",
@@ -10980,13 +11022,14 @@
    },
    "sessions": [
     "ECBS1h9a1d373bbe54",
-    "ECBS1hdebde0f96835"
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 144,
-   "verified": 144
+   "runs": 240,
+   "verified": 240
   },
   {
    "method_id": "ECM1ha10cd743c1f5",
@@ -11259,13 +11302,14 @@
     "ECBS1h33c3e5e4f75d",
     "ECBS1h774f0e722ea2",
     "ECBS1h9a1d373bbe54",
-    "ECBS1hdebde0f96835"
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
    ],
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],
-   "runs": 156,
-   "verified": 156
+   "runs": 252,
+   "verified": 252
   },
   {
    "method_id": "ECM1hb6123afffc07",
@@ -11454,7 +11498,8 @@
    "curve": "icv1-f2m37-tm534059-32aad96b",
    "sessions": [
     "ECBS1h9a1d373bbe54",
-    "ECBS1hdebde0f96835"
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
    ],
    "methods": [
     "ECM1h670d3d9b99a0"
@@ -11477,7 +11522,8 @@
    "curve": "icv1-f2m37-tm534059-32aad96b",
    "sessions": [
     "ECBS1h9a1d373bbe54",
-    "ECBS1hdebde0f96835"
+    "ECBS1hdebde0f96835",
+    "ECBS1he4e70185e6e2"
    ],
    "methods": [
     "ECM1h90d7515e0e7a"
@@ -15887,6 +15933,26 @@
    "slug": "icv1-f2m37-tm534059-32aad96b"
   },
   {
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 1184,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "bbfdf029e5a2",
+   "mentions": 2,
+   "files": 2,
+   "where": [
+    "docs/ic/LEADERBOARD.md",
+    "docs/ic/leaderboard.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
    "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h2cf7c9307467",
    "n": 37,
    "curve_tag": "kb0",
@@ -16093,6 +16159,25 @@
    "where": [
     "docs/ic/LEADERBOARD.md",
     "docs/ic/dashboard-overview-data.json",
+    "docs/ic/leaderboard.json"
+   ],
+   "slug": "icv1-f2m37-tm534059-32aad96b"
+  },
+  {
+   "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+   "n": 37,
+   "curve_tag": "kb0",
+   "factor_base_points": 592,
+   "summands": 3,
+   "solver": "mitmfrobeniuscounted",
+   "collector": "sample",
+   "linear_algebra": "gauss",
+   "descent": "pdp",
+   "isogeny": 0,
+   "record_sha12": "d7ebd078ae0c",
+   "mentions": 1,
+   "files": 1,
+   "where": [
     "docs/ic/leaderboard.json"
    ],
    "slug": "icv1-f2m37-tm534059-32aad96b"
@@ -21425,6 +21510,50 @@
     "verified": 384
    },
    "started_unix_ms": 1791105060214,
+   "curves": [
+    "icv1-f2m37-tm534059-32aad96b"
+   ],
+   "arms": [
+    {
+     "arm": "ic-k16",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k16-control",
+     "role": "control",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h670d3d9b99a0"
+    },
+    {
+     "arm": "ic-k8",
+     "role": "candidate",
+     "method": "ic.shared_rank",
+     "method_id": "ECM1h90d7515e0e7a"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h1d9961ee4601"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1he4e70185e6e2",
+   "dir": "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01",
+   "label": "n37 K8 versus K16 one-target online instruction attribution",
+   "status": "complete",
+   "spec_id": "ECS1h58bbb248d78e",
+   "env_class_id": "ECBENV2hd82681268e96",
+   "binary_sha256": "1a21947f0501585e4e3784bc43e3ac635cb78abe8b15a4dacbecf9e5c5166922",
+   "git_commit": "5e5cbbedef70840668a62815221ca7196901eb29",
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791110203063,
    "curves": [
     "icv1-f2m37-tm534059-32aad96b"
    ],

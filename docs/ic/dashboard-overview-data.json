@@ -65,6 +65,14 @@
     {
       "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
       "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
+    },
+    {
+      "path": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+      "sha256": "e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a"
+    },
+    {
+      "path": "research/ecbench_n37_online_ir_20261004/independent_validation/RECEIPT.json",
+      "sha256": "b75740f1a28dd4a5352c15e0e738a82bf9c8d3402e3f6ea797d129c424e05472"
     }
   ],
   "confirmation_online": {
@@ -1161,6 +1169,693 @@
     "unit": "callgrind.Ir",
     "workloads": 16
   },
+  "n37_online_ir": {
+    "all_archived_and_profiled_scalars_verified": true,
+    "archived_records_sha256": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
+    "census_sha256": "d2d8b05ff8c19931bf039deac72db801115b8383b86df4058068c88b4996462f",
+    "claim_limit": "same-binary Callgrind target-only and complete-solve user-space instruction diagnostics; no isolated native online wall speedup or n41/n53 transfer",
+    "complete_solve": {
+      "aa_max_absolute_relative_deviation": 0.00002815907818520813,
+      "arms": [
+        {
+          "arm": "ic-k8",
+          "max_ir": 44753626,
+          "mean_ir": 35959106.875,
+          "min_ir": 32890660,
+          "runs": 16,
+          "s_ir_per_target": 2367.9703644519386
+        },
+        {
+          "arm": "ic-k16",
+          "max_ir": 44306141,
+          "mean_ir": 42384589.875,
+          "min_ir": 41410714,
+          "runs": 16,
+          "s_ir_per_target": 2791.099708964885
+        },
+        {
+          "arm": "ic-k16-control",
+          "max_ir": 44306333,
+          "mean_ir": 42384550.4375,
+          "min_ir": 41411815,
+          "runs": 16,
+          "s_ir_per_target": 2791.097111936222
+        },
+        {
+          "arm": "rho-strong",
+          "max_ir": 14639150,
+          "mean_ir": 9026574.0625,
+          "min_ir": 5318085,
+          "runs": 16,
+          "s_ir_per_target": 594.4157608483579
+        }
+      ],
+      "comparisons": [
+        {
+          "bootstrap_95": [
+            0.818561578645601,
+            0.8837423166652679
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "ic-k16",
+          "numerator": "ic-k8",
+          "paired_ratio_range": [
+            0.7878780197609327,
+            1.0241139734830662
+          ],
+          "ratio_of_sums": 0.8484004913354137
+        },
+        {
+          "bootstrap_95": [
+            3.404324077867869,
+            4.692505604006916
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "rho-strong",
+          "numerator": "ic-k8",
+          "paired_ratio_range": [
+            2.3809462298015935,
+            7.102767631581669
+          ],
+          "ratio_of_sums": 3.9836937719692034
+        },
+        {
+          "bootstrap_95": [
+            4.02863753095543,
+            5.532976093089593
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "rho-strong",
+          "numerator": "ic-k16",
+          "paired_ratio_range": [
+            2.8338012111358926,
+            8.33122091880818
+          ],
+          "ratio_of_sums": 4.6955344942088875
+        },
+        {
+          "bootstrap_95": [
+            0.9999942257526618,
+            1.0000076202212955
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "ic-k16-control",
+          "numerator": "ic-k16",
+          "paired_ratio_range": [
+            0.9999734133845619,
+            1.0000281590781852
+          ],
+          "ratio_of_sums": 1.0000009304687578
+        }
+      ]
+    },
+    "decision": "prioritize_k16_for_isolated_n37_online_wall_gate",
+    "independent_audit_sha256": "b75740f1a28dd4a5352c15e0e738a82bf9c8d3402e3f6ea797d129c424e05472",
+    "independent_auditor_env_class_id": "ECBENV2h7797d0021f24",
+    "jobs_sha256": "a2d63e9063c98955e7fdf49b137d1c9baafc9912b903f8aa79cd69a43035a32f",
+    "normalised_unit": "crypto.S.callgrind_ir",
+    "online": {
+      "aa_max_absolute_relative_deviation": 0,
+      "arms": [
+        {
+          "arm": "ic-k8",
+          "max_ir": 11911753,
+          "mean_ir": 3171035,
+          "min_ir": 119883,
+          "runs": 16,
+          "s_ir_per_target": 208.81822595711654
+        },
+        {
+          "arm": "ic-k16",
+          "max_ir": 3020144,
+          "mean_ir": 1098761.8125,
+          "min_ir": 120844,
+          "runs": 16,
+          "s_ir_per_target": 72.3553957732021
+        },
+        {
+          "arm": "ic-k16-control",
+          "max_ir": 3020144,
+          "mean_ir": 1098761.8125,
+          "min_ir": 120844,
+          "runs": 16,
+          "s_ir_per_target": 72.3553957732021
+        },
+        {
+          "arm": "rho-strong",
+          "max_ir": 12773015,
+          "mean_ir": 7164034.3125,
+          "min_ir": 3455705,
+          "runs": 16,
+          "s_ir_per_target": 471.7642460055348
+        }
+      ],
+      "comparisons": [
+        {
+          "bootstrap_95": [
+            1.730215437274574,
+            4.601504089537422
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "ic-k16",
+          "numerator": "ic-k8",
+          "paired_ratio_range": [
+            0.6015906092701422,
+            39.375824567659116
+          ],
+          "ratio_of_sums": 2.8860076532738073
+        },
+        {
+          "bootstrap_95": [
+            0.25104706203552607,
+            0.7113805595156715
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "rho-strong",
+          "numerator": "ic-k8",
+          "paired_ratio_range": [
+            0.0162538343948181,
+            1.8296954734988182
+          ],
+          "ratio_of_sums": 0.4426325812631987
+        },
+        {
+          "bootstrap_95": [
+            0.09233888610436006,
+            0.24000314990195315
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "rho-strong",
+          "numerator": "ic-k16",
+          "paired_ratio_range": [
+            0.015997710798899084,
+            0.8739588593355047
+          ],
+          "ratio_of_sums": 0.15337193605882804
+        },
+        {
+          "bootstrap_95": [
+            1,
+            1
+          ],
+          "bootstrap_samples": 20000,
+          "bootstrap_seed": 202610044184,
+          "denominator": "ic-k16-control",
+          "numerator": "ic-k16",
+          "paired_ratio_range": [
+            1,
+            1
+          ],
+          "ratio_of_sums": 1
+        }
+      ]
+    },
+    "per_target": [
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 120844,
+            "post_online_ir": 3338475,
+            "pre_online_ir": 37951395,
+            "solve_ir": 41410714
+          },
+          "ic-k16-control": {
+            "online_ir": 120844,
+            "post_online_ir": 3338475,
+            "pre_online_ir": 37952496,
+            "solve_ir": 41411815
+          },
+          "ic-k8": {
+            "online_ir": 119883,
+            "post_online_ir": 1756419,
+            "pre_online_ir": 31014358,
+            "solve_ir": 32890660
+          },
+          "rho-strong": {
+            "online_ir": 7375675,
+            "post_online_ir": 24293,
+            "pre_online_ir": 1843628,
+            "solve_ir": 9243596
+          }
+        },
+        "workload_id": "W13da936e61c6"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1222589,
+            "post_online_ir": 3340079,
+            "pre_online_ir": 37949370,
+            "solve_ir": 42512038
+          },
+          "ic-k16-control": {
+            "online_ir": 1222589,
+            "post_online_ir": 3340074,
+            "pre_online_ir": 37948842,
+            "solve_ir": 42511505
+          },
+          "ic-k8": {
+            "online_ir": 3149227,
+            "post_online_ir": 1774924,
+            "pre_online_ir": 31014595,
+            "solve_ir": 35938746
+          },
+          "rho-strong": {
+            "online_ir": 12722524,
+            "post_online_ir": 24248,
+            "pre_online_ir": 1840002,
+            "solve_ir": 14586774
+          }
+        },
+        "workload_id": "W1b1caf1f6883"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 430202,
+            "post_online_ir": 3338489,
+            "pre_online_ir": 37952303,
+            "solve_ir": 41720994
+          },
+          "ic-k16-control": {
+            "online_ir": 430202,
+            "post_online_ir": 3338502,
+            "pre_online_ir": 37951878,
+            "solve_ir": 41720582
+          },
+          "ic-k8": {
+            "online_ir": 429221,
+            "post_online_ir": 1756423,
+            "pre_online_ir": 31015423,
+            "solve_ir": 33201067
+          },
+          "rho-strong": {
+            "online_ir": 6500633,
+            "post_online_ir": 24317,
+            "pre_online_ir": 1863964,
+            "solve_ir": 8388914
+          }
+        },
+        "workload_id": "W1ccaaa9a6807"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 2404984,
+            "post_online_ir": 3344693,
+            "pre_online_ir": 37950172,
+            "solve_ir": 43699849
+          },
+          "ic-k16-control": {
+            "online_ir": 2404984,
+            "post_online_ir": 3344684,
+            "pre_online_ir": 37950261,
+            "solve_ir": 43699929
+          },
+          "ic-k8": {
+            "online_ir": 11911753,
+            "post_online_ir": 1827267,
+            "pre_online_ir": 31014606,
+            "solve_ir": 44753626
+          },
+          "rho-strong": {
+            "online_ir": 6510238,
+            "post_online_ir": 24287,
+            "pre_online_ir": 1806310,
+            "solve_ir": 8340835
+          }
+        },
+        "workload_id": "W36cb7eaab340"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1347333,
+            "post_online_ir": 3333427,
+            "pre_online_ir": 37950407,
+            "solve_ir": 42631167
+          },
+          "ic-k16-control": {
+            "online_ir": 1347333,
+            "post_online_ir": 3333398,
+            "pre_online_ir": 37950330,
+            "solve_ir": 42631061
+          },
+          "ic-k8": {
+            "online_ir": 2480844,
+            "post_online_ir": 1770532,
+            "pre_online_ir": 31015132,
+            "solve_ir": 35266508
+          },
+          "rho-strong": {
+            "online_ir": 7543200,
+            "post_online_ir": 24311,
+            "pre_online_ir": 1803317,
+            "solve_ir": 9370828
+          }
+        },
+        "workload_id": "W531dd9ed4241"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1815462,
+            "post_online_ir": 3333417,
+            "pre_online_ir": 37949840,
+            "solve_ir": 43098719
+          },
+          "ic-k16-control": {
+            "online_ir": 1815462,
+            "post_online_ir": 3333422,
+            "pre_online_ir": 37950404,
+            "solve_ir": 43099288
+          },
+          "ic-k8": {
+            "online_ir": 1444253,
+            "post_online_ir": 1762950,
+            "pre_online_ir": 31013381,
+            "solve_ir": 34220584
+          },
+          "rho-strong": {
+            "online_ir": 5528530,
+            "post_online_ir": 24287,
+            "pre_online_ir": 1844503,
+            "solve_ir": 7397320
+          }
+        },
+        "workload_id": "W593652928ebb"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 201924,
+            "post_online_ir": 3329629,
+            "pre_online_ir": 37949639,
+            "solve_ir": 41481192
+          },
+          "ic-k16-control": {
+            "online_ir": 201924,
+            "post_online_ir": 3329629,
+            "pre_online_ir": 37949121,
+            "solve_ir": 41480674
+          },
+          "ic-k8": {
+            "online_ir": 7950924,
+            "post_online_ir": 1801207,
+            "pre_online_ir": 31012481,
+            "solve_ir": 40764612
+          },
+          "rho-strong": {
+            "online_ir": 5535200,
+            "post_online_ir": 24263,
+            "pre_online_ir": 1831924,
+            "solve_ir": 7391387
+          }
+        },
+        "workload_id": "W5a27837fec54"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 541192,
+            "post_online_ir": 3329588,
+            "pre_online_ir": 37949597,
+            "solve_ir": 41820377
+          },
+          "ic-k16-control": {
+            "online_ir": 541192,
+            "post_online_ir": 3329607,
+            "pre_online_ir": 37949378,
+            "solve_ir": 41820177
+          },
+          "ic-k8": {
+            "online_ir": 676195,
+            "post_online_ir": 1760149,
+            "pre_online_ir": 31014083,
+            "solve_ir": 33450427
+          },
+          "rho-strong": {
+            "online_ir": 4365739,
+            "post_online_ir": 24274,
+            "pre_online_ir": 1848127,
+            "solve_ir": 6238140
+          }
+        },
+        "workload_id": "W5bb290c1d0fb"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1561282,
+            "post_online_ir": 3340604,
+            "pre_online_ir": 37948944,
+            "solve_ir": 42850830
+          },
+          "ic-k16-control": {
+            "online_ir": 1561282,
+            "post_online_ir": 3340631,
+            "pre_online_ir": 37949586,
+            "solve_ir": 42851499
+          },
+          "ic-k8": {
+            "online_ir": 997660,
+            "post_online_ir": 1759369,
+            "pre_online_ir": 31012366,
+            "solve_ir": 33769395
+          },
+          "rho-strong": {
+            "online_ir": 5973670,
+            "post_online_ir": 24282,
+            "pre_online_ir": 1856717,
+            "solve_ir": 7854669
+          }
+        },
+        "workload_id": "W5e7693190b29"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 204339,
+            "post_online_ir": 3330532,
+            "pre_online_ir": 37949570,
+            "solve_ir": 41484441
+          },
+          "ic-k16-control": {
+            "online_ir": 204339,
+            "post_online_ir": 3330522,
+            "pre_online_ir": 37949457,
+            "solve_ir": 41484318
+          },
+          "ic-k8": {
+            "online_ir": 2073646,
+            "post_online_ir": 1768089,
+            "pre_online_ir": 31013294,
+            "solve_ir": 34855029
+          },
+          "rho-strong": {
+            "online_ir": 12773015,
+            "post_online_ir": 24489,
+            "pre_online_ir": 1841646,
+            "solve_ir": 14639150
+          }
+        },
+        "workload_id": "W74f9cb71a81b"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1226195,
+            "post_online_ir": 3340088,
+            "pre_online_ir": 37948982,
+            "solve_ir": 42515265
+          },
+          "ic-k16-control": {
+            "online_ir": 1226195,
+            "post_online_ir": 3340074,
+            "pre_online_ir": 37949070,
+            "solve_ir": 42515339
+          },
+          "ic-k8": {
+            "online_ir": 3025204,
+            "post_online_ir": 1774919,
+            "pre_online_ir": 31013067,
+            "solve_ir": 35813190
+          },
+          "rho-strong": {
+            "online_ir": 4908619,
+            "post_online_ir": 24199,
+            "pre_online_ir": 1858533,
+            "solve_ir": 6791351
+          }
+        },
+        "workload_id": "W790d84453b79"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1416627,
+            "post_online_ir": 3333010,
+            "pre_online_ir": 37950471,
+            "solve_ir": 42700108
+          },
+          "ic-k16-control": {
+            "online_ir": 1416627,
+            "post_online_ir": 3332978,
+            "pre_online_ir": 37950890,
+            "solve_ir": 42700495
+          },
+          "ic-k8": {
+            "online_ir": 4321813,
+            "post_online_ir": 1783694,
+            "pre_online_ir": 31013424,
+            "solve_ir": 37118931
+          },
+          "rho-strong": {
+            "online_ir": 9877215,
+            "post_online_ir": 24283,
+            "pre_online_ir": 1827462,
+            "solve_ir": 11728960
+          }
+        },
+        "workload_id": "W8f5ef44a2d94"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 580529,
+            "post_online_ir": 3338269,
+            "pre_online_ir": 37951422,
+            "solve_ir": 41870220
+          },
+          "ic-k16-control": {
+            "online_ir": 580529,
+            "post_online_ir": 3338269,
+            "pre_online_ir": 37950446,
+            "solve_ir": 41869244
+          },
+          "ic-k8": {
+            "online_ir": 1990688,
+            "post_online_ir": 1767852,
+            "pre_online_ir": 31013404,
+            "solve_ir": 34771944
+          },
+          "rho-strong": {
+            "online_ir": 10619452,
+            "post_online_ir": 24103,
+            "pre_online_ir": 1842596,
+            "solve_ir": 12486151
+          }
+        },
+        "workload_id": "Wb77f4bc0b022"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 163025,
+            "post_online_ir": 3329588,
+            "pre_online_ir": 37951672,
+            "solve_ir": 41444285
+          },
+          "ic-k16-control": {
+            "online_ir": 163025,
+            "post_online_ir": 3329578,
+            "pre_online_ir": 37950515,
+            "solve_ir": 41443118
+          },
+          "ic-k8": {
+            "online_ir": 4393527,
+            "post_online_ir": 1781135,
+            "pre_online_ir": 31014011,
+            "solve_ir": 37188673
+          },
+          "rho-strong": {
+            "online_ir": 7343192,
+            "post_online_ir": 24287,
+            "pre_online_ir": 1838139,
+            "solve_ir": 9205618
+          }
+        },
+        "workload_id": "Wbffeeb406193"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 3020144,
+            "post_online_ir": 3335010,
+            "pre_online_ir": 37950987,
+            "solve_ir": 44306141
+          },
+          "ic-k16-control": {
+            "online_ir": 3020144,
+            "post_online_ir": 3335024,
+            "pre_online_ir": 37951165,
+            "solve_ir": 44306333
+          },
+          "ic-k8": {
+            "online_ir": 4975506,
+            "post_online_ir": 1784149,
+            "pre_online_ir": 31013467,
+            "solve_ir": 37773122
+          },
+          "rho-strong": {
+            "online_ir": 3455705,
+            "post_online_ir": 24249,
+            "pre_online_ir": 1838131,
+            "solve_ir": 5318085
+          }
+        },
+        "workload_id": "Wd70ed7d87133"
+      },
+      {
+        "parts": {
+          "ic-k16": {
+            "online_ir": 1323518,
+            "post_online_ir": 3332454,
+            "pre_online_ir": 37951126,
+            "solve_ir": 42607098
+          },
+          "ic-k16-control": {
+            "online_ir": 1323518,
+            "post_online_ir": 3332441,
+            "pre_online_ir": 37951471,
+            "solve_ir": 42607430
+          },
+          "ic-k8": {
+            "online_ir": 796216,
+            "post_online_ir": 1759004,
+            "pre_online_ir": 31013976,
+            "solve_ir": 33569196
+          },
+          "rho-strong": {
+            "online_ir": 3591942,
+            "post_online_ir": 24230,
+            "pre_online_ir": 1827235,
+            "solve_ir": 5443407
+          }
+        },
+        "workload_id": "Wfb876411fedb"
+      }
+    ],
+    "profiles": 64,
+    "provenance_sha256": "63141dec02f6016bf80c57705ab8921a613bc5c6934476a29664fc95a593c032",
+    "schema": "ecbench.n37_online_ir_decision/v1",
+    "subgroup_order": 230603167,
+    "unit": "callgrind.Ir",
+    "workloads": 16
+  },
+  "n37_online_ir_independent_replay": {
+    "session_id": "ECBS1he4e70185e6e2",
+    "auditor_env_class_id": "ECBENV2h7797d0021f24",
+    "replays": 320,
+    "receipt_sha256": "b75740f1a28dd4a5352c15e0e738a82bf9c8d3402e3f6ea797d129c424e05472"
+  },
   "n37_rank_columns_independent_replay": {
     "session_id": "ECBS1h9a1d373bbe54",
     "auditor_env_class_id": "ECBENV2hda64b23436f4",
@@ -1205,7 +1900,7 @@
     }
   ],
   "historical_ledger_sha256": "7a0941495a21cc5bdfed9be7b3656d17ba406356605744d0290d94f1b2acfa87",
-  "historical_regime_summary_sha256": "95e4d00c0b0b2773c4a46f8cd22a5cdc9b4fb7906774d5a6a0ec75a0e24c6034",
+  "historical_regime_summary_sha256": "adc871083fd73c86df87994027e3f53ee9b67531063df6d02870acd105d70ac7",
   "historical_overview_panels": [
     {
       "section_id": "cold-compact-orbit-20261003",
@@ -1225,12 +1920,12 @@
     },
     {
       "section_id": "lab-progress",
-      "sha256": "e4bf03ea1fad27e320dd3ed7d9c2e52af6777c0896a3c36e313a87144e3c3571"
+      "sha256": "bf14a6663b74acfd5322c97024599dadb375a22de213420a28194e970106748b"
     },
     {
       "section_id": "lab-currency",
       "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
   ],
-  "progress_timeline_sha256": "7e9cd7e04372c741003bc7deff3bfaa5763d847cba0ccc140b4bbcf02fae358e"
+  "progress_timeline_sha256": "798101f25fe712f4a0978824d95d4275790734e04d2a0c25fc2cde1e7f86a207"
 }

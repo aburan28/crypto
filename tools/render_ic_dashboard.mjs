@@ -194,6 +194,34 @@ assert.equal(k8Confirm.comparisons[0].numerator, 'ic-k16');
 assert.equal(k8Confirm.comparisons[0].denominator, 'ic-k8');
 assert.equal(k8Confirm.comparisons[1].denominator, 'rho-strong');
 const k8ConfirmPin = {path:k8ConfirmPath, sha256:k8ConfirmSha};
+const onlineIrPath = 'research/ecbench_n37_online_ir_20261004/DECISION.json';
+const onlineIrBytes = readFileSync(resolve(ROOT, onlineIrPath));
+const onlineIrSha = 'e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a';
+assert.equal(sha(onlineIrBytes), onlineIrSha, 'n37 target-only instruction decision changed.');
+const onlineIr = JSON.parse(onlineIrBytes);
+assert.equal(onlineIr.schema, 'ecbench.n37_online_ir_decision/v1');
+assert.equal(onlineIr.unit, 'callgrind.Ir');
+assert.equal(onlineIr.workloads, 16);
+assert.equal(onlineIr.profiles, 64);
+assert.equal(onlineIr.all_archived_and_profiled_scalars_verified, true);
+assert.equal(onlineIr.decision, 'prioritize_k16_for_isolated_n37_online_wall_gate');
+assert.equal(onlineIr.online.comparisons[0].numerator, 'ic-k8');
+assert.equal(onlineIr.online.comparisons[0].denominator, 'ic-k16');
+assert.ok(onlineIr.online.comparisons[0].bootstrap_95[0] > 1.10);
+assert.equal(onlineIr.online.aa_max_absolute_relative_deviation, 0);
+const onlineIrPin = {path:onlineIrPath, sha256:onlineIrSha};
+const onlineIrReceiptPath = 'research/ecbench_n37_online_ir_20261004/independent_validation/RECEIPT.json';
+const onlineIrReceiptBytes = readFileSync(resolve(ROOT, onlineIrReceiptPath));
+const onlineIrReceiptSha = 'b75740f1a28dd4a5352c15e0e738a82bf9c8d3402e3f6ea797d129c424e05472';
+assert.equal(sha(onlineIrReceiptBytes), onlineIrReceiptSha, 'n37 target-only independent receipt changed.');
+const onlineIrReceipt = JSON.parse(onlineIrReceiptBytes);
+assert.equal(onlineIrReceipt.ok, true);
+assert.equal(onlineIrReceipt.records, 384);
+assert.equal(onlineIrReceipt.verified_records, 384);
+assert.equal(onlineIrReceipt.replays.length, 320);
+assert.ok(onlineIrReceipt.replays.every(row => row.reproduced));
+assert.equal(onlineIrReceiptSha, onlineIr.independent_audit_sha256);
+const onlineIrReceiptPin = {path:onlineIrReceiptPath, sha256:onlineIrReceiptSha};
 assert.equal(round3.decision.winner, 'incumbent');
 assert.equal(round3.decision.promotion_eligible, false);
 assert.ok(f5.scalar_verified && !f5.headline_online_admissible && !f5.fresh_paired_qualification);
@@ -289,8 +317,8 @@ ${rankColumns.candidates.map(row => `<tr><td>${escape(row.arm)}</td><td>${row.us
 </section>
 
 <section class="dash-section" id="n37-k8-k16-20261004" aria-labelledby="k8-confirm-title">
-<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 untouched one-target workloads / complete solve instructions</p><h2 id="k8-confirm-title">K8 wins cold implementation cost; K16 stays in the online comparison.</h2></div><span class="status neutral">Accounting · independent replay · L0</span></div>
-<p class="dash-section-intro panel-summary">The fresh public-point panel verified 384/384 native executions and 64/64 Callgrind profiles, with all 320 measured native rows independently replayed on Linux. K16/K8 whole-solve instructions are ${f(k8Confirm.comparisons[0].ratio_of_sums)} [${f(k8Confirm.comparisons[0].bootstrap_95[0])}, ${f(k8Confirm.comparisons[0].bootstrap_95[1])}], clearing the preregistered 5% K8 cold-route gate. K8/rho remains ${f(k8Confirm.comparisons[1].ratio_of_sums)} [${f(k8Confirm.comparisons[1].bootstrap_95[0])}, ${f(k8Confirm.comparisons[1].bootstrap_95[1])}] in the same simulated instruction unit. The primary isolated online wall result remains unset.</p>
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 untouched one-target workloads / complete solve instructions</p><h2 id="k8-confirm-title">K8 wins cold implementation cost; target-only attribution follows.</h2></div><span class="status neutral">Accounting · independent replay · L0</span></div>
+<p class="dash-section-intro panel-summary">The fresh public-point panel verified 384/384 native executions and 64/64 Callgrind profiles, with all 320 measured native rows independently replayed on Linux. K16/K8 whole-solve instructions are ${f(k8Confirm.comparisons[0].ratio_of_sums)} [${f(k8Confirm.comparisons[0].bootstrap_95[0])}, ${f(k8Confirm.comparisons[0].bootstrap_95[1])}], clearing the preregistered 5% K8 cold-route gate. K8/rho remains ${f(k8Confirm.comparisons[1].ratio_of_sums)} [${f(k8Confirm.comparisons[1].bootstrap_95[0])}, ${f(k8Confirm.comparisons[1].bootstrap_95[1])}] in the same simulated instruction unit. The new target-only instruction result appears below; the primary isolated online wall result remains unset.</p>
 <div class="table-scroll"><table><caption>Complete ecbench method-solve Callgrind Ir on the same 16 public points; one profile per arm and target. The cold method-solve boundary includes reusable setup and is not the online interval.</caption><thead><tr><th>Arm</th><th>Usable points</th><th>Folded columns</th><th>Verified</th><th>Mean solve Ir</th><th>Ir / √r</th></tr></thead><tbody>
 <tr><td>Strong signed-Frobenius rho</td><td>—</td><td>—</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'rho-strong').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'rho-strong').s_ir_per_target,2)}</td></tr>
 <tr><td>K8</td><td>592</td><td>8</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'ic-k8').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'ic-k8').s_ir_per_target,2)}</td></tr>
@@ -298,6 +326,15 @@ ${rankColumns.candidates.map(row => `<tr><td>${escape(row.arm)}</td><td>${row.us
 <tr><td>Identical K16 control</td><td>1,184</td><td>16</td><td>16/16</td><td>${Math.round(k8Confirm.arms.find(row => row.arm === 'ic-k16-control').mean_ir).toLocaleString('en-US')}</td><td>${f(k8Confirm.arms.find(row => row.arm === 'ic-k16-control').s_ir_per_target,2)}</td></tr>
 </tbody></table></div>
 <p class="dash-footnote">The older incomplete counted-cost estimate had K16/K8 = 1.0175 [0.973, 1.059] on these new targets and could not choose a base. K8's pair table has 2,344 entries versus K16's 9,412, while K16 averaged 477 counted target GAE versus K8's 3,385. The largest paired K16 A/A deviation was ${(100*k8Confirm.aa_max_absolute_relative_deviation).toFixed(4)}%. These phase counters explain why both bases must remain in the n41/n53 online study: the cold instruction choice cannot settle target-only cost. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_k8_k16_20261004/RESULT.md">Decision, raw profile archive, exact IC1 claims and limits →</a></p>
+</section>
+
+<section class="dash-section" id="n37-online-ir-20261004" aria-labelledby="n37-online-ir-title">
+<div class="dash-section-head"><div><p class="dash-kicker">n37 / 16 new public one-target workloads / target-only instructions</p><h2 id="n37-online-ir-title">K16 cuts target work; an isolated wall test is next.</h2></div><span class="status neutral">Accounting · independent replay · L0</span></div>
+<p class="dash-section-intro panel-summary">The fresh 16-point panel verified ${onlineIr.profiles}/${onlineIr.profiles} Callgrind profiles and independently replayed ${onlineIrReceipt.replays.length}/${onlineIrReceipt.replays.length} measured native executions. K8/K16 target-only instructions are ${f(onlineIr.online.comparisons[0].ratio_of_sums)} [${f(onlineIr.online.comparisons[0].bootstrap_95[0])}, ${f(onlineIr.online.comparisons[0].bootstrap_95[1])}], above the frozen 1.10 K16-priority gate. K16/rho target-only instructions are ${f(onlineIr.online.comparisons[2].ratio_of_sums)} [${f(onlineIr.online.comparisons[2].bootstrap_95[0])}, ${f(onlineIr.online.comparisons[2].bootstrap_95[1])}]. This is simulated instruction attribution, not an isolated online wall speedup.</p>
+<div class="table-scroll"><table><caption>One-target Callgrind Ir from the frozen solve and target interval markers; 16 same-point verified profiles per arm.</caption><thead><tr><th>Arm</th><th>Actual usable points</th><th>Folded columns</th><th>Mean target-only Ir</th><th>Mean complete-solve Ir</th></tr></thead><tbody>
+${[['rho-strong','Strong signed-Frobenius rho','—','—'],['ic-k8','K8','592','8'],['ic-k16','K16','1,184','16'],['ic-k16-control','Identical K16 control','1,184','16']].map(([arm,label,points,columns])=>`<tr><td>${label}</td><td>${points}</td><td>${columns}</td><td>${Math.round(onlineIr.online.arms.find(row=>row.arm===arm).mean_ir).toLocaleString('en-US')}</td><td>${Math.round(onlineIr.complete_solve.arms.find(row=>row.arm===arm).mean_ir).toLocaleString('en-US')}</td></tr>`).join('\n')}
+</tbody></table></div>
+<p class="dash-footnote">The cold choice reverses: K8/K16 complete-solve Ir is ${f(onlineIr.complete_solve.comparisons[0].ratio_of_sums)} [${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[0])}, ${f(onlineIr.complete_solve.comparisons[0].bootstrap_95[1])}], as K16's larger base and pair table cost more reusable work. The target-only K16 A/A difference is exactly zero. Both bases stay in the n41/n53 study; no ECC2K-130 transfer follows from n37. The Mac wall session earned L0, so the primary online speedup stays unknown. <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_n37_online_ir_20261004/RESULT.md">Decision, raw archive, exact IC1 claims, and limits →</a></p>
 </section>
 
 <section class="dash-section" id="lab-pipeline" aria-labelledby="pipeline-title"><div class="dash-section-head"><div><p class="dash-kicker">04 / Pipeline map</p><h2 id="pipeline-title">What the solver actually has to do.</h2></div></div><p class="dash-section-intro panel-summary">Reusable preparation produces factor-base logs. The online solve consumes one new public point and includes every target-dependent attempt through independent scalar verification.</p>
@@ -324,7 +361,7 @@ assert.ok(page.includes(historical), 'Historical regime summary lost');
 for (const panel of retainedPanels) assert.ok(page.includes(panel.html), `Historical panel lost: ${panel.id}`);
 const data = {
   schema_version: 2, scope: 'bounded IC autolab overview; not all repository research',
-  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin,k8ConfirmPin], confirmation_online: online,
+  sources: [roundPin,f5Pin,oldSatPin,satPin,sharedRankPin,solverComparisonPin,sharedTargetsPin,sharedEcbenchPin,sharedControlPin,sharedIndependentPin,sharedIndependentClaimPin,sharedIndependentCheckPin,rankColumnsPin,rankColumnsAuditPin,callgrindPin,k8ConfirmPin,onlineIrPin,onlineIrReceiptPin], confirmation_online: online,
   confirmation_familywise_online_upper: upper, paired_targets: confirmation.paired_cases,
   f5_control: f5, native_sat_control: sat, historical_incomplete_sat_control: oldSat.arms.sat,
   rho_online_comparison: rho,
@@ -333,6 +370,8 @@ const data = {
   n37_rank_columns: rankColumns,
   n37_callgrind: callgrind,
   n37_k8_k16_callgrind: k8Confirm,
+  n37_online_ir: onlineIr,
+  n37_online_ir_independent_replay: {session_id:onlineIrReceipt.session_id, auditor_env_class_id:onlineIrReceipt.auditor_env_class_id, replays:onlineIrReceipt.replays.length, receipt_sha256:onlineIrReceiptSha},
   n37_rank_columns_independent_replay: {session_id:rankColumnsAudit.session_id, auditor_env_class_id:rankColumnsAudit.auditor_env_class_id, replays:rankColumnsAudit.replays.length, receipt_sha256:rankColumnsAuditSha},
   rho_online_table: Object.values(rows).map(row=>Object.fromEntries(['alias','online_ms','rho_online_over_IC_online','verified','scheduled'].map(key=>[key,row[key]]))),
   historical_ledger_sha256: sha(ledgerBefore), historical_regime_summary_sha256: sha(historical),
