@@ -42,3 +42,12 @@ by itself support an ECC2K-130 extrapolation or an end-to-end cold-cost claim.
 Before measuring, commit this protocol. Any implementation issue discovered
 during the run must be fixed in a new commit and the affected measurement
 repeated with the changed source hash.
+
+The first post-fix paired run is retained as `r2` (root-level raw files). To
+quantify local timing variability without choosing a stopping point from the
+observed ratio, take exactly five more pairs, `r3` through `r7`, on the same
+frozen `Q` and binary hashes. Alternate arm order: IC then rho for odd-numbered
+repeats, rho then IC for even-numbered repeats. Each IC invocation rebuilds
+the factor base and rank from an empty process. Retain every raw row and
+independent replay receipt. Report each paired ratio and the median/range;
+do not promote a controlled CPU speedup without an isolation receipt.
