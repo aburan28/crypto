@@ -356,6 +356,7 @@ fn run_panel(
     observer: &mut impl Observer,
     mut frontend: impl FnMut(usize) -> Result<Frontend, String>,
 ) -> Result<Value, String> {
+    clock::mark(Phase::MatrixBuild);
     let mut matrix = FactorBaseLogSolver::new(&context.curve, &context.base, &context.options)
         .ok_or("relation matrix unavailable")?;
     require(matrix.columns() == 29, "folded columns differ")?;

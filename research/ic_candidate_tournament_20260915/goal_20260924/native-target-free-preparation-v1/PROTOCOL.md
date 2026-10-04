@@ -62,6 +62,10 @@ a rank claim. No known logs or target scalar are read by the preparation path.
 Every initialization, query and final-LA window has exclusive integer phase
 clocks whose sum must equal its wall interval. Controller/observer work between
 windows is charged to setup so the aggregate preparation interval also closes.
+Initial matrix construction enters `matrix_build`. The production row consumer
+keeps witness verification under `relation_check` and enters a nested
+`matrix_build` scope when inserting each verified, nonduplicate row. These
+clock boundaries change accounting only, not arithmetic, filtering or row order.
 Final report rendering and publication are outside that declared interval and
 need separate outer receipts. Unentered phases remain null in the window
 records. These are preparation stage diagnostics, not a complete-DLP total or
@@ -84,6 +88,9 @@ last planned slot; retain null unentered/online phases; reject a target-bearing
 plan; preserve CMS timeout attempts; reject a changed source manifest; and
 verify the retained original SAT ANF/CNF model, rejecting a flipped assignment.
 No new F5/CMS scientific query is executed by these controls.
+An additional producer-to-auditor control passes two mock timeout attempts into
+the independent mathematical auditor, checks the complete geometry and frozen
+query law, and rejects a changed scalar. It makes no native execution claim.
 
 Run builds and tests through the existing busy launcher. Correctness passes do
 not establish hardware speedups. CPU wall-time ratios remain exploratory absent
