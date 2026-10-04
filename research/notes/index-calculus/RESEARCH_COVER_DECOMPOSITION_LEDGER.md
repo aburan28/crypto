@@ -366,3 +366,62 @@ deployed curve follows: a curve of order divisible by `4` is in the walk's
 reach only through its class, and the class's weak members are `3/q` of its
 full-2-torsion curves.
 
+---
+
+## 12. Engineering after the fact: F4 replaying a recorded trace (2026-10-04)
+
+§10 left F4 at `83 %` of a six-point test.  Every residual's system has the
+same shape — six quadrics in the same six unknowns with the same monomial
+support — and F4's work on it is the same sequence of steps: the same
+degrees, the same pair rows, the same new leading monomials, step after
+step, system after system.  Joux and Vitse's variant of F4 (*A variant of
+the F4 algorithm*, 2011) records that sequence once and replays it, keeping
+only the rows that produced something; here the engine records, on the
+first system of a `p`, for every step **the pair rows every new pivot is a
+combination of** (a tracked echelon form on the step's reduced rows, done
+once), and replays those rows on the later systems with the symbolic
+preprocessing, the reductions and the staircase stop as before — no pair
+selection, no row that reduces to zero.  A replay checks the new leading
+monomials against the recorded ones at every step; where they differ (a
+system of another shape, `≈ 15 %` at `p ≈ 53`, `≈ 1 %` at `p ≥ 503`), it
+keeps what the step found (it is in the ideal) and finishes as a full F4
+over every pair the basis has accumulated, which costs the replayed prefix
+plus a full run.  A trace that diverges three times and more often than it
+holds is dropped and the next full run records a new one (the first
+system of a size is sometimes of the rarer shape).  Soundness is as in §10:
+the staircase argument needs no Gröbner basis of anything but the stopped
+partial basis, and the solver's final check against the input covers the
+rest; the oracle is the test of it.
+
+**Measured** (`33_jv_cover_trace_ccov{_oracle,}.json`, the same sizes,
+seeds and residual counts as §6 and §10; ledger section E.3):
+
+| | §10, F4 stopped | F4 stopped and replayed | ratio |
+|:--|--:|--:|--:|
+| F4 per test (mean over the eight sizes) | `2.67·10⁶` | `1.09·10⁶` | `2.44×` |
+| `C_cov` per test | `3.19·10⁶` | `1.62·10⁶` | `1.97×` |
+| F4 matrix (rows × columns) | `556 × 507` | `≈ 460 × 498` | |
+| tests that replayed a trace / diverged and ran in full | | `3,008` / `343` of `3,360` | |
+| oracle disagreements at `p ≤ 71` (`2,160` residuals) | `0` | `0` | |
+| planted sums found | all | all (`360/360`, `200/200`) | |
+| incomplete | `1` | `1` (the same positive-dimensional residual) | |
+
+Against §6's `5.15·10⁶`, the test now costs `3.2×` less, with the solver's
+own `5.3·10⁵` (§10) now a third of it.  Three defects were found and kept
+under their own names (`*_first_run_superseded`, `*_second_run_defective`,
+`*_third_run_defective`): a trace recorded on a rare shape at `p = 71`
+diverged on `355` of `360` systems (the re-recording rule above); a
+diverging replay dropped the pairs the trace had replaced and finished a
+"full" run that was not one (`41` incomplete and `8` planted sums missed
+at `p = 53`); a system whose input leading monomials differed from the
+trace's returned the inputs as its basis.  The oracle and the planted
+residuals caught all three.
+
+**End to end** (`33_jv_cover_trace_dlp*.json`): END_TO_END_PENDING
+
+**What it is.**  A constant on the test, `2×` on top of §10's `1.6×`, and so
+on `S / rho`; the route's exponent is untouched and nothing in §9 changes.
+The same replay serves the descent of §11's sieve route (its two six-point
+successes are `≈ 1,400` tests of this kind), where the descent was the
+larger term above the crossover.  Class: **engineering**.
+
