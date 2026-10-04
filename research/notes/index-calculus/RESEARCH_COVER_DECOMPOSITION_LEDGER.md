@@ -745,13 +745,13 @@ walk's spread on the same instance (`0.81–2.06`).  On the §14 instances
 
 | `p` | `ℓ` | `S` of the four runs | mean ± s.e. | pooled reference | `S / rho` of §14.4, pooled → measured |
 |--:|:--|:--|:--|:--|:--|
-| 1009 | `2^{57.9}` | `1.25, 2.14, 1.04, 1.28` | `1.43 ± 0.24` | `1.36` | `0.0221 → 0.0211`, `0.0353 → 0.0337` |
-| 1511 | `2^{61.4}` | `1.27, 0.16, 0.95, 0.85` | `0.81 ± 0.23` | `1.36` | `0.0068 → 0.0115`, `0.0077 → 0.0129` |
+| 1009 | `2^{57.9}` | `1.25, 2.14, 1.04, 1.28` | `1.43 ± 0.24` | `1.36` | `0.0221 → 0.0211` (seed 1; seed 2's instance was not walked) |
+| 1511 | `2^{61.4}` | `1.27, 0.16, 0.95, 0.85` | `0.81 ± 0.23` | `1.36` | `0.0068 → 0.0115` (seed 1) |
 
 The eight new walks together give `1.12 ± 0.19`, compatible with
 the pooled `1.36 ± 0.07`; one lucky walk at `p = 1511` (`0.16`) pulls that
-size's four-run mean to `0.81`, which is why its re-based ratios read
-`0.012–0.013` rather than `0.007`.  Either way the attack is `75–150×`
+size's four-run mean to `0.81`, which is why its re-based ratio reads
+`0.012` rather than `0.007`.  Either way the attack is `75–150×`
 below rho at `ℓ = 2^{61.4}` on this instance, and the reference is now
 measured where the headline rows live, not pooled.  Rho's cost per step
 is the harness's own affine addition (`331` multiplications, one inversion);

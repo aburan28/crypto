@@ -507,8 +507,9 @@ def print_sieve_comparison(base, traced, new):
         if rho:
             ss = [r["s"] for r in rho]
             m = mean(ss)
-            re = ", ".join(f"{r['s_over_rho']:.4f} → {r['s'] / m:.4f}" for key, r in sorted(n.items()) if key[0] == p)
-            print(f"\nrho measured at p = {p} by distinguished points (note §15, {len(ss)} runs, all correct: {all(r['correct'] for r in rho)}): S = {', '.join(f'{x:.3f}' for x in ss)}, mean {m:.3f}; the rows' S / rho, pooled → measured: {re}.")
+            seed = rho[0]["seed"]
+            re = ", ".join(f"{r['s_over_rho']:.4f} → {r['s'] / m:.4f}" for key, r in sorted(n.items()) if key == (p, seed))
+            print(f"\nrho measured at p = {p} (seed {seed}) by distinguished points (note §15, {len(ss)} runs, all correct: {all(r['correct'] for r in rho)}): S = {', '.join(f'{x:.3f}' for x in ss)}, mean {m:.3f}; that row's S / rho on its own reference → on the measured one: {re}.")
     print("\nP15, the per-m estimate against the exhausted m's (every per-m entry but the last of a run):\n")
     print("| p | seed | m | estimate | found | found / estimate |")
     print("|---:|--:|--:|--:|--:|--:|")
