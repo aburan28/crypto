@@ -598,10 +598,10 @@ pub struct Line {
 /// per line.
 pub fn b_space(setup: &SieveSetup) -> u128 {
     let p = setup.p as u128;
-    if setup.m % 2 == 1 {
+    if !setup.m.is_multiple_of(2) {
         p.pow(2 * setup.m2 as u32)
     } else {
-        ((p + 1) / 2) * p.pow(2 * setup.m2 as u32)
+        p.div_ceil(2) * p.pow(2 * setup.m2 as u32)
     }
 }
 
@@ -655,7 +655,7 @@ pub fn b_from_index(setup: &SieveSetup, k: u128, scramble: u128) -> Vec<E2> {
         idx /= p;
         b.push(E2([lo, hi]));
     }
-    if setup.m % 2 == 1 {
+    if !setup.m.is_multiple_of(2) {
         b.push(E2::ONE);
     } else {
         let reps = lead_reps(setup.p, setup.w);
@@ -685,7 +685,7 @@ pub fn lines_for_b(
         return Vec::new();
     }
     let dg = fdeg(&g) as usize;
-    let (lo, hi) = if setup.m % 2 == 0 {
+    let (lo, hi) = if setup.m.is_multiple_of(2) {
         (setup.m1, setup.m1)
     } else {
         (dg.saturating_sub(setup.m1), setup.m1)
@@ -705,10 +705,10 @@ pub fn lines_for_b(
     for k in lo..=hi.min(dg) {
         for a0 in ring.divisors_of_degree(&factors, k) {
             let a1 = ring.scale(&ring.exact_div(&g, &a0), half);
-            if setup.m % 2 == 0 && fdeg(&a1) >= setup.m1 as isize {
+            if setup.m.is_multiple_of(2) && fdeg(&a1) >= setup.m1 as isize {
                 continue;
             }
-            if setup.m % 2 == 1 {
+            if !setup.m.is_multiple_of(2) {
                 // the identity 2A₀A₁′ = G is symmetric: (A₁′/lc, lc·A₀) is the
                 // same line up to the scalar t/(ωsc), so keep one of the pair
                 let a1m = ring.monic(&a1);
@@ -1815,292 +1815,5 @@ mod tests {
         assert!(r.solved && r.correct, "{r:?}");
         assert_eq!(r.m_final, 11);
         assert_eq!(r.rels_failed_verify, 0);
-    }
-}
-#[cfg(test)]
-mod la_diag {
-    use super::*;
-    trait Pipe: Sized {
-        fn pipe<T>(self, f: impl FnOnce(Self) -> T) -> T {
-            f(self)
-        }
-    }
-    impl<T> Pipe for T {}
-    fn rank_mod(rows: &[Vec<u64>], l: u64) -> usize {
-        let mut m: Vec<Vec<u64>> = rows.to_vec();
-        let n = m.first().map(|r| r.len()).unwrap_or(0);
-        let mut rank = 0;
-        for c in 0..n {
-            let Some(piv) = (rank..m.len()).find(|&i| m[i][c] != 0) else {
-                continue;
-            };
-            m.swap(rank, piv);
-            let inv = inv_mod(m[rank][c], l);
-            for j in 0..n {
-                m[rank][j] = ((m[rank][j] as u128 * inv as u128) % l as u128) as u64;
-            }
-            for i in 0..m.len() {
-                if i != rank && m[i][c] != 0 {
-                    let f = m[i][c];
-                    for j in 0..n {
-                        m[i][j] = ((m[i][j] as u128 + (l as u128 - f as u128) * m[rank][j] as u128)
-                            % l as u128) as u64;
-                    }
-                }
-            }
-            rank += 1;
-        }
-        rank
-    }
-    #[test]
-    #[ignore]
-    fn tmp_la_diagnostic() {
-        let p: u64 = std::env::var("DIAG_P")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(251);
-        let m: usize = std::env::var("DIAG_M")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(10);
-        let seed = 1u64;
-        let spec = generate_spec(p, seed);
-        let ctx = Ctx::new(&spec);
-        let l = spec.l;
-        let mut rng = StdRng::seed_from_u64(seed);
-        let base = factor_base(&ctx, &mut rng);
-        let by_x: HashMap<u64, usize> = base.iter().enumerate().map(|(i, b)| (b.x, i)).collect();
-        let small = base.len();
-        let mut rels: Vec<SieveRel> = Vec::new();
-        let mut prov: Vec<(u128, usize, u64)> = Vec::new();
-        let target: usize = std::env::var("DIAG_N")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(small + 20);
-        let scr = {
-            let setup = sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m);
-            coprime_scramble(b_space(&setup), &mut rng)
-        };
-        let mut k = 0u128;
-        let chunk = 20000u128;
-        while rels.len() < target {
-            let outs: Vec<BatchOut> = (0..4u128)
-                .into_par_iter()
-                .map(|t| {
-                    sieve_batch(
-                        &spec,
-                        &base,
-                        &by_x,
-                        m,
-                        scr,
-                        (k + t * chunk)..(k + (t + 1) * chunk),
-                        seed,
-                    )
-                })
-                .collect();
-            k += 4 * chunk;
-            for o in outs {
-                rels.extend(o.rels);
-                prov.extend(o.prov);
-            }
-            eprintln!("B's {} relations {}", k, rels.len());
-        }
-        {
-            let dump: Vec<serde_json::Value> =
-                rels.iter().map(|r| serde_json::json!(r.terms)).collect();
-            let meta = serde_json::json!({"p": p, "l": l, "base_x": base.iter().map(|b| b.x).collect::<Vec<_>>(), "base_y": base.iter().map(|b| b.y.0).collect::<Vec<_>>(), "rels": dump});
-            std::fs::write("/tmp/claude-0/-home-user/df489a89-77a8-5643-9875-0a345fb3f77d/scratchpad/rels_251.json", meta.to_string()).unwrap();
-        }
-        {
-            let mut groups: HashMap<Vec<(usize, i8)>, Vec<(u128, usize, u64)>> = HashMap::new();
-            for (r, pv) in rels.iter().zip(prov.iter()) {
-                groups.entry(r.terms.clone()).or_default().push(*pv);
-            }
-            for (t, pvs) in groups.iter().filter(|(_, v)| v.len() > 1).take(8) {
-                eprintln!("duplicate ({} pts): {:?}", t.len(), pvs);
-            }
-        }
-        let rows: Vec<SparseRel> = rels
-            .iter()
-            .map(|r| SparseRel {
-                cols: r
-                    .terms
-                    .iter()
-                    .map(|&(i, e)| (i, if e == 1 { 1 } else { l - 1 }))
-                    .collect(),
-                rhs: 0,
-            })
-            .collect();
-        let dense: Vec<Vec<u64>> = rows
-            .iter()
-            .map(|r| {
-                let mut v = vec![0u64; small];
-                for &(c, a) in &r.cols {
-                    v[c] = a;
-                }
-                v
-            })
-            .collect();
-        eprintln!(
-            "sieve rows {} columns {} rank {}",
-            rows.len(),
-            small,
-            rank_mod(&dense, l)
-        );
-        let core = sieve_core(&rows, small + 1).expect("core");
-        let ncol = core.columns.iter().filter(|&&b| b).count();
-        let cd: Vec<Vec<u64>> = core.rows.iter().map(|&i| dense[i].clone()).collect();
-        eprintln!(
-            "core rows {} cols {} rank {}",
-            core.rows.len(),
-            ncol,
-            rank_mod(&cd, l)
-        );
-        // kernel vector of the full row set: solve via dense elimination with one column normalised
-        // (check the relations against a known solution: planted logs are not available, so check consistency instead)
-        let ker_dim = small - rank_mod(&dense, l);
-        eprintln!("kernel dimension {}", ker_dim);
-        let mut uniq: Vec<Vec<(usize, i8)>> = rels.iter().map(|r| r.terms.clone()).collect();
-        let before = uniq.len();
-        uniq.sort();
-        uniq.dedup();
-        let mut negs = 0;
-        for r in &uniq {
-            let neg: Vec<(usize, i8)> = r.iter().map(|&(i, e)| (i, -e)).collect();
-            if uniq.binary_search(&neg).is_ok() {
-                negs += 1;
-            }
-        }
-        eprintln!(
-            "distinct relations {} of {} (negated pairs {})",
-            uniq.len(),
-            before,
-            negs / 2
-        );
-        let mut w = vec![0usize; small];
-        for r in &rows {
-            for &(c, _) in &r.cols {
-                w[c] += 1;
-            }
-        }
-        let zero: Vec<usize> = (0..small).filter(|&c| w[c] == 0).collect();
-        let one: Vec<usize> = (0..small).filter(|&c| w[c] == 1).collect();
-        eprintln!(
-            "weight-0 columns {:?} (x = {:?}); weight-1 columns {:?}; min weight {}",
-            zero,
-            zero.iter().map(|&c| base[c].x).collect::<Vec<_>>(),
-            one,
-            w.iter().min().unwrap()
-        );
-        // nullspace basis by elimination over the covered columns
-        let cov: Vec<usize> = (0..small).filter(|&c| w[c] > 0).collect();
-        let mut mtx: Vec<Vec<u64>> = dense
-            .iter()
-            .map(|r| cov.iter().map(|&c| r[c]).collect())
-            .collect();
-        let n = cov.len();
-        let mut pivcol = Vec::new();
-        let mut rank = 0;
-        for c in 0..n {
-            let Some(piv) = (rank..mtx.len()).find(|&i| mtx[i][c] != 0) else {
-                continue;
-            };
-            mtx.swap(rank, piv);
-            let inv = inv_mod(mtx[rank][c], l);
-            for j in 0..n {
-                mtx[rank][j] = ((mtx[rank][j] as u128 * inv as u128) % l as u128) as u64;
-            }
-            for i in 0..mtx.len() {
-                if i != rank && mtx[i][c] != 0 {
-                    let f = mtx[i][c];
-                    for j in 0..n {
-                        mtx[i][j] = ((mtx[i][j] as u128
-                            + (l as u128 - f as u128) * mtx[rank][j] as u128)
-                            % l as u128) as u64;
-                    }
-                }
-            }
-            pivcol.push(c);
-            rank += 1;
-        }
-        let free: Vec<usize> = (0..n).filter(|c| !pivcol.contains(c)).collect();
-        eprintln!(
-            "covered columns {} rank {} free columns {:?} (x = {:?})",
-            n,
-            rank,
-            free,
-            free.iter().map(|&c| base[cov[c]].x).collect::<Vec<_>>()
-        );
-        for &fc in &free {
-            // kernel vector with 1 at fc
-            let mut v = vec![0u64; n];
-            v[fc] = 1;
-            for (r, &pc) in pivcol.iter().enumerate() {
-                v[pc] = (l - mtx[r][fc]) % l;
-            }
-            let supp: Vec<usize> = (0..n)
-                .filter(|&c| v[c] != 0)
-                .count()
-                .min(9999)
-                .pipe(|k| (0..k).collect());
-            let nz = (0..n).filter(|&c| v[c] != 0).count();
-            let distinct: std::collections::BTreeSet<u64> =
-                (0..n).filter(|&c| v[c] != 0).map(|c| v[c]).collect();
-            eprintln!("kernel vector from free column {} (x={}): support {} of {}, distinct values {} (first {:?})", fc, base[cov[fc]].x, nz, n, distinct.len(), distinct.iter().take(6).collect::<Vec<_>>());
-            let _ = supp;
-        }
-    }
-}
-#[cfg(test)]
-mod order_diag {
-    use super::*;
-    #[test]
-    #[ignore]
-    fn tmp_order_of_base_points() {
-        for p in [53u64, 101, 251] {
-            let spec = generate_spec(p, 1);
-            let ctx = Ctx::new(&spec);
-            let jac = ctx.jac();
-            let mut rng = StdRng::seed_from_u64(1);
-            let base = factor_base(&ctx, &mut rng);
-            let l = spec.l as u128;
-            let mut killed_4l = 0;
-            let mut killed_l = 0;
-            let mut killed_8l = 0;
-            let mut killed_16l = 0;
-            for b in base.iter().take(40) {
-                if jac.is_identity(&jac.mul(&b.d, 4 * l)) {
-                    killed_4l += 1;
-                }
-                if jac.is_identity(&jac.mul(&b.d, l)) {
-                    killed_l += 1;
-                }
-                if jac.is_identity(&jac.mul(&b.d, 8 * l)) {
-                    killed_8l += 1;
-                }
-                if jac.is_identity(&jac.mul(&b.d, 16 * l)) {
-                    killed_16l += 1;
-                }
-            }
-            println!("p={p} l={l}: of 40 base points, killed by l: {killed_l}, by 4l: {killed_4l}, by 8l: {killed_8l}, by 16l: {killed_16l}");
-            // and by l * small cofactors up to 64, and l^2
-            let mut byl2 = 0;
-            for b in base.iter().take(10) {
-                if jac.is_identity(&jac.mul(&b.d, l * l)) {
-                    byl2 += 1;
-                }
-            }
-            println!("   killed by l²: {byl2} of 10");
-            for c in [2u128, 3, 5, 6, 7, 9, 12, 16, 24, 32, 48, 64, 128, 256] {
-                let k = base
-                    .iter()
-                    .take(10)
-                    .filter(|b| jac.is_identity(&jac.mul(&b.d, c * l)))
-                    .count();
-                if k > 0 {
-                    println!("   killed by {c}·l: {k} of 10");
-                }
-            }
-        }
     }
 }
