@@ -758,3 +758,128 @@ is the harness's own affine addition (`331` multiplications, one inversion);
 a rho with batched inversion and the negation map would be `2–3×` cheaper
 a step, which the ledger's unit does not credit to either side.  Class:
 **accounting**; nothing above changes in kind.
+
+## 16. Other primes, other sizes, and the rest of the parameter space (2026-10-04; `experiments/37_jv_cover_sieve_primes_*.json`, `38_jv_cover_sieve_*.json`, `38_jv_cover_rho_dp_1777.json`; ledger section F.4)
+
+Asked to extend the measurements to other fields and other parameters,
+this section does three things: it runs the sieved route on twenty
+different primes of two sizes to see how much of the spread between
+instances is the field and how much the instance; it extends the size to
+the largest the harness's arithmetic allows; and it states, for the
+members of this construction that were *not* built, why — which of them
+are degenerate, which reduce to measurements the repository already has,
+and which would be a different build.  Nothing here was registered
+beforehand; the rows are read against the predictions of §11.2 that
+already cover them (P7 on the rate, P9 on the crossover).
+
+### 16.1 Twenty primes: the spread is the instance, not the field
+
+One instance (seed 1) on each of ten primes near `500` and ten near `1,000`,
+the sieved route with the descent replaying §12's trace and the line
+enumeration of §14, rho pooled (`1.361`).  Every one of the twenty
+logarithms was recovered and checked.
+
+| `p` | `ℓ` | `|F|` | `m` | rate / (`p/m!`) | `C_rel` | `S / rho` | relations / descent | descent tests |
+|--:|:--|--:|:--|--:|--:|--:|:--|--:|
+| 503 | `2^51.8` | 238 | 9 → 10 | `0.71` | `5.3e+07` | `0.6658` | 66 % / 34 % | 4,288 |
+| 509 | `2^51.9` | 268 | 9 → 10 | `8.11` | `5.1e+06` | `0.0782` | 60 % / 39 % | 576 |
+| 521 | `2^52.2` | 265 | 9 → 10 | `2.57` | `1.4e+07` | `0.2620` | 46 % / 54 % | 2,944 |
+| 541 | `2^52.5` | 274 | 9 → 10 | `3.26` | `1.1e+07` | `0.1488` | 59 % / 40 % | 1,408 |
+| 557 | `2^52.7` | 280 | 9 → 10 | `4.12` | `9.0e+06` | `0.1499` | 44 % / 56 % | 2,112 |
+| 563 | `2^52.8` | 279 | 9 → 10 | `2.49` | `1.4e+07` | `0.2018` | 49 % / 50 % | 2,688 |
+| 569 | `2^52.9` | 291 | 9 → 10 | `8.24` | `4.9e+06` | `0.0592` | 58 % / 40 % | 640 |
+| 577 | `2^53.0` | 277 | 9 → 10 | `1.52` | `2.3e+07` | `0.2217` | 65 % / 34 % | 2,176 |
+| 587 | `2^53.2` | 304 | 9 | `1.21` | `3.5e+06` | `0.0396` | 59 % / 39 % | 448 |
+| 593 | `2^53.3` | 282 | 9 → 10 | `1.03` | `3.3e+07` | `0.2348` | 84 % / 16 % | 1,152 |
+| 1009 | `2^57.9` | 484 | 9 | `0.70` | `4.4e+06` | `0.0221` | 42 % / 56 % | 1,856 |
+| 1013 | `2^57.9` | 482 | 9 | `0.56` | `5.5e+06` | `0.0194` | 58 % / 39 % | 1,152 |
+| 1019 | `2^58.0` | 510 | 9 | `0.94` | `3.2e+06` | `0.0175` | 40 % / 57 % | 1,536 |
+| 1021 | `2^58.0` | 496 | 9 | `0.81` | `3.8e+06` | `0.0113` | 70 % / 26 % | 448 |
+| 1031 | `2^58.1` | 497 | 9 | `0.69` | `4.3e+06` | `0.0320` | 27 % / 71 % | 3,712 |
+| 1033 | `2^58.1` | 534 | 9 | `1.23` | `2.4e+06` | `0.0173` | 31 % / 66 % | 1,856 |
+| 1039 | `2^58.1` | 532 | 9 | `1.22` | `2.4e+06` | `0.0097` | 54 % / 40 % | 640 |
+| 1049 | `2^58.2` | 518 | 9 | `0.78` | `3.8e+06` | `0.0178` | 43 % / 54 % | 1,664 |
+| 1051 | `2^58.2` | 534 | 9 | `1.00` | `2.9e+06` | `0.0092` | 65 % / 29 % | 448 |
+| 1061 | `2^58.3` | 542 | 9 | `1.12` | `2.6e+06` | `0.0081` | 66 % / 27 % | 384 |
+
+Near `500` the ratio runs from `0.040` to `0.666` (median `0.176`, geometric
+mean `0.154`); near `1,000` from `0.0081` to `0.0320` (median `0.0174`,
+geometric mean `0.0151`).  Three things the census says:
+
+- **The `p = 503` instance of §§11.5 and 14 is the worst of its band** by
+  `3×`: its rate at `m = 9` was `0.47` of `p/m!` where the band's single-`m`
+  rows run `0.56–1.23` (P7's band `[0.5, 2]` holds on every row that stayed
+  on one `m`), and its `m = 9` lines ran out so that most of its relations
+  cost `m = 10`'s price.  The rate correlates with the factor base's size
+  (`|F|/p` from `0.473` to `0.527` across the twenty; correlation `0.5` with
+  the rate) and not with `p mod 3` or `p mod 4`: the spread is the
+  instance's `h`, not the prime.
+- **The crossover from the bands is `p* ≈ 333`** (`ℓ ≈ 2^{48}`): between the
+  bands' geometric means `S / rho` falls as `p^{−3.7}`, and the band means
+  put parity at `333`, inside §11.2's registered `[280, 420]` and below the
+  `371–427` that two seeds at `251` and `503` gave.  The seed-1 instance at
+  `503` had pulled that estimate up.
+- **The descent's share varies from `16 %` to `71 %`** across instances of
+  one size, because two successes are a Poisson count with mean `2`: the
+  tests per success range `192–2,144` against the expected `≈ 720`.
+
+### 16.2 Larger sizes: `p = 1,777` and `1,823`, the arithmetic's limit
+
+The harness's rho reference and linear algebra work mod `ℓ` in 64-bit
+words with a modular addition that adds before reducing, so `ℓ < 2^{63}` is
+the limit: `p ≤ 1,823`.  The group-order search also computed `#E ≈ p⁶` in
+64 bits, which overflows from `p = 1,622`; it now runs in 128-bit
+arithmetic, which is what makes `1,777` and `1,823` reachable.  A first
+attempt at `p = 2,003` (`ℓ = 2^{63.8}`) sieved past `9,000` relations without
+the linear algebra ever succeeding, the modular additions wrapping; its log
+is kept as `38_jv_cover_sieve_2003_defective.log`.
+
+| `p` | `ℓ` | `|F|` | relations | `C_rel` | `S / rho` (pooled rho) | relations / descent | descent tests |
+|--:|:--|--:|--:|--:|--:|:--|--:|
+| 1777 | `2^62.8` | 880 | 889 | `2.64e+06` | `0.0047` | 39 % / 54 % | 2,112 |
+| 1777 | `2^62.8` | 891 | 892 | `2.32e+06` | `0.0037` | 45 % / 47 % | 1,408 |
+| 1823 | `2^63.0` | 893 | 900 | `2.71e+06` | `0.0030` | 59 % / 31 % | 832 |
+| 1823 | `2^63.0` | 922 | 933 | `2.06e+06` | `0.0037` | 38 % / 54 % | 1,792 |
+
+Rho measured at `p = 1,777` by distinguished points (§15's method, three
+runs): `S = 1.25, 1.48, 0.44`, mean `1.06` against the pooled `1.36`, every run correct; the seed-1 row re-based on it reads `0.0061` (pooled: `0.0047`).  All four logarithms recovered and checked.  From `p = 1,009`
+to `1,823` the ratio keeps falling at the slope the census gives.
+
+### 16.3 The rest of the parameter space, and why it was not built
+
+The construction is `E: y² = h(x)(x − α)(x − σα)` over `F_{q^n}` with
+`q = p^k`, a genus-`n` hyperelliptic cover over `F_q`, a factor base of
+abscissae in `F_p`, decompositions into `ng = nk` points.  The measured case
+is `n = 3`, `k = 2`.  The others:
+
+- **`n = 2` is degenerate.**  `(x − α)(x − σα)` is the norm polynomial of
+  `α` over `F_q`, so for `n = 2` the whole equation has coefficients in `F_q`
+  and `E` is a subfield curve: `E(F_{q²})` is isogenous to `E(F_q) × E′(F_q)`
+  and its logarithm splits into two of size `√q` each, with no cover
+  needed.  Genus-2 covers of curves over `F_{q²}` exist for a broader class
+  (Scholten's construction, a rational 2-torsion point), but index calculus
+  on a genus-2 Jacobian over `F_q` is `Õ(q)` with double large primes against
+  rho's `Õ(q)`: no exponent, a constant to measure, and not this family.
+- **`k = 1` (`E` over `F_{p³}`) is the ordinary genus-3 index calculus over
+  `F_p`**: decompositions into `3` points, no sieve (the sieve's quadratic
+  structure needs `[F_q : F_p] = 2`), linear algebra in `p/2` unknowns at
+  `O(p²)` against rho's `p^{3/2}`.  It loses by exponent without large
+  primes, and with them is Diem's `Õ(p^{4/3})`; the repository's genus-3 and
+  genus-4 hyperelliptic panels are that measurement.
+- **`k ≥ 3` (`E` over `F_{p⁹}` and up) has `ng ≥ 9`.**  The six-point test's
+  system becomes nine quadrics in nine unknowns with a rate of `1/9!`, the
+  sieve does not apply, and no size the harness can run would collect a
+  relation in reasonable time; the asymptotic gain (`p²` against `p^{4.5}`)
+  is real and unmeasurable here.
+- **`deg h = 2`** gives a cover of higher genus (the cover's equation gains
+  two degrees); the code constructs `h(x) = x` only.  Not built.
+- **Even characteristic** is where the GHS attack began (curves over
+  `F_{2^{nk}}`, Artin–Schreier covers) and is the genuine "other field".  The
+  repository has `F_{2^n}` curve arithmetic from its Koblitz work but no
+  cover construction over it; that is a separate build of its own, with its
+  own registration, and is not started here.
+
+**Class: measurement and accounting.**  Twenty more instances of the same
+route, two more sizes, and a boundary for the construction's parameters;
+the class stays the weak class, and nothing about a generic or deployed
+curve follows.
