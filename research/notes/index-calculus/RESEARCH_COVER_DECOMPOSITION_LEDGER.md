@@ -718,5 +718,11 @@ run): the climb found `0` relations from the `m = 9` lines (`5,354` of them),
 against §11.5's `1,977` (`S⁺ / rho` `2,183` against `2,902`), the relation phase
 `1.45×` lower where P14 said `5–20 %` — the `m = 10` lines are worth more
 than registered, their `7` relations costing `≈ 10×` less each than `m = 11`'s.
-Seed 2, which §11.5 could not finish within its budget, is reported when its
-run ends.
+Seed 2 (`35_jv_cover_sieve_enum_101_seed2.log`, no JSON) hit the same
+90-minute budget as in §11.5, at `38` of `49` relations: `0` from `m = 9`, `6`
+from `m = 10`, `21` from `m = 11` (its `1.05·10⁸` `B`'s exhausted) and `11` from
+`m = 12` in `2.8·10¹²` multiplications; `S / rho ≥ 12,400` against seed 1's rho
+(`1.501`), a lower bound like §11.5's `≥ 7,560` and not comparable to it as a
+cost (both runs are dominated by `m = 12` lines, whose relations cost
+`≈ 10¹¹` each at this size).  The instance's small factor base (`49`
+columns) is the whole story at `p = 101`, as P10 registered.
