@@ -1,5 +1,28 @@
 {
-  "confirmation_familywise_online_upper": 1.0338915916497726,
+  "schema_version": 2,
+  "scope": "bounded IC autolab overview; not all repository research",
+  "sources": [
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json",
+      "sha256": "8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
+      "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
+      "sha256": "9def5e0e4a3c3fd2e47252d08e3509a88205691c39a77912cd315428b7bed2eb"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/independent-audit.json",
+      "sha256": "3570722341b8ca2cd8794d51829cac1a1f3b8c1ff02a07a6af9377a36d2cbab7"
+    },
+    {
+      "path": "research/notes/ecc2k130/shared_rank_folded_table_20261003/EVIDENCE.json",
+      "sha256": "cf61ec46ae7be8eb58559a17a6f90eb91cfc1f1b67dae72beaabcebed6ba2531"
+    }
+  ],
   "confirmation_online": {
     "boundary": "one supplied public point after reusable preparation through scalar replay",
     "candidate_over_baseline": 0.9733345435416899,
@@ -16,6 +39,8 @@
       "n31a0": 1.0505801644881685
     }
   },
+  "confirmation_familywise_online_upper": 1.0338915916497726,
+  "paired_targets": 72,
   "f5_control": {
     "additional_executions_authorized": false,
     "archive_bytes": 25476819,
@@ -62,7 +87,146 @@
     "target_attempt_count": 3,
     "workload_id": "8b3d9065d872"
   },
-  "paired_targets": 72,
+  "native_sat_control": {
+    "audited_attempts": [
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 31409,
+            "sha256": "a7867583d28fe9593fd17dabdf6545d5bf79b0fda08888e5172f051a3d918eda"
+          },
+          "instance.magma": {
+            "bytes": 50707,
+            "sha256": "1e7609332d721678d763b1eb48658b505eae39506b0f6e4d0edff8261595eaab"
+          },
+          "instance.xor.cnf": {
+            "bytes": 40710,
+            "sha256": "05b0913d27231ae82601b44f042765cf9ba2727aeb66543467e92127b3a2d92f"
+          }
+        },
+        "status": "SOURCE_UNSAT",
+        "trial": 0
+      },
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 35760,
+            "sha256": "eab39a019e5298286e92169efcbe0eb381ce77af2d46749748d0ef202e1478ff"
+          },
+          "instance.magma": {
+            "bytes": 57519,
+            "sha256": "c5f7baa8ef80be4d749fb3be5ac6c3d957978166d534826090455378ec6e5d7e"
+          },
+          "instance.xor.cnf": {
+            "bytes": 42662,
+            "sha256": "03a017d1763f5be128f8069f78158723a456b0803757eaa03ffbb647d9c6d960"
+          }
+        },
+        "status": "SOURCE_UNSAT",
+        "trial": 1
+      },
+      {
+        "source_sha256": {
+          "instance.anf": {
+            "bytes": 36012,
+            "sha256": "1783698ff0fda61fc056b24b19d12e421f895c03ebbbc63fd399390b82def031"
+          },
+          "instance.magma": {
+            "bytes": 58011,
+            "sha256": "958701bb9e154d2bea03b83e8243aa2b5dfc90278f421ddf3e21ac1d88159a0f"
+          },
+          "instance.xor.cnf": {
+            "bytes": 42824,
+            "sha256": "2077d013463e6a58270a38f29752ec0395099d1db0abfcfaadb7f6b8970d784c"
+          }
+        },
+        "status": "VALID_POINT_WITNESS",
+        "trial": 2
+      }
+    ],
+    "auditor_binary_sha256": "c5338662f688c15f52e2b02debf5e7f82ee9c5450a8de7b1ad0961225a27bf41",
+    "fresh_paired_qualification": false,
+    "headline_eligible": false,
+    "independent_replay_inside_online_interval": false,
+    "independent_replay_wall_ns": "6258817750",
+    "native_children_executed_by_auditor": 0,
+    "online_attempt_wall_ns": 56585480167,
+    "online_phases_ns": {
+      "target_descent": 333,
+      "target_pdp": 56585062375,
+      "target_query": 11000,
+      "target_recovery_check": 9542,
+      "target_relation_check": 396917
+    },
+    "online_speedup": null,
+    "online_wall_ns": 56585480167,
+    "preparation_admission": {
+      "accounting": "historical preparation only; original Python controller provenance retained; no native timings measured",
+      "dependent_relations": 8,
+      "duplicate_relations": 0,
+      "folded_columns": 29,
+      "fresh_targets_generated": 0,
+      "geometric_points": 63,
+      "independently_proved_ordinary_negatives": 106,
+      "native_solvers_executed": 0,
+      "new_queries": 0,
+      "ordinary_outcome_mix": {
+        "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+        "SOURCE_UNSAT": 106,
+        "VALID_POINT_WITNESS": 37
+      },
+      "ordinary_queries": 149,
+      "preparation_source_sha256": "e4f75b4ba1e160518cb86827f88af53f101f63071f2729436d3f20fded95c06c",
+      "rank": 29,
+      "rank_trajectory_sha256": "4d70c17bef5eb3758f3b4f9c405bdd8c1ec4efc6b417afaf9f34c25dd55409c0",
+      "rows_sha256": "aa34d1e619c5c54c7a3e644b944cc86e2294730fdfbd786a589707b22a6b3d9e",
+      "status": "PASS_NATIVE_PREPARED_SAT_MATHEMATICS",
+      "usable_points": 62,
+      "verified_column_logs": 29,
+      "verified_relations": 37
+    },
+    "producer_sha256": "f6df7520c6b9151515ea866fc71dbc7cee75e35ed9a0ea14bb7ad8ee38fc734e",
+    "promotion_eligible": false,
+    "recovered_scalar": 24886,
+    "registration_sha256": "b098ebbe135abd4706e62d6286f513fe1c4f07fad61f7250487bd2d86ad317e4",
+    "scalar_verified": true,
+    "schema_version": 1,
+    "source_bound_execution_admitted": true,
+    "status": "PASS_NATIVE_SOURCE_BOUND_CONTROL_AUDIT",
+    "target_complete": true,
+    "target_input": [
+      52411,
+      72106
+    ]
+  },
+  "historical_incomplete_sat_control": {
+    "attempt_count": 8,
+    "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104",
+    "cold_wall_ns": null,
+    "controller_exit_code": 0,
+    "controller_timed_out": false,
+    "exact_geometric_feasible_queries": 1,
+    "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+    "false_negative_claims": 0,
+    "fresh_paired_qualification": false,
+    "headline_online_admissible": false,
+    "native_retry_allowed": false,
+    "native_status_mix": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 8
+    },
+    "online_speedup": null,
+    "original_mathematical_admission": true,
+    "original_transport_status": "PASS_FROZEN_PREPARED_TRANSPORT",
+    "promotion_eligible": false,
+    "recovered_scalar": null,
+    "registration_consumed": true,
+    "rho_online_wall_ns": null,
+    "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104Wb79558c422c7R2026100102",
+    "scalar_verified": false,
+    "status": "ADMITTED_INCOMPLETE_PREPARED_SAT_CONTROL",
+    "verified_online_wall_ns": null,
+    "workload_id": "b79558c422c7"
+  },
   "rho_online_comparison": {
     "boundary": "one supplied public point after reusable preparation through scalar replay",
     "candidate_over_baseline": 0.13428518699194839,
@@ -84,52 +248,61 @@
       "alias": "incumbent",
       "online_ms": 0.03392627559359315,
       "rho_online_over_IC_online": 7.44683775180623,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "ic_online",
       "online_ms": 0.03488011051765443,
       "rho_online_over_IC_online": 7.2431957960877815,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "rho",
       "online_ms": 0.2865062747183838,
       "rho_online_over_IC_online": 0.8818078072352278,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "rho_online",
       "online_ms": 0.2526434698685518,
-      "rho_online_over_IC_online": 1.0,
-      "scheduled": 216,
-      "verified": 216
+      "rho_online_over_IC_online": 1,
+      "verified": 216,
+      "scheduled": 216
     },
     {
       "alias": "stop7_word",
       "online_ms": 0.03395001644938487,
       "rho_online_over_IC_online": 7.441630263867792,
-      "scheduled": 216,
-      "verified": 216
+      "verified": 216,
+      "scheduled": 216
     }
   ],
-  "schema_version": 1,
-  "scope": "bounded IC autolab overview; not all repository research",
-  "sources": [
+  "historical_ledger_sha256": "873825c4d08c6778063767a14ab72daabefb8b7bc4c09c70206ee93cb2b0b237",
+  "historical_regime_summary_sha256": "166fd749083af9fdb1792b26b390372f1a50d61c532ddb8d6d23ad4388032fbb",
+  "historical_overview_panels": [
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json",
-      "sha256": "8e6b506517c945a6180da9c7e7eb85bef4f6a145948deec06bc4a31093aff143"
+      "section_id": "cold-compact-orbit-20261003",
+      "sha256": "bff4c17b8e65448df84a9989fac10c395be4dc038d4a2d4b4267fc734f98be95"
     },
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
-      "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+      "section_id": "full-rank-compact-orbit-20261003",
+      "sha256": "2373cd81cd4ab3900679b6479ac702ba8d4debf53a34698c828cb9f6a6743132"
     },
     {
-      "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
-      "sha256": "9def5e0e4a3c3fd2e47252d08e3509a88205691c39a77912cd315428b7bed2eb"
+      "section_id": "lab-ecbench-all",
+      "sha256": "6f00aede475a66fd2dedbfe5421cf9ac5f749fd94114f5dea485885d95e9ce8c"
+    },
+    {
+      "section_id": "lab-progress",
+      "sha256": "c9f666b67d718746fded960471230673fedb735aeedd2cdb48418376281e75fa"
+    },
+    {
+      "section_id": "lab-currency",
+      "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
-  ]
+  ],
+  "progress_timeline_sha256": "19de153634987bf9869042e2dd7d43237d9d90e6ccf704f275bfd1ca41c15bd3"
 }

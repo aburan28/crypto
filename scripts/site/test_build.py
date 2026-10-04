@@ -61,6 +61,10 @@ class BuildTests(unittest.TestCase):
             "scoreboard/performance-gains/summary.svg",
             "scoreboard/performance-gains/data.json",
             "scoreboard/performance-gains/comparisons.csv",
+            "browser/index.html",
+            "browser/browser.js",
+            "browser/browser.css",
+            "browser/data.json",
             "status/index.html",
             "status/style.css",
             "status/walk-forest.svg",
@@ -745,7 +749,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html", "browser/index.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -788,7 +792,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/ic-leaderboard.html", "scoreboard/ic-measurement.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html", "browser/index.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)
@@ -796,10 +800,67 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/scoreboard/", "/status/", "/status/how.html"):
+        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))
+
+    def test_lab_browser_index_is_current_and_self_consistent(self):
+        # AGENTS.md §7c: docs/browser/data.json is generated from the curve
+        # registry, the leaderboard data, every committed ecbench session and
+        # every tournament round, and is never edited by hand.  It must match
+        # a fresh build, and every cross-reference inside it must resolve.
+        import importlib.util
+        import json
+
+        spec = importlib.util.spec_from_file_location("build_lab_browser", os.path.join(ROOT, "scripts", "build_lab_browser.py"))
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
+        fresh = builder.build()
+        committed = read(os.path.join(ROOT, "docs", "browser", "data.json"))
+        # Mention statistics are volatile (see builder.comparable); the rest
+        # must match a fresh build exactly.
+        self.assertEqual(builder.comparable(json.loads(committed)), builder.comparable(fresh), "docs/browser/data.json is stale; run python3 scripts/build_lab_browser.py")
+
+        data = json.loads(committed)
+        registry = json.loads(read(os.path.join(ROOT, "docs", "curves", "registry.json")))
+        slugs = {c["slug"] for c in data["curves"]}
+        self.assertEqual(slugs, {c["slug"] for c in registry["curves"]}, "every registered curve and no other")
+        methods = {m["method_id"] for m in data["methods"]}
+        fbs = {f["fb_id"] for f in data["factor_bases"]}
+        sessions = {s["session_id"] for s in data["sessions"]}
+        rounds = {r["round"] for r in data["rounds"]}
+        for c in data["curves"]:
+            for e in c["ecbench"]:
+                self.assertIn(e["session_id"], sessions, c["slug"])
+                self.assertIn(e["method_id"], methods, c["slug"])
+            for fb in c["factor_bases"]:
+                self.assertIn(fb, fbs, c["slug"])
+            for t in c["tournament_cells"]:
+                self.assertIn(t["round"], rounds, c["slug"])
+        for f in data["factor_bases"]:
+            self.assertTrue(f["curve"] is None or f["curve"] in slugs, f["fb_id"])
+            self.assertRegex(f["points_sha256"] or "", r"^[a-f0-9]{64}$", f["fb_id"])
+        for k in data["candidates"]:
+            self.assertTrue(k["slug"] is None or k["slug"] in slugs, k["candidate_id"])
+            for path in k["where"]:
+                self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+        for r in data["rounds"]:
+            self.assertTrue(os.path.isdir(os.path.join(ROOT, r["dir"])), r["round"])
+        for s in data["sessions"]:
+            self.assertTrue(os.path.exists(os.path.join(ROOT, s["dir"], "records.jsonl")), s["session_id"])
+        for path, digest in data["sources"].items():
+            self.assertTrue(os.path.exists(os.path.join(ROOT, path)), path)
+            self.assertRegex(digest, r"^[a-f0-9]{64}$", path)
+
+    def test_lab_browser_renders_with_dom_nodes_only(self):
+        # The browser builds every row from data.json; like the dashboards it
+        # must never pass fetched data through innerHTML.
+        script = read(os.path.join(ROOT, "docs", "browser", "browser.js"))
+        self.assertNotIn("innerHTML", script)
+        self.assertNotIn("outerHTML", script)
+        self.assertNotIn("insertAdjacentHTML", script)
+        self.assertIn('fetch("./data.json"', script)
 
     def test_build_is_idempotent(self):
         again = build(self.out, ROOT, lastmod="2026-01-01")
@@ -820,7 +881,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_site_sources_trigger_the_workflow(self):
         workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
-        for path in ('"docs/site/**"', '"scripts/site/**"', '"docs/index-calculus-scoreboard.html"'):
+        for path in ('"docs/site/**"', '"scripts/site/**"', '"docs/index-calculus-scoreboard.html"', '"docs/browser/**"', '"scripts/build_lab_browser.py"'):
             # Once for pull_request, once for push.
             self.assertEqual(workflow.count(path), 2, path)
 

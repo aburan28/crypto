@@ -381,6 +381,42 @@ until the leaderboard shows it**, in the same pull request.
     confirm that, and raise the number.
 - **Published copies** are republishes of the repository file, as in §7.
 
+#### 7c. Keep the lab browser current
+
+`docs/browser/` (published at `/browser/`) is the searchable index over
+everything the workstream names: every curve in the ICV1 registry with
+its invariants (family, field, trace, order, subgroup order, cofactor,
+endomorphism discriminant) and identities (ICV1, EC1, curve UID, retired
+names), every `ecbench` method (`ECM1`) and factor base (`FB1`) a
+committed session ran, every tournament candidate identity (`IC1`) the
+repository writes, every tournament round, every committed `ecbench`
+session, and the vocabulary of oracles, solvers and factor-base families.
+It is how a reader gets from a number on the scoreboard to the curve,
+algorithm and evidence behind it.
+
+- **Generated, never edited.** `docs/browser/data.json` is written by
+  `python3 scripts/build_lab_browser.py` from committed files only (the
+  registry, `docs/ic/leaderboard.json`, `research/ecbench_*/sessions/*`,
+  the tournament's `runs/`, and the files that mention IC1 identities).
+  It computes nothing beyond a mean over a session's own verified runs.
+- **Regenerate it in the PR that lands** a new curve in the registry, a
+  new `ecbench` session, a new tournament round, a new candidate identity,
+  or a leaderboard change. CI (`ic-leaderboard`, `--check`) fails when the
+  file is stale, and the site build test fails when a cross-reference in
+  it does not resolve. The check ignores how many files mention each
+  candidate identity, and which: those counts change with any report that
+  writes one and refresh on the next regeneration.
+- **Every identity is a link.** A curve page links to the leaderboard
+  rows, sessions, factor bases, rounds and candidates that cite it; a
+  session, method, factor base or round links back to its curves. A new
+  kind of record gets a view and a join, not a free-text mention.
+- **The page renders data with DOM nodes only**, never `innerHTML`, like
+  the status dashboards; the site test pins that.
+- **Unregistered references stay visible.** A tournament cell or
+  candidate on a curve the registry does not hold is shown as
+  "not in the registry", never dropped or silently mapped; registering
+  the curve (§11) is the fix.
+
 ### 8. Use the frozen benchmark to establish end-to-end speedups
 
 Every index-calculus performance iteration must use the
