@@ -135,10 +135,10 @@ fn main() {
                         (m_override > 0).then_some(m_override),
                     );
                     println!(
-                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} m {} (rule {}, {:.0} available) | B's {} lines {} steps {} (base {}) roots {} hits {} false {} | relations {} ({:.3e}/line vs p/m! {:.3e}: ratio {:.2}) verified {} failed {} | C_rel {:.3e} = enum {:.3e} + sieve {:.3e} + extract {:.3e} + verify {:.3e} (per relation) | adds {:.3e} lookups {:.3e} | descent: residuals {} successes {} ({:.0}/success) C_cov {:.3e} muls {:.3e} stopped {} incomplete {} timed out {} | unknowns {} (filtered {}) row {:.1} LA attempts {} ops {} | solved {} correct {} exhausted {} | S {:.3e} S+ {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.4} (S+/rho {:.4}) = relation {:.4} + descent {:.4} + la {:.4} | {:.0} s",
+                        "p={:>5} seed={} l=2^{:.1} |F|={:>4} c_add E {:.0} J {:.0} m {} (rule {}, {:.0} available) | B's {} lines {} steps {} (base {}) roots {} hits {} false {} | relations {} ({:.3e}/line vs p/m! {:.3e}: ratio {:.2}) verified {} failed {} duplicates {} per-m {:?} | C_rel {:.3e} = enum {:.3e} + sieve {:.3e} + extract {:.3e} + verify {:.3e} (per relation) | adds {:.3e} lookups {:.3e} | descent: residuals {} successes {} ({:.0}/success) C_cov {:.3e} muls {:.3e} stopped {} incomplete {} timed out {} | unknowns {} (filtered {}) row {:.1} LA attempts {} ops {} | solved {} correct {} exhausted {} | S {:.3e} S+ {:.3e} | rho S {:.3} ± {:.3} ({} runs) | S/rho {:.4} (S+/rho {:.4}) = relation {:.4} + descent {:.4} + la {:.4} | {:.0} s",
                         r.p, r.seed, r.bits, r.base, r.c_add_e, r.c_add_j, r.m_final, r.m_rule, r.relations_available,
                         r.bs, r.lines, r.sieve_steps, r.base_steps, r.roots, r.hits, r.false_hits,
-                        r.relations, r.rels_per_line, r.expected_rels_per_line, r.rate_ratio, r.rels_verified, r.rels_failed_verify,
+                        r.relations, r.rels_per_line, r.expected_rels_per_line, r.rate_ratio, r.rels_verified, r.rels_failed_verify, r.duplicates, r.per_m,
                         r.c_rel, r.enum_muls as f64 / r.relations.max(1) as f64, r.sieve_muls as f64 / r.relations.max(1) as f64,
                         r.extract_muls as f64 / r.relations.max(1) as f64, r.verify_muls as f64 / r.relations.max(1) as f64,
                         r.sieve_adds as f64, r.sieve_lookups as f64,

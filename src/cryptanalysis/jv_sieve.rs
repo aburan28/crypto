@@ -1077,6 +1077,10 @@ pub struct SieveDlpReport {
     pub relations: usize,
     pub rels_verified: u64,
     pub rels_failed_verify: u64,
+    /// Relations found again (or as their negation), not counted in `relations`.
+    pub duplicates: u64,
+    /// Per `m` the run went through: `(m, B's, lines, relations, hits)`.
+    pub per_m: Vec<(usize, u64, u64, u64, u64)>,
     /// Measured relations per line against `p/m!`.
     pub rels_per_line: f64,
     pub expected_rels_per_line: f64,
@@ -1140,6 +1144,8 @@ pub struct SieveDlpReport {
 /// One batch of `B` indices sieved on one thread.
 struct BatchOut {
     rels: Vec<SieveRel>,
+    /// `(B index, line index within B, s)` of each relation, in order.
+    prov: Vec<(u128, usize, u64)>,
     bs: u64,
     lines: u64,
     cost: SieveCost,
@@ -1171,6 +1177,7 @@ fn sieve_batch(
     let mut ctr = Counters::new(spec.p);
     let mut out = BatchOut {
         rels: Vec::new(),
+        prov: Vec::new(),
         bs: 0,
         lines: 0,
         cost: SieveCost::default(),
@@ -1193,7 +1200,7 @@ fn sieve_batch(
         let lines = lines_for_b(&ring, fq, &setup, &b, &mut rng);
         out.enum_muls += fq.muls() + ring.muls();
         out.enum_adds += ring.adds();
-        for line in &lines {
+        for (li, line) in lines.iter().enumerate() {
             out.lines += 1;
             let (hits, cost) = sieve_line(&ring, &setup, line, &mut ctr, None);
             out.cost.steps += cost.steps;
@@ -1217,6 +1224,7 @@ fn sieve_batch(
                         if ok {
                             out.verified += 1;
                             out.rels.push(rel);
+                            out.prov.push((k, li, s));
                         } else {
                             out.failed += 1;
                         }
@@ -1298,6 +1306,7 @@ pub fn run_cover_sieve_dlp(
     let mut next_k: u128 = 0;
     let mut sieve_rows: Vec<SparseRel> = Vec::new();
     let mut sieve_rels: Vec<SieveRel> = Vec::new();
+    let mut seen: std::collections::HashSet<Vec<(usize, i8)>> = std::collections::HashSet::new();
     let threads = rayon::current_num_threads().max(1);
     // about 4·10⁶ sieve steps per thread and round
     let chunk: u128 = (4_000_000 / p as u128).max(64);
@@ -1331,7 +1340,14 @@ pub fn run_cover_sieve_dlp(
             .into_par_iter()
             .map(|ks| sieve_batch(&spec, &base, &by_x, m, scramble, ks, seed))
             .collect();
+        if rep.per_m.last().map(|e| e.0) != Some(m) {
+            rep.per_m.push((m, 0, 0, 0, 0));
+        }
         for o in outs {
+            let e = rep.per_m.last_mut().unwrap();
+            e.1 += o.bs;
+            e.2 += o.lines;
+            e.4 += o.hits;
             rep.bs += o.bs;
             rep.lines += o.lines;
             rep.sieve_steps += o.cost.steps;
@@ -1349,6 +1365,14 @@ pub fn run_cover_sieve_dlp(
             rep.rels_verified += o.verified;
             rep.rels_failed_verify += o.failed;
             for rel in o.rels {
+                // a relation found twice (or as its negation) is one relation
+                let neg: Vec<(usize, i8)> = rel.terms.iter().map(|&(i, e)| (i, -e)).collect();
+                if seen.contains(&rel.terms) || seen.contains(&neg) {
+                    rep.duplicates += 1;
+                    continue;
+                }
+                seen.insert(rel.terms.clone());
+                rep.per_m.last_mut().unwrap().3 += 1;
                 let cols: Vec<(usize, u64)> = rel
                     .terms
                     .iter()
@@ -1848,13 +1872,18 @@ mod la_diag {
         let by_x: HashMap<u64, usize> = base.iter().enumerate().map(|(i, b)| (b.x, i)).collect();
         let small = base.len();
         let mut rels: Vec<SieveRel> = Vec::new();
+        let mut prov: Vec<(u128, usize, u64)> = Vec::new();
+        let target: usize = std::env::var("DIAG_N")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(small + 20);
         let scr = {
             let setup = sieve_setup(&ctx.f.f, &ctx.cov.hx, &base, m);
             coprime_scramble(b_space(&setup), &mut rng)
         };
         let mut k = 0u128;
         let chunk = 20000u128;
-        while rels.len() < small + 20 {
+        while rels.len() < target {
             let outs: Vec<BatchOut> = (0..4u128)
                 .into_par_iter()
                 .map(|t| {
@@ -1872,6 +1901,7 @@ mod la_diag {
             k += 4 * chunk;
             for o in outs {
                 rels.extend(o.rels);
+                prov.extend(o.prov);
             }
             eprintln!("B's {} relations {}", k, rels.len());
         }
@@ -1880,6 +1910,15 @@ mod la_diag {
                 rels.iter().map(|r| serde_json::json!(r.terms)).collect();
             let meta = serde_json::json!({"p": p, "l": l, "base_x": base.iter().map(|b| b.x).collect::<Vec<_>>(), "base_y": base.iter().map(|b| b.y.0).collect::<Vec<_>>(), "rels": dump});
             std::fs::write("/tmp/claude-0/-home-user/df489a89-77a8-5643-9875-0a345fb3f77d/scratchpad/rels_251.json", meta.to_string()).unwrap();
+        }
+        {
+            let mut groups: HashMap<Vec<(usize, i8)>, Vec<(u128, usize, u64)>> = HashMap::new();
+            for (r, pv) in rels.iter().zip(prov.iter()) {
+                groups.entry(r.terms.clone()).or_default().push(*pv);
+            }
+            for (t, pvs) in groups.iter().filter(|(_, v)| v.len() > 1).take(8) {
+                eprintln!("duplicate ({} pts): {:?}", t.len(), pvs);
+            }
         }
         let rows: Vec<SparseRel> = rels
             .iter()

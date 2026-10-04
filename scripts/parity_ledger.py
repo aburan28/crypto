@@ -423,8 +423,21 @@ def print_sieve(rows, title):
         star = "*" if not r["rho"] else ""
         n = max(r["relations"], 1)
         per = lambda k: r[k] / n
-        print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['m_final']} ({r['m_rule']}) | {r['relations_available']:,.0f} | {r['bs']:,} | {r['lines']:,} | {r['relations']} | {r['rate_ratio']:.2f} | {r['c_rel']:.3e} | {per('enum_muls'):.2e} / {per('sieve_muls'):.2e} / {per('extract_muls'):.2e} / {per('verify_muls'):.2e} | {r['sieve_muls'] / max(r['base_steps'], 1):.2f} | {r['descent_residuals']:,} ({r['descent_tests_per_success']:.0f}) | {r['descent_c_cov']:.3e} | {r['s']:.3e} | {r['s_plus']:.3e} | {r['rho_s_mean']:.3f}{star} | {r['s_over_rho']:.4f} | {r['s_plus_over_rho']:.4f} | {r['relation_over_rho']:.4f} + {r['descent_over_rho']:.4f} + {r['la_over_rho']:.5f} | {r['solved']} / {r['correct']} | {r['rels_failed_verify']} |")
+        print(f"| {r['p']} | {r['seed']} | 2^{r['bits']:.1f} | {r['base']} | {r['m_rule']}{' → ' + str(r['m_final']) if r['m_final'] != r['m_rule'] else ''} | {r['relations_available']:,.0f} | {r['bs']:,} | {r['lines']:,} | {r['relations']} | {r['rate_ratio']:.2f} | {r['c_rel']:.3e} | {per('enum_muls'):.2e} / {per('sieve_muls'):.2e} / {per('extract_muls'):.2e} / {per('verify_muls'):.2e} | {r['sieve_muls'] / max(r['base_steps'], 1):.2f} | {r['descent_residuals']:,} ({r['descent_tests_per_success']:.0f}) | {r['descent_c_cov']:.3e} | {r['s']:.3e} | {r['s_plus']:.3e} | {r['rho_s_mean']:.3f}{star} | {r['s_over_rho']:.4f} | {r['s_plus_over_rho']:.4f} | {r['relation_over_rho']:.4f} + {r['descent_over_rho']:.4f} + {r['la_over_rho']:.5f} | {r['solved']} / {r['correct']} | {r['rels_failed_verify']} |")
     solved = [r for r in rows if r["solved"]]
+    # rate per m, from the rows' per-m bookkeeping where present, else from
+    # the rows that stayed on one m
+    per_m = {}
+    for r in rows:
+        if r.get("per_m"):
+            for m, bs, lines, rel, hits in r["per_m"]:
+                e = per_m.setdefault(m, [0, 0, 0, 0.0])
+                e[0] += bs; e[1] += lines; e[2] += rel; e[3] += lines * r["p"] / math.factorial(m)
+        elif r["m_final"] == r["m_rule"]:
+            e = per_m.setdefault(r["m_final"], [0, 0, 0, 0.0])
+            e[0] += r["bs"]; e[1] += r["lines"]; e[2] += r["relations"]; e[3] += r["lines"] * r["p"] / math.factorial(r["m_final"])
+    if per_m:
+        print("\nRate by m (relations against lines · p/m!, P7), lines per B: " + "; ".join(f"m = {m}: {e[2]} / {e[3]:.1f} = {e[2] / e[3]:.2f}, {e[1] / max(e[0], 1):.2f} lines per B" for m, e in sorted(per_m.items())) + ".  Rows whose m rose during the run (the registered fallback) are marked `→`.")
     g = by_size(solved, lambda r: r["p"])
     if len(g) >= 2:
         ps = list(g)
@@ -455,8 +468,9 @@ def print_sieve(rows, title):
             c = mean([r["c_rel"] for r in m9])
             cc = mean([r["descent_c_cov"] for r in m9]) * 720
             print(f"At m = 9 (p = {sorted(set(r['p'] for r in m9))}): C_rel = {c:.3e} per relation against 720 · C_cov = {cc:.3e} per Nagao relation, a ratio of {cc / c:,.0f} (registered P11: 10³ within 3×; P8: C_rel in [5·10⁵, 10⁷]).")
-        ratios = [r["rate_ratio"] for r in solved]
-        print(f"Rate against p/m! over every solved row: {min(ratios):.2f}–{max(ratios):.2f} (registered P7: [0.5, 2]); relations failing the group check: {sum(r['rels_failed_verify'] for r in rows)}; false hits: {sum(r['false_hits'] for r in rows)}.")
+        ratios = [r["rate_ratio"] for r in solved if r["m_final"] == r["m_rule"]]
+        if ratios:
+            print(f"Rate against p/m! over the solved rows that stayed on one m: {min(ratios):.2f}–{max(ratios):.2f} (registered P7: [0.5, 2]); relations failing the group check: {sum(r['rels_failed_verify'] for r in rows)}; false hits: {sum(r['false_hits'] for r in rows)}; duplicates found and dropped: {sum(r.get('duplicates', 0) for r in rows)}.")
         desc = [r["descent_over_rho"] / r["s_over_rho"] for r in solved if r["s_over_rho"] < 1]
         if desc:
             print(f"Share of the descent in S below parity: {min(desc):.2f}–{max(desc):.2f} (registered P9: more than half).")
