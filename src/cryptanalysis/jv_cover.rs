@@ -1179,11 +1179,21 @@ pub struct ZeroDimStats {
     pub trace_mismatch: bool,
 }
 
+/// A recorded trace with its record: replays that held, replays that
+/// diverged.  A trace recorded on a system of an uncommon shape diverges on
+/// most of the rest; once it has diverged three times and more often than
+/// it held, it is dropped and the next full run records a new one.
+pub struct TraceEntry {
+    pub trace: Arc<F4Trace>,
+    pub held: u64,
+    pub diverged: u64,
+}
+
 /// Traces of stopped F4 runs on the six-quadric systems, one per `p`
-/// (every residual's system has the same shape), recorded by the first
-/// full run and replayed on the rest when a context asks for it.
-fn trace_cache() -> &'static Mutex<HashMap<u64, Arc<F4Trace>>> {
-    static CACHE: OnceLock<Mutex<HashMap<u64, Arc<F4Trace>>>> = OnceLock::new();
+/// (every residual's system has the same shape up to rare variants),
+/// recorded by a full run and replayed on the rest when a context asks.
+fn trace_cache() -> &'static Mutex<HashMap<u64, TraceEntry>> {
+    static CACHE: OnceLock<Mutex<HashMap<u64, TraceEntry>>> = OnceLock::new();
     CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
@@ -1221,20 +1231,34 @@ pub fn solve_zero_dim_traced(
     let r = if !trace {
         f4_fp::f4(input, n, p, opts)
     } else {
-        let have = trace_cache().lock().unwrap().get(&p).cloned();
+        let have = trace_cache()
+            .lock()
+            .unwrap()
+            .get(&p)
+            .map(|e| e.trace.clone());
         match have {
             Some(t) => {
+                // a diverging replay finishes as a full run inside the engine
                 let r = f4_fp::f4_replay(input, n, p, opts, &t);
+                let mut cache = trace_cache().lock().unwrap();
+                if let Some(e) = cache.get_mut(&p) {
+                    if Arc::ptr_eq(&e.trace, &t) {
+                        if r.trace_mismatch {
+                            e.diverged += 1;
+                            if e.diverged >= 3 && e.diverged > e.held {
+                                cache.remove(&p);
+                            }
+                        } else {
+                            e.held += 1;
+                        }
+                    }
+                }
                 if r.trace_mismatch {
                     st.trace_mismatch = true;
-                    let mut full = f4_fp::f4(input, n, p, opts);
-                    full.field_ops += r.field_ops;
-                    full.ms += r.ms;
-                    full
                 } else {
                     st.replayed = true;
-                    r
                 }
+                r
             }
             None => {
                 let (r, t) = f4_fp::f4_record(input, n, p, opts);
@@ -1243,7 +1267,11 @@ pub fn solve_zero_dim_traced(
                         .lock()
                         .unwrap()
                         .entry(p)
-                        .or_insert_with(|| Arc::new(t));
+                        .or_insert_with(|| TraceEntry {
+                            trace: Arc::new(t),
+                            held: 0,
+                            diverged: 0,
+                        });
                 }
                 r
             }
@@ -3051,7 +3079,7 @@ mod tests {
             "replayed {replayed} of {n} ({mismatches} mismatches)"
         );
         eprintln!("replayed {replayed} of {n}, cheaper {cheaper}, mismatches {mismatches}");
-        let t = trace_cache().lock().unwrap().get(&53).cloned().unwrap();
+        let t = trace_cache().lock().unwrap().get(&53).map(|e| e.trace.clone()).unwrap();
         for (i, st) in t.steps.iter().enumerate() {
             eprintln!(
                 "  trace step {i}: degree {} useful rows {} new lms {}",
