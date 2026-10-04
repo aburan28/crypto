@@ -266,6 +266,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
+| `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
@@ -309,6 +310,13 @@ Two consequences to read every table with:
   larger method at any interesting size. The records keep `max_rss_kib`
   and the lookup counts. This is the known time–memory trade, never a
   finding.
+- **The pair claw's `S` omits its memory too.** `claw.pair_table`, ported
+  from `aburan28/cryptanalysis#175`, holds `M = table_scale·√(r/n)` classes.
+  Every base logarithm is known, so it is a generic method (a randomised
+  BSGS on signed Frobenius classes) whose mean is about
+  `(c + 1/c)/√n` at `c = table_scale`, at best `2/√n` against rho's
+  `√(π/4n)`. It is in the `claw` family, not `ic`, and it is not an
+  index-calculus candidate for a `vs_rho` claim.
 - **A lower bound is marked.** `cost.lower_bound` is set whenever
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
