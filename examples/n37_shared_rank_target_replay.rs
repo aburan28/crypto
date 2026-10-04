@@ -267,9 +267,17 @@ fn phase_cost(phase: &Value, name: &str) -> Result<(u64, f64), String> {
         .as_u64()
         .ok_or(format!("{name} doubles absent"))?;
     let gae = phase["gae"].as_f64().ok_or(format!("{name} GAE absent"))?;
-    if gae != (adds + doubles) as f64 {
+    // Default calibration prices these three mandatory native units at
+    // one GAE each, even though optional field conversions remain unset.
+    let native = &phase["native"];
+    let expected = adds
+        + doubles
+        + native["lookups"].as_u64().unwrap_or(0)
+        + native["row_ops"].as_u64().unwrap_or(0)
+        + native["target_guard_probes"].as_u64().unwrap_or(0);
+    if gae != expected as f64 {
         return Err(format!(
-            "{name} default-calibration GAE differs from group ledger"
+            "{name} default-calibration GAE differs from priced ledger"
         ));
     }
     Ok((wall, gae))

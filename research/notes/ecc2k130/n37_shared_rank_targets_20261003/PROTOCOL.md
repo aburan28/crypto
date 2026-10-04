@@ -68,3 +68,13 @@ run the complete cold shared-rank batch against the same-Q 32-lane strong
 signed-Frobenius batch rho on an isolated host, including independent replay,
 memory, native conversion costs, and A/A drift controls. If H1 fails,
 diagnose the exact failed Q and avoid spending on batch timing.
+
+## Post-gate process clarification
+
+The H1 inputs, stop rule and interpretation above were frozen before the
+run and are unchanged. For the next *comparative* measurement, the primary
+one-target contract takes precedence: first freeze one new Q and pair this
+candidate's verified online interval with a same-point strong rho solve.
+The 1,024-point experiment above follows only after that primary result;
+its distinct question is shared-setup amortization. This clarification
+does not reclassify the 16-point correctness cohort as a batch speed test.
