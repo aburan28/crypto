@@ -719,6 +719,50 @@ pub fn build(
     round: Option<u32>,
     independent: Option<&Independent>,
 ) -> Result<Value, String> {
+    build_from_session(dir, ic_arm, rho_arm, workload_id, round, independent, true)
+}
+
+/// Attach a later independent replay to a claim made by the session's
+/// original binary. Reconstruct the complete original report from the frozen
+/// session and current source, and require exact equality before adding any
+/// new provenance. This permits an auditor to arrive after the measuring
+/// binary has been retired without relaxing `build`'s binary-identity gate.
+pub fn attach_independent(
+    dir: &Path,
+    ic_arm: &str,
+    rho_arm: &str,
+    workload_id: &str,
+    round: Option<u32>,
+    original: &Value,
+    independent: &Independent,
+) -> Result<Value, String> {
+    let reconstructed = build_from_session(dir, ic_arm, rho_arm, workload_id, round, None, false)?;
+    if &reconstructed != original {
+        return Err(
+            "the original claim differs from the frozen session or this binary's claim sources"
+                .into(),
+        );
+    }
+    build_from_session(
+        dir,
+        ic_arm,
+        rho_arm,
+        workload_id,
+        round,
+        Some(independent),
+        false,
+    )
+}
+
+fn build_from_session(
+    dir: &Path,
+    ic_arm: &str,
+    rho_arm: &str,
+    workload_id: &str,
+    round: Option<u32>,
+    independent: Option<&Independent>,
+    require_recorded_binary: bool,
+) -> Result<Value, String> {
     let session = read_session(dir)?;
     let records = read_records(dir)?;
     let read =
@@ -739,15 +783,17 @@ pub fn build(
             local.problems.join("; ")
         ));
     }
-    let this = std::env::current_exe()
-        .ok()
-        .and_then(|p| std::fs::read(p).ok())
-        .map(|b| sha256_hex(&b));
-    if this.is_none() || this != session.binary_sha256 {
-        return Err(
-            "a claim is built by the binary that measured the session: the candidate identity binds this binary's sources"
-                .into(),
-        );
+    if require_recorded_binary {
+        let this = std::env::current_exe()
+            .ok()
+            .and_then(|p| std::fs::read(p).ok())
+            .map(|b| sha256_hex(&b));
+        if this.is_none() || this != session.binary_sha256 {
+            return Err(
+                "a claim is built by the binary that measured the session: the candidate identity binds this binary's sources"
+                    .into(),
+            );
+        }
     }
     let measured = |arm: &str, round: u32| {
         records.iter().find(|r| {

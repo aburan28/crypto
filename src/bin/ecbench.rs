@@ -10,6 +10,7 @@
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
 //! ecbench fb --curve C --factor-base F a factor base with its points
 //! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
+//! ecbench claim attach --base-report R --independent-receipt A   attach a later replay
 //! ecbench claim check --report R       the vs_rho checker
 //! ecbench db sql PATHS... | sqlite3 ecbench.db
 //! ecbench isolab-job --spec S --binary B    an isolab.job/v1 for an independent runner
@@ -223,6 +224,31 @@ enum ClaimCmd {
         #[arg(long)]
         exit_code: bool,
     },
+    /// Attach a later other-host replay to an unchanged claim produced by
+    /// the measuring binary. The entire original report is reconstructed
+    /// from the frozen session before provenance is added.
+    Attach {
+        #[arg(long)]
+        dir: PathBuf,
+        #[arg(long)]
+        ic: String,
+        #[arg(long)]
+        rho: String,
+        #[arg(long)]
+        workload: String,
+        #[arg(long)]
+        round: Option<u32>,
+        #[arg(long)]
+        base_report: PathBuf,
+        #[arg(long)]
+        independent_receipt: PathBuf,
+        #[arg(long)]
+        pointer: String,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long)]
+        exit_code: bool,
+    },
     /// Check a report against the `vs_rho` schema, as
     /// `boundary_autolab.py claim-check --stage vs_rho` does; exit 1 on
     /// any problem.
@@ -274,6 +300,41 @@ fn print_json(v: &impl serde::Serialize) -> Result<(), String> {
         serde_json::to_string_pretty(v).map_err(|e| e.to_string())?
     );
     Ok(())
+}
+
+fn load_independent(path: &Path, pointer: String) -> Result<claim::Independent, String> {
+    let bytes = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(claim::Independent {
+        receipt: serde_json::from_slice(&bytes).map_err(|e| format!("{}: {e}", path.display()))?,
+        receipt_sha256: canonical::sha256_hex(&bytes),
+        pointer,
+    })
+}
+
+fn emit_claim(
+    report: serde_json::Value,
+    out: Option<PathBuf>,
+    exit_code: bool,
+) -> Result<ExitCode, String> {
+    let problems = claim::check_problems(&claim::check_vs_rho(&report)?);
+    let text = serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n";
+    match out {
+        Some(o) => {
+            std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
+            eprintln!(
+                "claim {} sha256 {}",
+                o.display(),
+                canonical::sha256_hex(text.as_bytes())
+            );
+        }
+        None => print!("{text}"),
+    }
+    eprintln!("{}", report["verdict"].as_str().unwrap_or(""));
+    report_problems(&problems);
+    if exit_code && !problems.is_empty() {
+        return Ok(ExitCode::from(1));
+    }
+    Ok(ExitCode::SUCCESS)
 }
 
 fn run(cli: Cli) -> Result<ExitCode, String> {
@@ -606,37 +667,37 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 exit_code,
             } => {
                 let independent = match (independent_receipt, pointer) {
-                    (Some(p), Some(pointer)) => {
-                        let bytes =
-                            std::fs::read(&p).map_err(|e| format!("{}: {e}", p.display()))?;
-                        Some(claim::Independent {
-                            receipt: serde_json::from_slice(&bytes)
-                                .map_err(|e| format!("{}: {e}", p.display()))?,
-                            receipt_sha256: canonical::sha256_hex(&bytes),
-                            pointer,
-                        })
-                    }
+                    (Some(p), Some(pointer)) => Some(load_independent(&p, pointer)?),
                     _ => None,
                 };
                 let report = claim::build(&dir, &ic, &rho, &workload, round, independent.as_ref())?;
-                let problems = claim::check_problems(&claim::check_vs_rho(&report)?);
-                let text = serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n";
-                match out {
-                    Some(o) => {
-                        std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
-                        eprintln!(
-                            "claim {} sha256 {}",
-                            o.display(),
-                            canonical::sha256_hex(text.as_bytes())
-                        );
-                    }
-                    None => print!("{text}"),
-                }
-                eprintln!("{}", report["verdict"].as_str().unwrap_or(""));
-                report_problems(&problems);
-                if exit_code && !problems.is_empty() {
-                    return Ok(ExitCode::from(1));
-                }
+                return emit_claim(report, out, exit_code);
+            }
+            ClaimCmd::Attach {
+                dir,
+                ic,
+                rho,
+                workload,
+                round,
+                base_report,
+                independent_receipt,
+                pointer,
+                out,
+                exit_code,
+            } => {
+                let original: serde_json::Value = serde_json::from_str(&read(&base_report)?)
+                    .map_err(|e| format!("{}: {e}", base_report.display()))?;
+                let independent = load_independent(&independent_receipt, pointer)?;
+                let report = claim::attach_independent(
+                    &dir,
+                    &ic,
+                    &rho,
+                    &workload,
+                    round,
+                    &original,
+                    &independent,
+                )?;
+                return emit_claim(report, out, exit_code);
             }
             ClaimCmd::Check { report } => {
                 let v: serde_json::Value = serde_json::from_str(&read(&report)?)
