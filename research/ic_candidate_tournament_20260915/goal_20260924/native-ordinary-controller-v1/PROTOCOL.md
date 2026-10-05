@@ -1,7 +1,8 @@
 # Native ordinary preparation controller v1
 
-Status: source implementation and bounded transport controls. No source freeze,
-registration, scientific panel or fresh comparison is executed by this change.
+Status: source implementation, bounded controls and a passing validation-only
+offline freeze with [full data custody](BUILD_VALIDATION_RESULT.md). No scientific
+registration, panel, runtime admission or fresh comparison is executed by this change.
 Depends on worker PR #1344 and preparer PR #1342. The full complete-solver goal
 remains active; the old SAT/F5 controls and three confirmation sets stay closed.
 
@@ -22,6 +23,14 @@ manifest, binaries and compiled worker identity are retained. The native CMS
 arm additionally retains the accepted archive/manifest and its verified
 extracted files. Freeze invokes only build tools and the worker's identity
 command. Validation-only registrations cannot execute.
+
+The build-only custody extension adds `ordinary-control-publish-build` and
+`ordinary-control-replay-build`. The first retains the exact sidecars, receipts
+and a complete plain USTAR gzip archive from an unconsumed validation capsule.
+The second requires the external validation seal, verifies every byte and all
+original source/build/asset bindings as data, and launches no archived binary.
+The real build and the two retained failed attempts are documented separately;
+archive custody is never source-bound scientific execution admission.
 
 Execution requires the external registration seal and its own frozen controller
 binary. It creates the execution directory and durably consumes the registration

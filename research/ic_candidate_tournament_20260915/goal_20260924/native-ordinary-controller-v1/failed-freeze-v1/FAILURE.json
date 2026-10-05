@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "BUILD_VALIDATION_VENDOR_FAILURE",
+  "source_commit": "34304b60d85f497698cfafbc9a385200868291e1",
+  "controller_exit_code": 1,
+  "vendor_exit_code": 101,
+  "missing_locked_dependency": "zerocopy-derive 0.8.59",
+  "lock_sha256": "f99127c279e83c5fd8a474a604e5457a96d0ed16fb4c84758c78f51f1291ce79",
+  "registration_sha256": null,
+  "complete_capsule_bytes_verified": false,
+  "scientific_worker_calls": 0,
+  "execution_admitted": false,
+  "full_goal_complete": false
+}

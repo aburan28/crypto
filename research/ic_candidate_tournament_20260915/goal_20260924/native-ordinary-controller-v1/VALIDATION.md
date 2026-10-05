@@ -1,11 +1,11 @@
-# Controller source validation
+# Initial controller source validation
 
 These are portable source, representation and receipt controls on the disclosed
 educational n17 path. They are not natural-query measurements, a source freeze,
 an executable registration, runtime admission or a complete-solver comparison.
 No scientific worker, F5 search, exporter or CryptoMiniSat invocation ran.
 
-The final local invocation completed with exit 0. Its retained output is
+The initial final local invocation completed with exit 0. Its retained output is
 [`tests-v3.txt.gz`](tests-v3.txt.gz), losslessly compressed with `gzip -n`.
 Read it with `gzip -dc tests-v3.txt.gz`. Results:
 
@@ -63,7 +63,7 @@ Only this task's inactive disposable debug cache was removed after the terminal
 full-disk build failure. Sources, prior raw receipts and scientific evidence
 were retained. No worker was restarted to obtain a different scientific outcome.
 
-Final tested source SHA-256:
+Initial tested source SHA-256 (before the build-custody follow-up):
 
 | File | SHA-256 |
 | --- | --- |
@@ -85,7 +85,11 @@ They were read without rerunning a benchmark. They remain unresolved CI gates;
 local controls cannot replace them. Review current exact-head CI before any
 source acceptance or merge.
 
-Actual source freezing, publication-before-dispatch, the sole new fixed panel
+Actual scientific source freezing, publication-before-dispatch, the sole new fixed panel
 per solver, frozen runtime acceptance, fresh IC1/workload/exposure admission,
 independently verified one-target timing, incumbent/strong-rho pairing and the
 CPU isolation gate remain pending. The full user goal remains active.
+
+The subsequent validation-only offline build and complete archived-byte replay
+are in [BUILD_VALIDATION_RESULT.md](BUILD_VALIDATION_RESULT.md). They do not
+replace these earlier controls or establish any scientific execution.

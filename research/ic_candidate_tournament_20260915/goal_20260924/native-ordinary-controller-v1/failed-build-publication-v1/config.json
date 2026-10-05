@@ -1,0 +1,16 @@
+{
+  "conflict_budget": 100000,
+  "export_nonce": 2026100401,
+  "exporter_timeout_ms": 30000,
+  "plan": {
+    "algorithm_seed": 2026100311,
+    "family": "cryptominisat",
+    "planned_queries": 3,
+    "question": "native-target-free-preparation-n17-v1",
+    "schema_version": 1
+  },
+  "question": "disclosed-n17-native-ordinary-preparation-v1",
+  "schema_version": 1,
+  "solver_timeout_ms": 30000,
+  "worker_timeout_ms": 120000
+}

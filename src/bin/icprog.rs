@@ -43,6 +43,8 @@ mod f5_target;
 mod identity;
 #[path = "icprog/oracle.rs"]
 mod oracle;
+#[path = "icprog/ordinary_build.rs"]
+mod ordinary_build;
 #[path = "icprog/ordinary_control.rs"]
 mod ordinary_control;
 #[path = "icprog/ordinary_preparation.rs"]
@@ -111,6 +113,26 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Publish full data custody of an unconsumed validation-only build; no search.
+    OrdinaryControlPublishBuild {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Verify archived build bytes and receipts as data; executes no archived binary.
+    OrdinaryControlReplayBuild {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Freeze new target-free native preparation sources/binaries; builds only.
     OrdinaryControlFreeze {
         #[arg(long, default_value = ".")]
@@ -697,6 +719,22 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::OrdinaryControlPublishBuild {
+            capsule,
+            publication,
+            validation_registration_sha256,
+            out,
+        } => ordinary_build::publish(
+            &capsule,
+            &publication,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::OrdinaryControlReplayBuild {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => ordinary_build::replay(&publication, &validation_registration_sha256, &out),
         Command::OrdinaryControlFreeze {
             root,
             out,

@@ -118,6 +118,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog prepared_f5 -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog ordinary_preparation -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog ordinary_control -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog ordinary_build -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_target -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog f5_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_sat_control -- --test-threads=1
@@ -129,6 +130,10 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_ordinary_worker -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog ordinary-control-replay-build \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2 \
+            --validation-registration-sha256 02e12b456947c8034f096b47c16dd7b73eb6c15cedb6c0b79164f887ec1406f3 \
+            --out "$RUNNER_TEMP/native-ordinary-build-custody.json"
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"
@@ -142,6 +147,7 @@ jobs:
           name: disclosed-native-sat-replay-${{ matrix.os }}
           path: |
             ${{ runner.temp }}/native-sat-replay.json
+            ${{ runner.temp }}/native-ordinary-build-custody.json
             ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-f5-target-replay.json
             ${{ runner.temp }}/native-f5-build-validation-replay.json

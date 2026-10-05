@@ -58,7 +58,10 @@ role receipts and original model files, compares exact matrix rows with the
 independent mathematical reconstruction, and requires complete exclusive phase
 costs. Its bounded validation controls launch no scientific queries. Actual
 source freeze, registration/publication, panel execution and frozen runtime
-acceptance remain pending.
+acceptance remain pending. A [validation-only offline build](goal_20260924/native-ordinary-controller-v1/BUILD_VALIDATION_RESULT.md)
+now retains the complete source/dependency/binary archive and original receipts.
+Portable native data replay verifies every registered byte and launches no
+archived binary; it supplies build custody, not scientific runtime admission.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

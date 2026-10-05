@@ -2,7 +2,7 @@
 use super::{ordinary_preparation, sat_control::native};
 #[path = "../prepared_ordinary_worker/contract.rs"]
 #[allow(dead_code)] // Shared typed capsule/claim/query contract with the worker.
-mod capsule;
+pub(super) mod capsule;
 use crypto_lib::cryptanalysis::{
     prepared_ordinary::Family,
     prepared_sat_control::{canonical_sha, sha256},
@@ -910,6 +910,13 @@ fn verify_execution_inventory(execution: &Path, terminal: &Value) -> Result<(), 
     )
 }
 fn verify_build(root: &Path, record: &capsule::Registration) -> Result<(), String> {
+    verify_build_from(root, record, root)
+}
+pub(super) fn verify_build_from(
+    root: &Path,
+    record: &capsule::Registration,
+    original: &Path,
+) -> Result<(), String> {
     let dir = root.join("immutable/build-receipts");
     let build = load(&dir.join("build-identity.json"))?;
     require(
@@ -974,7 +981,7 @@ fn verify_build(root: &Path, record: &capsule::Registration) -> Result<(), Strin
                         "vendor",
                         "--locked",
                         "--offline",
-                        root.join("immutable/source/vendor")
+                        original.join("immutable/source/vendor")
                     ]),
                 "ordinary vendor arguments differ",
             )?;
