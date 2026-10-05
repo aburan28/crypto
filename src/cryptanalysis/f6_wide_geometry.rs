@@ -231,6 +231,121 @@ fn batch_x_keys_fixed_both_signs(
     Some(keys)
 }
 
+#[cfg(target_arch = "aarch64")]
+mod packed83 {
+    use super::*;
+    use num_bigint::BigUint;
+
+    pub(super) const MASK: u128 = (1u128 << 83) - 1;
+
+    #[inline(always)]
+    fn fold(value: u128) -> u128 {
+        let high = value >> 83;
+        (value & MASK) ^ high ^ (high << 1) ^ (high << 2) ^ (high << 45)
+    }
+
+    #[inline(always)]
+    fn reduce(low: u128, high: u128) -> u128 {
+        let upper = (low >> 83) ^ (high << 45);
+        let first = (low & MASK) ^ upper ^ (upper << 1) ^ (upper << 2) ^ (upper << 45);
+        let result = fold(fold(first));
+        debug_assert_eq!(result & !MASK, 0);
+        result
+    }
+
+    #[target_feature(enable = "aes")]
+    unsafe fn clmul(a: u64, b: u64) -> u128 {
+        std::arch::aarch64::vmull_p64(a, b)
+    }
+
+    /// Carry-less multiply modulo the pinned degree-83 polynomial.
+    ///
+    /// # Safety
+    /// The caller must have checked ARM64 AES/PMULL support.
+    #[target_feature(enable = "aes")]
+    pub(super) unsafe fn mul(a: u128, b: u128) -> u128 {
+        debug_assert_eq!((a | b) & !MASK, 0);
+        let a0 = a as u64;
+        let a1 = (a >> 64) as u64;
+        let b0 = b as u64;
+        let b1 = (b >> 64) as u64;
+        let low_product = unsafe { clmul(a0, b0) };
+        let cross = unsafe { clmul(a0, b1) ^ clmul(a1, b0) };
+        let high_product = unsafe { clmul(a1, b1) };
+        reduce(low_product ^ (cross << 64), (cross >> 64) ^ high_product)
+    }
+
+    /// Field squaring uses only two carry-less limb products.
+    ///
+    /// # Safety
+    /// The caller must have checked ARM64 AES/PMULL support.
+    #[target_feature(enable = "aes")]
+    pub(super) unsafe fn square(a: u128) -> u128 {
+        debug_assert_eq!(a & !MASK, 0);
+        reduce(unsafe { clmul(a as u64, a as u64) }, unsafe {
+            clmul((a >> 64) as u64, (a >> 64) as u64)
+        })
+    }
+
+    /// # Safety
+    /// The caller must have checked ARM64 AES/PMULL support and the pinned
+    /// degree-83 irreducible polynomial.
+    #[target_feature(enable = "aes")]
+    pub(super) unsafe fn batch_x_keys(
+        curve: &BinaryCurve,
+        fixed: &BinaryPoint,
+        others: &[BinaryPoint],
+    ) -> Option<Vec<(PointXKey, PointXKey)>> {
+        let BinaryPoint::Affine { x: x1, y: y1 } = fixed else {
+            return batch_x_keys_fixed_both_signs(curve, fixed, others);
+        };
+        let x1 = packed(x1)?;
+        let y1 = packed(y1)?;
+        let a = packed(&curve.a)?;
+        let mut keys = vec![(PointXKey::Infinity, PointXKey::Infinity); others.len()];
+        let mut positions = Vec::new();
+        let mut denominators = Vec::new();
+        for (i, other) in others.iter().enumerate() {
+            match other {
+                BinaryPoint::Affine { x: x2, .. } if x1 != packed(x2)? => {
+                    positions.push(i);
+                    denominators.push(x1 ^ packed(x2)?);
+                }
+                _ => {
+                    let plus = point_add(curve, fixed, other);
+                    let minus = point_add(curve, fixed, &point_neg(other));
+                    keys[i] = (x_key(&plus)?, x_key(&minus)?);
+                }
+            }
+        }
+        if denominators.is_empty() {
+            return Some(keys);
+        }
+        let mut prefix = Vec::with_capacity(denominators.len() + 1);
+        prefix.push(1u128);
+        for &denominator in &denominators {
+            prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+        }
+        let product = F2mElement::from_biguint(&BigUint::from(*prefix.last()?), 83);
+        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
+        for j in (0..positions.len()).rev() {
+            let i = positions[j];
+            let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+            inverse = unsafe { mul(inverse, denominators[j]) };
+            let BinaryPoint::Affine { x: x2, y: y2 } = &others[i] else {
+                unreachable!();
+            };
+            let x2 = packed(x2)?;
+            let lambda = unsafe { mul(y1 ^ packed(y2)?, denominator_inverse) };
+            let delta = unsafe { mul(x2, denominator_inverse) };
+            let x_plus = unsafe { square(lambda) } ^ lambda ^ x1 ^ x2 ^ a;
+            let x_minus = x_plus ^ unsafe { square(delta) } ^ delta;
+            keys[i] = (PointXKey::Affine(x_plus), PointXKey::Affine(x_minus));
+        }
+        Some(keys)
+    }
+}
+
 /// The memory cap counts unordered pairs, including repeats. This cap is
 /// independent of the target, and a failed construction allocates no table.
 pub struct F6WidePairIndex {
@@ -476,6 +591,54 @@ impl F6SignedPairIndex {
         }
         None
     }
+
+    /// ARM64 PMULL residual arithmetic for the pinned degree-83 field.
+    /// All other curves and CPUs use the exact x-only reference path.
+    pub fn solve4_xonly_pmull83(&self, target: &BinaryPoint) -> Option<[usize; 4]> {
+        #[cfg(not(target_arch = "aarch64"))]
+        {
+            self.solve4_xonly(target)
+        }
+        #[cfg(target_arch = "aarch64")]
+        {
+            if self.curve.m != 83
+                || self.curve.irreducible.degree != 83
+                || self.curve.irreducible.low_terms != [0, 1, 2, 45]
+                || !std::arch::is_aarch64_feature_detected!("aes")
+            {
+                return self.solve4_xonly(target);
+            }
+            if !self.curve.is_on_curve(target) {
+                return None;
+            }
+            const BATCH: usize = 256;
+            for chunk in self.sums.chunks(BATCH) {
+                let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+                // SAFETY: the field polynomial and ARM64 AES/PMULL feature
+                // were checked above. The result is verified in the group.
+                let keys = unsafe { packed83::batch_x_keys(&self.curve, target, &points) }?;
+                for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
+                    if let Some(&index) = self.lookup.get(&minus_key) {
+                        let residual = point_add(&self.curve, target, &point_neg(&entry.point));
+                        if let Some(pair) = self.pair_at(index, &residual) {
+                            if let Some(witness) = self.verify(target, entry.pair, pair) {
+                                return Some(witness);
+                            }
+                        }
+                    }
+                    if let Some(&index) = self.lookup.get(&plus_key) {
+                        let residual = point_add(&self.curve, target, &entry.point);
+                        if let Some(pair) = self.pair_at(index, &residual) {
+                            if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                                return Some(witness);
+                            }
+                        }
+                    }
+                }
+            }
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -506,6 +669,79 @@ mod tests {
             order: BigUint::from(8_569_786_107_849_059u64),
             cofactor: BigUint::from(1_128_547_018u64),
         }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn n83_pmull_field_matches_reference() {
+        if !std::arch::is_aarch64_feature_detected!("aes") {
+            return;
+        }
+        let curve = n83_curve();
+        let check = |a: u128, b: u128| {
+            let lhs = F2mElement::from_biguint(&BigUint::from(a), 83);
+            let rhs = F2mElement::from_biguint(&BigUint::from(b), 83);
+            // SAFETY: ARM64 AES/PMULL support was checked above.
+            assert_eq!(
+                unsafe { packed83::mul(a, b) },
+                packed(&lhs.mul(&rhs, &curve.irreducible)).unwrap()
+            );
+            assert_eq!(
+                unsafe { packed83::square(a) },
+                packed(&lhs.square(&curve.irreducible)).unwrap()
+            );
+        };
+        let edges = [
+            0,
+            1,
+            1 << 45,
+            1 << 64,
+            1 << 82,
+            (1 << 64) - 1,
+            packed83::MASK,
+        ];
+        for a in edges {
+            for b in edges {
+                check(a, b);
+            }
+        }
+        let mut state = 0x93cd_b69f_47e2_180d_a54b_8c31_f739_62e1u128;
+        for _ in 0..10_000 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            let a = state & packed83::MASK;
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            check(a, state & packed83::MASK);
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn n83_pmull_batch_keys_match_reference_with_exceptions() {
+        if !std::arch::is_aarch64_feature_detected!("aes") {
+            return;
+        }
+        let curve = n83_curve();
+        let points: Vec<_> = (1u32..=12)
+            .map(|i| scalar_mul(&curve, &curve.generator, &BigUint::from(i)))
+            .collect();
+        let fixed = &points[3];
+        let mut inputs = points.clone();
+        inputs.push(point_neg(fixed));
+        inputs.push(BinaryPoint::Infinity);
+        inputs.push(fixed.clone());
+        let expected = batch_x_keys_fixed_both_signs(&curve, fixed, &inputs).unwrap();
+        // SAFETY: ARM64 AES/PMULL support and the pinned polynomial were checked.
+        let observed = unsafe { packed83::batch_x_keys(&curve, fixed, &inputs) }.unwrap();
+        assert_eq!(observed, expected);
+        let expected_inf =
+            batch_x_keys_fixed_both_signs(&curve, &BinaryPoint::Infinity, &inputs).unwrap();
+        let observed_inf =
+            unsafe { packed83::batch_x_keys(&curve, &BinaryPoint::Infinity, &inputs) }.unwrap();
+        assert_eq!(observed_inf, expected_inf);
     }
 
     #[test]
@@ -609,6 +845,18 @@ mod tests {
                 expected,
                 "x-only target scalar {scalar}"
             );
+            let pmull_witness = index.solve4_xonly_pmull83(&target);
+            assert_eq!(
+                pmull_witness.is_some(),
+                expected,
+                "PMULL target scalar {scalar}"
+            );
+            if let Some(indices) = pmull_witness {
+                let replay = indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                    point_add(&curve, &acc, &points[i])
+                });
+                assert_eq!(replay, target);
+            }
             if let Some(indices) = xonly_witness {
                 let replay = indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
                     point_add(&curve, &acc, &points[i])
