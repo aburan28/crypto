@@ -98,3 +98,26 @@ Predictions:
 - Reading part B without part A having passed.
 
 Failures, timeouts and stops are committed as they are.
+
+## Amendment 1 (2026-10-05, before part B launched)
+
+AWS refused the launch: the account is on an account-verification hold
+(`RunInstances`: "This account is currently blocked"). Part B therefore runs
+on the development host instead. That host is an Apple M4 Pro with 10
+performance cores, 4 efficiency cores and 48 GB of RAM, running macOS.
+
+- **Host.** Eight sessions run side by side under `caffeinate`, launched by
+  [`run-local.sh`](run-local.sh). macOS has no CPU pinning, so every run is
+  isolation L0. Operation counts are the result, as before. Wall time is
+  descriptive and contended.
+- **`dp_bits` 13, not 12**, so that eight tables fit in 48 GB. That is
+  about `2^24` entries per process. The in-flight overhead,
+  `32 · 2^13 = 2^18` steps, is still about `2·10^-6` of a solve. Part A
+  calibrated `dp_bits` 4, 8 and 10. The table scales as measured
+  (`2^−dp_bits` to within 7 %), and nothing in the escape depends on walk
+  length.
+- **B3 becomes:** no process exceeds 6 GB of resident memory.
+- **No unattended stop.** There is no instance to stop. The sessions end
+  when their targets are solved, or at the spec's 96-hour timeout.
+
+Nothing else changes: the targets, the method, B1 and B2.
