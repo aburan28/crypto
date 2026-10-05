@@ -36,6 +36,8 @@ mod autolab;
 mod b2;
 #[path = "icprog/b2b.rs"]
 mod b2b;
+#[path = "icprog/b3b.rs"]
+mod b3b;
 #[path = "icprog/b7a.rs"]
 mod b7a;
 #[path = "icprog/bench.rs"]
@@ -451,6 +453,23 @@ enum Command {
         /// The directory to write; it must not exist.
         #[arg(long)]
         out: PathBuf,
+    },
+    /// B3b's measurement 6, the two-word premium (a stage diagnostic):
+    /// `run` or `analyse`.
+    B3bPremium {
+        step: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// B3b's `ic` (`run`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
     },
     /// B7a's own measurements (`rounds/B7a-f1-sampled/run.py`, ported):
     /// `f1`, `partial` or `analyse`.
@@ -1103,6 +1122,51 @@ fn b2_cmd(
     }
 }
 
+/// B3b's two-word premium.
+fn b3b_cmd(
+    step: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    cand: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            round_dir: programme.join("rounds").join("B3b-two-word-kic"),
+            runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            programme,
+        },
+        steps: Vec::new(),
+        aa_from: PathBuf::new(),
+    };
+    match step {
+        "run" => {
+            let cand = cand.ok_or("`run` needs --cand")?;
+            if !cand.exists() {
+                return Err(format!("no binary at {}", cand.display()));
+            }
+            let cand = std::path::absolute(&cand).map_err(|e| e.to_string())?;
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            b3b::run(&r, &bench::Bench { isolate }, &cand)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&b3b::analyse(&r)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are run and analyse"
+        )),
+    }
+}
+
 struct B7aArgs {
     step: String,
     steps: String,
@@ -1269,6 +1333,13 @@ fn main() -> ExitCode {
                 }
             };
         }
+        Command::B3bPremium {
+            step,
+            root,
+            runs,
+            cand,
+            isolate,
+        } => b3b_cmd(&step, &root, &runs, cand, isolate),
         Command::B7a {
             step,
             steps,
