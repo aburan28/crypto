@@ -11992,6 +11992,31 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-packed-atom-round16-20261005 -->
+<!-- BEGIN p256-s17-batch-inversion-round17-20261005 -->
+<section class="panel" id="p256-s17-batch-inversion-round17-20261005">
+  <div class="panel-head">
+    <h2>P-256 batched inversions cut exact oracle arithmetic by 2.10&times; <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Round 17 replaces independent quadratic denominator inversions with exact Montgomery batches. Cold fixed-atom cost falls from 192,640 to 91,689 charged field multiplications, while all eight frozen target classifications and the local degree-2 boundary remain unchanged.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact charged P-256 field multiplication counts; ratios are scalar total divided by batched total.</caption>
+    <thead><tr><th>Boundary</th><th>Scalar muls</th><th>Batched muls</th><th>Reduction</th><th>Scalar inversion</th><th>Batched inversion</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Image build</td><td class="n">104,576</td><td class="n"><strong>52,010</strong></td><td class="n"><strong>2.011&times;</strong></td><td class="n">58,368</td><td class="n">5,802</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Warm target</td><td class="n">88,064</td><td class="n"><strong>39,679</strong></td><td class="n"><strong>2.219&times;</strong></td><td class="n">49,152</td><td class="n">767</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Cold target</td><td class="n">192,640</td><td class="n"><strong>91,689</strong></td><td class="n"><strong>2.101&times;</strong></td><td class="n">107,520</td><td class="n">6,569</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>Two targets, one build</td><td class="n">280,704</td><td class="n"><strong>131,368</strong></td><td class="n"><strong>2.137&times;</strong></td><td class="n">156,672</td><td class="n">7,336</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">batch shape</span> build batches <code>[4,4,64,4,4,64]</code> with eight scalar leaf fallbacks; each target uses one batch of 128 nonzero denominators</span>
+    <span><span class="chip">exactness</span> identical half-image and hit digests, four planted hits, four public misses, and zero FN, FP or degeneracies against fresh exhaustive signed-group references</span>
+    <span><span class="chip">algebra</span> 152 build solves and 128 solves per target are unchanged; the local maximum degree remains 2</span>
+    <span><span class="chip">E2E boundary</span> relation yield remains 96.400018%; the complete-collector oracle fraction <code>f</code>, end-to-end speedup, <code>S</code>, and rho ratio remain null</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_batch_inversion_round17_20261005/RESULT.md</code>; deterministic result SHA-256 <code>57cf49ffbab65356b4ef69848e7824f0377bc058ddd57fe0bf6a8f7b77089ce7</code></span>
+  </div>
+</section>
+<!-- END p256-s17-batch-inversion-round17-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

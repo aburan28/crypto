@@ -24,6 +24,7 @@ const SIGNED_POINTS: u64 = 262_916;
 const ROUND13_SHA256: &str = "2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d";
 const ROUND14_SHA256: &str = "6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc";
 const ROUND15_SHA256: &str = "4220dafa066613630338886a916218602cd61ca914bd66ac7994cde163a53ad5";
+const ROUND16_SHA256: &str = "af2874ef5f0bdabec75b9bf707067232d0d6e3985f0cce4eba6834c2b5790e44";
 const ATOM_COLUMNS: usize = 16;
 const COLUMN_INDEX_BITS: usize = 18;
 const PACKED_ATOM_BYTES: usize = ATOM_COLUMNS * COLUMN_INDEX_BITS / 8;
@@ -47,6 +48,9 @@ struct Cli {
     /// Run the round-16 packed-atom compression after hash-checking round 15.
     #[arg(long)]
     pack_round15: Option<PathBuf>,
+    /// Run the round-17 batched-inversion candidate after hash-checking round 16.
+    #[arg(long)]
+    batch_round16: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -307,6 +311,80 @@ struct PackedAtomExperimentResult {
     samples: Vec<PackedAtomSampleResult>,
 }
 
+#[derive(Clone, Default, Serialize)]
+struct BatchInversionProfile {
+    batch_sizes: Vec<usize>,
+    batch_inversions: u64,
+    scalar_fallbacks: u64,
+}
+
+#[derive(Serialize)]
+struct BatchedTargetResult {
+    kind: String,
+    scalar: Option<String>,
+    target: [String; 2],
+    reference_positive: bool,
+    scalar_positive: bool,
+    batched_positive: bool,
+    algebra_hits: u64,
+    quadratic_solves: u64,
+    quadratic_roots_returned: u64,
+    algebra_index_lookups: u64,
+    linear_degeneracies: u64,
+    universal_degeneracies: u64,
+    scalar_multiplication_counts_warm: MultiplicationCounts,
+    batched_multiplication_counts_warm: MultiplicationCounts,
+    scalar_multiplication_counts_cold: MultiplicationCounts,
+    batched_multiplication_counts_cold: MultiplicationCounts,
+    warm_multiplication_reduction: f64,
+    cold_multiplication_reduction: f64,
+    inversion_profile: BatchInversionProfile,
+    false_negative: bool,
+    false_positive: bool,
+    exact: bool,
+    hit_sha256: String,
+}
+
+#[derive(Serialize)]
+struct BatchedInversionSampleResult {
+    kind: String,
+    packed_atom_hex: String,
+    columns: Vec<u64>,
+    decoded_exact: bool,
+    left_image_sha256: String,
+    right_image_sha256: String,
+    scalar_build_multiplication_counts: MultiplicationCounts,
+    batched_build_multiplication_counts: MultiplicationCounts,
+    build_multiplication_reduction: f64,
+    scalar_build_quadratic_solves: u64,
+    batched_build_quadratic_solves: u64,
+    build_inversion_profile: BatchInversionProfile,
+    two_target_scalar_multiplications: u64,
+    two_target_batched_multiplications: u64,
+    two_target_multiplication_reduction: f64,
+    transient_reconstruction_raw_bytes: usize,
+    intermediate_reference_group_additions: u64,
+    full_reference_group_additions: u64,
+    targets: Vec<BatchedTargetResult>,
+    exact: bool,
+}
+
+#[derive(Serialize)]
+struct BatchedInversionExperimentResult {
+    schema: String,
+    curve: String,
+    field_prime: String,
+    curve_a: String,
+    curve_b: String,
+    round16_sha256: String,
+    factor_base: FactorBaseReceipt,
+    local_maximum_degree: u32,
+    modeled_relation_success_unchanged: f64,
+    end_to_end_fraction_in_oracle: Option<f64>,
+    end_to_end_speedup: Option<f64>,
+    samples: Vec<BatchedInversionSampleResult>,
+}
+
 #[derive(Clone, Copy)]
 struct QuadraticRoots {
     roots: [Fe; 2],
@@ -506,6 +584,129 @@ fn solve_quadratic(
             universal: false,
         }
     }
+}
+
+fn roots_from_inverse(
+    qb: Fe,
+    sqrt: Fe,
+    inverse: Fe,
+    counts: &mut MultiplicationCounts,
+) -> QuadraticRoots {
+    let mut root_field = CountedField::default();
+    let neg_qb = qb.neg();
+    let first = root_field.mul(neg_qb.add(&sqrt), inverse);
+    let second = root_field.mul(neg_qb.sub(&sqrt), inverse);
+    counts.root_construction += root_field.multiplications;
+    if first == second {
+        QuadraticRoots {
+            roots: [first, Fe::ZERO],
+            len: 1,
+            linear: false,
+            universal: false,
+        }
+    } else {
+        QuadraticRoots {
+            roots: [first, second],
+            len: 2,
+            linear: false,
+            universal: false,
+        }
+    }
+}
+
+fn batch_invert(
+    denominators: &[Fe],
+    inverse_exponent: &BigUint,
+    counts: &mut MultiplicationCounts,
+) -> Result<Vec<Fe>, String> {
+    if denominators.len() < 2 {
+        return Err("batch inversion requires at least two denominators".into());
+    }
+    if denominators.contains(&Fe::ZERO) {
+        return Err("batch inversion received a zero denominator".into());
+    }
+    let mut field = CountedField::default();
+    let mut prefixes = Vec::with_capacity(denominators.len());
+    let mut product = Fe::ONE;
+    for &denominator in denominators {
+        prefixes.push(product);
+        product = field.mul(product, denominator);
+    }
+    let mut inverse_product = field.pow(product, inverse_exponent);
+    let mut inverses = vec![Fe::ZERO; denominators.len()];
+    for index in (0..denominators.len()).rev() {
+        inverses[index] = field.mul(inverse_product, prefixes[index]);
+        if index != 0 {
+            inverse_product = field.mul(inverse_product, denominators[index]);
+        }
+    }
+    counts.inversions += field.multiplications;
+    Ok(inverses)
+}
+
+fn solve_quadratic_batch(
+    coefficients: &[(Fe, Fe, Fe)],
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    counts: &mut MultiplicationCounts,
+    profile: &mut BatchInversionProfile,
+) -> Result<Vec<QuadraticRoots>, String> {
+    if coefficients.len() <= 1 {
+        profile.scalar_fallbacks += coefficients.len() as u64;
+        return Ok(coefficients
+            .iter()
+            .map(|&(qa, qb, qc)| {
+                solve_quadratic(qa, qb, qc, sqrt_exponent, inverse_exponent, counts)
+            })
+            .collect());
+    }
+
+    let mut roots = vec![QuadraticRoots::empty(); coefficients.len()];
+    let mut valid = Vec::new();
+    for (index, &(qa, qb, qc)) in coefficients.iter().enumerate() {
+        if qa == Fe::ZERO {
+            profile.scalar_fallbacks += 1;
+            roots[index] = solve_quadratic(qa, qb, qc, sqrt_exponent, inverse_exponent, counts);
+            continue;
+        }
+
+        let mut discriminant_field = CountedField::default();
+        let qb2 = discriminant_field.square(qb);
+        let ac = discriminant_field.mul(qa, qc);
+        let four_ac = ac.add(&ac).add(&ac.add(&ac));
+        let discriminant = qb2.sub(&four_ac);
+        counts.discriminants += discriminant_field.multiplications;
+
+        let mut sqrt_field = CountedField::default();
+        let sqrt = sqrt_field.pow(discriminant, sqrt_exponent);
+        let sqrt_check = sqrt_field.square(sqrt);
+        counts.square_roots += sqrt_field.multiplications;
+        if sqrt_check == discriminant {
+            valid.push((index, qb, sqrt, qa.add(&qa)));
+        }
+    }
+
+    if valid.is_empty() {
+        return Ok(roots);
+    }
+    if valid.len() == 1 {
+        profile.scalar_fallbacks += 1;
+        let (index, qb, sqrt, denominator) = valid[0];
+        let mut inverse_field = CountedField::default();
+        let inverse = inverse_field.pow(denominator, inverse_exponent);
+        counts.inversions += inverse_field.multiplications;
+        roots[index] = roots_from_inverse(qb, sqrt, inverse, counts);
+        return Ok(roots);
+    }
+
+    let denominators: Vec<Fe> = valid.iter().map(|entry| entry.3).collect();
+    let inverses = batch_invert(&denominators, inverse_exponent, counts)?;
+    profile.batch_sizes.push(valid.len());
+    profile.batch_inversions += 1;
+    for ((index, qb, sqrt, _), inverse) in valid.into_iter().zip(inverses) {
+        roots[index] = roots_from_inverse(qb, sqrt, inverse, counts);
+    }
+    Ok(roots)
 }
 
 fn algebra_pairs(
@@ -853,6 +1054,62 @@ fn compose_p256_images(
     })
 }
 
+#[allow(clippy::too_many_arguments)]
+fn compose_p256_images_batched(
+    left: &P256ImageState,
+    right: &P256ImageState,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+    linear: &mut u64,
+    universal: &mut u64,
+    counts: &mut MultiplicationCounts,
+    profile: &mut BatchInversionProfile,
+) -> Result<P256ImageState, String> {
+    let mut affine = BTreeMap::new();
+    if left.identity {
+        affine.extend(right.affine.iter().map(|(key, value)| (*key, *value)));
+    }
+    if right.identity {
+        affine.extend(left.affine.iter().map(|(key, value)| (*key, *value)));
+    }
+    let mut coefficient_rows = Vec::with_capacity(left.affine.len() * right.affine.len());
+    for &u in left.affine.values() {
+        for &v in right.affine.values() {
+            let mut coefficient_field = CountedField::default();
+            coefficient_rows.push(coefficients(u, v, a, b, &mut coefficient_field));
+            counts.coefficients += coefficient_field.multiplications;
+        }
+    }
+    *solves += coefficient_rows.len() as u64;
+    let roots = solve_quadratic_batch(
+        &coefficient_rows,
+        sqrt_exponent,
+        inverse_exponent,
+        counts,
+        profile,
+    )?;
+    for result in roots {
+        *linear += u64::from(result.linear);
+        *universal += u64::from(result.universal);
+        if result.universal {
+            return Err("universal quadratic has no bounded image".into());
+        }
+        *roots_returned += result.len as u64;
+        for root in result.roots[..result.len].iter().copied() {
+            affine.insert(fe_key(root), root);
+        }
+    }
+    let shared_affine = left.affine.keys().any(|key| right.affine.contains_key(key));
+    Ok(P256ImageState {
+        affine,
+        identity: (left.identity && right.identity) || shared_affine,
+    })
+}
+
 fn image_digest(image: &P256ImageState) -> String {
     let mut bytes = Vec::with_capacity(1 + 32 * image.affine.len());
     bytes.push(u8::from(image.identity));
@@ -1132,6 +1389,72 @@ fn build_verified_eight_image(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn build_verified_eight_image_batched(
+    label: &str,
+    xs: &[Fe],
+    points: &[Point],
+    curve: &CurveParams,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+    linear: &mut u64,
+    universal: &mut u64,
+    counts: &mut MultiplicationCounts,
+    profile: &mut BatchInversionProfile,
+    reference_group_additions: &mut u64,
+) -> Result<P256ImageState, String> {
+    if xs.len() != 8 || points.len() != 8 {
+        return Err(format!("{label} requires exactly eight leaves"));
+    }
+    let mut images: Vec<P256ImageState> = xs
+        .iter()
+        .copied()
+        .map(|x| P256ImageState {
+            affine: BTreeMap::from([(fe_key(x), x)]),
+            identity: false,
+        })
+        .collect();
+    for block_size in [2usize, 4, 8] {
+        let mut next = Vec::with_capacity(images.len() / 2);
+        for (node, pair) in images.chunks_exact(2).enumerate() {
+            let image = compose_p256_images_batched(
+                &pair[0],
+                &pair[1],
+                a,
+                b,
+                sqrt_exponent,
+                inverse_exponent,
+                solves,
+                roots_returned,
+                linear,
+                universal,
+                counts,
+                profile,
+            )?;
+            let start = node * block_size;
+            verify_width_node(
+                label,
+                block_size,
+                node,
+                &image,
+                &points[start..start + block_size],
+                curve,
+                reference_group_additions,
+            )?;
+            next.push(image);
+        }
+        images = next;
+    }
+    if images.len() != 1 {
+        return Err(format!("{label} did not reduce to one eight-leaf image"));
+    }
+    Ok(images.pop().expect("one image was checked"))
+}
+
+#[allow(clippy::too_many_arguments)]
 fn query_compressed_target(
     kind: &str,
     scalar: Option<&BigUint>,
@@ -1222,6 +1545,144 @@ fn query_compressed_target(
         false_positive,
         exact: !false_negative && !false_positive,
         hit_sha256: hex::encode(sha256(&hit_bytes)),
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn query_batched_target(
+    kind: &str,
+    scalar: Option<&BigUint>,
+    target: &Point,
+    reference_positive: bool,
+    left: &P256ImageState,
+    right: &P256ImageState,
+    curve: &CurveParams,
+    scalar_result: &CompressedTargetResult,
+    scalar_build_counts: MultiplicationCounts,
+    batched_build_counts: MultiplicationCounts,
+) -> Result<BatchedTargetResult, String> {
+    if matches!(target, Point::Infinity) || !curve.is_on_curve(target) {
+        return Err(format!("{kind} target is infinity or off curve"));
+    }
+    let (target_x, target_y) = affine_coordinates(target).expect("target was checked affine");
+    let t = Fe::from_biguint(target_x);
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut counts = MultiplicationCounts::default();
+    let mut profile = BatchInversionProfile::default();
+    let mut left_keys = Vec::with_capacity(left.affine.len());
+    let mut coefficient_rows = Vec::with_capacity(left.affine.len());
+    for (&left_key, &left_x) in &left.affine {
+        let mut coefficient_field = CountedField::default();
+        coefficient_rows.push(coefficients(left_x, t, a, b, &mut coefficient_field));
+        counts.coefficients += coefficient_field.multiplications;
+        left_keys.push(left_key);
+    }
+    let results = solve_quadratic_batch(
+        &coefficient_rows,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut counts,
+        &mut profile,
+    )?;
+    let mut roots_returned = 0u64;
+    let mut linear = 0u64;
+    let mut universal = 0u64;
+    let mut hits = BTreeSet::new();
+    for (left_key, result) in left_keys.into_iter().zip(results) {
+        linear += u64::from(result.linear);
+        universal += u64::from(result.universal);
+        if result.universal {
+            return Err(format!(
+                "{kind} batched query produced a universal quadratic"
+            ));
+        }
+        roots_returned += result.len as u64;
+        for root in result.roots[..result.len].iter().copied() {
+            let right_key = fe_key(root);
+            if right.affine.contains_key(&right_key) {
+                let mut record = Vec::with_capacity(65);
+                record.push(0);
+                record.extend_from_slice(&left_key);
+                record.extend_from_slice(&right_key);
+                hits.insert(record);
+            }
+        }
+    }
+    let target_key = big_key(target_x);
+    if left.identity && right.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(1);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    if right.identity && left.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(2);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    counts.finish();
+    let batched_positive = !hits.is_empty();
+    let false_negative = reference_positive && !batched_positive;
+    let false_positive = !reference_positive && batched_positive;
+    let mut hit_bytes = Vec::new();
+    for hit in &hits {
+        hit_bytes.extend_from_slice(hit);
+    }
+    let hit_sha256 = hex::encode(sha256(&hit_bytes));
+    let batched_cold = batched_build_counts.combined(counts);
+    let scalar_cold = scalar_build_counts.combined(scalar_result.multiplication_counts_warm);
+    let target_coordinates = [lower_hex(target_x), lower_hex(target_y)];
+    let scalar_text = scalar.map(lower_hex);
+    let exact = !false_negative
+        && !false_positive
+        && scalar_result.kind == kind
+        && scalar_result.scalar == scalar_text
+        && scalar_result.target == target_coordinates
+        && scalar_result.reference_positive == reference_positive
+        && scalar_result.candidate_positive == batched_positive
+        && scalar_result.algebra_hits == hits.len() as u64
+        && scalar_result.quadratic_solves_warm == coefficient_rows.len() as u64
+        && scalar_result.quadratic_roots_returned == roots_returned
+        && scalar_result.algebra_index_lookups == roots_returned
+        && scalar_result.linear_degeneracies == linear
+        && scalar_result.universal_degeneracies == universal
+        && scalar_result.hit_sha256 == hit_sha256;
+    let warm_multiplication_reduction =
+        scalar_result.multiplication_counts_warm.total as f64 / counts.total as f64;
+    let cold_multiplication_reduction = scalar_cold.total as f64 / batched_cold.total as f64;
+    if !exact || warm_multiplication_reduction < 2.0 || cold_multiplication_reduction < 2.0 {
+        return Err(format!(
+            "{kind} batched target gate failed: exact={exact}, warm={warm_multiplication_reduction:.6}, cold={cold_multiplication_reduction:.6}"
+        ));
+    }
+    Ok(BatchedTargetResult {
+        kind: kind.into(),
+        scalar: scalar_text,
+        target: target_coordinates,
+        reference_positive,
+        scalar_positive: scalar_result.candidate_positive,
+        batched_positive,
+        algebra_hits: hits.len() as u64,
+        quadratic_solves: coefficient_rows.len() as u64,
+        quadratic_roots_returned: roots_returned,
+        algebra_index_lookups: roots_returned,
+        linear_degeneracies: linear,
+        universal_degeneracies: universal,
+        scalar_multiplication_counts_warm: scalar_result.multiplication_counts_warm,
+        batched_multiplication_counts_warm: counts,
+        scalar_multiplication_counts_cold: scalar_cold,
+        batched_multiplication_counts_cold: batched_cold,
+        warm_multiplication_reduction,
+        cold_multiplication_reduction,
+        inversion_profile: profile,
+        false_negative,
+        false_positive,
+        exact,
+        hit_sha256,
     })
 }
 
@@ -1694,6 +2155,258 @@ fn run_packed_compression(round15_path: &PathBuf, out: Option<PathBuf>) -> Resul
     Ok(())
 }
 
+fn run_batched_inversion_sample(
+    kind: &str,
+    dependency: &serde_json::Value,
+    columns: &[Column],
+    curve: &CurveParams,
+) -> Result<BatchedInversionSampleResult, String> {
+    let stored_sample = dependency["samples"]
+        .as_array()
+        .ok_or("round-16 samples are missing")?
+        .iter()
+        .find(|sample| sample["kind"].as_str() == Some(kind))
+        .ok_or_else(|| format!("round-16 sample {kind} is missing"))?;
+    let packed_atom_hex = stored_sample["packed_atom_hex"]
+        .as_str()
+        .ok_or_else(|| format!("round-16 {kind} packet is missing"))?;
+    let packet =
+        hex::decode(packed_atom_hex).map_err(|error| format!("round-16 {kind} packet: {error}"))?;
+    let decoded = unpack_atom_columns(&packet)?;
+    let stored_columns: Vec<u64> = serde_json::from_value(stored_sample["columns"].clone())
+        .map_err(|error| format!("round-16 {kind} columns: {error}"))?;
+    let decoded_exact =
+        decoded == stored_columns && hex::encode(pack_atom_columns(&decoded)?) == packed_atom_hex;
+    if !decoded_exact {
+        return Err(format!("round-16 {kind} packet failed exact decode"));
+    }
+
+    let scalar = run_compression_sample(kind, decoded.clone(), columns, curve)?;
+    let scalar_targets =
+        serde_json::to_value(&scalar.targets).map_err(|error| error.to_string())?;
+    if stored_sample["columns"]
+        != serde_json::to_value(&scalar.columns).map_err(|error| error.to_string())?
+        || stored_sample["x_coordinates"]
+            != serde_json::to_value(&scalar.x_coordinates).map_err(|error| error.to_string())?
+        || stored_sample["left_image_sha256"].as_str() != Some(&scalar.left_image_sha256)
+        || stored_sample["right_image_sha256"].as_str() != Some(&scalar.right_image_sha256)
+        || stored_sample["targets"] != scalar_targets
+    {
+        return Err(format!(
+            "round-16 {kind} receipt differs from scalar replay"
+        ));
+    }
+
+    let selected: Vec<&Column> = decoded
+        .iter()
+        .map(|&index| {
+            columns
+                .get(index as usize)
+                .ok_or_else(|| format!("{kind} column {index} is out of range"))
+        })
+        .collect::<Result<_, _>>()?;
+    let xs: Vec<Fe> = selected.iter().map(|column| column.x).collect();
+    let points: Vec<Point> = selected.iter().map(|column| column.low.clone()).collect();
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut build_solves = 0u64;
+    let mut build_roots = 0u64;
+    let mut build_linear = 0u64;
+    let mut build_universal = 0u64;
+    let mut build_counts = MultiplicationCounts::default();
+    let mut build_profile = BatchInversionProfile::default();
+    let mut intermediate_reference_group_additions = 0u64;
+    let left = build_verified_eight_image_batched(
+        &format!("{kind}/left/batched"),
+        &xs[..8],
+        &points[..8],
+        curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut build_profile,
+        &mut intermediate_reference_group_additions,
+    )?;
+    let right = build_verified_eight_image_batched(
+        &format!("{kind}/right/batched"),
+        &xs[8..],
+        &points[8..],
+        curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut build_profile,
+        &mut intermediate_reference_group_additions,
+    )?;
+    build_counts.finish();
+    if image_digest(&left) != scalar.left_image_sha256
+        || image_digest(&right) != scalar.right_image_sha256
+        || build_solves != scalar.build_quadratic_solves
+        || build_roots != 304
+        || build_linear != 0
+        || build_universal != 0
+        || build_counts.inversions != 5_802
+        || build_counts.total != 52_010
+        || build_profile.batch_sizes != [4, 4, 64, 4, 4, 64]
+        || build_profile.batch_inversions != 6
+        || build_profile.scalar_fallbacks != 8
+    {
+        return Err(format!("{kind} batched build boundary changed"));
+    }
+    let build_multiplication_reduction =
+        scalar.build_multiplication_counts.total as f64 / build_counts.total as f64;
+    if build_multiplication_reduction < 2.0 {
+        return Err(format!("{kind} build multiplication gate failed"));
+    }
+
+    let curve_a = curve.a_fe();
+    let planted = points.iter().fold(Point::Infinity, |sum, point| {
+        sum.add_vartime(point, &curve_a)
+    });
+    let public_preimage = format!("{CURVE_SLUG}/s17-target-join-round15/sample/{kind}/public");
+    let mut public_scalar = BigUint::from_bytes_be(&sha256(public_preimage.as_bytes())) % &curve.n;
+    if public_scalar.is_zero() {
+        public_scalar = BigUint::one();
+    }
+    let public = curve
+        .generator()
+        .scalar_mul_vartime(&public_scalar, &curve_a);
+    let targets = vec![
+        query_batched_target(
+            "planted-positive",
+            None,
+            &planted,
+            scalar.targets[0].reference_positive,
+            &left,
+            &right,
+            curve,
+            &scalar.targets[0],
+            scalar.build_multiplication_counts,
+            build_counts,
+        )?,
+        query_batched_target(
+            "hash-public",
+            Some(&public_scalar),
+            &public,
+            scalar.targets[1].reference_positive,
+            &left,
+            &right,
+            curve,
+            &scalar.targets[1],
+            scalar.build_multiplication_counts,
+            build_counts,
+        )?,
+    ];
+    let two_target_scalar_multiplications = scalar.build_multiplication_counts.total
+        + scalar
+            .targets
+            .iter()
+            .map(|target| target.multiplication_counts_warm.total)
+            .sum::<u64>();
+    let two_target_batched_multiplications = build_counts.total
+        + targets
+            .iter()
+            .map(|target| target.batched_multiplication_counts_warm.total)
+            .sum::<u64>();
+    let two_target_multiplication_reduction =
+        two_target_scalar_multiplications as f64 / two_target_batched_multiplications as f64;
+    let exact = targets.iter().all(|target| target.exact)
+        && two_target_scalar_multiplications == 280_704
+        && two_target_batched_multiplications == 131_368
+        && two_target_multiplication_reduction >= 2.0;
+    if !exact {
+        return Err(format!("{kind} batched two-target gate failed"));
+    }
+
+    Ok(BatchedInversionSampleResult {
+        kind: kind.into(),
+        packed_atom_hex: packed_atom_hex.into(),
+        columns: decoded,
+        decoded_exact,
+        left_image_sha256: image_digest(&left),
+        right_image_sha256: image_digest(&right),
+        scalar_build_multiplication_counts: scalar.build_multiplication_counts,
+        batched_build_multiplication_counts: build_counts,
+        build_multiplication_reduction,
+        scalar_build_quadratic_solves: scalar.build_quadratic_solves,
+        batched_build_quadratic_solves: build_solves,
+        build_inversion_profile: build_profile,
+        two_target_scalar_multiplications,
+        two_target_batched_multiplications,
+        two_target_multiplication_reduction,
+        transient_reconstruction_raw_bytes: scalar.retained_raw_bytes,
+        intermediate_reference_group_additions,
+        full_reference_group_additions: scalar.full_reference_group_additions,
+        targets,
+        exact,
+    })
+}
+
+fn run_batched_inversion(round16_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round16_path).map_err(|error| error.to_string())?;
+    let round16_sha256 = hex::encode(sha256(&bytes));
+    if round16_sha256 != ROUND16_SHA256 {
+        return Err(format!(
+            "round-16 SHA-256 mismatch: expected {ROUND16_SHA256}, got {round16_sha256}"
+        ));
+    }
+    let dependency: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    if dependency["schema"].as_str() != Some("p256.s17_packed_atom/v1")
+        || dependency["curve"].as_str() != Some(CURVE_SLUG)
+        || dependency["factor_base"]["fb_id"].as_str() != Some(FB_ID)
+        || dependency["factor_base"]["fb_sha256"].as_str() != Some(FB_SHA256)
+        || dependency["factor_base"]["points_sha256"].as_str() != Some(POINTS_SHA256)
+    {
+        return Err("round-16 identity receipt changed".into());
+    }
+    let curve = CurveParams::p256();
+    let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
+    let mut samples = Vec::new();
+    for (kind, _) in round14_sample_specs() {
+        samples.push(run_batched_inversion_sample(
+            &kind,
+            &dependency,
+            &columns,
+            &curve,
+        )?);
+    }
+    let result = BatchedInversionExperimentResult {
+        schema: "p256.s17_batched_inversion/v1".into(),
+        curve: CURVE_SLUG.into(),
+        field_prime: lower_hex(&curve.p),
+        curve_a: lower_hex(&curve.a),
+        curve_b: lower_hex(&curve.b),
+        round16_sha256,
+        factor_base,
+        local_maximum_degree: 2,
+        modeled_relation_success_unchanged: 0.964_000_18,
+        end_to_end_fraction_in_oracle: None,
+        end_to_end_speedup: None,
+        samples,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_transfer(out: Option<PathBuf>) -> Result<(), String> {
     let curve = CurveParams::p256();
     let (factor_base, columns, signed_rows, x_index, signed_index) = build_indexes(&curve)?;
@@ -1760,10 +2473,12 @@ fn run(cli: Cli) -> Result<(), String> {
         width_round13,
         compress_round14,
         pack_round15,
+        batch_round16,
     } = cli;
     let continuation_modes = usize::from(width_round13.is_some())
         + usize::from(compress_round14.is_some())
-        + usize::from(pack_round15.is_some());
+        + usize::from(pack_round15.is_some())
+        + usize::from(batch_round16.is_some());
     if continuation_modes > 1 {
         return Err("choose only one continuation mode".into());
     }
@@ -1775,6 +2490,9 @@ fn run(cli: Cli) -> Result<(), String> {
     }
     if let Some(path) = pack_round15 {
         return run_packed_compression(&path, out);
+    }
+    if let Some(path) = batch_round16 {
+        return run_batched_inversion(&path, out);
     }
     run_transfer(out)
 }
@@ -1887,5 +2605,59 @@ mod tests {
         out_of_range[15] = COLUMNS;
         assert!(pack_atom_columns(&out_of_range).is_err());
         assert!(unpack_atom_columns(&[0u8; PACKED_ATOM_BYTES - 1]).is_err());
+    }
+
+    #[test]
+    fn batched_quadratics_match_scalar_roots_and_charge_one_inversion() {
+        let curve = CurveParams::p256();
+        let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+        let inverse_exponent = &curve.p - BigUint::from(2u8);
+        let rows: Vec<(Fe, Fe, Fe)> = [(3u64, 11u64), (17, 29), (101, 303)]
+            .into_iter()
+            .map(|(left, right)| {
+                let left = Fe::from_biguint(&BigUint::from(left));
+                let right = Fe::from_biguint(&BigUint::from(right));
+                (Fe::ONE, left.add(&right).neg(), left.mul(&right))
+            })
+            .collect();
+        let mut scalar_counts = MultiplicationCounts::default();
+        let scalar: Vec<QuadraticRoots> = rows
+            .iter()
+            .map(|&(qa, qb, qc)| {
+                solve_quadratic(
+                    qa,
+                    qb,
+                    qc,
+                    &sqrt_exponent,
+                    &inverse_exponent,
+                    &mut scalar_counts,
+                )
+            })
+            .collect();
+        let mut batched_counts = MultiplicationCounts::default();
+        let mut profile = BatchInversionProfile::default();
+        let batched = solve_quadratic_batch(
+            &rows,
+            &sqrt_exponent,
+            &inverse_exponent,
+            &mut batched_counts,
+            &mut profile,
+        )
+        .unwrap();
+        for (left, right) in scalar.iter().zip(&batched) {
+            let left: BTreeSet<[u8; 32]> =
+                left.roots[..left.len].iter().copied().map(fe_key).collect();
+            let right: BTreeSet<[u8; 32]> = right.roots[..right.len]
+                .iter()
+                .copied()
+                .map(fe_key)
+                .collect();
+            assert_eq!(left, right);
+        }
+        assert_eq!(profile.batch_sizes, [3]);
+        assert_eq!(profile.batch_inversions, 1);
+        assert_eq!(profile.scalar_fallbacks, 0);
+        assert_eq!(scalar_counts.inversions, 3 * 384);
+        assert_eq!(batched_counts.inversions, 384 + 3 * 3 - 1);
     }
 }
