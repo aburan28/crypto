@@ -26,7 +26,6 @@ use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
 use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance};
-use crate::cryptanalysis::ic_boundary::price_phase;
 use crate::cryptanalysis::ic_boundary::{
     rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
     Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
@@ -1117,22 +1116,16 @@ fn ic_report(
     let mut unpriced = Vec::new();
     let mut nondeterminism = Vec::new();
     // Solver work: run_pipeline prices it from this host's wall time,
-    // which is not a count.  Take it back out and list it unpriced.
-    //
-    // Re-price the relations phase from its own counts and re-add the
-    // phases in run_pipeline's order, rather than subtracting the solver's
-    // price: `(x + w) − w` is not `x` in floating point, and with `w` a wall
-    // time the residue changed from run to run, so a replay could not
-    // reproduce the record's `gae` bit for bit.  Sessions recorded before
-    // this carry that residue; the audit accepts it within the rounding
-    // bound of the removed term (`audit::removed_solver_rounding`).
+    // which is not a count.  Take it back out and list it unpriced.  The
+    // figure is rebuilt from the pre-solver phase, never by subtracting
+    // the wall term: `(x + w) - w` rounds `x` to `w`'s binade and so
+    // leaked host timing into the low bits of a "deterministic" record
+    // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
         if s.gae > 0.0 && s.priced_by != "pinned" {
-            let mut relations = rep.decomposition.cost.clone();
-            price_phase(&mut relations, calib);
-            phases[2].gae = relations.gae;
-            total = phases[0].gae + phases[1].gae + phases[2].gae + phases[3].gae + phases[4].gae;
+            phases[2].gae = rep.decomposition.gae_before_solver;
+            total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
         }
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
