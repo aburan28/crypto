@@ -112,6 +112,16 @@ The fresh 16-target panel reverses the base choice inside the **target-only simu
 
 The next native hosted n37 screen independently replayed 320/320 measured executions. For preregistered one-target workload `Wd281dbafa0cb`, descriptive rho/K16 online wall is 7.178. The separate 16-target panel has K8/K16 online wall 7.110 [3.669, 16.982]. All measured rows earned L1 and the identical K16 A/A maximum deviation was 12.85%, above the frozen 5% gate. The admitted online speedup remains unknown; both K8 and K16 carry to the L2 host gate and n41/n53. Read the [sealed native decision](../../research/ecbench_n37_native_online_wall_20261004/DECISION.json).
 
+## Complete n9 F6-IC control outside tables A–C
+
+The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183` recovered the logarithm of public point `[305, 466]` with inherited F4, F6-IC and matrix F5. Each cold run built 14 usable base points, collected 8 verified ordinary relations, solved 2 folded columns and independently replayed the scalar, relations, column logs and phase totals. Inside-worker cold times were 4.707, 3.150 and 61.937 ms respectively; one-target online times were 0.372, 0.272 and 3.118 ms. These are exploratory L0 Mac wall observations on a tiny subgroup. No same-target rho reference or fully priced operation count exists, so IC/rho speedup and `S` are unknown; this control cannot enter tables A–C. Read the [keyed measurements](../../research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl) and [independent replay](../../research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json).
+
+| solver | candidate | cold ms | online ms |
+|:--|:--|--:|--:|
+| Inherited F4 | `IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d` | 4.707 | 0.372 |
+| F6-IC | `IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2` | 3.150 | 0.272 |
+| Matrix F5 | `IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5` | 61.937 | 3.118 |
+
 
 ## Sources
 
@@ -130,4 +140,6 @@ The next native hosted n37 screen independently replayed 320/320 measured execut
 - `research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json` — sha256 `a708e63cb4ccfe36…`
 - `research/ecbench_n37_native_online_wall_20261004/DECISION.json` — sha256 `eebbe2eef9524c7f…`
 - `research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json` — sha256 `bb4dd48030029d21…`
+- `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
+- `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`

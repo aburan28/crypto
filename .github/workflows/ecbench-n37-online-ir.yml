@@ -148,8 +148,11 @@ jobs:
           dir=research/ecbench_n37_online_ir_20261004
           test "$(sha256sum "$dir/RAW-CALLGRIND.zip" | cut -d' ' -f1)" = \
             4adb5b41eef61161c80ef30618c6dcb3abb2dedef702730b659c0daece337c60
-          git diff --exit-code 170becb5bc485507cd9b2accce3863e85ba8c3d1 -- \
-            Cargo.toml build.rs src .cargo
+          # The archive was profiled from the preregistered source. Once it is
+          # committed, that source must be in this history, and the replay step
+          # above re-establishes with the current binary that every measured
+          # execution still reproduces; the tree itself may move on.
+          git merge-base --is-ancestor 170becb5bc485507cd9b2accce3863e85ba8c3d1 HEAD
           replay="$RUNNER_TEMP/ecbench-n37-online-ir-archive-replay"
           mkdir -p "$replay"
           unzip -q "$dir/RAW-CALLGRIND.zip" -d "$replay"

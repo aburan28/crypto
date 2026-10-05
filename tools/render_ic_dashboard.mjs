@@ -284,6 +284,7 @@ const retainedPanels = [
   ['full-rank-compact-orbit-20261003','Historical compact-orbit full-rank panel'],
   ['n61-compact-orbit-hosted-20261003','n61 compact-orbit autolab panels · hosted isolated reruns'],
   ['lab-ecbench-all','Cross-method evidence · every measured candidate'],
+  ['lab-pair-claw','Pair claw of cryptanalysis#175 · same-target strong rho'],
   ['lab-progress','Research progress over time · separate regimes and references'],
   ['lab-currency','How new results update this dashboard']
 ].map(([id,label])=>{
