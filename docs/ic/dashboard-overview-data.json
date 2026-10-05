@@ -23,6 +23,22 @@
       "sha256": "3570722341b8ca2cd8794d51829cac1a1f3b8c1ff02a07a6af9377a36d2cbab7"
     },
     {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/result-v1/stage-summary.json",
+      "sha256": "4a2689bedfdb5443c72239067b7a2997f30c20794c1e774db6b76019892e4d84"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-f5-one-target-registration-v1/result-v1/audit-original.json",
+      "sha256": "6754ae85061d60d240cd3d8cb50efd8649354255533fc3b7f49ce654486aeb31"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-budget-pilot-v1/result-v1/query-000/result.json",
+      "sha256": "51ca35d7d0afe9a3bf5e41337f325fc29cc81c94f8f3f1205962a1b96635f387"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-budget-pilot-v1/result-v1/query-015/result.json",
+      "sha256": "b4bd23aa4a5d6d0f277a80c5d5f011041918d6812adc390081debc0b6865552d"
+    },
+    {
       "path": "research/notes/ecc2k130/shared_rank_folded_table_20261003/EVIDENCE.json",
       "sha256": "cf61ec46ae7be8eb58559a17a6f90eb91cfc1f1b67dae72beaabcebed6ba2531"
     },
@@ -393,6 +409,41 @@
     "status": "ADMITTED_INCOMPLETE_PREPARED_SAT_CONTROL",
     "verified_online_wall_ns": null,
     "workload_id": "b79558c422c7"
+  },
+  "native_ordinary_stage": {
+    "ordinary_queries": 512,
+    "f5": {
+      "outcome_mix": {
+        "proved_unsat": 383,
+        "witness": 129
+      },
+      "final_rank": 29,
+      "folded_columns": 29,
+      "independently_recovered_logs": 29
+    },
+    "cms": {
+      "outcome_mix": {
+        "incomplete": 490,
+        "witness": 22
+      },
+      "final_rank": 22,
+      "folded_columns": 29,
+      "feasible_inconclusive_queries": 107
+    },
+    "online_speedup": null
+  },
+  "native_f5_one_target": {
+    "source_bound_execution_admitted": true,
+    "verified_recovery": true,
+    "recorded_online_interval_ns": 6501300958,
+    "headline_eligible": false,
+    "online_speedup": null
+  },
+  "disclosed_sat_budget_pilot": {
+    "negative_status": "SOURCE_UNSAT",
+    "feasible_status": "SAT_MODEL",
+    "source_bound_target_admitted": false,
+    "natural_yield_estimate": null
   },
   "rho_online_comparison": {
     "boundary": "one supplied public point after reusable preparation through scalar replay",
