@@ -7,7 +7,7 @@ use crate::cryptanalysis::gf2_elim;
 use crate::cryptanalysis::wide_groebner::WideFieldTable;
 
 pub const MAX_VARS: usize = 512;
-pub const MAX_ROOT_COLS: usize = 300_000;
+pub const MAX_ROOT_COLS: usize = 1_500_000;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Mono512(pub [u64; 8]);

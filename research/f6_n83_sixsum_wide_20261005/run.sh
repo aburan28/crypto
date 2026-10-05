@@ -28,7 +28,9 @@ if [[ -n $offset ]]; then args+=("$offset"); fi
 pid=$!
 start=$SECONDS
 while kill -0 "$pid" 2>/dev/null; do
-  rss=$(ps -o rss= -p "$pid" | tr -d '[:space:]')
+  # The process can exit between kill -0 and ps. Treat that race as an
+  # empty sample; wait below still records its real exit status.
+  rss=$(ps -o rss= -p "$pid" 2>/dev/null | tr -d '[:space:]' || true)
   if [[ $rss =~ ^[0-9]+$ ]] && (( rss > max_kib )); then
     max_kib=$rss
   fi
