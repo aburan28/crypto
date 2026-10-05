@@ -212,12 +212,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -1116,12 +1116,16 @@ fn ic_report(
     let mut unpriced = Vec::new();
     let mut nondeterminism = Vec::new();
     // Solver work: run_pipeline prices it from this host's wall time,
-    // which is not a count.  Take it back out and list it unpriced.
+    // which is not a count.  Take it back out and list it unpriced.  The
+    // figure is rebuilt from the pre-solver phase, never by subtracting
+    // the wall term: `(x + w) - w` rounds `x` to `w`'s binade and so
+    // leaked host timing into the low bits of a "deterministic" record
+    // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
         if s.gae > 0.0 && s.priced_by != "pinned" {
-            phases[2].gae -= s.gae;
-            total -= s.gae;
+            phases[2].gae = rep.decomposition.gae_before_solver;
+            total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
         }
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
@@ -1313,6 +1317,48 @@ fn solve_ic_prime(
     Ok(ic_report(m, rep, &calib, facts, wall, 2))
 }
 
+/// A binary-curve factor base that a linking binary adds to `ic.pipeline`
+/// by name, or `None` when the name is not its.
+pub type BinaryBasePlugin = for<'i> fn(
+    &str,
+    &'i BinaryInstance,
+) -> Option<Box<dyn FactorBaseBuilder<BinaryGroup<'i>> + 'i>>;
+
+/// A binary-curve decomposition oracle that a linking binary adds to
+/// `ic.pipeline` by name, given the summand count `m`, or `None`.
+pub type BinaryOraclePlugin =
+    for<'i> fn(
+        &str,
+        u32,
+        &'i BinaryInstance,
+    ) -> Option<Box<dyn DecompositionOracle<BinaryGroup<'i>> + 'i>>;
+
+/// Plug-ins a binary registers at start-up.
+///
+/// The library cannot name everything a binary may link. The `ecbench`
+/// binary's `pdp3-koblitz` oracle calls a `koblitz_index_calculus`
+/// function that the frozen-source replays' snapshots of that file lack,
+/// and those replays rebuild this library (never the `ecbench` binary)
+/// against them. Keeping such an oracle in the binary and resolving it here
+/// by name lets both builds compile, without a Cargo feature (`Cargo.toml`
+/// is pinned by other frozen evaluations) or a build script.
+#[derive(Clone, Copy)]
+pub struct BinaryPlugins {
+    pub base: BinaryBasePlugin,
+    pub oracle: BinaryOraclePlugin,
+}
+
+static BINARY_PLUGINS: std::sync::OnceLock<BinaryPlugins> = std::sync::OnceLock::new();
+
+/// Register a binary's plug-ins; the first registration wins.
+pub fn register_binary_plugins(plugins: BinaryPlugins) {
+    let _ = BINARY_PLUGINS.set(plugins);
+}
+
+fn binary_plugins() -> Option<&'static BinaryPlugins> {
+    BINARY_PLUGINS.get()
+}
+
 fn solve_ic_binary(
     m: &ResolvedMethod,
     inst: &BinaryInstance,
@@ -1325,21 +1371,26 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
-        other => {
-            return Err(format!(
-                "factor base `{other}` does not run on a binary curve"
-            ))
-        }
+        other => match plugin_base.as_deref() {
+            Some(b) => b,
+            None => {
+                return Err(format!(
+                    "factor base `{other}` does not run on a binary curve"
+                ))
+            }
+        },
     };
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
             let name = spec
@@ -1364,7 +1415,10 @@ fn solve_ic_binary(
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
-        other => return Err(format!("oracle `{other}` does not run on a binary curve")),
+        other => match plugin_oracle.as_deref_mut() {
+            Some(o) => o,
+            None => return Err(format!("oracle `{other}` does not run on a binary curve")),
+        },
     };
     let ctx = InstanceCtx {
         group: &g,
@@ -1721,15 +1775,19 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
-                other => {
-                    return Err(format!(
-                        "factor base `{other}` does not run on a binary curve"
-                    ))
-                }
+                other => match plugin_base.as_deref() {
+                    Some(b) => b,
+                    None => {
+                        return Err(format!(
+                            "factor base `{other}` does not run on a binary curve"
+                        ))
+                    }
+                },
             };
             let ctx = InstanceCtx {
                 group: &g,
