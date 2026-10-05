@@ -175,3 +175,134 @@ fn entire_catalog_replays_deterministically() {
         assert!(finding["minimal_genus"].is_null());
     }
 }
+
+#[test]
+fn all_small_model_changes_have_rational_inverses() {
+    use crypto_lib::utils::mod_inverse;
+    use num_traits::ToPrimitive;
+    for p in [5u32, 7, 11] {
+        let inv = |x: u32| {
+            mod_inverse(&BigUint::from(x), &BigUint::from(p))
+                .unwrap()
+                .to_u32()
+                .unwrap()
+        };
+        for form in [
+            "B*y^2=x^3+A*x^2+x",
+            "a*x^2+y^2=1+d*x^2*y^2",
+            "x^2+y^2=c^2*(1+d*x^2*y^2)",
+        ] {
+            for a in 0..p {
+                for b in 0..p {
+                    let v = json!({"v":"1","field":format!("fp-{p}"),"p":p.to_string(),"form":form,"A":a.to_string(),"B":b.to_string(),"a":a.to_string(),"c":a.to_string(),"d":b.to_string()});
+                    let singular = if form.starts_with("B*") {
+                        b == 0 || a * a % p == 4 % p
+                    } else if form.starts_with("a*") {
+                        a == 0 || b == 0 || a == b
+                    } else {
+                        a == 0 || b == 0 || b * a * a * a * a % p == 1
+                    };
+                    if singular {
+                        assert!(model(&v).is_err());
+                        continue;
+                    }
+                    let m = checked(&v);
+                    let n = m.normalization.as_ref().unwrap();
+                    let get =
+                        |key: &str| number(n[key].as_str().unwrap()).unwrap().to_u32().unwrap();
+                    let mb = get("montgomery_B");
+                    let shift = get("shift_A_over_3");
+                    let scale = get("edwards_scale");
+                    let sa = m.a.to_u32().unwrap();
+                    let sb = m.b.to_u32().unwrap();
+                    for x in 0..p {
+                        for y in 0..p {
+                            if y * y % p != (x * x * x + sa * x + sb) % p {
+                                continue;
+                            }
+                            let u = (mb * x + p - shift) % p;
+                            let w = mb * y % p;
+                            let (tx, ty) = if form.starts_with("B*") {
+                                (u, w)
+                            } else {
+                                if w == 0 || (u + 1) % p == 0 {
+                                    continue;
+                                }
+                                (
+                                    scale * u * inv(w) % p,
+                                    scale * (u + p - 1) * inv((u + 1) % p) % p,
+                                )
+                            };
+                            if form.starts_with("B*") {
+                                assert_eq!(b * ty * ty % p, (tx * tx * tx + a * tx * tx + tx) % p);
+                            } else if form.starts_with("a*") {
+                                assert_eq!(
+                                    (a * tx * tx + ty * ty) % p,
+                                    (1 + b * tx * tx * ty * ty) % p
+                                );
+                            } else {
+                                assert_eq!(
+                                    (tx * tx + ty * ty) % p,
+                                    a * a * (1 + b * tx * tx * ty * ty) % p
+                                );
+                            }
+                            let (ru, rw) = if form.starts_with("B*") {
+                                (tx, ty)
+                            } else {
+                                if tx == 0 || (scale + p - ty) % p == 0 {
+                                    continue;
+                                }
+                                let ru = (scale + ty) * inv((scale + p - ty) % p) % p;
+                                (ru, scale * ru * inv(tx) % p)
+                            };
+                            assert_eq!(((ru + shift) * inv(mb) % p, rw * inv(mb) % p), (x, y));
+                        }
+                    }
+                    let c = construct(&m);
+                    verify(&m, &c).unwrap();
+                    let mut altered = c.clone();
+                    altered.target_model_map.as_mut().unwrap()["montgomery_B"] = json!("0x0");
+                    assert!(verify(&m, &altered).is_err());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn cover_graph_is_content_addressed_and_rejects_wrong_ec1_binding() {
+    let v = prime(5, 0, 1);
+    let raw = v.to_string();
+    let mut rep = json!({"field":{"characteristic":5,"degree":1,"representation":"prime"},"curve":{"model":"short Weierstrass","coefficients":[0,0,0,0,1],"subgroup_order":"3","cofactor":2,"generator":["0x0","0x1"]}});
+    fn identify(rep: &mut Value) {
+        let h = digest(
+            json!({"field":rep["field"],"curve":rep["curve"]})
+                .to_string()
+                .as_bytes(),
+        );
+        rep["ec1"] = json!(format!("EC1P3Ctesth{}", &h[..12]));
+        rep["curve_uid"] = json!(format!("urn:ec-record:1:sha256:{h}"));
+    }
+    identify(&mut rep);
+    let hash = digest(raw.as_bytes());
+    let mut registry = json!({"schema_version":1,"curves":[{"slug":format!("test-{}",&hash[..8]),"icv1":format!("test:{}",&hash[..12]),"model_json":raw,"order":"6","representations":[rep]}]});
+    let report = catalog(registry.to_string().as_bytes()).unwrap();
+    let graph = super::links::graph(&registry, &report).unwrap();
+    for (collection, key, prefix) in [
+        ("covers", "cover_uid", "urn:hc-model:1:sha256:"),
+        ("maps", "map_uid", "urn:curve-cover-map:1:sha256:"),
+    ] {
+        for record in graph[collection].as_object().unwrap().values() {
+            assert_eq!(
+                record[key],
+                format!(
+                    "{prefix}{}",
+                    digest(record["record"].to_string().as_bytes())
+                )
+            );
+        }
+    }
+    registry["curves"][0]["representations"][0]["curve"]["coefficients"][4] = json!(2);
+    identify(&mut registry["curves"][0]["representations"][0]);
+    assert!(super::links::graph(&registry, &report).is_err());
+}

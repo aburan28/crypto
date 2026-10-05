@@ -1,7 +1,7 @@
 # Automatic hyperelliptic cover checks
 
 `curve_cover_check` constructs and replays explicit covers **H -> E** for
-the two elliptic model forms currently in the ICV1 catalog. Findings are in
+the supported elliptic model forms in the ICV1 catalog. Findings are in
 [`covers.json`](covers.json), joined to [`registry.json`](registry.json)
 by slug **and the full SHA-256 of the exact model JSON**. The registry's
 model and EC1 identities stay unchanged. The lab browser shows the finding
@@ -133,3 +133,34 @@ and function-field degree arguments above establish the geometric claims.
 - Xavier Xarles, *Hyperelliptic curves covering an elliptic curve twice*,
   [arXiv:1303.4220](https://arxiv.org/abs/1303.4220), Corollary 3.
   This broader two-map theorem is context, not the verifier's algorithm.
+
+## Montgomery and Edwards targets
+
+For `B*y^2=x^3+A*x^2+x` in characteristic greater than three, require
+`B*(A^2-4) != 0`. Put `s=A/3`, and use the short equation with
+`a=(1-A^2/3)/B^2`, `b=(2*s^3-s)/B^3`. The map from short coordinates is
+`x=B*X-s`, `y=B*Y`; its inverse is `X=(x+s)/B`, `Y=y/B`.
+The checker verifies the coefficient identities explicitly.
+
+For `a*x^2+y^2=1+d*x^2*y^2`, require `a*d*(a-d) != 0` and set
+`A=2*(a+d)/(a-d)`, `B=4/(a-d)`. Montgomery coordinates `(u,w)` map to
+`x=u/w`, `y=(u-1)/(u+1)`, with inverse `u=(1+y)/(1-y)`, `w=u/x`.
+After clearing denominators, the Edwards equation has numerator
+`u^2*(a*(u+1)^2-d*(u-1)^2)-4*u*w^2`, which vanishes by
+`B*w^2=u^3+A*u^2+u` and the definitions of A and B.
+For the scaled Edwards equation, divide x and y by nonzero c first;
+this gives a=1 and the coefficient `d*c^4` in the unit-scale equation.
+
+These are rational inverses, hence birational degree-one maps. They extend
+uniquely to the smooth projective models; exceptional affine denominators do
+not invalidate the cover. Certificates store both maps in `target_model_map`.
+The polynomial cover first targets the short equation and then composes with
+that map. Genus two and degree two are preserved. Small-field tests exhaust
+all nonsingular parameter choices in characteristics 5, 7 and 11 and verify
+the forward equations and inverse identities wherever affine formulas apply.
+
+The [standards importer](standards/README.md) expands the inventory, while
+[`cover-links.yaml`](cover-links.yaml) supplies exact ICV1/EC1/HC1/CV1 links.
+Pass `--links PATH` alongside custom registry/report paths. `--check` replays
+both the report and the graph. An unresolved source import is recorded in
+`standards/coverage.json` and is not evidence of cover nonexistence.

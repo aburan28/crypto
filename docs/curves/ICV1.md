@@ -129,3 +129,21 @@ way (`docs/ic/calibration.json`), matches through
    by rerunning the example (see [`README.md`](README.md)).
 3. Run `python3 scripts/build_curve_registry.py` and commit the registry
    with the work that first names the curve.
+
+## Additional prime model forms
+
+The native standards importer preserves these original equations in model JSON:
+
+| `form` | Additional keys (decimal strings) |
+| --- | --- |
+| `B*y^2=x^3+A*x^2+x` | `A`, `B` |
+| `a*x^2+y^2=1+d*x^2*y^2` | `a`, `d` |
+| `x^2+y^2=c^2*(1+d*x^2*y^2)` | `c`, `d` |
+
+Each also has `v: "1"`, `p` and `field`, as for short Weierstrass models.
+Coefficients are canonical residues. The model hash names the original equation,
+not its normalized short Weierstrass equation. Trace and order refer to the
+smooth projective model; j is computed using the verified birational change in
+[COVERS.md](COVERS.md). Existing identities are unchanged. Native import is in
+`src/bin/curve_standards`; [the standards inventory](standards/README.md) explains
+provenance and [the YAML graph](cover-links.yaml) links ICV1, EC1 and covers.

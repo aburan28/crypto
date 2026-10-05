@@ -290,13 +290,19 @@
     ]);
     view.appendChild(facts);
 
+    view.appendChild(el("p", { class: "note" }, [repoLink("docs/curves/standards/coverage.json", "Standards inventory and unresolved records"), "; worldwide historical completeness has not been established."]));
     view.appendChild(el("h2", { text: "Hyperelliptic cover" }));
     var cover = c.hyperelliptic_cover;
+    var linkage = (c.cover_links || [])[0];
     if (cover) {
       var cert = cover.certificate;
       view.appendChild(el("dl", { class: "facts" }, [
         fact("Existence", cover.exists === true ? "Verified over the declared field" : (cover.status === "invalid_input" ? "Invalid input model" : "Unresolved")),
         fact("Cover direction", "H → E"),
+        fact("Cover identity", linkage ? linkage.cover_id : null, true),
+        fact("Map identity", linkage ? linkage.map_id : null, true),
+        fact("Cover UID", linkage ? linkage.cover_uid : null, true),
+        fact("Map UID", linkage ? linkage.map_uid : null, true),
         fact("Cover genus", cert ? cert.genus : null),
         fact("Map degree", cert ? cert.degree : null),
         fact("Field", cert ? "Same field as E" : "Not established"),
@@ -305,10 +311,10 @@
         fact("Subfield descent / subgroup transfer", "Not tested"),
         fact("DLP advantage", "Not measured")
       ]));
-      view.appendChild(el("p", { class: "note" }, [cert ? "An explicit geometric cover is recorded. Computational advantage requires separate evidence. " : "This result establishes neither existence nor nonexistence. ", repoLink("docs/curves/COVERS.md", "Proof and scope"), "; ", repoLink("docs/curves/covers.json", "replayable catalog findings"), "."]));
+      view.appendChild(el("p", { class: "note" }, [cert ? "An explicit geometric cover is recorded. Computational advantage requires separate evidence. " : "This result establishes neither existence nor nonexistence. ", repoLink("docs/curves/COVERS.md", "Proof and scope"), "; ", repoLink("docs/curves/covers.json", "replayable catalog findings"), "; ", repoLink("docs/curves/cover-links.yaml", "YAML identity graph"), "."]));
       if (cert) {
         var details = el("details", null, [el("summary", { text: "Cover equation and map certificate" })]);
-        details.appendChild(el("p", { text: "Ascending powers of u; H: v² + h(u)v = f(u). Map: x = x(u), y = y_v(u)v + y_0(u). Coefficients use the curve's field representation." }));
+        details.appendChild(el("p", { text: "Ascending powers of u; H: v² + h(u)v = f(u). Map to the short model: x = x(u), y = y_v(u)v + y_0(u); compose with target_model_map when present. Coefficients use the curve's field representation." }));
         details.appendChild(el("pre", { text: JSON.stringify(cert, null, 2) }));
         view.appendChild(details);
       }

@@ -34,6 +34,8 @@ OUT = os.path.join(ROOT, "docs", "browser", "data.json")
 
 REGISTRY = "docs/curves/registry.json"
 COVERS = "docs/curves/covers.json"
+COVER_LINKS = "docs/curves/cover-links.yaml"
+STANDARDS_COVERAGE = "docs/curves/standards/coverage.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
 ECBENCH_SESSIONS_GLOB = "research/ecbench_*/sessions/*"
@@ -475,6 +477,19 @@ def build() -> dict:
     leaderboard = load(LEADERBOARD)
     curves = curve_rows(registry, leaderboard)
     attach_covers(curves, load(COVERS))
+    graph = load(COVER_LINKS)  # JSON syntax is a subset of YAML 1.2.
+    if graph.get("schema_version") != "curve-cover-graph/v1" or graph.get("registry_sha256") != sha256_file(REGISTRY):
+        raise ValueError("stale cover graph")
+    nodes = {node["icv1_identity"]["slug"]: node for node in graph["curves"]}
+    if len(nodes) != len(graph["curves"]) or set(nodes) != {c["slug"] for c in curves}:
+        raise ValueError("cover graph must bind every catalog model exactly once")
+    for curve in curves:
+        node = nodes[curve["slug"]]
+        if node["model_json"] != curve["model_json"]:
+            raise ValueError("cover graph model mismatch")
+        curve["cover_links"] = [dict(link, cover_id=graph["covers"][link["cover_uid"]]["cover_id"],
+                                     map_id=graph["maps"][link["map_uid"]]["map_id"]) for link in node["cover_links"]]
+        curve["standards_provenance"] = node.get("standards_provenance") or []
     by_slug = {c["slug"]: c for c in curves}
     sessions, methods, fbs, yields = ecbench_sessions(by_slug)
     rounds = tournament_rounds(curves)
@@ -488,6 +503,8 @@ def build() -> dict:
     sources = {
         REGISTRY: sha256_file(REGISTRY),
         COVERS: sha256_file(COVERS),
+        COVER_LINKS: sha256_file(COVER_LINKS),
+        STANDARDS_COVERAGE: sha256_file(STANDARDS_COVERAGE),
         LEADERBOARD: sha256_file(LEADERBOARD),
         **{os.path.join(s["dir"], "records.jsonl"): sha256_file(os.path.join(s["dir"], "records.jsonl")) for s in sessions},
     }
@@ -498,6 +515,7 @@ def build() -> dict:
         "counts": {"curves": len(curves), "methods": len(methods), "factor_bases": len(fbs), "candidates": len(candidates), "rounds": len(rounds), "sessions": len(sessions), "yields": len(yields)},
         "sources": sources,
         "vocabulary": VOCABULARY,
+        "standards_coverage": load(STANDARDS_COVERAGE),
         "curves": curves,
         "methods": methods,
         "factor_bases": fbs,
