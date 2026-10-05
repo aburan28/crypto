@@ -84,13 +84,13 @@ family: geometric `V_s` for s = 1..4 instead of random V.
 
 - Class: n = 31, a₂ = 0, from the walk.
 - Sample: 32 curves by the sweep's seeded hash, including K_a.
-- Probes: 8 full-group probes per cell, m = 2.
+- Probes: 4 full-group probes per cell, m = 2. (Planned as 8; cut to 4 before any cell completed, because a probe at l = 16 costs about 320 s and 8 probes put the run past 60 h on 2 cores.)
 - Order: shuffled cells.
 - Primary metric: reductions/call, which is load-independent.
 - Secondary metrics: log µs/call and yield.
-- Command: `KOBLITZ_PRES_GEOMETRIC=1 koblitz_presentation_sweep 31 0 16 8 32 1,2,3,4`
+- Command: `KOBLITZ_PRES_GEOMETRIC=1 koblitz_presentation_sweep 31 0 16 4 32 1,2,3,4`
 - Output: `experiments/koblitz_presentation/pres_31_0_l16_geom.jsonl`.
-- Budget: about 128 cells × 8 × 100 s ≈ 28 core-h, on 2 cores.
+- Budget: about 128 cells × 4 × 320 s ≈ 45 core-h, on 2 cores.
 
 Caveat stated up front: H0 or H1 here is scoped to geometric presentations, a
 measure-zero family of subspaces. It is not a statement about random V at n = 31,
