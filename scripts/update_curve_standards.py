@@ -10,6 +10,17 @@ REGISTRY = ROOT / 'docs/curves/registry.json'
 STANDARDS = ROOT / 'docs/curves/standards/registry.json'
 
 
+def catalog_displays():
+    """Refresh names/roster only; preserve every frozen measurement field."""
+    import build_ic_leaderboard as display
+    doc = json.loads(display.OUT_JSON.read_text())
+    doc['roster'] = display.roster(display.Names(), {r['slug'] for r in doc['board']})
+    doc['sources']['registry']['sha256'] = hashlib.sha256(REGISTRY.read_bytes()).hexdigest()
+    return {display.OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + '\n',
+            display.OUT_MD: display.markdown(doc),
+            display.OUT_HTML: display.page(doc, standalone=True)}
+
+
 def merge(catalog, imported):
     by_model = {row['model_json']: row for row in catalog['curves']}
     for new in imported['curves']:
@@ -62,6 +73,12 @@ def main():
         # Alias index formatting only; no identity arithmetic is invoked.
         import curve_id
         curve_id.ALIAS_MAP.write_text(curve_id.alias_map_text(result))
+    for path, rendered in catalog_displays().items():
+        if args.check:
+            if path.read_text() != rendered:
+                raise SystemExit(f'stale catalog display: {path.relative_to(ROOT)}')
+        else:
+            path.write_text(rendered)
     print(f"standard catalog join: {len(result['curves'])} models")
 
 
