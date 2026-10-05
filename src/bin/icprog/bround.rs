@@ -1004,8 +1004,8 @@ mod tests {
     }
 
     /// C009's frozen document is the generator's translation of the smoke
-    /// row `k0n31` `M1-T01`, under a name of its own: the reference must
-    /// write it again, byte for byte.
+    /// row `M1-T01` at `icv1-f2m31-tm90707-c95f16f5`, under a name of its
+    /// own: the reference must write it again, byte for byte.
     #[test]
     fn the_reference_reproduces_c009s_frozen_translation() {
         let programme = Path::new(env!("CARGO_MANIFEST_DIR")).join("research/ic_tool_program");
