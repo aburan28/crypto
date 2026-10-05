@@ -1,5 +1,10 @@
 # Native target controller source validation
 
+This is the source-control snapshot taken before the later offline target
+build and portable archive work. Its exact file and development-binary hashes
+belong to that snapshot. The subsequent validation-only build receipt and
+data-only publication are recorded separately in `BUILD_VALIDATION_RESULT.md`.
+
 Classification: source/control progress toward the full complete F5/SAT goal.
 No scientific target registration, native preparation panel, F5/SAT search,
 fresh target comparison, new relation yield or speedup is reported here. The

@@ -237,6 +237,17 @@ fn load_log(path: &Path) -> Result<Value, String> {
     super::target_math::parse(&read(path, 65536)?)
 }
 pub(super) fn verify(root: &Path, record: &capsule::Registration) -> Result<(), String> {
+    files::reject_ancestor_config(&root.join("immutable/source"))?;
+    verify_from(root, record, root)
+}
+/// Check retained original invocation receipts against archived sidecars.
+/// `root` holds the bytes being replayed; `original` names the build's actual
+/// capsule location recorded at freeze time. No archived program is run.
+pub(super) fn verify_from(
+    root: &Path,
+    record: &capsule::Registration,
+    original: &Path,
+) -> Result<(), String> {
     let dir = root.join("immutable/build-receipts");
     let build = load(&dir.join("build-identity.json"))?;
     require(
@@ -252,8 +263,7 @@ pub(super) fn verify(root: &Path, record: &capsule::Registration) -> Result<(), 
             && build["native_archive_sha256"].is_null(),
         "target compiled source/build flags differ",
     )?;
-    let source = root.join("immutable/source");
-    files::reject_ancestor_config(&source)?;
+    let source = original.join("immutable/source");
     let build_env = load(&dir.join("build.receipt.json"))?["environment"].clone();
     for name in ["vendor", "rustc", "cargo", "build", "worker-identity"] {
         let receipt = load(&dir.join(format!("{name}.receipt.json")))?;
@@ -283,9 +293,9 @@ pub(super) fn verify(root: &Path, record: &capsule::Registration) -> Result<(), 
             require(
                 load_log(&dir.join("worker-identity.log"))? == record.worker_build_identity
                     && receipt["argv"] == json!(["build-identity"])
-                    && receipt["cwd"] == json!(root)
+                    && receipt["cwd"] == json!(original)
                     && receipt["program"]
-                        == json!(root.join("immutable/bin").join(capsule::WORKER))
+                        == json!(original.join("immutable/bin").join(capsule::WORKER))
                     && receipt["environment"]
                         == json!(capsule::environment().into_iter().collect::<Vec<_>>()),
                 "target observed worker identity differs",
@@ -338,9 +348,9 @@ pub(super) fn verify(root: &Path, record: &capsule::Registration) -> Result<(), 
                         && env.get("CARGO_INCREMENTAL").map(String::as_str) == Some("0")
                         && env.get("LC_ALL").map(String::as_str) == Some("C")
                         && env.get("CARGO_HOME")
-                            == Some(&root.join("build-home").to_string_lossy().into_owned())
+                            == Some(&original.join("build-home").to_string_lossy().into_owned())
                         && env.get("CARGO_TARGET_DIR")
-                            == Some(&root.join("build-target").to_string_lossy().into_owned())
+                            == Some(&original.join("build-target").to_string_lossy().into_owned())
                         && env.get("RUSTC").map(String::as_str)
                             == load(&dir.join("rustc.receipt.json"))?["program"].as_str()
                         && env.contains_key("PATH"),

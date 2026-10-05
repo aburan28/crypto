@@ -85,6 +85,8 @@ mod suite;
 mod target_build;
 #[path = "icprog/target_control.rs"]
 mod target_control;
+#[path = "icprog/target_custody.rs"]
+mod target_custody;
 #[path = "icprog/target_math.rs"]
 mod target_math;
 
@@ -137,6 +139,26 @@ enum Command {
         host_context: PathBuf,
         #[arg(long)]
         validation_only: bool,
+    },
+    /// Publish full data custody of an unconsumed validation-only target build.
+    TargetControlPublishBuild {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Check archived target build bytes and receipts; never executes an archive.
+    TargetControlReplayBuild {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
     },
     /// Consume one separately published target registration; no retry or resume.
     TargetControlExecute {
@@ -811,6 +833,22 @@ fn main() -> ExitCode {
             host: &host_context,
             validation_only,
         }),
+        Command::TargetControlPublishBuild {
+            capsule,
+            publication,
+            validation_registration_sha256,
+            out,
+        } => target_custody::publish(
+            &capsule,
+            &publication,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlReplayBuild {
+            publication,
+            validation_registration_sha256,
+            out,
+        } => target_custody::replay(&publication, &validation_registration_sha256, &out),
         Command::TargetControlExecute {
             capsule,
             execution,

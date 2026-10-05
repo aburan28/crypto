@@ -144,7 +144,10 @@ fn pins(record: &Registration) -> Result<(), String> {
         "target compiled source pin differs",
     )
 }
-pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, String> {
+/// Validate the sealed registration and its small sidecars as data. This is
+/// also used for portable build-custody replay, where the immutable tree is
+/// checked inside a bounded archive instead of extracted or executed.
+pub fn registration(capsule: &Path, expected: &str) -> Result<Registration, String> {
     native::require(
         journal::digest(expected),
         "external target registration seal required",
@@ -165,6 +168,10 @@ pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, Str
         "target configuration changed",
     )?;
     config(capsule)?;
+    Ok(record)
+}
+pub fn check_capsule(capsule: &Path, expected: &str) -> Result<Registration, String> {
+    let record = registration(capsule, expected)?;
     native::check_tree(&capsule.join("immutable"), &record.immutable_files)?;
     native::require(
         canonical_sha(&native::inventory(&capsule.join("immutable/source"))?)?

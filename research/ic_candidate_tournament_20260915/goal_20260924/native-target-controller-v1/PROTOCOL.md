@@ -23,6 +23,17 @@ scientific execute call. Input loading, build and preparation audit are outside
 the one-target online interval; actual target-dependent work and record writes
 remain charged inside the worker's five phases.
 
+For a validation-only build, `target-control-publish-build` creates a bounded
+USTAR/Gzip copy of every sealed regular file plus the original small sidecars
+and build receipts. It requires the external registration seal, rechecks the
+original source/build and unconsumed state, and immediately runs
+`target-control-replay-build`. Replay treats the archive solely as data: it
+checks its complete member inventory, hashes, original invocation paths and
+environment, source manifest, binaries and receipts without extraction or
+execution. Archive or receipt mutations must fail. A passing replay says only
+that the validation build has portable byte custody; it cannot admit a solver,
+fresh target, relation-yield estimate or speedup.
+
 Execute must retain a durable consumed claim and target-exposure record before
 launch and never resume. Terminal receipts must survive success, failure and
 timeout and bind immutable source, worker/controller bytes, exact invocation,
