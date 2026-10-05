@@ -17,6 +17,9 @@ big-integer curve and group-law replay.
 ## Frozen encoding
 
 - logic: `QF_FF`;
+- cvc5 option: `--ff-solver=split`, selected before any run because the
+  cvc5 1.4.1 theory reference specifically identifies it as the solver for
+  field equations that encode bit decomposition;
 - field sort: `(_ FiniteField 630043)` for the frozen case;
 - `x1`, `y1`, `x2`, `y2`, and `lambda` are field elements;
 - each abscissa is linked to a little-endian vector of field variables
@@ -43,4 +46,3 @@ or target is tried after observing the frozen result.
 
 This remains a decomposition-stage diagnostic. Pollard-rho ratio,
 end-to-end `S`, and speedup remain `null`; no scoreboard row changes.
-
