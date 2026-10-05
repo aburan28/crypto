@@ -1,8 +1,9 @@
 # Curves
 
-[IC curve records and cross-repo links](ic/README.md) retain the exact EC1
-representations, optional trait statuses, and the factor-base/isogeny storage
-contract beside this ICV1 model registry.
+[IC curve records and cross-repo links](ic/README.md), including
+[typed links](ic/curve-links/README.md), retain the exact EC1 representations,
+optional trait statuses, and the factor-base/isogeny storage contract beside
+this ICV1 model registry.
 
 Curves isogenous to a registered prime-field curve are found and recorded
 by the native isogeny walker, `src/bin/isogeny_walk.rs`

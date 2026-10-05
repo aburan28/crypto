@@ -29,6 +29,11 @@ the curve UID, point-set encoding/digest, quotient rule and actual usable
 point count have been reconciled. `fb<B>` cannot be formed from a recipe
 with unknown `B`.
 
+[Typed curve-link rules](curve-links/README.md) distinguish twists, same-field
+model changes, and field extensions from isogenies. The mirrored curve YAML
+keeps explicit `not_enumerated` inventories for links that have not been
+constructed or checked. A shared j-invariant is not a base-field point map.
+
 The directed isogeny graph and ordered `IW1` routes live in
 cryptanalysis's
 [`isogeny_routes.json`](https://github.com/aburan28/cryptanalysis/blob/main/experiments/ic-candidate-catalog/isogeny_routes.json).

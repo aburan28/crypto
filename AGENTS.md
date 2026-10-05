@@ -732,7 +732,10 @@ registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
 slug to the EC1 identities of its recorded representations.
 The [IC curve crosswalk](docs/curves/ic/README.md) mirrors cryptanalysis's
 exact curve records and links them to ICV1 only when the model match is
-established. Keep unknown traits and unsupported models as `null` with status.
+established.
+The [typed curve-link rules](docs/curves/ic/curve-links/README.md) keep
+twists and field/model changes separate from verified isogeny routes; no
+base-field log transport is inferred from a shared j-invariant. Keep unknown traits and unsupported models as `null` with status.
 Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
