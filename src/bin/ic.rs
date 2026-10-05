@@ -184,7 +184,13 @@ pub fn git_commit() -> Option<String> {
 }
 
 fn compute_git_commit() -> Option<String> {
-    option_env!("CRYPTO_BUILD_GIT_COMMIT").map(str::to_owned)
+    // Release/install jobs set the repository-neutral override explicitly.
+    // GitHub Actions already exports its exact checkout SHA.  Keeping this in
+    // `option_env!` avoids a root build script, whose inputs would otherwise
+    // need to enter every source-bound research manifest in the repository.
+    option_env!("CRYPTO_BUILD_GIT_COMMIT")
+        .or(option_env!("GITHUB_SHA"))
+        .map(str::to_owned)
 }
 
 fn compute_binary_hash() -> Option<String> {
