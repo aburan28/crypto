@@ -31,6 +31,7 @@ repo_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 out_dir=${1:-"$PWD/p256-isogeny-task-$(date -u +%Y%m%dT%H%M%SZ)"}
 steps=${2:-4096}
 source_commit=${3:-$(git -C "$repo_root" rev-parse HEAD)}
+head_commit=$(git -C "$repo_root" rev-parse HEAD)
 
 if [ -e "$out_dir" ]; then
     printf 'p256-isogeny-task: refusing existing output path %s\n' "$out_dir" >&2
@@ -45,6 +46,14 @@ case "$source_commit" in
 esac
 if [ "${#source_commit}" -ne 40 ]; then
     printf 'p256-isogeny-task: SOURCE_COMMIT must be exactly 40 lowercase hex characters\n' >&2
+    exit 1
+fi
+if [ "$source_commit" != "$head_commit" ]; then
+    printf 'p256-isogeny-task: SOURCE_COMMIT must equal the checked-out HEAD (%s)\n' "$head_commit" >&2
+    exit 1
+fi
+if ! git -C "$repo_root" diff --quiet || ! git -C "$repo_root" diff --cached --quiet; then
+    printf 'p256-isogeny-task: tracked source is dirty; commit it before creating a pinned task\n' >&2
     exit 1
 fi
 

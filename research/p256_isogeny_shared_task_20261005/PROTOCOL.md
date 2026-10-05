@@ -40,6 +40,10 @@ The default and maximum task is the already measured 4,096-edge prefix.
 Shorter prefixes exist only for development and low-cost validation.  This
 contract cannot express an offset, arbitrary anchor, or shard.
 
+The local convenience script refuses tracked modifications and requires the
+declared source commit to equal checked-out `HEAD`.  The TaskQ path obtains the
+same property by checking out the task's pinned commit before it builds.
+
 ## Worker output and acceptance
 
 A worker writes exactly three files into a fresh result directory:
