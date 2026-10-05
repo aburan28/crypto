@@ -213,12 +213,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -1336,10 +1336,16 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    #[cfg(feature = "f6-ic-oracle")]
+    let standard = crate::cryptanalysis::ic_framework::pdp3_koblitz::KoblitzStandardSubspaceBase {
+        instance: inst,
+    };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
+        #[cfg(feature = "f6-ic-oracle")]
+        "koblitz-standard-subspace" => &standard,
         other => {
             return Err(format!(
                 "factor base `{other}` does not run on a binary curve"
@@ -1351,6 +1357,9 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    #[cfg(feature = "f6-ic-oracle")]
+    let mut pdp3 =
+        crate::cryptanalysis::ic_framework::pdp3_koblitz::Pdp3KoblitzOracle::new(ms, inst);
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
             let name = spec
@@ -1375,6 +1384,8 @@ fn solve_ic_binary(
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        #[cfg(feature = "f6-ic-oracle")]
+        "pdp3-koblitz" => &mut pdp3,
         other => return Err(format!("oracle `{other}` does not run on a binary curve")),
     };
     let ctx = InstanceCtx {
@@ -1732,10 +1743,17 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            #[cfg(feature = "f6-ic-oracle")]
+            let standard =
+                crate::cryptanalysis::ic_framework::pdp3_koblitz::KoblitzStandardSubspaceBase {
+                    instance: i,
+                };
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
+                #[cfg(feature = "f6-ic-oracle")]
+                "koblitz-standard-subspace" => &standard,
                 other => {
                     return Err(format!(
                         "factor base `{other}` does not run on a binary curve"
