@@ -33,6 +33,7 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 OUT = os.path.join(ROOT, "docs", "browser", "data.json")
 
 REGISTRY = "docs/curves/registry.json"
+COVERS = "docs/curves/covers.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
 ECBENCH_SESSIONS_GLOB = "research/ecbench_*/sessions/*"
@@ -454,10 +455,26 @@ def candidate_identities() -> list[dict]:
     return rows
 
 
+def attach_covers(curves: list[dict], report: dict) -> None:
+    """Join preverified metadata only; mathematical checks are native Rust."""
+    if report.get("schema_version") != "curve-covers/v1" or report.get("registry_sha256") != sha256_file(REGISTRY):
+        raise ValueError("cover report schema or registry digest is stale")
+    findings = report.get("curves", [])
+    by_slug = {r["slug"]: r for r in findings}
+    if len(by_slug) != len(findings) or set(by_slug) != {c["slug"] for c in curves}:
+        raise ValueError("cover report must have exactly one finding per catalog model")
+    for curve in curves:
+        finding = by_slug[curve["slug"]]
+        if finding.get("model_sha256") != hashlib.sha256(curve["model_json"].encode()).hexdigest():
+            raise ValueError(f"cover model digest mismatch: {curve['slug']}")
+        curve["hyperelliptic_cover"] = finding
+
+
 def build() -> dict:
     registry = load(REGISTRY)
     leaderboard = load(LEADERBOARD)
     curves = curve_rows(registry, leaderboard)
+    attach_covers(curves, load(COVERS))
     by_slug = {c["slug"]: c for c in curves}
     sessions, methods, fbs, yields = ecbench_sessions(by_slug)
     rounds = tournament_rounds(curves)
@@ -470,6 +487,7 @@ def build() -> dict:
         cand["slug"] = tag_to_slug.get((cand.get("n"), cand.get("curve_tag")))
     sources = {
         REGISTRY: sha256_file(REGISTRY),
+        COVERS: sha256_file(COVERS),
         LEADERBOARD: sha256_file(LEADERBOARD),
         **{os.path.join(s["dir"], "records.jsonl"): sha256_file(os.path.join(s["dir"], "records.jsonl")) for s in sessions},
     }

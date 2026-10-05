@@ -235,6 +235,10 @@
         { key: "r_bits", label: "log₂ r", numeric: true, digits: 2 },
         { key: "cofactor", label: "Cofactor", numeric: true, sort: function (c) { return c.cofactor === null ? null : Number(c.cofactor); } },
         { key: "end", label: "End. disc.", cell: function (c) { return tdText(c.endomorphism_discriminant === null ? "–" : String(c.endomorphism_discriminant), "n"); } },
+        { key: "cover", label: "Cover", cell: function (c) {
+          var cert = c.hyperelliptic_cover && c.hyperelliptic_cover.certificate;
+          return tdText(cert ? "genus " + cert.genus + ", degree " + cert.degree : "unresolved");
+        } },
         { key: "best", label: "Best IC / rho", numeric: true, sort: bestRatio, cell: function (c) { return ratioCell(bestRatio(c)); } },
         { key: "measured", label: "Cited by", sort: function (c) { return c.ecbench.length + c.tournament_cells.length + (c.on_leaderboard ? 1 : 0); }, cell: function (c) {
           var items = [];
@@ -285,6 +289,32 @@
       fact("Construction", c.construction, true)
     ]);
     view.appendChild(facts);
+
+    view.appendChild(el("h2", { text: "Hyperelliptic cover" }));
+    var cover = c.hyperelliptic_cover;
+    if (cover) {
+      var cert = cover.certificate;
+      view.appendChild(el("dl", { class: "facts" }, [
+        fact("Existence", cover.exists === true ? "Verified over the declared field" : (cover.status === "invalid_input" ? "Invalid input model" : "Unresolved")),
+        fact("Cover direction", "H → E"),
+        fact("Cover genus", cert ? cert.genus : null),
+        fact("Map degree", cert ? cert.degree : null),
+        fact("Field", cert ? "Same field as E" : "Not established"),
+        fact("Field validation", cover.field_check || cover.reason),
+        fact("Minimum genus / degree", "Not determined"),
+        fact("Subfield descent / subgroup transfer", "Not tested"),
+        fact("DLP advantage", "Not measured")
+      ]));
+      view.appendChild(el("p", { class: "note" }, [cert ? "An explicit geometric cover is recorded. Computational advantage requires separate evidence. " : "This result establishes neither existence nor nonexistence. ", repoLink("docs/curves/COVERS.md", "Proof and scope"), "; ", repoLink("docs/curves/covers.json", "replayable catalog findings"), "."]));
+      if (cert) {
+        var details = el("details", null, [el("summary", { text: "Cover equation and map certificate" })]);
+        details.appendChild(el("p", { text: "Ascending powers of u; H: v² + h(u)v = f(u). Map: x = x(u), y = y_v(u)v + y_0(u). Coefficients use the curve's field representation." }));
+        details.appendChild(el("pre", { text: JSON.stringify(cert, null, 2) }));
+        view.appendChild(details);
+      }
+    } else {
+      view.appendChild(el("p", { class: "note", text: "Cover existence has not been checked for this model." }));
+    }
 
     view.appendChild(el("h2", { text: "Identities" }));
     var idl = el("dl", { class: "facts" });
