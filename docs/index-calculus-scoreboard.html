@@ -1478,7 +1478,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         bit-identical trajectories, so the saving is a subtraction rather than an estimate &mdash;
         537 of 537 rows identical in every counter but the pool&rsquo;s, zero trajectories moved,
         zero rows whose saving differs from the offsets they stopped drawing.</p>
-      <p><strong>P-256 S17 boundary, newly priced.</strong> The separate fixed-atom route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm or matched operation-unit rho run. Its actual-P-256 outer-prefix scan measures one bit of additional oracle work per Dickson prefix depth, and the optimistic complete-collector projection reaches 2<sup>272.404</sup> field multiplications, 144.404 bits above the 2<sup>128</sup> rho exponent. It is retained below as an accounting rejection, not inserted into this end-to-end table.</p>
+      <p><strong>P-256 S17 boundary, repriced with variable columns.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications. Round 19 exactly constructs the global 8+9 frontier and lowers the optimistic 138,031-row projection by 107.248 bits to 2<sup>165.156</sup> P-256 field-multiplication equivalents, still 32.690 bits above the same-unit rho reference. The result remains a rejected stage projection and is retained below rather than inserted into this end-to-end table.</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -1969,7 +1969,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
           ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
-        <p>The P-256 fixed-atom S17 diagnostic is intentionally not plotted on this group-order axis: it measures a depth-prefix slope of 0.991543 for field multiplications, not a multi-size exponent in the subgroup order. Pricing the remaining atom search yields a separately labelled optimistic projection of 2<sup>272.404</sup> field multiplications for relation collection, so it fails the 2<sup>128</sup> comparison before a whole-pipeline fit exists.</p>
+        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>, not a multi-size exponent in the subgroup order. Exact full-size combinatorics project the variable-column collector to 2<sup>165.156</sup> FME, 32.690 bits above the same-unit rho reference.</p>
       </div>
       <div class="exp">
         <div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
@@ -12060,6 +12060,44 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-outer-scan-round18-20261005 -->
+<!-- BEGIN p256-s17-multilevel-selector-round19-20261005 -->
+<section class="panel" id="p256-s17-multilevel-selector-round19-20261005">
+  <div class="panel-head">
+    <h2>P-256 variable-column S17: 107 bits recovered, but the exact 8+9 frontier still loses <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Replaces fixed atoms with exact global 8+9 and 4+4+4+5 selectors: all four P-256 prefix cells agree with zero errors, but Dickson membership prunes nothing and the optimistic collector remains 32.690 bits above rho.</p>
+    <p>Round 19 keeps all 17 factor-base columns variable. The direct arm indexes every signed eight-sum; the structured arm constructs the same frontier through exact signed four- and five-lists and all 256 external buckets. Complete compressed point keys are matched and every hit is replayed by fresh P-256 group addition.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured actual-P-256 counts. FME converts each complete projective addition to 17 field multiplications. Candidate storage is the simultaneous exact-key disk frontier.</caption>
+    <thead><tr><th>Active B</th><th>Signed 8-list</th><th>Signed 9-list</th><th>Direct 8+9 FME</th><th>4+4+4+5 FME</th><th>Candidate / direct</th><th>Candidate frontier</th><th>FN / FP</th></tr></thead>
+    <tbody>
+      <tr><td class="n">17</td><td class="n">6,223,360</td><td class="n">12,446,720</td><td class="n">903,818,583</td><td class="n">1,113,769,569</td><td class="n">1.2323</td><td class="n">765,473,280 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">18</td><td class="n">11,202,048</td><td class="n">24,893,440</td><td class="n">1,779,616,529</td><td class="n">2,197,217,483</td><td class="n">1.2347</td><td class="n">1,479,915,008 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">19</td><td class="n">19,348,992</td><td class="n">47,297,536</td><td class="n">3,337,713,009</td><td class="n">4,128,581,739</td><td class="n">1.2369</td><td class="n">2,732,507,648 B</td><td class="n">0 / 0</td></tr>
+      <tr><td class="n">20</td><td class="n">32,248,320</td><td class="n">85,995,520</td><td class="n">6,002,572,382</td><td class="n">7,437,716,615</td><td class="n"><strong>1.2391</strong></td><td class="n">4,847,997,440 B</td><td class="n">0 / 0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Full-factor-base lower-bound projection in one FME unit. Sorting and byte I/O are omitted, so they cannot improve these figures.</caption>
+    <thead><tr><th>Boundary</th><th>Exact / projected quantity</th><th>log<sub>2</sub></th><th>Gate / ratio</th></tr></thead>
+    <tbody>
+      <tr><td>Signed eight-sum list</td><td class="n">C(131,458,8)&middot;2<sup>8</sup></td><td class="n">128.734 records</td><td><span class="chip">exact combinatorics</span></td></tr>
+      <tr><td>Signed nine-sum list</td><td class="n">C(131,458,9)&middot;2<sup>9</sup></td><td class="n">143.569 records</td><td><span class="chip">exact combinatorics</span></td></tr>
+      <tr><td>One usable relation</td><td class="n">optimistic warm lower bound</td><td class="n"><strong>148.081 FME</strong></td><td><span class="chip">45.081 bits above 2^103</span></td></tr>
+      <tr><td>138,031-row collection + sparse LA</td><td class="n">143,185.66 projected targets</td><td class="n"><strong>165.156 FME</strong></td><td><span class="chip">32.690 bits above rho</span></td></tr>
+      <tr><td>Structured materialised frontier</td><td class="n">41-byte exact-key records</td><td class="n"><strong>148.926 bytes</strong></td><td><span class="chip">98.926 bits above 2^50</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> the planted relation is recovered in every cell; the hash-public target has no bounded-prefix hit; selectors agree throughout; independent 17-sum references cover B=17 and B=18</span>
+    <span><span class="chip">Dickson</span> every depth-18 leaf reaches the frozen terminal and survival is 1.0; membership is separable by leaf and gives no cross-column pruning</span>
+    <span><span class="chip">degree</span> local join degree 2; frozen residual maxima 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">classification</span> global 8+9 is a stage advance over fixed atoms but remains rejected; external 4+4+4+5 lowers resident bucket memory while raising FME and disk traffic, so it is relabelling</span>
+    <span><span class="chip">decision</span> per-relation, collection, storage and rho gates fail; the preregistered full-depth unplanted attempt was not run</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_multilevel_selector_round19_20261005/RESULT.md</code>; deterministic result SHA-256 <code>3096540621408e4a48cfa18963ad01da9686d3527ee26776c8b6cf6f45a71114</code></span>
+  </div>
+</section>
+<!-- END p256-s17-multilevel-selector-round19-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
