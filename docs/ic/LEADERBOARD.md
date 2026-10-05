@@ -122,6 +122,16 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 | F6-IC | `IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2` | 3.150 | 0.272 |
 | Matrix F5 | `IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5` | 61.937 | 3.118 |
 
+## F6-IC E_0 ladder in ecbench, outside tables A–C
+
+#1333's inherited-F4 and F6-IC decomposers ran unmodified in `ic.pipeline` beside same-target strong rho on eight public one-target workloads per size. IC `S` is a lower bound: the solver's word XORs are counted but unpriced, and F6-IC's geometric point additions are charged. The F6-IC word-XOR saving vanishes once the base exceeds #1333's 256-point closure cap; charging its geometry makes the trade a relabelling. Decision: not decidable: fewer than six targets completed at some size, or fewer than four sizes (m = 31 incomplete). Read the [analysis](../../research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json).
+
+| m | curve | targets | rho S | F4 S/rho (lower bound) | F6-IC S/rho (lower bound) | median log2(W4/W6) |
+|--:|:--|--:|--:|--:|--:|--:|
+| 13 | `icv1-f2m13-t181-515ee569` | 8 | 14.713 | 1.105 | 54.751 | 0.377 |
+| 19 | `icv1-f2m19-t797-b6cf2467` | 8 | 3.134 | 1.582 | 2090.849 | 0.433 |
+| 23 | `icv1-f2m23-t5197-69e76b73` | 8 | 1.046 | 2.091 | 2.721 | 0.000 |
+
 
 ## Sources
 
@@ -142,4 +152,5 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 - `research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json` — sha256 `bb4dd48030029d21…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
+- `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
 - `docs/curves/registry.json` — sha256 `25083c9cf2ac96f8…`
