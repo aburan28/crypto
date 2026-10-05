@@ -737,6 +737,10 @@ Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
 has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+To enumerate a prime-field curve's isogeny class, use the native walker
+`src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
+it emits these records and kernel-certified `IW1` routes, and `isogeny_walk
+verify` replays them.
 
 # Agent rules for IC measurements
 
