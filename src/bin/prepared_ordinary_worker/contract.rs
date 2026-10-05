@@ -396,7 +396,9 @@ mod tests {
         let p =
             std::env::temp_dir().join(format!("ordinary-contract-{label}-{}", std::process::id()));
         fs::create_dir(&p).unwrap();
-        p
+        // macOS TMPDIR may use /var, an alias of /private/var. Production
+        // execution records are canonical; the control must model that rule.
+        p.canonicalize().unwrap()
     }
     #[test]
     fn strict_configuration_and_compiled_identity_are_required() {
