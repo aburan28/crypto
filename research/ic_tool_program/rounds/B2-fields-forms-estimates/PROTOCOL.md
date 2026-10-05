@@ -317,6 +317,8 @@ None of it loosens a case: no case file changes.
 - **The chain** gains B4 after B3b, as B4's protocol declares.
 - **The arm carries one port commit:** `ic`'s estimates read each size
   by its ICV1 slug. Main's v1 and v2 baselines carry no `size` label.
-- **Measurements 6 and 7** (the estimate's error, `rho-bignum`'s step
-  cost) run once their native harness has landed (plan §10a).
+- **Measurements 6 and 7** run on `icprog b2`. `estimate` prices each
+  size's `M1-T01` translation at F2, and `stepcost` runs
+  `examples/rho_bignum_rate.rs`, built from B2's arm, once a width,
+  20,000 steps, isolated. `analyse` reads both.
 - **Nothing else changes:** the cases, the pins, the acceptance rules.
