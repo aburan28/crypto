@@ -1,0 +1,96 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/toy_p17_sat.json",
+  "input": {
+    "bytes": 278,
+    "blake3": "cf6352bb837e9ae6b78d923d62bb87bb5d91c9cca07f1c9a1e0c5a440c4f14e2"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "schema": "prime-field-smt.encoding/v1",
+    "logic": "QF_BV",
+    "relation": "finite P1 + P2 = target; x1,x2 < x_bound",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "declared_variables": 5,
+    "field_helpers": 3,
+    "addition_branches": 2,
+    "assertion_count": 10,
+    "canonical_range_constraints": true,
+    "widened_arithmetic": true,
+    "symmetry_breaking": "x1 < x2 for ordinary addition; x1 = x2 for doubling",
+    "canonical_instance_blake3": "c3abd6b3a84845829ba33e5c72e8d4cf9df839bb1fd6814c5c9c2b3aa6fafaf6",
+    "query_bytes": 1847,
+    "query_blake3": "706e8a3daee7658c11204828b17f2e363b677ad8f22387f458589a98a34da4ea"
+  },
+  "harness_binary_blake3": "a3a9c350667cd86d80c623d47000e0efa2986ffc1f085e5635b9d6065ca92385",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1/cvc5-Linux-x86_64-static/bin/cvc5",
+    "blake3_before": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "blake3_after": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=10000",
+      "research/prime_field_smt_20261005/results/toy_sat_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 10000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 51,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 75,
+      "blake3": "442b78183f9c4374a739b6dcf25dc7398c8f3e8fdf9921d0732a15ca3e787370"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "verified_sat",
+  "parsed": {
+    "status": "sat",
+    "witness": {
+      "x1": "0",
+      "y1": "6",
+      "x2": "3",
+      "y2": "1",
+      "lambda": "4"
+    }
+  },
+  "parse_error": null,
+  "verification": {
+    "schema": "prime-field-smt.verification/v1",
+    "branch": "ordinary",
+    "canonical_field_values": true,
+    "factor_base_bounds": true,
+    "symmetry": true,
+    "points_on_curve": true,
+    "encoded_branch_equations": true,
+    "independent_sum_finite": true,
+    "independent_sum_matches_target": true,
+    "lambda_matches_independent_addition": true,
+    "recomputed_sum": {
+      "x": "13",
+      "y": "10"
+    },
+    "verified": true
+  },
+  "accepted_sat": true,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

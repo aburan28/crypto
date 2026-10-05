@@ -249,6 +249,7 @@ pub mod pq_xl;
 pub mod prepared_control_archive;
 pub mod prepared_sat_control;
 pub mod preprocessing_rho;
+pub mod prime_field_smt;
 pub mod q_curve;
 pub mod quantum_estimator;
 pub mod quasi_subfield;

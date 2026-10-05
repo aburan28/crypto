@@ -1,0 +1,18 @@
+{
+  "schema": "prime-field-smt.instance/v1",
+  "curve": {
+    "p": "17",
+    "a": "2",
+    "b": "2"
+  },
+  "target": {
+    "x": "13",
+    "y": "10"
+  },
+  "x_bound": "4",
+  "source": {
+    "kind": "planted-control",
+    "decomposition": "(0,6) + (3,1)",
+    "lambda": "4"
+  }
+}

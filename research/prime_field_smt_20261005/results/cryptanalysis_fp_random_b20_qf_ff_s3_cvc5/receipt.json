@@ -1,0 +1,78 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/cryptanalysis_fp_random_b20.json",
+  "input": {
+    "bytes": 581,
+    "blake3": "14e9e04df5ca8e4e92d966059c2eff8a0de22c9a2af8ee5ad1b68753d57336e4"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 20,
+    "multiplication_bits": 40,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "abscissa_bits": 12,
+    "boolean_field_variables": 24,
+    "canonical_instance_blake3": "73dd66449fd6d55673e2f55e69086ebc4b8848c12e27b0c331d08ae4ce175cd6",
+    "complete_native_sign_lift_required": true,
+    "declared_field_variables": 26,
+    "exact_field_arithmetic": true,
+    "field_bits": 20,
+    "field_modulus": "630043",
+    "liftable_abscissae": 1996,
+    "liftable_abscissae_blake3": "6a128582978a5ab09e1c50e3750ebb23c3786e759ce876f26bd454595ce07374",
+    "logic": "QF_FF",
+    "membership_trie_nodes": 5927,
+    "query_blake3": "73372438127466fa54aa1dea1701a8d9f9e562ac3aca7a0233b707b94665d685",
+    "query_bytes": 125520,
+    "recommended_solver_option": "--ff-solver=split",
+    "relation": "S3(x1,x2,x_target)=0 with exact liftable factor-base x",
+    "schema": "prime-field-smt.s3-encoding/v1",
+    "symmetry_breaking": "exact bitwise x1 <= x2",
+    "x_values_scanned": 4096
+  },
+  "harness_binary_blake3": "aa771f284df39745f3cf43ca49f00e8815ff7cca9ea370485c65f025a1c29758",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1-gpl/cvc5-Linux-x86_64-static-gpl/bin/cvc5",
+    "blake3_before": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "blake3_after": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=120000",
+      "--ff-solver=split",
+      "research/prime_field_smt_20261005/results/cryptanalysis_fp_random_b20_qf_ff_s3_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 120000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 120028,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 42,
+      "blake3": "a4117586af5a17f3f3f1ad46a567b7ee1b10253d6a2d7877efdf64bf88aed5ca"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "unknown",
+  "parsed": {
+    "status": "unknown"
+  },
+  "parse_error": null,
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}
