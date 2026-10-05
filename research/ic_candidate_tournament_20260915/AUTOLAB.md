@@ -70,6 +70,14 @@ they do not dispatch a solver or establish preparation custody, natural yield,
 fresh qualification or performance. The external CMS target adapter and a new
 source-frozen one-use complete-solver controller remain pending. An old control
 registration or historical log table never supplies those gates.
+The [external SAT public-point source interface](goal_20260924/native-sat-target-boundary-v1/PROTOCOL.md)
+now derives cofactor-image logs from the checked columns, validates source models,
+performs full-point lifting and independently checks recovery inside the online
+interval. It requires start/completion callbacks for every attempted query,
+preserves failed rows and excludes failed completion from success. This is a
+callback source contract: actual accepted CryptoMiniSat execution, source-bound
+target custody/audit and fresh comparison remain pending. Native UNSAT is a
+claim awaiting geometric proof, and valid nonlifting models remain unresolved.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

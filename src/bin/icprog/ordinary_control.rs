@@ -685,6 +685,47 @@ fn verify_matrix(report: &Value, mathematics: &Value) -> Result<(), String> {
         "producer relation matrix/counts differ from independently reconstructed rows",
     )
 }
+fn verify_failed_sat_model(
+    outcome: &str,
+    indices: &Value,
+    checked: Result<Vec<bool>, String>,
+    curve: &super::oracle::Curve,
+    base: &[super::oracle::Point],
+    query: (u64, u64),
+) -> Result<(), String> {
+    require(
+        matches!(outcome, "invalid_model" | "nonlifting_model") && indices.is_null(),
+        "SAT model has incompatible outcome",
+    )?;
+    match checked {
+        Err(_) => require(
+            outcome == "invalid_model",
+            "invalid assignment mislabeled as nonlifting model",
+        ),
+        Ok(model) => {
+            require(
+                outcome == "nonlifting_model" && model.len() >= 51,
+                "valid assignment mislabeled as invalid model or too short",
+            )?;
+            let xs: [u64; 3] = std::array::from_fn(|i| {
+                (0..6).fold(0, |v, b| v | ((model[i * 6 + b] as u64) << b))
+            });
+            let lifts = base
+                .iter()
+                .filter(|p| p.is_some_and(|p| p.0 == xs[0]))
+                .any(|a| {
+                    base.iter()
+                        .filter(|p| p.is_some_and(|p| p.0 == xs[1]))
+                        .any(|b| {
+                            base.iter()
+                                .filter(|p| p.is_some_and(|p| p.0 == xs[2]))
+                                .any(|c| curve.add(curve.add(*a, *b), *c) == Some(query))
+                        })
+                });
+            require(!lifts, "claimed nonlifting source model actually lifts")
+        }
+    }
+}
 fn verify_cms_rows(
     root: &Path,
     execution: &Path,
@@ -830,30 +871,14 @@ fn verify_cms_rows(
                         )?;
                     }
                 } else {
-                    require(
-                        outcome == "invalid_model" && row["attempt"]["indices"].is_null(),
-                        "SAT model has incompatible outcome",
+                    verify_failed_sat_model(
+                        outcome,
+                        &row["attempt"]["indices"],
+                        checked,
+                        &curve,
+                        &base,
+                        p,
                     )?;
-                    if let Ok(model) = checked {
-                        let xs: [u64; 3] = std::array::from_fn(|i| {
-                            (0..6).fold(0, |v, b| v | ((model[i * 6 + b] as u64) << b))
-                        });
-                        let lifts =
-                            base.iter()
-                                .filter(|p| p.is_some_and(|p| p.0 == xs[0]))
-                                .any(|a| {
-                                    base.iter().filter(|p| p.is_some_and(|p| p.0 == xs[1])).any(
-                                        |b| {
-                                            base.iter()
-                                                .filter(|p| p.is_some_and(|p| p.0 == xs[2]))
-                                                .any(|c| {
-                                                    curve.add(curve.add(*a, *b), *c) == Some(p)
-                                                })
-                                        },
-                                    )
-                                });
-                        require(!lifts, "claimed invalid source model actually lifts")?;
-                    }
                 }
             }
             "SOURCE_UNSAT" => require(
@@ -1192,6 +1217,85 @@ pub fn audit(root: &Path, execution: &Path, expected: &str, out: &Path) -> Resul
 mod tests {
     use super::*;
     use std::path::PathBuf;
+    #[test]
+    fn source_gate_distinguishes_invalid_assignments_from_nonlifting_models() {
+        let fixture: Value = serde_json::from_str(include_str!("../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json")).unwrap();
+        let curve = super::super::oracle::Curve::new(
+            &super::super::json::parse(&fixture["certificate"]["inputs"]["fixture"].to_string())
+                .unwrap(),
+        )
+        .unwrap();
+        let base = fixture["record"]["factor_base"]["points"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| {
+                curve
+                    .decode(&super::super::json::parse(&p.to_string()).unwrap())
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+        let anf = include_str!("../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.anf");
+        let cnf = include_str!("../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/instance.xor.cnf");
+        let retained: Value = serde_json::from_str(include_str!("../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/sat-source-check/result.json")).unwrap();
+        let model = retained["cnf_assignment"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_bool().unwrap())
+            .collect::<Vec<_>>();
+        let mut stdout = "s SATISFIABLE\nv ".to_string();
+        for (i, &b) in model.iter().enumerate() {
+            stdout.push_str(&format!(
+                "{} ",
+                if b { i as i32 + 1 } else { -(i as i32 + 1) }
+            ));
+        }
+        stdout.push_str("0\n");
+        let checked = super::super::sat_source::verify_native_model(anf, cnf, &stdout).unwrap();
+        // This retained assignment really lifts to its original source point:
+        // neither invalid-model nor nonlifting-model is an admissible label.
+        for label in ["invalid_model", "nonlifting_model"] {
+            assert!(verify_failed_sat_model(
+                label,
+                &Value::Null,
+                Ok(checked.clone()),
+                &curve,
+                &base,
+                (62577, 27783)
+            )
+            .is_err());
+        }
+        assert!(verify_failed_sat_model(
+            "nonlifting_model",
+            &Value::Null,
+            Err("bad assignment".into()),
+            &curve,
+            &base,
+            (62577, 27783)
+        )
+        .is_err());
+        assert!(verify_failed_sat_model(
+            "invalid_model",
+            &Value::Null,
+            Err("bad assignment".into()),
+            &curve,
+            &base,
+            (62577, 27783)
+        )
+        .is_ok());
+        // Only the lift helper is tested on another query. Source equivalence
+        // for that different query is not asserted or scientifically admitted.
+        assert!(verify_failed_sat_model(
+            "nonlifting_model",
+            &Value::Null,
+            Ok(checked),
+            &curve,
+            &base,
+            curve.g
+        )
+        .is_ok());
+    }
     fn config() -> capsule::Config {
         capsule::Config {
             schema_version: 1,

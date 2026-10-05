@@ -39,6 +39,7 @@ enum Outcome {
     Incomplete,
     Unsupported,
     InvalidModel,
+    NonliftingModel,
     Unresolved,
     Timeout,
     TransportFailure,
@@ -575,6 +576,17 @@ mod tests {
         assert_eq!(matrix.dependent, 1);
         assert!(matrix.push(2, vec![0, 1, 2], vec![1, 0, 3], 65587).is_err());
         assert!(matrix.solve(65587).is_none());
+    }
+    #[test]
+    fn nonlifting_claim_is_inconclusive_and_cannot_contribute_a_relation() {
+        let mut value = retained();
+        value["attempts"][0]["outcome"] = json!("nonlifting_model");
+        let checked = audit(&value).unwrap();
+        assert_eq!(checked["ordinary_outcome_mix"]["nonlifting_model"], 1);
+        assert_eq!(checked["verified_witnesses"], 61);
+        assert_eq!(checked["source_bound_execution_admitted"], false);
+        value["attempts"][0]["indices"] = json!([0, 0, 0]);
+        assert!(audit(&value).is_err());
     }
     #[test]
     fn floats_unknown_fields_and_inconclusive_witnesses_do_not_admit() {

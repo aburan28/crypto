@@ -1,0 +1,63 @@
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-native-sat-target-boundary-20261004)
+    Finished `test` profile [unoptimized] target(s) in 11.78s
+     Running unittests src/bin/icprog.rs (/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/icprog-30e51a89c3fe902e)
+
+running 9 tests
+test ordinary_preparation::tests::changed_law_targets_geometry_witnesses_and_logs_are_rejected ... ok
+test ordinary_preparation::tests::cli_preserves_output_and_rejects_duplicate_struct_keys ... ok
+test ordinary_preparation::tests::floats_unknown_fields_and_inconclusive_witnesses_do_not_admit ... ok
+test ordinary_preparation::tests::keyed_query_law_matches_production_without_calling_it_in_audit ... ok
+test ordinary_preparation::tests::nonlifting_claim_is_inconclusive_and_cannot_contribute_a_relation ... ok
+test ordinary_preparation::tests::partial_full_rank_panel_stays_incomplete_and_failed_attempts_stay_rows ... ok
+test ordinary_preparation::tests::raw_duplicates_do_not_create_novel_rank_and_inconsistent_rows_fail ... ok
+test ordinary_preparation::tests::retained_rows_logs_and_negative_controls_replay_without_new_yield ... ok
+test ordinary_preparation::tests::target_free_producer_transcript_passes_independent_mathematical_gate ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 94 filtered out; finished in 0.27s
+

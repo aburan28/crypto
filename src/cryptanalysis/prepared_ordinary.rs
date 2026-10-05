@@ -238,14 +238,16 @@ fn sat_frontend(
                 let model = sat::parse_model(&output.native.stdout, count)?;
                 sat::verify_anf(&output.anf, &model[..51])?;
                 sat::verify_cnf(&output.cnf, &model)?;
-                context
-                    .lift_model(&model, point)
-                    .ok_or_else(|| "source model does not readd".to_string())
+                Ok::<_, String>(context.lift_model(&model, point))
             })();
             match checked {
-                Ok(witness) => {
+                Ok(Some(witness)) => {
                     indices = Some(witness);
                     "witness"
+                }
+                Ok(None) => {
+                    reason = Some("valid source assignment has no full-point lift; not a geometric negative proof".into());
+                    "nonlifting_model"
                 }
                 Err(e) => {
                     reason = Some(e);
@@ -627,6 +629,32 @@ mod tests {
         );
         assert_eq!(report["log_report"]["rejected_relations"], 1);
         assert_eq!(report["log_report"]["relations"], 0);
+    }
+    #[test]
+    fn nonlifting_model_stays_a_zero_row_and_does_not_stop_fixed_panel() {
+        let old = retained();
+        let mut observer = Observed::default();
+        let report = control(&plan(3), &mut observer, |t| {
+            let mut a = fixture_frontend(&old, t);
+            if t == 0 {
+                a.outcome = "nonlifting_model".into();
+                a.indices = None;
+                a.fatal = false;
+                a.evidence =
+                    json!({"kind":"synthetic-outcome-control-no-source-model-or-native-execution"});
+            }
+            Ok(a)
+        });
+        assert_eq!(report["panel_complete"], true);
+        assert_eq!(observer.starts.len(), 3);
+        assert_eq!(observer.records.len(), 3);
+        assert_eq!(
+            report["query_records"][0]["attempt"]["outcome"],
+            "nonlifting_model"
+        );
+        assert_eq!(report["log_report"]["relations"], 0);
+        assert!(report["stop_reason"].is_null());
+        assert_eq!(report["source_bound_execution_admitted"], false);
     }
     #[test]
     fn full_panel_failure_is_count_complete_but_never_runtime_admitted() {
