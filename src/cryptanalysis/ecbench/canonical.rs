@@ -130,9 +130,100 @@ pub fn derive_u64(domain: &str, parts: &[u64]) -> u64 {
     u64::from_be_bytes(d[..8].try_into().expect("eight bytes"))
 }
 
+/// A 128-bit value derived like [`derive_u64`], for scalars on curves whose
+/// subgroup order does not fit a word.  `parts` are decimal strings, so a
+/// wide order enters the hash exactly; the first sixteen digest bytes are
+/// the value.
+pub fn derive_u128(domain: &str, parts: &[String]) -> u128 {
+    let v = serde_json::json!({"domain": domain, "parts": parts});
+    let d = sha256(canonical(&v).expect("strings only").as_bytes());
+    u128::from_be_bytes(d[..16].try_into().expect("sixteen bytes"))
+}
+
+/// Serde for a `u128` that is written as a JSON number while it fits a
+/// `u64` and as a decimal string above that.  Every record and identity
+/// written before wide curves existed therefore serialises byte for byte
+/// as it did; a wide subgroup order or scalar, which `serde_json` cannot
+/// hold as a number, becomes a string.  Reading accepts either form.
+pub mod compat_u128 {
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S: Serializer>(v: &u128, s: S) -> Result<S::Ok, S::Error> {
+        match u64::try_from(*v) {
+            Ok(small) => s.serialize_u64(small),
+            Err(_) => s.serialize_str(&v.to_string()),
+        }
+    }
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Either {
+        Number(u64),
+        Text(String),
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<u128, D::Error> {
+        match Either::deserialize(d)? {
+            Either::Number(n) => Ok(u128::from(n)),
+            Either::Text(t) => t.parse().map_err(de::Error::custom),
+        }
+    }
+
+    /// The same for an `Option<u128>`; `None` is `null`.
+    pub mod option {
+        use serde::{Deserialize, Deserializer, Serializer};
+
+        pub fn serialize<S: Serializer>(v: &Option<u128>, s: S) -> Result<S::Ok, S::Error> {
+            match v {
+                Some(x) => super::serialize(x, s),
+                None => s.serialize_none(),
+            }
+        }
+
+        pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<u128>, D::Error> {
+            #[derive(Deserialize)]
+            struct Wrap(#[serde(with = "super")] u128);
+            Ok(Option::<Wrap>::deserialize(d)?.map(|w| w.0))
+        }
+    }
+
+    /// A `u128` as a `serde_json::Value` under the same rule.
+    pub fn value(v: u128) -> serde_json::Value {
+        match u64::try_from(v) {
+            Ok(small) => serde_json::Value::from(small),
+            Err(_) => serde_json::Value::from(v.to_string()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compat_u128_is_a_number_below_two_to_the_64_and_a_string_above() {
+        #[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+        struct T {
+            #[serde(with = "compat_u128")]
+            a: u128,
+            #[serde(with = "compat_u128::option")]
+            b: Option<u128>,
+        }
+        let narrow = T {
+            a: 21044858204113,
+            b: Some(852941048852),
+        };
+        let text = serde_json::to_string(&narrow).unwrap();
+        assert_eq!(text, r#"{"a":21044858204113,"b":852941048852}"#);
+        assert_eq!(serde_json::from_str::<T>(&text).unwrap(), narrow);
+        let wide = T {
+            a: 2417851639230796216685689,
+            b: None,
+        };
+        let text = serde_json::to_string(&wide).unwrap();
+        assert_eq!(text, r#"{"a":"2417851639230796216685689","b":null}"#);
+        assert_eq!(serde_json::from_str::<T>(&text).unwrap(), wide);
+    }
     use serde_json::json;
 
     #[test]

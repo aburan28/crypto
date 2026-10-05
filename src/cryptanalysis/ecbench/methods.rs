@@ -533,7 +533,13 @@ impl SolverStats {
 /// What a solve reports.  The runner adds verification and timing.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct SolveReport {
-    pub recovered: Option<u64>,
+    /// The candidate logarithm, unverified.  Wide enough for a subgroup
+    /// order past `2^64`; written as a number while it fits a `u64`.
+    #[serde(
+        default,
+        with = "crate::cryptanalysis::ecbench::canonical::compat_u128::option"
+    )]
+    pub recovered: Option<u128>,
     /// The budget ran out before an answer.
     pub exhausted: bool,
     pub phases: Vec<PhaseRecord>,
@@ -594,7 +600,7 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
 fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
-        recovered: out.recovered,
+        recovered: out.recovered.map(u128::from),
         exhausted: out.exhausted,
         phases: vec![
             ops_phase("setup", out.setup),
@@ -644,7 +650,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
     counters.insert("walks".into(), res.walks);
     counters.insert("distinguished_points".into(), res.distinguished_points);
     SolveReport {
-        recovered: res.recovered,
+        recovered: res.recovered.map(u128::from),
         exhausted: res.recovered.is_none(),
         total_gae: res.gae,
         automorphisms_used: res.automorphisms,
@@ -915,7 +921,7 @@ fn solve_claw(
         "expected_s_law": "(c + 1/c)/√n with c = table_scale, from a hit probability of 2nM/r per query at two additions each; finite base support and duplicate classes not modelled",
     });
     Ok(SolveReport {
-        recovered: o.recovered,
+        recovered: o.recovered.map(u128::from),
         exhausted: o.exhausted,
         phases: vec![
             ops_phase("base", o.base),
@@ -1037,7 +1043,7 @@ fn solve_strong(
         counters.insert(k.to_string(), v);
     }
     Ok(SolveReport {
-        recovered: Some(o.scalar),
+        recovered: Some(u128::from(o.scalar)),
         exhausted: false,
         total_gae: setup.gae + search.gae,
         phases: vec![setup, search],
@@ -1173,7 +1179,7 @@ fn ic_report(
         "framework_total_gae_before_solver_removal": rep.total_gae,
     });
     SolveReport {
-        recovered: rep.recovered,
+        recovered: rep.recovered.map(u128::from),
         exhausted: rep.exhausted,
         phases,
         total_gae: total,
@@ -1452,7 +1458,7 @@ fn solve_shared_rank(
         .targets
         .first()
         .ok_or("shared rank returned no target")?;
-    let recovered = row.recovered_log;
+    let recovered = row.recovered_log.map(u128::from);
     let phases = vec![
         phase_of("factor_base", &report.rank.base),
         phase_of("oracle_setup", &report.rank.table),
@@ -1605,7 +1611,7 @@ mod shared_rank_tests {
             19,
         )
         .unwrap();
-        assert_eq!(report.recovered, Some(113 % binary.r));
+        assert_eq!(report.recovered, Some(u128::from(113 % binary.r)));
         assert_eq!(report.factor_base.as_ref().unwrap().columns, 4);
         assert!(report
             .unpriced

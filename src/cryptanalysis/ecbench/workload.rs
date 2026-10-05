@@ -16,7 +16,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::cryptanalysis::ecbench::canonical::{bare_id, derive_u64};
+use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128, derive_u64};
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
     BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
@@ -181,9 +181,14 @@ pub struct CurveFacts {
     pub field_degree: Option<u32>,
     /// Bits of the field characteristic for prime curves.
     pub field_bits: Option<u32>,
-    pub group_order: u64,
-    pub r: u64,
-    pub cofactor: u64,
+    /// Orders as `u128` for wide curves; a value that fits a `u64` is
+    /// written as the number it always was (`canonical::compat_u128`).
+    #[serde(with = "compat_u128")]
+    pub group_order: u128,
+    #[serde(with = "compat_u128")]
+    pub r: u128,
+    #[serde(with = "compat_u128")]
+    pub cofactor: u128,
     /// Generator coordinates as lower-case hex.
     pub generator: [String; 2],
     /// Automorphisms a generic algorithm may use: 2 (negation), or `2n`
@@ -216,14 +221,14 @@ fn parse_hex(s: &str) -> Option<u64> {
 
 /// `(ec1, curve_uid)` of the representation with this subgroup and
 /// generator.
-fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(String, String)> {
+fn matching_representation(entry: &Value, r: u128, gx: u64, gy: u64) -> Option<(String, String)> {
     entry
         .get("representations")?
         .as_array()?
         .iter()
         .find_map(|rep| {
             let c = rep.get("curve")?;
-            let order: u64 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
+            let order: u128 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
             let g = c.get("generator")?.as_array()?;
             let x = parse_hex(g.first()?.as_str()?)?;
             let y = parse_hex(g.get(1)?.as_str()?)?;
@@ -238,10 +243,10 @@ fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(S
 }
 
 impl Instance {
-    pub fn r(&self) -> u64 {
+    pub fn r(&self) -> u128 {
         match self {
-            Instance::Prime(i) => i.r,
-            Instance::Binary(i) => i.r,
+            Instance::Prime(i) => u128::from(i.r),
+            Instance::Binary(i) => u128::from(i.r),
         }
     }
 
@@ -279,7 +284,7 @@ impl Instance {
         let entry = registry_entry(&id.slug);
         let rep = entry
             .as_ref()
-            .and_then(|e| matching_representation(e, r, gx, gy));
+            .and_then(|e| matching_representation(e, u128::from(r), gx, gy));
         CurveFacts {
             slug: id.slug,
             icv1: id.icv1,
@@ -287,9 +292,9 @@ impl Instance {
             construction: spec.call(),
             field_degree: degree,
             field_bits: bits,
-            group_order: order,
-            r,
-            cofactor: h,
+            group_order: u128::from(order),
+            r: u128::from(r),
+            cofactor: u128::from(h),
             generator: [format!("0x{gx:x}"), format!("0x{gy:x}")],
             automorphisms_available: aut,
             registered: entry.is_some(),
@@ -301,8 +306,11 @@ impl Instance {
     /// `[k]G` as hex coordinates, computed by the instance's own counted
     /// double-and-add on a ledger nobody reads.  Used to build the
     /// target and, separately, to verify an answer.
-    pub fn mul_generator_hex(&self, k: u64) -> Option<[String; 2]> {
+    pub fn mul_generator_hex(&self, k: u128) -> Option<[String; 2]> {
         let mut scratch = GroupOps::default();
+        // A one-word instance's subgroup order fits a word, so a reduced
+        // scalar does too.
+        let k = u64::try_from(k % self.r()).ok()?;
         match self {
             Instance::Prime(i) => {
                 let p = i.curve.mul(&mut scratch, i.generator_point(), k);
@@ -333,7 +341,9 @@ impl Instance {
         let model = model_hash(curve);
         let mut scratch = GroupOps::default();
         for counter in 0..10_000u64 {
-            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, curve.r, seed, index, counter]);
+            // One-word curves only: their order fits the law's u64 parts.
+            let r = u64::try_from(curve.r).ok()?;
+            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, r, seed, index, counter]);
             let flip = (h >> 63) & 1 == 1;
             match self {
                 Instance::Prime(i) => {
@@ -408,12 +418,30 @@ impl TargetKind {
     }
 }
 
+/// The planted-scalar law for a subgroup order past `2^64`: the same
+/// inputs, hashed as decimal strings, with a 128-bit draw.  A one-word
+/// order keeps [`TARGET_LAW`], so every existing workload is unchanged.
+pub const TARGET_LAW_WIDE: &str = "uniform_scalar_sha256_v2";
+
 /// `k ∈ [1, r−1]` for target `index` under `target_seed`.
-pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u64 {
+pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u128 {
     // The curve's model hash and subgroup enter the derivation, so the
     // same seed on two curves gives unrelated scalars.
     let model = model_hash(curve);
-    1 + derive_u64(TARGET_LAW, &[model, curve.r, target_seed, index]) % (curve.r - 1)
+    match u64::try_from(curve.r) {
+        Ok(r) => u128::from(1 + derive_u64(TARGET_LAW, &[model, r, target_seed, index]) % (r - 1)),
+        Err(_) => {
+            let parts = [model, target_seed, index].map(|v| v.to_string());
+            let parts = [
+                parts[0].clone(),
+                curve.r.to_string(),
+                parts[1].clone(),
+                parts[2].clone(),
+            ];
+            // The modulo bias of a 128-bit draw over r < 2^127 is below 2^-1.
+            1 + derive_u128(TARGET_LAW_WIDE, &parts) % (curve.r - 1)
+        }
+    }
 }
 
 /// One built single-target workload.
@@ -433,7 +461,8 @@ pub struct Workload {
     /// The planted `k` with `Q = [k]G`, for a planted target.  Not in the
     /// identity (the target point is) and never passed to a solver.
     /// `None` for a public target, whose logarithm nobody knows.
-    pub planted: Option<u64>,
+    #[serde(default, with = "compat_u128::option")]
+    pub planted: Option<u128>,
     /// The hash counter that landed a public target in the subgroup.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_counter: Option<u64>,

@@ -320,7 +320,7 @@ pub fn audit_with(
         }
         // Re-check the answer here.
         let inst = p.instance(ex.workload);
-        let rec: Option<u64> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
+        let rec: Option<u128> = r.outcome.recovered.as_deref().and_then(|s| s.parse().ok());
         let target_ok = rec.map(|k| inst.mul_generator_hex(k).as_ref() == Some(&w.target));
         let planted_ok = w.planted.and_then(|p| rec.map(|k| k == p));
         if target_ok != r.outcome.matches_target || planted_ok != r.outcome.matches_planted {
