@@ -279,3 +279,35 @@ the reversible patch SHA-256 is
 `fcc8ede0500335b78d3d35eab3433e1395de908c84c3f6d87b67a5ddf7245147`.
 The protocol SHA-256 is
 `ef1025d16ef06ac79615fe8de3f4e4094b3d28f47bba524c33521e295ac76a27`.
+
+## Rejected stored-negative pair sums
+
+The [negated-sum protocol](NEGATED_SUM_PROTOCOL.md) tested storing `-(P_i+P_j)`
+once at index construction and recovering its pair indexes from row offsets
+only if a query lookup matched. This removed the per-query negation vector.
+The candidate passed the n=83 exact closure tests and matched all baseline
+no-witness outcomes and pair counts, but failed the registered query gate and
+was reverted. Its reversible [patch archive](negated_candidate.patch.gz)
+is retained (`gunzip -c` to inspect or apply).
+
+| Usable points | Build baseline / candidate | Query baseline / candidate | Peak RSS baseline / candidate |
+| ---: | ---: | ---: | ---: |
+| 258 | 20.178 / 35.972 ms (medians) | 16.962 / 19.491 ms (medians) | unmeasured |
+| 1,048 | 359.280 / 447.505 ms (medians) | 339.875 / 405.034 ms (medians) | unmeasured |
+| 4,054 | 8.549 / 8.386 s (single runs) | 6.137 / 6.583 s (single runs) | 2,678,407,168 / 2,542,632,960 bytes |
+
+The [small baseline](negated_baseline_small.jsonl),
+[small candidate](negated_candidate_small.jsonl),
+[full baseline](negated_baseline_full.jsonl), and
+[full candidate](negated_candidate_full.jsonl) preserve all observations.
+Full-base memory fell by 5.1%, but the full query was 7.3% slower rather
+than at least 10% faster. Both smaller query medians regressed, and their
+build timings showed substantial host variation. These unisolated timings
+do not support a controlled CPU claim. The retained source SHA-256 is
+`7cae9b6c9610bfe17cb0c16e053b616971fdff3a91748e1fc6a41c12b2499a60`,
+the candidate source SHA-256 was
+`12f2e1df4df01d6e4f88c0e139d1a19ce3eb5fba3a3bff8d0e58283413241c3a`,
+the reversible patch SHA-256 is
+`262aff030ebf0addecd9b296621231a7e622fd4d8e0e8cd0dbf0669544bca25c`,
+and the protocol SHA-256 is
+`f00c8eaf287b4c0bc0e04ce08a29d58f78aea39ef01c59e0075406a00bbb5ffb`.
