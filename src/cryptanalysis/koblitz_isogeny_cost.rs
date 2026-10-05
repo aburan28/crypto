@@ -380,6 +380,12 @@ pub struct IcCostOptions {
     /// draws `l` linearly independent elements of `F_{2^n}` from seed `s`,
     /// so the presentation can be varied independently of the curve.
     pub basis_seed: Option<u64>,
+    /// With `basis_seed = Some(s)`, draw `V = θ·⟨1, g, …, g^{l−1}⟩` for
+    /// seeded `θ, g` instead of a random basis.  Such `V` have
+    /// `dim span(V·V) ≤ 2l − 1`, which is what makes the monomial subspace
+    /// cheap (`subspace-structure-20261004.md`).  `false` reproduces every
+    /// committed run.
+    pub geometric_basis: bool,
 }
 
 impl Default for IcCostOptions {
@@ -399,6 +405,7 @@ impl Default for IcCostOptions {
             cofactor_tolerant: false,
             full_group_probes: false,
             basis_seed: None,
+            geometric_basis: false,
         }
     }
 }
@@ -817,7 +824,10 @@ pub fn measure_member(
     let mut rng = StdRng::seed_from_u64(opts.seed ^ (a6 << 1) ^ ((n as u64) << 40));
 
     // ── the factor base: abscissae in V, folded by cofactor projection ──
-    let basis: Vec<F2mElement> = factor_base_basis(n, opts.l, opts.basis_seed);
+    let basis: Vec<F2mElement> = match opts.basis_seed {
+        Some(seed) if opts.geometric_basis => geometric_basis(n, opts.l, seed, &me.irr),
+        seed => factor_base_basis(n, opts.l, seed),
+    };
     let st = FieldStructure::new(n, &me.irr);
 
     let mut entry_of: HashMap<u64, BaseEntry> = HashMap::new();
@@ -1137,6 +1147,25 @@ pub fn factor_base_basis(n: u32, l: u32, seed: Option<u64>) -> Vec<F2mElement> {
             echelon.sort_unstable_by(|a, b| b.cmp(a));
             out.push(to_element(v, n));
         }
+    }
+    out
+}
+
+/// `θ·⟨1, g, …, g^{l−1}⟩` for seeded `θ, g ∉ F_2`.  Independent for prime
+/// `n ≥ l`, since `g` then has degree `n` over `F_2`.
+pub fn geometric_basis(n: u32, l: u32, seed: u64, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+    let mut rng = StdRng::seed_from_u64(seed ^ 0x6e0 ^ ((n as u64) << 32));
+    let mut nz = || loop {
+        let v = rng.gen::<u64>() & ((1u64 << n) - 1);
+        if v > 1 {
+            break to_element(v, n);
+        }
+    };
+    let (theta, g) = (nz(), nz());
+    let mut out = vec![theta];
+    while out.len() < l as usize {
+        let next = out.last().unwrap().mul(&g, irr);
+        out.push(next);
     }
     out
 }
@@ -1747,6 +1776,59 @@ mod tests {
         );
         let b = factor_base_basis(n, 5, Some(11));
         assert_eq!(b.len(), 5);
+    }
+
+    #[test]
+    fn geometric_basis_has_small_doubling_and_solves_soundly() {
+        // dim span(V·V) ≤ 2l − 1 for V = θ·⟨1, g, …⟩, against ≈ min(l², n)
+        // for a random V; and the instrument still recovers the secret.
+        let span_dim = |vals: Vec<u64>| {
+            let mut ech: Vec<u64> = Vec::new();
+            for v in vals {
+                let mut x = v;
+                for &e in &ech {
+                    x = x.min(x ^ e);
+                }
+                if x != 0 {
+                    ech.push(x);
+                    ech.sort_unstable_by(|a, b| b.cmp(a));
+                }
+            }
+            ech.len()
+        };
+        let products = |b: &[F2mElement], irr: &IrreduciblePoly| {
+            let mut v = Vec::new();
+            for x in b {
+                for y in b {
+                    v.push(from_element(&x.mul(y, irr)));
+                }
+            }
+            v
+        };
+        let (n, l) = (31, 6);
+        let irr = field_for(n).expect("field");
+        let g = geometric_basis(n, l, 3, &irr);
+        assert_eq!(span_dim(g.iter().map(from_element).collect()), l as usize);
+        assert!(span_dim(products(&g, &irr)) <= 2 * l as usize - 1);
+        let r = factor_base_basis(n, l, Some(3));
+        assert!(span_dim(products(&r, &irr)) > 2 * l as usize - 1);
+
+        let n = 13;
+        let irr = field_for(n).expect("field");
+        let (a2, _, _) = preferred_family(n).expect("family");
+        let opts = IcCostOptions {
+            l: 5,
+            m: 2,
+            max_trials: 4_000,
+            ffd_targets: 4,
+            full_group_probes: true,
+            basis_seed: Some(5),
+            geometric_basis: true,
+            ..Default::default()
+        };
+        let row = measure_member(n, &irr, a2, 1, &opts).expect("member");
+        assert_eq!(row.inconsistent_relations, 0);
+        assert!(row.verified, "IC and BSGS disagreed over a geometric V");
     }
 
     #[test]
