@@ -37,23 +37,38 @@ and that "a projective evaluation of the 5-5-7 chain in a real library is
 the measurement that would settle the number"; this directory is that
 measurement.
 
+**Success condition** (declared in advance): measured ratio baseline/GLV
+> 1 for the `5·5·7` arm, with the median and the minimum of both arms on
+the same side (both ratio columns above 1), and every correctness check
+passing.  **Stop condition**: one benchmark run of the stated size.
+
 ## Frozen inputs
 
 | file | sha256 | content |
 |:--|:--|:--|
-| `frozen_inputs/cryptopro_b_chain_5_5_7.constants.json` | `3ad2ca805b7181cc8c183852d42b3bbbf0b4fa7bfe9a098f1173b2f3eeb59ade` | the degree-175 chain `5·5·7` (element `4 + ω`): curve, kernel polynomials `ψ`, numerators `N`, `M`, codomain coefficients per step, `iso_u`, `λ`, the LLL-reduced GLV basis, the Babai bound, four test vectors |
-| `frozen_inputs/cryptopro_b_chain_5_31.constants.json` | `de3ea720d37cdb3c46e4560d848b10be49496de715bf983ea5cc3a9a932a5272` | the degree-155 chain `5·31` (element `ω`), same fields |
+| `frozen_inputs/cryptopro_b_chain_5_5_7.constants.json` | `3ad2ca805b7181cc8c183852d42b3bbbf0b4fa7bfe9a098f1173b2f3eeb59ade` | the degree-175 chain `5·5·7` (element `4 + ω`, matched on points as `-5 + ω`): curve, kernel polynomials `ψ`, numerators `N`, `M`, codomain coefficients per step, `iso_u`, `λ`, the LLL-reduced GLV basis, the Babai bound, four test vectors |
+| `frozen_inputs/cryptopro_b_chain_5_31.constants.json` | `de3ea720d37cdb3c46e4560d848b10be49496de715bf983ea5cc3a9a932a5272` | the degree-155 chain `5·31` (element `ω`, matched as `-ω`), same fields |
 | `frozen_inputs/SHA256SUMS` | — | the two hashes above, `sha256sum -c` form |
 
 The constants were generated and verified outside this repository (the
 autoresearcher's `export_chain_constants.py` / `emit_rust_constants.py`;
 Python provenance, kept as frozen input per `AGENTS.md`).  The Rust module
 `src/ecc/cryptopro_b_chain_consts.rs` was emitted from those two JSON files
-and copied here **unchanged**; its header records both hashes.  Every field
-element in it is a canonical little-endian `[u64; 4]` (not Montgomery form)
-and polynomials are listed low-degree first.  The curve parameters come from
-the existing `CurveParams::gost_cryptopro_b()` in `src/ecc/curve_zoo.rs`;
-the tests check the frozen `p, a, b, n` against it.
+and copied here **unchanged except for one added line**,
+`#![cfg_attr(rustfmt, rustfmt::skip)]`, so that the generated layout passes
+the PR-scoped rustfmt check without being reformatted; its header records
+both hashes.  Every field element in it is a canonical little-endian
+`[u64; 4]` (not Montgomery form) and polynomials are listed low-degree
+first.  The curve parameters come from the existing
+`CurveParams::gost_cryptopro_b()` in `src/ecc/curve_zoo.rs`; the tests check
+the frozen `p, a, b, n` against it.
+
+Each JSON names its chain by an element but also records the element the
+composite was matched to on points (`matched_element`: `(-5, 1)` and
+`(0, -1)`).  The tests confirm that `λ` is the eigenvalue of the *matched*
+element — `λ² + 9λ + 175 ≡ 0` and `λ² + λ + 155 ≡ 0 (mod n)` respectively,
+and `λ₁₇₅ + λ₁₅₅ + 5 ≡ 0` — which is `4 + ω` up to sign and conjugation,
+same norm, same cost.
 
 Nothing in this directory was computed by Python; the benchmark, the
 arithmetic, the decomposition and every check are Rust in the crate.
@@ -127,18 +142,108 @@ arm equals the baseline, that the baseline equals the crate's textbook
 each chain, and that every decomposition satisfies `k1 + k2·λ ≡ k (mod n)`
 within the Babai bound; the exit status is non-zero if any check fails.
 
-**Success condition** (declared in advance): measured ratio baseline/GLV
-> 1 for the `5·5·7` arm, with the median and the minimum of both arms on
-the same side (both ratio columns above 1), and every correctness check
-passing.  **Stop condition**: one benchmark run of the stated size.
-
 ## Results
 
-**Pending** — the measured run has not been executed yet; this section is filled by a follow-up commit from the run itself.
+One run, as declared.  Unit: **nanoseconds per scalar multiplication** (per
+operation for the stage-diagnostic rows), `w = 5`, `M = 256`, `R = 20`,
+seed `20261005`.  The table below is the bench's own output
+([`bench_w5.stdout.md`](bench_w5.stdout.md), verbatim rows; the full record
+with every per-round value is [`bench_w5.json`](bench_w5.json)).
+
+| arm | class | ns per scalar multiplication, median of 20 rounds | min of 20 rounds | ratio baseline/arm (median) | ratio baseline/arm (min) | correctness |
+|:--|:--|--:|--:|--:|--:|:--|
+| baseline: width-5 NAF (affine odd-multiple table, mixed additions) | reference | 111158 | 107220 | 1.000 | 1.000 | baseline == textbook BigUint reference on all 256 pairs: yes |
+| GLV-2 total via chain 5·5·7 (element 4 + 1 w, degree 175): decomposition + phi(P) + interleaved width-5 NAF | engineering | 88759 | 80199 | 1.252 | 1.337 | GLV == baseline on all 256 pairs: yes |
+| stage diagnostic: decomposition alone, basis of chain 5·5·7 (num-bigint Babai rounding) | stage diagnostic | 1006 | 875 | — (stage) | — (stage) | k1 + k2·λ ≡ k (mod n) and |k1|,|k2| ≤ 128 bits on all 256 scalars: yes |
+| stage diagnostic: phi(P) alone, chain 5·5·7 (element 4 + 1 w, degree 175; projective Horner, no inversion) | stage diagnostic | 4269 | 3841 | — (stage) | — (stage) | phi(P) == λ·P on all 256 points: yes |
+| GLV-2 total via chain 5·31 (element 0 + 1 w, degree 155): decomposition + phi(P) + interleaved width-5 NAF | engineering | 91799 | 84544 | 1.211 | 1.268 | GLV == baseline on all 256 pairs: yes |
+| stage diagnostic: decomposition alone, basis of chain 5·31 (num-bigint Babai rounding) | stage diagnostic | 1007 | 863 | — (stage) | — (stage) | k1 + k2·λ ≡ k (mod n) and |k1|,|k2| ≤ 128 bits on all 256 scalars: yes |
+| stage diagnostic: phi(P) alone, chain 5·31 (element 0 + 1 w, degree 155; projective Horner, no inversion) | stage diagnostic | 9510 | 8479 | — (stage) | — (stage) | phi(P) == λ·P on all 256 points: yes |
+| A/A control: the baseline arm timed again as a separate arm (identical code and inputs; its ratio to the baseline is the noise floor) | A/A control | 118769 | 108890 | 0.936 | 0.985 | same routine as the baseline, so baseline == textbook BigUint reference on all 256 pairs: yes |
+
+All correctness checks passed (the bench prints `all correctness checks
+passed: yes` and exits 0).
+
+**Verdict against the declared success condition: met.**  Baseline/GLV for
+the `5·5·7` chain is 1.252 on the medians and 1.337 on the minima, both
+above 1, every check passing.  The A/A control puts the noise floor of a
+median ratio at about 6 % (0.936) and of a minimum ratio at about 1.5 %
+(0.985); the GLV ratios clear both.  Per-round spread (max/min − 1 over the
+20 rounds, from the JSON): baseline 14.7 %, GLV `5·5·7` 18.7 %, GLV `5·31`
+19.9 %, A/A 15.0 %, `φ(P)` rows about 20 %, the sub-microsecond
+decomposition rows 41–55 %; the medians are the robust statistic, the minima
+the least-contended one.
+
+**Against the modelled 1.45×: short of it.**  Measured 1.25–1.34 against a
+modelled 1.45.  A formula-derived count for *this* implementation (derived
+from the formulas and the expected `256/(w+1) ≈ 43` non-zero wNAF digits,
+counting `S` as `M` because `mont_sqr` is `mont_mul` here; not a
+measurement) puts the baseline at roughly 2 940 M-equivalents (table 120,
+batch conversion with its 264-M Fermat inversion 318, 255 doublings 2 040,
+≈ 42 mixed additions 462) and the `5·5·7` GLV arm at roughly 2 240 plus the
+measured 1.0 µs decomposition (chain ≈ 128, two tables 240, batch of
+sixteen 374, 128 doublings 1 024, ≈ 43 mixed additions 473), a ratio near
+1.30, which is where the measurement sits.  The implied 37.8 ns per
+M-equivalent also predicts `φ(P)` at ≈ 4.8 µs for `5·5·7` (128
+M-equivalents) and ≈ 10.3 µs for `5·31` (≈ 272, the degree-31 step's
+polynomials have degrees 15, 31 and 45), against 4.27 µs and 9.51 µs
+measured.  What compresses the modelled 1.45 is therefore accounted for by
+costs the model prices differently or not at all: the inversion both arms
+pay (≈ 9 % of the baseline), the second table and larger batch the GLV arm
+pays, and a projective chain at ≈ 128 M against the model's 53 M in affine
+Kohel form.  None of this is a measurement of the model; it is the
+reconciliation a reader would otherwise have to do.
+
+**Secondary expectation (`5·5·7` beats `5·31`): consistent, not
+separately established.**  The `φ(P)` stage rows measure the chains directly:
+4.27 µs against 9.51 µs (medians), the degree-155 chain costing 2.2× more to
+evaluate, as the model's ordering says.  The two *total* arms differ by
+3.0 µs on the medians and 4.3 µs on the minima, inside the ≈ 6 % A/A band
+on 90 µs, so the totals alone do not separate the two chains; the stage
+rows do.
+
+The decomposition stage is about 1.0 µs, ≈ 1 % of the GLV total, even with
+`num-bigint`; the precomputed-constant rounding trick would not change the
+verdict.
 
 ## Class
 
-**Pending** — filled by the follow-up commit that lands the run.
+**engineering** (`AGENTS.md` §3): same problem, same curve, same
+arithmetic; a constant factor on `k·P`.  No boundary moves, nothing is
+exponent-moving, and this is a constructive measurement, not an attack, so
+there is no `S` row and no scoreboard entry to update.
+
+## Host, build and isolation
+
+* Host: `Intel(R) Xeon(R) Processor @ 2.10GHz`, a cloud virtual machine with
+  4 logical CPUs (`cpu_flags_of_interest`: `pclmulqdq sse4_2 popcnt aes avx
+  bmi1 avx2 bmi2 avx512f adx`), kernel `6.18.44-fc-v70`, Linux x86-64.  The
+  bench's own host line says `logical cpus: 1` because it ran pinned to
+  CPU 3 and `available_parallelism` reports the affinity mask; the
+  isolation record says 4.
+* Build: `rustc 1.97.0 (2d8144b78 2026-07-07)`, `release` profile, no
+  `target-cpu` flags; the crate's generic const-generic `U256::mont_mul`.
+* Commit at run time: `e1df564168943f7d03f9462503feb63b218fa392`.  The
+  record says `git_dirty: true` only because the run's own three output
+  files were untracked at that moment; `git diff HEAD` was empty (no tracked
+  file differed from that commit), and the outputs were committed next.
+* Isolation (`AGENTS.md` §10): run through the native `isolated_bench run`
+  (`src/bin/isolated_bench.rs`), which took the benchmark lock, moved every
+  movable thread off CPU 3, pinned the bench there and recorded the
+  conditions in [`isolated_bench_record.jsonl`](isolated_bench_record.jsonl):
+  `contended: false`, other processes used 0.12 CPU-seconds during the
+  2.9 s run (the agent runtime `claude[96]` 0.11 of it), 33 involuntary
+  context switches, no major faults, PSI `some avg10` 0.03 before and 0.02
+  after.  The first attempt, with the tool's default budget of 0.10 CPUs for
+  other processes, was refused (`other processes used 0.80 CPU s in 5.0 s
+  (limit 0.50)`), the excess being the agent runtime itself, which cannot be
+  stopped from inside the session; the run was admitted with
+  `--max-other-cpu 0.5`.  Both the refusal and the admitted run's numbers
+  are recorded above.  The VM's host neighbours and CPU frequency are
+  outside the tool's reach, which is what the A/A row measures.
+* One hardware class only: Linux x86-64 on this VM.  Not measured on Arm64
+  (Apple silicon, Graviton), on any other x86-64 host, or with any
+  vectorised or assembly field arithmetic.
 
 ## Honesty notes
 
@@ -148,23 +253,51 @@ passing.  **Stop condition**: one benchmark run of the stated size.
   This is a measurement harness; nothing here is for secret scalars.
 * **Unoptimised pieces.**  The field multiplication is the crate's generic
   const-generic schoolbook `U256::mont_mul` (no dedicated squaring, no
-  assembly); the decomposition is `num-bigint`; the chain uses no special
-  case for `Z = 1` in the first step.  Both arms share the first point, so
-  the ratio is what it is on this arithmetic; a faster field would change
-  both arms' absolute numbers and could move the ratio either way, since the
-  decomposition is a fixed cost that does not scale with the field.
-* **One machine, one hardware class.**  See the host line of the run.  A
-  shared virtual CPU on a cloud container; expect ±5–10 % residual wall
-  noise, which is what the A/A control row measures.  Not measured on Arm64
-  or on any other x86-64 host.
+  assembly); the field inversion is Fermat with the sparse exponent `p - 2`
+  (256 squarings, 8 multiplications); the decomposition is `num-bigint`; the
+  chain has no special case for `Z = 1` in the first step.  Both arms share
+  the field, so the ratio is what it is on this arithmetic; a faster field
+  would change both arms' absolute numbers and could move the ratio either
+  way, since the decomposition is a fixed cost that does not scale with the
+  field.
 * **Wall time, not operation counts.**  The unit is nanoseconds per scalar
   multiplication because that is what the hypothesis is about; the field
   operation count of each arm is fixed by the formulas above and does not
-  depend on the host.
+  depend on the host.  The counts quoted under "Results" are derived, and
+  labelled so.
+* **Not an ICV1-registered curve.**  The curve is named by its published
+  standard name (RFC 4357 CryptoPro-B), which `AGENTS.md` §11 allows; it is
+  not in `docs/curves/registry.json`, and registering it is a separate
+  change outside this PR's scope.
 
 ## Commands
 
-**Pending** — filled by the follow-up commit that lands the run.
+Exactly what was run, in this order, on branch
+`cryptopro-b-glv-chain-20261005` at commit `e1df5641`:
+
+```sh
+cargo test --release --lib cryptopro_b            # 32 passed, 0 failed
+cargo build --release --bin cryptopro-b-glv-bench --bin isolated_bench
+
+# refused by the isolation tool (agent runtime above the 0.10-CPU budget):
+target/release/isolated_bench run --wait --cpus 3 --settle 5 \
+  --label cryptopro-b-glv-bench-w5 \
+  --out research/cryptopro_b_glv_chain_20261005/isolated_bench_record.jsonl -- \
+  target/release/cryptopro-b-glv-bench --pairs 256 --rounds 20 --w 5 --seed 20261005 \
+  --json research/cryptopro_b_glv_chain_20261005/bench_w5.json
+
+# the run reported above:
+target/release/isolated_bench run --wait --cpus 3 --settle 5 --max-other-cpu 0.5 \
+  --label cryptopro-b-glv-bench-w5 \
+  --out research/cryptopro_b_glv_chain_20261005/isolated_bench_record.jsonl -- \
+  target/release/cryptopro-b-glv-bench --pairs 256 --rounds 20 --w 5 --seed 20261005 \
+  --json research/cryptopro_b_glv_chain_20261005/bench_w5.json \
+  > research/cryptopro_b_glv_chain_20261005/bench_w5.stdout.md
+```
+
+`cargo run --release --bin cryptopro-b-glv-bench -- --pairs 256 --rounds 20
+--w 5 --seed 20261005 --json out.json` reproduces the same inputs and
+checks on any host; the timings are the host's.
 
 ## Files
 
@@ -175,7 +308,7 @@ passing.  **Stop condition**: one benchmark run of the stated size.
 | `bench_w5.json` | the full JSON record of the run (times per round, host, build, correctness) |
 | `bench_w5.stdout.md` | the bench's standard output, verbatim |
 | `isolated_bench_record.jsonl` | the `isolated_bench` conditions record of the run |
-| `src/ecc/cryptopro_b_chain_consts.rs` | the constants module (copied unchanged) |
+| `src/ecc/cryptopro_b_chain_consts.rs` | the constants module (copied unchanged but for the rustfmt-skip line) |
 | `src/ecc/cryptopro_b_field.rs` | the Montgomery-form field |
-| `src/ecc/cryptopro_b_point.rs` | Jacobian arithmetic, wNAF, the chain, the decomposition, both arms |
+| `src/ecc/cryptopro_b_point.rs` | Jacobian arithmetic, wNAF, the chains, the decomposition, both arms |
 | `src/bin/cryptopro_b_glv_bench.rs` | the benchmark |
