@@ -12,7 +12,7 @@ use crypto_lib::cryptanalysis::p256_dickson_factor_base::CURVE_SLUG;
 use crypto_lib::ecc::CurveParams;
 use crypto_lib::hash::sha256;
 use num_traits::ToPrimitive;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 const P: u64 = 1151;
 const A: u64 = P - 3;
@@ -21,6 +21,7 @@ const TERMINALS: [u64; 2] = [0, 369];
 const CELLS_PER_CLASS: usize = 4;
 const MAX_DEGREE: u32 = 8;
 const BUDGET_SECS: u64 = 20;
+const ROUND9_SHA256: &str = "44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a";
 
 #[derive(Parser)]
 #[command(about = "Compare balanced S5 F4 with exact liftability specialisation")]
@@ -28,6 +29,9 @@ struct Cli {
     /// Compact deterministic JSON output; stdout when omitted.
     #[arg(long)]
     out: Option<PathBuf>,
+    /// Run the round-10 atomized replay from this hash-pinned round-9 result.
+    #[arg(long)]
+    atomize_round9: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -150,7 +154,7 @@ impl Pol {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct F4Run {
     arm: String,
     variables: usize,
@@ -166,7 +170,7 @@ struct F4Run {
     field_ops: u64,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct StagedRun {
     positive: bool,
     correct: bool,
@@ -182,7 +186,7 @@ struct StagedRun {
     image_sha256: String,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct CellResult {
     boundaries: [u64; 4],
     expected_positive: bool,
@@ -192,14 +196,14 @@ struct CellResult {
     staged: StagedRun,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct BoundaryRecord {
     boundary: u64,
     liftable_x: Vec<u64>,
     signed_points: usize,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct TerminalResult {
     terminal: u64,
     boundaries: Vec<BoundaryRecord>,
@@ -210,7 +214,7 @@ struct TerminalResult {
     cells: Vec<CellResult>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct ExperimentResult {
     schema: String,
     curve: String,
@@ -223,6 +227,77 @@ struct ExperimentResult {
     max_degree: u32,
     budget_seconds_per_arm_cell: u64,
     terminal_results: Vec<TerminalResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomReference {
+    affine: bool,
+    identity: bool,
+    full: bool,
+    signed_tuples: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomRun {
+    x: [u64; 4],
+    reference: AtomReference,
+    identity_chart_positive: bool,
+    identity_s3_checks: u64,
+    identity_chart_correct: bool,
+    affine_f4: F4Run,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomizedStagedRun {
+    positive: bool,
+    correct: bool,
+    pair_image_solves: u64,
+    join_solves: u64,
+    roots_returned: u64,
+    index_lookups: u64,
+    field_multiplications: u64,
+    left_identity: bool,
+    right_identity: bool,
+    identity_index_checks: u64,
+    witness_chart: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomizedCellResult {
+    boundaries: [u64; 4],
+    expected_positive: bool,
+    atoms: usize,
+    signed_tuples: usize,
+    affine_positive: bool,
+    identity_positive: bool,
+    combined_positive: bool,
+    false_negative: bool,
+    false_positive: bool,
+    atom_runs: Vec<AtomRun>,
+    staged: AtomizedStagedRun,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomizedTerminalResult {
+    terminal: u64,
+    target: [u64; 2],
+    parent_cells: usize,
+    atomized_subcomponents: usize,
+    signed_tuples: usize,
+    cells: Vec<AtomizedCellResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct AtomizedExperimentResult {
+    schema: String,
+    curve: String,
+    prime: u64,
+    a: u64,
+    b: u64,
+    round9_sha256: String,
+    max_degree: u32,
+    budget_seconds_per_atom: u64,
+    terminal_results: Vec<AtomizedTerminalResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -823,7 +898,292 @@ fn run_terminal(
     })
 }
 
-fn run(cli: Cli) -> Result<(), String> {
+fn s3_value(x: u64, y: u64, z: u64, b: u64) -> u64 {
+    let q = mulm(x, y);
+    let sum = addm(x, y);
+    let difference = subm(x, y);
+    let first = mulm(mulm(z, z), mulm(difference, difference));
+    let inner = addm(mulm(sum, addm(q, A)), mulm(2, b));
+    let second = negm(mulm(mulm(2, z), inner));
+    let third = subm(mulm(subm(q, A), subm(q, A)), mulm(mulm(4, b), sum));
+    addm(addm(first, second), third)
+}
+
+fn atom_reference(
+    xs: [u64; 4],
+    target: Affine,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> AtomReference {
+    let point_sets: Vec<Vec<Affine>> = xs
+        .into_iter()
+        .map(|x| {
+            square_roots[curve_rhs(x, b) as usize]
+                .iter()
+                .map(|&y| Affine { x, y })
+                .collect()
+        })
+        .collect();
+    let mut affine = false;
+    let mut identity = false;
+    let mut signed_tuples = 0;
+    for &p1 in &point_sets[0] {
+        for &p2 in &point_sets[1] {
+            for &p3 in &point_sets[2] {
+                for &p4 in &point_sets[3] {
+                    signed_tuples += 1;
+                    let left = add_points(Point::Affine(p1), Point::Affine(p2));
+                    let right = add_points(Point::Affine(p3), Point::Affine(p4));
+                    let sum = add_points(left, right);
+                    if sum != Point::Affine(target) && sum != Point::Affine(negate(target)) {
+                        continue;
+                    }
+                    if left == Point::Infinity || right == Point::Infinity {
+                        identity = true;
+                    } else {
+                        affine = true;
+                    }
+                }
+            }
+        }
+    }
+    AtomReference {
+        affine,
+        identity,
+        full: affine || identity,
+        signed_tuples,
+    }
+}
+
+fn identity_chart(xs: [u64; 4], target_x: u64, b: u64) -> (bool, u64) {
+    let mut positive = false;
+    let mut checks = 0;
+    if xs[0] == xs[1] {
+        checks += 1;
+        positive |= s3_value(xs[2], xs[3], target_x, b) == 0;
+    }
+    if xs[2] == xs[3] {
+        checks += 1;
+        positive |= s3_value(xs[0], xs[1], target_x, b) == 0;
+    }
+    (positive, checks)
+}
+
+fn atomized_staged_run(
+    leaves: [&[u64]; 4],
+    target_x: u64,
+    b: u64,
+    expected_positive: bool,
+) -> AtomizedStagedRun {
+    let mut field = CountedField::default();
+    let mut pair_image_solves = 0;
+    let mut roots_returned = 0;
+    let left_image = image(
+        leaves[0],
+        leaves[1],
+        b,
+        &mut field,
+        &mut pair_image_solves,
+        &mut roots_returned,
+    );
+    let right_image = image(
+        leaves[2],
+        leaves[3],
+        b,
+        &mut field,
+        &mut pair_image_solves,
+        &mut roots_returned,
+    );
+    let left_identity = leaves[0].iter().any(|x| leaves[1].contains(x));
+    let right_identity = leaves[2].iter().any(|x| leaves[3].contains(x));
+    let mut join_solves = 0;
+    let mut index_lookups = 0;
+    let mut witness_chart = None;
+    for &left in &left_image {
+        join_solves += 1;
+        let (qa, qb, qc) = coefficients(&mut field, left, target_x, b);
+        let roots = solve_quadratic(&mut field, qa, qb, qc);
+        roots_returned += roots.len as u64;
+        for &right in &roots.roots[..roots.len] {
+            index_lookups += 1;
+            if witness_chart.is_none() && right_image.contains(&right) {
+                witness_chart = Some("affine-affine".into());
+            }
+        }
+    }
+    let mut identity_index_checks = 0;
+    if left_identity {
+        identity_index_checks += 1;
+        if witness_chart.is_none() && right_image.contains(&target_x) {
+            witness_chart = Some("left-identity".into());
+        }
+    }
+    if right_identity {
+        identity_index_checks += 1;
+        if witness_chart.is_none() && left_image.contains(&target_x) {
+            witness_chart = Some("right-identity".into());
+        }
+    }
+    let positive = witness_chart.is_some();
+    AtomizedStagedRun {
+        positive,
+        correct: positive == expected_positive,
+        pair_image_solves,
+        join_solves,
+        roots_returned,
+        index_lookups,
+        field_multiplications: field.multiplications,
+        left_identity,
+        right_identity,
+        identity_index_checks,
+        witness_chart,
+    }
+}
+
+fn run_atomized_terminal(
+    terminal: &TerminalResult,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<AtomizedTerminalResult, String> {
+    let x_by_boundary: BTreeMap<u64, Vec<u64>> = terminal
+        .boundaries
+        .iter()
+        .filter(|record| !record.liftable_x.is_empty())
+        .map(|record| (record.boundary, record.liftable_x.clone()))
+        .collect();
+    let target = Affine {
+        x: terminal.target[0],
+        y: terminal.target[1],
+    };
+    let mut atomized_subcomponents = 0;
+    let mut terminal_signed_tuples = 0;
+    let mut cells = Vec::new();
+    for parent in &terminal.cells {
+        let roots = [
+            &x_by_boundary[&parent.boundaries[0]],
+            &x_by_boundary[&parent.boundaries[1]],
+            &x_by_boundary[&parent.boundaries[2]],
+            &x_by_boundary[&parent.boundaries[3]],
+        ];
+        let mut atom_runs = Vec::new();
+        let mut affine_positive = false;
+        let mut identity_positive = false;
+        let mut signed_tuples = 0;
+        for &x1 in roots[0] {
+            for &x2 in roots[1] {
+                for &x3 in roots[2] {
+                    for &x4 in roots[3] {
+                        let xs = [x1, x2, x3, x4];
+                        let reference = atom_reference(xs, target, b, square_roots);
+                        let (identity_chart_positive, identity_s3_checks) =
+                            identity_chart(xs, target.x, b);
+                        let singleton = [[x1], [x2], [x3], [x4]];
+                        let leaves = [
+                            singleton[0].as_slice(),
+                            singleton[1].as_slice(),
+                            singleton[2].as_slice(),
+                            singleton[3].as_slice(),
+                        ];
+                        let (equations, n) = specialised_system(leaves, target.x, b)?;
+                        let affine_f4 = run_f4("atomized-affine", &equations, n, reference.affine);
+                        affine_positive |= !affine_f4.inconsistent;
+                        identity_positive |= identity_chart_positive;
+                        signed_tuples += reference.signed_tuples;
+                        atom_runs.push(AtomRun {
+                            x: xs,
+                            identity_chart_correct: identity_chart_positive == reference.identity,
+                            identity_chart_positive,
+                            identity_s3_checks,
+                            reference,
+                            affine_f4,
+                        });
+                    }
+                }
+            }
+        }
+        let combined_positive = affine_positive || identity_positive;
+        let leaves = [
+            roots[0].as_slice(),
+            roots[1].as_slice(),
+            roots[2].as_slice(),
+            roots[3].as_slice(),
+        ];
+        let staged = atomized_staged_run(leaves, target.x, b, parent.expected_positive);
+        atomized_subcomponents += atom_runs.len();
+        terminal_signed_tuples += signed_tuples;
+        cells.push(AtomizedCellResult {
+            boundaries: parent.boundaries,
+            expected_positive: parent.expected_positive,
+            atoms: atom_runs.len(),
+            signed_tuples,
+            affine_positive,
+            identity_positive,
+            combined_positive,
+            false_negative: parent.expected_positive && !combined_positive,
+            false_positive: !parent.expected_positive && combined_positive,
+            atom_runs,
+            staged,
+        });
+    }
+    Ok(AtomizedTerminalResult {
+        terminal: terminal.terminal,
+        target: terminal.target,
+        parent_cells: terminal.cells.len(),
+        atomized_subcomponents,
+        signed_tuples: terminal_signed_tuples,
+        cells,
+    })
+}
+
+fn run_atomized(round9_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round9_path).map_err(|error| error.to_string())?;
+    let round9_sha256 = hex::encode(sha256(&bytes));
+    if round9_sha256 != ROUND9_SHA256 {
+        return Err(format!(
+            "round-9 SHA-256 mismatch: expected {ROUND9_SHA256}, got {round9_sha256}"
+        ));
+    }
+    let round9: ExperimentResult =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    if round9.schema != "p256.dickson_balanced_s5_degree/v1"
+        || round9.curve != CURVE_SLUG
+        || round9.prime != P
+        || round9.a != A
+        || round9.depth != DEPTH
+        || round9.terminals != TERMINALS
+        || round9.terminal_results.len() != TERMINALS.len()
+        || round9
+            .terminal_results
+            .iter()
+            .any(|terminal| terminal.cells.len() != 2 * CELLS_PER_CLASS)
+    {
+        return Err("round-9 header or frozen cell count mismatch".into());
+    }
+    let square_roots = square_root_table();
+    let mut terminal_results = Vec::new();
+    for terminal in &round9.terminal_results {
+        terminal_results.push(run_atomized_terminal(terminal, round9.b, &square_roots)?);
+    }
+    let result = AtomizedExperimentResult {
+        schema: "p256.dickson_atomized_s5_degree/v1".into(),
+        curve: CURVE_SLUG.into(),
+        prime: P,
+        a: A,
+        b: round9.b,
+        round9_sha256,
+        max_degree: MAX_DEGREE,
+        budget_seconds_per_atom: BUDGET_SECS,
+        terminal_results,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
+fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
     let p256 = CurveParams::p256();
     let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
     let square_roots = square_root_table();
@@ -845,11 +1205,18 @@ fn run(cli: Cli) -> Result<(), String> {
         terminal_results,
     };
     let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
-    match cli.out {
+    match out {
         Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
         None => print!("{text}"),
     }
     Ok(())
+}
+
+fn run(cli: Cli) -> Result<(), String> {
+    match cli.atomize_round9 {
+        Some(path) => run_atomized(&path, cli.out),
+        None => run_round9(cli.out),
+    }
 }
 
 fn main() -> ExitCode {

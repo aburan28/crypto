@@ -11819,6 +11819,32 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-balanced-s5-round9-20261004 -->
+<!-- BEGIN p256-atomized-s5-round10-20261004 -->
+<section class="panel" id="p256-atomized-s5-round10-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson four-summand atoms: exact charts, but 44 negatives remain degree 3 <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Closes every infinity-chart mismatch across 1,664 signed tuples and cuts terminal-369 F4 work 22.16&times;, but 44 of 96 affine atoms still require solving degree 3, so the degree-2 gate fails.</p>
+    <p>Round 10 splits every multi-root factor-base leaf into its exact stored x-coordinate, runs all 104 resulting affine F4 atoms, and unions them with explicit left/right point-at-infinity charts. An enhanced indexed-image control carries the same identity sentinels without F4.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>All affine atoms and identity charts match their signed references; units are not converted across F4, staged field arithmetic and group-law enumeration.</caption>
+    <thead><tr><th>Terminal</th><th>Arm</th><th>Parents / atoms</th><th>Correct</th><th>Max degree</th><th>Max columns</th><th>Field ops</th><th>FN / FP</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Round-9 specialised</td><td class="n">8 / 8</td><td class="n">6 / 8 cells</td><td class="n">2</td><td class="n">32</td><td class="n">7,768</td><td class="n">2 / 0</td><td><span class="chip">incomplete chart</span></td></tr>
+      <tr><td>0</td><td>Atomized + identity</td><td class="n">8 / 8</td><td class="n"><strong>8 / 8</strong></td><td class="n"><strong>2</strong></td><td class="n">32</td><td class="n">7,768</td><td class="n">0 / 0</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td>Round-9 specialised</td><td class="n">8 / 8</td><td class="n">7 / 8 cells</td><td class="n">3</td><td class="n">447</td><td class="n">3,011,675</td><td class="n">1 / 0</td><td><span class="chip">incomplete chart</span></td></tr>
+      <tr><td>369</td><td>Atomized + identity</td><td class="n">8 / 96</td><td class="n"><strong>96 / 96 atoms; 8 / 8 cells</strong></td><td class="n"><strong>3</strong></td><td class="n">67</td><td class="n">135,927</td><td class="n">0 / 0</td><td><span class="chip">rejected</span> degree gate</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact charts</span> all 104 affine F4 atoms and identity checks agree with 1,664 signed tuples; all three round-9 false negatives are recovered</span>
+    <span><span class="chip">degree histogram</span> terminal 0: 8 degree-2 atoms; terminal 369: 52 degree-2 and 44 degree-3 atoms</span>
+    <span><span class="chip">cost</span> terminal-369 atomization expands 8 parents to 96 atoms but uses 0.045133 of specialised F4 operations and 67 versus 447 maximum columns</span>
+    <span><span class="chip">next lever</span> atomize the fixed pair-image roots before the final join, charging the new image-component factor</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_atomized_s5_round10_20261004/RESULT.md</code>; deterministic result SHA-256 <code>1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93</code></span>
+  </div>
+</section>
+<!-- END p256-atomized-s5-round10-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
