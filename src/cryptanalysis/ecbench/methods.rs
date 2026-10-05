@@ -1116,12 +1116,16 @@ fn ic_report(
     let mut unpriced = Vec::new();
     let mut nondeterminism = Vec::new();
     // Solver work: run_pipeline prices it from this host's wall time,
-    // which is not a count.  Take it back out and list it unpriced.
+    // which is not a count.  Take it back out and list it unpriced.  The
+    // figure is rebuilt from the pre-solver phase, never by subtracting
+    // the wall term: `(x + w) - w` rounds `x` to `w`'s binade and so
+    // leaked host timing into the low bits of a "deterministic" record
+    // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
         if s.gae > 0.0 && s.priced_by != "pinned" {
-            phases[2].gae -= s.gae;
-            total -= s.gae;
+            phases[2].gae = rep.decomposition.gae_before_solver;
+            total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
         }
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
