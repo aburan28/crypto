@@ -424,15 +424,15 @@ mod tests {
 
     #[test]
     fn short_result_replays_and_tampering_fails() {
-        let task = task("pilot", "prefix", 2);
-        let certificate = generate(task.steps).unwrap();
+        let pilot = task("pilot", "prefix", 2);
+        let certificate = generate(pilot.steps).unwrap();
         let artifact = to_json_lines(&certificate).unwrap();
-        let result = build_result(&task, &artifact, &certificate).unwrap();
-        verify_result(&task, &result, &artifact, &certificate).unwrap();
+        let result = build_result(&pilot, &artifact, &certificate).unwrap();
+        verify_result(&pilot, &result, &artifact, &certificate).unwrap();
 
         let receipt =
-            CairnWalkReceipt::from_verified(&task, &result, &artifact, &certificate).unwrap();
-        receipt.validate(&task, &result).unwrap();
+            CairnWalkReceipt::from_verified(&pilot, &result, &artifact, &certificate).unwrap();
+        receipt.validate(&pilot, &result).unwrap();
         assert_eq!(receipt.claim_key(), format!("p256-isogeny-walk:{}", result.work_sha256));
 
         let relabelled = task("another-run", "another-task", 2);
@@ -455,7 +455,7 @@ mod tests {
         tampered
             .certificate_sha256
             .replace_range(0..1, replacement);
-        assert!(verify_result(&task, &tampered, &artifact, &certificate).is_err());
+        assert!(verify_result(&pilot, &tampered, &artifact, &certificate).is_err());
     }
 
     #[test]
