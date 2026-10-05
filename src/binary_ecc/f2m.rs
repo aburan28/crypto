@@ -457,6 +457,15 @@ impl F2mElement {
     pub fn mul(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
         debug_assert_eq!(self.m, other.m);
         let m = self.m;
+        #[cfg(target_arch = "aarch64")]
+        if n83_pmull_available(m, irreducible) {
+            let a = u128::from(self.bits[0]) | (u128::from(self.bits[1]) << 64);
+            let b = u128::from(other.bits[0]) | (u128::from(other.bits[1]) << 64);
+            // SAFETY: the exact polynomial and ARM64 AES/PMULL feature were
+            // checked above; both operands are reduced degree-83 elements.
+            let product = unsafe { n83_mul_packed(a, b) };
+            return Self::from_words(&[product as u64, (product >> 64) as u64], m);
+        }
         let nw = self.bits.len().max(other.bits.len());
         let mut out = Self::zero(m);
         with_scratch(2 * nw + 1, |prod| {
@@ -474,6 +483,14 @@ impl F2mElement {
     /// reduce mod `m(z)`.
     pub fn square(&self, irreducible: &IrreduciblePoly) -> Self {
         let m = self.m;
+        #[cfg(target_arch = "aarch64")]
+        if n83_pmull_available(m, irreducible) {
+            let a = u128::from(self.bits[0]) | (u128::from(self.bits[1]) << 64);
+            // SAFETY: the exact polynomial and ARM64 AES/PMULL feature were
+            // checked above; the operand is a reduced degree-83 element.
+            let square = unsafe { n83_square_packed(a) };
+            return Self::from_words(&[square as u64, (square >> 64) as u64], m);
+        }
         let nw = self.bits.len();
         let mut out = Self::zero(m);
         with_scratch(2 * nw + 1, |sq| {
@@ -494,6 +511,16 @@ impl F2mElement {
         let mut acc = self.clone();
         if k == 0 {
             return acc;
+        }
+        #[cfg(target_arch = "aarch64")]
+        if n83_pmull_available(self.m, irreducible) {
+            let mut value = u128::from(self.bits[0]) | (u128::from(self.bits[1]) << 64);
+            for _ in 0..k {
+                // SAFETY: the exact polynomial and ARM64 AES/PMULL feature
+                // were checked above. Every square stays reduced.
+                value = unsafe { n83_square_packed(value) };
+            }
+            return Self::from_words(&[value as u64, (value >> 64) as u64], self.m);
         }
         let nw = acc.bits.len();
         with_scratch(2 * nw + 1, |sq| {
@@ -764,6 +791,70 @@ unsafe fn clmul64_hw(a: u64, b: u64) -> (u64, u64) {
 unsafe fn clmul64_hw(a: u64, b: u64) -> (u64, u64) {
     let p = std::arch::aarch64::vmull_p64(a, b);
     (p as u64, (p >> 64) as u64)
+}
+
+#[cfg(target_arch = "aarch64")]
+const N83_MASK: u128 = (1u128 << 83) - 1;
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+fn n83_pmull_available(m: u32, irreducible: &IrreduciblePoly) -> bool {
+    m == 83
+        && irreducible.degree == 83
+        && irreducible.low_terms == [0, 1, 2, 45]
+        && std::arch::is_aarch64_feature_detected!("aes")
+}
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+fn n83_fold(value: u128) -> u128 {
+    let high = value >> 83;
+    (value & N83_MASK) ^ high ^ (high << 1) ^ (high << 2) ^ (high << 45)
+}
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+fn n83_reduce(low: u128, high: u128) -> u128 {
+    let upper = (low >> 83) ^ (high << 45);
+    let first = (low & N83_MASK) ^ upper ^ (upper << 1) ^ (upper << 2) ^ (upper << 45);
+    let result = n83_fold(n83_fold(first));
+    debug_assert_eq!(result & !N83_MASK, 0);
+    result
+}
+
+/// # Safety
+/// The caller must check ARM64 AES/PMULL support and the pinned field.
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn n83_mul_packed(a: u128, b: u128) -> u128 {
+    debug_assert_eq!((a | b) & !N83_MASK, 0);
+    let a0 = a as u64;
+    let a1 = (a >> 64) as u64;
+    let b0 = b as u64;
+    let b1 = (b >> 64) as u64;
+    let (p0_lo, p0_hi) = unsafe { clmul64_hw(a0, b0) };
+    let (c0_lo, c0_hi) = unsafe { clmul64_hw(a0, b1) };
+    let (c1_lo, c1_hi) = unsafe { clmul64_hw(a1, b0) };
+    let (p2_lo, p2_hi) = unsafe { clmul64_hw(a1, b1) };
+    let low_product = u128::from(p0_lo) | (u128::from(p0_hi) << 64);
+    let cross = u128::from(c0_lo ^ c1_lo) | (u128::from(c0_hi ^ c1_hi) << 64);
+    let high_product = u128::from(p2_lo) | (u128::from(p2_hi) << 64);
+    n83_reduce(low_product ^ (cross << 64), (cross >> 64) ^ high_product)
+}
+
+/// # Safety
+/// The caller must check ARM64 AES/PMULL support and the pinned field.
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn n83_square_packed(a: u128) -> u128 {
+    debug_assert_eq!(a & !N83_MASK, 0);
+    let (p0_lo, p0_hi) = unsafe { clmul64_hw(a as u64, a as u64) };
+    let a1 = (a >> 64) as u64;
+    let (p2_lo, p2_hi) = unsafe { clmul64_hw(a1, a1) };
+    n83_reduce(
+        u128::from(p0_lo) | (u128::from(p0_hi) << 64),
+        u128::from(p2_lo) | (u128::from(p2_hi) << 64),
+    )
 }
 
 /// Carry-less `64 × 64 → 128` without hardware support: a 4-bit
@@ -1071,6 +1162,54 @@ fn reduce_chunked(value: &mut [u64], irreducible: &IrreduciblePoly) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn n83_pmull_field_matches_independent_schoolbook() {
+        let irr = IrreduciblePoly {
+            degree: 83,
+            low_terms: vec![0, 1, 2, 45],
+        };
+        let mask = (1u128 << 83) - 1;
+        let check = |a: u128, b: u128| {
+            let lhs = F2mElement::from_biguint(&BigUint::from(a), 83);
+            let rhs = F2mElement::from_biguint(&BigUint::from(b), 83);
+            assert_eq!(lhs.mul(&rhs, &irr), lhs.schoolbook_mul(&rhs, &irr));
+            assert_eq!(lhs.square(&irr), lhs.schoolbook_mul(&lhs, &irr));
+        };
+        let edges = [0, 1, 1 << 45, 1 << 64, 1 << 82, (1 << 64) - 1, mask];
+        for a in edges {
+            for b in edges {
+                check(a, b);
+            }
+        }
+        let mut state = 0x93cd_b69f_47e2_180d_a54b_8c31_f739_62e1u128;
+        for _ in 0..10_000 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            let a = state & mask;
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            check(a, state & mask);
+        }
+        let nonzero = F2mElement::from_biguint(&BigUint::from(state & mask | 1), 83);
+        for k in [0, 1, 2, 7, 17, 82] {
+            let mut reference = nonzero.clone();
+            for _ in 0..k {
+                reference = reference.schoolbook_mul(&reference, &irr);
+            }
+            assert_eq!(nonzero.square_k_times(k, &irr), reference);
+        }
+        for _ in 0..32 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            let value = F2mElement::from_biguint(&BigUint::from(state & mask | 1), 83);
+            let inverse = value.flt_inverse(&irr).unwrap();
+            assert_eq!(value.schoolbook_mul(&inverse, &irr), F2mElement::one(83));
+        }
+    }
 
     /// Addition in `F_2^m` is XOR; verify on a small concrete case.
     #[test]
