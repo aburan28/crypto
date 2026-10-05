@@ -7,6 +7,17 @@ It answers whether the complete descendant-native 1,024-target batch is
 competitive with the strongest available same-point signed-Frobenius batched
 rho on this host. The primary one-target online IC/rho question is separate.
 
+Native-driver amendment, committed before the repeat panel: the first
+20-arm pilot used a Python process driver and audit script. Repository
+`AGENTS.md` disallows that execution path for research comparisons. Preserve
+that pilot's raw archive and source commit as historical provenance, but do
+not use its timings for this decision. Repeat the same frozen schedule and
+unchanged producer binaries with the Rust
+`examples/n37_native_batch_rho_panel.rs` driver. The Rust analyzer and
+published independent replay must validate the repeat panel. The new raw
+directory and receipt remain separate from the pilot; no pilot rows are
+selected or substituted into the repeat.
+
 Freeze repository parent `80a05cc22ade46e5ddd5918bb5a01da9d66c0d3c`
 and the three unchanged example sources:
 
