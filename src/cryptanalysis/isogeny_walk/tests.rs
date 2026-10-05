@@ -273,3 +273,96 @@ fn a_short_p224_walk_reverifies_from_its_records() {
     assert!(yaml.contains("schema_version: 1\nidentity_rule: sha256_sorted_key_compact_utf8_json_of_field_and_curve\ncurves:\n"));
     assert!(yaml.contains(&format!("  {}:\n", ids[1].slug)));
 }
+
+#[test]
+fn detectors_class_audits_and_queued_shards_agree() {
+    use super::queue;
+    let config = WalkConfig {
+        primes: vec![3, 11],
+        max_curves: 12,
+        ..WalkConfig::default()
+    };
+    let mut w = Walk::new(StartCurve::p224(), config).unwrap();
+    w.run();
+    w.run_class_audits(3);
+    let audits = w.class_audits.clone().unwrap().json();
+    let audits: serde_json::Value = serde_json::from_str(&audits).unwrap();
+    assert_eq!(audits["ecc_safety"]["all_pass"], true);
+    assert_eq!(audits["invariance_check"]["curves_sampled"], 3);
+    assert_eq!(audits["invariance_check"]["identical_to_root"], true);
+    assert_eq!(audits["pkm"]["solinas_weight"], 3);
+
+    let ids: Vec<_> = (0..w.nodes.len()).map(|i| w.node_ids(i)).collect();
+    let routes = RouteIndex::build(&w, &ids);
+    let text = w.routes_json(&ids, &routes).json();
+    // The root's detectors: P-224 is an a = -3 model with a valid generator.
+    let one = queue::run_shard(&text, &w.start, 0, 1, 0).unwrap();
+    let root: serde_json::Value = serde_json::from_str(one.jsonl.lines().next().unwrap()).unwrap();
+    assert_eq!(root["traits"]["a_minus_3_model"]["value"], true);
+    assert_eq!(root["traits"]["generator_valid"]["value"], true);
+    assert_eq!(root["traits"]["non_singular"]["value"], true);
+    assert_eq!(root["traits"]["coefficient_bits"]["value"]["a"], 2);
+    // The YAML records the same detectors.
+    let yaml = w.curves_yaml(&ids, &routes);
+    for name in [
+        "generator_valid",
+        "non_singular",
+        "coefficient_bits",
+        "qr_prefix_64",
+    ] {
+        assert!(yaml.contains(&format!("      {name}:\n")), "{name}");
+    }
+
+    // Three shards collect into exactly the single-shard output.
+    let base = std::env::temp_dir().join(format!("isogeny-walk-queue-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    let dirs: Vec<_> = (0..3)
+        .map(|i| {
+            let d = base.join(format!("shard{i}"));
+            let out = queue::run_shard(&text, &w.start, i, 3, 2).unwrap();
+            queue::write_shard(&d, &out).unwrap();
+            d
+        })
+        .collect();
+    let (merged, summary, class) = queue::collect(&dirs).unwrap();
+    assert_eq!(merged, one.jsonl);
+    assert!(class.is_some());
+    assert!(summary
+        .json()
+        .contains(&format!("\"curves\": {}", w.nodes.len())));
+    // A missing shard, a repeated shard and an edited shard are refused.
+    assert!(queue::collect(&dirs[..2]).is_err());
+    assert!(queue::collect(&[
+        dirs[0].clone(),
+        dirs[1].clone(),
+        dirs[1].clone(),
+        dirs[2].clone()
+    ])
+    .is_err());
+    let f = dirs[2].join(queue::TRAITS_FILE);
+    let edited = std::fs::read_to_string(&f)
+        .unwrap()
+        .replace("true", "false");
+    std::fs::write(&f, edited).unwrap();
+    assert!(queue::collect(&dirs).is_err());
+    let _ = std::fs::remove_dir_all(&base);
+
+    // Plans: one spec per shard, distinct keys, full shas only.
+    let pw = queue::PlanWalk {
+        curve_args: vec!["--curve".into(), "p224".into()],
+        walk_args: vec!["--primes".into(), "3,11".into()],
+    };
+    assert!(queue::plan(&pw, "main", "cpu", 2, 60).is_err());
+    let specs = queue::plan(&pw, &"a".repeat(40), "cpu", 2, 60).unwrap();
+    let keys: Vec<String> = specs
+        .iter()
+        .map(|s| {
+            serde_json::from_str::<serde_json::Value>(&s.json()).unwrap()["idempotency_key"]
+                .as_str()
+                .unwrap()
+                .to_string()
+        })
+        .collect();
+    assert_eq!(keys.len(), 2);
+    assert_ne!(keys[0], keys[1]);
+}

@@ -94,3 +94,49 @@ Walked curves get computed ICV1 slugs and EC1 identities but are not added
 to [`registry.json`](../registry.json); register a slug before citing it in
 prose (`AGENTS.md` §11).  The first runs are in
 [`research/isogeny_walk_20261004/`](../../../research/isogeny_walk_20261004/README.md).
+
+### Traits and queued detection
+
+Trait detection (`src/cryptanalysis/isogeny_walk/traits.rs`) has two
+scopes, because isogenous curves over `F_p` share `p`, `#E` and the trace.
+
+- **Class audits** depend only on `p` and `#E` and run once per walk, on
+  the root.  They are `ecc_safety`'s parameter audit, the structural report
+  (`p256_structural::curve_structural_report`) and the
+  Petit–Kosters–Messeng signals (`pkm_criterion`).  `walk.json#class_audits`
+  records them.  The two audits that read a model are re-run on a sample of
+  walked curves (`--class-audit-sample`, default 8), and
+  `invariance_check.identical_to_root` records whether every verdict
+  matched the root's.
+- **Curve detectors** (the `Detector` trait) read one curve's model and
+  generator.  Each writes one `trait_status` entry in `curves.yaml`.
+  - The built-in detectors are `non_singular`, `generator_valid`,
+    `a_minus_3_model`, `qr_prefix_64` and `coefficient_bits`.
+  - Add a detector to `default_detectors()` and every walk, shard and
+    queue job records it.
+
+Detection also runs as queued jobs, using `taskq` (`taskq/README.md`).
+
+```bash
+./target/release/isogeny_walk plan --curve p256 --max-ell 61 --max-curves 20000 \
+    --commit "$(git rev-parse HEAD)" --shards 16 --out specs/
+for f in specs/*.json; do taskq submit --spec "$f"; done
+# Fetch each task's artifacts into its own directory, then:
+./target/release/isogeny_walk collect --out traits/ shard-dirs/*
+```
+
+- **What each job does.** Each spec checks out the pinned commit, builds
+  the walker, and rebuilds the walk in its setup step.  The walk is
+  deterministic, so no shared storage is needed.  The job then runs
+  `isogeny_walk traits --shard i --of N` into `$TASKQ_OUTPUT_DIR`.
+- **Ownership.** A shard owns the curves with `index ≡ i (mod N)`.  It
+  writes `traits.jsonl`, `metrics.json` (taskq parses it into the run's
+  metrics) and, for shard 0, `class_audits.json`.
+- **Collecting.** `collect` merges the shards and refuses:
+  - a missing or repeated shard;
+  - a curve seen twice or not at all;
+  - shards built from different walks (the routes file's SHA-256 differs);
+  - a `traits.jsonl` that does not match its recorded hash.
+
+  It reports each trait's distribution in `collect.json`.
+- **Without a queue.** The same shards run locally in a loop.

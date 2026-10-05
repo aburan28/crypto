@@ -5,7 +5,19 @@
 //! isogeny_walk class  --curve p256 --max-ell 61
 //! isogeny_walk walk   --curve p256 --max-ell 13 --max-curves 1000 --out DIR
 //! isogeny_walk verify --curve p256 --dir DIR
+//! isogeny_walk traits --curve p256 --dir DIR --shard 0 --of 4 --out SHARD0
+//! isogeny_walk collect --out TRAITS SHARD0 SHARD1 SHARD2 SHARD3
+//! isogeny_walk plan   --curve p256 --max-ell 61 --max-curves 20000 \
+//!                     --commit <sha> --shards 16 --out SPECS
 //! ```
+//!
+//! `walk` also runs the class audits (`ecc_safety`, the structural report,
+//! the PKM signals) and every curve detector
+//! (`src/cryptanalysis/isogeny_walk/traits.rs`).  `traits` runs the
+//! detectors on one shard of an existing walk; `plan` writes one `taskq`
+//! task spec per shard (`taskq/README.md`, submit each with
+//! `taskq submit --spec FILE`), and `collect` merges and checks the
+//! shards.
 //!
 //! `walk` writes `curves.yaml` (the `docs/curves/ic/curves.yaml` format),
 //! `isogeny_routes.json` (nodes, kernel-certified edges and `IW1` routes)
@@ -17,6 +29,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
+use crypto_lib::cryptanalysis::isogeny_walk::queue::{self, PlanWalk};
 use crypto_lib::cryptanalysis::isogeny_walk::record::{sha256_hex, V};
 use crypto_lib::cryptanalysis::isogeny_walk::walk::{
     self, ClassInfo, EllKind, RouteIndex, StartCurve, Walk, WalkConfig,
@@ -66,7 +79,64 @@ enum Cmd {
         /// Also walk Atkin primes (they have no rational ℓ-isogeny).
         #[arg(long)]
         include_atkin: bool,
+        /// Walked curves on which the class audits are re-run to check that
+        /// their verdicts are the root's.
+        #[arg(long, default_value_t = 8)]
+        class_audit_sample: usize,
+        /// Skip the class audits.
+        #[arg(long)]
+        no_class_audits: bool,
         /// Output directory.
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Run the curve detectors on one shard of a walk directory.
+    Traits {
+        #[command(flatten)]
+        curve: CurveArgs,
+        /// A walk directory (its isogeny_routes.json is read).
+        #[arg(long)]
+        dir: PathBuf,
+        #[arg(long, default_value_t = 0)]
+        shard: usize,
+        #[arg(long, default_value_t = 1)]
+        of: usize,
+        /// Walked curves shard 0 re-audits with the class audits.
+        #[arg(long, default_value_t = 8)]
+        class_audit_sample: usize,
+        /// Output directory; default $TASKQ_OUTPUT_DIR.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Merge trait shard directories, refusing gaps, duplicates and mixed walks.
+    Collect {
+        #[arg(long)]
+        out: PathBuf,
+        dirs: Vec<PathBuf>,
+    },
+    /// Write one taskq task spec per trait shard of a walk.
+    Plan {
+        #[command(flatten)]
+        curve: CurveArgs,
+        #[command(flatten)]
+        primes: PrimeArgs,
+        #[arg(long, default_value_t = 256)]
+        max_curves: usize,
+        #[arg(long)]
+        max_depth: Option<usize>,
+        #[arg(long)]
+        include_atkin: bool,
+        /// Full commit sha the workers check out (must be pushed).
+        #[arg(long)]
+        commit: String,
+        #[arg(long, default_value = "cpu")]
+        queue: String,
+        #[arg(long, default_value_t = 4)]
+        shards: usize,
+        /// Per-shard run limit in seconds.
+        #[arg(long, default_value_t = 3600)]
+        timeout: u64,
+        /// Directory for the spec files.
         #[arg(long)]
         out: PathBuf,
     },
@@ -151,6 +221,34 @@ impl CurveArgs {
     }
 }
 
+impl CurveArgs {
+    /// The arguments that select this curve, for a planned command.
+    fn argv(&self) -> Vec<String> {
+        let mut v = vec!["--curve".to_string(), self.curve.clone()];
+        if self.curve == "custom" {
+            for (k, x) in [
+                ("--p", &self.p),
+                ("--a", &self.a),
+                ("--b", &self.b),
+                ("--order", &self.order),
+                ("--gx", &self.gx),
+                ("--gy", &self.gy),
+            ] {
+                if let Some(x) = x {
+                    v.extend([k.to_string(), x.clone()]);
+                }
+            }
+            v.extend([
+                "--cofactor".into(),
+                self.cofactor.to_string(),
+                "--name".into(),
+                self.name.clone(),
+            ]);
+        }
+        v
+    }
+}
+
 impl PrimeArgs {
     fn list(&self) -> Vec<u64> {
         match &self.primes {
@@ -185,6 +283,8 @@ fn run(cli: Cli) -> Result<(), String> {
             audit_points,
             threads,
             include_atkin,
+            class_audit_sample,
+            no_class_audits,
             out,
         } => {
             if let Some(t) = threads {
@@ -228,6 +328,9 @@ fn run(cli: Cli) -> Result<(), String> {
                 w.stats.phi_ms.iter().map(|x| x.1).collect::<Vec<_>>()
             );
             w.run();
+            if !no_class_audits {
+                w.run_class_audits(class_audit_sample);
+            }
             let ids: Vec<_> = (0..w.nodes.len()).map(|i| w.node_ids(i)).collect();
             let routes = RouteIndex::build(&w, &ids);
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
@@ -266,6 +369,89 @@ fn run(cli: Cli) -> Result<(), String> {
                     w.failures.len()
                 ))
             }
+        }
+        Cmd::Traits {
+            curve,
+            dir,
+            shard,
+            of,
+            class_audit_sample,
+            out,
+        } => {
+            let start = curve.start()?;
+            let out = out
+                .or_else(|| std::env::var_os("TASKQ_OUTPUT_DIR").map(PathBuf::from))
+                .ok_or("--out or TASKQ_OUTPUT_DIR is required")?;
+            let path = dir.join("isogeny_routes.json");
+            let text =
+                std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+            let shard_out = queue::run_shard(&text, &start, shard, of, class_audit_sample)?;
+            queue::write_shard(&out, &shard_out)?;
+            eprintln!(
+                "isogeny_walk: trait shard {shard}/{of} of {} written to {}",
+                path.display(),
+                out.display()
+            );
+            Ok(())
+        }
+        Cmd::Collect { out, dirs } => {
+            let (merged, summary, class) = queue::collect(&dirs)?;
+            std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
+            write(&out.join(queue::TRAITS_FILE), &merged)?;
+            write(&out.join("collect.json"), &summary.json())?;
+            if let Some(c) = class {
+                write(&out.join(queue::CLASS_FILE), &c)?;
+            }
+            print!("{}", summary.json());
+            Ok(())
+        }
+        Cmd::Plan {
+            curve,
+            primes,
+            max_curves,
+            max_depth,
+            include_atkin,
+            commit,
+            queue: queue_name,
+            shards,
+            timeout,
+            out,
+        } => {
+            curve.start()?;
+            let mut walk_args = vec![
+                "--primes".to_string(),
+                primes
+                    .list()
+                    .iter()
+                    .map(u64::to_string)
+                    .collect::<Vec<_>>()
+                    .join(","),
+                "--max-curves".into(),
+                max_curves.to_string(),
+            ];
+            if let Some(d) = max_depth {
+                walk_args.extend(["--max-depth".into(), d.to_string()]);
+            }
+            if include_atkin {
+                walk_args.push("--include-atkin".into());
+            }
+            let plan_walk = PlanWalk {
+                curve_args: curve.argv(),
+                walk_args,
+            };
+            let specs = queue::plan(&plan_walk, &commit, &queue_name, shards, timeout)?;
+            std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
+            for (i, spec) in specs.iter().enumerate() {
+                write(
+                    &out.join(format!("shard-{i:04}-of-{shards:04}.json")),
+                    &spec.json(),
+                )?;
+            }
+            eprintln!(
+                "isogeny_walk: {shards} taskq specs in {}; submit each with `taskq submit --spec FILE`",
+                out.display()
+            );
+            Ok(())
         }
         Cmd::Verify {
             curve,
