@@ -80,7 +80,9 @@ use crate::cryptanalysis::koblitz_groebner::{
     echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask, monomials_up_to_mask,
     pack_rows, rref_f2_counted,
 };
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::pq_groebner_f2::{
+    cmp_mono, sort_masks_descending, F2BoolMono, F2BoolPoly,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -397,6 +399,190 @@ impl Draft {
 thread_local! {
     /// Full-width staging for [`ReducedBasis::rewrite`], zero between uses.
     static STAGING: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
+    /// Open-addressing slots for [`odd_terms`], and the call's stamp: a
+    /// slot is live only if its high half is the current stamp, and then
+    /// its low half is `k + 1` for the `k`-th distinct monomial seen.  The
+    /// stamp spares clearing the table on every call.
+    static ODD_SLOTS: RefCell<(Vec<u64>, u32)> = const { RefCell::new((Vec::new(), 0)) };
+}
+
+/// The completion rows of one specialisation, gathered before the layout
+/// grows to hold them.
+///
+/// A product `t·p` has the terms `m ∪ t` of odd multiplicity, and the
+/// rows of one generator share most of their monomials, many of them new
+/// to the layout.  Each occurrence is hashed once, to a batch-local id;
+/// a row's parity is taken on one bit per id, and whether a monomial is in
+/// the layout is asked once per distinct monomial.  The rows, their order
+/// and the monomials added to the layout are exactly those of multiplying
+/// out each row, cancelling, and extending the layout by every monomial of
+/// a kept row that it lacks.
+#[derive(Default)]
+struct CompletionBatch {
+    /// Monomial → id.
+    ids: MaskMap<u32>,
+    /// Per id: the monomial, its column in the layout the batch was
+    /// gathered against (`DELETED` if absent), and whether a kept row
+    /// holds it.
+    monos: Vec<u64>,
+    old_column: Vec<u32>,
+    used: Vec<bool>,
+    /// One parity bit per id, zero between rows.
+    parity: Vec<u64>,
+    /// The ids of the row being gathered, with repeats.
+    scratch: Vec<u32>,
+    /// The kept rows: the ids of their terms, in order of first occurrence.
+    rows: Vec<Vec<u32>>,
+}
+
+impl CompletionBatch {
+    /// Gather the row with terms `monos` (repeats cancelling in pairs)
+    /// against the layout `index`; kept only if something survives.
+    fn push_row(&mut self, monos: impl ExactSizeIterator<Item = u64>, index: &MaskMap<usize>) {
+        self.scratch.clear();
+        let len = monos.len();
+        self.scratch.reserve(len);
+        self.monos.reserve(len);
+        self.old_column.reserve(len);
+        self.used.reserve(len);
+        for m in monos {
+            let next = self.monos.len() as u32;
+            let id = *self.ids.entry(m).or_insert(next);
+            if id == next {
+                self.monos.push(m);
+                self.old_column
+                    .push(index.get(&m).map_or(DELETED, |&c| c as u32));
+                self.used.push(false);
+                if id as usize / 64 >= self.parity.len() {
+                    self.parity.push(0);
+                }
+            }
+            self.parity[id as usize / 64] ^= 1u64 << (id % 64);
+            self.scratch.push(id);
+        }
+        // Emit each odd id at its first occurrence and clear its bit; the
+        // even ones are already clear.
+        let mut row = Vec::with_capacity(len);
+        for &id in &self.scratch {
+            let (w, bit) = (id as usize / 64, 1u64 << (id % 64));
+            if self.parity[w] & bit != 0 {
+                self.parity[w] &= !bit;
+                self.used[id as usize] = true;
+                row.push(id);
+            }
+        }
+        if !row.is_empty() {
+            self.rows.push(row);
+        }
+    }
+
+    /// Grow `basis`'s layout by the monomials the kept rows hold and it
+    /// lacks, and return every used id's column in the new layout.
+    fn place(&self, basis: &mut ReducedBasis) -> Vec<u32> {
+        let mut missing: Vec<u64> = (0..self.monos.len())
+            .filter(|&i| self.used[i] && self.old_column[i] == DELETED)
+            .map(|i| self.monos[i])
+            .collect();
+        if missing.is_empty() {
+            return self.old_column.clone();
+        }
+        sort_masks_descending(&mut missing);
+        let placed = basis.insert_columns(&missing);
+        let step = basis
+            .history
+            .last()
+            .expect("a step was just adopted")
+            .map
+            .clone();
+        let mut column: Vec<u32> = self
+            .old_column
+            .iter()
+            .map(|&c| {
+                if c == DELETED {
+                    DELETED
+                } else {
+                    step[c as usize]
+                }
+            })
+            .collect();
+        for (m, c) in missing.iter().zip(placed) {
+            column[self.ids[m] as usize] = c;
+        }
+        column
+    }
+}
+
+/// `dst ^= src` over their common length, in fixed-width chunks the
+/// compiler packs into vector XORs on the baseline target.
+#[inline]
+fn xor_words(dst: &mut [u64], src: &[u64]) {
+    let n = dst.len().min(src.len());
+    let (dst, src) = (&mut dst[..n], &src[..n]);
+    let mut d4 = dst.chunks_exact_mut(4);
+    let mut s4 = src.chunks_exact(4);
+    for (d, s) in (&mut d4).zip(&mut s4) {
+        d[0] ^= s[0];
+        d[1] ^= s[1];
+        d[2] ^= s[2];
+        d[3] ^= s[3];
+    }
+    for (d, &s) in d4.into_remainder().iter_mut().zip(s4.remainder()) {
+        *d ^= s;
+    }
+}
+
+/// The monomials occurring an odd number of times in `monos`, in order of
+/// first occurrence: the terms of `Σ monos` over `F_2`.  A product `t·p`
+/// in the Boolean ring maps the terms of `p` to `m ∪ t`, and two terms that
+/// differ only inside `t` meet and cancel.  Order does not matter to any
+/// caller (each packs the row by column or collects it into a set), so the
+/// parity is taken with a small hash table rather than by sorting.
+fn odd_terms(monos: impl ExactSizeIterator<Item = u64>) -> Vec<u64> {
+    let len = monos.len();
+    let mut keys: Vec<u64> = Vec::with_capacity(len);
+    let mut odd: Vec<bool> = Vec::with_capacity(len);
+    ODD_SLOTS.with(|state| {
+        let mut state = state.borrow_mut();
+        let (slots, stamp) = &mut *state;
+        let bits = (2 * len).max(16).next_power_of_two().trailing_zeros();
+        let cap = 1usize << bits;
+        *stamp = stamp.wrapping_add(1);
+        if *stamp == 0 || slots.len() < cap {
+            // a wrapped stamp could meet a stale slot; a grown table has
+            // fresh ones: either way start from zeros
+            slots.clear();
+            slots.resize(cap.max(slots.capacity()), 0);
+            *stamp = 1;
+        }
+        let live = u64::from(*stamp) << 32;
+        for m in monos {
+            let mut s = (m.wrapping_mul(0x9E37_79B9_7F4A_7C15) >> (64 - bits)) as usize;
+            loop {
+                let slot = slots[s];
+                if slot & !0xFFFF_FFFF != live {
+                    keys.push(m);
+                    odd.push(true);
+                    slots[s] = live | keys.len() as u64;
+                    break;
+                }
+                let k = (slot & 0xFFFF_FFFF) as usize - 1;
+                if keys[k] == m {
+                    odd[k] ^= true;
+                    break;
+                }
+                s = (s + 1) & (cap - 1);
+            }
+        }
+    });
+    let mut kept = 0;
+    for i in 0..keys.len() {
+        if odd[i] {
+            keys[kept] = keys[i];
+            kept += 1;
+        }
+    }
+    keys.truncate(kept);
+    keys
 }
 
 /// The reduced degree-`degree` Macaulay row space of a system, kept as an
@@ -836,19 +1022,28 @@ impl ReducedBasis {
     /// Bring row `r` into the current layout if it is not there yet.  A
     /// kept row's leading monomial survives every step, so its image is
     /// nonzero.
+    #[inline]
     fn ensure_current(&mut self, r: usize, cost: &mut InheritCost) {
+        // Most calls find the row current (a pivot hit twice at one level),
+        // so only the rewrite stays out of line.
         if self.rows[r].version != self.epoch() {
-            let (start, data) = self
-                .rewrite_frozen(&self.rows[r], cost)
-                .expect("a kept pivot survives");
-            let lead = start + data.iter().position(|&w| w != 0).expect("nonzero");
-            self.rows[r] = LazyRow {
-                version: self.epoch(),
-                start: start as u32,
-                lead: lead as u32,
-                data,
-            };
+            self.materialise(r, cost);
         }
+    }
+
+    /// Rewrite row `r` into the current layout.
+    #[inline(never)]
+    fn materialise(&mut self, r: usize, cost: &mut InheritCost) {
+        let (start, data) = self
+            .rewrite_frozen(&self.rows[r], cost)
+            .expect("a kept pivot survives");
+        let lead = start + data.iter().position(|&w| w != 0).expect("nonzero");
+        self.rows[r] = LazyRow {
+            version: self.epoch(),
+            start: start as u32,
+            lead: lead as u32,
+            data,
+        };
     }
 
     /// Bring every row into the current layout.
@@ -948,9 +1143,7 @@ impl ReducedBasis {
                     self.ensure_current(r as usize, cost);
                     let pivot = &self.rows[r as usize];
                     let at = w - row.start;
-                    for (dst, &src) in row.data[at..].iter_mut().zip(pivot.from_word(w)) {
-                        *dst ^= src;
-                    }
+                    xor_words(&mut row.data[at..], pivot.from_word(w));
                     cost.reduce_word_ops += (self.words - w) as u64;
                     from = w;
                 }
@@ -1174,48 +1367,34 @@ impl ReducedBasis {
                 .flat_map(|p| p.terms.iter())
                 .fold(0u64, |acc, t| acc | t.mask)
                 & all_variable_mask(out.n_vars);
-            let mut completion: Vec<Vec<u64>> = Vec::new();
-            for &(index, old_degree, new_degree) in &dropped {
-                let p = &out.system[index];
-                let old_gap = self.degree - old_degree;
-                let new_gap = self.degree - new_degree;
-                let mask = if self.support_local {
-                    multiplier_mask & p.terms.iter().fold(0u64, |acc, t| acc | t.mask)
-                } else {
-                    multiplier_mask
-                };
-                for t in monomials_up_to_mask(mask, new_gap) {
-                    if t.count_ones() <= old_gap {
-                        continue;
-                    }
-                    let mut monos: Vec<u64> = p.terms.iter().map(|m| m.mask | t).collect();
-                    monos.sort_unstable();
-                    let mut row_monos = Vec::with_capacity(monos.len());
-                    let mut i = 0;
-                    while i < monos.len() {
-                        let mut j = i;
-                        while j < monos.len() && monos[j] == monos[i] {
-                            j += 1;
+            let mut batch = CompletionBatch::default();
+            {
+                out.column_index();
+                let index = out.column_index.as_ref().expect("just built");
+                for &(i, old_degree, new_degree) in &dropped {
+                    let p = &out.system[i];
+                    let old_gap = self.degree - old_degree;
+                    let new_gap = self.degree - new_degree;
+                    let mask = if self.support_local {
+                        multiplier_mask & p.terms.iter().fold(0u64, |acc, t| acc | t.mask)
+                    } else {
+                        multiplier_mask
+                    };
+                    for t in monomials_up_to_mask(mask, new_gap) {
+                        if t.count_ones() <= old_gap {
+                            continue;
                         }
-                        if (j - i) % 2 == 1 {
-                            row_monos.push(monos[i]);
-                        }
-                        i = j;
-                    }
-                    if !row_monos.is_empty() {
-                        completion.push(row_monos);
+                        batch.push_row(p.terms.iter().map(|m| m.mask | t), index);
                     }
                 }
             }
-            if !completion.is_empty() {
-                out.extend_columns(&completion);
-                cost.completion_rows = completion.len() as u64;
-                for monos in completion {
-                    let words = out.words;
-                    let index = out.column_index();
-                    let mut row = vec![0u64; words];
-                    for m in monos {
-                        let c = index[&m];
+            if !batch.rows.is_empty() {
+                let columns = batch.place(&mut out);
+                cost.completion_rows = batch.rows.len() as u64;
+                for ids in &batch.rows {
+                    let mut row = vec![0u64; out.words];
+                    for &id in ids {
+                        let c = columns[id as usize] as usize;
                         row[c / 64] |= 1u64 << (c % 64);
                     }
                     let inserted = out.insert(Draft::full(row), &mut cost);
@@ -1318,20 +1497,7 @@ impl ReducedBasis {
                     if t == 0 {
                         continue;
                     }
-                    let mut all: Vec<u64> = q_monos.iter().map(|&m| m | t).collect();
-                    all.sort_unstable();
-                    let mut product = Vec::with_capacity(all.len());
-                    let mut i = 0;
-                    while i < all.len() {
-                        let mut j = i;
-                        while j < all.len() && all[j] == all[i] {
-                            j += 1;
-                        }
-                        if (j - i) % 2 == 1 {
-                            product.push(all[i]);
-                        }
-                        i = j;
-                    }
+                    let product = odd_terms(q_monos.iter().map(|&m| m | t));
                     if !product.is_empty() {
                         products.push(product);
                         read_words += q.live().len() as u64;
@@ -1422,25 +1588,53 @@ impl ReducedBasis {
     /// are not touched.
     fn extend_columns(&mut self, rows_monos: &[Vec<u64>]) {
         let index = self.column_index();
-        let mut missing: Vec<u64> = rows_monos
-            .iter()
-            .flatten()
-            .copied()
-            .filter(|m| !index.contains_key(m))
-            .collect();
+        // The products share most of their new monomials, so collect each
+        // distinct one once as it is first met and key only those into the
+        // layout's order.
+        let mut seen: MaskMap<()> = MaskMap::default();
+        let mut missing: Vec<u64> = Vec::new();
+        for &m in rows_monos.iter().flatten() {
+            if !index.contains_key(&m) && seen.insert(m, ()).is_none() {
+                missing.push(m);
+            }
+        }
         if missing.is_empty() {
             return;
         }
-        missing.sort_unstable();
-        missing.dedup();
-        let mut columns = self.columns.clone();
-        columns.extend(missing);
-        columns.sort_by(|a, b| {
-            cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
-        });
-        let index: MaskMap<usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
-        let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
+        sort_masks_descending(&mut missing);
+        self.insert_columns(&missing);
+    }
+
+    /// Adopt the layout with the monomials `missing` added: distinct, absent
+    /// from the layout and in its descending order.  Returns the new column
+    /// of each.  The layout is already in descending order, so the new one
+    /// is a merge of two sorted lists and the old → new map falls out of
+    /// the merge, as in `fold_layout`.
+    fn insert_columns(&mut self, missing: &[u64]) -> Vec<u32> {
+        let old = &self.columns;
+        let mut columns = Vec::with_capacity(old.len() + missing.len());
+        let mut map = vec![0u32; old.len()];
+        let mut placed = Vec::with_capacity(missing.len());
+        let (mut i, mut j) = (0usize, 0usize);
+        while i < old.len() || j < missing.len() {
+            let take_old = j == missing.len()
+                || (i < old.len()
+                    && cmp_mono(
+                        F2BoolMono::from_mask(old[i]),
+                        F2BoolMono::from_mask(missing[j]),
+                    ) == std::cmp::Ordering::Greater);
+            if take_old {
+                map[i] = columns.len() as u32;
+                columns.push(old[i]);
+                i += 1;
+            } else {
+                placed.push(columns.len() as u32);
+                columns.push(missing[j]);
+                j += 1;
+            }
+        }
         self.adopt_layout(columns, map);
+        placed
     }
 
     /// The linear tail — the intersection of the row space with the
@@ -1526,6 +1720,131 @@ pub fn substitute(p: &F2BoolPoly, var: u32, value: bool) -> F2BoolPoly {
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::matrix_f4_f2;
+
+    /// The sort-and-count parity the completion rows used before
+    /// [`odd_terms`] and [`CompletionBatch`].
+    fn odd_by_sort(mut monos: Vec<u64>) -> Vec<u64> {
+        monos.sort_unstable();
+        let mut out = Vec::new();
+        let mut i = 0;
+        while i < monos.len() {
+            let mut j = i;
+            while j < monos.len() && monos[j] == monos[i] {
+                j += 1;
+            }
+            if (j - i) % 2 == 1 {
+                out.push(monos[i]);
+            }
+            i = j;
+        }
+        out
+    }
+
+    fn xorshift(seed: &mut u64) -> u64 {
+        *seed ^= *seed << 13;
+        *seed ^= *seed >> 7;
+        *seed ^= *seed << 17;
+        *seed
+    }
+
+    #[test]
+    fn odd_terms_matches_sorting_parity() {
+        let mut seed = 0x2545_f491_4f6c_dd1du64;
+        for round in 0..400 {
+            let len = (xorshift(&mut seed) % 90) as usize;
+            // a small alphabet, so repeats of every multiplicity occur
+            let alphabet = 1 + xorshift(&mut seed) % 40;
+            let monos: Vec<u64> = (0..len)
+                .map(|_| (xorshift(&mut seed) % alphabet) << (round % 7))
+                .collect();
+            let mut got = odd_terms(monos.iter().copied());
+            got.sort_unstable();
+            assert_eq!(got, odd_by_sort(monos), "round {round}");
+        }
+    }
+
+    #[test]
+    fn xor_words_is_wordwise_xor_over_the_common_length() {
+        let mut seed = 0x9e37_79b9_7f4a_7c15u64;
+        for len in 0..20 {
+            let a: Vec<u64> = (0..len).map(|_| xorshift(&mut seed)).collect();
+            let b: Vec<u64> = (0..len + 3).map(|_| xorshift(&mut seed)).collect();
+            let mut got = a.clone();
+            xor_words(&mut got, &b);
+            let want: Vec<u64> = a.iter().zip(&b).map(|(x, y)| x ^ y).collect();
+            assert_eq!(got, want);
+        }
+    }
+
+    /// The completion batch keeps exactly the rows, in order, and adds
+    /// exactly the columns that per-row cancellation plus a sorted layout
+    /// extension would.
+    #[test]
+    fn completion_batch_matches_cancel_then_extend() {
+        let mut seed = 0x51_7cc1_b727_220au64;
+        for _ in 0..60 {
+            let n_vars = 12;
+            let system = vec![random_poly(n_vars, 3, 14, &mut seed)];
+            let Some((basis, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
+                continue;
+            };
+            // products of random monomials by random multipliers, some
+            // cancelling, some reaching outside the layout
+            let products: Vec<Vec<u64>> = (0..12)
+                .map(|_| {
+                    let t = xorshift(&mut seed) & (0b111 << (xorshift(&mut seed) % 9));
+                    (0..(xorshift(&mut seed) % 16))
+                        .map(|_| (xorshift(&mut seed) & 0xfff) | t)
+                        .collect()
+                })
+                .collect();
+
+            // reference: cancel each row, extend by sorting, pack by index
+            let mut reference = basis.clone();
+            let kept: Vec<Vec<u64>> = products
+                .iter()
+                .map(|p| odd_by_sort(p.clone()))
+                .filter(|r| !r.is_empty())
+                .collect();
+            let old: std::collections::HashSet<u64> = reference.columns.iter().copied().collect();
+            let mut want_columns = reference.columns.clone();
+            let mut added: Vec<u64> = kept
+                .iter()
+                .flatten()
+                .copied()
+                .filter(|m| !old.contains(m))
+                .collect();
+            added.sort_unstable();
+            added.dedup();
+            want_columns.extend(added);
+            want_columns.sort_by(|a, b| {
+                cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
+            });
+            if !kept.is_empty() {
+                reference.extend_columns(&kept);
+            }
+            assert_eq!(reference.columns, want_columns);
+
+            let mut out = basis.clone();
+            let mut batch = CompletionBatch::default();
+            out.column_index();
+            let index = out.column_index.clone().expect("built");
+            for p in &products {
+                batch.push_row(p.iter().copied(), &index);
+            }
+            assert_eq!(batch.rows.len(), kept.len());
+            let columns = batch.place(&mut out);
+            assert_eq!(out.columns, want_columns);
+            for (ids, want) in batch.rows.iter().zip(&kept) {
+                let mut got: Vec<u64> = ids
+                    .iter()
+                    .map(|&id| out.columns[columns[id as usize] as usize])
+                    .collect();
+                got.sort_unstable();
+                assert_eq!(&got, want);
+            }
+        }
+    }
 
     fn random_poly(n_vars: usize, deg: u32, terms: usize, seed: &mut u64) -> F2BoolPoly {
         let mut next = || {

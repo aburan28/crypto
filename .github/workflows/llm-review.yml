@@ -1,0 +1,49 @@
+name: Free LLM pull-request review
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number to review
+        required: true
+        type: number
+
+concurrency:
+  group: llm-review-${{ github.event.pull_request.number || inputs.pull_request || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  review:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # pull_request_target has access to secrets. Deliberately check out only
+      # the trusted default branch and retrieve the PR patch as inert API data.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Validate reviewer
+        run: |
+          node --check .github/scripts/llm-review.mjs
+          node .github/scripts/llm-review.mjs --self-test
+
+      - name: Review pull request
+        env:
+          FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
+          FIREWORKS_MODEL: ${{ vars.FIREWORKS_MODEL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL || 'openrouter/free' }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull_request }}
+        run: node .github/scripts/llm-review.mjs

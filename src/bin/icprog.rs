@@ -35,6 +35,8 @@ mod bench;
 mod callgrind;
 #[path = "icprog/f5_control.rs"]
 mod f5_control;
+#[path = "icprog/f5_control_publication.rs"]
+mod f5_control_publication;
 #[path = "icprog/f5_target.rs"]
 mod f5_target;
 #[path = "icprog/identity.rs"]
@@ -173,6 +175,26 @@ enum Command {
         execution: PathBuf,
         #[arg(long)]
         registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Publish the exact consumed native F5 control; never reruns its worker or audit.
+    F5ControlPublishResult {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        audit: PathBuf,
+        #[arg(long)]
+        source_acceptance: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Portable postexecution F5 data/math replay; executes no archived binary.
+    F5ControlReplayResult {
+        #[arg(long)]
+        publication: PathBuf,
         #[arg(long)]
         out: PathBuf,
     },
@@ -662,6 +684,18 @@ fn main() -> ExitCode {
             registration_sha256,
             out,
         } => f5_control::audit(&capsule, &execution, &registration_sha256, &out),
+        Command::F5ControlPublishResult {
+            capsule,
+            execution,
+            audit,
+            source_acceptance,
+            out,
+        } => {
+            f5_control_publication::publish(&capsule, &execution, &audit, &source_acceptance, &out)
+        }
+        Command::F5ControlReplayResult { publication, out } => {
+            f5_control_publication::replay_to(&publication, &out)
+        }
         Command::F5TargetReplay { root, out } => f5_target::replay(&root, &out),
         Command::F5PreparationReplay { root, out } => prepared_f5::run(&root, &out),
         Command::SatControlPublish {
