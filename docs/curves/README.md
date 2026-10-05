@@ -1,5 +1,11 @@
 # Curves
 
+[Automatic hyperelliptic cover checks](COVERS.md) attach replayable
+same-field cover certificates to each supported catalog model in
+[`covers.json`](covers.json). Each curve page in the lab browser displays
+the verified genus, map degree and field assumptions. Descent and DLP
+advantage remain unmeasured.
+
 [IC curve records and cross-repo links](ic/README.md), including
 [typed links](ic/curve-links/README.md), retain the exact EC1 representations,
 optional trait statuses, and the factor-base/isogeny storage contract beside
