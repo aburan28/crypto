@@ -11793,6 +11793,32 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s3-image-transfer-20261004 -->
+<!-- BEGIN p256-balanced-s5-round9-20261004 -->
+<section class="panel" id="p256-balanced-s5-round9-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson four-summand screen: one fibre reaches degree 2, the other ties at 3 <span class="chip">rejected</span></h2>
+    <p class="panel-summary">Rejects uniform liftability specialisation: terminal 0 falls from solving degree 3 to 2, terminal 369 remains at 3, and three exhaustive-positive cells expose missing point-at-infinity charts in every affine S3 arm.</p>
+    <p>Round 9 balances four factor-base leaves through two unknown pair-sum x-coordinates. The baseline carries each leaf's curve lift; the candidate replaces it with the exact degree-1/2 polynomial of x-coordinates stored in that Dickson branch. A third arm composes only univariate quadratic images. All are checked against exhaustive signed four-point addition.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>All F4 cells complete. Correctness includes pair cancellations through the point at infinity, which an affine intermediate x chart omits.</caption>
+    <thead><tr><th>Terminal</th><th>Arm</th><th>Cells correct</th><th>Variables / equations</th><th>Max degree</th><th>Max columns</th><th>Field ops</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Curve-lift F4</td><td class="n">6 / 8</td><td class="n">23 / 24</td><td class="n">3</td><td class="n">453</td><td class="n">4,114,322</td><td><span class="chip">reference failure</span></td></tr>
+      <tr><td>0</td><td>Liftability-specialised F4</td><td class="n">6 / 8</td><td class="n">15 / 16</td><td class="n"><strong>2</strong></td><td class="n">32</td><td class="n">7,768</td><td><span class="chip">advance</span> but incomplete chart</td></tr>
+      <tr><td>369</td><td>Curve-lift F4</td><td class="n">7 / 8</td><td class="n">23 / 24</td><td class="n">3</td><td class="n">453</td><td class="n">4,536,753</td><td><span class="chip">reference failure</span></td></tr>
+      <tr><td>369</td><td>Liftability-specialised F4</td><td class="n">7 / 8</td><td class="n">15 / 16</td><td class="n"><strong>3</strong></td><td class="n">447</td><td class="n">3,011,675</td><td><span class="chip">rejected</span> degree tie</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree gate</span> fails because both terminals had to improve by at least one; the terminal-369 maximum remains 3</span>
+    <span><span class="chip">failure custody</span> mismatches are <code>(25,25,767,1110)</code>, <code>(25,25,1110,767)</code>, and <code>(94,94,288,1057)</code>; none is dropped</span>
+    <span><span class="chip">next lever</span> atomise multi-root leaves to stored x columns and add explicit identity charts, charging every resulting subcomponent</span>
+    <span><span class="chip">scope</span> 16 toy-prime four-summand cells; no P-256 S18 system, relation, logarithm, S or rho comparison</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_balanced_s5_round9_20261004/RESULT.md</code>; deterministic result SHA-256 <code>44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a</code></span>
+  </div>
+</section>
+<!-- END p256-balanced-s5-round9-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
