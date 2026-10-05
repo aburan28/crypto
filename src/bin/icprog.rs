@@ -228,6 +228,26 @@ enum Command {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Publish an unconsumed scientific ordinary registration before dispatch.
+    OrdinaryControlPublishRegistration {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Check the published scientific registration as data, without execution.
+    OrdinaryControlReplayRegistration {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Freeze new target-free native preparation sources/binaries; builds only.
     OrdinaryControlFreeze {
         #[arg(long, default_value = ".")]
@@ -249,6 +269,8 @@ enum Command {
     OrdinaryControlExecute {
         #[arg(long)]
         capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
         #[arg(long)]
         execution: PathBuf,
         #[arg(long)]
@@ -882,6 +904,17 @@ fn main() -> ExitCode {
             validation_registration_sha256,
             out,
         } => ordinary_build::replay(&publication, &validation_registration_sha256, &out),
+        Command::OrdinaryControlPublishRegistration {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+        } => ordinary_build::publish_scientific(&capsule, &publication, &registration_sha256, &out),
+        Command::OrdinaryControlReplayRegistration {
+            publication,
+            registration_sha256,
+            out,
+        } => ordinary_build::replay_scientific(&publication, &registration_sha256, &out),
         Command::OrdinaryControlFreeze {
             root,
             out,
@@ -901,9 +934,10 @@ fn main() -> ExitCode {
         ),
         Command::OrdinaryControlExecute {
             capsule,
+            publication,
             execution,
             registration_sha256,
-        } => ordinary_control::execute(&capsule, &execution, &registration_sha256),
+        } => ordinary_control::execute(&capsule, &publication, &execution, &registration_sha256),
         Command::OrdinaryControlInspect {
             capsule,
             execution,

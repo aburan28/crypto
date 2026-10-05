@@ -1,4 +1,5 @@
-//! Portable, data-only custody of an unconsumed validation build. No solver launch.
+//! Portable, data-only custody of an unconsumed ordinary build or preregistration.
+//! Publication and replay never run the solver or any archived executable.
 use super::{
     ordinary_control::{self, capsule},
     sat_control::native,
@@ -23,6 +24,46 @@ const FILES: [&str; 4] = [
     "seal.json",
 ];
 const QUESTION: &str = "ordinary-build-custody-n17-v1";
+const SCIENTIFIC_QUESTION: &str = "ordinary-scientific-registration-custody-n17-v1";
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Kind {
+    Validation,
+    Scientific,
+}
+impl Kind {
+    fn question(self) -> &'static str {
+        match self {
+            Self::Validation => QUESTION,
+            Self::Scientific => SCIENTIFIC_QUESTION,
+        }
+    }
+    fn stage(self) -> &'static str {
+        match self {
+            Self::Validation => "validation-only-not-dispatched",
+            Self::Scientific => "scientific-registered-not-dispatched",
+        }
+    }
+    fn status(self) -> &'static str {
+        match self {
+            Self::Validation => "PASS_DATA_ONLY_ORDINARY_BUILD_CUSTODY",
+            Self::Scientific => "PASS_DATA_ONLY_ORDINARY_SCIENTIFIC_REGISTRATION_CUSTODY",
+        }
+    }
+    fn check(
+        self,
+        record: &capsule::Registration,
+        hash: &str,
+        expected: &str,
+    ) -> Result<(), String> {
+        match self {
+            Self::Validation => validation(record, hash, expected),
+            Self::Scientific => require(
+                !record.validation_only && hash == expected,
+                "scientific ordinary registration requires its external executable seal",
+            ),
+        }
+    }
+}
 fn desc(bytes: &[u8]) -> Value {
     json!({"bytes":bytes.len(),"sha256":sha256(bytes)})
 }
@@ -43,7 +84,7 @@ fn unconsumed(root: &Path) -> Result<(), String> {
             .join("consumed.json")
             .try_exists()
             .map_err(|e| e.to_string())?,
-        "validation capsule was consumed",
+        "ordinary capsule was consumed",
     )
 }
 fn validation(record: &capsule::Registration, hash: &str, expected: &str) -> Result<(), String> {
@@ -155,17 +196,25 @@ fn full_files(
     }
     Ok(files)
 }
+#[cfg(test)]
 fn claims(header: &Value) -> Result<(), String> {
+    claims_for(header, Kind::Validation)
+}
+fn claims_for(header: &Value, kind: Kind) -> Result<(), String> {
     require(
         header["schema_version"] == 1
-            && header["question"] == QUESTION
-            && header["stage"] == "validation-only-not-dispatched"
+            && header["question"] == kind.question()
+            && header["stage"] == kind.stage()
             && header["scientific_worker_calls"] == 0
             && header["execution_admitted"] == false
             && header["full_goal_complete"] == false
-            && header
-                .get("source_bound_execution_admitted")
-                .is_none_or(|v| v == false)
+            && (if kind == Kind::Scientific {
+                header["source_bound_execution_admitted"] == false
+            } else {
+                header
+                    .get("source_bound_execution_admitted")
+                    .is_none_or(|v| v == false)
+            })
             && header["online_wall_ns"].is_null()
             && header["online_speedup"].is_null(),
         "build custody scope or claims differ",
@@ -177,9 +226,26 @@ pub fn publish(
     expected: &str,
     out: &Path,
 ) -> Result<String, String> {
+    publish_for(root, publication, expected, out, Kind::Validation)
+}
+pub fn publish_scientific(
+    root: &Path,
+    publication: &Path,
+    expected: &str,
+    out: &Path,
+) -> Result<String, String> {
+    publish_for(root, publication, expected, out, Kind::Scientific)
+}
+fn publish_for(
+    root: &Path,
+    publication: &Path,
+    expected: &str,
+    out: &Path,
+    kind: Kind,
+) -> Result<String, String> {
     let root = root.canonicalize().map_err(|e| e.to_string())?;
     let (record, hash) = capsule::check_capsule(&root)?;
-    validation(&record, &hash, expected)?;
+    kind.check(&record, &hash, expected)?;
     unconsumed(&root)?;
     ordinary_control::verify_build_from(&root, &record, &root)?;
     fs::create_dir(publication).map_err(|e| e.to_string())?;
@@ -199,30 +265,36 @@ pub fn publish(
     eprintln!("ordinary build custody: archive stream completed; checking descriptor");
     let bytes = read(&publication.join("capsule.tar.gz"), 96 * 1024 * 1024)?;
     eprintln!("ordinary build custody: bounded archive read completed");
-    let header = json!({"schema_version":1,"question":QUESTION,"stage":"validation-only-not-dispatched",
+    let header = json!({"schema_version":1,"question":kind.question(),"stage":kind.stage(),
         "registration_sha256":hash,"capsule_root":root,"source_commit":record.source_commit,
         "immutable_file_count":record.immutable_files.as_object().ok_or("missing inventory")?.len(),
         "files":retained,"archive":{"path":"capsule.tar.gz","bytes":bytes.len(),"sha256":sha256(&bytes)},
-        "scientific_worker_calls":0,"execution_admitted":false,"full_goal_complete":false,"online_wall_ns":null,"online_speedup":null});
+        "scientific_worker_calls":0,"execution_admitted":false,
+        "source_bound_execution_admitted":false,"full_goal_complete":false,
+        "online_wall_ns":null,"online_speedup":null});
     save(&publication.join("PUBLICATION.json"), &header)?;
     eprintln!(
         "ordinary build custody: publication descriptor retained; rechecking original capsule"
     );
     require(
         capsule::check_capsule(&root)?.1 == hash,
-        "validation capsule changed during publication",
+        "ordinary capsule changed during publication",
     )?;
     unconsumed(&root)?;
     eprintln!(
         "ordinary build custody: original capsule unchanged; verifying archived bytes as data"
     );
-    replay(publication, expected, out)
+    replay_for(publication, expected, out, kind)
 }
+#[cfg(test)]
 fn verify(publication: &Path, expected: &str) -> Result<Value, String> {
+    verify_for(publication, expected, Kind::Validation)
+}
+fn verify_for(publication: &Path, expected: &str, kind: Kind) -> Result<Value, String> {
     let header = load(&publication.join("PUBLICATION.json"))?;
-    claims(&header)?;
+    claims_for(&header, kind)?;
     let (record, hash) = capsule::registration(publication)?;
-    validation(&record, &hash, expected)?;
+    kind.check(&record, &hash, expected)?;
     unconsumed(publication)?;
     require(
         header["registration_sha256"] == hash
@@ -294,18 +366,53 @@ fn verify(publication: &Path, expected: &str) -> Result<Value, String> {
         "custody decompression exceeded bound",
     )?;
     let members = verify_tar_inventory(&tar, &json!(full_files(publication, &record)?))?;
-    Ok(
-        json!({"schema_version":1,"status":"PASS_DATA_ONLY_ORDINARY_BUILD_CUSTODY",
+    let mut result = json!({"schema_version":1,"status":kind.status(),
         "registration_sha256":hash,"source_commit":record.source_commit,"source_manifest_sha256":record.source_manifest_sha256,
         "archive_sha256":sha256(&bytes),"archive_regular_files":members,"complete_published_capsule_bytes_verified":true,
         "archived_binaries_executed":0,"scientific_worker_calls":0,"execution_admitted":false,
         "source_bound_execution_admitted":false,
         "fresh_paired_qualification":false,"headline_eligible":false,"promotion_eligible":false,
-        "full_goal_complete":false,"online_wall_ns":null,"online_speedup":null}),
-    )
+        "full_goal_complete":false,"online_wall_ns":null,"online_speedup":null});
+    if kind == Kind::Scientific {
+        result["scientific_registration_published"] = json!(true);
+    }
+    Ok(result)
 }
 pub fn replay(publication: &Path, expected: &str, out: &Path) -> Result<String, String> {
-    let receipt = verify(publication, expected)?;
+    replay_for(publication, expected, out, Kind::Validation)
+}
+pub fn replay_scientific(publication: &Path, expected: &str, out: &Path) -> Result<String, String> {
+    replay_for(publication, expected, out, Kind::Scientific)
+}
+/// A complete data-only prerequisite for the original one-use controller.
+/// The absolute original capsule path must match the one in the publication.
+pub(super) fn scientific_preflight(
+    publication: &Path,
+    capsule: &Path,
+    expected: &str,
+) -> Result<Value, String> {
+    let publication = publication.canonicalize().map_err(|e| e.to_string())?;
+    let receipt = verify_for(&publication, expected, Kind::Scientific)?;
+    let descriptor = read(&publication.join("PUBLICATION.json"), 16 * 1024 * 1024)?;
+    let header: Value = serde_json::from_slice(&descriptor).map_err(|e| e.to_string())?;
+    require(
+        header["capsule_root"] == json!(capsule),
+        "published ordinary registration names a different original capsule",
+    )?;
+    Ok(json!({"schema_version":1,"question":SCIENTIFIC_QUESTION,
+        "stage":"scientific-registered-not-dispatched",
+        "publication_root":publication,"publication_descriptor_sha256":sha256(&descriptor),
+        "registration_sha256":expected,"source_manifest_sha256":receipt["source_manifest_sha256"],
+        "archive_sha256":receipt["archive_sha256"],"scientific_worker_calls":0,
+        "execution_admitted":false}))
+}
+fn replay_for(
+    publication: &Path,
+    expected: &str,
+    out: &Path,
+    kind: Kind,
+) -> Result<String, String> {
+    let receipt = verify_for(publication, expected, kind)?;
     save(out, &receipt)?;
     serde_json::to_string_pretty(&receipt).map_err(|e| e.to_string())
 }
@@ -345,6 +452,54 @@ mod tests {
         let mut wrong = header;
         wrong["online_wall_ns"] = json!(0);
         assert!(claims(&wrong).is_err());
+    }
+    #[test]
+    fn scientific_registration_is_distinct_from_validation_and_execution() {
+        let publication = Path::new(
+            "research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2",
+        );
+        let (record, seal) = capsule::registration(publication).unwrap();
+        assert!(Kind::Validation.check(&record, &seal, &seal).is_ok());
+        assert!(Kind::Scientific.check(&record, &seal, &seal).is_err());
+        let mut scientific: capsule::Registration = serde_json::from_value(json!(record)).unwrap();
+        scientific.validation_only = false;
+        assert!(Kind::Scientific.check(&scientific, &seal, &seal).is_ok());
+        assert!(Kind::Scientific
+            .check(&scientific, &seal, &"0".repeat(64))
+            .is_err());
+        let changed = std::env::temp_dir().join(format!(
+            "ordinary-scientific-seal-control-{}",
+            std::process::id()
+        ));
+        fs::create_dir(&changed).unwrap();
+        for name in FILES {
+            fs::copy(publication.join(name), changed.join(name)).unwrap();
+        }
+        let mut changed_registration = load(&changed.join("registration.json")).unwrap();
+        changed_registration["validation_only"] = json!(false);
+        fs::write(
+            changed.join("registration.json"),
+            serde_json::to_vec(&changed_registration).unwrap(),
+        )
+        .unwrap();
+        assert!(capsule::registration(&changed).is_err());
+        fs::remove_dir_all(changed).unwrap();
+        let good = json!({"schema_version":1,"question":SCIENTIFIC_QUESTION,
+            "stage":"scientific-registered-not-dispatched","scientific_worker_calls":0,
+            "execution_admitted":false,"source_bound_execution_admitted":false,
+            "full_goal_complete":false,"online_wall_ns":null,"online_speedup":null});
+        claims_for(&good, Kind::Scientific).unwrap();
+        assert!(claims_for(&good, Kind::Validation).is_err());
+        for (key, value) in [
+            ("scientific_worker_calls", json!(1)),
+            ("execution_admitted", json!(true)),
+            ("source_bound_execution_admitted", json!(true)),
+            ("online_wall_ns", json!(0)),
+        ] {
+            let mut changed = good.clone();
+            changed[key] = value;
+            assert!(claims_for(&changed, Kind::Scientific).is_err(), "{key}");
+        }
     }
     fn retained_control(label: &str) -> std::path::PathBuf {
         let original=Path::new("research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2");

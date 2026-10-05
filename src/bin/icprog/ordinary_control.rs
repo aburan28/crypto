@@ -1,5 +1,5 @@
 //! New target-free source freeze and one-use native controller; never old controls.
-use super::{ordinary_preparation, sat_control::native};
+use super::{ordinary_build, ordinary_preparation, sat_control::native};
 #[path = "../prepared_ordinary_worker/contract.rs"]
 #[allow(dead_code)] // Shared typed capsule/claim/query contract with the worker.
 pub(super) mod capsule;
@@ -288,15 +288,26 @@ fn worker_args(capsule: &Path, execution: &Path) -> Vec<String> {
     ]
 }
 /// Durably consume before the sole launch; always retain transport/source/drain outcomes.
-pub fn execute(capsule: &Path, execution: &Path, expected: &str) -> Result<String, String> {
+pub fn execute(
+    capsule: &Path,
+    publication: &Path,
+    execution: &Path,
+    expected: &str,
+) -> Result<String, String> {
     native::enforce_hardware()?;
     let capsule = capsule.canonicalize().map_err(|e| e.to_string())?;
     let (record, hash) = capsule::check_capsule(&capsule)?;
     expected_seal(&record, &hash, expected)?;
     let own = frozen_self(&capsule, &record)?;
     let cfg = capsule::config(&capsule)?;
+    let publication_preflight =
+        ordinary_build::scientific_preflight(publication, &capsule, expected)?;
     fs::create_dir(execution).map_err(|e| e.to_string())?;
     let execution = execution.canonicalize().map_err(|e| e.to_string())?;
+    let publication_preflight_path = execution.join("publication-preflight.json");
+    save(&publication_preflight_path, &publication_preflight)?;
+    let publication_preflight_sha256 =
+        sha256(&read(&publication_preflight_path, 16 * 1024 * 1024)?);
     save(
         &capsule.join("consumed.json"),
         &json!(capsule::Claim {
@@ -331,6 +342,7 @@ pub fn execute(capsule: &Path, execution: &Path, expected: &str) -> Result<Strin
     let unchanged = own_after.as_ref().is_ok_and(|hash| hash == &own);
     let mut terminal = json!({"schema_version":1,"scope":capsule::SCOPE,"registration_sha256":hash,
         "controller_sha256":own,"controller_unchanged":unchanged,"controller_read_error":own_after.err(),"source_gate_passed":gate.is_ok(),"source_gate_error":gate.err(),
+        "publication_preflight_sha256":publication_preflight_sha256,
         "worker_drain_passed":worker_drain.is_ok(),"worker_drain_error":worker_drain.err(),
         "role_drain_passed":role_drain.is_ok(),"role_drain_error":role_drain.err(),
         "execution_files":evidence.as_ref().ok(),"execution_inventory_error":evidence.as_ref().err(),
@@ -1084,6 +1096,21 @@ pub fn audit(root: &Path, execution: &Path, expected: &str, out: &Path) -> Resul
             "ordinary terminal source/drain gate failed",
         )?;
         verify_execution_inventory(&execution, &terminal)?;
+        let publication_preflight_path = execution.join("publication-preflight.json");
+        let publication_preflight_bytes = read(&publication_preflight_path, 16 * 1024 * 1024)?;
+        let publication_preflight: Value =
+            serde_json::from_slice(&publication_preflight_bytes).map_err(|e| e.to_string())?;
+        let publication_root = Path::new(
+            publication_preflight["publication_root"]
+                .as_str()
+                .ok_or("missing original ordinary publication path")?,
+        );
+        require(
+            terminal["publication_preflight_sha256"] == sha256(&publication_preflight_bytes)
+                && publication_preflight
+                    == ordinary_build::scientific_preflight(publication_root, &root, expected)?,
+            "ordinary pre-dispatch publication or data replay differs",
+        )?;
         let receipt = load(&execution.join("worker.receipt.json"))?;
         let argv = std::iter::once(
             root.join("immutable/bin")
@@ -1182,6 +1209,7 @@ pub fn audit(root: &Path, execution: &Path, expected: &str, out: &Path) -> Resul
         Ok(
             json!({"schema_version":1,"status":"PASS_NATIVE_SOURCE_BOUND_ORDINARY_PREPARATION_AUDIT",
             "registration_sha256":hash,"source_bound_execution_admitted":true,
+            "publication_preflight":publication_preflight,
             "mathematical_preparation_complete":mathematics["mathematical_preparation_complete"],"mathematics":mathematics,
             "producer_sha256":sha256(&bytes),"worker_pid":worker_pid,"audited_worker_calls":1,
             "audited_role_calls":roles,"audited_ordinary_queries":rows.len(),"preparation_wall_ns":wall,
