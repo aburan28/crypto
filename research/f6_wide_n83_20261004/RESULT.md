@@ -240,3 +240,42 @@ relation yield from one target, recover a logarithm, or establish any
 F6/F4/F5 or IC/rho speedup. The mathematical four-summand coverage ceiling
 for this base remains `4.662e-12` for a uniform subgroup target, so
 full-base feasibility alone does not meet the high-arity admission gate.
+
+## Rejected packed pair-sum representation
+
+The [compact-index protocol](COMPACT_INDEX_PROTOCOL.md) compared the retained
+full-point pair sums with packed `u128` coordinates and `u32` point indexes.
+The candidate passed the n=83 closure tests and a high-word field-encoding
+test. It returned the same exact no-witness outcome and pair counts on all
+three actual K_0 bases. The complete
+[candidate patch archive](compact_candidate.patch.gz) is retained (decompress
+with `gunzip -c`), but the implementation was reverted because it failed the
+registered timing gates.
+
+| Usable points | Build baseline / compact | Query baseline / compact | Peak RSS baseline / compact |
+| ---: | ---: | ---: | ---: |
+| 258 | 23.031 / 26.453 ms (medians) | 18.696 / 20.490 ms (medians) | unmeasured |
+| 1,048 | 449.559 / 460.722 ms (medians) | 406.332 / 496.496 ms (medians) | unmeasured |
+| 4,054 | 6.755 / 12.208 s (single runs) | 5.192 / 10.306 s (single runs) | 2,673,278,976 / 1,548,173,312 bytes |
+
+The fresh [small baseline](compact_baseline_small.jsonl),
+[small candidate](compact_candidate_small.jsonl),
+[full baseline](compact_baseline_full.jsonl), and
+[full candidate](compact_candidate_full.jsonl) preserve all observations.
+At full size the packed layout used **42.1% less peak RSS**, but the query
+took about twice as long in this unisolated pair. The 258-point build median
+also regressed by 14.9%, exceeding the 10% gate. The fresh baseline itself
+was slower than the earlier full-base run, showing host variation; none of
+these time ratios is a controlled CPU speedup claim.
+
+The retained index source SHA-256 is
+`7cae9b6c9610bfe17cb0c16e053b616971fdff3a91748e1fc6a41c12b2499a60`
+and its field source SHA-256 is
+`15d8f5f357e863e0f16d49f04e88bbbd3269a8ddbb930079f41dff8ef2c0f197`.
+The candidate versions were
+`b512826c68434d1a0aab7582beb95be5442302be9987752c45e44236af6311d7`
+and `b8ffad9804a0b5646b46a06ecd3a197e9b9fc9a230eebe4ed0b2e366eaba05f1`;
+the reversible patch SHA-256 is
+`fcc8ede0500335b78d3d35eab3433e1395de908c84c3f6d87b67a5ddf7245147`.
+The protocol SHA-256 is
+`ef1025d16ef06ac79615fe8de3f4e4094b3d28f47bba524c33521e295ac76a27`.
