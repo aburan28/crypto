@@ -344,6 +344,63 @@ mod packed83 {
         }
         Some(keys)
     }
+
+    /// # Safety
+    /// The caller must have checked ARM64 AES/PMULL support and the pinned
+    /// degree-83 irreducible polynomial.
+    #[target_feature(enable = "aes")]
+    pub(super) unsafe fn batch_add_fixed(
+        curve: &BinaryCurve,
+        fixed: &BinaryPoint,
+        others: &[BinaryPoint],
+    ) -> Option<Vec<BinaryPoint>> {
+        let BinaryPoint::Affine { x: x1, y: y1 } = fixed else {
+            return Some(others.to_vec());
+        };
+        let x1 = packed(x1)?;
+        let y1 = packed(y1)?;
+        let a = packed(&curve.a)?;
+        let mut result = vec![BinaryPoint::Infinity; others.len()];
+        let mut positions = Vec::new();
+        let mut denominators = Vec::new();
+        for (i, other) in others.iter().enumerate() {
+            match other {
+                BinaryPoint::Affine { x: x2, .. } if x1 != packed(x2)? => {
+                    positions.push(i);
+                    denominators.push(x1 ^ packed(x2)?);
+                }
+                _ => result[i] = point_add(curve, fixed, other),
+            }
+        }
+        if denominators.is_empty() {
+            return Some(result);
+        }
+        let mut prefix = Vec::with_capacity(denominators.len() + 1);
+        prefix.push(1u128);
+        for &denominator in &denominators {
+            prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+        }
+        let product = *prefix.last()?;
+        let product = F2mElement::from_words(&[product as u64, (product >> 64) as u64], 83);
+        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
+        for j in (0..positions.len()).rev() {
+            let i = positions[j];
+            let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+            inverse = unsafe { mul(inverse, denominators[j]) };
+            let BinaryPoint::Affine { x: x2, y: y2 } = &others[i] else {
+                unreachable!();
+            };
+            let x2 = packed(x2)?;
+            let lambda = unsafe { mul(y1 ^ packed(y2)?, denominator_inverse) };
+            let x3 = unsafe { square(lambda) } ^ lambda ^ x1 ^ x2 ^ a;
+            let y3 = unsafe { mul(lambda, x1 ^ x3) } ^ x3 ^ y1;
+            result[i] = BinaryPoint::Affine {
+                x: F2mElement::from_words(&[x3 as u64, (x3 >> 64) as u64], 83),
+                y: F2mElement::from_words(&[y3 as u64, (y3 >> 64) as u64], 83),
+            };
+        }
+        Some(result)
+    }
 }
 
 /// The memory cap counts unordered pairs, including repeats. This cap is
@@ -472,7 +529,21 @@ impl F6SignedPairIndex {
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
         let mut lookup = HashMap::with_capacity(capacity);
+        #[cfg(target_arch = "aarch64")]
+        let use_packed = curve.m == 83
+            && curve.irreducible.degree == 83
+            && curve.irreducible.low_terms == [0, 1, 2, 45]
+            && std::arch::is_aarch64_feature_detected!("aes");
         for i in 0..points.len() {
+            #[cfg(target_arch = "aarch64")]
+            let row = if use_packed {
+                // SAFETY: the exact polynomial and ARM64 AES/PMULL feature
+                // were checked once above; all inputs were curve-checked.
+                unsafe { packed83::batch_add_fixed(curve, &points[i], &points[i..]) }?
+            } else {
+                batch_add_fixed(curve, &points[i], &points[i..])
+            };
+            #[cfg(not(target_arch = "aarch64"))]
             let row = batch_add_fixed(curve, &points[i], &points[i..]);
             for (offset, sum) in row.into_iter().enumerate() {
                 let x = x_key(&sum)?;
@@ -762,6 +833,36 @@ mod tests {
                 .map(|p| point_add(&curve, fixed, p))
                 .collect::<Vec<_>>()
         );
+        #[cfg(target_arch = "aarch64")]
+        if std::arch::is_aarch64_feature_detected!("aes") {
+            // SAFETY: the pinned polynomial and CPU feature were checked.
+            let packed = unsafe { packed83::batch_add_fixed(&curve, fixed, &inputs) }.unwrap();
+            assert_eq!(packed, batch_add_fixed(&curve, fixed, &inputs));
+            let packed_inf =
+                unsafe { packed83::batch_add_fixed(&curve, &BinaryPoint::Infinity, &inputs) }
+                    .unwrap();
+            assert_eq!(packed_inf, inputs);
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn n83_pmull_pair_build_matches_k0_reference() {
+        if !std::arch::is_aarch64_feature_detected!("aes") {
+            return;
+        }
+        let kc = KoblitzCurve::known_n83_k0().unwrap();
+        let parent = build_standard_subspace_factor_base(&kc, 8).unwrap();
+        let base = cofactor_project_factor_base(&kc, &parent).unwrap();
+        assert_eq!(base.points.len(), 258);
+        for i in [0usize, 1, 2, 7, 64, 127, 257] {
+            let reference = batch_add_fixed(&kc.curve, &base.points[i], &base.points[i..]);
+            // SAFETY: the pinned polynomial and CPU feature were checked.
+            let candidate =
+                unsafe { packed83::batch_add_fixed(&kc.curve, &base.points[i], &base.points[i..]) }
+                    .unwrap();
+            assert_eq!(candidate, reference, "base row {i}");
+        }
     }
 
     #[test]
