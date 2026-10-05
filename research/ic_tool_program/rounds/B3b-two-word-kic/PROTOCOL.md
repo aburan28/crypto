@@ -272,6 +272,8 @@ None of these is a measurement.
   Each of the ten runs is under the tool's one-day budget, and
   `icprog f0 analyse` replays both arms' answers in arithmetic of its
   own.
-- **Measurement 6, the two-word premium,** runs once its native harness
-  has landed (plan §10a).
+- **Measurement 6, the two-word premium,** runs on `icprog
+  b3b-premium`. Its prices are the build phase over the stored pairs, the
+  collection phase over the summands scanned, and the online probe loop
+  (`target_pdp`) over the descent's trials.
 - **Nothing else changes:** the cases, the pins, the acceptance rules.
