@@ -1,0 +1,78 @@
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-native-target-controller-20261004)
+    Finished `test` profile [unoptimized] target(s) in 6.10s
+     Running unittests src/bin/icprog.rs (/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/icprog-30e51a89c3fe902e)
+
+running 24 tests
+test target_control::capsule::tests::claim_rejects_validation_capsule_wrong_seal_and_wrong_execution ... ok
+test target_control::capsule::tests::config_rejects_unbounded_and_known_scalar_fields ... ok
+test target_control::capsule::tests::old_capsule_scope_and_mismatched_compiled_identity_are_rejected ... ok
+test target_control::capsule::tests::preparation_receipt_pins_reject_missing_native_admission_and_changed_input ... ok
+test target_control::journal::tests::abrupt_record_helper ... ok
+test target_control::journal::tests::binding_and_record_limits_are_fail_closed ... ok
+test target_control::journal::tests::both_record_shapes_preserve_complete_prefix_with_no_runtime_admission ... ok
+test target_control::journal::tests::durable_start_survives_drop_as_unadmitted_pending_prefix ... ok
+test target_control::journal::tests::failed_write_poisoning_prevents_overwrite_and_resume ... ok
+test target_control::journal::tests::inspector_rejects_orphans_gaps_changed_links_and_wrong_seal ... ok
+test target_control::journal::tests::watchdog_killed_writer_retains_start_and_original_drain_receipt ... ok
+test target_control::journal::tests::wrong_target_coefficients_family_and_completion_are_rejected ... ok
+test target_control::tests::audit_output_cannot_mutate_original_capsule_or_execution ... ok
+test target_control::tests::consumed_claim_and_exposure_are_one_use_and_not_freshness ... ok
+test target_control::tests::controller_source_and_nested_drain_gates_cannot_be_omitted ... ok
+test target_control::tests::frozen_build_receipt_contract_rejects_changed_flags_tools_and_identity ... ok
+test target_control::tests::host_bytes_and_external_seal_are_bound_without_granting_execution ... ok
+test target_control::tests::interrupted_prefix_without_files_is_not_admitted_or_assumed_no_search ... ok
+test target_control::tests::ledger_requires_the_exact_completed_original_role ... ok
+test target_control::tests::original_worker_and_nested_preparation_receipts_reject_substitution ... ok
+test target_control::tests::prefix_worker_and_target_binding_cannot_be_swapped ... ok
+test target_control::tests::validation_development_and_unsealed_capsules_cannot_dispatch ... ok
+test target_control::tests::verified_budget_failure_is_not_a_successful_exit_or_win ... ok
+test target_control::tests::whole_interval_requires_nonoverlapping_components_and_checked_sum ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 115 filtered out; finished in 4.96s
+

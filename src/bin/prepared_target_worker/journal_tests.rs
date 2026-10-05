@@ -184,7 +184,12 @@ fn watchdog_killed_writer_retains_start_and_original_drain_receipt() {
     let own = std::env::current_exe().unwrap();
     let args = vec![
         "--exact".into(),
-        "journal::tests::abrupt_record_helper".into(),
+        // The journal is also compiled below icprog::target_control. Test names
+        // omit the crate prefix, so retain the actual module path in both bins.
+        format!(
+            "{}::abrupt_record_helper",
+            module_path!().split_once("::").unwrap().1
+        ),
         "--nocapture".into(),
     ];
     let env = vec![(

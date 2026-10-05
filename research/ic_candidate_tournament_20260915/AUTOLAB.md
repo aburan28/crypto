@@ -92,8 +92,8 @@ native preparation with its frozen auditor before online timing. A data-only
 prefix reader retains an unfinished query after a watchdog kills a file-only
 control process. The shared journal accepts both record shapes; a complete SAT
 worker still requires accepted preinitialized transport, and the target
-controller/freezer, independent runtime audit and scientific dispatch remain
-pending. File survival and source controls establish no native relation yield
+controller/freezer and independent runtime audit are connected below; scientific
+dispatch remains pending. File survival and source controls establish no native relation yield
 or speedup.
 The [independent target mathematical audit](goal_20260924/native-target-math-audit-v1/PROTOCOL.md)
 adds `icprog target-mathematics-audit` for new n17 F5 producer and attempt files.
@@ -102,7 +102,21 @@ full-point witnesses, exact geometric negatives and projected scalar recovery.
 It binds every completed record and checks the five-phase ledger, retaining
 failed targets and unknown phase costs. Historical-data controls execute no
 solver; this mathematical gate cannot admit source/build/runtime custody or
-timing, and the independently frozen complete-run audit is still required.
+timing by itself.
+The [new target controller and original runtime audit](goal_20260924/native-target-controller-v1/PROTOCOL.md)
+adds `target-control-freeze`, `target-control-execute`, `target-control-inspect`
+and `target-control-audit`. The original frozen controller consumes its claim
+before the sole worker launch and records the supplied point's exposure without
+claiming freshness. It drains both the worker and nested preparation-auditor
+groups and preserves failed/timeout receipts. Its data-only audit binds complete
+source/build receipts, original preparation, both native invocations and PID
+ledgers, durable target attempts, independent mathematics and clock closure.
+A verified budget-exhausted execution remains a failed target; inspection and
+validation-only builds cannot admit a run. Host-context bytes are pinned too.
+These are bounded n17 source controls, not an accepted scientific registration
+or new yield result. Complete offline target-build custody, accepted-source
+ordinary F5/CMS panels, SAT transport, canonical identities, fresh paired
+targets/strong rho and host isolation/noise gates remain required.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

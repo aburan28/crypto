@@ -44,6 +44,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-worker-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-math-audit-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -82,6 +83,7 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-durable-target-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-worker-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-math-audit-v1/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-target-replay-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-v1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-custody-v1/**'
@@ -148,6 +150,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::recording_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_math::tests -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
