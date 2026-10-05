@@ -1,0 +1,46 @@
+name: Curve cover certificates
+on:
+  pull_request:
+    paths:
+      - 'src/bin/curve_cover_check.rs'
+      - 'src/bin/curve_cover_check/**'
+      - 'src/binary_ecc/**'
+      - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/hash/sha256.rs'
+      - 'src/utils/**'
+      - 'docs/curves/**'
+      - 'docs/browser/**'
+      - 'scripts/build_lab_browser.py'
+      - 'scripts/test_cover_catalog.py'
+      - '.github/workflows/curve-covers.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/bin/curve_cover_check.rs'
+      - 'src/bin/curve_cover_check/**'
+      - 'src/binary_ecc/**'
+      - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/hash/sha256.rs'
+      - 'src/utils/**'
+      - 'docs/curves/**'
+      - 'docs/browser/**'
+      - 'scripts/build_lab_browser.py'
+      - 'scripts/test_cover_catalog.py'
+      - '.github/workflows/curve-covers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certificates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --bin curve_cover_check
+      - run: cargo run --bin curve_cover_check -- --check
+      - run: python3 scripts/test_cover_catalog.py
+      - run: python3 scripts/build_lab_browser.py --check
