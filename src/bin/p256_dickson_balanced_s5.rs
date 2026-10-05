@@ -22,6 +22,9 @@ const CELLS_PER_CLASS: usize = 4;
 const MAX_DEGREE: u32 = 8;
 const BUDGET_SECS: u64 = 20;
 const ROUND9_SHA256: &str = "44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a";
+const ROUND10_SHA256: &str = "1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93";
+const IMAGE_MAX_DEGREE: u32 = 4;
+const IMAGE_BUDGET_SECS: u64 = 5;
 
 #[derive(Parser)]
 #[command(about = "Compare balanced S5 F4 with exact liftability specialisation")]
@@ -32,6 +35,9 @@ struct Cli {
     /// Run the round-10 atomized replay from this hash-pinned round-9 result.
     #[arg(long)]
     atomize_round9: Option<PathBuf>,
+    /// Run the round-11 pair-image atomization from this round-10 result.
+    #[arg(long)]
+    image_atomize_round10: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -229,7 +235,7 @@ struct ExperimentResult {
     terminal_results: Vec<TerminalResult>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomReference {
     affine: bool,
     identity: bool,
@@ -237,7 +243,7 @@ struct AtomReference {
     signed_tuples: usize,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomRun {
     x: [u64; 4],
     reference: AtomReference,
@@ -247,7 +253,7 @@ struct AtomRun {
     affine_f4: F4Run,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomizedStagedRun {
     positive: bool,
     correct: bool,
@@ -262,7 +268,7 @@ struct AtomizedStagedRun {
     witness_chart: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomizedCellResult {
     boundaries: [u64; 4],
     expected_positive: bool,
@@ -277,7 +283,7 @@ struct AtomizedCellResult {
     staged: AtomizedStagedRun,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomizedTerminalResult {
     terminal: u64,
     target: [u64; 2],
@@ -287,7 +293,7 @@ struct AtomizedTerminalResult {
     cells: Vec<AtomizedCellResult>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct AtomizedExperimentResult {
     schema: String,
     curve: String,
@@ -298,6 +304,66 @@ struct AtomizedExperimentResult {
     max_degree: u32,
     budget_seconds_per_atom: u64,
     terminal_results: Vec<AtomizedTerminalResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ImageAtomRun {
+    left_image_x: u64,
+    expected_positive: bool,
+    coefficient_multiplications: u64,
+    f4: F4Run,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ImageLeafRun {
+    leaf_x: [u64; 4],
+    left_affine_image: Vec<u64>,
+    right_affine_image: Vec<u64>,
+    image_build_solves: u64,
+    image_build_roots: u64,
+    image_build_multiplications: u64,
+    identity_chart_positive: bool,
+    identity_s3_checks: u64,
+    image_atoms: Vec<ImageAtomRun>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ImageCellResult {
+    boundaries: [u64; 4],
+    expected_positive: bool,
+    leaf_atoms: usize,
+    image_atoms: usize,
+    signed_tuples: usize,
+    affine_positive: bool,
+    identity_positive: bool,
+    combined_positive: bool,
+    false_negative: bool,
+    false_positive: bool,
+    leaf_runs: Vec<ImageLeafRun>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ImageTerminalResult {
+    terminal: u64,
+    target: [u64; 2],
+    parent_cells: usize,
+    leaf_atoms: usize,
+    image_atoms: usize,
+    signed_tuples: usize,
+    cells: Vec<ImageCellResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ImageExperimentResult {
+    schema: String,
+    curve: String,
+    prime: u64,
+    a: u64,
+    b: u64,
+    round10_sha256: String,
+    max_degree: u32,
+    budget_seconds_per_image_atom: u64,
+    terminal_results: Vec<ImageTerminalResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -610,13 +676,31 @@ fn specialised_system(
 }
 
 fn run_f4(arm: &str, equations: &[Pol], n: usize, expected_positive: bool) -> F4Run {
+    run_f4_bounded(
+        arm,
+        equations,
+        n,
+        expected_positive,
+        MAX_DEGREE,
+        BUDGET_SECS,
+    )
+}
+
+fn run_f4_bounded(
+    arm: &str,
+    equations: &[Pol],
+    n: usize,
+    expected_positive: bool,
+    max_degree: u32,
+    budget_secs: u64,
+) -> F4Run {
     let input: Vec<F4Poly> = equations.iter().map(Pol::to_f4).collect();
     let report = f4_fp::f4(
         &input,
         n,
         P,
-        &F4Options::new(Ordering::Grevlex, MAX_DEGREE)
-            .with_budget(Duration::from_secs(BUDGET_SECS)),
+        &F4Options::new(Ordering::Grevlex, max_degree)
+            .with_budget(Duration::from_secs(budget_secs)),
     );
     let complete =
         !report.timed_out && report.pairs_above_bound == 0 && report.staircase_at_stop.is_none();
@@ -1183,6 +1267,218 @@ fn run_atomized(round9_path: &PathBuf, out: Option<PathBuf>) -> Result<(), Strin
     Ok(())
 }
 
+fn affine_pair_image_reference(
+    left_x: u64,
+    right_x: u64,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> BTreeSet<u64> {
+    let mut out = BTreeSet::new();
+    for &left_y in &square_roots[curve_rhs(left_x, b) as usize] {
+        for &right_y in &square_roots[curve_rhs(right_x, b) as usize] {
+            let sum = add_points(
+                Point::Affine(Affine {
+                    x: left_x,
+                    y: left_y,
+                }),
+                Point::Affine(Affine {
+                    x: right_x,
+                    y: right_y,
+                }),
+            );
+            if let Point::Affine(point) = sum {
+                out.insert(point.x);
+            }
+        }
+    }
+    out
+}
+
+fn counted_pair_image(left_x: u64, right_x: u64, b: u64) -> (BTreeSet<u64>, u64, u64, u64) {
+    let mut field = CountedField::default();
+    let mut solves = 0;
+    let mut roots_returned = 0;
+    let image = image(
+        &[left_x],
+        &[right_x],
+        b,
+        &mut field,
+        &mut solves,
+        &mut roots_returned,
+    );
+    (image, solves, roots_returned, field.multiplications)
+}
+
+fn quadratic_polynomial(qa: u64, qb: u64, qc: u64) -> Pol {
+    let variable = Pol::var(1, 0);
+    variable
+        .square()
+        .scale(qa)
+        .add(&variable.scale(qb))
+        .add(&Pol::constant(1, qc))
+}
+
+fn run_image_terminal(
+    terminal: &AtomizedTerminalResult,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<ImageTerminalResult, String> {
+    let target_x = terminal.target[0];
+    let mut terminal_leaf_atoms = 0;
+    let mut terminal_image_atoms = 0;
+    let mut cells = Vec::new();
+    for parent in &terminal.cells {
+        let mut leaf_runs = Vec::new();
+        let mut affine_positive = false;
+        let mut identity_positive = false;
+        let mut image_atoms = 0;
+        for atom in &parent.atom_runs {
+            let (left_image, left_solves, left_roots, left_muls) =
+                counted_pair_image(atom.x[0], atom.x[1], b);
+            let (right_image, right_solves, right_roots, right_muls) =
+                counted_pair_image(atom.x[2], atom.x[3], b);
+            let left_reference = affine_pair_image_reference(atom.x[0], atom.x[1], b, square_roots);
+            let right_reference =
+                affine_pair_image_reference(atom.x[2], atom.x[3], b, square_roots);
+            if left_image != left_reference || right_image != right_reference {
+                return Err(format!(
+                    "pair image mismatch at terminal {}, leaf atom {:?}",
+                    terminal.terminal, atom.x
+                ));
+            }
+            let right_values: Vec<u64> = right_image.iter().copied().collect();
+            if right_values.is_empty() || right_values.len() > 2 {
+                return Err(format!(
+                    "right pair image at {:?} has {} affine roots",
+                    atom.x,
+                    right_values.len()
+                ));
+            }
+            let right_membership = leaf_polynomial(1, 0, &right_values)?;
+            let mut atom_image_runs = Vec::new();
+            for &left in &left_image {
+                let mut coefficient_field = CountedField::default();
+                let (qa, qb, qc) = coefficients(&mut coefficient_field, left, target_x, b);
+                let target_polynomial = quadratic_polynomial(qa, qb, qc);
+                let expected_positive = right_values
+                    .iter()
+                    .any(|&right| s3_value(left, right, target_x, b) == 0);
+                let f4 = run_f4_bounded(
+                    "image-atomized-final-join",
+                    &[target_polynomial, right_membership.clone()],
+                    1,
+                    expected_positive,
+                    IMAGE_MAX_DEGREE,
+                    IMAGE_BUDGET_SECS,
+                );
+                affine_positive |= !f4.inconsistent;
+                atom_image_runs.push(ImageAtomRun {
+                    left_image_x: left,
+                    expected_positive,
+                    coefficient_multiplications: coefficient_field.multiplications,
+                    f4,
+                });
+            }
+            identity_positive |= atom.identity_chart_positive;
+            image_atoms += atom_image_runs.len();
+            leaf_runs.push(ImageLeafRun {
+                leaf_x: atom.x,
+                left_affine_image: left_image.iter().copied().collect(),
+                right_affine_image: right_values,
+                image_build_solves: left_solves + right_solves,
+                image_build_roots: left_roots + right_roots,
+                image_build_multiplications: left_muls + right_muls,
+                identity_chart_positive: atom.identity_chart_positive,
+                identity_s3_checks: atom.identity_s3_checks,
+                image_atoms: atom_image_runs,
+            });
+        }
+        let combined_positive = affine_positive || identity_positive;
+        terminal_leaf_atoms += leaf_runs.len();
+        terminal_image_atoms += image_atoms;
+        cells.push(ImageCellResult {
+            boundaries: parent.boundaries,
+            expected_positive: parent.expected_positive,
+            leaf_atoms: leaf_runs.len(),
+            image_atoms,
+            signed_tuples: parent.signed_tuples,
+            affine_positive,
+            identity_positive,
+            combined_positive,
+            false_negative: parent.expected_positive && !combined_positive,
+            false_positive: !parent.expected_positive && combined_positive,
+            leaf_runs,
+        });
+    }
+    Ok(ImageTerminalResult {
+        terminal: terminal.terminal,
+        target: terminal.target,
+        parent_cells: terminal.cells.len(),
+        leaf_atoms: terminal_leaf_atoms,
+        image_atoms: terminal_image_atoms,
+        signed_tuples: terminal.signed_tuples,
+        cells,
+    })
+}
+
+fn run_image_atomized(round10_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round10_path).map_err(|error| error.to_string())?;
+    let round10_sha256 = hex::encode(sha256(&bytes));
+    if round10_sha256 != ROUND10_SHA256 {
+        return Err(format!(
+            "round-10 SHA-256 mismatch: expected {ROUND10_SHA256}, got {round10_sha256}"
+        ));
+    }
+    let round10: AtomizedExperimentResult =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    let total_atoms: usize = round10
+        .terminal_results
+        .iter()
+        .map(|terminal| terminal.atomized_subcomponents)
+        .sum();
+    let total_signed: usize = round10
+        .terminal_results
+        .iter()
+        .map(|terminal| terminal.signed_tuples)
+        .sum();
+    if round10.schema != "p256.dickson_atomized_s5_degree/v1"
+        || round10.curve != CURVE_SLUG
+        || round10.prime != P
+        || round10.a != A
+        || round10.terminal_results.len() != TERMINALS.len()
+        || total_atoms != 104
+        || total_signed != 1664
+        || round10
+            .terminal_results
+            .iter()
+            .any(|terminal| terminal.cells.len() != 2 * CELLS_PER_CLASS)
+    {
+        return Err("round-10 header or frozen evidence count mismatch".into());
+    }
+    let square_roots = square_root_table();
+    let mut terminal_results = Vec::new();
+    for terminal in &round10.terminal_results {
+        terminal_results.push(run_image_terminal(terminal, round10.b, &square_roots)?);
+    }
+    let result = ImageExperimentResult {
+        schema: "p256.dickson_image_atomized_s5_degree/v1".into(),
+        curve: CURVE_SLUG.into(),
+        prime: P,
+        a: A,
+        b: round10.b,
+        round10_sha256,
+        max_degree: IMAGE_MAX_DEGREE,
+        budget_seconds_per_image_atom: IMAGE_BUDGET_SECS,
+        terminal_results,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
     let p256 = CurveParams::p256();
     let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
@@ -1213,9 +1509,11 @@ fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
 }
 
 fn run(cli: Cli) -> Result<(), String> {
-    match cli.atomize_round9 {
-        Some(path) => run_atomized(&path, cli.out),
-        None => run_round9(cli.out),
+    match (cli.atomize_round9, cli.image_atomize_round10) {
+        (Some(_), Some(_)) => Err("choose only one continuation mode".into()),
+        (Some(path), None) => run_atomized(&path, cli.out),
+        (None, Some(path)) => run_image_atomized(&path, cli.out),
+        (None, None) => run_round9(cli.out),
     }
 }
 
