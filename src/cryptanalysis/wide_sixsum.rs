@@ -324,7 +324,7 @@ impl System512 {
             gf2_elim::Config::from_env(),
             &mut ops,
         );
-        let mut linear = 0;
+        let mut linear_equations = Vec::new();
         let mut contradiction = false;
         for row in &matrix[..rank] {
             let lead = row
@@ -334,23 +334,56 @@ impl System512 {
                 .map(|(w, bits)| w * 64 + bits.trailing_zeros() as usize)
                 .expect("nonzero pivot");
             if columns[lead].degree() <= 1 {
-                linear += 1;
-                if columns[lead].degree() == 0 {
-                    contradiction = true;
+                let mut variables = Vec::new();
+                let mut constant = false;
+                for (w, &word) in row.iter().enumerate() {
+                    let mut bits = word;
+                    while bits != 0 {
+                        let c = w * 64 + bits.trailing_zeros() as usize;
+                        bits &= bits - 1;
+                        let mono = columns[c];
+                        match mono.degree() {
+                            0 => constant = true,
+                            1 => {
+                                let (word_index, &value) = mono
+                                    .0
+                                    .iter()
+                                    .enumerate()
+                                    .find(|(_, value)| **value != 0)
+                                    .expect("linear monomial");
+                                variables.push(word_index * 64 + value.trailing_zeros() as usize);
+                            }
+                            _ => unreachable!("degree-one pivot cannot have a higher-degree tail"),
+                        }
+                    }
                 }
+                variables.sort_unstable();
+                contradiction |= variables.is_empty() && constant;
+                linear_equations.push(LinearEquation {
+                    variables,
+                    constant,
+                });
             }
         }
         RootReduction::Reduced {
             columns: columns.len(),
             rank,
-            linear,
+            linear: linear_equations.len(),
+            linear_equations,
             contradiction,
             xor_ops: ops,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LinearEquation {
+    /// XOR of these variable bits equals `constant`.
+    pub variables: Vec<usize>,
+    pub constant: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum RootReduction {
     ColumnLimit {
         columns: usize,
@@ -359,6 +392,7 @@ pub enum RootReduction {
         columns: usize,
         rank: usize,
         linear: usize,
+        linear_equations: Vec<LinearEquation>,
         contradiction: bool,
         xor_ops: u64,
     },
@@ -385,5 +419,34 @@ mod tests {
         let product = x.mul(&y);
         assert_eq!(product.terms[0].degree(), 2);
         assert_eq!(product.add(&product), Poly512::zero());
+    }
+
+    #[test]
+    fn exact_linear_consequence_replays() {
+        let system = System512 {
+            equations: vec![Poly512::var(64)
+                .add(&Poly512::var(384))
+                .add(&Poly512::one())],
+            n_vars: 512,
+            summand_bits: 96,
+        };
+        let RootReduction::Reduced {
+            rank,
+            linear_equations,
+            contradiction,
+            ..
+        } = system.root_reduce()
+        else {
+            panic!("small matrix must reduce")
+        };
+        assert_eq!(rank, 1);
+        assert!(!contradiction);
+        assert_eq!(
+            linear_equations,
+            vec![LinearEquation {
+                variables: vec![64, 384],
+                constant: true
+            }]
+        );
     }
 }

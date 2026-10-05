@@ -181,14 +181,16 @@ fn main() {
     if offset == Some(0) {
         let reduce = Instant::now();
         let result = system.root_reduce();
-        let (status, columns, rank, linear, contradiction, xor_ops) = match result {
+        let (status, columns, rank, linear, linear_equations, contradiction, xor_ops) = match result
+        {
             RootReduction::ColumnLimit { columns } => {
-                ("column_limit", columns, None, None, None, None)
+                ("column_limit", columns, None, None, None, None, None)
             }
             RootReduction::Reduced {
                 columns,
                 rank,
                 linear,
+                linear_equations,
                 contradiction,
                 xor_ops,
             } => (
@@ -196,6 +198,23 @@ fn main() {
                 columns,
                 Some(rank),
                 Some(linear),
+                Some(
+                    linear_equations
+                        .into_iter()
+                        .map(|equation| {
+                            let summand_variables = equation
+                                .variables
+                                .iter()
+                                .filter(|&&v| v < system.summand_bits)
+                                .count();
+                            json!({
+                                "variables":equation.variables,
+                                "constant":equation.constant,
+                                "summand_variables":summand_variables
+                            })
+                        })
+                        .collect::<Vec<_>>(),
+                ),
                 Some(contradiction),
                 Some(xor_ops),
             ),
@@ -205,7 +224,8 @@ fn main() {
             json!({
                 "phase":"root_reduction", "mode":args[1], "offset":offset,
                 "status":status, "columns":columns, "rank":rank,
-                "linear":linear, "contradiction":contradiction, "xor_ops":xor_ops,
+                "linear":linear, "linear_equations":linear_equations,
+                "contradiction":contradiction, "xor_ops":xor_ops,
                 "reduce_ns":reduce.elapsed().as_nanos(), "peak_rss_bytes":peak_rss_bytes(),
                 "claim_scope":"algebraic_feasibility_only"
             })
