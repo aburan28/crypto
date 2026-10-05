@@ -32,16 +32,32 @@ versioned agency/standard/OID crosswalk, including withdrawn standards and
 basis variants. Additional GOST representations and other agency inventories
 must be sourced before that census can be called complete.
 
-## Rebuild
+## Run the binaries
+
+Release archives include `curve_standards`, `curve_cover_check`, and the pinned
+catalog under `docs/curves`. Run from the archive's root; Cargo is not required.
 
 ```sh
-cargo run --bin curve_standards --
+./curve_standards --check
+./curve_cover_check --check
+```
+
+`curve_standards --directory PATH` reads the two input parameter files and
+updates that directory's native registry and coverage report.
+`curve_cover_check --registry PATH --output PATH --links PATH` writes findings
+and the YAML graph for a supplied ICV1 registry. Add `--check` for read-only replay.
+
+## Rebuild from source
+
+```sh
+cargo build --release --bin curve_standards --bin curve_cover_check
+./target/release/curve_standards
 python3 scripts/update_curve_standards.py
-cargo run --bin curve_cover_check --
+./target/release/curve_cover_check
 python3 scripts/build_lab_browser.py
 ```
 
-Each command accepts `--check` (after `--` for Cargo). The Python steps only
+Each generation command accepts `--check`. The Python steps only
 merge or render native-generated metadata; curve arithmetic, field checks,
 model identities and cover verification run in Rust. The older registry builder
 also consumes the native standards registry when rebuilding other legacy inputs.

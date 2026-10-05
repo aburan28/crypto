@@ -88,6 +88,8 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           "./target/${{ matrix.target }}/release/crypto$ext" --help > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/curve_cover_check$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/curve_standards$ext" --help > /dev/null
       - name: Stage the archive
         shell: bash
         run: |
@@ -97,6 +99,13 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           cp "target/${{ matrix.target }}/release/crypto$ext" "dist/$name/"
           cp "target/${{ matrix.target }}/release/ic$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/curve_cover_check$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/curve_standards$ext" "dist/$name/"
+          mkdir -p "dist/$name/docs/curves"
+          cp docs/curves/registry.json docs/curves/covers.json docs/curves/cover-links.yaml \
+             docs/curves/cover-links.schema.json docs/curves/COVERS.md docs/curves/ICV1.md \
+             "dist/$name/docs/curves/"
+          cp -R docs/curves/standards "dist/$name/docs/curves/"
           # `[ -f ] && cp` leaves the loop's exit status at 1 when the last
           # candidate is absent, which trips the step's `bash -e`.
           for extra in README.md LICENSE LICENSE.md; do
