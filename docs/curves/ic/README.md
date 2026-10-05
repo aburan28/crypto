@@ -94,3 +94,92 @@ Walked curves get computed ICV1 slugs and EC1 identities but are not added
 to [`registry.json`](../registry.json); register a slug before citing it in
 prose (`AGENTS.md` §11).  The first runs are in
 [`research/isogeny_walk_20261004/`](../../../research/isogeny_walk_20261004/README.md).
+
+### Traits and queued detection
+
+Trait detection (`src/cryptanalysis/isogeny_walk/traits.rs`) has two
+scopes, because isogenous curves over `F_p` share `p`, `#E` and the trace.
+
+- **Class audits** depend only on `p` and `#E` and run once per walk, on
+  the root.  They are `ecc_safety`'s parameter audit, the structural report
+  (`p256_structural::curve_structural_report`) and the
+  Petit–Kosters–Messeng signals (`pkm_criterion`).  `walk.json#class_audits`
+  records them.  The two audits that read a model are re-run on a sample of
+  walked curves (`--class-audit-sample`, default 8), and
+  `invariance_check.identical_to_root` records whether every verdict
+  matched the root's.
+- **Curve detectors** (the `Detector` trait) read one curve's model and
+  generator.  Each writes one `trait_status` entry in `curves.yaml`.
+  - The built-in detectors are `non_singular`, `generator_valid`,
+    `a_minus_3_model`, `qr_prefix_64` and `coefficient_bits`.
+  - Add a detector to `default_detectors()` and every walk, shard and
+    queue job records it.
+
+Detection also runs as queued jobs, using `taskq` (`taskq/README.md`).
+
+```bash
+./target/release/isogeny_walk plan --curve p256 --max-ell 61 --max-curves 20000 \
+    --commit "$(git rev-parse HEAD)" --shards 16 --out specs/
+for f in specs/*.json; do taskq submit --spec "$f"; done
+# Fetch each task's artifacts into its own directory, then:
+./target/release/isogeny_walk collect --out traits/ shard-dirs/*
+```
+
+- **What each job does.** Each spec checks out the pinned commit, builds
+  the walker, and rebuilds the walk in its setup step.  The walk is
+  deterministic, so no shared storage is needed.  The job then runs
+  `isogeny_walk traits --shard i --of N` into `$TASKQ_OUTPUT_DIR`.
+- **Ownership.** A shard owns the curves with `index ≡ i (mod N)`.  It
+  writes `traits.jsonl`, `metrics.json` (taskq parses it into the run's
+  metrics) and, for shard 0, `class_audits.json`.
+- **Collecting.** `collect` merges the shards and refuses:
+  - a missing or repeated shard;
+  - a curve seen twice or not at all;
+  - shards built from different walks (the routes file's SHA-256 differs);
+  - a `traits.jsonl` that does not match its recorded hash.
+
+  It reports each trait's distribution in `collect.json`.
+- **Without a queue.** The same shards run locally in a loop.
+
+### Storage in S3
+
+Walk and trait outputs are stored in S3, not on local disk.  The store is
+`s3://crypto-autoresearcher/isogeny-walk` (`src/cryptanalysis/isogeny_walk/store.rs`),
+laid out on the pattern of PR #1330's campaign contract.
+
+```text
+runs/<curve>-<walk key>/attempts/<attempt id>/{curves.yaml,isogeny_routes.json,walk.json}.gz
+runs/<curve>-<walk key>/complete.json
+runs/<curve>-<walk key>/traits/<N>/shard-<i>/…/complete.json
+runs/<curve>-<walk key>/traits/<N>/collected/…/complete.json
+```
+
+- **Write-once.** Every object is created with `If-None-Match: *` and
+  never overwritten.
+- **Hash-checked.** Each upload's SHA-256, as S3 reports it, must equal the
+  local hash before the run's `complete.json` is created, also
+  write-once.
+- **One winner.** That marker lists every object by key, stored SHA-256,
+  bytes and uncompressed SHA-256.  If two attempts race, one marker wins and
+  the loser's objects are never authoritative.  A run that is already
+  complete is not uploaded again.
+- **Checked downloads.** `fetch` recomputes both hashes of every object.
+- **Transport.** The AWS CLI, with the caller's credentials.
+
+```bash
+isogeny_walk walk  --curve p256 --max-ell 61 --max-curves 20000 \
+    --store s3://crypto-autoresearcher/isogeny-walk --prune-local --out W   # STORE.json names the run
+isogeny_walk fetch --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --out W
+isogeny_walk traits --curve p256 --dir W --shard 0 --of 8 \
+    --store s3://crypto-autoresearcher/isogeny-walk --run <run id> --out S0
+isogeny_walk collect --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --of 8 \
+    --store s3://crypto-autoresearcher/isogeny-walk --out T
+isogeny_walk plan ... --store s3://crypto-autoresearcher/isogeny-walk --walk-from-store
+```
+
+With `plan --store --walk-from-store`, each taskq job fetches the stored
+walk instead of rebuilding it and publishes its shard.  The workers then
+need AWS credentials that can read and write the prefix.
+
+The bucket is encrypted (SSE-S3) and blocks public access.  Versioning is
+off; write-once keys make it unnecessary for these objects.
