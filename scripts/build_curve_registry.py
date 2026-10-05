@@ -287,7 +287,11 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     if o.get("generator_call"):
                         params["generator_call"] = o["generator_call"]
                     names = [name] if name else []
-                    if fam == "koblitz":
+                    # An explicit model may certify the Koblitz endomorphism
+                    # while using a different polynomial basis from the
+                    # repository constructor. Its record name is safe, but
+                    # the bare `K_a / GF(2^n)` aliases would be ambiguous.
+                    if fam == "koblitz" and not o.get("suppress_koblitz_aliases"):
                         names += koblitz_aliases(a, m)
                     check_rust(o, ident, rel, fatal)
                     reg.add(ident, fam, params, rel, names)

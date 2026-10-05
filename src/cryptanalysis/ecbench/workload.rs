@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{bare_id, derive_u64};
+use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
     BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
@@ -48,6 +49,20 @@ pub enum CurveSpec {
     /// children this form so a child never repeats a curve search.
     PrimeExplicit {
         p: u64,
+        a: u64,
+        b: u64,
+        group_order: u64,
+        r: u64,
+        gx: u64,
+        gy: u64,
+    },
+    /// A binary curve given outright in polynomial basis. `modulus` is
+    /// the complete integer bitmask, including its degree-`n` leading bit.
+    /// The constructor checks irreducibility, subgroup divisibility,
+    /// generator membership, and `[r]G = O`.
+    BinaryExplicit {
+        n: u32,
+        modulus: u64,
         a: u64,
         b: u64,
         group_order: u64,
@@ -122,6 +137,17 @@ impl CurveSpec {
                 inst.name = inst.curve_id().slug;
                 Ok(Instance::Prime(inst))
             }
+            CurveSpec::BinaryExplicit {
+                n,
+                modulus,
+                a,
+                b,
+                group_order,
+                r,
+                gx,
+                gy,
+            } => binary_explicit_instance(n, modulus, a, b, group_order, r, gx, gy)
+                .map(|i| Instance::Binary(Box::new(i))),
         }
     }
 
@@ -138,6 +164,26 @@ impl CurveSpec {
                 gx: i.generator.0,
                 gy: i.generator.1,
             }),
+            Instance::Binary(i) if i.koblitz.is_none() => {
+                let modulus = i
+                    .irreducible
+                    .low_terms
+                    .iter()
+                    .fold(1u64 << i.n, |v, &term| v | (1u64 << term));
+                Some(CurveSpec::BinaryExplicit {
+                    n: i.n,
+                    modulus,
+                    a: i.a,
+                    b: i.b,
+                    group_order: i.group_order,
+                    r: i.r,
+                    gx: i.generator.x,
+                    gy: i.generator.y,
+                })
+            }
+            // Preserve the original Koblitz constructor: it carries the
+            // certified Frobenius action and endomorphism identity that a
+            // generic explicit binary instance intentionally does not claim.
             Instance::Binary(_) => None,
         }
     }
@@ -158,6 +204,9 @@ impl CurveSpec {
             CurveSpec::PrimeExplicit { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
+            CurveSpec::BinaryExplicit {
+                n, modulus, a, b, ..
+            } => format!("binary_explicit_instance({n}, 0x{modulus:x}, 0x{a:x}, 0x{b:x}, ...)"),
         }
     }
 }
