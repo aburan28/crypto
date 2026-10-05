@@ -58,7 +58,7 @@ Slopes of the exact medians on `K₁` over `ℓ = 2…6`: `rr` 1.10, `x4` 1.40. 
 
 | | |
 |:--|:--|
-| engine | `examples/macaulay_dense.rs` at commit `bafb36a4f`, unchanged through the run |
+| engine | `examples/macaulay_dense.rs` at commit `bafb36a4f`, unchanged through the run. After the run, one progress-print condition was rewritten for clippy 1.98 (`pos % (batch * 32) == 0` to `pos.is_multiple_of(batch * 32)`), which leaves the arithmetic unchanged; the rebuilt engine reproduces the logged readings and ranks on `K₁/2¹⁷` `ℓ = 4` and `ℓ = 5` |
 | systems | the earlier round's exports, regenerated from `rr_degree_ladder --dump-dir` at seed 20260930 and checked against [dump.sha256](../ic_gb_ladder_20261003/runs/registered/dump.sha256) before use, on every host |
 | serial phase | 2026-10-04 14:35Z to 2026-10-05 02:08Z, [run.sh](run.sh), one process at a time, four threads: calibration cells, the `ℓ = 6` `rr` arms, the `K₁/2¹⁹` `x4` arm |
 | parallel phase | 2026-10-05 01:48Z to 05:22Z, [lanes.sh](lanes.sh): the controls in a one-thread lane, `K₀/2¹⁹` `x4` draws 0 and 2 in two two-thread lanes on this host, draws 3 and 4 on two other 4-core hosts |
