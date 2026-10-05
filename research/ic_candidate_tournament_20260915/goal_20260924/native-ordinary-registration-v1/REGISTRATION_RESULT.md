@@ -1,5 +1,11 @@
 # Scientific ordinary-panel registrations: data custody, before dispatch
 
+**Post-dispatch status (2026-10-05):** Both one-use registrations have since
+been consumed and independently audited. The [original result](result-v1/RESULT.md)
+retains the full execution archives and checker receipts. F5 reached rank
+29/29; the registered CryptoMiniSat arm reached 22/29. The text below is the
+unaltered pre-dispatch registration record, not a current dispatch instruction.
+
 Both arms have been frozen from source commit
 `4e8634896cfa6271c550013ab99415e5bc771a02` and the common source
 manifest SHA-256
