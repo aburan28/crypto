@@ -14,6 +14,8 @@ const FIXTURE_BYTES: &[u8] = include_bytes!(
     "../research/cryptopro_b_cm_map_checks_20261005/evidence/legacy/results.json"
 );
 const MAP_SHA256: &str = "51ad7edaf9c931364be2513a1163a95474858381152a715ad9140648fad6a042";
+const FIXTURE_SHA256: &str = "e69d3bc1bcd7b8cfccaeb8f0e332dfb4d23c348ea4f944b550387155166d99b5";
+const VERIFIER_BYTES: &[u8] = include_bytes!("cryptopro_b_cm_map_checks.rs");
 
 type Check<T> = Result<T, String>;
 type Poly = Vec<BigUint>;
@@ -303,6 +305,10 @@ fn curve() -> Curve {
 }
 
 fn verify() -> Check<Value> {
+    require(
+        hex::encode(sha256(FIXTURE_BYTES)) == FIXTURE_SHA256,
+        "Known-input hash mismatch",
+    )?;
     let data = read_map()?;
     let curve = curve();
     let p = &curve.field.0;
@@ -367,7 +373,8 @@ fn verify() -> Check<Value> {
         "curve": "id-GostR3410-2001-CryptoPro-B-ParamSet",
         "map": "degree-155 CM endomorphism omega", "implementation": "Rust",
         "source_map_sha256": MAP_SHA256,
-        "known_input_fixture_sha256": hex::encode(sha256(FIXTURE_BYTES)),
+        "known_input_fixture_sha256": FIXTURE_SHA256,
+        "verifier_source_sha256": hex::encode(sha256(VERIFIER_BYTES)),
         "scope": "forward-map correctness on known public inputs",
         "genus_two_transfer_tested": false, "relation_solver_benchmarked": false,
         "exact_component_map_identities": [

@@ -44,6 +44,7 @@ jobs:
           cargo run --release --example cryptopro_b_cm_map_checks > "$RUNNER_TEMP/cryptopro-b-cm/cryptopro_b_cm_native.json"
           sha256sum "$RUNNER_TEMP/cryptopro-b-cm/cryptopro_b_cm_native.json"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: cryptopro-b-cm-native-replay
           path: ${{ runner.temp }}/cryptopro-b-cm/

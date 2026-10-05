@@ -26,6 +26,10 @@ The input `endomorphism155.json` is unchanged from the supplied
 `cryptopro_b_evidence.zip` and has SHA-256
 `51ad7edaf9c931364be2513a1163a95474858381152a715ad9140648fad6a042`.
 The example checks this hash and parses large integer tokens exactly.
+The known-input fixture is pinned to SHA-256
+`e69d3bc1bcd7b8cfccaeb8f0e332dfb4d23c348ea4f944b550387155166d99b5`.
+Native reports also identify the verifier source by its SHA-256.
+`SHA256SUMS` records the unchanged map and historical evidence files.
 
 `evidence/legacy/` preserves the original Python source snapshot, README,
 and recorded result without alteration. The legacy result reports 39
@@ -34,7 +38,9 @@ were generated with Python RNG seed `202610059`; the native replay reads
 those frozen scalars instead of substituting another random stream.
 The Python snapshot is historical evidence. The executable verifier and
 CI replay use Rust and the repository's existing Cargo dependencies.
-CI uploads its native JSON report as `cryptopro-b-cm-native-replay`.
+CI uploads its native JSON report and formatted source as
+`cryptopro-b-cm-native-replay`. The formatted source is retained even when
+a later check fails; a native report counts only with a successful replay job.
 
 These checks cover the elliptic forward map. No explicit genus-two curve
 equation or transfer formulas are supplied, and no genus-two transfer is
