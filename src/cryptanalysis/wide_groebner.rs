@@ -535,7 +535,8 @@ pub struct WideStats {
     /// Largest linearisation matrix, rows × columns.
     pub max_rows: usize,
     pub max_cols: usize,
-    /// The node budget ran out: a `None` then says nothing.
+    /// The search is incomplete from a spent budget or unsupported input:
+    /// a `None` then says nothing.
     pub exhausted: bool,
     /// The field representation or input is outside this solver's model.
     pub unsupported: bool,
@@ -929,6 +930,7 @@ pub fn wide_groebner_decompose(
     let mut stats = WideStats::default();
     if m >= 2 && (st.degree() != kc.n || st.degree() > st.max_degree() || st.degree() > 128) {
         stats.unsupported = true;
+        stats.exhausted = true;
         return (None, stats);
     }
     let opts = SearchOptions::from_env();
@@ -1030,12 +1032,14 @@ fn decompose_rec(
     }
     if st.degree() != kc.n || st.degree() > st.max_degree() || st.degree() > 128 {
         stats.unsupported = true;
+        stats.exhausted = true;
         return None;
     }
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => {
             stats.unsupported = true;
+            stats.exhausted = true;
             return None;
         }
     };
@@ -1077,10 +1081,12 @@ fn decompose_rec(
         .find(|&k| k * (ell + st.degree() as usize) <= opts.max_vars)
     else {
         stats.unsupported = true;
+        stats.exhausted = true;
         return None;
     };
     let Some(sys) = WideSystem::build_suffix(&fb.subspace_basis, &x_r, &kc.curve.b, k, st) else {
         stats.unsupported = true;
+        stats.exhausted = true;
         return None;
     };
     search(
@@ -1654,7 +1660,7 @@ mod tests {
             wide_groebner_decompose(&kc, &source, &source.index_map(), &legacy, &sum, 3, 16);
         assert!(legacy_witness.is_none());
         assert!(legacy_stats.unsupported);
-        assert!(!legacy_stats.exhausted);
+        assert!(legacy_stats.exhausted);
         let system = WideSystem::build(&source.subspace_basis, x_sum, &kc.curve.b, 3, &st)
             .expect("119 variables fit the wide mask");
         assert_eq!(system.n_vars, 119);
