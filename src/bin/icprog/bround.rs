@@ -241,7 +241,7 @@ fn powmod(mut b: u64, mut e: u64, m: u64) -> u64 {
 }
 
 /// Miller–Rabin with the first twelve primes as bases: exact below 2^64.
-fn is_prime(n: u64) -> bool {
+pub(crate) fn is_prime(n: u64) -> bool {
     const BASES: [u64; 12] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
     if n < 2 {
         return false;
@@ -332,7 +332,7 @@ pub fn largest_prime_factor(m: u128) -> Result<u128, String> {
 }
 
 /// `a·b mod f` over GF(2), for `deg f ≤ 63`.
-fn clmul_mod(a: u64, b: u64, f: u64, n: u32) -> u64 {
+pub(crate) fn clmul_mod(a: u64, b: u64, f: u64, n: u32) -> u64 {
     let mut p = 0u128;
     for i in 0..64 {
         if b >> i & 1 == 1 {

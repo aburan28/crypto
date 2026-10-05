@@ -34,6 +34,8 @@
 mod autolab;
 #[path = "icprog/b2.rs"]
 mod b2;
+#[path = "icprog/b2b.rs"]
+mod b2b;
 #[path = "icprog/b7a.rs"]
 mod b7a;
 #[path = "icprog/bench.rs"]
@@ -439,6 +441,16 @@ enum Command {
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
+    },
+    /// B2b's measurement 6, the subfield sweep (`sweep.py`, ported): every
+    /// run once into a fresh directory, under the benchmark lock.
+    B2bSweep {
+        /// B2b's `ic`.
+        #[arg(long)]
+        ic: PathBuf,
+        /// The directory to write; it must not exist.
+        #[arg(long)]
+        out: PathBuf,
     },
     /// B7a's own measurements (`rounds/B7a-f1-sampled/run.py`, ported):
     /// `f1`, `partial` or `analyse`.
@@ -1238,6 +1250,25 @@ fn main() -> ExitCode {
             example,
             isolate,
         } => b2_cmd(&step, &steps, &root, &runs, cand, example, isolate),
+        Command::B2bSweep { ic, out } => {
+            return match std::path::absolute(&ic)
+                .map_err(|e| e.to_string())
+                .and_then(|ic| b2b::sweep(&ic, &out))
+            {
+                Ok((summary, clean)) => {
+                    println!("{}", json::dumps(&summary, 1));
+                    if clean {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(e) => {
+                    eprintln!("icprog: {e}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
         Command::B7a {
             step,
             steps,
