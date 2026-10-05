@@ -18,6 +18,12 @@ enum PointKey {
     Affine(u128, u128),
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+enum PointXKey {
+    Infinity,
+    Affine(u128),
+}
+
 fn packed(element: &F2mElement) -> Option<u128> {
     let bits = element.raw_bits();
     if bits.len() > 2 {
@@ -30,6 +36,13 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
     match point {
         BinaryPoint::Infinity => Some(PointKey::Infinity),
         BinaryPoint::Affine { x, y } => Some(PointKey::Affine(packed(x)?, packed(y)?)),
+    }
+}
+
+fn x_key(point: &BinaryPoint) -> Option<PointXKey> {
+    match point {
+        BinaryPoint::Infinity => Some(PointXKey::Infinity),
+        BinaryPoint::Affine { x, .. } => Some(PointXKey::Affine(packed(x)?)),
     }
 }
 
@@ -87,6 +100,67 @@ pub fn batch_add_fixed(
         result[i] = BinaryPoint::Affine { x: x3, y: y3 };
     }
     result
+}
+
+/// Compute `fixed + other` and `fixed - other` using the same batch of
+/// denominator inverses. On a binary curve the two operands have the same
+/// x-coordinate, so their ordinary-addition denominators coincide.
+pub fn batch_add_fixed_both_signs(
+    curve: &BinaryCurve,
+    fixed: &BinaryPoint,
+    others: &[BinaryPoint],
+) -> (Vec<BinaryPoint>, Vec<BinaryPoint>) {
+    let BinaryPoint::Affine { x: x1, y: y1 } = fixed else {
+        return (others.to_vec(), others.iter().map(point_neg).collect());
+    };
+    let irr = &curve.irreducible;
+    let mut plus = vec![BinaryPoint::Infinity; others.len()];
+    let mut minus = vec![BinaryPoint::Infinity; others.len()];
+    let mut positions = Vec::new();
+    let mut denominators = Vec::new();
+    for (i, other) in others.iter().enumerate() {
+        match other {
+            BinaryPoint::Affine { x: x2, .. } if x1 != x2 => {
+                positions.push(i);
+                denominators.push(x1.add(x2));
+            }
+            _ => {
+                plus[i] = point_add(curve, fixed, other);
+                minus[i] = point_add(curve, fixed, &point_neg(other));
+            }
+        }
+    }
+    if denominators.is_empty() {
+        return (plus, minus);
+    }
+    let mut prefix = Vec::with_capacity(denominators.len() + 1);
+    prefix.push(F2mElement::one(curve.m));
+    for denominator in &denominators {
+        prefix.push(prefix.last().unwrap().mul(denominator, irr));
+    }
+    let mut inverse = prefix
+        .last()
+        .unwrap()
+        .flt_inverse(irr)
+        .expect("nonzero product");
+    for j in (0..positions.len()).rev() {
+        let i = positions[j];
+        let denominator_inverse = inverse.mul(&prefix[j], irr);
+        inverse = inverse.mul(&denominators[j], irr);
+        let BinaryPoint::Affine { x: x2, y: y2 } = &others[i] else {
+            unreachable!();
+        };
+        let lambda_plus = y1.add(y2).mul(&denominator_inverse, irr);
+        let lambda_minus = lambda_plus.add(&x2.mul(&denominator_inverse, irr));
+        let finish = |lambda: &F2mElement| {
+            let x3 = lambda.square(irr).add(lambda).add(x1).add(x2).add(&curve.a);
+            let y3 = lambda.mul(&x1.add(&x3), irr).add(&x3).add(y1);
+            BinaryPoint::Affine { x: x3, y: y3 }
+        };
+        plus[i] = finish(&lambda_plus);
+        minus[i] = finish(&lambda_minus);
+    }
+    (plus, minus)
 }
 
 /// The memory cap counts unordered pairs, including repeats. This cap is
@@ -174,6 +248,130 @@ impl F6WidePairIndex {
     }
 }
 
+struct SignedPairSum {
+    point: BinaryPoint,
+    pair: (usize, usize),
+    neg_pair: (usize, usize),
+}
+
+/// Exact sign-quotient pair index for a distinct, negation-closed base.
+/// Each stored pair sum also represents its negative via the negated source
+/// points. A query checks both signs and verifies every returned witness.
+pub struct F6SignedPairIndex {
+    curve: BinaryCurve,
+    points: Vec<BinaryPoint>,
+    sums: Vec<SignedPairSum>,
+    lookup: HashMap<PointXKey, usize>,
+    pair_count: usize,
+}
+
+impl F6SignedPairIndex {
+    pub fn new(curve: &BinaryCurve, points: &[BinaryPoint], max_pairs: usize) -> Option<Self> {
+        if curve.m > 128 || points.is_empty() || points.iter().any(|p| !curve.is_on_curve(p)) {
+            return None;
+        }
+        let pair_count = points.len().checked_mul(points.len().checked_add(1)?)? / 2;
+        if pair_count > max_pairs {
+            return None;
+        }
+        let point_index: HashMap<_, _> = points
+            .iter()
+            .enumerate()
+            .map(|(i, point)| Some((key(point)?, i)))
+            .collect::<Option<_>>()?;
+        if point_index.len() != points.len() {
+            return None;
+        }
+        let negatives: Vec<usize> = points
+            .iter()
+            .map(|point| point_index.get(&key(&point_neg(point))?).copied())
+            .collect::<Option<_>>()?;
+        let capacity = pair_count.div_ceil(2);
+        let mut sums = Vec::with_capacity(capacity);
+        let mut lookup = HashMap::with_capacity(capacity);
+        for i in 0..points.len() {
+            let row = batch_add_fixed(curve, &points[i], &points[i..]);
+            for (offset, sum) in row.into_iter().enumerate() {
+                let x = x_key(&sum)?;
+                if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+                    let j = i + offset;
+                    entry.insert(sums.len());
+                    sums.push(SignedPairSum {
+                        point: sum,
+                        pair: (i, j),
+                        neg_pair: (negatives[i], negatives[j]),
+                    });
+                }
+            }
+        }
+        Some(Self {
+            curve: curve.clone(),
+            points: points.to_vec(),
+            sums,
+            lookup,
+            pair_count,
+        })
+    }
+
+    pub fn pair_count(&self) -> usize {
+        self.pair_count
+    }
+
+    pub fn signed_sum_count(&self) -> usize {
+        self.sums.len()
+    }
+
+    fn lookup_pair(&self, residual: &BinaryPoint) -> Option<(usize, usize)> {
+        let entry = &self.sums[*self.lookup.get(&x_key(residual)?)?];
+        if *residual == entry.point {
+            Some(entry.pair)
+        } else if *residual == point_neg(&entry.point) {
+            Some(entry.neg_pair)
+        } else {
+            None
+        }
+    }
+
+    fn verify(
+        &self,
+        target: &BinaryPoint,
+        first: (usize, usize),
+        second: (usize, usize),
+    ) -> Option<[usize; 4]> {
+        let indices = [first.0, first.1, second.0, second.1];
+        let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+            point_add(&self.curve, &acc, &self.points[index])
+        });
+        (sum == *target).then_some(indices)
+    }
+
+    pub fn solve4(&self, target: &BinaryPoint) -> Option<[usize; 4]> {
+        if !self.curve.is_on_curve(target) {
+            return None;
+        }
+        const BATCH: usize = 256;
+        for chunk in self.sums.chunks(BATCH) {
+            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+            let (plus, minus) = batch_add_fixed_both_signs(&self.curve, target, &points);
+            for ((entry, plus_residual), minus_residual) in
+                chunk.iter().zip(plus.iter()).zip(minus.iter())
+            {
+                if let Some(pair) = self.lookup_pair(minus_residual) {
+                    if let Some(witness) = self.verify(target, entry.pair, pair) {
+                        return Some(witness);
+                    }
+                }
+                if let Some(pair) = self.lookup_pair(plus_residual) {
+                    if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                        return Some(witness);
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -222,6 +420,75 @@ mod tests {
                 .map(|p| point_add(&curve, fixed, p))
                 .collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn n83_signed_batch_add_matches_reference_with_exceptions() {
+        let curve = n83_curve();
+        let points: Vec<_> = (1u32..=12)
+            .map(|i| scalar_mul(&curve, &curve.generator, &BigUint::from(i)))
+            .collect();
+        let fixed = &points[3];
+        let mut inputs = points.clone();
+        inputs.push(point_neg(fixed));
+        inputs.push(BinaryPoint::Infinity);
+        let (plus, minus) = batch_add_fixed_both_signs(&curve, fixed, &inputs);
+        assert_eq!(
+            plus,
+            inputs
+                .iter()
+                .map(|p| point_add(&curve, fixed, p))
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(
+            minus,
+            inputs
+                .iter()
+                .map(|p| point_add(&curve, fixed, &point_neg(p)))
+                .collect::<Vec<_>>()
+        );
+        let (plus_inf, minus_inf) =
+            batch_add_fixed_both_signs(&curve, &BinaryPoint::Infinity, &inputs);
+        assert_eq!(plus_inf, inputs);
+        assert_eq!(minus_inf, inputs.iter().map(point_neg).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn n83_signed_pair_index_matches_exhaustive_small_base() {
+        let curve = n83_curve();
+        let positive: Vec<_> = (1u32..=4)
+            .map(|i| scalar_mul(&curve, &curve.generator, &BigUint::from(i)))
+            .collect();
+        assert!(F6SignedPairIndex::new(&curve, &positive, 10).is_none());
+        let mut points = positive.clone();
+        points.extend(positive.iter().map(point_neg));
+        let index = F6SignedPairIndex::new(&curve, &points, 36).unwrap();
+        assert_eq!(index.pair_count(), 36);
+        assert!(index.signed_sum_count() <= 36);
+        let mut four_sums = std::collections::HashSet::new();
+        for a in &points {
+            for b in &points {
+                let ab = point_add(&curve, a, b);
+                for c in &points {
+                    let abc = point_add(&curve, &ab, c);
+                    for d in &points {
+                        four_sums.insert(key(&point_add(&curve, &abc, d)).unwrap());
+                    }
+                }
+            }
+        }
+        for scalar in 0u32..=40 {
+            let target = scalar_mul(&curve, &curve.generator, &BigUint::from(scalar));
+            let expected = four_sums.contains(&key(&target).unwrap());
+            let witness = index.solve4(&target);
+            assert_eq!(witness.is_some(), expected, "target scalar {scalar}");
+            if let Some(indices) = witness {
+                let replay = indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                    point_add(&curve, &acc, &points[i])
+                });
+                assert_eq!(replay, target);
+            }
+        }
     }
 
     #[test]
