@@ -7,12 +7,17 @@ underlying abelian variety E squared. This is a sufficient test, not a
 complete decision algorithm for every matrix, order or elliptic curve.
 
 ```sh
-cargo test --bin jacobian_certificate
-cargo run --bin jacobian_certificate -- --sql docs/curves/jacobian-certificates.sql
-cargo run --bin jacobian_certificate -- --check --sql docs/curves/jacobian-certificates.sql
+cargo build --release --bin jacobian-certificate
+./target/release/jacobian-certificate --sql docs/curves/jacobian-certificates.sql
+./target/release/jacobian-certificate --check --sql docs/curves/jacobian-certificates.sql
 sqlite3 curves.sqlite < docs/curves/jacobian-certificates.sql
 sqlite3 curves.sqlite "SELECT discriminant,status,json_extract(record_json,'$.lattice.minimum') FROM jacobian_certificates;"
 ```
+
+Cargo registers this as a standalone binary target. The built executable can
+be copied or installed with the compiled research tools; running it does not
+invoke Cargo. For development, `cargo test --bin jacobian-certificate` runs
+its correctness suite.
 
 The committed input is [jacobian-candidates.json](jacobian-candidates.json).
 The outputs are [JSON](jacobian-certificates.json) and an idempotent

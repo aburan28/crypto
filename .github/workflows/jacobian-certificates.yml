@@ -30,8 +30,9 @@ jobs:
           components: rustfmt
       - uses: Swatinem/rust-cache@v2
       - run: rustfmt --edition 2021 --check src/bin/jacobian_certificate.rs
-      - run: cargo test --bin jacobian_certificate
-      - run: cargo run --bin jacobian_certificate -- --check --sql docs/curves/jacobian-certificates.sql
+      - run: cargo test --bin jacobian-certificate
+      - run: cargo build --release --bin jacobian-certificate
+      - run: ./target/release/jacobian-certificate --check --sql docs/curves/jacobian-certificates.sql
       - name: Import twice and query the SQLite index
         run: |
           command -v sqlite3 || (sudo apt-get update && sudo apt-get install -y sqlite3)
@@ -44,6 +45,6 @@ jobs:
         run: |
           cp docs/curves/jacobian-certificates.json /tmp/altered.json
           sed -i 's/"minimum": 12/"minimum": 11/' /tmp/altered.json
-          if cargo run --bin jacobian_certificate -- --check --output /tmp/altered.json; then
+          if ./target/release/jacobian-certificate --check --output /tmp/altered.json; then
             exit 1
           fi
