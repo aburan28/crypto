@@ -6563,13 +6563,14 @@ fn add_coordinate_domain(
     solver: &mut crate::cryptanalysis::sat::Solver,
     offset: usize,
     ell: usize,
-    codes: &[u64],
+    codes: &[u128],
 ) {
+    assert!(ell <= 128, "coordinate domain exceeds u128 width");
     fn visit(
         solver: &mut crate::cryptanalysis::sat::Solver,
         offset: usize,
         bit: usize,
-        codes: &[u64],
+        codes: &[u128],
         prefix: &mut Vec<i32>,
     ) {
         if codes.is_empty() {
@@ -6843,11 +6844,15 @@ pub fn sat_decompose_with(
                 BinaryPoint::Infinity => None,
             })
             .collect();
-        let mut codes: Vec<u64> = if fb.uses_ambient_basis() {
+        let mut codes: Vec<u128> = if fb.uses_ambient_basis() {
             // Union construction uses the full polynomial field basis.
             legal_x
                 .iter()
-                .map(|x| x.to_u64_digits().first().copied().unwrap_or(0))
+                .map(|x| {
+                    let words = x.to_u64_digits();
+                    u128::from(*words.first().unwrap_or(&0))
+                        | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+                })
                 .collect()
         } else {
             (0..(1u64 << ell))
@@ -6857,6 +6862,7 @@ pub fn sat_decompose_with(
                             .to_biguint(),
                     )
                 })
+                .map(u128::from)
                 .collect()
         };
         codes.sort_unstable();
@@ -6936,6 +6942,11 @@ fn sat_decompose_union_s4(
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
     use crate::cryptanalysis::semaev_sat::encode_semaev_s4;
     let mut stats = SatDecompositionStats::default();
+    if kc.n > 128 {
+        stats.exhausted = true;
+        stats.unsupported = true;
+        return (None, stats);
+    }
     let BinaryPoint::Affine { x: x_r, .. } = target else {
         stats.exhausted = true;
         stats.unsupported = true;
@@ -6950,11 +6961,17 @@ fn sat_decompose_union_s4(
         options.encoding,
     );
     enc.solver.conflict_budget = options.conflict_budget;
-    let mut codes: Vec<_> = fb
+    let mut codes: Vec<u128> = fb
         .points
         .iter()
         .filter_map(|p| match p {
-            BinaryPoint::Affine { x, .. } => Some(x.raw_bits().first().copied().unwrap_or(0)),
+            BinaryPoint::Affine { x, .. } => {
+                let words = x.raw_bits();
+                Some(
+                    u128::from(*words.first().unwrap_or(&0))
+                        | (u128::from(*words.get(1).unwrap_or(&0)) << 64),
+                )
+            }
             BinaryPoint::Infinity => None,
         })
         .collect();
@@ -13429,7 +13446,7 @@ mod tests {
         use crate::cryptanalysis::sat::{SolveResult, Solver};
         for ell in 1..=5usize {
             for mode in 0..4 {
-                let codes: Vec<_> = (0..(1u64 << ell))
+                let codes: Vec<_> = (0..(1u128 << ell))
                     .filter(|x| match mode {
                         0 => false,
                         1 => true,
@@ -13437,7 +13454,7 @@ mod tests {
                         _ => x & 1 == 1,
                     })
                     .collect();
-                for x in 0..(1u64 << ell) {
+                for x in 0..(1u128 << ell) {
                     let mut solver = Solver::new(ell as u32 + 2);
                     add_coordinate_domain(&mut solver, 2, ell, &codes);
                     for j in 0..ell {
@@ -13447,6 +13464,28 @@ mod tests {
                     assert_eq!(solver.solve() == SolveResult::Sat, codes.contains(&x));
                 }
             }
+        }
+    }
+
+    #[test]
+    fn domain_trie_distinguishes_n83_high_bits() {
+        use crate::cryptanalysis::sat::{SolveResult, Solver};
+        let low = 0x1a5u128;
+        let high = low | (1u128 << 82);
+        let codes = [low, high];
+        for (value, accepted) in [
+            (low, true),
+            (high, true),
+            (low | (1u128 << 64), false),
+            (high | (1u128 << 70), false),
+        ] {
+            let mut solver = Solver::new(85);
+            add_coordinate_domain(&mut solver, 2, 83, &codes);
+            for bit in 0..83 {
+                let lit = (bit + 3) as i32;
+                solver.add_clause(vec![if (value >> bit) & 1 == 1 { lit } else { -lit }]);
+            }
+            assert_eq!(solver.solve() == SolveResult::Sat, accepted, "{value:#x}");
         }
     }
 
