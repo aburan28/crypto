@@ -1,0 +1,194 @@
+{
+  "build_wall_seconds": 0.114923316,
+  "circuit_variant": "inductive_factor_validity",
+  "claim_boundary": "one bounded PDP gate; no relation-rank, DLP, cold-cost crossover, or speed claim",
+  "cnf": {
+    "blake3": "052b4e522a4b8d8f188e4983bb155fc491af80a01dcc546a86a94a497c6ded30",
+    "bytes": 57642729,
+    "clauses": 2571271,
+    "dag": {
+      "and_gates": 196012,
+      "primary_inputs": 2996,
+      "total_nodes": 694818,
+      "xor_gates": 495808
+    },
+    "relation_output_literal": 694818,
+    "variables": 694818
+  },
+  "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
+  "curve_id": "EC1N83Ckb1h876c2921cb64",
+  "dag": {
+    "and_gates": 196012,
+    "primary_inputs": 2996,
+    "total_nodes": 694818,
+    "xor_gates": 495808
+  },
+  "dag_prefix_blake3": "e8715d805517fc35cb70f6b96c5d387a28579c0800e259f69e642c91e5636f88",
+  "rho_baseline": {
+    "verified": true,
+    "walk_iterations": "201733439488",
+    "walk_iterations_log2": 37.55365928975891
+  },
+  "schema": "n83_rotated_m10_chain_v1",
+  "slot_dimensions": [
+    9,
+    9,
+    9,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+  ],
+  "slots": [
+    {
+      "coordinate_positions": [
+        0,
+        21,
+        16,
+        39,
+        44,
+        11,
+        69,
+        36,
+        20
+      ],
+      "dimension": 9
+    },
+    {
+      "coordinate_positions": [
+        1,
+        43,
+        33,
+        79,
+        76,
+        23,
+        26,
+        73,
+        41
+      ],
+      "dimension": 9
+    },
+    {
+      "coordinate_positions": [
+        3,
+        78,
+        67,
+        6,
+        12,
+        47,
+        53,
+        18,
+        82
+      ],
+      "dimension": 9
+    },
+    {
+      "coordinate_positions": [
+        7,
+        8,
+        30,
+        13,
+        25,
+        70,
+        58,
+        37
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        15,
+        17,
+        61,
+        27,
+        51,
+        24,
+        48,
+        75
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        31,
+        35,
+        42,
+        55,
+        62,
+        49,
+        68,
+        14
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        63,
+        71,
+        80,
+        54,
+        40,
+        66,
+        28,
+        29
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        38,
+        22,
+        4,
+        56,
+        81,
+        32,
+        57,
+        59
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        77,
+        45,
+        9,
+        52,
+        2,
+        65,
+        50,
+        46
+      ],
+      "dimension": 8
+    },
+    {
+      "coordinate_positions": [
+        10,
+        74,
+        19,
+        60,
+        5,
+        34,
+        64,
+        72
+      ],
+      "dimension": 8
+    }
+  ],
+  "solver": {
+    "exit_code": 0,
+    "nonterminal_exit": 0,
+    "path": "research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical",
+    "wall_cap_seconds": 120,
+    "wall_seconds": 120.154232002
+  },
+  "status": "BUDGET_OR_SOLVER_STOP",
+  "target": {
+    "infinity": false,
+    "x": "0x78f3daa4bf524e3e8e9c7",
+    "y": "0x2e08b1e3a8d43e5becd4"
+  },
+  "target_kind": "public_rho_target"
+}
