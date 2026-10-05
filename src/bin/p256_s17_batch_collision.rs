@@ -224,10 +224,21 @@ struct FullProjection {
     factor_base_columns: u64,
     group_order: String,
     disjoint_probability: f64,
-    samples_per_side: f64,
-    samples_per_side_log2: f64,
+    signed_left_domain: String,
+    signed_left_domain_log2: f64,
+    signed_right_domain: String,
+    signed_right_domain_log2: f64,
+    withdrawn_symmetric_samples_per_side_log2: f64,
+    target_allowance: f64,
+    per_target_relation_mean: f64,
+    expected_relation_population: f64,
+    collision_events_for_distinct_rows: f64,
+    duplicate_collision_allowance: f64,
+    required_streamed_right_images: f64,
+    required_streamed_right_images_log2: f64,
+    measured_normalization_fme_per_image: f64,
     exact_record_bytes: u64,
-    direct_materialized_bytes_log2: f64,
+    direct_left_materialized_bytes_log2: f64,
     rho_reference_fme_log2: f64,
     variants: Vec<VariantProjection>,
     structured_degree_gate: bool,
@@ -1040,10 +1051,23 @@ fn slope(xs: &[f64], ys: &[f64]) -> f64 {
     numerator / denominator
 }
 
+fn choose_big(n: u64, k: u32) -> BigUint {
+    let k = u64::from(k).min(n - u64::from(k));
+    let mut value = BigUint::one();
+    for index in 0..k {
+        value *= BigUint::from(n - index);
+        value /= BigUint::from(index + 1);
+    }
+    value
+}
+
 fn projection(
     record_bytes: u64,
     exactness_gate: bool,
     degree_gate: bool,
+    normalization_fme_per_image: f64,
+    measured_target_additions: u64,
+    measured_target_doublings: u64,
 ) -> (SparseLinearAlgebraProjection, FullProjection) {
     let rows = 138_031u64;
     let row_weight = 17u64;
@@ -1070,26 +1094,45 @@ fn projection(
     }
     let curve = CurveParams::p256();
     let order = curve.n.to_f64().expect("P-256 order fits f64");
-    let samples_per_side = ((rows as f64 * order) / disjoint).sqrt();
-    let images = 2.0 * samples_per_side;
+    let signed_left = choose_big(COLUMNS as u64, 8) << 8usize;
+    let signed_right = choose_big(COLUMNS as u64, 9) << 9usize;
+    let signed_domain = choose_big(COLUMNS as u64, 17) << 17usize;
+    let left_images = signed_left.to_f64().expect("left domain fits f64");
+    let right_domain = signed_right.to_f64().expect("right domain fits f64");
+    let relation_mean = signed_domain.to_f64().expect("relation domain fits f64") / order;
+    let whole_success = 0.964_000_182_074_505_8f64;
+    let target_allowance = rows as f64 / whole_success;
+    let relation_population = relation_mean * target_allowance;
+    let collision_events = -relation_population * (1.0 - rows as f64 / relation_population).ln();
+    let duplicate_allowance = collision_events / rows as f64;
+    let right_images = collision_events * order / (left_images * disjoint);
+    assert!(right_images / target_allowance < right_domain);
+    let images = left_images + right_images;
+    let withdrawn_symmetric = ((rows as f64 * order) / disjoint).sqrt();
     let rho_fme = 1.3 * order.sqrt() * 17.0;
-    let direct_additions = 16.0 * samples_per_side;
+    let direct_additions = 7.0 * left_images + 9.0 * right_images;
     let optimistic_additions = images;
+    let replay_fme = rows as f64 * (16.0 * 17.0 + 4.0);
+    let target_ops_per_target =
+        (measured_target_additions + measured_target_doublings) as f64 / PUBLIC_TARGETS as f64;
+    let target_setup_fme = target_allowance * target_ops_per_target * 17.0;
     let variants = [
         (
             "direct random signed 8+9 sums",
             direct_additions,
+            images * normalization_fme_per_image + replay_fme + target_setup_fme,
             "projected algorithmic advance",
         ),
         (
             "optimistic one-addition-per-image generic boundary",
             optimistic_additions,
+            0.0,
             "generic lower boundary",
         ),
     ]
     .into_iter()
-    .map(|(name, additions, class)| {
-        let collection_fme = additions * 17.0;
+    .map(|(name, additions, other_collection_fme, class)| {
+        let collection_fme = additions * 17.0 + other_collection_fme;
         let total = collection_fme + sparse_minimum as f64;
         VariantProjection {
             name: name.into(),
@@ -1104,7 +1147,7 @@ fn projection(
     })
     .collect::<Vec<_>>();
     let direct = &variants[0];
-    let storage_log2 = (images * record_bytes as f64).log2();
+    let storage_log2 = (left_images * record_bytes as f64).log2();
     let per_relation_gate = direct.per_usable_row_fme_log2 < 103.0;
     let collection_gate = direct.total_with_sparse_la_fme_log2 < 120.0;
     let storage_gate = storage_log2 < 50.0;
@@ -1116,10 +1159,21 @@ fn projection(
             factor_base_columns: COLUMNS as u64,
             group_order: curve.n.to_string(),
             disjoint_probability: disjoint,
-            samples_per_side,
-            samples_per_side_log2: samples_per_side.log2(),
+            signed_left_domain: signed_left.to_string(),
+            signed_left_domain_log2: left_images.log2(),
+            signed_right_domain: signed_right.to_string(),
+            signed_right_domain_log2: right_domain.log2(),
+            withdrawn_symmetric_samples_per_side_log2: withdrawn_symmetric.log2(),
+            target_allowance,
+            per_target_relation_mean: relation_mean,
+            expected_relation_population: relation_population,
+            collision_events_for_distinct_rows: collision_events,
+            duplicate_collision_allowance: duplicate_allowance,
+            required_streamed_right_images: right_images,
+            required_streamed_right_images_log2: right_images.log2(),
+            measured_normalization_fme_per_image: normalization_fme_per_image,
             exact_record_bytes: record_bytes,
-            direct_materialized_bytes_log2: storage_log2,
+            direct_left_materialized_bytes_log2: storage_log2,
             rho_reference_fme_log2: rho_fme.log2(),
             variants,
             structured_degree_gate: degree_gate,
@@ -1178,8 +1232,18 @@ fn run(cli: Cli) -> Result<(), String> {
     };
     let record_bytes = cells[0].record_logical_bytes;
     let degree_gate = residual_degree_evidence.structured_residual_maximum <= 5;
-    let (sparse_linear_algebra_projection, full_projection) =
-        projection(record_bytes, exact, degree_gate);
+    let largest_cell = cells.last().expect("nonempty width ladder");
+    let normalization_fme_per_image = largest_cell.operations.normalization_field_multiplications
+        as f64
+        / (2 * largest_cell.samples_per_side) as f64;
+    let (sparse_linear_algebra_projection, full_projection) = projection(
+        record_bytes,
+        exact,
+        degree_gate,
+        normalization_fme_per_image,
+        target_setup.0,
+        target_setup.1,
+    );
     let attack_promotion_gate = exact
         && degree_gate
         && full_projection.per_relation_below_2_pow_103
@@ -1260,8 +1324,9 @@ mod tests {
 
     #[test]
     fn generic_batch_floor_remains_above_rho() {
-        let (_, full) = projection(64, true, true);
-        assert!(full.variants[1].total_over_rho_log2 > 9.0);
+        let (_, full) = projection(64, true, true, 5.0, 32_891, 65_064);
+        assert!(full.variants[1].total_over_rho_log2 > 15.0);
+        assert!(full.required_streamed_right_images_log2 > 144.0);
         assert!(!full.rho_parity_gate);
         assert!(!full.collection_below_2_pow_120);
     }
