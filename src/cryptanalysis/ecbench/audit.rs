@@ -97,7 +97,10 @@ pub fn legacy_solver_rounding(
 ) -> Option<(Vec<f64>, f64)> {
     let solver = detail.pointer("/decomposition/solver")?;
     let w = solver.get("gae")?.as_f64()?;
-    if exact.len() != 5 || !(w > 0.0) || solver.get("priced_by")?.as_str()? == "pinned" {
+    if exact.len() != 5
+        || w.partial_cmp(&0.0) != Some(std::cmp::Ordering::Greater)
+        || solver.get("priced_by")?.as_str()? == "pinned"
+    {
         return None;
     }
     let with_w = exact[2] + w;
