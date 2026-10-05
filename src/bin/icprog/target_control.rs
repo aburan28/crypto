@@ -25,7 +25,7 @@ pub(super) fn original_preparation(binding: &capsule::PreparationBinding) -> Res
     )?;
     ordinary_control::verify_build_from(&root, &record, &root)?;
     let bytes = read(&execution.join("producer.json"), 16 * 1024 * 1024)?;
-    let producer = target_math::parse(&bytes)?;
+    let producer = target_math::parse_ordinary_producer(&bytes)?;
     let math = producer["mathematical_input"].clone();
     let checked = ordinary_preparation::audit(&math)?;
     require(
@@ -453,7 +453,7 @@ fn verified_runtime(root: &Path, execution: &Path, seal: &str, own: &str) -> Res
     let math = capsule::preparation_receipt(
         &record.preparation,
         &prep_audit,
-        &target_math::parse(&prep_bytes)?,
+        &target_math::parse_ordinary_producer(&prep_bytes)?,
         &prep_bytes,
     )?;
     require(

@@ -339,6 +339,16 @@ fn duplicate_keys_nested_floats_and_missing_schema_are_rejected() {
     ] {
         assert!(parse(bytes).is_err());
     }
+    let ordinary =
+        br#"{"mathematical_input":{"rank":29},"log_report":{"collection_seconds":0.007025581}}"#;
+    assert_eq!(
+        parse_ordinary_producer(ordinary).unwrap()["log_report"]["collection_seconds"],
+        json!(0.007025581)
+    );
+    assert!(parse_ordinary_producer(
+        br#"{"log_report":{"collection_seconds":0.1,"collection_seconds":0.2}}"#
+    )
+    .is_err());
     let (_, cfg, report) = retained();
     assert_eq!(
         parse(&serde_json::to_vec(&report).unwrap()).unwrap(),

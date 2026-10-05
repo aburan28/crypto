@@ -38,15 +38,20 @@ const ONLINE: [&str; 6] = [
     "rho_solve",
 ];
 
-/// Preserve duplicate-key and float rejection before Value could erase them.
-struct StrictJson(Value);
-impl<'de> Deserialize<'de> for StrictJson {
+/// Reject duplicate keys for both record types. Only the source-bound ordinary
+/// preparation producer may carry finite diagnostic floats outside its math.
+struct StrictJson<const ALLOW_FLOAT: bool>(Value);
+impl<'de, const ALLOW_FLOAT: bool> Deserialize<'de> for StrictJson<ALLOW_FLOAT> {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        struct V;
-        impl<'de> Visitor<'de> for V {
-            type Value = StrictJson;
+        struct V<const ALLOW_FLOAT: bool>;
+        impl<'de, const ALLOW_FLOAT: bool> Visitor<'de> for V<ALLOW_FLOAT> {
+            type Value = StrictJson<ALLOW_FLOAT>;
             fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("JSON with unique keys and integer numbers")
+                if ALLOW_FLOAT {
+                    f.write_str("JSON with unique keys and finite numbers")
+                } else {
+                    f.write_str("JSON with unique keys and integer numbers")
+                }
             }
             fn visit_bool<E: de::Error>(self, v: bool) -> Result<Self::Value, E> {
                 Ok(StrictJson(json!(v)))
@@ -56,6 +61,16 @@ impl<'de> Deserialize<'de> for StrictJson {
             }
             fn visit_i64<E: de::Error>(self, v: i64) -> Result<Self::Value, E> {
                 Ok(StrictJson(json!(v)))
+            }
+            fn visit_f64<E: de::Error>(self, v: f64) -> Result<Self::Value, E> {
+                if !ALLOW_FLOAT {
+                    return Err(de::Error::custom(
+                        "floating point is forbidden in target records",
+                    ));
+                }
+                let n = serde_json::Number::from_f64(v)
+                    .ok_or_else(|| de::Error::custom("nonfinite diagnostic number"))?;
+                Ok(StrictJson(Value::Number(n)))
             }
             fn visit_str<E: de::Error>(self, v: &str) -> Result<Self::Value, E> {
                 Ok(StrictJson(json!(v)))
@@ -71,7 +86,7 @@ impl<'de> Deserialize<'de> for StrictJson {
             }
             fn visit_seq<A: SeqAccess<'de>>(self, mut a: A) -> Result<Self::Value, A::Error> {
                 let mut out = Vec::new();
-                while let Some(v) = a.next_element::<StrictJson>()? {
+                while let Some(v) = a.next_element::<StrictJson<ALLOW_FLOAT>>()? {
                     out.push(v.0);
                 }
                 Ok(StrictJson(Value::Array(out)))
@@ -82,16 +97,21 @@ impl<'de> Deserialize<'de> for StrictJson {
                     if out.contains_key(&k) {
                         return Err(de::Error::custom("duplicate JSON key"));
                     }
-                    out.insert(k, a.next_value::<StrictJson>()?.0);
+                    out.insert(k, a.next_value::<StrictJson<ALLOW_FLOAT>>()?.0);
                 }
                 Ok(StrictJson(Value::Object(out)))
             }
         }
-        d.deserialize_any(V)
+        d.deserialize_any(V::<ALLOW_FLOAT>)
     }
 }
 pub(super) fn parse(bytes: &[u8]) -> Result<Value, String> {
-    serde_json::from_slice::<StrictJson>(bytes)
+    serde_json::from_slice::<StrictJson<false>>(bytes)
+        .map(|v| v.0)
+        .map_err(|e| e.to_string())
+}
+pub(super) fn parse_ordinary_producer(bytes: &[u8]) -> Result<Value, String> {
+    serde_json::from_slice::<StrictJson<true>>(bytes)
         .map(|v| v.0)
         .map_err(|e| e.to_string())
 }
