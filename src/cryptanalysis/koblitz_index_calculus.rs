@@ -6559,6 +6559,12 @@ pub struct SatDecompositionStats {
 /// Encode a finite set of coordinates without enumerating its complement.
 /// Missing branches of the binary trie become forbidden-prefix clauses.
 /// No auxiliary variables are needed; at most O(ell * |codes|) clauses.
+fn packed_coordinate_u128(x: &F2mElement) -> u128 {
+    let words = x.raw_bits();
+    assert!(words.len() <= 2, "coordinate exceeds u128 width");
+    u128::from(*words.first().unwrap_or(&0)) | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+}
+
 fn add_coordinate_domain(
     solver: &mut crate::cryptanalysis::sat::Solver,
     offset: usize,
@@ -6965,13 +6971,7 @@ fn sat_decompose_union_s4(
         .points
         .iter()
         .filter_map(|p| match p {
-            BinaryPoint::Affine { x, .. } => {
-                let words = x.raw_bits();
-                Some(
-                    u128::from(*words.first().unwrap_or(&0))
-                        | (u128::from(*words.get(1).unwrap_or(&0)) << 64),
-                )
-            }
+            BinaryPoint::Affine { x, .. } => Some(packed_coordinate_u128(x)),
             BinaryPoint::Infinity => None,
         })
         .collect();
@@ -13487,6 +13487,11 @@ mod tests {
             }
             assert_eq!(solver.solve() == SolveResult::Sat, accepted, "{value:#x}");
         }
+        let x = F2mElement::from_bit_positions(&[0, 64, 82], 83);
+        assert_eq!(
+            packed_coordinate_u128(&x),
+            1 | (1u128 << 64) | (1u128 << 82)
+        );
     }
 
     /// The single-word enumeration returns exactly the generic search's
