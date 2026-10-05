@@ -205,3 +205,38 @@ and the capacity protocol SHA-256 is
 `29a52195325552e6e2d8c547e8ae37eaea5e568c5d78ffd41e0f298e8d7d4b00`.
 The probe and compiler were the same as above on the same unisolated host;
 these are exploratory stage timings only.
+
+## Full K_0 dimension-12 pair-index feasibility
+
+The [full-index protocol](FULL_INDEX_PROTOCOL.md) used all 4,054 actual
+subgroup-usable points (2,027 signed columns), indexed all 8,219,485
+unordered pairs, and queried public T001. The target passed on-curve and
+subgroup checks. The first run built the index in **5.099 s** and completed
+the exact no-witness query in **4.501 s**. The program wrote a PASS row in
+[the first raw record](full_index_raw.jsonl), but the `/usr/bin/time -l`
+wrapper exited 1 after the program because this sandbox denied its
+`sysctl kern.clockrate` call; [its stderr](full_index_memory.txt) is
+preserved. That wrapper produced no peak-memory measurement. The first
+program's source was reconstructed byte-for-byte from the pre-instrumentation
+patch as [a source snapshot](full_index_initial_source.rs), SHA-256
+`efd09c56620ad868ff355db9f602d87cbdc64f4c25d24b7261973198002e0208`;
+it differs from the rerun only in the added peak-RSS reading and JSON field.
+
+The separately [registered memory rerun](FULL_INDEX_MEMORY_PROTOCOL.md)
+read `getrusage(RUSAGE_SELF).ru_maxrss` inside the same process after the
+query. [Its raw record](full_index_memory_raw.jsonl) reports build **5.099 s**,
+exact no-witness query **4.491 s**, and peak process resident memory
+**2,678,554,624 bytes (2.49 GiB)**. The rerun exited 0. Its source SHA-256
+is `d17d2e1952d101b435295728248be061de04c4bd305db66f52dc6c890e8648ad`;
+the retained index source SHA-256 is
+`7cae9b6c9610bfe17cb0c16e053b616971fdff3a91748e1fc6a41c12b2499a60`.
+The full-index and memory-rerun protocol SHA-256 values are
+`402dc7450091edc1c2485702ece2b3fb62e49e7365bccc405b120633063a10f5`
+and `3a81f25df1e1b412616d7e307a47c559702e5ee19f93f438a25bce6c087d1985`.
+
+These two runs establish that the exact four-summand index can complete at
+the largest tested K_0 base on this host. They do not estimate ordinary
+relation yield from one target, recover a logarithm, or establish any
+F6/F4/F5 or IC/rho speedup. The mathematical four-summand coverage ceiling
+for this base remains `4.662e-12` for a uniform subgroup target, so
+full-base feasibility alone does not meet the high-arity admission gate.
