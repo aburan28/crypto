@@ -18,7 +18,8 @@ The candidate holds one shared parent and a small choice record per
 child; it substitutes the frame only when that child is visited. The
 equations, choice order, node budget, final group verification, and
 source-to-subgroup arithmetic are unchanged. The existing small-curve
-and n83 wide-backend tests all passed: [eight of eight](wide_tests_candidate.log).
+and n83 wide-backend tests all passed: [eight of eight](wide_tests_candidate.log.gz),
+with the exact raw log preserved by lossless `gzip -n` compression.
 
 Five alternating pairs ran the **same frozen probe binary source and
 input**, with node budget one. Every process exited zero, returned
