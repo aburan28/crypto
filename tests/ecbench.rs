@@ -674,3 +674,70 @@ fn copy_dir(from: &Path, to: &Path) {
         }
     }
 }
+
+#[test]
+fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
+    // #1333's inherited-F4 and F6-IC decomposers inside ic.pipeline on the
+    // E_0 m = 13 curve: every run verifies; both arms, being exact solvers
+    // on the same base and seed, issue the same queries and find the same
+    // relations; F6-IC's gate additions are charged and the solver's word
+    // XORs are counted but left out of S, which is therefore a lower bound.
+    let dir = scratch("pdp3");
+    let spec = r#"{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-koblitz test",
+      "workloads": {"curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+                    "targets_per_curve": 2, "target_seed": 7, "target_kind": "public"},
+      "arms": [
+        {"name": "ic-f4", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192"}}},
+        {"name": "ic-f6", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=3,node_budget=8192"}}}
+      ],
+      "measurement": {"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 120}
+    }"#;
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_workload: std::collections::BTreeMap<String, Vec<Value>> = Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+        let unpriced = r["cost"]["unpriced"].to_string();
+        assert!(unpriced.contains("word_XORs"), "{unpriced}");
+        let extra = &r["solver"]["extra"];
+        let geometry = extra["geometric_group_additions"].as_u64().unwrap();
+        assert_eq!(extra["geometric_fallbacks"], 0, "{line}");
+        if r["arm"] == "ic-f6" {
+            assert!(geometry > 0, "F6-IC charged no geometry: {line}");
+        } else {
+            assert_eq!(geometry, 0, "{line}");
+        }
+        assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
+        by_workload.entry(w).or_default().push(r);
+    }
+    assert_eq!(by_workload.len(), 2);
+    for (w, rs) in by_workload {
+        assert_eq!(rs.len(), 2, "{w}");
+        for key in ["targets_tried", "relations_found", "matrix_rank"] {
+            assert_eq!(
+                rs[0]["counters"][key], rs[1]["counters"][key],
+                "{w}: the arms' query streams diverged at {key}"
+            );
+        }
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}

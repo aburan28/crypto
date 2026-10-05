@@ -1,0 +1,66 @@
+1	ntt	238
+1	invntt	278
+1	basemul_acc k=3	320
+1	gen_a k=2	2790
+1	gen_a k=3	8268
+1	gen_a k=4	11058
+1	getnoise eta2 x1	760
+1	getnoise eta2 x7 (batched)	2912
+1	compress d=10	358
+1	decompress d=10	288
+1	compress d=4	338
+1	compress d=1 (tomsg)	334
+1	compress d=11	374
+1	decompress d=4	184
+1	decompress d=1 (frommsg)	310
+1	decode_t_hat k=3 (frombytes)	698
+1	sha3_512_2 (G)	1026
+1	zero Matrix (KMAX^2 polys)	120
+1	vec![0; ct_len 768]	74
+1	kpke_encrypt_with k=3 (no hashing of ek, no gen_a)	7808
+1	encaps_internal k=3 (total)	22778
+1	sha3_256(ek) k=3	4980
+2	ntt	252
+2	invntt	280
+2	basemul_acc k=3	316
+2	gen_a k=2	2808
+2	gen_a k=3	8294
+2	gen_a k=4	11090
+2	getnoise eta2 x1	760
+2	getnoise eta2 x7 (batched)	2814
+2	compress d=10	358
+2	decompress d=10	292
+2	compress d=4	350
+2	compress d=1 (tomsg)	330
+2	compress d=11	362
+2	decompress d=4	154
+2	decompress d=1 (frommsg)	272
+2	decode_t_hat k=3 (frombytes)	686
+2	sha3_512_2 (G)	596
+2	zero Matrix (KMAX^2 polys)	120
+2	vec![0; ct_len 768]	74
+2	kpke_encrypt_with k=3 (no hashing of ek, no gen_a)	7766
+2	encaps_internal k=3 (total)	22578
+2	sha3_256(ek) k=3	4990
+3	ntt	238
+3	invntt	278
+3	basemul_acc k=3	344
+3	gen_a k=2	2822
+3	gen_a k=3	8344
+3	gen_a k=4	11164
+3	getnoise eta2 x1	768
+3	getnoise eta2 x7 (batched)	2808
+3	compress d=10	364
+3	decompress d=10	290
+3	compress d=4	334
+3	compress d=1 (tomsg)	330
+3	compress d=11	352
+3	decompress d=4	152
+3	decompress d=1 (frommsg)	238
+3	decode_t_hat k=3 (frombytes)	684
+3	sha3_512_2 (G)	596
+3	zero Matrix (KMAX^2 polys)	118
+3	vec![0; ct_len 768]	74
+3	kpke_encrypt_with k=3 (no hashing of ek, no gen_a)	7774
+3	encaps_internal k=3 (total)	22730
+3	sha3_256(ek) k=3	4982
