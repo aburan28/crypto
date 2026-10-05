@@ -100,18 +100,15 @@ Preserve every additional relation and every public-target outcome.
 
 ## Exact balanced 8+9 baseline
 
-Enumerate every signed eight-column sum and retain a deterministic 128-bit
-prefix of its full compressed P-256 point key plus the exact column and sign
-masks.  Enumerate every signed nine-column sum, subtract it from each target,
-and look up the same prefix.  A pair is eligible only when the largest active
+Enumerate every signed eight-column sum and retain its complete 257-bit
+compressed P-256 point key plus the exact column and sign masks.  Enumerate
+every signed nine-column sum, subtract it from each target, and look up the
+same complete key.  A pair is eligible only when the largest active
 index on the eight side is smaller than the smallest active index on the nine
 side.  Thus every distinct 17-column set has exactly one canonical split.
 
-The 128-bit prefix is an index, not a probabilistic filter: every prefix match
-is replayed with the full points, and only exact group equalities are emitted.
-Equal full points necessarily have equal prefixes, so collisions can add work
-or false candidates but cannot cause false negatives.  Record collisions and
-replay failures.
+Every complete-key match is replayed with fresh points, and only exact group
+equalities are emitted.  Record duplicate key matches and replay failures.
 
 ## Exact structured 4+4+4+5 candidate
 
@@ -130,15 +127,17 @@ Join canonical 4+4 records to form every signed eight-column sum and canonical
 4+5 records to form every signed nine-column sum.  The intermediate P-256
 point is propagated exactly, which enforces the corresponding split
 summation-polynomial constraint.  Partition records by the first eight bits
-of the 128-bit point-key prefix into 256 external buckets.  Write and read
-every bucket, sort complete 128-bit prefixes within it, replay every prefix
-collision, and delete no bucket before its result and byte counts are sealed.
+of the complete point key into 256 external buckets.  Retain the left buckets
+and process one target's right buckets at a time, so the materialised peak is
+one left frontier plus one right frontier rather than all target frontiers.
+Write and read every bucket, sort complete keys within it, replay every exact
+key match, and delete no bucket before its result and byte counts are sealed.
 This is a storage schedule, not an information-set sample: all 256 buckets are
-mandatory.
+mandatory for every target.
 
 Report Dickson membership candidates, rejections, survival ratio, 4-list and
-5-list sizes, 4+4 and 4+5 output widths, bucket min/median/max widths, prefix
-collisions, exact hits, bytes written and read, peak resident logical bytes,
+5-list sizes, 4+4 and 4+5 output widths, bucket min/median/max widths, key
+matches, exact hits, bytes written and read, peak resident logical bytes,
 and peak total materialised bytes.
 
 ## Independent completeness reference
