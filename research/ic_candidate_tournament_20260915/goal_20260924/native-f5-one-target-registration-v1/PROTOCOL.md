@@ -29,8 +29,8 @@ by its external seal, auditor, producer and mathematical input hashes in
 `preparation-binding.json`. The original target worker repeats that frozen
 ordinary audit before starting the target-dependent online interval.
 
-Freeze from a clean committed source with `target-control-freeze` and
-`--validation-only=false`. Before dispatch, publish the full unconsumed target
+Freeze from a clean committed source with `target-control-freeze`, omitting
+`--validation-only`. Before dispatch, publish the full unconsumed target
 capsule with `target-control-publish-registration`, retain its external seal and
 archive, and replay it with `target-control-replay-registration`. Push those
 bytes before the sole frozen `target-control-execute --publication ...` call.
