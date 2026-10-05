@@ -49,6 +49,8 @@ cell_draws() {  # cell arm -> draws measured on that arm (rootless), from the ca
   grep "\"arm\":\"$2\"" "$DUMP/$1.catalogue.jsonl" | grep -v '"roots":[1-9]' | sed -E 's/.*"draw":([0-9]+).*/\1/'
 }
 
+[ "${LIB_ONLY:-}" = 1 ] && return 0   # sourced by lanes.sh for the functions above
+
 if [ "${SMOKE:-}" = 1 ]; then  # plumbing check on the l = 2 cell only
   for arm in rr x4 ctrl; do for draw in $(cell_draws K1n17l2 $arm); do measure K1n17l2 $draw $arm; done; done
   mkdir -p "$OUT/dump" && cp "$DUMP/K1n17l2.catalogue.jsonl" "$OUT/dump/"; exit 0
