@@ -7,8 +7,8 @@ use std::time::Instant;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_rotated_chain::{
-    build_n83_rotated_chain, n83_public_generator, n83_public_target, write_dimacs,
-    write_dimacs_model, N83TargetKind, OnbCurve, Type2Onb, N83, N83_RHO_SCALAR,
+    build_n83_rotated_chain_variant, n83_public_generator, n83_public_target, write_dimacs,
+    write_dimacs_model, N83CircuitVariant, N83TargetKind, OnbCurve, Type2Onb, N83, N83_RHO_SCALAR,
     N83_RHO_WALK_ITERATIONS, N83_SLOT_DIMENSIONS, N83_SUBGROUP_ORDER,
 };
 use serde_json::{json, Value};
@@ -30,6 +30,21 @@ impl From<TargetArg> for N83TargetKind {
     }
 }
 
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum CircuitArg {
+    Complete,
+    Inductive,
+}
+
+impl From<CircuitArg> for N83CircuitVariant {
+    fn from(value: CircuitArg) -> Self {
+        match value {
+            CircuitArg::Complete => Self::CompletePerEdgeValidity,
+            CircuitArg::Inductive => Self::InductiveFactorValidity,
+        }
+    }
+}
+
 #[derive(Debug, Parser)]
 #[command(about = "Complete-point n83 rotated-m10 relation gate")]
 struct Cli {
@@ -45,6 +60,8 @@ enum Action {
     Emit {
         #[arg(long, value_enum, default_value_t = TargetArg::Public)]
         target: TargetArg,
+        #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
+        circuit: CircuitArg,
         #[arg(long)]
         cnf: PathBuf,
         #[arg(long)]
@@ -54,6 +71,8 @@ enum Action {
     },
     /// Emit the planted positive control plus an independently replayable model.
     CertifyPlanted {
+        #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
+        circuit: CircuitArg,
         #[arg(long)]
         cnf: PathBuf,
         #[arg(long)]
@@ -67,6 +86,8 @@ enum Action {
     Verify {
         #[arg(long, value_enum, default_value_t = TargetArg::Public)]
         target: TargetArg,
+        #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
+        circuit: CircuitArg,
         #[arg(long)]
         model: PathBuf,
         #[arg(long, default_value_t = DEFAULT_NODE_CAP)]
@@ -76,6 +97,8 @@ enum Action {
     Solve {
         #[arg(long, value_enum, default_value_t = TargetArg::Public)]
         target: TargetArg,
+        #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
+        circuit: CircuitArg,
         #[arg(long)]
         solver: PathBuf,
         #[arg(long)]
@@ -141,6 +164,7 @@ fn chain_report(
         "curve_id": "EC1N83Ckb1h876c2921cb64",
         "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
         "target_kind": chain.target_kind,
+        "circuit_variant": chain.circuit_variant,
         "target": chain.target,
         "slot_dimensions": N83_SLOT_DIMENSIONS,
         "slots": chain.slots,
@@ -158,6 +182,7 @@ fn chain_report(
 
 fn build_with_report(
     target: N83TargetKind,
+    circuit: N83CircuitVariant,
     node_cap: usize,
 ) -> Result<
     (
@@ -167,7 +192,7 @@ fn build_with_report(
     String,
 > {
     let started = Instant::now();
-    let chain = build_n83_rotated_chain(target, node_cap)?;
+    let chain = build_n83_rotated_chain_variant(target, circuit, node_cap)?;
     let report = chain_report(&chain, started.elapsed().as_secs_f64());
     Ok((chain, report))
 }
@@ -190,11 +215,12 @@ fn run() -> Result<(), String> {
         }
         Action::Emit {
             target,
+            circuit,
             cnf,
             report,
             node_cap,
         } => {
-            let (chain, mut value) = build_with_report(target.into(), node_cap)?;
+            let (chain, mut value) = build_with_report(target.into(), circuit.into(), node_cap)?;
             let started = Instant::now();
             let receipt = write_dimacs(&chain, &cnf)?;
             value["cnf"] = serde_json::to_value(receipt).map_err(|error| error.to_string())?;
@@ -203,13 +229,17 @@ fn run() -> Result<(), String> {
             println!("{}", serde_json::to_string_pretty(&value).unwrap());
         }
         Action::CertifyPlanted {
+            circuit,
             cnf,
             model,
             report,
             node_cap,
         } => {
-            let (chain, mut value) =
-                build_with_report(N83TargetKind::DeterministicPlanted, node_cap)?;
+            let (chain, mut value) = build_with_report(
+                N83TargetKind::DeterministicPlanted,
+                circuit.into(),
+                node_cap,
+            )?;
             let cnf_receipt = write_dimacs(&chain, &cnf)?;
             let model_values = chain.known_planted_model()?;
             write_dimacs_model(&model_values, &model)?;
@@ -223,10 +253,11 @@ fn run() -> Result<(), String> {
         }
         Action::Verify {
             target,
+            circuit,
             model,
             node_cap,
         } => {
-            let (chain, mut value) = build_with_report(target.into(), node_cap)?;
+            let (chain, mut value) = build_with_report(target.into(), circuit.into(), node_cap)?;
             let decoded = chain.decode_dimacs_model(&model)?;
             value["status"] = json!("PASS_MODEL_REPLAY");
             value["decoded_relation"] =
@@ -235,6 +266,7 @@ fn run() -> Result<(), String> {
         }
         Action::Solve {
             target,
+            circuit,
             solver,
             out,
             seconds,
@@ -249,7 +281,7 @@ fn run() -> Result<(), String> {
             let model = out.join("model.txt");
             let stdout_path = out.join("solver.stdout.txt");
             let stderr_path = out.join("solver.stderr.txt");
-            let (chain, mut value) = build_with_report(target.into(), node_cap)?;
+            let (chain, mut value) = build_with_report(target.into(), circuit.into(), node_cap)?;
             let cnf_receipt = write_dimacs(&chain, &cnf)?;
             value["cnf"] = serde_json::to_value(cnf_receipt).map_err(|error| error.to_string())?;
             value["solver"] = json!({

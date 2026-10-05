@@ -1,0 +1,96 @@
+{
+  "schema": "n83-rotated-m10-inductive-manifest-v1",
+  "source_commit": "203eb86df1d0cc5ee28d99e0de39f3bbe5f7d511",
+  "preregistered_head": "9cc5ec0c62fa662c6a91b6e7da9cd5d1afc993df",
+  "pr": "https://github.com/aburan28/crypto/pull/1346",
+  "parent_pr": "https://github.com/aburan28/crypto/pull/1343",
+  "host": {
+    "os": "Linux 6.18.44 x86_64",
+    "logical_cpus_visible": 5,
+    "memory_total_kib": 18440136
+  },
+  "files": [
+    {
+      "path": "evidence/planted.cnf",
+      "bytes": 57564571,
+      "sha256": "4ab1769f67064a7ad213c41aff699de01e8d6081a0594c8cef4b4090d960f9cb",
+      "blake3": "34d227715fed60e96f925e513e483758a73f9141e40daae43c7f16744c03a5a4",
+      "committed": false,
+      "reason": "deterministic large generated file; digest retained"
+    },
+    {
+      "path": "evidence/planted.json",
+      "bytes": 4605,
+      "sha256": "93c2575452d8745e8683e12a4d79ee7f0f7be3f93f8277317d72cb835c12100e",
+      "committed": true
+    },
+    {
+      "path": "evidence/planted.model",
+      "bytes": 5317391,
+      "sha256": "d86e724e638bf4bf794a77ea6330541a3c2769af6a6fb60bb93b2729f3842053",
+      "committed": false,
+      "reason": "deterministic large generated file; decoded replay committed"
+    },
+    {
+      "path": "evidence/planted_replay.json",
+      "bytes": 2285,
+      "sha256": "f533b7a4084deff8538c4b7dfaf9e05de665a09280d66e939673ed9ceec433f4",
+      "committed": true
+    },
+    {
+      "path": "evidence/reference_complete.cnf",
+      "bytes": 83446635,
+      "sha256": "22db3390b0f398f3f68e80ea3186be36b8cb17ee7722c967dafa541daf935176",
+      "blake3": "bd4c5148fa97d7af749c5736bd389b77fe938a2b978aed901d893b8bd463b892",
+      "committed": false,
+      "reason": "deterministic large drift-control file; digest retained"
+    },
+    {
+      "path": "evidence/reference_complete.json",
+      "bytes": 3082,
+      "sha256": "4604056171f46044e5b2e193c619a549ee139e1ef589f9e67a66762d06d916c2",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/instance.cnf",
+      "bytes": 57642729,
+      "sha256": "44135cfbbebe2449ee5a24385df36d93d3513c22e0c3fa303febdbf77c44c325",
+      "blake3": "052b4e522a4b8d8f188e4983bb155fc491af80a01dcc546a86a94a497c6ded30",
+      "committed": false,
+      "reason": "deterministic large generated file; digests and full solver log retained"
+    },
+    {
+      "path": "evidence/public/model.txt",
+      "bytes": 10,
+      "sha256": "8fba55cea0f98be36fab7b65349dda867a58aabfcf974a46098f5123830ac5cb",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/result.json",
+      "bytes": 3299,
+      "sha256": "e4de962e20d51583ce392f6ebb9f294603b851095cc4c8e137c1c7f407cf2ea8",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stdout.txt",
+      "bytes": 11593,
+      "sha256": "8368295605d66a05c565e7c50082cc9311e6c42dc16a989cc375b4b4583f0d88",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committed": true
+    }
+  ],
+  "controls": {
+    "exhaustive_n3_addition": "PASS",
+    "complete_parent_digest_replay": "PASS",
+    "planted_full_model_replay": "PASS",
+    "representation_win": "PASS"
+  },
+  "decision": "BOUNDED_NATURAL_TARGET_TIMEOUT",
+  "speed_claim": null,
+  "full_dlp": false
+}

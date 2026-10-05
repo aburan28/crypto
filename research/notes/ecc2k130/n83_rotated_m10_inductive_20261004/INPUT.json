@@ -1,0 +1,45 @@
+{
+  "schema": "n83-rotated-m10-inductive-input-v1",
+  "parent": {
+    "pr": "https://github.com/aburan28/crypto/pull/1343",
+    "decision": "BOUNDED_NATURAL_TARGET_TIMEOUT",
+    "result_sha256": "f6fc7358e292d72011df85531a3ba5a0a7f7df3a8c17c2ab80fe651dfba10d3a",
+    "manifest_sha256": "311acb623b8943e3ac39ad987bfaad25f2d160f9b30095b03103d5e5cbf4114d",
+    "public_result_sha256": "a2a09c66d696d8d058bf6b5a5628d567852e97286c9f5b1410289719b7e234fa",
+    "public_dag_prefix_blake3": "689697d223df16ad1cb65edfa6f44f4ecbb3f0032ca55f8b31587da8696525cf",
+    "public_cnf_blake3": "bd4c5148fa97d7af749c5736bd389b77fe938a2b978aed901d893b8bd463b892",
+    "public_nodes": 998338,
+    "public_and_gates": 279052,
+    "public_clauses": 3702311,
+    "public_bytes": 83446635
+  },
+  "variant": {
+    "name": "inductive_factor_validity",
+    "factor_curve_checks": 10,
+    "intermediate_curve_checks": 0,
+    "addition_edges": 9,
+    "complete_branches": ["copy_q", "copy_p", "inverse", "double", "generic"]
+  },
+  "instance": {
+    "curve_id": "EC1N83Ckb1h876c2921cb64",
+    "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
+    "subgroup_order": "2417851639230796216685689",
+    "slot_dimensions": [9, 9, 9, 8, 8, 8, 8, 8, 8, 8],
+    "public_target_x_hex": "0x78f3daa4bf524e3e8e9c7",
+    "public_target_y_hex": "0x2e08b1e3a8d43e5becd4"
+  },
+  "caps": {
+    "dag_nodes": 8000000,
+    "dimacs_bytes": 2000000000,
+    "solver_wall_seconds": 120,
+    "external_cold_wall_seconds": 900,
+    "address_space_and_rss_bytes": 12884901888,
+    "solver_threads": 1
+  },
+  "solver": {
+    "name": "cadical",
+    "version": "3.0.1",
+    "relative_path": "research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical",
+    "sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51"
+  }
+}

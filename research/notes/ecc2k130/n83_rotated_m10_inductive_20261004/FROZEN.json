@@ -1,0 +1,28 @@
+{
+  "schema": "n83-rotated-m10-inductive-freeze-v1",
+  "status": "PRE_OUTCOME",
+  "source_commit": "203eb86df1d0cc5ee28d99e0de39f3bbe5f7d511",
+  "source_sha256": {
+    "src/cryptanalysis/koblitz_rotated_chain.rs": "c2677a2fb4fc0aa60f624327d6bf49f255d10b5338940ea59d6abb6c7143a23d",
+    "src/bin/n83_rotated_m10.rs": "3a9d41c003be71a409a6f9c3de6757c199c9f8bb37659eb003020432c67d624d"
+  },
+  "protocol_sha256": "63b8fdbb000e4c5f9e60fcd9090ef6ed72f58f5c5edf78fb9695185b15db0c64",
+  "input_sha256": "2950163364115e5b1cca2ad495c6d302e70304fb9868c8f7d8464f1da35f3017",
+  "solver_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "commands": {
+    "exhaustive_n3": "cargo test --offline --release --lib cryptanalysis::koblitz_rotated_chain::tests::validity_free_addition_is_sound_and_complete_for_valid_n3_points --no-default-features",
+    "n83_known_model": "cargo test --offline --release --lib cryptanalysis::koblitz_rotated_chain::tests::inductive_planted_chain_replays_and_is_strictly_smaller --no-default-features",
+    "build": "cargo build --offline --release --bin n83_rotated_m10",
+    "planted": "target/release/n83_rotated_m10 certify-planted --circuit inductive --cnf <out>/planted.cnf --model <out>/planted.model --report <out>/planted.json --node-cap 8000000",
+    "natural": "target/release/n83_rotated_m10 solve --target public --circuit inductive --solver research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical --out <out>/public --seconds 120 --node-cap 8000000"
+  },
+  "pre_freeze_controls": {
+    "exhaustive_n3_sound_and_complete": "PASS",
+    "n83_planted_known_model": "PASS",
+    "inductive_strictly_smaller_boolean_only": "PASS",
+    "inductive_n83_cnf_exported": false,
+    "inductive_exact_n83_counts_inspected_or_recorded": false,
+    "inductive_solver_run": false
+  },
+  "speed_claim_allowed": false
+}
