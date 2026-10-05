@@ -10,11 +10,15 @@ capsules. The point is supplied directly; no fixture scalar is constructed.
 Build `examples/ic_n17_same_point_rho.rs` from committed source with the locked
 offline Cargo dependencies and record the exact source, binary and Cargo.lock
 hashes. Run this source once through the shared busy wrapper on the same
-physical Apple M4 Pro. The algorithm is the repository's strongest existing
-`StrongRho` reference: signed-Frobenius orbit quotient, normal-basis lockstep
+physical Apple M4 Pro. The algorithm is the repository's `StrongRho`
+reference: signed-Frobenius orbit quotient, normal-basis lockstep
 batch inversion, 32 lanes, four distinguished-point bits and default
-2000× step-cap factor. Freeze jump seed 2026100502 and walk-start seed
-2026100503. It uses only one target, one worker, no cross-target collision
+2000× step-cap factor. This is a strong, independently implemented Koblitz
+reference, not proof that it is the fastest n17 rho configuration; the
+campaign's qualified `rho_pairinv_4` still needs its own same-point run before
+any claim against the strongest compatible reference. Freeze jump seed
+2026100502 and walk-start seed 2026100503. It uses only one target, one worker,
+no cross-target collision
 table and no reused target-dependent work. The jump table and curve
 construction are target-independent preparation.
 
