@@ -131,8 +131,45 @@ its external validation seal for portable data verification; it executes no
 archived binary and cannot admit a scientific run. Keep validation-only mode;
 never dispatch an archive restoration. Do not loosen an old target-control
 registration for this worker.
+The [fresh scientific ordinary registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/PROTOCOL.md)
+separately freezes the 512-query natural MatrixF5 and external CryptoMiniSat
+panels on identical ordered n17 points. Its
+[`REGISTRATION_RESULT.md`](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/REGISTRATION_RESULT.md)
+pins distinct external seals, source/build manifests, complete capsule archives
+and two matching data-only replay receipts per arm. For a new registration,
+publish and push the full unconsumed scientific archive with
+`ordinary-control-publish-registration`, then check it with
+`ordinary-control-replay-registration` before the sole invocation. The
+original frozen `ordinary-control-execute` now requires `--publication` and
+replays its bytes before consuming the claim; its frozen audit checks that
+preflight again. Never substitute the validation-only publication. Preserve
+each arm's original execution, partial prefixes, failed attempts and audit;
+stage yield and exploratory wall time are not complete one-target results.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
+Both scientific ordinary registrations are now consumed and closed. Their
+[original frozen-audit result](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-registration-v1/result-v1/RESULT.md)
+preserves all 512 paired attempts per arm, full raw execution archives and
+original checker receipts. MatrixF5 reached rank 29/29 with 29 independently
+replayed logs; the frozen 100,000-conflict CryptoMiniSat arm reached 22/29
+and has no complete log table. Audit PASS validates custody and mathematics,
+not full-rank preparation. Do not refill the missing SAT rows from F5 or an
+oracle, rerun either consumed capsule, or turn shorter incomplete CMS attempts
+into a CPU speedup. A revised SAT budget/encoding needs a newly registered
+natural panel. F5 may bind its audited logs to a separate new target claim.
+The [SAT target transport design](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/DESIGN.md)
+specifies a new source-bound prestarted exporter and one CMS child per permitted
+attempt. This is a feasibility design, not a validated transport or a dispatch
+registration. The [disclosed control plan](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/CONTROL_PLAN.md)
+fixes three points and exact export hashes for the unexecuted
+`ic_sat_stdin_probe` and `ic_exporter_prestart_probe` examples. Compile and run
+these controls only after the ordinary timing panels release the shared busy
+lock. A passing accepted-CMS stdin compatibility probe is still insufficient
+for online admission: its reader line occurs before parser initialization.
+The proposed post-parser marker requires a separately built, pinned CMS binary
+and three-way disclosed parity. Then freeze a separate SAT one-target source
+and claim. Do not charge child startup to the online interval by stopwatch
+subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

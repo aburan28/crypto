@@ -22,6 +22,15 @@
 //!   7 2 standard 1 100000 /tmp/pdp-explicit \
 //!   --target-x 12 --target-y 34 --blind-instance-id b-0123 --export-only
 //! ```
+//!
+//! # Prepared one-request target transport (new binary/source identity):
+//! Launch with static positional arguments and `--export-only --prestart-stdin`,
+//! but no target arguments. After the process emits
+//! `c EXPORTER_PREPARED_STDIN_READY_v1`, send exactly one newline-terminated
+//! JSON request such as
+//! `{ "target_x":"12", "target_y":"34", "blind_instance_id":"b-0123" }`
+//! and close stdin. The marker follows reusable field and geometric-base
+//! construction. The target and blind ID are never launch arguments.
 
 use crypto_lib::binary_ecc::curve::{point_add, point_neg};
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
@@ -43,6 +52,7 @@ use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
@@ -506,15 +516,50 @@ fn validate_blind_instance_id(value: &str) {
     }
 }
 
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PreparedExplicitTarget {
+    target_x: String,
+    target_y: String,
+    blind_instance_id: String,
+}
+
+fn read_prepared_explicit_target() -> PreparedExplicitTarget {
+    println!("c EXPORTER_PREPARED_STDIN_READY_v1");
+    std::io::stdout()
+        .flush()
+        .expect("flush prepared exporter marker");
+    let mut bytes = Vec::new();
+    std::io::stdin()
+        .take(512)
+        .read_to_end(&mut bytes)
+        .expect("read bounded prepared exporter request");
+    assert!(
+        !bytes.is_empty()
+            && bytes.len() < 512
+            && bytes.last() == Some(&b'\n')
+            && bytes.iter().filter(|&&byte| byte == b'\n').count() == 1,
+        "prepared exporter request must be one bounded JSON line with EOF"
+    );
+    let request: PreparedExplicitTarget =
+        serde_json::from_slice(&bytes).expect("prepared exporter request JSON");
+    validate_blind_instance_id(&request.blind_instance_id);
+    request
+}
+
 fn main() {
     let mut args: Vec<String> = std::env::args().collect();
+    let prestart_stdin = args.last().map(String::as_str) == Some("--prestart-stdin");
+    if prestart_stdin {
+        args.pop();
+    }
     let export_only = args.last().map(String::as_str) == Some("--export-only");
     if export_only {
         args.pop();
     }
-    let target_x_argument = take_named_value(&mut args, "--target-x");
-    let target_y_argument = take_named_value(&mut args, "--target-y");
-    let blind_instance_id = take_named_value(&mut args, "--blind-instance-id");
+    let mut target_x_argument = take_named_value(&mut args, "--target-x");
+    let mut target_y_argument = take_named_value(&mut args, "--target-y");
+    let mut blind_instance_id = take_named_value(&mut args, "--blind-instance-id");
     let explicit_arguments = [
         target_x_argument.is_some(),
         target_y_argument.is_some(),
@@ -531,8 +576,12 @@ fn main() {
         "blinded explicit targets require --export-only so the producer cannot reveal their class"
     );
     assert!(
+        !prestart_stdin || (export_only && !explicit_target_mode),
+        "prestarted stdin requires --export-only and no target command-line arguments"
+    );
+    assert!(
         matches!(args.len(), 7 | 9),
-        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir> [curve-a factor-index] [--target-x X --target-y Y --blind-instance-id ID] [--export-only]"
+        "usage: koblitz_pdp_export <n> <ell> <standard|ggmp> <seed> <conflict-budget> <new-output-dir> [curve-a factor-index] [--target-x X --target-y Y --blind-instance-id ID] [--export-only] [--prestart-stdin]"
     );
     let n: u32 = args[1].parse().expect("n");
     let requested_ell: usize = args[2].parse().expect("ell");
@@ -622,6 +671,14 @@ fn main() {
         "degenerate factor base: only {} curve point(s) above the algebraic x-domain",
         distinct_factor_points.len()
     );
+    let basis_bits: Vec<String> = basis.iter().map(|x| x.to_biguint().to_string()).collect();
+    if prestart_stdin {
+        fs::create_dir_all(&output).expect("prepare static exporter output directory");
+        let request = read_prepared_explicit_target();
+        target_x_argument = Some(request.target_x);
+        target_y_argument = Some(request.target_y);
+        blind_instance_id = Some(request.blind_instance_id);
+    }
     let target_start = Instant::now();
     let (target, planted) = match (
         target_x_argument.as_deref(),
@@ -683,7 +740,9 @@ fn main() {
     let anf = wdsat_anf(n_vars, &rows);
     let (cms, cnf_clauses, xor_rows, cms_vars) = xor_dimacs(n_vars, &rows);
     let magma = magma_script(n_vars, &rows);
-    fs::create_dir_all(&output).expect("create output directory");
+    if !prestart_stdin {
+        fs::create_dir_all(&output).expect("create output directory");
+    }
     write(&output.join("instance.anf"), &anf);
     write(&output.join("instance.xor.cnf"), &cms);
     write(&output.join("instance.magma"), &magma);
@@ -796,7 +855,6 @@ fn main() {
     } else {
         direct_mitm(&curve, &basis, &target)
     };
-    let basis_bits: Vec<String> = basis.iter().map(|x| x.to_biguint().to_string()).collect();
     let planted_points: Option<Vec<Value>> = planted.map(|points| {
         points
             .iter()
@@ -853,7 +911,7 @@ fn main() {
             &exports,
         )
     };
-    let manifest = if let Some(id) = blind_instance_id {
+    let mut manifest = if let Some(id) = blind_instance_id {
         json!({
             "kind":"binary_koblitz_pdp_cross_solver_instance",
             "scope":"standalone blinded explicit-target point-decomposition problem; not a completed index-calculus attack",
@@ -923,6 +981,14 @@ fn main() {
             "interpretation":"SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT"
         })
     };
+    if prestart_stdin {
+        manifest["transport"] = json!({
+            "mode":"one-request-prestarted-stdin-v1",
+            "readiness_marker":"c EXPORTER_PREPARED_STDIN_READY_v1",
+            "whole_process_internal_includes_prepared_idle":true,
+            "target_argument_source":"stdin-after-readiness"
+        });
+    }
     let manifest_text = serde_json::to_string_pretty(&manifest).expect("manifest json") + "\n";
     write(&output.join("manifest.json"), &manifest_text);
     println!("{manifest_text}");

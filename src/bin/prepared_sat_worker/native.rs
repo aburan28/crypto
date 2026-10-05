@@ -14,7 +14,7 @@ use std::{
     fs,
     io::{Read, Write},
     path::{Path, PathBuf},
-    process::{Child, Command, Stdio},
+    process::{Child, ChildStdin, Command, Stdio},
     time::{Duration, Instant},
 };
 
@@ -596,6 +596,363 @@ pub fn measured_child_request(request: ChildRequest<'_>) -> Result<NativeOutput,
         stdout: String::from_utf8(out).map_err(|e| e.to_string())?,
         receipt,
     })
+}
+
+/// A one-use native role whose target-independent startup has completed before
+/// the caller opens its online clock. The marker must be tied to the exact
+/// source and binary in the candidate manifest; observing a string alone does
+/// not prove where that role put its initialization boundary.
+pub struct PreparedChild {
+    guard: Guard,
+    stdin: Option<ChildStdin>,
+    program: PathBuf,
+    executable_sha256: String,
+    stdout_path: PathBuf,
+    stderr_path: PathBuf,
+    stem: PathBuf,
+    argv: Vec<String>,
+    cwd: PathBuf,
+    environment: BTreeMap<String, String>,
+    marker: String,
+    launch: Instant,
+    ready: Instant,
+}
+
+pub struct PreparedLaunch<'a> {
+    pub program: &'a Path,
+    pub expected_sha256: &'a str,
+    pub args: &'a [String],
+    pub cwd: &'a Path,
+    pub stem: &'a Path,
+    pub ledger: &'a Path,
+    pub environment: &'a [(String, String)],
+    pub marker: &'a str,
+    pub ready_deadline_ms: u64,
+}
+
+/// Preserve the raw file and its size even when a child exceeds the output
+/// envelope. An oversized output cannot become a model, but still gets a
+/// receipt instead of disappearing behind a bounded-read error.
+fn prepared_output(path: &Path) -> Result<(u64, Option<Vec<u8>>), String> {
+    const LIMIT: u64 = 8 * 1024 * 1024;
+    let meta = fs::symlink_metadata(path).map_err(|e| e.to_string())?;
+    require(
+        meta.is_file() && !meta.file_type().is_symlink(),
+        "prepared-child output is not a regular file",
+    )?;
+    if meta.len() > LIMIT {
+        return Ok((meta.len(), None));
+    }
+    let bytes = read(path, LIMIT)?;
+    Ok((bytes.len() as u64, Some(bytes)))
+}
+
+impl PreparedChild {
+    pub fn launch(request: PreparedLaunch<'_>) -> Result<Self, String> {
+        require(cfg!(unix), "prepared native transport requires Unix")?;
+        require(
+            (100..=120_000).contains(&request.ready_deadline_ms)
+                && !request.marker.is_empty()
+                && request.marker.len() <= 128
+                && request
+                    .marker
+                    .bytes()
+                    .all(|byte| byte.is_ascii_graphic() || byte == b' '),
+            "invalid prepared-child readiness policy",
+        )?;
+        let environment = request
+            .environment
+            .iter()
+            .cloned()
+            .collect::<BTreeMap<_, _>>();
+        require(
+            environment.len() == request.environment.len(),
+            "duplicate prepared-child environment key",
+        )?;
+        require(
+            request.expected_sha256.len() == 64
+                && request
+                    .expected_sha256
+                    .bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
+            "invalid prepared-child executable pin",
+        )?;
+        let executable_sha256 = sha256(&read(request.program, 128 * 1024 * 1024)?);
+        require(
+            executable_sha256 == request.expected_sha256,
+            "prepared-child executable differs from frozen pin",
+        )?;
+        let stdout_path = request.stem.with_extension("stdout");
+        let stderr_path = request.stem.with_extension("stderr");
+        let stdout = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&stdout_path)
+            .map_err(|e| e.to_string())?;
+        let stderr = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&stderr_path)
+            .map_err(|e| e.to_string())?;
+        let mut command = Command::new(request.program);
+        command
+            .args(request.args)
+            .current_dir(request.cwd)
+            .env_clear()
+            .envs(request.environment.iter().map(|(key, value)| (key, value)))
+            .stdin(Stdio::piped())
+            .stdout(stdout)
+            .stderr(stderr);
+        #[cfg(unix)]
+        command.process_group(0);
+        let launch = Instant::now();
+        let mut guard = Guard {
+            child: command.spawn().map_err(|e| e.to_string())?,
+            ledger: request.ledger.to_path_buf(),
+        };
+        let pid = guard.child.id();
+        record_pid(request.ledger, pid, "start")?;
+        let deadline = launch + Duration::from_millis(request.ready_deadline_ms);
+        loop {
+            let out = read(&stdout_path, 8 * 1024 * 1024)?;
+            let marker_count = out
+                .split_inclusive(|&byte| byte == b'\n')
+                .filter(|line| line.strip_suffix(b"\n") == Some(request.marker.as_bytes()))
+                .count();
+            require(marker_count <= 1, "prepared-child marker repeated")?;
+            if marker_count == 1 {
+                require(
+                    guard.child.try_wait().map_err(|e| e.to_string())?.is_none(),
+                    "prepared child exited at readiness marker",
+                )?;
+                break;
+            }
+            require(
+                fs::metadata(&stderr_path).map_err(|e| e.to_string())?.len() <= 8 * 1024 * 1024,
+                "prepared-child stderr exceeded limit before readiness",
+            )?;
+            require(
+                guard.child.try_wait().map_err(|e| e.to_string())?.is_none(),
+                "prepared child exited before readiness marker",
+            )?;
+            require(
+                Instant::now() < deadline,
+                "prepared-child readiness deadline",
+            )?;
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        let ready = Instant::now();
+        let stdin = guard
+            .child
+            .stdin
+            .take()
+            .ok_or("prepared child lacks stdin pipe")?;
+        let receipt = json!({
+            "schema_version":1,"state":"ready-without-input","pid":pid,
+            "argv":std::iter::once(request.program.to_string_lossy().into_owned())
+                .chain(request.args.iter().cloned()).collect::<Vec<_>>(),
+            "cwd":request.cwd,"environment":environment,
+            "executable_sha256":executable_sha256,
+            "marker":request.marker,
+            "ready_after_launch_ns":ready.duration_since(launch).as_nanos(),
+            "stdin_written_bytes":0,
+            "stdout_at_ready_sha256":sha256(&read(&stdout_path, 8 * 1024 * 1024)?)
+        });
+        save(&request.stem.with_extension("ready.json"), &receipt)?;
+        Ok(Self {
+            guard,
+            stdin: Some(stdin),
+            program: request.program.to_path_buf(),
+            executable_sha256,
+            stdout_path,
+            stderr_path,
+            stem: request.stem.to_path_buf(),
+            argv: request.args.to_vec(),
+            cwd: request.cwd.to_path_buf(),
+            environment,
+            marker: request.marker.to_string(),
+            launch,
+            ready,
+        })
+    }
+
+    /// Deliver exactly one target-dependent request. The caller must invoke
+    /// this within target_PDP, and retain its own phase clock around the call.
+    /// The held stdin pipe is the only input route and is closed after delivery.
+    pub fn deliver(mut self, input: &[u8], deadline_ms: u64) -> Result<NativeOutput, String> {
+        require(
+            !input.is_empty()
+                && input.len() <= 16 * 1024 * 1024
+                && (100..=120_000).contains(&deadline_ms),
+            "invalid prepared-child request or deadline",
+        )?;
+        let start = Instant::now();
+        let deadline = start + Duration::from_millis(deadline_ms);
+        let mut pipe = self.stdin.take().ok_or("prepared child already used")?;
+        #[cfg(unix)]
+        {
+            let fd = pipe.as_raw_fd();
+            let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
+            require(flags >= 0, "cannot inspect prepared stdin pipe")?;
+            require(
+                unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } >= 0,
+                "cannot make prepared stdin nonblocking",
+            )?;
+        }
+        let mut written = 0;
+        let mut write_error = None;
+        let mut timed_out = false;
+        let mut output_limit = false;
+        loop {
+            if written < input.len() {
+                match pipe.write(&input[written..input.len().min(written + 65_536)]) {
+                    Ok(0) => write_error = Some("prepared stdin made no progress".to_string()),
+                    Ok(n) => written += n,
+                    Err(e)
+                        if matches!(
+                            e.kind(),
+                            std::io::ErrorKind::WouldBlock | std::io::ErrorKind::Interrupted
+                        ) => {}
+                    Err(e) => write_error = Some(e.to_string()),
+                }
+            }
+            if written == input.len() || write_error.is_some() {
+                drop(pipe);
+                break;
+            }
+            output_limit = [&self.stdout_path, &self.stderr_path]
+                .iter()
+                .any(|p| fs::metadata(p).map_or(true, |m| m.len() > 8 * 1024 * 1024));
+            if output_limit || write_error.is_some() || Instant::now() >= deadline {
+                timed_out = !output_limit && write_error.is_none();
+                drop(pipe);
+                break;
+            }
+            if self
+                .guard
+                .child
+                .try_wait()
+                .map_err(|e| e.to_string())?
+                .is_some()
+            {
+                write_error = Some("prepared child exited before complete input".to_string());
+                drop(pipe);
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let status = loop {
+            if let Some(status) = self.guard.child.try_wait().map_err(|e| e.to_string())? {
+                break status;
+            }
+            output_limit = [&self.stdout_path, &self.stderr_path]
+                .iter()
+                .any(|p| fs::metadata(p).map_or(true, |m| m.len() > 8 * 1024 * 1024));
+            if output_limit || write_error.is_some() || timed_out || Instant::now() >= deadline {
+                timed_out |= !output_limit && write_error.is_none() && Instant::now() >= deadline;
+                kill_group(self.guard.child.id());
+                let _ = self.guard.child.kill();
+                break self.guard.child.wait().map_err(|e| e.to_string())?;
+            }
+            std::thread::sleep(Duration::from_millis(5));
+        };
+        let elapsed_ns = start.elapsed().as_nanos();
+        let pid = self.guard.child.id();
+        let drained = confirm_drain(pid);
+        let after = sha256(&read(&self.program, 128 * 1024 * 1024)?);
+        let (out_size, out) = prepared_output(&self.stdout_path)?;
+        let (err_size, err) = prepared_output(&self.stderr_path)?;
+        output_limit |= out.is_none() || err.is_none();
+        let marker_count = out.as_ref().map_or(0, |out| {
+            out.split_inclusive(|&byte| byte == b'\n')
+                .filter(|line| line.strip_suffix(b"\n") == Some(self.marker.as_bytes()))
+                .count()
+        });
+        let receipt = json!({
+            "schema_version":1,"state":"used","pid":pid,
+            "argv":std::iter::once(self.program.to_string_lossy().into_owned())
+                .chain(self.argv.iter().cloned()).collect::<Vec<_>>(),
+            "cwd":self.cwd,"environment":self.environment,
+            "marker":self.marker,
+            "launch_to_ready_ns":self.ready.duration_since(self.launch).as_nanos(),
+            "request_to_exit_ns":elapsed_ns,
+            "stdin_bytes":input.len(),"stdin_sha256":sha256(input),
+            "stdin_written_bytes":written,"stdin_write_error":write_error,
+            "deadline_ms":deadline_ms,"exit_code":status.code(),
+            "timed_out":timed_out,"output_limit":output_limit,
+            "executable_sha256_before":self.executable_sha256,
+            "executable_sha256_after":after,
+            "stdout_bytes":out_size,"stdout_sha256":out.as_ref().map(|bytes| sha256(bytes)),
+            "readiness_marker_count":marker_count,
+            "stderr_bytes":err_size,"stderr_sha256":err.as_ref().map(|bytes| sha256(bytes)),
+            "process_group_drain_confirmed":drained
+        });
+        save(&self.stem.with_extension("receipt.json"), &receipt)?;
+        require(
+            after == self.executable_sha256,
+            "prepared executable changed",
+        )?;
+        require(drained, "prepared child process group did not drain")?;
+        require(!output_limit, "prepared child output exceeded bound")?;
+        require(
+            marker_count == 1,
+            "prepared child readiness marker was not unique",
+        )?;
+        require(write_error.is_none(), "prepared stdin delivery failed")?;
+        Ok(NativeOutput {
+            exit_code: status.code(),
+            timed_out,
+            stdout: String::from_utf8(out.ok_or("missing bounded stdout")?)
+                .map_err(|e| e.to_string())?,
+            receipt,
+        })
+    }
+
+    /// An unused pool member has never received target-dependent input.
+    pub fn cancel(mut self) -> Result<Value, String> {
+        require(self.stdin.is_some(), "prepared child already used")?;
+        let pid = self.guard.child.id();
+        kill_group(pid);
+        let _ = self.guard.child.kill();
+        let status = self.guard.child.wait().map_err(|e| e.to_string())?;
+        self.stdin.take();
+        let drained = confirm_drain(pid);
+        let after = sha256(&read(&self.program, 128 * 1024 * 1024)?);
+        let (out_size, out) = prepared_output(&self.stdout_path)?;
+        let (err_size, err) = prepared_output(&self.stderr_path)?;
+        let marker_count = out.as_ref().map_or(0, |out| {
+            out.split_inclusive(|&byte| byte == b'\n')
+                .filter(|line| line.strip_suffix(b"\n") == Some(self.marker.as_bytes()))
+                .count()
+        });
+        let receipt = json!({
+            "schema_version":1,"state":"cancelled-unused","pid":pid,
+            "exit_code":status.code(),"stdin_written_bytes":0,
+            "launch_to_ready_ns":self.ready.duration_since(self.launch).as_nanos(),
+            "ready_to_cancel_ns":self.ready.elapsed().as_nanos(),
+            "executable_sha256_before":self.executable_sha256,
+            "executable_sha256_after":after,
+            "stdout_bytes":out_size,"stdout_sha256":out.as_ref().map(|bytes| sha256(bytes)),
+            "readiness_marker_count":marker_count,
+            "stderr_bytes":err_size,"stderr_sha256":err.as_ref().map(|bytes| sha256(bytes)),
+            "process_group_drain_confirmed":drained
+        });
+        save(&self.stem.with_extension("receipt.json"), &receipt)?;
+        require(
+            after == self.executable_sha256,
+            "prepared executable changed",
+        )?;
+        require(drained, "unused prepared child process group did not drain")?;
+        require(
+            out.is_some() && err.is_some(),
+            "unused child output exceeded bound",
+        )?;
+        require(
+            marker_count == 1,
+            "unused child readiness marker was not unique",
+        )?;
+        Ok(receipt)
+    }
 }
 pub fn config(capsule: &Path) -> Result<ControlConfig, String> {
     let config: ControlConfig =
