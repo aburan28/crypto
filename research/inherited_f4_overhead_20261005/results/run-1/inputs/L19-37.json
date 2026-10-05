@@ -1,0 +1,26 @@
+{
+  "schema": "ecbench.child_input/v1",
+  "curve": {
+    "kind": "koblitz",
+    "a": 0,
+    "n": 19
+  },
+  "target_seed": 202610051901,
+  "target_index": 4,
+  "target_kind": "public",
+  "expected_workload_id": "W8dc366d192ed",
+  "method": {
+    "id": "ic.pipeline",
+    "params": {
+      "factor_base": "koblitz-standard-subspace:dimension=7",
+      "linalg": "incremental-gauss",
+      "max_trials": "200000",
+      "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+      "solver": "",
+      "solver_budget_seconds": "0",
+      "targets": "walk"
+    }
+  },
+  "expected_method_id": "ECM1h717ee5de5167",
+  "algorithm_seed": 4867996974079862839
+}

@@ -70,6 +70,10 @@ impl StartCurve {
         Self::from_params(&CurveParams::p256(), true)
     }
 
+    pub fn p192() -> Self {
+        Self::from_params(&CurveParams::p192(), true)
+    }
+
     pub fn p224() -> Self {
         Self::from_params(&CurveParams::p224(), true)
     }
