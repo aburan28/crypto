@@ -558,6 +558,7 @@ then runs index calculus on the higher-genus Jacobian.
 | `cryptanalysis::ghs_descent`          | Frey-Rück / GHS cover-curve construction                 |
 | `cryptanalysis::ghs_full_attack`      | End-to-end orchestrator producing structured `AttackReport` |
 | `cryptanalysis::ec_trapdoor`          | EC trapdoor / weak-curve detection                       |
+| `cryptanalysis::ghs_screen`           | Exact all-factorisation GHS structural screen and cover towers |
 | `cryptanalysis::binary_isogeny`       | Vélu-style isogeny computation in characteristic 2       |
 | `binary_ecc::hyperelliptic`           | Genus-`g` hyperelliptic curve arithmetic over F_{2^m}    |
 | `binary_ecc::poly_f2m`                | Polynomial arithmetic over F_{2^m}                        |
@@ -565,7 +566,9 @@ then runs index calculus on the higher-genus Jacobian.
 
 End-to-end m=1 ECDLP recovery runs on F_{2^6}; m=2 type-II symbolic descent
 demonstrated on F_{2^6} with (n=3, ℓ=2).  See `examples/ghs_attack_demo.rs`
-for three runnable scenarios.
+for three runnable scenarios. The native [`ghs_screen`](docs/GHS_SCREEN.md)
+CLI validates a polynomial-basis field and reports every GHS tower without
+fixed-width genus truncation.
 
 ### Auto-attack framework + CLI
 
@@ -849,6 +852,7 @@ src/
 │   ├── boomerang.rs           — Generic distinguisher + rectangle + sandwich + trail search
 │   ├── ghs_descent.rs         — Binary-curve Weil descent (cover construction)
 │   ├── ghs_full_attack.rs     — GHS attack orchestrator
+│   ├── ghs_screen.rs          — Exact all-factorisation GHS screener
 │   ├── binary_isogeny.rs      — Char-2 Vélu isogenies
 │   ├── ec_trapdoor.rs         — Weak-curve / trapdoor detection
 │   ├── cipher_registry.rs     — Named-cipher catalog
