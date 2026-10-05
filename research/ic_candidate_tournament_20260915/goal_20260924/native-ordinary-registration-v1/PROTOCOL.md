@@ -8,6 +8,9 @@ registration, publication and one-use execution. Neither arm is the worker's
 built-in Rust CDCL solver. These are preparation stages of complete IC
 pipelines, not complete target-DLP results.
 
+The exact frozen seals and full data-only archives are in the
+[registration result](REGISTRATION_RESULT.md).
+
 ## Frozen question and input
 
 The proposed common natural panel has 512 target-free ordinary queries from
@@ -32,6 +35,39 @@ The host is a physical macOS ARM64 M4 Pro in an uncalibrated environment.
 The busy lock serializes local jobs but supplies no physical CPU isolation.
 Preparation phase times are exploratory diagnostics. No CPU speedup may be
 promoted without the user-required isolated-host/noise receipt.
+
+## Hypothesis, reference and stop rule
+
+The falsifiable stage hypothesis is that each real solver family can turn this
+fixed natural panel into 29 independent verified projected rows and recover
+all 29 column logs. The independent finite-group pair-complement oracle is the
+reference for whether each query has a geometric decomposition. It certifies
+negative answers and identifies feasible queries that a bounded solver missed;
+it does not replace solver execution or supply a timing baseline. The two arms
+are paired by trial/point, but neither is treated as an incumbent complete IC
+solver. That comparison and same-point rho belong to the later one-target
+protocol.
+
+Each arm qualifies for a later complete-solve experiment only if its original
+frozen audit passes, all 512 starts and completions are retained, every witness
+readds to its query, every claimed negative is geometrically impossible, rank
+is 29/29, and all column logs pass independent scalar replay. A complete panel
+with rank below 29, a zero-yield arm, or an arm with feasible inconclusive
+queries remains a measured outcome; it is not repaired by filling in oracle
+relations. An interrupted panel remains censored. The one-use run stops after
+512 queries or its 12-hour outer deadline; a consumed registration is never
+retried. A revised budget or solver needs a new preregistration and source
+freeze.
+
+Report all 512 outcomes, including timed-out and budget-exhausted attempts;
+verified-witness rate, accepted-row rate and novel rank per query; uncertainty
+for the rates; and exploratory paired cost differences with uncertainty. The
+charged preparation interval includes initialization, all query generation,
+encoding/solver and relation checks for successful and failed queries, matrix
+building, final relation LA and group replay, plus measured controller setup.
+Its exclusive phases must sum to the observed preparation wall time. Report
+cost per useful row only with its zero-denominator case explicit. No stage
+rate or cost is a one-target IC speedup.
 
 ## Publication before the sole dispatch
 
