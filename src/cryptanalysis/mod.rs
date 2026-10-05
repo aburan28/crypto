@@ -99,6 +99,7 @@ pub mod aut_folded_rho;
 pub mod auto_attack;
 pub mod avalanche;
 pub mod b_seed_profile;
+pub mod bielliptic_quartic;
 pub mod binary_field_basis;
 pub mod binary_isogeny;
 pub mod binary_semaev;
