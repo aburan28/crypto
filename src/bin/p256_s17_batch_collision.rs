@@ -1121,7 +1121,7 @@ fn projection(
             "direct random signed 8+9 sums",
             direct_additions,
             images * normalization_fme_per_image + replay_fme + target_setup_fme,
-            "projected algorithmic advance",
+            "projected engineering",
         ),
         (
             "optimistic one-addition-per-image generic boundary",
