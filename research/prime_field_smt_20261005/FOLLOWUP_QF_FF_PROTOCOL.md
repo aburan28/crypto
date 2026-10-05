@@ -3,6 +3,16 @@
 Status: preregistered after the frozen `QF_BV` run returned `unknown` at
 120,000 ms and before any `QF_FF` solver run.
 
+Compatibility addendum, recorded before the frozen `QF_FF` run: the first
+toy control with the non-GPL static artifact exited immediately with
+`cvc5 can't solve field problems since it was not configured with --cocoa`.
+That failed control is retained. Native finite fields require CoCoA, so the
+remaining controls and frozen run use the same cvc5 1.4.1 release and git
+revision from the official `cvc5-Linux-x86_64-static-gpl.zip` artifact,
+SHA-256
+`d0b54324ec2129697975da8753767fd255309947b87832917d32a78da7d16666`.
+The extracted executable hash is recorded in every receipt.
+
 The first protocol and its input, target, factor-base bound, cvc5 release,
 time cap, verification rules, and claim exclusions remain unchanged. This
 follow-up changes only the arithmetic representation.
