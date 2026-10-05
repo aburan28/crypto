@@ -99,6 +99,29 @@ The [EC index-calculus baseline](research/index_calculus_baseline_20260914/READM
 adds counting bounds, an operation-accounting contract, and a certified WDSat control
 with frozen measurements and reproducible commands.
 
+## Isogeny walks
+
+`isogeny_walk` walks a prime-field curve's isogeny class (P-256, P-224,
+P-192 or a custom curve).
+
+- **Certified.** Every isogeny is certified by an explicit kernel
+  polynomial, and every curve is recorded with its ICV1/EC1 identity and
+  traits.
+- **Stored.** Runs can be stored in S3, write-once and hash-checked.
+
+    cargo build --release --bin isogeny_walk
+    ./target/release/isogeny_walk walk --curve p256 --max-ell 61 --max-curves 2000 --out runs/p256
+    ./target/release/isogeny_walk verify --curve p256 --dir runs/p256
+    ./target/release/isogeny_walk walk --curve p256 --max-ell 61 --max-curves 20000 \
+        --store s3://crypto-autoresearcher/isogeny-walk --prune-local --out runs/p256-20k
+
+See [the isogeny-walk guide](docs/isogeny-walk/README.md) for:
+- every command;
+- S3 setup and IAM;
+- offline use;
+- sizing;
+- what the tool does and does not establish.
+
 ## Algorithm coverage
 
 ### Symmetric primitives

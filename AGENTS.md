@@ -744,6 +744,8 @@ To enumerate a prime-field curve's isogeny class, use the native walker
 `src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
 it emits these records and kernel-certified `IW1` routes, and `isogeny_walk
 verify` replays them.
+The user guide, including S3 storage, is
+[docs/isogeny-walk/README.md](docs/isogeny-walk/README.md).
 
 # Agent rules for IC measurements
 
