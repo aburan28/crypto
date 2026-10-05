@@ -1,0 +1,57 @@
+{
+  "build_wall_seconds": 0.11751541,
+  "circuit_variant": "inductive_factor_validity",
+  "claim_boundary": "complete relation representation only; no natural-target yield, DLP, or rho crossover claim",
+  "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
+  "curve_id": "EC1N83Ckb1h876c2921cb64",
+  "dag": {
+    "and_gates": 195682,
+    "primary_inputs": 2996,
+    "total_nodes": 693872,
+    "xor_gates": 495192
+  },
+  "dag_prefix_blake3": "5a4a82336e032434fb927e1baae59faa5034486cd0d838f109346409ef24bf8c",
+  "decoded_relation": {
+    "curve_checked": true,
+    "dag_checked": true,
+    "factors": [
+      { "infinity": false, "x": "0x200001", "y": "0x612d0814ec6ba7116ee9c" },
+      { "infinity": false, "x": "0x80200800000", "y": "0x59dd628e8a36c97b0d499" },
+      { "infinity": false, "x": "0x80020000000000040", "y": "0x320d10fb3a9fba12f159a" },
+      { "infinity": false, "x": "0x400400000002000000", "y": "0x46551fe9438abbc2dcfeb" },
+      { "infinity": false, "x": "0x8000008000008000000", "y": "0x71d1b9a11068ef1437b7a" },
+      { "infinity": false, "x": "0x4082000800004000", "y": "0x3ea1bab3d0b04a025e4e8" },
+      { "infinity": false, "x": "0x40000000030000000", "y": "0x7ddcae520e65afad237cc" },
+      { "infinity": false, "x": "0x400010", "y": "0x7c6d3c219105ac527bc49" },
+      { "infinity": false, "x": "0x20010200000000000", "y": "0x9d5dfce1ad2f9da729fe" },
+      { "infinity": false, "x": "0x4010000000000000020", "y": "0x4e46d50cbec87af26b9f0" }
+    ],
+    "group_sum_checked": true,
+    "sum": {
+      "infinity": false,
+      "x": "0x1ddabdd28b7a7268c5263",
+      "y": "0x21c5bd8d43bb09dc61c82"
+    },
+    "target": {
+      "infinity": false,
+      "x": "0x1ddabdd28b7a7268c5263",
+      "y": "0x21c5bd8d43bb09dc61c82"
+    }
+  },
+  "model_sha256": "d86e724e638bf4bf794a77ea6330541a3c2769af6a6fb60bb93b2729f3842053",
+  "rho_baseline": {
+    "verified": true,
+    "walk_iterations": "201733439488",
+    "walk_iterations_log2": 37.55365928975891
+  },
+  "schema": "n83-rotated-m10-native-xor-planted-replay-summary-v1",
+  "slot_dimensions": [9, 9, 9, 8, 8, 8, 8, 8, 8, 8],
+  "status": "PASS_MODEL_REPLAY",
+  "target": {
+    "infinity": false,
+    "x": "0x1ddabdd28b7a7268c5263",
+    "y": "0x21c5bd8d43bb09dc61c82"
+  },
+  "target_kind": "deterministic_planted",
+  "xor_dimacs_stream_check": "PASS"
+}
