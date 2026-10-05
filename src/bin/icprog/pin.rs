@@ -95,6 +95,31 @@ pub fn untimed(binary: &Path, row: &Row, out: &Path) -> Result<J, String> {
     Ok(runs::load(out))
 }
 
+/// All 90 suite rows, each with its tier: `S`, then `smoke`.
+pub fn suite_rows(programme: &Path) -> Result<Vec<(&'static str, Row)>, String> {
+    let mut out = Vec::new();
+    for tier in ["S", "smoke"] {
+        out.extend(suite::rows(programme, tier)?.into_iter().map(|r| (tier, r)));
+    }
+    Ok(out)
+}
+
+/// v0's report for a suite row: R01's first profile pass for an `S` row,
+/// its smoke run for a smoke row.
+pub fn v0_report(r01: &Path, tier: &str, row: &Row) -> Result<J, String> {
+    let suite_id = row.suite_id.as_ref().ok_or("a suite row has no suite id")?;
+    Ok(if tier == "S" {
+        let first = r01
+            .join("profile")
+            .join("v0")
+            .join(suite_id)
+            .join("r1.price.json");
+        runs::load(&runs::figure_path(&first)?)
+    } else {
+        runs::load(&r01.join("smoke").join(format!("{suite_id}.price.json")))
+    })
+}
+
 /// The candidate's pin against v0's outputs, written to `<runs>/pin/pin.json`
 /// once; an existing record is returned as it is.
 pub fn pin(programme: &Path, runs_dir: &Path, cand: &Path) -> Result<J, String> {
@@ -104,22 +129,9 @@ pub fn pin(programme: &Path, runs_dir: &Path, cand: &Path) -> Result<J, String> 
     }
     let r01 = r01_runs(programme)?;
     let mut result = Vec::new();
-    let mut tiers = Vec::new();
-    for tier in ["S", "smoke"] {
-        tiers.extend(suite::rows(programme, tier)?.into_iter().map(|r| (tier, r)));
-    }
-    for (tier, row) in tiers {
+    for (tier, row) in suite_rows(programme)? {
         let suite_id = row.suite_id.clone().ok_or("a suite row has no suite id")?;
-        let old = if tier == "S" {
-            let first = r01
-                .join("profile")
-                .join("v0")
-                .join(&suite_id)
-                .join("r1.price.json");
-            runs::load(&runs::figure_path(&first)?)
-        } else {
-            runs::load(&r01.join("smoke").join(format!("{suite_id}.price.json")))
-        };
+        let old = v0_report(&r01, tier, &row)?;
         let slug = suite::curve_slug(row.a, row.n)?;
         let v0_name = curve_id::resolve(old.get("curve").and_then(J::as_str).unwrap_or(""));
         let new = untimed(

@@ -34,8 +34,12 @@
 mod autolab;
 #[path = "icprog/bench.rs"]
 mod bench;
+#[path = "icprog/bround.rs"]
+mod bround;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/conformance.rs"]
+mod conformance;
 #[path = "icprog/f5_control.rs"]
 mod f5_control;
 #[path = "icprog/f5_control_publication.rs"]
@@ -367,6 +371,65 @@ enum Command {
         /// The commit the fixture was built from, for a fresh reference check.
         #[arg(long)]
         fixture_commit: Option<String>,
+    },
+    /// One of Track B's measurement steps (`harness/bround.py`, ported):
+    /// manifest, aa, conformance, pin, translate, timing, v2timing, chain
+    /// or analyse.
+    Bround {
+        step: String,
+        /// The conformance steps accepted so far and the one judged, e.g.
+        /// `B0,B1,B3`.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The round whose A/A bands the timing is read against, a directory
+        /// under `rounds/` (e.g. `R07-main-head`).
+        #[arg(long)]
+        aa_from: String,
+        /// The baseline arm's `ic`.
+        #[arg(long)]
+        base: Option<PathBuf>,
+        /// The commit the base was built from.
+        #[arg(long)]
+        base_commit: Option<String>,
+        /// The candidate arm's `ic`.
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// The commit the candidate was built from.
+        #[arg(long)]
+        cand_commit: Option<String>,
+        /// A chain arm, `NAME=PATH` or `NAME=PATH@COMMIT`, NAME one of base,
+        /// B0, B1, B3, B2, B2b, B7a, B3b, B4; repeat for each.
+        #[arg(long = "arm")]
+        arms: Vec<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// The conformance suite's cases for the steps named, on one `ic`
+    /// (`conformance/run.py` and `v2/run.py`, ported): the report as JSON
+    /// on stdout; the exit status is 0 only if every case passed.
+    Conformance {
+        /// The `ic` binary the cases run.
+        #[arg(long)]
+        ic: PathBuf,
+        /// The steps accepted so far and the one judged, e.g. `B0,B1,B3`.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The commit the binary was built from (`json_equals_build_commit`).
+        #[arg(long)]
+        build_commit: Option<String>,
+        /// Also write the report here.
+        #[arg(long)]
+        out: Option<PathBuf>,
     },
     /// A round's fresh holdouts by suite v1's own construction
     /// (`suite/v1/make_suite.py`, ported): written once into the round's
@@ -734,9 +797,218 @@ fn holdouts(args: HoldoutArgs) -> Result<String, String> {
     ))
 }
 
+/// The conformance runner: the report, and whether every case passed.
+fn conformance_cmd(
+    ic: &std::path::Path,
+    steps: &str,
+    root: &std::path::Path,
+    build_commit: Option<&str>,
+    out: Option<&std::path::Path>,
+) -> Result<(String, bool), String> {
+    let programme = suite::programme(root)?;
+    let steps: Vec<String> = steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let ic = std::path::absolute(ic).map_err(|e| format!("{}: {e}", ic.display()))?;
+    let (report, all) = conformance::run_steps(&programme, &ic, &steps, build_commit)?;
+    let text = json::dumps(&report, 1);
+    if let Some(out) = out {
+        std::fs::write(out, text.clone() + "\n").map_err(|e| format!("{}: {e}", out.display()))?;
+    }
+    Ok((text, all))
+}
+
+struct BroundArgs {
+    step: String,
+    steps: String,
+    root: PathBuf,
+    runs: PathBuf,
+    aa_from: String,
+    base: Option<PathBuf>,
+    base_commit: Option<String>,
+    cand: Option<PathBuf>,
+    cand_commit: Option<String>,
+    arms: Vec<String>,
+    isolate: Option<PathBuf>,
+}
+
+/// `NAME=PATH` or `NAME=PATH@COMMIT`.
+fn chain_arm(spec: &str) -> Result<(bench::Arm, Option<String>), String> {
+    let (name, rest) = spec
+        .split_once('=')
+        .ok_or_else(|| format!("--arm {spec}: expected NAME=PATH or NAME=PATH@COMMIT"))?;
+    let (path, commit) = match rest.rsplit_once('@') {
+        Some((p, c)) => (p, Some(c.to_string())),
+        None => (rest, None),
+    };
+    Ok((
+        bench::Arm {
+            name: name.to_string(),
+            binary: std::path::absolute(path).map_err(|e| format!("{path}: {e}"))?,
+        },
+        commit,
+    ))
+}
+
+fn bround_cmd(args: BroundArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    std::fs::create_dir_all(&args.runs).map_err(|e| format!("{}: {e}", args.runs.display()))?;
+    let runs = std::path::absolute(&args.runs).map_err(|e| e.to_string())?;
+    let aa_from = programme.join("rounds").join(&args.aa_from);
+    if !aa_from.join("analysis.json").exists() {
+        return Err(format!(
+            "{} has no analysis.json to read A/A bands from",
+            aa_from.display()
+        ));
+    }
+    let steps = args
+        .steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            programme,
+            round_dir: aa_from.clone(),
+            runs,
+        },
+        steps,
+        aa_from,
+    };
+    if args.step == "analyse" {
+        return Ok(json::dumps(&bround::analyse(&r)?, 1));
+    }
+    let isolate = match args.isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    let b = bench::Bench { isolate };
+    let (arms, commits): (Vec<bench::Arm>, Vec<Option<String>>) = if args.step == "chain" {
+        let given = args
+            .arms
+            .iter()
+            .map(|s| chain_arm(s))
+            .collect::<Result<Vec<_>, _>>()?;
+        let ordered = bround::chain_arms(given.iter().map(|(a, _)| a.clone()).collect())?;
+        let commits = ordered
+            .iter()
+            .map(|a| {
+                given
+                    .iter()
+                    .find(|(g, _)| g.name == a.name)
+                    .and_then(|(_, c)| c.clone())
+            })
+            .collect();
+        (ordered, commits)
+    } else {
+        let need = |p: Option<PathBuf>, flag: &str| -> Result<PathBuf, String> {
+            let p = p.ok_or_else(|| format!("{} needs --{flag}", args.step))?;
+            if !p.exists() {
+                return Err(format!("no binary at {}", p.display()));
+            }
+            std::path::absolute(&p).map_err(|e| e.to_string())
+        };
+        let cand = need(args.cand, "cand")?;
+        let base = need(args.base, "base")?;
+        (
+            vec![
+                bench::Arm {
+                    name: "base".into(),
+                    binary: base,
+                },
+                bench::Arm {
+                    name: "cand".into(),
+                    binary: cand,
+                },
+            ],
+            vec![args.base_commit, args.cand_commit.clone()],
+        )
+    };
+    let timed = ["aa", "timing", "v2timing", "chain"].contains(&args.step.as_str());
+    if timed && !b.isolate.exists() {
+        return Err(format!("no isolation tool at {}", b.isolate.display()));
+    }
+    let doc = match args.step.as_str() {
+        "manifest" => bround::manifest(&r, &b, &arms, &args.root, &commits)?,
+        "aa" => rounds::speed::aa(&r.ctx, &b, &arms)?,
+        "conformance" => bround::conformance(&r, &arms, args.cand_commit.as_deref())?,
+        "pin" => bround::pin(&r, &arms)?,
+        "translate" => bround::translate(&r, &arms)?,
+        "timing" => bround::timing(&r, &b, &arms)?,
+        "v2timing" => bround::v2timing(&r, &b, &arms)?,
+        "chain" => bround::chain(&r, &b, &arms, &args.root, &commits)?,
+        other => {
+            return Err(format!(
+                "unknown step {other:?}; the steps are manifest, aa, conformance, pin, \
+                 translate, timing, v2timing, chain and analyse"
+            ))
+        }
+    };
+    Ok(match doc {
+        json::J::Null => String::new(),
+        d => json::dumps(&d, 1),
+    })
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    if let Command::Conformance {
+        ic,
+        steps,
+        root,
+        build_commit,
+        out,
+    } = &cli.command
+    {
+        return match conformance_cmd(ic, steps, root, build_commit.as_deref(), out.as_deref()) {
+            Ok((text, all)) => {
+                println!("{text}");
+                if all {
+                    ExitCode::SUCCESS
+                } else {
+                    ExitCode::FAILURE
+                }
+            }
+            Err(e) => {
+                eprintln!("icprog: {e}");
+                ExitCode::FAILURE
+            }
+        };
+    }
     let result = match cli.command {
+        Command::Conformance { .. } => unreachable!("handled above"),
+        Command::Bround {
+            step,
+            steps,
+            root,
+            runs,
+            aa_from,
+            base,
+            base_commit,
+            cand,
+            cand_commit,
+            arms,
+            isolate,
+        } => bround_cmd(BroundArgs {
+            step,
+            steps,
+            root,
+            runs,
+            aa_from,
+            base,
+            base_commit,
+            cand,
+            cand_commit,
+            arms,
+            isolate,
+        }),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,

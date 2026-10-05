@@ -59,7 +59,7 @@ fn paired(d: &Path, rows: &[Row], measure: Measure, half_width: bool) -> Result<
 }
 
 /// The same for any two arms, the first over the second.
-fn paired_of(
+pub(crate) fn paired_of(
     d: &Path,
     rows: &[Row],
     arms: (&str, &str),
@@ -148,12 +148,12 @@ fn unit_v0(c: &Ctx) -> Result<HashMap<String, f64>, String> {
     Ok(out)
 }
 
-fn round3(x: f64) -> f64 {
+pub(crate) fn round3(x: f64) -> f64 {
     format!("{x:.3}").parse().expect("a formatted float parses")
 }
 
 /// The A/A band's keys, and whether the row regresses beyond it.
-fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> {
+pub(crate) fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> {
     let Some(band) = band.filter(|b| b.truthy()) else {
         return Ok(());
     };
@@ -177,7 +177,7 @@ fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> 
     Ok(())
 }
 
-fn size_head(slug: &str, a: u8, n: u32, rs: &[Row]) -> Vec<(String, J)> {
+pub(crate) fn size_head(slug: &str, a: u8, n: u32, rs: &[Row]) -> Vec<(String, J)> {
     vec![
         ("slug".into(), J::Str(slug.into())),
         ("a".into(), J::Int(a.into())),
@@ -216,7 +216,7 @@ fn aa_reasons(suite: &J, reasons: &mut Vec<J>) {
     }
 }
 
-fn pin_summary(pin: &Option<J>) -> Result<J, String> {
+pub(crate) fn pin_summary(pin: &Option<J>) -> Result<J, String> {
     Ok(match pin {
         Some(p) => obj([
             ("held", p.at("held")?.clone()),
@@ -245,7 +245,7 @@ fn accounting(c: &Ctx, steps: &[&str]) -> Result<J, String> {
     Ok(J::Obj(kv))
 }
 
-fn opt(v: Option<J>) -> J {
+pub(crate) fn opt(v: Option<J>) -> J {
     v.unwrap_or(J::Null)
 }
 
@@ -906,7 +906,7 @@ pub mod speed {
 
     /// Each arm's binary, as a manifest names it: its file name, SHA-256 and,
     /// where given, the commit it was built from.
-    fn binaries(arms: &[Arm], commits: &[Option<String>]) -> Result<J, String> {
+    pub(crate) fn binaries(arms: &[Arm], commits: &[Option<String>]) -> Result<J, String> {
         let mut kv = Vec::new();
         for (i, a) in arms.iter().enumerate() {
             let name = if a.name == "cand" {
