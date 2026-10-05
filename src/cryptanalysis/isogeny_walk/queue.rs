@@ -465,7 +465,7 @@ pub fn plan(
                     "idempotency_key",
                     V::s(format!(
                         "isogeny-walk-traits/{}/{}/{i}-of-{shards}",
-                        &key,
+                        key,
                         &commit[..12]
                     )),
                 ),
