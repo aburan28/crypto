@@ -102,10 +102,197 @@ call:
 
 ### What was not done
 
-- No SIMD. The machine has AVX2 and AVX-512F and the NTT is the obvious
-  candidate; a vectorised butterfly would be worth considerably more than
-  anything above. It is not written, so it is not claimed.
+- ~~No SIMD.~~ Done in the second round below, which supersedes this item;
+  the first-round table above is kept as its "before".
 - No constant-time work. This went the other way if anything: see below.
+
+### Second round: public-data reuse and SIMD
+
+The "after" column above became this round's baseline. Profiled again, the
+picture had changed: in ML-KEM-768 encapsulation Keccak was ~45% of
+instructions, expanding `Â` ~42%, and hashing `ek` for `H(ek)` ~10%. That is
+the split Sayed, Taha and Nijjer report on a Cortex-M7 in *System-Level
+Optimization Beyond Cryptographic Kernels* (arXiv:2610.01960), and their
+first lever, caching work that depends only on public data, was the first
+thing tried here. Evidence, per-step tables, host and commands are in
+[`research/pqc_ml_kem_system_level_20261005/`](../research/pqc_ml_kem_system_level_20261005/README.md).
+
+Class: **engineering**. Same algorithm, same bytes: every row is held to the
+ACVP-validated reference, and keys, ciphertexts and shared secrets are
+unchanged.
+
+Kilocycles, median of 1400 interleaved samples per cell, isolated, on a
+2.1 GHz Xeon with AVX-512 (a different session from the first round's table, so
+compare within this table only). "prepared" is the same operation against a
+key prepared once with `MlKemPreparedEncapsKey` / `MlKemPreparedDecapsKey`,
+the preparation itself excluded and listed separately.
+
+| scheme | operation | main | this round | prepared | main / round | main / prepared | correct |
+|---|---|---:|---:|---:|---:|---:|:-:|
+| ML-KEM-512 | keygen | 46.7 | 17.1 | 18.7 | 2.73× | 2.50× | yes |
+| ML-KEM-512 | encaps | 54.2 | 15.9 | 8.3 | 3.40× | 6.55× | yes |
+| ML-KEM-512 | decaps | 72.0 | 21.3 | 16.9 | 3.38× | 4.25× | yes |
+| ML-KEM-768 | keygen | 83.1 | 28.0 | 29.6 | 2.97× | 2.81× | yes |
+| ML-KEM-768 | encaps | 96.1 | 25.9 | 9.8 | 3.72× | 9.81× | yes |
+| ML-KEM-768 | decaps | 119.8 | 33.1 | 22.3 | 3.62× | 5.38× | yes |
+| ML-KEM-1024 | keygen | 136.3 | 36.5 | 37.8 | 3.74× | 3.61× | yes |
+| ML-KEM-1024 | encaps | 149.0 | 34.5 | 13.0 | 4.32× | 11.43× | yes |
+| ML-KEM-1024 | decaps | 180.5 | 44.4 | 30.0 | 4.07× | 6.01× | yes |
+
+Preparing a key costs 7.7 / 16.2 / 21.6 kilocycles for the encapsulation
+side and 5.6 / 12.5 / 16.1 for the decapsulation side (512 / 768 / 1024),
+less than one unprepared encapsulation, so the cache pays for itself on its
+first use. Key generation that captures the cache
+(`ml_kem_keygen_prepared_internal`) costs within noise of plain key
+generation, because it computes all of it anyway. The A/A spread on this
+host is ±2%.
+
+#### What each step bought, ML-KEM-768
+
+Each row is a separate interleaved run against `main`, so the baseline
+column moves by its noise; read the ratios.
+
+| step | keygen | encaps | decaps | encaps, prepared | decaps, prepared |
+|---|---:|---:|---:|---:|---:|
+| main | 84.4 | 94.4 | 117.7 | | |
+| public-data reuse | 82.8 | 93.6 | 117.6 | 43.4 | 70.7 |
+| + four-way Keccak | 56.4 | 62.8 | 85.8 | 38.7 | 66.2 |
+| + AVX2 NTT, inverse NTT, pointwise product | 38.4 | 38.4 | 52.9 | 14.3 | 32.3 |
+| + grouped packing, single sponges in one AVX-512 lane | 30.4 | 30.3 | 38.5 | 11.8 | 24.1 |
+| + vector compression | 30.8 | 28.1 | 35.2 | 9.8 | 21.8 |
+| + vector rejection sampling | 28.0 | 25.9 | 33.1 | 9.8 | 22.3 |
+
+- **Public-data reuse.** A prepared key holds `Â`, `t̂`, `H(ek)` and, for
+  decapsulation, `ŝ`. On encapsulation that removes the matrix expansion
+  and the `H(ek)` hash, 2.18× by itself; on decapsulation it removes the
+  matrix from re-encryption, 1.66×: 54% and 40% fewer cycles. The paper
+  measures 41–62% and 38–58% for its cached-`A` knob alone on the M7, so
+  the lever transfers. What does not transfer is its ranking: there, the
+  remaining system knobs were worth at most ~2.5%; here, once the cache
+  existed, SIMD was worth more than the cache.
+- **Four-way Keccak** (`pqc::fast::keccak4`). The k² matrix entries and the
+  2k (+1) noise PRFs are independent sponges, so they run four to a
+  256-bit register. On this host four AVX-512VL permutations (`vprolq`,
+  `vpternlogq`) take ~610 cycles against ~880 for one scalar permutation,
+  and four AVX2 permutations take ~1,500. So a leftover single sponge goes
+  through the vector unit with AVX-512 and through the scalar code with
+  AVX2.
+- **AVX2 ring arithmetic** (`pqc::fast::ml_kem::avx2`). The largest single
+  step. It is *bit-identical* to the scalar code, not merely congruent:
+  `vpmulhw`/`vpmullw` give exactly the scalar Montgomery result, and the
+  scalar Barrett quotient `⌊(va + 2²⁵)/2²⁶⌋` equals
+  `⌊(⌊va/2¹⁶⌋ + 2⁹)/2¹⁰⌋` by the nested-floor identity. So coefficients
+  keep the standard order (no pq-crystals-style permuted NTT and repacking)
+  and the vector and scalar paths are tested for array equality.
+- **Grouped packing.** Eight `d`-bit values are exactly `d` bytes, so
+  `ByteEncode_d`/`ByteDecode_d` now assemble a group in one register. The
+  byte-at-a-time accumulator it replaced had become 18% of a prepared
+  encapsulation. The same step routed the scalar sponges (`H`, `G`, `J`,
+  SHA3-512) through one lane of the AVX-512 kernel, ~630 cycles against
+  ~880 per permutation; this also speeds up `pqc::fast::ml_dsa`, which
+  shares the sponge.
+- **Vector compression.** `Compress_d` divides by q. Done four lanes per
+  `vpmuludq` with the reciprocal `⌈2³⁵/q⌉`, which is exact for every
+  numerator below 13.7 million; ML-KEM's stay below 2²³. The test checks
+  every input at every width.
+- **Vector rejection sampling.** 24 bytes, 16 candidates per step, compacted
+  with a 256-entry `pshufb` table. Worth ~2 kilocycles on the paths that
+  still expand `Â`; nothing on prepared keys, which do not.
+
+#### Per hardware class
+
+The code picks AVX-512, AVX2 or scalar at run time, with no `target-cpu`
+flag, so one binary runs everywhere. Each class measured on this host with
+the others disabled, interleaved against `main` (ML-KEM-768 shown; all sets
+in the research directory):
+
+| class | keygen | encaps | decaps | encaps, prepared | decaps, prepared |
+|---|---:|---:|---:|---:|---:|
+| AVX-512VL + AVX2 | 2.97× | 3.72× | 3.62× | 9.81× | 5.38× |
+| AVX2 only | 2.25× | 2.51× | 2.66× | 7.84× | 4.44× |
+| scalar only | 1.16× | 1.17× | 1.21× | 2.26× | 1.77× |
+
+No class got slower. The scalar row is the path Arm64 and pre-AVX2 x86
+take, but it was measured on x86 with SIMD disabled, not on Arm64, which
+has not been measured. There is no NEON backend.
+
+Instructions per operation from callgrind, which is deterministic and does
+not depend on the VM's neighbours (valgrind does not emulate AVX-512, so
+these are the AVX2 path): ML-KEM-768 encapsulation 527,337 → 204,964, and
+56,993 prepared; decapsulation 644,420 → 236,201, and 141,976 prepared.
+
+#### Using the prepared keys
+
+```rust
+use crypto_lib::pqc::fast::ml_kem as kem;
+use crypto_lib::pqc::ml_kem::ML_KEM_768;
+
+// Key owner: generate and keep the cache, which costs nothing extra.
+let (ek, dk, prepared) = kem::ml_kem_keygen_prepared(&ML_KEM_768);
+// A peer holding only the standard encapsulation key prepares it once.
+let peer = kem::MlKemPreparedEncapsKey::new(&ML_KEM_768, &ek).unwrap();
+let (ct, ss) = peer.encaps();
+assert_eq!(prepared.decaps(&ct), Some(ss));
+```
+
+The cache owns a copy of the key it came from, so it cannot be paired with
+another key through this API; `ŝ` and `z` are zeroised on drop. A cache is
+12 KiB for ML-KEM-768 (6 / 20 KiB for 512 / 1024).
+
+#### Not done, and not claimed
+
+- ~~**No comparison with the pq-crystals AVX2 implementation.**~~ Since
+  made on this host, see the next section.
+- **`J(z ‖ c)` is still computed on every decapsulation.** Skipping it when
+  the ciphertext checks out would be the cheapest remaining saving (nine
+  permutations at ML-KEM-768) and would hand an attacker a timing oracle on
+  ciphertext validity, the plaintext-checking oracle that chosen-ciphertext
+  attacks on Kyber are built from. It stays.
+- **No AVX-512 ring arithmetic, no NEON.** The NTT is AVX2 only.
+
+### The reference: pq-crystals AVX2 on the same host
+
+Until this row existed the only comparison was against our own `main`.
+pq-crystals' AVX2 Kyber (FIPS 203 version, `3edd5af`), built with its own
+`Makefile` (`-march=native`) on the same machine and run interleaved with
+ours, is the boundary. Kilocycles; ratio is ours ÷ reference, so above 1 is
+slower. Details, kernel-level breakdown and raw runs:
+[`research/pqc_ml_kem_reference_20261005/`](../research/pqc_ml_kem_reference_20261005/README.md).
+
+| operation | pq-crystals AVX2 | ours | ratio | ours, prepared | ratio |
+|---|---:|---:|---:|---:|---:|
+| ML-KEM-768 keygen | 18.10 | 28.1 | 1.55 | 29.5 | 1.63 |
+| ML-KEM-768 encaps | 18.48 | 26.0 | 1.41 | 9.7 | 0.52 |
+| ML-KEM-768 decaps | 21.20 | 33.2 | 1.57 | 21.8 | 1.03 |
+
+So after this round we are still **1.35–1.63× behind** the reference
+across all three parameter sets on the operations both implement. We are
+ahead only with a prepared key, an API the reference does not have and
+would gain from too. Per kernel, our NTT, inverse NTT and pointwise
+product are 1.8–1.95× slower than its hand-scheduled assembly, and our
+matrix expansion 1.25–1.31× slower; those explain about half of the
+encapsulation gap, and the rest is not yet attributed. The next round's
+success condition, stated in that note before any change: every unprepared
+ML-KEM-768 operation within 1.10× of this reference.
+
+#### Where the gap is (profile)
+
+[`research/pqc_ml_kem_profile_20261005/`](../research/pqc_ml_kem_profile_20261005/README.md)
+attributes it, by callgrind on the same AVX2 path for both and by per-phase
+cycles. Two corrections to the table above come with it:
+
+- **Accounting.** That table's ratios are one sample. Five interleaved
+  rounds put ML-KEM-768 encapsulation at 1.37–1.63× the `-march=native`
+  build and 1.0–1.3× an AVX2-only build of the same reference, and two
+  builds of our own harness differed by ~12% on identical code. The stable
+  figure is instructions: **1.40×** encaps, 1.45× decaps, 1.50× keygen.
+- **Attribution.** The gap is mostly bookkeeping, not arithmetic. Our
+  pack/unpack/compress/decompress and one-bit message kernels are 5–11×
+  pq-crystals' per call; ring arithmetic 1.7–2.0×; zero-filling and copying
+  polynomials ~23k instructions per encapsulation; byte-wise constant-time
+  compare ~13k per decapsulation. Our matrix expansion is already faster
+  than the reference's AVX2 build here, by ~1k cycles, thanks to the
+  AVX-512 Keccak.
 
 ## ML-DSA
 
