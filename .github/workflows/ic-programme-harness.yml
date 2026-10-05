@@ -167,6 +167,10 @@ jobs:
             --publication research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2 \
             --validation-registration-sha256 02e12b456947c8034f096b47c16dd7b73eb6c15cedb6c0b79164f887ec1406f3 \
             --out "$RUNNER_TEMP/native-ordinary-build-custody.json"
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog target-control-replay-build \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-target-controller-v1/build-validation-v1 \
+            --validation-registration-sha256 571ec54d81e02ba68a6238236a51808631758a60f0dc997da684d398e6436662 \
+            --out "$RUNNER_TEMP/native-target-build-custody.json"
           target/debug/icprog sat-source-replay --out "$RUNNER_TEMP/native-sat-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-preparation-replay --out "$RUNNER_TEMP/native-f5-preparation-replay.json"
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-target-replay --out "$RUNNER_TEMP/native-f5-target-replay.json"
@@ -181,6 +185,7 @@ jobs:
           path: |
             ${{ runner.temp }}/native-sat-replay.json
             ${{ runner.temp }}/native-ordinary-build-custody.json
+            ${{ runner.temp }}/native-target-build-custody.json
             ${{ runner.temp }}/native-f5-preparation-replay.json
             ${{ runner.temp }}/native-f5-target-replay.json
             ${{ runner.temp }}/native-f5-build-validation-replay.json

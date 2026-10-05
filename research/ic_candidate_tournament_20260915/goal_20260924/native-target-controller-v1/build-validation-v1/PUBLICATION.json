@@ -1,0 +1,82 @@
+{
+  "archive": {
+    "bytes": 35577720,
+    "path": "capsule.tar.gz",
+    "sha256": "d9f8b4db6cb6b9b9cad746f4b11fe439f19c476eaecd4c5df2c7cb64bf392ad3"
+  },
+  "capsule_root": "/Volumes/SSD990/llm/tmp/ic-target-validation-capsule-20261005-v2",
+  "execution_admitted": false,
+  "files": {
+    "config.json": {
+      "bytes": 300,
+      "sha256": "48e671908392f36580aef3dfa9d3e96a981be68126230ca3b312a087dd3931e5"
+    },
+    "host-context.json": {
+      "bytes": 281,
+      "sha256": "1d7a08c506edb04458ff3b7a60cde00b65fd314810bc65a2025aaf711eb17509"
+    },
+    "immutable/build-receipts/build-identity.json": {
+      "bytes": 681,
+      "sha256": "1265ed0c6174826e856bb6b970dcf1af8c02be93a750b0af71481984ec3ce660"
+    },
+    "immutable/build-receipts/build.log": {
+      "bytes": 3875,
+      "sha256": "4f16f0921f0c6ade922a0eb8751656b311ededc7d018148b8ee91badcecf4605"
+    },
+    "immutable/build-receipts/build.receipt.json": {
+      "bytes": 2869,
+      "sha256": "4637d79dc0f8f5e13eea8b2df678989af50741ea14ec74cc31828d9a6ec6019f"
+    },
+    "immutable/build-receipts/cargo.log": {
+      "bytes": 213,
+      "sha256": "2acedc6d91ea99958f144b6e38dc6419f20e834ecc6154591888896d0a1691ea"
+    },
+    "immutable/build-receipts/cargo.receipt.json": {
+      "bytes": 2768,
+      "sha256": "96ea49049b3b91bb617b6799d66ff7a23f73623249d44dd0bc0023f76c82bb35"
+    },
+    "immutable/build-receipts/rustc.log": {
+      "bytes": 203,
+      "sha256": "dbd639801eacf9d8900b64719640b726c1ad6b3e8fc216b7f0b2eae7c256a602"
+    },
+    "immutable/build-receipts/rustc.receipt.json": {
+      "bytes": 2766,
+      "sha256": "d24b782a503fa9a345cb4c162bc0579f0b7c1e4528621540753292580b89b38c"
+    },
+    "immutable/build-receipts/vendor.log": {
+      "bytes": 28314,
+      "sha256": "5aedd58eb34f81e9ca0f45a800e1a1dd5ebe4d344bd6c8dc01df521d85f8ef2e"
+    },
+    "immutable/build-receipts/vendor.receipt.json": {
+      "bytes": 2247,
+      "sha256": "edc159bfd1d79609ce79e2939867e9108eb9bd783b1ddee5bdb1c66a99f09c1c"
+    },
+    "immutable/build-receipts/worker-identity.log": {
+      "bytes": 260,
+      "sha256": "ef53ef99c7f21aa0739a3ead62e27380714af0f4efaae7844fe8b11a9e0b8dd6"
+    },
+    "immutable/build-receipts/worker-identity.receipt.json": {
+      "bytes": 664,
+      "sha256": "3fbbc5197b3f45f95155c1004bd7a0b3e96f54f0c702736f0dbb0d3c1d5828e1"
+    },
+    "registration.json": {
+      "bytes": 1182431,
+      "sha256": "b71f94cbe701657eff76553cba76c27fa4867d4df3418e2577be144810509b1f"
+    },
+    "seal.json": {
+      "bytes": 95,
+      "sha256": "ee6d5007f590e09400cac27c3d356b75c7808dddfd837ebb7c58cdde04b1f725"
+    }
+  },
+  "full_goal_complete": false,
+  "immutable_file_count": 6944,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "question": "target-build-custody-n17-v1",
+  "registration_sha256": "571ec54d81e02ba68a6238236a51808631758a60f0dc997da684d398e6436662",
+  "schema_version": 1,
+  "scientific_worker_calls": 0,
+  "source_bound_execution_admitted": false,
+  "source_commit": "5614c9a429becb77bceda469980ff1981225d1a1",
+  "stage": "validation-only-not-dispatched"
+}

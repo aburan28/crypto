@@ -23,9 +23,13 @@ size and regular/symlink status; `--nocapture` retains the values in the next
 Ubuntu/macOS replay logs. Source tests still use the exact same code and
 fixtures. No scientific registration or closed confirmation set is rerun.
 
-This document records the original failure and proposed correction. A future
-CI run must independently show the revised helper metadata and a passing
-watchdog control before the correction can be treated as verified on Linux.
+The [next Ubuntu replay job](https://github.com/aburan28/crypto/actions/runs/37353937752/job/111911442372)
+passed both worker and controller watchdog controls. Its worker helper was
+measured at 7,254,928 bytes, regular and nonsymlink; the worker suite passed
+23/23 and the controller suite 24/24. The macOS replay job passed too. This
+verifies the correction on that Linux runner. The original failed job did not
+retain a helper size, so excess debug-binary size remains the likely cause,
+not a proven measurement of that original file.
 
 On the local physical macOS ARM64 host, both exact watchdog controls passed
 with the revised Cargo profile environment (`CARGO_PROFILE_DEV_DEBUG=0`,

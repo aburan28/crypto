@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "build-identity"
+  ],
+  "cwd": "/Volumes/SSD990/llm/tmp/ic-target-validation-capsule-20261005-v2",
+  "environment": [
+    [
+      "LC_ALL",
+      "C"
+    ],
+    [
+      "RAYON_NUM_THREADS",
+      "1"
+    ]
+  ],
+  "exit_code": 0,
+  "log_sha256": "ef53ef99c7f21aa0739a3ead62e27380714af0f4efaae7844fe8b11a9e0b8dd6",
+  "program": "/Volumes/SSD990/llm/tmp/ic-target-validation-capsule-20261005-v2/immutable/bin/prepared_target_worker",
+  "program_sha256_after": "5523d08f4d92e461640e5dd9c36a112c4f98c12d5d8b7c9409fd72d59b86b182",
+  "program_sha256_before": "5523d08f4d92e461640e5dd9c36a112c4f98c12d5d8b7c9409fd72d59b86b182",
+  "wall_ns": "557311708"
+}
