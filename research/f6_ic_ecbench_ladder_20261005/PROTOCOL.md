@@ -155,7 +155,8 @@ both quantities, never `S` alone.
 
 **Sensitivity row, at m = 13 and 31 only.** `docs/ic/calibration.json`
 pins `ns_per_word_xor / ns_per_add` for this family only at those two
-degrees (keys `koblitz/K_0 / GF(2^13)` and `koblitz/K_0 / GF(2^31)`). There,
+degrees (its `koblitz` entries for `icv1-f2m13-t181-515ee569` and
+`icv1-f2m31-tm90707-c95f16f5`). There,
 and only there, the result also reports `S` with the solver's word XORs
 priced at the pinned ratio. That ratio was calibrated on another host, so
 the row is labelled as such, carries no fit, and never enters a headline.
