@@ -1,10 +1,25 @@
 # P-256 isogeny search: native S3 ledger and Cairn receipts
 
-Status: **control-plane contract implemented; production search blocked**
+Status: **control plane and bounded Gate 1 implemented; production search blocked**
 
 Date frozen: 2026-10-04
 
 Result class: **plan / stage diagnostic, not an ECDLP speedup**
+
+## Status update — 2026-10-05
+
+PR #1351 subsequently passed the bounded native Gate-1 experiment: 4,096
+degree-11 edges from exact P-256 were generated and independently replayed,
+with 4,097 distinct `j`-invariants including the start and no cycle in that
+prefix.  This satisfies the edge-correctness part of Gate 1, but it also makes
+the remaining scale blocker precise: the frozen degree-11 direction is one
+sequential chain, not `2^20` independently rooted shards.
+
+The follow-on contract in
+`research/p256_isogeny_shared_task_20261005/PROTOCOL.md` packages that exact
+prefix as one content-addressed task.  Labels for the same prefix collapse to
+one work hash.  It does not retrofit independent anchors into this production
+layout, authorize the bounded storage pilot, or make a Cairn receipt payable.
 
 ## Question and falsification target
 
@@ -64,7 +79,7 @@ does not classify itself as a stage diagnostic.
 AWS Batch static array index
         |
         v
-native P-256 isogeny worker                 [not implemented]
+native P-256 isogeny worker                 [bounded sequential prefix only]
         |
         | immutable attempt objects, SHA-256 metadata
         v
@@ -197,7 +212,9 @@ id and invalidates selection claims from the old run.
 - Verify every emitted edge independently from the worker's choice logic.
 - Establish that the walk preserves the P-256 trace and registered identity.
 
-Until Gate 1 passes, no production worker image exists.
+The bounded correctness gate passed in PR #1351.  A production worker image
+still does not exist because the verified chain has no independently certified
+shard anchors and cannot satisfy the frozen `2^20 x 2^20` ownership contract.
 
 ### Gate 2 — bounded pilot
 
@@ -224,7 +241,8 @@ not authorize `2^40` compute.
 
 ## Current conclusion
 
-The S3/Cairn control contract is implementable and tested. The cryptographic
-worker and a sound payable-work witness are not. Therefore the rigorous next
-step is the native bounded pilot, not a `2^40` launch, and no index-calculus
-speedup is established by this protocol.
+The S3/Cairn control contract and a bounded cryptographic prefix are implemented
+and tested.  A shardable cryptographic worker and a sound payable-work witness
+are not.  Therefore the rigorous next step is independently rooted frontier
+work plus a much smaller storage/queue pilot, not a `2^40` launch, and no
+index-calculus speedup is established by this protocol.
