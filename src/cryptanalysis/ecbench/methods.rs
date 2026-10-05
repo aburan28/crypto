@@ -1329,7 +1329,7 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
-    #[cfg(feature = "f6-ic-oracle")]
+    #[cfg(has_f6_ic)]
     let standard = crate::cryptanalysis::ic_framework::pdp3_koblitz::KoblitzStandardSubspaceBase {
         instance: inst,
     };
@@ -1337,7 +1337,7 @@ fn solve_ic_binary(
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
-        #[cfg(feature = "f6-ic-oracle")]
+        #[cfg(has_f6_ic)]
         "koblitz-standard-subspace" => &standard,
         other => {
             return Err(format!(
@@ -1350,7 +1350,7 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
-    #[cfg(feature = "f6-ic-oracle")]
+    #[cfg(has_f6_ic)]
     let mut pdp3 =
         crate::cryptanalysis::ic_framework::pdp3_koblitz::Pdp3KoblitzOracle::new(ms, inst);
     let mut algebraic = match or_name.as_str() {
@@ -1377,7 +1377,7 @@ fn solve_ic_binary(
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
-        #[cfg(feature = "f6-ic-oracle")]
+        #[cfg(has_f6_ic)]
         "pdp3-koblitz" => &mut pdp3,
         other => return Err(format!("oracle `{other}` does not run on a binary curve")),
     };
@@ -1736,7 +1736,7 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
-            #[cfg(feature = "f6-ic-oracle")]
+            #[cfg(has_f6_ic)]
             let standard =
                 crate::cryptanalysis::ic_framework::pdp3_koblitz::KoblitzStandardSubspaceBase {
                     instance: i,
@@ -1745,7 +1745,7 @@ pub fn dump_factor_base(
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
-                #[cfg(feature = "f6-ic-oracle")]
+                #[cfg(has_f6_ic)]
                 "koblitz-standard-subspace" => &standard,
                 other => {
                     return Err(format!(

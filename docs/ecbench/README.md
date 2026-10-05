@@ -336,9 +336,12 @@ is the base #1333's workers used.
   gate counter ride in the record's `solver.extra`.
 
 Both engines are exact on the same base and seed, so the two arms issue the
-same queries until one exhausts its node budget. The module is behind the
-default Cargo feature `f6-ic-oracle`, because frozen-source replays rebuild
-the crate with pre-F6 snapshots that lack the function it calls. It also
+same queries until one exhausts its node budget. The module compiles only
+under `cfg(has_f6_ic)`, which `build.rs` sets when the
+`koblitz_index_calculus.rs` being compiled defines the function it calls.
+Frozen-source replays rebuild the crate with pre-F6 snapshots of that file,
+and other frozen evaluations pin `Cargo.toml` by hash, so the gate keys on
+the source rather than on a Cargo feature. It also
 refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
 
 **Calibration.** The unit has been checked against theory in

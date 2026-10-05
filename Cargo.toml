@@ -29,12 +29,6 @@ name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
-# The F6-IC and inherited-F4 PDP3 oracle in ic.pipeline
-# (src/cryptanalysis/ic_framework/pdp3_koblitz.rs).  On by default; the
-# frozen-source replays rebuild with pre-F6 snapshots of this file, which do
-# not declare it, so the module is left out of those builds.
-default = ["f6-ic-oracle"]
-f6-ic-oracle = []
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []

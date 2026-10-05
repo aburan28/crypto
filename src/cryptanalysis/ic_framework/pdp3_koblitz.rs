@@ -43,13 +43,15 @@
 //! search without changing the method's identity, so `prepare` refuses to
 //! run while any of them is set, as #1333's exclusive worker does.
 //!
-//! ## Why a feature
+//! ## Why a `cfg`
 //!
 //! Some frozen-source replay workflows rebuild this crate with pre-F6
-//! snapshots of `Cargo.toml`, `src/lib.rs` and `koblitz_index_calculus.rs`
-//! (`research/notes/ecc2k130/compact_frozen_source_replay_20260929`).  Those
-//! snapshots do not declare `f6-ic-oracle`, so this module, which calls a
-//! function they do not have, is left out of those builds.
+//! snapshots of `src/lib.rs` and `koblitz_index_calculus.rs`
+//! (`research/notes/ecc2k130/compact_frozen_source_replay_20260929`), and
+//! other frozen evaluations pin `Cargo.toml` by hash. So the module is
+//! compiled only under `cfg(has_f6_ic)`, which `build.rs` sets when the
+//! `koblitz_index_calculus.rs` being compiled defines the function this
+//! module calls.
 
 use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;

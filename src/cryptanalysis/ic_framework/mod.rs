@@ -63,7 +63,7 @@
 //! report what comes out.
 
 pub mod linalg;
-#[cfg(feature = "f6-ic-oracle")]
+#[cfg(has_f6_ic)]
 pub mod pdp3_koblitz;
 pub mod plugins;
 pub mod shared_rank;

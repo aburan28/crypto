@@ -675,7 +675,7 @@ fn copy_dir(from: &Path, to: &Path) {
     }
 }
 
-#[cfg(feature = "f6-ic-oracle")]
+#[cfg(has_f6_ic)]
 #[test]
 fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
     // #1333's inherited-F4 and F6-IC decomposers inside ic.pipeline on the
