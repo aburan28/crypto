@@ -23,6 +23,12 @@ Rust only (AGENTS.md).
    - Be deterministic in (workload, seed). No `thread_rng`, no wall-clock budget
      in the search, and no iteration over a `RandomState` map that decides
      anything. The audit's replays must reproduce bit for bit.
+   - Keep wall-derived numbers out of every recorded float, low bits included.
+     Never remove a wall-priced term by subtraction: `(x + w) - w` rounds `x`
+     to `w`'s binade, so the host's clock reaches the record (the
+     `ecbench_yield_sweep_20261004` koblitz session was written that way; the
+     audit reproduces it from the record's own solver term). Rebuild the
+     figure from the parts that exclude `w`.
    - Put generic algorithms in `src/cryptanalysis/ecbench/generic.rs`, with unit
      tests recovering known logarithms on a prime curve and a Koblitz curve.
 2. **Register it** in `methods::registry()`: id `family.variant`, a one-line

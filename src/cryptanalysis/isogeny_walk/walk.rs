@@ -15,6 +15,7 @@ use super::kernel::{self, EdgeError, Isogeny};
 use super::modpoly::{self, ModPoly};
 use super::poly::{self, Poly};
 use super::record::{self, V};
+use super::traits;
 use crate::cryptanalysis::curve_id;
 use crate::ecc::curve::CurveParams;
 
@@ -67,6 +68,10 @@ impl StartCurve {
 
     pub fn p256() -> Self {
         Self::from_params(&CurveParams::p256(), true)
+    }
+
+    pub fn p192() -> Self {
+        Self::from_params(&CurveParams::p192(), true)
     }
 
     pub fn p224() -> Self {
@@ -399,6 +404,8 @@ pub struct Walk {
     pub edges: Vec<Edge>,
     pub failures: Vec<Failure>,
     pub stats: Stats,
+    /// [`traits::class_audits`] once run.
+    pub class_audits: Option<V>,
 }
 
 type Expansion = Vec<(u64, usize, Vec<(Fe, Result<Isogeny, EdgeError>)>)>;
@@ -476,6 +483,7 @@ impl Walk {
             edges: Vec::new(),
             failures: Vec::new(),
             stats,
+            class_audits: None,
         })
     }
 
@@ -666,6 +674,28 @@ impl Walk {
         }
     }
 
+    /// Run the class audits ([`traits::class_audits`]) on the root, and
+    /// re-run them on the first `sample` walked curves to check that their
+    /// verdicts are those of the root.
+    pub fn run_class_audits(&mut self, sample: usize) {
+        let f = &self.field;
+        let picked: Vec<_> = self
+            .nodes
+            .iter()
+            .skip(1)
+            .take(sample)
+            .map(|n| {
+                (
+                    f.to_big(&n.model.a),
+                    f.to_big(&n.model.b),
+                    f.to_big(&n.generator.0),
+                    f.to_big(&n.generator.1),
+                )
+            })
+            .collect();
+        self.class_audits = Some(traits::class_audits(&self.start, &picked));
+    }
+
     /// `<EC1>V<ℓ>L<level>…` over the proved levels, `ℓ` ascending.
     pub fn position_alias(&self, i: usize, ec1: &str) -> String {
         let mut lv = self.nodes[i].levels.clone();
@@ -813,6 +843,8 @@ impl Walk {
 
     /// The curves in the `docs/curves/ic/curves.yaml` format.
     pub fn curves_yaml(&self, ids: &[NodeIds], routes: &RouteIndex) -> String {
+        let detectors = traits::default_detectors();
+        let detectors = &detectors;
         let f = &self.field;
         let class = &self.class;
         let mut curves = Vec::new();
@@ -869,6 +901,63 @@ impl Walk {
             } else {
                 format!("{}-isogenous curve, walk node {i}", self.start.name)
             };
+            let mut traits: Vec<(String, V)> = vec![
+                (
+                    "ordinary",
+                    V::map(vec![
+                        ("value", V::Bool(true)),
+                        ("status", V::s("derived_from_model")),
+                    ]),
+                ),
+                (
+                    "j_invariant",
+                    V::map(vec![
+                        ("value", V::big(&self.fe(&node.j))),
+                        ("status", V::s("derived_from_model")),
+                    ]),
+                ),
+                ("endomorphism_discriminant", end_disc),
+                (
+                    "volcano_component",
+                    V::map(vec![("value", V::Null), ("status", V::s("unknown"))]),
+                ),
+                (
+                    "volcano_total_depth",
+                    V::map(vec![("value", V::Null), ("status", V::s("unmeasured"))]),
+                ),
+                (
+                    "group_order",
+                    V::map(vec![
+                        ("value", V::big(&self.start.order)),
+                        ("status", V::s(order_status)),
+                    ]),
+                ),
+                (
+                    "trace",
+                    V::map(vec![
+                        ("value", V::bigi(&class.trace)),
+                        ("status", V::s("derived_from_model")),
+                    ]),
+                ),
+            ]
+            .into_iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+            let ctx = traits::CurveCtx {
+                field: f,
+                model: &node.model,
+                generator: node.generator,
+                start: &self.start,
+            };
+            for d in detectors {
+                traits.push((
+                    d.name().to_string(),
+                    V::map(vec![
+                        ("value", d.detect(&ctx)),
+                        ("status", V::s(d.status())),
+                    ]),
+                ));
+            }
             curves.push((
                 id.slug.clone(),
                 V::map(vec![
@@ -901,67 +990,7 @@ impl Walk {
                             "computed by curve_id::prime; not registered"
                         }),
                     ),
-                    (
-                        "trait_status",
-                        V::map(vec![
-                            (
-                                "ordinary",
-                                V::map(vec![
-                                    ("value", V::Bool(true)),
-                                    ("status", V::s("derived_from_model")),
-                                ]),
-                            ),
-                            (
-                                "j_invariant",
-                                V::map(vec![
-                                    ("value", V::big(&self.fe(&node.j))),
-                                    ("status", V::s("derived_from_model")),
-                                ]),
-                            ),
-                            ("endomorphism_discriminant", end_disc),
-                            (
-                                "volcano_component",
-                                V::map(vec![("value", V::Null), ("status", V::s("unknown"))]),
-                            ),
-                            (
-                                "volcano_total_depth",
-                                V::map(vec![("value", V::Null), ("status", V::s("unmeasured"))]),
-                            ),
-                            (
-                                "group_order",
-                                V::map(vec![
-                                    ("value", V::big(&self.start.order)),
-                                    ("status", V::s(order_status)),
-                                ]),
-                            ),
-                            (
-                                "trace",
-                                V::map(vec![
-                                    ("value", V::bigi(&class.trace)),
-                                    ("status", V::s("derived_from_model")),
-                                ]),
-                            ),
-                            (
-                                "a_minus_3_model",
-                                V::map(vec![
-                                    (
-                                        "value",
-                                        V::Bool(
-                                            !curve::a_minus_3_models(f, &node.model).is_empty(),
-                                        ),
-                                    ),
-                                    ("status", V::s("derived_from_model")),
-                                ]),
-                            ),
-                            (
-                                "qr_prefix_64",
-                                V::map(vec![
-                                    ("value", V::int(curve::qr_prefix_64(f, &node.model))),
-                                    ("status", V::s("derived_from_model")),
-                                ]),
-                            ),
-                        ]),
-                    ),
+                    ("trait_status", V::Map(traits)),
                     ("factor_base_refs", V::Seq(vec![])),
                     ("factor_base_link_status", V::s("not_reconciled")),
                     ("field", id.field.clone()),
@@ -1232,6 +1261,7 @@ impl Walk {
                 ("curves", V::int(c)),
             ])).collect())),
             ("failures", V::Seq(failures)),
+            ("class_audits", self.class_audits.clone().unwrap_or(V::Null)),
             ("timing_practicality_note", V::map(vec![
                 ("walk_ms", V::int(self.stats.walk_ms)),
                 ("audit_ms", V::int(self.stats.audit_ms)),

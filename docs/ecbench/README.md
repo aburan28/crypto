@@ -401,7 +401,14 @@ and the seed, never on the host. `ecbench verify --replay N` re-executes
 N measured runs (`--replay-all`, every deterministic one) and requires
 the same answer, total, phase counts, counters, unpriced work and factor
 base, bit for bit. Run on another machine, it is an independent check of
-the figure. The audit also recomputes every derived figure from the
+the figure. Records written before 2026-10-05 by an `ic.pipeline` arm
+whose solver work was wall-priced (the descent-algebraic arms of
+`research/ecbench_yield_sweep_20261004/sessions/koblitz`) carry gae
+figures rounded to the binade of that wall term, because the term was
+removed by subtraction; the audit reproduces that rounding from the
+solver term and pre-removal total the record itself carries, reports the
+replay as `identical (legacy gae rounding, …)`, and new records carry the
+exact figure. The audit also recomputes every derived figure from the
 record's own counts (`S = total/√r`, the floor, the ratio, the
 lower-bound flag) and, for a session graded under the current rules,
 regrades every run from its recorded observations. A figure edited by

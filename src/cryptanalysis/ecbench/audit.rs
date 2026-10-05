@@ -74,6 +74,45 @@ fn close(a: f64, b: f64) -> bool {
     a == b || (a - b).abs() <= 1e-12 * a.abs().max(b.abs())
 }
 
+/// Replay detail for a record whose gae carries the pre-fix rounding.
+pub const LEGACY_IDENTICAL: &str =
+    "identical (legacy gae rounding, reproduced from the record's solver term)";
+
+/// The gae figures an `ic.pipeline` record written before the
+/// solver-rounding fix carries, from the replay's exact phases.
+///
+/// Those binaries removed a wall-priced solver term `w` by subtraction,
+/// so the relations phase was `(x + w) - w` and the total
+/// `(fb + prep + (x + w) + la + ver) - w`: `x` rounded to `w`'s binade.
+/// The rounding is a function of `w`, which the record carries
+/// (`detail.decomposition.solver.gae`), so it is reproduced here from the
+/// record rather than from the replay host's clock.  `w` is accepted only
+/// when it also reproduces the record's own pre-removal total
+/// (`detail.framework_total_gae_before_solver_removal`), so the record
+/// cannot pick a `w` that absorbs a real difference; what stays unchecked
+/// is below one ulp of `x + w`.
+pub fn legacy_solver_rounding(
+    exact: &[f64],
+    detail: &serde_json::Value,
+) -> Option<(Vec<f64>, f64)> {
+    let solver = detail.pointer("/decomposition/solver")?;
+    let w = solver.get("gae")?.as_f64()?;
+    if exact.len() != 5 || !(w > 0.0) || solver.get("priced_by")?.as_str()? == "pinned" {
+        return None;
+    }
+    let with_w = exact[2] + w;
+    let before = exact[0] + exact[1] + with_w + exact[3] + exact[4];
+    let recorded = detail
+        .get("framework_total_gae_before_solver_removal")?
+        .as_f64()?;
+    if json_roundtrip(before).to_bits() != recorded.to_bits() {
+        return None;
+    }
+    let mut phases = exact.to_vec();
+    phases[2] = with_w - w;
+    Some((phases, before - w))
+}
+
 pub const AUDIT_SCHEMA: &str = "ecbench.audit/v1";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -427,9 +466,27 @@ pub fn audit_with(
                     }
                     // Integer counts compare exactly; a float compares after
                     // the same serialise-parse round trip the record's took.
-                    if Some(json_roundtrip(rep.total_gae).to_bits())
-                        != r.cost.total_gae.map(f64::to_bits)
-                    {
+                    let same_gae = |phases: &[f64], total: f64| {
+                        (
+                            Some(json_roundtrip(total).to_bits())
+                                == r.cost.total_gae.map(f64::to_bits),
+                            phases
+                                .iter()
+                                .map(|g| json_roundtrip(*g).to_bits())
+                                .eq(r.phases.iter().map(|p| p.gae.to_bits())),
+                        )
+                    };
+                    let exact: Vec<f64> = rep.phases.iter().map(|p| p.gae).collect();
+                    let (mut total_ok, mut phases_ok) = same_gae(&exact, rep.total_gae);
+                    let mut legacy = false;
+                    if !(total_ok && phases_ok) {
+                        if let Some((ph, tot)) = legacy_solver_rounding(&exact, &r.detail) {
+                            if same_gae(&ph, tot) == (true, true) {
+                                (total_ok, phases_ok, legacy) = (true, true, true);
+                            }
+                        }
+                    }
+                    if !total_ok {
                         diffs.push("total_gae");
                     }
                     let ints = |ps: &[crate::cryptanalysis::ecbench::methods::PhaseRecord]| {
@@ -448,12 +505,7 @@ pub fn audit_with(
                     if ints(&rep.phases) != ints(&r.phases) {
                         diffs.push("phase counts");
                     }
-                    if rep
-                        .phases
-                        .iter()
-                        .map(|p| json_roundtrip(p.gae).to_bits())
-                        .ne(r.phases.iter().map(|p| p.gae.to_bits()))
-                    {
+                    if !phases_ok {
                         diffs.push("phase gae");
                     }
                     if rep.counters != r.counters {
@@ -470,7 +522,9 @@ pub fn audit_with(
                     }
                     (
                         diffs.is_empty(),
-                        if diffs.is_empty() {
+                        if diffs.is_empty() && legacy {
+                            LEGACY_IDENTICAL.into()
+                        } else if diffs.is_empty() {
                             "identical".into()
                         } else {
                             format!("differs in {}", diffs.join(", "))
@@ -516,4 +570,52 @@ pub fn audit_with(
             .map(|d| d.as_millis())
             .unwrap_or(0),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn detail(w: f64, before: f64, priced_by: &str) -> serde_json::Value {
+        json!({
+            "decomposition": {"solver": {"gae": w, "priced_by": priced_by}},
+            "framework_total_gae_before_solver_removal": before,
+        })
+    }
+
+    /// The figures of the committed koblitz session's seq 4
+    /// (`sub6-da-buch`): the pre-fix rounding is a function of the
+    /// record's own solver term, so it reproduces exactly.
+    #[test]
+    fn legacy_rounding_is_reproduced_from_the_record_alone() {
+        let x = 611.5963;
+        let exact = [3.223395, 0.0, x, 2.721705, 15.0];
+        let w = 91449423.0;
+        let before = exact[0] + exact[1] + (x + w) + exact[3] + exact[4];
+        let (ph, tot) = legacy_solver_rounding(&exact, &detail(w, before, "measured")).unwrap();
+        assert_eq!(ph[2], (x + w) - w);
+        assert_eq!(tot, before - w);
+        assert_eq!(ph[..2], exact[..2]);
+        assert_eq!(ph[3..], exact[3..]);
+        // Another host's clock lands `w` in another binade: the old
+        // subtraction then disagrees with itself, the exact figure does not.
+        let w2 = 29295605.0;
+        assert_ne!((x + w).to_bits(), x.to_bits());
+        assert_ne!(((x + w) - w).to_bits(), ((x + w2) - w2).to_bits());
+    }
+
+    #[test]
+    fn legacy_rounding_needs_the_records_own_total_and_a_wall_price() {
+        let exact = [3.223395, 0.0, 611.5963, 2.721705, 15.0];
+        let w = 91449423.0;
+        let before = exact[0] + exact[1] + (exact[2] + w) + exact[3] + exact[4];
+        // A solver term that does not reproduce the recorded pre-removal
+        // total is not the one the record was written with.
+        assert!(legacy_solver_rounding(&exact, &detail(w * 2.0, before, "measured")).is_none());
+        assert!(legacy_solver_rounding(&exact, &detail(w, before + 1.0, "measured")).is_none());
+        // Pinned solver work was never subtracted.
+        assert!(legacy_solver_rounding(&exact, &detail(w, before, "pinned")).is_none());
+        assert!(legacy_solver_rounding(&exact, &json!({})).is_none());
+    }
 }

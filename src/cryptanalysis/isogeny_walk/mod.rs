@@ -25,7 +25,10 @@ pub mod field;
 pub mod kernel;
 pub mod modpoly;
 pub mod poly;
+pub mod queue;
 pub mod record;
+pub mod store;
+pub mod traits;
 pub mod walk;
 
 #[cfg(test)]
