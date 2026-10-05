@@ -1352,6 +1352,28 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     </div>
   </div>
 
+  <div class="panel" id="inherited-f4-overhead-20261005">
+    <div class="panel-head">
+      <h2>Inherited F4: 16&ndash;21% fewer instructions on the cubic ladder, every count identical <span class="chip">engineering</span></h2>
+      <p class="panel-summary">A preregistered round cut the bookkeeping around the inherited-F4 engine's counted work. Completion rows are gathered once, new columns are merged rather than re-sorted, the pivot is-current test is inlined and the pivot XOR is vectorised. On 48 frozen inputs every output is byte-identical. The instruction count falls to 0.793&times; for inherited F4 at m = 19 and 0.863&times; at m = 13; S does not move.</p>
+      <p>On the E_0 ladder of the F6-IC round, one whole-process <code>ecbench exec</code> of the inherited-F4 arm ran about 120 instructions per counted word XOR on <code>icv1-f2m19-t797-b6cf2467</code>, so almost all of its machine work lay outside the unit. The candidate changes only that work. The protocol was committed with the code before any confirmatory run. It gated on identical outputs: recovered scalar, every phase's counted operations, every solver statistic and total GAE, on 16 ladder inputs at m = 13, 16 at m = 19, 4 at m = 23, and 12 fresh holdout targets. All 48 passed. Callgrind instruction counts cover the whole process, one run per binary and input.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Candidate / baseline Callgrind instructions, whole process, pooled per row; ladder round 1 plus fresh holdouts. Baseline <code>main</code> fa80835a, candidate 4d9355cb, one x86-64 Linux VM.</caption>
+      <thead><tr><th>m (curve)</th><th>Arm</th><th>Inputs</th><th>Instructions, candidate / baseline</th><th>Per-input range</th><th>Instructions per word XOR</th><th>S</th></tr></thead>
+      <tbody>
+        <tr><td>13 (<code>icv1-f2m13-t181-515ee569</code>)</td><td>Inherited F4</td><td class="n">12</td><td class="n"><strong>0.863&times;</strong></td><td class="n">0.856&ndash;0.878</td><td class="n">&mdash;</td><td>identical</td></tr>
+        <tr><td>13</td><td>F6-IC</td><td class="n">12</td><td class="n"><strong>0.947&times;</strong></td><td class="n">0.943&ndash;0.954</td><td class="n">&mdash;</td><td>identical</td></tr>
+        <tr><td>19 (<code>icv1-f2m19-t797-b6cf2467</code>)</td><td>Inherited F4</td><td class="n">4</td><td class="n"><strong>0.793&times;</strong></td><td class="n">0.792&ndash;0.795</td><td class="n">95 <small>was 120</small></td><td>identical</td></tr>
+        <tr><td>19</td><td>F6-IC</td><td class="n">4</td><td class="n"><strong>0.917&times;</strong></td><td class="n">0.916&ndash;0.917</td><td class="n">84 <small>was 92</small></td><td>identical</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><strong>Decision: success.</strong> The pooled ratio over the confirmatory m = 19 inputs, which exclude the one input used in exploration, is 0.847, against a preregistered threshold of 0.90. No input regressed; the worst is 0.954. As a practicality note, pinned process CPU time fell to 0.840WALL_SENTENCEtimes; for inherited F4 at m = 19 and 0.834WALL_SENTENCEtimes; at m = 23 (110.4 s to 91.7 s), outside the A/A spread; F6-ICWALL_SENTENCErsquo;s 0.937WALL_SENTENCEtimes; is not resolved from this VMWALL_SENTENCErsquo;s noise.</p>
+      <p><strong>Class: engineering, outside the unit.</strong> Every counted operation is identical, so S, S/floor and S/rho are those of the <a href="#ic-f6-ecbench-ladder-20261005">F6-IC ladder</a>, and its verdict stands: IC is slower than rho at m = 13, 19 and 23. A cheaper instruction stream lowers only the measured solver price, and re-pinning a calibration ratio from it would be a separate accounting round. Rejected: a branch-free scatter in the row remap, which cost 2.5 &times; 10<sup>9</sup> more instructions than it saved. What remains is the remap, the re-reduction, allocation and substitution. <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_overhead_20261005/RESULT.md">Result</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_overhead_20261005/PROTOCOL.md">protocol</a>; <a href="https://github.com/aburan28/crypto/tree/main/research/inherited_f4_overhead_20261005/results/run-1">raw gate, instruction and timing tables</a>.</p>
+    </div>
+  </div>
+
   <div class="panel" id="ic-sat-v3-full-development-20260930">
     <div class="panel-head">
       <h2>Source-bound SAT IC completes one n17 development target <span class="chip">accounting</span></h2>
