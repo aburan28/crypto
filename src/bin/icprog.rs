@@ -40,6 +40,8 @@ mod bround;
 mod callgrind;
 #[path = "icprog/conformance.rs"]
 mod conformance;
+#[path = "icprog/f0.rs"]
+mod f0;
 #[path = "icprog/f5_control.rs"]
 mod f5_control;
 #[path = "icprog/f5_control_publication.rs"]
@@ -407,6 +409,27 @@ enum Command {
         /// B0, B1, B3, B2, B2b, B7a, B3b, B4; repeat for each.
         #[arg(long = "arm")]
         arms: Vec<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// Track B's F0 instance runs (`run`) and their replays (`analyse`):
+    /// B3's gate rho (`b3-gate`), B3b's two-word instances (`b3b`) and B4's
+    /// three-word instances (`b4`).
+    F0 {
+        step: String,
+        /// The instance set: b3-gate, b3b or b4.
+        #[arg(long)]
+        set: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The `ic` the runs price (`run` only).
+        #[arg(long)]
+        ic: Option<PathBuf>,
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
@@ -957,6 +980,50 @@ fn bround_cmd(args: BroundArgs) -> Result<String, String> {
     })
 }
 
+/// Track B's F0 runs: `run` prices each instance of the set, `analyse`
+/// replays them.
+fn f0_cmd(
+    step: &str,
+    set: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    ic: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    let list = f0::instances(&programme, set)?;
+    let what = match set {
+        "b3-gate" => "B3's measurement 5: the gate's rho at F0",
+        "b3b" => "B3b's measurement 5: F0 at two words",
+        _ => "B4's measurement 5: F0 at three words",
+    };
+    match step {
+        "run" => {
+            let ic = ic.ok_or("`run` needs --ic")?;
+            if !ic.exists() {
+                return Err(format!("no binary at {}", ic.display()));
+            }
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+            let ic = std::path::absolute(&ic).map_err(|e| e.to_string())?;
+            f0::run(&bench::Bench { isolate }, &ic, &list, runs)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&f0::analyse(&programme, what, &list, runs)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are run and analyse"
+        )),
+    }
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
     if let Command::Conformance {
@@ -984,6 +1051,14 @@ fn main() -> ExitCode {
     }
     let result = match cli.command {
         Command::Conformance { .. } => unreachable!("handled above"),
+        Command::F0 {
+            step,
+            set,
+            root,
+            runs,
+            ic,
+            isolate,
+        } => f0_cmd(&step, &set, &root, &runs, ic, isolate),
         Command::Bround {
             step,
             steps,
