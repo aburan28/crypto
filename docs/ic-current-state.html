@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 277 panels, one line each</summary>
+    <summary>Show all 278 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -463,6 +463,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-s17-target-join-round15-20261005">P-256 target-indexed images: exact state falls 128× without leaving degree 2</a> <span class="chip">stage advance</span><br>Retains two 128-entry eight-leaf images instead of one 32,768-entry sixteen-leaf image: 8 KiB versus 1 MiB raw, 280 versus 16,536 cold quadratic solves, and zero errors on eight P-256 targets.</li>
       <li><a href="./#p256-s17-packed-atom-round16-20261005">P-256 packed atoms: 36 exact bytes, another 227.56× reduction</a> <span class="chip">stage advance</span><br>Stores sixteen 18-bit factor-base column IDs instead of two 128-entry half-images: 36 persistent bytes versus 8,192, with byte-exact reconstruction and zero errors on eight P-256 targets.</li>
       <li><a href="./#p256-s17-batch-inversion-round17-20261005">P-256 batched inversions cut exact oracle arithmetic by 2.10×</a> <span class="chip">stage advance</span><br>Round 17 replaces independent quadratic denominator inversions with exact Montgomery batches. Cold fixed-atom cost falls from 192,640 to 91,689 charged field multiplications, while all eight frozen target classifications and the local degree-2 boundary remain unchanged.</li>
+      <li><a href="./#p256-s17-outer-scan-round18-20261005">P-256 S17 outer scan: low degree survives, fixed-atom collection projects to 2^272.404</a> <span class="chip">accounting</span><br>Prices the missing outer relation search: 4,096 actual P-256 oracle calls are exact, but the optimistic 138,031-row collection projection is 144.404 bits above rho, rejecting fixed-atom enumeration.</li>
     </ol>
   </details>
 <!-- END panel-index -->

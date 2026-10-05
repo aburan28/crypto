@@ -25,9 +25,21 @@ const ROUND13_SHA256: &str = "2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3
 const ROUND14_SHA256: &str = "6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc";
 const ROUND15_SHA256: &str = "4220dafa066613630338886a916218602cd61ca914bd66ac7994cde163a53ad5";
 const ROUND16_SHA256: &str = "af2874ef5f0bdabec75b9bf707067232d0d6e3985f0cce4eba6834c2b5790e44";
+const ROUND17_SHA256: &str = "57cf49ffbab65356b4ef69848e7824f0377bc058ddd57fe0bf6a8f7b77089ce7";
+const ROUND6_SHA256: &str = "71d63031111ba48ff831e79430bc87e6c7bac34626d7d0de4acfb4eaa65d40f4";
 const ATOM_COLUMNS: usize = 16;
 const COLUMN_INDEX_BITS: usize = 18;
 const PACKED_ATOM_BYTES: usize = ATOM_COLUMNS * COLUMN_INDEX_BITS / 8;
+const OUTER_OFFSET: u64 = 90_322;
+const OUTER_STRIDE: u64 = 23_509;
+const OUTER_MAX_DEPTH: u32 = 10;
+const OUTER_DEPTHS: [u32; 7] = [4, 5, 6, 7, 8, 9, 10];
+const PLANTED_OUTER_POSITION: u64 = 7;
+const PLANTED_OUTER_COLUMN: u64 = 123_427;
+const OUTER_PUBLIC_TARGET_PREIMAGE: &str = concat!(
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "/s17-outer-scan-round18/public-target-0"
+);
 const TARGET_PREIMAGE: &str = concat!(
     "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
     "/s3-image-transfer-round8/target/0"
@@ -51,6 +63,12 @@ struct Cli {
     /// Run the round-17 batched-inversion candidate after hash-checking round 16.
     #[arg(long)]
     batch_round16: Option<PathBuf>,
+    /// Run the round-18 charged outer scan after hash-checking round 17.
+    #[arg(long)]
+    outer_scan_round17: Option<PathBuf>,
+    /// Round-6 residual-degree receipt required by --outer-scan-round17.
+    #[arg(long)]
+    round6: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -95,6 +113,15 @@ impl MultiplicationCounts {
         };
         combined.finish();
         combined
+    }
+
+    fn add_assign(&mut self, other: Self) {
+        self.coefficients += other.coefficients;
+        self.discriminants += other.discriminants;
+        self.square_roots += other.square_roots;
+        self.inversions += other.inversions;
+        self.root_construction += other.root_construction;
+        self.finish();
     }
 }
 
@@ -383,6 +410,229 @@ struct BatchedInversionExperimentResult {
     end_to_end_fraction_in_oracle: Option<f64>,
     end_to_end_speedup: Option<f64>,
     samples: Vec<BatchedInversionSampleResult>,
+}
+
+#[derive(Clone, Default, Serialize)]
+struct BatchSizeTotals {
+    sizes: BTreeMap<usize, u64>,
+    batch_inversions: u64,
+    scalar_fallbacks: u64,
+}
+
+impl BatchSizeTotals {
+    fn record(&mut self, profile: &BatchInversionProfile) {
+        for &size in &profile.batch_sizes {
+            *self.sizes.entry(size).or_default() += 1;
+        }
+        self.batch_inversions += profile.batch_inversions;
+        self.scalar_fallbacks += profile.scalar_fallbacks;
+    }
+}
+
+struct BatchedQueryObservation {
+    positive: bool,
+    algebra_hits: u64,
+    quadratic_solves: u64,
+    quadratic_roots_returned: u64,
+    algebra_index_lookups: u64,
+    linear_degeneracies: u64,
+    universal_degeneracies: u64,
+    multiplication_counts: MultiplicationCounts,
+    inversion_profile: BatchInversionProfile,
+    hit_sha256: String,
+}
+
+#[derive(Clone, Serialize)]
+struct OuterTargetIdentity {
+    kind: String,
+    scalar: Option<String>,
+    target: [String; 2],
+    planted: bool,
+}
+
+#[derive(Clone, Serialize)]
+struct OuterRelation {
+    target_kind: String,
+    stream_position: u64,
+    outer_column: u64,
+    outer_negative: bool,
+    atom_negative_mask: u32,
+    direct_verified: bool,
+}
+
+#[derive(Clone, Serialize)]
+struct OuterTargetCheckpoint {
+    kind: String,
+    signed_branch_cells: u64,
+    oracle_calls: u64,
+    quadratic_solves: u64,
+    quadratic_roots_returned: u64,
+    algebra_index_lookups: u64,
+    algebra_hits: u64,
+    candidate_positive_trials: u64,
+    reference_positive_trials: u64,
+    false_negatives: u64,
+    false_positives: u64,
+    multiplication_counts: MultiplicationCounts,
+    target_adjustment_group_additions: u64,
+    reference_index_lookups: u64,
+    direct_relation_verification_additions: u64,
+    batch_profile: BatchSizeTotals,
+    relation_count: usize,
+    relation_sha256: String,
+    trial_stream_sha256: String,
+    exact: bool,
+}
+
+#[derive(Serialize)]
+struct OuterCheckpoint {
+    depth: u32,
+    stream_positions: u64,
+    skipped_atom_columns: u64,
+    eligible_outer_columns: u64,
+    targets: Vec<OuterTargetCheckpoint>,
+}
+
+#[derive(Serialize)]
+struct OuterGrowthFit {
+    depths: Vec<u32>,
+    public_field_multiplications: Vec<u64>,
+    log2_multiplication_slope_per_depth: f64,
+    outer_calls_growth_per_depth: f64,
+}
+
+#[derive(Serialize)]
+struct ResidualDegreeEvidence {
+    round6_sha256: String,
+    maximum_by_residual_depth: BTreeMap<u32, u32>,
+    every_component_complete_and_correct: bool,
+    promotion_degree_gate_at_most_five: bool,
+}
+
+#[derive(Serialize)]
+struct OuterMemoryModel {
+    persistent_atom_bytes: u64,
+    reconstructed_image_raw_bytes: u64,
+    candidate_peak_logical_bytes: u64,
+    factor_base_point_raw_bytes: u64,
+    reference_entries: u64,
+    reference_final_logical_bytes: u64,
+    reference_build_peak_logical_bytes: u64,
+    reference_memory_excluded_from_candidate: bool,
+}
+
+#[derive(Serialize)]
+struct OuterCollectionProjection {
+    classification: String,
+    distinct_sixteen_column_atoms: String,
+    distinct_sixteen_column_atoms_log2: f64,
+    distinct_seventeen_column_sets: String,
+    distinct_seventeen_column_sets_log2: f64,
+    eligible_outer_columns_per_atom: u64,
+    signed_oracle_calls_per_complete_atom_scan: u64,
+    signed_candidate_domain_per_atom: String,
+    poisson_mean_per_atom: f64,
+    poisson_success_per_atom: f64,
+    expected_atom_scans_per_relation: f64,
+    expected_atom_scans_log2: f64,
+    measured_public_multiplications_per_oracle_call: f64,
+    projected_complete_atom_scan_multiplications: f64,
+    projected_complete_atom_scan_multiplications_log2: f64,
+    projected_multiplications_per_relation: f64,
+    projected_multiplications_per_relation_log2: f64,
+    whole_factor_base_signed_domain: String,
+    whole_factor_base_poisson_mean: f64,
+    whole_factor_base_poisson_success: f64,
+    relation_rows: u64,
+    projected_targets_for_relation_rows: f64,
+    projected_collection_multiplications: f64,
+    projected_collection_multiplications_log2: f64,
+    below_2_pow_120: bool,
+    below_2_pow_128: bool,
+    bits_above_2_pow_128: f64,
+    optimistic_lower_projection: bool,
+}
+
+#[derive(Serialize)]
+struct SparseLinearAlgebraProjection {
+    rows: u64,
+    columns: u64,
+    row_weight: u64,
+    nonzeros: u64,
+    csr_entry_bytes: u64,
+    csr_row_offset_bytes: u64,
+    csr_total_bytes: u64,
+    wiedemann_sparse_matvecs: u64,
+    wiedemann_nonzero_additions: u64,
+    berlekamp_massey_scalar_operations: u64,
+    field_vectors: u64,
+    field_vector_bytes: u64,
+    modeled_working_bytes: u64,
+    operation_unit_separate_from_collection: bool,
+}
+
+#[derive(Serialize)]
+struct OuterScanExperimentResult {
+    schema: String,
+    curve: String,
+    field_prime: String,
+    curve_a: String,
+    curve_b: String,
+    round17_sha256: String,
+    factor_base: FactorBaseReceipt,
+    atom_kind: String,
+    packed_atom_hex: String,
+    atom_columns: Vec<u64>,
+    outer_offset: u64,
+    outer_stride: u64,
+    checkpoint_depths: Vec<u32>,
+    planted_outer_position: u64,
+    planted_outer_column: u64,
+    targets: Vec<OuterTargetIdentity>,
+    scalar_build_multiplication_counts: MultiplicationCounts,
+    batched_build_multiplication_counts: MultiplicationCounts,
+    build_inversion_profile: BatchInversionProfile,
+    reference_signed_sums: u64,
+    reference_build_group_additions: u64,
+    intermediate_reference_group_additions: u64,
+    checkpoints: Vec<OuterCheckpoint>,
+    growth_fit: OuterGrowthFit,
+    residual_degree_evidence: ResidualDegreeEvidence,
+    local_maximum_degree: u32,
+    memory: OuterMemoryModel,
+    collection_projection: OuterCollectionProjection,
+    sparse_linear_algebra_projection: SparseLinearAlgebraProjection,
+    relations: Vec<OuterRelation>,
+    exact: bool,
+    attack_promotion_gate: bool,
+}
+
+#[derive(Clone, Default)]
+struct OuterTargetAccumulator {
+    signed_branch_cells: u64,
+    oracle_calls: u64,
+    quadratic_solves: u64,
+    quadratic_roots_returned: u64,
+    algebra_index_lookups: u64,
+    algebra_hits: u64,
+    candidate_positive_trials: u64,
+    reference_positive_trials: u64,
+    false_negatives: u64,
+    false_positives: u64,
+    multiplication_counts: MultiplicationCounts,
+    target_adjustment_group_additions: u64,
+    reference_index_lookups: u64,
+    direct_relation_verification_additions: u64,
+    batch_profile: BatchSizeTotals,
+    relations: Vec<OuterRelation>,
+    trial_stream: String,
+}
+
+struct OuterTargetSpec {
+    kind: String,
+    scalar: Option<BigUint>,
+    point: Point,
+    planted: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -1549,6 +1799,93 @@ fn query_compressed_target(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn observe_batched_target(
+    target: &Point,
+    left: &P256ImageState,
+    right: &P256ImageState,
+    curve: &CurveParams,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+) -> Result<BatchedQueryObservation, String> {
+    if matches!(target, Point::Infinity) || !curve.is_on_curve(target) {
+        return Err("batched observation target is infinity or off curve".into());
+    }
+    let (target_x, _) = affine_coordinates(target).expect("target was checked affine");
+    let t = Fe::from_biguint(target_x);
+    let mut counts = MultiplicationCounts::default();
+    let mut profile = BatchInversionProfile::default();
+    let mut left_keys = Vec::with_capacity(left.affine.len());
+    let mut coefficient_rows = Vec::with_capacity(left.affine.len());
+    for (&left_key, &left_x) in &left.affine {
+        let mut coefficient_field = CountedField::default();
+        coefficient_rows.push(coefficients(left_x, t, a, b, &mut coefficient_field));
+        counts.coefficients += coefficient_field.multiplications;
+        left_keys.push(left_key);
+    }
+    let results = solve_quadratic_batch(
+        &coefficient_rows,
+        sqrt_exponent,
+        inverse_exponent,
+        &mut counts,
+        &mut profile,
+    )?;
+    let mut roots_returned = 0u64;
+    let mut linear = 0u64;
+    let mut universal = 0u64;
+    let mut hits = BTreeSet::new();
+    for (left_key, result) in left_keys.into_iter().zip(results) {
+        linear += u64::from(result.linear);
+        universal += u64::from(result.universal);
+        if result.universal {
+            return Err("batched observation produced a universal quadratic".into());
+        }
+        roots_returned += result.len as u64;
+        for root in result.roots[..result.len].iter().copied() {
+            let right_key = fe_key(root);
+            if right.affine.contains_key(&right_key) {
+                let mut record = Vec::with_capacity(65);
+                record.push(0);
+                record.extend_from_slice(&left_key);
+                record.extend_from_slice(&right_key);
+                hits.insert(record);
+            }
+        }
+    }
+    let target_key = big_key(target_x);
+    if left.identity && right.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(1);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    if right.identity && left.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(2);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    counts.finish();
+    let mut hit_bytes = Vec::new();
+    for hit in &hits {
+        hit_bytes.extend_from_slice(hit);
+    }
+    Ok(BatchedQueryObservation {
+        positive: !hits.is_empty(),
+        algebra_hits: hits.len() as u64,
+        quadratic_solves: coefficient_rows.len() as u64,
+        quadratic_roots_returned: roots_returned,
+        algebra_index_lookups: roots_returned,
+        linear_degeneracies: linear,
+        universal_degeneracies: universal,
+        multiplication_counts: counts,
+        inversion_profile: profile,
+        hit_sha256: hex::encode(sha256(&hit_bytes)),
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
 fn query_batched_target(
     kind: &str,
     scalar: Option<&BigUint>,
@@ -2407,6 +2744,765 @@ fn run_batched_inversion(round16_path: &PathBuf, out: Option<PathBuf>) -> Result
     Ok(())
 }
 
+fn signed_atom_reference(
+    points: &[Point],
+    curve: &CurveParams,
+) -> Result<(BTreeMap<[u8; 65], Vec<u32>>, u64), String> {
+    if points.len() != ATOM_COLUMNS {
+        return Err(format!("signed atom reference needs {ATOM_COLUMNS} points"));
+    }
+    let curve_a = curve.a_fe();
+    let mut states = BTreeMap::from([(
+        full_point_key(&Point::Infinity),
+        (Point::Infinity, vec![0u32]),
+    )]);
+    let mut additions = 0u64;
+    for (index, point) in points.iter().enumerate() {
+        let negative = negate(point, curve);
+        let mut next: BTreeMap<[u8; 65], (Point, Vec<u32>)> = BTreeMap::new();
+        for (_, (sum, masks)) in states {
+            for (negative_sign, signed) in [(false, point), (true, &negative)] {
+                for &mask in &masks {
+                    let value = sum.add_vartime(signed, &curve_a);
+                    additions += 1;
+                    let next_mask = if negative_sign {
+                        mask | (1u32 << index)
+                    } else {
+                        mask
+                    };
+                    let key = full_point_key(&value);
+                    let entry = next.entry(key).or_insert_with(|| (value, Vec::new()));
+                    entry.1.push(next_mask);
+                }
+            }
+        }
+        states = next;
+    }
+    let reference: BTreeMap<[u8; 65], Vec<u32>> = states
+        .into_iter()
+        .map(|(key, (_, masks))| (key, masks))
+        .collect();
+    let signed_sums: usize = reference.values().map(Vec::len).sum();
+    if signed_sums != 1usize << ATOM_COLUMNS {
+        return Err(format!(
+            "signed atom reference retained {signed_sums} masks, expected {}",
+            1usize << ATOM_COLUMNS
+        ));
+    }
+    Ok((reference, additions))
+}
+
+fn verify_outer_relation(
+    mask: u32,
+    atom_points: &[Point],
+    outer_point: &Point,
+    outer_negative: bool,
+    target: &Point,
+    curve: &CurveParams,
+) -> (bool, u64) {
+    let curve_a = curve.a_fe();
+    let mut sum = Point::Infinity;
+    let mut additions = 0u64;
+    for (index, point) in atom_points.iter().enumerate() {
+        let signed = if mask & (1u32 << index) == 0 {
+            point.clone()
+        } else {
+            negate(point, curve)
+        };
+        sum = sum.add_vartime(&signed, &curve_a);
+        additions += 1;
+    }
+    let signed_outer = if outer_negative {
+        negate(outer_point, curve)
+    } else {
+        outer_point.clone()
+    };
+    sum = sum.add_vartime(&signed_outer, &curve_a);
+    additions += 1;
+    (sum == *target, additions)
+}
+
+fn relation_digest(relations: &[OuterRelation]) -> Result<String, String> {
+    let bytes = serde_json::to_vec(relations).map_err(|error| error.to_string())?;
+    Ok(hex::encode(sha256(&bytes)))
+}
+
+fn outer_target_checkpoint(
+    kind: &str,
+    accumulator: &OuterTargetAccumulator,
+) -> Result<OuterTargetCheckpoint, String> {
+    Ok(OuterTargetCheckpoint {
+        kind: kind.into(),
+        signed_branch_cells: accumulator.signed_branch_cells,
+        oracle_calls: accumulator.oracle_calls,
+        quadratic_solves: accumulator.quadratic_solves,
+        quadratic_roots_returned: accumulator.quadratic_roots_returned,
+        algebra_index_lookups: accumulator.algebra_index_lookups,
+        algebra_hits: accumulator.algebra_hits,
+        candidate_positive_trials: accumulator.candidate_positive_trials,
+        reference_positive_trials: accumulator.reference_positive_trials,
+        false_negatives: accumulator.false_negatives,
+        false_positives: accumulator.false_positives,
+        multiplication_counts: accumulator.multiplication_counts,
+        target_adjustment_group_additions: accumulator.target_adjustment_group_additions,
+        reference_index_lookups: accumulator.reference_index_lookups,
+        direct_relation_verification_additions: accumulator.direct_relation_verification_additions,
+        batch_profile: accumulator.batch_profile.clone(),
+        relation_count: accumulator.relations.len(),
+        relation_sha256: relation_digest(&accumulator.relations)?,
+        trial_stream_sha256: hex::encode(sha256(accumulator.trial_stream.as_bytes())),
+        exact: accumulator.false_negatives == 0 && accumulator.false_positives == 0,
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_outer_trial(
+    target: &OuterTargetSpec,
+    stream_position: u64,
+    outer_column: u64,
+    outer_negative: bool,
+    outer_point: &Point,
+    atom_points: &[Point],
+    reference: &BTreeMap<[u8; 65], Vec<u32>>,
+    left: &P256ImageState,
+    right: &P256ImageState,
+    curve: &CurveParams,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    accumulator: &mut OuterTargetAccumulator,
+) -> Result<(), String> {
+    let curve_a = curve.a_fe();
+    let signed_outer = if outer_negative {
+        negate(outer_point, curve)
+    } else {
+        outer_point.clone()
+    };
+    let adjusted = target
+        .point
+        .add_vartime(&negate(&signed_outer, curve), &curve_a);
+    accumulator.target_adjustment_group_additions += 1;
+    if matches!(adjusted, Point::Infinity) {
+        return Err(format!(
+            "{} outer trial {stream_position}/{outer_column} adjusted to infinity",
+            target.kind
+        ));
+    }
+    let reference_masks = reference.get(&full_point_key(&adjusted));
+    let reference_positive = reference_masks.is_some_and(|masks| !masks.is_empty());
+    accumulator.reference_index_lookups += 1;
+    let observation = observe_batched_target(
+        &adjusted,
+        left,
+        right,
+        curve,
+        a,
+        b,
+        sqrt_exponent,
+        inverse_exponent,
+    )?;
+    accumulator.signed_branch_cells += 1;
+    accumulator.oracle_calls += 1;
+    accumulator.quadratic_solves += observation.quadratic_solves;
+    accumulator.quadratic_roots_returned += observation.quadratic_roots_returned;
+    accumulator.algebra_index_lookups += observation.algebra_index_lookups;
+    accumulator.algebra_hits += observation.algebra_hits;
+    accumulator.candidate_positive_trials += u64::from(observation.positive);
+    accumulator.reference_positive_trials += u64::from(reference_positive);
+    accumulator.false_negatives += u64::from(reference_positive && !observation.positive);
+    accumulator.false_positives += u64::from(!reference_positive && observation.positive);
+    accumulator
+        .multiplication_counts
+        .add_assign(observation.multiplication_counts);
+    accumulator
+        .batch_profile
+        .record(&observation.inversion_profile);
+    writeln!(
+        accumulator.trial_stream,
+        "{},{stream_position},{outer_column},{},{},{},{},{},{},{}",
+        target.kind,
+        u8::from(outer_negative),
+        u8::from(reference_positive),
+        u8::from(observation.positive),
+        observation.algebra_hits,
+        observation.quadratic_roots_returned,
+        observation.multiplication_counts.total,
+        observation.hit_sha256
+    )
+    .expect("writing a String cannot fail");
+    if observation.linear_degeneracies != 0 || observation.universal_degeneracies != 0 {
+        return Err(format!(
+            "{} outer trial produced {} linear and {} universal degeneracies",
+            target.kind, observation.linear_degeneracies, observation.universal_degeneracies
+        ));
+    }
+    if reference_positive != observation.positive {
+        return Err(format!(
+            "{} outer trial {stream_position}/{outer_column}/{} disagreed: reference={reference_positive}, candidate={}",
+            target.kind,
+            u8::from(outer_negative),
+            observation.positive
+        ));
+    }
+    if let Some(masks) = reference_masks {
+        for &mask in masks {
+            let (direct_verified, additions) = verify_outer_relation(
+                mask,
+                atom_points,
+                outer_point,
+                outer_negative,
+                &target.point,
+                curve,
+            );
+            accumulator.direct_relation_verification_additions += additions;
+            if !direct_verified {
+                return Err(format!(
+                    "{} outer relation failed direct group verification",
+                    target.kind
+                ));
+            }
+            accumulator.relations.push(OuterRelation {
+                target_kind: target.kind.clone(),
+                stream_position,
+                outer_column,
+                outer_negative,
+                atom_negative_mask: mask,
+                direct_verified,
+            });
+        }
+    }
+    Ok(())
+}
+
+fn log2_slope(depths: &[u32], values: &[u64]) -> Result<f64, String> {
+    if depths.len() != values.len() || depths.len() < 2 || values.contains(&0) {
+        return Err("growth fit needs matching nonzero samples".into());
+    }
+    let count = depths.len() as f64;
+    let mean_x = depths.iter().map(|&value| value as f64).sum::<f64>() / count;
+    let logs: Vec<f64> = values.iter().map(|&value| (value as f64).log2()).collect();
+    let mean_y = logs.iter().sum::<f64>() / count;
+    let numerator: f64 = depths
+        .iter()
+        .map(|&value| value as f64)
+        .zip(&logs)
+        .map(|(x, y)| (x - mean_x) * (y - mean_y))
+        .sum();
+    let denominator: f64 = depths
+        .iter()
+        .map(|&value| {
+            let delta = value as f64 - mean_x;
+            delta * delta
+        })
+        .sum();
+    Ok(numerator / denominator)
+}
+
+fn binomial_big(n: u64, k: u32) -> BigUint {
+    let k = u64::from(k).min(n - u64::from(k));
+    let mut value = BigUint::one();
+    for index in 0..k {
+        value *= BigUint::from(n - index);
+        value /= BigUint::from(index + 1);
+    }
+    value
+}
+
+fn load_residual_degree_evidence(path: &PathBuf) -> Result<ResidualDegreeEvidence, String> {
+    let bytes = std::fs::read(path).map_err(|error| error.to_string())?;
+    let digest = hex::encode(sha256(&bytes));
+    if digest != ROUND6_SHA256 {
+        return Err(format!(
+            "round-6 SHA-256 mismatch: expected {ROUND6_SHA256}, got {digest}"
+        ));
+    }
+    let dependency: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    if dependency["schema"].as_str() != Some("p256.dickson_residual_scaling/v1")
+        || dependency["curve"].as_str() != Some(CURVE_SLUG)
+    {
+        return Err("round-6 degree identity changed".into());
+    }
+    let cells = dependency["cells"]
+        .as_array()
+        .ok_or("round-6 cells are missing")?;
+    let mut maximum_by_residual_depth = BTreeMap::new();
+    let mut every_component_complete_and_correct = true;
+    for cell in cells {
+        let residual = cell["residual_depth"]
+            .as_u64()
+            .ok_or("round-6 cell residual depth is missing")? as u32;
+        let degree = cell["max_solving_degree"]
+            .as_u64()
+            .ok_or("round-6 cell maximum degree is missing")? as u32;
+        maximum_by_residual_depth
+            .entry(residual)
+            .and_modify(|value: &mut u32| *value = (*value).max(degree))
+            .or_insert(degree);
+        let components = cell["components"]
+            .as_u64()
+            .ok_or("round-6 component count is missing")?;
+        every_component_complete_and_correct &= cell["complete_components"].as_u64()
+            == Some(components)
+            && cell["correct_components"].as_u64() == Some(components);
+    }
+    let expected = BTreeMap::from([(1u32, 3u32), (2, 3), (3, 4)]);
+    if maximum_by_residual_depth != expected || !every_component_complete_and_correct {
+        return Err(format!(
+            "round-6 residual-degree boundary changed: {maximum_by_residual_depth:?}"
+        ));
+    }
+    Ok(ResidualDegreeEvidence {
+        round6_sha256: digest,
+        maximum_by_residual_depth,
+        every_component_complete_and_correct,
+        promotion_degree_gate_at_most_five: true,
+    })
+}
+
+fn run_outer_scan(
+    round17_path: &PathBuf,
+    round6_path: &PathBuf,
+    out: Option<PathBuf>,
+) -> Result<(), String> {
+    let round17_bytes = std::fs::read(round17_path).map_err(|error| error.to_string())?;
+    let round17_sha256 = hex::encode(sha256(&round17_bytes));
+    if round17_sha256 != ROUND17_SHA256 {
+        return Err(format!(
+            "round-17 SHA-256 mismatch: expected {ROUND17_SHA256}, got {round17_sha256}"
+        ));
+    }
+    let dependency: serde_json::Value =
+        serde_json::from_slice(&round17_bytes).map_err(|error| error.to_string())?;
+    if dependency["schema"].as_str() != Some("p256.s17_batched_inversion/v1")
+        || dependency["curve"].as_str() != Some(CURVE_SLUG)
+        || dependency["factor_base"]["fb_id"].as_str() != Some(FB_ID)
+        || dependency["factor_base"]["fb_sha256"].as_str() != Some(FB_SHA256)
+        || dependency["factor_base"]["points_sha256"].as_str() != Some(POINTS_SHA256)
+    {
+        return Err("round-17 identity receipt changed".into());
+    }
+    let stored_sample = dependency["samples"]
+        .as_array()
+        .ok_or("round-17 samples are missing")?
+        .iter()
+        .find(|sample| sample["kind"].as_str() == Some("hash-0"))
+        .ok_or("round-17 hash-0 sample is missing")?;
+    let packed_atom_hex = stored_sample["packed_atom_hex"]
+        .as_str()
+        .ok_or("round-17 hash-0 packet is missing")?;
+    let packet = hex::decode(packed_atom_hex).map_err(|error| error.to_string())?;
+    let atom_columns = unpack_atom_columns(&packet)?;
+    let expected_atom_columns = vec![
+        114_616, 101_224, 36_382, 129_678, 17_773, 72_570, 33_360, 118_255, 88_179, 58_271, 40_458,
+        117_426, 13_544, 42_490, 88_617, 31_941,
+    ];
+    if atom_columns != expected_atom_columns
+        || packed_atom_hex
+            != "6fee18b6823879fa8e115b51b7a20941cdef561cce39f27829cab20d3a0a5fa568a47cc5"
+    {
+        return Err("round-17 hash-0 packet changed".into());
+    }
+    let residual_degree_evidence = load_residual_degree_evidence(round6_path)?;
+
+    let curve = CurveParams::p256();
+    let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
+    let scalar = run_compression_sample("hash-0", atom_columns.clone(), &columns, &curve)?;
+    if stored_sample["left_image_sha256"].as_str() != Some(&scalar.left_image_sha256)
+        || stored_sample["right_image_sha256"].as_str() != Some(&scalar.right_image_sha256)
+    {
+        return Err("round-17 hash-0 scalar image receipt changed".into());
+    }
+    let selected: Vec<&Column> = atom_columns
+        .iter()
+        .map(|&index| {
+            columns
+                .get(index as usize)
+                .ok_or_else(|| format!("atom column {index} is out of range"))
+        })
+        .collect::<Result<_, _>>()?;
+    let xs: Vec<Fe> = selected.iter().map(|column| column.x).collect();
+    let atom_points: Vec<Point> = selected.iter().map(|column| column.low.clone()).collect();
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut build_solves = 0u64;
+    let mut build_roots = 0u64;
+    let mut build_linear = 0u64;
+    let mut build_universal = 0u64;
+    let mut build_counts = MultiplicationCounts::default();
+    let mut build_profile = BatchInversionProfile::default();
+    let mut intermediate_reference_group_additions = 0u64;
+    let left = build_verified_eight_image_batched(
+        "outer/hash-0/left",
+        &xs[..8],
+        &atom_points[..8],
+        &curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut build_profile,
+        &mut intermediate_reference_group_additions,
+    )?;
+    let right = build_verified_eight_image_batched(
+        "outer/hash-0/right",
+        &xs[8..],
+        &atom_points[8..],
+        &curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut build_profile,
+        &mut intermediate_reference_group_additions,
+    )?;
+    build_counts.finish();
+    if image_digest(&left) != scalar.left_image_sha256
+        || image_digest(&right) != scalar.right_image_sha256
+        || build_solves != 152
+        || build_roots != 304
+        || build_linear != 0
+        || build_universal != 0
+        || build_counts.total != 52_010
+        || build_profile.batch_sizes != [4, 4, 64, 4, 4, 64]
+        || build_profile.batch_inversions != 6
+        || build_profile.scalar_fallbacks != 8
+    {
+        return Err("round-18 batched atom build boundary changed".into());
+    }
+
+    let (reference, reference_build_group_additions) = signed_atom_reference(&atom_points, &curve)?;
+    let reference_signed_sums: u64 = reference.values().map(|masks| masks.len() as u64).sum();
+    let curve_a = curve.a_fe();
+    let atom_low_sum = atom_points.iter().fold(Point::Infinity, |sum, point| {
+        sum.add_vartime(point, &curve_a)
+    });
+    let planted_outer = columns
+        .get(PLANTED_OUTER_COLUMN as usize)
+        .ok_or("planted outer column is out of range")?;
+    let planted_target = atom_low_sum.add_vartime(&planted_outer.low, &curve_a);
+    if matches!(planted_target, Point::Infinity) || !curve.is_on_curve(&planted_target) {
+        return Err("planted outer target is infinity or off curve".into());
+    }
+    let mut public_scalar =
+        BigUint::from_bytes_be(&sha256(OUTER_PUBLIC_TARGET_PREIMAGE.as_bytes())) % &curve.n;
+    if public_scalar.is_zero() {
+        public_scalar = BigUint::one();
+    }
+    let public_target = curve
+        .generator()
+        .scalar_mul_vartime(&public_scalar, &curve_a);
+    if matches!(public_target, Point::Infinity) || !curve.is_on_curve(&public_target) {
+        return Err("public outer target is infinity or off curve".into());
+    }
+    let targets = [
+        OuterTargetSpec {
+            kind: "planted-control".into(),
+            scalar: None,
+            point: planted_target,
+            planted: true,
+        },
+        OuterTargetSpec {
+            kind: "hash-public".into(),
+            scalar: Some(public_scalar),
+            point: public_target,
+            planted: false,
+        },
+    ];
+    let target_identities: Vec<OuterTargetIdentity> = targets
+        .iter()
+        .map(|target| {
+            let (x, y) = affine_coordinates(&target.point).expect("targets were checked affine");
+            OuterTargetIdentity {
+                kind: target.kind.clone(),
+                scalar: target.scalar.as_ref().map(lower_hex),
+                target: [lower_hex(x), lower_hex(y)],
+                planted: target.planted,
+            }
+        })
+        .collect();
+
+    let atom_set: BTreeSet<u64> = atom_columns.iter().copied().collect();
+    let mut accumulators = vec![OuterTargetAccumulator::default(); targets.len()];
+    let mut checkpoints = Vec::new();
+    let mut seen_outer = BTreeSet::new();
+    let mut skipped_atom_columns = 0u64;
+    let mut eligible_outer_columns = 0u64;
+    for stream_position in 0..(1u64 << OUTER_MAX_DEPTH) {
+        let outer_column = (OUTER_OFFSET + OUTER_STRIDE * stream_position) % COLUMNS;
+        if !seen_outer.insert(outer_column) {
+            return Err(format!(
+                "outer stream repeated column {outer_column} at position {stream_position}"
+            ));
+        }
+        if stream_position == PLANTED_OUTER_POSITION && outer_column != PLANTED_OUTER_COLUMN {
+            return Err("planted outer stream position changed".into());
+        }
+        if atom_set.contains(&outer_column) {
+            skipped_atom_columns += 1;
+        } else {
+            eligible_outer_columns += 1;
+            let outer_point = &columns[outer_column as usize].low;
+            for (target, accumulator) in targets.iter().zip(&mut accumulators) {
+                for outer_negative in [false, true] {
+                    run_outer_trial(
+                        target,
+                        stream_position,
+                        outer_column,
+                        outer_negative,
+                        outer_point,
+                        &atom_points,
+                        &reference,
+                        &left,
+                        &right,
+                        &curve,
+                        a,
+                        b,
+                        &sqrt_exponent,
+                        &inverse_exponent,
+                        accumulator,
+                    )?;
+                }
+            }
+        }
+        let positions = stream_position + 1;
+        if let Some(&depth) = OUTER_DEPTHS
+            .iter()
+            .find(|&&depth| positions == 1u64 << depth)
+        {
+            let target_rows = targets
+                .iter()
+                .zip(&accumulators)
+                .map(|(target, accumulator)| outer_target_checkpoint(&target.kind, accumulator))
+                .collect::<Result<_, _>>()?;
+            checkpoints.push(OuterCheckpoint {
+                depth,
+                stream_positions: positions,
+                skipped_atom_columns,
+                eligible_outer_columns,
+                targets: target_rows,
+            });
+        }
+    }
+    if checkpoints.len() != OUTER_DEPTHS.len() {
+        return Err("outer scan missed a frozen checkpoint".into());
+    }
+    let public_field_multiplications: Vec<u64> = checkpoints
+        .iter()
+        .map(|checkpoint| build_counts.total + checkpoint.targets[1].multiplication_counts.total)
+        .collect();
+    let public_oracle_calls: Vec<u64> = checkpoints
+        .iter()
+        .map(|checkpoint| checkpoint.targets[1].oracle_calls)
+        .collect();
+    let growth_fit = OuterGrowthFit {
+        depths: OUTER_DEPTHS.to_vec(),
+        public_field_multiplications: public_field_multiplications.clone(),
+        log2_multiplication_slope_per_depth: log2_slope(
+            &OUTER_DEPTHS,
+            &public_field_multiplications,
+        )?,
+        outer_calls_growth_per_depth: log2_slope(&OUTER_DEPTHS, &public_oracle_calls)?,
+    };
+
+    let final_public = &checkpoints
+        .last()
+        .expect("checkpoints are nonempty")
+        .targets[1];
+    let multiplications_per_oracle_call =
+        final_public.multiplication_counts.total as f64 / final_public.oracle_calls as f64;
+    let eligible_full = COLUMNS - ATOM_COLUMNS as u64;
+    let full_calls = 2 * eligible_full;
+    let signed_domain = BigUint::from(eligible_full) << 17usize;
+    let distinct_sixteen_column_atoms = binomial_big(COLUMNS, 16);
+    let distinct_seventeen_column_sets = binomial_big(COLUMNS, 17);
+    let whole_factor_base_signed_domain = &distinct_seventeen_column_sets << 17usize;
+    let group_order = curve
+        .n
+        .to_f64()
+        .ok_or("P-256 subgroup order cannot be represented as f64")?;
+    let poisson_mean_per_atom = signed_domain
+        .to_f64()
+        .ok_or("outer signed domain cannot be represented as f64")?
+        / group_order;
+    let poisson_success_per_atom = -(-poisson_mean_per_atom).exp_m1();
+    let expected_atom_scans_per_relation = 1.0 / poisson_success_per_atom;
+    let complete_atom_scan_multiplications =
+        build_counts.total as f64 + full_calls as f64 * multiplications_per_oracle_call;
+    let relation_rows = (COLUMNS * 105).div_ceil(100);
+    let whole_factor_base_poisson_mean = whole_factor_base_signed_domain
+        .to_f64()
+        .ok_or("whole factor-base signed domain cannot be represented as f64")?
+        / group_order;
+    let whole_factor_base_poisson_success = -(-whole_factor_base_poisson_mean).exp_m1();
+    let projected_targets = relation_rows as f64 / whole_factor_base_poisson_success;
+    let projected_per_relation =
+        complete_atom_scan_multiplications * expected_atom_scans_per_relation;
+    let projected_collection = projected_targets * projected_per_relation;
+    let collection_log2 = projected_collection.log2();
+    let below_2_pow_120 = collection_log2 < 120.0;
+    let below_2_pow_128 = collection_log2 < 128.0;
+    let classification = if below_2_pow_120 {
+        "promotion candidate"
+    } else if below_2_pow_128 {
+        "not promoted: less than eight bits of margin"
+    } else {
+        "rejected: enumeration exponent exceeds rho"
+    };
+    let collection_projection = OuterCollectionProjection {
+        classification: classification.into(),
+        distinct_sixteen_column_atoms: distinct_sixteen_column_atoms.to_string(),
+        distinct_sixteen_column_atoms_log2: distinct_sixteen_column_atoms
+            .to_f64()
+            .ok_or("sixteen-column atom count cannot be represented as f64")?
+            .log2(),
+        distinct_seventeen_column_sets: distinct_seventeen_column_sets.to_string(),
+        distinct_seventeen_column_sets_log2: distinct_seventeen_column_sets
+            .to_f64()
+            .ok_or("seventeen-column set count cannot be represented as f64")?
+            .log2(),
+        eligible_outer_columns_per_atom: eligible_full,
+        signed_oracle_calls_per_complete_atom_scan: full_calls,
+        signed_candidate_domain_per_atom: signed_domain.to_string(),
+        poisson_mean_per_atom,
+        poisson_success_per_atom,
+        expected_atom_scans_per_relation,
+        expected_atom_scans_log2: expected_atom_scans_per_relation.log2(),
+        measured_public_multiplications_per_oracle_call: multiplications_per_oracle_call,
+        projected_complete_atom_scan_multiplications: complete_atom_scan_multiplications,
+        projected_complete_atom_scan_multiplications_log2: complete_atom_scan_multiplications
+            .log2(),
+        projected_multiplications_per_relation: projected_per_relation,
+        projected_multiplications_per_relation_log2: projected_per_relation.log2(),
+        whole_factor_base_signed_domain: whole_factor_base_signed_domain.to_string(),
+        whole_factor_base_poisson_mean,
+        whole_factor_base_poisson_success,
+        relation_rows,
+        projected_targets_for_relation_rows: projected_targets,
+        projected_collection_multiplications: projected_collection,
+        projected_collection_multiplications_log2: collection_log2,
+        below_2_pow_120,
+        below_2_pow_128,
+        bits_above_2_pow_128: collection_log2 - 128.0,
+        optimistic_lower_projection: true,
+    };
+
+    let row_weight = 17u64;
+    let nonzeros = relation_rows * row_weight;
+    let csr_entry_bytes = nonzeros * 5;
+    let csr_row_offset_bytes = (relation_rows + 1) * 8;
+    let csr_total_bytes = csr_entry_bytes + csr_row_offset_bytes;
+    let wiedemann_sparse_matvecs = 2 * COLUMNS;
+    let wiedemann_nonzero_additions = wiedemann_sparse_matvecs * nonzeros;
+    let berlekamp_massey_scalar_operations = COLUMNS * COLUMNS;
+    let field_vectors = 3u64;
+    let field_vector_bytes = field_vectors * COLUMNS * 32;
+    let sparse_linear_algebra_projection = SparseLinearAlgebraProjection {
+        rows: relation_rows,
+        columns: COLUMNS,
+        row_weight,
+        nonzeros,
+        csr_entry_bytes,
+        csr_row_offset_bytes,
+        csr_total_bytes,
+        wiedemann_sparse_matvecs,
+        wiedemann_nonzero_additions,
+        berlekamp_massey_scalar_operations,
+        field_vectors,
+        field_vector_bytes,
+        modeled_working_bytes: csr_total_bytes + field_vector_bytes,
+        operation_unit_separate_from_collection: true,
+    };
+
+    let relations: Vec<OuterRelation> = accumulators
+        .iter()
+        .flat_map(|accumulator| accumulator.relations.iter().cloned())
+        .collect();
+    let planted_witness = relations.iter().any(|relation| {
+        relation.target_kind == "planted-control"
+            && relation.stream_position == PLANTED_OUTER_POSITION
+            && relation.outer_column == PLANTED_OUTER_COLUMN
+            && !relation.outer_negative
+            && relation.atom_negative_mask == 0
+            && relation.direct_verified
+    });
+    let exact = planted_witness
+        && checkpoints
+            .iter()
+            .flat_map(|checkpoint| &checkpoint.targets)
+            .all(|target| target.exact)
+        && residual_degree_evidence.every_component_complete_and_correct;
+    if !exact {
+        return Err("round-18 exactness or planted-witness gate failed".into());
+    }
+    let attack_promotion_gate = exact
+        && residual_degree_evidence.promotion_degree_gate_at_most_five
+        && collection_projection.below_2_pow_120;
+    let memory = OuterMemoryModel {
+        persistent_atom_bytes: PACKED_ATOM_BYTES as u64,
+        reconstructed_image_raw_bytes: ((left.affine.len() + right.affine.len()) * 32) as u64,
+        candidate_peak_logical_bytes: 75_008,
+        factor_base_point_raw_bytes: COLUMNS * 96,
+        reference_entries: reference_signed_sums,
+        reference_final_logical_bytes: reference_signed_sums * (65 + 4),
+        reference_build_peak_logical_bytes: ((1u64 << 15) + (1u64 << 16)) * (65 + 64 + 4),
+        reference_memory_excluded_from_candidate: true,
+    };
+    let result = OuterScanExperimentResult {
+        schema: "p256.s17_outer_scan/v1".into(),
+        curve: CURVE_SLUG.into(),
+        field_prime: lower_hex(&curve.p),
+        curve_a: lower_hex(&curve.a),
+        curve_b: lower_hex(&curve.b),
+        round17_sha256,
+        factor_base,
+        atom_kind: "hash-0".into(),
+        packed_atom_hex: packed_atom_hex.into(),
+        atom_columns,
+        outer_offset: OUTER_OFFSET,
+        outer_stride: OUTER_STRIDE,
+        checkpoint_depths: OUTER_DEPTHS.to_vec(),
+        planted_outer_position: PLANTED_OUTER_POSITION,
+        planted_outer_column: PLANTED_OUTER_COLUMN,
+        targets: target_identities,
+        scalar_build_multiplication_counts: scalar.build_multiplication_counts,
+        batched_build_multiplication_counts: build_counts,
+        build_inversion_profile: build_profile,
+        reference_signed_sums,
+        reference_build_group_additions,
+        intermediate_reference_group_additions,
+        checkpoints,
+        growth_fit,
+        residual_degree_evidence,
+        local_maximum_degree: 2,
+        memory,
+        collection_projection,
+        sparse_linear_algebra_projection,
+        relations,
+        exact,
+        attack_promotion_gate,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_transfer(out: Option<PathBuf>) -> Result<(), String> {
     let curve = CurveParams::p256();
     let (factor_base, columns, signed_rows, x_index, signed_index) = build_indexes(&curve)?;
@@ -2474,11 +3570,14 @@ fn run(cli: Cli) -> Result<(), String> {
         compress_round14,
         pack_round15,
         batch_round16,
+        outer_scan_round17,
+        round6,
     } = cli;
     let continuation_modes = usize::from(width_round13.is_some())
         + usize::from(compress_round14.is_some())
         + usize::from(pack_round15.is_some())
-        + usize::from(batch_round16.is_some());
+        + usize::from(batch_round16.is_some())
+        + usize::from(outer_scan_round17.is_some());
     if continuation_modes > 1 {
         return Err("choose only one continuation mode".into());
     }
@@ -2493,6 +3592,13 @@ fn run(cli: Cli) -> Result<(), String> {
     }
     if let Some(path) = batch_round16 {
         return run_batched_inversion(&path, out);
+    }
+    if let Some(path) = outer_scan_round17 {
+        let round6 = round6.ok_or("--outer-scan-round17 requires --round6")?;
+        return run_outer_scan(&path, &round6, out);
+    }
+    if round6.is_some() {
+        return Err("--round6 is only valid with --outer-scan-round17".into());
     }
     run_transfer(out)
 }
@@ -2659,5 +3765,19 @@ mod tests {
         assert_eq!(profile.scalar_fallbacks, 0);
         assert_eq!(scalar_counts.inversions, 3 * 384);
         assert_eq!(batched_counts.inversions, 384 + 3 * 3 - 1);
+    }
+
+    #[test]
+    fn outer_stream_is_full_cycle_and_freezes_the_planted_column() {
+        let mut seen = BTreeSet::new();
+        for position in 0..COLUMNS {
+            let column = (OUTER_OFFSET + OUTER_STRIDE * position) % COLUMNS;
+            assert!(seen.insert(column));
+            if position == PLANTED_OUTER_POSITION {
+                assert_eq!(column, PLANTED_OUTER_COLUMN);
+            }
+        }
+        assert_eq!(seen.len() as u64, COLUMNS);
+        assert_eq!(binomial_big(5, 2), BigUint::from(10u8));
     }
 }

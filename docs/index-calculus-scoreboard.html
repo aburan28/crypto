@@ -1478,6 +1478,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         bit-identical trajectories, so the saving is a subtraction rather than an estimate &mdash;
         537 of 537 rows identical in every counter but the pool&rsquo;s, zero trajectories moved,
         zero rows whose saving differs from the offsets they stopped drawing.</p>
+      <p><strong>P-256 S17 boundary, newly priced.</strong> The separate fixed-atom route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm or matched operation-unit rho run. Its actual-P-256 outer-prefix scan measures one bit of additional oracle work per Dickson prefix depth, and the optimistic complete-collector projection reaches 2<sup>272.404</sup> field multiplications, 144.404 bits above the 2<sup>128</sup> rho exponent. It is retained below as an accounting rejection, not inserted into this end-to-end table.</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -1968,6 +1969,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
           ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
+        <p>The P-256 fixed-atom S17 diagnostic is intentionally not plotted on this group-order axis: it measures a depth-prefix slope of 0.991543 for field multiplications, not a multi-size exponent in the subgroup order. Pricing the remaining atom search yields a separately labelled optimistic projection of 2<sup>272.404</sup> field multiplications for relation collection, so it fails the 2<sup>128</sup> comparison before a whole-pipeline fit exists.</p>
       </div>
       <div class="exp">
         <div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
@@ -12017,6 +12019,47 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-batch-inversion-round17-20261005 -->
+<!-- BEGIN p256-s17-outer-scan-round18-20261005 -->
+<section class="panel" id="p256-s17-outer-scan-round18-20261005">
+  <div class="panel-head">
+    <h2>P-256 S17 outer scan: low degree survives, fixed-atom collection projects to 2^272.404 <span class="chip">accounting</span></h2>
+    <p class="panel-summary">Prices the missing outer relation search: 4,096 actual P-256 oracle calls are exact, but the optimistic 138,031-row collection projection is 144.404 bits above rho, rejecting fixed-atom enumeration.</p>
+    <p>Round 18 scans both signs of a hash-selected seventeenth factor-base column around the frozen 36-byte <code>hash-0</code> atom. Every batched quadratic classification is checked against an independent full-point table of all 65,536 signed atom sums. The planted length-17 relation is recovered and directly verified; the hash-public bounded prefix has no hit.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Measured cumulative public-target prefix. The 52,010-multiplication image build is charged once on every total row.</caption>
+    <thead><tr><th>Outer depth</th><th>Positions</th><th>Oracle calls</th><th>Query muls</th><th>Build + query</th><th>FN / FP</th><th>Public relations</th></tr></thead>
+    <tbody>
+      <tr><td class="n">4</td><td class="n">16</td><td class="n">32</td><td class="n">1,269,728</td><td class="n">1,321,738</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">5</td><td class="n">32</td><td class="n">64</td><td class="n">2,539,456</td><td class="n">2,591,466</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">6</td><td class="n">64</td><td class="n">128</td><td class="n">5,078,912</td><td class="n">5,130,922</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">7</td><td class="n">128</td><td class="n">256</td><td class="n">10,157,824</td><td class="n">10,209,834</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">8</td><td class="n">256</td><td class="n">512</td><td class="n">20,315,648</td><td class="n">20,367,658</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">9</td><td class="n">512</td><td class="n">1,024</td><td class="n">40,631,296</td><td class="n">40,683,306</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+      <tr><td class="n">10</td><td class="n">1,024</td><td class="n">2,048</td><td class="n">81,262,592</td><td class="n">81,314,602</td><td class="n">0 / 0</td><td class="n">0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Optimistic enumeration projection; atom generation and no-relation target exhaustion are omitted, so they cannot improve these figures.</caption>
+    <thead><tr><th>Boundary</th><th>Count / probability</th><th>log<sub>2</sub> work</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Complete signed outer scan, one atom</td><td class="n">262,884 calls; 1.48787&middot;10<sup>&minus;67</sup> success</td><td class="n">33.280 muls</td><td><span class="chip">measured-cost projection</span></td></tr>
+      <tr><td>Expected atom scans per relation</td><td class="n">6.72101&middot;10<sup>66</sup></td><td class="n">221.996 scans</td><td><span class="chip">enumeration floor</span></td></tr>
+      <tr><td>One relation</td><td class="n">7.01071&middot;10<sup>76</sup> field muls</td><td class="n"><strong>255.276</strong></td><td><span class="chip">rejected</span></td></tr>
+      <tr><td>138,031-row collection</td><td class="n">1.00383&middot;10<sup>82</sup> field muls</td><td class="n"><strong>272.404</strong></td><td><span class="chip">144.404 bits above rho</span></td></tr>
+      <tr><td>Sparse Wiedemann, separate unit</td><td class="n">616,939,492,732 nonzero additions</td><td class="n">39.166</td><td><span class="chip">not the bottleneck</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">growth</span> oracle-call slope 1.000 and field-multiplication slope 0.991543 per outer depth; each query remains exactly 39,679 multiplications</span>
+    <span><span class="chip">degree</span> local image degree 2; frozen residual depths 1 / 2 / 3 retain maximum degrees 3 / 3 / 4; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">correctness</span> 4,096 / 4,096 candidate-reference agreements, one direct 17-point planted witness, zero FN or FP, and no public-prefix hit</span>
+    <span><span class="chip">memory</span> 36-byte packet, 8,192-byte images, 75,008-byte candidate peak, 24.278-MiB sparse-matrix model; relation acquisition dominates</span>
+    <span><span class="chip">decision</span> further constant-factor oracle tuning cannot close the gap; a follow-on must change the atom-selection exponent</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_outer_scan_round18_20261005/RESULT.md</code>; deterministic result SHA-256 <code>b9081ea3cd3957dcae7805852371e395a2a63c8d4a2062e5c8e2c0b23980fce3</code></span>
+  </div>
+</section>
+<!-- END p256-s17-outer-scan-round18-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
