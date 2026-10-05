@@ -105,6 +105,9 @@ peaks. There is no x86 or GPU performance claim.
 The remaining n83 method gate is an ordinary verified relation from
 eight or more source summands, charging all failed attempts. The
 128-variable block solves three summands; it does not solve the full
-high-arity equation. A completed relation matrix, fresh target DLP,
+high-arity equation. The [high-arity audit](HIGH_ARITY_GATE.md) shows
+that the current free-input suffix recursion has an algebraic root for
+every generic valid trailing tuple, so simply widening that suffix
+does not provide the missing pruning. A completed relation matrix, fresh target DLP,
 same-point one-target rho reference and isolated-host timing are still
 needed before any end-to-end speedup can be stated.
