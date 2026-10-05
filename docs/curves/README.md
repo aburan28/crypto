@@ -1,5 +1,12 @@
 # Curves
 
+[CM Jacobian certificates](JACOBIAN_CERTIFICATES.md) check principal
+polarizations on elliptic squares using exact Hermitian arithmetic and all
+ideal classes. The [versioned JSON](jacobian-certificates.json) and
+[SQLite import](jacobian-certificates.sql) support lookup by full curve UID
+when bound, and by order or certificate UID when unbound. Geometric
+endomorphism hypotheses remain explicitly conditional.
+
 [Automatic hyperelliptic cover checks](COVERS.md) attach replayable
 same-field cover certificates to each supported catalog model in
 [`covers.json`](covers.json). Each curve page in the lab browser displays

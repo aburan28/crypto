@@ -100,7 +100,7 @@ fn analyze(
             || rec.arm != "rho-strong"
             || rec.method.id != METHOD
             || rec.workload.curve.slug != CURVE
-            || rec.workload.curve.r != R
+            || rec.workload.curve.r != u128::from(R)
             || rec.workload.curve.group_order != 137_439_487_532
             || rec.workload.curve.generator[0] != "0x17262ad4f3"
             || rec.workload.curve.generator[1] != "0x82fe10673"

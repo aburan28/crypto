@@ -1,0 +1,33 @@
+{
+  "schema": "n83-rotated-m10-freeze-v1",
+  "status": "PRE_OUTCOME",
+  "source_commit": "422753df47b3420031dbe78b3e84fdf964745c21",
+  "source_sha256": {
+    "src/cryptanalysis/koblitz_rotated_chain.rs": "0771acf5da435e8ee061db84234bc4d3f3c24abe3046f8c96f27b338839fb089",
+    "src/bin/n83_rotated_m10.rs": "be48c9c2786ae041577258aa50515051d2ae149479e76a9eecba83c751ed568c",
+    "src/cryptanalysis/mod.rs": "a62b0e68d8c3fd93aa36c4484579780d775d837cf270cf84dfc4dbbecabc9ad7"
+  },
+  "protocol_sha256": "28ea23ec070cbbd4ac38617482f7173dcd49007ccfa51d1aa1941ceab7536367",
+  "input_sha256": "1227f635f54b628ec3eb75890cd187fe64d14d81f6e65caf2886574d00c750c2",
+  "solver_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "toolchain": {
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "rustc_commit": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+    "host": "x86_64-unknown-linux-gnu",
+    "llvm": "23.1.1",
+    "os_observed_at_freeze": "Linux 6.18.44 x86_64"
+  },
+  "commands": {
+    "build": "cargo build --offline --release --bin n83_rotated_m10",
+    "identity": "target/release/n83_rotated_m10 check",
+    "planted": "target/release/n83_rotated_m10 certify-planted --cnf <out>/planted.cnf --model <out>/planted.model --report <out>/planted.json --node-cap 8000000",
+    "natural": "target/release/n83_rotated_m10 solve --target public --solver research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical --out <out>/public --seconds 120 --node-cap 8000000"
+  },
+  "admission": {
+    "identity_replay_before_freeze": "PASS_NON_OUTCOME",
+    "n83_chain_built_before_freeze": false,
+    "planted_certificate_run_before_freeze": false,
+    "natural_target_solver_run_before_freeze": false,
+    "speed_claim_allowed": false
+  }
+}
