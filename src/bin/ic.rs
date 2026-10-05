@@ -184,7 +184,7 @@ pub fn git_commit() -> Option<String> {
 }
 
 fn compute_git_commit() -> Option<String> {
-    option_env!("IC_BUILD_GIT_COMMIT").map(str::to_owned)
+    option_env!("CRYPTO_BUILD_GIT_COMMIT").map(str::to_owned)
 }
 
 fn compute_binary_hash() -> Option<String> {
