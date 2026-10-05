@@ -209,7 +209,7 @@ fn main() {
             }
         }
         pos = end;
-        if pos % (batch * 32) == 0 {
+        if pos.is_multiple_of(batch * 32) {
             eprintln!(
                 "  rows {pos}/{n_rows}, rank {rank}, {:.0} s",
                 started.elapsed().as_secs_f64()
