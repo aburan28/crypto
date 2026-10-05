@@ -163,6 +163,74 @@ pub fn batch_add_fixed_both_signs(
     (plus, minus)
 }
 
+/// Query only the x keys of both sums. The y-coordinate is needed solely
+/// when a key is present in the signed pair index, so the caller can defer
+/// that calculation to the rare candidate hit.
+fn batch_x_keys_fixed_both_signs(
+    curve: &BinaryCurve,
+    fixed: &BinaryPoint,
+    others: &[BinaryPoint],
+) -> Option<Vec<(PointXKey, PointXKey)>> {
+    let BinaryPoint::Affine { x: x1, y: y1 } = fixed else {
+        return others
+            .iter()
+            .map(|point| {
+                let x = x_key(point)?;
+                Some((x, x))
+            })
+            .collect();
+    };
+    let irr = &curve.irreducible;
+    let mut keys = vec![(PointXKey::Infinity, PointXKey::Infinity); others.len()];
+    let mut positions = Vec::new();
+    let mut denominators = Vec::new();
+    for (i, other) in others.iter().enumerate() {
+        match other {
+            BinaryPoint::Affine { x: x2, .. } if x1 != x2 => {
+                positions.push(i);
+                denominators.push(x1.add(x2));
+            }
+            _ => {
+                let plus = point_add(curve, fixed, other);
+                let minus = point_add(curve, fixed, &point_neg(other));
+                keys[i] = (x_key(&plus)?, x_key(&minus)?);
+            }
+        }
+    }
+    if denominators.is_empty() {
+        return Some(keys);
+    }
+    let mut prefix = Vec::with_capacity(denominators.len() + 1);
+    prefix.push(F2mElement::one(curve.m));
+    for denominator in &denominators {
+        prefix.push(prefix.last().unwrap().mul(denominator, irr));
+    }
+    let mut inverse = prefix.last()?.flt_inverse(irr)?;
+    for j in (0..positions.len()).rev() {
+        let i = positions[j];
+        let denominator_inverse = inverse.mul(&prefix[j], irr);
+        inverse = inverse.mul(&denominators[j], irr);
+        let BinaryPoint::Affine { x: x2, y: y2 } = &others[i] else {
+            unreachable!();
+        };
+        let lambda = y1.add(y2).mul(&denominator_inverse, irr);
+        let delta = x2.mul(&denominator_inverse, irr);
+        let x_plus = lambda
+            .square(irr)
+            .add(&lambda)
+            .add(x1)
+            .add(x2)
+            .add(&curve.a);
+        // lambda_minus = lambda_plus + delta in characteristic two.
+        let x_minus = x_plus.add(&delta.square(irr)).add(&delta);
+        keys[i] = (
+            PointXKey::Affine(packed(&x_plus)?),
+            PointXKey::Affine(packed(&x_minus)?),
+        );
+    }
+    Some(keys)
+}
+
 /// The memory cap counts unordered pairs, including repeats. This cap is
 /// independent of the target, and a failed construction allocates no table.
 pub struct F6WidePairIndex {
@@ -322,7 +390,12 @@ impl F6SignedPairIndex {
     }
 
     fn lookup_pair(&self, residual: &BinaryPoint) -> Option<(usize, usize)> {
-        let entry = &self.sums[*self.lookup.get(&x_key(residual)?)?];
+        let index = *self.lookup.get(&x_key(residual)?)?;
+        self.pair_at(index, residual)
+    }
+
+    fn pair_at(&self, index: usize, residual: &BinaryPoint) -> Option<(usize, usize)> {
+        let entry = &self.sums[index];
         if *residual == entry.point {
             Some(entry.pair)
         } else if *residual == point_neg(&entry.point) {
@@ -364,6 +437,39 @@ impl F6SignedPairIndex {
                 if let Some(pair) = self.lookup_pair(plus_residual) {
                     if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
                         return Some(witness);
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    /// Exact four-summand search with y-coordinate work deferred until an
+    /// x-key match. The search order and verification are the same as
+    /// `solve4`; only the bulk residual representation changes.
+    pub fn solve4_xonly(&self, target: &BinaryPoint) -> Option<[usize; 4]> {
+        if !self.curve.is_on_curve(target) {
+            return None;
+        }
+        const BATCH: usize = 256;
+        for chunk in self.sums.chunks(BATCH) {
+            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+            let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
+            for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
+                if let Some(&index) = self.lookup.get(&minus_key) {
+                    let residual = point_add(&self.curve, target, &point_neg(&entry.point));
+                    if let Some(pair) = self.pair_at(index, &residual) {
+                        if let Some(witness) = self.verify(target, entry.pair, pair) {
+                            return Some(witness);
+                        }
+                    }
+                }
+                if let Some(&index) = self.lookup.get(&plus_key) {
+                    let residual = point_add(&self.curve, target, &entry.point);
+                    if let Some(pair) = self.pair_at(index, &residual) {
+                        if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                            return Some(witness);
+                        }
                     }
                 }
             }
@@ -433,6 +539,13 @@ mod tests {
         inputs.push(point_neg(fixed));
         inputs.push(BinaryPoint::Infinity);
         let (plus, minus) = batch_add_fixed_both_signs(&curve, fixed, &inputs);
+        let keys = batch_x_keys_fixed_both_signs(&curve, fixed, &inputs).unwrap();
+        for ((plus_key, minus_key), (plus_point, minus_point)) in
+            keys.iter().zip(plus.iter().zip(minus.iter()))
+        {
+            assert_eq!(*plus_key, x_key(plus_point).unwrap());
+            assert_eq!(*minus_key, x_key(minus_point).unwrap());
+        }
         assert_eq!(
             plus,
             inputs
@@ -449,6 +562,14 @@ mod tests {
         );
         let (plus_inf, minus_inf) =
             batch_add_fixed_both_signs(&curve, &BinaryPoint::Infinity, &inputs);
+        let keys_inf =
+            batch_x_keys_fixed_both_signs(&curve, &BinaryPoint::Infinity, &inputs).unwrap();
+        for ((plus_key, minus_key), (plus_point, minus_point)) in
+            keys_inf.iter().zip(plus_inf.iter().zip(minus_inf.iter()))
+        {
+            assert_eq!(*plus_key, x_key(plus_point).unwrap());
+            assert_eq!(*minus_key, x_key(minus_point).unwrap());
+        }
         assert_eq!(plus_inf, inputs);
         assert_eq!(minus_inf, inputs.iter().map(point_neg).collect::<Vec<_>>());
     }
@@ -482,6 +603,18 @@ mod tests {
             let expected = four_sums.contains(&key(&target).unwrap());
             let witness = index.solve4(&target);
             assert_eq!(witness.is_some(), expected, "target scalar {scalar}");
+            let xonly_witness = index.solve4_xonly(&target);
+            assert_eq!(
+                xonly_witness.is_some(),
+                expected,
+                "x-only target scalar {scalar}"
+            );
+            if let Some(indices) = xonly_witness {
+                let replay = indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                    point_add(&curve, &acc, &points[i])
+                });
+                assert_eq!(replay, target);
+            }
             if let Some(indices) = witness {
                 let replay = indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
                     point_add(&curve, &acc, &points[i])
