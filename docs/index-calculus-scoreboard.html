@@ -1288,6 +1288,44 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     </div>
   </div>
 
+  <div class="panel" id="ic-f6-geometric-20261003">
+    <div class="panel-head">
+      <h2>F6-IC wins eight prepared targets and completes cold n9 IC, misses 2&times; <span class="chip">engineering</span></h2>
+      <p class="panel-summary">On eight new n17 public targets F6-IC beat inherited F4 by an observed 1.291–1.583&times; online and matrix F5 by 287.921–536.449&times;. A separate n9 cold run collected its own relations and recovered one public logarithm with all three solvers. Mac timings are exploratory and the 2&times; F4 gate failed.</p>
+      <p>F6-IC is a project name for an IC-specific hybrid PDP solver, not Faugère's F6: exact usable factor-base geometry refutes or closes branches inside an inherited Boolean F4 search. On <code>icv1-f2m17-tm101-00378d4e</code> eight distinct public hash-to-curve points (seeds <code>20261004031</code>–<code>20261004038</code>) were frozen before measurement; no scalar was supplied to a solver. Every arm used the same certified 62-point usable base and 29 folded column logs. All 40 processes (two F4, two F6 and one F5 per target) exited zero, recovered a scalar independently checked against its public point, and closed their five exclusive online phases.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Prepared one-target online wall time in milliseconds on unisolated macOS ARM64 (L0). F4 and F6 are medians of two fresh processes, F5 is one process. Reusable preparation excluded. No rho arm ran, so rho / IC and <code>S</code> / floor are unknown for every row.</caption>
+      <thead><tr><th>Target</th><th>Public point / workload</th><th>Attempts</th><th>F4 online ms</th><th>F6-IC online ms</th><th>F5 online ms</th><th>F4 / F6</th><th>F5 / F6</th><th>Verified scalar</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>[73407,129763]</code> / <code>146a1e9ee3c8</code></td><td>1</td><td>3.536</td><td>2.740</td><td>1,152.728</td><td>1.291&times;</td><td>420.777&times;</td><td>4785</td></tr>
+        <tr><td>2</td><td><code>[58883,25416]</code> / <code>865e90e93f52</code></td><td>3</td><td>46.119</td><td>31.030</td><td>10,867.124</td><td>1.486&times;</td><td>350.214&times;</td><td>11875</td></tr>
+        <tr><td>3</td><td><code>[94847,4428]</code> / <code>b84590ddb689</code></td><td>4</td><td>85.498</td><td>56.067</td><td>17,592.913</td><td>1.525&times;</td><td>313.784&times;</td><td>40040</td></tr>
+        <tr><td>4</td><td><code>[5195,53623]</code> / <code>b984d0f27633</code></td><td>4</td><td>72.933</td><td>48.072</td><td>16,241.401</td><td>1.517&times;</td><td>337.857&times;</td><td>20797</td></tr>
+        <tr><td>5</td><td><code>[26551,41396]</code> / <code>84b483f33a5e</code></td><td>2</td><td>25.504</td><td>16.678</td><td>8,947.016</td><td>1.529&times;</td><td>536.449&times;</td><td>64523</td></tr>
+        <tr><td>6</td><td><code>[52031,20189]</code> / <code>52cfcbd27e5b</code></td><td>1</td><td>9.608</td><td>6.656</td><td>3,251.246</td><td>1.443&times;</td><td>488.455&times;</td><td>48005</td></tr>
+        <tr><td>7</td><td><code>[98625,98119]</code> / <code>ced1677f0976</code></td><td>11</td><td>224.314</td><td>141.685</td><td>56,898.256</td><td>1.583&times;</td><td>401.582&times;</td><td>2391</td></tr>
+        <tr><td>8</td><td><code>[106265,104984]</code> / <code>458f63b989bb</code></td><td>2</td><td>26.428</td><td>20.398</td><td>5,873.096</td><td>1.296&times;</td><td>287.921&times;</td><td>40513</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Across the eight fixed targets F4 / F6 ranges 1.291–1.583&times; (median 1.502&times;) and F5 / F6 ranges 287.921–536.449&times; (median 375.898&times;). These are observed ranges on the frozen sample, not complexity bounds or confidence intervals. The F4 A/A pair spread was 0.96–7.34%; the smallest F4 / F6 gap is 29.1%. Target PDP took 98.97–99.96% of F6's online interval. Candidates: F4 <code>IC1N17Ckb1fb62PDP3f4RCsampleLAgaussTDpdpISO0hb1a6951540e1</code>, F6-IC <code>IC1N17Ckb1fb62PDP3f6RCsampleLAgaussTDpdpISO0h15f9c2712c0e</code>, F5 <code>IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h50b072bea277</code>. F5 uses lowest-free splitting and F4/F6 inherited-basis, highest-free splitting, so the ratios compare complete solver choices. The preregistered 2&times; complete-call F4 gate failed on all eight targets, as it did on the matched three-way target (median F4 / F6 1.537&times;) and on the v0–v3 pilots.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Full cold control on <code>icv1-f2m9-tm5-4a3ea183</code>, subgroup order 37, workload <code>f6d79f6dd9f2</code>, public point <code>[305,466]</code>. One process per arm; inside-worker milliseconds on unisolated macOS ARM64 (L0).</caption>
+      <thead><tr><th>IC arm</th><th>Candidate</th><th>Cold ms</th><th>Online ms</th><th>Cold F4 / arm</th><th>Online F4 / arm</th><th>Verified log</th><th>Rho / IC</th><th>S / floor</th></tr></thead>
+      <tbody>
+        <tr><td>Inherited F4</td><td><code>IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d</code></td><td>4.707</td><td>0.372</td><td>1.000&times;</td><td>1.000&times;</td><td>4</td><td>unknown</td><td>unknown</td></tr>
+        <tr><td>F6-IC</td><td><code>IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2</code></td><td>3.150</td><td>0.272</td><td>1.495&times;</td><td>1.366&times;</td><td>4</td><td>unknown</td><td>unknown</td></tr>
+        <tr><td>Matrix F5</td><td><code>IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5</code></td><td>61.937</td><td>3.118</td><td>0.076&times;</td><td>0.119&times;</td><td>4</td><td>unknown</td><td>unknown</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Each cold arm built its 14-point usable base from scratch, issued eight ordinary queries, accepted eight distinct checked relations, solved both folded columns in one dense matrix and found the target relation on its first attempt; no prepared log table was imported. An independent native replay (SHA-256 <code>307f02ce84e5cb463257c5bfc9a572aed8508a90f8c9b58e1c3d550589bb0d90</code>) recomputed <code>[4]G = Q</code>, all 24 ordinary relation identities, six column-log identities and every phase sum. With 37 group elements and two columns this control cannot be extrapolated to larger curves.</p>
+      <p><strong>Class: engineering.</strong> The solver changed and an IC cost fell, but nothing moved the floor, and the gain is a wall-time observation on an unisolated host, not an operation-counted <code>S</code>. No same-target rho arm ran, so no IC/rho ratio exists and no progress-chart point is added. The n53 <code>PDP4root</code> path does not call F6-IC. <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/RESULT.md">Result</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/eight_target/RESULT.md">eight-target panel</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/eight_target/target-summary.json">per-target summary</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/three_way/RESULT.md">matched three-way target</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/small_cold/RESULT.md">n9 cold control</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json">replay certificate</a>; <a href="https://github.com/aburan28/crypto/pull/1333">PR #1333</a>.</p>
+    </div>
+  </div>
+
   <div class="panel" id="ic-sat-v3-full-development-20260930">
     <div class="panel-head">
       <h2>Source-bound SAT IC completes one n17 development target <span class="chip">accounting</span></h2>
