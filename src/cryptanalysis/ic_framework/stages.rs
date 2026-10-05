@@ -301,8 +301,15 @@ impl SolverTotals {
             self.solving_degree_max = self.solving_degree_max.max(d);
             self.calls_with_a_degree += 1;
         }
+        // A key that names a maximum (`*_max`) is the maximum over
+        // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
-            *self.extra.entry(k.clone()).or_insert(0) += v;
+            let entry = self.extra.entry(k.clone()).or_insert(0);
+            if k.ends_with("_max") {
+                *entry = (*entry).max(*v);
+            } else {
+                *entry += v;
+            }
         }
     }
 

@@ -4315,6 +4315,34 @@ pub struct SolveStats {
     /// rather than fixed (`eliminate_linear_generators`); those it fixed
     /// outright are counted as propagations.
     pub eliminated: usize,
+    /// Branches proved unable to contain an accepted IC relation by an
+    /// optional exact node oracle, before another Macaulay reduction.
+    #[serde(default)]
+    pub geometric_refutations: usize,
+    /// Accepted relations found by the optional node oracle before a full
+    /// Boolean assignment was constructed.
+    #[serde(default)]
+    pub geometric_witnesses: usize,
+    /// Fixed summand x-coordinate checks performed by the IC node oracle.
+    #[serde(default)]
+    pub geometric_support_checks: u64,
+    /// Exact residual-point hash lookups performed by the IC node oracle.
+    #[serde(default)]
+    pub geometric_residual_lookups: u64,
+    /// Residual lookups using the validated packed single-word curve path.
+    #[serde(default)]
+    pub geometric_fast_residual_lookups: u64,
+    /// Nonempty packed batched-addition calls made by the IC node oracle.
+    #[serde(default)]
+    pub geometric_batch_groups: u64,
+    /// Group additions, including independent witness replay, performed by
+    /// the IC node oracle.
+    #[serde(default)]
+    pub geometric_group_additions: u64,
+    /// The IC gate could not prove that its coordinate encoding matched
+    /// this base, so the solve used plain inherited F4 instead.
+    #[serde(default)]
+    pub geometric_fallbacks: usize,
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a
@@ -4871,6 +4899,39 @@ pub fn solve_boolean_system_filtered(
     )
 }
 
+/// An exact IC-specific decision at a partial Boolean assignment. A
+/// `Refute` decision must prove that no *accepted relation* extends this
+/// assignment; a `Witness` decision must have independently checked the
+/// returned group relation. The generic Boolean solver does not inspect
+/// that proof and is unchanged when no node oracle is supplied.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NodeOracleDecision {
+    Continue,
+    Refute,
+    Witness,
+}
+
+/// Search with an exact node oracle. `defined_mask` marks variables held as
+/// placeholders for affine definitions; their `assignment` values are not
+/// facts and must not be used in geometric checks.
+pub fn solve_boolean_system_with_node_oracle(
+    equations: &[F2BoolPoly],
+    n_vars: usize,
+    opts: &SolveOptions,
+    accept: impl FnMut(u64) -> bool,
+    node_oracle: impl FnMut(&[Option<bool>], u64) -> NodeOracleDecision,
+) -> (Vec<u64>, SolveStats) {
+    let opts = opts.resolve();
+    solve_with_policy_and_oracle(
+        equations,
+        n_vars,
+        &opts,
+        InheritPolicy::resolve(opts.engine),
+        accept,
+        node_oracle,
+    )
+}
+
 /// [`solve_boolean_system_filtered`] with resolved options and an explicit
 /// [`InheritPolicy`] — the environment is not read, so tests can run both
 /// policies side by side.
@@ -4879,7 +4940,20 @@ fn solve_with_policy(
     n_vars: usize,
     opts: &SolveOptions,
     policy: InheritPolicy,
+    accept: impl FnMut(u64) -> bool,
+) -> (Vec<u64>, SolveStats) {
+    solve_with_policy_and_oracle(equations, n_vars, opts, policy, accept, |_, _| {
+        NodeOracleDecision::Continue
+    })
+}
+
+fn solve_with_policy_and_oracle(
+    equations: &[F2BoolPoly],
+    n_vars: usize,
+    opts: &SolveOptions,
+    policy: InheritPolicy,
     mut accept: impl FnMut(u64) -> bool,
+    mut node_oracle: impl FnMut(&[Option<bool>], u64) -> NodeOracleDecision,
 ) -> (Vec<u64>, SolveStats) {
     let mut stats = SolveStats::default();
     let mut out = Vec::new();
@@ -4899,6 +4973,7 @@ fn solve_with_policy(
         &mut stats,
         &mut out,
         &mut accept,
+        &mut node_oracle,
         &mut stop,
         None,
         Vec::new(),
@@ -4918,6 +4993,7 @@ fn solve_rec(
     stats: &mut SolveStats,
     out: &mut Vec<u64>,
     accept: &mut impl FnMut(u64) -> bool,
+    node_oracle: &mut impl FnMut(&[Option<bool>], u64) -> NodeOracleDecision,
     stop: &mut bool,
     parent: Option<(&InheritedBases, u32, bool)>,
     mut defined: Vec<(u32, u64, bool)>,
@@ -4960,6 +5036,21 @@ fn solve_rec(
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
+        let defined_mask = defined
+            .iter()
+            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+        match node_oracle(&assignment, defined_mask) {
+            NodeOracleDecision::Continue => {}
+            NodeOracleDecision::Refute => {
+                stats.geometric_refutations += 1;
+                return;
+            }
+            NodeOracleDecision::Witness => {
+                stats.geometric_witnesses += 1;
+                *stop = true;
+                return;
+            }
+        }
         drop_zeros(&mut system);
         if system.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
@@ -5108,6 +5199,7 @@ fn solve_rec(
                     stats,
                     out,
                     accept,
+                    node_oracle,
                     stop,
                     Some((&bases, free as u32, value)),
                     defined.clone(),
@@ -5123,6 +5215,33 @@ fn solve_rec(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn node_oracle_never_treats_affine_placeholders_as_fixed_bits() {
+        let equations = vec![F2BoolPoly::from_monos(
+            vec![F2BoolMono::var(0), F2BoolMono::var(1)],
+            4,
+        )];
+        let opts = SolveOptions {
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            max_solutions: 1,
+            node_budget: 128,
+            split_rule: SplitRule::Auto,
+        };
+        let mut saw_placeholder = false;
+        let (_, stats) = solve_boolean_system_with_node_oracle(
+            &equations,
+            4,
+            &opts,
+            |_| false,
+            |assignment, defined_mask| {
+                saw_placeholder |= defined_mask != 0
+                    && (0..4).any(|v| defined_mask & (1u64 << v) != 0 && assignment[v].is_some());
+                NodeOracleDecision::Continue
+            },
+        );
+        assert!(stats.eliminated > 0 && saw_placeholder);
+    }
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
