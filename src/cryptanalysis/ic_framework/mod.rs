@@ -162,6 +162,10 @@ pub struct DecompositionReport {
     /// oracle.
     pub setup: PhaseCost,
     pub cost: PhaseCost,
+    /// `cost.gae` before the solver's priced term was added: equal to it
+    /// when no solver ran, and the exact count-derived figure when one
+    /// was priced from wall time.
+    pub gae_before_solver: f64,
     /// The algebraic system, when the oracle built one.
     pub system: Option<SystemShape>,
     /// Totals over the solver calls, when the oracle used a solver.
@@ -386,6 +390,12 @@ pub fn run_pipeline<G: CountedGroup>(
     for phase in [&mut fb_phase, &mut prep_cost, &mut rel, &mut la, &mut ver] {
         price_phase(phase, calib);
     }
+    // The relations phase before the solver term joins it.  A caller that
+    // takes a `measured` (wall-priced) solver term back out must start
+    // from this, not subtract: `(x + w) - w` keeps only the bits of `x`
+    // that `w`'s binade allows, which puts this host's timing into the
+    // low bits of a figure that is otherwise a count.
+    let gae_before_solver = rel.gae;
     // The solver's work is engine work in its own unit.  Only a unit the
     // calibration carries a ratio for is priced by count — `word XORs`,
     // the dense Macaulay row operation §5 of the ledger note priced
@@ -472,6 +482,7 @@ pub fn run_pipeline<G: CountedGroup>(
             hit_rate: outcome.relations_found as f64 / outcome.trials.max(1) as f64,
             setup: prep_cost,
             cost: rel,
+            gae_before_solver,
             system: oracle.last_system(),
             solver: solver_report,
         },
