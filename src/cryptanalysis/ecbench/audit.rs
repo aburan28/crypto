@@ -426,9 +426,23 @@ pub fn audit_with(
                         diffs.push("recovered");
                     }
                     // Integer counts compare exactly; a float compares after
-                    // the same serialise-parse round trip the record's took.
-                    if Some(json_roundtrip(rep.total_gae).to_bits())
-                        != r.cost.total_gae.map(f64::to_bits)
+                    // the same serialise-parse round trip the record's took,
+                    // bit for bit, except for the documented rounding of a
+                    // removed wall-priced solver term in older records.
+                    let removed = removed_solver_rounding(r);
+                    let mut rounded = false;
+                    let mut same_gae = |new: f64, old: f64| match gae_agrees(new, old, removed) {
+                        GaeAgreement::Identical => true,
+                        GaeAgreement::WithinRemovedSolverRounding => {
+                            rounded = true;
+                            true
+                        }
+                        GaeAgreement::Differs => false,
+                    };
+                    if !r
+                        .cost
+                        .total_gae
+                        .is_some_and(|old| same_gae(rep.total_gae, old))
                     {
                         diffs.push("total_gae");
                     }
@@ -448,11 +462,12 @@ pub fn audit_with(
                     if ints(&rep.phases) != ints(&r.phases) {
                         diffs.push("phase counts");
                     }
-                    if rep
-                        .phases
-                        .iter()
-                        .map(|p| json_roundtrip(p.gae).to_bits())
-                        .ne(r.phases.iter().map(|p| p.gae.to_bits()))
+                    if rep.phases.len() != r.phases.len()
+                        || !rep
+                            .phases
+                            .iter()
+                            .zip(&r.phases)
+                            .all(|(new, old)| same_gae(new.gae, old.gae))
                     {
                         diffs.push("phase gae");
                     }
@@ -470,10 +485,14 @@ pub fn audit_with(
                     }
                     (
                         diffs.is_empty(),
-                        if diffs.is_empty() {
-                            "identical".into()
-                        } else {
+                        if !diffs.is_empty() {
                             format!("differs in {}", diffs.join(", "))
+                        } else if rounded {
+                            "identical counts; gae within the rounding of the removed \
+                             wall-priced solver term"
+                                .into()
+                        } else {
+                            "identical".into()
                         },
                     )
                 }
@@ -516,4 +535,70 @@ pub fn audit_with(
             .map(|d| d.as_millis())
             .unwrap_or(0),
     })
+}
+
+/// How a replayed `gae` agrees with the recorded one.
+#[derive(Debug, PartialEq, Eq)]
+enum GaeAgreement {
+    Identical,
+    WithinRemovedSolverRounding,
+    Differs,
+}
+
+/// The magnitude of the wall-priced solver term an `ic.pipeline` record
+/// removed from its `gae`, when it removed one.
+///
+/// Before the fix in `methods::ic_report`, the removal was `(x + w) − w`
+/// with `w` the solver's wall time in addition units, which leaves a
+/// rounding residue that depends on `w`, so such a record's `gae` could not
+/// be reproduced bit for bit.  Counts were never affected.  This is the
+/// `w` that bounds the residue: the record's own solver wall time (the
+/// pinned-only calibration ecbench uses prices one addition at 1 ns).
+fn removed_solver_rounding(r: &Record) -> Option<f64> {
+    let s = r.solver.as_ref()?;
+    let removed = r.cost.unpriced.iter().any(|u| u.starts_with("solver_"));
+    (removed && s.wall_ns > 0).then_some(s.wall_ns as f64)
+}
+
+/// Compare a replayed `gae` with the recorded one.  Bit equality after
+/// the JSON round trip, or, for a record that removed a wall-priced solver
+/// term `w`, a difference of at most 64 ulps of `|recorded| + w`: the
+/// residue of two roundings at that magnitude, and far below any change in
+/// a count (the smallest pinned native price is about 10⁻³ addition).
+fn gae_agrees(new: f64, recorded: f64, removed: Option<f64>) -> GaeAgreement {
+    let new = json_roundtrip(new);
+    if new.to_bits() == recorded.to_bits() {
+        return GaeAgreement::Identical;
+    }
+    match removed {
+        Some(w) if (new - recorded).abs() <= 64.0 * f64::EPSILON * (recorded.abs() + w) => {
+            GaeAgreement::WithinRemovedSolverRounding
+        }
+        _ => GaeAgreement::Differs,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn gae_rounding_tolerance_applies_only_to_a_removed_solver_term() {
+        // The pre-fix removal `(x + w) − w`, with `w` a solver wall time
+        // taken from a committed yield-sweep record.
+        let x = 632.5414_f64;
+        let w = 496_233_018.0_f64;
+        let residue = (x + w) - w;
+        assert_ne!(residue.to_bits(), x.to_bits());
+        assert_eq!(gae_agrees(x, x, Some(w)), GaeAgreement::Identical);
+        assert_eq!(
+            gae_agrees(x, residue, Some(w)),
+            GaeAgreement::WithinRemovedSolverRounding
+        );
+        // With no removed term, only bit equality agrees.
+        assert_eq!(gae_agrees(x, residue, None), GaeAgreement::Differs);
+        // A real change, as small as the smallest pinned native price, is
+        // never absorbed.
+        assert_eq!(gae_agrees(x + 1e-3, x, Some(w)), GaeAgreement::Differs);
+    }
 }
