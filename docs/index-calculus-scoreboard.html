@@ -11917,6 +11917,32 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-image-growth-round13-20261004 -->
+<!-- BEGIN p256-s17-image-width-round14-20261004 -->
+<section class="panel" id="p256-s17-image-width-round14-20261004">
+  <div class="panel-head">
+    <h2>P-256 sixteen-summand images: degree 2 transfers, but state reaches the generic ceiling <span class="chip">no compression</span></h2>
+    <p class="panel-summary">All four actual-P-256 samples match exact signed group addition at widths 2 &rarr; 8 &rarr; 128 &rarr; 32,768; the local degree stays 2, while the full factor-base pair image has a 515.020-GiB raw storage floor.</p>
+    <p>Round 14 rebuilds <code>FB1h2f8621cda105</code>, forms every balanced image node with indexed univariate quadratics, and independently enumerates signed P-256 group sums for the prefix sample and three hash-frozen samples.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Each sample verifies every two-, four-, eight-, and sixteen-leaf node; field multiplications and group additions remain separate units.</caption>
+    <thead><tr><th>Sample</th><th>Leaves</th><th>Widths 2 / 4 / 8 / 16</th><th>16 width / ceiling</th><th>Quadratic solves</th><th>Field muls</th><th>Reference additions</th><th>Exact</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>prefix</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-0</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-1</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+      <tr><td>hash-2</td><td class="n">16</td><td class="n">2 / 8 / 128 / 32,768</td><td class="n"><strong>1.000000</strong></td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">132,258</td><td class="n">yes</td><td class="n">2</td><td><span class="chip">no compression</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree</span> every local algebraic operation is a univariate quadratic; this is not unsplit P-256 S17 or S18 regularity</span>
+    <span><span class="chip">correctness</span> all candidate affine images and identity flags equal exhaustive signed P-256 point-sum references</span>
+    <span><span class="chip">storage floor</span> one fixed sixteen-leaf image is 1 MiB raw; the identity-corrected full pair layer is 17,281,205,764 affine entries and 515.020 GiB raw</span>
+    <span><span class="chip">decision</span> retain the degree-2 decomposition, reject collision compression, and require the next solver to share work without materialising the pair frontier</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_image_width_round14_20261004/RESULT.md</code>; deterministic result SHA-256 <code>6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc</code></span>
+  </div>
+</section>
+<!-- END p256-s17-image-width-round14-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

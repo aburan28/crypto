@@ -1,6 +1,6 @@
 //! Transfer the indexed final-S3 image gate to the committed P-256 factor base.
 
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt::Write as _;
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -11,7 +11,7 @@ use crypto_lib::ecc::p256_field::P256FieldElement as Fe;
 use crypto_lib::ecc::{CurveParams, Point};
 use crypto_lib::hash::sha256;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::{One, ToPrimitive, Zero};
 use serde::Serialize;
 
 const SPEC: &str = "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129";
@@ -21,6 +21,7 @@ const POINTS_SHA256: &str = "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa9
 const TERMINAL: &str = "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5";
 const COLUMNS: u64 = 131_458;
 const SIGNED_POINTS: u64 = 262_916;
+const ROUND13_SHA256: &str = "2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d";
 const TARGET_PREIMAGE: &str = concat!(
     "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
     "/s3-image-transfer-round8/target/0"
@@ -32,6 +33,9 @@ struct Cli {
     /// Compact deterministic JSON output; stdout when omitted.
     #[arg(long)]
     out: Option<PathBuf>,
+    /// Run the round-14 P-256 sixteen-leaf width transfer after hash-checking round 13.
+    #[arg(long)]
+    width_round13: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -113,6 +117,66 @@ struct ExperimentResult {
     factor_base: FactorBaseReceipt,
     target_preimage: String,
     targets: Vec<TargetResult>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct P256ImageState {
+    affine: BTreeMap<[u8; 32], Fe>,
+    identity: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ReferenceImageState {
+    affine: BTreeSet<[u8; 32]>,
+    identity: bool,
+}
+
+#[derive(Serialize)]
+struct WidthSampleResult {
+    kind: String,
+    columns: Vec<u64>,
+    x_coordinates: Vec<String>,
+    two_leaf_widths: Vec<usize>,
+    four_leaf_widths: Vec<usize>,
+    eight_leaf_widths: Vec<usize>,
+    sixteen_leaf_width: usize,
+    identity_images_by_level: [u64; 4],
+    quadratic_solves: u64,
+    quadratic_roots_returned: u64,
+    linear_degeneracies: u64,
+    universal_degeneracies: u64,
+    multiplication_counts: MultiplicationCounts,
+    reference_group_additions: u64,
+    exact: bool,
+    final_image_sha256: String,
+}
+
+#[derive(Serialize)]
+struct WidthStorageModel {
+    generic_sixteen_leaf_x_entries: u64,
+    bytes_per_x: u64,
+    generic_sixteen_leaf_raw_bytes: u64,
+    factor_base_columns: u64,
+    unordered_factor_base_pairs: u64,
+    two_root_pair_image_entry_upper_bound: u64,
+    two_root_pair_image_raw_byte_upper_bound: u64,
+    identity_aware_pair_image_affine_entries: u64,
+    identity_aware_pair_image_raw_bytes: u64,
+}
+
+#[derive(Serialize)]
+struct WidthExperimentResult {
+    schema: String,
+    curve: String,
+    field_prime: String,
+    curve_a: String,
+    curve_b: String,
+    round13_sha256: String,
+    factor_base: FactorBaseReceipt,
+    local_maximum_degree: u32,
+    generic_widths: [u64; 4],
+    samples: Vec<WidthSampleResult>,
+    storage_model: WidthStorageModel,
 }
 
 #[derive(Clone, Copy)]
@@ -560,7 +624,318 @@ fn build_indexes(
     ))
 }
 
-fn run(cli: Cli) -> Result<(), String> {
+fn full_point_key(value: &Point) -> [u8; 65] {
+    let mut key = [0u8; 65];
+    if let Some((x, y)) = affine_coordinates(value) {
+        key[0] = 1;
+        key[1..33].copy_from_slice(&big_key(x));
+        key[33..].copy_from_slice(&big_key(y));
+    }
+    key
+}
+
+fn reference_image(
+    points: &[Point],
+    curve: &CurveParams,
+) -> Result<(ReferenceImageState, u64), String> {
+    let a = curve.a_fe();
+    let mut sums = BTreeMap::from([(full_point_key(&Point::Infinity), Point::Infinity)]);
+    let mut additions = 0u64;
+    for point in points {
+        let negated = negate(point, curve);
+        if negated == *point {
+            return Err("factor-base leaf has only one signed lift".into());
+        }
+        let mut next = BTreeMap::new();
+        for sum in sums.values() {
+            for signed in [point, &negated] {
+                let value = sum.add_vartime(signed, &a);
+                additions += 1;
+                next.insert(full_point_key(&value), value);
+            }
+        }
+        sums = next;
+    }
+    let mut affine = BTreeSet::new();
+    let mut identity = false;
+    for point in sums.values() {
+        match affine_coordinates(point) {
+            Some((x, _)) => {
+                affine.insert(big_key(x));
+            }
+            None => identity = true,
+        }
+    }
+    Ok((ReferenceImageState { affine, identity }, additions))
+}
+
+fn image_matches_reference(candidate: &P256ImageState, reference: &ReferenceImageState) -> bool {
+    candidate.identity == reference.identity
+        && candidate.affine.len() == reference.affine.len()
+        && candidate
+            .affine
+            .keys()
+            .zip(reference.affine.iter())
+            .all(|(left, right)| left == right)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn compose_p256_images(
+    left: &P256ImageState,
+    right: &P256ImageState,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+    linear: &mut u64,
+    universal: &mut u64,
+    counts: &mut MultiplicationCounts,
+) -> Result<P256ImageState, String> {
+    let mut affine = BTreeMap::new();
+    if left.identity {
+        affine.extend(right.affine.iter().map(|(key, value)| (*key, *value)));
+    }
+    if right.identity {
+        affine.extend(left.affine.iter().map(|(key, value)| (*key, *value)));
+    }
+    for &u in left.affine.values() {
+        for &v in right.affine.values() {
+            *solves += 1;
+            let mut coefficient_field = CountedField::default();
+            let (qa, qb, qc) = coefficients(u, v, a, b, &mut coefficient_field);
+            counts.coefficients += coefficient_field.multiplications;
+            let roots = solve_quadratic(qa, qb, qc, sqrt_exponent, inverse_exponent, counts);
+            *linear += u64::from(roots.linear);
+            *universal += u64::from(roots.universal);
+            if roots.universal {
+                return Err("universal quadratic has no bounded image".into());
+            }
+            *roots_returned += roots.len as u64;
+            for root in roots.roots[..roots.len].iter().copied() {
+                affine.insert(fe_key(root), root);
+            }
+        }
+    }
+    let shared_affine = left.affine.keys().any(|key| right.affine.contains_key(key));
+    Ok(P256ImageState {
+        affine,
+        identity: (left.identity && right.identity) || shared_affine,
+    })
+}
+
+fn image_digest(image: &P256ImageState) -> String {
+    let mut bytes = Vec::with_capacity(1 + 32 * image.affine.len());
+    bytes.push(u8::from(image.identity));
+    for key in image.affine.keys() {
+        bytes.extend_from_slice(key);
+    }
+    hex::encode(sha256(&bytes))
+}
+
+fn verify_width_node(
+    kind: &str,
+    level: usize,
+    node: usize,
+    candidate: &P256ImageState,
+    points: &[Point],
+    curve: &CurveParams,
+    reference_group_additions: &mut u64,
+) -> Result<(), String> {
+    let (reference, additions) = reference_image(points, curve)?;
+    *reference_group_additions += additions;
+    if !image_matches_reference(candidate, &reference) {
+        return Err(format!(
+            "{kind} {level}-leaf node {node} differs from exact signed group image"
+        ));
+    }
+    Ok(())
+}
+
+fn run_width_sample(
+    kind: &str,
+    column_indices: Vec<u64>,
+    columns: &[Column],
+    curve: &CurveParams,
+) -> Result<WidthSampleResult, String> {
+    if column_indices.len() != 16
+        || column_indices
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>()
+            .len()
+            != 16
+    {
+        return Err(format!("{kind} does not contain 16 distinct columns"));
+    }
+    let selected: Vec<&Column> = column_indices
+        .iter()
+        .map(|&index| {
+            columns
+                .get(index as usize)
+                .ok_or_else(|| format!("{kind} column {index} is out of range"))
+        })
+        .collect::<Result<_, _>>()?;
+    let points: Vec<Point> = selected.iter().map(|column| column.low.clone()).collect();
+    let x_coordinates: Vec<String> = selected
+        .iter()
+        .map(|column| lower_hex(&BigUint::from_bytes_be(&column.x.to_bytes_be())))
+        .collect();
+    let mut images: Vec<P256ImageState> = selected
+        .iter()
+        .map(|column| P256ImageState {
+            affine: BTreeMap::from([(fe_key(column.x), column.x)]),
+            identity: false,
+        })
+        .collect();
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut solves = 0u64;
+    let mut roots_returned = 0u64;
+    let mut linear = 0u64;
+    let mut universal = 0u64;
+    let mut counts = MultiplicationCounts::default();
+    let mut reference_group_additions = 0u64;
+    let mut widths_by_level: Vec<Vec<usize>> = Vec::new();
+    let mut identity_images_by_level = [0u64; 4];
+
+    for (level_index, block_size) in [2usize, 4, 8, 16].into_iter().enumerate() {
+        let mut next = Vec::with_capacity(images.len() / 2);
+        for (node, pair) in images.chunks_exact(2).enumerate() {
+            let image = compose_p256_images(
+                &pair[0],
+                &pair[1],
+                a,
+                b,
+                &sqrt_exponent,
+                &inverse_exponent,
+                &mut solves,
+                &mut roots_returned,
+                &mut linear,
+                &mut universal,
+                &mut counts,
+            )?;
+            let start = node * block_size;
+            verify_width_node(
+                kind,
+                block_size,
+                node,
+                &image,
+                &points[start..start + block_size],
+                curve,
+                &mut reference_group_additions,
+            )?;
+            identity_images_by_level[level_index] += u64::from(image.identity);
+            next.push(image);
+        }
+        widths_by_level.push(next.iter().map(|image| image.affine.len()).collect());
+        images = next;
+    }
+    if images.len() != 1 {
+        return Err(format!("{kind} did not reduce to one sixteen-leaf image"));
+    }
+    counts.finish();
+    let final_image = &images[0];
+    Ok(WidthSampleResult {
+        kind: kind.into(),
+        columns: column_indices,
+        x_coordinates,
+        two_leaf_widths: widths_by_level[0].clone(),
+        four_leaf_widths: widths_by_level[1].clone(),
+        eight_leaf_widths: widths_by_level[2].clone(),
+        sixteen_leaf_width: widths_by_level[3][0],
+        identity_images_by_level,
+        quadratic_solves: solves,
+        quadratic_roots_returned: roots_returned,
+        linear_degeneracies: linear,
+        universal_degeneracies: universal,
+        multiplication_counts: counts,
+        reference_group_additions,
+        exact: true,
+        final_image_sha256: image_digest(final_image),
+    })
+}
+
+fn hash_sample_indices(sample: usize) -> Vec<u64> {
+    let mut indices = Vec::with_capacity(16);
+    for leaf in 0..16 {
+        let mut counter = 0u64;
+        loop {
+            let preimage = format!(
+                "{CURVE_SLUG}/s17-image-width-round14/sample/{sample}/leaf/{leaf}/counter/{counter}"
+            );
+            let digest = sha256(preimage.as_bytes());
+            let index = (BigUint::from_bytes_be(&digest) % BigUint::from(COLUMNS))
+                .to_u64()
+                .expect("reduced column index fits u64");
+            if !indices.contains(&index) {
+                indices.push(index);
+                break;
+            }
+            counter += 1;
+        }
+    }
+    indices
+}
+
+fn run_width(round13_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round13_path).map_err(|error| error.to_string())?;
+    let round13_sha256 = hex::encode(sha256(&bytes));
+    if round13_sha256 != ROUND13_SHA256 {
+        return Err(format!(
+            "round-13 SHA-256 mismatch: expected {ROUND13_SHA256}, got {round13_sha256}"
+        ));
+    }
+    let curve = CurveParams::p256();
+    let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
+    let sample_specs = [
+        ("prefix".to_string(), (0..16).collect::<Vec<u64>>()),
+        ("hash-0".to_string(), hash_sample_indices(0)),
+        ("hash-1".to_string(), hash_sample_indices(1)),
+        ("hash-2".to_string(), hash_sample_indices(2)),
+    ];
+    let mut samples = Vec::new();
+    for (kind, indices) in sample_specs {
+        samples.push(run_width_sample(&kind, indices, &columns, &curve)?);
+    }
+    let unordered_factor_base_pairs = COLUMNS * (COLUMNS + 1) / 2;
+    let two_root_pair_image_entry_upper_bound = 2 * unordered_factor_base_pairs;
+    let identity_aware_pair_image_affine_entries = COLUMNS * COLUMNS;
+    let result = WidthExperimentResult {
+        schema: "p256.s17_image_width_transfer/v1".into(),
+        curve: CURVE_SLUG.into(),
+        field_prime: lower_hex(&curve.p),
+        curve_a: lower_hex(&curve.a),
+        curve_b: lower_hex(&curve.b),
+        round13_sha256,
+        factor_base,
+        local_maximum_degree: 2,
+        generic_widths: [2, 8, 128, 32_768],
+        samples,
+        storage_model: WidthStorageModel {
+            generic_sixteen_leaf_x_entries: 32_768,
+            bytes_per_x: 32,
+            generic_sixteen_leaf_raw_bytes: 32_768 * 32,
+            factor_base_columns: COLUMNS,
+            unordered_factor_base_pairs,
+            two_root_pair_image_entry_upper_bound,
+            two_root_pair_image_raw_byte_upper_bound: two_root_pair_image_entry_upper_bound * 32,
+            identity_aware_pair_image_affine_entries,
+            identity_aware_pair_image_raw_bytes: identity_aware_pair_image_affine_entries * 32,
+        },
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
+fn run_transfer(out: Option<PathBuf>) -> Result<(), String> {
     let curve = CurveParams::p256();
     let (factor_base, columns, signed_rows, x_index, signed_index) = build_indexes(&curve)?;
     let a = curve.a_fe();
@@ -613,11 +988,18 @@ fn run(cli: Cli) -> Result<(), String> {
         targets,
     };
     let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
-    match cli.out {
+    match out {
         Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
         None => print!("{text}"),
     }
     Ok(())
+}
+
+fn run(cli: Cli) -> Result<(), String> {
+    match cli.width_round13 {
+        Some(path) => run_width(&path, cli.out),
+        None => run_transfer(cli.out),
+    }
 }
 
 fn main() -> ExitCode {
