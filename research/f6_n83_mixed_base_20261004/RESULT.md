@@ -1,5 +1,10 @@
 # n83 K0 mixed-base six-summand capacity screen
 
+The follow-on [Frobenius-closure result](ORBIT_RESULT.md) found a more
+column-efficient high-arity proposal on the same curve: 332,166 actual
+usable points in 2,001 signed Frobenius columns. It remains a structural
+screen with no ordinary relation or complete solver measurement.
+
 The [registered protocol](PROTOCOL.md) used the exact K0 confidence-gate
 curve from PR #1341. One native Rust process constructed standard polynomial
 subspaces, enumerated their curve points, projected every point by the
