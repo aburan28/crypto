@@ -37,7 +37,7 @@ fn stats(values: &[f64]) -> Value {
     let mut sorted = values.to_vec();
     sorted.sort_by(|a, b| a.total_cmp(b));
     let len = sorted.len();
-    let median = if len % 2 == 0 {
+    let median = if len.is_multiple_of(2) {
         (sorted[len / 2 - 1] + sorted[len / 2]) / 2.0
     } else {
         sorted[len / 2]
