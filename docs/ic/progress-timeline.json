@@ -82,6 +82,17 @@
       ]
     },
     {
+      "id": "ec-native-batch-n37",
+      "label": "Elliptic curve, n37 1,024-target native batch CPU diagnostic",
+      "role": "context",
+      "barrier_test": false,
+      "note": "Complete-process child CPU on the same 1,024 public points, including reusable setup and shared within-batch rho collision work. The unisolated host and failed duplicate-drift gate in both schedules make these descriptive, not admitted speed or one-target online results.",
+      "points": [
+        {"date": "2026-10-05", "value": 10.297652822556913, "reference": "matched", "unit": "unisolated native batch CPU diagnostic", "label": "n37 descendant-native K42 batch, first native schedule", "detail": "Five interleaved four-arm blocks, each method recovering the same 1,024 b01 public points twice: median complete-process child CPU IC/rho 10.298, descriptive log-t interval [9.728, 10.886]. Native audit checked 20,480 scalar outputs and ten independent IC replays. Two blocks failed the frozen 10% duplicate-drift gate and the host was unisolated; no admitted speedup, common-unit S, or one-target online inference.", "class": "accounting", "anchor": "#n37-native-batch-rho-20261005", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md"},
+        {"date": "2026-10-05", "value": 10.766848430462483, "reference": "matched", "unit": "unisolated native batch CPU diagnostic", "label": "n37 descendant-native K42 batch, formatted-source replication", "detail": "Unchanged producer binaries, public b01 Q, seed and four-arm schedule with a formatted Rust driver: median complete-process child CPU IC/rho 10.767, descriptive log-t interval [10.222, 10.952]. Native audit checked another 20,480 scalar outputs and ten independent IC replays. One block failed the frozen 10% duplicate-drift gate; no admitted speedup or one-target inference.", "class": "accounting", "anchor": "#n37-native-batch-rho-20261005", "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n37_native_residual_rho_20261005/RESULT.md"}
+      ]
+    },
+    {
       "id": "ec-online",
       "label": "Elliptic curve, online phase only (reusable set-up excluded)",
       "role": "context",
