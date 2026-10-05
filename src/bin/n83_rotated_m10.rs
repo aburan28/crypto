@@ -8,8 +8,8 @@ use std::time::Instant;
 use clap::{Parser, Subcommand, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_rotated_chain::{
     build_n83_rotated_chain_variant, n83_public_generator, n83_public_target, write_dimacs,
-    write_dimacs_model, N83CircuitVariant, N83TargetKind, OnbCurve, Type2Onb, N83, N83_RHO_SCALAR,
-    N83_RHO_WALK_ITERATIONS, N83_SLOT_DIMENSIONS, N83_SUBGROUP_ORDER,
+    write_dimacs_model, write_dimacs_xor, N83CircuitVariant, N83TargetKind, OnbCurve, Type2Onb,
+    N83, N83_RHO_SCALAR, N83_RHO_WALK_ITERATIONS, N83_SLOT_DIMENSIONS, N83_SUBGROUP_ORDER,
 };
 use serde_json::{json, Value};
 
@@ -69,12 +69,38 @@ enum Action {
         #[arg(long, default_value_t = DEFAULT_NODE_CAP)]
         node_cap: usize,
     },
+    /// Build the Boolean DAG and preserve XOR gates in extended DIMACS.
+    EmitXor {
+        #[arg(long, value_enum, default_value_t = TargetArg::Public)]
+        target: TargetArg,
+        #[arg(long, value_enum, default_value_t = CircuitArg::Inductive)]
+        circuit: CircuitArg,
+        #[arg(long)]
+        xcnf: PathBuf,
+        #[arg(long)]
+        report: PathBuf,
+        #[arg(long, default_value_t = DEFAULT_NODE_CAP)]
+        node_cap: usize,
+    },
     /// Emit the planted positive control plus an independently replayable model.
     CertifyPlanted {
         #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
         circuit: CircuitArg,
         #[arg(long)]
         cnf: PathBuf,
+        #[arg(long)]
+        model: PathBuf,
+        #[arg(long)]
+        report: PathBuf,
+        #[arg(long, default_value_t = DEFAULT_NODE_CAP)]
+        node_cap: usize,
+    },
+    /// Emit and stream-validate a planted native-XOR positive control.
+    CertifyPlantedXor {
+        #[arg(long, value_enum, default_value_t = CircuitArg::Inductive)]
+        circuit: CircuitArg,
+        #[arg(long)]
+        xcnf: PathBuf,
         #[arg(long)]
         model: PathBuf,
         #[arg(long)]
@@ -98,6 +124,21 @@ enum Action {
         #[arg(long, value_enum, default_value_t = TargetArg::Public)]
         target: TargetArg,
         #[arg(long, value_enum, default_value_t = CircuitArg::Complete)]
+        circuit: CircuitArg,
+        #[arg(long)]
+        solver: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 120)]
+        seconds: u64,
+        #[arg(long, default_value_t = DEFAULT_NODE_CAP)]
+        node_cap: usize,
+    },
+    /// Cold-build and solve native-XOR DIMACS with one-thread CryptoMiniSat.
+    SolveXor {
+        #[arg(long, value_enum, default_value_t = TargetArg::Public)]
+        target: TargetArg,
+        #[arg(long, value_enum, default_value_t = CircuitArg::Inductive)]
         circuit: CircuitArg,
         #[arg(long)]
         solver: PathBuf,
@@ -197,6 +238,30 @@ fn build_with_report(
     Ok((chain, report))
 }
 
+fn extract_cryptominisat_model(stdout_path: &Path, model_path: &Path) -> Result<(), String> {
+    let contents = fs::read_to_string(stdout_path)
+        .map_err(|error| format!("read {}: {error}", stdout_path.display()))?;
+    let mut saw_sat = false;
+    let mut saw_values = false;
+    let mut model = String::new();
+    for line in contents.lines() {
+        let line = line.trim();
+        if line == "s SATISFIABLE" {
+            saw_sat = true;
+            model.push_str(line);
+            model.push('\n');
+        } else if line.starts_with("v ") {
+            saw_values = true;
+            model.push_str(line);
+            model.push('\n');
+        }
+    }
+    if !saw_sat || !saw_values {
+        return Err("CryptoMiniSat exit 10 output lacks a SAT declaration or model".into());
+    }
+    fs::write(model_path, model).map_err(|error| format!("write {}: {error}", model_path.display()))
+}
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("n83-rotated-m10: {error}");
@@ -228,6 +293,22 @@ fn run() -> Result<(), String> {
             write_json(&report, &value)?;
             println!("{}", serde_json::to_string_pretty(&value).unwrap());
         }
+        Action::EmitXor {
+            target,
+            circuit,
+            xcnf,
+            report,
+            node_cap,
+        } => {
+            let (chain, mut value) = build_with_report(target.into(), circuit.into(), node_cap)?;
+            let started = Instant::now();
+            let receipt = write_dimacs_xor(&chain, &xcnf)?;
+            value["xor_dimacs"] =
+                serde_json::to_value(receipt).map_err(|error| error.to_string())?;
+            value["xor_dimacs_write_wall_seconds"] = json!(started.elapsed().as_secs_f64());
+            write_json(&report, &value)?;
+            println!("{}", serde_json::to_string_pretty(&value).unwrap());
+        }
         Action::CertifyPlanted {
             circuit,
             cnf,
@@ -246,6 +327,32 @@ fn run() -> Result<(), String> {
             let decoded = chain.decode_dimacs_model(&model)?;
             value["status"] = json!("PASS_PLANTED_CERTIFICATE");
             value["cnf"] = serde_json::to_value(cnf_receipt).map_err(|error| error.to_string())?;
+            value["decoded_relation"] =
+                serde_json::to_value(decoded).map_err(|error| error.to_string())?;
+            write_json(&report, &value)?;
+            println!("{}", serde_json::to_string_pretty(&value).unwrap());
+        }
+        Action::CertifyPlantedXor {
+            circuit,
+            xcnf,
+            model,
+            report,
+            node_cap,
+        } => {
+            let (chain, mut value) = build_with_report(
+                N83TargetKind::DeterministicPlanted,
+                circuit.into(),
+                node_cap,
+            )?;
+            let xcnf_receipt = write_dimacs_xor(&chain, &xcnf)?;
+            let model_values = chain.known_planted_model()?;
+            write_dimacs_model(&model_values, &model)?;
+            chain.verify_xor_dimacs_model(&xcnf, &model)?;
+            let decoded = chain.decode_dimacs_model(&model)?;
+            value["status"] = json!("PASS_PLANTED_XOR_CERTIFICATE");
+            value["xor_dimacs"] =
+                serde_json::to_value(xcnf_receipt).map_err(|error| error.to_string())?;
+            value["xor_dimacs_model_checked"] = json!(true);
             value["decoded_relation"] =
                 serde_json::to_value(decoded).map_err(|error| error.to_string())?;
             write_json(&report, &value)?;
@@ -321,6 +428,87 @@ fn run() -> Result<(), String> {
             };
             value["claim_boundary"] = json!(
                 "one bounded PDP gate; no relation-rank, DLP, cold-cost crossover, or speed claim"
+            );
+            write_json(&out.join("result.json"), &value)?;
+            println!("{}", serde_json::to_string_pretty(&value).unwrap());
+        }
+        Action::SolveXor {
+            target,
+            circuit,
+            solver,
+            out,
+            seconds,
+            node_cap,
+        } => {
+            if out.exists() {
+                return Err(format!("refusing to overwrite {}", out.display()));
+            }
+            fs::create_dir_all(&out)
+                .map_err(|error| format!("create {}: {error}", out.display()))?;
+            let xcnf = out.join("instance.xor.cnf");
+            let model = out.join("model.txt");
+            let stdout_path = out.join("solver.stdout.txt");
+            let stderr_path = out.join("solver.stderr.txt");
+            let (chain, mut value) = build_with_report(target.into(), circuit.into(), node_cap)?;
+            let xcnf_receipt = write_dimacs_xor(&chain, &xcnf)?;
+            value["xor_dimacs"] =
+                serde_json::to_value(xcnf_receipt).map_err(|error| error.to_string())?;
+            value["solver"] = json!({
+                "kind": "cryptominisat_native_xor",
+                "path": solver,
+                "wall_cap_seconds": seconds,
+                "threads": 1,
+                "random": 1,
+                "max_solutions": 1,
+            });
+            let stdout = File::create(&stdout_path)
+                .map_err(|error| format!("create {}: {error}", stdout_path.display()))?;
+            let stderr = File::create(&stderr_path)
+                .map_err(|error| format!("create {}: {error}", stderr_path.display()))?;
+            let started = Instant::now();
+            let status = Command::new(&solver)
+                .arg("--verb")
+                .arg("1")
+                .arg("--threads")
+                .arg("1")
+                .arg("--random")
+                .arg("1")
+                .arg("--maxsol")
+                .arg("1")
+                .arg("--maxtime")
+                .arg(seconds.to_string())
+                .arg(&xcnf)
+                .stdout(Stdio::from(stdout))
+                .stderr(Stdio::from(stderr))
+                .status()
+                .map_err(|error| format!("launch {}: {error}", solver.display()))?;
+            let solver_seconds = started.elapsed().as_secs_f64();
+            value["solver"]["exit_code"] = json!(status.code());
+            value["solver"]["wall_seconds"] = json!(solver_seconds);
+            value["status"] = match status.code() {
+                Some(10) => {
+                    extract_cryptominisat_model(&stdout_path, &model)?;
+                    chain.verify_xor_dimacs_model(&xcnf, &model)?;
+                    let decoded = chain.decode_dimacs_model(&model)?;
+                    value["xor_dimacs_model_checked"] = json!(true);
+                    value["decoded_relation"] =
+                        serde_json::to_value(decoded).map_err(|error| error.to_string())?;
+                    json!("SAT_VERIFIED_RELATION")
+                }
+                Some(20) => {
+                    fs::write(&model, b"s UNSATISFIABLE\n")
+                        .map_err(|error| format!("write {}: {error}", model.display()))?;
+                    json!("UNSAT")
+                }
+                code => {
+                    fs::write(&model, b"c UNKNOWN\n")
+                        .map_err(|error| format!("write {}: {error}", model.display()))?;
+                    value["solver"]["nonterminal_exit"] = json!(code);
+                    json!("BUDGET_OR_SOLVER_STOP")
+                }
+            };
+            value["claim_boundary"] = json!(
+                "one bounded native-XOR PDP gate; no relation-rank, DLP, cold-cost crossover, or speed claim"
             );
             write_json(&out.join("result.json"), &value)?;
             println!("{}", serde_json::to_string_pretty(&value).unwrap());

@@ -970,6 +970,17 @@ impl RotatedChain {
             group_sum_checked: true,
         })
     }
+
+    /// Check that a complete DIMACS model satisfies the emitted native-XOR
+    /// text, in addition to the independent DAG/group replay above.
+    pub fn verify_xor_dimacs_model(
+        &self,
+        instance_path: &Path,
+        model_path: &Path,
+    ) -> Result<(), String> {
+        let values = parse_dimacs_model(model_path, self.dag.nodes.len())?;
+        verify_dimacs_xor_assignment(instance_path, &values)
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -1138,6 +1149,18 @@ pub struct CnfReceipt {
     pub dag: DagCounts,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct XorDimacsReceipt {
+    pub variables: usize,
+    pub constraints: usize,
+    pub cnf_clauses: usize,
+    pub xor_rows: usize,
+    pub bytes: u64,
+    pub blake3: String,
+    pub relation_output_literal: u32,
+    pub dag: DagCounts,
+}
+
 struct HashingWriter<W> {
     inner: W,
     hasher: blake3::Hasher,
@@ -1215,6 +1238,157 @@ pub fn write_dimacs(chain: &RotatedChain, path: &Path) -> Result<CnfReceipt, Str
     })
 }
 
+/// Emit CryptoMiniSat extended DIMACS while preserving every DAG XOR as one
+/// native parity row.  In that format an XOR line is required to have parity
+/// one, so `z = a xor b` is written as `x -a b z 0`.
+pub fn write_dimacs_xor(chain: &RotatedChain, path: &Path) -> Result<XorDimacsReceipt, String> {
+    write_dimacs_xor_dag(&chain.dag, chain.output, path)
+}
+
+fn write_dimacs_xor_dag(
+    dag: &BoolDag,
+    output: NodeId,
+    path: &Path,
+) -> Result<XorDimacsReceipt, String> {
+    let counts = dag.counts();
+    let cnf_clauses = 3 + 3 * counts.and_gates;
+    let xor_rows = counts.xor_gates;
+    let constraints = cnf_clauses + xor_rows;
+    let file = File::create(path).map_err(|error| format!("create {}: {error}", path.display()))?;
+    let buffered = BufWriter::with_capacity(1 << 20, file);
+    let mut writer = HashingWriter::new(buffered);
+    writeln!(writer, "p cnf {} {constraints}", counts.total_nodes)
+        .map_err(|error| error.to_string())?;
+    writeln!(writer, "-1 0").map_err(|error| error.to_string())?;
+    writeln!(writer, "2 0").map_err(|error| error.to_string())?;
+    for (id, node) in dag.nodes.iter().enumerate().skip(2) {
+        let z = id as i64 + 1;
+        match *node {
+            Node::Constant(_) | Node::Input(_) => {}
+            Node::Xor(a, b) => {
+                let a = a as i64 + 1;
+                let b = b as i64 + 1;
+                writeln!(writer, "x -{a} {b} {z} 0").map_err(|error| error.to_string())?;
+            }
+            Node::And(a, b) => {
+                let a = a as i64 + 1;
+                let b = b as i64 + 1;
+                writeln!(writer, "-{a} -{b} {z} 0").map_err(|error| error.to_string())?;
+                writeln!(writer, "{a} -{z} 0").map_err(|error| error.to_string())?;
+                writeln!(writer, "{b} -{z} 0").map_err(|error| error.to_string())?;
+            }
+        }
+    }
+    writeln!(writer, "{} 0", output + 1).map_err(|error| error.to_string())?;
+    writer.flush().map_err(|error| error.to_string())?;
+    let digest = writer.hasher.finalize().to_hex().to_string();
+    Ok(XorDimacsReceipt {
+        variables: counts.total_nodes,
+        constraints,
+        cnf_clauses,
+        xor_rows,
+        bytes: writer.bytes,
+        blake3: digest,
+        relation_output_literal: output + 1,
+        dag: counts,
+    })
+}
+
+/// Stream-check an extended-DIMACS instance against a complete assignment.
+/// This validates the emitted text itself, independently of DAG replay.
+pub fn verify_dimacs_xor_assignment(path: &Path, values: &[bool]) -> Result<(), String> {
+    let file = File::open(path).map_err(|error| format!("open {}: {error}", path.display()))?;
+    let mut declared_variables = None;
+    let mut declared_constraints = None;
+    let mut observed_constraints = 0usize;
+
+    for (line_index, line) in BufReader::new(file).lines().enumerate() {
+        let line = line.map_err(|error| error.to_string())?;
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('c') {
+            continue;
+        }
+        if line.starts_with("p ") {
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields.len() != 4 || fields[1] != "cnf" {
+                return Err(format!("line {} has an invalid header", line_index + 1));
+            }
+            declared_variables =
+                Some(fields[2].parse::<usize>().map_err(|_| {
+                    format!("line {} has an invalid variable count", line_index + 1)
+                })?);
+            declared_constraints =
+                Some(fields[3].parse::<usize>().map_err(|_| {
+                    format!("line {} has an invalid constraint count", line_index + 1)
+                })?);
+            continue;
+        }
+
+        let is_xor = line.starts_with('x');
+        let payload = if is_xor { &line[1..] } else { line };
+        let mut terminated = false;
+        let mut parity = false;
+        let mut clause_satisfied = false;
+        let mut literal_count = 0usize;
+        for token in payload.split_whitespace() {
+            let literal = token
+                .parse::<i64>()
+                .map_err(|_| format!("line {} has invalid literal {token:?}", line_index + 1))?;
+            if literal == 0 {
+                terminated = true;
+                break;
+            }
+            let variable = literal.unsigned_abs() as usize;
+            if variable == 0 || variable > values.len() {
+                return Err(format!(
+                    "line {} references variable {variable} outside 1..={}",
+                    line_index + 1,
+                    values.len()
+                ));
+            }
+            let value = if literal < 0 {
+                !values[variable - 1]
+            } else {
+                values[variable - 1]
+            };
+            parity ^= value;
+            clause_satisfied |= value;
+            literal_count += 1;
+        }
+        if !terminated {
+            return Err(format!("line {} lacks a zero terminator", line_index + 1));
+        }
+        let satisfied = if is_xor {
+            literal_count > 0 && parity
+        } else {
+            clause_satisfied
+        };
+        if !satisfied {
+            return Err(format!(
+                "assignment violates {} on line {}",
+                if is_xor { "XOR row" } else { "CNF clause" },
+                line_index + 1
+            ));
+        }
+        observed_constraints += 1;
+    }
+
+    let variables = declared_variables.ok_or("extended DIMACS has no header")?;
+    if variables != values.len() {
+        return Err(format!(
+            "header declares {variables} variables, assignment has {}",
+            values.len()
+        ));
+    }
+    let constraints = declared_constraints.ok_or("extended DIMACS has no header")?;
+    if constraints != observed_constraints {
+        return Err(format!(
+            "header declares {constraints} constraints, observed {observed_constraints}"
+        ));
+    }
+    Ok(())
+}
+
 pub fn write_dimacs_model(values: &[bool], path: &Path) -> Result<(), String> {
     let file = File::create(path).map_err(|error| format!("create {}: {error}", path.display()))?;
     let mut writer = BufWriter::new(file);
@@ -1280,6 +1454,8 @@ fn parse_dimacs_model(path: &Path, variables: usize) -> Result<Vec<bool>, String
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn set_point_inputs(
         inputs: &mut [bool],
@@ -1427,5 +1603,40 @@ mod tests {
         assert!(values[inductive.output as usize]);
         assert!(inductive.counts().total_nodes < complete.counts().total_nodes);
         assert!(inductive.counts().and_gates < complete.counts().and_gates);
+    }
+
+    #[test]
+    fn native_xor_dimacs_preserves_xor_and_and_semantics() {
+        let mut dag = BoolDag::new(32);
+        let a = dag.input("a");
+        let b = dag.input("b");
+        let xor = dag.xor(a, b);
+        let output = dag.and(a, b);
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "crypto-n83-native-xor-{}-{nonce}.xor.cnf",
+            std::process::id()
+        ));
+        let receipt = write_dimacs_xor_dag(&dag, output, &path).expect("write XOR DIMACS");
+        assert_eq!(receipt.variables, 6);
+        assert_eq!(receipt.xor_rows, 1);
+        assert_eq!(receipt.cnf_clauses, 6);
+        assert_eq!(receipt.constraints, 7);
+
+        let values = dag.evaluate(&[true, true]).expect("evaluate");
+        assert!(!values[xor as usize]);
+        assert!(values[output as usize]);
+        verify_dimacs_xor_assignment(&path, &values).expect("valid assignment");
+
+        let mut bad_xor = values.clone();
+        bad_xor[xor as usize] = true;
+        assert!(verify_dimacs_xor_assignment(&path, &bad_xor).is_err());
+        let mut bad_and = values;
+        bad_and[output as usize] = false;
+        assert!(verify_dimacs_xor_assignment(&path, &bad_and).is_err());
+        std::fs::remove_file(path).expect("remove test instance");
     }
 }
