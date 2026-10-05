@@ -46,6 +46,8 @@ existing measurement contract.
 
 ## Walking an isogeny class
 
+**How to run it, including S3 setup:** [`docs/isogeny-walk/README.md`](../../isogeny-walk/README.md).
+
 `src/bin/isogeny_walk.rs` walks the `F_p`-isogeny class of a prime-field
 curve (P-256, P-224, or a custom short Weierstrass curve with its order and
 generator) over the `ℓ`-isogeny graphs for a set of odd primes `ℓ`, breadth

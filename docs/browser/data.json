@@ -4,11 +4,11 @@
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
   "curves": 304,
-  "methods": 44,
+  "methods": 46,
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 24,
+  "sessions": 25,
   "yields": 1956
  },
  "sources": {
@@ -39,6 +39,7 @@
   "research/ecbench_numa_vm_20261002/sessions/v2-interrupted/records.jsonl": "a68ffa3bfef32b38c45113ae6a345d54e0493c890fc574b8b821e7f5a9bc499b",
   "research/ecbench_numa_vm_20261002/sessions/v2-node0/records.jsonl": "6a8cbb87f5a9354470a26d131c43b2d3573a29a99edbc7e4a55a04ebecf71f96",
   "research/ecbench_pair_claw_20261003/sessions/koblitz/records.jsonl": "4a2ffb331ade66ca0c09d3f0a7617e64070f27824c7c27eca56fbe37ba90effc",
+  "research/ecbench_wide_gf2m_20261004/sessions/smoke-m83/records.jsonl": "836b6d168720393b4490727ab539207190a95ebc3c8bb9398e12fee745271e05",
   "research/ecbench_yield_sweep_20261004/sessions/koblitz/records.jsonl": "4aa6203a024ccd00606949a4a2ca454ef6efb5a7a4e3c6d9a365e8fb0723ce69",
   "research/ecbench_yield_sweep_20261004/sessions/prime/records.jsonl": "f77e03fd67ccc344b14c3b04efc5398e30a2d3a5e8cbf6a7941e21c1d2ee8afe"
  },
@@ -30147,7 +30148,28 @@
    ],
    "on_leaderboard": false,
    "leaderboard": [],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1h487c13e3a766",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h76c786dca40e",
+     "runs": 2,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1h487c13e3a766",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h2400af10ecaa",
+     "runs": 2,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": [],
    "hyperelliptic_cover": {
@@ -44395,6 +44417,25 @@
    "verified": 192
   },
   {
+   "method_id": "ECM1h76c786dca40e",
+   "method_sha256": "76c786dca40e5780e301f6fe8cf9f59fe905c46b44bb045b7834011c88ed3ed4",
+   "method": "claw.pair_table",
+   "family": "claw",
+   "params": {
+    "base_scale": "4",
+    "cap_multiple": "0",
+    "table_scale": "1"
+   },
+   "sessions": [
+    "ECBS1h487c13e3a766"
+   ],
+   "curves": [
+    "icv1-f2m83-tm6151469093347-debefd74"
+   ],
+   "runs": 2,
+   "verified": 0
+  },
+  {
    "method_id": "ECM1hd9f76acb83c0",
    "method_sha256": "d9f76acb83c0bc0e8d6bc09ed06279658c7fc8142b298d1f89603c933cd857b6",
    "method": "claw.pair_table",
@@ -45415,6 +45456,25 @@
    ],
    "runs": 348,
    "verified": 348
+  },
+  {
+   "method_id": "ECM1h2400af10ecaa",
+   "method_sha256": "2400af10ecaa100ba83b85a55dd927e41732dafede8bb768fa4ea308d474c6e4",
+   "method": "rho.signed_frobenius_strong",
+   "family": "rho",
+   "params": {
+    "dp_bits": "4",
+    "lanes": "32",
+    "step_cap_factor": "0"
+   },
+   "sessions": [
+    "ECBS1h487c13e3a766"
+   ],
+   "curves": [
+    "icv1-f2m83-tm6151469093347-debefd74"
+   ],
+   "runs": 2,
+   "verified": 0
   },
   {
    "method_id": "ECM1hb6123afffc07",
@@ -56850,6 +56910,38 @@
      "role": "control",
      "method": "rho.signed_frobenius_strong",
      "method_id": "ECM1hb6123afffc07"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h487c13e3a766",
+   "dir": "research/ecbench_wide_gf2m_20261004/sessions/smoke-m83",
+   "label": "wide smoke: n = 83, capped",
+   "status": "complete",
+   "spec_id": "ECS1h8e813e1033a3",
+   "env_class_id": "ECBENV2h59034d4cd61b",
+   "binary_sha256": "3d5c588c0f89ca7c21560513a9655d901266ba4837b2164bc4ab6095f3aa458d",
+   "git_commit": "65f349e227cd49570eebbb29ea67ed42fd206ea8",
+   "records": 4,
+   "status_counts": {
+    "exhausted": 4
+   },
+   "started_unix_ms": 1791165069414,
+   "curves": [
+    "icv1-f2m83-tm6151469093347-debefd74"
+   ],
+   "arms": [
+    {
+     "arm": "claw-c1",
+     "role": "candidate",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h76c786dca40e"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h2400af10ecaa"
     }
    ]
   },

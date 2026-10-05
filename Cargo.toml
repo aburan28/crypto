@@ -13,6 +13,10 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+[[bin]]
+name = "quartic-ic"
+path = "src/bin/quartic_ic.rs"
+
 # `icx` — index calculus across every standardized curve (catalog + engine).
 [[bin]]
 name = "icx"
@@ -23,6 +27,11 @@ path = "src/bin/icx.rs"
 [[bin]]
 name = "ecc2k-guard"
 path = "src/bin/ecc2k_guard.rs"
+
+# Exact CM polarization checker with a standalone catalog/database CLI.
+[[bin]]
+name = "jacobian-certificate"
+path = "src/bin/jacobian_certificate.rs"
 
 [lib]
 name = "crypto_lib"

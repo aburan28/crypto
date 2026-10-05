@@ -239,7 +239,10 @@ pub fn price_descent_cell(
         brute.push((terms as f64) * 2f64.powi(vars as i32));
         let (gb, stats) = groebner_basis_f2_within(eqs, vars, budget);
         let inconsistent = gb.len() == 1 && gb[0].terms.len() == 1 && gb[0].terms[0].degree() == 0;
-        runs.push(TargetRun { stats, inconsistent });
+        runs.push(TargetRun {
+            stats,
+            inconsistent,
+        });
     }
 
     let seen: Vec<u32> = bounds.iter().filter_map(|f| *f).collect();
@@ -259,11 +262,23 @@ pub fn price_descent_cell(
         inconsistent: runs.iter().filter(|r| r.inconsistent).count(),
         timed_out: runs.iter().filter(|r| r.stats.timed_out).count(),
         d_av,
-        d_max: runs.iter().map(|r| r.stats.solving_degree).max().unwrap_or(0),
+        d_max: runs
+            .iter()
+            .map(|r| r.stats.solving_degree)
+            .max()
+            .unwrap_or(0),
         d_pair_av: mean(runs.iter().map(|r| r.stats.max_pair_degree as f64)),
-        d_pair_max: runs.iter().map(|r| r.stats.max_pair_degree).max().unwrap_or(0),
+        d_pair_max: runs
+            .iter()
+            .map(|r| r.stats.max_pair_degree)
+            .max()
+            .unwrap_or(0),
         d_poly_av: mean(runs.iter().map(|r| r.stats.max_poly_degree as f64)),
-        d_poly_max: runs.iter().map(|r| r.stats.max_poly_degree).max().unwrap_or(0),
+        d_poly_max: runs
+            .iter()
+            .map(|r| r.stats.max_poly_degree)
+            .max()
+            .unwrap_or(0),
         d_semireg_min,
         d_semireg_max: seen.iter().copied().max(),
         d_semireg_unbounded: bounds.iter().filter(|f| f.is_none()).count(),
@@ -451,7 +466,10 @@ pub struct EngineCell {
     pub per_target: Vec<EngineTarget>,
 }
 
-fn system_blake3(eqs: &[crate::cryptanalysis::pq_groebner_f2::F2BoolPoly], n_vars: usize) -> String {
+fn system_blake3(
+    eqs: &[crate::cryptanalysis::pq_groebner_f2::F2BoolPoly],
+    n_vars: usize,
+) -> String {
     let mut h = blake3::Hasher::new();
     h.update(&(n_vars as u64).to_le_bytes());
     h.update(&(eqs.len() as u64).to_le_bytes());
@@ -490,7 +508,11 @@ fn median(mut xs: Vec<f64>) -> f64 {
 /// answers every other engine is checked against.
 #[allow(clippy::too_many_arguments)]
 pub fn price_engine_cell(
-    engines: &[(String, Box<dyn crate::cryptanalysis::ic_framework::stages::SystemSolver>, crate::cryptanalysis::ic_framework::stages::Params)],
+    engines: &[(
+        String,
+        Box<dyn crate::cryptanalysis::ic_framework::stages::SystemSolver>,
+        crate::cryptanalysis::ic_framework::stages::Params,
+    )],
     family: &str,
     n: u32,
     n_prime: u32,
@@ -514,7 +536,10 @@ pub fn price_engine_cell(
     for _ in 0..targets {
         let x_r = rng.gen::<u64>() & inst.gf.mask;
         let d = descend(&inst.gf, inst.b, x_r, &v_basis, summands).ok()?;
-        let system = BooleanSystem { equations: d.equations, n_vars: d.n_vars };
+        let system = BooleanSystem {
+            equations: d.equations,
+            n_vars: d.n_vars,
+        };
         let sh = system.shape();
         n_vars = system.n_vars;
         equations = system.equations.len();
@@ -527,7 +552,10 @@ pub fn price_engine_cell(
                 // budget", and repeating it would spend the budget again
                 // to learn nothing.  Such a target has one run, not
                 // `repeats`, and every count on it is a lower bound.
-                if runs.get(name).is_some_and(|rs| rs.iter().any(|r| r.verdict == "budget")) {
+                if runs
+                    .get(name)
+                    .is_some_and(|rs| rs.iter().any(|r| r.verdict == "budget"))
+                {
                     continue;
                 }
                 let run = if !solver.accepts(&sh) {
@@ -579,7 +607,11 @@ pub fn price_engine_cell(
     // The reference: the strongest exhaustive search that applies, else
     // the first listed engine that enumerates every solution — a
     // first-solution engine cannot say what the full answer is.
-    let applies = |name: &str| engines.iter().any(|(n, s, _)| n == name && s.accepts(&shape));
+    let applies = |name: &str| {
+        engines
+            .iter()
+            .any(|(n, s, _)| n == name && s.accepts(&shape))
+    };
     let reference = ["fes-f2-wide", "fes-f2", "exhaustive"]
         .into_iter()
         .find(|r| applies(r))
@@ -637,7 +669,10 @@ pub fn price_engine_cell(
             ops.push(median(runs.iter().map(|r| r.ops as f64).collect()));
             let my_ms = median(runs.iter().map(|r| r.wall_ns as f64 / 1e6).collect());
             ms.push(my_ms);
-            peak = runs.iter().map(|r| r.peak_bytes as f64 / 1024.0).fold(peak, f64::max);
+            peak = runs
+                .iter()
+                .map(|r| r.peak_bytes as f64 / 1024.0)
+                .fold(peak, f64::max);
             if declined || !runs.iter().all(decided) {
                 continue;
             }
@@ -661,16 +696,27 @@ pub fn price_engine_cell(
                     };
                     ok &= fine;
                 }
-                let ref_ms = median(t.runs[&reference].iter().map(|r| r.wall_ns as f64 / 1e6).collect());
+                let ref_ms = median(
+                    t.runs[&reference]
+                        .iter()
+                        .map(|r| r.wall_ns as f64 / 1e6)
+                        .collect(),
+                );
                 mine_sum += my_ms;
                 ref_sum += ref_ms;
             }
         }
-        let mean_u = |v: &[u32]| (!v.is_empty()).then(|| v.iter().sum::<u32>() as f64 / v.len() as f64);
+        let mean_u =
+            |v: &[u32]| (!v.is_empty()).then(|| v.iter().sum::<u32>() as f64 / v.len() as f64);
         summaries.push(EngineSummary {
             engine: name.clone(),
             op_unit,
-            workload: if every { "complete enumeration" } else { "first solution" }.into(),
+            workload: if every {
+                "complete enumeration"
+            } else {
+                "first solution"
+            }
+            .into(),
             declined,
             decided: n_decided,
             over_budget: n_budget,
@@ -687,7 +733,10 @@ pub fn price_engine_cell(
         });
     }
 
-    let bounds: Vec<u32> = per_target.iter().filter_map(|t| t.semi_regular_degree).collect();
+    let bounds: Vec<u32> = per_target
+        .iter()
+        .filter_map(|t| t.semi_regular_degree)
+        .collect();
     Some(EngineCell {
         family: family.into(),
         curve: inst.name.clone(),
@@ -746,7 +795,9 @@ pub fn format_engine_markdown(cells: &[EngineCell]) -> String {
             let reference = if e.engine == c.reference_engine {
                 "ref".to_string()
             } else {
-                e.wall_over_reference.map(|r| format!("{r:.1}×")).unwrap_or_else(|| "—".into())
+                e.wall_over_reference
+                    .map(|r| format!("{r:.1}×"))
+                    .unwrap_or_else(|| "—".into())
             };
             // Agreement over nothing decided is vacuous, so it is not shown.
             let agrees = match (e.decided, e.agrees_with_reference) {
@@ -834,7 +885,8 @@ mod tests {
     /// that grows with the work done.
     #[test]
     fn a_descent_cell_reports_a_degree_and_a_cost() {
-        let cell = price_descent_cell("K", 11, 4, 2, 3, 7, None).expect("K_1 over GF(2^11) at n'=4");
+        let cell =
+            price_descent_cell("K", 11, 4, 2, 3, 7, None).expect("K_1 over GF(2^11) at n'=4");
         assert_eq!(cell.n_vars, 8, "two summands over a 4-dimensional subspace");
         assert_eq!(cell.equations, 11, "one equation per field coordinate");
         assert_eq!(cell.per_target.len(), 3);
@@ -914,7 +966,10 @@ mod tests {
         let square = semi_regular_degree(16, &[2; 16]).unwrap();
         let over = semi_regular_degree(16, &[2; 32]).unwrap();
         assert!(over < square, "{over} should fall before {square}");
-        assert!(square <= 16, "a boolean monomial cannot exceed the variable count");
+        assert!(
+            square <= 16,
+            "a boolean monomial cannot exceed the variable count"
+        );
         // Degree-1 equations are linear: they cut the ring down at once.
         assert_eq!(semi_regular_degree(8, &[1; 8]), Some(1));
     }
@@ -960,7 +1015,10 @@ mod tests {
         let list = engines(&["f4-f2", "buchberger-f2", "sat-cdcl", "fes-f2", "exhaustive"]);
         let cell = price_engine_cell(&list, "K", 11, 5, 2, 4, 7, None, 2).expect("K at n = 11");
         let frozen = price_descent_cell("K", 11, 5, 2, 4, 7, None).unwrap();
-        assert_eq!(cell.reference_engine, "fes-f2", "the quadratic cell's reference");
+        assert_eq!(
+            cell.reference_engine, "fes-f2",
+            "the quadratic cell's reference"
+        );
         assert_eq!(cell.n_vars, frozen.n_vars);
         for (t, run) in cell.per_target.iter().zip(&frozen.per_target) {
             // The same target: the Buchberger engine inside the paired
@@ -972,7 +1030,11 @@ mod tests {
             assert!(e.agrees_with_reference, "{} disagrees", e.engine);
             assert_eq!(e.decided, 4, "{} left a target undecided", e.engine);
         }
-        let cdcl = cell.engines.iter().find(|e| e.engine == "sat-cdcl").unwrap();
+        let cdcl = cell
+            .engines
+            .iter()
+            .find(|e| e.engine == "sat-cdcl")
+            .unwrap();
         assert_eq!(cdcl.workload, "first solution");
         // The reference order does not depend on the listed order, and the
         // digest depends on the inputs and answers only.
@@ -981,12 +1043,26 @@ mod tests {
         assert_eq!(again.reference_engine, "fes-f2");
         assert_eq!(again.verdict_digest, cell.verdict_digest);
         assert_eq!(
-            again.per_target.iter().map(|t| &t.system_blake3).collect::<Vec<_>>(),
-            cell.per_target.iter().map(|t| &t.system_blake3).collect::<Vec<_>>()
+            again
+                .per_target
+                .iter()
+                .map(|t| &t.system_blake3)
+                .collect::<Vec<_>>(),
+            cell.per_target
+                .iter()
+                .map(|t| &t.system_blake3)
+                .collect::<Vec<_>>()
         );
         // A cubic cell has no quadratic reference, so the general one is used.
         let cubic = price_engine_cell(&reordered, "K", 7, 2, 3, 2, 7, None, 1).unwrap();
         assert_eq!(cubic.reference_engine, "exhaustive");
-        assert!(cubic.engines.iter().find(|e| e.engine == "fes-f2").unwrap().declined);
+        assert!(
+            cubic
+                .engines
+                .iter()
+                .find(|e| e.engine == "fes-f2")
+                .unwrap()
+                .declined
+        );
     }
 }

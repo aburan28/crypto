@@ -66,7 +66,8 @@ pub struct ArmSummary {
 pub struct WorkloadRow {
     pub workload_id: String,
     pub slug: String,
-    pub r: u64,
+    #[serde(with = "crate::cryptanalysis::ecbench::canonical::compat_u128")]
+    pub r: u128,
     pub floor_s: f64,
     /// Matched, verified pairs on this workload.
     pub pairs: u64,
