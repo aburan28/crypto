@@ -132,6 +132,10 @@ Two disclosures:
 | `sessions/n31-interrupted-01` | `ECBS1h83ac48e3f4d3` | 2 | interrupted (same relaunch) | — |
 | `sessions/n31-killed-02` | `ECBS1haeebe969c2a3` | 4 | killed by a worker restart, still marked `running` | — |
 
+The m = 13 and m = 19 sessions were replayed again after merging #1365,
+which replaced this branch's replay-determinism fix with its own. All
+72 + 72 replays are again identical (`audits/n1{3,9}-replay-all-after-1365.json`).
+
 Every run was produced by one `ecbench` binary built from `f4994f9f`. A
 rebuild was byte-identical. The interrupted m = 23 attempt's first seven records
 match the complete session's first seven exactly: the same workloads,
