@@ -199,6 +199,7 @@ pub mod koblitz_relation_solver;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
+pub mod koblitz_wide;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
@@ -274,6 +275,7 @@ pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
 pub mod weil_charts;
+pub mod wide_gf2m;
 pub mod wide_groebner;
 
 pub use aut_folded_rho::{
