@@ -31,6 +31,14 @@ impl Mono512 {
     pub fn divides_assignment(self, values: &Self) -> bool {
         self.0.iter().zip(values.0).all(|(a, b)| a & !b == 0)
     }
+
+    fn intersects(self, other: Self) -> bool {
+        self.0.iter().zip(other.0).any(|(a, b)| a & b != 0)
+    }
+
+    fn without(self, other: Self) -> Self {
+        Self(std::array::from_fn(|i| self.0[i] & !other.0[i]))
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -100,6 +108,21 @@ impl Poly512 {
 
     pub fn degree(&self) -> u32 {
         self.terms.iter().map(|m| m.degree()).max().unwrap_or(0)
+    }
+
+    /// Substitute all selected Boolean variables in one pass. Terms
+    /// containing a zero vanish; stripping one-bits can create pairs
+    /// that must cancel in the Boolean quotient.
+    pub fn assign_constants(&self, zeros: Mono512, ones: Mono512) -> Self {
+        assert!(!zeros.intersects(ones));
+        Self::from_monos(
+            self.terms
+                .iter()
+                .copied()
+                .filter(|m| !m.intersects(zeros))
+                .map(|m| m.without(ones))
+                .collect(),
+        )
     }
 }
 
@@ -282,6 +305,40 @@ impl System512 {
             .unwrap_or(0)
     }
 
+    /// Fix one complete source-coordinate code while retaining the same
+    /// variable layout for the remaining system and its certificates.
+    pub fn assign_summand_code(&self, summand: usize, ell: usize, code: u64) -> Option<Self> {
+        let start = summand.checked_mul(ell)?;
+        if ell == 0
+            || ell > 64
+            || start.checked_add(ell)? > self.summand_bits
+            || (ell < 64 && code >> ell != 0)
+        {
+            return None;
+        }
+        let mut zeros = Mono512::default();
+        let mut ones = Mono512::default();
+        for i in 0..ell {
+            let destination = if code >> i & 1 == 1 {
+                &mut ones
+            } else {
+                &mut zeros
+            };
+            destination.0[(start + i) / 64] |= 1u64 << ((start + i) % 64);
+        }
+        let mut equations: Vec<_> = self
+            .equations
+            .iter()
+            .map(|p| p.assign_constants(zeros, ones))
+            .collect();
+        equations.retain(|p| !p.terms.is_empty());
+        Some(Self {
+            equations,
+            n_vars: self.n_vars,
+            summand_bits: self.summand_bits,
+        })
+    }
+
     /// One own-degree Macaulay reduction; a column-cap stop is inconclusive.
     pub fn root_reduce(&self) -> RootReduction {
         let mut index: FxMap<Mono512, usize> = FxMap::default();
@@ -448,5 +505,32 @@ mod tests {
                 constant: true
             }]
         );
+    }
+
+    #[test]
+    fn source_code_substitution_preserves_evaluation_and_cancellation() {
+        let p = Poly512::var(63)
+            .mul(&Poly512::var(64))
+            .add(&Poly512::var(64))
+            .add(&Poly512::var(384));
+        let mut zeros = Mono512::default();
+        zeros.0[0] = 1u64 << 63;
+        let reduced = p.assign_constants(zeros, Mono512::default());
+        assert_eq!(reduced, Poly512::var(64).add(&Poly512::var(384)));
+        let mut ones = Mono512::default();
+        ones.0[0] = 1u64 << 63;
+        assert_eq!(
+            p.assign_constants(Mono512::default(), ones),
+            Poly512::var(384)
+        );
+        let system = System512 {
+            equations: vec![p],
+            n_vars: 512,
+            summand_bits: 96,
+        };
+        let fixed = system
+            .assign_summand_code(3, 16, 0)
+            .expect("v63 is in summand 3");
+        assert_eq!(fixed.equations[0], reduced);
     }
 }
