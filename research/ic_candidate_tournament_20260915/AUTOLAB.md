@@ -85,6 +85,16 @@ recovery. Failed record writes stop the loop and retain its partial transcript
 without a verified answer. Retained-data controls check ordering and unchanged
 seeded coefficients; a new frozen file-writing worker and interruption/custody
 audit remain required before native execution admission.
+The [new target worker and durable file contract](goal_20260924/native-target-worker-v1/PROTOCOL.md)
+now connects the F5 recording entry to exclusive fsynced start/completion files.
+It requires a separate target claim and compiled identity and rechecks original
+native preparation with its frozen auditor before online timing. A data-only
+prefix reader retains an unfinished query after a watchdog kills a file-only
+control process. The shared journal accepts both record shapes; a complete SAT
+worker still requires accepted preinitialized transport, and the target
+controller/freezer, independent runtime audit and scientific dispatch remain
+pending. File survival and source controls establish no native relation yield
+or speedup.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

@@ -1,0 +1,533 @@
+paired-s3-batch (53)	Set up job	﻿2026-10-05T02:20:42.2125613Z Current runner version: '2.337.0'
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2142651Z ##[group]Runner Image Provisioner
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2143230Z Hosted Compute Agent
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2143708Z Version: 20260901.588
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2144064Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2144510Z Build Date: 2026-09-01T19:56:44Z
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2144926Z Worker ID: {39ee0b66-f0a3-43ad-95ee-6302080d79a0}
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2145308Z Azure Region: westus3
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2145677Z ##[endgroup]
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2146407Z ##[group]Operating System
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2146839Z Ubuntu
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2147137Z 24.04.5
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2147420Z LTS
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2147756Z ##[endgroup]
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2148069Z ##[group]Runner Image
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2148437Z Image: ubuntu-24.04
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2148797Z Version: 20260927.320.1
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2149370Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2150363Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2150913Z ##[endgroup]
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2152568Z ##[group]GITHUB_TOKEN Permissions
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2154089Z Actions: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2154437Z ArtifactMetadata: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2154780Z Attestations: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2155177Z Checks: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2155492Z CodeQuality: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2155839Z Contents: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2156169Z CopilotRequests: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2156499Z Deployments: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2156899Z Discussions: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2157215Z Drives: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2157543Z Issues: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2157856Z Metadata: read
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2158207Z Models: read
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2158575Z Packages: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2158883Z Pages: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2159180Z PullRequests: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2159550Z RepositoryProjects: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2159955Z SecurityEvents: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2160310Z Statuses: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2160633Z VulnerabilityAlerts: read
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2160963Z ##[endgroup]
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2162262Z Secret source: Actions
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2162793Z Cache mode: write
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2163243Z Prepare workflow directory
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2354479Z Prepare all required actions
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.2383822Z Getting action download info
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.5510499Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.6244128Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+paired-s3-batch (53)	Set up job	2026-10-05T02:20:42.8062341Z Complete job name: paired-s3-batch (53)
+paired-s3-batch (53)	Run actions/checkout@v4	﻿2026-10-05T02:20:42.8560268Z ##[group]Run actions/checkout@v4
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8560694Z with:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8560933Z   sparse-checkout-cone-mode: false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8564301Z   sparse-checkout: Cargo.toml
+paired-s3-batch (53)	Run actions/checkout@v4	docs/ic/calibration.json
+paired-s3-batch (53)	Run actions/checkout@v4	src
+paired-s3-batch (53)	Run actions/checkout@v4	examples/koblitz_orbit_dlp_s3_batch.rs
+paired-s3-batch (53)	Run actions/checkout@v4	examples/koblitz_orbit_dlp_swap.rs
+paired-s3-batch (53)	Run actions/checkout@v4	examples/koblitz_rho_batch_ks_v2_n61.rs
+paired-s3-batch (53)	Run actions/checkout@v4	examples/koblitz_rho_batch_ks_v3.rs
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+paired-s3-batch (53)	Run actions/checkout@v4	research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_s3_batch_20260929
+paired-s3-batch (53)	Run actions/checkout@v4	research/notes/ecc2k130/compact_frozen_source_replay_20260929
+paired-s3-batch (53)	Run actions/checkout@v4	.github/workflows/compact-s3-batch.yml
+paired-s3-batch (53)	Run actions/checkout@v4	
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8567539Z   repository: aburan28/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8569713Z   token: ***
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8569932Z   ssh-strict: true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8570156Z   ssh-user: git
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8570387Z   persist-credentials: true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8570635Z   clean: true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8570850Z   fetch-depth: 1
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8571069Z   fetch-tags: false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8571299Z   show-progress: true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8571526Z   lfs: false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8571738Z   submodules: false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8571969Z   set-safe-directory: true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8572231Z   allow-unsafe-pr-checkout: false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.8572614Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9217376Z Syncing repository: aburan28/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9218504Z ##[group]Getting Git version info
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9218897Z Working directory is '/home/runner/work/crypto/crypto'
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9219445Z [command]/usr/bin/git version
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9288955Z git version 2.55.0
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9303545Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9313761Z Temporarily overriding HOME='/home/runner/work/_temp/68c80516-7622-450b-ba66-93851f1a9985' before making global git config changes
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9314957Z Adding repository directory to the temporary git global config as a safe directory
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9317664Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9389448Z Deleting the contents of '/home/runner/work/crypto/crypto'
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9390424Z ##[group]Initializing the repository
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9390949Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9477859Z hint: Using 'master' as the name for the initial branch. This default branch name
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9478406Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9478926Z hint: to use in all of your new repositories, which will suppress this warning,
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9479302Z hint: call:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9479633Z hint:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9480051Z hint: 	git config --global init.defaultBranch <name>
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9480553Z hint:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9481003Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9481737Z hint: 'development'. The just-created branch can be renamed via this command:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9482332Z hint:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9482661Z hint: 	git branch -m <name>
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9482979Z hint:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9483303Z hint: Disable this message with "git config set advice.defaultBranchName false"
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9483947Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9489095Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9528875Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9529314Z ##[group]Disabling automatic garbage collection
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9531298Z [command]/usr/bin/git config --local gc.auto 0
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9554202Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9554597Z ##[group]Setting up auth
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9558494Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9580858Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9866835Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:42.9893066Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0059167Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0082030Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0242430Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0271224Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0271898Z ##[group]Fetching the repository
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.0277765Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +509268435509486297773e885598d7c2e90d4137:refs/remotes/pull/1362/merge
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8868433Z From https://github.com/aburan28/crypto
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8869966Z  * [new ref]         509268435509486297773e885598d7c2e90d4137 -> pull/1362/merge
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8872576Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8873705Z ##[group]Determining the checkout info
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8874767Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8875659Z ##[group]Setting up sparse checkout
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8877169Z [command]/usr/bin/git config core.sparseCheckout true
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8909782Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8926685Z .git/info/sparse-checkout
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8932890Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8933979Z ##[group]Checking out the ref
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:43.8935814Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1362/merge
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:48.7586781Z Updating files:   0% (1/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:48.7592472Z Updating files:   1% (9/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:48.7596430Z Updating files:   2% (17/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:48.7600646Z Updating files:   3% (25/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:48.7610809Z Updating files:   4% (34/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:49.0971730Z Updating files:   5% (42/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:49.7601817Z Updating files:   5% (43/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.0993696Z Updating files:   6% (50/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.4254130Z Updating files:   6% (52/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7596788Z Updating files:   7% (59/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7623746Z Updating files:   8% (67/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7624164Z Updating files:   9% (75/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7624481Z Updating files:  10% (83/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7624741Z Updating files:  11% (92/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7625125Z Updating files:  12% (100/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7636325Z Updating files:  13% (108/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7636611Z Updating files:  14% (117/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7636911Z Updating files:  15% (125/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7689602Z Updating files:  16% (133/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7700075Z Updating files:  17% (141/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7706148Z Updating files:  18% (150/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7726445Z Updating files:  19% (158/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7734442Z Updating files:  20% (166/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.7739113Z Updating files:  21% (175/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.8600927Z Updating files:  22% (183/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.8894936Z Updating files:  23% (191/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.8971763Z Updating files:  24% (199/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9008340Z Updating files:  25% (208/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9041208Z Updating files:  26% (216/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9067654Z Updating files:  27% (224/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9082763Z Updating files:  28% (233/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9105293Z Updating files:  29% (241/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9124166Z Updating files:  30% (249/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9140423Z Updating files:  31% (257/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9153511Z Updating files:  32% (266/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9160071Z Updating files:  33% (274/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9179321Z Updating files:  34% (282/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9187367Z Updating files:  35% (291/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9198190Z Updating files:  36% (299/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9215164Z Updating files:  37% (307/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9226899Z Updating files:  38% (316/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9241685Z Updating files:  39% (324/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9260073Z Updating files:  40% (332/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9280870Z Updating files:  41% (340/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9294567Z Updating files:  42% (349/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9386973Z Updating files:  42% (353/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9387205Z Updating files:  43% (357/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9387437Z Updating files:  44% (365/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9388188Z Updating files:  45% (374/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9388458Z Updating files:  46% (382/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9388692Z Updating files:  47% (390/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9388988Z Updating files:  48% (398/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9397911Z Updating files:  49% (407/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9416455Z Updating files:  50% (415/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9426195Z Updating files:  51% (423/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9436742Z Updating files:  52% (432/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9446508Z Updating files:  53% (440/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9482670Z Updating files:  54% (448/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9497585Z Updating files:  55% (456/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9506133Z Updating files:  56% (465/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9514241Z Updating files:  57% (473/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9522112Z Updating files:  58% (481/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9531442Z Updating files:  59% (490/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9542653Z Updating files:  60% (498/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9549723Z Updating files:  61% (506/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9562114Z Updating files:  62% (514/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9570094Z Updating files:  63% (523/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9587426Z Updating files:  64% (531/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9599332Z Updating files:  65% (539/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9606452Z Updating files:  66% (548/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9611713Z Updating files:  67% (556/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9614777Z Updating files:  68% (564/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9617379Z Updating files:  69% (573/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9620044Z Updating files:  70% (581/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9622880Z Updating files:  71% (589/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9627193Z Updating files:  72% (597/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9632180Z Updating files:  73% (606/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9637509Z Updating files:  74% (614/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9641610Z Updating files:  75% (622/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9645493Z Updating files:  76% (631/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9653268Z Updating files:  77% (639/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9658463Z Updating files:  78% (647/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9665292Z Updating files:  79% (655/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9672025Z Updating files:  80% (664/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9675745Z Updating files:  81% (672/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9679984Z Updating files:  82% (680/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9688420Z Updating files:  83% (689/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9696047Z Updating files:  84% (697/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9699679Z Updating files:  85% (705/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9713458Z Updating files:  86% (713/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9719258Z Updating files:  87% (722/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9730486Z Updating files:  88% (730/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9737553Z Updating files:  89% (738/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9744184Z Updating files:  90% (747/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9749903Z Updating files:  91% (755/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9755746Z Updating files:  92% (763/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9760638Z Updating files:  93% (771/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9765419Z Updating files:  94% (780/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9770921Z Updating files:  95% (788/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9777187Z Updating files:  96% (796/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9782001Z Updating files:  97% (805/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9787990Z Updating files:  98% (813/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9793086Z Updating files:  99% (821/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9793296Z Updating files: 100% (829/829)
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:50.9793604Z Updating files: 100% (829/829), done.
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0087130Z Note: switching to 'refs/remotes/pull/1362/merge'.
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0087401Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0087533Z You are in 'detached HEAD' state. You can look around, make experimental
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0087802Z changes and commit them, and you can discard any commits you make in this
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0088057Z state without impacting any branches by switching back to a branch.
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0088396Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0088545Z If you want to create a new branch to retain commits you create, you may
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0088916Z do so (now or later) by using -c with the switch command. Example:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0089470Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0089566Z   git switch -c <new-branch-name>
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0089710Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0089802Z Or undo this operation with:
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0089938Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0090016Z   git switch -
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0090127Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0090303Z Turn off this advice by setting config variable advice.detachedHead to false
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0090560Z 
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0090832Z HEAD is now at 5092684 Merge 30c84566f782e6503901d187348709dfaad05cc2 into e3508a67797401525ba7bc0ebd3b99349a8cac13
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0121954Z ##[endgroup]
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0160601Z [command]/usr/bin/git log -1 --format=%H
+paired-s3-batch (53)	Run actions/checkout@v4	2026-10-05T02:20:51.0184089Z 509268435509486297773e885598d7c2e90d4137
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	﻿2026-10-05T02:20:51.0348445Z ##[group]Run python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.0349023Z ^[[36;1mpython3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v^[[0m
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.0571621Z shell: /usr/bin/bash -e {0}
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.0571863Z ##[endgroup]
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1198291Z test_drifted_file_replayed_from_snapshot (test_materialize.MaterializeTest.test_drifted_file_replayed_from_snapshot) ... ok
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1213884Z test_missing_snapshot_fails_closed (test_materialize.MaterializeTest.test_missing_snapshot_fails_closed) ... ok
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1227975Z test_snapshot_for_other_path_rejected (test_materialize.MaterializeTest.test_snapshot_for_other_path_rejected) ... ok
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1243741Z test_tampered_snapshot_fails_closed (test_materialize.MaterializeTest.test_tampered_snapshot_fails_closed) ... ok
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1244112Z 
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1244388Z ----------------------------------------------------------------------
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1244656Z Ran 4 tests in 0.007s
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1244736Z 
+paired-s3-batch (53)	Check fail-closed frozen-source materialization	2026-10-05T02:20:51.1244784Z OK
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	﻿2026-10-05T02:20:51.1359353Z ##[group]Run python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.1359760Z ^[[36;1mpython3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \^[[0m
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.1360096Z ^[[36;1m  --freeze research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json \^[[0m
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.1360338Z ^[[36;1m  --dest "/home/runner/work/_temp/frozen-src"^[[0m
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.1411958Z shell: /usr/bin/bash -e {0}
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.1412110Z ##[endgroup]
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606104Z {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606352Z   "freezes": [
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606559Z     "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606751Z   ],
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606862Z   "live": [
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2606967Z     "Cargo.toml",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2607087Z     "docs/ic/calibration.json",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2607239Z     "examples/koblitz_orbit_dlp_swap.rs",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2607403Z     "examples/koblitz_rho_batch_ks_v2_n61.rs",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2607664Z     "examples/koblitz_rho_batch_ks_v3.rs",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2607871Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2608141Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2608409Z     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2608656Z     "research/notes/ecc2k130/compact_s3_batch_20260929/PROTOCOL.md",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2608877Z     "research/notes/ecc2k130/compact_s3_batch_20260929/analyze.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2609098Z     "research/notes/ecc2k130/compact_s3_batch_20260929/archive.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2609333Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/FROZEN.json",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2609636Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n41_L1024_eval.points.jsonl",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2609978Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n53_L1024_eval.points.jsonl",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2610461Z     "research/notes/ecc2k130/compact_s3_batch_20260929/prepare.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2610684Z     "research/notes/ecc2k130/compact_s3_batch_20260929/run_panel.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2610914Z     "research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611141Z     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611417Z     "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611646Z     "src/lib.rs"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611750Z   ],
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611856Z   "pinned_files": 25,
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2611984Z   "replayed_from_snapshot": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2612146Z     ".github/workflows/compact-s3-batch.yml": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2612386Z       "frozen_sha256": "8a1d24841733cc5913b570004543a8d7f1e5fdd3ce2f98267ba7924849184888",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2612680Z       "live_sha256": "a61937db79cedcb7268d35850fec0ae9db5fe118501dd77531f9017ccb384a72"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2612902Z     },
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2613026Z     "examples/koblitz_orbit_dlp_s3_batch.rs": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2613256Z       "frozen_sha256": "e998120842faf393910a6b4a9740b3af9880eb626578fa88c575a32e5254f2c7",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2613665Z       "live_sha256": "7b2393731cd7da047b9404585c85dc2f384ee857e43778661e806649c6cf552d"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2613909Z     },
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2614024Z     "src/cryptanalysis/koblitz_fast.rs": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2614249Z       "frozen_sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2614530Z       "live_sha256": "0b86548e12930040177e1b84a0955e2bb983d3945b538d2cdc6cc2ad4f154de5"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2614730Z     },
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2614857Z     "src/cryptanalysis/koblitz_index_calculus.rs": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2615091Z       "frozen_sha256": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2615520Z       "live_sha256": "4308533e6ae62437766e6e64a66ad45546050ec876e3076207928e2def5b824c"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2615724Z     },
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2615839Z     "src/cryptanalysis/semaev_decomp.rs": {
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616065Z       "frozen_sha256": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616351Z       "live_sha256": "88e4351922a8c0b3e3bc1dc692e4beaae332ff515d38b080be8911d5669e3bb5"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616555Z     }
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616652Z   },
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616788Z   "schema": "compact-frozen-source-materialization-v1"
+paired-s3-batch (53)	Materialize frozen source tree from committed snapshots	2026-10-05T02:20:51.2616956Z }
+paired-s3-batch (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	﻿2026-10-05T02:20:51.2689042Z ##[group]Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+paired-s3-batch (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:20:51.2689379Z ^[[36;1mcp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock^[[0m
+paired-s3-batch (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:20:51.2740869Z shell: /usr/bin/bash -e {0}
+paired-s3-batch (53)	Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock	2026-10-05T02:20:51.2741014Z ##[endgroup]
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	﻿2026-10-05T02:20:51.2869738Z ##[group]Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:51.2870166Z ^[[36;1mcargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch^[[0m
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:51.2916647Z shell: /usr/bin/bash -e {0}
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:51.2916804Z ##[endgroup]
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:52.8848729Z     Updating crates.io index
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.5150363Z  Downloading crates ...
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6107386Z   Downloaded colorchoice v1.0.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6496639Z   Downloaded adler2 v2.0.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6506245Z   Downloaded anstream v1.0.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6523713Z   Downloaded anstyle v1.0.14
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6533671Z   Downloaded anstyle-parse v1.0.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6545216Z   Downloaded anstyle-query v1.1.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6553598Z   Downloaded rand_chacha v0.3.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6561806Z   Downloaded find-msvc-tools v0.1.13
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6573791Z   Downloaded simd-adler32 v0.3.10
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6684924Z   Downloaded zeroize v1.9.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6696678Z   Downloaded proc-macro2 v1.0.107
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6717954Z   Downloaded serde_derive v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6740023Z   Downloaded strsim v0.11.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6749253Z   Downloaded hex v0.4.3
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6760168Z   Downloaded miniz_oxide v0.9.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6778202Z   Downloaded rand_core v0.6.4
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6787932Z   Downloaded cc v1.4.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6856045Z   Downloaded num-integer v0.1.47
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6868603Z   Downloaded shlex v2.0.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6876719Z   Downloaded utf8parse v0.2.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6882989Z   Downloaded subtle v2.6.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6892109Z   Downloaded zmij v1.0.23
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6905750Z   Downloaded crc32fast v1.5.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6920430Z   Downloaded heck v0.5.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6929982Z   Downloaded itoa v1.0.18
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6942384Z   Downloaded getrandom v0.2.17
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6966377Z   Downloaded cfg-if v1.0.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6975888Z   Downloaded clap_lex v1.1.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6983733Z   Downloaded crossbeam-deque v0.8.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.6994486Z   Downloaded quote v1.0.47
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7013448Z   Downloaded either v1.18.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7023726Z   Downloaded cpufeatures v0.3.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7033782Z   Downloaded autocfg v1.5.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7046816Z   Downloaded rayon-core v1.13.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7072979Z   Downloaded serde_core v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7092103Z   Downloaded rand v0.8.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7115454Z   Downloaded clap_derive v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7130794Z   Downloaded zeroize_derive v1.5.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7137457Z   Downloaded clap v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7211087Z   Downloaded constant_time_eq v0.4.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7225865Z   Downloaded unicode-ident v1.0.26
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7244852Z   Downloaded flate2 v1.1.10
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7279212Z   Downloaded crossbeam-utils v0.8.23
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7298427Z   Downloaded num-traits v0.2.19
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7316380Z   Downloaded serde v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7340264Z   Downloaded clap_builder v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7384778Z   Downloaded memchr v2.8.3
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7423224Z   Downloaded is_terminal_polyfill v1.70.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7429670Z   Downloaded serde_json v1.0.151
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7480669Z   Downloaded ppv-lite86 v0.2.21
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7489588Z   Downloaded blake3 v1.8.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7544136Z   Downloaded arrayvec v0.7.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7558431Z   Downloaded crossbeam-epoch v0.9.21
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7575214Z   Downloaded rayon v1.12.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7640994Z   Downloaded zlib-rs v0.6.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7678796Z   Downloaded num-bigint v0.4.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7711245Z   Downloaded base64 v0.21.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7737468Z   Downloaded zerocopy v0.8.57
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7888712Z   Downloaded syn v2.0.119
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.7961685Z   Downloaded syn v3.0.6
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.8035738Z   Downloaded libc v0.2.189
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.9014441Z    Compiling proc-macro2 v1.0.107
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.9015141Z    Compiling unicode-ident v1.0.26
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.9015546Z    Compiling quote v1.0.47
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:53.9015717Z    Compiling cfg-if v1.0.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:56.2273925Z    Compiling libc v0.2.189
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:20:57.6086088Z    Compiling zerocopy v0.8.57
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:00.4194971Z    Compiling crossbeam-utils v0.8.23
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:00.4445210Z    Compiling crossbeam-epoch v0.9.21
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:00.5098591Z    Compiling autocfg v1.5.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.1448982Z    Compiling num-traits v0.2.19
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.1966839Z    Compiling syn v3.0.6
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.3144576Z    Compiling getrandom v0.2.17
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.5183172Z    Compiling utf8parse v0.2.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.5641980Z    Compiling serde_core v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.5804794Z    Compiling find-msvc-tools v0.1.13
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.6940570Z    Compiling shlex v2.0.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.7054824Z    Compiling crossbeam-deque v0.8.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.7894580Z    Compiling cc v1.4.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.8054194Z    Compiling anstyle-parse v1.0.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:01.9664389Z    Compiling rand_core v0.6.4
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.5014390Z    Compiling anstyle-query v1.1.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.5474514Z    Compiling anstyle v1.0.14
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.6124587Z    Compiling crc32fast v1.5.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.7093287Z    Compiling is_terminal_polyfill v1.70.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.7134455Z    Compiling colorchoice v1.0.5
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.7424998Z    Compiling rayon-core v1.13.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.7520535Z    Compiling zmij v1.0.23
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.8145905Z    Compiling anstream v1.0.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:02.8734489Z    Compiling blake3 v1.8.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:03.3974372Z    Compiling syn v2.0.119
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:03.6674518Z    Compiling clap_lex v1.1.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:03.8281564Z    Compiling ppv-lite86 v0.2.21
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:03.8717559Z    Compiling serde_json v1.0.151
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:03.9324842Z    Compiling heck v0.5.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.0229634Z    Compiling adler2 v2.0.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.1064425Z    Compiling serde v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.2143013Z    Compiling strsim v0.11.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.3990098Z    Compiling rand_chacha v0.3.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.6504444Z    Compiling simd-adler32 v0.3.10
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:04.8099989Z    Compiling miniz_oxide v0.9.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:05.0546444Z    Compiling rand v0.8.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:05.4064398Z    Compiling clap_builder v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:05.5904619Z    Compiling clap_derive v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:05.9312952Z    Compiling num-integer v0.1.47
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:06.0634491Z    Compiling zeroize_derive v1.5.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:06.3870522Z    Compiling serde_derive v1.0.229
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.0802514Z    Compiling memchr v2.8.3
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.1682329Z    Compiling arrayvec v0.7.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.2876315Z    Compiling constant_time_eq v0.4.2
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.4460013Z    Compiling either v1.18.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.5584324Z    Compiling cpufeatures v0.3.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.5846716Z    Compiling itoa v1.0.18
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:08.7515366Z    Compiling rayon v1.12.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.3070963Z    Compiling flate2 v1.1.10
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.6306569Z    Compiling clap v4.6.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.6575587Z    Compiling zeroize v1.9.0
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.7499874Z    Compiling num-bigint v0.4.8
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.7912603Z    Compiling hex v0.4.3
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:10.9180544Z    Compiling base64 v0.21.7
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:11.1401404Z    Compiling subtle v2.6.1
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.3292687Z    Compiling crypto v0.1.0 (/home/runner/work/_temp/frozen-src)
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7415711Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ic/boundary_targets.json`: No such file or directory (os error 2)
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7416132Z   --> src/cryptanalysis/ecbench/claim.rs:37:32
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7416296Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7416488Z 37 | pub const CLAIM_LEDGER: &str = include_str!("../../../docs/ic/boundary_targets.json");
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7416744Z    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7417246Z 
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7966653Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ecbench/schema.sql`: No such file or directory (os error 2)
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7967028Z   --> src/cryptanalysis/ecbench/db.rs:31:30
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7967171Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7967340Z 31 | pub const SCHEMA_SQL: &str = include_str!("../../../docs/ecbench/schema.sql");
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7967566Z    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.7967684Z 
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8702444Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/curves/registry.json`: No such file or directory (os error 2)
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8702831Z    --> src/cryptanalysis/ecbench/workload.rs:201:24
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8702995Z     |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8703162Z 201 | const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8703613Z     |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:13.8704015Z 
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3015776Z error[E0432]: unresolved imports `super::koblitz_index_calculus::IndividualLogInterruption`, `super::koblitz_index_calculus::IndividualLogObserver`
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3016237Z   --> src/cryptanalysis/prepared_n17_target.rs:12:9
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3016402Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3016625Z 12 |         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3016992Z    |         ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^ no `IndividualLogObserver` in `cryptanalysis::koblitz_index_calculus`
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3017219Z    |         |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3017411Z    |         no `IndividualLogInterruption` in `cryptanalysis::koblitz_index_calculus`
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3017620Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3032516Z help: a similar name exists in the module
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3032768Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3033098Z 12 -         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3033913Z 12 +         IndividualLogInterruption, IndividualLogSolver, IndividualLogReport, IndividualLogSolver,
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3034163Z    |
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:14.3034223Z 
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:15.9245589Z For more information about this error, try `rustc --explain E0432`.
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:15.9361680Z error: could not compile `crypto` (lib) due to 4 previous errors
+paired-s3-batch (53)	Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch	2026-10-05T02:21:15.9600836Z ##[error]Process completed with exit code 101.
+paired-s3-batch (53)	Run actions/upload-artifact@v4	﻿2026-10-05T02:21:15.9682798Z ##[group]Run actions/upload-artifact@v4
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9682967Z with:
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683090Z   name: compact-s3-batch-n53-L1024
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683267Z   path: /home/runner/work/_temp/compact-s3-batch/n53_L1024
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683610Z   if-no-files-found: warn
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683741Z   retention-days: 90
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683857Z   compression-level: 6
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9683972Z   overwrite: false
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9684089Z   include-hidden-files: false
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:15.9684220Z ##[endgroup]
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:16.0732152Z (node:3246) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:16.0732780Z (Use `node --trace-deprecation ...` to show where the warning was created)
+paired-s3-batch (53)	Run actions/upload-artifact@v4	2026-10-05T02:21:16.0749319Z ##[warning]No files were found with the provided path: /home/runner/work/_temp/compact-s3-batch/n53_L1024. No artifacts will be uploaded.
+paired-s3-batch (53)	Post Run actions/checkout@v4	﻿2026-10-05T02:21:16.0911893Z Post job cleanup.
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1429898Z [command]/usr/bin/git version
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1457981Z git version 2.55.0
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1479393Z Temporarily overriding HOME='/home/runner/work/_temp/0231568e-ca3e-4ef0-98fc-61d080c54930' before making global git config changes
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1480275Z Adding repository directory to the temporary git global config as a safe directory
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1482847Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1510334Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1534448Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1732970Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1755244Z http.https://github.com/.extraheader
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1762625Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1789893Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.1986975Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+paired-s3-batch (53)	Post Run actions/checkout@v4	2026-10-05T02:21:16.2012445Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+paired-s3-batch (53)	Complete job	﻿2026-10-05T02:21:16.2334194Z Cleaning up orphan processes
+paired-s3-batch (53)	Complete job	2026-10-05T02:21:16.2526404Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

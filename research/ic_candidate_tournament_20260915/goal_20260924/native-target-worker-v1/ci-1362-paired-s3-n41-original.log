@@ -1,0 +1,532 @@
+﻿2026-10-05T02:18:20.9707054Z Current runner version: '2.337.0'
+2026-10-05T02:18:20.9725815Z ##[group]Runner Image Provisioner
+2026-10-05T02:18:20.9726388Z Hosted Compute Agent
+2026-10-05T02:18:20.9726782Z Version: 20260901.588
+2026-10-05T02:18:20.9727201Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-05T02:18:20.9727633Z Build Date: 2026-09-01T19:56:44Z
+2026-10-05T02:18:20.9728072Z Worker ID: {c9f9a620-6056-4a5c-b32c-2a76a50e95ac}
+2026-10-05T02:18:20.9728496Z Azure Region: westus2
+2026-10-05T02:18:20.9728830Z ##[endgroup]
+2026-10-05T02:18:20.9729687Z ##[group]Operating System
+2026-10-05T02:18:20.9730191Z Ubuntu
+2026-10-05T02:18:20.9730538Z 24.04.5
+2026-10-05T02:18:20.9730884Z LTS
+2026-10-05T02:18:20.9731201Z ##[endgroup]
+2026-10-05T02:18:20.9731604Z ##[group]Runner Image
+2026-10-05T02:18:20.9731971Z Image: ubuntu-24.04
+2026-10-05T02:18:20.9732330Z Version: 20260927.320.1
+2026-10-05T02:18:20.9733098Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-05T02:18:20.9734035Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-05T02:18:20.9734600Z ##[endgroup]
+2026-10-05T02:18:20.9736393Z ##[group]GITHUB_TOKEN Permissions
+2026-10-05T02:18:20.9737776Z Actions: write
+2026-10-05T02:18:20.9738209Z ArtifactMetadata: write
+2026-10-05T02:18:20.9738570Z Attestations: write
+2026-10-05T02:18:20.9738915Z Checks: write
+2026-10-05T02:18:20.9739286Z CodeQuality: write
+2026-10-05T02:18:20.9739629Z Contents: write
+2026-10-05T02:18:20.9740158Z CopilotRequests: write
+2026-10-05T02:18:20.9740516Z Deployments: write
+2026-10-05T02:18:20.9740848Z Discussions: write
+2026-10-05T02:18:20.9741210Z Drives: write
+2026-10-05T02:18:20.9741560Z Issues: write
+2026-10-05T02:18:20.9741929Z Metadata: read
+2026-10-05T02:18:20.9742321Z Models: read
+2026-10-05T02:18:20.9742645Z Packages: write
+2026-10-05T02:18:20.9743003Z Pages: write
+2026-10-05T02:18:20.9743365Z PullRequests: write
+2026-10-05T02:18:20.9743738Z RepositoryProjects: write
+2026-10-05T02:18:20.9744142Z SecurityEvents: write
+2026-10-05T02:18:20.9744488Z Statuses: write
+2026-10-05T02:18:20.9744892Z VulnerabilityAlerts: read
+2026-10-05T02:18:20.9745249Z ##[endgroup]
+2026-10-05T02:18:20.9746670Z Secret source: Actions
+2026-10-05T02:18:20.9747244Z Cache mode: write
+2026-10-05T02:18:20.9747662Z Prepare workflow directory
+2026-10-05T02:18:20.9976346Z Prepare all required actions
+2026-10-05T02:18:21.0009980Z Getting action download info
+2026-10-05T02:18:21.3526339Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-05T02:18:21.7667240Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-05T02:18:22.1738288Z Complete job name: paired-s3-batch (41)
+2026-10-05T02:18:22.2253418Z ##[group]Run actions/checkout@v4
+2026-10-05T02:18:22.2253874Z with:
+2026-10-05T02:18:22.2254134Z   sparse-checkout-cone-mode: false
+2026-10-05T02:18:22.2258542Z   sparse-checkout: Cargo.toml
+docs/ic/calibration.json
+src
+examples/koblitz_orbit_dlp_s3_batch.rs
+examples/koblitz_orbit_dlp_swap.rs
+examples/koblitz_rho_batch_ks_v2_n61.rs
+examples/koblitz_rho_batch_ks_v3.rs
+research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures
+research/notes/ecc2k130/compact_s3_batch_20260929
+research/notes/ecc2k130/compact_frozen_source_replay_20260929
+.github/workflows/compact-s3-batch.yml
+
+2026-10-05T02:18:22.2263040Z   repository: aburan28/crypto
+2026-10-05T02:18:22.2265695Z   token: ***
+2026-10-05T02:18:22.2265935Z   ssh-strict: true
+2026-10-05T02:18:22.2266179Z   ssh-user: git
+2026-10-05T02:18:22.2266427Z   persist-credentials: true
+2026-10-05T02:18:22.2266702Z   clean: true
+2026-10-05T02:18:22.2266941Z   fetch-depth: 1
+2026-10-05T02:18:22.2267183Z   fetch-tags: false
+2026-10-05T02:18:22.2267442Z   show-progress: true
+2026-10-05T02:18:22.2267694Z   lfs: false
+2026-10-05T02:18:22.2267935Z   submodules: false
+2026-10-05T02:18:22.2268190Z   set-safe-directory: true
+2026-10-05T02:18:22.2268479Z   allow-unsafe-pr-checkout: false
+2026-10-05T02:18:22.2268879Z ##[endgroup]
+2026-10-05T02:18:22.2915139Z Syncing repository: aburan28/crypto
+2026-10-05T02:18:22.2916295Z ##[group]Getting Git version info
+2026-10-05T02:18:22.2916753Z Working directory is '/home/runner/work/crypto/crypto'
+2026-10-05T02:18:22.2917415Z [command]/usr/bin/git version
+2026-10-05T02:18:22.2968149Z git version 2.55.0
+2026-10-05T02:18:22.2980365Z ##[endgroup]
+2026-10-05T02:18:22.2990158Z Temporarily overriding HOME='/home/runner/work/_temp/89645c02-a747-43b9-bfc5-015004d1f2c0' before making global git config changes
+2026-10-05T02:18:22.2991585Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-05T02:18:22.2998444Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-05T02:18:22.3610015Z Deleting the contents of '/home/runner/work/crypto/crypto'
+2026-10-05T02:18:22.3617365Z ##[group]Initializing the repository
+2026-10-05T02:18:22.3618033Z [command]/usr/bin/git init /home/runner/work/crypto/crypto
+2026-10-05T02:18:22.4598157Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-05T02:18:22.4600335Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-05T02:18:22.4601643Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-05T02:18:22.4602623Z hint: call:
+2026-10-05T02:18:22.4603141Z hint:
+2026-10-05T02:18:22.4603794Z hint: 	git config --global init.defaultBranch <name>
+2026-10-05T02:18:22.4604586Z hint:
+2026-10-05T02:18:22.4605451Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-05T02:18:22.4606766Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-05T02:18:22.4607645Z hint:
+2026-10-05T02:18:22.4608051Z hint: 	git branch -m <name>
+2026-10-05T02:18:22.4608541Z hint:
+2026-10-05T02:18:22.4609238Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-05T02:18:22.4610574Z Initialized empty Git repository in /home/runner/work/crypto/crypto/.git/
+2026-10-05T02:18:22.4612764Z [command]/usr/bin/git remote add origin https://github.com/aburan28/crypto
+2026-10-05T02:18:22.4903493Z ##[endgroup]
+2026-10-05T02:18:22.4904931Z ##[group]Disabling automatic garbage collection
+2026-10-05T02:18:22.4906559Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-05T02:18:22.4991898Z ##[endgroup]
+2026-10-05T02:18:22.4993211Z ##[group]Setting up auth
+2026-10-05T02:18:22.4996409Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-05T02:18:22.5024922Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-05T02:18:22.5401559Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-05T02:18:22.5428770Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-05T02:18:22.5603018Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-05T02:18:22.5629162Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-05T02:18:22.5803078Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-05T02:18:22.6162692Z ##[endgroup]
+2026-10-05T02:18:22.6164445Z ##[group]Fetching the repository
+2026-10-05T02:18:22.6170124Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +509268435509486297773e885598d7c2e90d4137:refs/remotes/pull/1362/merge
+2026-10-05T02:18:23.5092033Z From https://github.com/aburan28/crypto
+2026-10-05T02:18:23.5093187Z  * [new ref]         509268435509486297773e885598d7c2e90d4137 -> pull/1362/merge
+2026-10-05T02:18:23.5096623Z ##[endgroup]
+2026-10-05T02:18:23.5097950Z ##[group]Determining the checkout info
+2026-10-05T02:18:23.5099280Z ##[endgroup]
+2026-10-05T02:18:23.5100440Z ##[group]Setting up sparse checkout
+2026-10-05T02:18:23.5101579Z [command]/usr/bin/git config core.sparseCheckout true
+2026-10-05T02:18:23.5590140Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+2026-10-05T02:18:23.5618092Z .git/info/sparse-checkout
+2026-10-05T02:18:23.5624933Z ##[endgroup]
+2026-10-05T02:18:23.5626488Z ##[group]Checking out the ref
+2026-10-05T02:18:23.5628047Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1362/merge
+2026-10-05T02:18:28.1178730Z Updating files:   0% (1/829)
+2026-10-05T02:18:28.1197009Z Updating files:   1% (9/829)
+2026-10-05T02:18:28.1197362Z Updating files:   2% (17/829)
+2026-10-05T02:18:28.1197579Z Updating files:   3% (25/829)
+2026-10-05T02:18:28.1209522Z Updating files:   4% (34/829)
+2026-10-05T02:18:28.6850176Z Updating files:   5% (42/829)
+2026-10-05T02:18:28.9731139Z Updating files:   5% (46/829)
+2026-10-05T02:18:29.5479316Z Updating files:   6% (50/829)
+2026-10-05T02:18:29.8275177Z Updating files:   7% (59/829)
+2026-10-05T02:18:29.8277309Z Updating files:   7% (61/829)
+2026-10-05T02:18:29.8282751Z Updating files:   8% (67/829)
+2026-10-05T02:18:29.8286742Z Updating files:   9% (75/829)
+2026-10-05T02:18:29.8290970Z Updating files:  10% (83/829)
+2026-10-05T02:18:29.8296167Z Updating files:  11% (92/829)
+2026-10-05T02:18:29.8301641Z Updating files:  12% (100/829)
+2026-10-05T02:18:29.8305760Z Updating files:  13% (108/829)
+2026-10-05T02:18:29.8310243Z Updating files:  14% (117/829)
+2026-10-05T02:18:29.8312843Z Updating files:  15% (125/829)
+2026-10-05T02:18:29.8354190Z Updating files:  16% (133/829)
+2026-10-05T02:18:29.8362685Z Updating files:  17% (141/829)
+2026-10-05T02:18:29.8367167Z Updating files:  18% (150/829)
+2026-10-05T02:18:29.8382414Z Updating files:  19% (158/829)
+2026-10-05T02:18:29.8388254Z Updating files:  20% (166/829)
+2026-10-05T02:18:29.8391813Z Updating files:  21% (175/829)
+2026-10-05T02:18:29.9227207Z Updating files:  22% (183/829)
+2026-10-05T02:18:29.9407486Z Updating files:  23% (191/829)
+2026-10-05T02:18:29.9431168Z Updating files:  24% (199/829)
+2026-10-05T02:18:29.9446455Z Updating files:  25% (208/829)
+2026-10-05T02:18:29.9455309Z Updating files:  26% (216/829)
+2026-10-05T02:18:29.9463649Z Updating files:  27% (224/829)
+2026-10-05T02:18:29.9471744Z Updating files:  28% (233/829)
+2026-10-05T02:18:29.9482485Z Updating files:  29% (241/829)
+2026-10-05T02:18:29.9489949Z Updating files:  30% (249/829)
+2026-10-05T02:18:29.9498011Z Updating files:  31% (257/829)
+2026-10-05T02:18:29.9503973Z Updating files:  32% (266/829)
+2026-10-05T02:18:29.9507804Z Updating files:  33% (274/829)
+2026-10-05T02:18:29.9516252Z Updating files:  34% (282/829)
+2026-10-05T02:18:29.9519959Z Updating files:  35% (291/829)
+2026-10-05T02:18:29.9526127Z Updating files:  36% (299/829)
+2026-10-05T02:18:29.9532108Z Updating files:  37% (307/829)
+2026-10-05T02:18:29.9537126Z Updating files:  38% (316/829)
+2026-10-05T02:18:29.9544092Z Updating files:  39% (324/829)
+2026-10-05T02:18:29.9552943Z Updating files:  40% (332/829)
+2026-10-05T02:18:29.9562533Z Updating files:  41% (340/829)
+2026-10-05T02:18:29.9573639Z Updating files:  42% (349/829)
+2026-10-05T02:18:29.9584085Z Updating files:  43% (357/829)
+2026-10-05T02:18:29.9592437Z Updating files:  44% (365/829)
+2026-10-05T02:18:29.9599619Z Updating files:  45% (374/829)
+2026-10-05T02:18:29.9607869Z Updating files:  46% (382/829)
+2026-10-05T02:18:29.9619286Z Updating files:  47% (390/829)
+2026-10-05T02:18:29.9634719Z Updating files:  48% (398/829)
+2026-10-05T02:18:29.9645311Z Updating files:  49% (407/829)
+2026-10-05T02:18:29.9662890Z Updating files:  50% (415/829)
+2026-10-05T02:18:29.9673212Z Updating files:  51% (423/829)
+2026-10-05T02:18:29.9740491Z Updating files:  52% (432/829)
+2026-10-05T02:18:29.9741235Z Updating files:  53% (440/829)
+2026-10-05T02:18:29.9750828Z Updating files:  54% (448/829)
+2026-10-05T02:18:29.9751266Z Updating files:  55% (456/829)
+2026-10-05T02:18:29.9755279Z Updating files:  56% (465/829)
+2026-10-05T02:18:29.9763429Z Updating files:  57% (473/829)
+2026-10-05T02:18:29.9771526Z Updating files:  58% (481/829)
+2026-10-05T02:18:29.9780818Z Updating files:  59% (490/829)
+2026-10-05T02:18:29.9792085Z Updating files:  60% (498/829)
+2026-10-05T02:18:29.9799095Z Updating files:  61% (506/829)
+2026-10-05T02:18:29.9811709Z Updating files:  62% (514/829)
+2026-10-05T02:18:29.9819731Z Updating files:  63% (523/829)
+2026-10-05T02:18:29.9837120Z Updating files:  64% (531/829)
+2026-10-05T02:18:29.9848168Z Updating files:  65% (539/829)
+2026-10-05T02:18:29.9855670Z Updating files:  66% (548/829)
+2026-10-05T02:18:29.9861143Z Updating files:  67% (556/829)
+2026-10-05T02:18:29.9864041Z Updating files:  68% (564/829)
+2026-10-05T02:18:29.9866821Z Updating files:  69% (573/829)
+2026-10-05T02:18:29.9869425Z Updating files:  70% (581/829)
+2026-10-05T02:18:29.9872398Z Updating files:  71% (589/829)
+2026-10-05T02:18:29.9876533Z Updating files:  72% (597/829)
+2026-10-05T02:18:29.9881453Z Updating files:  73% (606/829)
+2026-10-05T02:18:29.9886730Z Updating files:  74% (614/829)
+2026-10-05T02:18:29.9891067Z Updating files:  75% (622/829)
+2026-10-05T02:18:29.9894799Z Updating files:  76% (631/829)
+2026-10-05T02:18:29.9902698Z Updating files:  77% (639/829)
+2026-10-05T02:18:29.9907484Z Updating files:  78% (647/829)
+2026-10-05T02:18:29.9914104Z Updating files:  79% (655/829)
+2026-10-05T02:18:29.9920117Z Updating files:  80% (664/829)
+2026-10-05T02:18:29.9924887Z Updating files:  81% (672/829)
+2026-10-05T02:18:29.9928878Z Updating files:  82% (680/829)
+2026-10-05T02:18:29.9936938Z Updating files:  83% (689/829)
+2026-10-05T02:18:29.9943504Z Updating files:  84% (697/829)
+2026-10-05T02:18:29.9947178Z Updating files:  85% (705/829)
+2026-10-05T02:18:29.9960712Z Updating files:  86% (713/829)
+2026-10-05T02:18:29.9966466Z Updating files:  87% (722/829)
+2026-10-05T02:18:29.9977433Z Updating files:  88% (730/829)
+2026-10-05T02:18:29.9984529Z Updating files:  89% (738/829)
+2026-10-05T02:18:29.9991096Z Updating files:  90% (747/829)
+2026-10-05T02:18:29.9996873Z Updating files:  91% (755/829)
+2026-10-05T02:18:30.0002935Z Updating files:  92% (763/829)
+2026-10-05T02:18:30.0007655Z Updating files:  93% (771/829)
+2026-10-05T02:18:30.0011730Z Updating files:  94% (780/829)
+2026-10-05T02:18:30.0017375Z Updating files:  95% (788/829)
+2026-10-05T02:18:30.0024108Z Updating files:  96% (796/829)
+2026-10-05T02:18:30.0028734Z Updating files:  97% (805/829)
+2026-10-05T02:18:30.0034563Z Updating files:  98% (813/829)
+2026-10-05T02:18:30.0039628Z Updating files:  99% (821/829)
+2026-10-05T02:18:30.0040131Z Updating files: 100% (829/829)
+2026-10-05T02:18:30.0040374Z Updating files: 100% (829/829), done.
+2026-10-05T02:18:30.0325825Z Note: switching to 'refs/remotes/pull/1362/merge'.
+2026-10-05T02:18:30.0326088Z 
+2026-10-05T02:18:30.0326261Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-05T02:18:30.0326664Z changes and commit them, and you can discard any commits you make in this
+2026-10-05T02:18:30.0326917Z state without impacting any branches by switching back to a branch.
+2026-10-05T02:18:30.0327064Z 
+2026-10-05T02:18:30.0327193Z If you want to create a new branch to retain commits you create, you may
+2026-10-05T02:18:30.0327463Z do so (now or later) by using -c with the switch command. Example:
+2026-10-05T02:18:30.0327625Z 
+2026-10-05T02:18:30.0327694Z   git switch -c <new-branch-name>
+2026-10-05T02:18:30.0328067Z 
+2026-10-05T02:18:30.0328130Z Or undo this operation with:
+2026-10-05T02:18:30.0328228Z 
+2026-10-05T02:18:30.0328284Z   git switch -
+2026-10-05T02:18:30.0328355Z 
+2026-10-05T02:18:30.0328477Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-05T02:18:30.0328650Z 
+2026-10-05T02:18:30.0328842Z HEAD is now at 5092684 Merge 30c84566f782e6503901d187348709dfaad05cc2 into e3508a67797401525ba7bc0ebd3b99349a8cac13
+2026-10-05T02:18:30.0365327Z ##[endgroup]
+2026-10-05T02:18:30.0403839Z [command]/usr/bin/git log -1 --format=%H
+2026-10-05T02:18:30.0423530Z 509268435509486297773e885598d7c2e90d4137
+2026-10-05T02:18:30.0597035Z ##[group]Run python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+2026-10-05T02:18:30.0597607Z [36;1mpython3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v[0m
+2026-10-05T02:18:30.0828842Z shell: /usr/bin/bash -e {0}
+2026-10-05T02:18:30.0829082Z ##[endgroup]
+2026-10-05T02:18:30.1523722Z test_drifted_file_replayed_from_snapshot (test_materialize.MaterializeTest.test_drifted_file_replayed_from_snapshot) ... ok
+2026-10-05T02:18:30.1680814Z test_missing_snapshot_fails_closed (test_materialize.MaterializeTest.test_missing_snapshot_fails_closed) ... ok
+2026-10-05T02:18:30.1695736Z test_snapshot_for_other_path_rejected (test_materialize.MaterializeTest.test_snapshot_for_other_path_rejected) ... ok
+2026-10-05T02:18:30.1712452Z test_tampered_snapshot_fails_closed (test_materialize.MaterializeTest.test_tampered_snapshot_fails_closed) ... ok
+2026-10-05T02:18:30.1712950Z 
+2026-10-05T02:18:30.1713088Z ----------------------------------------------------------------------
+2026-10-05T02:18:30.1713406Z Ran 4 tests in 0.021s
+2026-10-05T02:18:30.1713534Z 
+2026-10-05T02:18:30.1713617Z OK
+2026-10-05T02:18:30.1833400Z ##[group]Run python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+2026-10-05T02:18:30.1833828Z [36;1mpython3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \[0m
+2026-10-05T02:18:30.1834166Z [36;1m  --freeze research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json \[0m
+2026-10-05T02:18:30.1834413Z [36;1m  --dest "/home/runner/work/_temp/frozen-src"[0m
+2026-10-05T02:18:30.1889742Z shell: /usr/bin/bash -e {0}
+2026-10-05T02:18:30.1890046Z ##[endgroup]
+2026-10-05T02:18:30.3076453Z {
+2026-10-05T02:18:30.3076762Z   "freezes": [
+2026-10-05T02:18:30.3077052Z     "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json"
+2026-10-05T02:18:30.3077282Z   ],
+2026-10-05T02:18:30.3077392Z   "live": [
+2026-10-05T02:18:30.3077505Z     "Cargo.toml",
+2026-10-05T02:18:30.3077637Z     "docs/ic/calibration.json",
+2026-10-05T02:18:30.3077799Z     "examples/koblitz_orbit_dlp_swap.rs",
+2026-10-05T02:18:30.3078056Z     "examples/koblitz_rho_batch_ks_v2_n61.rs",
+2026-10-05T02:18:30.3078232Z     "examples/koblitz_rho_batch_ks_v3.rs",
+2026-10-05T02:18:30.3078460Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py",
+2026-10-05T02:18:30.3078742Z     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py",
+2026-10-05T02:18:30.3079023Z     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py",
+2026-10-05T02:18:30.3079288Z     "research/notes/ecc2k130/compact_s3_batch_20260929/PROTOCOL.md",
+2026-10-05T02:18:30.3079527Z     "research/notes/ecc2k130/compact_s3_batch_20260929/analyze.py",
+2026-10-05T02:18:30.3079935Z     "research/notes/ecc2k130/compact_s3_batch_20260929/archive.py",
+2026-10-05T02:18:30.3080224Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/FROZEN.json",
+2026-10-05T02:18:30.3080577Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n41_L1024_eval.points.jsonl",
+2026-10-05T02:18:30.3080972Z     "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n53_L1024_eval.points.jsonl",
+2026-10-05T02:18:30.3081278Z     "research/notes/ecc2k130/compact_s3_batch_20260929/prepare.py",
+2026-10-05T02:18:30.3081732Z     "research/notes/ecc2k130/compact_s3_batch_20260929/run_panel.py",
+2026-10-05T02:18:30.3081990Z     "research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py",
+2026-10-05T02:18:30.3082250Z     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
+2026-10-05T02:18:30.3082551Z     "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py",
+2026-10-05T02:18:30.3082800Z     "src/lib.rs"
+2026-10-05T02:18:30.3082910Z   ],
+2026-10-05T02:18:30.3083020Z   "pinned_files": 25,
+2026-10-05T02:18:30.3083158Z   "replayed_from_snapshot": {
+2026-10-05T02:18:30.3083322Z     ".github/workflows/compact-s3-batch.yml": {
+2026-10-05T02:18:30.3083585Z       "frozen_sha256": "8a1d24841733cc5913b570004543a8d7f1e5fdd3ce2f98267ba7924849184888",
+2026-10-05T02:18:30.3083972Z       "live_sha256": "a61937db79cedcb7268d35850fec0ae9db5fe118501dd77531f9017ccb384a72"
+2026-10-05T02:18:30.3084344Z     },
+2026-10-05T02:18:30.3084533Z     "examples/koblitz_orbit_dlp_s3_batch.rs": {
+2026-10-05T02:18:30.3084892Z       "frozen_sha256": "e998120842faf393910a6b4a9740b3af9880eb626578fa88c575a32e5254f2c7",
+2026-10-05T02:18:30.3085298Z       "live_sha256": "7b2393731cd7da047b9404585c85dc2f384ee857e43778661e806649c6cf552d"
+2026-10-05T02:18:30.3085604Z     },
+2026-10-05T02:18:30.3085785Z     "src/cryptanalysis/koblitz_fast.rs": {
+2026-10-05T02:18:30.3086157Z       "frozen_sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+2026-10-05T02:18:30.3086607Z       "live_sha256": "0b86548e12930040177e1b84a0955e2bb983d3945b538d2cdc6cc2ad4f154de5"
+2026-10-05T02:18:30.3086931Z     },
+2026-10-05T02:18:30.3087123Z     "src/cryptanalysis/koblitz_index_calculus.rs": {
+2026-10-05T02:18:30.3087687Z       "frozen_sha256": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+2026-10-05T02:18:30.3088125Z       "live_sha256": "4308533e6ae62437766e6e64a66ad45546050ec876e3076207928e2def5b824c"
+2026-10-05T02:18:30.3088451Z     },
+2026-10-05T02:18:30.3088642Z     "src/cryptanalysis/semaev_decomp.rs": {
+2026-10-05T02:18:30.3088993Z       "frozen_sha256": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+2026-10-05T02:18:30.3089446Z       "live_sha256": "88e4351922a8c0b3e3bc1dc692e4beaae332ff515d38b080be8911d5669e3bb5"
+2026-10-05T02:18:30.3089759Z     }
+2026-10-05T02:18:30.3090062Z   },
+2026-10-05T02:18:30.3090264Z   "schema": "compact-frozen-source-materialization-v1"
+2026-10-05T02:18:30.3090510Z }
+2026-10-05T02:18:30.3157236Z ##[group]Run cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+2026-10-05T02:18:30.3157600Z [36;1mcp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock[0m
+2026-10-05T02:18:30.3212170Z shell: /usr/bin/bash -e {0}
+2026-10-05T02:18:30.3212320Z ##[endgroup]
+2026-10-05T02:18:30.3318928Z ##[group]Run cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch
+2026-10-05T02:18:30.3319373Z [36;1mcargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch[0m
+2026-10-05T02:18:30.3371915Z shell: /usr/bin/bash -e {0}
+2026-10-05T02:18:30.3372068Z ##[endgroup]
+2026-10-05T02:18:30.9040464Z     Updating crates.io index
+2026-10-05T02:18:31.4899185Z  Downloading crates ...
+2026-10-05T02:18:31.5817996Z   Downloaded adler2 v2.0.1
+2026-10-05T02:18:31.5978278Z   Downloaded arrayvec v0.7.8
+2026-10-05T02:18:31.5999467Z   Downloaded anstyle-query v1.1.5
+2026-10-05T02:18:31.6052349Z   Downloaded rand v0.8.8
+2026-10-05T02:18:31.6076508Z   Downloaded serde v1.0.229
+2026-10-05T02:18:31.6102022Z   Downloaded anstream v1.0.0
+2026-10-05T02:18:31.6116912Z   Downloaded anstyle-parse v1.0.0
+2026-10-05T02:18:31.6128416Z   Downloaded blake3 v1.8.7
+2026-10-05T02:18:31.6185703Z   Downloaded serde_json v1.0.151
+2026-10-05T02:18:31.6239090Z   Downloaded anstyle v1.0.14
+2026-10-05T02:18:31.6248875Z   Downloaded crossbeam-utils v0.8.23
+2026-10-05T02:18:31.6267949Z   Downloaded itoa v1.0.18
+2026-10-05T02:18:31.6277364Z   Downloaded find-msvc-tools v0.1.13
+2026-10-05T02:18:31.6288753Z   Downloaded either v1.18.0
+2026-10-05T02:18:31.6298317Z   Downloaded hex v0.4.3
+2026-10-05T02:18:31.6308876Z   Downloaded getrandom v0.2.17
+2026-10-05T02:18:31.6329464Z   Downloaded autocfg v1.5.1
+2026-10-05T02:18:31.6341878Z   Downloaded heck v0.5.0
+2026-10-05T02:18:31.6350960Z   Downloaded is_terminal_polyfill v1.70.2
+2026-10-05T02:18:31.6356818Z   Downloaded clap v4.6.7
+2026-10-05T02:18:31.6436521Z   Downloaded crossbeam-epoch v0.9.21
+2026-10-05T02:18:31.6456738Z   Downloaded rayon v1.12.0
+2026-10-05T02:18:31.6525669Z   Downloaded serde_derive v1.0.229
+2026-10-05T02:18:31.6546164Z   Downloaded zeroize v1.9.0
+2026-10-05T02:18:31.6556343Z   Downloaded rayon-core v1.13.0
+2026-10-05T02:18:31.6581898Z   Downloaded strsim v0.11.1
+2026-10-05T02:18:31.6590691Z   Downloaded syn v2.0.119
+2026-10-05T02:18:31.6663470Z   Downloaded unicode-ident v1.0.26
+2026-10-05T02:18:31.6682045Z   Downloaded flate2 v1.1.10
+2026-10-05T02:18:31.6715730Z   Downloaded shlex v2.0.1
+2026-10-05T02:18:31.6724558Z   Downloaded simd-adler32 v0.3.10
+2026-10-05T02:18:31.6736978Z   Downloaded quote v1.0.47
+2026-10-05T02:18:31.6755127Z   Downloaded subtle v2.6.1
+2026-10-05T02:18:31.6762880Z   Downloaded rand_chacha v0.3.1
+2026-10-05T02:18:31.6770154Z   Downloaded colorchoice v1.0.5
+2026-10-05T02:18:31.6776276Z   Downloaded cfg-if v1.0.5
+2026-10-05T02:18:31.6785133Z   Downloaded zeroize_derive v1.5.0
+2026-10-05T02:18:31.6791435Z   Downloaded proc-macro2 v1.0.107
+2026-10-05T02:18:31.6811246Z   Downloaded clap_lex v1.1.1
+2026-10-05T02:18:31.6818398Z   Downloaded cpufeatures v0.3.1
+2026-10-05T02:18:31.6828018Z   Downloaded miniz_oxide v0.9.1
+2026-10-05T02:18:31.6845205Z   Downloaded constant_time_eq v0.4.2
+2026-10-05T02:18:31.6859047Z   Downloaded crossbeam-deque v0.8.8
+2026-10-05T02:18:31.6869011Z   Downloaded ppv-lite86 v0.2.21
+2026-10-05T02:18:31.6877534Z   Downloaded clap_derive v4.6.7
+2026-10-05T02:18:31.6892931Z   Downloaded num-integer v0.1.47
+2026-10-05T02:18:31.6903684Z   Downloaded num-traits v0.2.19
+2026-10-05T02:18:31.6921292Z   Downloaded rand_core v0.6.4
+2026-10-05T02:18:31.6930120Z   Downloaded base64 v0.21.7
+2026-10-05T02:18:31.6956200Z   Downloaded utf8parse v0.2.2
+2026-10-05T02:18:31.6962833Z   Downloaded zmij v1.0.23
+2026-10-05T02:18:31.6974682Z   Downloaded serde_core v1.0.229
+2026-10-05T02:18:31.6993095Z   Downloaded crc32fast v1.5.2
+2026-10-05T02:18:31.7006957Z   Downloaded clap_builder v4.6.7
+2026-10-05T02:18:31.7050870Z   Downloaded num-bigint v0.4.8
+2026-10-05T02:18:31.7083497Z   Downloaded cc v1.4.7
+2026-10-05T02:18:31.7104637Z   Downloaded memchr v2.8.3
+2026-10-05T02:18:31.7142569Z   Downloaded zlib-rs v0.6.8
+2026-10-05T02:18:31.7179517Z   Downloaded zerocopy v0.8.57
+2026-10-05T02:18:31.7330075Z   Downloaded syn v3.0.6
+2026-10-05T02:18:31.7405678Z   Downloaded libc v0.2.189
+2026-10-05T02:18:31.8279234Z    Compiling proc-macro2 v1.0.107
+2026-10-05T02:18:31.8279545Z    Compiling quote v1.0.47
+2026-10-05T02:18:31.8279758Z    Compiling unicode-ident v1.0.26
+2026-10-05T02:18:31.8280098Z    Compiling cfg-if v1.0.5
+2026-10-05T02:18:33.3934733Z    Compiling libc v0.2.189
+2026-10-05T02:18:34.2704400Z    Compiling zerocopy v0.8.57
+2026-10-05T02:18:35.7487459Z    Compiling crossbeam-utils v0.8.23
+2026-10-05T02:18:35.7704971Z    Compiling autocfg v1.5.1
+2026-10-05T02:18:35.8483556Z    Compiling crossbeam-epoch v0.9.21
+2026-10-05T02:18:36.1547890Z    Compiling num-traits v0.2.19
+2026-10-05T02:18:36.5580944Z    Compiling getrandom v0.2.17
+2026-10-05T02:18:36.7008386Z    Compiling syn v3.0.6
+2026-10-05T02:18:36.7146075Z    Compiling shlex v2.0.1
+2026-10-05T02:18:36.7319502Z    Compiling utf8parse v0.2.2
+2026-10-05T02:18:36.7801040Z    Compiling crossbeam-deque v0.8.8
+2026-10-05T02:18:36.8051318Z    Compiling find-msvc-tools v0.1.13
+2026-10-05T02:18:36.8631242Z    Compiling serde_core v1.0.229
+2026-10-05T02:18:36.9321116Z    Compiling cc v1.4.7
+2026-10-05T02:18:36.9987138Z    Compiling anstyle-parse v1.0.0
+2026-10-05T02:18:37.1498929Z    Compiling rand_core v0.6.4
+2026-10-05T02:18:37.6443324Z    Compiling anstyle v1.0.14
+2026-10-05T02:18:37.8180813Z    Compiling colorchoice v1.0.5
+2026-10-05T02:18:37.8681041Z    Compiling rayon-core v1.13.0
+2026-10-05T02:18:37.9140987Z    Compiling anstyle-query v1.1.5
+2026-10-05T02:18:37.9410931Z    Compiling crc32fast v1.5.2
+2026-10-05T02:18:37.9781699Z    Compiling is_terminal_polyfill v1.70.2
+2026-10-05T02:18:38.0119732Z    Compiling zmij v1.0.23
+2026-10-05T02:18:38.0582178Z    Compiling anstream v1.0.0
+2026-10-05T02:18:38.1363593Z    Compiling blake3 v1.8.7
+2026-10-05T02:18:38.8321379Z    Compiling syn v2.0.119
+2026-10-05T02:18:38.9050883Z    Compiling ppv-lite86 v0.2.21
+2026-10-05T02:18:39.2381400Z    Compiling heck v0.5.0
+2026-10-05T02:18:39.3251189Z    Compiling rand_chacha v0.3.1
+2026-10-05T02:18:39.3401015Z    Compiling simd-adler32 v0.3.10
+2026-10-05T02:18:39.8531000Z    Compiling serde_json v1.0.151
+2026-10-05T02:18:39.9251118Z    Compiling adler2 v2.0.1
+2026-10-05T02:18:40.0031450Z    Compiling strsim v0.11.1
+2026-10-05T02:18:40.0121159Z    Compiling clap_lex v1.1.1
+2026-10-05T02:18:40.2341141Z    Compiling serde v1.0.229
+2026-10-05T02:18:40.2960794Z    Compiling clap_builder v4.6.7
+2026-10-05T02:18:40.3751033Z    Compiling miniz_oxide v0.9.1
+2026-10-05T02:18:40.6441025Z    Compiling rand v0.8.8
+2026-10-05T02:18:41.2540995Z    Compiling clap_derive v4.6.7
+2026-10-05T02:18:41.6330995Z    Compiling serde_derive v1.0.229
+2026-10-05T02:18:42.0431981Z    Compiling zeroize_derive v1.5.0
+2026-10-05T02:18:42.3751760Z    Compiling num-integer v0.1.47
+2026-10-05T02:18:43.8013184Z    Compiling constant_time_eq v0.4.2
+2026-10-05T02:18:43.9516993Z    Compiling arrayvec v0.7.8
+2026-10-05T02:18:44.0685484Z    Compiling itoa v1.0.18
+2026-10-05T02:18:44.1659976Z    Compiling memchr v2.8.3
+2026-10-05T02:18:44.1884742Z    Compiling cpufeatures v0.3.1
+2026-10-05T02:18:44.2438344Z    Compiling either v1.18.0
+2026-10-05T02:18:44.3733357Z    Compiling rayon v1.12.0
+2026-10-05T02:18:46.2555775Z    Compiling flate2 v1.1.10
+2026-10-05T02:18:46.7929368Z    Compiling num-bigint v0.4.8
+2026-10-05T02:18:47.0090227Z    Compiling clap v4.6.7
+2026-10-05T02:18:47.0373812Z    Compiling zeroize v1.9.0
+2026-10-05T02:18:47.1598053Z    Compiling subtle v2.6.1
+2026-10-05T02:18:47.2386182Z    Compiling base64 v0.21.7
+2026-10-05T02:18:47.5588524Z    Compiling hex v0.4.3
+2026-10-05T02:18:48.7288965Z    Compiling crypto v0.1.0 (/home/runner/work/_temp/frozen-src)
+2026-10-05T02:18:49.1717505Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ic/boundary_targets.json`: No such file or directory (os error 2)
+2026-10-05T02:18:49.1717918Z   --> src/cryptanalysis/ecbench/claim.rs:37:32
+2026-10-05T02:18:49.1718084Z    |
+2026-10-05T02:18:49.1718283Z 37 | pub const CLAIM_LEDGER: &str = include_str!("../../../docs/ic/boundary_targets.json");
+2026-10-05T02:18:49.1718765Z    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-05T02:18:49.1718898Z 
+2026-10-05T02:18:49.2381266Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/ecbench/schema.sql`: No such file or directory (os error 2)
+2026-10-05T02:18:49.2381874Z   --> src/cryptanalysis/ecbench/db.rs:31:30
+2026-10-05T02:18:49.2382129Z    |
+2026-10-05T02:18:49.2382420Z 31 | pub const SCHEMA_SQL: &str = include_str!("../../../docs/ecbench/schema.sql");
+2026-10-05T02:18:49.2382808Z    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-05T02:18:49.2383004Z 
+2026-10-05T02:18:49.3160513Z error: couldn't read `src/cryptanalysis/ecbench/../../../docs/curves/registry.json`: No such file or directory (os error 2)
+2026-10-05T02:18:49.3161128Z    --> src/cryptanalysis/ecbench/workload.rs:201:24
+2026-10-05T02:18:49.3161394Z     |
+2026-10-05T02:18:49.3161655Z 201 | const REGISTRY: &str = include_str!("../../../docs/curves/registry.json");
+2026-10-05T02:18:49.3162032Z     |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-05T02:18:49.3162228Z 
+2026-10-05T02:18:49.8523460Z error[E0432]: unresolved imports `super::koblitz_index_calculus::IndividualLogInterruption`, `super::koblitz_index_calculus::IndividualLogObserver`
+2026-10-05T02:18:49.8524167Z   --> src/cryptanalysis/prepared_n17_target.rs:12:9
+2026-10-05T02:18:49.8524343Z    |
+2026-10-05T02:18:49.8524579Z 12 |         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+2026-10-05T02:18:49.8524954Z    |         ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^ no `IndividualLogObserver` in `cryptanalysis::koblitz_index_calculus`
+2026-10-05T02:18:49.8525195Z    |         |
+2026-10-05T02:18:49.8525389Z    |         no `IndividualLogInterruption` in `cryptanalysis::koblitz_index_calculus`
+2026-10-05T02:18:49.8525600Z    |
+2026-10-05T02:18:49.8525717Z help: a similar name exists in the module
+2026-10-05T02:18:49.8525866Z    |
+2026-10-05T02:18:49.8526099Z 12 -         IndividualLogInterruption, IndividualLogObserver, IndividualLogReport, IndividualLogSolver,
+2026-10-05T02:18:49.8526466Z 12 +         IndividualLogInterruption, IndividualLogSolver, IndividualLogReport, IndividualLogSolver,
+2026-10-05T02:18:49.8526716Z    |
+2026-10-05T02:18:49.8526779Z 
+2026-10-05T02:18:51.6197912Z For more information about this error, try `rustc --explain E0432`.
+2026-10-05T02:18:51.6322235Z error: could not compile `crypto` (lib) due to 4 previous errors
+2026-10-05T02:18:51.6587504Z ##[error]Process completed with exit code 101.
+2026-10-05T02:18:51.6664146Z ##[group]Run actions/upload-artifact@v4
+2026-10-05T02:18:51.6664305Z with:
+2026-10-05T02:18:51.6664429Z   name: compact-s3-batch-n41-L1024
+2026-10-05T02:18:51.6664607Z   path: /home/runner/work/_temp/compact-s3-batch/n41_L1024
+2026-10-05T02:18:51.6664793Z   if-no-files-found: warn
+2026-10-05T02:18:51.6664919Z   retention-days: 90
+2026-10-05T02:18:51.6665041Z   compression-level: 6
+2026-10-05T02:18:51.6665158Z   overwrite: false
+2026-10-05T02:18:51.6665281Z   include-hidden-files: false
+2026-10-05T02:18:51.6665414Z ##[endgroup]
+2026-10-05T02:18:51.7796631Z (node:3270) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-05T02:18:51.7797058Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-05T02:18:51.7821081Z ##[warning]No files were found with the provided path: /home/runner/work/_temp/compact-s3-batch/n41_L1024. No artifacts will be uploaded.
+2026-10-05T02:18:51.7975018Z Post job cleanup.
+2026-10-05T02:18:51.8518397Z [command]/usr/bin/git version
+2026-10-05T02:18:51.8547480Z git version 2.55.0
+2026-10-05T02:18:51.8568626Z Temporarily overriding HOME='/home/runner/work/_temp/4fbc5109-39d0-4980-8ffa-556187a62883' before making global git config changes
+2026-10-05T02:18:51.8569241Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-05T02:18:51.8572619Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/crypto/crypto
+2026-10-05T02:18:51.8601740Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-05T02:18:51.8627054Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-05T02:18:51.8843398Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-05T02:18:51.8870622Z http.https://github.com/.extraheader
+2026-10-05T02:18:51.8878215Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-05T02:18:51.8907164Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-05T02:18:51.9115096Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-05T02:18:51.9144295Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-05T02:18:51.9491056Z Cleaning up orphan processes
+2026-10-05T02:18:51.9684641Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

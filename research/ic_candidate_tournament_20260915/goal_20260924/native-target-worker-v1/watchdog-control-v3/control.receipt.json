@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/prepared_target_worker-c828abe59f749a96",
+    "--exact",
+    "journal::tests::abrupt_record_helper",
+    "--nocapture"
+  ],
+  "child_wall_ns": 2002517125,
+  "cwd": "/Volumes/SSD990/llm/tmp/ic-target-journal-watchdog-49207-1791168707920762000",
+  "deadline_ms": 2000,
+  "environment": {
+    "IC_TARGET_RECORD_CONTROL": "/Volumes/SSD990/llm/tmp/ic-target-journal-watchdog-49207-1791168707920762000"
+  },
+  "executable_sha256_after": "c19b59254f7873b36673306525f41ae112abaefcaeb5a848f1a912e79c32247b",
+  "executable_sha256_before": "c19b59254f7873b36673306525f41ae112abaefcaeb5a848f1a912e79c32247b",
+  "exit_code": null,
+  "output_limit": false,
+  "pid": 49219,
+  "process_group_drain_confirmed": true,
+  "process_group_drain_requested": true,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 36,
+  "stdout_sha256": "1d3695b106fb99dc8d7c2ad9ad5b4888bb97649392f4cdcc156dde77dafa78cd",
+  "timed_out": true
+}
