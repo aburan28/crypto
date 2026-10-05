@@ -33,6 +33,7 @@ use num_traits::ToPrimitive;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::Write;
+use std::process::ExitCode;
 use std::time::{Duration, Instant};
 
 /// Consecutive laps on one clock: the laps of an interval sum to its length.
@@ -711,7 +712,7 @@ fn peak_rss_bytes() -> Option<u64> {
     }
 }
 
-fn main() {
+fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
@@ -1064,6 +1065,7 @@ fn main() {
         } else {
             failed += 1;
         }
+        let target_exit_code = if verified == Some(true) { 0 } else { 1 };
         let record = json!({
             "kind":"compact_orbit_dlp_target",
             "n":n, "a":a, "fixture_index":fixture_index,
@@ -1071,7 +1073,7 @@ fn main() {
             "generator":generator.map(|(x, y)| [x, y]),
             "target":target.map(|(x, y)| [x, y]),
             "published_q":target.map(|(x, y)| [x, y]),
-            "exit_code":0,
+            "exit_code":target_exit_code,
             "x_codes":relation.as_ref().map(|relation| relation.x_codes),
             "pinned_intermediates":relation.as_ref().map(|relation| relation.intermediates),
             "point_indices":relation.as_ref().map(|relation| relation.point_indices),
@@ -1213,5 +1215,10 @@ fn main() {
             "factor_base_representatives":representatives,
         });
         std::fs::write(path, format!("{dump}\n")).expect("write base dump");
+    }
+    if failed == 0 {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }
