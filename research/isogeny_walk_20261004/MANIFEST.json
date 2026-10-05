@@ -1,0 +1,28 @@
+{
+  "schema": "isogeny-walk-raw-manifest/v1",
+  "why_not_committed": "raw outputs of the 20k walks exceed what belongs in Git; the walk is deterministic, so the command regenerates the same bytes from the commit that adds this file",
+  "durable_location": "none uploaded; regenerate with the command below and compare SHA-256",
+  "build": "cargo build --release --bin isogeny_walk",
+  "runs": [
+    {
+      "run": "p256-ell61-20k",
+      "command": "./target/release/isogeny_walk walk --curve p256 --max-ell 61 --max-curves 20000 --out DIR",
+      "verify_command": "./target/release/isogeny_walk verify --curve p256 --dir DIR",
+      "files": {
+        "curves.yaml": {"sha256": "44c170cbd9439943947000fb1347b055cc4ad9557167aac91de08b0062877e5e", "bytes": 109115150},
+        "isogeny_routes.json": {"sha256": "05f7df41c391e0153c65386262695462bff22151a0a9993aaeae00f302b01dad", "bytes": 224036521}
+      },
+      "committed": ["runs/p256-ell61-20k/walk.json", "runs/p256-ell61-20k/VERIFY.json"]
+    },
+    {
+      "run": "p224-ell61-20k",
+      "command": "./target/release/isogeny_walk walk --curve p224 --max-ell 61 --max-curves 20000 --out DIR",
+      "verify_command": "./target/release/isogeny_walk verify --curve p224 --dir DIR",
+      "files": {
+        "curves.yaml": {"sha256": "7588e57c9dade59278a255884ceaa101ec32609e722e8309de2f2826921e9cdf", "bytes": 89133486},
+        "isogeny_routes.json": {"sha256": "e88d7c763a46dff6b0f10501b37dfd1ab6458db840d79122e8e50f757648bc5b", "bytes": 317510566}
+      },
+      "committed": ["runs/p224-ell61-20k/walk.json", "runs/p224-ell61-20k/VERIFY.json"]
+    }
+  ]
+}
