@@ -99,6 +99,19 @@ enum Cmd {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Upload a walk or trait-shard directory made earlier (offline) to S3,
+    /// as `walk --store` or `traits --store` would have.
+    Publish {
+        /// The directory: a walk (has walk.json) or a trait shard (has metrics.json).
+        #[arg(long)]
+        dir: PathBuf,
+        /// s3://bucket/prefix.
+        #[arg(long)]
+        store: String,
+        /// For a trait shard: the walk's run id.
+        #[arg(long)]
+        run: Option<String>,
+    },
     /// Download a stored walk, trait shard or collected traits, checking every hash.
     Fetch {
         /// s3://bucket/prefix the run was published under.
@@ -204,7 +217,7 @@ enum Cmd {
 
 #[derive(Args)]
 struct CurveArgs {
-    /// p256, p224, or custom (with --p --a --b --order --gx --gy).
+    /// p256, p224, p192, or custom (with --p --a --b --order --gx --gy).
     #[arg(long, default_value = "p256")]
     curve: String,
     #[arg(long)]
@@ -252,6 +265,7 @@ impl CurveArgs {
     fn start(&self) -> Result<StartCurve, String> {
         match self.curve.as_str() {
             "p256" | "P-256" => Ok(StartCurve::p256()),
+            "p192" | "P-192" => Ok(StartCurve::p192()),
             "p224" | "P-224" => Ok(StartCurve::p224()),
             "custom" => {
                 let name: &'static str = Box::leak(self.name.clone().into_boxed_str());
@@ -267,7 +281,9 @@ impl CurveArgs {
                 };
                 Ok(StartCurve::from_params(&params, false))
             }
-            other => Err(format!("unknown curve {other}; use p256, p224 or custom")),
+            other => Err(format!(
+                "unknown curve {other}; use p256, p224, p192 or custom"
+            )),
         }
     }
 }
@@ -462,6 +478,32 @@ fn run(cli: Cli) -> Result<(), String> {
                 V::Map(m) => m,
                 _ => unreachable!(),
             };
+            summary.push((
+                "run".into(),
+                V::map(vec![
+                    ("run_id", V::s(plan_walk.run_id())),
+                    (
+                        "curve_args",
+                        V::Seq(
+                            plan_walk
+                                .curve_args
+                                .iter()
+                                .map(|a| V::s(a.clone()))
+                                .collect(),
+                        ),
+                    ),
+                    (
+                        "walk_args",
+                        V::Seq(
+                            plan_walk
+                                .walk_args
+                                .iter()
+                                .map(|a| V::s(a.clone()))
+                                .collect(),
+                        ),
+                    ),
+                ]),
+            ));
             summary.push((
                 "outputs".into(),
                 V::map(vec![
@@ -663,6 +705,86 @@ fn run(cli: Cli) -> Result<(), String> {
                 "isogeny_walk: {shards} taskq specs in {}; submit each with `taskq submit --spec FILE`",
                 out.display()
             );
+            Ok(())
+        }
+        Cmd::Publish {
+            dir,
+            store: uri,
+            run,
+        } => {
+            let read = |n: &str| -> Result<serde_json::Value, String> {
+                let t = std::fs::read_to_string(dir.join(n)).map_err(|e| format!("{n}: {e}"))?;
+                serde_json::from_str(&t).map_err(|e| e.to_string())
+            };
+            if dir.join("walk.json").exists() {
+                let w = read("walk.json")?;
+                let run_id = w["run"]["run_id"]
+                    .as_str()
+                    .ok_or("walk.json has no run id; rerun the walk with this version")?
+                    .to_string();
+                if w["counts"]["failures"].as_u64() != Some(0) {
+                    return Err("not publishing a walk with failures".into());
+                }
+                for f in ["curves.yaml", "isogeny_routes.json"] {
+                    let text =
+                        std::fs::read_to_string(dir.join(f)).map_err(|e| format!("{f}: {e}"))?;
+                    if w["outputs"][f].as_str() != Some(sha256_hex(&text).as_str()) {
+                        return Err(format!("{f} does not match the hash walk.json records"));
+                    }
+                }
+                let meta = V::map(vec![
+                    ("kind", V::s("walk")),
+                    ("run_id", V::s(run_id.clone())),
+                    (
+                        "root",
+                        V::s(w["root"]["name"].as_str().unwrap_or("").to_string()),
+                    ),
+                    ("published_later", V::Bool(true)),
+                    (
+                        "curves",
+                        V::int(w["counts"]["curves"].as_u64().unwrap_or(0)),
+                    ),
+                    (
+                        "edges",
+                        V::int(w["counts"]["edges_verified"].as_u64().unwrap_or(0)),
+                    ),
+                ]);
+                let r = publish_dir(
+                    &uri,
+                    &store::walk_rel(&run_id)?,
+                    &dir,
+                    &["curves.yaml", "isogeny_routes.json", "walk.json"],
+                    meta,
+                )?;
+                write(
+                    &dir.join("STORE.json"),
+                    &V::map(vec![
+                        ("run_id", V::s(run_id)),
+                        ("marker", V::s(r.marker_uri)),
+                        ("won", V::Bool(r.won)),
+                        ("complete", r.marker),
+                    ])
+                    .json(),
+                )?;
+            } else {
+                let m = read(queue::METRICS_FILE)?;
+                let run = run.ok_or("a trait shard needs --run (the walk's run id)")?;
+                let shard = m["shard"].as_u64().ok_or("metrics.json shard")? as usize;
+                let of = m["of"].as_u64().ok_or("metrics.json of")? as usize;
+                publish_dir(
+                    &uri,
+                    &store::shard_rel(&run, shard, of)?,
+                    &dir,
+                    &[queue::TRAITS_FILE, queue::METRICS_FILE, queue::CLASS_FILE],
+                    V::map(vec![
+                        ("kind", V::s("trait-shard")),
+                        ("run_id", V::s(run)),
+                        ("shard", V::int(shard)),
+                        ("of", V::int(of)),
+                        ("published_later", V::Bool(true)),
+                    ]),
+                )?;
+            }
             Ok(())
         }
         Cmd::Fetch {

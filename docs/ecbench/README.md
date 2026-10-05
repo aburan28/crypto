@@ -320,6 +320,30 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`koblitz-standard-subspace:dimension=d` with
+`pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
+PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no
+default for any parameter that changes the search. The base is every point
+whose abscissa lies in `span(1, z, …, z^{d−1})`, folded by negation only. It
+is the base #1333's workers used.
+
+- **Charged:** every point addition the decomposition performs, including
+  F6-IC's `geometric_group_additions` (support closure, residual arithmetic
+  and witness replay), plus the framework's sign lift of each witness.
+- **Counted, not charged:** the Boolean solver's word XORs, under the
+  inherited-F4 adapters' unit string, so `S` is a lower bound and names
+  that unit in `unpriced`. Reductions, splits, propagations and every F6
+  gate counter ride in the record's `solver.extra`.
+
+Both engines are exact on the same base and seed, so the two arms issue the
+same queries until one exhausts its node budget. The base and oracle live in the
+`ecbench` binary (`src/bin/ecbench/pdp3_koblitz.rs`) and reach `ic.pipeline`
+through `methods::register_binary_plugins`. The library cannot name them:
+frozen-source replays rebuild it against pre-F6 snapshots of
+`koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
+evaluations, and the tournament admits no root build script. It also
+refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic
@@ -401,7 +425,14 @@ and the seed, never on the host. `ecbench verify --replay N` re-executes
 N measured runs (`--replay-all`, every deterministic one) and requires
 the same answer, total, phase counts, counters, unpriced work and factor
 base, bit for bit. Run on another machine, it is an independent check of
-the figure. The audit also recomputes every derived figure from the
+the figure. Records written before 2026-10-05 by an `ic.pipeline` arm
+whose solver work was wall-priced (the descent-algebraic arms of
+`research/ecbench_yield_sweep_20261004/sessions/koblitz`) carry gae
+figures rounded to the binade of that wall term, because the term was
+removed by subtraction; the audit reproduces that rounding from the
+solver term and pre-removal total the record itself carries, reports the
+replay as `identical (legacy gae rounding, …)`, and new records carry the
+exact figure. The audit also recomputes every derived figure from the
 record's own counts (`S = total/√r`, the floor, the ratio, the
 lower-bound flag) and, for a session graded under the current rules,
 regrades every run from its recorded observations. A figure edited by
@@ -588,12 +619,24 @@ Stated so that nothing here is read as more than it is:
   is a passing audit of these exact files, run elsewhere, that
   reproduced both runs, and a reader checks the receipt itself at the
   pointer the claim cites.
-- **Word-size curves only.** The counted group types hold `GF(p)` with
-  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
-  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it. `p256_factor_base` only constructs and inventories a factor base on the
-  registered wide curve; it does not make that curve runnable by
-  `ic.pipeline` and produces no operation-count or speed claim.
+- **Wide curves run two methods.** Prime curves need `p < 2^62`. Binary
+  curves run every method for `m ≤ 62`. Koblitz curves with `64 ≤ m ≤ 127`
+  (`koblitz_wide`, over the registry's modulus, so the m = 83 gate curve
+  `icv1-f2m83-tm6151469093347-debefd74` of AGENTS.md §8a builds) run only
+  `rho.signed_frobenius_strong` and `claw.pair_table`. Both are the one-word
+  code made generic over the word, and the committed sessions' replays pin
+  that the one-word walk did not change. Every other method refuses a wide
+  curve. A subgroup order past `2^64` is written as a decimal string
+  (`canonical::compat_u128`) and gets the `_v2` target laws
+  (`uniform_scalar_sha256_v2`, `hash_to_subgroup_v2`). Of the registered
+  wide Koblitz curves only m = 83 and m = 97 have a prime `#E/h`, so the
+  cheapest wide solve is m = 83 itself: about `2^37` strong-rho steps,
+  some 20 single-core hours at the 0.49 µs per step measured on Apple
+  silicon. The claw's cost-minimising table there is about `2^37` entries,
+  out of reach of one host's memory. `p256_factor_base` only constructs
+  and inventories a factor base on the registered wide prime curve; it
+  does not make that curve runnable by `ic.pipeline` and produces no
+  operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a

@@ -1,0 +1,13 @@
+diff --git a/src/cryptanalysis/f6_wide_geometry.rs b/src/cryptanalysis/f6_wide_geometry.rs
+index d65fed03a..073e1a624 100644
+--- a/src/cryptanalysis/f6_wide_geometry.rs
++++ b/src/cryptanalysis/f6_wide_geometry.rs
+@@ -147,7 +147,7 @@ impl F6WidePairIndex {
+         if !self.curve.is_on_curve(target) {
+             return None;
+         }
+-        const BATCH: usize = 256;
++        const BATCH: usize = 2_048;
+         for chunk in self.sums.chunks(BATCH) {
+             let negated: Vec<_> = chunk.iter().map(|(sum, _)| point_neg(sum)).collect();
+             let residuals = if batched {

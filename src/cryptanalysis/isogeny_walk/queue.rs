@@ -463,11 +463,10 @@ pub fn plan(
                 ("retry", V::map(vec![("max_attempts", V::int(3))])),
                 (
                     "idempotency_key",
-                    V::s(format!(
-                        "isogeny-walk-traits/{}/{}/{i}-of-{shards}",
-                        &key,
-                        &commit[..12]
-                    )),
+                    V::s({
+                        let short_commit = &commit[..12];
+                        format!("isogeny-walk-traits/{key}/{short_commit}/{i}-of-{shards}")
+                    }),
                 ),
                 (
                     "labels",
