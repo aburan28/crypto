@@ -18,6 +18,9 @@ on:
       - "docs/ecc2k130-status/**"
       - "docs/site/**"
       - "docs/index-calculus-scoreboard.html"
+      # The panel index is generated from the scoreboard and pinned by
+      # scripts/site/test_build.py; an edit to either side must rerun it.
+      - "docs/ic-current-state.html"
       - "docs/browser/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"
@@ -42,6 +45,9 @@ on:
       - "docs/ecc2k130-status/**"
       - "docs/site/**"
       - "docs/index-calculus-scoreboard.html"
+      # The panel index is generated from the scoreboard and pinned by
+      # scripts/site/test_build.py; an edit to either side must rerun it.
+      - "docs/ic-current-state.html"
       - "docs/browser/**"
       - "scripts/build_lab_browser.py"
       - "docs/ic/progress-timeline.json"

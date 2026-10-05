@@ -241,15 +241,39 @@ another key through this API; `ŝ` and `z` are zeroised on drop. A cache is
 
 #### Not done, and not claimed
 
-- **No comparison with the pq-crystals AVX2 implementation.** Its published
-  ML-KEM-768 figures are on other hardware; a peer row needs a same-machine
-  build, which this round did not make.
+- ~~**No comparison with the pq-crystals AVX2 implementation.**~~ Since
+  made on this host, see the next section.
 - **`J(z ‖ c)` is still computed on every decapsulation.** Skipping it when
   the ciphertext checks out would be the cheapest remaining saving (nine
   permutations at ML-KEM-768) and would hand an attacker a timing oracle on
   ciphertext validity, the plaintext-checking oracle that chosen-ciphertext
   attacks on Kyber are built from. It stays.
 - **No AVX-512 ring arithmetic, no NEON.** The NTT is AVX2 only.
+
+### The reference: pq-crystals AVX2 on the same host
+
+Until this row existed the only comparison was against our own `main`.
+pq-crystals' AVX2 Kyber (FIPS 203 version, `3edd5af`), built with its own
+`Makefile` (`-march=native`) on the same machine and run interleaved with
+ours, is the boundary. Kilocycles; ratio is ours ÷ reference, so above 1 is
+slower. Details, kernel-level breakdown and raw runs:
+[`research/pqc_ml_kem_reference_20261005/`](../research/pqc_ml_kem_reference_20261005/README.md).
+
+| operation | pq-crystals AVX2 | ours | ratio | ours, prepared | ratio |
+|---|---:|---:|---:|---:|---:|
+| ML-KEM-768 keygen | 18.10 | 28.1 | 1.55 | 29.5 | 1.63 |
+| ML-KEM-768 encaps | 18.48 | 26.0 | 1.41 | 9.7 | 0.52 |
+| ML-KEM-768 decaps | 21.20 | 33.2 | 1.57 | 21.8 | 1.03 |
+
+So after this round we are still **1.35–1.63× behind** the reference
+across all three parameter sets on the operations both implement. We are
+ahead only with a prepared key, an API the reference does not have and
+would gain from too. Per kernel, our NTT, inverse NTT and pointwise
+product are 1.8–1.95× slower than its hand-scheduled assembly, and our
+matrix expansion 1.25–1.31× slower; those explain about half of the
+encapsulation gap, and the rest is not yet attributed. The next round's
+success condition, stated in that note before any change: every unprepared
+ML-KEM-768 operation within 1.10× of this reference.
 
 ## ML-DSA
 

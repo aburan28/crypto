@@ -338,6 +338,30 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`koblitz-standard-subspace:dimension=d` with
+`pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
+PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no
+default for any parameter that changes the search. The base is every point
+whose abscissa lies in `span(1, z, …, z^{d−1})`, folded by negation only. It
+is the base #1333's workers used.
+
+- **Charged:** every point addition the decomposition performs, including
+  F6-IC's `geometric_group_additions` (support closure, residual arithmetic
+  and witness replay), plus the framework's sign lift of each witness.
+- **Counted, not charged:** the Boolean solver's word XORs, under the
+  inherited-F4 adapters' unit string, so `S` is a lower bound and names
+  that unit in `unpriced`. Reductions, splits, propagations and every F6
+  gate counter ride in the record's `solver.extra`.
+
+Both engines are exact on the same base and seed, so the two arms issue the
+same queries until one exhausts its node budget. The base and oracle live in the
+`ecbench` binary (`src/bin/ecbench/pdp3_koblitz.rs`) and reach `ic.pipeline`
+through `methods::register_binary_plugins`. The library cannot name them:
+frozen-source replays rebuild it against pre-F6 snapshots of
+`koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
+evaluations, and the tournament admits no root build script. It also
+refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic
