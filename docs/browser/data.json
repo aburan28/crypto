@@ -3,17 +3,17 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 111,
-  "methods": 42,
+  "curves": 114,
+  "methods": 44,
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 23,
+  "sessions": 24,
   "yields": 1956
  },
  "sources": {
-  "docs/curves/registry.json": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed",
-  "docs/ic/leaderboard.json": "cba2d1e3a7a3ad874b44fae5d9d3a2235fb97325f018afc4af60b83c52c6690c",
+  "docs/curves/registry.json": "341792fbfc9f18a4a4c95d0b42bf26c77727f080315530b37ed6c39ff07d31a8",
+  "docs/ic/leaderboard.json": "0db123b06a463e6bf3f0b2293944547e1fa2de99185b593084b9c76e74c2bd22",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -35,6 +35,7 @@
   "research/ecbench_numa_vm_20261002/sessions/v2-auto/records.jsonl": "126d9bf61729d2043d9ef41f36ae599d0f8601dcd4c990688a6d9d39ad72ea79",
   "research/ecbench_numa_vm_20261002/sessions/v2-interrupted/records.jsonl": "a68ffa3bfef32b38c45113ae6a345d54e0493c890fc574b8b821e7f5a9bc499b",
   "research/ecbench_numa_vm_20261002/sessions/v2-node0/records.jsonl": "6a8cbb87f5a9354470a26d131c43b2d3573a29a99edbc7e4a55a04ebecf71f96",
+  "research/ecbench_pair_claw_20261003/sessions/koblitz/records.jsonl": "4a2ffb331ade66ca0c09d3f0a7617e64070f27824c7c27eca56fbe37ba90effc",
   "research/ecbench_yield_sweep_20261004/sessions/koblitz/records.jsonl": "4aa6203a024ccd00606949a4a2ca454ef6efb5a7a4e3c6d9a365e8fb0723ce69",
   "research/ecbench_yield_sweep_20261004/sessions/prime/records.jsonl": "f77e03fd67ccc344b14c3b04efc5398e30a2d3a5e8cbf6a7941e21c1d2ee8afe"
  },
@@ -193,7 +194,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -245,7 +246,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -353,7 +354,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -397,7 +398,7 @@
     "K_0/F_2^11"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -1012,7 +1013,7 @@
     "K_1/F_2^13"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -1120,7 +1121,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -1164,7 +1165,7 @@
     "K_0/F_2^17"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -2202,7 +2203,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -3250,7 +3251,7 @@
     "K_1/F_2^21"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -3302,7 +3303,7 @@
    ],
    "sources": [
     "docs/curves/sources/generated.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -4671,7 +4672,7 @@
     "K_1/F_2^31"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -5320,6 +5321,56 @@
      "verified": 24,
      "mean_s": 0.9926,
      "mean_ratio_to_floor": 7.172
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9151,
+     "mean_ratio_to_floor": 6.612
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.3467,
+     "mean_ratio_to_floor": 2.505
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 5.7741,
+     "mean_ratio_to_floor": 41.719
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1384,
+     "mean_ratio_to_floor": 1.0
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1384,
+     "mean_ratio_to_floor": 1.0
     }
    ],
    "factor_bases": [],
@@ -5370,7 +5421,7 @@
    "sources": [
     "docs/curves/sources/generated.json",
     "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -5445,6 +5496,56 @@
      "verified": 24,
      "mean_s": 1.3634,
      "mean_ratio_to_floor": 10.088
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9103,
+     "mean_ratio_to_floor": 6.735
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.3381,
+     "mean_ratio_to_floor": 2.502
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.7929,
+     "mean_ratio_to_floor": 35.464
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1829,
+     "mean_ratio_to_floor": 1.354
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1829,
+     "mean_ratio_to_floor": 1.354
     }
    ],
    "factor_bases": [],
@@ -5532,7 +5633,7 @@
    "sources": [
     "docs/curves/sources/generated.json",
     "research/ic_descent_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -5598,7 +5699,7 @@
     "research/ic_descent_20260930/curve_records.json",
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -5623,7 +5724,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0207,
+     "mean_ratio_to_floor": 7.896
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.338,
+     "mean_ratio_to_floor": 2.615
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5224,
+     "mean_ratio_to_floor": 34.984
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1636,
+     "mean_ratio_to_floor": 1.265
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1636,
+     "mean_ratio_to_floor": 1.265
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5700,7 +5852,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0564,
+     "mean_ratio_to_floor": 8.678
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.2925,
+     "mean_ratio_to_floor": 2.403
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.3832,
+     "mean_ratio_to_floor": 27.792
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.0989,
+     "mean_ratio_to_floor": 0.813
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.0989,
+     "mean_ratio_to_floor": 0.813
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5749,7 +5952,7 @@
    "sources": [
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -5829,7 +6032,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9371,
+     "mean_ratio_to_floor": 8.122
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.2358,
+     "mean_ratio_to_floor": 2.044
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.798,
+     "mean_ratio_to_floor": 41.585
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1138,
+     "mean_ratio_to_floor": 0.986
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1138,
+     "mean_ratio_to_floor": 0.986
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5881,7 +6135,7 @@
     "research/ic_descent_20260930/curve_records.json",
     "research/ic_exponent_top_20260930/curve_records.json",
     "research/ic_single_target_20260930/curve_records.json",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -5906,7 +6160,58 @@
      "verified": true
     }
    ],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "bsgs-neg",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9043,
+     "mean_ratio_to_floor": 7.969
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.258,
+     "mean_ratio_to_floor": 2.274
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "claw-pr",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.6348,
+     "mean_ratio_to_floor": 32.033
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1266,
+     "mean_ratio_to_floor": 1.115
+    },
+    {
+     "session_id": "ECBS1ha960fa84a3c2",
+     "arm": "rho-strong-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1266,
+     "mean_ratio_to_floor": 1.115
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -5947,7 +6252,7 @@
    ],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -5992,7 +6297,7 @@
    ],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6036,7 +6341,7 @@
     "K_0/F_2^71"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6080,7 +6385,7 @@
     "K_1/F_2^71"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6124,7 +6429,7 @@
     "K_0/F_2^73"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6169,7 +6474,7 @@
    ],
    "sources": [
     "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6214,7 +6519,7 @@
    ],
    "sources": [
     "the m = 83 confidence gate (AGENTS.md §8a)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6258,7 +6563,7 @@
     "K_1/F_2^83"
    ],
    "sources": [
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6313,7 +6618,7 @@
    ],
    "sources": [
     "ECC2K-95 (src/bin/ic/params.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6358,7 +6663,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6406,7 +6711,7 @@
    ],
    "sources": [
     "ECC2K-130 (src/cryptanalysis/ecc2k130_guard.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6451,7 +6756,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6496,7 +6801,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6541,7 +6846,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6596,7 +6901,7 @@
    ],
    "sources": [
     "sect163k1, SEC 2 (src/binary_ecc/curve.rs)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6641,7 +6946,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6686,7 +6991,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6734,7 +7039,7 @@
    ],
    "sources": [
     "sect233k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6782,7 +7087,7 @@
    ],
    "sources": [
     "sect239k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6830,7 +7135,7 @@
    ],
    "sources": [
     "sect283k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6878,7 +7183,7 @@
    ],
    "sources": [
     "sect409k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6926,7 +7231,7 @@
    ],
    "sources": [
     "sect571k1, SEC 2",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -6971,7 +7276,7 @@
    ],
    "sources": [
     "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
-    "prose, by the constructor rule: docs/curves/registry.json"
+    "prose, by the constructor rule: docs/browser/data.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -8917,6 +9222,45 @@
    "tournament_cells": []
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "icv1": "ICV1:fp-11617:-63:11681:9935:unk:unk:r:1a762b57ab66",
+   "family": "prime",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "11617",
+    "bits": 14,
+    "degree": 1,
+    "modulus": null
+   },
+   "a": "3797",
+   "b": "2081",
+   "construction": null,
+   "trace": "-63",
+   "order": "11681",
+   "order_bits": 13.426,
+   "r": null,
+   "r_bits": null,
+   "cofactor": null,
+   "generator": null,
+   "target_group": null,
+   "j": "9935",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"3797\",\"b\":\"2081\",\"field\":\"fp-11617\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11617\",\"v\":\"1\"}",
+   "ec1": [],
+   "curve_uid": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "retired_names": [],
+   "sources": [
+    "tools/icms/tests/fixtures/autoresearcher-p14-smallx-m3-mitm.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": []
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "icv1": "ICV1:fp-14389:-143:14533:7345:unk:unk:r:dec4cf6b8cf5",
    "family": "prime",
@@ -9029,6 +9373,45 @@
    "tournament_cells": []
   },
   {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "icv1": "ICV1:fp-53197:-393:53591:11973:unk:unk:r:20f8a24e456a",
+   "family": "prime",
+   "standard_names": [],
+   "field": {
+    "characteristic": "p",
+    "p": "53197",
+    "bits": 16,
+    "degree": 1,
+    "modulus": null
+   },
+   "a": "40230",
+   "b": "5",
+   "construction": null,
+   "trace": "-393",
+   "order": "53591",
+   "order_bits": 15.635,
+   "r": null,
+   "r_bits": null,
+   "cofactor": null,
+   "generator": null,
+   "target_group": null,
+   "j": "11973",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"40230\",\"b\":\"5\",\"field\":\"fp-53197\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"53197\",\"v\":\"1\"}",
+   "ec1": [],
+   "curve_uid": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "retired_names": [],
+   "sources": [
+    "tools/icms/tests/fixtures/autoresearcher-p16-smallx-m2-enum.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": []
+  },
+  {
    "slug": "icv1-fp16-t295-8d3c3165",
    "icv1": "ICV1:fp-53411:295:53117:36611:unk:unk:r:8d3c316511e3",
    "family": "prime",
@@ -9068,7 +9451,10 @@
     "generated-16bit-53411"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -9325,7 +9711,10 @@
     "generated-18bit-212099"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -9682,7 +10071,12 @@
     "generated-20bit-563153"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json",
+    "research/ecbench_numa_vm_20261002/sessions/auto/plan.json",
+    "research/ecbench_numa_vm_20261002/sessions/auto/spec.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -10319,7 +10713,10 @@
     "generated-22bit-2434423"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -10868,7 +11265,10 @@
     "generated-24bit-16483309"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/prime.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -11137,7 +11537,12 @@
     "generated-26bit-42652151"
    ],
    "sources": [
-    "docs/curves/sources/generated.json"
+    "docs/curves/sources/generated.json",
+    "research/ecbench_calibration_20261002/sessions/followup-prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/followup-prime/spec.json",
+    "research/ecbench_calibration_20261002/sessions/prime/plan.json",
+    "research/ecbench_calibration_20261002/sessions/prime/spec.json",
+    "research/ecbench_calibration_20261002/specs/followup-prime.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -11233,6 +11638,56 @@
      "mean_ratio_to_floor": 1.119
     }
    ],
+   "factor_bases": [],
+   "tournament_cells": []
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "icv1": "ICV1:fp-26959946667150639794667015087019630673557916260026308143510066298881:4733100108545601916421827343930821:26959946667150639794667015087019625940457807714424391721682722368061:20781977079628996477063007379734849057519732242287194936686605794677:unk:unk:r:fec01e99874c",
+   "family": "prime",
+   "standard_names": [
+    "P-224"
+   ],
+   "field": {
+    "characteristic": "p",
+    "p": "26959946667150639794667015087019630673557916260026308143510066298881",
+    "bits": 224,
+    "degree": 1,
+    "modulus": null
+   },
+   "a": "26959946667150639794667015087019630673557916260026308143510066298878",
+   "b": "18958286285566608000408668544493926415504680968679321075787234672564",
+   "construction": null,
+   "trace": "4733100108545601916421827343930821",
+   "order": "26959946667150639794667015087019625940457807714424391721682722368061",
+   "order_bits": 224.0,
+   "r": "26959946667150639794667015087019625940457807714424391721682722368061",
+   "r_bits": 224.0,
+   "cofactor": 1,
+   "generator": [
+    "0xb70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21",
+    "0xbd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "20781977079628996477063007379734849057519732242287194936686605794677",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"26959946667150639794667015087019630673557916260026308143510066298878\",\"b\":\"18958286285566608000408668544493926415504680968679321075787234672564\",\"field\":\"fp-26959946667150639794667015087019630673557916260026308143510066298881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"26959946667150639794667015087019630673557916260026308143510066298881\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1P224Cp224h8e110c585480"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:8e110c5854808bfd2283aa4b15063d4c3052a0d742a47224e34876c6ade763bd"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "P-224"
+   ],
+   "sources": [
+    "src/ecc/curve_zoo.rs"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
    "factor_bases": [],
    "tournament_cells": []
   },
@@ -11384,6 +11839,7 @@
     "ECBS1h498fa819ba21",
     "ECBS1h73210d525d59",
     "ECBS1h923e3eb44444",
+    "ECBS1ha960fa84a3c2",
     "ECBS1haf997766feb9",
     "ECBS1hafb48c7c6d26",
     "ECBS1hc6d15a12b9b6",
@@ -11399,6 +11855,10 @@
     "icv1-f2m37-tm534059-32aad96b",
     "icv1-f2m41-tm2308219-7f48b14a",
     "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5",
     "icv1-fp16-t295-8d3c3165",
     "icv1-fp18-tm337-d28d5e09",
     "icv1-fp20-t727-cd198a38",
@@ -11406,8 +11866,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 649,
-   "verified": 649
+   "runs": 841,
+   "verified": 841
   },
   {
    "method_id": "ECM1h2ee5b13dfb35",
@@ -11434,6 +11894,54 @@
    ],
    "runs": 400,
    "verified": 400
+  },
+  {
+   "method_id": "ECM1h3f1995f505fa",
+   "method_sha256": "3f1995f505fa3767af1cfd6fd89c6e965bbb93324175c33bd6506a994b6b651d",
+   "method": "claw.pair_table",
+   "family": "claw",
+   "params": {
+    "base_scale": "4",
+    "cap_multiple": "64",
+    "table_scale": "1"
+   },
+   "sessions": [
+    "ECBS1ha960fa84a3c2"
+   ],
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 192,
+   "verified": 192
+  },
+  {
+   "method_id": "ECM1hd9f76acb83c0",
+   "method_sha256": "d9f76acb83c0bc0e8d6bc09ed06279658c7fc8142b298d1f89603c933cd857b6",
+   "method": "claw.pair_table",
+   "family": "claw",
+   "params": {
+    "base_scale": "1.06",
+    "cap_multiple": "64",
+    "table_scale": "0.03125"
+   },
+   "sessions": [
+    "ECBS1ha960fa84a3c2"
+   ],
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 192,
+   "verified": 192
   },
   {
    "method_id": "ECM1h1b3ceb861d0c",
@@ -12446,6 +12954,7 @@
    "sessions": [
     "ECBS1h0d1ce1d04e54",
     "ECBS1h6302265165a5",
+    "ECBS1ha960fa84a3c2",
     "ECBS1hb0cb85a662d8",
     "ECBS1hf4c34c2455f9"
    ],
@@ -12454,10 +12963,16 @@
     "icv1-f2m17-tm101-00378d4e",
     "icv1-f2m19-t797-b6cf2467",
     "icv1-f2m23-t5197-69e76b73",
-    "icv1-f2m29-tm40309-30c52b96"
+    "icv1-f2m29-tm40309-30c52b96",
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
    ],
-   "runs": 429,
-   "verified": 429
+   "runs": 813,
+   "verified": 813
   }
  ],
  "factor_bases": [
@@ -23805,6 +24320,61 @@
      "role": "control",
      "method": "rho.negation",
      "method_id": "ECM1hefea4e0ebe79"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha960fa84a3c2",
+   "dir": "research/ecbench_pair_claw_20261003/sessions/koblitz",
+   "label": "pair claw of aburan28/cryptanalysis#175 against the strong signed-Frobenius rho, same targets, six Koblitz curves",
+   "status": "complete",
+   "spec_id": "ECS1h307d73440e6a",
+   "env_class_id": "ECBENV2h59034d4cd61b",
+   "binary_sha256": "0528c4f0321de049c6ac432e2a18340f529224c7f16a9b6c8ad9e88666aa37c6",
+   "git_commit": "1423dfc3403460c3ba4c0ead5774a1c950bd9106",
+   "records": 960,
+   "status_counts": {
+    "verified": 960
+   },
+   "started_unix_ms": 1791069098769,
+   "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m43-tm998717-e2e742b0",
+    "icv1-f2m47-t22705043-f4e44623",
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "arms": [
+    {
+     "arm": "bsgs-neg",
+     "role": "baseline",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3"
+    },
+    {
+     "arm": "claw-c1",
+     "role": "candidate",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h3f1995f505fa"
+    },
+    {
+     "arm": "claw-pr",
+     "role": "candidate",
+     "method": "claw.pair_table",
+     "method_id": "ECM1hd9f76acb83c0"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    },
+    {
+     "arm": "rho-strong-aa",
+     "role": "control",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
     }
    ]
   },
