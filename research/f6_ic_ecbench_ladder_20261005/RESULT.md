@@ -13,12 +13,13 @@ Inputs: [`PROTOCOL.md`](PROTOCOL.md), [`AMENDMENT_1.md`](AMENDMENT_1.md)
 (rounds are independent seeds), [`AMENDMENT_2.md`](AMENDMENT_2.md) (m = 31
 stop rule) and the frozen `SPEC-n*.json`. The analysis is
 [`ANALYSIS.json`](ANALYSIS.json), written by the native
-`examples/f6_ladder_analyze.rs` from the sessions' `records.jsonl` and
-`docs/ic/calibration.json`:
+`examples/f6_ladder_analyze.rs` from the sessions' `records.jsonl`. It
+reads pinned ratios through the library's `Calibration::pin`, which looks
+up `docs/ic/calibration.json` by curve:
 
 ```sh
 cargo build --release --example f6_ladder_analyze
-target/release/examples/f6_ladder_analyze docs/ic/calibration.json \
+target/release/examples/f6_ladder_analyze \
   research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json \
   research/f6_ic_ecbench_ladder_20261005/sessions/{n13,n19,n23,n31-killed-02}
 ```

@@ -2,7 +2,7 @@
 //! exactly as `research/f6_ic_ecbench_ladder_20261005/PROTOCOL.md` and its
 //! `AMENDMENT_1.md` fix it.
 //!
-//! Usage: f6_ladder_analyze CALIBRATION.json OUT.json SESSION_DIR...
+//! Usage: f6_ladder_analyze OUT.json SESSION_DIR...
 //!
 //! Reads only each session's `records.jsonl`. The paired unit is a
 //! (target, round): within a round the three arms share one algorithm seed,
@@ -18,6 +18,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use crypto_lib::cryptanalysis::ic_boundary::Calibration;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
@@ -34,14 +35,25 @@ const PHASES: [&str; 5] = [
     "verify",
 ];
 
-/// The calibration entries the protocol's sensitivity row may use, by
-/// field degree: `docs/ic/calibration.json`'s `koblitz` keys for the
-/// `a = 0` curves `icv1-f2m13-t181-515ee569` and
-/// `icv1-f2m31-tm90707-c95f16f5`.
-const PINNED_WORD_XOR: [(u64, &str); 2] = [
-    (13, "koblitz/K_0 / GF(2^13)"),
-    (31, "koblitz/K_0 / GF(2^31)"),
-];
+/// The sizes at which the protocol's sensitivity row prices word XORs at the
+/// repository's pinned ratio (`docs/ic/calibration.json`, resolved by curve
+/// through `Calibration::pin`). Only these two `a = 0` degrees have one.
+const PINNED_SENSITIVITY_SIZES: [u64; 2] = [13, 31];
+
+/// The pinned `ns_per_word_xor / ns_per_add` for a curve, if it has one.
+fn pinned_word_xor_ratio(slug: &str) -> Option<f64> {
+    let mut c = Calibration {
+        ns_per_add: 1.0,
+        ns_per_double: 1.0,
+        ..Default::default()
+    };
+    c.pin("koblitz", slug);
+    if c.is_pinned("ns_per_word_xor") {
+        c.ns_per_word_xor
+    } else {
+        None
+    }
+}
 
 #[derive(Clone, Debug)]
 struct Run {
@@ -225,16 +237,12 @@ fn arm_of<'p>(p: &'p Pair, arm: &str) -> &'p Run {
 
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() < 4 {
-        return Err("usage: f6_ladder_analyze CALIBRATION.json OUT.json SESSION_DIR...".into());
+    if args.len() < 3 {
+        return Err("usage: f6_ladder_analyze OUT.json SESSION_DIR...".into());
     }
-    let calibration: Value = serde_json::from_str(
-        &std::fs::read_to_string(&args[1]).map_err(|e| format!("{}: {e}", args[1]))?,
-    )
-    .map_err(|e| e.to_string())?;
     let mut all = Vec::new();
     let mut sessions = Vec::new();
-    for d in &args[3..] {
+    for d in &args[2..] {
         let runs = read_runs(Path::new(d))?;
         sessions.push(json!({"dir": d, "measured_records": runs.len()}));
         all.extend(runs);
@@ -321,22 +329,21 @@ fn main() -> Result<(), String> {
                     )),
                 );
             }
-            let sensitivity =
-                PINNED_WORD_XOR
-                    .iter()
-                    .find(|(deg, _)| *deg == m)
-                    .and_then(|(_, key)| {
-                        let ratio = calibration["instances"][key]["ns_per_word_xor"].as_f64()?;
-                        let priced = med(&|t| {
-                            t.mean(|p| {
-                                let a = arm_of(p, arm);
-                                Some((a.total_gae? + a.word_xors? as f64 * ratio) / a.r.sqrt())
-                            })
-                        });
-                        Some(json!({"calibration_key": key,
-                        "ns_per_word_xor_over_ns_per_add": ratio,
-                        "median_s_with_word_xors_priced": priced}))
+            let sensitivity = PINNED_SENSITIVITY_SIZES
+                .contains(&m)
+                .then(|| pinned_word_xor_ratio(&any.slug))
+                .flatten()
+                .map(|ratio| {
+                    let priced = med(&|t| {
+                        t.mean(|p| {
+                            let a = arm_of(p, arm);
+                            Some((a.total_gae? + a.word_xors? as f64 * ratio) / a.r.sqrt())
+                        })
                     });
+                    json!({"calibration_curve": any.slug,
+                        "ns_per_word_xor_over_ns_per_add": ratio,
+                        "median_s_with_word_xors_priced": priced})
+                });
             arms.insert(
                 arm.into(),
                 json!({
@@ -471,7 +478,7 @@ fn main() -> Result<(), String> {
         "decisions_agree": decision == sensitivity_decision,
     });
     let text = serde_json::to_string_pretty(&out).map_err(|e| e.to_string())?;
-    std::fs::write(&args[2], format!("{text}\n")).map_err(|e| format!("{}: {e}", args[2]))?;
+    std::fs::write(&args[1], format!("{text}\n")).map_err(|e| format!("{}: {e}", args[1]))?;
     println!("{text}");
     Ok(())
 }
