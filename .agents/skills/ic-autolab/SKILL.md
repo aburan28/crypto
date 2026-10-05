@@ -159,17 +159,18 @@ into a CPU speedup. A revised SAT budget/encoding needs a newly registered
 natural panel. F5 may bind its audited logs to a separate new target claim.
 The [SAT target transport design](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/DESIGN.md)
 specifies a new source-bound prestarted exporter and one CMS child per permitted
-attempt. This is a feasibility design, not a validated transport or a dispatch
-registration. The [disclosed control plan](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/CONTROL_PLAN.md)
-fixes three points and exact export hashes for the unexecuted
-`ic_sat_stdin_probe` and `ic_exporter_prestart_probe` examples. Compile and run
-these controls only after the ordinary timing panels release the shared busy
-lock. A passing accepted-CMS stdin compatibility probe is still insufficient
-for online admission: its reader line occurs before parser initialization.
-The proposed post-parser marker requires a separately built, pinned CMS binary
-and three-way disclosed parity. Then freeze a separate SAT one-target source
-and claim. Do not charge child startup to the online interval by stopwatch
-subtraction.
+attempt. This is a feasibility design, not a dispatch registration. The
+[disclosed control result](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/controls-v1/RESULT.md)
+retains all three fixed exporter parity passes, two accepted-CMS stdin parity
+passes and the first frozen CMS parity **failure** (file-mode wall timeout).
+A separately predeclared 120-second diagnostic on that first point passed but
+does not repair the frozen 60-second result. The accepted reader line occurs
+before parser initialization, so even passing compatibility does not establish
+the online boundary. A new post-parser CMS binary needs its own source/build
+pin and a newly predeclared three-way parity protocol; the current marker
+patch is unbuilt. CMS also needs a new, audited full-rank natural preparation
+before a SAT one-target claim. Do not charge child startup to the online
+interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

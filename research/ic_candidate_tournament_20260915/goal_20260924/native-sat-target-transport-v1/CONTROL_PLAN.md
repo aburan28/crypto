@@ -1,7 +1,9 @@
 # Disclosed CryptoMiniSat prestarted-stdin controls
 
-This fixes the three source inputs for the unexecuted
-[prestarted-stdin feasibility probe](../../../../examples/ic_sat_stdin_probe.rs). These are
+This fixed the three source inputs for the
+[prestarted-stdin feasibility probe](../../../../examples/ic_sat_stdin_probe.rs).
+The [result](controls-v1/RESULT.md) retains all frozen runs, the failed
+query-00 v1 and its separately labeled longer diagnostic. These are
 controls from the closed native SAT registration, not fresh targets or new
 natural-yield observations. Run only after both 512-query ordinary timing
 panels release the shared busy lock. The accepted executable SHA-256 is
@@ -66,7 +68,10 @@ this exact disclosed input from prestarted stdin. It does not retroactively
 pass the frozen 60-second panel, show a speed benefit, establish a
 post-initialization online boundary, or admit a complete SAT IC target.
 
-If the accepted stdin probe passes, build a **new** instrumented binary from
+Because the frozen accepted-stdin panel passed only two of three points, a
+future marked-CMS three-way gate needs a new, explicit control protocol; the
+longer post-hoc diagnostic cannot silently replace the failed 60-second row.
+Under that new protocol, build a **new** instrumented binary from
 the retained CMS source commit `7ae1b4a74259cdce223a584281fb8f090bbd3eed`
 plus [the one-line marker patch](cms-stdin-ready.patch). Archive the complete
 source, dependencies, build receipt and new binary hash before any target
@@ -81,8 +86,8 @@ query; byte-equality of solver stdout is not a mathematical requirement.
 Preserve every failed build and control result. This parity gate does not
 measure natural yield or solve a fresh public target.
 
-The [prepared exporter mode](../../../../examples/koblitz_pdp_export.rs) needs
-its own disclosed three-point parity gate. The source-only
+The [prepared exporter mode](../../../../examples/koblitz_pdp_export.rs) has
+its own disclosed three-point parity gate. The
 [`ic_exporter_prestart_probe`](../../../../examples/ic_exporter_prestart_probe.rs)
 executes the accepted exporter and a newly built prepared exporter on each
 fixed public point, then checks all three fixed source-file SHA-256 values,

@@ -1,10 +1,15 @@
 # Draft for a fresh n17 external-SAT one-target transport
 
-Status: design draft following ordinary registration, not a registered
-experiment or dispatch authority. Implement and freeze a separate target
-registration only after the original 512-query ordinary panels are audited.
-The three historical confirmation sets and consumed registrations remain closed.
-Prestarted-stdin behavior and prepared-exporter parity have not been tested.
+Status: target design draft, not a registered target experiment or dispatch
+authority. Both original 512-query ordinary panels have been audited:
+MatrixF5 reached rank 29/29; the registered CryptoMiniSat arm reached 22/29
+and has no complete log table. The three historical confirmation sets and
+consumed registrations remain closed. The disclosed
+[transport controls](controls-v1/RESULT.md) passed exporter parity on all
+three points; accepted-CMS stdin parity passed two of the three frozen
+60-second controls and a separately labeled longer diagnostic for the third.
+The first frozen control failure remains. No post-parser CMS binary or
+source-bound SAT target worker has been built or admitted.
 
 ## Question and bounded scope
 
@@ -78,15 +83,16 @@ proved geometric negatives (`[40991,73355]`, `[73003,104622]`) and one
 source-verified witness (`[59775,2910]`) for exact transport parity. Use new
 low-budget and watchdog controls for inconclusive and timeout paths; do not
 run or mutate the consumed control registration itself.
-The [Rust prestarted-stdin probe](../../../../examples/ic_sat_stdin_probe.rs) is an
-unexecuted control for one retained CNF/ANF pair. It pins the CMS binary hash,
+The [Rust prestarted-stdin probe](../../../../examples/ic_sat_stdin_probe.rs) is a
+disclosed control for one retained CNF/ANF pair. It pins the CMS binary hash,
 runs a cold-file and prestarted-stdin path with the same conflict budget, checks
 the manifest's public point and all three export digests, retains both outputs,
 checks each SAT assignment against the retained ANF and CNF and a full-point
 lift, independently enumerates the three-sum class, and reports
 status parity. Its [disclosed input plan](CONTROL_PLAN.md) fixes the three
-audited points and exact source-file hashes. Run it separately for each point only
-after the ordinary timing lock is free. A passing probe is transport evidence,
+audited points and exact source-file hashes. The
+[retained result](controls-v1/RESULT.md) records two frozen passes, one frozen
+failure and its separate post-hoc diagnostic. A passing probe is transport evidence,
 not a source-bound complete target solve or a performance measurement.
 
 The accepted exporter source constructs the standard factor-base predicate
@@ -98,8 +104,9 @@ the field, predicate, geometric base and static basis encoding before a
 flushed READY marker. Prestart one exporter child per permitted target attempt
 as part of the frozen resource envelope. Each child then accepts exactly one
 bounded point and blind instance ID from stdin after the online clock starts,
-exports the source files and exits. This code is uncompiled and untested; it is
-not the accepted ordinary-exporter binary. Preserve the accepted ANF, CNF-XOR,
+exports the source files and exits. Its release binary passed all three
+disclosed export-parity controls; it is not the accepted ordinary-exporter
+binary. Preserve the accepted ANF, CNF-XOR,
 manifest and model semantics. Cross-check ANF, CNF-XOR and Magma export bytes
 exactly; compare the deterministic manifest fields and source-instance
 identity exactly while excluding timing and the new `transport` metadata,
@@ -110,14 +117,15 @@ Check independent full-point lifting against
 the accepted exporter for a frozen disclosed corpus. Do not import known target
 logs or derive `[a]G+[b]Q` before the clock. Record all exporter process
 startup, request/response, source bytes, hashes, watchdog and drain receipts.
-The source-only `PreparedChild` transport in
+The `PreparedChild` transport in
 `src/bin/prepared_sat_worker/native.rs` implements pinned-binary startup,
 one exact flushed readiness marker, a durable no-input READY receipt,
 deferred bounded stdin delivery and unused-child cancellation. The
 [`ic_exporter_prestart_probe`](../../../../examples/ic_exporter_prestart_probe.rs)
-is its first disclosed-input control. Both are uncompiled and untested while
-the frozen ordinary timing panel is active; neither may be treated as a
-target-worker admission without a source-frozen build and independent audit.
+passed its three disclosed-input controls, including malformed/oversize
+rejection and unused-child drain. These controls may not be treated as a
+target-worker admission without a new source-frozen target registration and
+independent audit.
 
 ## Target implementation and admission
 

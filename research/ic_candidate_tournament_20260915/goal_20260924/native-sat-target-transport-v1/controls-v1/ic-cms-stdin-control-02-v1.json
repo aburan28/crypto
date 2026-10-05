@@ -1,0 +1,102 @@
+{
+  "anf_path": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/execution/query-02/instance/instance.anf",
+  "anf_sha256": "1783698ff0fda61fc056b24b19d12e421f895c03ebbbc63fd399390b82def031",
+  "cms_path": "/Volumes/SSD990/llm/tmp/ic-native-ordinary-registration-20261005-cms-capsule-v1/immutable/assets/bin/cms",
+  "cms_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+  "cms_unchanged": true,
+  "cnf_path": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/execution/query-02/instance/instance.xor.cnf",
+  "cnf_sha256": "2077d013463e6a58270a38f29752ec0395099d1db0abfcfaadb7f6b8970d784c",
+  "cold": {
+    "argv": [
+      "--verb",
+      "1",
+      "--threads",
+      "1",
+      "--random",
+      "1",
+      "--maxsol",
+      "1",
+      "--maxconfl",
+      "1000000",
+      "/Volumes/SSD990/llm/tmp/ic-cms-stdin-control-02-v1/cold-input.xor.cnf"
+    ],
+    "exit_code": 10,
+    "model_check": {
+      "full_point_witness_indices": [
+        53,
+        1,
+        48
+      ],
+      "model_sha256": "d7271754b64b0ff72211cf53b2cabe41629721948cd3f93108c3ef7514ce408b",
+      "source_model_valid": true
+    },
+    "pid": 12120,
+    "status": "SAT_MODEL",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 30252,
+    "stdout_sha256": "94031ddbe9dadc2ff5c7648fe2676688459fc5e16653ed921241c245c1aebb60",
+    "timed_out": false
+  },
+  "cold_input_unchanged": true,
+  "conflict_budget": 1000000,
+  "expected_status": "SAT_MODEL",
+  "geometric_class_valid": true,
+  "geometric_witness": [
+    48,
+    53,
+    1
+  ],
+  "magma_sha256": "958701bb9e154d2bea03b83e8243aa2b5dfc90278f421ddf3e21ac1d88159a0f",
+  "manifest_path": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/execution/query-02/instance/manifest.json",
+  "manifest_sha256": "3ecd7c38a81d15b6849e538c89c1673f3e0a979d38e7365f2abb7cd2bfaa9e1e",
+  "native_child_group_drain_audited": false,
+  "online_speedup": null,
+  "preparation_path": "/Volumes/SSD990/crypto/worktrees/ic-native-ordinary-registration-20261005/research/ic_candidate_tournament_20260915/goal_20260924/native-sat-control-registration-v1/result-v1/data/preparation.json",
+  "preparation_sha256": "67319e5bb0c65e9ae9a10bfbd929487afd5a7e4e8c885b7d123da79b385a9d49",
+  "prestarted_stdin_compatible": true,
+  "public_point": [
+    59775,
+    2910
+  ],
+  "question": "disclosed-cms-prestarted-stdin-control-v1",
+  "reader_ready_before_cnf_delivery": true,
+  "reader_ready_wait_ns": 5242000,
+  "schema_version": 1,
+  "source_bound_target_admitted": false,
+  "source_model_parity": true,
+  "source_unchanged": true,
+  "status_parity": true,
+  "stdin": {
+    "argv": [
+      "--verb",
+      "1",
+      "--threads",
+      "1",
+      "--random",
+      "1",
+      "--maxsol",
+      "1",
+      "--maxconfl",
+      "1000000"
+    ],
+    "exit_code": 10,
+    "model_check": {
+      "full_point_witness_indices": [
+        53,
+        1,
+        48
+      ],
+      "model_sha256": "d7271754b64b0ff72211cf53b2cabe41629721948cd3f93108c3ef7514ce408b",
+      "source_model_valid": true
+    },
+    "pid": 13024,
+    "status": "SAT_MODEL",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 30159,
+    "stdout_sha256": "ccbbfc0bab954222a3e00afacefbb4405e923c8312289f35ee8b1824b8cbd859",
+    "timed_out": false
+  },
+  "timeout_ms": 60000
+}
