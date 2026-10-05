@@ -1,5 +1,28 @@
 # September 24 bounded IC goal
 
+Current native status (October 3): both disclosed synthetic n17 prepared-target
+controls are consumed and closed. The [native SAT result](native-sat-control-registration-v1/RESULT.md)
+is accepted in PR #1277. The [new native F5 result](native-f5-control-registration-v1/RESULT.md)
+retains its sole invocation after main accepted PR #1294, and the original
+preexecution-frozen checker admits source-bound execution, two exact negatives,
+third-query decomposition and scalar 24886. Its result-publication follow-up is
+unmerged until that PR's exact-head gates pass. Never dispatch, retry, resume or
+execute restorations of either control. Data-only publication replay starts no
+solver and cannot replace the original frozen admission audit.
+
+This is correctness progress only: zero new ordinary queries, no fresh paired
+performance qualification and no measured speedup. F5's producer stopwatch is
+500 ns below its phase sum; both raw values remain explicit diagnostics. All
+historical Python preparation provenance remains visible. The full active goal
+still requires native natural-yield and failed-attempt evidence for the exact
+F5 and CryptoMiniSat pipelines, complete exposure exclusions, strong incumbent
+and same-point rho references, IC1 identities, calibration/resources and a new
+frozen fresh one-target protocol. The built-in Rust SAT worker is a different
+backend and cannot supply CryptoMiniSat's admission. The three historical
+confirmation sets remain closed.
+
+The dated entries below preserve the historical gate state and failures.
+
 Current family-admission status (September 30): the complete source-bound
 [SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
 is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)

@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "scope": "bounded IC autolab overview; not all repository research",
   "sources": [
     {
@@ -9,6 +9,10 @@
     {
       "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/TERMINAL.json",
       "sha256": "a06b68139abad2934fab8127d2ee69ea126ab09a7679ba6e775c9352db09ba1e"
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-registration-v1/result-v1/data/independent-audit.json",
+      "sha256": "994ab5bf1f3153eb6d22425eb15647a152cc1ebd14b68347147c279479a9ed69"
     },
     {
       "path": "research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/outcome/result.json",
@@ -101,7 +105,7 @@
   },
   "confirmation_familywise_online_upper": 1.0338915916497726,
   "paired_targets": 72,
-  "f5_control": {
+  "historical_f5_control": {
     "additional_executions_authorized": false,
     "archive_bytes": 25476819,
     "archive_sha256": "12ea04c458036c0ca56c588d151ae317ada2cbc661124344be472bbecc94804b",
@@ -146,6 +150,109 @@
     "status": "CONSUMED_CLOSED_COMPLETE_DISCLOSED_CONTROL",
     "target_attempt_count": 3,
     "workload_id": "8b3d9065d872"
+  },
+  "native_f5_control": {
+    "audit_timing_policy": "independent external replay outside original producer interval; no headline online claim",
+    "checker_binary_sha256": "5055542e85dc805c6a0c8ee9e09548d53f8bf2a84892e15e02695d580221e8b1",
+    "fresh_paired_qualification": false,
+    "full_goal_complete": false,
+    "headline_eligible": false,
+    "independent_external_audit_wall_ns": "10480790791",
+    "mathematics": {
+      "attempted_online_diagnostic_ns": 22420494542,
+      "audited_attempts": [
+        {
+          "a": 57707,
+          "b": 37266,
+          "outcome": "proved_unsat",
+          "public_query": [
+            20087,
+            50635
+          ],
+          "trial": 0
+        },
+        {
+          "a": 43768,
+          "b": 33418,
+          "outcome": "proved_unsat",
+          "public_query": [
+            39701,
+            75542
+          ],
+          "trial": 1
+        },
+        {
+          "a": 45669,
+          "b": 63073,
+          "outcome": "witness",
+          "public_query": [
+            111691,
+            70749
+          ],
+          "trial": 2
+        }
+      ],
+      "checker_source_sha256": "c1bd8137f13487d2895ef172a034c447bcdc493d81be2800cd05bf837ecc7b6f",
+      "complete_online_diagnostic_ns": 22420494542,
+      "fresh_paired_qualification": false,
+      "headline_eligible": false,
+      "native_children_executed": 0,
+      "online_phases_ns": {
+        "recovery_check": 7208,
+        "rho_solve": null,
+        "target_descent": 9583,
+        "target_pdp": 22420441207,
+        "target_query": 36127,
+        "target_relation_check": 417
+      },
+      "online_speedup": null,
+      "ordinary_queries_executed": 0,
+      "preparation_admission": {
+        "accounting": "historical ordinary preparation; original Python provenance retained; no new native yield or timing",
+        "certificate_sha256": "d8c5d6679fe89561606154785fdfba763835bf261dceb08fae193eff9f5636ae",
+        "dependent_relations": 32,
+        "duplicate_relations": 0,
+        "folded_columns": 29,
+        "fresh_targets_generated": 0,
+        "geometric_points": 63,
+        "independently_proved_geometric_negatives": 155,
+        "mathematical_state_sha256": "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107",
+        "native_solvers_executed": 0,
+        "new_queries": 0,
+        "online_speedup": null,
+        "online_wall_ns": null,
+        "ordinary_queries": 216,
+        "original_outcome_mix": {
+          "proved_unsat": 155,
+          "witness": 61
+        },
+        "promotion_eligible": false,
+        "rank": 29,
+        "rank_trajectory_sha256": "fbe95ff756164f671a055258a7bfa050972707d615819c5600ed8aae7306599d",
+        "rows_sha256": "c75aa7a93efae8f699de1557f4d2d6100755f8aa14cd7843e3497cd9576332e2",
+        "status": "PASS_NATIVE_PREPARED_F5_MATHEMATICS",
+        "target_input_present": false,
+        "usable_points": 62,
+        "verified_column_logs": 29,
+        "verified_relations": 61
+      },
+      "promotion_eligible": false,
+      "recovered_scalar": 24886,
+      "scalar_independently_verified": true,
+      "source_bound_execution_admitted": false,
+      "status": "PASS_NATIVE_PREPARED_F5_TARGET_MATHEMATICS",
+      "target_complete": true,
+      "unmeasured_phase_slots": []
+    },
+    "native_children_executed_by_auditor": 0,
+    "online_speedup": null,
+    "ordinary_queries_executed": 0,
+    "promotion_eligible": false,
+    "registration_sha256": "5a50e01c02fa7e14f227dea413cb9e569f73d68d684a68541e49fd357660f060",
+    "schema_version": 1,
+    "source_bound_execution_admitted": true,
+    "status": "PASS_NATIVE_SOURCE_BOUND_F5_CONTROL_AUDIT",
+    "target_complete": true
   },
   "native_sat_control": {
     "audited_attempts": [
@@ -3242,7 +3349,7 @@
       "scheduled": 216
     }
   ],
-  "historical_ledger_sha256": "89429dceb6efa580c2adf9329d66e60c27c0c5c4e6ccfe6dd8751b2ec159addd",
+  "historical_ledger_sha256": "51d46e6e025da061c9660fd9e285b4e024435b39bf626e723bfd40f7d1ebabca",
   "historical_regime_summary_sha256": "893d88343b01aa36d7bf75f1bbd0dc4321ff8b923300c36201c42d7bb5ac3bf9",
   "historical_overview_panels": [
     {
