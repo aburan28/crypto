@@ -330,14 +330,10 @@ pub struct F6SignedPairIndex {
     points: Vec<BinaryPoint>,
     sums: Vec<SignedPairSum>,
     lookup: HashMap<PointXKey, usize>,
-    x_filter: Vec<u64>,
     pair_count: usize,
 }
 
 impl F6SignedPairIndex {
-    const X_FILTER_BITS: usize = 25;
-    const X_FILTER_MASK: usize = (1 << Self::X_FILTER_BITS) - 1;
-
     pub fn new(curve: &BinaryCurve, points: &[BinaryPoint], max_pairs: usize) -> Option<Self> {
         if curve.m > 128 || points.is_empty() || points.iter().any(|p| !curve.is_on_curve(p)) {
             return None;
@@ -361,16 +357,11 @@ impl F6SignedPairIndex {
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
         let mut lookup = HashMap::with_capacity(capacity);
-        let mut x_filter = vec![0u64; 1 << (Self::X_FILTER_BITS - 6)];
         for i in 0..points.len() {
             let row = batch_add_fixed(curve, &points[i], &points[i..]);
             for (offset, sum) in row.into_iter().enumerate() {
                 let x = x_key(&sum)?;
                 if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
-                    if let PointXKey::Affine(value) = x {
-                        let bit = (value as usize) & Self::X_FILTER_MASK;
-                        x_filter[bit >> 6] |= 1u64 << (bit & 63);
-                    }
                     let j = i + offset;
                     entry.insert(sums.len());
                     sums.push(SignedPairSum {
@@ -386,7 +377,6 @@ impl F6SignedPairIndex {
             points: points.to_vec(),
             sums,
             lookup,
-            x_filter,
             pair_count,
         })
     }
@@ -397,16 +387,6 @@ impl F6SignedPairIndex {
 
     pub fn signed_sum_count(&self) -> usize {
         self.sums.len()
-    }
-
-    fn may_contain_x(&self, x: PointXKey) -> bool {
-        match x {
-            PointXKey::Infinity => true,
-            PointXKey::Affine(value) => {
-                let bit = (value as usize) & Self::X_FILTER_MASK;
-                self.x_filter[bit >> 6] & (1u64 << (bit & 63)) != 0
-            }
-        }
     }
 
     fn lookup_pair(&self, residual: &BinaryPoint) -> Option<(usize, usize)> {
@@ -476,11 +456,7 @@ impl F6SignedPairIndex {
             let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
             let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
             for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                let minus_hit = self
-                    .may_contain_x(minus_key)
-                    .then(|| self.lookup.get(&minus_key).copied())
-                    .flatten();
-                if let Some(index) = minus_hit {
+                if let Some(&index) = self.lookup.get(&minus_key) {
                     let residual = point_add(&self.curve, target, &point_neg(&entry.point));
                     if let Some(pair) = self.pair_at(index, &residual) {
                         if let Some(witness) = self.verify(target, entry.pair, pair) {
@@ -488,11 +464,7 @@ impl F6SignedPairIndex {
                         }
                     }
                 }
-                let plus_hit = self
-                    .may_contain_x(plus_key)
-                    .then(|| self.lookup.get(&plus_key).copied())
-                    .flatten();
-                if let Some(index) = plus_hit {
+                if let Some(&index) = self.lookup.get(&plus_key) {
                     let residual = point_add(&self.curve, target, &entry.point);
                     if let Some(pair) = self.pair_at(index, &residual) {
                         if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
@@ -614,7 +586,6 @@ mod tests {
         let index = F6SignedPairIndex::new(&curve, &points, 36).unwrap();
         assert_eq!(index.pair_count(), 36);
         assert!(index.signed_sum_count() <= 36);
-        assert!(index.lookup.keys().all(|&x| index.may_contain_x(x)));
         let mut four_sums = std::collections::HashSet::new();
         for a in &points {
             for b in &points {
