@@ -310,6 +310,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
+| `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 | `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
 
@@ -354,6 +355,13 @@ Two consequences to read every table with:
   larger method at any interesting size. The records keep `max_rss_kib`
   and the lookup counts. This is the known time–memory trade, never a
   finding.
+- **The pair claw's `S` omits its memory too.** `claw.pair_table`, ported
+  from `aburan28/cryptanalysis#175`, holds `M = table_scale·√(r/n)` classes.
+  Every base logarithm is known, so it is a generic method (a randomised
+  BSGS on signed Frobenius classes) whose mean is about
+  `(c + 1/c)/√n` at `c = table_scale`, at best `2/√n` against rho's
+  `√(π/4n)`. It is in the `claw` family, not `ic`, and it is not an
+  index-calculus candidate for a `vs_rho` claim.
 - **A lower bound is marked.** `cost.lower_bound` is set whenever
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
@@ -411,7 +419,14 @@ and the seed, never on the host. `ecbench verify --replay N` re-executes
 N measured runs (`--replay-all`, every deterministic one) and requires
 the same answer, total, phase counts, counters, unpriced work and factor
 base, bit for bit. Run on another machine, it is an independent check of
-the figure. The audit also recomputes every derived figure from the
+the figure. Records written before 2026-10-05 by an `ic.pipeline` arm
+whose solver work was wall-priced (the descent-algebraic arms of
+`research/ecbench_yield_sweep_20261004/sessions/koblitz`) carry gae
+figures rounded to the binade of that wall term, because the term was
+removed by subtraction; the audit reproduces that rounding from the
+solver term and pre-removal total the record itself carries, reports the
+replay as `identical (legacy gae rounding, …)`, and new records carry the
+exact figure. The audit also recomputes every derived figure from the
 record's own counts (`S = total/√r`, the floor, the ratio, the
 lower-bound flag) and, for a session graded under the current rules,
 regrades every run from its recorded observations. A figure edited by

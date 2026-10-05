@@ -1,0 +1,179 @@
+{
+  "schema": "isogeny-walk-s3-manifest/v1",
+  "store": "s3://crypto-autoresearcher/isogeny-walk",
+  "notes": "Write-once objects (If-None-Match: *), SHA-256 checked on upload and on fetch. complete.json is authoritative. Fetch with: isogeny_walk fetch --from s3://crypto-autoresearcher/isogeny-walk --run <run_id> [--collected --of 8] --out DIR",
+  "runs": [
+    {
+      "marker": "s3://crypto-autoresearcher/isogeny-walk/runs/p224-03abf7dcdecb7b0a/complete.json",
+      "kind": "walk",
+      "run_id": "p224-03abf7dcdecb7b0a",
+      "attempt_id": "local-1791165850802728000",
+      "meta": {
+        "kind": "walk",
+        "run_id": "p224-03abf7dcdecb7b0a",
+        "root": "P-224",
+        "curve_args": [
+          "--curve",
+          "p224"
+        ],
+        "walk_args": [
+          "--primes",
+          "3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61",
+          "--max-curves",
+          "20000"
+        ],
+        "curves": 20000,
+        "edges": 117840
+      },
+      "objects": [
+        {
+          "name": "curves.yaml",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/attempts/local-1791165850802728000/curves.yaml.gz",
+          "sha256": "39286f2e3a80bac4fde074df49d594568ab544c6d9b2262197089dc3a47932d1",
+          "bytes": 8830532,
+          "content_sha256": "55d39faf611f68307ed3905c16e8b86680fd86479ba8f2c7c1c65aa51a6f7100",
+          "content_bytes": 93863612
+        },
+        {
+          "name": "isogeny_routes.json",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/attempts/local-1791165850802728000/isogeny_routes.json.gz",
+          "sha256": "63f3200d43bb92fc321b0f4692690098bfeda54a0a732e378604071337e4344b",
+          "bytes": 99125583,
+          "content_sha256": "e88d7c763a46dff6b0f10501b37dfd1ab6458db840d79122e8e50f757648bc5b",
+          "content_bytes": 317510566
+        },
+        {
+          "name": "walk.json",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/attempts/local-1791165850802728000/walk.json.gz",
+          "sha256": "c52606a8c59d5ebb495fd49531981f2199e4b4253c59aa593f021f0f028db334",
+          "bytes": 3366,
+          "content_sha256": "7f3f29810086d228005feeb2baad346917e6704bd08ea92f62339e7c07808a8b",
+          "content_bytes": 11399
+        }
+      ]
+    },
+    {
+      "marker": "s3://crypto-autoresearcher/isogeny-walk/runs/p224-03abf7dcdecb7b0a/traits/8/collected/complete.json",
+      "kind": "traits-collected",
+      "run_id": "p224-03abf7dcdecb7b0a",
+      "attempt_id": "local-1791165915700621000",
+      "meta": {
+        "kind": "traits-collected",
+        "run_id": "p224-03abf7dcdecb7b0a",
+        "of": 8
+      },
+      "objects": [
+        {
+          "name": "traits.jsonl",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/traits/8/collected/attempts/local-1791165915700621000/traits.jsonl.gz",
+          "sha256": "504cd6e3345be56900f32251755505a720dc54ef2013839dfc9bd1485962c920",
+          "bytes": 1201028,
+          "content_sha256": "882b5775ac6ffb936ad56566b0d3c69ad2ce69040b70e849957bbe4231c3ac59",
+          "content_bytes": 10474079
+        },
+        {
+          "name": "collect.json",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/traits/8/collected/attempts/local-1791165915700621000/collect.json.gz",
+          "sha256": "6438b50b4dd4a39344365b05cbb350421637645194665c193d842424489fa535",
+          "bytes": 629,
+          "content_sha256": "a24f96a1a9af5b45c82da91a73ebcceb3e9a7bc2ad53196d7a297cd7dda7d31e",
+          "content_bytes": 1671
+        },
+        {
+          "name": "class_audits.json",
+          "key": "isogeny-walk/runs/p224-03abf7dcdecb7b0a/traits/8/collected/attempts/local-1791165915700621000/class_audits.json.gz",
+          "sha256": "50d5bc395a27c17b8c26160e934efdfdcc9b6de76c52278ec23fb24a376b1828",
+          "bytes": 1450,
+          "content_sha256": "25b7e2c397153a02b8af09056a26fc0fd6f024e81bf11baf9b6e998504d8c055",
+          "content_bytes": 3342
+        }
+      ]
+    },
+    {
+      "marker": "s3://crypto-autoresearcher/isogeny-walk/runs/p256-aed06c3fc90f7645/complete.json",
+      "kind": "walk",
+      "run_id": "p256-aed06c3fc90f7645",
+      "attempt_id": "local-1791165299208787000",
+      "meta": {
+        "kind": "walk",
+        "run_id": "p256-aed06c3fc90f7645",
+        "root": "P-256",
+        "curve_args": [
+          "--curve",
+          "p256"
+        ],
+        "walk_args": [
+          "--primes",
+          "3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61",
+          "--max-curves",
+          "20000"
+        ],
+        "curves": 20000,
+        "edges": 78672
+      },
+      "objects": [
+        {
+          "name": "curves.yaml",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/attempts/local-1791165299208787000/curves.yaml.gz",
+          "sha256": "aa757e0b99894eed2bb3f97faaeeb5495f180c4e057496e988d5b45a8752ca4f",
+          "bytes": 8591805,
+          "content_sha256": "5eeab9be633f79f82149442c0bb2d6bebdf842fe4f62f05f401acad767e8e4b9",
+          "content_bytes": 113834760
+        },
+        {
+          "name": "isogeny_routes.json",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/attempts/local-1791165299208787000/isogeny_routes.json.gz",
+          "sha256": "62e082ea7eb8ed554c7cc4c81ef37eb44d4da0fccf7205470cafdbdf0b9543b6",
+          "bytes": 66828534,
+          "content_sha256": "05f7df41c391e0153c65386262695462bff22151a0a9993aaeae00f302b01dad",
+          "content_bytes": 224036521
+        },
+        {
+          "name": "walk.json",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/attempts/local-1791165299208787000/walk.json.gz",
+          "sha256": "b78961f623b3496091377fd95bd7abbb711b8c945e7250c31676e6aa54ee06a3",
+          "bytes": 3539,
+          "content_sha256": "74eaf1bfa6d6ad26647e3ed93ba5598ae0ab76efad56c8e6babf167277225724",
+          "content_bytes": 13859
+        }
+      ]
+    },
+    {
+      "marker": "s3://crypto-autoresearcher/isogeny-walk/runs/p256-aed06c3fc90f7645/traits/8/collected/complete.json",
+      "kind": "traits-collected",
+      "run_id": "p256-aed06c3fc90f7645",
+      "attempt_id": "local-1791165356488780000",
+      "meta": {
+        "kind": "traits-collected",
+        "run_id": "p256-aed06c3fc90f7645",
+        "of": 8
+      },
+      "objects": [
+        {
+          "name": "traits.jsonl",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/traits/8/collected/attempts/local-1791165356488780000/traits.jsonl.gz",
+          "sha256": "5ed8a2ed3638d2bf2a441a51a5e84f95cc76d1116669fcdba79d6598968b1d23",
+          "bytes": 1199352,
+          "content_sha256": "2351961fafaa439f0d23fb1feab7e9b4246dfc7e8bfc4062a45865966d190505",
+          "content_bytes": 10538305
+        },
+        {
+          "name": "collect.json",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/traits/8/collected/attempts/local-1791165356488780000/collect.json.gz",
+          "sha256": "94a70ebe974c6a38c520bb41d6855be7e003f873d370f88f94e2ea226a94cb1b",
+          "bytes": 615,
+          "content_sha256": "0102f9ae6014828ae9df004a87ec05e3fe171f5412ac8b59c9b72cd45a5f0319",
+          "content_bytes": 1692
+        },
+        {
+          "name": "class_audits.json",
+          "key": "isogeny-walk/runs/p256-aed06c3fc90f7645/traits/8/collected/attempts/local-1791165356488780000/class_audits.json.gz",
+          "sha256": "0c9bf31b55979a9e4249893dc58929b361da994ade5c39f726f55ee66b3e905f",
+          "bytes": 1534,
+          "content_sha256": "3a339c28a5d7dc6f56d4270f480539ffba65cfcf4a8a44f24721c5774a6454a8",
+          "content_bytes": 3517
+        }
+      ]
+    }
+  ]
+}

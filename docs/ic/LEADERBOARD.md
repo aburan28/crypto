@@ -142,4 +142,4 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 - `research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json` — sha256 `bb4dd48030029d21…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
-- `docs/curves/registry.json` — sha256 `ac96fc4a4e9c20e1…`
+- `docs/curves/registry.json` — sha256 `25083c9cf2ac96f8…`

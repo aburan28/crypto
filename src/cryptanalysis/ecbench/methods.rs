@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::claw::{pair_claw, ClawShape};
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
@@ -180,6 +181,30 @@ pub fn registry() -> &'static [MethodDecl] {
             entry: "ecbench::generic::kangaroo",
             applies: Applies::Any,
             params: RHO_PARAMS,
+        },
+        MethodDecl {
+            id: "claw.pair_table",
+            family: "claw",
+            summary: "four-point signed-Frobenius pair claw of aburan28/cryptanalysis#175: known-log orbit base, target-independent quotient pair table of M = c·√(r/n) classes, unique query pairs Q − (F_k + F_l); generic, mean S ≈ (c + 1/c)/√n, Koblitz curves only",
+            entry: "ecbench::claw::pair_claw",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "base_scale",
+                    default: None,
+                    help: "seed orbits S = ⌈base_scale · r^(1/4) · n^(−3/4)⌉; the PR's n=83 base is ≈ 1.06",
+                },
+                ParamDecl {
+                    name: "table_scale",
+                    default: None,
+                    help: "table classes M = ⌈table_scale · √(r/n)⌉; 1 minimises additions, the PR's n=83 tables are ≈ 1/32",
+                },
+                ParamDecl {
+                    name: "cap_multiple",
+                    default: Some("64"),
+                    help: "charged-addition budget as a multiple of √r before the run counts as exhausted",
+                },
+            ],
         },
         MethodDecl {
             id: "ic.pipeline",
@@ -812,6 +837,7 @@ fn solve_inner(
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
         }
+        (Instance::Binary(i), "claw") => solve_claw(m, i, FastPoint::affine(tx, ty), seed),
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius" => {
             let t = Instant::now();
             measurement::begin_online(Phase::RhoSolve);
@@ -1043,6 +1069,7 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
         w.included_stages = match family {
             "rho" => vec!["walk".into(), "collision".into(), "recovery_check".into()],
             "kangaroo" => vec!["jumps".into(), "collision".into(), "recovery_check".into()],
+            "claw" => vec!["queries".into(), "collision".into(), "recovery".into()],
             _ => vec![
                 "baby_steps".into(),
                 "giant_steps".into(),
@@ -1052,6 +1079,66 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
         w.mapping = format!("{family}: the whole target-dependent solve, one exclusive phase");
     }
     Some(w)
+}
+
+fn param_f64(m: &ResolvedMethod, name: &str) -> Result<f64, String> {
+    let v: f64 = m.params[name]
+        .parse()
+        .map_err(|_| format!("parameter `{name}` is not a number: `{}`", m.params[name]))?;
+    if v.is_finite() && v > 0.0 {
+        Ok(v)
+    } else {
+        Err(format!("parameter `{name}` must be positive: `{v}`"))
+    }
+}
+
+/// The pair claw ([`crate::cryptanalysis::ecbench::claw`]).  The base and
+/// the table are target-independent set-up; the online window opens at
+/// the first query `Q − (F_k + F_l)`.
+fn solve_claw(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let shape = ClawShape {
+        base_scale: param_f64(m, "base_scale")?,
+        table_scale: param_f64(m, "table_scale")?,
+        max_adds: rho_cap(inst.r, param_u64(m, "cap_multiple")? as f64),
+    };
+    let t = Instant::now();
+    let o = pair_claw(inst, target, seed, shape).ok_or("not a Koblitz instance")?;
+    let wall = t.elapsed().as_nanos() as u64;
+    let total = o.base.gae() + o.table.gae() + o.search.gae() + o.recover.gae();
+    let detail = json!({
+        "source": "aburan28/cryptanalysis#175, experiments/koblitz-pair-claw-20260929 (known-log orbit base, quotient pair table, unique query schedule)",
+        "seed_orbits": shape.seeds(inst.r, inst.n),
+        "table_classes_target": shape.table(inst.r, inst.n),
+        "expected_s": (shape.table_scale + 1.0 / shape.table_scale) / (inst.n as f64).sqrt(),
+        "expected_s_law": "(c + 1/c)/√n with c = table_scale, from a hit probability of 2nM/r per query at two additions each; finite base support and duplicate classes not modelled",
+    });
+    Ok(SolveReport {
+        recovered: o.recovered,
+        exhausted: o.exhausted,
+        phases: vec![
+            ops_phase("base", o.base),
+            ops_phase("table", o.table),
+            ops_phase("search", o.search),
+            ops_phase("recover", o.recover),
+        ],
+        total_gae: total,
+        automorphisms_used: 2 * inst.n,
+        unpriced: unpriced_of(&o.counters),
+        counters: o.counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: wall,
+        factor_base: None,
+        detail,
+        online: None,
+        online_error: None,
+        solver: None,
+    })
 }
 
 /// The strong reference: `koblitz_strong_rho` as the admissible fixture
@@ -1232,12 +1319,16 @@ fn ic_report(
     let mut unpriced = Vec::new();
     let mut nondeterminism = Vec::new();
     // Solver work: run_pipeline prices it from this host's wall time,
-    // which is not a count.  Take it back out and list it unpriced.
+    // which is not a count.  Take it back out and list it unpriced.  The
+    // figure is rebuilt from the pre-solver phase, never by subtracting
+    // the wall term: `(x + w) - w` rounds `x` to `w`'s binade and so
+    // leaked host timing into the low bits of a "deterministic" record
+    // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
         if s.gae > 0.0 && s.priced_by != "pinned" {
-            phases[2].gae -= s.gae;
-            total -= s.gae;
+            phases[2].gae = rep.decomposition.gae_before_solver;
+            total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
         }
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {

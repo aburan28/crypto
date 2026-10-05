@@ -65,7 +65,7 @@ KOBLITZ_STANDARDS = {
     "sect409k1": (0, 409), "sect571k1": (0, 571),
 }
 PRIME_STANDARDS = {
-    # name: (p, a, b, n, h, (gx, gy)), as src/ecc/curve.rs constructs them.
+    # name: (p, a, b, n, h, (gx, gy)), as the source tree constructs them.
     "secp256k1": (
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F, 0, 7,
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141, 1,
@@ -78,7 +78,23 @@ PRIME_STANDARDS = {
         0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551, 1,
         (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
          0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5)),
+    "P-224": (
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFE,
+        0xB4050A850C04B3ABF54132565044B0B7D7BFD8BA270B39432355FFB4,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFF16A2E0B8F03E13DD29455C5C2A3D, 1,
+        (0xB70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21,
+         0xBD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34)),
+    "P-192": (
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC,
+        0x64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1,
+        0xFFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831, 1,
+        (0x188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012,
+         0x07192B95FFC8DA78631011ED6B24CDD573F977A11E794811)),
 }
+# Where the source tree constructs each prime standard, when not curve.rs.
+PRIME_STANDARD_SOURCES = {"P-224": "src/ecc/curve_zoo.rs", "P-192": "src/ecc/curve_zoo.rs"}
 # Binary standards whose generator the source tree carries, in the basis of
 # the modulus above: (subgroup order, cofactor, gx, gy).
 BINARY_GENERATORS = {
@@ -474,9 +490,10 @@ def harvest_standards(reg: Registry) -> None:
                           STANDARD_MODULI[n][1])
     for name, (p, a, b, n, h, g) in PRIME_STANDARDS.items():
         ident = cid.prime_id(p, a, b, n * h)
+        src = PRIME_STANDARD_SOURCES.get(name, "src/ecc/curve.rs")
         reg.add(ident, "prime", {"p": str(p), "a": str(a), "b": str(b)},
-                "src/ecc/curve.rs", [], standard=name)
-        reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), "src/ecc/curve.rs")
+                src, [], standard=name)
+        reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), src)
 
 
 def unresolved_text(reg: Registry) -> list[str]:

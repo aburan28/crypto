@@ -43,7 +43,10 @@ defaults:
 jobs:
   harness:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    # The committed-evidence step replays every measured run of every
+    # committed session; with the pair-claw (about 24 min) and yield-sweep
+    # sessions that no longer fits in an hour on a hosted runner.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
