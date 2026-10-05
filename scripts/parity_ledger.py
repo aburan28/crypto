@@ -501,6 +501,15 @@ def print_sieve_comparison(base, traced, new):
         srr = f"{rt['s_over_rho'] / r['s_over_rho']:.2f}" if rt and r["s_over_rho"] > 0 else "—"
         eb = f"{rb['enum_muls'] / max(rb['bs'], 1):,.0f} → {r['enum_muls'] / max(r['bs'], 1):,.0f}"
         print(f"| {key[0]} | {key[1]} | {crel} | {rb['c_rel'] / r['c_rel']:.2f} | {rel} | {rb['relation_muls'] / r['relation_muls']:.2f} | {sr} | {srr} | {eb} |")
+    # note §15: rho measured by distinguished points at the top sizes
+    for p in sorted({k[0] for k in n}):
+        rho = load(f"36_jv_cover_rho_dp_{p}.json")
+        if rho:
+            ss = [r["s"] for r in rho]
+            m = mean(ss)
+            seed = rho[0]["seed"]
+            re = ", ".join(f"{r['s_over_rho']:.4f} → {r['s'] / m:.4f}" for key, r in sorted(n.items()) if key == (p, seed))
+            print(f"\nrho measured at p = {p} (seed {seed}) by distinguished points (note §15, {len(ss)} runs, all correct: {all(r['correct'] for r in rho)}): S = {', '.join(f'{x:.3f}' for x in ss)}, mean {m:.3f}; that row's S / rho on its own reference → on the measured one: {re}.")
     print("\nP15, the per-m estimate against the exhausted m's (every per-m entry but the last of a run):\n")
     print("| p | seed | m | estimate | found | found / estimate |")
     print("|---:|--:|--:|--:|--:|--:|")
@@ -512,6 +521,35 @@ def print_sieve_comparison(base, traced, new):
             m, found = e[0], e[3]
             if m in est and est[m] > 0:
                 print(f"| {key[0]} | {key[1]} | {m} | {est[m]:,.0f} | {found} | {found / est[m]:.2f} |")
+
+
+def print_census(census, extent):
+    """Note §16: the spread of S / rho over primes of one size band (one
+    instance each), the crossover from the bands' geometric means, and the
+    rows at the sizes above p = 1511 with the rho measured there when a
+    38_jv_cover_rho_dp file exists."""
+    bands = [(500, 600), (1000, 1100)]
+    stats = []
+    for lo, hi in bands:
+        g = [r for r in census if lo <= r["p"] < hi]
+        if not g:
+            continue
+        s = [r["s_over_rho"] for r in g]
+        gm = math.exp(mean([math.log(x) for x in s]))
+        pm = mean([r["p"] for r in g])
+        rr = [r["rate_ratio"] for r in g if r["m_final"] == r["m_rule"]]
+        print(f"\nPrimes in [{lo}, {hi}) ({len(g)} instances, all solved and correct: {all(r['solved'] and r['correct'] for r in g)}): S / rho from {min(s):.4f} to {max(s):.4f}, median {statistics.median(s):.4f}, geometric mean {gm:.4f} at mean p {pm:.0f}; the rate against p/m! on the rows that stayed on one m: {min(rr):.2f}–{max(rr):.2f} ({len(rr)} rows); |F|/p from {min(r['base'] / r['p'] for r in g):.3f} to {max(r['base'] / r['p'] for r in g):.3f}.")
+        stats.append((pm, gm))
+    if len(stats) == 2:
+        (pa, a), (pb, b) = stats
+        slope = math.log(b / a) / math.log(pb / pa)
+        p_star = pa * (1 / a) ** (1 / slope)
+        print(f"\nBetween the two bands S / rho falls as p^{slope:.2f}; the crossover from the bands' geometric means is p* ≈ {p_star:,.0f} (subgroup ≈ 2^{6 * math.log2(p_star) - 2:.0f}; registered P9: [280, 420]).")
+    for r in sorted(extent, key=lambda r: (r["p"], r["seed"])):
+        rho = load(f"38_jv_cover_rho_dp_{r['p']}.json")
+        if rho and rho[0]["seed"] == r["seed"]:
+            ss = [x["s"] for x in rho]
+            print(f"\np = {r['p']} seed {r['seed']} (ℓ = 2^{r['bits']:.1f}): S / rho {r['s_over_rho']:.4f} on the pooled rho; rho measured there by distinguished points over {len(ss)} runs (S = {', '.join(f'{x:.2f}' for x in ss)}, mean {mean(ss):.2f}, all correct: {all(x['correct'] for x in rho)}): {r['s'] / mean(ss):.4f}.")
 
 
 def walk(name):
@@ -704,6 +742,11 @@ def main():
         print_sieve_comparison(sv, svt, sve)
     if svt:
         print_sieve(svt, "F.2 The sieving variant with the descent's F4 replaying a recorded trace (33_jv_cover_trace_sieve_*.json; note §12)")
+    svc = sieve("37_jv_cover_sieve_primes")
+    svx = sieve("38_jv_cover_sieve")
+    if svc or svx:
+        print_sieve((svc or []) + (svx or []), "F.4 Other primes and larger sizes on the sieved route (37_jv_cover_sieve_primes_*.json, 38_jv_cover_sieve_*.json; note §16)")
+        print_census(svc or [], svx or [])
     wk = walk("34_jv_isogeny_walk.json")
     wk2 = walk("34_jv_isogeny_walk_two_only.json") or []
     if wk:

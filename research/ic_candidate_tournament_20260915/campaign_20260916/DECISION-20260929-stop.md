@@ -141,3 +141,22 @@ decision.
   item "a published degree bound for Weil-descended systems" is unchanged. The next rung is
   an engine and memory question (about 21 GB for a dense elimination at `ℓ = 6`, more for
   this engine's truncated basis), not a mathematical one.
+
+## Addendum 4, 2026-10-05: the `ℓ = 6` rung resolved by a dense in-tree engine
+
+This addendum records what
+[ic_dense_ladder_20261004](../../ic_dense_ladder_20261004/RESULTS.md) measured. It changes no
+decision.
+
+- **The rung Addendum 3 left open is resolved.** A bit-packed dense Macaulay elimination
+  (`examples/macaulay_dense.rs`) reads the same systems. It agrees with the external engine
+  on all 32 calibration draws. At `ℓ = 6` the direct `S₄` descent refutes at 11 on all
+  eight draws of both `n = 19` curves, and the symmetric norm form at 8. Degree 11 needed
+  about 5.5 GB, not the 21 GB estimated above, because the echelon basis stores only the
+  rows it finds.
+- **What it leaves.** Item 3 stays stopped, now on firmer ground. The measured solving
+  degree is 4 above the first-fall bound at `ℓ = 6`, after 3 at `ℓ = 5`. It rises by
+  one per rung from `ℓ = 3` and shows no sign of flattening. The next rung, `ℓ = 7`, needs
+  about 1.2 million columns at degree 9. A dense basis there would be near 180 GB, so it
+  needs a sparse or structured elimination. The reopening item "a published degree bound
+  for Weil-descended systems" is unchanged.

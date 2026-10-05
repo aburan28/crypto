@@ -293,6 +293,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
+| `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
@@ -319,6 +320,30 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`koblitz-standard-subspace:dimension=d` with
+`pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
+PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no
+default for any parameter that changes the search. The base is every point
+whose abscissa lies in `span(1, z, …, z^{d−1})`, folded by negation only. It
+is the base #1333's workers used.
+
+- **Charged:** every point addition the decomposition performs, including
+  F6-IC's `geometric_group_additions` (support closure, residual arithmetic
+  and witness replay), plus the framework's sign lift of each witness.
+- **Counted, not charged:** the Boolean solver's word XORs, under the
+  inherited-F4 adapters' unit string, so `S` is a lower bound and names
+  that unit in `unpriced`. Reductions, splits, propagations and every F6
+  gate counter ride in the record's `solver.extra`.
+
+Both engines are exact on the same base and seed, so the two arms issue the
+same queries until one exhausts its node budget. The base and oracle live in the
+`ecbench` binary (`src/bin/ecbench/pdp3_koblitz.rs`) and reach `ic.pipeline`
+through `methods::register_binary_plugins`. The library cannot name them:
+frozen-source replays rebuild it against pre-F6 snapshots of
+`koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
+evaluations, and the tournament admits no root build script. It also
+refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic
@@ -336,6 +361,13 @@ Two consequences to read every table with:
   larger method at any interesting size. The records keep `max_rss_kib`
   and the lookup counts. This is the known time–memory trade, never a
   finding.
+- **The pair claw's `S` omits its memory too.** `claw.pair_table`, ported
+  from `aburan28/cryptanalysis#175`, holds `M = table_scale·√(r/n)` classes.
+  Every base logarithm is known, so it is a generic method (a randomised
+  BSGS on signed Frobenius classes) whose mean is about
+  `(c + 1/c)/√n` at `c = table_scale`, at best `2/√n` against rho's
+  `√(π/4n)`. It is in the `claw` family, not `ic`, and it is not an
+  index-calculus candidate for a `vs_rho` claim.
 - **A lower bound is marked.** `cost.lower_bound` is set whenever
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
@@ -393,7 +425,14 @@ and the seed, never on the host. `ecbench verify --replay N` re-executes
 N measured runs (`--replay-all`, every deterministic one) and requires
 the same answer, total, phase counts, counters, unpriced work and factor
 base, bit for bit. Run on another machine, it is an independent check of
-the figure. The audit also recomputes every derived figure from the
+the figure. Records written before 2026-10-05 by an `ic.pipeline` arm
+whose solver work was wall-priced (the descent-algebraic arms of
+`research/ecbench_yield_sweep_20261004/sessions/koblitz`) carry gae
+figures rounded to the binade of that wall term, because the term was
+removed by subtraction; the audit reproduces that rounding from the
+solver term and pre-removal total the record itself carries, reports the
+replay as `identical (legacy gae rounding, …)`, and new records carry the
+exact figure. The audit also recomputes every derived figure from the
 record's own counts (`S = total/√r`, the floor, the ratio, the
 lower-bound flag) and, for a session graded under the current rules,
 regrades every run from its recorded observations. A figure edited by
@@ -524,13 +563,28 @@ on another hash) is stopped by the schema's identity triggers.
 | `factor_bases`, `factor_base_points` | every factor base a run used, by `FB1h…`; with its points when an `ecbench fb` dump is loaded |
 | `hosts`, `sessions`, `arms` | the host class and capsule, the session's build and reservation, its arms |
 | `runs`, `phases`, `run_counters`, `isolation_blockers` | one row per execution, its phases, its counters, and why it did not reach a higher level |
+| `run_solver` | the decomposition solver's statistics for an algebraic or SAT IC run (the record's `solver` block): the system's variables, equations and semi-regular degree, the solving degree reached, Macaulay rows, columns, degree and rank where the solver reports them, SAT variables, clauses, conflicts, decisions and propagations, and every solver-specific counter verbatim. Absent for table oracles. Informational: outside `S` beyond the relations phase's `solver_*` counters, and outside the replay comparison |
 | `comparisons` | every saved comparison |
 | `claims` | every loaded `vs_rho` claim, keyed by its IC1 `run_id`, with the checker's status at load time; a claim rebuilt with an independent receipt replaces its earlier form |
 
 Views: `arm_workload_summary` (the AGENTS.md §2 table, per workload),
 `method_by_curve` (each method's mean `S` and ratio to the floor per curve,
 across sessions), `ic_phase_split` (each IC run's phase shares with its
-factor base).
+factor base), `ic_yield` (the yield ledger: one row per IC run with its
+curve, target, factor base, oracle, trials, relations, `yield` =
+relations / trials, lookups, lift failures, matrix rank and rows, and the
+`run_solver` statistics; `ic.pipeline`'s `relations` and
+`ic.shared_rank`'s `hits` are read as the same count).
+
+```sql
+SELECT fb_family, oracle, count(*), round(avg(yield), 4), round(avg(lookups * 1.0 / relations), 1)
+FROM ic_yield WHERE status = 'verified' GROUP BY fb_family, oracle ORDER BY avg(yield) DESC;
+```
+
+The same ledger, joined with the curve registry and the tournament's
+rounds, is the Yield view of the lab browser (`docs/browser/`,
+AGENTS.md §7c). A yield is a stage diagnostic: it ranks bases and oracles
+on the same targets, and only the whole-pipeline `S` decides speed.
 
 ```sql
 SELECT method, curve_slug, verified_runs, round(mean_s, 3), round(mean_ratio_to_floor, 2)

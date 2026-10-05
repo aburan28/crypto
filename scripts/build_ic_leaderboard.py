@@ -64,6 +64,9 @@ SOURCES = {
     "n37_online_k16_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
     "n37_native_wall": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
     "n37_native_wall_evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+    "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+    "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+    "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -500,6 +503,74 @@ def families(board: list[dict]) -> dict:
 
 def build() -> dict:
     names = Names()
+    small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
+    small_replay = load(SOURCES["f6_small_cold_replay"])
+    small_by_arm = {row["arm"]: row for row in small_rows}
+    if (len(small_rows) != 3
+            or set(small_by_arm) != {"inherited_f4", "f6_ic", "f5"}
+            or small_replay["status"] != "verified"
+            or len(small_replay["runs"]) != 3
+            or any(row["status"] != "complete" or row["exit_status"] != 0
+                   or row["workload_id"] != "f6d79f6dd9f2"
+                   or row["target"] != [305, 466]
+                   or row["recovered"] != "4"
+                   or row["actual_usable_base_points"] != 14
+                   or row["folded_columns"] != 2
+                   or row["verified_relations"] != 8
+                   or row["cold_inside_worker_ns"] != row["cold_phase_sum_ns"]
+                   or row["online_wall_ns"] != row["online_phase_sum_ns"]
+                   for row in small_rows)
+            or any(not all(replay[key] for key in (
+                "group_replay", "phase_closure", "relation_certified",
+                "relations_replayed", "column_logs_replayed"))
+                for replay in small_replay["runs"])):
+        raise SystemExit("review the n9 F6-IC cold result before updating the leaderboard")
+    for arm, row in small_by_arm.items():
+        replay = next((r for r in small_replay["runs"]
+                       if r["run_file"].endswith(f"R1-{arm}.stdout.json")), None)
+        if (replay is None or replay["cold_inside_worker_ns"] != row["cold_inside_worker_ns"]
+                or replay["online_ns"] != row["online_wall_ns"]):
+            raise SystemExit("n9 F6-IC replay and measurement disagree")
+    small_cold_diagnostic = {
+        "curve": names("icv1-f2m9-tm5-4a3ea183")["slug"],
+        "source": SOURCES["f6_small_cold_rows"],
+        "replay": SOURCES["f6_small_cold_replay"],
+        "workload_id": "f6d79f6dd9f2",
+        "target": [305, 466],
+        "usable_points": 14,
+        "folded_columns": 2,
+        "verified_relations": 8,
+        "arms": {arm: {"candidate_id": row["candidate_id"],
+                       "cold_inside_worker_ns": row["cold_inside_worker_ns"],
+                       "online_wall_ns": row["online_wall_ns"]}
+                 for arm, row in small_by_arm.items()},
+        "rho_online_ms": None,
+        "online_speedup": None,
+        "cpu_isolation": "L0-unverified-mac",
+    }
+    ladder = load(SOURCES["f6_ecbench_ladder"])
+    if (ladder["schema"] != "f6-ic-ladder-analysis/v2"
+            or not ladder["decision"].startswith("not decidable")):
+        raise SystemExit("review the F6-IC ladder decision before updating the leaderboard")
+    ladder_diagnostic = {
+        "source": SOURCES["f6_ecbench_ladder"],
+        "decision": ladder["decision"],
+        "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+        "sizes": [
+            {
+                "m": z["m"],
+                "curve": names(z["slug"])["slug"],
+                "targets": z["targets_completed_both_ic_arms"],
+                "rho_s": z["rho_median_s"],
+                "f4_s_lower_over_rho": z["arms"]["ic-f4"]["median_s_lower_over_rho"],
+                "f6_s_lower_over_rho": z["arms"]["ic-f6"]["median_s_lower_over_rho"],
+                "median_log2_w4_over_w6": z["median_log2_w4_over_w6"],
+            }
+            for z in ladder["per_size"] if z["targets_completed_both_ic_arms"] > 0
+        ],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     rank_columns = load(SOURCES["n37_rank_columns"])
     if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
             or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
@@ -657,6 +728,8 @@ def build() -> dict:
         "n37_k8_k16_confirmation": k8_confirmation,
         "n37_online_ir_diagnostic": online_ir_diagnostic,
         "n37_native_wall_diagnostic": native_wall_diagnostic,
+        "f6_small_cold_diagnostic": small_cold_diagnostic,
+        "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -789,6 +862,52 @@ def markdown(doc: dict) -> str:
           "the frozen 5% gate. The admitted online speedup remains unknown; "
           "both K8 and K16 carry to the L2 host gate and n41/n53. "
           f"Read the [sealed native decision](../../{w['source']}).", ""]
+    z = doc["f6_small_cold_diagnostic"]
+    f4, f6, f5 = (z["arms"][arm] for arm in ("inherited_f4", "f6_ic", "f5"))
+    L += ["## Complete n9 F6-IC control outside tables A–C", "",
+          f"The preregistered one-target workload `{z['workload_id']}` on "
+          f"`{z['curve']}` recovered the logarithm of public point "
+          f"`{z['target']}` with inherited F4, F6-IC and matrix F5. "
+          f"Each cold run built {z['usable_points']} usable base points, "
+          f"collected {z['verified_relations']} verified ordinary relations, "
+          f"solved {z['folded_columns']} folded columns and independently replayed "
+          "the scalar, relations, column logs and phase totals. "
+          f"Inside-worker cold times were {f4['cold_inside_worker_ns']/1e6:.3f}, "
+          f"{f6['cold_inside_worker_ns']/1e6:.3f} and "
+          f"{f5['cold_inside_worker_ns']/1e6:.3f} ms respectively; one-target "
+          f"online times were {f4['online_wall_ns']/1e6:.3f}, "
+          f"{f6['online_wall_ns']/1e6:.3f} and "
+          f"{f5['online_wall_ns']/1e6:.3f} ms. These are exploratory L0 Mac "
+          "wall observations on a tiny subgroup. No same-target rho reference "
+          "or fully priced operation count exists, so IC/rho speedup and `S` "
+          "are unknown; this control cannot enter tables A–C. "
+          f"Read the [keyed measurements](../../{z['source']}) and "
+          f"[independent replay](../../{z['replay']}).", ""]
+    L += ["| solver | candidate | cold ms | online ms |",
+          "|:--|:--|--:|--:|"]
+    for arm, label in (("inherited_f4", "Inherited F4"), ("f6_ic", "F6-IC"), ("f5", "Matrix F5")):
+        row = z["arms"][arm]
+        L.append(f"| {label} | `{row['candidate_id']}` | "
+                 f"{row['cold_inside_worker_ns']/1e6:.3f} | "
+                 f"{row['online_wall_ns']/1e6:.3f} |")
+    L.append("")
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    L += ["## F6-IC E_0 ladder in ecbench, outside tables A–C", "",
+          "#1333's inherited-F4 and F6-IC decomposers ran unmodified in `ic.pipeline` "
+          "beside same-target strong rho on eight public one-target workloads per size. "
+          "IC `S` is a lower bound: the solver's word XORs are counted but unpriced, and "
+          "F6-IC's geometric point additions are charged. The F6-IC word-XOR saving "
+          "vanishes once the base exceeds #1333's 256-point closure cap; charging its "
+          "geometry makes the trade a relabelling. "
+          f"Decision: {y['decision']} (m = 31 incomplete). "
+          f"Read the [analysis](../../{y['source']}).", "",
+          "| m | curve | targets | rho S | F4 S/rho (lower bound) | F6-IC S/rho (lower bound) | median log2(W4/W6) |",
+          "|--:|:--|--:|--:|--:|--:|--:|"]
+    for z in y["sizes"]:
+        L.append(f"| {z['m']} | `{z['curve']}` | {z['targets']} | {z['rho_s']:.3f} | "
+                 f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
+                 f"{z['median_log2_w4_over_w6']:.3f} |")
+    L.append("")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -1023,6 +1142,46 @@ def page(doc: dict, standalone: bool) -> str:
              f'{100*w["aa_max_relative_deviation"]:.2f}%, above the frozen 5% gate. '
              'No online speedup is admitted; carry K8 and K16 to an L2 host and n41/n53. '
              f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(w["source"])}">Frozen decision</a>.</p></section>')
+    z = doc["f6_small_cold_diagnostic"]
+    f4, f6, f5 = (z["arms"][arm] for arm in ("inherited_f4", "f6_ic", "f5"))
+    P.append(f'<section class="card" id="bounded-f6-small-cold"><h2>Complete n9 F6-IC control, outside the priced tables</h2>'
+             f'<p>On <code>{esc(z["curve"])}</code>, all three arms recovered the logarithm of '
+             f'public point <code>{esc(z["target"])}</code> after building {z["usable_points"]} usable '
+             f'base points, collecting {z["verified_relations"]} verified ordinary relations and '
+             f'solving {z["folded_columns"]} folded columns. Inherited F4, F6-IC and matrix F5 '
+             f'inside-worker cold times were {f4["cold_inside_worker_ns"]/1e6:.3f}, '
+             f'{f6["cold_inside_worker_ns"]/1e6:.3f} and {f5["cold_inside_worker_ns"]/1e6:.3f} ms; '
+             f'their one-target online times were {f4["online_wall_ns"]/1e6:.3f}, '
+             f'{f6["online_wall_ns"]/1e6:.3f} and {f5["online_wall_ns"]/1e6:.3f} ms. '
+             'Independent replay checked all scalars, relations, column logs and phase totals. '
+             'These are exploratory L0 Mac wall observations on a tiny subgroup. With no '
+             'same-target rho reference or fully priced operation count, IC/rho speedup and S '
+             'remain unknown. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(z["source"])}">Keyed measurements</a> · '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(z["replay"])}">independent replay</a>.</p>')
+    P.append('<table><thead><tr><th>Solver</th><th>Candidate ID</th><th>Cold ms</th><th>Online ms</th></tr></thead><tbody>')
+    for arm, label in (("inherited_f4", "Inherited F4"), ("f6_ic", "F6-IC"), ("f5", "Matrix F5")):
+        row = z["arms"][arm]
+        P.append(f'<tr><td>{label}</td><td><code>{esc(row["candidate_id"])}</code></td>'
+                 f'<td>{row["cold_inside_worker_ns"]/1e6:.3f}</td>'
+                 f'<td>{row["online_wall_ns"]/1e6:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    P.append(f'<section class="card" id="bounded-f6-ecbench-ladder"><h2>F6-IC E_0 ladder in ecbench, outside the priced tables</h2>'
+             '<p>#1333\'s inherited-F4 and F6-IC decomposers ran unmodified in <code>ic.pipeline</code> '
+             'beside same-target strong rho on eight public one-target workloads per size. IC S is a '
+             'lower bound: the solver\'s word XORs are counted but unpriced, and F6-IC\'s geometric point '
+             'additions are charged. The F6-IC word-XOR saving vanishes once the base exceeds #1333\'s '
+             '256-point closure cap; charging its geometry makes the trade a relabelling. '
+             f'Decision: {esc(y["decision"])} (m = 31 incomplete). '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(y["source"])}">Analysis</a>.</p>')
+    P.append('<table><thead><tr><th>m</th><th>Curve</th><th>Targets</th><th>Rho S</th>'
+             '<th>F4 S/rho (lower bound)</th><th>F6-IC S/rho (lower bound)</th><th>Median log₂(W4/W6)</th></tr></thead><tbody>')
+    for z in y["sizes"]:
+        P.append(f'<tr><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td><td>{z["targets"]}</td>'
+                 f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
+                 f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

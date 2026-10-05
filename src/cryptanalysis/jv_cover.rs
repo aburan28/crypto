@@ -713,6 +713,21 @@ impl<'a> EllE<'a> {
     pub fn sub(&self, p: &PtE6, q: &PtE6) -> PtE6 {
         self.add(p, &self.neg(q))
     }
+    /// [`EllE::mul`] for a scalar above 2⁶⁴ (the group order itself).
+    pub fn mul_u128(&self, pt: &PtE6, mut k: u128) -> PtE6 {
+        let mut acc = PtE6::INF;
+        let mut base = *pt;
+        while k > 0 {
+            if k & 1 == 1 {
+                acc = self.add(&acc, &base);
+            }
+            k >>= 1;
+            if k > 0 {
+                base = self.add(&base, &base);
+            }
+        }
+        acc
+    }
     pub fn mul(&self, pt: &PtE6, mut k: u64) -> PtE6 {
         let mut acc = PtE6::INF;
         let mut base = *pt;
@@ -739,29 +754,21 @@ impl<'a> EllE<'a> {
     }
 }
 
-fn isqrt(n: u64) -> u64 {
-    let mut r = (n as f64).sqrt() as u64;
-    while r * r > n {
-        r -= 1;
-    }
-    while (r + 1) * (r + 1) <= n {
-        r += 1;
-    }
-    r
-}
-
 /// `#E(F_{q³})` by baby-step giant-step on a random point, accepted when it
 /// is four times a prime (the group is then `Z/2 × Z/2ℓ` and the DLP lives
 /// in the subgroup of order `ℓ`).
 fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
-    let p = ec.f.f.p;
+    // returns ℓ = #E/4 when #E = 4ℓ with ℓ prime;
+    // the order is near p⁶, which passes 2⁶⁴ at p = 1,622 while ℓ = #E/4 stays
+    // below it up to p = 2,039: the search runs in u128 (note §16)
+    let p = ec.f.f.p as u128;
     let q3 = p.pow(6);
-    let two_sqrt = 2 * isqrt(q3) + 2;
+    let two_sqrt = 2 * isqrt128(q3) + 2;
     let lo = q3 + 1 - two_sqrt;
     let width = 2 * two_sqrt;
     let pt = ec.random_point(rng);
-    let steps = isqrt(width) + 1;
-    let mut table: HashMap<PtE6, u64> = HashMap::new();
+    let steps = isqrt128(width) + 1;
+    let mut table: HashMap<PtE6, u128> = HashMap::new();
     let mut jp = PtE6::INF;
     for j in 0..steps {
         if !jp.inf {
@@ -769,9 +776,9 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         }
         jp = ec.add(&jp, &pt);
     }
-    let giant = ec.mul(&pt, steps);
-    let mut t = ec.mul(&pt, lo);
-    let mut i = 0u64;
+    let giant = ec.mul_u128(&pt, steps);
+    let mut t = ec.mul_u128(&pt, lo);
+    let mut i = 0u128;
     let mut found = None;
     while i * steps <= width + steps {
         let m = if t.inf {
@@ -787,11 +794,22 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         i += 1;
     }
     let m = found?;
-    if m % 4 != 0 || !is_prime_u64(m / 4) {
+    if m % 4 != 0 || m / 4 > u64::MAX as u128 || !is_prime_u64((m / 4) as u64) {
         return None;
     }
     let other = ec.random_point(rng);
-    ec.mul(&other, m).inf.then_some(m)
+    ec.mul_u128(&other, m).inf.then_some((m / 4) as u64)
+}
+
+fn isqrt128(n: u128) -> u128 {
+    let mut r = (n as f64).sqrt() as u128;
+    while r * r > n {
+        r -= 1;
+    }
+    while (r + 1) * (r + 1) <= n {
+        r += 1;
+    }
+    r
 }
 
 // ── The genus-3 cover H : y² = F(x)·N(x) over F_q ─────────────────────────
@@ -1654,10 +1672,9 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             continue;
         }
         let ec = EllE::new(&f, &alpha);
-        let Some(m) = group_order_4_prime(&ec, &mut rng) else {
+        let Some(l) = group_order_4_prime(&ec, &mut rng) else {
             continue;
         };
-        let l = m / 4;
         let Some(cov) = Cover::new(&f, &alpha) else {
             continue;
         };
@@ -2091,6 +2108,162 @@ pub fn rho_e(spec: &Spec, seed: u64) -> RhoRunE {
         group_ops: ops,
         s: ops as f64 / (n as f64).sqrt(),
         correct: found == Some(spec.d),
+    }
+}
+
+/// [`rho_e`] without the stored walk (note §15): the same r-adding walk,
+/// `threads` walkers from random starts, a point distinguished when `dp_bits`
+/// bits of its mixed hash vanish, the distinguished points shared between
+/// the walkers; a walker that meets no distinguished point in `40·2^dp_bits`
+/// steps restarts from a new random point.  Every group operation of every
+/// walker is charged, the walk's multipliers once per walker.
+pub fn rho_e_dp(spec: &Spec, seed: u64, dp_bits: u32, threads: usize) -> RhoRunE {
+    use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+    use std::sync::Mutex;
+    let n = spec.l;
+    let r = 32usize;
+    let scalars: Vec<(u64, u64)> = {
+        let mut rng = StdRng::seed_from_u64(seed ^ 0x8D06);
+        (0..r)
+            .map(|_| (rng.gen_range(0..n), rng.gen_range(1..n)))
+            .collect()
+    };
+    let table: Mutex<HashMap<PtE6, (u64, u64)>> = Mutex::new(HashMap::new());
+    let found: Mutex<Option<u64>> = Mutex::new(None);
+    let stop = AtomicBool::new(false);
+    let steps = AtomicU64::new(0);
+    let ops = AtomicU64::new(0);
+    let cap = 64 * (n as f64).sqrt() as u64 + 1_000_000;
+    let mask = (1u64 << dp_bits) - 1;
+    let tail_cap = 40u64 << dp_bits;
+    let progress = std::env::var("JV_RHO_PROGRESS").is_ok();
+    let start = Instant::now();
+    std::thread::scope(|sc| {
+        for w in 0..threads.max(1) {
+            let (table, found, stop, steps, ops, scalars) =
+                (&table, &found, &stop, &steps, &ops, &scalars);
+            sc.spawn(move || {
+                let f = Fq3::new(spec.p);
+                let ec = EllE::new(&f, &spec.alpha);
+                let mults: Vec<PtE6> = scalars
+                    .iter()
+                    .map(|&(al, be)| ec.add(&ec.mul(&spec.g, al), &ec.mul(&spec.q, be)))
+                    .collect();
+                let mut rng = StdRng::seed_from_u64(
+                    seed ^ 0x8D06 ^ (w as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15),
+                );
+                let mut local = 0u64;
+                'outer: while !stop.load(Ordering::Relaxed) {
+                    let mut a = rng.gen_range(0..n);
+                    let mut b = rng.gen_range(1..n);
+                    let mut l = ec.add(&ec.mul(&spec.g, a), &ec.mul(&spec.q, b));
+                    let mut tail = 0u64;
+                    loop {
+                        let h = l.x.0[0].0[0]
+                            ^ l.x.0[0].0[1].wrapping_mul(0x9E37_79B9)
+                            ^ l.x.0[1].0[0].rotate_left(17)
+                            ^ l.x.0[2].0[1].rotate_left(33);
+                        let idx = mix64(h);
+                        if (idx >> 20) & mask == 0 {
+                            let mut t = table.lock().unwrap();
+                            if let Some(&(a2, b2)) = t.get(&l) {
+                                let db = (b + n - b2) % n;
+                                if db != 0 {
+                                    let da = (a2 + n - a) % n;
+                                    *found.lock().unwrap() = Some(mm(da, inv_mod(db, n), n));
+                                    stop.store(true, Ordering::Relaxed);
+                                    break 'outer;
+                                }
+                                drop(t);
+                                break; // the same walk met its own point: restart
+                            }
+                            t.insert(l, (a, b));
+                            drop(t);
+                            tail = 0;
+                        }
+                        let j = (idx % r as u64) as usize;
+                        l = ec.add(&l, &mults[j]);
+                        a = (a + scalars[j].0) % n;
+                        b = (b + scalars[j].1) % n;
+                        local += 1;
+                        tail += 1;
+                        if local & ((1 << 20) - 1) == 0 {
+                            let tot = steps.fetch_add(1 << 20, Ordering::Relaxed) + (1 << 20);
+                            if progress && w == 0 && tot & ((1 << 26) - 1) < (1 << 20) {
+                                eprintln!(
+                                    "  [rho-dp p={} seed={}] steps {:.3e} ({:.2} sqrt l) dps {} {:.0} s",
+                                    spec.p,
+                                    seed,
+                                    tot as f64,
+                                    tot as f64 / (n as f64).sqrt(),
+                                    table.lock().unwrap().len(),
+                                    start.elapsed().as_secs_f64()
+                                );
+                            }
+                            if tot > cap || stop.load(Ordering::Relaxed) {
+                                stop.store(true, Ordering::Relaxed);
+                                break 'outer;
+                            }
+                        }
+                        if tail > tail_cap {
+                            break;
+                        }
+                    }
+                }
+                steps.fetch_add(local & ((1 << 20) - 1), Ordering::Relaxed);
+                ops.fetch_add(ec.ops(), Ordering::Relaxed);
+            });
+        }
+    });
+    let ops = ops.load(Ordering::Relaxed);
+    let correct = *found.lock().unwrap() == Some(spec.d);
+    RhoRunE {
+        seed,
+        steps: steps.load(Ordering::Relaxed),
+        group_ops: ops,
+        s: ops as f64 / (n as f64).sqrt(),
+        correct,
+    }
+}
+
+/// One distinguished-point rho run on the instance `(p, seed)` (note §15).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct RhoDpReport {
+    pub p: u64,
+    pub seed: u64,
+    pub run: u64,
+    pub l: u64,
+    pub bits: f64,
+    pub dp_bits: u32,
+    pub threads: usize,
+    pub c_add_e: f64,
+    pub steps: u64,
+    pub group_ops: u64,
+    pub s: f64,
+    pub correct: bool,
+    pub wall_ms: f64,
+}
+
+pub fn run_rho_dp(p: u64, seed: u64, run: u64, dp_bits: u32, threads: usize) -> RhoDpReport {
+    let spec = generate_spec(p, seed);
+    let ctx = Ctx::new(&spec);
+    let (c_e, _) = unit_costs(&spec, &ctx);
+    let start = Instant::now();
+    let r = rho_e_dp(&spec, seed.wrapping_mul(1000) + run, dp_bits, threads);
+    RhoDpReport {
+        p,
+        seed,
+        run,
+        l: spec.l,
+        bits: (spec.l as f64).log2(),
+        dp_bits,
+        threads,
+        c_add_e: c_e,
+        steps: r.steps,
+        group_ops: r.group_ops,
+        s: r.s,
+        correct: r.correct,
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
 }
 
@@ -3028,6 +3201,17 @@ mod tests {
             cheaper, n,
             "every stopped run ends at a lower degree with a smaller matrix"
         );
+    }
+
+    #[test]
+    fn distinguished_point_rho_finds_the_planted_logarithm() {
+        // p = 53: l ≈ 2^32, sqrt l ≈ 6.5·10⁴ steps; three runs, two walkers
+        let spec = generate_spec(53, 1);
+        for run in 0..3u64 {
+            let r = rho_e_dp(&spec, 100 + run, 6, 2);
+            assert!(r.correct, "run {run}: {r:?}");
+            assert!(r.s > 0.2 && r.s < 8.0, "run {run}: S = {}", r.s);
+        }
     }
 
     #[test]

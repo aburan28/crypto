@@ -43,6 +43,30 @@ const MAX_RESTARTS: u64 = 128;
 /// Fruitless-collision restart budget for larger fields (n≥41).
 const MAX_RESTARTS_LARGE: u64 = 100_000;
 
+fn peak_rss_bytes() -> Option<u64> {
+    #[cfg(unix)]
+    {
+        let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+        // SAFETY: getrusage initializes the complete value on success.
+        if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } != 0 {
+            return None;
+        }
+        // SAFETY: getrusage succeeded above.
+        let rss = unsafe { usage.assume_init() }.ru_maxrss;
+        if rss < 0 {
+            return None;
+        }
+        #[cfg(target_os = "macos")]
+        return Some(rss as u64);
+        #[cfg(not(target_os = "macos"))]
+        return (rss as u64).checked_mul(1024);
+    }
+    #[cfg(not(unix))]
+    {
+        None
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Quotient {
     Ordinary,
@@ -1118,6 +1142,7 @@ fn solve_fixture_strong(
         "distinguished_bits":params.dp_bits,
         "table_entries":outcome.table_entries,
         "table_payload_lower_bound_bytes":outcome.table_entries * (1 + 4 * std::mem::size_of::<u64>()),
+        "peak_rss_bytes":peak_rss_bytes(),
         "setup_ms":setup_ms,
         "target_generation_ms":target_generation_ms,
         "walk_ms":walk_ms,
