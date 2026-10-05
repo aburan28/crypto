@@ -11,8 +11,11 @@
 //! changes the code it measures.
 //!
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
-//!   tree only.  `r05` and `r02b` are native; `r03` reproduces R03's
+//!   tree only.  `r05`, `r02b` and `r07` are native; `r03` reproduces R03's
 //!   frozen `analysis.json` from its frozen runs.
+//! - `icprog holdouts`: a round's fresh holdouts by suite v1's own
+//!   construction (`suite/v1/make_suite.py`, ported), drawn once, or
+//!   checked against the files a round froze.
 //! - `icprog run <round> <step>`: a round's declared steps on the native
 //!   runner (`harness/bench.py`, ported), through `isolated_bench`: its
 //!   manifest, pin, A/A, timed rows and callgrind profiles.  It resumes a
@@ -97,6 +100,7 @@ enum Round {
     R02b,
     R03,
     R05,
+    R07,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
@@ -364,11 +368,34 @@ enum Command {
         #[arg(long)]
         fixture_commit: Option<String>,
     },
-    /// One of a round's declared steps, natively (R05, R02b).
+    /// A round's fresh holdouts by suite v1's own construction
+    /// (`suite/v1/make_suite.py`, ported): written once into the round's
+    /// `holdouts/` with their `SHA256SUMS`, or, with `--check`, re-derived
+    /// and compared byte for byte with the files already there.
+    Holdouts {
+        /// The round's directory, e.g. `research/ic_tool_program/rounds/R07-main-head`.
+        round_dir: PathBuf,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// A size, as `a,n`; repeat for each.
+        #[arg(long = "size", required = true)]
+        sizes: Vec<String>,
+        /// The recipe seeds, two targets to a seed, in order.
+        #[arg(long, value_delimiter = ',', required = true)]
+        seeds: Vec<i128>,
+        /// The first target's number; the rest follow on.
+        #[arg(long)]
+        first_target: i128,
+        /// Compare with the files already there instead of writing.
+        #[arg(long)]
+        check: bool,
+    },
+    /// One of a round's declared steps, natively (R05, R02b, R07).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
-        /// R02b: plan, manifest, pin, aa, compare, holdout, extend,
+        /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
         /// callgrind or manifest-resumed.
         step: String,
         /// The repository checkout (default: the current directory).
@@ -402,6 +429,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R02b => "R02b-wide-tail-retest",
         Round::R03 => "R03-curve-construction",
         Round::R05 => "R05-presence-filter",
+        Round::R07 => "R07-main-head",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -478,6 +506,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let doc = match round {
         Round::R02b => rounds::r02b::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R05 => rounds::r05::run(&ctx, step, &b, &arms, &root)?,
+        Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -631,8 +660,78 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R02b => rounds::r02b::analyse(&ctx)?,
         Round::R03 => rounds::r03::analyse(&ctx)?,
         Round::R05 => rounds::r05::analyse(&ctx)?,
+        Round::R07 => rounds::r07::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
+}
+
+struct HoldoutArgs {
+    round_dir: PathBuf,
+    root: PathBuf,
+    sizes: Vec<String>,
+    seeds: Vec<i128>,
+    first_target: i128,
+    check: bool,
+}
+
+/// Write a round's fresh holdouts once, or check the ones it has.
+fn holdouts(args: HoldoutArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    let mut sizes = Vec::new();
+    for s in &args.sizes {
+        let size = s
+            .split_once(',')
+            .and_then(|(a, n)| Some((a.trim().parse().ok()?, n.trim().parse().ok()?)))
+            .ok_or_else(|| format!("--size {s:?} is not a,n"))?;
+        sizes.push(size);
+    }
+    let files = suite::holdouts(&programme, &sizes, &args.seeds, args.first_target)?;
+    let sums = suite::sums_text(&files);
+    let dir = args.round_dir.join("holdouts");
+    if args.check {
+        let mut mismatches = Vec::new();
+        for (path, text) in &files {
+            if std::fs::read(dir.join(path)).ok().as_deref() != Some(text.as_bytes()) {
+                mismatches.push(json::J::Str(path.clone()));
+            }
+        }
+        if std::fs::read_to_string(dir.join("SHA256SUMS"))
+            .ok()
+            .as_deref()
+            != Some(sums.as_str())
+        {
+            mismatches.push(json::J::Str("SHA256SUMS".into()));
+        }
+        let doc = json::obj([
+            ("files", json::J::Int(files.len() as i128)),
+            ("mismatches", json::J::Arr(mismatches.clone())),
+        ]);
+        return if mismatches.is_empty() {
+            Ok(json::dumps(&doc, 1))
+        } else {
+            Err(json::dumps(&doc, 1))
+        };
+    }
+    if dir.exists() {
+        return Err(format!(
+            "{} exists; a round's holdouts are drawn once (use --check)",
+            dir.display()
+        ));
+    }
+    for (path, text) in &files {
+        let out = dir.join(path);
+        if let Some(parent) = out.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
+        }
+        std::fs::write(&out, text).map_err(|e| format!("{}: {e}", out.display()))?;
+    }
+    let out = dir.join("SHA256SUMS");
+    std::fs::write(&out, &sums).map_err(|e| format!("{}: {e}", out.display()))?;
+    Ok(format!(
+        "{} holdout files written to {}",
+        files.len(),
+        dir.display()
+    ))
 }
 
 fn main() -> ExitCode {
@@ -771,8 +870,23 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b => report::r05(&doc),
+            Round::R05 | Round::R02b | Round::R07 => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
+        }),
+        Command::Holdouts {
+            round_dir,
+            root,
+            sizes,
+            seeds,
+            first_target,
+            check,
+        } => holdouts(HoldoutArgs {
+            round_dir,
+            root,
+            sizes,
+            seeds,
+            first_target,
+            check,
         }),
         Command::Run {
             round,
