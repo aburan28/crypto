@@ -636,3 +636,14 @@ memory at 12 GB on both `n = 19` curves. §3.1's "every measurement on record po
 against `c` being that small" now rests on an independently confirmed ladder one rung
 longer. The `m = 3` `x4` readings quoted in §0 item 3 and §2 from the in-tree scan carry
 that scan's floor (6 at `ℓ = 2` is 5).
+
+## Addendum 4 (2026-10-05): the `m = 3` ladder at `ℓ = 6`
+
+Pointer only; the sections above are unchanged.
+[ic_dense_ladder_20261004](../../ic_dense_ladder_20261004/RESULTS.md) resolved the rung the
+external engine could not, with a dense in-tree elimination that agrees with it on all 32
+calibration draws. On `K₀/2¹⁹` and `K₁/2¹⁹` at `ℓ = 6`, the direct `S₄` descent refutes at 11
+on all eight draws, four above the sharp first-fall bound. The symmetric norm form refutes
+at 8. The direct descent's excess now reads −2, 1, 2, 3, 4 over `ℓ = 2…6`. §3.1's statement
+that every measurement points against `c` being small now rests on a ladder one rung longer
+again.
