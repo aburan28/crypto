@@ -1,0 +1,135 @@
+{
+  "controller_read_error": null,
+  "controller_sha256": "27b4494a0cbd8b55bae7e326fb38b66492f16846ce6d8cb34cfdafd9b4bcc147",
+  "controller_unchanged": true,
+  "execution_files": {
+    "attempts/binding.json": {
+      "bytes": 377,
+      "sha256": "f80ff23d6eba4c6942e3b9302e5230526785c1a343dc11456c6905377ee55145"
+    },
+    "attempts/completed-000.json": {
+      "bytes": 1087,
+      "sha256": "6d6754ed1ee57b7cf9187eb640046d645f19185115e367ec75b1f77e3eeeb6f1"
+    },
+    "attempts/completed-001.json": {
+      "bytes": 1124,
+      "sha256": "c19d57588a2e36afdd0e0fc0b8fe5f0dded47f1a2ff04bb1092102eb7b041bfe"
+    },
+    "attempts/start-000.json": {
+      "bytes": 445,
+      "sha256": "d38fe7556ec2955cffd8e47d21d24a34f06f53f1597434f469623e55c1279bcd"
+    },
+    "attempts/start-001.json": {
+      "bytes": 445,
+      "sha256": "6363382a4e23644e04b58f189b6696221702c1401a3c3f316a2d69a4ff011a6d"
+    },
+    "preparation-auditor-pids": {
+      "bytes": 23,
+      "sha256": "a7a79fd7a8d484c6dbc85d50ce85dfc839099a27aa2524104f34eb952431022b"
+    },
+    "preparation-auditor.receipt.json": {
+      "bytes": 1391,
+      "sha256": "cfd64ae3a73ca95b3caf00b9962994e9056de2eb351a74cbf5abc475d2bde828"
+    },
+    "preparation-auditor.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "preparation-auditor.stdout": {
+      "bytes": 13100,
+      "sha256": "c9ff3eb84090433ba8c884b015f85a922cfba573155d8653ae5d9069e781d097"
+    },
+    "preparation-recheck.json": {
+      "bytes": 13099,
+      "sha256": "ac3f8a52520ab1c3cc04dedbf1922179c15db689dfea704977ba0d9cb1411421"
+    },
+    "producer.json": {
+      "bytes": 4288,
+      "sha256": "fce2fe09cf554582bf66eefb85629ae28cbab9cdc0ef553dda0c5e2277682f60"
+    },
+    "publication-preflight.json": {
+      "bytes": 789,
+      "sha256": "ec7725a28a871820161d55d2246436bfa6f109cbd1a7d552547f3610266c51fd"
+    },
+    "target-exposure.json": {
+      "bytes": 519,
+      "sha256": "e4fd152e3c7249eff9d8f7312b9883305f64b5340529deaedf5bafd99ea30ad2"
+    },
+    "worker-pids": {
+      "bytes": 23,
+      "sha256": "5fe16828ca1f4257c3bff97ef14a404b4fea2e3c313713e770a7e5d3e8fda90f"
+    },
+    "worker-started.json": {
+      "bytes": 704,
+      "sha256": "0e92bb1c3aa957e4254935f88fe717c59461429cb04b5652e1c93f1c2aab18de"
+    },
+    "worker-terminal.json": {
+      "bytes": 573,
+      "sha256": "d98f33070f5e04de5303c4137ec8d42da4145de4946597e63e6f65d92fb11aa0"
+    },
+    "worker.receipt.json": {
+      "bytes": 1268,
+      "sha256": "2cc7801be1e34cb3a59bc0bb9bb55b9992ffb071c70a0c64b538f5ac22db5c76"
+    },
+    "worker.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker.stdout": {
+      "bytes": 58,
+      "sha256": "a80e9bf34fc592c6a4d6463ff699dd42b0cb3382d8554e600c47a2c77f2ea5ef"
+    }
+  },
+  "execution_inventory_error": null,
+  "fresh_paired_qualification": false,
+  "full_goal_complete": false,
+  "headline_eligible": false,
+  "online_speedup": null,
+  "preparation_auditor_drain_error": null,
+  "preparation_auditor_drain_passed": true,
+  "promotion_eligible": false,
+  "publication_preflight_sha256": "ec7725a28a871820161d55d2246436bfa6f109cbd1a7d552547f3610266c51fd",
+  "registration_sha256": "fcc320ea595781d94ab9cfc9461759c8f639fc58505489c1c8e4715e28be7d2e",
+  "schema_version": 1,
+  "scope": "disclosed-n17-native-one-target-f5-v1",
+  "source_bound_execution_admitted": false,
+  "source_gate_error": null,
+  "source_gate_passed": true,
+  "worker": {
+    "exit_code": 0,
+    "receipt": {
+      "argv": [
+        "/Volumes/SSD990/llm/tmp/ic-native-f5-one-target-registration-20261005-capsule-v1/immutable/bin/prepared_target_worker",
+        "run",
+        "--capsule",
+        "/Volumes/SSD990/llm/tmp/ic-native-f5-one-target-registration-20261005-capsule-v1",
+        "--execution",
+        "/Volumes/SSD990/llm/tmp/ic-native-f5-one-target-registration-20261005-execution-v1",
+        "--registration-sha256",
+        "fcc320ea595781d94ab9cfc9461759c8f639fc58505489c1c8e4715e28be7d2e"
+      ],
+      "child_wall_ns": 33006260708,
+      "cwd": "/Volumes/SSD990/llm/tmp/ic-native-f5-one-target-registration-20261005-execution-v1",
+      "deadline_ms": 900000,
+      "environment": {
+        "LC_ALL": "C",
+        "RAYON_NUM_THREADS": "1"
+      },
+      "executable_sha256_after": "1b46e7157bb790a56f3857bfb32d242757bb8264b0d24fefa10dfdaa110acac9",
+      "executable_sha256_before": "1b46e7157bb790a56f3857bfb32d242757bb8264b0d24fefa10dfdaa110acac9",
+      "exit_code": 0,
+      "output_limit": false,
+      "pid": 40105,
+      "process_group_drain_confirmed": true,
+      "process_group_drain_requested": true,
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 58,
+      "stdout_sha256": "a80e9bf34fc592c6a4d6463ff699dd42b0cb3382d8554e600c47a2c77f2ea5ef",
+      "timed_out": false
+    },
+    "timed_out": false
+  },
+  "worker_drain_error": null,
+  "worker_drain_passed": true
+}

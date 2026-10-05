@@ -1,0 +1,177 @@
+{
+  "actual_usable_base_points": 62,
+  "candidate_id": null,
+  "costs": {
+    "observed_wall_ns": 6501301584,
+    "online_phases_ns": {
+      "recovery_check": 9751,
+      "rho_solve": null,
+      "target_descent": 9250,
+      "target_pdp": 6436693790,
+      "target_query": 40232959,
+      "target_relation_check": 24355208
+    },
+    "online_wall_ns": 6501300958,
+    "phases_ns": {
+      "factor_base": null,
+      "matrix_build": null,
+      "pdp": null,
+      "precompute": null,
+      "queries": null,
+      "recovery_check": 9751,
+      "relation_check": null,
+      "relation_la": null,
+      "rho_solve": null,
+      "setup": 626,
+      "target_descent": 9250,
+      "target_pdp": 6436693790,
+      "target_query": 40232959,
+      "target_relation_check": 24355208
+    },
+    "schema_version": 1
+  },
+  "dispatch": {
+    "attempt_record_contract": "start-and-completed-pdp-before-recovery-v1",
+    "collapse_negation": true,
+    "collapse_projected_orbits": false,
+    "direct_collision": false,
+    "engine": {
+      "MatrixF5": {
+        "max_degree": 3
+      }
+    },
+    "field_kernel": "pmull",
+    "node_budget": 8192,
+    "pair_table": false,
+    "query_rule": "seeded-sample",
+    "strategy": "Groebner",
+    "summands": 3
+  },
+  "effective_columns": 29,
+  "exclusive_ic_online_phases_ns": {
+    "target_descent": 9250,
+    "target_pdp": 6436693790,
+    "target_query": 40232959,
+    "target_recovery_check": 9751,
+    "target_relation_check": 24355208
+  },
+  "failure": null,
+  "fresh_paired_qualification": false,
+  "full_goal_complete": false,
+  "geometric_base_points": 63,
+  "headline_eligible": false,
+  "independent_recovery_certificate": {
+    "check": "independent-shift-and-add-scalar-replay",
+    "generator": [
+      43693,
+      23339
+    ],
+    "inside_online_interval": true,
+    "scalar": 14668,
+    "target": [
+      61889,
+      74818
+    ]
+  },
+  "interruption": null,
+  "online_speedup": null,
+  "operation_counts": null,
+  "plan": {
+    "algorithm_seed": 2026100501,
+    "max_queries": 8,
+    "question": "prepared-public-target-n17-f5-v1",
+    "schema_version": 1
+  },
+  "preparation_family": "matrix_f5",
+  "preparation_math_sha256": "3384136534557911ff9d25070a8ad592e8f3d7a766f7f82378f7ec741294d5a9",
+  "promotion_eligible": false,
+  "question": "prepared-public-target-n17-f5-producer-v1",
+  "report": {
+    "attempts": [
+      {
+        "a": 11184,
+        "b": 32710,
+        "pdp": {
+          "outcome": "proved_unsat",
+          "points": null,
+          "stats": {
+            "engine": {
+              "MatrixF5": {
+                "max_degree": 3
+              }
+            },
+            "family": "groebner",
+            "stats": {
+              "eliminated": 0,
+              "exhausted": false,
+              "infeasible_branches": 2542,
+              "max_degree_built": 3,
+              "oversize": 0,
+              "propagations": 10670,
+              "reductions": 6622,
+              "splits": 2541,
+              "unsupported": false
+            }
+          }
+        },
+        "trial": 0
+      },
+      {
+        "a": 11342,
+        "b": 25460,
+        "pdp": {
+          "outcome": "witness",
+          "points": [
+            6,
+            36,
+            52
+          ],
+          "stats": {
+            "engine": {
+              "MatrixF5": {
+                "max_degree": 3
+              }
+            },
+            "family": "groebner",
+            "stats": {
+              "eliminated": 0,
+              "exhausted": false,
+              "infeasible_branches": 157,
+              "max_degree_built": 3,
+              "oversize": 0,
+              "propagations": 677,
+              "reductions": 421,
+              "splits": 165,
+              "unsupported": false
+            }
+          }
+        },
+        "trial": 1
+      }
+    ],
+    "claimed_scalar": "14668",
+    "relation": {
+      "a": 11342,
+      "b": 25460,
+      "points": [
+        6,
+        36,
+        52
+      ]
+    },
+    "trials": 2
+  },
+  "reusable_validation_ns": 1422333,
+  "run_id": null,
+  "schema_version": 1,
+  "solver_setup_ns": 61458,
+  "source_bound_execution_admitted": false,
+  "target": [
+    61889,
+    74818
+  ],
+  "target_count": 1,
+  "timing_class": "ordinary-host-diagnostic",
+  "verified_scalar": 14668,
+  "workload_id": null
+}

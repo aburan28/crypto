@@ -1,0 +1,1090 @@
+{
+  "attempt_files": {
+    "files": [
+      {
+        "bytes": 377,
+        "path": "binding.json",
+        "sha256": "f80ff23d6eba4c6942e3b9302e5230526785c1a343dc11456c6905377ee55145"
+      },
+      {
+        "bytes": 1087,
+        "path": "completed-000.json",
+        "sha256": "6d6754ed1ee57b7cf9187eb640046d645f19185115e367ec75b1f77e3eeeb6f1"
+      },
+      {
+        "bytes": 1124,
+        "path": "completed-001.json",
+        "sha256": "c19d57588a2e36afdd0e0fc0b8fe5f0dded47f1a2ff04bb1092102eb7b041bfe"
+      },
+      {
+        "bytes": 445,
+        "path": "start-000.json",
+        "sha256": "d38fe7556ec2955cffd8e47d21d24a34f06f53f1597434f469623e55c1279bcd"
+      },
+      {
+        "bytes": 445,
+        "path": "start-001.json",
+        "sha256": "6363382a4e23644e04b58f189b6696221702c1401a3c3f316a2d69a4ff011a6d"
+      }
+    ],
+    "names": [
+      "binding.json",
+      "completed-000.json",
+      "completed-001.json",
+      "start-000.json",
+      "start-001.json"
+    ]
+  },
+  "audited_preparation_auditor_calls": 1,
+  "audited_worker_calls": 1,
+  "candidate_id": null,
+  "checker_sha256": "27b4494a0cbd8b55bae7e326fb38b66492f16846ce6d8cb34cfdafd9b4bcc147",
+  "exclusive_ic_online_phases_ns": {
+    "target_descent": 9250,
+    "target_pdp": 6436693790,
+    "target_query": 40232959,
+    "target_recovery_check": 9751,
+    "target_relation_check": 24355208
+  },
+  "five_phase_recorded_total_ns": 6501300958,
+  "fresh_paired_qualification": false,
+  "full_goal_complete": false,
+  "headline_eligible": false,
+  "independent_audit_wall_ns": "53606685000",
+  "mathematics": {
+    "audited_attempts": [
+      {
+        "a": 11184,
+        "b": 32710,
+        "outcome": "proved_unsat",
+        "public_query": [
+          64189,
+          98855
+        ],
+        "trial": 0
+      },
+      {
+        "a": 11342,
+        "b": 25460,
+        "outcome": "witness",
+        "public_query": [
+          110223,
+          32353
+        ],
+        "trial": 1
+      }
+    ],
+    "fresh_paired_qualification": false,
+    "full_goal_complete": false,
+    "headline_eligible": false,
+    "online_speedup": null,
+    "online_wall_ns": null,
+    "outcome_mix": {
+      "proved_unsat": 1,
+      "witness": 1
+    },
+    "preparation": {
+      "accepted_rows": 127,
+      "accounting": "mathematical input replay only; native execution, source-model custody, costs and rates need separate evidence",
+      "audited_queries": 512,
+      "column_points": [
+        [
+          471,
+          57570
+        ],
+        [
+          731,
+          20518
+        ],
+        [
+          829,
+          20614
+        ],
+        [
+          985,
+          26841
+        ],
+        [
+          1129,
+          41552
+        ],
+        [
+          1391,
+          127363
+        ],
+        [
+          2655,
+          98654
+        ],
+        [
+          2731,
+          8581
+        ],
+        [
+          2777,
+          21372
+        ],
+        [
+          3023,
+          53794
+        ],
+        [
+          3175,
+          115860
+        ],
+        [
+          3421,
+          90551
+        ],
+        [
+          3681,
+          42918
+        ],
+        [
+          3773,
+          54163
+        ],
+        [
+          5119,
+          100649
+        ],
+        [
+          7111,
+          60995
+        ],
+        [
+          7159,
+          18374
+        ],
+        [
+          7811,
+          52278
+        ],
+        [
+          9099,
+          1429
+        ],
+        [
+          10143,
+          18204
+        ],
+        [
+          10199,
+          19284
+        ],
+        [
+          12063,
+          105083
+        ],
+        [
+          12091,
+          102062
+        ],
+        [
+          13087,
+          36345
+        ],
+        [
+          14073,
+          3990
+        ],
+        [
+          14203,
+          51661
+        ],
+        [
+          18915,
+          34422
+        ],
+        [
+          18941,
+          32935
+        ],
+        [
+          39617,
+          72163
+        ]
+      ],
+      "declared_family": "matrix_f5",
+      "dependent_relations": 98,
+      "duplicate_relations": 2,
+      "feasible_inconclusive_queries": 0,
+      "folded_columns": 29,
+      "fresh_paired_qualification": false,
+      "full_goal_complete": false,
+      "geometric_order_sha256": "bec87229df1e344b84b9075e8af273dfd2c0ea7ebbfee6277e851d7a6ca5e72a",
+      "geometric_points": 63,
+      "headline_eligible": false,
+      "independently_recovered_column_logs": [
+        63339,
+        4377,
+        65416,
+        51034,
+        19569,
+        48468,
+        56224,
+        55591,
+        50531,
+        14472,
+        61582,
+        16657,
+        44888,
+        41533,
+        48375,
+        43107,
+        38770,
+        2895,
+        58938,
+        45617,
+        57054,
+        19961,
+        5522,
+        52742,
+        33022,
+        14807,
+        44336,
+        18617,
+        35813
+      ],
+      "input_sha256": "3384136534557911ff9d25070a8ad592e8f3d7a766f7f82378f7ec741294d5a9",
+      "mathematical_preparation_complete": true,
+      "native_solvers_executed": 0,
+      "new_queries": 0,
+      "online_speedup": null,
+      "online_wall_ns": null,
+      "ordinary_outcome_mix": {
+        "proved_unsat": 383,
+        "witness": 129
+      },
+      "panel_complete": true,
+      "planned_queries": 512,
+      "projection": [
+        null,
+        [
+          28,
+          14021
+        ],
+        [
+          28,
+          51566
+        ],
+        [
+          28,
+          35813
+        ],
+        [
+          28,
+          29774
+        ],
+        [
+          4,
+          51550
+        ],
+        [
+          4,
+          14037
+        ],
+        [
+          5,
+          20335
+        ],
+        [
+          5,
+          45252
+        ],
+        [
+          8,
+          65586
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          28,
+          7771
+        ],
+        [
+          28,
+          57816
+        ],
+        [
+          16,
+          13810
+        ],
+        [
+          16,
+          51777
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          65586
+        ],
+        [
+          1,
+          54691
+        ],
+        [
+          1,
+          10896
+        ],
+        [
+          15,
+          55241
+        ],
+        [
+          15,
+          10346
+        ],
+        [
+          23,
+          44894
+        ],
+        [
+          23,
+          20693
+        ],
+        [
+          21,
+          35813
+        ],
+        [
+          21,
+          29774
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          3,
+          65586
+        ],
+        [
+          19,
+          17186
+        ],
+        [
+          19,
+          48401
+        ],
+        [
+          24,
+          20693
+        ],
+        [
+          24,
+          44894
+        ],
+        [
+          9,
+          24202
+        ],
+        [
+          9,
+          41385
+        ],
+        [
+          11,
+          10896
+        ],
+        [
+          11,
+          54691
+        ],
+        [
+          18,
+          48313
+        ],
+        [
+          18,
+          17274
+        ],
+        [
+          14,
+          48403
+        ],
+        [
+          14,
+          17184
+        ],
+        [
+          10,
+          17182
+        ],
+        [
+          10,
+          48405
+        ],
+        [
+          0,
+          14021
+        ],
+        [
+          0,
+          51566
+        ],
+        [
+          27,
+          51777
+        ],
+        [
+          27,
+          13810
+        ],
+        [
+          6,
+          35813
+        ],
+        [
+          6,
+          29774
+        ],
+        [
+          7,
+          17178
+        ],
+        [
+          7,
+          48409
+        ],
+        [
+          26,
+          44894
+        ],
+        [
+          26,
+          20693
+        ],
+        [
+          13,
+          14021
+        ],
+        [
+          13,
+          51566
+        ],
+        [
+          22,
+          57816
+        ],
+        [
+          22,
+          7771
+        ],
+        [
+          12,
+          54691
+        ],
+        [
+          12,
+          10896
+        ],
+        [
+          25,
+          55241
+        ],
+        [
+          25,
+          10346
+        ],
+        [
+          20,
+          41385
+        ],
+        [
+          20,
+          24202
+        ],
+        [
+          17,
+          57816
+        ],
+        [
+          17,
+          7771
+        ]
+      ],
+      "promotion_eligible": false,
+      "query_law": "independent-probe-scalar-rand08-v1",
+      "rank": 29,
+      "rank_trajectory": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        8,
+        8,
+        9,
+        9,
+        9,
+        10,
+        11,
+        11,
+        12,
+        12,
+        12,
+        13,
+        13,
+        13,
+        14,
+        15,
+        15,
+        16,
+        16,
+        16,
+        17,
+        17,
+        17,
+        18,
+        18,
+        18,
+        18,
+        18,
+        19,
+        19,
+        19,
+        19,
+        20,
+        21,
+        21,
+        22,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        26,
+        26,
+        26,
+        26,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        28,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29
+      ],
+      "repeated_projected_rows": 0,
+      "rows_sha256": "6b5b4b12087a81c2953f3e962abc008f67bb315f4d582bbe807bf6eecbd4567b",
+      "schema_version": 1,
+      "source_bound_execution_admitted": false,
+      "status": "PASS_ORDINARY_PREPARATION_MATHEMATICS",
+      "usable_points": 62,
+      "verified_witnesses": 129
+    },
+    "preparation_math_sha256": "3384136534557911ff9d25070a8ad592e8f3d7a766f7f82378f7ec741294d5a9",
+    "promotion_eligible": false,
+    "schema_version": 1,
+    "solver_calls_by_auditor": 0,
+    "source_bound_execution_admitted": false,
+    "status": "PASS_TARGET_MATHEMATICS_RUNTIME_NOT_ADMITTED",
+    "target": [
+      61889,
+      74818
+    ],
+    "timing": {
+      "exclusive_ic_online_phases_ns": {
+        "target_descent": 9250,
+        "target_pdp": 6436693790,
+        "target_query": 40232959,
+        "target_recovery_check": 9751,
+        "target_relation_check": 24355208
+      },
+      "five_phase_recorded_total_ns": 6501300958,
+      "missing_costs": [],
+      "producer_recorded_online_interval_ns": 6501300958,
+      "source_timing_attested": false
+    },
+    "verified_recovery": true,
+    "verified_scalar": 14668
+  },
+  "native_children_executed_by_auditor": 0,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "operation_counts": null,
+  "outer_worker_wall_ns": 33006260708,
+  "peak_memory": null,
+  "preparation_auditor_pid": 42214,
+  "preparation_registration_sha256": "89de6a771df622536b83ae15744f47a429c3e63063a696c6b9012e8ca0fcca97",
+  "producer_sha256": "fce2fe09cf554582bf66eefb85629ae28cbab9cdc0ef553dda0c5e2277682f60",
+  "promotion_eligible": false,
+  "recorded_online_interval_ns": 6501300958,
+  "registration_sha256": "fcc320ea595781d94ab9cfc9461759c8f639fc58505489c1c8e4715e28be7d2e",
+  "run_id": null,
+  "schema_version": 1,
+  "source_bound_execution_admitted": true,
+  "source_timing_attested": true,
+  "status": "PASS_NATIVE_SOURCE_BOUND_TARGET_EXECUTION_AUDIT",
+  "target": [
+    61889,
+    74818
+  ],
+  "target_count": 1,
+  "unassigned_worker_setup_and_tail_ns": 20592765333,
+  "verified_recovery": true,
+  "wall_timing_class": "ordinary-host-exploratory; isolation unverified",
+  "worker_pid": 40105,
+  "workload_id": null
+}

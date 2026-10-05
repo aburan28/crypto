@@ -1,5 +1,8 @@
 # F5 one-target registration: published, not dispatched
 
+This is the retained **pre-dispatch** registration record. The subsequent
+sole execution and original frozen audit are in `result-v1/RESULT.md`.
+
 The scientific target capsule was frozen from committed source
 `5e4a4d8ea19bae3afa2398b7d9a310e069cae151` and completed full offline
 source/build verification. Its external registration seal is
