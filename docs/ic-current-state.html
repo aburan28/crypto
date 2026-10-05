@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 267 panels, one line each</summary>
+    <summary>Show all 268 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -453,6 +453,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#current-f4-stage201-exact-ends">Current Boolean F4, Stage 201: exact M4RI combination ends save 0.187% work</a> <span class="chip">rejected</span><br>Rejects exact combination ends because CPU falls 1.30% while wall rises 4.43% and RSS rises, so confirmation is prohibited and the candidate is reverted with no full-rho movement.</li>
       <li><a href="./#p256-dickson-residual-scaling-20261004">P-256 Dickson branching: degree 3 survives through depth 8, branch exponent remains</a> <span class="chip">stage advance</span><br>Certifies 114,240 toy-prime components with zero mismatches: residual depths 1–2 stay at solving degree 3, residual depth 3 stays at 4, and total work still quadruples per added original level.</li>
       <li><a href="./#p256-dickson-s3-image-filter-20261004">P-256 Dickson final-S3 gate: indexed quadratic image replaces the squared branch scan</a> <span class="chip">stage advance</span><br>Recovers exactly all 33 true pairs from 87,040 toy candidates with 914 quadratic solves, zero misses or surplus pairs, and 0.002008 of the all-pairs F4 field-operation count.</li>
+      <li><a href="./#p256-s3-image-transfer-20261004">P-256 final-S3 transfer: exact indexed images on the selected 131,458-column factor base</a> <span class="chip">engineering</span><br>Validates the quadratic image at the actual P-256 modulus: two frozen targets match a 262,916-row signed-point oracle exactly, replacing a 17.281-billion-pair frontier with 131,458 solves and 262,916 root lookups.</li>
     </ol>
   </details>
 <!-- END panel-index -->

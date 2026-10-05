@@ -11769,6 +11769,30 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-dickson-s3-image-filter-20261004 -->
+<!-- BEGIN p256-s3-image-transfer-20261004 -->
+<section class="panel" id="p256-s3-image-transfer-20261004">
+  <div class="panel-head">
+    <h2>P-256 final-S3 transfer: exact indexed images on the selected 131,458-column factor base <span class="chip">engineering</span></h2>
+    <p class="panel-summary">Validates the quadratic image at the actual P-256 modulus: two frozen targets match a 262,916-row signed-point oracle exactly, replacing a 17.281-billion-pair frontier with 131,458 solves and 262,916 root lookups.</p>
+    <p>The complete <code>FB1h2f8621cda105</code> dump rebuilds and verifies before the test. For each factor-base x-coordinate <code>u</code>, Round 8 solves <code>S3(u,v,target_x)=0</code> directly over P-256 and indexes its two roots. An independent public-point path computes <code>Q-P</code> for every signed factor-base point and folds exact hits to ordered columns.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Pair trials, field multiplications and group operations remain separate stage units; the frontier ratio is structural, not a whole-ECDLP speedup.</caption>
+    <thead><tr><th>Target</th><th>Rejected pair frontier</th><th>Quadratic solves</th><th>Root lookups</th><th>Algebra = reference pairs</th><th>FN / FP</th><th>Field muls</th><th>Reference group ops</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Planted positive</td><td class="n">17,281,205,764</td><td class="n">131,458</td><td class="n">262,916</td><td class="n"><strong>2 = 2</strong></td><td class="n">0 / 0</td><td class="n">90,443,104</td><td class="n">262,916</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>Hash public</td><td class="n">17,281,205,764</td><td class="n">131,458</td><td class="n">262,916</td><td class="n"><strong>0 = 0</strong></td><td class="n">0 / 0</td><td class="n">90,443,104</td><td class="n">262,916</td><td><span class="chip">engineering</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exact</span> both pair sets equal; all emitted sign combinations independently verify against <code>Q</code> or <code>-Q</code>; zero linear or universal degeneracies</span>
+    <span><span class="chip">frontier</span> solves are 131,458&times; fewer than ordered pair trials; solves plus root lookups are 43,819.33&times; fewer abstract visits</span>
+    <span><span class="chip">degree</span> the final known-target gate now needs no Gr&ouml;bner run; it is a family of univariate quadratics, not a new degree-of-regularity claim for <code>S18</code></span>
+    <span><span class="chip">scope</span> actual P-256 field and factor base, but only the final two-summand gate; unknown intermediate coordinates, relation collection, linear algebra, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s3_image_transfer_round8_20261004/RESULT.md</code>; deterministic result SHA-256 <code>c2a5178aea46223fb1e6f82a65df4d273c68aeacdf5c664a827bec50b144a6e7</code></span>
+  </div>
+</section>
+<!-- END p256-s3-image-transfer-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
