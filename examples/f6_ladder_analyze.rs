@@ -1,14 +1,19 @@
 //! Derive the F6-IC size-ladder decision from committed ecbench sessions,
-//! exactly as `research/f6_ic_ecbench_ladder_20261005/PROTOCOL.md` fixes it.
+//! exactly as `research/f6_ic_ecbench_ladder_20261005/PROTOCOL.md` and its
+//! `AMENDMENT_1.md` fix it.
 //!
 //! Usage: f6_ladder_analyze CALIBRATION.json OUT.json SESSION_DIR...
 //!
-//! Reads only each session's `records.jsonl`. For every size it reports the
-//! IC arms' lower-bound `S` against the floor and the same-target strong-rho
-//! `S`, the Boolean word XORs `W4`, `W6`, and F6-IC's geometric additions
-//! `G6`. It fits the protocol's slope of `log2(W4/W6)` against `m`, with a
-//! within-size bootstrap at the frozen seed, and applies the frozen rules.
-//! It computes nothing the protocol does not name.
+//! Reads only each session's `records.jsonl`. The paired unit is a
+//! (target, round): within a round the three arms share one algorithm seed,
+//! which is checked, as is the F4 and F6 arms' query stream. A target's
+//! value is the mean over its measured rounds. For every size the analysis
+//! reports both IC arms' lower-bound `S` against the floor and same-target
+//! strong rho, the Boolean word XORs `W4` and `W6`, and F6-IC's geometric
+//! additions `G6`. It fits the slope of `log2(W4/W6)` against `m` with a
+//! within-size target bootstrap at the frozen seed, the per-relation
+//! geometry check, the first-round-only sensitivity, and applies the frozen
+//! rules. It computes nothing the protocol does not name.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -20,8 +25,14 @@ use serde_json::{json, Value};
 const BOOTSTRAP_SAMPLES: usize = 10_000;
 const BOOTSTRAP_SEED: u64 = 202_610_050_001;
 const MIN_TARGETS: usize = 6;
-const IC_ARMS: [&str; 2] = ["ic-f4", "ic-f6"];
 const RHO_ARM: &str = "rho-strong";
+const PHASES: [&str; 5] = [
+    "factor_base",
+    "oracle_setup",
+    "relations",
+    "linear_algebra",
+    "verify",
+];
 
 /// The calibration entries the protocol's sensitivity row may use, by
 /// field degree: `docs/ic/calibration.json`'s `koblitz` keys for the
@@ -36,6 +47,8 @@ const PINNED_WORD_XOR: [(u64, &str); 2] = [
 struct Run {
     arm: String,
     workload: String,
+    round: u64,
+    seed: String,
     m: u64,
     r: f64,
     slug: String,
@@ -50,10 +63,7 @@ struct Run {
     trials: Option<u64>,
     phases: BTreeMap<String, f64>,
     isolation: String,
-}
-
-fn u(v: &Value) -> Option<u64> {
-    v.as_u64()
+    solve_wall_ns: Option<u64>,
 }
 
 fn read_runs(dir: &Path) -> Result<Vec<Run>, String> {
@@ -82,20 +92,25 @@ fn read_runs(dir: &Path) -> Result<Vec<Run>, String> {
                 .as_str()
                 .unwrap_or("?")
                 .to_string(),
-            m: u(&curve["field_degree"]).ok_or("record without field_degree")?,
+            round: r["round"].as_u64().ok_or("record without round")?,
+            seed: r["algorithm_seed"].as_str().unwrap_or("?").to_string(),
+            m: curve["field_degree"]
+                .as_u64()
+                .ok_or("record without field_degree")?,
             r: curve["r"].as_f64().ok_or("record without r")?,
             slug: curve["slug"].as_str().unwrap_or("?").to_string(),
             verified: status == "verified",
             status,
             s: r["cost"]["s"].as_f64(),
             total_gae: r["cost"]["total_gae"].as_f64(),
-            word_xors: u(&r["solver"]["ops"]),
-            reductions: u(&r["solver"]["extra"]["reductions"]),
-            geometry: u(&r["solver"]["extra"]["geometric_group_additions"]),
-            relations: u(&r["counters"]["relations_found"]),
-            trials: u(&r["counters"]["targets_tried"]),
+            word_xors: r["solver"]["ops"].as_u64(),
+            reductions: r["solver"]["extra"]["reductions"].as_u64(),
+            geometry: r["solver"]["extra"]["geometric_group_additions"].as_u64(),
+            relations: r["counters"]["relations_found"].as_u64(),
+            trials: r["counters"]["targets_tried"].as_u64(),
             phases,
             isolation: r["isolation"]["level"].as_str().unwrap_or("?").to_string(),
+            solve_wall_ns: r["time"]["solve_wall_ns"].as_u64(),
         });
     }
     Ok(out)
@@ -114,6 +129,10 @@ fn median(mut v: Vec<f64>) -> Option<f64> {
     })
 }
 
+fn mean(v: &[f64]) -> Option<f64> {
+    (!v.is_empty()).then(|| v.iter().sum::<f64>() / v.len() as f64)
+}
+
 fn min_max(v: &[f64]) -> Option<(f64, f64)> {
     let lo = v.iter().cloned().fold(f64::INFINITY, f64::min);
     let hi = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
@@ -122,10 +141,10 @@ fn min_max(v: &[f64]) -> Option<(f64, f64)> {
 
 /// Ordinary least squares slope and intercept of `y` on `x`.
 fn ols(points: &[(f64, f64)]) -> Option<(f64, f64)> {
-    let n = points.len() as f64;
     if points.len() < 2 {
         return None;
     }
+    let n = points.len() as f64;
     let mx = points.iter().map(|p| p.0).sum::<f64>() / n;
     let my = points.iter().map(|p| p.1).sum::<f64>() / n;
     let sxx: f64 = points.iter().map(|p| (p.0 - mx).powi(2)).sum();
@@ -137,23 +156,71 @@ fn ols(points: &[(f64, f64)]) -> Option<(f64, f64)> {
     Some((b, my - b * mx))
 }
 
-/// Every measured round of a deterministic arm must carry the same counts.
-fn check_rounds(runs: &[&Run]) -> Result<(), String> {
-    let first = runs[0];
-    for r in &runs[1..] {
-        if r.status != first.status
-            || r.word_xors != first.word_xors
-            || r.geometry != first.geometry
-            || r.relations != first.relations
-            || r.total_gae.map(f64::to_bits) != first.total_gae.map(f64::to_bits)
-        {
-            return Err(format!(
-                "{} {}: measured rounds disagree on counts",
-                first.arm, first.workload
-            ));
+/// The slope's 95% percentile interval, resampling targets within each size.
+fn bootstrap(points: &[(f64, f64)]) -> (usize, Option<f64>, Option<f64>) {
+    let mut by_size: BTreeMap<u64, Vec<(f64, f64)>> = BTreeMap::new();
+    for p in points {
+        by_size.entry(p.0 as u64).or_default().push(*p);
+    }
+    let mut rng = StdRng::seed_from_u64(BOOTSTRAP_SEED);
+    let mut slopes = Vec::with_capacity(BOOTSTRAP_SAMPLES);
+    for _ in 0..BOOTSTRAP_SAMPLES {
+        let mut sample = Vec::with_capacity(points.len());
+        for pts in by_size.values() {
+            for _ in 0..pts.len() {
+                sample.push(pts[rng.gen_range(0..pts.len())]);
+            }
+        }
+        if let Some((b, _)) = ols(&sample) {
+            slopes.push(b);
         }
     }
-    Ok(())
+    slopes.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let pct = |q: f64| -> Option<f64> {
+        (!slopes.is_empty()).then(|| slopes[(q * (slopes.len() - 1) as f64).round() as usize])
+    };
+    (slopes.len(), pct(0.025), pct(0.975))
+}
+
+/// One (target, round): the two IC arms and rho on one seed.
+struct Pair {
+    round: u64,
+    f4: Run,
+    f6: Run,
+    rho: Option<Run>,
+}
+
+impl Pair {
+    fn log2_ratio(&self) -> Option<f64> {
+        Some((self.f4.word_xors? as f64 / self.f6.word_xors? as f64).log2())
+    }
+}
+
+struct Target {
+    m: u64,
+    workload: String,
+    pairs: Vec<Pair>,
+}
+
+impl Target {
+    /// The mean over this target's rounds of a per-pair quantity.
+    fn mean(&self, f: impl Fn(&Pair) -> Option<f64>) -> Option<f64> {
+        let v: Vec<f64> = self.pairs.iter().filter_map(&f).collect();
+        (v.len() == self.pairs.len()).then(|| mean(&v)).flatten()
+    }
+
+    /// The same quantity on the first measured round only.
+    fn first(&self, f: impl Fn(&Pair) -> Option<f64>) -> Option<f64> {
+        self.pairs.iter().min_by_key(|p| p.round).and_then(f)
+    }
+}
+
+fn arm_of<'p>(p: &'p Pair, arm: &str) -> &'p Run {
+    if arm == "ic-f4" {
+        &p.f4
+    } else {
+        &p.f6
+    }
 }
 
 fn main() -> Result<(), String> {
@@ -173,22 +240,54 @@ fn main() -> Result<(), String> {
         all.extend(runs);
     }
 
-    // (m, workload, arm) -> first measured run, after checking rounds agree.
-    let mut grouped: BTreeMap<(u64, String, String), Vec<&Run>> = BTreeMap::new();
+    // (m, workload, round) -> arm -> run.
+    let mut cells: BTreeMap<(u64, String, u64), BTreeMap<String, Run>> = BTreeMap::new();
     for r in &all {
-        grouped
-            .entry((r.m, r.workload.clone(), r.arm.clone()))
+        cells
+            .entry((r.m, r.workload.clone(), r.round))
             .or_default()
-            .push(r);
+            .insert(r.arm.clone(), r.clone());
     }
-    let mut cell: BTreeMap<(u64, String, String), &Run> = BTreeMap::new();
-    let mut round_disagreements = Vec::new();
-    for (k, rs) in &grouped {
-        if let Err(e) = check_rounds(rs) {
-            round_disagreements.push(e);
+
+    let mut seed_mismatches = Vec::new();
+    let mut divergent = Vec::new();
+    let mut incomplete = Vec::new();
+    let mut by_target: BTreeMap<(u64, String), (Vec<Pair>, bool)> = BTreeMap::new();
+    for ((m, w, round), arms) in &cells {
+        let entry = by_target
+            .entry((*m, w.clone()))
+            .or_insert_with(|| (Vec::new(), true));
+        let seeds: Vec<&String> = arms.values().map(|r| &r.seed).collect();
+        if seeds.windows(2).any(|s| s[0] != s[1]) {
+            seed_mismatches.push(json!({"m": m, "workload": w, "round": round}));
         }
-        cell.insert(k.clone(), rs[0]);
+        match (arms.get("ic-f4"), arms.get("ic-f6")) {
+            (Some(f4), Some(f6)) if f4.verified && f6.verified => {
+                if f4.trials != f6.trials || f4.relations != f6.relations {
+                    divergent.push(json!({"m": m, "workload": w, "round": round,
+                        "f4": {"trials": f4.trials, "relations": f4.relations},
+                        "f6": {"trials": f6.trials, "relations": f6.relations}}));
+                }
+                entry.0.push(Pair {
+                    round: *round,
+                    f4: f4.clone(),
+                    f6: f6.clone(),
+                    rho: arms.get(RHO_ARM).filter(|r| r.verified).cloned(),
+                });
+            }
+            (f4, f6) => {
+                entry.1 = false;
+                incomplete.push(json!({"m": m, "workload": w, "round": round,
+                    "f4": f4.map(|r| r.status.clone()), "f6": f6.map(|r| r.status.clone())}));
+            }
+        }
     }
+    // A target completes when every measured round verified in both IC arms.
+    let targets: Vec<Target> = by_target
+        .into_iter()
+        .filter(|(_, (pairs, complete))| *complete && !pairs.is_empty())
+        .map(|((m, workload), (pairs, _))| Target { m, workload, pairs })
+        .collect();
 
     let sizes: Vec<u64> = {
         let mut v: Vec<u64> = all.iter().map(|r| r.m).collect();
@@ -197,50 +296,6 @@ fn main() -> Result<(), String> {
         v
     };
 
-    // Per-target paired rows.
-    struct Target {
-        m: u64,
-        workload: String,
-        f4: Run,
-        f6: Run,
-        rho: Option<Run>,
-    }
-    let mut targets: Vec<Target> = Vec::new();
-    let mut incomplete = Vec::new();
-    let mut divergent = Vec::new();
-    for (k, f4) in &cell {
-        if k.2 != "ic-f4" {
-            continue;
-        }
-        let f6 = cell.get(&(k.0, k.1.clone(), "ic-f6".to_string()));
-        let rho = cell
-            .get(&(k.0, k.1.clone(), RHO_ARM.to_string()))
-            .map(|r| (*r).clone());
-        match f6 {
-            Some(f6) if f4.verified && f6.verified => {
-                if f4.trials != f6.trials || f4.relations != f6.relations {
-                    divergent.push(json!({"m": k.0, "workload": k.1,
-                        "f4": {"trials": f4.trials, "relations": f4.relations},
-                        "f6": {"trials": f6.trials, "relations": f6.relations}}));
-                }
-                targets.push(Target {
-                    m: k.0,
-                    workload: k.1.clone(),
-                    f4: (*f4).clone(),
-                    f6: (*f6).clone(),
-                    rho,
-                });
-            }
-            _ => incomplete.push(json!({"m": k.0, "workload": k.1,
-                "f4": f4.status, "f6": f6.map(|r| r.status.clone())})),
-        }
-    }
-
-    let log2_ratio = |t: &Target| -> Option<f64> {
-        Some((t.f4.word_xors? as f64 / t.f6.word_xors? as f64).log2())
-    };
-
-    // Per size.
     let mut per_size = Vec::new();
     let mut completed_by_size: BTreeMap<u64, usize> = BTreeMap::new();
     for &m in &sizes {
@@ -248,38 +303,23 @@ fn main() -> Result<(), String> {
         completed_by_size.insert(m, ts.len());
         let any = all.iter().find(|r| r.m == m).unwrap();
         let floor = (std::f64::consts::PI / (4.0 * m as f64)).sqrt();
-        let rho_s: Vec<f64> = cell
-            .iter()
-            .filter(|(k, r)| k.0 == m && k.2 == RHO_ARM && r.verified)
-            .filter_map(|(_, r)| r.s)
-            .collect();
+        let med =
+            |f: &dyn Fn(&Target) -> Option<f64>| median(ts.iter().filter_map(|t| f(t)).collect());
         let mut arms = serde_json::Map::new();
-        for arm in IC_ARMS {
-            let pick = |t: &Target| {
-                if arm == "ic-f4" {
-                    t.f4.clone()
-                } else {
-                    t.f6.clone()
-                }
-            };
-            let s: Vec<f64> = ts.iter().filter_map(|t| pick(t).s).collect();
+        for arm in ["ic-f4", "ic-f6"] {
+            let s_of = |t: &Target| t.mean(|p| arm_of(p, arm).s);
             let vs_rho: Vec<f64> = ts
                 .iter()
-                .filter_map(|t| Some(pick(t).s? / t.rho.as_ref().filter(|r| r.verified)?.s?))
+                .filter_map(|t| t.mean(|p| Some(arm_of(p, arm).s? / p.rho.as_ref()?.s?)))
                 .collect();
             let mut phase_median = serde_json::Map::new();
-            for name in [
-                "factor_base",
-                "oracle_setup",
-                "relations",
-                "linear_algebra",
-                "verify",
-            ] {
-                let v: Vec<f64> = ts
-                    .iter()
-                    .filter_map(|t| pick(t).phases.get(name).copied())
-                    .collect();
-                phase_median.insert(name.into(), json!(median(v)));
+            for name in PHASES {
+                phase_median.insert(
+                    name.into(),
+                    json!(med(
+                        &|t| t.mean(|p| arm_of(p, arm).phases.get(name).copied())
+                    )),
+                );
             }
             let sensitivity =
                 PINNED_WORD_XOR
@@ -287,35 +327,34 @@ fn main() -> Result<(), String> {
                     .find(|(deg, _)| *deg == m)
                     .and_then(|(_, key)| {
                         let ratio = calibration["instances"][key]["ns_per_word_xor"].as_f64()?;
-                        let priced: Vec<f64> = ts
-                            .iter()
-                            .filter_map(|t| {
-                                let p = pick(t);
-                                Some((p.total_gae? + p.word_xors? as f64 * ratio) / p.r.sqrt())
+                        let priced = med(&|t| {
+                            t.mean(|p| {
+                                let a = arm_of(p, arm);
+                                Some((a.total_gae? + a.word_xors? as f64 * ratio) / a.r.sqrt())
                             })
-                            .collect();
-                        Some(
-                            json!({"calibration_key": key, "ns_per_word_xor_over_ns_per_add": ratio,
-                        "median_s_with_word_xors_priced": median(priced)}),
-                        )
+                        });
+                        Some(json!({"calibration_key": key,
+                        "ns_per_word_xor_over_ns_per_add": ratio,
+                        "median_s_with_word_xors_priced": priced}))
                     });
             arms.insert(
                 arm.into(),
                 json!({
-                    "median_s_lower": median(s.clone()),
-                    "median_s_lower_over_floor": median(s.iter().map(|x| x / floor).collect()),
+                    "median_s_lower": med(&s_of),
+                    "median_s_lower_over_floor": med(&|t| Some(s_of(t)? / floor)),
                     "median_s_lower_over_rho": median(vs_rho.clone()),
                     "min_max_s_lower_over_rho": min_max(&vs_rho),
-                    "median_word_xors": median(ts.iter().filter_map(|t| pick(t).word_xors.map(|x| x as f64)).collect()),
-                    "median_reductions": median(ts.iter().filter_map(|t| pick(t).reductions.map(|x| x as f64)).collect()),
-                    "median_geometric_additions": median(ts.iter().filter_map(|t| pick(t).geometry.map(|x| x as f64)).collect()),
-                    "median_relations": median(ts.iter().filter_map(|t| pick(t).relations.map(|x| x as f64)).collect()),
+                    "median_word_xors": med(&|t| t.mean(|p| Some(arm_of(p, arm).word_xors? as f64))),
+                    "median_reductions": med(&|t| t.mean(|p| Some(arm_of(p, arm).reductions? as f64))),
+                    "median_geometric_additions": med(&|t| t.mean(|p| Some(arm_of(p, arm).geometry? as f64))),
+                    "median_relations": med(&|t| t.mean(|p| Some(arm_of(p, arm).relations? as f64))),
                     "median_phase_gae": phase_median,
+                    "median_solve_wall_ns_practicality_only": med(&|t| t.mean(|p| Some(arm_of(p, arm).solve_wall_ns? as f64))),
                     "pinned_sensitivity": sensitivity,
                 }),
             );
         }
-        let ys: Vec<f64> = ts.iter().filter_map(|t| log2_ratio(t)).collect();
+        let ys: Vec<f64> = ts.iter().filter_map(|t| t.mean(Pair::log2_ratio)).collect();
         let mut levels: BTreeMap<String, usize> = BTreeMap::new();
         for r in all.iter().filter(|r| r.m == m) {
             *levels.entry(r.isolation.clone()).or_default() += 1;
@@ -325,85 +364,64 @@ fn main() -> Result<(), String> {
             "slug": any.slug,
             "r": any.r,
             "s_floor": floor,
+            "rounds_per_target": ts.first().map(|t| t.pairs.len()),
             "targets_completed_both_ic_arms": ts.len(),
-            "rho_median_s": median(rho_s),
+            "rho_median_s": med(&|t| t.mean(|p| p.rho.as_ref()?.s)),
             "arms": arms,
             "median_log2_w4_over_w6": median(ys.clone()),
             "min_max_log2_w4_over_w6": min_max(&ys),
-            "abandon_rule_all_w6_ge_w4": (m == 19).then(|| ts.iter().all(|t|
-                t.f6.word_xors.unwrap_or(u64::MAX) >= t.f4.word_xors.unwrap_or(0))),
+            "abandon_rule_all_w6_ge_w4": (m == 19).then(|| ts.iter().all(|t| {
+                t.pairs.iter().all(|p| p.f6.word_xors.unwrap_or(u64::MAX) >= p.f4.word_xors.unwrap_or(0))
+            })),
             "isolation_levels": levels,
         }));
     }
 
-    // The slope and its within-size bootstrap.
-    let points: Vec<(f64, f64)> = targets
-        .iter()
-        .filter_map(|t| Some((t.m as f64, log2_ratio(t)?)))
-        .collect();
-    let fit = ols(&points);
-    let mut by_size: BTreeMap<u64, Vec<(f64, f64)>> = BTreeMap::new();
-    for t in &targets {
-        if let Some(y) = log2_ratio(t) {
-            by_size.entry(t.m).or_default().push((t.m as f64, y));
-        }
-    }
-    let mut rng = StdRng::seed_from_u64(BOOTSTRAP_SEED);
-    let mut slopes = Vec::with_capacity(BOOTSTRAP_SAMPLES);
-    for _ in 0..BOOTSTRAP_SAMPLES {
-        let mut sample = Vec::with_capacity(points.len());
-        for pts in by_size.values() {
-            for _ in 0..pts.len() {
-                sample.push(pts[rng.gen_range(0..pts.len())]);
-            }
-        }
-        if let Some((b, _)) = ols(&sample) {
-            slopes.push(b);
-        }
-    }
-    slopes.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    let pct = |q: f64| -> Option<f64> {
-        (!slopes.is_empty()).then(|| slopes[((q * (slopes.len() - 1) as f64).round()) as usize])
+    // Primary fit (per-target mean over rounds) and first-round sensitivity.
+    let fit_of = |f: &dyn Fn(&Target) -> Option<f64>| -> Value {
+        let points: Vec<(f64, f64)> = targets
+            .iter()
+            .filter_map(|t| Some((t.m as f64, f(t)?)))
+            .collect();
+        let fit = ols(&points);
+        let (n, lo, hi) = bootstrap(&points);
+        json!({"points": points.len(), "slope_per_unit_m": fit.map(|f| f.0),
+               "intercept": fit.map(|f| f.1),
+               "bootstrap": {"samples": n, "seed": BOOTSTRAP_SEED, "ci95": [lo, hi],
+                             "scheme": "targets resampled within each size"}})
     };
-    let (ci_lo, ci_hi) = (pct(0.025), pct(0.975));
-
-    // Per-relation growth of F6's charged geometry against F4's word XORs.
-    let per_rel = |f: &dyn Fn(&Target) -> Option<f64>| -> Option<f64> {
+    let primary = fit_of(&|t| t.mean(Pair::log2_ratio));
+    let first_round = fit_of(&|t| t.first(Pair::log2_ratio));
+    let slope_of = |f: &dyn Fn(&Target) -> Option<f64>| -> Option<f64> {
         let pts: Vec<(f64, f64)> = targets
             .iter()
             .filter_map(|t| Some((t.m as f64, f(t)?.log2())))
             .collect();
         ols(&pts).map(|(b, _)| b)
     };
-    let geometry_slope = per_rel(&|t| Some(t.f6.geometry? as f64 / t.f6.relations?.max(1) as f64));
-    let w4_slope = per_rel(&|t| Some(t.f4.word_xors? as f64 / t.f4.relations?.max(1) as f64));
+    let geometry_slope =
+        slope_of(&|t| t.mean(|p| Some(p.f6.geometry? as f64 / p.f6.relations?.max(1) as f64)));
+    let w4_slope =
+        slope_of(&|t| t.mean(|p| Some(p.f4.word_xors? as f64 / p.f4.relations?.max(1) as f64)));
 
-    // Exponents of the lower-bound S against m (log2 S per unit m).
-    let s_slope = |arm: &str| -> Option<f64> {
-        let pts: Vec<(f64, f64)> = targets
-            .iter()
-            .filter_map(|t| {
-                let s = if arm == "ic-f4" { t.f4.s? } else { t.f6.s? };
-                Some((t.m as f64, s.log2()))
-            })
-            .collect();
-        ols(&pts).map(|(b, _)| b)
+    let decide = |fit: &Value| -> &'static str {
+        let undecidable = sizes.len() < 4
+            || sizes
+                .iter()
+                .any(|m| completed_by_size.get(m).copied().unwrap_or(0) < MIN_TARGETS);
+        let lo = fit["bootstrap"]["ci95"][0].as_f64();
+        if undecidable {
+            "not decidable: fewer than six targets completed at some size, or fewer than four sizes"
+        } else if lo.is_some_and(|lo| lo > 0.0)
+            && matches!((geometry_slope, w4_slope), (Some(g), Some(w)) if g <= w)
+        {
+            "supported: a stage-level exponent lead (reductions unpriced; no whole-method claim)"
+        } else {
+            "rejected: the F6-IC gain is a constant factor; class engineering; close the F6 thread"
+        }
     };
-
-    let undecidable = sizes
-        .iter()
-        .any(|m| completed_by_size.get(m).copied().unwrap_or(0) < MIN_TARGETS)
-        || sizes.len() < 4;
-    let supported = !undecidable
-        && ci_lo.is_some_and(|lo| lo > 0.0)
-        && matches!((geometry_slope, w4_slope), (Some(g), Some(w)) if g <= w);
-    let decision = if undecidable {
-        "not decidable: fewer than six targets completed at some size, or fewer than four sizes"
-    } else if supported {
-        "supported: a stage-level exponent lead (reductions unpriced; no whole-method claim)"
-    } else {
-        "rejected: the F6-IC gain is a constant factor; class engineering; close the F6 thread"
-    };
+    let decision = decide(&primary);
+    let sensitivity_decision = decide(&first_round);
 
     let rows: Vec<Value> = targets
         .iter()
@@ -411,42 +429,46 @@ fn main() -> Result<(), String> {
             json!({
                 "m": t.m,
                 "workload": t.workload,
-                "w4_word_xors": t.f4.word_xors,
-                "w6_word_xors": t.f6.word_xors,
-                "log2_w4_over_w6": log2_ratio(t),
-                "f4_reductions": t.f4.reductions,
-                "f6_reductions": t.f6.reductions,
-                "g6_geometric_additions": t.f6.geometry,
-                "relations": t.f4.relations,
-                "trials": t.f4.trials,
-                "s_lower_f4": t.f4.s,
-                "s_lower_f6": t.f6.s,
-                "s_rho": t.rho.as_ref().filter(|r| r.verified).and_then(|r| r.s),
+                "rounds": t.pairs.len(),
+                "mean_log2_w4_over_w6": t.mean(Pair::log2_ratio),
+                "first_round_log2_w4_over_w6": t.first(Pair::log2_ratio),
+                "mean_w4_word_xors": t.mean(|p| Some(p.f4.word_xors? as f64)),
+                "mean_w6_word_xors": t.mean(|p| Some(p.f6.word_xors? as f64)),
+                "mean_f4_reductions": t.mean(|p| Some(p.f4.reductions? as f64)),
+                "mean_f6_reductions": t.mean(|p| Some(p.f6.reductions? as f64)),
+                "mean_g6_geometric_additions": t.mean(|p| Some(p.f6.geometry? as f64)),
+                "mean_relations": t.mean(|p| Some(p.f4.relations? as f64)),
+                "mean_trials": t.mean(|p| Some(p.f4.trials? as f64)),
+                "mean_s_lower_f4": t.mean(|p| p.f4.s),
+                "mean_s_lower_f6": t.mean(|p| p.f6.s),
+                "mean_s_rho": t.mean(|p| p.rho.as_ref()?.s),
             })
         })
         .collect();
+
     let out = json!({
-        "schema": "f6-ic-ladder-analysis/v1",
-        "targets": rows,
-        "protocol": "research/f6_ic_ecbench_ladder_20261005/PROTOCOL.md",
+        "schema": "f6-ic-ladder-analysis/v2",
+        "protocol": ["research/f6_ic_ecbench_ladder_20261005/PROTOCOL.md",
+                     "research/f6_ic_ecbench_ladder_20261005/AMENDMENT_1.md"],
         "sessions": sessions,
-        "round_disagreements": round_disagreements,
-        "incomplete_targets": incomplete,
+        "seed_mismatches": seed_mismatches,
+        "incomplete_pairs": incomplete,
         "divergent_query_streams": divergent,
+        "targets": rows,
         "per_size": per_size,
         "fit": {
-            "statistic": "log2(W4/W6), W = Boolean solver word XORs over all PDP calls",
-            "points": points.len(),
-            "slope_per_unit_m": fit.map(|f| f.0),
-            "intercept": fit.map(|f| f.1),
-            "bootstrap": {"samples": slopes.len(), "seed": BOOTSTRAP_SEED,
-                          "ci95": [ci_lo, ci_hi], "scheme": "targets resampled within each size"},
+            "statistic": "log2(W4/W6), W = Boolean solver word XORs over all PDP calls; per-target mean over rounds",
+            "primary": primary,
+            "first_round_only_sensitivity": first_round,
             "slope_log2_geometry_per_relation_f6": geometry_slope,
             "slope_log2_word_xors_per_relation_f4": w4_slope,
-            "slope_log2_s_lower_ic_f4": s_slope("ic-f4"),
-            "slope_log2_s_lower_ic_f6": s_slope("ic-f6"),
+            "slope_log2_s_lower_ic_f4": slope_of(&|t| t.mean(|p| p.f4.s)),
+            "slope_log2_s_lower_ic_f6": slope_of(&|t| t.mean(|p| p.f6.s)),
+            "slope_log2_s_rho": slope_of(&|t| t.mean(|p| p.rho.as_ref()?.s)),
         },
         "decision": decision,
+        "first_round_only_decision": sensitivity_decision,
+        "decisions_agree": decision == sensitivity_decision,
     });
     let text = serde_json::to_string_pretty(&out).map_err(|e| e.to_string())?;
     std::fs::write(&args[2], format!("{text}\n")).map_err(|e| format!("{}: {e}", args[2]))?;
