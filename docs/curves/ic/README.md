@@ -46,6 +46,8 @@ existing measurement contract.
 
 ## Walking an isogeny class
 
+**How to run it, including S3 setup:** [`docs/isogeny-walk/README.md`](../../isogeny-walk/README.md).
+
 `src/bin/isogeny_walk.rs` walks the `F_p`-isogeny class of a prime-field
 curve (P-256, P-224, or a custom short Weierstrass curve with its order and
 generator) over the `ℓ`-isogeny graphs for a set of odd primes `ℓ`, breadth
@@ -140,6 +142,45 @@ for f in specs/*.json; do taskq submit --spec "$f"; done
 
   It reports each trait's distribution in `collect.json`.
 - **Without a queue.** The same shards run locally in a loop.
+
+### Running on a laptop, offline
+
+Everything except `--store`, `fetch` and `collect --from` runs without a
+network.  The walker is plain Rust: no GPU, no Python, no services.
+
+```bash
+# Once, while online: fetch the crates so later builds need no network.
+git clone https://github.com/aburan28/crypto && cd crypto
+cargo fetch
+# Offline from here.
+cargo build --release --offline --bin isogeny_walk
+B=./target/release/isogeny_walk
+
+$B class  --curve p192 --max-ell 61                       # seconds: class invariants
+$B walk   --curve p192 --max-ell 61 --max-curves 2000 --out walk-p192
+$B verify --curve p192 --dir walk-p192                     # independent replay
+for i in 0 1 2 3; do $B traits --curve p192 --dir walk-p192 --shard $i --of 4 --out traits-$i; done
+$B collect --out traits-p192 traits-0 traits-1 traits-2 traits-3
+
+# Back online: upload what you made, exactly as `--store` would have.
+$B publish --dir walk-p192 --store s3://crypto-autoresearcher/isogeny-walk
+$B publish --dir traits-0 --store s3://crypto-autoresearcher/isogeny-walk --run <run id from walk.json>
+```
+
+- **Sizing.** Measured on a 14-core M4 Pro, unisolated, so this is a
+  practicality note:
+  - a 20,000-curve P-256 walk with every odd `ℓ ≤ 61` takes about
+    2.5 minutes;
+  - P-224 takes about 6.5 minutes (more of its curves are expanded);
+  - raw output is about 17 KB per curve (curves.yaml plus
+    isogeny_routes.json), so plan disk for `--max-curves`.
+- **Fewer cores.** `--threads N` caps them.  Time scales roughly with
+  cores.
+- **`Φ_ℓ mod p`.** It is rebuilt at each start: about 10 s for `ℓ = 59` at
+  256 bits.  `--max-ell 31` keeps startup under a second.
+- **Determinism.** The walk is deterministic.  A laptop run and an S3 run
+  with the same arguments produce byte-identical files and the same run id,
+  so `publish` of a duplicate finds the existing run and uploads nothing.
 
 ### Storage in S3
 
