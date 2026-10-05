@@ -1809,7 +1809,7 @@ mod tests {
         let irr = field_for(n).expect("field");
         let g = geometric_basis(n, l, 3, &irr);
         assert_eq!(span_dim(g.iter().map(from_element).collect()), l as usize);
-        assert!(span_dim(products(&g, &irr)) <= 2 * l as usize - 1);
+        assert!(span_dim(products(&g, &irr)) < 2 * l as usize);
         let r = factor_base_basis(n, l, Some(3));
         assert!(span_dim(products(&r, &irr)) > 2 * l as usize - 1);
 
