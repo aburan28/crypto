@@ -1,0 +1,24 @@
+{
+  "schema": "n83-rotated-m10-native-xor-controls-v1",
+  "solver": {
+    "name": "cryptominisat",
+    "version": "5.16.0",
+    "binary_sha256": "934682565dcfcf4cac2947b818fff3a1b94bbb432158e593d810cd90e4cae482"
+  },
+  "sat_control": {
+    "path": "controls/xor_relation_sat.xor.cnf",
+    "sha256": "dfd45585e968d1a05bb5680321262bd3e528bd777700c392e17da8a960299edb",
+    "exit_code": 10,
+    "status_line": "s SATISFIABLE",
+    "model_line": "v 1 2 -3 0",
+    "passed": true
+  },
+  "unsat_control": {
+    "path": "controls/xor_relation_unsat.xor.cnf",
+    "sha256": "f5463d9e254e12217d150a95fc83853aedf1918b40d7cad3cc1eaf74d39a1d85",
+    "exit_code": 20,
+    "status_line": "s UNSATISFIABLE",
+    "passed": true
+  },
+  "overall": "PASS"
+}

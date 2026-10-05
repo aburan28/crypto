@@ -1,0 +1,70 @@
+{
+  "schema": "n83-rotated-m10-native-xor-input-v1",
+  "parent": {
+    "pr": "https://github.com/aburan28/crypto/pull/1346",
+    "decision": "BOUNDED_NATURAL_TARGET_TIMEOUT",
+    "result_sha256": "8b071efcc3a5066a96aa4b79cd0172602b937c5d4c222158ee5a3c4ce39bfc33",
+    "manifest_sha256": "f82818b148b73884198c19b51ae1d61af14b8a02d44933679d775d39db85bbb2",
+    "public_result_sha256": "e4de962e20d51583ce392f6ebb9f294603b851095cc4c8e137c1c7f407cf2ea8",
+    "public_dag_prefix_blake3": "e8715d805517fc35cb70f6b96c5d387a28579c0800e259f69e642c91e5636f88",
+    "public_nodes": 694818,
+    "public_xor_gates": 495808,
+    "public_and_gates": 196012,
+    "public_cnf_clauses": 2571271,
+    "public_cnf_bytes": 57642729
+  },
+  "variant": {
+    "circuit": "inductive_factor_validity",
+    "encoding": "cryptominisat_extended_dimacs",
+    "xor_gate_encoding": "one native parity row",
+    "and_gate_encoding": "three exact CNF clauses",
+    "factor_curve_checks": 10,
+    "intermediate_curve_checks": 0,
+    "addition_edges": 9
+  },
+  "instance": {
+    "curve_id": "EC1N83Ckb1h876c2921cb64",
+    "crypto_curve_id": "icv1-f2m83-tm6151469093347-debefd74",
+    "subgroup_order": "2417851639230796216685689",
+    "slot_dimensions": [9, 9, 9, 8, 8, 8, 8, 8, 8, 8],
+    "public_target_x_hex": "0x78f3daa4bf524e3e8e9c7",
+    "public_target_y_hex": "0x2e08b1e3a8d43e5becd4"
+  },
+  "caps": {
+    "dag_nodes": 8000000,
+    "extended_dimacs_bytes": 2000000000,
+    "solver_wall_seconds": 120,
+    "external_cold_wall_seconds": 900,
+    "address_space_and_rss_bytes": 12884901888,
+    "solver_threads": 1
+  },
+  "solver": {
+    "name": "cryptominisat",
+    "version": "5.16.0",
+    "release_tag": "release/v5.16.0",
+    "release_asset": "cryptominisat5-v5.16.0-linux-amd64.tar.gz",
+    "release_asset_url": "https://github.com/msoos/cryptominisat/releases/download/release/v5.16.0/cryptominisat5-v5.16.0-linux-amd64.tar.gz",
+    "release_asset_bytes": 2583480,
+    "release_asset_sha256": "9599eea560305291cb593ba9d6733605fae763a7f7a1fcdd63191ef8089e9979",
+    "binary_sha256": "934682565dcfcf4cac2947b818fff3a1b94bbb432158e593d810cd90e4cae482",
+    "cms_sha1": "2bf89cfb3e126e559d472388486327813f735f7e",
+    "arguments": ["--verb", "1", "--threads", "1", "--random", "1", "--maxsol", "1", "--maxtime", "120"],
+    "gaussian_defaults": {
+      "max_matrix_rows": 100000,
+      "max_matrix_cols": 100000,
+      "auto_disable": true
+    }
+  },
+  "development_disclosure": {
+    "planted_variables": 693872,
+    "planted_xor_rows": 495192,
+    "planted_cnf_clauses": 587049,
+    "planted_constraints": 1082241,
+    "planted_bytes": 22859716,
+    "planted_xor_dimacs_blake3": "91b95c8c73ff777cb1466624b41ff8443a1c3ddab71034793e233ac331d1865a",
+    "ten_second_planted_solver_status": "INDETERMINATE",
+    "gaussian_matrices_enabled": 0,
+    "public_xor_instance_emitted": false,
+    "public_solver_run": false
+  }
+}

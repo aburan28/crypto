@@ -1,0 +1,45 @@
+{
+  "schema": "n83-rotated-m10-native-xor-freeze-v1",
+  "status": "PRE_OUTCOME",
+  "source_commit": "9deefe38109b5745e974fbbb6808f332cd4c65eb",
+  "source_sha256": {
+    "src/cryptanalysis/koblitz_rotated_chain.rs": "c28317c91f624581576b70e7ff82b2b61140514da5cf21fcc0ecaa4be791202e",
+    "src/bin/n83_rotated_m10.rs": "af5d1fae03f4ca4bd3c3f84e7a4a515d64ba8c64facf01513c5261d6740274e3"
+  },
+  "protocol_sha256": "5a8601dc3aff334c0326728ec9ac35852807e19e686b8820c934cb0a0d1fd42c",
+  "input_sha256": "dc3dd02b5afbc668925b35e0b316794425702e67ea13dbc67a09ae112c3c9967",
+  "control_sha256": {
+    "controls/xor_relation_sat.xor.cnf": "dfd45585e968d1a05bb5680321262bd3e528bd777700c392e17da8a960299edb",
+    "controls/xor_relation_unsat.xor.cnf": "f5463d9e254e12217d150a95fc83853aedf1918b40d7cad3cc1eaf74d39a1d85"
+  },
+  "solver": {
+    "version": "5.16.0",
+    "release_asset_sha256": "9599eea560305291cb593ba9d6733605fae763a7f7a1fcdd63191ef8089e9979",
+    "binary_sha256": "934682565dcfcf4cac2947b818fff3a1b94bbb432158e593d810cd90e4cae482",
+    "cms_sha1": "2bf89cfb3e126e559d472388486327813f735f7e"
+  },
+  "commands": {
+    "tests": "cargo test --offline --release --lib cryptanalysis::koblitz_rotated_chain::tests --no-default-features",
+    "build": "cargo build --offline --release --bin n83_rotated_m10 --no-default-features",
+    "sat_control": "<cms> --verb 0 --threads 1 --random 1 --maxsol 1 controls/xor_relation_sat.xor.cnf",
+    "unsat_control": "<cms> --verb 0 --threads 1 --random 1 --maxsol 1 controls/xor_relation_unsat.xor.cnf",
+    "planted": "target/release/n83_rotated_m10 certify-planted-xor --circuit inductive --xcnf <out>/planted.xor.cnf --model <out>/planted.model --report <out>/planted.json --node-cap 8000000",
+    "planted_replay": "target/release/n83_rotated_m10 verify --target planted --circuit inductive --model <out>/planted.model --node-cap 8000000",
+    "public": "target/release/n83_rotated_m10 solve-xor --target public --circuit inductive --solver <cms> --out <out>/public --seconds 120 --node-cap 8000000"
+  },
+  "outer_limits": {
+    "cold_process_wall_seconds": 900,
+    "virtual_memory_kib": 12582912
+  },
+  "pre_freeze_controls": {
+    "module_tests": "PASS",
+    "streaming_xor_and_cnf_model_validation": "PASS",
+    "cryptominisat_sat_control_exit": 10,
+    "cryptominisat_unsat_control_exit": 20,
+    "planted_xor_certificate": "PASS",
+    "development_planted_solver_status": "INDETERMINATE",
+    "public_xor_instance_emitted": false,
+    "public_solver_run": false
+  },
+  "speed_claim_allowed": false
+}

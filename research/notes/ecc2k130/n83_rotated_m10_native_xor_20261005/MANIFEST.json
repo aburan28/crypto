@@ -1,0 +1,97 @@
+{
+  "schema": "n83-rotated-m10-native-xor-manifest-v1",
+  "source_commit": "9deefe38109b5745e974fbbb6808f332cd4c65eb",
+  "preregistered_head": "2ee9c33b10cf941aaff0844415e4b8b382237c01",
+  "pr": "https://github.com/aburan28/crypto/pull/1352",
+  "parent_pr": "https://github.com/aburan28/crypto/pull/1346",
+  "host": {
+    "os": "Linux 6.18.44 x86_64",
+    "logical_cpus_visible": 5,
+    "memory_total_kib": 18440136
+  },
+  "external_solver": {
+    "name": "cryptominisat",
+    "version": "5.16.0",
+    "release_asset_bytes": 2583480,
+    "release_asset_sha256": "9599eea560305291cb593ba9d6733605fae763a7f7a1fcdd63191ef8089e9979",
+    "binary_sha256": "934682565dcfcf4cac2947b818fff3a1b94bbb432158e593d810cd90e4cae482"
+  },
+  "files": [
+    {
+      "path": "evidence/controls.json",
+      "bytes": 739,
+      "sha256": "6d150406e98ce0a763023dfb6615b12ab7436720ac31677ca84640373e11866e",
+      "committed": true
+    },
+    {
+      "path": "evidence/planted.xor.cnf",
+      "bytes": 22859716,
+      "sha256": "75d4eadcae6ffcf43fd470eebe2d19d180a32282c9ecb207f7c7948849036b31",
+      "blake3": "91b95c8c73ff777cb1466624b41ff8443a1c3ddab71034793e233ac331d1865a",
+      "committed": false,
+      "reason": "deterministic large generated file; digest retained"
+    },
+    {
+      "path": "evidence/planted.model",
+      "bytes": 5317391,
+      "sha256": "d86e724e638bf4bf794a77ea6330541a3c2769af6a6fb60bb93b2729f3842053",
+      "committed": false,
+      "reason": "deterministic large generated file; decoded replay committed"
+    },
+    {
+      "path": "evidence/planted.json",
+      "bytes": 4708,
+      "sha256": "c6ed4bf24463a99572ec9eece883d67bffe99868d775592fd5fa6c84c3fb6024",
+      "committed": true
+    },
+    {
+      "path": "evidence/planted_replay.json",
+      "bytes": 2322,
+      "sha256": "616d7df8166100c53a913d126cc8365eee51f238a910df5ceb0d09f95a3fa283",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/instance.xor.cnf",
+      "bytes": 22893789,
+      "sha256": "fd6d246082db12775e7d0e64ed370677e8a365a58fe898235e8074dc20e54410",
+      "blake3": "6cc3d18c15b6cbd22dea85b03f03f42380bf20acdbdb3ff6125185db397a21f6",
+      "committed": false,
+      "reason": "deterministic large generated file; digests and full solver log retained"
+    },
+    {
+      "path": "evidence/public/model.txt",
+      "bytes": 10,
+      "sha256": "8fba55cea0f98be36fab7b65349dda867a58aabfcf974a46098f5123830ac5cb",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/result.json",
+      "bytes": 3430,
+      "sha256": "4e43cc4e8c0eb76d63194d7eea10c029b9d49392fe61f7fa5f402d758a7ddf69",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stdout.txt",
+      "bytes": 18682,
+      "sha256": "419ce5d2aa32b72c814aa988ccfb67c0b28a01ff4a093ed63781b3e928d6bd76",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committed": true
+    }
+  ],
+  "controls": {
+    "module_tests": "PASS",
+    "cryptominisat_parity_sat": "PASS",
+    "cryptominisat_parity_unsat": "PASS",
+    "planted_xor_stream_validation": "PASS",
+    "planted_full_model_replay": "PASS",
+    "public_dag_drift_control": "PASS"
+  },
+  "decision": "BOUNDED_NATURAL_TARGET_TIMEOUT",
+  "speed_claim": null,
+  "full_dlp": false
+}
