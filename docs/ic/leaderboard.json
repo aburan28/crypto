@@ -78,9 +78,13 @@
    "path": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
    "sha256": "307f02ce84e5cb463257c5bfc9a572aed8508a90f8c9b58e1c3d550589bb0d90"
   },
+  "f6_ecbench_ladder": {
+   "path": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+   "sha256": "69ca54385c62a50e2a1b8fcb5245459dd8550966221f5ba94fcdf3437c1bada6"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "ac96fc4a4e9c20e1082adf3df704f77745d418e0831fd70027954fb4bdb81bed"
+   "sha256": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3"
   }
  },
  "families": {
@@ -5223,6 +5227,42 @@
   "online_speedup": null,
   "cpu_isolation": "L0-unverified-mac"
  },
+ "f6_ecbench_ladder_diagnostic": {
+  "source": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+  "decision": "not decidable: fewer than six targets completed at some size, or fewer than four sizes",
+  "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+  "sizes": [
+   {
+    "m": 13,
+    "curve": "icv1-f2m13-t181-515ee569",
+    "targets": 8,
+    "rho_s": 14.713116223286512,
+    "f4_s_lower_over_rho": 1.105362599399004,
+    "f6_s_lower_over_rho": 54.75104049279727,
+    "median_log2_w4_over_w6": 0.37728567379745975
+   },
+   {
+    "m": 19,
+    "curve": "icv1-f2m19-t797-b6cf2467",
+    "targets": 8,
+    "rho_s": 3.1338637392766118,
+    "f4_s_lower_over_rho": 1.582275124863434,
+    "f6_s_lower_over_rho": 2090.8492586008015,
+    "median_log2_w4_over_w6": 0.432982288712685
+   },
+   {
+    "m": 23,
+    "curve": "icv1-f2m23-t5197-69e76b73",
+    "targets": 8,
+    "rho_s": 1.0462204446268615,
+    "f4_s_lower_over_rho": 2.090818628531976,
+    "f6_s_lower_over_rho": 2.721264717429671,
+    "median_log2_w4_over_w6": 0.0
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",
@@ -6951,6 +6991,18 @@
    "on_board": true
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "family": "prime",
+   "field": "GF(p), p = 11617",
+   "coefficients": "a = 3797, b = 2081",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "family": "prime",
    "field": "GF(p), p = 14389",
@@ -6981,6 +7033,18 @@
     "bench-14bit"
    ],
    "on_board": true
+  },
+  {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "family": "prime",
+   "field": "GF(p), p = 53197",
+   "coefficients": "a = 40230, b = 5",
+   "order_bits": 16,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
   },
   {
    "slug": "icv1-fp16-t295-8d3c3165",
@@ -7235,6 +7299,42 @@
    "ec1_unresolved": null,
    "legacy": [
     "generated-26bit-42652151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+   "family": "prime",
+   "field": "GF(p), 192-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 192,
+   "standard": [
+    "P-192"
+   ],
+   "ec1": [
+    "EC1P192Cp192h5531c4a08bdb"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-192"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "family": "prime",
+   "field": "GF(p), 224-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 224,
+   "standard": [
+    "P-224"
+   ],
+   "ec1": [
+    "EC1P224Cp224h8e110c585480"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-224"
    ],
    "on_board": false
   },

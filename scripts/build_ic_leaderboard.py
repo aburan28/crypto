@@ -66,6 +66,7 @@ SOURCES = {
     "n37_native_wall_evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
     "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
     "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+    "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -547,6 +548,29 @@ def build() -> dict:
         "online_speedup": None,
         "cpu_isolation": "L0-unverified-mac",
     }
+    ladder = load(SOURCES["f6_ecbench_ladder"])
+    if (ladder["schema"] != "f6-ic-ladder-analysis/v2"
+            or not ladder["decision"].startswith("not decidable")):
+        raise SystemExit("review the F6-IC ladder decision before updating the leaderboard")
+    ladder_diagnostic = {
+        "source": SOURCES["f6_ecbench_ladder"],
+        "decision": ladder["decision"],
+        "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+        "sizes": [
+            {
+                "m": z["m"],
+                "curve": names(z["slug"])["slug"],
+                "targets": z["targets_completed_both_ic_arms"],
+                "rho_s": z["rho_median_s"],
+                "f4_s_lower_over_rho": z["arms"]["ic-f4"]["median_s_lower_over_rho"],
+                "f6_s_lower_over_rho": z["arms"]["ic-f6"]["median_s_lower_over_rho"],
+                "median_log2_w4_over_w6": z["median_log2_w4_over_w6"],
+            }
+            for z in ladder["per_size"] if z["targets_completed_both_ic_arms"] > 0
+        ],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
     rank_columns = load(SOURCES["n37_rank_columns"])
     if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
             or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
@@ -705,6 +729,7 @@ def build() -> dict:
         "n37_online_ir_diagnostic": online_ir_diagnostic,
         "n37_native_wall_diagnostic": native_wall_diagnostic,
         "f6_small_cold_diagnostic": small_cold_diagnostic,
+        "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -865,6 +890,23 @@ def markdown(doc: dict) -> str:
         L.append(f"| {label} | `{row['candidate_id']}` | "
                  f"{row['cold_inside_worker_ns']/1e6:.3f} | "
                  f"{row['online_wall_ns']/1e6:.3f} |")
+    L.append("")
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    L += ["## F6-IC E_0 ladder in ecbench, outside tables A–C", "",
+          "#1333's inherited-F4 and F6-IC decomposers ran unmodified in `ic.pipeline` "
+          "beside same-target strong rho on eight public one-target workloads per size. "
+          "IC `S` is a lower bound: the solver's word XORs are counted but unpriced, and "
+          "F6-IC's geometric point additions are charged. The F6-IC word-XOR saving "
+          "vanishes once the base exceeds #1333's 256-point closure cap; charging its "
+          "geometry makes the trade a relabelling. "
+          f"Decision: {y['decision']} (m = 31 incomplete). "
+          f"Read the [analysis](../../{y['source']}).", "",
+          "| m | curve | targets | rho S | F4 S/rho (lower bound) | F6-IC S/rho (lower bound) | median log2(W4/W6) |",
+          "|--:|:--|--:|--:|--:|--:|--:|"]
+    for z in y["sizes"]:
+        L.append(f"| {z['m']} | `{z['curve']}` | {z['targets']} | {z['rho_s']:.3f} | "
+                 f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
+                 f"{z['median_log2_w4_over_w6']:.3f} |")
     L.append("")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
@@ -1123,6 +1165,22 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td>{label}</td><td><code>{esc(row["candidate_id"])}</code></td>'
                  f'<td>{row["cold_inside_worker_ns"]/1e6:.3f}</td>'
                  f'<td>{row["online_wall_ns"]/1e6:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    P.append(f'<section class="card" id="bounded-f6-ecbench-ladder"><h2>F6-IC E_0 ladder in ecbench, outside the priced tables</h2>'
+             '<p>#1333\'s inherited-F4 and F6-IC decomposers ran unmodified in <code>ic.pipeline</code> '
+             'beside same-target strong rho on eight public one-target workloads per size. IC S is a '
+             'lower bound: the solver\'s word XORs are counted but unpriced, and F6-IC\'s geometric point '
+             'additions are charged. The F6-IC word-XOR saving vanishes once the base exceeds #1333\'s '
+             '256-point closure cap; charging its geometry makes the trade a relabelling. '
+             f'Decision: {esc(y["decision"])} (m = 31 incomplete). '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(y["source"])}">Analysis</a>.</p>')
+    P.append('<table><thead><tr><th>m</th><th>Curve</th><th>Targets</th><th>Rho S</th>'
+             '<th>F4 S/rho (lower bound)</th><th>F6-IC S/rho (lower bound)</th><th>Median log₂(W4/W6)</th></tr></thead><tbody>')
+    for z in y["sizes"]:
+        P.append(f'<tr><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td><td>{z["targets"]}</td>'
+                 f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
+                 f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
     P.append('</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
