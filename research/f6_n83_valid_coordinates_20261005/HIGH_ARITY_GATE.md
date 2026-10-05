@@ -44,3 +44,33 @@ shortcut: elliptic-curve point coordinates do not provide a known
 public additive bit projection. A candidate that buckets point sums
 must prove its bucket rule and charge the point additions used to
 form those sums. No such method or speedup is established here.
+
+## Orbit-closure pair index screen
+
+The earlier [orbit-closure inventory](../f6_n83_mixed_base_20261004/ORBIT_RESULT.md)
+has 332,166 usable subgroup points in 2,001 full signed Frobenius
+orbits of 166 points. This improves the **five-summand counting
+capacity**, but it does not make a pair-index join small. The action is
+`H ≅ C₈₃ × C₂`; it is free on each nonidentity point orbit.
+For two points from different orbits there are 166 relative-action
+classes. For two points from the same orbit, relative actions are
+identified with their inverses; two of the 166 elements are
+self-inverse, giving `(166+2)/2 = 84` classes. Therefore the exact
+number of unordered point-pair **multiset classes** under the common
+action is
+
+`166·C(2001,2) + 84·2001 = 332,334,084`.
+
+This counts input-pair classes before equal-sum collisions; it is not a
+measured count of distinct sum points. A perfectly packed 16-byte entry
+per class already needs 5,317,345,344 bytes, excluding hash-table and
+construction overhead. To query a generic target against every actual
+point pair through this quotient, the straightforward method must
+consider up to 166 translates per class, or 55,167,457,944 pair
+instances. The orbit-closure inventory's four-summand uniform-target
+coverage ceiling is only `0.000209791390`. Appending an extra point to
+make a five-summand query multiplies a straightforward search by up to
+332,166 choices. These are structural counts and a capacity upper
+bound, not measured runtimes or a lower bound on a new joint solver.
+They rule out treating orbit folding plus the existing pair-query loop
+as the missing end-to-end method.
