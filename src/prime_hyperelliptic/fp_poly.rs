@@ -236,6 +236,27 @@ impl FpPoly {
         self.divrem(divisor).1
     }
 
+    /// Binary exponentiation in `F_p[x] / (modulus)`.
+    ///
+    /// The exponent is public and this routine is variable-time. It is used by
+    /// finite-field factorisation and Frobenius root extraction, not protocol
+    /// code handling secrets.
+    pub fn pow_mod(&self, exponent: &BigUint, modulus: &Self) -> Self {
+        assert!(!modulus.is_zero(), "polynomial modulus must be non-zero");
+        debug_assert_eq!(self.p, modulus.p);
+        let mut accumulator = Self::one(self.p.clone());
+        let mut base = self.rem(modulus);
+        for bit in 0..exponent.bits() {
+            if exponent.bit(bit) {
+                accumulator = accumulator.mul(&base).rem(modulus);
+            }
+            if bit + 1 < exponent.bits() {
+                base = base.mul(&base).rem(modulus);
+            }
+        }
+        accumulator
+    }
+
     /// Euclidean GCD, returned monic.
     pub fn gcd(&self, other: &Self) -> Self {
         let mut a = self.clone();
@@ -388,6 +409,20 @@ mod tests {
         let f = FpPoly::from_coeffs(vec![BigUint::from(4u32), BigUint::from(7u32)], p.clone());
         let m = f.monic();
         assert_eq!(m.lead(), BigUint::one());
+    }
+
+    #[test]
+    fn pow_mod_matches_small_field() {
+        let p = BigUint::from(7u32);
+        let modulus = FpPoly::from_coeffs(
+            vec![BigUint::one(), BigUint::zero(), BigUint::one()],
+            p.clone(),
+        );
+        let x = FpPoly::x(p);
+        assert_eq!(
+            x.pow_mod(&BigUint::from(5u32), &modulus),
+            FpPoly::from_coeffs(vec![BigUint::zero(), BigUint::one()], modulus.p.clone())
+        );
     }
 
     #[test]
