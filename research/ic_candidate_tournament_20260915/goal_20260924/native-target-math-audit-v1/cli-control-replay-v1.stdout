@@ -1,0 +1,780 @@
+{
+  "attempt_files": {
+    "files": [
+      {
+        "bytes": 377,
+        "path": "binding.json",
+        "sha256": "49d487cda6f5282690b0e77dedf521c70f8a516a7d786ea8c94017b85022b344"
+      },
+      {
+        "bytes": 1087,
+        "path": "completed-000.json",
+        "sha256": "a86c37eb30a36a1d9a428580e66eff5d4f0bf8a8cd95b439d86766d6abe1d532"
+      },
+      {
+        "bytes": 1087,
+        "path": "completed-001.json",
+        "sha256": "4c6197dc6f1b71973b38f0cadf446e054454d0d25edfafe1a752aa62047a5112"
+      },
+      {
+        "bytes": 1125,
+        "path": "completed-002.json",
+        "sha256": "bc8813059aa5ec494dea67413c7e46dcab0825ffa041218ee7a62a56c58f0097"
+      },
+      {
+        "bytes": 445,
+        "path": "start-000.json",
+        "sha256": "209e6f777e116c2ae618295fdfcd2ecfde7a010487b6933164c525ac3fd2ffd1"
+      },
+      {
+        "bytes": 445,
+        "path": "start-001.json",
+        "sha256": "152366d9e021e8b34131c980f5ebfa73f30fc7abf20410c49d8a419e4795c8ef"
+      },
+      {
+        "bytes": 445,
+        "path": "start-002.json",
+        "sha256": "3e2c53eed30f03f756c82ad5f92d85674e79ba1e4bc0b49f68af7f1562313287"
+      }
+    ],
+    "names": [
+      "binding.json",
+      "completed-000.json",
+      "completed-001.json",
+      "completed-002.json",
+      "start-000.json",
+      "start-001.json",
+      "start-002.json"
+    ]
+  },
+  "audit_scope": "original target data and mathematics only; source/build/runtime/timing custody remain unverified",
+  "audited_attempts": [
+    {
+      "a": 57707,
+      "b": 37266,
+      "outcome": "proved_unsat",
+      "public_query": [
+        20087,
+        50635
+      ],
+      "trial": 0
+    },
+    {
+      "a": 43768,
+      "b": 33418,
+      "outcome": "proved_unsat",
+      "public_query": [
+        39701,
+        75542
+      ],
+      "trial": 1
+    },
+    {
+      "a": 45669,
+      "b": 63073,
+      "outcome": "witness",
+      "public_query": [
+        111691,
+        70749
+      ],
+      "trial": 2
+    }
+  ],
+  "fresh_paired_qualification": false,
+  "full_goal_complete": false,
+  "headline_eligible": false,
+  "independent_audit_wall_ns": "33869958",
+  "input_sha256": {
+    "config": "48e671908392f36580aef3dfa9d3e96a981be68126230ca3b312a087dd3931e5",
+    "preparation": "8b61e01c0da0ae4b31c2649b8d25549262e568ed29c9b44b117a147b40f5e183",
+    "producer": "46fbcc28030b130015949d61dae59ffab3dcb17309b573977c20e387032af8b1"
+  },
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "outcome_mix": {
+    "proved_unsat": 2,
+    "witness": 1
+  },
+  "preparation": {
+    "accepted_rows": 61,
+    "accounting": "mathematical input replay only; native execution, source-model custody, costs and rates need separate evidence",
+    "audited_queries": 216,
+    "column_points": [
+      [
+        471,
+        57570
+      ],
+      [
+        731,
+        20518
+      ],
+      [
+        829,
+        20614
+      ],
+      [
+        985,
+        26841
+      ],
+      [
+        1129,
+        41552
+      ],
+      [
+        1391,
+        127363
+      ],
+      [
+        2655,
+        98654
+      ],
+      [
+        2731,
+        8581
+      ],
+      [
+        2777,
+        21372
+      ],
+      [
+        3023,
+        53794
+      ],
+      [
+        3175,
+        115860
+      ],
+      [
+        3421,
+        90551
+      ],
+      [
+        3681,
+        42918
+      ],
+      [
+        3773,
+        54163
+      ],
+      [
+        5119,
+        100649
+      ],
+      [
+        7111,
+        60995
+      ],
+      [
+        7159,
+        18374
+      ],
+      [
+        7811,
+        52278
+      ],
+      [
+        9099,
+        1429
+      ],
+      [
+        10143,
+        18204
+      ],
+      [
+        10199,
+        19284
+      ],
+      [
+        12063,
+        105083
+      ],
+      [
+        12091,
+        102062
+      ],
+      [
+        13087,
+        36345
+      ],
+      [
+        14073,
+        3990
+      ],
+      [
+        14203,
+        51661
+      ],
+      [
+        18915,
+        34422
+      ],
+      [
+        18941,
+        32935
+      ],
+      [
+        39617,
+        72163
+      ]
+    ],
+    "declared_family": "matrix_f5",
+    "dependent_relations": 32,
+    "duplicate_relations": 0,
+    "feasible_inconclusive_queries": 0,
+    "folded_columns": 29,
+    "fresh_paired_qualification": false,
+    "full_goal_complete": false,
+    "geometric_order_sha256": "bec87229df1e344b84b9075e8af273dfd2c0ea7ebbfee6277e851d7a6ca5e72a",
+    "geometric_points": 63,
+    "headline_eligible": false,
+    "independently_recovered_column_logs": [
+      63339,
+      4377,
+      65416,
+      51034,
+      19569,
+      48468,
+      56224,
+      55591,
+      50531,
+      14472,
+      61582,
+      16657,
+      44888,
+      41533,
+      48375,
+      43107,
+      38770,
+      2895,
+      58938,
+      45617,
+      57054,
+      19961,
+      5522,
+      52742,
+      33022,
+      14807,
+      44336,
+      18617,
+      35813
+    ],
+    "input_sha256": "6c1904315b7cfe41736a889160c27427ac07bb8cac717e607d5e82c96b449a20",
+    "mathematical_preparation_complete": true,
+    "native_solvers_executed": 0,
+    "new_queries": 0,
+    "online_speedup": null,
+    "online_wall_ns": null,
+    "ordinary_outcome_mix": {
+      "proved_unsat": 155,
+      "witness": 61
+    },
+    "panel_complete": true,
+    "planned_queries": 216,
+    "projection": [
+      null,
+      [
+        28,
+        14021
+      ],
+      [
+        28,
+        51566
+      ],
+      [
+        28,
+        35813
+      ],
+      [
+        28,
+        29774
+      ],
+      [
+        4,
+        51550
+      ],
+      [
+        4,
+        14037
+      ],
+      [
+        5,
+        20335
+      ],
+      [
+        5,
+        45252
+      ],
+      [
+        8,
+        65586
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        28,
+        7771
+      ],
+      [
+        28,
+        57816
+      ],
+      [
+        16,
+        13810
+      ],
+      [
+        16,
+        51777
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        65586
+      ],
+      [
+        1,
+        54691
+      ],
+      [
+        1,
+        10896
+      ],
+      [
+        15,
+        55241
+      ],
+      [
+        15,
+        10346
+      ],
+      [
+        23,
+        44894
+      ],
+      [
+        23,
+        20693
+      ],
+      [
+        21,
+        35813
+      ],
+      [
+        21,
+        29774
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        65586
+      ],
+      [
+        19,
+        17186
+      ],
+      [
+        19,
+        48401
+      ],
+      [
+        24,
+        20693
+      ],
+      [
+        24,
+        44894
+      ],
+      [
+        9,
+        24202
+      ],
+      [
+        9,
+        41385
+      ],
+      [
+        11,
+        10896
+      ],
+      [
+        11,
+        54691
+      ],
+      [
+        18,
+        48313
+      ],
+      [
+        18,
+        17274
+      ],
+      [
+        14,
+        48403
+      ],
+      [
+        14,
+        17184
+      ],
+      [
+        10,
+        17182
+      ],
+      [
+        10,
+        48405
+      ],
+      [
+        0,
+        14021
+      ],
+      [
+        0,
+        51566
+      ],
+      [
+        27,
+        51777
+      ],
+      [
+        27,
+        13810
+      ],
+      [
+        6,
+        35813
+      ],
+      [
+        6,
+        29774
+      ],
+      [
+        7,
+        17178
+      ],
+      [
+        7,
+        48409
+      ],
+      [
+        26,
+        44894
+      ],
+      [
+        26,
+        20693
+      ],
+      [
+        13,
+        14021
+      ],
+      [
+        13,
+        51566
+      ],
+      [
+        22,
+        57816
+      ],
+      [
+        22,
+        7771
+      ],
+      [
+        12,
+        54691
+      ],
+      [
+        12,
+        10896
+      ],
+      [
+        25,
+        55241
+      ],
+      [
+        25,
+        10346
+      ],
+      [
+        20,
+        41385
+      ],
+      [
+        20,
+        24202
+      ],
+      [
+        17,
+        57816
+      ],
+      [
+        17,
+        7771
+      ]
+    ],
+    "promotion_eligible": false,
+    "query_law": "independent-probe-scalar-rand08-v1",
+    "rank": 29,
+    "rank_trajectory": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      6,
+      6,
+      6,
+      6,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      10,
+      10,
+      10,
+      10,
+      11,
+      12,
+      13,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      15,
+      15,
+      15,
+      16,
+      16,
+      17,
+      17,
+      17,
+      17,
+      17,
+      17,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      19,
+      19,
+      20,
+      20,
+      20,
+      20,
+      21,
+      21,
+      22,
+      22,
+      23,
+      23,
+      23,
+      24,
+      25,
+      25,
+      25,
+      25,
+      25,
+      26,
+      26,
+      26,
+      26,
+      27,
+      27,
+      27,
+      27,
+      27,
+      27,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      29,
+      29,
+      29
+    ],
+    "repeated_projected_rows": 0,
+    "rows_sha256": "996c5e60e698ce78c9da111f3c251d7b138cfd82dccd1c2834a536f31489c00c",
+    "schema_version": 1,
+    "source_bound_execution_admitted": false,
+    "status": "PASS_ORDINARY_PREPARATION_MATHEMATICS",
+    "usable_points": 62,
+    "verified_witnesses": 61
+  },
+  "preparation_math_sha256": "6c1904315b7cfe41736a889160c27427ac07bb8cac717e607d5e82c96b449a20",
+  "promotion_eligible": false,
+  "registration_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "schema_version": 1,
+  "solver_calls_by_auditor": 0,
+  "source_bound_execution_admitted": false,
+  "status": "PASS_TARGET_MATHEMATICS_RUNTIME_NOT_ADMITTED",
+  "target": [
+    52411,
+    72106
+  ],
+  "timing": {
+    "exclusive_ic_online_phases_ns": {
+      "target_descent": 1,
+      "target_pdp": 1,
+      "target_query": 1,
+      "target_recovery_check": 1,
+      "target_relation_check": 1
+    },
+    "five_phase_recorded_total_ns": 5,
+    "missing_costs": [],
+    "producer_recorded_online_interval_ns": 5,
+    "source_timing_attested": false
+  },
+  "verified_recovery": true,
+  "verified_scalar": 24886,
+  "worker_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+}

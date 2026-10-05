@@ -1,0 +1,49 @@
+{
+  "binding_sha256": "fb4c1c65f339ebcbcdaf398f35a8ab0dbf1edb25833eae8bd412c1c2c62cd35a",
+  "body": {
+    "attempt": {
+      "a": 57707,
+      "b": 37266,
+      "pdp": {
+        "outcome": "proved_unsat",
+        "points": null,
+        "stats": {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "family": "groebner",
+          "stats": {
+            "eliminated": 0,
+            "exhausted": false,
+            "infeasible_branches": 2548,
+            "max_degree_built": 3,
+            "oversize": 0,
+            "propagations": 10572,
+            "reductions": 6639,
+            "splits": 2547,
+            "unsupported": false
+          }
+        }
+      },
+      "trial": 0
+    },
+    "record_kind": "completed-pdp-before-scalar-recovery",
+    "target": [
+      52411,
+      72106
+    ]
+  },
+  "header": {
+    "a": 57707,
+    "b": 37266,
+    "target": [
+      52411,
+      72106
+    ],
+    "trial": 0
+  },
+  "schema_version": 1,
+  "start_sha256": "b0de61207ed30e817ed29c0fe1937ffb90f0ac586447e435bbb390f9d6e3066b"
+}

@@ -95,6 +95,14 @@ worker still requires accepted preinitialized transport, and the target
 controller/freezer, independent runtime audit and scientific dispatch remain
 pending. File survival and source controls establish no native relation yield
 or speedup.
+The [independent target mathematical audit](goal_20260924/native-target-math-audit-v1/PROTOCOL.md)
+adds `icprog target-mathematics-audit` for new n17 F5 producer and attempt files.
+It independently reconstructs preparation rank/logs, the seeded query law,
+full-point witnesses, exact geometric negatives and projected scalar recovery.
+It binds every completed record and checks the five-phase ledger, retaining
+failed targets and unknown phase costs. Historical-data controls execute no
+solver; this mathematical gate cannot admit source/build/runtime custody or
+timing, and the independently frozen complete-run audit is still required.
 This extends the existing tournament; its archived rounds keep their original
 evaluators and claims. The retained `autolab.py` was a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,

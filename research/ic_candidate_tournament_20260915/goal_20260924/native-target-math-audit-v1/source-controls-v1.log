@@ -1,0 +1,66 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-native-target-audit-20261004)
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 24.21s
+     Running unittests src/bin/icprog.rs (/Volumes/SSD990/llm/tmp/ic-native-preparation-build-cache-20261004/debug/deps/icprog-30e51a89c3fe902e)
+
+running 12 tests
+test target_math::tests::clock_mapping_overflow_extra_phases_and_reusable_work_are_rejected ... ok
+test target_math::tests::duplicate_keys_nested_floats_and_missing_schema_are_rejected ... ok
+test target_math::tests::failed_audit_retains_receipt_and_original_input_and_cannot_write_into_evidence ... ok
+test target_math::tests::false_negative_with_true_decomposition_is_independently_rejected ... ok
+test target_math::tests::inconclusive_budget_exhaustion_is_retained_and_never_a_win ... ok
+test target_math::tests::missing_phase_stays_unknown_even_with_correct_scalar ... ok
+test target_math::tests::no_query_may_follow_recovery_and_early_budget_stop_is_rejected ... ok
+test target_math::tests::original_records_binding_links_pending_orphans_and_body_changes_are_rejected ... ok
+test target_math::tests::query_law_stop_count_preparation_and_schema_changes_are_rejected ... ok
+test target_math::tests::retained_witness_and_negatives_verify_without_runtime_or_timing_admission ... ok
+test target_math::tests::scalar_relation_witness_and_certificate_tampering_are_rejected ... ok
+test target_math::tests::wrong_engine_limits_dispatch_and_identity_are_rejected ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 103 filtered out; finished in 1.56s
+
