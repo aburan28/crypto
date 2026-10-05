@@ -11864,7 +11864,7 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
     <span><span class="chip">degree</span> every final image join is one variable with two degree-&le;2 polynomials; all 152 measured solving degrees are 2</span>
     <span><span class="chip">correctness</span> all affine images match signed point addition and the affine-plus-identity union matches all 16 parent classifications</span>
     <span><span class="chip">cost</span> terminal-369 total counted field work is 0.087091 of round 10's F4 count; image atoms expand only 1.5&times; over leaf atoms on that row</span>
-    <span><span class="chip">scope</span> exact toy four-summand decomposition; eight-summand image growth, actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span><span class="chip">scope</span> exact toy four-summand decomposition; rounds 12&ndash;13 measure the later toy image growth, while actual P-256 S18, relations, S and rho remain unmeasured</span>
     <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_image_atomized_s5_round11_20261004/RESULT.md</code>; deterministic result SHA-256 <code>7266c05093c815734db0a0319b946f76d003e836cce0911541be5ab4d50f2e60</code></span>
   </div>
 </section>
@@ -11887,12 +11887,36 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   <div class="legend" style="padding-top:0">
     <span><span class="chip">correctness</span> all four-leaf affine images and identity flags match exhaustive group sums before every final join</span>
     <span><span class="chip">degree</span> every algebraic operation is a univariate quadratic; this is an explicitly split local degree, not unsplit S9 regularity</span>
-    <span><span class="chip">growth boundary</span> maximum affine width grows from 2 at two leaves to 8 at four; the 16-summand doubling remains unmeasured</span>
+    <span><span class="chip">growth boundary</span> maximum affine width grows from 2 at two leaves to 8 at four; Round 13 measures the 16-summand doubling and finds width 117 at eight leaves</span>
     <span><span class="chip">scope</span> toy field, eight summands and known target; actual P-256 S18, relations, S and rho remain unmeasured</span>
     <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s9_image_growth_round12_20261004/RESULT.md</code>; deterministic result SHA-256 <code>11512f946ee9256dcb978f11280f577f2fefff3f3d761feafded1b93349bbde5</code></span>
   </div>
 </section>
 <!-- END p256-s9-image-growth-round12-20261004 -->
+<!-- BEGIN p256-s17-image-growth-round13-20261004 -->
+<section class="panel" id="p256-s17-image-growth-round13-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson sixteen-summand images: degree 2 survives while width jumps to 117 <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Matches 2,883,584 represented signed tuples with zero intermediate-image or classification errors: 10,474 quadratic solves plus 8,600 lookups give a 0.006615 structural-visit ratio, but eight-leaf width reaches 117.</p>
+    <p>Round 13 composes complete four-leaf images into exact eight-leaf images with explicit infinity sentinels, verifies both layers against group addition, and joins two eight-leaf blocks to a known target using only indexed univariate quadratics.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Visits are quadratic solves plus final indexed root lookups; field multiplications and exact group-law references remain separate.</caption>
+    <thead><tr><th>Terminal</th><th>Cells</th><th>x atoms</th><th>Signed tuples</th><th>Solves + lookups</th><th>Visit ratio</th><th>Max 2 / 4 / 8 image</th><th>FN / FP</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="n">4</td><td class="n">10</td><td class="n">655,360</td><td class="n">2,149 + 1,776</td><td class="n"><strong>0.005989</strong></td><td class="n">2 / 8 / 117</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td class="n">4</td><td class="n">34</td><td class="n">2,228,224</td><td class="n">8,325 + 6,824</td><td class="n"><strong>0.006799</strong></td><td class="n">2 / 8 / 110</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> every four- and eight-leaf affine image and identity flag matches exact signed group sums before the final join</span>
+    <span><span class="chip">degree</span> every algebraic operation is a univariate quadratic; this is explicitly split local degree, not unsplit S17 regularity</span>
+    <span><span class="chip">width warning</span> positive-cell width grows 2 &rarr; 8 &rarr; 117; exact sixteen-leaf references reach 298 of the toy curve's 596 affine x-coordinates</span>
+    <span><span class="chip">scope</span> toy field, sixteen summands and known target; actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_image_growth_round13_20261004/RESULT.md</code>; deterministic result SHA-256 <code>2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d</code></span>
+  </div>
+</section>
+<!-- END p256-s17-image-growth-round13-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

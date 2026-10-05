@@ -24,6 +24,7 @@ const BUDGET_SECS: u64 = 20;
 const ROUND9_SHA256: &str = "44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a";
 const ROUND10_SHA256: &str = "1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93";
 const ROUND11_SHA256: &str = "7266c05093c815734db0a0319b946f76d003e836cce0911541be5ab4d50f2e60";
+const ROUND12_SHA256: &str = "11512f946ee9256dcb978f11280f577f2fefff3f3d761feafded1b93349bbde5";
 const IMAGE_MAX_DEGREE: u32 = 4;
 const IMAGE_BUDGET_SECS: u64 = 5;
 
@@ -42,6 +43,9 @@ struct Cli {
     /// Run the round-12 eight-summand image-growth screen after hash-checking round 11.
     #[arg(long)]
     scale_eight_round11: Option<PathBuf>,
+    /// Run the round-13 sixteen-summand image-growth screen after hash-checking round 12.
+    #[arg(long)]
+    scale_sixteen_round12: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -415,6 +419,53 @@ struct S9ExperimentResult {
     round11_sha256: String,
     local_maximum_degree: u32,
     terminal_results: Vec<S9TerminalResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S17CellResult {
+    kind: String,
+    boundaries: [u64; 16],
+    expected_positive: bool,
+    candidate_positive: bool,
+    x_atoms: usize,
+    signed_tuples: usize,
+    quadratic_solves: u64,
+    roots_returned: u64,
+    final_index_lookups: u64,
+    field_multiplications: u64,
+    maximum_two_leaf_affine_image: usize,
+    maximum_four_leaf_affine_image: usize,
+    maximum_eight_leaf_affine_image: usize,
+    maximum_sixteen_leaf_reference_image: usize,
+    four_leaf_identity_images: u64,
+    eight_leaf_identity_images: u64,
+    sixteen_leaf_reference_identity_images: u64,
+    false_negative: bool,
+    false_positive: bool,
+    image_stream_sha256: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S17TerminalResult {
+    terminal: u64,
+    target: [u64; 2],
+    nonempty_boundaries: usize,
+    selected_boundaries: [u64; 16],
+    negative_pool: [u64; 2],
+    cells: Vec<S17CellResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S17ExperimentResult {
+    schema: String,
+    curve: String,
+    prime: u64,
+    a: u64,
+    b: u64,
+    affine_curve_x_domain: usize,
+    round12_sha256: String,
+    local_maximum_degree: u32,
+    terminal_results: Vec<S17TerminalResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -1990,6 +2041,356 @@ fn run_s9(round11_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
     Ok(())
 }
 
+fn boundary_cell_reference_16(
+    boundaries: [u64; 16],
+    points_by_boundary: &BTreeMap<u64, Vec<Affine>>,
+    target: Affine,
+) -> (bool, usize) {
+    let sets: Vec<Vec<Affine>> = boundaries
+        .iter()
+        .map(|boundary| points_by_boundary[boundary].clone())
+        .collect();
+    let signed_tuples = sets.iter().map(Vec::len).product();
+    let sums = sum_sets(&sets);
+    (
+        sums.contains(&Point::Affine(target)) || sums.contains(&Point::Affine(negate(target))),
+        signed_tuples,
+    )
+}
+
+fn enumerate_x_atoms_16(leaves: [&[u64]; 16]) -> Vec<[u64; 16]> {
+    fn visit(
+        index: usize,
+        leaves: &[&[u64]; 16],
+        current: &mut [u64; 16],
+        out: &mut Vec<[u64; 16]>,
+    ) {
+        if index == 16 {
+            out.push(*current);
+            return;
+        }
+        for &value in leaves[index] {
+            current[index] = value;
+            visit(index + 1, leaves, current, out);
+        }
+    }
+    let mut out = Vec::new();
+    visit(0, &leaves, &mut [0; 16], &mut out);
+    out
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_s17_cell(
+    kind: &str,
+    boundaries: [u64; 16],
+    expected_positive: bool,
+    signed_tuples: usize,
+    target: Affine,
+    x_by_boundary: &BTreeMap<u64, Vec<u64>>,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<S17CellResult, String> {
+    let leaf_vec: Vec<&[u64]> = boundaries
+        .iter()
+        .map(|boundary| x_by_boundary[boundary].as_slice())
+        .collect();
+    let leaves: [&[u64]; 16] = leaf_vec
+        .try_into()
+        .map_err(|_| "sixteen leaf lists required".to_string())?;
+    let atoms = enumerate_x_atoms_16(leaves);
+    let mut candidate_positive = false;
+    let mut quadratic_solves = 0;
+    let mut roots_returned = 0;
+    let mut final_index_lookups = 0;
+    let mut field = CountedField::default();
+    let mut maximum_two_leaf_affine_image = 0;
+    let mut maximum_four_leaf_affine_image = 0;
+    let mut maximum_eight_leaf_affine_image = 0;
+    let mut maximum_sixteen_leaf_reference_image = 0;
+    let mut four_leaf_identity_images = 0;
+    let mut eight_leaf_identity_images = 0;
+    let mut sixteen_leaf_reference_identity_images = 0;
+    let mut stream = String::new();
+    for xs in &atoms {
+        let mut pairs = Vec::with_capacity(8);
+        for pair in xs.chunks_exact(2) {
+            pairs.push(pair_image_state(
+                pair[0],
+                pair[1],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            ));
+        }
+        maximum_two_leaf_affine_image = maximum_two_leaf_affine_image.max(
+            pairs
+                .iter()
+                .map(|image| image.affine.len())
+                .max()
+                .unwrap_or(0),
+        );
+
+        let mut fours = Vec::with_capacity(4);
+        for (index, pair) in pairs.chunks_exact(2).enumerate() {
+            let image = compose_image_states(
+                &pair[0],
+                &pair[1],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            );
+            let start = 4 * index;
+            let reference = reference_image(&xs[start..start + 4], b, square_roots);
+            if image != reference {
+                return Err(format!(
+                    "four-leaf image mismatch in {kind} at x atom {xs:?}, block {index}"
+                ));
+            }
+            maximum_four_leaf_affine_image = maximum_four_leaf_affine_image.max(image.affine.len());
+            four_leaf_identity_images += u64::from(image.identity);
+            fours.push(image);
+        }
+
+        let mut eights = Vec::with_capacity(2);
+        for (index, pair) in fours.chunks_exact(2).enumerate() {
+            let image = compose_image_states(
+                &pair[0],
+                &pair[1],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            );
+            let start = 8 * index;
+            let reference = reference_image(&xs[start..start + 8], b, square_roots);
+            if image != reference {
+                return Err(format!(
+                    "eight-leaf image mismatch in {kind} at x atom {xs:?}, block {index}"
+                ));
+            }
+            maximum_eight_leaf_affine_image =
+                maximum_eight_leaf_affine_image.max(image.affine.len());
+            eight_leaf_identity_images += u64::from(image.identity);
+            eights.push(image);
+        }
+
+        let left = &eights[0];
+        let right = &eights[1];
+        let mut atom_positive = false;
+        for &left_x in &left.affine {
+            quadratic_solves += 1;
+            let (qa, qb, qc) = coefficients(&mut field, left_x, target.x, b);
+            let roots = solve_quadratic(&mut field, qa, qb, qc);
+            roots_returned += roots.len as u64;
+            for &right_x in &roots.roots[..roots.len] {
+                final_index_lookups += 1;
+                atom_positive |= right.affine.contains(&right_x);
+            }
+        }
+        atom_positive |= left.identity && right.affine.contains(&target.x);
+        atom_positive |= right.identity && left.affine.contains(&target.x);
+        let reference = reference_image(xs, b, square_roots);
+        maximum_sixteen_leaf_reference_image =
+            maximum_sixteen_leaf_reference_image.max(reference.affine.len());
+        sixteen_leaf_reference_identity_images += u64::from(reference.identity);
+        let reference_positive = reference.affine.contains(&target.x);
+        if atom_positive != reference_positive {
+            return Err(format!(
+                "final sixteen-leaf classification mismatch in {kind} at x atom {xs:?}"
+            ));
+        }
+        candidate_positive |= atom_positive;
+        writeln!(
+            stream,
+            "{:?}|{:?}:{}|{:?}:{}|{}|{}",
+            xs,
+            left.affine,
+            u8::from(left.identity),
+            right.affine,
+            u8::from(right.identity),
+            u8::from(atom_positive),
+            u8::from(reference_positive)
+        )
+        .expect("writing to String cannot fail");
+    }
+    Ok(S17CellResult {
+        kind: kind.into(),
+        boundaries,
+        expected_positive,
+        candidate_positive,
+        x_atoms: atoms.len(),
+        signed_tuples,
+        quadratic_solves,
+        roots_returned,
+        final_index_lookups,
+        field_multiplications: field.multiplications,
+        maximum_two_leaf_affine_image,
+        maximum_four_leaf_affine_image,
+        maximum_eight_leaf_affine_image,
+        maximum_sixteen_leaf_reference_image,
+        four_leaf_identity_images,
+        eight_leaf_identity_images,
+        sixteen_leaf_reference_identity_images,
+        false_negative: expected_positive && !candidate_positive,
+        false_positive: !expected_positive && candidate_positive,
+        image_stream_sha256: hex::encode(sha256(stream.as_bytes())),
+    })
+}
+
+fn run_s17_terminal(
+    terminal: u64,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<S17TerminalResult, String> {
+    let mut inventory = Vec::new();
+    let mut x_by_boundary = BTreeMap::new();
+    let mut points_by_boundary = BTreeMap::new();
+    for boundary in roots(DEPTH - 1, terminal) {
+        let xs = liftable_x(boundary, b, square_roots);
+        if xs.is_empty() {
+            continue;
+        }
+        let points = signed_points(&xs, b, square_roots);
+        inventory.push((boundary, xs.clone()));
+        x_by_boundary.insert(boundary, xs);
+        points_by_boundary.insert(boundary, points);
+    }
+    if inventory != frozen_nonempty_inventory(terminal) {
+        return Err(format!("terminal {terminal} factor-base inventory changed"));
+    }
+
+    let first_eight: Vec<u64> = inventory[..8].iter().map(|entry| entry.0).collect();
+    let selected_boundaries: [u64; 16] = first_eight
+        .iter()
+        .chain(first_eight.iter())
+        .copied()
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("sixteen selected boundaries");
+    let selected_point_sets: Vec<Vec<Affine>> = selected_boundaries
+        .iter()
+        .map(|boundary| points_by_boundary[boundary].clone())
+        .collect();
+    let target = first_finite_sum(&selected_point_sets)
+        .ok_or_else(|| format!("terminal {terminal} planted target stayed infinity"))?;
+    let reverse: [u64; 16] = selected_boundaries
+        .iter()
+        .rev()
+        .copied()
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("sixteen reversed boundaries");
+
+    let mut selected_cells = Vec::new();
+    for (kind, boundaries) in [
+        ("planted-forward", selected_boundaries),
+        ("planted-reverse", reverse),
+    ] {
+        let (positive, signed_tuples) =
+            boundary_cell_reference_16(boundaries, &points_by_boundary, target);
+        if !positive {
+            return Err(format!("terminal {terminal} {kind} cell is not positive"));
+        }
+        selected_cells.push((kind.to_string(), boundaries, positive, signed_tuples));
+    }
+
+    let single_x_boundaries: Vec<u64> = inventory
+        .iter()
+        .filter(|entry| entry.1.len() == 1)
+        .map(|entry| entry.0)
+        .take(2)
+        .collect();
+    let negative_pool: [u64; 2] = single_x_boundaries
+        .try_into()
+        .map_err(|_| format!("terminal {terminal} lacks two single-x boundaries"))?;
+    for code in 0u32..(1u32 << 16) {
+        let mut boundaries = [0u64; 16];
+        for (index, boundary) in boundaries.iter_mut().enumerate() {
+            *boundary = negative_pool[((code >> (15 - index)) & 1) as usize];
+        }
+        let (positive, signed_tuples) =
+            boundary_cell_reference_16(boundaries, &points_by_boundary, target);
+        if !positive {
+            let negative_index = selected_cells.len() - 2;
+            selected_cells.push((
+                format!("negative-{negative_index}"),
+                boundaries,
+                false,
+                signed_tuples,
+            ));
+            if selected_cells.len() == 4 {
+                break;
+            }
+        }
+    }
+    if selected_cells.len() != 4 {
+        return Err(format!(
+            "terminal {terminal} did not yield two negative controls"
+        ));
+    }
+
+    let mut cells = Vec::new();
+    for (kind, boundaries, expected_positive, signed_tuples) in selected_cells {
+        cells.push(run_s17_cell(
+            &kind,
+            boundaries,
+            expected_positive,
+            signed_tuples,
+            target,
+            &x_by_boundary,
+            b,
+            square_roots,
+        )?);
+    }
+    Ok(S17TerminalResult {
+        terminal,
+        target: [target.x, target.y],
+        nonempty_boundaries: inventory.len(),
+        selected_boundaries,
+        negative_pool,
+        cells,
+    })
+}
+
+fn run_s17(round12_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round12_path).map_err(|error| error.to_string())?;
+    let round12_sha256 = hex::encode(sha256(&bytes));
+    if round12_sha256 != ROUND12_SHA256 {
+        return Err(format!(
+            "round-12 SHA-256 mismatch: expected {ROUND12_SHA256}, got {round12_sha256}"
+        ));
+    }
+    let p256 = CurveParams::p256();
+    let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
+    let square_roots = square_root_table();
+    let affine_curve_x_domain = (0..P)
+        .filter(|&x| !square_roots[curve_rhs(x, b) as usize].is_empty())
+        .count();
+    let mut terminal_results = Vec::new();
+    for terminal in TERMINALS {
+        terminal_results.push(run_s17_terminal(terminal, b, &square_roots)?);
+    }
+    let result = S17ExperimentResult {
+        schema: "p256.dickson_s17_image_growth/v1".into(),
+        curve: CURVE_SLUG.into(),
+        prime: P,
+        a: A,
+        b,
+        affine_curve_x_domain,
+        round12_sha256,
+        local_maximum_degree: 2,
+        terminal_results,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
     let p256 = CurveParams::p256();
     let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
@@ -2020,19 +2421,38 @@ fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
 }
 
 fn run(cli: Cli) -> Result<(), String> {
-    match (
-        cli.atomize_round9,
-        cli.image_atomize_round10,
-        cli.scale_eight_round11,
-    ) {
-        (Some(_), Some(_), _) | (Some(_), _, Some(_)) | (_, Some(_), Some(_)) => {
-            Err("choose only one continuation mode".into())
-        }
-        (Some(path), None, None) => run_atomized(&path, cli.out),
-        (None, Some(path), None) => run_image_atomized(&path, cli.out),
-        (None, None, Some(path)) => run_s9(&path, cli.out),
-        (None, None, None) => run_round9(cli.out),
+    let Cli {
+        out,
+        atomize_round9,
+        image_atomize_round10,
+        scale_eight_round11,
+        scale_sixteen_round12,
+    } = cli;
+    let mode_count = [
+        atomize_round9.is_some(),
+        image_atomize_round10.is_some(),
+        scale_eight_round11.is_some(),
+        scale_sixteen_round12.is_some(),
+    ]
+    .into_iter()
+    .filter(|selected| *selected)
+    .count();
+    if mode_count > 1 {
+        return Err("choose only one continuation mode".into());
     }
+    if let Some(path) = atomize_round9 {
+        return run_atomized(&path, out);
+    }
+    if let Some(path) = image_atomize_round10 {
+        return run_image_atomized(&path, out);
+    }
+    if let Some(path) = scale_eight_round11 {
+        return run_s9(&path, out);
+    }
+    if let Some(path) = scale_sixteen_round12 {
+        return run_s17(&path, out);
+    }
+    run_round9(out)
 }
 
 fn main() -> ExitCode {
