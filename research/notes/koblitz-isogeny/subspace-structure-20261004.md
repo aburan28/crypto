@@ -88,7 +88,8 @@ family: geometric `V_s` for s = 1..4 instead of random V.
 - Order: shuffled cells.
 - Primary metric: reductions/call, which is load-independent.
 - Secondary metrics: log µs/call and yield.
-- Command: `KOBLITZ_PRES_GEOMETRIC=1 koblitz_presentation_sweep 31 0 16 4 32 1,2,3,4`
+- First fall is not measured in this arm (`KOBLITZ_PRES_FFD_TARGETS=0`). Its decomposability pre-check is a 2^{2l} = 2^32 scan per target, which made the first restart finish no cell in 40 min. It also uses the monomial V, not V_s, so it carries no information about the presentation.
+- Command: `KOBLITZ_PRES_FFD_TARGETS=0 KOBLITZ_PRES_GEOMETRIC=1 koblitz_presentation_sweep 31 0 16 4 32 1,2,3,4`
 - Output: `experiments/koblitz_presentation/pres_31_0_l16_geom.jsonl`.
 - Budget: about 128 cells × 4 × 320 s ≈ 45 core-h, on 2 cores.
 

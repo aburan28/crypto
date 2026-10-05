@@ -98,6 +98,10 @@ fn main() {
         cells.len()
     );
 
+    let ffd_targets: u32 = std::env::var("KOBLITZ_PRES_FFD_TARGETS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(4);
     let irr = field_for(n).unwrap();
     let order = koblitz_family_order(n, a2) as u64;
     let file = std::sync::Mutex::new(
@@ -116,7 +120,10 @@ fn main() {
             m: 2,
             yield_probes: probes,
             max_trials: 0,
-            ffd_targets: 4,
+            // `KOBLITZ_PRES_FFD_TARGETS=0` skips first fall: its decomposability
+            // check is a 2^{2l} scan over the monomial V (not V_s), which at
+            // l = 16 dominates the cell and measures nothing about V_s.
+            ffd_targets,
             ffd_d_max: 6,
             known_order: Some(order),
             full_group_probes: true,
