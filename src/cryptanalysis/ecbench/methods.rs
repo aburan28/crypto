@@ -1033,7 +1033,7 @@ fn solve_large_prime(
     let detail =
         serde_json::to_value(&report).map_err(|e| format!("serialise large-prime report: {e}"))?;
     Ok(SolveReport {
-        recovered: report.recovered,
+        recovered: report.recovered.map(u128::from),
         exhausted: report.exhausted,
         phases,
         total_gae,

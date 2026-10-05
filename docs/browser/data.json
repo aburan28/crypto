@@ -13,7 +13,7 @@
  },
  "sources": {
   "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
-  "docs/curves/covers.json": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
+  "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
   "docs/ic/leaderboard.json": "866d198acfeaea22f9a3613e53bbfaacb122a168e970489c2676775d4bf3a334",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
@@ -798,7 +798,55 @@
    "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "ae0facd240e84e43254c1fb74f0851b186e405bce8ed4a264913dd67d2d9a894",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m11-t67-ae0facd2",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m13-t181-515ee569",
@@ -1501,7 +1549,55 @@
    "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "e4cd523ec44fc00eb103a3ea48f2c4b6b6d11634ca16b0a83f0043565dd88a5e",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m13-tm181-e4cd523e",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
@@ -1653,7 +1749,55 @@
    "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "25edae8389f13e4f7ba13ea611b2ae6c61d85c6409a79c7f39e3582c2535219c",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m15-t275-25edae83",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m15-t275-b7f03703",
@@ -4947,7 +5091,55 @@
     }
    ],
    "factor_bases": [],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m23-tm5197-a023238e",
@@ -5146,9 +5338,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "model_sha256": "a023238e6474f945bd8be7ddb502618b652064406ac23760b8ab5560b58ac039",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "slug": "icv1-f2m23-tm5197-a023238e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5412,7 +5604,55 @@
     "FB1h280d69cfbf38",
     "FB1h3a3262d6867f"
    ],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m29-tm40309-6aecea52",
@@ -5575,9 +5815,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "model_sha256": "6aecea52fac93749eeedfd85e1121feaed9eb35764396fcadf862d8411b40307",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "slug": "icv1-f2m29-tm40309-6aecea52",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5842,7 +6082,55 @@
    "leaderboard": [],
    "ecbench": [],
    "factor_bases": [],
-   "tournament_cells": []
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "5fc996f03a86af22aab8a078ea9e1e59ea1c188a4ca0ab837b81ee91fb31b322",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m31-t90707-5fc996f0",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
   },
   {
    "slug": "icv1-f2m31-t90707-8fd18741",
@@ -20526,8 +20814,8 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "84b504d19844",
-   "mentions": 25,
-   "files": 14,
+   "mentions": 26,
+   "files": 15,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/AUDIT.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/receipt.json",
