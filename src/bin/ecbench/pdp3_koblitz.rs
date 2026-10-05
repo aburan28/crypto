@@ -43,34 +43,36 @@
 //! search without changing the method's identity, so `prepare` refuses to
 //! run while any of them is set, as #1333's exclusive worker does.
 //!
-//! ## Why a `cfg`
+//! ## Why it lives in the binary
 //!
-//! Some frozen-source replay workflows rebuild this crate with pre-F6
-//! snapshots of `src/lib.rs` and `koblitz_index_calculus.rs`
-//! (`research/notes/ecc2k130/compact_frozen_source_replay_20260929`), and
-//! other frozen evaluations pin `Cargo.toml` by hash. So the module is
-//! compiled only under `cfg(has_f6_ic)`, which `build.rs` sets when the
-//! `koblitz_index_calculus.rs` being compiled defines the function this
-//! module calls.
+//! The frozen-source replay workflows rebuild the library against pre-F6
+//! snapshots of `koblitz_index_calculus.rs`
+//! (`research/notes/ecc2k130/compact_frozen_source_replay_20260929`), which
+//! lack the function this module calls. Other frozen evaluations pin
+//! `Cargo.toml` by hash, and the tournament admits no root build script, so
+//! neither a feature nor a `cfg` can gate it. The module therefore lives in
+//! the `ecbench` binary, which those replays never build, and reaches
+//! `ic.pipeline` through `methods::register_binary_plugins`.
 
 use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;
 
 use num_bigint::BigUint;
 
-use super::stages::{
-    DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost, SolverTotals,
-    SystemShape,
-};
-use crate::cryptanalysis::ic_boundary::{
+use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
+use crypto_lib::cryptanalysis::ic_boundary::{
     koblitz_factor_base, lift_abscissae, BinaryGroup, BinaryInstance, ColumnFold, FactorBase,
     GroupOps, OracleCounters,
 };
-use crate::cryptanalysis::koblitz_fast::FastPoint;
-use crate::cryptanalysis::koblitz_groebner::{
+use crypto_lib::cryptanalysis::ic_framework::stages::{
+    DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost, SolverTotals,
+    SystemShape,
+};
+use crypto_lib::cryptanalysis::koblitz_fast::FastPoint;
+use crypto_lib::cryptanalysis::koblitz_groebner::{
     f4_word_ops_thread, FieldStructure, SolveStats, SolverEngine,
 };
-use crate::cryptanalysis::koblitz_index_calculus::{
+use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic, point_key,
     FrobeniusFactorBase,
 };
@@ -451,5 +453,23 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
 
     fn solver_totals(&self) -> Option<SolverTotals> {
         Some(self.totals.clone())
+    }
+}
+
+/// This module's plug-ins, for `methods::register_binary_plugins`.
+pub fn plugins() -> BinaryPlugins {
+    BinaryPlugins {
+        base: |name, instance| {
+            (name == "koblitz-standard-subspace").then(|| {
+                Box::new(KoblitzStandardSubspaceBase { instance })
+                    as Box<dyn FactorBaseBuilder<BinaryGroup<'_>> + '_>
+            })
+        },
+        oracle: |name, summands, instance| {
+            (name == "pdp3-koblitz").then(|| {
+                Box::new(Pdp3KoblitzOracle::new(summands, instance))
+                    as Box<dyn DecompositionOracle<BinaryGroup<'_>> + '_>
+            })
+        },
     }
 }

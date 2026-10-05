@@ -136,6 +136,15 @@ The m = 13 and m = 19 sessions were replayed again after merging #1365,
 which replaced this branch's replay-determinism fix with its own. All
 72 + 72 replays are again identical (`audits/n1{3,9}-replay-all-after-1365.json`).
 
+**Deviation in packaging, not in method.** `PROTOCOL.md` put the adapter
+behind a Cargo feature, `f6-ic-oracle`. That edit to `Cargo.toml` broke a
+frozen evaluation that pins `Cargo.toml` by hash. The next attempt, a root
+build script, is refused by the tournament's build admission. So the
+shipped adapter lives in the `ecbench` binary (`src/bin/ecbench/pdp3_koblitz.rs`)
+and registers with `ic.pipeline` at start-up. The code that runs is
+unchanged. The m = 13 session replays 72 of 72 identical with the shipped
+binary, and with every earlier packaging.
+
 Every run was produced by one `ecbench` binary built from `f4994f9f`. A
 rebuild was byte-identical. The interrupted m = 23 attempt's first seven records
 match the complete session's first seven exactly: the same workloads,
