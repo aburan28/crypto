@@ -11967,6 +11967,31 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-target-join-round15-20261005 -->
+<!-- BEGIN p256-s17-packed-atom-round16-20261005 -->
+<section class="panel" id="p256-s17-packed-atom-round16-20261005">
+  <div class="panel-head">
+    <h2>P-256 packed atoms: 36 exact bytes, another 227.56&times; reduction <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Stores sixteen 18-bit factor-base column IDs instead of two 128-entry half-images: 36 persistent bytes versus 8,192, with byte-exact reconstruction and zero errors on eight P-256 targets.</p>
+    <p>Round 16 treats the hash-pinned factor base as a shared dictionary. Four canonical packets decode to every frozen column and x-coordinate, reproduce both half-image and hit digests, and pass fresh exhaustive 65,536-sign references while every algebraic operation remains quadratic.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Persistent raw state excludes the shared factor base on every row; transient reconstruction state and algebraic work remain charged explicitly.</caption>
+    <thead><tr><th>Representation</th><th>Persistent bytes</th><th>Reduction from prior</th><th>Cold solves</th><th>Two-target solves</th><th>Transient bytes</th><th>Targets correct</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Round-14 full image</td><td class="n">1,048,576</td><td class="n">reference</td><td class="n">16,536</td><td class="n">16,536 + lookups</td><td class="n">1,048,576</td><td class="n">4 / 4 width samples</td><td class="n">2</td><td><span class="chip">reference</span></td></tr>
+      <tr><td>Round-15 half-images</td><td class="n">8,192</td><td class="n">128&times;</td><td class="n">280</td><td class="n">408</td><td class="n">8,192</td><td class="n">8 / 8</td><td class="n">2</td><td><span class="chip">prior</span></td></tr>
+      <tr><td>Round-16 packed columns</td><td class="n"><strong>36</strong></td><td class="n"><strong>227.556&times;</strong></td><td class="n">280</td><td class="n">408</td><td class="n">8,192</td><td class="n"><strong>8 / 8</strong></td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">state</span> sixteen 18-bit IDs occupy exactly 288 bits; 8,192 / 36 = 227.5556&times; beyond round 15 and 1,048,576 / 36 = 29,127.1111&times; beyond round 14</span>
+    <span><span class="chip">exactness</span> canonical decode/re-encode, full frozen-receipt equality, four positive hits, four public negative controls, zero FN, FP or degeneracies</span>
+    <span><span class="chip">dictionary boundary</span> exact decoding requires <code>FB1h2f8621cda105</code> and its pinned point-set hash; the shared factor base is excluded from both storage arms</span>
+    <span><span class="chip">remaining boundary</span> persistent state is compressed, but reconstruction still peaks at 8 KiB; a later streaming round must price recomputation against that transient working set</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_packed_atom_round16_20261005/RESULT.md</code>; deterministic result SHA-256 <code>af2874ef5f0bdabec75b9bf707067232d0d6e3985f0cce4eba6834c2b5790e44</code></span>
+  </div>
+</section>
+<!-- END p256-s17-packed-atom-round16-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

@@ -23,6 +23,10 @@ const COLUMNS: u64 = 131_458;
 const SIGNED_POINTS: u64 = 262_916;
 const ROUND13_SHA256: &str = "2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d";
 const ROUND14_SHA256: &str = "6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc";
+const ROUND15_SHA256: &str = "4220dafa066613630338886a916218602cd61ca914bd66ac7994cde163a53ad5";
+const ATOM_COLUMNS: usize = 16;
+const COLUMN_INDEX_BITS: usize = 18;
+const PACKED_ATOM_BYTES: usize = ATOM_COLUMNS * COLUMN_INDEX_BITS / 8;
 const TARGET_PREIMAGE: &str = concat!(
     "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
     "/s3-image-transfer-round8/target/0"
@@ -40,6 +44,9 @@ struct Cli {
     /// Run the round-15 target-indexed compression after hash-checking round 14.
     #[arg(long)]
     compress_round14: Option<PathBuf>,
+    /// Run the round-16 packed-atom compression after hash-checking round 15.
+    #[arg(long)]
+    pack_round15: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -253,6 +260,51 @@ struct CompressionExperimentResult {
     factor_base: FactorBaseReceipt,
     local_maximum_degree: u32,
     samples: Vec<CompressionSampleResult>,
+}
+
+#[derive(Serialize)]
+struct PackedAtomSampleResult {
+    kind: String,
+    packed_atom_hex: String,
+    packed_atom_sha256: String,
+    bits_per_column: usize,
+    packet_bytes: usize,
+    round15_retained_raw_bytes: usize,
+    materialized_sixteen_leaf_raw_bytes: usize,
+    additional_persistent_reduction: f64,
+    full_materialized_reduction: f64,
+    columns: Vec<u64>,
+    x_coordinates: Vec<String>,
+    decoded_exact: bool,
+    reencoded_exact: bool,
+    dependency_sample_exact: bool,
+    left_image_sha256: String,
+    right_image_sha256: String,
+    transient_reconstruction_raw_bytes: usize,
+    build_quadratic_solves: u64,
+    one_cold_query_quadratic_solves: u64,
+    two_query_one_rebuild_quadratic_solves: u64,
+    intermediate_reference_group_additions: u64,
+    full_reference_group_additions: u64,
+    build_linear_degeneracies: u64,
+    build_universal_degeneracies: u64,
+    build_multiplication_counts: MultiplicationCounts,
+    targets: Vec<CompressedTargetResult>,
+}
+
+#[derive(Serialize)]
+struct PackedAtomExperimentResult {
+    schema: String,
+    curve: String,
+    field_prime: String,
+    curve_a: String,
+    curve_b: String,
+    round15_sha256: String,
+    factor_base: FactorBaseReceipt,
+    local_maximum_degree: u32,
+    factor_base_column_bits: usize,
+    packed_atom_bytes: usize,
+    samples: Vec<PackedAtomSampleResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -1421,6 +1473,227 @@ fn run_compression(round14_path: &PathBuf, out: Option<PathBuf>) -> Result<(), S
     Ok(())
 }
 
+fn validate_atom_columns(column_indices: &[u64]) -> Result<(), String> {
+    if column_indices.len() != ATOM_COLUMNS {
+        return Err(format!(
+            "packed atom requires {ATOM_COLUMNS} columns, got {}",
+            column_indices.len()
+        ));
+    }
+    let mut seen = BTreeSet::new();
+    for &column in column_indices {
+        if column >= COLUMNS {
+            return Err(format!(
+                "packed atom column {column} is outside the {COLUMNS}-column dictionary"
+            ));
+        }
+        if !seen.insert(column) {
+            return Err(format!("packed atom repeats column {column}"));
+        }
+    }
+    Ok(())
+}
+
+fn pack_atom_columns(column_indices: &[u64]) -> Result<[u8; PACKED_ATOM_BYTES], String> {
+    validate_atom_columns(column_indices)?;
+    let mut packet = [0u8; PACKED_ATOM_BYTES];
+    let mut cursor = 0usize;
+    for &column in column_indices {
+        for shift in (0..COLUMN_INDEX_BITS).rev() {
+            let bit = ((column >> shift) & 1) as u8;
+            packet[cursor / 8] |= bit << (7 - cursor % 8);
+            cursor += 1;
+        }
+    }
+    if cursor != PACKED_ATOM_BYTES * 8 {
+        return Err("packed atom bit count changed".into());
+    }
+    Ok(packet)
+}
+
+fn unpack_atom_columns(packet: &[u8]) -> Result<Vec<u64>, String> {
+    if packet.len() != PACKED_ATOM_BYTES {
+        return Err(format!(
+            "packed atom requires {PACKED_ATOM_BYTES} bytes, got {}",
+            packet.len()
+        ));
+    }
+    let mut columns = Vec::with_capacity(ATOM_COLUMNS);
+    let mut cursor = 0usize;
+    for _ in 0..ATOM_COLUMNS {
+        let mut column = 0u64;
+        for _ in 0..COLUMN_INDEX_BITS {
+            let bit = (packet[cursor / 8] >> (7 - cursor % 8)) & 1;
+            column = (column << 1) | u64::from(bit);
+            cursor += 1;
+        }
+        columns.push(column);
+    }
+    if cursor != packet.len() * 8 {
+        return Err("packed atom decoder did not consume the packet".into());
+    }
+    validate_atom_columns(&columns)?;
+    Ok(columns)
+}
+
+fn round15_sample<'a>(
+    dependency: &'a serde_json::Value,
+    kind: &str,
+) -> Result<&'a serde_json::Value, String> {
+    dependency["samples"]
+        .as_array()
+        .ok_or("round-15 samples are missing")?
+        .iter()
+        .find(|sample| sample["kind"].as_str() == Some(kind))
+        .ok_or_else(|| format!("round-15 sample {kind} is missing"))
+}
+
+fn run_packed_atom_sample(
+    kind: &str,
+    expected_columns: Vec<u64>,
+    dependency: &serde_json::Value,
+    columns: &[Column],
+    curve: &CurveParams,
+) -> Result<PackedAtomSampleResult, String> {
+    let stored_sample = round15_sample(dependency, kind)?;
+    let stored_columns: Vec<u64> = serde_json::from_value(stored_sample["columns"].clone())
+        .map_err(|error| format!("round-15 {kind} columns: {error}"))?;
+    if stored_columns != expected_columns {
+        return Err(format!("round-15 {kind} column selection changed"));
+    }
+
+    let packet = pack_atom_columns(&stored_columns)?;
+    let decoded = unpack_atom_columns(&packet)?;
+    let decoded_exact = decoded == stored_columns;
+    let reencoded_exact = pack_atom_columns(&decoded)? == packet;
+    if !decoded_exact || !reencoded_exact {
+        return Err(format!("{kind} packed atom failed canonical round trip"));
+    }
+
+    let recomputed = run_compression_sample(kind, decoded, columns, curve)?;
+    let recomputed_value = serde_json::to_value(&recomputed).map_err(|error| error.to_string())?;
+    if &recomputed_value != stored_sample {
+        return Err(format!(
+            "{kind} reconstructed round-15 sample differs from its frozen receipt"
+        ));
+    }
+    if recomputed.targets.len() != 2 || recomputed.targets.iter().any(|target| !target.exact) {
+        return Err(format!("{kind} reconstructed targets are not both exact"));
+    }
+    let one_cold_query_quadratic_solves = recomputed.targets[0].quadratic_solves_cold;
+    if recomputed
+        .targets
+        .iter()
+        .any(|target| target.quadratic_solves_cold != one_cold_query_quadratic_solves)
+    {
+        return Err(format!("{kind} cold-query solve counts differ"));
+    }
+    let two_query_one_rebuild_quadratic_solves = recomputed.build_quadratic_solves
+        + recomputed
+            .targets
+            .iter()
+            .map(|target| target.quadratic_solves_warm)
+            .sum::<u64>();
+    if packet.len() != 36
+        || recomputed.retained_raw_bytes != 8_192
+        || recomputed.materialized_raw_bytes != 1_048_576
+        || one_cold_query_quadratic_solves != 280
+        || two_query_one_rebuild_quadratic_solves != 408
+        || recomputed.build_linear_degeneracies != 0
+        || recomputed.build_universal_degeneracies != 0
+    {
+        return Err(format!("{kind} packed-atom boundary changed"));
+    }
+    let additional_persistent_reduction =
+        recomputed.retained_raw_bytes as f64 / packet.len() as f64;
+    if additional_persistent_reduction < 30.0 {
+        return Err(format!(
+            "{kind} compression gate failed: {additional_persistent_reduction:.6}x"
+        ));
+    }
+
+    Ok(PackedAtomSampleResult {
+        kind: recomputed.kind,
+        packed_atom_hex: hex::encode(packet),
+        packed_atom_sha256: hex::encode(sha256(&packet)),
+        bits_per_column: COLUMN_INDEX_BITS,
+        packet_bytes: packet.len(),
+        round15_retained_raw_bytes: recomputed.retained_raw_bytes,
+        materialized_sixteen_leaf_raw_bytes: recomputed.materialized_raw_bytes,
+        additional_persistent_reduction,
+        full_materialized_reduction: recomputed.materialized_raw_bytes as f64 / packet.len() as f64,
+        columns: recomputed.columns,
+        x_coordinates: recomputed.x_coordinates,
+        decoded_exact,
+        reencoded_exact,
+        dependency_sample_exact: true,
+        left_image_sha256: recomputed.left_image_sha256,
+        right_image_sha256: recomputed.right_image_sha256,
+        transient_reconstruction_raw_bytes: recomputed.retained_raw_bytes,
+        build_quadratic_solves: recomputed.build_quadratic_solves,
+        one_cold_query_quadratic_solves,
+        two_query_one_rebuild_quadratic_solves,
+        intermediate_reference_group_additions: recomputed.intermediate_reference_group_additions,
+        full_reference_group_additions: recomputed.full_reference_group_additions,
+        build_linear_degeneracies: recomputed.build_linear_degeneracies,
+        build_universal_degeneracies: recomputed.build_universal_degeneracies,
+        build_multiplication_counts: recomputed.build_multiplication_counts,
+        targets: recomputed.targets,
+    })
+}
+
+fn run_packed_compression(round15_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round15_path).map_err(|error| error.to_string())?;
+    let round15_sha256 = hex::encode(sha256(&bytes));
+    if round15_sha256 != ROUND15_SHA256 {
+        return Err(format!(
+            "round-15 SHA-256 mismatch: expected {ROUND15_SHA256}, got {round15_sha256}"
+        ));
+    }
+    let dependency: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    if dependency["schema"].as_str() != Some("p256.s17_target_indexed_compression/v1")
+        || dependency["curve"].as_str() != Some(CURVE_SLUG)
+        || dependency["factor_base"]["fb_id"].as_str() != Some(FB_ID)
+        || dependency["factor_base"]["fb_sha256"].as_str() != Some(FB_SHA256)
+        || dependency["factor_base"]["points_sha256"].as_str() != Some(POINTS_SHA256)
+    {
+        return Err("round-15 identity receipt changed".into());
+    }
+
+    let curve = CurveParams::p256();
+    let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
+    let mut samples = Vec::new();
+    for (kind, expected_columns) in round14_sample_specs() {
+        samples.push(run_packed_atom_sample(
+            &kind,
+            expected_columns,
+            &dependency,
+            &columns,
+            &curve,
+        )?);
+    }
+    let result = PackedAtomExperimentResult {
+        schema: "p256.s17_packed_atom/v1".into(),
+        curve: CURVE_SLUG.into(),
+        field_prime: lower_hex(&curve.p),
+        curve_a: lower_hex(&curve.a),
+        curve_b: lower_hex(&curve.b),
+        round15_sha256,
+        factor_base,
+        local_maximum_degree: 2,
+        factor_base_column_bits: COLUMN_INDEX_BITS,
+        packed_atom_bytes: PACKED_ATOM_BYTES,
+        samples,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_transfer(out: Option<PathBuf>) -> Result<(), String> {
     let curve = CurveParams::p256();
     let (factor_base, columns, signed_rows, x_index, signed_index) = build_indexes(&curve)?;
@@ -1486,8 +1759,12 @@ fn run(cli: Cli) -> Result<(), String> {
         out,
         width_round13,
         compress_round14,
+        pack_round15,
     } = cli;
-    if width_round13.is_some() && compress_round14.is_some() {
+    let continuation_modes = usize::from(width_round13.is_some())
+        + usize::from(compress_round14.is_some())
+        + usize::from(pack_round15.is_some());
+    if continuation_modes > 1 {
         return Err("choose only one continuation mode".into());
     }
     if let Some(path) = width_round13 {
@@ -1495,6 +1772,9 @@ fn run(cli: Cli) -> Result<(), String> {
     }
     if let Some(path) = compress_round14 {
         return run_compression(&path, out);
+    }
+    if let Some(path) = pack_round15 {
+        return run_packed_compression(&path, out);
     }
     run_transfer(out)
 }
@@ -1576,5 +1856,36 @@ mod tests {
         let seven = Fe::from_biguint(&BigUint::from(7u8));
         let thirty_five = Fe::from_biguint(&BigUint::from(35u8));
         assert_eq!(seven.mul(&linear.roots[0]).add(&thirty_five), Fe::ZERO);
+    }
+
+    #[test]
+    fn packed_atom_is_canonical_and_round_trips() {
+        let columns: Vec<u64> = (0..ATOM_COLUMNS as u64)
+            .map(|index| index * 8_001)
+            .collect();
+        let packet = pack_atom_columns(&columns).unwrap();
+        assert_eq!(packet.len(), 36);
+        assert_eq!(unpack_atom_columns(&packet).unwrap(), columns);
+
+        let mut aggregate = BigUint::zero();
+        for column in &columns {
+            aggregate = (aggregate << COLUMN_INDEX_BITS) + BigUint::from(*column);
+        }
+        let encoded = aggregate.to_bytes_be();
+        let mut reference = [0u8; PACKED_ATOM_BYTES];
+        reference[PACKED_ATOM_BYTES - encoded.len()..].copy_from_slice(&encoded);
+        assert_eq!(packet, reference);
+    }
+
+    #[test]
+    fn packed_atom_rejects_noncanonical_columns() {
+        let mut duplicate: Vec<u64> = (0..ATOM_COLUMNS as u64).collect();
+        duplicate[15] = duplicate[0];
+        assert!(pack_atom_columns(&duplicate).is_err());
+
+        let mut out_of_range: Vec<u64> = (0..ATOM_COLUMNS as u64).collect();
+        out_of_range[15] = COLUMNS;
+        assert!(pack_atom_columns(&out_of_range).is_err());
+        assert!(unpack_atom_columns(&[0u8; PACKED_ATOM_BYTES - 1]).is_err());
     }
 }
