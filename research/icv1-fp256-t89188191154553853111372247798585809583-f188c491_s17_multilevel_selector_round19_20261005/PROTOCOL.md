@@ -126,8 +126,9 @@ or an empirically chosen chain prefix.
 Join canonical 4+4 records to form every signed eight-column sum and canonical
 4+5 records to form every signed nine-column sum.  The intermediate P-256
 point is propagated exactly, which enforces the corresponding split
-summation-polynomial constraint.  Partition records by the first eight bits
-of the complete point key into 256 external buckets.  Retain the left buckets
+summation-polynomial constraint.  Partition affine records by the low eight
+bits of the x-coordinate into 256 external buckets (the identity uses bucket
+zero).  Retain the left buckets
 and process one target's right buckets at a time, so the materialised peak is
 one left frontier plus one right frontier rather than all target frontiers.
 Write and read every bucket, sort complete keys within it, replay every exact
