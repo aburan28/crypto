@@ -13482,7 +13482,7 @@ mod tests {
             let mut solver = Solver::new(85);
             add_coordinate_domain(&mut solver, 2, 83, &codes);
             for bit in 0..83 {
-                let lit = (bit + 3) as i32;
+                let lit = bit + 3;
                 solver.add_clause(vec![if (value >> bit) & 1 == 1 { lit } else { -lit }]);
             }
             assert_eq!(solver.solve() == SolveResult::Sat, accepted, "{value:#x}");
