@@ -123,6 +123,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_INCREMENTAL: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -148,7 +152,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::boundary_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::external_sat::sat_boundary_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::recording_tests -- --test-threads=1
-          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1 --nocapture
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_math::tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
