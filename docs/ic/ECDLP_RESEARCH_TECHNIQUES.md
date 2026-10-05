@@ -26,11 +26,11 @@ a deployed curve.
 
 | Stage | Integrated | Experimental or component | Explicit backlog |
 |:--|:--|:--|:--|
-| Factor base | Subspace bases; Frobenius-invariant bases; signed-orbit quotienting; orbit representatives | Trace-zero tests and subspaces | General trace-zero-variety factor-base pipeline |
-| Relation collection | Semaev systems; point decomposition; Weil restriction; F4 and hybrid F4/F5 | XL; symmetrised systems; single/double-large-prime experiments | Mainline symmetrised oracle; reusable multi-large-prime collector |
-| Filtering | Deduplication; singleton peeling; clique removal; structured merging; Markowitz-style pivoting | Partial-relation combination in bounded IC experiments | General large-prime graph/hypergraph filter |
-| Linear algebra | Parallel block Wiedemann; black-box sparse Krylov products | Sequential Wiedemann component | Block Lanczos in the ECDLP pipeline; distributed/GPU sparse matrix-vector backend |
-| Individual logarithm | Randomized one-relation target decomposition; signed-Frobenius-orbit lookup and certified recovery | Recursive decomposition and large-prime descent experiments | General recursive descent scheduler; independently valid Frobenius-orbit recursive descent |
+| Factor base | Subspace bases; Frobenius-invariant bases; signed-orbit quotienting; orbit representatives; trace-zero subspace policy | Higher-genus GHS/trace-zero experiments | General trace-zero-variety factor bases beyond the Koblitz subspace policy |
+| Relation collection | Semaev systems; point decomposition; Weil restriction; F4/F5 and hybrid solving; symmetrised systems | XL; single/double/multi-large-prime experiments | Collector-specific adapters to the common multi-large-prime layer |
+| Filtering | Deduplication; singleton peeling; clique removal; structured merging; Markowitz pivoting; large-prime graph/hypergraph filtering | Collector-specific partial-relation combination | None at the reusable filtering layer |
+| Linear algebra | Parallel block Wiedemann; block Lanczos; black-box Krylov methods; serial/Rayon/sharded/worker SpMV | CUDA SpMV worker (hardware validation required) | Performance evidence for distributed/GPU deployments |
+| Individual logarithm | Randomized target decomposition; signed-Frobenius recovery; budgeted recursive scheduler with large-prime children and orbit canonicalisation | Curve-specific recursive-descent adapters | Higher-genus GHS target descent |
 
 ## 1. Factor-base construction
 
@@ -61,10 +61,15 @@ canonical orbit representatives needed to replay the same column assignment.
 This is a representation quotient, not permission to drop relation witnesses:
 every accepted decomposition is still re-added and verified in the curve group.
 
-### Trace-zero constructions — Component
+### Trace-zero constructions — Integrated for Koblitz subspace bases
 
-The factor-base search detects when an invariant abscissa subspace is contained
-in the trace kernel and records the resulting yield property. The GHS code in
+The `koblitz-trace-zero` framework policy constructs a Frobenius-invariant
+abscissa subspace, proves that every element is in the absolute-trace kernel,
+and refuses a divisor containing a trace-one element before collection starts.
+The factor-base search also detects this property and records its yield. See
+[`ic_framework/plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs)
+and [`koblitz_factor_base_search.rs`](../../src/cryptanalysis/koblitz_factor_base_search.rs).
+The GHS code in
 [`ghs_descent.rs`](../../src/cryptanalysis/ghs_descent.rs) also provides an
 end-to-end \(m=1\) trace descent and structural \(m=2\) machinery.
 
@@ -114,14 +119,15 @@ the bounded degree and cost measurements are in
   Macaulay reduction, propagation, and splitting/guessing. Budget exhaustion is
   reported as inconclusive, never as “no decomposition.”
 
-### Symmetrised polynomial systems — Component
+### Symmetrised polynomial systems — Integrated
 
 [`symmetrized_semaev.rs`](../../src/cryptanalysis/symmetrized_semaev.rs)
-implements elementary-symmetric coordinates and symmetrisation for the available
-Semaev polynomials. It is useful for formula and density experiments, but it is
-not yet a selectable mainline decomposition oracle. Integrating it requires a
-bijection-preserving witness lift back to factor-base points and an end-to-end
-cost comparison.
+implements elementary-symmetric coordinates. The Koblitz implementation in
+[`koblitz_symmetrised.rs`](../../src/cryptanalysis/koblitz_symmetrised.rs)
+constructs the torsion-closed factor base, solves the symmetrised systems, lifts
+roots back to points, and verifies their group sum. `koblitz-symmetrised` plus
+the `symmetrised` oracle is selectable through the IC framework and has an
+end-to-end logarithm-recovery test.
 
 ### Large-prime variants — Experimental
 
@@ -135,7 +141,11 @@ Three distinct research paths exist:
 - bounded Gaudry cubic runs with configurable large-prime count and merge level:
   [`gaudry_cubic.rs`](../../src/cryptanalysis/gaudry_cubic.rs).
 
-These are not silently treated as one general ECDLP large-prime collector.
+The common [`large_prime_filter.rs`](../../src/cryptanalysis/large_prime_filter.rs)
+layer accepts all three shapes. It preserves source coefficients for replay,
+peels the large-prime hypergraph, closes graph cycles, and performs bounded
+Markowitz elimination on arbitrary hyperedges. Collector adapters remain
+explicit so different point encodings cannot be mixed silently.
 
 ## 3. Relation filtering
 
@@ -159,13 +169,15 @@ The generic research framework also provides a lightest-column,
 Markowitz-style incremental solver in
 [`ic_framework/linalg.rs`](../../src/cryptanalysis/ic_framework/linalg.rs).
 
-### Large-prime graphs/hypergraphs — Backlog as a reusable layer
+### Large-prime graphs/hypergraphs — Integrated reusable layer
 
-Some experimental collectors combine their own partial relations, but the
-repository has no common graph/hypergraph filter that accepts single, double,
-and multi-large-prime relations from every ECDLP collector. A complete version
-must preserve edge provenance, reject trivial cycles, emit independently
-verified complete relations, and report peeling/merge work separately.
+[`large_prime_filter.rs`](../../src/cryptanalysis/large_prime_filter.rs) accepts
+single, double, and arbitrary multi-large-prime relations with coefficients
+modulo the subgroup order. It deduplicates, recursively peels degree-one
+vertices, closes cycles, and uses fill-bounded Markowitz pivots on the
+hypergraph two-core. Every complete row carries its exact sparse combination of
+source relation ids, and the replay helper reconstructs the row before the
+collector independently verifies its curve-group witness.
 
 ## 4. Sparse linear algebra
 
@@ -184,21 +196,24 @@ caller. Sparse products run in parallel over rows.
 scalar black-box algorithm and sparse matrix-vector primitives. The main
 Koblitz path uses the block implementation instead.
 
-### Block Lanczos — Backlog for ECDLP
+### Block Lanczos — Integrated
 
-Block Lanczos is documented as an alternative but is not registered as an
-ECDLP relation-matrix backend. An implementation must avoid unsound plain
-normal-equation reasoning in characteristic two, expose deterministic counted
-work, and cross-check its kernel or solution against the existing dense and
-block-Wiedemann references.
+[`koblitz_sparse_la.rs`](../../src/cryptanalysis/koblitz_sparse_la.rs) provides
+a selectable finite-field block-Lanczos/conjugate-direction backend. It applies
+the symmetric congruence `A^T D A` only over the odd prime subgroup order,
+retries deterministic random diagonals on breakdown, and accepts a result only
+after checking every original equation `A x = b`. Tests cross-check it against
+the dense reference and exercise selection through the full sparse solver.
 
-### Distributed/GPU sparse matrix-vector multiplication — Backlog
+### Distributed/GPU sparse matrix-vector multiplication — Integrated backend
 
-The current block-Wiedemann products are shared-memory CPU code. GPU algebra in
-other repository modules does not constitute an ECDLP sparse-matrix backend.
-A future backend needs a stable sparse format, deterministic modular
-accumulation, sharded checkpoint/restart, exact replay certificates, and
-CPU-reference cross-checks before performance measurement.
+The ECDLP CSR operator now selects serial, Rayon, deterministic row-sharded, or
+external-worker products. The stable `SPMV1` contract and native host/CUDA
+workers live in [`gpu/spmv`](../../gpu/spmv). External results are recomputed
+and compared with the portable CPU product before use, so an accelerator can
+only cause a fallback, never a false logarithm. A cluster launcher may split
+the same independent row shards. No GPU or distributed speed claim is made
+until matched hardware measurements and replay evidence exist.
 
 ## 5. Individual logarithm
 
@@ -217,42 +232,43 @@ orbit columns used by the precomputed logarithm database. This is an orbit-aware
 one-relation descent, not a claim that every target decomposition has an
 independent Frobenius symmetry.
 
-### Recursive point decomposition — Experimental
+### Recursive point decomposition — Integrated scheduler, experimental adapters
 
-The repository contains degree, coordinate, and algebraic descent experiments,
-including
+[`recursive_descent.rs`](../../src/cryptanalysis/recursive_descent.rs) implements
+the common budgeted scheduler: memoisation, depth/node/relation caps, randomized
+attempts, cycle rejection, verified relations, and a replay transcript. The
+repository also contains degree, coordinate, and algebraic adapters and
+experiments, including
 [`coordinate_descent.rs`](../../src/cryptanalysis/coordinate_descent.rs),
 [`descent_algebraic.rs`](../../src/cryptanalysis/descent_algebraic.rs), and
-[`diem_descent.rs`](../../src/cryptanalysis/diem_descent.rs). They do not yet
-form one general recursive scheduler with a shared cost ledger and termination
-certificate.
+[`diem_descent.rs`](../../src/cryptanalysis/diem_descent.rs). Curve-specific
+adapters decide which decomposition oracle supplies each recursion level.
 
-### Large-prime descent — Experimental
+### Large-prime descent — Integrated scheduler, experimental collectors
 
-Large-prime combination exists in bounded Gaudry, residual-walk, and Jacobian
-experiments, but it is not a selectable target-descent policy in the main
-Koblitz workflow.
+Large primes are ordinary recursive children in the scheduler. Their relations
+can be reduced by the common hypergraph filter, while the bounded Gaudry,
+residual-walk, and Jacobian collectors provide concrete experimental sources.
 
-### Frobenius-orbit recursive descent — Backlog unless separately proved
+### Frobenius-orbit recursive descent — Integrated proof boundary
 
-Frobenius quotienting is valid for factor-base columns because the action and
-its scalar \(\lambda\) are known. A per-target symmetry of a point-decomposition
-system does not follow automatically. Any recursive orbit descent must state
-the applicable curve and subspace hypotheses, prove witness transport, and
-verify each lifted relation before it can be integrated.
+The recursive scheduler exposes canonicalisation as an explicit proof boundary:
+an adapter returns a representative and the multiplier transporting its
+logarithm. Signed Frobenius adapters use `±lambda^k`; adapters without a proven
+action must return the identity. Every lifted relation and final logarithm is
+verified independently, so an invalid per-target symmetry is rejected rather
+than assumed.
 
 ## Integration order for the remaining items
 
-1. Add a reusable partial-relation graph/hypergraph layer with provenance and
-   complete-relation verification.
-2. Add a recursive target-descent scheduler over the existing decomposition
-   oracle interface, with explicit node and total-work budgets.
-3. Wire symmetrised systems into that interface with a certified witness lift.
-4. Add block Lanczos as a relation-matrix backend and cross-check it on the
-   frozen dense/block-Wiedemann corpus.
-5. Separate sparse matrix-times-block behind a backend trait, then add
-   distributed CPU and GPU implementations without changing the transcript.
-6. Attempt general trace-zero or higher-genus GHS integration only after the
+1. Add collector-specific converters for the common large-prime relation type,
+   retaining each collector's independent curve-group verifier.
+2. Add curve-specific recursive-descent adapters and frozen termination
+   transcripts for the Koblitz, Diem, and Gaudry paths.
+3. Validate block Lanczos against the larger frozen block-Wiedemann corpus.
+4. Validate the CUDA worker and a cluster launcher on named hardware without
+   changing the `SPMV1` transcript.
+5. Attempt general trace-zero or higher-genus GHS integration only after the
    explicit smooth-model map is available and independently checked.
 
 Each item is a separate research iteration. Before measuring, it requires a

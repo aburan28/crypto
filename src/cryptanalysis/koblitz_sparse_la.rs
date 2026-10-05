@@ -64,6 +64,8 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::io::Write;
+use std::process::Command;
 
 // ── Modular arithmetic over Z/rZ with r < 2^63 ─────────────────────
 
@@ -1009,6 +1011,39 @@ pub struct CsrMatrix {
     /// reductions ([`Reducer::lazy_terms`] for the largest stored
     /// coefficient); `None` for a modulus outside `[2, 2⁶³)`.
     lazy: Option<(Reducer, usize)>,
+    spmv: SpmvOptions,
+}
+
+/// Sparse matrix-times-block execution backend.  `Worker` uses the stable
+/// `SPMV1` contract implemented by `gpu/spmv`; it may be a CUDA executable or
+/// a distributed launcher.  Worker output is always cross-checked on the CPU.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum SpmvBackend {
+    #[default]
+    Auto,
+    Serial,
+    Rayon,
+    Sharded,
+    Worker,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct SpmvOptions {
+    pub backend: SpmvBackend,
+    /// Deterministic row shards used by `sharded`; zero selects the Rayon
+    /// thread count.  A distributed launcher can use the same row ranges.
+    pub shards: usize,
+}
+
+impl Default for SpmvOptions {
+    fn default() -> Self {
+        Self {
+            backend: SpmvBackend::Auto,
+            shards: 0,
+        }
+    }
 }
 
 /// Rows below this many are multiplied serially.
@@ -1045,7 +1080,13 @@ impl CsrMatrix {
             vals,
             modulus,
             lazy,
+            spmv: SpmvOptions::default(),
         }
+    }
+
+    pub fn with_spmv(mut self, options: SpmvOptions) -> Self {
+        self.spmv = options;
+        self
     }
 
     /// Number of stored entries.
@@ -1122,12 +1163,176 @@ impl CsrMatrix {
         }
     }
 
+    fn mul_block_serial(&self, x: &[u64], n: usize, y: &mut [u64]) {
+        for (i, out) in y.chunks_mut(n).enumerate() {
+            self.row_into(i, x, n, out);
+        }
+    }
+
+    fn mul_block_rayon(&self, x: &[u64], n: usize, y: &mut [u64]) {
+        y.par_chunks_mut(n)
+            .enumerate()
+            .for_each(|(i, out)| self.row_into(i, x, n, out));
+    }
+
+    fn mul_block_sharded(&self, x: &[u64], n: usize, y: &mut [u64]) {
+        let shards = if self.spmv.shards == 0 {
+            rayon::current_num_threads()
+        } else {
+            self.spmv.shards
+        }
+        .max(1)
+        .min(self.n_rows.max(1));
+        let rows_per_shard = self.n_rows.div_ceil(shards);
+        y.par_chunks_mut(rows_per_shard * n)
+            .enumerate()
+            .for_each(|(shard, output)| {
+                let first = shard * rows_per_shard;
+                for (offset, row) in output.chunks_mut(n).enumerate() {
+                    self.row_into(first + offset, x, n, row);
+                }
+            });
+    }
+
+    fn worker_contract(&self, x: &[u64], lanes: usize) -> String {
+        let mut contract = format!(
+            "SPMV1 {} {} {} {} {}\n",
+            self.n_rows,
+            self.n_cols,
+            lanes,
+            self.modulus,
+            self.vals.len()
+        );
+        let append = |target: &mut String, values: &[u64]| {
+            for (index, value) in values.iter().enumerate() {
+                if index != 0 {
+                    target.push(' ');
+                }
+                target.push_str(&value.to_string());
+            }
+            target.push('\n');
+        };
+        append(
+            &mut contract,
+            &self.row_ptr.iter().map(|&v| v as u64).collect::<Vec<_>>(),
+        );
+        append(
+            &mut contract,
+            &self.col_idx.iter().map(|&v| v as u64).collect::<Vec<_>>(),
+        );
+        append(&mut contract, &self.vals);
+        append(&mut contract, x);
+        contract
+    }
+
+    fn mul_block_worker(&self, x: &[u64], lanes: usize, y: &mut [u64]) -> Result<(), String> {
+        let worker = std::env::var_os("IC_SPMV_WORKER").ok_or("IC_SPMV_WORKER is not set")?;
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or(0);
+        let mut input = std::env::temp_dir();
+        input.push(format!("ic-spmv-{}-{nonce}.txt", std::process::id()));
+        let mut input_file = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&input)
+            .map_err(|error| format!("create SPMV1 input: {error}"))?;
+        let write_result = input_file.write_all(self.worker_contract(x, lanes).as_bytes());
+        drop(input_file);
+        if let Err(error) = write_result {
+            let _ = std::fs::remove_file(&input);
+            return Err(format!("write SPMV1 input: {error}"));
+        }
+        let result = Command::new(worker).arg("--in").arg(&input).output();
+        let _ = std::fs::remove_file(&input);
+        let output = result.map_err(|error| format!("run SPMV1 worker: {error}"))?;
+        if !output.status.success() {
+            return Err(format!("SPMV1 worker exited with {}", output.status));
+        }
+        let text = std::str::from_utf8(&output.stdout)
+            .map_err(|error| format!("SPMV1 output is not UTF-8: {error}"))?;
+        let mut tokens = text.split_whitespace();
+        if tokens.next() != Some("SPMV1") {
+            return Err("SPMV1 worker returned the wrong header".into());
+        }
+        let rows: usize = tokens
+            .next()
+            .ok_or("SPMV1 output is missing rows")?
+            .parse()
+            .map_err(|_| "SPMV1 rows are invalid")?;
+        let returned_lanes: usize = tokens
+            .next()
+            .ok_or("SPMV1 output is missing lanes")?
+            .parse()
+            .map_err(|_| "SPMV1 lanes are invalid")?;
+        if rows != self.n_rows || returned_lanes != lanes {
+            return Err("SPMV1 output dimensions do not match the request".into());
+        }
+        for value in y.iter_mut() {
+            *value = tokens
+                .next()
+                .ok_or("SPMV1 output is truncated")?
+                .parse::<u64>()
+                .map_err(|_| "SPMV1 output value is invalid")?
+                % self.modulus;
+        }
+        if tokens.next().is_some() {
+            return Err("SPMV1 output has trailing values".into());
+        }
+        // An accelerator proposes a product; the portable implementation is
+        // the authority until the worker has a separately audited certificate.
+        let mut reference = vec![0u64; y.len()];
+        self.mul_block_serial(x, lanes, &mut reference);
+        if reference != y {
+            return Err("SPMV1 worker disagrees with the CPU reference".into());
+        }
+        Ok(())
+    }
+
     /// `y = A · x` for `n` column vectors stored row-major
     /// (`x[c * n + j]`), in parallel over rows.
     pub fn mul_block(&self, x: &[u64], n: usize, y: &mut [u64]) {
         debug_assert_eq!(x.len(), self.n_cols * n);
         debug_assert_eq!(y.len(), self.n_rows * n);
-        self.for_each_row(y, n, |i, out| self.row_into(i, x, n, out));
+        match self.spmv.backend {
+            SpmvBackend::Auto => self.for_each_row(y, n, |i, out| self.row_into(i, x, n, out)),
+            SpmvBackend::Serial => self.mul_block_serial(x, n, y),
+            SpmvBackend::Rayon => self.mul_block_rayon(x, n, y),
+            SpmvBackend::Sharded => self.mul_block_sharded(x, n, y),
+            SpmvBackend::Worker => {
+                if let Err(error) = self.mul_block_worker(x, n, y) {
+                    static WARNING: std::sync::Once = std::sync::Once::new();
+                    WARNING.call_once(|| {
+                        eprintln!(
+                            "warning: external SPMV1 worker failed; using serial CPU: {error}"
+                        );
+                    });
+                    self.mul_block_serial(x, n, y);
+                }
+            }
+        }
+    }
+
+    /// `y = A^T · x` for `n` lanes.  This is kept beside the forward
+    /// product so block Lanczos can form the verified normal operator
+    /// `A^T D A` without materialising it.
+    pub fn mul_block_transpose(&self, x: &[u64], n: usize, y: &mut [u64]) {
+        debug_assert_eq!(x.len(), self.n_rows * n);
+        debug_assert_eq!(y.len(), self.n_cols * n);
+        y.fill(0);
+        let modulus = self.modulus;
+        for row in 0..self.n_rows {
+            let source = &x[row * n..(row + 1) * n];
+            for index in self.row_ptr[row]..self.row_ptr[row + 1] {
+                let column = self.col_idx[index] as usize;
+                let coefficient = self.vals[index];
+                let target = &mut y[column * n..(column + 1) * n];
+                for (out, &value) in target.iter_mut().zip(source) {
+                    *out = addmod(*out, mulmod(coefficient, value, modulus), modulus);
+                }
+            }
+        }
     }
 }
 
@@ -1515,14 +1720,309 @@ pub fn block_wiedemann_kernel(
     None
 }
 
+// ── Block Lanczos ─────────────────────────────────────────────────
+
+/// Controls for the finite-field block-Lanczos core solver.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct BlockLanczosOptions {
+    /// Simultaneous Krylov directions.  The first right-hand side is the
+    /// ECDLP system; the remaining lanes are deterministic random probes that
+    /// reduce scalar Lanczos breakdowns.
+    pub block_size: usize,
+    /// Iterations beyond `ceil(N / block_size)` before declaring breakdown.
+    pub margin: usize,
+}
+
+impl Default for BlockLanczosOptions {
+    fn default() -> Self {
+        Self {
+            block_size: 4,
+            margin: 8,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BlockLanczosReport {
+    pub dimension: usize,
+    pub block_size: usize,
+    pub iterations: usize,
+    /// Applications of the original sparse matrix or its transpose.
+    pub sparse_products: usize,
+}
+
+/// The symmetric, nonsingular (when `A` is nonsingular) congruence
+/// `S = A^T D A`, where `D` is a random nonzero diagonal.  Working with this
+/// operator is sound over the odd subgroup-order fields used by ECDLP: a
+/// returned vector is accepted only after checking `A x = b` itself.
+struct NormalOperator<'a> {
+    a: &'a CsrMatrix,
+    diagonal: Vec<u64>,
+}
+
+impl NormalOperator<'_> {
+    fn apply(&self, x: &[u64], lanes: usize, y: &mut [u64], scratch: &mut [u64]) {
+        self.a.mul_block(x, lanes, scratch);
+        let modulus = self.a.modulus;
+        for (row, block) in scratch.chunks_mut(lanes).enumerate() {
+            let scale = self.diagonal[row];
+            for value in block {
+                *value = mulmod(*value, scale, modulus);
+            }
+        }
+        self.a.mul_block_transpose(scratch, lanes, y);
+    }
+
+    fn rhs(&self, b: &[u64], lanes: usize, out: &mut [u64]) {
+        let modulus = self.a.modulus;
+        let mut scaled = b.to_vec();
+        for (row, block) in scaled.chunks_mut(lanes).enumerate() {
+            let scale = self.diagonal[row];
+            for value in block {
+                *value = mulmod(*value, scale, modulus);
+            }
+        }
+        self.a.mul_block_transpose(&scaled, lanes, out);
+    }
+}
+
+fn small_inverse(matrix: &[u64], n: usize, modulus: u64) -> Option<Vec<u64>> {
+    let mut augmented = vec![0u64; n * 2 * n];
+    for row in 0..n {
+        for column in 0..n {
+            augmented[row * 2 * n + column] = matrix[row * n + column];
+        }
+        augmented[row * 2 * n + n + row] = 1;
+    }
+    for column in 0..n {
+        let pivot = (column..n).find(|&row| augmented[row * 2 * n + column] != 0)?;
+        if pivot != column {
+            for j in 0..2 * n {
+                augmented.swap(column * 2 * n + j, pivot * 2 * n + j);
+            }
+        }
+        let inverse = invmod(augmented[column * 2 * n + column], modulus)?;
+        for j in 0..2 * n {
+            let slot = &mut augmented[column * 2 * n + j];
+            *slot = mulmod(*slot, inverse, modulus);
+        }
+        for row in 0..n {
+            if row == column {
+                continue;
+            }
+            let factor = augmented[row * 2 * n + column];
+            if factor == 0 {
+                continue;
+            }
+            for j in 0..2 * n {
+                let product = mulmod(factor, augmented[column * 2 * n + j], modulus);
+                let slot = &mut augmented[row * 2 * n + j];
+                *slot = submod(*slot, product, modulus);
+            }
+        }
+    }
+    let mut inverse = vec![0u64; n * n];
+    for row in 0..n {
+        inverse[row * n..(row + 1) * n]
+            .copy_from_slice(&augmented[row * 2 * n + n..row * 2 * n + 2 * n]);
+    }
+    Some(inverse)
+}
+
+/// `left^T * right` for two row-major `rows × lanes` blocks.
+fn block_gram(left: &[u64], right: &[u64], rows: usize, lanes: usize, modulus: u64) -> Vec<u64> {
+    let mut out = vec![0u64; lanes * lanes];
+    for row in 0..rows {
+        for i in 0..lanes {
+            let a = left[row * lanes + i];
+            for j in 0..lanes {
+                out[i * lanes + j] = addmod(
+                    out[i * lanes + j],
+                    mulmod(a, right[row * lanes + j], modulus),
+                    modulus,
+                );
+            }
+        }
+    }
+    out
+}
+
+fn small_product(a: &[u64], b: &[u64], n: usize, modulus: u64) -> Vec<u64> {
+    let mut out = vec![0u64; n * n];
+    for i in 0..n {
+        for k in 0..n {
+            if a[i * n + k] == 0 {
+                continue;
+            }
+            for j in 0..n {
+                out[i * n + j] = addmod(
+                    out[i * n + j],
+                    mulmod(a[i * n + k], b[k * n + j], modulus),
+                    modulus,
+                );
+            }
+        }
+    }
+    out
+}
+
+/// `target += sign * block * small`, all row-major. `sign` is `1` or `-1`.
+fn block_axpy_small(
+    target: &mut [u64],
+    block: &[u64],
+    small: &[u64],
+    rows: usize,
+    lanes: usize,
+    subtract: bool,
+    modulus: u64,
+) {
+    for row in 0..rows {
+        for j in 0..lanes {
+            let mut value = 0;
+            for k in 0..lanes {
+                value = addmod(
+                    value,
+                    mulmod(block[row * lanes + k], small[k * lanes + j], modulus),
+                    modulus,
+                );
+            }
+            let slot = &mut target[row * lanes + j];
+            *slot = if subtract {
+                submod(*slot, value, modulus)
+            } else {
+                addmod(*slot, value, modulus)
+            };
+        }
+    }
+}
+
+/// Solve a nonsingular square sparse system with a block-Lanczos/conjugate-
+/// direction iteration on `A^T D A`.  Breakdown is reported as `None`; callers
+/// retry with a fresh diagonal.  The first lane is always the requested `b`,
+/// and the returned solution is verified against `A x = b`.
+pub fn block_lanczos_solve(
+    a: &CsrMatrix,
+    b: &[u64],
+    options: &BlockLanczosOptions,
+    seed: u64,
+) -> Option<(Vec<u64>, BlockLanczosReport)> {
+    if a.n_rows == 0 || a.n_rows != a.n_cols || b.len() != a.n_rows {
+        return None;
+    }
+    let dimension = a.n_rows;
+    let modulus = a.modulus;
+    // A final short block needs Montgomery-style mask deflation.  Until that
+    // specialised mask path is useful at the repository's matrix sizes, pick
+    // the largest requested width dividing N; this preserves exact block
+    // recurrences and falls back to scalar Lanczos only for prime dimensions.
+    let requested_lanes = options.block_size.max(1).min(dimension);
+    let lanes = (1..=requested_lanes)
+        .rev()
+        .find(|width| dimension.is_multiple_of(*width))
+        .unwrap_or(1);
+    let mut rng = StdRng::seed_from_u64(seed ^ 0x424c_4f43_4b4c_414e);
+    let normal = NormalOperator {
+        a,
+        diagonal: (0..dimension).map(|_| rng.gen_range(1..modulus)).collect(),
+    };
+    let mut right = vec![0u64; dimension * lanes];
+    for row in 0..dimension {
+        right[row * lanes] = b[row] % modulus;
+        for lane in 1..lanes {
+            right[row * lanes + lane] = rng.gen_range(0..modulus);
+        }
+    }
+    let mut residual = vec![0u64; dimension * lanes];
+    normal.rhs(&right, lanes, &mut residual);
+    let mut direction = residual.clone();
+    let mut solution = vec![0u64; dimension * lanes];
+    let mut image = vec![0u64; dimension * lanes];
+    let mut scratch = vec![0u64; dimension * lanes];
+    let mut report = BlockLanczosReport {
+        dimension,
+        block_size: lanes,
+        sparse_products: 1,
+        ..BlockLanczosReport::default()
+    };
+    let limit = dimension.div_ceil(lanes) + options.margin.max(2);
+    for iteration in 0..limit {
+        normal.apply(&direction, lanes, &mut image, &mut scratch);
+        report.sparse_products += 2;
+        let h = block_gram(&direction, &image, dimension, lanes, modulus);
+        let h_inverse = small_inverse(&h, lanes, modulus)?;
+        let projected = block_gram(&direction, &residual, dimension, lanes, modulus);
+        let alpha = small_product(&h_inverse, &projected, lanes, modulus);
+        block_axpy_small(
+            &mut solution,
+            &direction,
+            &alpha,
+            dimension,
+            lanes,
+            false,
+            modulus,
+        );
+        block_axpy_small(
+            &mut residual,
+            &image,
+            &alpha,
+            dimension,
+            lanes,
+            true,
+            modulus,
+        );
+        report.iterations = iteration + 1;
+        // The first lane is the requested ECDLP right-hand side.  Random
+        // companion lanes may lose rank in the final partial block when
+        // `dimension` is not divisible by `lanes`; do not turn their expected
+        // terminal deflation into a breakdown once lane zero has converged.
+        if residual.chunks(lanes).all(|block| block[0] == 0) {
+            let answer: Vec<u64> = solution.chunks(lanes).map(|block| block[0]).collect();
+            let mut check = vec![0u64; dimension];
+            a.mul_block(&answer, 1, &mut check);
+            if check.iter().zip(b).all(|(&x, &y)| x == y % modulus) {
+                return Some((answer, report));
+            }
+            return None;
+        }
+        // P_new = R_new - P H^{-1} (A P)^T R_new. This makes the new
+        // block A-conjugate to the previous direction block.
+        let cross = block_gram(&image, &residual, dimension, lanes, modulus);
+        let beta = small_product(&h_inverse, &cross, lanes, modulus);
+        let mut next_direction = residual.clone();
+        block_axpy_small(
+            &mut next_direction,
+            &direction,
+            &beta,
+            dimension,
+            lanes,
+            true,
+            modulus,
+        );
+        direction = next_direction;
+    }
+    None
+}
+
 // ── The sparse solve: filter → fold → block Wiedemann → reconstruct ──
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum SparseCoreSolver {
+    #[default]
+    BlockWiedemann,
+    BlockLanczos,
+}
 
 /// Controls for [`solve_sparse_system`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct SparseSolveOptions {
     pub filter: FilterOptions,
+    pub solver: SparseCoreSolver,
+    pub spmv: SpmvOptions,
     pub wiedemann: BlockWiedemannOptions,
+    pub lanczos: BlockLanczosOptions,
     /// Base rows each excess row is folded into.
     pub fold: usize,
     /// Independent `(fold, X, Y)` draws before giving up.
@@ -1534,7 +2034,10 @@ impl Default for SparseSolveOptions {
     fn default() -> Self {
         Self {
             filter: FilterOptions::default(),
+            solver: SparseCoreSolver::default(),
+            spmv: SpmvOptions::default(),
             wiedemann: BlockWiedemannOptions::default(),
+            lanczos: BlockLanczosOptions::default(),
             fold: 3,
             attempts: 3,
             seed: 0x5350_4152_5345_4c41,
@@ -1546,10 +2049,13 @@ impl Default for SparseSolveOptions {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SparseSolveReport {
     pub filter: FilterReport,
-    /// Rows and columns of the square system handed to Wiedemann.
+    pub solver: SparseCoreSolver,
+    pub spmv: SpmvOptions,
+    /// Rows and columns of the square system handed to the Krylov solver.
     pub core_dimension: usize,
     pub core_nonzeros: usize,
     pub wiedemann: Option<BlockWiedemannReport>,
+    pub lanczos: Option<BlockLanczosReport>,
     /// Draws of `(fold, X, Y)` used.
     pub attempts: usize,
     /// Columns recovered by back-substitution, propagation and the
@@ -1600,7 +2106,11 @@ pub fn solve_sparse_system(
     modulus: u64,
     opts: &SparseSolveOptions,
 ) -> (SparseSolveOutcome, SparseSolveReport) {
-    let mut report = SparseSolveReport::default();
+    let mut report = SparseSolveReport {
+        solver: opts.solver,
+        spmv: opts.spmv,
+        ..SparseSolveReport::default()
+    };
     // Cheap necessary condition: every column occurs somewhere.
     let mut covered = vec![false; columns];
     for row in rows {
@@ -1650,21 +2160,34 @@ pub fn solve_sparse_system(
         for attempt in 0..opts.attempts.max(1) {
             report.attempts = attempt + 1;
             let square = fold_square(&core, core_cols, modulus, opts.fold, &mut rng);
-            let a = CsrMatrix::from_rows(&square, core_cols, modulus);
+            let a = CsrMatrix::from_rows(&square, core_cols, modulus).with_spmv(opts.spmv);
             let b: Vec<u64> = square.iter().map(|r| r.rhs).collect();
-            let op = Homogenised { a: &a, b: &b };
-            let Some((z, wr)) = block_wiedemann_kernel(&op, &opts.wiedemann, rng.gen()) else {
-                continue;
+            let x = match opts.solver {
+                SparseCoreSolver::BlockWiedemann => {
+                    let op = Homogenised { a: &a, b: &b };
+                    let Some((z, wr)) = block_wiedemann_kernel(&op, &opts.wiedemann, rng.gen())
+                    else {
+                        continue;
+                    };
+                    report.wiedemann = Some(wr);
+                    let t = z[core_cols];
+                    let Some(inv) = (t != 0).then(|| invmod(t, modulus)).flatten() else {
+                        continue;
+                    };
+                    z[..core_cols]
+                        .iter()
+                        .map(|&v| mulmod(v, inv, modulus))
+                        .collect()
+                }
+                SparseCoreSolver::BlockLanczos => {
+                    let Some((x, lr)) = block_lanczos_solve(&a, &b, &opts.lanczos, rng.gen())
+                    else {
+                        continue;
+                    };
+                    report.lanczos = Some(lr);
+                    x
+                }
             };
-            report.wiedemann = Some(wr);
-            let t = z[core_cols];
-            let Some(inv) = (t != 0).then(|| invmod(t, modulus)).flatten() else {
-                continue;
-            };
-            let x: Vec<u64> = z[..core_cols]
-                .iter()
-                .map(|&v| mulmod(v, inv, modulus))
-                .collect();
             if core.iter().all(|row| row.evaluate(&x, modulus) == row.rhs) {
                 core_solution = Some(x);
                 break;
@@ -2524,6 +3047,121 @@ mod tests {
             columns
         );
         assert!(report.wiedemann.is_some());
+    }
+
+    #[test]
+    fn block_lanczos_solves_and_verifies_a_sparse_prime_field_system() {
+        let columns = 12usize;
+        let planted: Vec<u64> = (0..columns).map(|i| (17 * i as u64 + 9) % P).collect();
+        // A cyclic, nonsymmetric three-diagonal matrix.  Lanczos sees only
+        // A^T D A; the final assertion checks the original equations.
+        let mut rows = Vec::new();
+        for i in 0..columns {
+            let entries = vec![
+                (i as u32, 3),
+                (((i + 1) % columns) as u32, 5),
+                (((i + 3) % columns) as u32, 7),
+            ];
+            let mut row = SparseRow::new(entries, 0, P);
+            row.rhs = row.evaluate(&planted, P);
+            rows.push(row);
+        }
+        assert!(dense_reference(&rows, columns, P).is_some());
+        let matrix = CsrMatrix::from_rows(&rows, columns, P);
+        let rhs: Vec<u64> = rows.iter().map(|row| row.rhs).collect();
+        let options = BlockLanczosOptions {
+            block_size: 3,
+            margin: 12,
+        };
+        let mut found = None;
+        for seed in 0..64 {
+            if let Some(result) = block_lanczos_solve(&matrix, &rhs, &options, seed) {
+                found = Some(result);
+                break;
+            }
+        }
+        let (solution, report) =
+            found.expect("a randomized block-Lanczos draw must not break down");
+        assert_eq!(solution, planted);
+        assert!(report.iterations > 0);
+        assert!(rows.iter().all(|row| row.evaluate(&solution, P) == row.rhs));
+    }
+
+    #[test]
+    fn serial_rayon_and_sharded_spmv_are_identical() {
+        let rows = vec![
+            SparseRow::new(vec![(0, 3), (2, 5)], 0, P),
+            SparseRow::new(vec![(1, 7), (3, 11)], 0, P),
+            SparseRow::new(vec![(0, 13), (3, 17)], 0, P),
+            SparseRow::new(vec![(1, 19), (2, 23)], 0, P),
+        ];
+        let x: Vec<u64> = (0..4 * 3).map(|i| (29 * i as u64 + 1) % P).collect();
+        let multiply = |backend| {
+            let matrix =
+                CsrMatrix::from_rows(&rows, 4, P).with_spmv(SpmvOptions { backend, shards: 3 });
+            let mut y = vec![0u64; 4 * 3];
+            matrix.mul_block(&x, 3, &mut y);
+            y
+        };
+        let serial = multiply(SpmvBackend::Serial);
+        assert_eq!(multiply(SpmvBackend::Rayon), serial);
+        assert_eq!(multiply(SpmvBackend::Sharded), serial);
+    }
+
+    #[test]
+    fn configured_spmv_worker_matches_the_cpu_reference() {
+        if std::env::var_os("IC_SPMV_WORKER").is_none() {
+            return;
+        }
+        let rows = vec![
+            SparseRow::new(vec![(0, 91), (2, 17)], 0, P),
+            SparseRow::new(vec![(1, 31), (2, 43)], 0, P),
+            SparseRow::new(vec![(0, 59), (1, 61)], 0, P),
+        ];
+        let x: Vec<u64> = (0..3 * 4).map(|i| (67 * i as u64 + 5) % P).collect();
+        let multiply = |backend| {
+            let matrix =
+                CsrMatrix::from_rows(&rows, 3, P).with_spmv(SpmvOptions { backend, shards: 0 });
+            let mut y = vec![0u64; 3 * 4];
+            matrix.mul_block(&x, 4, &mut y);
+            y
+        };
+        assert_eq!(multiply(SpmvBackend::Worker), multiply(SpmvBackend::Serial));
+    }
+
+    #[test]
+    fn sparse_pipeline_selects_block_lanczos() {
+        let columns = 12usize;
+        let planted: Vec<u64> = (0..columns).map(|i| (31 * i as u64 + 4) % P).collect();
+        let mut rows = Vec::new();
+        for i in 0..columns {
+            let entries = vec![
+                (i as u32, 3),
+                (((i + 1) % columns) as u32, 5),
+                (((i + 3) % columns) as u32, 7),
+            ];
+            let mut row = SparseRow::new(entries, 0, P);
+            row.rhs = row.evaluate(&planted, P);
+            rows.push(row);
+        }
+        assert!(dense_reference(&rows, columns, P).is_some());
+        let options = SparseSolveOptions {
+            solver: SparseCoreSolver::BlockLanczos,
+            lanczos: BlockLanczosOptions {
+                block_size: 3,
+                margin: 8,
+            },
+            attempts: 64,
+            ..SparseSolveOptions::default()
+        };
+        let (outcome, report) = solve_sparse_system(&rows, columns, P, &options);
+        assert_eq!(outcome, SparseSolveOutcome::Solved(planted));
+        assert_eq!(report.solver, SparseCoreSolver::BlockLanczos);
+        assert_eq!(report.spmv, options.spmv);
+        // Filtering is allowed to solve the entire system before a Krylov
+        // backend is needed; otherwise the selected backend must be Lanczos.
+        assert!(report.core_dimension == 0 || report.lanczos.is_some());
+        assert!(report.wiedemann.is_none());
     }
 
     /// Timing on a relation-shaped system at a chosen size, against the

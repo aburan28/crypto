@@ -177,6 +177,7 @@ pub mod inherited_f4;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
 pub mod isogeny_degree_search;
+pub mod isogeny_walk;
 pub mod j0_twists;
 pub mod jv_cover;
 pub mod jv_isogeny_walk;
@@ -196,6 +197,7 @@ pub mod koblitz_relation_solver;
 pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
+pub mod large_prime_filter;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
@@ -246,6 +248,7 @@ pub mod preprocessing_rho;
 pub mod q_curve;
 pub mod quantum_estimator;
 pub mod quasi_subfield;
+pub mod recursive_descent;
 pub mod research_bench;
 pub mod residual_walk;
 pub mod sat;
@@ -352,9 +355,10 @@ pub use koblitz_index_calculus::{
     SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
 };
 pub use koblitz_sparse_la::{
-    block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,
-    BlockWiedemannReport, CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
+    BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
+    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{
