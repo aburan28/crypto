@@ -11661,6 +11661,40 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
       </div>
     </div>
 <!-- END current-f4-stage201-exact-ends -->
+<!-- BEGIN p256-dickson-residual-scaling-20261004 -->
+<section class="panel" id="p256-dickson-residual-scaling-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson branching: degree 3 survives through depth 8, branch exponent remains <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Certifies 114,240 toy-prime components with zero mismatches: residual depths 1&ndash;2 stay at solving degree 3, residual depth 3 stays at 4, and total work still quadruples per added original level.</p>
+    <p>Rounds 1&ndash;5 on <code>icv1-fp256-t89188191154553853111372247798585809583-f188c491</code> rejected affine-bitbox replacement, terminal retuning, and quadraticization alone before deep branching first lowered the small-prime component degree from 4 to 3. Round 6 tests the mechanism at original depths 5&ndash;8 over <code>F_7681</code>, using two solver-blind full fibres and matched positive/negative targets. Every component is classified by exhaustive signed-point addition before native F4.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Both terminals and both target classes aggregated; counted finite-field operations are a solver-stage unit, not full ECDLP S.</caption>
+    <thead><tr><th>Original depth</th><th>Residual depth</th><th>Components</th><th>Max degree / boundary</th><th>Max columns</th><th>Total field ops</th><th>Ops / component</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td>1</td><td class="n">1,024</td><td class="n"><strong>3 / 4</strong></td><td class="n">24</td><td class="n">807,800</td><td class="n">788.867</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>5</td><td>2</td><td class="n">256</td><td class="n"><strong>3 / 4</strong></td><td class="n">44</td><td class="n">1,133,326</td><td class="n">4,427.055</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>5</td><td>3</td><td class="n">64</td><td class="n">4 / 4</td><td class="n">196</td><td class="n">6,602,032</td><td class="n">103,156.750</td><td><span class="chip">control</span></td></tr>
+      <tr><td>6</td><td>1</td><td class="n">4,096</td><td class="n"><strong>3 / 4</strong></td><td class="n">24</td><td class="n">3,230,804</td><td class="n">788.771</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>6</td><td>2</td><td class="n">1,024</td><td class="n"><strong>3 / 4</strong></td><td class="n">44</td><td class="n">4,499,895</td><td class="n">4,394.429</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>6</td><td>3</td><td class="n">256</td><td class="n">4 / 4</td><td class="n">196</td><td class="n">26,342,038</td><td class="n">102,898.586</td><td><span class="chip">control</span></td></tr>
+      <tr><td>7</td><td>1</td><td class="n">16,384</td><td class="n"><strong>3 / 4</strong></td><td class="n">24</td><td class="n">12,925,397</td><td class="n">788.904</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>7</td><td>2</td><td class="n">4,096</td><td class="n"><strong>3 / 4</strong></td><td class="n">44</td><td class="n">17,972,479</td><td class="n">4,387.812</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>7</td><td>3</td><td class="n">1,024</td><td class="n">4 / 4</td><td class="n">196</td><td class="n">105,319,482</td><td class="n">102,851.057</td><td><span class="chip">control</span></td></tr>
+      <tr><td>8</td><td>1</td><td class="n">65,536</td><td class="n"><strong>3 / 4</strong></td><td class="n">24</td><td class="n"><strong>51,702,629</strong></td><td class="n">788.920</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>8</td><td>2</td><td class="n">16,384</td><td class="n"><strong>3 / 4</strong></td><td class="n">44</td><td class="n">71,883,372</td><td class="n">4,387.413</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>8</td><td>3</td><td class="n">4,096</td><td class="n">4 / 4</td><td class="n">196</td><td class="n">421,257,286</td><td class="n">102,846.017</td><td><span class="chip">control</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> 114,240 / 114,240 correct and complete; zero timeouts, cap stops, mismatches, or exceptional records</span>
+    <span><span class="chip">best stage row</span> residual depth 1 costs 0.7193&times; residual depth 2 at depth 8, but still enumerates <code>4^(D-1)</code> branch pairs</span>
+    <span><span class="chip">projection only</span> holding depth-8 cost constant at original depth 18 gives 17.18 billion pairs and 1.355&middot;10<sup>13</sup> field operations for one two-summand target; this is not a P-256 measurement</span>
+    <span><span class="chip">factor base</span> best verified P-256 inventory remains <code>FB1h2f8621cda105</code>, 131,458 columns and 96.400018% modeled m=17 relation success</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_residual_scaling_round6_20261004/RESULT.md</code>; no full-P-256 Gr&ouml;bner basis, logarithm, S, rho ratio, or attack exponent is measured</span>
+  </div>
+</section>
+<!-- END p256-dickson-residual-scaling-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
