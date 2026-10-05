@@ -1,0 +1,70 @@
+{
+  "acceptance": {
+    "axes": [
+      "ops",
+      "memory"
+    ],
+    "min_runs_per_size": 8,
+    "min_sizes": 4,
+    "require_audit": true,
+    "require_replay_all": true,
+    "uncharged_tolerance": 0.05
+  },
+  "challenge_id": "ECCH1h904625668686",
+  "description": "Standing challenge against the harness's reference method for prime curves, rho.negation, the memory-light frontier entry at 1.466 x the generic floor over 18 to 24 bits (docs/bounds/records/prime-rho-neg.json). The question every rho variant and every index-calculus candidate on prime curves is asked first.",
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "prime",
+    "problem": "ecdlp.single_target",
+    "target_kind": "planted",
+    "tier": "toy",
+    "unit": "ecbench.gae"
+  },
+  "domain_id": "ECDOM1ha1f283af3a5d",
+  "incumbent": {
+    "bound_id": "ECBND1h7b69b9787056",
+    "method": {
+      "id": "rho.negation",
+      "params": {}
+    }
+  },
+  "label": "beat the negation-map rho on toy prime curves",
+  "measurement": {
+    "isolation_required": "L2",
+    "rounds": 3,
+    "timeout_seconds": 300,
+    "warmup": 1
+  },
+  "schema": "ecbench.challenge/v1",
+  "workloads": {
+    "curves": [
+      {
+        "bits": 18,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 20,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 22,
+        "kind": "prime_search",
+        "seed": 59297
+      },
+      {
+        "bits": 24,
+        "kind": "prime_search",
+        "seed": 59297
+      }
+    ],
+    "nonce": 20261006,
+    "target_kind": "planted",
+    "targets_per_curve": 8
+  }
+}
