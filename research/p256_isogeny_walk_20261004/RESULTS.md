@@ -98,6 +98,19 @@ These values are frozen in the Rust test rather than learned from the
 
 ## Reproduction
 
+The one-command gate builds the release binary, checks the independent
+division-polynomial/Velu fixtures, generates exactly 4,096 edges, performs a
+fresh standalone replay, and writes hashes plus isolated-run records to a new
+output directory:
+
+```bash
+tools/run_p256_isogeny_walk.sh
+```
+
+Use `--out-dir PATH` to choose the artifact directory, or `--no-isolation` for
+a correctness-only run whose timing is not treated as rigorous evidence. The
+equivalent individual commands are:
+
 ```bash
 cargo run --release --bin p256_isogeny_walk -- fixture
 cargo run --release --bin p256_isogeny_walk -- \
