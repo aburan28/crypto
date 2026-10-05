@@ -18,6 +18,15 @@ published independent replay must validate the repeat panel. The new raw
 directory and receipt remain separate from the pilot; no pilot rows are
 selected or substituted into the repeat.
 
+Formatting-only repeat amendment, committed before its execution: the first
+Rust-driven schedule completed and remains archived in full. `rustfmt`
+changed only the driver and post-run auditor source text; the three frozen
+producer/replay binaries, input points, schedule, seed and resource caps are
+unchanged. Run one more five-block schedule from the formatted driver in a
+new directory. Report **both** native schedules and their noise failures;
+do not select the more favorable one. The second schedule is a source-format
+replication, not a new method or a held-out target block.
+
 Freeze repository parent `80a05cc22ade46e5ddd5918bb5a01da9d66c0d3c`
 and the three unchanged example sources:
 
