@@ -23,6 +23,7 @@ const MAX_DEGREE: u32 = 8;
 const BUDGET_SECS: u64 = 20;
 const ROUND9_SHA256: &str = "44f8412ff1c4dec61d0fd05bc2d66f8788e14da4063239e7431e6410da67565a";
 const ROUND10_SHA256: &str = "1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93";
+const ROUND11_SHA256: &str = "7266c05093c815734db0a0319b946f76d003e836cce0911541be5ab4d50f2e60";
 const IMAGE_MAX_DEGREE: u32 = 4;
 const IMAGE_BUDGET_SECS: u64 = 5;
 
@@ -38,6 +39,9 @@ struct Cli {
     /// Run the round-11 pair-image atomization from this round-10 result.
     #[arg(long)]
     image_atomize_round10: Option<PathBuf>,
+    /// Run the round-12 eight-summand image-growth screen after hash-checking round 11.
+    #[arg(long)]
+    scale_eight_round11: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -46,7 +50,7 @@ struct Affine {
     y: u64,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum Point {
     Infinity,
     Affine(Affine),
@@ -364,6 +368,53 @@ struct ImageExperimentResult {
     max_degree: u32,
     budget_seconds_per_image_atom: u64,
     terminal_results: Vec<ImageTerminalResult>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ImageState {
+    affine: BTreeSet<u64>,
+    identity: bool,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S9CellResult {
+    kind: String,
+    boundaries: [u64; 8],
+    expected_positive: bool,
+    candidate_positive: bool,
+    x_atoms: usize,
+    signed_tuples: usize,
+    quadratic_solves: u64,
+    roots_returned: u64,
+    final_index_lookups: u64,
+    field_multiplications: u64,
+    maximum_two_leaf_affine_image: usize,
+    maximum_four_leaf_affine_image: usize,
+    four_leaf_identity_images: u64,
+    false_negative: bool,
+    false_positive: bool,
+    image_stream_sha256: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S9TerminalResult {
+    terminal: u64,
+    target: [u64; 2],
+    nonempty_boundaries: usize,
+    selected_boundaries: [u64; 8],
+    cells: Vec<S9CellResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct S9ExperimentResult {
+    schema: String,
+    curve: String,
+    prime: u64,
+    a: u64,
+    b: u64,
+    round11_sha256: String,
+    local_maximum_degree: u32,
+    terminal_results: Vec<S9TerminalResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -1479,6 +1530,466 @@ fn run_image_atomized(round10_path: &PathBuf, out: Option<PathBuf>) -> Result<()
     Ok(())
 }
 
+fn sum_sets(point_sets: &[Vec<Affine>]) -> BTreeSet<Point> {
+    let mut sums = BTreeSet::from([Point::Infinity]);
+    for points in point_sets {
+        let mut next = BTreeSet::new();
+        for &sum in &sums {
+            for &point in points {
+                next.insert(add_points(sum, Point::Affine(point)));
+            }
+        }
+        sums = next;
+    }
+    sums
+}
+
+fn first_finite_sum(point_sets: &[Vec<Affine>]) -> Option<Affine> {
+    fn visit(index: usize, point_sets: &[Vec<Affine>], sum: Point) -> Option<Affine> {
+        if index == point_sets.len() {
+            return match sum {
+                Point::Infinity => None,
+                Point::Affine(point) => Some(point),
+            };
+        }
+        for &point in &point_sets[index] {
+            if let Some(result) =
+                visit(index + 1, point_sets, add_points(sum, Point::Affine(point)))
+            {
+                return Some(result);
+            }
+        }
+        None
+    }
+    visit(0, point_sets, Point::Infinity)
+}
+
+fn boundary_cell_reference(
+    boundaries: [u64; 8],
+    points_by_boundary: &BTreeMap<u64, Vec<Affine>>,
+    target: Affine,
+) -> (bool, usize) {
+    let sets: Vec<Vec<Affine>> = boundaries
+        .iter()
+        .map(|boundary| points_by_boundary[boundary].clone())
+        .collect();
+    let signed_tuples = sets.iter().map(Vec::len).product();
+    let sums = sum_sets(&sets);
+    (
+        sums.contains(&Point::Affine(target)) || sums.contains(&Point::Affine(negate(target))),
+        signed_tuples,
+    )
+}
+
+fn enumerate_x_atoms(leaves: [&[u64]; 8]) -> Vec<[u64; 8]> {
+    fn visit(index: usize, leaves: &[&[u64]; 8], current: &mut [u64; 8], out: &mut Vec<[u64; 8]>) {
+        if index == 8 {
+            out.push(*current);
+            return;
+        }
+        for &value in leaves[index] {
+            current[index] = value;
+            visit(index + 1, leaves, current, out);
+        }
+    }
+    let mut out = Vec::new();
+    visit(0, &leaves, &mut [0; 8], &mut out);
+    out
+}
+
+fn reference_image(xs: &[u64], b: u64, square_roots: &[Vec<u64>]) -> ImageState {
+    let point_sets: Vec<Vec<Affine>> = xs
+        .iter()
+        .map(|&x| {
+            square_roots[curve_rhs(x, b) as usize]
+                .iter()
+                .map(|&y| Affine { x, y })
+                .collect()
+        })
+        .collect();
+    let sums = sum_sets(&point_sets);
+    ImageState {
+        affine: sums
+            .iter()
+            .filter_map(|point| match point {
+                Point::Infinity => None,
+                Point::Affine(point) => Some(point.x),
+            })
+            .collect(),
+        identity: sums.contains(&Point::Infinity),
+    }
+}
+
+fn pair_image_state(
+    left: u64,
+    right: u64,
+    b: u64,
+    field: &mut CountedField,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+) -> ImageState {
+    *solves += 1;
+    let (qa, qb, qc) = coefficients(field, left, right, b);
+    let roots = solve_quadratic(field, qa, qb, qc);
+    *roots_returned += roots.len as u64;
+    ImageState {
+        affine: roots.roots[..roots.len].iter().copied().collect(),
+        identity: left == right,
+    }
+}
+
+fn compose_image_states(
+    left: &ImageState,
+    right: &ImageState,
+    b: u64,
+    field: &mut CountedField,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+) -> ImageState {
+    let mut affine = BTreeSet::new();
+    if left.identity {
+        affine.extend(right.affine.iter().copied());
+    }
+    if right.identity {
+        affine.extend(left.affine.iter().copied());
+    }
+    for &u in &left.affine {
+        for &v in &right.affine {
+            *solves += 1;
+            let (qa, qb, qc) = coefficients(field, u, v, b);
+            let roots = solve_quadratic(field, qa, qb, qc);
+            *roots_returned += roots.len as u64;
+            affine.extend(roots.roots[..roots.len].iter().copied());
+        }
+    }
+    let shared_affine = left.affine.iter().any(|x| right.affine.contains(x));
+    ImageState {
+        affine,
+        identity: (left.identity && right.identity) || shared_affine,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_s9_cell(
+    kind: &str,
+    boundaries: [u64; 8],
+    expected_positive: bool,
+    signed_tuples: usize,
+    target: Affine,
+    x_by_boundary: &BTreeMap<u64, Vec<u64>>,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<S9CellResult, String> {
+    let leaves = [
+        x_by_boundary[&boundaries[0]].as_slice(),
+        x_by_boundary[&boundaries[1]].as_slice(),
+        x_by_boundary[&boundaries[2]].as_slice(),
+        x_by_boundary[&boundaries[3]].as_slice(),
+        x_by_boundary[&boundaries[4]].as_slice(),
+        x_by_boundary[&boundaries[5]].as_slice(),
+        x_by_boundary[&boundaries[6]].as_slice(),
+        x_by_boundary[&boundaries[7]].as_slice(),
+    ];
+    let atoms = enumerate_x_atoms(leaves);
+    let mut candidate_positive = false;
+    let mut quadratic_solves = 0;
+    let mut roots_returned = 0;
+    let mut final_index_lookups = 0;
+    let mut field = CountedField::default();
+    let mut maximum_two_leaf_affine_image = 0;
+    let mut maximum_four_leaf_affine_image = 0;
+    let mut four_leaf_identity_images = 0;
+    let mut stream = String::new();
+    for xs in &atoms {
+        let pairs = [
+            pair_image_state(
+                xs[0],
+                xs[1],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            ),
+            pair_image_state(
+                xs[2],
+                xs[3],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            ),
+            pair_image_state(
+                xs[4],
+                xs[5],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            ),
+            pair_image_state(
+                xs[6],
+                xs[7],
+                b,
+                &mut field,
+                &mut quadratic_solves,
+                &mut roots_returned,
+            ),
+        ];
+        maximum_two_leaf_affine_image = maximum_two_leaf_affine_image.max(
+            pairs
+                .iter()
+                .map(|image| image.affine.len())
+                .max()
+                .unwrap_or(0),
+        );
+        let left = compose_image_states(
+            &pairs[0],
+            &pairs[1],
+            b,
+            &mut field,
+            &mut quadratic_solves,
+            &mut roots_returned,
+        );
+        let right = compose_image_states(
+            &pairs[2],
+            &pairs[3],
+            b,
+            &mut field,
+            &mut quadratic_solves,
+            &mut roots_returned,
+        );
+        let left_reference = reference_image(&xs[..4], b, square_roots);
+        let right_reference = reference_image(&xs[4..], b, square_roots);
+        if left != left_reference || right != right_reference {
+            return Err(format!(
+                "four-leaf image mismatch in {kind} at x atom {xs:?}"
+            ));
+        }
+        maximum_four_leaf_affine_image = maximum_four_leaf_affine_image
+            .max(left.affine.len())
+            .max(right.affine.len());
+        four_leaf_identity_images += u64::from(left.identity) + u64::from(right.identity);
+        let mut atom_positive = false;
+        for &left_x in &left.affine {
+            quadratic_solves += 1;
+            let (qa, qb, qc) = coefficients(&mut field, left_x, target.x, b);
+            let roots = solve_quadratic(&mut field, qa, qb, qc);
+            roots_returned += roots.len as u64;
+            for &right_x in &roots.roots[..roots.len] {
+                final_index_lookups += 1;
+                atom_positive |= right.affine.contains(&right_x);
+            }
+        }
+        atom_positive |= left.identity && right.affine.contains(&target.x);
+        atom_positive |= right.identity && left.affine.contains(&target.x);
+        let reference = reference_image(xs, b, square_roots);
+        let reference_positive = reference.affine.contains(&target.x);
+        if atom_positive != reference_positive {
+            return Err(format!(
+                "final eight-leaf classification mismatch in {kind} at x atom {xs:?}"
+            ));
+        }
+        candidate_positive |= atom_positive;
+        writeln!(
+            stream,
+            "{:?}|{:?}:{}|{:?}:{}|{}|{}",
+            xs,
+            left.affine,
+            u8::from(left.identity),
+            right.affine,
+            u8::from(right.identity),
+            u8::from(atom_positive),
+            u8::from(reference_positive)
+        )
+        .expect("writing to String cannot fail");
+    }
+    Ok(S9CellResult {
+        kind: kind.into(),
+        boundaries,
+        expected_positive,
+        candidate_positive,
+        x_atoms: atoms.len(),
+        signed_tuples,
+        quadratic_solves,
+        roots_returned,
+        final_index_lookups,
+        field_multiplications: field.multiplications,
+        maximum_two_leaf_affine_image,
+        maximum_four_leaf_affine_image,
+        four_leaf_identity_images,
+        false_negative: expected_positive && !candidate_positive,
+        false_positive: !expected_positive && candidate_positive,
+        image_stream_sha256: hex::encode(sha256(stream.as_bytes())),
+    })
+}
+
+fn frozen_nonempty_inventory(terminal: u64) -> Vec<(u64, Vec<u64>)> {
+    match terminal {
+        0 => vec![
+            (25, vec![519]),
+            (41, vec![1061]),
+            (262, vec![372]),
+            (342, vec![583]),
+            (384, vec![409]),
+            (433, vec![678]),
+            (718, vec![408, 743]),
+            (767, vec![725]),
+            (809, vec![1040]),
+            (894, vec![969]),
+            (1110, vec![320]),
+            (1126, vec![235]),
+        ],
+        369 => vec![
+            (94, vec![163, 988]),
+            (166, vec![390]),
+            (288, vec![574, 577]),
+            (507, vec![462]),
+            (539, vec![328]),
+            (614, vec![935]),
+            (626, vec![138]),
+            (644, vec![229]),
+            (704, vec![330]),
+            (863, vec![273, 878]),
+            (985, vec![318]),
+            (1057, vec![470, 681]),
+        ],
+        _ => Vec::new(),
+    }
+}
+
+fn run_s9_terminal(
+    terminal: u64,
+    b: u64,
+    square_roots: &[Vec<u64>],
+) -> Result<S9TerminalResult, String> {
+    let mut inventory = Vec::new();
+    let mut x_by_boundary = BTreeMap::new();
+    let mut points_by_boundary = BTreeMap::new();
+    for boundary in roots(DEPTH - 1, terminal) {
+        let xs = liftable_x(boundary, b, square_roots);
+        if xs.is_empty() {
+            continue;
+        }
+        let points = signed_points(&xs, b, square_roots);
+        inventory.push((boundary, xs.clone()));
+        x_by_boundary.insert(boundary, xs);
+        points_by_boundary.insert(boundary, points);
+    }
+    if inventory != frozen_nonempty_inventory(terminal) {
+        return Err(format!("terminal {terminal} factor-base inventory changed"));
+    }
+    let selected_boundaries: [u64; 8] = inventory[..8]
+        .iter()
+        .map(|entry| entry.0)
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("eight selected boundaries");
+    let selected_point_sets: Vec<Vec<Affine>> = selected_boundaries
+        .iter()
+        .map(|boundary| points_by_boundary[boundary].clone())
+        .collect();
+    let target = first_finite_sum(&selected_point_sets)
+        .ok_or_else(|| format!("terminal {terminal} planted target stayed infinity"))?;
+    let reverse: [u64; 8] = selected_boundaries
+        .iter()
+        .rev()
+        .copied()
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("eight reversed boundaries");
+    let mut selected_cells = Vec::new();
+    for (kind, boundaries) in [
+        ("planted-forward", selected_boundaries),
+        ("planted-reverse", reverse),
+    ] {
+        let (positive, signed_tuples) =
+            boundary_cell_reference(boundaries, &points_by_boundary, target);
+        if !positive {
+            return Err(format!("terminal {terminal} {kind} cell is not positive"));
+        }
+        selected_cells.push((kind.to_string(), boundaries, positive, signed_tuples));
+    }
+    let pool = [inventory[0].0, inventory[1].0];
+    for code in 0u16..256 {
+        let mut boundaries = [0u64; 8];
+        for (index, boundary) in boundaries.iter_mut().enumerate() {
+            *boundary = pool[((code >> (7 - index)) & 1) as usize];
+        }
+        let (positive, signed_tuples) =
+            boundary_cell_reference(boundaries, &points_by_boundary, target);
+        if !positive {
+            let negative_index = selected_cells.len() - 2;
+            selected_cells.push((
+                format!("negative-{negative_index}"),
+                boundaries,
+                false,
+                signed_tuples,
+            ));
+            if selected_cells.len() == 4 {
+                break;
+            }
+        }
+    }
+    if selected_cells.len() != 4 {
+        return Err(format!(
+            "terminal {terminal} did not yield two negative controls"
+        ));
+    }
+    let mut cells = Vec::new();
+    for (kind, boundaries, expected_positive, signed_tuples) in selected_cells {
+        cells.push(run_s9_cell(
+            &kind,
+            boundaries,
+            expected_positive,
+            signed_tuples,
+            target,
+            &x_by_boundary,
+            b,
+            square_roots,
+        )?);
+    }
+    Ok(S9TerminalResult {
+        terminal,
+        target: [target.x, target.y],
+        nonempty_boundaries: inventory.len(),
+        selected_boundaries,
+        cells,
+    })
+}
+
+fn run_s9(round11_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round11_path).map_err(|error| error.to_string())?;
+    let round11_sha256 = hex::encode(sha256(&bytes));
+    if round11_sha256 != ROUND11_SHA256 {
+        return Err(format!(
+            "round-11 SHA-256 mismatch: expected {ROUND11_SHA256}, got {round11_sha256}"
+        ));
+    }
+    let p256 = CurveParams::p256();
+    let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
+    let square_roots = square_root_table();
+    let mut terminal_results = Vec::new();
+    for terminal in TERMINALS {
+        terminal_results.push(run_s9_terminal(terminal, b, &square_roots)?);
+    }
+    let result = S9ExperimentResult {
+        schema: "p256.dickson_s9_image_growth/v1".into(),
+        curve: CURVE_SLUG.into(),
+        prime: P,
+        a: A,
+        b,
+        round11_sha256,
+        local_maximum_degree: 2,
+        terminal_results,
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
 fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
     let p256 = CurveParams::p256();
     let b = (&p256.b % P).to_u64().ok_or("P-256 b reduction failed")?;
@@ -1509,11 +2020,18 @@ fn run_round9(out: Option<PathBuf>) -> Result<(), String> {
 }
 
 fn run(cli: Cli) -> Result<(), String> {
-    match (cli.atomize_round9, cli.image_atomize_round10) {
-        (Some(_), Some(_)) => Err("choose only one continuation mode".into()),
-        (Some(path), None) => run_atomized(&path, cli.out),
-        (None, Some(path)) => run_image_atomized(&path, cli.out),
-        (None, None) => run_round9(cli.out),
+    match (
+        cli.atomize_round9,
+        cli.image_atomize_round10,
+        cli.scale_eight_round11,
+    ) {
+        (Some(_), Some(_), _) | (Some(_), _, Some(_)) | (_, Some(_), Some(_)) => {
+            Err("choose only one continuation mode".into())
+        }
+        (Some(path), None, None) => run_atomized(&path, cli.out),
+        (None, Some(path), None) => run_image_atomized(&path, cli.out),
+        (None, None, Some(path)) => run_s9(&path, cli.out),
+        (None, None, None) => run_round9(cli.out),
     }
 }
 

@@ -11869,6 +11869,30 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-image-atomized-s5-round11-20261004 -->
+<!-- BEGIN p256-s9-image-growth-round12-20261004 -->
+<section class="panel" id="p256-s9-image-growth-round12-20261004">
+  <div class="panel-head">
+    <h2>P-256 Dickson eight-summand images: exact degree-2 joins use 0.0799 of signed visits <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Matches 101,888 exhaustive signed tuples with zero image or classification errors: 5,057 quadratic solves plus 3,080 lookups give a 0.079862 structural-visit ratio, while four-leaf image width grows to 8.</p>
+    <p>Round 12 composes the exact pair images from Round 11 into balanced four-leaf images with explicit infinity sentinels, verifies every intermediate against group addition, and joins two four-leaf blocks to a known target using only indexed univariate quadratics.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Visits are quadratic solves plus final indexed root lookups; field multiplications and exhaustive group-law work remain separate.</caption>
+    <thead><tr><th>Terminal</th><th>Cells</th><th>x atoms</th><th>Signed tuples</th><th>Solves + lookups</th><th>Visit ratio</th><th>Max pair / four image</th><th>FN / FP</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="n">4</td><td class="n">6</td><td class="n">1,536</td><td class="n">97 + 72</td><td class="n"><strong>0.110026</strong></td><td class="n">2 / 8</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+      <tr><td>369</td><td class="n">4</td><td class="n">392</td><td class="n">100,352</td><td class="n">4,960 + 3,008</td><td class="n"><strong>0.079401</strong></td><td class="n">2 / 8</td><td class="n">0 / 0</td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">correctness</span> all four-leaf affine images and identity flags match exhaustive group sums before every final join</span>
+    <span><span class="chip">degree</span> every algebraic operation is a univariate quadratic; this is an explicitly split local degree, not unsplit S9 regularity</span>
+    <span><span class="chip">growth boundary</span> maximum affine width grows from 2 at two leaves to 8 at four; the 16-summand doubling remains unmeasured</span>
+    <span><span class="chip">scope</span> toy field, eight summands and known target; actual P-256 S18, relations, S and rho remain unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s9_image_growth_round12_20261004/RESULT.md</code>; deterministic result SHA-256 <code>11512f946ee9256dcb978f11280f577f2fefff3f3d761feafded1b93349bbde5</code></span>
+  </div>
+</section>
+<!-- END p256-s9-image-growth-round12-20261004 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
