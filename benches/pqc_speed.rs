@@ -153,6 +153,42 @@ fn bench_ml_kem_fast(rows: &mut Vec<Row>) {
             cycles: measure(3, 25, || fast::ml_kem_decaps(p, &dk, &ct).unwrap()),
             ok,
         });
+
+        // Public-data reuse: the same operations against a key whose `Â`,
+        // `t̂`, `H(ek)` and `ŝ` were prepared once. The correctness column
+        // holds the prepared paths to the reference too: the prepared
+        // ciphertext must decapsulate under the reference to the prepared
+        // secret, and the prepared decapsulation must agree with it.
+        let pe = fast::MlKemPreparedEncapsKey::new(p, &ek).expect("prepare ek");
+        let pd = fast::MlKemPreparedDecapsKey::new(p, &dk).expect("prepare dk");
+        let (pct, pk_enc) = pe.encaps();
+        let ok_prep = crypto_lib::pqc::ml_kem::ml_kem_decaps(p, &dk, &pct) == Some(pk_enc)
+            && pd.decaps(&pct) == Some(pk_enc)
+            && pd.decaps(&ct) == Some(k_enc);
+        rows.push(Row {
+            scheme: name,
+            op: "keygen, prepared",
+            cycles: measure(3, 25, || fast::ml_kem_keygen_prepared(p)),
+            ok: ok_prep,
+        });
+        rows.push(Row {
+            scheme: name,
+            op: "encaps, prepared",
+            cycles: measure(3, 25, || pe.encaps()),
+            ok: ok_prep,
+        });
+        rows.push(Row {
+            scheme: name,
+            op: "decaps, prepared",
+            cycles: measure(3, 25, || pd.decaps(&ct).unwrap()),
+            ok: ok_prep,
+        });
+        rows.push(Row {
+            scheme: name,
+            op: "prepare ek (once per key)",
+            cycles: measure(3, 25, || fast::MlKemPreparedEncapsKey::new(p, &ek).unwrap()),
+            ok: ok_prep,
+        });
     }
 }
 
@@ -465,7 +501,10 @@ fn bench_isogeny(rows: &mut Vec<Row>) {
         break;
     }
     assert!(!base.is_infinity(), "no base point found");
-    assert!(!kernel.is_infinity(), "no usable full-order 2-torsion point found");
+    assert!(
+        !kernel.is_infinity(),
+        "no usable full-order 2-torsion point found"
+    );
     let curve_ok = xdbl_e(&kernel, TWO_TORSION_POWER, &a24).is_infinity()
         && ladder(&P_PLUS_1, P_PLUS_1_BITS, &base, &a24).is_infinity();
 
@@ -566,15 +605,10 @@ fn bench_isogeny(rows: &mut Vec<Row>) {
     let strategy = optimal_strategy(n, COST_DBL, COST_EVAL);
 
     let mut probe = [kernel, base];
-    let chain_ok = two_isogeny_chain_with_strategy(
-        &curve,
-        &kernel,
-        TWO_TORSION_POWER,
-        &mut probe,
-        &strategy,
-    )
-    .map(|img| probe[0].is_infinity() && img.is_on_curve(&probe[1]))
-    .unwrap_or(false);
+    let chain_ok =
+        two_isogeny_chain_with_strategy(&curve, &kernel, TWO_TORSION_POWER, &mut probe, &strategy)
+            .map(|img| probe[0].is_infinity() && img.is_on_curve(&probe[1]))
+            .unwrap_or(false);
 
     rows.push(Row {
         scheme: S,
@@ -603,7 +637,10 @@ fn bench_isogeny(rows: &mut Vec<Row>) {
 }
 
 fn main() {
-    let filter: Vec<String> = std::env::args().skip(1).filter(|a| !a.starts_with('-')).collect();
+    let filter: Vec<String> = std::env::args()
+        .skip(1)
+        .filter(|a| !a.starts_with('-'))
+        .collect();
     let want = |name: &str| filter.is_empty() || filter.iter().any(|f| name.contains(f.as_str()));
 
     let hz = cycle_hz();
