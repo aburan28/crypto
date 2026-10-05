@@ -56,7 +56,12 @@ constructor, and give `call()` its registry `generator_call` form. Check that
 `ecbench plan` shows the slug `registered=true` and an EC1 alias. Otherwise
 register the curve (`scripts/build_curve_registry.py`, AGENTS.md §11) before
 citing it. Word-size limits: `GF(p)` with `p < 2^62`, and `GF(2^m)` with
-`m ≤ 62`.
+`m ≤ 62` for every method. Koblitz curves with `64 ≤ m ≤ 127` build as
+`Instance::Wide` and run `rho.signed_frobenius_strong` and
+`claw.pair_table` only; to give another method a wide path, write it over
+the width-generic types (`koblitz_strong_rho::{RhoField, RhoScalar}` or
+`claw::ClawGroup`) so the one-word instantiation stays the committed code,
+and dispatch it in `methods::solve_wide`.
 
 ## A factor base or decomposition oracle
 

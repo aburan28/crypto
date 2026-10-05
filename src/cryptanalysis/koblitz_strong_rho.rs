@@ -174,6 +174,7 @@ pub trait RhoScalar:
     fn one() -> Self;
     fn from_biguint(v: &BigUint) -> Option<Self>;
     fn to_f64(self) -> f64;
+    fn to_u128(self) -> u128;
     /// Bits in the binary expansion (`0` for zero).
     fn bit_len(self) -> u32;
     fn bit(self, i: u32) -> bool;
@@ -203,6 +204,9 @@ impl RhoScalar for u64 {
     }
     fn to_f64(self) -> f64 {
         self as f64
+    }
+    fn to_u128(self) -> u128 {
+        u128::from(self)
     }
     fn bit_len(self) -> u32 {
         64 - self.leading_zeros()
@@ -293,6 +297,9 @@ impl RhoScalar for u128 {
     }
     fn to_f64(self) -> f64 {
         self as f64
+    }
+    fn to_u128(self) -> u128 {
+        self
     }
     fn bit_len(self) -> u32 {
         128 - self.leading_zeros()
@@ -810,6 +817,45 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
             lam_pow: vec![S::one(); n as usize],
             mm: S::mul_ctx(modulus),
         }
+    }
+
+    /// The Frobenius orbit of an abscissa: the least normal-basis rotation of
+    /// `x`'s coordinates (a name equal on `{x^{2^k}}` and nowhere else) and
+    /// the `k` with `x^{2^k}` the least, the convention
+    /// [`Self::canonicalize`] uses.
+    pub fn x_orbit(&self, x: F::E) -> (F::E, u32) {
+        let nb = &self.nb;
+        let xc = nb.to_normal.apply(x);
+        let mut best = xc;
+        let mut best_k = 0u32;
+        for k in 1..nb.n {
+            let cur = nb.rotate(xc, k);
+            if cur < best {
+                best = cur;
+                best_k = k;
+            }
+        }
+        (best, best_k)
+    }
+
+    /// `φ^t(P) = (x^{2^t}, y^{2^t})`, by normal-basis rotation.
+    pub fn frobenius(&self, t: u32, point: RawPointG<F::E>) -> RawPointG<F::E> {
+        match point {
+            RawPointG::Affine { x, y } if !t.is_multiple_of(self.n) => {
+                let nb = &self.nb;
+                let t = t % self.n;
+                RawPointG::Affine {
+                    x: nb.to_poly.apply(nb.rotate(nb.to_normal.apply(x), t)),
+                    y: nb.to_poly.apply(nb.rotate(nb.to_normal.apply(y), t)),
+                }
+            }
+            other => other,
+        }
+    }
+
+    /// The extension degree `n`.
+    pub fn degree(&self) -> u32 {
+        self.n
     }
 
     /// Prime subgroup order `r`.

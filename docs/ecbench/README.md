@@ -588,12 +588,24 @@ Stated so that nothing here is read as more than it is:
   is a passing audit of these exact files, run elsewhere, that
   reproduced both runs, and a reader checks the receipt itself at the
   pointer the claim cites.
-- **Word-size curves only.** The counted group types hold `GF(p)` with
-  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
-  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it. `p256_factor_base` only constructs and inventories a factor base on the
-  registered wide curve; it does not make that curve runnable by
-  `ic.pipeline` and produces no operation-count or speed claim.
+- **Wide curves run two methods.** Prime curves need `p < 2^62`. Binary
+  curves run every method for `m ≤ 62`. Koblitz curves with `64 ≤ m ≤ 127`
+  (`koblitz_wide`, over the registry's modulus, so the m = 83 gate curve
+  `icv1-f2m83-tm6151469093347-debefd74` of AGENTS.md §8a builds) run only
+  `rho.signed_frobenius_strong` and `claw.pair_table`. Both are the one-word
+  code made generic over the word, and the committed sessions' replays pin
+  that the one-word walk did not change. Every other method refuses a wide
+  curve. A subgroup order past `2^64` is written as a decimal string
+  (`canonical::compat_u128`) and gets the `_v2` target laws
+  (`uniform_scalar_sha256_v2`, `hash_to_subgroup_v2`). Of the registered
+  wide Koblitz curves only m = 83 and m = 97 have a prime `#E/h`, so the
+  cheapest wide solve is m = 83 itself: about `2^37` strong-rho steps,
+  some 20 single-core hours at the 0.49 µs per step measured on Apple
+  silicon. The claw's cost-minimising table there is about `2^37` entries,
+  out of reach of one host's memory. `p256_factor_base` only constructs
+  and inventories a factor base on the registered wide prime curve; it
+  does not make that curve runnable by `ic.pipeline` and produces no
+  operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a
