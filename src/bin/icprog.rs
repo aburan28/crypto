@@ -32,6 +32,8 @@
 //!   claim, and the figures read from the checked rows.
 #[path = "icprog/autolab.rs"]
 mod autolab;
+#[path = "icprog/b2.rs"]
+mod b2;
 #[path = "icprog/b7a.rs"]
 mod b7a;
 #[path = "icprog/bench.rs"]
@@ -411,6 +413,29 @@ enum Command {
         /// B0, B1, B3, B2, B2b, B7a, B3b, B4; repeat for each.
         #[arg(long = "arm")]
         arms: Vec<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B2's measurements 6 and 7: `estimate` (F2 against v0), `stepcost`
+    /// (`rho-bignum`'s step costs) or `analyse`.
+    B2 {
+        step: String,
+        /// The conformance steps through B2.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// B2's run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// B2's `ic` (`estimate`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// `examples/rho_bignum_rate.rs` built from B2's arm (`stepcost`).
+        #[arg(long)]
+        example: Option<PathBuf>,
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
@@ -1008,6 +1033,64 @@ fn bround_cmd(args: BroundArgs) -> Result<String, String> {
     })
 }
 
+/// B2's measurements 6 and 7.
+fn b2_cmd(
+    step: &str,
+    steps: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    cand: Option<PathBuf>,
+    example: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            round_dir: programme.join("rounds").join("B2-fields-forms-estimates"),
+            runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            programme,
+        },
+        steps: steps
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect(),
+        aa_from: PathBuf::new(),
+    };
+    let existing = |p: Option<PathBuf>, flag: &str| -> Result<PathBuf, String> {
+        let p = p.ok_or_else(|| format!("`{step}` needs --{flag}"))?;
+        if !p.exists() {
+            return Err(format!("no binary at {}", p.display()));
+        }
+        std::path::absolute(&p).map_err(|e| e.to_string())
+    };
+    match step {
+        "estimate" => {
+            b2::estimate(&r, &existing(cand, "cand")?)?;
+            Ok(String::new())
+        }
+        "stepcost" => {
+            let example = existing(example, "example")?;
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            b2::stepcost(&r, &bench::Bench { isolate }, &example)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&b2::analyse(&r)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are estimate, stepcost and analyse"
+        )),
+    }
+}
+
 struct B7aArgs {
     step: String,
     steps: String,
@@ -1146,6 +1229,15 @@ fn main() -> ExitCode {
     }
     let result = match cli.command {
         Command::Conformance { .. } => unreachable!("handled above"),
+        Command::B2 {
+            step,
+            steps,
+            root,
+            runs,
+            cand,
+            example,
+            isolate,
+        } => b2_cmd(&step, &steps, &root, &runs, cand, example, isolate),
         Command::B7a {
             step,
             steps,
