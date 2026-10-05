@@ -46,6 +46,14 @@ claims. Clippy completed with the inherited warnings described in
 Linux/macOS CI now runs the same data replay and retains its own receipt.
 Cross-platform CI acceptance remains pending at publication time.
 
+Worker macOS CI subsequently exposed an uncanonicalized temporary-path fixture.
+The [test-only correction](../native-ordinary-executor-v1/MACOS_CONTROL_FIX.md)
+preserves production claim/path checks. All 11 worker controls, then all 11
+controller/contract and four custody controls passed using an explicit symlinked
+TMPDIR; the controller output is [retained](alias-controller-controls-v1.txt.gz).
+This follow-up does not edit the original frozen source, archive, registration
+or identity receipt. New final-head CI remains required.
+
 The [first offline freeze failure](failed-freeze-v1/FAILURE.json) remains:
 vendoring exited 101 because the local cache lacked locked dependency
 `zerocopy-derive 0.8.59`. The exact original log, receipt and native-asset
