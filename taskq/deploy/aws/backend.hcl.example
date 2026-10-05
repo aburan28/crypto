@@ -1,5 +1,6 @@
 # terraform init -backend-config=backend.hcl
-# The bucket and lock table must exist first (one-time, outside this stack).
+# Generated for you by bootstrap/: terraform output -raw backend_hcl > ../backend.hcl
+# Fill this in by hand only to use a bucket and lock table you already have.
 bucket         = "CHANGE-ME-terraform-state"
 key            = "taskq/us-west-2/terraform.tfstate"
 region         = "us-west-2"
