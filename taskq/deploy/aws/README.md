@@ -16,7 +16,8 @@ installs taskq onto it:
 
 ```sh
 cd taskq/deploy/aws
-cp backend.hcl.example backend.hcl            # an S3 bucket + DynamoDB lock table you own
+(cd bootstrap && terraform init && terraform apply \
+   && terraform output -raw backend_hcl > ../backend.hcl)   # one-time: state bucket + lock table
 cp terraform.tfvars.example terraform.tfvars  # pools, sizes, API CIDRs
 terraform init -backend-config=backend.hcl
 terraform plan -out tfplan
@@ -30,6 +31,14 @@ Prerequisites:
 * AWS credentials with rights to create a VPC, EKS, EC2, IAM roles, ElastiCache and EFS.
 * The `aws` CLI on the machine that runs Terraform. The Kubernetes and Helm providers get their cluster token from `aws eks get-token`.
 * Terraform 1.6 or later.
+
+**`bootstrap/` creates the state backend once.** It makes a versioned,
+KMS-encrypted S3 bucket and a DynamoDB lock table. The bucket blocks all public
+access and refuses non-TLS requests. Both resources are protected from
+`terraform destroy`. The bootstrap keeps its own small state locally, in
+`bootstrap/terraform.tfstate` (gitignored, no secrets). Keep that file, or
+`terraform import` the two resources later. To use a bucket you already have
+instead, fill in `backend.hcl.example` by hand.
 
 **State holds the Redis AUTH token.** Keep state in the encrypted S3 backend
 and never commit it. `.gitignore` here excludes state, `terraform.tfvars` and
@@ -106,6 +115,7 @@ has `prevent_destroy`. To delete the results as well, remove that line first.
 terraform fmt -check -recursive
 terraform init -backend=false && terraform validate
 terraform test     # offline plans with mocked providers: no AWS account needed
+(cd bootstrap && terraform init -input=false && terraform validate && terraform test)
 ```
 
 `tests/plan.tftest.hcl` plans the whole stack against mocked providers in
