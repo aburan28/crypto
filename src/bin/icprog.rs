@@ -32,6 +32,8 @@
 //!   claim, and the figures read from the checked rows.
 #[path = "icprog/autolab.rs"]
 mod autolab;
+#[path = "icprog/b7a.rs"]
+mod b7a;
 #[path = "icprog/bench.rs"]
 mod bench;
 #[path = "icprog/bround.rs"]
@@ -409,6 +411,32 @@ enum Command {
         /// B0, B1, B3, B2, B2b, B7a, B3b, B4; repeat for each.
         #[arg(long = "arm")]
         arms: Vec<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B7a's own measurements (`rounds/B7a-f1-sampled/run.py`, ported):
+    /// `f1`, `partial` or `analyse`.
+    B7a {
+        step: String,
+        /// The conformance steps through B7a.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// B7a's run tree: its conformance, pin, translation and F1 runs.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The chain's run tree, whose B7a arm gives F0's figures.
+        #[arg(long)]
+        chain_runs: PathBuf,
+        /// The round whose A/A bands the timing is read against.
+        #[arg(long)]
+        aa_from: String,
+        /// B7a's `ic` (`f1` and `partial`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
@@ -980,6 +1008,73 @@ fn bround_cmd(args: BroundArgs) -> Result<String, String> {
     })
 }
 
+struct B7aArgs {
+    step: String,
+    steps: String,
+    root: PathBuf,
+    runs: PathBuf,
+    chain_runs: PathBuf,
+    aa_from: String,
+    cand: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+}
+
+/// B7a's own measurements: `f1` and `partial` run, `analyse` reads them
+/// with the chain's B7a arm.
+fn b7a_cmd(args: B7aArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    let aa_from = programme.join("rounds").join(&args.aa_from);
+    let steps: Vec<String> = args
+        .steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let run_of = |runs: &std::path::Path| -> Result<bround::Run, String> {
+        Ok(bround::Run {
+            ctx: rounds::Ctx {
+                programme: programme.clone(),
+                round_dir: aa_from.clone(),
+                runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            },
+            steps: steps.clone(),
+            aa_from: aa_from.clone(),
+        })
+    };
+    std::fs::create_dir_all(&args.runs).map_err(|e| format!("{}: {e}", args.runs.display()))?;
+    let r = run_of(&args.runs)?;
+    if args.step == "analyse" {
+        let chain = run_of(&args.chain_runs)?;
+        return Ok(json::dumps(&b7a::analyse(&r, &chain)?, 1));
+    }
+    let cand = args.cand.ok_or("`f1` and `partial` need --cand")?;
+    if !cand.exists() {
+        return Err(format!("no binary at {}", cand.display()));
+    }
+    let cand = std::path::absolute(&cand).map_err(|e| e.to_string())?;
+    let isolate = match args.isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    if !isolate.exists() {
+        return Err(format!("no isolation tool at {}", isolate.display()));
+    }
+    let b = bench::Bench { isolate };
+    match args.step.as_str() {
+        "f1" => b7a::f1(&r, &b, &cand)?,
+        "partial" => b7a::partial(&r, &b, &cand)?,
+        other => {
+            return Err(format!(
+                "unknown step {other:?}; the steps are f1, partial and analyse"
+            ))
+        }
+    };
+    Ok(String::new())
+}
+
 /// Track B's F0 runs: `run` prices each instance of the set, `analyse`
 /// replays them.
 fn f0_cmd(
@@ -1051,6 +1146,25 @@ fn main() -> ExitCode {
     }
     let result = match cli.command {
         Command::Conformance { .. } => unreachable!("handled above"),
+        Command::B7a {
+            step,
+            steps,
+            root,
+            runs,
+            chain_runs,
+            aa_from,
+            cand,
+            isolate,
+        } => b7a_cmd(B7aArgs {
+            step,
+            steps,
+            root,
+            runs,
+            chain_runs,
+            aa_from,
+            cand,
+            isolate,
+        }),
         Command::F0 {
             step,
             set,

@@ -512,7 +512,7 @@ fn translation_path(r: &Run, row: &Row) -> PathBuf {
 
 /// `ic check --translate` on the row's v1 file, written beside the run
 /// once.
-fn translate_row(r: &Run, cand: &Path, row: &Row) -> Result<J, String> {
+pub(crate) fn translate_row(r: &Run, cand: &Path, row: &Row) -> Result<J, String> {
     let path = translation_path(r, row);
     if !path.exists() {
         let params = row.params.as_ref().ok_or("a suite row has no parameters")?;
