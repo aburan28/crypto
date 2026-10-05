@@ -275,6 +275,25 @@ encapsulation gap, and the rest is not yet attributed. The next round's
 success condition, stated in that note before any change: every unprepared
 ML-KEM-768 operation within 1.10× of this reference.
 
+#### Where the gap is (profile)
+
+[`research/pqc_ml_kem_profile_20261005/`](../research/pqc_ml_kem_profile_20261005/README.md)
+attributes it, by callgrind on the same AVX2 path for both and by per-phase
+cycles. Two corrections to the table above come with it:
+
+- **Accounting.** That table's ratios are one sample. Five interleaved
+  rounds put ML-KEM-768 encapsulation at 1.37–1.63× the `-march=native`
+  build and 1.0–1.3× an AVX2-only build of the same reference, and two
+  builds of our own harness differed by ~12% on identical code. The stable
+  figure is instructions: **1.40×** encaps, 1.45× decaps, 1.50× keygen.
+- **Attribution.** The gap is mostly bookkeeping, not arithmetic. Our
+  pack/unpack/compress/decompress and one-bit message kernels are 5–11×
+  pq-crystals' per call; ring arithmetic 1.7–2.0×; zero-filling and copying
+  polynomials ~23k instructions per encapsulation; byte-wise constant-time
+  compare ~13k per decapsulation. Our matrix expansion is already faster
+  than the reference's AVX2 build here, by ~1k cycles, thanks to the
+  AVX-512 Keccak.
+
 ## ML-DSA
 
 ML-DSA-65, median of four back-to-back runs. Absolute counts on this machine
