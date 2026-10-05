@@ -11943,6 +11943,30 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-image-width-round14-20261004 -->
+<!-- BEGIN p256-s17-target-join-round15-20261005 -->
+<section class="panel" id="p256-s17-target-join-round15-20261005">
+  <div class="panel-head">
+    <h2>P-256 target-indexed images: exact state falls 128&times; without leaving degree 2 <span class="chip">stage advance</span></h2>
+    <p class="panel-summary">Retains two 128-entry eight-leaf images instead of one 32,768-entry sixteen-leaf image: 8 KiB versus 1 MiB raw, 280 versus 16,536 cold quadratic solves, and zero errors on eight P-256 targets.</p>
+    <p>Round 15 stops the balanced tree one layer early and probes the right half-image with one univariate quadratic per left x-coordinate. Four planted targets hit exactly once; four hash-public controls miss; exhaustive 65,536-sign group references agree.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Counts are identical on the prefix and three hash-frozen samples; half-image construction is reusable across targets.</caption>
+    <thead><tr><th>Arm</th><th>Stored entries</th><th>Raw bytes</th><th>Build solves</th><th>Query solves</th><th>Cold solves</th><th>Cold field muls</th><th>Targets correct</th><th>Local degree</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Round-14 materialised image</td><td class="n">32,768</td><td class="n">1,048,576</td><td class="n">16,536</td><td class="n">lookup</td><td class="n">16,536</td><td class="n">11,376,768</td><td class="n">4 / 4 width samples</td><td class="n">2</td><td><span class="chip">reference</span></td></tr>
+      <tr><td>Target-indexed halves</td><td class="n"><strong>256</strong></td><td class="n"><strong>8,192</strong></td><td class="n">152</td><td class="n">128</td><td class="n"><strong>280</strong></td><td class="n"><strong>192,640</strong></td><td class="n"><strong>8 / 8 targets</strong></td><td class="n">2</td><td><span class="chip">advance</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">state</span> 256 / 32,768 = 0.0078125, an exact 128&times; raw-coordinate reduction with no fingerprints or truncation</span>
+    <span><span class="chip">work</span> cold one-target solves fall 59.057&times;; each additional warm target costs 128 solves and 88,064 field multiplications</span>
+    <span><span class="chip">correctness</span> zero intermediate mismatches, FN, FP, identity errors, linear degeneracies or universal degeneracies</span>
+    <span><span class="chip">remaining boundary</span> fixed-atom state is compressed; sharing these half-images across the Dickson branch-cell frontier remains unmeasured</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_s17_target_join_round15_20261005/RESULT.md</code>; deterministic result SHA-256 <code>4220dafa066613630338886a916218602cd61ca914bd66ac7994cde163a53ad5</code></span>
+  </div>
+</section>
+<!-- END p256-s17-target-join-round15-20261005 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by

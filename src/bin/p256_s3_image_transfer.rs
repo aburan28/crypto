@@ -22,6 +22,7 @@ const TERMINAL: &str = "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75
 const COLUMNS: u64 = 131_458;
 const SIGNED_POINTS: u64 = 262_916;
 const ROUND13_SHA256: &str = "2008dcb659d3120157480b6096a4873d1f9c23ee30123f4dd3a32d450f53ba1d";
+const ROUND14_SHA256: &str = "6eefb6b27768023af5850cd785d75ef3729484ac85e5defef9d1d596834ebccc";
 const TARGET_PREIMAGE: &str = concat!(
     "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
     "/s3-image-transfer-round8/target/0"
@@ -36,6 +37,9 @@ struct Cli {
     /// Run the round-14 P-256 sixteen-leaf width transfer after hash-checking round 13.
     #[arg(long)]
     width_round13: Option<PathBuf>,
+    /// Run the round-15 target-indexed compression after hash-checking round 14.
+    #[arg(long)]
+    compress_round14: Option<PathBuf>,
 }
 
 #[derive(Clone)]
@@ -67,6 +71,19 @@ impl MultiplicationCounts {
             + self.square_roots
             + self.inversions
             + self.root_construction;
+    }
+
+    fn combined(self, other: Self) -> Self {
+        let mut combined = Self {
+            coefficients: self.coefficients + other.coefficients,
+            discriminants: self.discriminants + other.discriminants,
+            square_roots: self.square_roots + other.square_roots,
+            inversions: self.inversions + other.inversions,
+            root_construction: self.root_construction + other.root_construction,
+            total: 0,
+        };
+        combined.finish();
+        combined
     }
 }
 
@@ -177,6 +194,65 @@ struct WidthExperimentResult {
     generic_widths: [u64; 4],
     samples: Vec<WidthSampleResult>,
     storage_model: WidthStorageModel,
+}
+
+#[derive(Serialize)]
+struct CompressedTargetResult {
+    kind: String,
+    scalar: Option<String>,
+    target: [String; 2],
+    reference_positive: bool,
+    candidate_positive: bool,
+    algebra_hits: u64,
+    quadratic_solves_warm: u64,
+    quadratic_solves_cold: u64,
+    quadratic_roots_returned: u64,
+    algebra_index_lookups: u64,
+    linear_degeneracies: u64,
+    universal_degeneracies: u64,
+    multiplication_counts_warm: MultiplicationCounts,
+    multiplication_counts_cold: MultiplicationCounts,
+    false_negative: bool,
+    false_positive: bool,
+    exact: bool,
+    hit_sha256: String,
+}
+
+#[derive(Serialize)]
+struct CompressionSampleResult {
+    kind: String,
+    columns: Vec<u64>,
+    x_coordinates: Vec<String>,
+    left_eight_leaf_entries: usize,
+    right_eight_leaf_entries: usize,
+    retained_entries: usize,
+    materialized_sixteen_leaf_entries: usize,
+    retained_raw_bytes: usize,
+    materialized_raw_bytes: usize,
+    retained_to_materialized_ratio: f64,
+    build_quadratic_solves: u64,
+    full_materialization_quadratic_solves: u64,
+    intermediate_reference_group_additions: u64,
+    full_reference_group_additions: u64,
+    build_linear_degeneracies: u64,
+    build_universal_degeneracies: u64,
+    build_multiplication_counts: MultiplicationCounts,
+    left_image_sha256: String,
+    right_image_sha256: String,
+    targets: Vec<CompressedTargetResult>,
+}
+
+#[derive(Serialize)]
+struct CompressionExperimentResult {
+    schema: String,
+    curve: String,
+    field_prime: String,
+    curve_a: String,
+    curve_b: String,
+    round14_sha256: String,
+    factor_base: FactorBaseReceipt,
+    local_maximum_degree: u32,
+    samples: Vec<CompressionSampleResult>,
 }
 
 #[derive(Clone, Copy)]
@@ -881,6 +957,15 @@ fn hash_sample_indices(sample: usize) -> Vec<u64> {
     indices
 }
 
+fn round14_sample_specs() -> Vec<(String, Vec<u64>)> {
+    vec![
+        ("prefix".to_string(), (0..16).collect::<Vec<u64>>()),
+        ("hash-0".to_string(), hash_sample_indices(0)),
+        ("hash-1".to_string(), hash_sample_indices(1)),
+        ("hash-2".to_string(), hash_sample_indices(2)),
+    ]
+}
+
 fn run_width(round13_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
     let bytes = std::fs::read(round13_path).map_err(|error| error.to_string())?;
     let round13_sha256 = hex::encode(sha256(&bytes));
@@ -891,12 +976,7 @@ fn run_width(round13_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String>
     }
     let curve = CurveParams::p256();
     let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
-    let sample_specs = [
-        ("prefix".to_string(), (0..16).collect::<Vec<u64>>()),
-        ("hash-0".to_string(), hash_sample_indices(0)),
-        ("hash-1".to_string(), hash_sample_indices(1)),
-        ("hash-2".to_string(), hash_sample_indices(2)),
-    ];
+    let sample_specs = round14_sample_specs();
     let mut samples = Vec::new();
     for (kind, indices) in sample_specs {
         samples.push(run_width_sample(&kind, indices, &columns, &curve)?);
@@ -926,6 +1006,412 @@ fn run_width(round13_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String>
             identity_aware_pair_image_affine_entries,
             identity_aware_pair_image_raw_bytes: identity_aware_pair_image_affine_entries * 32,
         },
+    };
+    let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
+    match out {
+        Some(path) => std::fs::write(path, text).map_err(|error| error.to_string())?,
+        None => print!("{text}"),
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn build_verified_eight_image(
+    label: &str,
+    xs: &[Fe],
+    points: &[Point],
+    curve: &CurveParams,
+    a: Fe,
+    b: Fe,
+    sqrt_exponent: &BigUint,
+    inverse_exponent: &BigUint,
+    solves: &mut u64,
+    roots_returned: &mut u64,
+    linear: &mut u64,
+    universal: &mut u64,
+    counts: &mut MultiplicationCounts,
+    reference_group_additions: &mut u64,
+) -> Result<P256ImageState, String> {
+    if xs.len() != 8 || points.len() != 8 {
+        return Err(format!("{label} requires exactly eight leaves"));
+    }
+    let mut images: Vec<P256ImageState> = xs
+        .iter()
+        .copied()
+        .map(|x| P256ImageState {
+            affine: BTreeMap::from([(fe_key(x), x)]),
+            identity: false,
+        })
+        .collect();
+    for block_size in [2usize, 4, 8] {
+        let mut next = Vec::with_capacity(images.len() / 2);
+        for (node, pair) in images.chunks_exact(2).enumerate() {
+            let image = compose_p256_images(
+                &pair[0],
+                &pair[1],
+                a,
+                b,
+                sqrt_exponent,
+                inverse_exponent,
+                solves,
+                roots_returned,
+                linear,
+                universal,
+                counts,
+            )?;
+            let start = node * block_size;
+            verify_width_node(
+                label,
+                block_size,
+                node,
+                &image,
+                &points[start..start + block_size],
+                curve,
+                reference_group_additions,
+            )?;
+            next.push(image);
+        }
+        images = next;
+    }
+    if images.len() != 1 {
+        return Err(format!("{label} did not reduce to one eight-leaf image"));
+    }
+    Ok(images.pop().expect("one image was checked"))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn query_compressed_target(
+    kind: &str,
+    scalar: Option<&BigUint>,
+    target: &Point,
+    reference_positive: bool,
+    left: &P256ImageState,
+    right: &P256ImageState,
+    curve: &CurveParams,
+    build_solves: u64,
+    build_counts: MultiplicationCounts,
+) -> Result<CompressedTargetResult, String> {
+    if matches!(target, Point::Infinity) || !curve.is_on_curve(target) {
+        return Err(format!("{kind} target is infinity or off curve"));
+    }
+    let (target_x, target_y) = affine_coordinates(target).expect("target was checked affine");
+    let t = Fe::from_biguint(target_x);
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut solves = 0u64;
+    let mut roots_returned = 0u64;
+    let mut linear = 0u64;
+    let mut universal = 0u64;
+    let mut counts = MultiplicationCounts::default();
+    let mut hits = BTreeSet::new();
+    for (&left_key, &left_x) in &left.affine {
+        solves += 1;
+        let mut coefficient_field = CountedField::default();
+        let (qa, qb, qc) = coefficients(left_x, t, a, b, &mut coefficient_field);
+        counts.coefficients += coefficient_field.multiplications;
+        let roots = solve_quadratic(qa, qb, qc, &sqrt_exponent, &inverse_exponent, &mut counts);
+        linear += u64::from(roots.linear);
+        universal += u64::from(roots.universal);
+        if roots.universal {
+            return Err(format!("{kind} query produced a universal quadratic"));
+        }
+        roots_returned += roots.len as u64;
+        for root in roots.roots[..roots.len].iter().copied() {
+            let right_key = fe_key(root);
+            if right.affine.contains_key(&right_key) {
+                let mut record = Vec::with_capacity(65);
+                record.push(0);
+                record.extend_from_slice(&left_key);
+                record.extend_from_slice(&right_key);
+                hits.insert(record);
+            }
+        }
+    }
+    let target_key = big_key(target_x);
+    if left.identity && right.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(1);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    if right.identity && left.affine.contains_key(&target_key) {
+        let mut record = Vec::with_capacity(33);
+        record.push(2);
+        record.extend_from_slice(&target_key);
+        hits.insert(record);
+    }
+    counts.finish();
+    let candidate_positive = !hits.is_empty();
+    let false_negative = reference_positive && !candidate_positive;
+    let false_positive = !reference_positive && candidate_positive;
+    let mut hit_bytes = Vec::new();
+    for hit in &hits {
+        hit_bytes.extend_from_slice(hit);
+    }
+    let cold_counts = build_counts.combined(counts);
+    Ok(CompressedTargetResult {
+        kind: kind.into(),
+        scalar: scalar.map(lower_hex),
+        target: [lower_hex(target_x), lower_hex(target_y)],
+        reference_positive,
+        candidate_positive,
+        algebra_hits: hits.len() as u64,
+        quadratic_solves_warm: solves,
+        quadratic_solves_cold: build_solves + solves,
+        quadratic_roots_returned: roots_returned,
+        algebra_index_lookups: roots_returned,
+        linear_degeneracies: linear,
+        universal_degeneracies: universal,
+        multiplication_counts_warm: counts,
+        multiplication_counts_cold: cold_counts,
+        false_negative,
+        false_positive,
+        exact: !false_negative && !false_positive,
+        hit_sha256: hex::encode(sha256(&hit_bytes)),
+    })
+}
+
+fn verify_round14_samples(
+    dependency: &serde_json::Value,
+    sample_specs: &[(String, Vec<u64>)],
+    columns: &[Column],
+) -> Result<(), String> {
+    let samples = dependency
+        .get("samples")
+        .and_then(serde_json::Value::as_array)
+        .ok_or("round-14 dependency has no samples array")?;
+    if samples.len() != sample_specs.len() {
+        return Err("round-14 dependency sample count changed".into());
+    }
+    for (sample, (expected_kind, expected_columns)) in samples.iter().zip(sample_specs) {
+        if sample.get("kind").and_then(serde_json::Value::as_str) != Some(expected_kind) {
+            return Err(format!("round-14 sample name changed for {expected_kind}"));
+        }
+        let stored_columns: Vec<u64> = sample
+            .get("columns")
+            .and_then(serde_json::Value::as_array)
+            .ok_or_else(|| format!("round-14 {expected_kind} columns are missing"))?
+            .iter()
+            .map(|value| {
+                value
+                    .as_u64()
+                    .ok_or_else(|| format!("round-14 {expected_kind} has a non-u64 column"))
+            })
+            .collect::<Result<_, _>>()?;
+        if &stored_columns != expected_columns {
+            return Err(format!("round-14 {expected_kind} column selection changed"));
+        }
+        let stored_xs: Vec<&str> = sample
+            .get("x_coordinates")
+            .and_then(serde_json::Value::as_array)
+            .ok_or_else(|| format!("round-14 {expected_kind} x-coordinates are missing"))?
+            .iter()
+            .map(|value| {
+                value
+                    .as_str()
+                    .ok_or_else(|| format!("round-14 {expected_kind} has a non-string x"))
+            })
+            .collect::<Result<_, _>>()?;
+        let rebuilt_xs: Vec<String> = expected_columns
+            .iter()
+            .map(|&index| {
+                lower_hex(&BigUint::from_bytes_be(
+                    &columns[index as usize].x.to_bytes_be(),
+                ))
+            })
+            .collect();
+        if stored_xs
+            .iter()
+            .zip(&rebuilt_xs)
+            .any(|(stored, rebuilt)| *stored != rebuilt)
+        {
+            return Err(format!("round-14 {expected_kind} x-coordinates changed"));
+        }
+    }
+    Ok(())
+}
+
+fn run_compression_sample(
+    kind: &str,
+    column_indices: Vec<u64>,
+    columns: &[Column],
+    curve: &CurveParams,
+) -> Result<CompressionSampleResult, String> {
+    let selected: Vec<&Column> = column_indices
+        .iter()
+        .map(|&index| {
+            columns
+                .get(index as usize)
+                .ok_or_else(|| format!("{kind} column {index} is out of range"))
+        })
+        .collect::<Result<_, _>>()?;
+    if selected.len() != 16 {
+        return Err(format!("{kind} requires exactly sixteen columns"));
+    }
+    let xs: Vec<Fe> = selected.iter().map(|column| column.x).collect();
+    let points: Vec<Point> = selected.iter().map(|column| column.low.clone()).collect();
+    let x_coordinates: Vec<String> = xs
+        .iter()
+        .map(|x| lower_hex(&BigUint::from_bytes_be(&x.to_bytes_be())))
+        .collect();
+    let a = Fe::from_biguint(&curve.a);
+    let b = Fe::from_biguint(&curve.b);
+    let sqrt_exponent = (&curve.p + BigUint::one()) >> 2usize;
+    let inverse_exponent = &curve.p - BigUint::from(2u8);
+    let mut build_solves = 0u64;
+    let mut build_roots = 0u64;
+    let mut build_linear = 0u64;
+    let mut build_universal = 0u64;
+    let mut build_counts = MultiplicationCounts::default();
+    let mut intermediate_reference_group_additions = 0u64;
+    let left = build_verified_eight_image(
+        &format!("{kind}/left"),
+        &xs[..8],
+        &points[..8],
+        curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut intermediate_reference_group_additions,
+    )?;
+    let right = build_verified_eight_image(
+        &format!("{kind}/right"),
+        &xs[8..],
+        &points[8..],
+        curve,
+        a,
+        b,
+        &sqrt_exponent,
+        &inverse_exponent,
+        &mut build_solves,
+        &mut build_roots,
+        &mut build_linear,
+        &mut build_universal,
+        &mut build_counts,
+        &mut intermediate_reference_group_additions,
+    )?;
+    build_counts.finish();
+    if left.affine.len() != 128
+        || right.affine.len() != 128
+        || left.identity
+        || right.identity
+        || build_solves != 152
+        || build_roots != 304
+    {
+        return Err(format!("{kind} half-image shape or count changed"));
+    }
+
+    let (full_reference, full_reference_group_additions) = reference_image(&points, curve)?;
+    let curve_a = curve.a_fe();
+    let planted = points.iter().fold(Point::Infinity, |sum, point| {
+        sum.add_vartime(point, &curve_a)
+    });
+    if matches!(planted, Point::Infinity) || !curve.is_on_curve(&planted) {
+        return Err(format!("{kind} planted target is infinity or off curve"));
+    }
+    let public_preimage = format!("{CURVE_SLUG}/s17-target-join-round15/sample/{kind}/public");
+    let mut public_scalar = BigUint::from_bytes_be(&sha256(public_preimage.as_bytes())) % &curve.n;
+    if public_scalar.is_zero() {
+        public_scalar = BigUint::one();
+    }
+    let public = curve
+        .generator()
+        .scalar_mul_vartime(&public_scalar, &curve_a);
+
+    let reference_membership = |target: &Point| -> Result<bool, String> {
+        let (x, _) = affine_coordinates(target).ok_or("compressed target is infinity")?;
+        Ok(full_reference.affine.contains(&big_key(x)))
+    };
+    let targets = vec![
+        query_compressed_target(
+            "planted-positive",
+            None,
+            &planted,
+            reference_membership(&planted)?,
+            &left,
+            &right,
+            curve,
+            build_solves,
+            build_counts,
+        )?,
+        query_compressed_target(
+            "hash-public",
+            Some(&public_scalar),
+            &public,
+            reference_membership(&public)?,
+            &left,
+            &right,
+            curve,
+            build_solves,
+            build_counts,
+        )?,
+    ];
+    if targets.iter().any(|target| !target.exact) {
+        return Err(format!("{kind} compressed target classification mismatch"));
+    }
+    let retained_entries = left.affine.len() + right.affine.len();
+    let materialized_sixteen_leaf_entries = 32_768usize;
+    Ok(CompressionSampleResult {
+        kind: kind.into(),
+        columns: column_indices,
+        x_coordinates,
+        left_eight_leaf_entries: left.affine.len(),
+        right_eight_leaf_entries: right.affine.len(),
+        retained_entries,
+        materialized_sixteen_leaf_entries,
+        retained_raw_bytes: retained_entries * 32,
+        materialized_raw_bytes: materialized_sixteen_leaf_entries * 32,
+        retained_to_materialized_ratio: retained_entries as f64
+            / materialized_sixteen_leaf_entries as f64,
+        build_quadratic_solves: build_solves,
+        full_materialization_quadratic_solves: 16_536,
+        intermediate_reference_group_additions,
+        full_reference_group_additions,
+        build_linear_degeneracies: build_linear,
+        build_universal_degeneracies: build_universal,
+        build_multiplication_counts: build_counts,
+        left_image_sha256: image_digest(&left),
+        right_image_sha256: image_digest(&right),
+        targets,
+    })
+}
+
+fn run_compression(round14_path: &PathBuf, out: Option<PathBuf>) -> Result<(), String> {
+    let bytes = std::fs::read(round14_path).map_err(|error| error.to_string())?;
+    let round14_sha256 = hex::encode(sha256(&bytes));
+    if round14_sha256 != ROUND14_SHA256 {
+        return Err(format!(
+            "round-14 SHA-256 mismatch: expected {ROUND14_SHA256}, got {round14_sha256}"
+        ));
+    }
+    let dependency: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
+    let curve = CurveParams::p256();
+    let (factor_base, columns, _, _, _) = build_indexes(&curve)?;
+    let sample_specs = round14_sample_specs();
+    verify_round14_samples(&dependency, &sample_specs, &columns)?;
+    let mut samples = Vec::new();
+    for (kind, indices) in sample_specs {
+        samples.push(run_compression_sample(&kind, indices, &columns, &curve)?);
+    }
+    let result = CompressionExperimentResult {
+        schema: "p256.s17_target_indexed_compression/v1".into(),
+        curve: CURVE_SLUG.into(),
+        field_prime: lower_hex(&curve.p),
+        curve_a: lower_hex(&curve.a),
+        curve_b: lower_hex(&curve.b),
+        round14_sha256,
+        factor_base,
+        local_maximum_degree: 2,
+        samples,
     };
     let text = serde_json::to_string_pretty(&result).map_err(|error| error.to_string())? + "\n";
     match out {
@@ -996,10 +1482,21 @@ fn run_transfer(out: Option<PathBuf>) -> Result<(), String> {
 }
 
 fn run(cli: Cli) -> Result<(), String> {
-    match cli.width_round13 {
-        Some(path) => run_width(&path, cli.out),
-        None => run_transfer(cli.out),
+    let Cli {
+        out,
+        width_round13,
+        compress_round14,
+    } = cli;
+    if width_round13.is_some() && compress_round14.is_some() {
+        return Err("choose only one continuation mode".into());
     }
+    if let Some(path) = width_round13 {
+        return run_width(&path, out);
+    }
+    if let Some(path) = compress_round14 {
+        return run_compression(&path, out);
+    }
+    run_transfer(out)
 }
 
 fn main() -> ExitCode {
