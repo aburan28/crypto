@@ -350,8 +350,8 @@ pinned file, changes.
   the base against a byte-identical copy, on `M1`'s 22 rows, five
   rounds, in the chain's run tree.
 - **The chain** gains B4 after B3b, as B4's protocol declares.
-- **Measurement 6, the subfield sweep,** runs on a native port of
-  `sweep.py`. The port lands before B2b's measurement (plan §10a), and
-  it rebuilds the curves and replays every answer in arithmetic of its
-  own.
+- **Measurement 6, the subfield sweep,** runs on `icprog b2b-sweep`,
+  `sweep.py` ported. It rebuilds the curves and replays every answer in
+  arithmetic of its own. It writes B2b's frozen C059 and C063 documents
+  again, byte for byte, and finds the protocol's 20 curves and 40 runs.
 - **Nothing else changes:** the cases, the pins, the acceptance rules.
