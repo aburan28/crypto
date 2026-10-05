@@ -34,6 +34,18 @@ execution. Archive or receipt mutations must fail. A passing replay says only
 that the validation build has portable byte custody; it cannot admit a solver,
 fresh target, relation-yield estimate or speedup.
 
+The later scientific registration extension adds
+`target-control-publish-registration` and `target-control-replay-registration`.
+They retain and independently replay the complete unconsumed scientific target
+capsule as data, with a distinct question and status from validation custody.
+Publication checks the original completed F5 preparation. The frozen
+`target-control-execute` requires `--publication` and replays every archived
+member before it consumes the target claim. It writes a preflight receipt before
+dispatch. The original frozen target audit checks that receipt against the
+publication again. A missing, swapped or mutated publication cannot authorize
+the worker. Publication and replay execute no archived binary and do not
+admit a target solve by themselves.
+
 Execute must retain a durable consumed claim and target-exposure record before
 launch and never resume. Terminal receipts must survive success, failure and
 timeout and bind immutable source, worker/controller bytes, exact invocation,

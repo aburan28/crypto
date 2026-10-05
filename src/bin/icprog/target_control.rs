@@ -1,7 +1,7 @@
 //! Original-capsule controller and data-only runtime audit for the bounded n17 worker.
 use super::ordinary_control::capsule as preparation;
 use super::sat_control::native;
-use super::{ordinary_control, ordinary_preparation, target_build, target_math};
+use super::{ordinary_control, ordinary_preparation, target_build, target_custody, target_math};
 #[path = "../prepared_target_worker/contract.rs"]
 pub(super) mod capsule;
 #[path = "../prepared_target_worker/journal.rs"]
@@ -136,7 +136,12 @@ fn output_outside(execution: &Path, root: &Path, out: &Path) -> Result<(), Strin
 }
 
 /// Consume before the sole launch; preserve every transport/source/drain outcome.
-pub(super) fn execute(root: &Path, execution: &Path, expected: &str) -> Result<String, String> {
+pub(super) fn execute(
+    root: &Path,
+    publication: &Path,
+    execution: &Path,
+    expected: &str,
+) -> Result<String, String> {
     native::enforce_hardware()?;
     let root = root.canonicalize().map_err(|e| e.to_string())?;
     let record = capsule::check_capsule(&root, expected)?;
@@ -151,9 +156,13 @@ pub(super) fn execute(root: &Path, execution: &Path, expected: &str) -> Result<S
             .map_err(|e| e.to_string())?,
         "target registration already consumed; never retry",
     )?;
+    let publication_preflight = target_custody::scientific_preflight(publication, &root, expected)?;
     let cfg = capsule::config(&root)?;
     fs::create_dir(execution).map_err(|e| e.to_string())?;
     let execution = execution.canonicalize().map_err(|e| e.to_string())?;
+    let preflight_path = execution.join("publication-preflight.json");
+    save(&preflight_path, &publication_preflight)?;
+    let preflight_sha256 = sha256(&read(&preflight_path, 16 * 1024 * 1024)?);
     consume(&root, &execution, &record, &cfg, expected)?;
     let env = capsule::environment().into_iter().collect::<Vec<_>>();
     let args = worker_args(&root, &execution, expected);
@@ -179,6 +188,7 @@ pub(super) fn execute(root: &Path, execution: &Path, expected: &str) -> Result<S
         .map(|b| sha256(&b));
     let unchanged = own_after.as_ref().is_ok_and(|v| v == &own);
     let mut terminal = json!({"schema_version":1,"scope":capsule::SCOPE,"registration_sha256":expected,
+        "publication_preflight_sha256":preflight_sha256,
         "controller_sha256":own,"controller_unchanged":unchanged,"controller_read_error":own_after.as_ref().err(),
         "source_gate_passed":gate.is_ok(),"source_gate_error":gate.as_ref().err(),
         "worker_drain_passed":worker_drain.is_ok(),"worker_drain_error":worker_drain.as_ref().err(),
@@ -349,6 +359,19 @@ fn verified_runtime(root: &Path, execution: &Path, seal: &str, own: &str) -> Res
     let terminal = load(&execution.join("terminal.json"))?;
     terminal_binding(&terminal, seal, own)?;
     ordinary_control::verify_execution_inventory(execution, &terminal)?;
+    let preflight_path = execution.join("publication-preflight.json");
+    let preflight_bytes = read(&preflight_path, 16 * 1024 * 1024)?;
+    let preflight = target_math::parse(&preflight_bytes)?;
+    let publication = Path::new(
+        preflight["publication_root"]
+            .as_str()
+            .ok_or("target publication preflight lacks root")?,
+    );
+    require(
+        sha256(&preflight_bytes) == terminal["publication_preflight_sha256"]
+            && preflight == target_custody::scientific_preflight(publication, root, seal)?,
+        "original target publication preflight differs from registered bytes",
+    )?;
     require(
         load(&execution.join("target-exposure.json"))? == exposure(&cfg, &record, seal),
         "original target exposure differs",

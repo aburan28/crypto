@@ -157,6 +157,14 @@ not full-rank preparation. Do not refill the missing SAT rows from F5 or an
 oracle, rerun either consumed capsule, or turn shorter incomplete CMS attempts
 into a CPU speedup. A revised SAT budget/encoding needs a newly registered
 natural panel. F5 may bind its audited logs to a separate new target claim.
+For a new F5 target capsule, publish its full unconsumed scientific bytes with
+`target-control-publish-registration`, replay them with
+`target-control-replay-registration`, and pass `--publication` to the original
+frozen `target-control-execute`. Its independent audit must match the saved
+preflight to the same publication. The older `target-control-publish-build` is
+validation-only and cannot authorize a solve. A disclosed target recovery
+still needs fresh-target qualification, a same-point rho arm, canonical IDs
+and host isolation before any speedup claim.
 The [SAT target transport design](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/DESIGN.md)
 specifies a new source-bound prestarted exporter and one CMS child per permitted
 attempt. This is a feasibility design, not a dispatch registration. The

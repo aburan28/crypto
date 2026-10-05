@@ -160,10 +160,32 @@ enum Command {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Publish full data custody of an unconsumed scientific target registration.
+    TargetControlPublishRegistration {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Verify published scientific target registration as data; no execution.
+    TargetControlReplayRegistration {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Consume one separately published target registration; no retry or resume.
     TargetControlExecute {
         #[arg(long)]
         capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
         #[arg(long)]
         execution: PathBuf,
         #[arg(long)]
@@ -871,11 +893,23 @@ fn main() -> ExitCode {
             validation_registration_sha256,
             out,
         } => target_custody::replay(&publication, &validation_registration_sha256, &out),
+        Command::TargetControlPublishRegistration {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+        } => target_custody::publish_scientific(&capsule, &publication, &registration_sha256, &out),
+        Command::TargetControlReplayRegistration {
+            publication,
+            registration_sha256,
+            out,
+        } => target_custody::replay_scientific(&publication, &registration_sha256, &out),
         Command::TargetControlExecute {
             capsule,
+            publication,
             execution,
             registration_sha256,
-        } => target_control::execute(&capsule, &execution, &registration_sha256),
+        } => target_control::execute(&capsule, &publication, &execution, &registration_sha256),
         Command::TargetControlInspect {
             capsule,
             execution,
