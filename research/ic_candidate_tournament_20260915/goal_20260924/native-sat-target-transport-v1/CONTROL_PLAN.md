@@ -44,6 +44,28 @@ readiness needed to exclude all target-independent startup from the primary
 online interval. That later handshake needs its own source-bound implementation
 and disclosed parity tests.
 
+### Explicit post-hoc transport diagnostic after the frozen controls
+
+The frozen 60,000 ms control for `query-00` failed status parity: file mode
+timed out after reaching about 375,000 conflicts, while stdin mode proved
+UNSAT at 415,862 conflicts. The raw failed result remains in the separately
+retained `ic-cms-stdin-control-00-v1` directory and must be published
+alongside any follow-up. The other frozen controls passed: `query-01` was
+UNSAT in both modes and `query-02` had independently verified source/model
+and full-point witnesses in both modes. A 60-second wall watchdog on this
+unisolated host cannot distinguish parser incompatibility from scheduling
+noise when file mode stops just short of the observed conflict count.
+
+Run one separately labeled `query-00-v2` diagnostic with **the same pinned
+accepted executable, CNF/ANF/manifest/preparation bytes, one-million-conflict
+budget, single thread and expected UNSAT class**, changing only the wall
+watchdog to 120,000 ms, which the already committed probe permits. Use a new
+create-only output directory and retain the v1 failure. A v2 parity pass
+supports only the narrow claim that the accepted binary can parse and solve
+this exact disclosed input from prestarted stdin. It does not retroactively
+pass the frozen 60-second panel, show a speed benefit, establish a
+post-initialization online boundary, or admit a complete SAT IC target.
+
 If the accepted stdin probe passes, build a **new** instrumented binary from
 the retained CMS source commit `7ae1b4a74259cdce223a584281fb8f090bbd3eed`
 plus [the one-line marker patch](cms-stdin-ready.patch). Archive the complete
