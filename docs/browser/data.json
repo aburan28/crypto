@@ -3,7 +3,7 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 114,
+  "curves": 115,
   "methods": 44,
   "factor_bases": 29,
   "candidates": 258,
@@ -12,8 +12,8 @@
   "yields": 1956
  },
  "sources": {
-  "docs/curves/registry.json": "341792fbfc9f18a4a4c95d0b42bf26c77727f080315530b37ed6c39ff07d31a8",
-  "docs/ic/leaderboard.json": "0db123b06a463e6bf3f0b2293944547e1fa2de99185b593084b9c76e74c2bd22",
+  "docs/curves/registry.json": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3",
+  "docs/ic/leaderboard.json": "7e9e3da7d67fa44d5e458b27fb64e2365f45c8a240b7f005d8c0a9b0eadaa28d",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -11638,6 +11638,56 @@
      "mean_ratio_to_floor": 1.119
     }
    ],
+   "factor_bases": [],
+   "tournament_cells": []
+  },
+  {
+   "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+   "icv1": "ICV1:fp-6277101735386680763835789423207666416083908700390324961279:31607402316713927207482677199:6277101735386680763835789423176059013767194773182842284081:6234286251230310114240839169629130138801351179850969208331:unk:unk:r:52e4af591e39",
+   "family": "prime",
+   "standard_names": [
+    "P-192"
+   ],
+   "field": {
+    "characteristic": "p",
+    "p": "6277101735386680763835789423207666416083908700390324961279",
+    "bits": 192,
+    "degree": 1,
+    "modulus": null
+   },
+   "a": "6277101735386680763835789423207666416083908700390324961276",
+   "b": "2455155546008943817740293915197451784769108058161191238065",
+   "construction": null,
+   "trace": "31607402316713927207482677199",
+   "order": "6277101735386680763835789423176059013767194773182842284081",
+   "order_bits": 192.0,
+   "r": "6277101735386680763835789423176059013767194773182842284081",
+   "r_bits": 192.0,
+   "cofactor": 1,
+   "generator": [
+    "0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",
+    "0x7192b95ffc8da78631011ed6b24cdd573f977a11e794811"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "6234286251230310114240839169629130138801351179850969208331",
+   "endomorphism_discriminant": null,
+   "model_json": "{\"a\":\"6277101735386680763835789423207666416083908700390324961276\",\"b\":\"2455155546008943817740293915197451784769108058161191238065\",\"field\":\"fp-6277101735386680763835789423207666416083908700390324961279\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"6277101735386680763835789423207666416083908700390324961279\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1P192Cp192h5531c4a08bdb"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:5531c4a08bdb64b6e86a6e30e9a08aa57edef7af15ac5f6d4d2a83a53bf2f646"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "P-192"
+   ],
+   "sources": [
+    "src/ecc/curve_zoo.rs"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
    "factor_bases": [],
    "tournament_cells": []
   },
