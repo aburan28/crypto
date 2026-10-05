@@ -1,7 +1,12 @@
 # Native prepared F5 control preregistration
 
-**Status: registered locally, not dispatched; source acceptance and this
-preregistration's final-head CI remain pending.** This is the actual frozen
+**Current status: consumed and closed.** The original frozen auditor admits
+the complete native disclosed-input execution; see [the result](RESULT.md).
+Do not execute the capsule or a restored copy again. The following describes
+the historical before-execution registration, whose pending gates subsequently
+passed before dispatch. The result publication's review/CI remains separate.
+
+This is the actual frozen
 capsule for the disclosed synthetic n17 known-input control. It is separate from
 the non-executable compact build-validation capsule. No scientific invocation
 claim exists, no new query has run and no target has been recovered by this
