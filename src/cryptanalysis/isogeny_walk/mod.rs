@@ -27,6 +27,7 @@ pub mod modpoly;
 pub mod poly;
 pub mod queue;
 pub mod record;
+pub mod store;
 pub mod traits;
 pub mod walk;
 

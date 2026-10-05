@@ -321,13 +321,52 @@ pub struct PlanWalk {
 
 /// The `taskq.task-spec/v1` documents for a sharded trait run: one per
 /// shard, each rebuilding the walk at `commit` and detecting one shard.
+impl PlanWalk {
+    /// Sixteen hex digits naming this walk's arguments.
+    pub fn key(&self) -> String {
+        sha256_hex(&format!("{:?}|{:?}", self.curve_args, self.walk_args))[..16].to_string()
+    }
+
+    /// `<curve>-<key>`: the run id a stored walk is filed under.
+    pub fn run_id(&self) -> String {
+        let curve = self
+            .curve_args
+            .iter()
+            .position(|a| a == "--curve")
+            .and_then(|i| self.curve_args.get(i + 1))
+            .map_or("curve".to_string(), |c| {
+                c.to_ascii_lowercase()
+                    .chars()
+                    .filter(|ch| ch.is_ascii_alphanumeric())
+                    .collect()
+            });
+        format!("{curve}-{}", self.key())
+    }
+}
+
+/// Where planned jobs read the walk from and write their shards to.
+#[derive(Clone, Debug, Default)]
+pub struct PlanStore {
+    /// `s3://bucket/prefix`: each shard publishes its output there.
+    pub store: Option<String>,
+    /// Fetch the walk from `store` instead of rebuilding it.
+    pub walk_from_store: bool,
+}
+
 pub fn plan(
     walk: &PlanWalk,
     commit: &str,
     queue: &str,
     shards: usize,
     timeout_seconds: u64,
+    storage: &PlanStore,
 ) -> Result<Vec<V>, String> {
+    if storage.walk_from_store && storage.store.is_none() {
+        return Err("--walk-from-store needs --store".into());
+    }
+    if let Some(s) = &storage.store {
+        super::store::S3Loc::parse(s)?;
+    }
     if commit.len() != 40
         || !commit
             .bytes()
@@ -340,8 +379,9 @@ pub fn plan(
     if shards == 0 {
         return Err("--shards must be at least 1".into());
     }
-    let key = sha256_hex(&format!("{:?}|{:?}", walk.curve_args, walk.walk_args));
-    let dir = format!("target/isogeny-walk/{}", &key[..16]);
+    let key = walk.key();
+    let run_id = walk.run_id();
+    let dir = format!("target/isogeny-walk/{key}");
     let bin = "target/release/isogeny_walk".to_string();
     let mut walk_cmd = vec![bin.clone(), "walk".into()];
     walk_cmd.extend(walk.curve_args.iter().cloned());
@@ -352,6 +392,18 @@ pub fn plan(
         "--out".to_string(),
         dir.clone(),
     ]);
+    if let (true, Some(store)) = (storage.walk_from_store, &storage.store) {
+        walk_cmd = vec![
+            bin.clone(),
+            "fetch".into(),
+            "--from".into(),
+            store.clone(),
+            "--run".into(),
+            run_id.clone(),
+            "--out".into(),
+            dir.clone(),
+        ];
+    }
     let strs = |v: &[String]| V::Seq(v.iter().map(|s| V::s(s.clone())).collect());
     Ok((0..shards)
         .map(|i| {
@@ -365,6 +417,14 @@ pub fn plan(
                 "--of".into(),
                 shards.to_string(),
             ]);
+            if let Some(store) = &storage.store {
+                argv.extend([
+                    "--store".to_string(),
+                    store.clone(),
+                    "--run".into(),
+                    run_id.clone(),
+                ]);
+            }
             V::map(vec![
                 ("schema", V::s("taskq.task-spec/v1")),
                 ("queue", V::s(queue)),
@@ -405,7 +465,7 @@ pub fn plan(
                     "idempotency_key",
                     V::s(format!(
                         "isogeny-walk-traits/{}/{}/{i}-of-{shards}",
-                        &key[..16],
+                        &key,
                         &commit[..12]
                     )),
                 ),
@@ -413,7 +473,7 @@ pub fn plan(
                     "labels",
                     V::map(vec![
                         ("experiment", V::s("isogeny-walk-traits")),
-                        ("walk", V::s(&key[..16])),
+                        ("walk", V::s(&key)),
                         ("shard", V::s(format!("{i}/{shards}"))),
                     ]),
                 ),

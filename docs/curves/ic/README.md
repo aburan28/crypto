@@ -140,3 +140,46 @@ for f in specs/*.json; do taskq submit --spec "$f"; done
 
   It reports each trait's distribution in `collect.json`.
 - **Without a queue.** The same shards run locally in a loop.
+
+### Storage in S3
+
+Walk and trait outputs are stored in S3, not on local disk.  The store is
+`s3://crypto-autoresearcher/isogeny-walk` (`src/cryptanalysis/isogeny_walk/store.rs`),
+laid out on the pattern of PR #1330's campaign contract.
+
+```text
+runs/<curve>-<walk key>/attempts/<attempt id>/{curves.yaml,isogeny_routes.json,walk.json}.gz
+runs/<curve>-<walk key>/complete.json
+runs/<curve>-<walk key>/traits/<N>/shard-<i>/…/complete.json
+runs/<curve>-<walk key>/traits/<N>/collected/…/complete.json
+```
+
+- **Write-once.** Every object is created with `If-None-Match: *` and
+  never overwritten.
+- **Hash-checked.** Each upload's SHA-256, as S3 reports it, must equal the
+  local hash before the run's `complete.json` is created, also
+  write-once.
+- **One winner.** That marker lists every object by key, stored SHA-256,
+  bytes and uncompressed SHA-256.  If two attempts race, one marker wins and
+  the loser's objects are never authoritative.  A run that is already
+  complete is not uploaded again.
+- **Checked downloads.** `fetch` recomputes both hashes of every object.
+- **Transport.** The AWS CLI, with the caller's credentials.
+
+```bash
+isogeny_walk walk  --curve p256 --max-ell 61 --max-curves 20000 \
+    --store s3://crypto-autoresearcher/isogeny-walk --prune-local --out W   # STORE.json names the run
+isogeny_walk fetch --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --out W
+isogeny_walk traits --curve p256 --dir W --shard 0 --of 8 \
+    --store s3://crypto-autoresearcher/isogeny-walk --run <run id> --out S0
+isogeny_walk collect --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --of 8 \
+    --store s3://crypto-autoresearcher/isogeny-walk --out T
+isogeny_walk plan ... --store s3://crypto-autoresearcher/isogeny-walk --walk-from-store
+```
+
+With `plan --store --walk-from-store`, each taskq job fetches the stored
+walk instead of rebuilding it and publishes its shard.  The workers then
+need AWS credentials that can read and write the prefix.
+
+The bucket is encrypted (SSE-S3) and blocks public access.  Versioning is
+off; write-once keys make it unnecessary for these objects.

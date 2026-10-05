@@ -352,8 +352,16 @@ fn detectors_class_audits_and_queued_shards_agree() {
         curve_args: vec!["--curve".into(), "p224".into()],
         walk_args: vec!["--primes".into(), "3,11".into()],
     };
-    assert!(queue::plan(&pw, "main", "cpu", 2, 60).is_err());
-    let specs = queue::plan(&pw, &"a".repeat(40), "cpu", 2, 60).unwrap();
+    assert!(queue::plan(&pw, "main", "cpu", 2, 60, &queue::PlanStore::default()).is_err());
+    let specs = queue::plan(
+        &pw,
+        &"a".repeat(40),
+        "cpu",
+        2,
+        60,
+        &queue::PlanStore::default(),
+    )
+    .unwrap();
     let keys: Vec<String> = specs
         .iter()
         .map(|s| {

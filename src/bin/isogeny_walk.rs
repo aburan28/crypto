@@ -29,8 +29,9 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
-use crypto_lib::cryptanalysis::isogeny_walk::queue::{self, PlanWalk};
+use crypto_lib::cryptanalysis::isogeny_walk::queue::{self, PlanStore, PlanWalk};
 use crypto_lib::cryptanalysis::isogeny_walk::record::{sha256_hex, V};
+use crypto_lib::cryptanalysis::isogeny_walk::store::{self, S3Loc};
 use crypto_lib::cryptanalysis::isogeny_walk::walk::{
     self, ClassInfo, EllKind, RouteIndex, StartCurve, Walk, WalkConfig,
 };
@@ -86,7 +87,34 @@ enum Cmd {
         /// Skip the class audits.
         #[arg(long)]
         no_class_audits: bool,
+        /// Publish the outputs to S3 (s3://bucket/prefix), write-once and
+        /// hash-checked, under runs/<curve>-<walk key>/.
+        #[arg(long)]
+        store: Option<String>,
+        /// After a successful publish, delete the local curves.yaml and
+        /// isogeny_routes.json (walk.json and STORE.json stay).
+        #[arg(long)]
+        prune_local: bool,
         /// Output directory.
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Download a stored walk, trait shard or collected traits, checking every hash.
+    Fetch {
+        /// s3://bucket/prefix the run was published under.
+        #[arg(long)]
+        from: String,
+        /// Run id (printed by `walk --store`, in STORE.json).
+        #[arg(long)]
+        run: String,
+        /// Fetch trait shard SHARD of OF instead of the walk.
+        #[arg(long)]
+        shard: Option<usize>,
+        #[arg(long)]
+        of: Option<usize>,
+        /// Fetch the collected traits of OF shards instead of the walk.
+        #[arg(long)]
+        collected: bool,
         #[arg(long)]
         out: PathBuf,
     },
@@ -107,12 +135,28 @@ enum Cmd {
         /// Output directory; default $TASKQ_OUTPUT_DIR.
         #[arg(long)]
         out: Option<PathBuf>,
+        /// Also publish the shard to S3 under runs/RUN/traits/OF/shard-I.
+        #[arg(long)]
+        store: Option<String>,
+        #[arg(long)]
+        run: Option<String>,
     },
     /// Merge trait shard directories, refusing gaps, duplicates and mixed walks.
     Collect {
         #[arg(long)]
         out: PathBuf,
+        /// Shard directories (or use --from/--run/--of to fetch them from S3).
         dirs: Vec<PathBuf>,
+        /// s3://bucket/prefix to fetch completed shards from.
+        #[arg(long)]
+        from: Option<String>,
+        #[arg(long)]
+        run: Option<String>,
+        #[arg(long)]
+        of: Option<usize>,
+        /// Publish the collected traits to S3 under runs/RUN/traits/OF/collected.
+        #[arg(long)]
+        store: Option<String>,
     },
     /// Write one taskq task spec per trait shard of a walk.
     Plan {
@@ -136,6 +180,13 @@ enum Cmd {
         /// Per-shard run limit in seconds.
         #[arg(long, default_value_t = 3600)]
         timeout: u64,
+        /// s3://bucket/prefix: each shard job publishes its output there.
+        #[arg(long)]
+        store: Option<String>,
+        /// Shard jobs fetch the stored walk (published with `walk --store`)
+        /// instead of rebuilding it.
+        #[arg(long)]
+        walk_from_store: bool,
         /// Directory for the spec files.
         #[arg(long)]
         out: PathBuf,
@@ -261,6 +312,67 @@ impl PrimeArgs {
     }
 }
 
+/// The walk arguments a stored walk and a plan are keyed by.
+fn walk_args(
+    primes: &PrimeArgs,
+    max_curves: usize,
+    max_depth: Option<usize>,
+    include_atkin: bool,
+) -> Vec<String> {
+    let mut v = vec![
+        "--primes".to_string(),
+        primes
+            .list()
+            .iter()
+            .map(u64::to_string)
+            .collect::<Vec<_>>()
+            .join(","),
+        "--max-curves".into(),
+        max_curves.to_string(),
+    ];
+    if let Some(d) = max_depth {
+        v.extend(["--max-depth".into(), d.to_string()]);
+    }
+    if include_atkin {
+        v.push("--include-atkin".into());
+    }
+    v
+}
+
+/// Scratch space for S3 transfers, inside `dir`, removed afterwards.
+fn scratch(dir: &std::path::Path) -> PathBuf {
+    dir.join(".s3-scratch")
+}
+
+fn publish_dir(
+    uri: &str,
+    rel: &str,
+    dir: &std::path::Path,
+    names: &[&str],
+    meta: V,
+) -> Result<store::Published, String> {
+    let loc = S3Loc::parse(uri)?;
+    let files: Vec<PathBuf> = names
+        .iter()
+        .map(|n| dir.join(n))
+        .filter(|p| p.exists())
+        .collect();
+    let sc = scratch(dir);
+    let r = store::publish(&loc, rel, &files, meta, &sc);
+    let _ = std::fs::remove_dir_all(&sc);
+    let r = r?;
+    eprintln!(
+        "isogeny_walk: {} {}",
+        if r.won {
+            "published"
+        } else {
+            "another attempt already completed"
+        },
+        r.marker_uri
+    );
+    Ok(r)
+}
+
 fn write(path: &PathBuf, text: &str) -> Result<String, String> {
     std::fs::write(path, text).map_err(|e| format!("{}: {e}", path.display()))?;
     Ok(sha256_hex(text))
@@ -285,8 +397,15 @@ fn run(cli: Cli) -> Result<(), String> {
             include_atkin,
             class_audit_sample,
             no_class_audits,
+            store: store_uri,
+            prune_local,
             out,
         } => {
+            let key_args = walk_args(&primes, max_curves, max_depth, include_atkin);
+            let plan_walk = PlanWalk {
+                curve_args: curve.argv(),
+                walk_args: key_args,
+            };
             if let Some(t) = threads {
                 rayon::ThreadPoolBuilder::new()
                     .num_threads(t)
@@ -361,6 +480,58 @@ fn run(cli: Cli) -> Result<(), String> {
                 w.stats.walk_ms,
                 out.display()
             );
+            if let Some(uri) = &store_uri {
+                if !w.failures.is_empty() {
+                    return Err("not publishing a walk with failures".into());
+                }
+                let run_id = plan_walk.run_id();
+                let meta = V::map(vec![
+                    ("kind", V::s("walk")),
+                    ("run_id", V::s(run_id.clone())),
+                    ("root", V::s(w.start.name.clone())),
+                    (
+                        "curve_args",
+                        V::Seq(
+                            plan_walk
+                                .curve_args
+                                .iter()
+                                .map(|a| V::s(a.clone()))
+                                .collect(),
+                        ),
+                    ),
+                    (
+                        "walk_args",
+                        V::Seq(
+                            plan_walk
+                                .walk_args
+                                .iter()
+                                .map(|a| V::s(a.clone()))
+                                .collect(),
+                        ),
+                    ),
+                    ("curves", V::int(w.nodes.len())),
+                    ("edges", V::int(w.edges.len())),
+                ]);
+                let r = publish_dir(
+                    uri,
+                    &store::walk_rel(&run_id)?,
+                    &out,
+                    &["curves.yaml", "isogeny_routes.json", "walk.json"],
+                    meta,
+                )?;
+                let receipt = V::map(vec![
+                    ("run_id", V::s(run_id)),
+                    ("marker", V::s(r.marker_uri)),
+                    ("won", V::Bool(r.won)),
+                    ("complete", r.marker),
+                ]);
+                write(&out.join("STORE.json"), &receipt.json())?;
+                if prune_local && r.won {
+                    for f in ["curves.yaml", "isogeny_routes.json"] {
+                        let _ = std::fs::remove_file(out.join(f));
+                    }
+                }
+            }
             if w.failures.is_empty() {
                 Ok(())
             } else {
@@ -377,6 +548,8 @@ fn run(cli: Cli) -> Result<(), String> {
             of,
             class_audit_sample,
             out,
+            store: store_uri,
+            run,
         } => {
             let start = curve.start()?;
             let out = out
@@ -387,6 +560,21 @@ fn run(cli: Cli) -> Result<(), String> {
                 std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
             let shard_out = queue::run_shard(&text, &start, shard, of, class_audit_sample)?;
             queue::write_shard(&out, &shard_out)?;
+            if let Some(uri) = &store_uri {
+                let run = run.as_deref().ok_or("--store needs --run")?;
+                publish_dir(
+                    uri,
+                    &store::shard_rel(run, shard, of)?,
+                    &out,
+                    &[queue::TRAITS_FILE, queue::METRICS_FILE, queue::CLASS_FILE],
+                    V::map(vec![
+                        ("kind", V::s("trait-shard")),
+                        ("run_id", V::s(run)),
+                        ("shard", V::int(shard)),
+                        ("of", V::int(of)),
+                    ]),
+                )?;
+            }
             eprintln!(
                 "isogeny_walk: trait shard {shard}/{of} of {} written to {}",
                 path.display(),
@@ -394,13 +582,48 @@ fn run(cli: Cli) -> Result<(), String> {
             );
             Ok(())
         }
-        Cmd::Collect { out, dirs } => {
+        Cmd::Collect {
+            out,
+            dirs,
+            from,
+            run,
+            of,
+            store: store_uri,
+        } => {
+            let mut dirs = dirs;
+            if let Some(uri) = &from {
+                let run = run.as_deref().ok_or("--from needs --run")?;
+                let of = of.ok_or("--from needs --of")?;
+                let loc = S3Loc::parse(uri)?;
+                let sc = scratch(&out);
+                for i in 0..of {
+                    let d = out.join("shards").join(format!("shard-{i:04}"));
+                    store::fetch(&loc, &store::shard_rel(run, i, of)?, &d, &sc)?;
+                    dirs.push(d);
+                }
+                let _ = std::fs::remove_dir_all(&sc);
+            }
             let (merged, summary, class) = queue::collect(&dirs)?;
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
             write(&out.join(queue::TRAITS_FILE), &merged)?;
             write(&out.join("collect.json"), &summary.json())?;
             if let Some(c) = class {
                 write(&out.join(queue::CLASS_FILE), &c)?;
+            }
+            if let Some(uri) = &store_uri {
+                let run = run.as_deref().ok_or("--store needs --run")?;
+                let n = of.unwrap_or(dirs.len());
+                publish_dir(
+                    uri,
+                    &store::collected_rel(run, n)?,
+                    &out,
+                    &[queue::TRAITS_FILE, "collect.json", queue::CLASS_FILE],
+                    V::map(vec![
+                        ("kind", V::s("traits-collected")),
+                        ("run_id", V::s(run)),
+                        ("of", V::int(n)),
+                    ]),
+                )?;
             }
             print!("{}", summary.json());
             Ok(())
@@ -415,31 +638,20 @@ fn run(cli: Cli) -> Result<(), String> {
             queue: queue_name,
             shards,
             timeout,
+            store: store_uri,
+            walk_from_store,
             out,
         } => {
             curve.start()?;
-            let mut walk_args = vec![
-                "--primes".to_string(),
-                primes
-                    .list()
-                    .iter()
-                    .map(u64::to_string)
-                    .collect::<Vec<_>>()
-                    .join(","),
-                "--max-curves".into(),
-                max_curves.to_string(),
-            ];
-            if let Some(d) = max_depth {
-                walk_args.extend(["--max-depth".into(), d.to_string()]);
-            }
-            if include_atkin {
-                walk_args.push("--include-atkin".into());
-            }
             let plan_walk = PlanWalk {
                 curve_args: curve.argv(),
-                walk_args,
+                walk_args: walk_args(&primes, max_curves, max_depth, include_atkin),
             };
-            let specs = queue::plan(&plan_walk, &commit, &queue_name, shards, timeout)?;
+            let storage = PlanStore {
+                store: store_uri,
+                walk_from_store,
+            };
+            let specs = queue::plan(&plan_walk, &commit, &queue_name, shards, timeout, &storage)?;
             std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
             for (i, spec) in specs.iter().enumerate() {
                 write(
@@ -449,6 +661,33 @@ fn run(cli: Cli) -> Result<(), String> {
             }
             eprintln!(
                 "isogeny_walk: {shards} taskq specs in {}; submit each with `taskq submit --spec FILE`",
+                out.display()
+            );
+            Ok(())
+        }
+        Cmd::Fetch {
+            from,
+            run,
+            shard,
+            of,
+            collected,
+            out,
+        } => {
+            let loc = S3Loc::parse(&from)?;
+            let rel = match (shard, of, collected) {
+                (Some(i), Some(n), false) => store::shard_rel(&run, i, n)?,
+                (None, Some(n), true) => store::collected_rel(&run, n)?,
+                (None, None, false) => store::walk_rel(&run)?,
+                _ => return Err("use --shard I --of N, or --collected --of N, or neither".into()),
+            };
+            let sc = scratch(&out);
+            let marker = store::fetch(&loc, &rel, &out, &sc);
+            let _ = std::fs::remove_dir_all(&sc);
+            let marker = marker?;
+            eprintln!(
+                "isogeny_walk: fetched {} ({} objects, hashes checked) into {}",
+                loc.uri(&rel),
+                marker["objects"].as_array().map_or(0, |o| o.len()),
                 out.display()
             );
             Ok(())

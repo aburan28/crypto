@@ -58,9 +58,31 @@ validation.
 
 Each directory holds `collect.json` (per-trait distributions, the merged
 `traits.jsonl` hash) and `class_audits.json`.  The radius-2 runs also hold
-`walk.json`.  The 20k `traits.jsonl` files (about 12 MB each) are not
-committed; `collect.json` pins their SHA-256, and the commands below
-regenerate them.
+`walk.json`.
+
+**Raw output is in S3** ([`S3.json`](S3.json)).  The store is
+`s3://crypto-autoresearcher/isogeny-walk`, and each object is write-once
+and SHA-256-checked on upload and on fetch.
+
+| run | S3 run id | walk objects, stored / raw | traits, stored / raw |
+|:--|:--|:--|:--|
+| P-256 20k | `p256-aed06c3fc90f7645` | 75 MB / 338 MB | 1.2 MB / 10.5 MB |
+| P-224 20k | `p224-03abf7dcdecb7b0a` | 108 MB / 411 MB | 1.2 MB / 10.5 MB |
+
+How each run was published and checked:
+- The walk was published with `walk --store --prune-local`.
+- It was fetched back by the trait shards, and its hashes were checked.
+- The fetched copy was replayed with `verify` and passed.  Its routes
+  hashes equal #1336's manifest.
+- The 8 shards published their outputs, and `collect --from` merged them
+  from S3.  The merged hash equals the committed `collect.json`.
+
+The local copies were then deleted.  Fetch either run with:
+
+```bash
+isogeny_walk fetch --from s3://crypto-autoresearcher/isogeny-walk --run p256-aed06c3fc90f7645 --out W
+isogeny_walk fetch --from s3://crypto-autoresearcher/isogeny-walk --run p256-aed06c3fc90f7645 --collected --of 8 --out T
+```
 
 ### Class audits
 
