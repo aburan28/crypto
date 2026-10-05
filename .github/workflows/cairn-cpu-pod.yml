@@ -1,0 +1,51 @@
+name: cairn-cpu-pod
+
+# Rents the cairn seed's CPU pod. GitHub-hosted runners on cryptanalysis
+# are not starting, so this runs here, where they do. The key is the
+# repository or organization secret RUNPOD_API_KEY. An empty secret
+# refuses before any pod is created.
+on:
+  push:
+    branches: [cursor/cairn-cpu-pod-46c6]
+    paths: [".github/workflows/cairn-cpu-pod.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: cairn launcher
+        uses: actions/checkout@v4
+        with:
+          repository: aburan28/cairn
+          ref: main
+          path: cairn
+
+      - name: rent the CPU pod
+        working-directory: cairn
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RUNPOD_API_KEY}" ]; then
+            echo "RUNPOD_API_KEY is empty in this repository. No pod was created."
+            exit 1
+          fi
+          echo "Runpod key is set; not printing it."
+          if python3 launch/runpod-seed/create.py; then
+            exit 0
+          fi
+          echo "community create did not keep a pod; trying secure cloud under the same cap"
+          CAIRN_SEED_CLOUD=SECURE python3 launch/runpod-seed/create.py
+
+      - name: keep the public key
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seed-out
+          path: cairn/launch/runpod-seed/out/
+          if-no-files-found: ignore
