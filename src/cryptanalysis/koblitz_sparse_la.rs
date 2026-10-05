@@ -2014,14 +2014,23 @@ pub enum SparseCoreSolver {
     BlockLanczos,
 }
 
+fn is_default<T: Default + PartialEq>(value: &T) -> bool {
+    value == &T::default()
+}
+
 /// Controls for [`solve_sparse_system`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct SparseSolveOptions {
     pub filter: FilterOptions,
+    /// Omitted from JSON at its historical block-Wiedemann default so frozen
+    /// job configurations retain their exact schema and digest.
+    #[serde(skip_serializing_if = "is_default")]
     pub solver: SparseCoreSolver,
+    #[serde(skip_serializing_if = "is_default")]
     pub spmv: SpmvOptions,
     pub wiedemann: BlockWiedemannOptions,
+    #[serde(skip_serializing_if = "is_default")]
     pub lanczos: BlockLanczosOptions,
     /// Base rows each excess row is folded into.
     pub fold: usize,
@@ -2047,14 +2056,18 @@ impl Default for SparseSolveOptions {
 
 /// What [`solve_sparse_system`] did.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct SparseSolveReport {
     pub filter: FilterReport,
+    #[serde(skip_serializing_if = "is_default")]
     pub solver: SparseCoreSolver,
+    #[serde(skip_serializing_if = "is_default")]
     pub spmv: SpmvOptions,
     /// Rows and columns of the square system handed to the Krylov solver.
     pub core_dimension: usize,
     pub core_nonzeros: usize,
     pub wiedemann: Option<BlockWiedemannReport>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lanczos: Option<BlockLanczosReport>,
     /// Draws of `(fold, X, Y)` used.
     pub attempts: usize,
@@ -3085,6 +3098,45 @@ mod tests {
         assert_eq!(solution, planted);
         assert!(report.iterations > 0);
         assert!(rows.iter().all(|row| row.evaluate(&solution, P) == row.rhs));
+    }
+
+    #[test]
+    fn new_sparse_defaults_preserve_the_frozen_json_shape() {
+        let defaults = SparseSolveOptions::default();
+        let value = serde_json::to_value(defaults).unwrap();
+        assert!(value.get("solver").is_none());
+        assert!(value.get("spmv").is_none());
+        assert!(value.get("lanczos").is_none());
+        assert_eq!(
+            serde_json::from_value::<SparseSolveOptions>(value).unwrap(),
+            defaults
+        );
+
+        let selected = SparseSolveOptions {
+            solver: SparseCoreSolver::BlockLanczos,
+            spmv: SpmvOptions {
+                backend: SpmvBackend::Sharded,
+                shards: 8,
+            },
+            lanczos: BlockLanczosOptions {
+                block_size: 8,
+                ..BlockLanczosOptions::default()
+            },
+            ..defaults
+        };
+        let selected_json = serde_json::to_value(selected).unwrap();
+        assert_eq!(selected_json["solver"], "block-lanczos");
+        assert_eq!(selected_json["spmv"]["backend"], "sharded");
+        assert_eq!(selected_json["lanczos"]["block_size"], 8);
+        assert_eq!(
+            serde_json::from_value::<SparseSolveOptions>(selected_json).unwrap(),
+            selected
+        );
+
+        let report = serde_json::to_value(SparseSolveReport::default()).unwrap();
+        assert!(report.get("solver").is_none());
+        assert!(report.get("spmv").is_none());
+        assert!(report.get("lanczos").is_none());
     }
 
     #[test]

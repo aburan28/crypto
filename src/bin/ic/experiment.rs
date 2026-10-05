@@ -223,8 +223,8 @@ pub(crate) fn with_linear_algebra(
     };
     opts
 }
-/// Sparse-solve options with one block size for both sides of the
-/// Krylov sequence; everything else at its default.
+/// Sparse-solve options with one block size for the selected Krylov solver;
+/// everything else stays at its default.
 pub(crate) fn sparse_options(
     block_size: usize,
     solver: SparseSolverMode,
@@ -242,9 +242,12 @@ pub(crate) fn sparse_options(
             block_n: block_size,
             ..BlockWiedemannOptions::default()
         },
-        lanczos: BlockLanczosOptions {
-            block_size,
-            ..BlockLanczosOptions::default()
+        lanczos: match solver {
+            SparseSolverMode::BlockLanczos => BlockLanczosOptions {
+                block_size,
+                ..BlockLanczosOptions::default()
+            },
+            SparseSolverMode::BlockWiedemann => BlockLanczosOptions::default(),
         },
         ..SparseSolveOptions::default()
     }
