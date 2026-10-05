@@ -28,6 +28,11 @@ path = "src/bin/icx.rs"
 name = "ecc2k-guard"
 path = "src/bin/ecc2k_guard.rs"
 
+# Exact CM polarization checker with a standalone catalog/database CLI.
+[[bin]]
+name = "jacobian-certificate"
+path = "src/bin/jacobian_certificate.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
