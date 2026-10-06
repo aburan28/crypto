@@ -174,11 +174,21 @@ passes and the first frozen CMS parity **failure** (file-mode wall timeout).
 A separately predeclared 120-second diagnostic on that first point passed but
 does not repair the frozen 60-second result. The accepted reader line occurs
 before parser initialization, so even passing compatibility does not establish
-the online boundary. A new post-parser CMS binary needs its own source/build
-pin and a newly predeclared three-way parity protocol; the current marker
-patch is unbuilt. CMS also needs a new, audited full-rank natural preparation
-before a SAT one-target claim. Do not charge child startup to the online
-interval by stopwatch subtraction.
+the online boundary. A new post-buffer-marker CMS binary needs its own
+source/build pin and the predeclared three-way parity protocol in
+[`MARKED_CMS_CONTROL_V1.md`](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/MARKED_CMS_CONTROL_V1.md).
+The source patch and guarded build recipe are committed, but the marked binary
+remains unbuilt. The new, separately sealed 512-query, one-million-conflict
+natural SAT preparation registration is consumed: inspect its original
+execution and run its frozen auditor once it terminates; never restart, refill
+or treat partial progress as final rank or yield. Build the marked binary only
+if that original audit admits a complete 29-column SAT log table, then run the
+three-way disclosed control and its independent data-only audit before using
+the binary in a target candidate. The staged SAT target worker and public-point
+card are not a dispatch authority. Freeze and publish a target-free SAT
+registration before creating the card, bind the exact card to a one-use claim,
+and independently audit native source/model receipts and execution custody.
+Do not charge child startup to the online interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
 still requires the Linux implementation. Do not infer a quiet measurement host

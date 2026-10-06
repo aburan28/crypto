@@ -8,8 +8,10 @@ consumed registrations remain closed. The disclosed
 [transport controls](controls-v1/RESULT.md) passed exporter parity on all
 three points; accepted-CMS stdin parity passed two of the three frozen
 60-second controls and a separately labeled longer diagnostic for the third.
-The first frozen control failure remains. No post-parser CMS binary or
-source-bound SAT target worker has been built or admitted.
+The first frozen control failure remains. Source for a post-buffer-marker CMS
+build and a target-free SAT worker is staged, but neither has been built or
+admitted. The new 512-query natural SAT preparation is still running; its
+final rank and yield are unknown.
 
 ## Question and bounded scope
 
@@ -137,16 +139,19 @@ independent audit.
 
 Use a new SAT target scope/worker and a new scientific registration; do not
 weaken the F5 target scope or a consumed old controller. Freeze the complete
-source, vendored dependencies, accepted/rebuilt native assets, config,
-preparation binding, exact public point, resource envelope, startup policy,
-algorithm seed and max attempts. Publish its full archive and external seal
-before the one-use dispatch. The original frozen checker must verify the
-published archive, preparation's original source-bound audit and recovered
-factor logs, native child identities/inputs/outputs, every attempt, source
-ANF/CNF/model, geometric negatives, final scalar and the five exclusive
-online phases. A bad model, no full-point lift, budget exhaustion, timeout,
-transport error, or failed durability check remains a distinct retained row.
-No failed target is a verified recovery.
+source, vendored dependencies, accepted/rebuilt native assets, target-free
+config, preparation binding, resource envelope, startup policy, algorithm
+seed and max attempts. Publish the source and registration with external seals
+before generating a public point. Then publish a scalar-free point card whose
+source-publication hashes and creation order can be audited independently;
+bind that exact card to the one-use claim before dispatch. The original frozen
+checker must verify the published archive and card, preparation's original
+source-bound audit and recovered factor logs, native child
+identities/inputs/outputs, every attempt, source ANF/CNF/model, geometric
+negatives, final scalar and the five exclusive online phases. A bad model,
+no full-point lift, budget exhaustion, timeout, transport error, or failed
+durability check remains a distinct retained row. No failed target is a
+verified recovery.
 
 Preparation and native role startup are cold/setup costs outside the online
 interval and reported separately. The interval opens immediately before the
