@@ -16,7 +16,7 @@ use std::{
 pub const SCOPE: &str = "disclosed-n17-native-one-target-cms-v1";
 pub const WORKER: &str = "prepared_sat_target_worker";
 pub const CARD_QUESTION: &str = "fresh-paired-n17-public-point-card-v1";
-const CARD_CURVE: &str = "EC1N17Ce1hdfbf24105ef5";
+const CARD_CURVE: &str = "EC1N17Ckb1hbbe2b5b6b1e6";
 const CARD_LAW: &str = "sha256-seed-first-lift-min-y-cofactor2-v1";
 
 #[derive(Clone, Deserialize, Serialize)]

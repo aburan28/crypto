@@ -21,10 +21,28 @@ use std::{
 };
 
 const QUESTION: &str = "fresh-paired-n17-public-point-card-v1";
-const CURVE_ID: &str = "EC1N17Ce1hdfbf24105ef5";
+const SOURCE_QUESTION: &str = "fresh-paired-n17-source-publication-v1";
+// The tournament's canonical decimal polynomial-bit record for this fixture.
+// The older curve registry also has an e1/hex-encoding alias; it is not the
+// identity used by ecbench's paired IC/rho candidate and workload records.
+const CURVE_ID: &str = "EC1N17Ckb1hbbe2b5b6b1e6";
 const POINT_LAW: &str = "sha256-seed-first-lift-min-y-cofactor2-v1";
 const DOMAIN: &[u8] = b"IC-fresh-paired-n17-point-v1\0";
 const ROLES: [&str; 4] = ["cms", "f5", "incumbent", "rho"];
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SourceDescriptor {
+    schema_version: u32,
+    question: String,
+    role: String,
+    curve_id: String,
+    registration_sha256: String,
+    source_manifest_sha256: String,
+    archive_sha256: String,
+    target_free: bool,
+    source_bound_execution_admitted: bool,
+}
 
 fn digest(value: &str) -> bool {
     value.len() == 64
@@ -42,14 +60,20 @@ fn source_pins(paths: &BTreeMap<String, PathBuf>) -> Result<BTreeMap<String, Str
     paths
         .iter()
         .map(|(role, path)| {
-            let bytes = native::read(path, 16 * 1024 * 1024)?;
-            let descriptor = target_math::parse(&bytes)?;
+            let bytes = native::read(path, 65536)?;
+            let descriptor: SourceDescriptor =
+                serde_json::from_value(target_math::parse(&bytes)?).map_err(|e| e.to_string())?;
             native::require(
-                descriptor["registration_sha256"]
-                    .as_str()
-                    .is_some_and(digest)
-                    && descriptor["source_bound_execution_admitted"] == false,
-                "source descriptor is not a sealed unexecuted registration",
+                descriptor.schema_version == 1
+                    && descriptor.question == SOURCE_QUESTION
+                    && descriptor.role.as_str() == role.as_str()
+                    && descriptor.curve_id == CURVE_ID
+                    && digest(&descriptor.registration_sha256)
+                    && digest(&descriptor.source_manifest_sha256)
+                    && digest(&descriptor.archive_sha256)
+                    && descriptor.target_free
+                    && !descriptor.source_bound_execution_admitted,
+                "source descriptor differs from target-free sealed role and curve",
             )?;
             Ok((role.clone(), sha256(&bytes)))
         })
@@ -258,8 +282,12 @@ mod tests {
             let path = root.join(format!("{role}-publication.json"));
             native::save(
                 &path,
-                &json!({"registration_sha256":format!("{index:064x}"),
-                    "source_bound_execution_admitted":false}),
+                &json!({"schema_version":1,"question":SOURCE_QUESTION,
+                    "role":role,"curve_id":CURVE_ID,
+                    "registration_sha256":format!("{index:064x}"),
+                    "source_manifest_sha256":format!("{:064x}",index+10),
+                    "archive_sha256":format!("{:064x}",index+20),
+                    "target_free":true,"source_bound_execution_admitted":false}),
             )
             .unwrap();
             paths.insert((*role).to_string(), path);
@@ -277,12 +305,38 @@ mod tests {
         assert_eq!(audited["publication_order_and_freshness_certified"], false);
         std::fs::write(
             paths.get("cms").unwrap(),
-            serde_json::to_vec(&json!({"registration_sha256":"f".repeat(64),
-                "source_bound_execution_admitted":false}))
+            serde_json::to_vec(&json!({"schema_version":1,"question":SOURCE_QUESTION,
+                "role":"cms","curve_id":CURVE_ID,
+                "registration_sha256":"f".repeat(64),
+                "source_manifest_sha256":format!("{:064x}",10),
+                "archive_sha256":format!("{:064x}",20),
+                "target_free":true,"source_bound_execution_admitted":false}))
             .unwrap(),
         )
         .unwrap();
         assert!(audit(&card, &listing, &root.join("tampered-audit.json")).is_err());
+        let wrong_curve = root.join("wrong-curve-publication.json");
+        native::save(
+            &wrong_curve,
+            &json!({"schema_version":1,"question":SOURCE_QUESTION,
+                "role":"cms","curve_id":"EC1N17Ce1hdfbf24105ef5",
+                "registration_sha256":"f".repeat(64),
+                "source_manifest_sha256":format!("{:064x}",10),
+                "archive_sha256":format!("{:064x}",20),
+                "target_free":true,"source_bound_execution_admitted":false}),
+        )
+        .unwrap();
+        paths.insert("cms".into(), wrong_curve);
+        native::save(&root.join("wrong-curve-list.json"), &json!(paths)).unwrap();
+        assert!(super::paths(&root.join("wrong-curve-list.json")).is_err());
+        paths.insert("cms".into(), root.join("cms-publication.json"));
+        let mut leaked: Value =
+            target_math::parse(&native::read(paths.get("f5").unwrap(), 65536).unwrap()).unwrap();
+        leaked["target"] = json!([43693, 23339]);
+        native::save(&root.join("target-leak.json"), &leaked).unwrap();
+        paths.insert("f5".into(), root.join("target-leak.json"));
+        native::save(&root.join("target-leak-list.json"), &json!(paths)).unwrap();
+        assert!(super::paths(&root.join("target-leak-list.json")).is_err());
         std::fs::remove_dir_all(root).unwrap();
     }
 }

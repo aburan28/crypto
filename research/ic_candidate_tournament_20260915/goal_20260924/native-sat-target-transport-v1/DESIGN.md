@@ -19,7 +19,10 @@ Can the accepted external CryptoMiniSat engine be part of a complete,
 source-bound, single-public-point IC solver whose online interval begins only
 after every target-independent process launch, executable load, curve/base/log
 preparation, and native role setup? The target is the exact educational n17
-Koblitz representation `EC1N17Ce1hdfbf24105ef5`, not a challenge target.
+Koblitz representation `EC1N17Ckb1hbbe2b5b6b1e6` used by the native
+`ecbench` candidate/workload records, not a challenge target. The registry's
+older `EC1N17Ce1hdfbf24105ef5` label uses a different encoding record for
+the same field and curve; it is not the new paired workload identity.
 The target input is one public point with no known scalar supplied to the
 worker. Its factor logs must come from an independently audited, complete,
 natural CryptoMiniSat ordinary panel. A separate F5 preparation cannot be
@@ -142,11 +145,17 @@ weaken the F5 target scope or a consumed old controller. Freeze the complete
 source, vendored dependencies, accepted/rebuilt native assets, target-free
 config, preparation binding, resource envelope, startup policy, algorithm
 seed and max attempts. Publish the source and registration with external seals
-before generating a public point. Then publish a scalar-free point card whose
-source-publication hashes and creation order can be audited independently;
-bind that exact card to the one-use claim before dispatch. The original frozen
-checker must verify the published archive and card, preparation's original
-source-bound audit and recovered factor logs, native child
+before generating a public point. Each of the four strict source descriptors
+must name its role (`cms`, `f5`, `incumbent` or `rho`), the same canonical
+`kb1` curve ID, sealed registration, source manifest and full archive digest,
+and declare a target-free, unexecuted build. Unknown fields are rejected so a
+descriptor cannot carry a target or scalar. These declarations require an
+independent publication audit; the point-card generator does not prove them.
+Then publish a scalar-free point card whose source-publication hashes and
+creation order can be audited independently. Bind that exact card to the
+one-use claim before dispatch. The original frozen checker must verify the
+published archive and card, the preparation's original source-bound audit and
+recovered factor logs, native child
 identities/inputs/outputs, every attempt, source ANF/CNF/model, geometric
 negatives, final scalar and the five exclusive online phases. A bad model,
 no full-point lift, budget exhaustion, timeout, transport error, or failed
