@@ -7,6 +7,8 @@
 //! cargo run --release --example dreg_score -- compare committed.jsonl rerun.jsonl
 //! # the semi-regular degree of regularity of chained-system shapes
 //! cargo run --release --example dreg_score -- semireg 4 5:2 6:2 7:2
+//! # upper bounds on the degree-D Macaulay matrix shape
+//! cargo run --release --example dreg_score -- shape 4 6:2:8 8:2:7
 //! ```
 //!
 //! The native replacement for the degree-7 study's `score.py`, `compare.py`
@@ -181,14 +183,50 @@ fn semireg(m: usize, cells: &[String]) {
     }
 }
 
+/// `C(N, ≤ d)`: square-free monomials of degree at most `d` in `N` unknowns.
+fn monomials_up_to(n_vars: u128, d: i64) -> u128 {
+    let mut total = 0u128;
+    let mut binom = 1u128;
+    for i in 0..=d.max(-1) {
+        if i as u128 > n_vars {
+            break;
+        }
+        total += binom;
+        binom = binom * (n_vars - i as u128) / (i as u128 + 1);
+    }
+    total
+}
+
+/// Upper bounds on the degree-`D` Macaulay matrix of the `m`-summand chain:
+/// every equation times every monomial of degree `≤ D − deg`, and every
+/// monomial of degree `≤ D` as a column.
+fn shape(m: usize, cells: &[String]) {
+    println!("| m | cell (n, ℓ) | N | degree | rows | columns |");
+    println!("|--:|---|--:|--:|--:|--:|");
+    for c in cells {
+        let p: Vec<usize> = c.split(':').map(|x| x.parse().expect("n:ℓ:D")).collect();
+        let (n, ell, d) = (p[0], p[1], p[2] as i64);
+        let n_vars = ((m - 2) * n + m * ell) as u128;
+        let rows = ((m - 2) * n) as u128 * monomials_up_to(n_vars, d - 3)
+            + n as u128 * monomials_up_to(n_vars, d - 2);
+        println!(
+            "| {m} | ({n}, {ell}) | {n_vars} | {d} | {rows} | {} |",
+            monomials_up_to(n_vars, d)
+        );
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("score") => score(&args[1..]),
         Some("compare") if args.len() == 3 => compare(&args[1], &args[2]),
         Some("semireg") if args.len() >= 3 => semireg(args[1].parse().expect("m"), &args[2..]),
+        Some("shape") if args.len() >= 3 => shape(args[1].parse().expect("m"), &args[2..]),
         _ => {
-            eprintln!("usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ…");
+            eprintln!(
+                "usage: dreg_score score FILES… | compare REF RERUN | semireg M n:ℓ… | shape M n:ℓ:D…"
+            );
             std::process::exit(2);
         }
     }
