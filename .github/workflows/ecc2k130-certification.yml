@@ -7,6 +7,10 @@ on:
       - 'src/bin/ecc2k_guard.rs'
       - 'src/cryptanalysis/ecc2k130_merge.rs'
       - 'src/bin/ecc2k_merge.rs'
+      - 'src/cryptanalysis/ecc2k130_pyjson.rs'
+      - 'src/cryptanalysis/ecc2k130_status.rs'
+      - 'src/bin/ecc2k_status.rs'
+      - 'src/hash/sha256.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   push:
     branches: [main]
@@ -16,6 +20,10 @@ on:
       - 'src/bin/ecc2k_guard.rs'
       - 'src/cryptanalysis/ecc2k130_merge.rs'
       - 'src/bin/ecc2k_merge.rs'
+      - 'src/cryptanalysis/ecc2k130_pyjson.rs'
+      - 'src/cryptanalysis/ecc2k130_status.rs'
+      - 'src/bin/ecc2k_status.rs'
+      - 'src/hash/sha256.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   workflow_dispatch:
 permissions:
@@ -78,6 +86,37 @@ jobs:
         run: ECC_MERGE_BIN="$PWD/target/release/ecc2k-merge" python3 -m unittest discover -s ecc2k130/aws -p test_certification.py -v
       - name: Byte-for-byte parity with merge.py
         run: ECC_MERGE_BIN="$PWD/target/release/ecc2k-merge" python3 -m unittest discover -s ecc2k130/aws -p test_merge_parity.py -v
+
+  # The campaign dashboard (ecc2k-status, which replaced aws/status.py) and the
+  # Python-compatible JSON the Rust ports print through. The unit tests hold
+  # bytes CPython printed; the smoke run reads a rehearsal store end to end.
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98"
+      - uses: Swatinem/rust-cache@v2
+      - run: make -C ecc2k130 test-status
+      - run: cargo build --release --bin ecc2k-status
+      - name: Snapshot of a rehearsal store
+        run: |
+          store=$(mktemp -d)
+          now=$(date +%s)
+          cat > "$store/slots.json" <<EOF
+          {"0": {"owner": "i-0a", "state": "active", "leaseUntil": $((now + 600)), "rate": 14.1e9,
+                 "walks": 6160384, "ckptIter": 17400000, "dpUploaded": 300000},
+           "1": {"owner": "i-0b", "state": "retired", "leaseUntil": 0, "ckptIter": 52, "walks": 16}}
+          EOF
+          ./target/release/ecc2k-status --local "$store"
+          ./target/release/ecc2k-status --local "$store" --json | python3 -c '
+          import json, sys
+          s = json.load(sys.stdin)
+          assert (s["slots"], s["alive"], s["retired"], s["stepsPerWalkSlots"]) == (2, 1, 1, 1), s
+          assert abs(s["stepsPerWalkLog2"] - 28.41) < 0.01, s
+          '
 
   local-software:
     runs-on: ubuntu-latest

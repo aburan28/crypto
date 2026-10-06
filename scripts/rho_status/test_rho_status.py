@@ -543,8 +543,9 @@ class WalkRateTests(unittest.TestCase):
     # The measured rate is the point of the feature, so these are the numbers
     # it was verified against: four consecutive samples of the live campaign
     # feed on 2026-09-15, whose checkpoint totals differ by 109,081,968,771,072
-    # iterations over 1504 s = 72.5 B it/s. status.py's own sum of what the
-    # walkers reported themselves over the same period was 86-101 B it/s; the
+    # iterations over 1504 s = 72.5 B it/s. The slot dashboard's own sum (then
+    # status.py, now ecc2k-status) of what the walkers reported themselves over
+    # the same period was 86-101 B it/s; the
     # difference is each slot's walked-but-not-yet-checkpointed tail, which
     # this figure deliberately does not count.
     LIVE = (
