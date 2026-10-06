@@ -1,7 +1,10 @@
 //! Original-capsule controller and data-only runtime audit for the bounded n17 worker.
 use super::ordinary_control::capsule as preparation;
 use super::sat_control::native;
-use super::{ordinary_control, ordinary_preparation, target_build, target_custody, target_math};
+use super::{
+    f5_source_custody, ordinary_control, ordinary_preparation, target_build, target_custody,
+    target_math,
+};
 #[path = "../prepared_target_worker/contract.rs"]
 pub(super) mod capsule;
 #[path = "../prepared_target_worker/journal.rs"]
@@ -157,12 +160,28 @@ pub(super) fn execute(
         "target registration already consumed; never retry",
     )?;
     let publication_preflight = target_custody::scientific_preflight(publication, &root, expected)?;
+    let adopted = root
+        .join("adoption-start.json")
+        .try_exists()
+        .map_err(|e| e.to_string())?;
+    let adoption_preflight = if adopted {
+        Some(f5_source_custody::verify_adoption(&root, expected)?)
+    } else {
+        None
+    };
     let cfg = capsule::config(&root)?;
     fs::create_dir(execution).map_err(|e| e.to_string())?;
     let execution = execution.canonicalize().map_err(|e| e.to_string())?;
     let preflight_path = execution.join("publication-preflight.json");
     save(&preflight_path, &publication_preflight)?;
     let preflight_sha256 = sha256(&read(&preflight_path, 16 * 1024 * 1024)?);
+    if let Some(adoption) = &adoption_preflight {
+        save(&execution.join("adoption-preflight.json"), adoption)?;
+    }
+    let adoption_preflight_sha256 = adoption_preflight
+        .as_ref()
+        .map(|_| read(&execution.join("adoption-preflight.json"), 65536).map(|b| sha256(&b)))
+        .transpose()?;
     consume(&root, &execution, &record, &cfg, expected)?;
     let env = capsule::environment().into_iter().collect::<Vec<_>>();
     let args = worker_args(&root, &execution, expected);
@@ -181,6 +200,11 @@ pub(super) fn execute(
     // The nested auditor has its own process group; draining the outer group is insufficient.
     let prep_drain = native::drain_ledger(&execution.join("preparation-auditor-pids"));
     let gate = capsule::check_capsule(&root, expected);
+    let adoption_gate = if adopted {
+        Some(f5_source_custody::verify_adoption(&root, expected))
+    } else {
+        None
+    };
     let evidence = native::inventory(&execution);
     let own_after = std::env::current_exe()
         .map_err(|e| e.to_string())
@@ -189,6 +213,9 @@ pub(super) fn execute(
     let unchanged = own_after.as_ref().is_ok_and(|v| v == &own);
     let mut terminal = json!({"schema_version":1,"scope":capsule::SCOPE,"registration_sha256":expected,
         "publication_preflight_sha256":preflight_sha256,
+        "adoption_preflight_sha256":adoption_preflight_sha256,
+        "adoption_gate_passed":adoption_gate.as_ref().map(Result::is_ok),
+        "adoption_gate_error":adoption_gate.as_ref().and_then(|result| result.as_ref().err()),
         "controller_sha256":own,"controller_unchanged":unchanged,"controller_read_error":own_after.as_ref().err(),
         "source_gate_passed":gate.is_ok(),"source_gate_error":gate.as_ref().err(),
         "worker_drain_passed":worker_drain.is_ok(),"worker_drain_error":worker_drain.as_ref().err(),
@@ -205,7 +232,9 @@ pub(super) fn execute(
         Err(error) => terminal["worker_transport_error"] = json!(error),
     }
     save(&execution.join("terminal.json"), &terminal)?;
-    require(completed && unchanged && gate.is_ok() && worker_drain.is_ok() && prep_drain.is_ok() && evidence.is_ok(),
+    require(completed && unchanged && gate.is_ok()
+        && adoption_gate.as_ref().is_none_or(Result::is_ok)
+        && worker_drain.is_ok() && prep_drain.is_ok() && evidence.is_ok(),
         "target worker failed/interrupted or source/drain gate failed; terminal retained; never retry")?;
     serde_json::to_string_pretty(&terminal).map_err(|e| e.to_string())
 }
@@ -326,6 +355,8 @@ fn terminal_binding(value: &Value, seal: &str, own: &str) -> Result<(), String> 
             && value["controller_read_error"].is_null()
             && value["source_gate_passed"] == true
             && value["source_gate_error"].is_null()
+            && (value["adoption_gate_passed"].is_null() || value["adoption_gate_passed"] == true)
+            && value["adoption_gate_error"].is_null()
             && value["worker_drain_passed"] == true
             && value["worker_drain_error"].is_null()
             && value["preparation_auditor_drain_passed"] == true
@@ -372,6 +403,33 @@ fn verified_runtime(root: &Path, execution: &Path, seal: &str, own: &str) -> Res
             && preflight == target_custody::scientific_preflight(publication, root, seal)?,
         "original target publication preflight differs from registered bytes",
     )?;
+    let adoption = if root
+        .join("adoption-start.json")
+        .try_exists()
+        .map_err(|e| e.to_string())?
+    {
+        let bytes = read(&execution.join("adoption-preflight.json"), 65536)?;
+        let checked = f5_source_custody::verify_adoption(root, seal)?;
+        require(
+            sha256(&bytes) == terminal["adoption_preflight_sha256"]
+                && target_math::parse(&bytes)? == checked
+                && terminal["adoption_gate_passed"] == true
+                && terminal["adoption_gate_error"].is_null(),
+            "original F5 source/card adoption preflight differs",
+        )?;
+        Some(checked)
+    } else {
+        require(
+            terminal["adoption_preflight_sha256"].is_null()
+                && terminal["adoption_gate_passed"].is_null()
+                && !execution
+                    .join("adoption-preflight.json")
+                    .try_exists()
+                    .map_err(|e| e.to_string())?,
+            "unadopted F5 target has an adoption preflight",
+        )?;
+        None
+    };
     require(
         load(&execution.join("target-exposure.json"))? == exposure(&cfg, &record, seal),
         "original target exposure differs",
@@ -492,7 +550,8 @@ fn verified_runtime(root: &Path, execution: &Path, seal: &str, own: &str) -> Res
         "registration_sha256":seal,"source_bound_execution_admitted":true,"verified_recovery":recovered,
         "target":cfg.target,"target_count":1,"worker_pid":pid,"preparation_auditor_pid":prep_pid,
         "audited_worker_calls":1,"audited_preparation_auditor_calls":1,"producer_sha256":sha256(&producer_bytes),
-        "preparation_registration_sha256":record.preparation.registration_sha256,"mathematics":checked,
+        "preparation_registration_sha256":record.preparation.registration_sha256,
+        "source_adoption":adoption,"mathematics":checked,
         "attempt_files":attempt_files,"recorded_online_interval_ns":producer["costs"]["online_wall_ns"],
         "five_phase_recorded_total_ns":checked["timing"]["five_phase_recorded_total_ns"],
         "exclusive_ic_online_phases_ns":checked["timing"]["exclusive_ic_online_phases_ns"],

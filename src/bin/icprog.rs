@@ -54,6 +54,8 @@ mod ordinary_preparation;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
+#[path = "icprog/f5_source_custody.rs"]
+mod f5_source_custody;
 #[path = "icprog/json.rs"]
 #[allow(dead_code)]
 mod json;
@@ -266,6 +268,52 @@ enum Command {
         host_context: PathBuf,
         #[arg(long)]
         validation_only: bool,
+    },
+    /// Publish only the exact F5 source/build bytes before a fresh point exists.
+    TargetControlPublishSource {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay the target-free F5 source archive as data without executing it.
+    TargetControlReplaySource {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        source_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Irreversibly bind a later public card to the prepublished F5 binary.
+    TargetControlAdoptCard {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        source_publication: PathBuf,
+        #[arg(long)]
+        source_registration_sha256: String,
+        #[arg(long)]
+        source_descriptor: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        validation_registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Recheck the original F5 source/card adoption before target dispatch.
+    TargetControlAuditAdoption {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
     },
     /// Publish full data custody of an unconsumed validation-only target build.
     TargetControlPublishBuild {
@@ -1164,6 +1212,44 @@ fn main() -> ExitCode {
             host: &host_context,
             validation_only,
         }),
+        Command::TargetControlPublishSource {
+            capsule,
+            publication,
+            validation_registration_sha256,
+            out,
+        } => f5_source_custody::publish(
+            &capsule,
+            &publication,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlReplaySource {
+            publication,
+            source_registration_sha256,
+            out,
+        } => f5_source_custody::replay(&publication, &source_registration_sha256, &out),
+        Command::TargetControlAdoptCard {
+            capsule,
+            source_publication,
+            source_registration_sha256,
+            source_descriptor,
+            card,
+            validation_registration_sha256,
+            out,
+        } => f5_source_custody::adopt_card(
+            &capsule,
+            &source_publication,
+            &source_registration_sha256,
+            &source_descriptor,
+            &card,
+            &validation_registration_sha256,
+            &out,
+        ),
+        Command::TargetControlAuditAdoption {
+            capsule,
+            registration_sha256,
+            out,
+        } => f5_source_custody::audit_adoption(&capsule, &registration_sha256, &out),
         Command::TargetControlPublishBuild {
             capsule,
             publication,

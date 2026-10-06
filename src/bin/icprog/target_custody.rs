@@ -54,6 +54,15 @@ const FILES: [&str; 4] = [
     "registration.json",
     "seal.json",
 ];
+const CARD_SIDECARS: [&str; 7] = [
+    "source-descriptor.json",
+    "card.json",
+    "adoption-start.json",
+    "adoption-terminal.json",
+    "precard-validation/config.json",
+    "precard-validation/registration.json",
+    "precard-validation/seal.json",
+];
 
 fn desc(bytes: &[u8]) -> Value {
     json!({"bytes":bytes.len(),"sha256":sha256(bytes)})
@@ -86,6 +95,14 @@ fn sidecars(root: &Path) -> Result<serde_json::Map<String, Value>, String> {
             desc(&read(&root.join(name), 16 * 1024 * 1024)?),
         );
     }
+    for name in CARD_SIDECARS {
+        if root.join(name).try_exists().map_err(|e| e.to_string())? {
+            files.insert(
+                name.into(),
+                desc(&read(&root.join(name), 16 * 1024 * 1024)?),
+            );
+        }
+    }
     for (name, value) in native::inventory(&root.join("immutable/build-receipts"))?
         .as_object()
         .ok_or("missing target build receipts")?
@@ -104,6 +121,14 @@ fn full_files(
             name.into(),
             desc(&read(&root.join(name), 16 * 1024 * 1024)?),
         );
+    }
+    for name in CARD_SIDECARS {
+        if root.join(name).try_exists().map_err(|e| e.to_string())? {
+            files.insert(
+                name.into(),
+                desc(&read(&root.join(name), 16 * 1024 * 1024)?),
+            );
+        }
     }
     for (name, value) in record
         .immutable_files
