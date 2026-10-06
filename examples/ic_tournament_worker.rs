@@ -95,6 +95,7 @@ struct Config {
     groebner_degree: u32,
     direct_fused_pack: bool,
     active_multipliers: bool,
+    support_local_stream: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -115,6 +116,7 @@ impl Default for Config {
             groebner_degree: 3,
             direct_fused_pack: false,
             active_multipliers: false,
+            support_local_stream: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -697,6 +699,9 @@ fn run_prepared_target(
     let dispatch = solver.admission_dispatch();
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_direct_fused_pack(
         job.config.direct_fused_pack,
+    );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_stream(
+        job.config.support_local_stream,
     );
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
