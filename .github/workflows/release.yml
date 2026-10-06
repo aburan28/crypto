@@ -13,6 +13,14 @@ on:
     paths:
       - '.github/workflows/release.yml'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/bin/ic.rs'
+      - 'src/bin/ic/**'
+      - 'src/bin/ecbench.rs'
+      - 'src/build_provenance.rs'
+      - 'src/cryptanalysis/ecbench/**'
+      - 'src/cryptanalysis/ecbench_large_prime.rs'
+      - 'tests/fixtures/ecbench_manifest_small.json'
       - 'ecc2k130/Makefile'
   workflow_dispatch:
 
@@ -76,9 +84,11 @@ jobs:
       - name: Install the musl linker
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
-      # No --locked: Cargo.lock is gitignored in this repo, so a fresh
-      # checkout has none and --locked would refuse to build.
-      - run: cargo build --release --bins --target ${{ matrix.target }}
+      - name: Build release binaries with source provenance
+        env:
+          CRYPTO_BUILD_GIT_COMMIT: ${{ github.sha }}
+          CRYPTO_BUILD_GIT_DIRTY: "false"
+        run: cargo build --locked --release --bins --target ${{ matrix.target }}
       - name: Smoke-test the binaries
         # Every target in the matrix is native to its runner, so the
         # binaries must start here.
@@ -88,6 +98,20 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           "./target/${{ matrix.target }}/release/crypto$ext" --help > /dev/null
           "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/ic$ext" --version > /dev/null
+          "./target/${{ matrix.target }}/release/ic$ext" --json > ic-smoke.json
+          grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ic-smoke.json
+          "./target/${{ matrix.target }}/release/ic$ext" --json large-prime \
+            --manifest tests/fixtures/ecbench_manifest_small.json --validate-only \
+            > ic-large-prime-smoke.json
+          grep -Fq '"status": "checks_passed"' ic-large-prime-smoke.json
+          "./target/${{ matrix.target }}/release/ecbench$ext" --version > /dev/null
+          "./target/${{ matrix.target }}/release/ecbench$ext" methods --json \
+            > ecbench-methods-smoke.json
+          grep -Fq 'ic.large_prime' ecbench-methods-smoke.json
+          "./target/${{ matrix.target }}/release/ecbench$ext" host --json \
+            > ecbench-host-smoke.json
+          grep -Fq '"git_commit": "'"$GITHUB_SHA"'"' ecbench-host-smoke.json
       - name: Stage the archive
         shell: bash
         run: |
@@ -97,6 +121,7 @@ jobs:
           [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
           cp "target/${{ matrix.target }}/release/crypto$ext" "dist/$name/"
           cp "target/${{ matrix.target }}/release/ic$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/ecbench$ext" "dist/$name/"
           # `[ -f ] && cp` leaves the loop's exit status at 1 when the last
           # candidate is absent, which trips the step's `bash -e`.
           for extra in README.md LICENSE LICENSE.md; do
@@ -232,10 +257,10 @@ jobs:
 
           | Artifact | Contents |
           | --- | --- |
-          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic` — glibc |
-          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | `crypto`, `ic` — static |
-          | `crypto-*-aarch64-apple-darwin.tar.gz` | `crypto`, `ic` — Apple silicon |
-          | `crypto-*-x86_64-pc-windows-msvc.zip` | `crypto.exe`, `ic.exe` |
+          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic`, `ecbench` — glibc |
+          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | `crypto`, `ic`, `ecbench` — static |
+          | `crypto-*-aarch64-apple-darwin.tar.gz` | `crypto`, `ic`, `ecbench` — Apple silicon |
+          | `crypto-*-x86_64-pc-windows-msvc.zip` | `crypto.exe`, `ic.exe`, `ecbench.exe` |
           | `ecc2k130-cpu-*.tar.gz` | ECC2K-130 client, CPU (`-march=x86-64-v3`) |
           | `ecc2k130-cuda-*.tar.gz` | ECC2K-130 client, CUDA fatbinary (sm_80–sm_120) |
 
