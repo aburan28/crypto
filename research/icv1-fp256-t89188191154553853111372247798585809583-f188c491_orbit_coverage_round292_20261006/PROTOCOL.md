@@ -24,7 +24,7 @@ algebra, scalar recovery, or an end-to-end improvement over Pollard rho.
 - curve: `icv1-fp256-t89188191154553853111372247798585809583-f188c491`;
 - comparison factor base: `FB1h2f8621cda105`;
 - family: Round 33 / Round 291 known-log two-delta cyclic coefficient base;
-- columns: `138030`; arity: `17`; rare edges: `6935`; cutoff: `219`;
+- columns: `131458`; arity: `17`; rare edges: `6935`; cutoff: `219`;
 - P-256 subgroup order is taken from the repository's native curve catalog;
 - Round 291 result path:
   `research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/serpentine-result.json`;
