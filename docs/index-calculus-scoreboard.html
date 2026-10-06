@@ -12655,6 +12655,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-codebook-support-round38-20261006 -->
+<!-- BEGIN p256-affine-log-orbit-round39-20261006 -->
+<section class="panel" id="p256-affine-log-orbit-round39-20261006">
+  <div class="panel-head">
+    <h2>P-256 affine-log orbits: free pair differences erase relation information <span class="chip">exact obstruction / negative</span></h2>
+    <p class="panel-summary">For <code>P_i=[a_i]H+[b_i]G</code>, every true relation is either an anchor-independent coefficient identity or directly returns the anchor discrete log; common translates make pair differences free only in the uninformative branch.</p>
+    <p>This closes the maximal one-hidden-log affine family. It is an exact algebraic reduction with native replay, not a measured rho ratio or a new generic-group lower bound.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact controls and surviving promotion gates.</caption>
+    <thead><tr><th>Evidence</th><th class="n">Checked</th><th class="n">Failures</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Complete toy trichotomy</td><td class="n">1,464,120 candidates</td><td class="n">0 FP / 0 FN</td><td>identity, impossible and informative branches match direct equality</td></tr>
+      <tr><td>Term-by-term P-256 S17 replay</td><td class="n">4,096 relations</td><td class="n">0</td><td>all 17 points replay; aggregate coefficient form agrees</td></tr>
+      <tr><td>P-256 negative controls</td><td class="n">4,096 targets</td><td class="n">0</td><td>every one-unit perturbation rejected</td></tr>
+      <tr><td>Common-translate pair law</td><td class="n">4,096 pairs</td><td class="n">0</td><td><code>(H+b_iG)-(H+b_jG)=(b_i-b_j)G</code></td></tr>
+      <tr><td>Storage gate</td><td class="n">12,751,426 bytes</td><td class="n">passes</td><td>point keys plus two scalar coefficients; not an attack win</td></tr>
+      <tr><td>Degree / collection / non-generic gates</td><td class="n">0 ordinary rows</td><td class="n">fail</td><td>affine-family dreg unknown; informative equality is the original DLP</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">degree scope</span> structured residual maximum 4 remains valid only for <code>FB1h2f8621cda105</code>; unsplit S17 and affine-family dreg remain unknown</span>
+    <span><span class="chip">exact native replay</span> 184,321 scalar multiplications, 44,920,099 doublings and 22,734,751 additions are verification work, not attack pricing</span>
+    <span><span class="chip">decision</span> reject affine-log and common-translate bases; no selector benchmark or full-depth relation attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_affine_log_orbit_round39_20261006/RESULT.md</code>; deterministic result SHA-256 <code>189e48a45ab2919dd3e279bf058940230c4a0461c745fba42dffb26f785ba079</code></span>
+  </div>
+</section>
+<!-- END p256-affine-log-orbit-round39-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
