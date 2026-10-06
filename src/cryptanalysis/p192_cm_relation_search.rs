@@ -1771,7 +1771,21 @@ fn verify_relation(entry: &RelationRecord, records: &[GeneratorRecord]) -> Resul
     let left = serde_json::to_value(entry).map_err(|error| error.to_string())?;
     let right = serde_json::to_value(recomputed).map_err(|error| error.to_string())?;
     if left != right {
-        return Err("relation certificate differs from independent replay".to_owned());
+        if let (Some(left_fields), Some(right_fields)) = (left.as_object(), right.as_object()) {
+            for (field, left_value) in left_fields {
+                if right_fields.get(field) != Some(left_value) {
+                    return Err(format!(
+                        "relation certificate field {field} differs from independent replay: certificate={left_value}, replay={}",
+                        right_fields
+                            .get(field)
+                            .map_or_else(|| "<missing>".to_owned(), ToString::to_string)
+                    ));
+                }
+            }
+        }
+        return Err(
+            "relation certificate differs from independent replay at an unknown field".to_owned(),
+        );
     }
     Ok(())
 }
@@ -2020,6 +2034,25 @@ mod tests {
         assert_eq!(report.non_scalar_relation_count, 0);
         assert_eq!(report.exact_search_status, "complete-exact-algebra-box");
         verify_search_report(&report, true, true).unwrap();
+
+        let encoded = serde_json::to_vec(&report).unwrap();
+        let decoded: SearchReport = serde_json::from_slice(&encoded).unwrap();
+        assert_eq!(
+            decoded.principal_relations[13].log2_degree.to_bits(),
+            report.principal_relations[13].log2_degree.to_bits()
+        );
+        verify_search_report(&decoded, true, true).unwrap();
+
+        let mut one_ulp_mutation = decoded.clone();
+        let bits = one_ulp_mutation.principal_relations[13]
+            .log2_degree
+            .to_bits();
+        one_ulp_mutation.principal_relations[13].log2_degree = f64::from_bits(bits + 1);
+        assert!(verify_search_report(&one_ulp_mutation, true, true).is_err());
+
+        let mut nan_mutation = decoded;
+        nan_mutation.principal_relations[13].log2_degree = f64::NAN;
+        assert!(verify_search_report(&nan_mutation, true, true).is_err());
     }
 
     #[test]
