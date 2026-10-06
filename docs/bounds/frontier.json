@@ -1,0 +1,1177 @@
+{
+  "axes": [
+    "ops",
+    "memory"
+  ],
+  "built_from": [
+    "ECBND1h0069f2c753d5",
+    "ECBND1h01d56ac05650",
+    "ECBND1h11f6a579f4ae",
+    "ECBND1h1573ea580e89",
+    "ECBND1h18e0d9d32693",
+    "ECBND1h242c8c9495a1",
+    "ECBND1h2eb0cf5648a1",
+    "ECBND1h3271f30a876a",
+    "ECBND1h412ef80d6c1a",
+    "ECBND1h4bf964dff427",
+    "ECBND1h65b55d17b35c",
+    "ECBND1h7b69b9787056",
+    "ECBND1h8406f3255acf",
+    "ECBND1h8a535b61cad3",
+    "ECBND1h9834244fe7f6",
+    "ECBND1h9d3beb6852c6",
+    "ECBND1h9db4ac1ad04e",
+    "ECBND1hbab6d6dc37fc",
+    "ECBND1hcf67af806cc5",
+    "ECBND1hd392c8f42bb0",
+    "ECBND1he508a84e4e20"
+  ],
+  "domains": [
+    {
+      "axes": [
+        "ops",
+        "memory"
+      ],
+      "domain": {
+        "envelope": {
+          "precomputation": "none",
+          "targets": 1,
+          "threads": 1
+        },
+        "family": "koblitz",
+        "problem": "ecdlp.single_target",
+        "target_kind": "planted",
+        "tier": "toy",
+        "unit": "ecbench.gae"
+      },
+      "domain_id": "ECDOM1h080dd3dc639e",
+      "entries": [
+        {
+          "alpha": 0.5146538873175605,
+          "alpha_ci95": [
+            -0.3487383346759463,
+            0.7727966236842979
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.5019415142959062,
+                0.5085988462718992
+              ],
+              "known": true,
+              "value": 0.5052701802839037
+            },
+            "ops": {
+              "ci95": [
+                4.674117867215585,
+                7.187658607227296
+              ],
+              "known": true,
+              "value": 5.876711130775258
+            },
+            "uncharged": {
+              "ci95": [
+                0.9317585122142616,
+                1.19800435178485
+              ],
+              "known": true,
+              "value": 1.0762676100602306
+            }
+          },
+          "bound_id": "ECBND1h8406f3255acf",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "bsgs.negation on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "bsgs.negation",
+          "method_id": "ECM1h87f6341629c3",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.2956200982732732,
+          "alpha_ci95": [
+            0.012667294464851916,
+            0.5732998376978917
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.03438278551038546,
+                0.0715100692620268
+              ],
+              "known": true,
+              "value": 0.05518748438494842
+            },
+            "ops": {
+              "ci95": [
+                6.471843537255783,
+                12.017351522799558
+              ],
+              "known": true,
+              "value": 9.04136607399036
+            },
+            "uncharged": {
+              "ci95": [
+                0.9822488983669776,
+                1.517078702245262
+              ],
+              "known": true,
+              "value": 1.233890599016083
+            }
+          },
+          "bound_id": "ECBND1h01d56ac05650",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "rho.negation on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "rho.negation",
+          "method_id": "ECM1hefea4e0ebe79",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.19866140566317708,
+          "alpha_ci95": [
+            -0.4092793982591526,
+            0.3879836205743792
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.01039982778552224,
+                0.01982317079174315
+              ],
+              "known": true,
+              "value": 0.015796221652121186
+            },
+            "ops": {
+              "ci95": [
+                2.932881180426605,
+                19.89750665661397
+              ],
+              "known": true,
+              "value": 9.455226514767691
+            },
+            "uncharged": {
+              "ci95": [
+                0.28867781071295906,
+                2.9545027401858883
+              ],
+              "known": true,
+              "value": 1.294391245114139
+            }
+          },
+          "bound_id": "ECBND1h3271f30a876a",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "rho.signed_frobenius on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "rho.signed_frobenius",
+          "method_id": "ECM1h64b303e4183b",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.5041267503876816,
+          "alpha_ci95": [
+            -0.24994750355584344,
+            0.8022760244479948
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                1.177098459279108,
+                1.4601836500843524
+              ],
+              "known": true,
+              "value": 1.326467205207088
+            },
+            "ops": {
+              "ci95": [
+                5.916087426762066,
+                8.602994541019397
+              ],
+              "known": true,
+              "value": 7.205835994222621
+            },
+            "uncharged": {
+              "ci95": [
+                2.3566852591798826,
+                2.9244475319900665
+              ],
+              "known": true,
+              "value": 2.6559876309667727
+            }
+          },
+          "bound_id": "ECBND1h0069f2c753d5",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h8406f3255acf (bsgs.negation) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h8406f3255acf"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "bsgs.interleaved on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "bsgs.interleaved",
+          "method_id": "ECM1h6153371050b8",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.5084579197818817,
+          "alpha_ci95": [
+            -0.07646699183936521,
+            0.6857717135070986
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                1.0004280456037238,
+                1.0040608437103429
+              ],
+              "known": true,
+              "value": 1.002244444657035
+            },
+            "ops": {
+              "ci95": [
+                7.05569703700006,
+                10.115424801913791
+              ],
+              "known": true,
+              "value": 8.509835668043907
+            },
+            "uncharged": {
+              "ci95": [
+                1.429068655222425,
+                1.6981443137102263
+              ],
+              "known": true,
+              "value": 1.5751320892894312
+            }
+          },
+          "bound_id": "ECBND1h9db4ac1ad04e",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h8406f3255acf (bsgs.negation) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h8406f3255acf"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "bsgs.textbook on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "bsgs.textbook",
+          "method_id": "ECM1h2ee5b13dfb35",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.36865147516837976,
+          "alpha_ci95": [
+            0.05645933207707329,
+            0.4637999727290983
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.05140909129103208,
+                0.09224929781830164
+              ],
+              "known": true,
+              "value": 0.07314740105298626
+            },
+            "ops": {
+              "ci95": [
+                8.25110265305867,
+                13.327802689345878
+              ],
+              "known": true,
+              "value": 10.31049282949114
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1h9834244fe7f6",
+          "bounded": false,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h3271f30a876a (rho.signed_frobenius) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h3271f30a876a"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "rho.plain on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "rho.plain",
+          "method_id": "ECM1hb367476fce6c",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.5074108411285786,
+          "alpha_ci95": [
+            0.3106270362671435,
+            0.8468183290371695
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.16028927047218883,
+                0.28157773060531294
+              ],
+              "known": true,
+              "value": 0.2210050650201204
+            },
+            "ops": {
+              "ci95": [
+                9.619330977428124,
+                12.079236925599496
+              ],
+              "known": true,
+              "value": 10.800748931781415
+            },
+            "uncharged": {
+              "ci95": [
+                0.3287658075349283,
+                0.5653416119137296
+              ],
+              "known": true,
+              "value": 0.4450633505928384
+            }
+          },
+          "bound_id": "ECBND1h4bf964dff427",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h3271f30a876a (rho.signed_frobenius) is clearly better on memory",
+            "ECBND1h01d56ac05650 (rho.negation) is clearly better on memory",
+            "ECBND1h9834244fe7f6 (rho.plain) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h3271f30a876a",
+            "ECBND1h01d56ac05650",
+            "ECBND1h9834244fe7f6"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "kangaroo.vow on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "kangaroo.vow",
+          "method_id": "ECM1h05c1dc19c164",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.13151456503674772,
+          "alpha_ci95": [
+            0.10388168116870948,
+            0.18974322842147864
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.02236805063462459,
+                0.03709142843361165
+              ],
+              "known": true,
+              "value": 0.02970523677413899
+            },
+            "ops": {
+              "ci95": [
+                9.106921784262797,
+                25.31049630445604
+              ],
+              "known": true,
+              "value": 16.79352705063938
+            },
+            "uncharged": {
+              "ci95": [
+                0.8001467243964232,
+                1.2852369287257683
+              ],
+              "known": true,
+              "value": 1.060414156430714
+            }
+          },
+          "bound_id": "ECBND1h1573ea580e89",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h3271f30a876a (rho.signed_frobenius) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h3271f30a876a"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "rho.signed_frobenius_strong on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "rho.signed_frobenius_strong",
+          "method_id": "ECM1hb6123afffc07",
+          "params": {
+            "dp_bits": "4",
+            "lanes": "32",
+            "step_cap_factor": "2000"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.21592321550627583,
+          "alpha_ci95": [
+            -0.00998854602746716,
+            0.31256083553735026
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.021913325232791176,
+                0.06248473121940727
+              ],
+              "known": true,
+              "value": 0.04445993464997253
+            },
+            "ops": {
+              "ci95": [
+                18.69542794330539,
+                43.11217589135792
+              ],
+              "known": true,
+              "value": 29.860370546503972
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1h2eb0cf5648a1",
+          "bounded": false,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h3271f30a876a (rho.signed_frobenius) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1h3271f30a876a"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "rho.frozen_reference on 4 koblitz curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            15.373714813957372,
+            16.001122266128682,
+            16.997807964508816,
+            20.99910610127197
+          ],
+          "method": "rho.frozen_reference",
+          "method_id": "ECM1h9c08616a41bb",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        }
+      ],
+      "floor_model": "S_floor = sqrt(pi / 2A), A the usable automorphisms; ops = S / S_floor",
+      "memory_leader": "ECBND1h3271f30a876a",
+      "ops_leader": "ECBND1h8406f3255acf"
+    },
+    {
+      "axes": [
+        "ops",
+        "memory"
+      ],
+      "domain": {
+        "envelope": {
+          "precomputation": "none",
+          "targets": 1,
+          "threads": 1
+        },
+        "family": "prime",
+        "problem": "ecdlp.single_target",
+        "target_kind": "planted",
+        "tier": "toy",
+        "unit": "ecbench.gae"
+      },
+      "domain_id": "ECDOM1ha1f283af3a5d",
+      "entries": [
+        {
+          "alpha": 0.45779951496245297,
+          "alpha_ci95": [
+            0.3492422796678856,
+            0.5476509483230162
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.5005415492284316,
+                0.5027786360437511
+              ],
+              "known": true,
+              "value": 0.5015101558342762
+            },
+            "ops": {
+              "ci95": [
+                1.0477039080539872,
+                1.2544062781269616
+              ],
+              "known": true,
+              "value": 1.15374501190364
+            },
+            "uncharged": {
+              "ci95": [
+                0.9237721131947294,
+                1.090153099581825
+              ],
+              "known": true,
+              "value": 1.0081132383055311
+            }
+          },
+          "bound_id": "ECBND1hd392c8f42bb0",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "bsgs.negation on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "bsgs.negation",
+          "method_id": "ECM1h87f6341629c3",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.4544521140612318,
+          "alpha_ci95": [
+            0.273450018785023,
+            0.6071657296197525
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.020397236764511727,
+                0.04904287009049884
+              ],
+              "known": true,
+              "value": 0.0339995565077037
+            },
+            "ops": {
+              "ci95": [
+                1.278072243919189,
+                1.6525760269448382
+              ],
+              "known": true,
+              "value": 1.466137316459902
+            },
+            "uncharged": {
+              "ci95": [
+                0.9332166895777604,
+                1.3072609885400706
+              ],
+              "known": true,
+              "value": 1.1080822671715589
+            }
+          },
+          "bound_id": "ECBND1h7b69b9787056",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "rho.negation on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "rho.negation",
+          "method_id": "ECM1hefea4e0ebe79",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.3239829051266733,
+          "alpha_ci95": [
+            0.1111111111111111,
+            0.4471193530501562
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.0044898170773026505,
+                0.02128180049356682
+              ],
+              "known": true,
+              "value": 0.011751161642072915
+            },
+            "ops": {
+              "ci95": [
+                2.7496797075391224,
+                5.660330226983236
+              ],
+              "known": true,
+              "value": 4.066050497229104
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1h412ef80d6c1a",
+          "bounded": false,
+          "declared_alpha": 0.5,
+          "dominance_notes": [],
+          "dominated_by": [],
+          "improves_on": [],
+          "is_frontier": true,
+          "label": "rho.frozen_reference on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "rho.frozen_reference",
+          "method_id": "ECM1h9c08616a41bb",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.4086962582459416,
+          "alpha_ci95": [
+            0.21100273914481993,
+            0.5928907474734058
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                1.185294523876897,
+                1.5893968920086023
+              ],
+              "known": true,
+              "value": 1.3964568773933097
+            },
+            "ops": {
+              "ci95": [
+                1.3558721970614953,
+                1.8260947758246189
+              ],
+              "known": true,
+              "value": 1.592524923878691
+            },
+            "uncharged": {
+              "ci95": [
+                2.3749040728741497,
+                3.18560816363385
+              ],
+              "known": true,
+              "value": 2.7940112789071585
+            }
+          },
+          "bound_id": "ECBND1h65b55d17b35c",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1hd392c8f42bb0 (bsgs.negation) is clearly better on ops, memory",
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1hd392c8f42bb0",
+            "ECBND1h7b69b9787056"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "bsgs.interleaved on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "bsgs.interleaved",
+          "method_id": "ECM1h6153371050b8",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.47372279953812735,
+          "alpha_ci95": [
+            0.4084543017706425,
+            0.5331816107754924
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                1.0000529085882708,
+                1.0001924377047573
+              ],
+              "known": true,
+              "value": 1.000122673146515
+            },
+            "ops": {
+              "ci95": [
+                1.6106625780336832,
+                1.81571272275215
+              ],
+              "known": true,
+              "value": 1.7156504835385673
+            },
+            "uncharged": {
+              "ci95": [
+                1.423297517005339,
+                1.5888517739492607
+              ],
+              "known": true,
+              "value": 1.507186520948171
+            }
+          },
+          "bound_id": "ECBND1he508a84e4e20",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1hd392c8f42bb0 (bsgs.negation) is clearly better on ops, memory",
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on memory"
+          ],
+          "dominated_by": [
+            "ECBND1hd392c8f42bb0",
+            "ECBND1h7b69b9787056"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "bsgs.textbook on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "bsgs.textbook",
+          "method_id": "ECM1h2ee5b13dfb35",
+          "params": {},
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.4241890916365018,
+          "alpha_ci95": [
+            0.25772307843666714,
+            0.501677401935098
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.029370222016512827,
+                0.08704440190442356
+              ],
+              "known": true,
+              "value": 0.05450778540720084
+            },
+            "ops": {
+              "ci95": [
+                1.7446084065662226,
+                2.2732975507348705
+              ],
+              "known": true,
+              "value": 1.9902615637735943
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1hcf67af806cc5",
+          "bounded": false,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on ops"
+          ],
+          "dominated_by": [
+            "ECBND1h7b69b9787056"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "rho.plain on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "rho.plain",
+          "method_id": "ECM1hb367476fce6c",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.5259774148947509,
+          "alpha_ci95": [
+            0.2359846057036605,
+            0.6408975262390517
+          ],
+          "axes": {
+            "memory": {
+              "ci95": [
+                0.09037438234615904,
+                0.2267342796154402
+              ],
+              "known": true,
+              "value": 0.14684165739546975
+            },
+            "ops": {
+              "ci95": [
+                2.2785423212621003,
+                2.7714319262554805
+              ],
+              "known": true,
+              "value": 2.5267052026360752
+            },
+            "uncharged": {
+              "ci95": [
+                0.17931581896667015,
+                0.4555884730087119
+              ],
+              "known": true,
+              "value": 0.29478083891147716
+            }
+          },
+          "bound_id": "ECBND1h8a535b61cad3",
+          "bounded": true,
+          "declared_alpha": 0.5,
+          "dominance_notes": [
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on ops, memory",
+            "ECBND1hcf67af806cc5 (rho.plain) is clearly better on ops, memory"
+          ],
+          "dominated_by": [
+            "ECBND1h7b69b9787056",
+            "ECBND1hcf67af806cc5"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "kangaroo.vow on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "kangaroo.vow",
+          "method_id": "ECM1h05c1dc19c164",
+          "params": {
+            "cap_multiple": "64"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 0.8406832362281925,
+          "alpha_ci95": [
+            0.4996242969474544,
+            1.0236338192501349
+          ],
+          "axes": {
+            "memory": {
+              "ci95": null,
+              "known": false,
+              "value": null
+            },
+            "ops": {
+              "ci95": [
+                11.420701404563468,
+                40.106912820117074
+              ],
+              "known": true,
+              "value": 22.68550285153695
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1hbab6d6dc37fc",
+          "bounded": true,
+          "declared_alpha": null,
+          "dominance_notes": [
+            "ECBND1h65b55d17b35c (bsgs.interleaved) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1hd392c8f42bb0 (bsgs.negation) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1he508a84e4e20 (bsgs.textbook) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h8a535b61cad3 (kangaroo.vow) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h412ef80d6c1a (rho.frozen_reference) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1hcf67af806cc5 (rho.plain) is clearly better on ops; memory unknown on one side and left out"
+          ],
+          "dominated_by": [
+            "ECBND1h65b55d17b35c",
+            "ECBND1hd392c8f42bb0",
+            "ECBND1he508a84e4e20",
+            "ECBND1h8a535b61cad3",
+            "ECBND1h412ef80d6c1a",
+            "ECBND1h7b69b9787056",
+            "ECBND1hcf67af806cc5"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "ic.pipeline on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "ic.pipeline",
+          "method_id": "ECM1he27eac0cec8f",
+          "params": {
+            "factor_base": "prime-abscissa:size=32",
+            "linalg": "incremental-gauss",
+            "max_trials": "100000000",
+            "oracle": "mitm:negation_folded=1",
+            "solver": "",
+            "solver_budget_seconds": "0",
+            "targets": "walk"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        },
+        {
+          "alpha": 1.0054133004771464,
+          "alpha_ci95": [
+            0.7856771131175083,
+            1.0986697998455754
+          ],
+          "axes": {
+            "memory": {
+              "ci95": null,
+              "known": false,
+              "value": null
+            },
+            "ops": {
+              "ci95": [
+                395.6470915251534,
+                2482.9041619934223
+              ],
+              "known": true,
+              "value": 1258.2297948317716
+            },
+            "uncharged": {
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "known": true,
+              "value": 0.0
+            }
+          },
+          "bound_id": "ECBND1h9d3beb6852c6",
+          "bounded": true,
+          "declared_alpha": null,
+          "dominance_notes": [
+            "ECBND1h65b55d17b35c (bsgs.interleaved) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1hd392c8f42bb0 (bsgs.negation) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1he508a84e4e20 (bsgs.textbook) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1hbab6d6dc37fc (ic.pipeline) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h8a535b61cad3 (kangaroo.vow) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h412ef80d6c1a (rho.frozen_reference) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1h7b69b9787056 (rho.negation) is clearly better on ops; memory unknown on one side and left out",
+            "ECBND1hcf67af806cc5 (rho.plain) is clearly better on ops; memory unknown on one side and left out"
+          ],
+          "dominated_by": [
+            "ECBND1h65b55d17b35c",
+            "ECBND1hd392c8f42bb0",
+            "ECBND1he508a84e4e20",
+            "ECBND1hbab6d6dc37fc",
+            "ECBND1h8a535b61cad3",
+            "ECBND1h412ef80d6c1a",
+            "ECBND1h7b69b9787056",
+            "ECBND1hcf67af806cc5"
+          ],
+          "improves_on": [],
+          "is_frontier": false,
+          "label": "ic.pipeline on 4 prime curves, toy tier",
+          "level": "exponent",
+          "log2_r": [
+            17.696675535624497,
+            19.101306328859888,
+            21.215969580418943,
+            23.974409950711376
+          ],
+          "method": "ic.pipeline",
+          "method_id": "ECM1heb3c3fdeabc8",
+          "params": {
+            "factor_base": "prime-abscissa:size=32",
+            "linalg": "incremental-gauss",
+            "max_trials": "100000000",
+            "oracle": "subtract",
+            "solver": "",
+            "solver_budget_seconds": "0",
+            "targets": "walk"
+          },
+          "runs": 96,
+          "scaling_claim": true
+        }
+      ],
+      "floor_model": "S_floor = sqrt(pi / 2A), A the usable automorphisms; ops = S / S_floor",
+      "memory_leader": "ECBND1h412ef80d6c1a",
+      "ops_leader": "ECBND1hd392c8f42bb0"
+    }
+  ],
+  "frontier_id": "ECFR1h9b60f2a67210",
+  "inadmissible": [
+    {
+      "bound_id": "ECBND1h11f6a579f4ae",
+      "label": "ic.pipeline on 2 koblitz curves, toy tier",
+      "reasons": [
+        "48 of 96 measured runs did not verify; only a wholly verified arm is admissible",
+        "2 size(s): below 4, so the exponent is descriptive and this is a constant bound"
+      ]
+    },
+    {
+      "bound_id": "ECBND1h18e0d9d32693",
+      "label": "ic.pipeline on 2 koblitz curves, toy tier",
+      "reasons": [
+        "48 of 96 measured runs did not verify; only a wholly verified arm is admissible",
+        "2 size(s): below 4, so the exponent is descriptive and this is a constant bound"
+      ]
+    },
+    {
+      "bound_id": "ECBND1h242c8c9495a1",
+      "label": "ic.pipeline on 2 koblitz curves, toy tier",
+      "reasons": [
+        "48 of 96 measured runs did not verify; only a wholly verified arm is admissible",
+        "2 size(s): below 4, so the exponent is descriptive and this is a constant bound"
+      ]
+    }
+  ],
+  "schema": "ecbench.frontier/v1"
+}
