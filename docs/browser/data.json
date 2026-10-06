@@ -8,7 +8,7 @@
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 25,
+  "sessions": 27,
   "yields": 1956
  },
  "sources": {
@@ -19,6 +19,8 @@
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
   "research/ecbench_all_candidates_20261003/sessions/prime/records.jsonl": "6e5745b63dde26261040f0585363c3337da5569afb17abbe8eeb0275a4b902aa",
+  "research/ecbench_bounds_challenges_20261006/sessions/koblitz-toy-reference-e1/records.jsonl": "e2c5f797f7d04fbe4cb74a662a2f6b54d77e0cb38ddb0b9bb149cfd7b7b0c080",
+  "research/ecbench_bounds_challenges_20261006/sessions/prime-toy-reference-e1/records.jsonl": "27ea1485e5f840882af010f92ba78f16f2d4e365f67eed18a77f0892283b4f47",
   "research/ecbench_calibration_20261002/sessions/followup-koblitz/records.jsonl": "5893554789019f108376e2461dd389400af0a1aa86190a75fefcd8d435123bfd",
   "research/ecbench_calibration_20261002/sessions/followup-prime/records.jsonl": "87a60d048f8cb81bd302e560ae5dd4de197fb649599c214a1fb33fc3c0ef8c56",
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
@@ -2047,6 +2049,36 @@
      "mean_ratio_to_floor": 8.178
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.4472,
+     "mean_ratio_to_floor": 6.733
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.066,
+     "mean_ratio_to_floor": 18.917
+    },
+    {
      "session_id": "ECBS1h73210d525d59",
      "arm": "bsgs-il",
      "method": "bsgs.interleaved",
@@ -2915,6 +2947,36 @@
      "verified": 4,
      "mean_s": 717.4026,
      "mean_ratio_to_floor": 3528.538
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.7604,
+     "mean_ratio_to_floor": 3.74
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 3.0821,
+     "mean_ratio_to_floor": 15.16
     },
     {
      "session_id": "ECBS1hb0cb85a662d8",
@@ -4161,6 +4223,36 @@
      "mean_ratio_to_floor": 13107.556
     },
     {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.4404,
+     "mean_ratio_to_floor": 2.383
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0885,
+     "mean_ratio_to_floor": 5.89
+    },
+    {
      "session_id": "ECBS1hf4c34c2455f9",
      "arm": "bsgs",
      "method": "bsgs.textbook",
@@ -5009,6 +5101,36 @@
    "on_leaderboard": false,
    "leaderboard": [],
    "ecbench": [
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1733,
+     "mean_ratio_to_floor": 7.129
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
+    {
+     "session_id": "ECBS1h5eaf9eef9f25",
+     "arm": "incumbent-aa",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 4.5383,
+     "mean_ratio_to_floor": 27.577
+    },
     {
      "session_id": "ECBS1hb0cb85a662d8",
      "arm": "ic-sub6-mitm",
@@ -14379,6 +14501,36 @@
      "mean_ratio_to_floor": 1.872
     },
     {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1111,
+     "mean_ratio_to_floor": 1.254
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.3054,
+     "mean_ratio_to_floor": 1.473
+    },
+    {
      "session_id": "ECBS1h548d49a71881",
      "arm": "abs16-mitm",
      "method": "ic.pipeline",
@@ -14857,6 +15009,36 @@
      "verified": 24,
      "mean_s": 1.935,
      "mean_ratio_to_floor": 2.183
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.0552,
+     "mean_ratio_to_floor": 1.191
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.289,
+     "mean_ratio_to_floor": 1.455
     },
     {
      "session_id": "ECBS1h445dba3005bc",
@@ -15535,6 +15717,36 @@
      "verified": 24,
      "mean_s": 1.6,
      "mean_ratio_to_floor": 1.805
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.9866,
+     "mean_ratio_to_floor": 1.113
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.2474,
+     "mean_ratio_to_floor": 1.408
     },
     {
      "session_id": "ECBS1haf997766feb9",
@@ -16362,6 +16574,36 @@
      "mean_ratio_to_floor": 1.687
     },
     {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.96,
+     "mean_ratio_to_floor": 1.083
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
+    },
+    {
+     "session_id": "ECBS1h3a5708ad901b",
+     "arm": "incumbent-aa",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 1.1432,
+     "mean_ratio_to_floor": 1.29
+    },
+    {
      "session_id": "ECBS1haf997766feb9",
      "arm": "bsgs",
      "method": "bsgs.textbook",
@@ -17175,6 +17417,7 @@
    "sessions": [
     "ECBS1h14bbcca48793",
     "ECBS1h162089ae4d82",
+    "ECBS1h3a5708ad901b",
     "ECBS1h445dba3005bc",
     "ECBS1h46ed5b65cdcf",
     "ECBS1h498fa819ba21",
@@ -17207,8 +17450,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 841,
-   "verified": 841
+   "runs": 969,
+   "verified": 969
   },
   {
    "method_id": "ECM1h2ee5b13dfb35",
@@ -18181,6 +18424,7 @@
    "sessions": [
     "ECBS1h14bbcca48793",
     "ECBS1h162089ae4d82",
+    "ECBS1h3a5708ad901b",
     "ECBS1h445dba3005bc",
     "ECBS1h46ed5b65cdcf",
     "ECBS1h498fa819ba21",
@@ -18210,8 +18454,8 @@
     "icv1-fp24-t1059-6df599df",
     "icv1-fp26-tm1775-7e8fb6df"
    ],
-   "runs": 1022,
-   "verified": 1021
+   "runs": 1278,
+   "verified": 1277
   },
   {
    "method_id": "ECM1hb367476fce6c",
@@ -18257,6 +18501,7 @@
     "cap_multiple": "64"
    },
    "sessions": [
+    "ECBS1h5eaf9eef9f25",
     "ECBS1h6302265165a5",
     "ECBS1h6f9ddee85cae",
     "ECBS1h73210d525d59",
@@ -18274,8 +18519,8 @@
     "icv1-f2m41-tm2308219-7f48b14a",
     "icv1-f2m43-tm998717-e2e742b0"
    ],
-   "runs": 479,
-   "verified": 479
+   "runs": 607,
+   "verified": 607
   },
   {
    "method_id": "ECM1h1d9961ee4601",
@@ -18332,6 +18577,7 @@
    },
    "sessions": [
     "ECBS1h0d1ce1d04e54",
+    "ECBS1h5eaf9eef9f25",
     "ECBS1h6302265165a5",
     "ECBS1ha960fa84a3c2",
     "ECBS1hb0cb85a662d8",
@@ -18350,8 +18596,8 @@
     "icv1-f2m59-tm943548413-98844ecc",
     "icv1-f2m61-t158598901-ab42b6c5"
    ],
-   "runs": 813,
-   "verified": 813
+   "runs": 1069,
+   "verified": 1069
   }
  ],
  "factor_bases": [
@@ -20232,8 +20478,8 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "84b504d19844",
-   "mentions": 25,
-   "files": 14,
+   "mentions": 26,
+   "files": 15,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/AUDIT.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/receipt.json",
@@ -28915,6 +29161,88 @@
      "role": "baseline",
      "method": "rho.plain",
      "method_id": "ECM1hb367476fce6c"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h5eaf9eef9f25",
+   "dir": "research/ecbench_bounds_challenges_20261006/sessions/koblitz-toy-reference-e1",
+   "label": "challenge ECCH1h76d71da2a89c epoch 1: rho.signed_frobenius against rho.signed_frobenius_strong",
+   "status": "complete",
+   "spec_id": "ECS1h97880b56eeb4",
+   "env_class_id": "ECBENV2h393e9c141834",
+   "binary_sha256": "58c0eea59b37c190b86f7729fb5f613ee79d9a99a2e08b6df670f0379a519016",
+   "git_commit": null,
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791253767374,
+   "curves": [
+    "icv1-f2m17-tm101-00378d4e",
+    "icv1-f2m19-t797-b6cf2467",
+    "icv1-f2m23-t5197-69e76b73",
+    "icv1-f2m29-tm40309-30c52b96"
+   ],
+   "arms": [
+    {
+     "arm": "candidate",
+     "role": "candidate",
+     "method": "rho.signed_frobenius",
+     "method_id": "ECM1h64b303e4183b"
+    },
+    {
+     "arm": "incumbent",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    },
+    {
+     "arm": "incumbent-aa",
+     "role": "control",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1h3a5708ad901b",
+   "dir": "research/ecbench_bounds_challenges_20261006/sessions/prime-toy-reference-e1",
+   "label": "challenge ECCH1h904625668686 epoch 1: bsgs.negation against rho.negation",
+   "status": "complete",
+   "spec_id": "ECS1h6ae84963ddfc",
+   "env_class_id": "ECBENV2h393e9c141834",
+   "binary_sha256": "58c0eea59b37c190b86f7729fb5f613ee79d9a99a2e08b6df670f0379a519016",
+   "git_commit": null,
+   "records": 384,
+   "status_counts": {
+    "verified": 384
+   },
+   "started_unix_ms": 1791253765415,
+   "curves": [
+    "icv1-fp18-tm337-d28d5e09",
+    "icv1-fp20-t727-cd198a38",
+    "icv1-fp22-tm1385-475dcb5f",
+    "icv1-fp24-t1059-6df599df"
+   ],
+   "arms": [
+    {
+     "arm": "candidate",
+     "role": "candidate",
+     "method": "bsgs.negation",
+     "method_id": "ECM1h87f6341629c3"
+    },
+    {
+     "arm": "incumbent",
+     "role": "reference",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79"
+    },
+    {
+     "arm": "incumbent-aa",
+     "role": "control",
+     "method": "rho.negation",
+     "method_id": "ECM1hefea4e0ebe79"
     }
    ]
   },
