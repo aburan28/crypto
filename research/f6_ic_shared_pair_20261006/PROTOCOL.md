@@ -27,6 +27,9 @@ Cloning or changing the base must invalidate the derived cache. The first
 one-fixed branch to cross the **unchanged** `B × (B + 1)` prior-addition
 threshold builds the index. Build work is charged to that first target PDP
 attempt; later attempts reuse it with zero new build count. The pair lookup
+in later attempts begins at their first eligible one-fixed branch; the
+threshold applies only to the first build. This clarifies the registered
+reuse policy before any timed run. The pair lookup
 must check both partial-code orientations and replay every proposed witness
 in general group arithmetic. No point outside the exact usable base may
 be returned. Keep the original attempt-local and original F6 arms available

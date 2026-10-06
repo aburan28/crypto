@@ -5828,6 +5828,7 @@ struct F6GeometricGate<'a> {
     batch_fast: bool,
     pair_index_enabled: bool,
     shared_pair_index: bool,
+    shared_cache_checked: bool,
     pair_index: Option<Arc<F6PairIndex>>,
     pair_index_builds: u64,
     pair_index_lookups: u64,
@@ -5918,6 +5919,7 @@ impl<'a> F6GeometricGate<'a> {
             batch_fast: true,
             pair_index_enabled: false,
             shared_pair_index: false,
+            shared_cache_checked: false,
             pair_index: None,
             pair_index_builds: 0,
             pair_index_lookups: 0,
@@ -5984,6 +5986,10 @@ impl<'a> F6GeometricGate<'a> {
         defined_mask: u64,
     ) -> bool {
         if self.pair_index_enabled && self.fast.is_some() {
+            if self.shared_pair_index && !self.shared_cache_checked {
+                self.reuse_shared_pair_index();
+                self.shared_cache_checked = true;
+            }
             let size = self.fb.points.len() as u64;
             if self.pair_index.is_none()
                 && self.one_fixed_additions >= size.saturating_mul(size + 1)
@@ -6036,19 +6042,27 @@ impl<'a> F6GeometricGate<'a> {
     }
 
     fn build_or_reuse_shared_pair_index(&mut self) {
-        let key = self.fb.projection_fingerprint(self.kc);
-        if let Some((built_for, index)) = self.fb.derived.f6_pairs.get() {
-            if *built_for == key {
-                self.pair_index = Some(Arc::clone(index));
-                return;
-            }
+        if self.reuse_shared_pair_index() {
+            return;
         }
+        let key = self.fb.projection_fingerprint(self.kc);
         // Build outside the cell, like the other derived constructions.
         // A changed public base gets a local index and never a stale hit.
         self.build_pair_index();
         if let Some(index) = &self.pair_index {
             let _ = self.fb.derived.f6_pairs.set((key, Arc::clone(index)));
         }
+    }
+
+    fn reuse_shared_pair_index(&mut self) -> bool {
+        let key = self.fb.projection_fingerprint(self.kc);
+        if let Some((built_for, index)) = self.fb.derived.f6_pairs.get() {
+            if *built_for == key {
+                self.pair_index = Some(Arc::clone(index));
+                return true;
+            }
+        }
+        false
     }
 
     fn close_one_fixed_fast_pair(
@@ -17061,7 +17075,7 @@ mod tests {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let mut fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
         let target = kc.mul(kc.generator(), &BigUint::from(5u32));
-        let check = |base: &FrobeniusFactorBase, expect_build: u64| {
+        let check = |base: &FrobeniusFactorBase, expect_build: u64, prior_additions: u64| {
             let index_of = base.index_map();
             let mut shared = F6GeometricGate::new(&kc, base, &index_of, &target, 3, None).unwrap();
             let code = shared.fast.as_ref().unwrap().codes[0];
@@ -17074,7 +17088,7 @@ mod tests {
             let expected = legacy.decide(&assignment, 0);
             shared.pair_index_enabled = true;
             shared.shared_pair_index = true;
-            shared.one_fixed_additions = (base.points.len() * (base.points.len() + 1)) as u64;
+            shared.one_fixed_additions = prior_additions;
             let actual = shared.decide(&assignment, 0);
             assert_eq!(actual, expected);
             assert_eq!(shared.pair_index_builds, expect_build);
@@ -17091,14 +17105,15 @@ mod tests {
             }
             Arc::clone(shared.pair_index.as_ref().unwrap())
         };
-        let first = check(&fb, 1);
-        let reused = check(&fb, 0);
+        let threshold = (fb.points.len() * (fb.points.len() + 1)) as u64;
+        let first = check(&fb, 1, threshold);
+        let reused = check(&fb, 0, 0);
         assert!(Arc::ptr_eq(&first, &reused));
         let cloned = fb.clone();
-        let clone_index = check(&cloned, 1);
+        let clone_index = check(&cloned, 1, threshold);
         assert!(!Arc::ptr_eq(&first, &clone_index));
         fb.points.swap(0, 1);
-        let edited_index = check(&fb, 1);
+        let edited_index = check(&fb, 1, threshold);
         assert!(!Arc::ptr_eq(&first, &edited_index));
     }
 
