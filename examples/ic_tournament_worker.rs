@@ -103,6 +103,8 @@ struct Config {
     active_multipliers: bool,
     #[serde(skip_serializing_if = "is_false")]
     support_local_stream: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    support_local_bitmap_columns: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -124,6 +126,7 @@ impl Default for Config {
             direct_fused_pack: false,
             active_multipliers: false,
             support_local_stream: false,
+            support_local_bitmap_columns: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -710,6 +713,9 @@ fn run_prepared_target(
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_stream(
         job.config.support_local_stream,
     );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_support_local_bitmap_columns(
+        job.config.support_local_bitmap_columns,
+    );
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
@@ -846,6 +852,19 @@ mod prepared_target_tests {
         config.support_local_stream = true;
         let opted_in = serde_json::to_value(&config).unwrap();
         assert_eq!(opted_in.get("support_local_stream"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_bitmap_columns_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_bitmap_columns").is_none());
+        config.support_local_bitmap_columns = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(
+            opted_in.get("support_local_bitmap_columns"),
+            Some(&json!(true))
+        );
     }
 
     fn prepared_job(cap: u64) -> Job {
