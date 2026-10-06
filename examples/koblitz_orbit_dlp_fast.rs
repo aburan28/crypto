@@ -902,6 +902,20 @@ mod wide {
         KnownAnswerScalar(u64),
     }
 
+    /// Deterministic rank-stage scalar / start derivation for the parallel
+    /// guided rank: each column `j` uses `mix(rank_seed, j, attempt)`, so
+    /// the set of extractions is independent of thread scheduling.  The
+    /// resulting factor-log table is the unique full-rank solution either
+    /// way, so the published target row is unchanged.
+    fn rank_mix(seed: u64, column: u64, attempt: u64) -> u64 {
+        let mut z = seed
+            ^ column.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+            ^ attempt.wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^ (z >> 31)
+    }
+
     // serde_json's default Number representation cannot emit arbitrary
     // u128 field elements.  Keep the wide-only wire format lossless by
     // encoding every field coordinate as a decimal string; the legacy
@@ -998,6 +1012,7 @@ mod wide {
         base: &Base128,
         codes: &[u128; 4],
         target: FastPoint128,
+        relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
         let choices: Vec<&Vec<usize>> = codes.iter().map(|code| base.by_x.get(code)).collect::<Option<_>>()?;
         for &a in choices[0] {
@@ -1006,7 +1021,10 @@ mod wide {
                 for &c in choices[2] {
                     let abc = fast.add(ab, base.points[c]);
                     for &d in choices[3] {
-                        if fast.add(abc, base.points[d]) == target {
+                        let check_started = Instant::now();
+                        let matches = fast.add(abc, base.points[d]) == target;
+                        *relation_check_ns += check_started.elapsed().as_nanos();
+                        if matches {
                             return Some([a, b, c, d]);
                         }
                     }
@@ -1025,6 +1043,7 @@ mod wide {
         base: &Base128,
         target: FastPoint128,
         start: usize,
+        relation_check_ns: &mut u128,
     ) -> Option<Relation128> {
         let (target_x, _) = target?;
         let n = gf.n;
@@ -1054,7 +1073,13 @@ mod wide {
                             index.shifted[left2][left_shift2],
                             index.shifted[right2][right_shift2],
                         ];
-                        if let Some(point_indices) = lift128(fast, base, &codes, target) {
+                        if let Some(point_indices) = lift128(
+                            fast,
+                            base,
+                            &codes,
+                            target,
+                            relation_check_ns,
+                        ) {
                             return Some(Relation128 { point_indices, x_codes: codes, intermediates: [absolute, partner], probes });
                         }
                     }
@@ -1271,24 +1296,129 @@ mod wide {
         let mut rank_relations = 0u64;
         let mut rank_probes = 0u64;
         let mut rank_rows_without_gain = 0u64;
-        while echelon.rank < base.columns {
-            rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-            let scalar = (rank_seed >> 11) % (r - 1) + 1;
-            let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
-            let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
-            let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve128::neg(rep));
-            rank_attempts += 1;
-            match extract128(&gf, &fast, &basis, &solver, &index, &base, point, (rank_seed >> 20) as usize) {
-                Some(relation) => {
+        let mut rank_unused_relation_check_ns = 0u128;
+        let rank_threads: usize = std::env::var("KIC_RANK_THREADS")
+            .ok()
+            .and_then(|value| value.trim().parse::<usize>().ok())
+            .filter(|&threads| threads > 0)
+            .unwrap_or(1);
+        let rank_policy_parallel = rank_threads > 1;
+        if rank_policy_parallel {
+            // Parallel guided rank: every column is anchored by its own
+            // relation with a scheduling-independent scalar, so the row set
+            // (and therefore the solved logs, the unique full-rank
+            // solution) does not depend on thread interleaving.  Rows may
+            // arrive covering already-pivoted columns; those count as
+            // rows without gain, exactly as sequential duplicates would.
+            let (sender, receiver) =
+                std::sync::mpsc::channel::<(usize, u64, Relation128, u64, u128, u64)>();
+            std::thread::scope(|scope| {
+                let mut handles = Vec::with_capacity(rank_threads);
+                for thread in 0..rank_threads {
+                    let sender = sender.clone();
+                    let gf = &gf;
+                    let fast = &fast;
+                    let basis = &basis;
+                    let solver = &solver;
+                    let index = &index;
+                    let base = &base;
+                    let generator = &generator;
+                    let representatives = &representatives;
+                    handles.push(scope.spawn(move || {
+                        let mut thread_attempts = 0u64;
+                        let mut thread_relation_check_ns = 0u128;
+                        for column in (thread..base.columns).step_by(rank_threads) {
+                            let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
+                            let mut attempt = 0u64;
+                            loop {
+                                let mixed = rank_mix(rank_seed, column as u64, attempt);
+                                let scalar = mixed % (r - 1) + 1;
+                                let start = (mixed >> 20) as usize;
+                                let point = fast.add(
+                                    fast.scalar_mul(*generator, &BigUint::from(scalar)),
+                                    FastBinaryCurve128::neg(rep),
+                                );
+                                thread_attempts += 1;
+                                match extract128(
+                                    gf,
+                                    fast,
+                                    basis,
+                                    solver,
+                                    index,
+                                    base,
+                                    point,
+                                    start,
+                                    &mut thread_relation_check_ns,
+                                ) {
+                                    Some(relation) => {
+                                        let probes = relation.probes;
+                                        sender
+                                            .send((
+                                                column,
+                                                scalar,
+                                                relation,
+                                                probes,
+                                                thread_relation_check_ns,
+                                                thread_attempts,
+                                            ))
+                                            .expect("rank receiver is alive");
+                                        thread_relation_check_ns = 0;
+                                        thread_attempts = 0;
+                                        break;
+                                    }
+                                    None => attempt += 1,
+                                }
+                            }
+                        }
+                    }));
+                }
+                drop(sender);
+                for (column, scalar, relation, probes, relation_check_ns, attempts) in receiver {
+                    rank_attempts += attempts;
                     rank_relations += 1;
-                    rank_probes += relation.probes;
+                    rank_probes += probes;
+                    rank_unused_relation_check_ns += relation_check_ns;
                     let mut row = relation_row128(&base, &relation, scalar, r);
                     row[column] = (row[column] + 1) % r;
                     if !echelon.insert(row) {
                         rank_rows_without_gain += 1;
                     }
                 }
-                None => rank_failures += 1,
+                for handle in handles {
+                    handle.join().expect("rank worker thread");
+                }
+            });
+        } else {
+            while echelon.rank < base.columns {
+                rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                let scalar = (rank_seed >> 11) % (r - 1) + 1;
+                let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
+                let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
+                let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve128::neg(rep));
+                rank_attempts += 1;
+                let mut unused_relation_check_ns = 0u128;
+                match extract128(
+                    &gf,
+                    &fast,
+                    &basis,
+                    &solver,
+                    &index,
+                    &base,
+                    point,
+                    (rank_seed >> 20) as usize,
+                    &mut unused_relation_check_ns,
+                ) {
+                    Some(relation) => {
+                        rank_relations += 1;
+                        rank_probes += relation.probes;
+                        let mut row = relation_row128(&base, &relation, scalar, r);
+                        row[column] = (row[column] + 1) % r;
+                        if !echelon.insert(row) {
+                            rank_rows_without_gain += 1;
+                        }
+                    }
+                    None => rank_failures += 1,
+                }
             }
         }
         let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
@@ -1320,8 +1450,21 @@ mod wide {
             let start = query_hash as usize;
             let target_query_stage_ms = query_hash_started.elapsed().as_secs_f64() * 1000.0;
             let target_pdp_started = Instant::now();
-            let relation = extract128(&gf, &fast, &basis, &solver, &index, &base, target, start);
-            let target_pdp_and_relation_check_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
+            let mut target_relation_check_ns = 0u128;
+            let relation = extract128(
+                &gf,
+                &fast,
+                &basis,
+                &solver,
+                &index,
+                &base,
+                target,
+                start,
+                &mut target_relation_check_ns,
+            );
+            let target_decomposition_total_ms = target_pdp_started.elapsed().as_secs_f64() * 1000.0;
+            let target_relation_check_ms = target_relation_check_ns as f64 / 1_000_000.0;
+            let target_pdp_ms = (target_decomposition_total_ms - target_relation_check_ms).max(0.0);
             let target_descent_started = Instant::now();
             let recovered = relation.as_ref().map(|relation| {
                 relation.point_indices.iter().fold(0u64, |acc, &index| {
@@ -1358,10 +1501,11 @@ mod wide {
                 "group_verified":verified,
                 "target_generation_ms_excluded":target_generation_ms,
                 "target_query_ms":target_query_stage_ms,
-                "target_pdp_and_relation_check_ms":target_pdp_and_relation_check_ms,
+                "target_pdp_ms":target_pdp_ms,
+                "target_relation_check_ms":target_relation_check_ms,
                 "target_descent_ms":target_descent_ms,
                 "target_recovery_check_ms":target_recovery_check_ms,
-                "target_phase_sum_ms":target_query_stage_ms + target_pdp_and_relation_check_ms + target_descent_ms + target_recovery_check_ms,
+                "target_phase_sum_ms":target_query_stage_ms + target_pdp_ms + target_relation_check_ms + target_descent_ms + target_recovery_check_ms,
                 "target_ms":elapsed,
             });
             writeln!(out, "{record}").unwrap();
@@ -1399,14 +1543,18 @@ mod wide {
             "rank_relations":rank_relations,
             "rank_failures":rank_failures,
             "rank_rows_without_gain":rank_rows_without_gain,
-            "rank_policy":"guided: decompose [a]G - R_j for the first pivotless column j",
+            "rank_policy": if rank_policy_parallel {
+                "guided parallel: every column anchors [a]G - R_j with a scheduling-independent scalar; logs are the unique full-rank solution"
+            } else {
+                "guided: decompose [a]G - R_j for the first pivotless column j"
+            },
             "rank_probes_mean":if rank_relations > 0 { rank_probes as f64 / rank_relations as f64 } else { 0.0 },
             "rank":echelon.rank,
             "targets":target_inputs.len(),
             "targets_solved":solved,
             "targets_failed":failed,
             "peak_rss_bytes":super::peak_rss_bytes(),
-            "threads":1,
+            "threads":rank_threads,
             "scope":"public synthetic Koblitz fixtures; shared-factor-log DLP with every stage timed in one process; no external points or key recovery",
         });
         println!("{summary}");

@@ -115,6 +115,15 @@ def now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
+def independent_replay_pointer(run: Path) -> str:
+    """Return the reserved path for this run's independent replay receipt."""
+    replay_path = run / "validation" / "independent_replay.json"
+    try:
+        return replay_path.relative_to(REPO).as_posix()
+    except ValueError:
+        return str(replay_path)
+
+
 def sha256(path: Path | str) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -746,9 +755,7 @@ def draft_vs_rho_claim(
         ),
         "ic_precomputation_fixture_ms": precompute_ms,
         "ic_target_relation_attempts": online_row.get("target_trials") if online_row else None,
-        "independent_replay_pointer": str(
-            (run / "artifacts/claim_draft.json").relative_to(REPO)
-        ),
+        "independent_replay_pointer": independent_replay_pointer(run),
         "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
         "executable_or_source_hash": {
             "direct": sha256(binaries["direct"]),
@@ -881,11 +888,7 @@ def draft_factor_base_claim(
             "not imported/external points",
             "not ledger promotion until independent validation",
         ],
-        "independent_replay_pointer": str(
-            (run / "artifacts/claim_draft.json").relative_to(REPO)
-            if REPO in (run / "artifacts/claim_draft.json").parents
-            else (run / "artifacts/claim_draft.json")
-        ),
+        "independent_replay_pointer": independent_replay_pointer(run),
         "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
         "executable_or_source_hash": {
             "direct": sha256(binaries["direct"]),

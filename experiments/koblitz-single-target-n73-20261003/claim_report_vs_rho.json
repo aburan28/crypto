@@ -1,0 +1,119 @@
+{
+ "all_stages_charged_same_series": true,
+ "automorphism_discount": {
+  "A": 146,
+  "description": "signed Frobenius automorphism discount family used by the Koblitz rho control (quotient_mode signed_frobenius, automorphism_size 146)",
+  "formula": "sqrt(2n)",
+  "n": 73
+ },
+ "claim_boundary": "Public synthetic Koblitz n=73 (a=0, b=1 over GF(2^73), modulus x^73+x^4+x^3+x^2+1, 56.3-bit subgroup); exactly one previously unseen public target point solved online by IC and rho on the identical frozen point (sequential single-process arms, same host); constant-factor win only. Not ECC2K-130 evidence, not an asymptotic sub-rho claim, not key recovery, not external/private targets.",
+ "claim_boundary_non_claims": [
+  "not ECC2K-130 evidence (n=131 is a different field degree on the same curve family)",
+  "not an asymptotic sub-rho claim",
+  "not key recovery or deployed-curve security impact",
+  "multi-target amortized results remain secondary",
+  "total operation-count comparison absent; S unknown"
+ ],
+ "curve": {
+  "a": 0,
+  "b": 1,
+  "cofactor": 109796,
+  "field_modulus": "x^73 + x^4 + x^3 + x^2 + 1",
+  "weierstrass_model": "y^2 + x*y = x^3 + 1"
+ },
+ "evidence": [
+  "crypto/experiments/koblitz-single-target-n73-20261003/runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1",
+  "crypto/experiments/koblitz-single-target-n73-20261003/runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR2",
+  "crypto/experiments/koblitz-single-target-n73-20261003/runs/IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR3",
+  "experiments/koblitz-single-target-n73-20261003/frozen/fixture.json"
+ ],
+ "fixture_scalar": 12345678901234567,
+ "fixture_scalar_note": "validation-only sidecar; never supplied to either solver input",
+ "ic_and_rho_scalar_identical": true,
+ "ic_online_phase_ms": {
+  "target_query": 4.2e-05
+ },
+ "ic_verified_all_runs": true,
+ "kind": "single_target_online_vs_rho_claim_report",
+ "median_online_speedup": 1189.7419463922945,
+ "n": 73,
+ "n_or_bits": 73,
+ "online_speedup_range_all_runs": [
+  184.8588383342762,
+  2094.667646891953
+ ],
+ "paired_runs": [
+  {
+   "ic_online_ms": 249.023875,
+   "ic_rank_seed": 7,
+   "online_speedup": 184.8588383342762,
+   "rho_online_ms": 46034.26425,
+   "rho_walk_seed": 202610041,
+   "run": "R1"
+  },
+  {
+   "ic_online_ms": 326.15937499999995,
+   "ic_rank_seed": 8,
+   "online_speedup": 2094.667646891953,
+   "rho_online_ms": 683195.490543,
+   "rho_walk_seed": 202610042,
+   "run": "R2"
+  },
+  {
+   "ic_online_ms": 543.8117500000001,
+   "ic_rank_seed": 9,
+   "online_speedup": 1189.7419463922945,
+   "rho_online_ms": 646995.649916,
+   "rho_walk_seed": 202610043,
+   "run": "R3"
+  }
+ ],
+ "paired_same_public_point": true,
+ "precompute_detail": {
+  "edge_selectors": 0,
+  "factor_base_points": 87600,
+  "orbit_columns": 600,
+  "pair_table_entries": 0,
+  "rank": 600,
+  "rank_failures": 0,
+  "rank_probes_mean_range": [
+   56896974.775,
+   65475673.415
+  ],
+  "rank_stage_ms_range": [
+   18398763.583208002,
+   48797543.425375
+  ],
+  "regular_states": 26280000,
+  "root_table_entries": 26278197,
+  "target_probes": [
+   457561,
+   457561,
+   457561
+  ]
+ },
+ "public_generator": [
+  "4735344536444938487862",
+  "4753051995279452466153"
+ ],
+ "public_target_q": [
+  "1852858978593996699777",
+  "7821257062942871962177"
+ ],
+ "regime": "koblitz",
+ "resource_caps": {
+  "common_cap_bytes": null,
+  "ic_peak_rss_bytes_max": 5630296064,
+  "note": "no finite kernel cap declared; per-process peak RSS recorded with wait4(2)",
+  "rho_peak_rss_bytes_max": 5199986688
+ },
+ "rho_verified_all_runs": true,
+ "schema_version": "2.0",
+ "stage": "vs_rho",
+ "subgroup_log2_order": 56.3,
+ "subgroup_order": 86020738150056119,
+ "target_count": 1,
+ "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+ "timing_class": "single_target_online",
+ "verdict": "N73_U128_COMPACT_ORBIT_SINGLE_TARGET_ONLINE_IC_OVER_RHO_CROSSOVER"
+}

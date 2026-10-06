@@ -1812,6 +1812,15 @@ fn solve_full_column_rank_system(
     Some((0..columns).map(|row| matrix[row][columns]).collect())
 }
 
+fn should_emit_multi_target_summary(
+    producer_fixtures: usize,
+    shared_factor_log_precomputation: bool,
+) -> bool {
+    // The first fixture builds reusable logs and is setup, not an online target.
+    let precomputation_fixtures = usize::from(shared_factor_log_precomputation);
+    producer_fixtures.saturating_sub(precomputation_fixtures) > 1
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
@@ -3076,7 +3085,10 @@ fn main() {
         })
     );
     }
-    if batch_fixtures > 1 {
+    if should_emit_multi_target_summary(
+        batch_fixtures as usize,
+        shared_factor_log_precomputation,
+    ) {
         let observed_batch_section_ms = batch_started.elapsed().as_secs_f64() * 1000.0;
         println!(
             "{}",
@@ -3144,6 +3156,14 @@ fn main() {
 #[cfg(test)]
 mod packed_tests {
     use super::*;
+
+    #[test]
+    fn one_online_target_with_log_precomputation_does_not_emit_batch_summary() {
+        assert!(!should_emit_multi_target_summary(2, true));
+        assert!(should_emit_multi_target_summary(3, true));
+        assert!(!should_emit_multi_target_summary(1, false));
+        assert!(should_emit_multi_target_summary(2, false));
+    }
 
     #[test]
     fn quotient_pair_witness_packs_48_bit_coefficients_losslessly() {

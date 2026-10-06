@@ -1122,18 +1122,24 @@ mod wide {
             .ok()
             .map(|encoded| parse_point_coordinates128(&encoded));
         assert!(
-            public_target.is_none() || fixed_target.is_some(),
-            "a public point input requires its validation-only known-answer scalar"
+            public_target.is_none() || fixed_target.is_none(),
+            "a public point run must not receive a known-answer scalar"
         );
         let mut rng = StdRng::seed_from_u64(fixture_seed);
-        let d0 = fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus));
-        assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
+        let d0 = if public_target.is_some() {
+            None
+        } else {
+            Some(fixed_target.unwrap_or_else(|| rng.gen_range(1..modulus)))
+        };
+        if let Some(d0) = d0 {
+            assert!((1..modulus).contains(&d0), "fixed target scalar must be in [1,r)");
+        }
         let mut charges = Charges::default();
         let (q, target_generation_ms) = if let Some((x, y)) = public_target {
             (Some((x, y)), 0.0)
         } else {
             let target_generation_started = Instant::now();
-            let q = raw_scalar_mul128(&backend, generator, d0);
+            let q = raw_scalar_mul128(&backend, generator, d0.expect("generated target needs a scalar"));
             let elapsed = target_generation_started.elapsed().as_secs_f64() * 1000.0;
             charges.scalar_multiplications += 1;
             (q, elapsed)
@@ -1206,8 +1212,10 @@ mod wide {
         let walk_ms = walk_started.elapsed().as_secs_f64() * 1000.0;
         let recovered = recovered.expect("wide packed public rho fixture exceeded cap");
         let validation_started = Instant::now();
-        assert_eq!(recovered, d0);
-        let reference_q = curve.mul(curve.generator(), &BigUint::from(d0));
+        if let Some(d0) = d0 {
+            assert_eq!(recovered, d0);
+        }
+        let reference_q = curve.mul(curve.generator(), &BigUint::from(recovered));
         assert_eq!(raw_point128(&backend, &reference_q), q);
         assert_eq!(curve.mul(curve.generator(), &BigUint::from(recovered)), reference_q);
         let validation_ms = validation_started.elapsed().as_secs_f64() * 1000.0;

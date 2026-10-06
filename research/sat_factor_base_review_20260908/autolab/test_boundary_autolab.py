@@ -198,6 +198,70 @@ class MeasurementSchemaTests(unittest.TestCase):
 
 
 class HelperTests(unittest.TestCase):
+    def test_independent_replay_pointer_targets_validation_receipt(self) -> None:
+        run = lab.REPO / "research/example/autolab/runs/test-run"
+        self.assertEqual(
+            lab.independent_replay_pointer(run),
+            "research/example/autolab/runs/test-run/validation/independent_replay.json",
+        )
+
+    def test_single_target_claim_points_to_separate_validation_receipt(self) -> None:
+        target = [17, 23]
+        scalar = 3
+        direct_rows = [
+            {
+                "kind": "relation_rank_summary",
+                "online_target_count": 1,
+                "published_q": target,
+                "published_fixture_scalar": scalar,
+                "status": "SHARED_FACTOR_LOG_ONE_RELATION",
+                "uses_retained_factor_logs": True,
+                "linear_solution_verified": True,
+                "recovered_fixture_scalar": scalar,
+                "target_online_phase_ms": {"target_pdp": 1.0},
+                "target_online_wall_ms": 1.0,
+                "target_trials": 1,
+            }
+        ]
+        rho_rows = [
+            {
+                "kind": "rho_public_fixture",
+                "published_q": target,
+                "published_fixture_scalar": scalar,
+                "verified": True,
+                "walk_ms": 2.0,
+                "validation_ms": 0.1,
+            }
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            run = Path(tmp) / "run"
+            (run / "artifacts").mkdir(parents=True)
+            direct_bin = run / "direct"
+            rho_bin = run / "rho"
+            direct_bin.write_text("direct")
+            rho_bin.write_text("rho")
+            claim = lab.draft_vs_rho_claim(
+                beat={"timing_class_goal": "single_target_online", "n": 41, "regime": "koblitz"},
+                beat_id="koblitz.vs_rho.n41_charged",
+                run=run,
+                direct_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in direct_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                rho_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in rho_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                binaries={"direct": str(direct_bin), "rho": str(rho_bin)},
+            )
+            self.assertEqual(claim["target_count"], 1)
+            self.assertEqual(
+                claim["independent_replay_pointer"],
+                str(run / "validation/independent_replay.json"),
+            )
+
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
             lab.seed_for("koblitz.vs_rho.n37_wall", "direct", 0),
@@ -281,6 +345,10 @@ class HelperTests(unittest.TestCase):
             self.assertEqual(claim["factor_base_size_F"], 19928)
             self.assertEqual(claim["orbit_count_K"], 188)
             self.assertEqual(claim["retained_bytes"], 89887680)
+            self.assertEqual(
+                claim["independent_replay_pointer"],
+                str(run / "validation/independent_replay.json"),
+            )
             self.assertTrue(claim["resource_caps"]["under_cap"])
             ledger = lab.load_ledger(protocol)
             result = lab.validate_claim(claim, stage="factor_base", ledger=ledger)
