@@ -151,8 +151,24 @@ must name its role (`cms`, `f5`, `incumbent` or `rho`), the same canonical
 and declare a target-free, unexecuted build. Unknown fields are rejected so a
 descriptor cannot carry a target or scalar. These declarations require an
 independent publication audit; the point-card generator does not prove them.
-Then publish a scalar-free point card whose source-publication hashes and
-creation order can be audited independently. Bind that exact card to the
+Then publish a scalar-free point card using `ecbench`'s
+`hash_to_subgroup_v1` public-target law. It carries the native workload ID,
+full workload digest, seed, index, derivation counter and exact point; the SAT
+worker replays that workload before consuming the card. This is the same
+one-point workload representation accepted by the incumbent IC and rho arms.
+The `ecbench_workload_id` is a point/fixture cross-check here; a later campaign
+must mint its own canonical workload ID from the frozen resource and online
+accounting policy. The card alone does not qualify an IC or rho run.
+The existing native F5 worker can accept a point in a newly frozen post-card
+target config, provided its complete source/build archive is published before
+the card and the final registration proves byte-for-byte source and executable
+identity with that publication. Its old one-use registration remains closed;
+the old auditor's `fresh_paired_qualification: false` still needs a separate
+chronology and same-point campaign audit. Generate the incumbent and rho
+`ecbench` workloads from the card's seed and check their workload digest and
+point before either measured solve.
+The card's source-publication hashes and creation order must be audited
+independently. Bind that exact card to the
 one-use claim before dispatch. The original frozen checker must verify the
 published archive and card, the preparation's original source-bound audit and
 recovered factor logs, native child

@@ -188,6 +188,9 @@ the binary in a target candidate. The staged SAT target worker and public-point
 card are not a dispatch authority. Freeze and publish a target-free SAT
 registration before creating the card, bind the exact card to a one-use claim,
 and independently audit native source/model receipts and execution custody.
+The [fresh paired n17 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/PROTOCOL.md)
+predeclares the four source-publication roles, native public-point workload,
+one-use four-arm execution and non-promotion of exploratory wall ratios.
 Do not charge child startup to the online interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation

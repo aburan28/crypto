@@ -3,16 +3,10 @@
 //! An outer frozen controller must establish publication order and runtime
 //! custody before a card can qualify a one-target comparison.
 use super::{json, oracle::Curve, sat_control::native, target_math};
-use crypto_lib::{
-    binary_ecc::{BinaryPoint, F2mElement},
-    cryptanalysis::{
-        koblitz_fast::FastCurve,
-        koblitz_index_calculus::{points_with_x_fast, KoblitzCurve},
-        prepared_sat_control::{canonical_sha, sha256},
-    },
+use crypto_lib::cryptanalysis::{
+    ecbench::workload::{CurveSpec, TargetKind, Workload, PUBLIC_TARGET_LAW},
+    prepared_sat_control::{canonical_sha, sha256},
 };
-use num_bigint::BigUint;
-use num_traits::ToPrimitive;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -20,14 +14,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const QUESTION: &str = "fresh-paired-n17-public-point-card-v1";
+const QUESTION: &str = "fresh-paired-n17-ecbench-public-point-card-v1";
 const SOURCE_QUESTION: &str = "fresh-paired-n17-source-publication-v1";
 // The tournament's canonical decimal polynomial-bit record for this fixture.
 // The older curve registry also has an e1/hex-encoding alias; it is not the
 // identity used by ecbench's paired IC/rho candidate and workload records.
 const CURVE_ID: &str = "EC1N17Ckb1hbbe2b5b6b1e6";
-const POINT_LAW: &str = "sha256-seed-first-lift-min-y-cofactor2-v1";
-const DOMAIN: &[u8] = b"IC-fresh-paired-n17-point-v1\0";
 const ROLES: [&str; 4] = ["cms", "f5", "incumbent", "rho"];
 
 #[derive(Deserialize)]
@@ -98,10 +90,11 @@ pub(super) struct Card {
     question: String,
     curve_id: String,
     point_law: String,
-    seed_hex: String,
-    start_x: u64,
-    offset: u64,
-    lift_x: u64,
+    target_seed: u64,
+    target_index: u64,
+    target_counter: u64,
+    ecbench_workload_id: String,
+    ecbench_workload_sha256: String,
     target: [u64; 2],
     source_publications: BTreeMap<String, String>,
     scalar_generated: bool,
@@ -120,49 +113,36 @@ fn independently_check(point: [u64; 2]) -> Result<(), String> {
         "derived public point is outside the nonidentity subgroup",
     )
 }
-fn first_point(seed: &[u8; 32]) -> Result<(u64, u64, [u64; 2]), String> {
-    let mut input = DOMAIN.to_vec();
-    input.extend_from_slice(seed);
-    let digest = sha256(&input);
-    let start_x = u64::from_str_radix(&digest[..8], 16)
-        .map_err(|_| "point-seed digest is invalid")?
-        % (1 << 17);
-    let curve = KoblitzCurve::new(1, 17).ok_or("n17 point-card curve unavailable")?;
+fn native_workload(seed: u64) -> Result<(Workload, [u64; 2]), String> {
+    let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+    let instance = spec.build()?;
+    let workload = Workload::on(&spec, &instance, seed, 0, TargetKind::Public)?;
     native::require(
-        curve.n == 17
-            && curve.a == 1
-            && curve.k == 1
-            && curve.subgroup_order.to_u64() == Some(65587)
-            && curve.cofactor.to_u64() == Some(2),
-        "point-card curve differs from declared n17 subgroup",
+        workload.curve.family == "koblitz"
+            && workload.curve.field_degree == Some(17)
+            && workload.curve.group_order == 131174
+            && workload.curve.r == 65587
+            && workload.curve.cofactor == 2
+            && workload.curve.generator[0] == "0xaaad"
+            && workload.curve.generator[1] == "0x5b2b"
+            && workload.target_law == PUBLIC_TARGET_LAW
+            && workload.planted.is_none()
+            && workload.target_counter.is_some(),
+        "ecbench public workload differs from exact n17 subgroup",
     )?;
-    let fast = FastCurve::new(&curve.curve).ok_or("n17 native curve unavailable")?;
-    for offset in 0..(1u64 << 17) {
-        let x = (start_x + offset) % (1 << 17);
-        let element = F2mElement::from_biguint(&BigUint::from(x), 17);
-        let chosen = points_with_x_fast(&fast, &element)
-            .into_iter()
-            .filter_map(|point| match &point {
-                BinaryPoint::Affine { y, .. } => {
-                    y.to_biguint().to_u64().map(|value| (value, point))
-                }
-                BinaryPoint::Infinity => None,
-            })
-            .min_by_key(|(y, _)| *y);
-        let Some((_, point)) = chosen else {
-            continue;
-        };
-        let subgroup = fast.mul_u64(fast.lift(&point), 2);
-        if subgroup.infinity {
-            continue;
-        }
-        let target = [subgroup.x, subgroup.y];
-        independently_check(target)?;
-        return Ok((start_x, offset, target));
-    }
-    Err("no nonidentity subgroup point in the declared x search".into())
+    let parse = |hex: &str| {
+        u64::from_str_radix(
+            hex.strip_prefix("0x")
+                .ok_or_else(|| "noncanonical point hex".to_string())?,
+            16,
+        )
+        .map_err(|_| "invalid point coordinate hex".to_string())
+    };
+    let target = [parse(&workload.target[0])?, parse(&workload.target[1])?];
+    independently_check(target)?;
+    Ok((workload, target))
 }
-fn derive(seed: &[u8; 32], sources: BTreeMap<String, String>) -> Result<Card, String> {
+fn derive(seed: u64, sources: BTreeMap<String, String>) -> Result<Card, String> {
     native::require(
         sources.len() == ROLES.len()
             && ROLES
@@ -170,41 +150,42 @@ fn derive(seed: &[u8; 32], sources: BTreeMap<String, String>) -> Result<Card, St
                 .all(|role| sources.get(*role).is_some_and(|value| digest(value))),
         "point card source digests are incomplete",
     )?;
-    let (start_x, offset, target) = first_point(seed)?;
+    let (workload, target) = native_workload(seed)?;
     Ok(Card {
         schema_version: 1,
         question: QUESTION.into(),
         curve_id: CURVE_ID.into(),
-        point_law: POINT_LAW.into(),
-        seed_hex: hex::encode(seed),
-        start_x,
-        offset,
-        lift_x: (start_x + offset) % (1 << 17),
+        point_law: PUBLIC_TARGET_LAW.into(),
+        target_seed: seed,
+        target_index: 0,
+        target_counter: workload
+            .target_counter
+            .ok_or("public target counter absent")?,
+        ecbench_workload_id: workload.workload_id,
+        ecbench_workload_sha256: workload.workload_sha256,
         target,
         source_publications: sources,
         scalar_generated: false,
     })
 }
 fn replay(card: &Card, sources: BTreeMap<String, String>) -> Result<(), String> {
-    let seed = hex::decode(&card.seed_hex).map_err(|e| e.to_string())?;
-    let seed: [u8; 32] = seed.try_into().map_err(|_| "card seed is not 32 bytes")?;
     native::require(
         card.schema_version == 1
             && card.question == QUESTION
             && card.curve_id == CURVE_ID
-            && card.point_law == POINT_LAW
+            && card.point_law == PUBLIC_TARGET_LAW
             && !card.scalar_generated
             && card.source_publications == sources
-            && *card == derive(&seed, sources)?,
+            && *card == derive(card.target_seed, sources)?,
         "public point or published source pins differ from the frozen card",
     )
 }
 pub(super) fn generate(publications: &Path, out: &Path) -> Result<String, String> {
     let paths = paths(publications)?;
     let before = source_pins(&paths)?;
-    let mut seed = [0u8; 32];
+    let mut seed = [0u8; 8];
     getrandom::getrandom(&mut seed).map_err(|e| e.to_string())?;
-    let card = derive(&seed, before.clone())?;
+    let card = derive(u64::from_le_bytes(seed), before.clone())?;
     native::require(
         source_pins(&paths)? == before,
         "source publication changed during point generation",
@@ -214,10 +195,12 @@ pub(super) fn generate(publications: &Path, out: &Path) -> Result<String, String
     serde_json::to_string_pretty(
         &json!({"schema_version":1,"status":"PUBLIC_POINT_CARD_CREATED",
         "card_sha256":sha256(&bytes),"card_identity_sha256":canonical_sha(&json!(card))?,
-        "target":card.target,
+        "target":card.target,"ecbench_workload_id":card.ecbench_workload_id,
+        "ecbench_workload_sha256":card.ecbench_workload_sha256,
         "source_publications":before,"scalar_generated":false,
         "publication_order_and_freshness_certified":false,"solver_calls":0,
-        "source_bound_execution_admitted":false,"online_speedup":null}),
+        "source_bound_execution_admitted":false,"campaign_workload_id":null,
+        "online_speedup":null}),
     )
     .map_err(|e| e.to_string())
 }
@@ -235,9 +218,12 @@ pub(super) fn audit(card_path: &Path, publications: &Path, out: &Path) -> Result
     let result = json!({"schema_version":1,"status":"PASS_PUBLIC_POINT_CARD_DATA_ONLY_AUDIT",
         "card_sha256":sha256(&bytes),"card_identity_sha256":canonical_sha(&json!(card))?,
         "target":card.target,"curve_id":CURVE_ID,
+        "ecbench_workload_id":card.ecbench_workload_id,
+        "ecbench_workload_sha256":card.ecbench_workload_sha256,
         "source_publications":sources,"scalar_generated":false,"solver_calls_by_auditor":0,
         "publication_order_and_freshness_certified":false,
-        "source_bound_execution_admitted":false,"online_speedup":null});
+        "source_bound_execution_admitted":false,"campaign_workload_id":null,
+        "online_speedup":null});
     native::save(out, &result)?;
     serde_json::to_string_pretty(&result).map_err(|e| e.to_string())
 }
@@ -253,12 +239,20 @@ mod tests {
             .enumerate()
             .map(|(i, role)| (role.to_string(), format!("{i:064x}")))
             .collect::<BTreeMap<_, _>>();
-        let card = derive(&[7u8; 32], sources.clone()).unwrap();
+        let card = derive(7, sources.clone()).unwrap();
         assert_eq!(card.curve_id, CURVE_ID);
+        assert_eq!(card.point_law, PUBLIC_TARGET_LAW);
+        assert_eq!(card.target_index, 0);
+        assert!(card.ecbench_workload_id.starts_with('W'));
+        assert_eq!(card.ecbench_workload_id.len(), 13);
+        assert!(digest(&card.ecbench_workload_sha256));
         assert!(!card.scalar_generated);
         replay(&card, sources.clone()).unwrap();
         let mut changed = card.clone();
         changed.target[0] ^= 1;
+        assert!(replay(&changed, sources.clone()).is_err());
+        let mut changed = card.clone();
+        changed.ecbench_workload_id = "W000000000000".into();
         assert!(replay(&changed, sources.clone()).is_err());
         let mut changed = sources;
         changed.insert("cms".into(), "f".repeat(64));
@@ -300,6 +294,10 @@ mod tests {
             serde_json::from_str(&audit(&card, &listing, &root.join("audit.json")).unwrap())
                 .unwrap();
         assert_eq!(created["card_sha256"], audited["card_sha256"]);
+        assert_eq!(
+            created["ecbench_workload_id"],
+            audited["ecbench_workload_id"]
+        );
         assert_eq!(audited["scalar_generated"], false);
         assert_eq!(audited["solver_calls_by_auditor"], 0);
         assert_eq!(audited["publication_order_and_freshness_certified"], false);

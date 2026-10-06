@@ -8,7 +8,8 @@ SAT target registration is eligible. Its partial progress files cannot supply
 the target worker's log table. The three earlier confirmation sets remain
 closed.
 
-The worker consumes a scalar-free public point card and a separate one-use
+The worker consumes a scalar-free `ecbench` `hash_to_subgroup_v1` public point
+card, replays its exact workload ID and point, and consumes a separate one-use
 claim. The target-free capsule pins its complete source inventory, build
 identity, preparation producer/auditor, config, and **new prepared** exporter
 and CMS binaries. It rejects the accepted cold exporter/CMS binaries in the
@@ -16,6 +17,11 @@ prepared roles. No target coordinates enter the capsule config, source build,
 role argv, or child environment. The card's four source-publication digests
 must be independently verified by the outer frozen controller, including
 publication order and freshness.
+
+The target interface permits a 120-second CMS attempt, matching the registered
+one-million-conflict natural preparation panel. The frozen one-target outer
+watchdog remains at most 900 seconds and charges every failed or timed-out
+attempt. A timeout cannot be silently retried or counted as a verified solve.
 
 Before opening the online interval, the worker re-audits the original SAT
 preparation, reconstructs the independent full-rank log table, and starts one

@@ -1,6 +1,7 @@
 //! New SAT target capsule: no target point enters the frozen source/config.
 use super::{journal, native, preparation};
 use crypto_lib::cryptanalysis::{
+    ecbench::workload::{CurveSpec, TargetKind, Workload, PUBLIC_TARGET_LAW},
     koblitz_fast::{FastCurve, FastPoint},
     koblitz_index_calculus::KoblitzCurve,
     prepared_n17_target::SatTargetPlan,
@@ -15,9 +16,8 @@ use std::{
 
 pub const SCOPE: &str = "disclosed-n17-native-one-target-cms-v1";
 pub const WORKER: &str = "prepared_sat_target_worker";
-pub const CARD_QUESTION: &str = "fresh-paired-n17-public-point-card-v1";
+pub const CARD_QUESTION: &str = "fresh-paired-n17-ecbench-public-point-card-v1";
 const CARD_CURVE: &str = "EC1N17Ckb1hbbe2b5b6b1e6";
-const CARD_LAW: &str = "sha256-seed-first-lift-min-y-cofactor2-v1";
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -206,10 +206,11 @@ pub struct Card {
     pub question: String,
     pub curve_id: String,
     pub point_law: String,
-    pub seed_hex: String,
-    pub start_x: u64,
-    pub offset: u64,
-    pub lift_x: u64,
+    pub target_seed: u64,
+    pub target_index: u64,
+    pub target_counter: u64,
+    pub ecbench_workload_id: String,
+    pub ecbench_workload_sha256: String,
     pub target: [u64; 2],
     pub source_publications: BTreeMap<String, String>,
     pub scalar_generated: bool,
@@ -217,6 +218,20 @@ pub struct Card {
 pub fn card(path: &Path) -> Result<(Card, String), String> {
     let bytes = native::read(path, 65536)?;
     let value: Card = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
+    let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+    let (workload, _) = Workload::build(&spec, value.target_seed, 0, TargetKind::Public)?;
+    let coordinate = |hex: &str| -> Result<u64, String> {
+        u64::from_str_radix(
+            hex.strip_prefix("0x")
+                .ok_or_else(|| "noncanonical public target hex".to_string())?,
+            16,
+        )
+        .map_err(|_| "invalid public target coordinate".to_string())
+    };
+    let expected = [
+        coordinate(&workload.target[0])?,
+        coordinate(&workload.target[1])?,
+    ];
     let curve = KoblitzCurve::new(1, 17).ok_or("n17 SAT target curve unavailable")?;
     let fast = FastCurve::new(&curve.curve).ok_or("native SAT target curve unavailable")?;
     let point = FastPoint::affine(value.target[0], value.target[1]);
@@ -224,16 +239,21 @@ pub fn card(path: &Path) -> Result<(Card, String), String> {
         value.schema_version == 1
             && value.question == CARD_QUESTION
             && value.curve_id == CARD_CURVE
-            && value.point_law == CARD_LAW
+            && value.point_law == PUBLIC_TARGET_LAW
             && !value.scalar_generated
-            && value.seed_hex.len() == 64
-            && value
-                .seed_hex
-                .bytes()
-                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
-            && value.start_x < 1 << 17
-            && value.offset < 1 << 17
-            && value.lift_x == (value.start_x + value.offset) % (1 << 17)
+            && value.target_index == 0
+            && workload.curve.family == "koblitz"
+            && workload.curve.field_degree == Some(17)
+            && workload.curve.group_order == 131174
+            && workload.curve.r == 65587
+            && workload.curve.cofactor == 2
+            && workload.curve.generator[0] == "0xaaad"
+            && workload.curve.generator[1] == "0x5b2b"
+            && workload.planted.is_none()
+            && workload.target_counter == Some(value.target_counter)
+            && workload.workload_id == value.ecbench_workload_id
+            && workload.workload_sha256 == value.ecbench_workload_sha256
+            && value.target == expected
             && value.target.iter().all(|&v| v < 1 << 17)
             && value.source_publications.len() == 4
             && ["cms", "f5", "incumbent", "rho"].into_iter().all(|name| {
@@ -500,16 +520,29 @@ mod tests {
             .into_iter()
             .map(|name| (name.to_string(), "a".repeat(64)))
             .collect();
+        let (workload, _) = Workload::build(
+            &CurveSpec::Koblitz { a: 1, n: 17 },
+            7,
+            0,
+            TargetKind::Public,
+        )
+        .unwrap();
+        let coordinate =
+            |hex: &str| u64::from_str_radix(hex.strip_prefix("0x").unwrap(), 16).unwrap();
         let mut value = Card {
             schema_version: 1,
             question: CARD_QUESTION.into(),
             curve_id: CARD_CURVE.into(),
-            point_law: CARD_LAW.into(),
-            seed_hex: "b".repeat(64),
-            start_x: 0,
-            offset: 0,
-            lift_x: 0,
-            target: [61889, 74818],
+            point_law: PUBLIC_TARGET_LAW.into(),
+            target_seed: 7,
+            target_index: 0,
+            target_counter: workload.target_counter.unwrap(),
+            ecbench_workload_id: workload.workload_id.clone(),
+            ecbench_workload_sha256: workload.workload_sha256.clone(),
+            target: [
+                coordinate(&workload.target[0]),
+                coordinate(&workload.target[1]),
+            ],
             source_publications: sources,
             scalar_generated: false,
         };
@@ -519,7 +552,15 @@ mod tests {
         let invalid_point = root.join("card-invalid-point.json");
         native::save(&invalid_point, &json!(value)).unwrap();
         assert!(card(&invalid_point).is_err());
-        value.target = [61889, 74818];
+        value.target = [
+            coordinate(&workload.target[0]),
+            coordinate(&workload.target[1]),
+        ];
+        value.ecbench_workload_id = "W000000000000".into();
+        let wrong_workload = root.join("card-wrong-workload.json");
+        native::save(&wrong_workload, &json!(value)).unwrap();
+        assert!(card(&wrong_workload).is_err());
+        value.ecbench_workload_id = workload.workload_id;
         value.source_publications.remove("rho");
         let missing_source = root.join("card-missing-source.json");
         native::save(&missing_source, &json!(value)).unwrap();
