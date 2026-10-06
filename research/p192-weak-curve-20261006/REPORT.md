@@ -16,12 +16,17 @@ urlcolor: blue
 
 # Status and verdict
 
-**Evidence cutoff: 2026-10-06. Experimental verdict: PENDING.** This is the
-source-linked report scaffold for two approved native experiments. It contains
-derived algebra, frozen inputs, claim gates, and prior-art provenance. It does
-**not** contain an observed recovery, a completed CM census, a timing result, or
-a new weakness claim. Every empirical result cell remains `PENDING` until it is
-filled from hashed run artifacts and independently replayed.
+**Evidence cutoff: 2026-10-06. Both native producer runs and the independent
+review are complete; the review verdict is `BREAKS`, with separate subclaim
+dispositions.** The validator independently reproduced the singular lane's
+fixed public synthetic scalar recovery, so the tested unchecked interface is
+`IMPLEMENTATION_WEAK`, not weak P-192. In the valid CM lane the order facts,
+enumeration counts, theorem bound, and all 103 emitted scalar relations were
+reproduced. However, the frozen protocol did not specify the canonical-set
+digest serialization, so exact set identity was not independently bindable.
+Explicit maps, HOT/COLD calibration, and charged payoff also remain
+unavailable. The complete-set negative and full CM experiment are therefore
+`INDETERMINATE`; no P-192 structural weakness or speedup was found.
 
 The work uses one fixed, public, synthetic scalar. It does not target deployed
 keys, live services, or private data. Its purpose is to distinguish an
@@ -46,15 +51,18 @@ Two hypotheses are deliberately kept separate:
 
 # Evidence labels
 
-Statements in this report use the following labels.
+Statements in this report use these labels:
 
-| label | meaning |
-|:--|:--|
-| **FROZEN** | Fixed by approved protocol before execution. |
-| **DERIVED** | Algebraically derived from stated inputs; not a run measurement. |
-| **INDEPENDENTLY VERIFIED — PRIOR** | Replayed evidence from an earlier committed/archived run. |
-| **MEASURED** | Hashed native run plus replay receipt. No new item has this label yet. |
-| **PENDING** | Required evidence does not yet exist in this report package. |
+- **FROZEN:** fixed by approved protocol before execution.
+- **DERIVED:** algebraically derived from stated inputs; not a run measurement.
+- **INDEPENDENTLY VERIFIED — PRIOR:** replayed evidence from an earlier
+  committed/archived run.
+- **PRODUCER-MEASURED:** hash-bound native producer output that was not itself
+  independently rederived.
+- **VALIDATED:** independently rederived against the content snapshot. This
+  label applies to the singular scientific joints and named CM subclaims only;
+  it does not override the review's overall `BREAKS` verdict.
+- **OPEN:** required evidence or capability is explicitly unavailable.
 
 # Exact object identities
 
@@ -110,8 +118,12 @@ an isogeny, an isomorphism, or a curve-family member.
 
 Protocol: `EXP-SCURVE-29040c`, approved by `DEC-20261006-af8214`.
 Exact inspected protocol SHA-256:
-`5de49bcf72cc676290982314046c6579b10473372aed822c6955813660e9030e`.
-Its archive/commit receipt is PENDING; see
+`ae25388412acb9fbc8a0387f8d4782fe215a493b6bccb6f1f0fa49f8f1b3fde6`.
+Protocol v2 amendment SHA-256 is
+`c5be1d42be520cbadec68c76928f579559f8e1ebfb7fa9aa93c58fa0853512a0`;
+the x-only encoding correction is `CORR-20261006-500337`. Producer run
+`RUN-SCURVE-af5caf` used code commit `6d9d1ed7674cead991549d2060de3e91be1d9a3c`
+and is bound by the content snapshot described in
 [`ARTIFACT_INDEX.md`](ARTIFACT_INDEX.md).
 
 ## Frozen algebra and attack path
@@ -193,39 +205,61 @@ successful torus arithmetic:
 
 If instrument controls pass but the x-only transcript cannot recover the
 coherent class, or neither residual orientation replays to `Q`, the hypothesis
-is falsified. A timeout, OOM, or missing receipt is `INCOMPLETE`, not evidence
+is falsified. A timeout, OOM, or missing receipt is `INDETERMINATE`, not evidence
 that the valid curve is strong.
 
-## Result table — PENDING
+## Producer result and independent validation
 
-No speedup is asserted. Counts below are the frozen boundaries; observed
-values must be copied from `recovery.json` and `phase-metrics.json` only.
+**VALIDATED AT THE STATED INTERFACE; OVERALL REVIEW `BREAKS` ON ARCHIVE
+METADATA.** The native run recovered the exact fixed scalar listed in the
+fixture above; a source-blind checker independently reproduced all 72 tags,
+1,245,111 candidate comparisons, the coherent global sign, the BSGS equation,
+the residual `k`, the recovered `d`, and `[d]G=Q`. Order, torus, transcript,
+mutation, `p=59`, safe-path rejection, and full-point-model controls passed.
+Both singular scientific joints are `HOLDS`. No speedup is asserted.
 
-| phase | frozen boundary/reference | observed |
-|:--|:--|:--|
-| Valid P-192 reference | approximately `sqrt(n)` group work; matched native reference not run | PENDING |
-| Nested residue recovery | exactly 72 oracle queries; comparisons separate | PENDING |
-| Two-orientation BSGS | at most 5,800,018 babies and 5,800,018 giants/orientation | PENDING |
-| Whole pipeline | certification, probes, comparisons, table, giants, replays | PENDING |
+- **Valid P-192 reference:** approximately `sqrt(n)` group work; a matched
+  native reference was not run.
+- **Nested residues:** 72 primary x-only queries and 1,245,111 candidate
+  comparisons, kept as different counted units.
+- **Shifted-negation-v2 BSGS:** 5,800,018 baby entries. The exact hit has
+  orientation `-1`, giant index 3,159,226, baby index 989,698, and sign `-1`.
+- **Whole pipeline:** success; 20.809205507 seconds wall time, 133,616 KiB
+  maximum RSS, and every frozen control passed.
 
-Correctness and the ratio to a matched reference are both PENDING. A ratio is
-not meaningful until every phase is expressed in the same counted unit.
+Correctness is certificate-backed at the producer layer. A ratio to a matched
+reference remains unavailable and is not meaningful until every phase is
+expressed in the same counted unit.
 
 Wall time is secondary engineering evidence. A performance claim additionally
 requires the repository's isolated A/A and interleaved paired-measurement
-protocol; a single recovery run is a feasibility result, not a confidence
-interval.
+protocol; this single recovery run is a deterministic feasibility result, not
+a timing confidence interval or prevalence estimate. The supported object is
+the exposed implementation interface. The singular cubic remains neither an
+elliptic curve nor a P-192 isogenous representative.
+
+The original snapshot receipt misspelled the singular producer-origin commit.
+All 62 content hashes and both manifest chains passed, but strict provenance
+therefore broke. The immutable receipt remains unchanged; additive correction
+`CORR-20261006-cfc18a` overlays the actual commit
+`8b81f8efa613766a76eaf46465892f22b37fad5d`. This administrative defect does
+not erase the independently reproduced arithmetic, and the correction does not
+turn the overall review verdict into a pass.
 
 # Experiment B — exact weighted CM class-relation census
 
 Protocol: `EXP-SCURVE-647ade`, approved by `DEC-20261006-af8214`.
 Exact inspected protocol SHA-256:
 `0fe122a0c6be3e2118b4d9c276a1085285c7e6a2cee38d15bbeed8099fa17145`.
-Its archive/commit receipt is PENDING.
+Protocol v2 amendment SHA-256 is
+`029fcf0ed147af8eb590e770bed9c2a023eadfd3bca8567d0297caa6130d3a33`.
+Producer run `RUN-SCURVE-81c5e4` used corrected code commit
+`78ba2da296c505621feb0b05c11507f3b5ae6669` and is bound by the content
+snapshot described in [`ARTIFACT_INDEX.md`](ARTIFACT_INDEX.md).
 
 ## Frozen order and generator set
 
-**DERIVED; certificate PENDING.** The Frobenius discriminant is
+**PRODUCER-MEASURED; certificate emitted.** The Frobenius discriminant is
 
 $$
 D=t^2-4p=-24109379060336110122544161233113975664949272517896865359515
@@ -234,9 +268,11 @@ $$
 
 where
 `C=14140398275856956083603613626459809774163796198179979683`.
-The run must emit and replay a recursive Pocklington certificate for `C`.
-Only after that proof may it conclude that `D` is squarefree and fundamental,
-the Frobenius conductor is one, and `End(E)=Z[pi]=O_D`.
+The run emitted and replayed a recursive Pocklington certificate for `C`, then
+certified that `D` is squarefree and fundamental, the Frobenius conductor is
+one, and `End(E)=Z[pi]=O_D`. The native p/n checks remain fixed-base
+probable-prime checks with pinned SEC 2/FIPS provenance, not newly constructed
+recursive proofs.
 
 The frozen ramified roots are `5:[2]`, `11:[3]`, and `31:[7]`. The frozen
 split roots are:
@@ -288,48 +324,89 @@ algebraically but is outside the buildable `ell<=113` set: a `C`-degree edge
 is unavailable, and its action on `E(F_p)[n]` does not by itself improve a
 DLP. It must remain a rejected symbolic control.
 
-## Payoff gate and result table — PENDING
+## Result and payoff gates
 
-Every gate is currently **PENDING**:
+**PRODUCER-MEASURED.** Complete exact algebra census; no non-scalar relation in
+the frozen box. Both enumeration orders returned 9,948,061 oriented vectors,
+635 conjugation-fixed vectors, 4,974,348 canonical vectors including zero, and
+4,974,347 canonical nonzero vectors, with identical set digests. The exact
+`L=2^48` layer is empty with the canonical empty-input SHA-256. There are 104
+scalar-principal states including zero, hence 103 emitted nonzero relations;
+all are scalar ramified, all 103 HNF/form replays passed, and zero are
+non-scalar.
 
-1. **Order/CM proof:** P-192 tuple/order, `C` certificate, fundamental `D`,
-   and conductor one. Without it there is no search claim.
-2. **Exact membership:** both enumeration orders, exact counts, and boundary
-   digest. This can establish only finite-scope completeness.
-3. **Algebraic relation replay:** reduced forms, vectors, `alpha`, norm,
-   lambda, and ideal-HNF checks. This can establish only an algebraic identity.
-4. **Global map realization:** oriented kernels, explicit chains and endpoint
-   IDs, maps, and point replay. This establishes buildability, not payoff.
-5. **HOT/COLD accounting:** raw operation tuples and calibration dispersion,
-   including construction, evaluation, verification, and serialization.
-6. **Whole payoff:** a fully charged canonicalization or DLP inequality against
-   the declared baseline. Only this gate can support a valid-curve weakness.
+**INDEPENDENT REVIEW.** The order/discriminant/conductor facts, generator
+roots, theorem lower bound, all enumeration cardinalities, all 103 emitted
+relation certificates, and the mutation controls were independently
+reproduced. The 103 emitted relations are therefore validated as scalar.
+The review could not reproduce the producer's canonical-set digest from the
+frozen protocol, because the protocol names a digest but never defines its
+domain separator, vector serialization, XOR/sum chunking, or byte order. The
+producer source uses a domain-separated construction, but learning that after
+blind sealing cannot retroactively repair the protocol. Thus matching counts
+do not independently certify exact set identity.
 
-The current native implementation may explicitly report map calibration as
-unsupported. If so, the exact census can still establish a bounded negative
-algebraic result, but the map and payoff layers remain `INCOMPLETE`; no proxy
-cost may be substituted for measured HOT/COLD tuples.
+- **Order/CM proof — pass:** pinned tuple, Hasse uniqueness, recursive `C`
+  proof, fundamental `D`, and conductor one.
+- **Exact membership — inconclusive:** forward/reverse producer counts and
+  digests agree, and counts independently reproduce, but the digest encoding
+  was not frozen and exact set identity is not independently bound.
+- **Algebraic replay — validated:** 103 scalar-ramified records accepted and zero
+  rejected.
+- **Global map realization — OPEN:** no non-scalar candidate exists, and
+  globally oriented explicit maps and terminal isomorphisms are not implemented.
+- **HOT/COLD accounting — OPEN:** zero of 368 required calibration records;
+  missing tuples are null, not zero.
+- **Whole payoff — not passed:** no charged attack or canonicalization
+  inequality exists.
+
+The exact search took 28.239448942 seconds and the full verifier replay took
+11.462448644 seconds; aggregate phase wall time was 39.733819654 seconds with
+639,024 KiB peak RSS. These are single-run engineering observations, not a
+speed comparison. The degree-linear proxy was not substituted for missing
+HOT/COLD operation costs.
+
+Two preserved attempts found defects in the research harness rather than in
+P-192: an incorrect Bézout coefficient plus duplicated factor in generic
+quadratic-form composition, and a one-ULP JSON float round-trip mismatch that
+the exact verifier correctly rejected. Commits `bcd59e1` and `78ba2da` repaired
+them and added full-census, one-ULP, and NaN regressions before attempt 3.
+
+The producer's bounded negative remains a useful observation, but independent
+review does not license `NO_WEAKNESS_FOUND_WITHIN_SCOPE` for the complete set.
+Because exact set identity, map/calibration/payoff evidence, and map-specific
+controls are unavailable, the CM experiment is `INDETERMINATE`, not evidence
+that P-192 is globally strong or weak. No non-scalar relation was found in the
+producer census, and none appears among the independently replayed emissions.
 
 # What will count as “weak”
 
 The word *weak* is reserved for an auditable statement with an exact object,
 threat model, boundary, and verified advantage.
 
-- **`REJECTED_AS_DESIGNED`:** the validated public path rejects the singular
-  probe before secret multiplication. This says nothing about unchecked
-  low-level callers.
+- **`INVALID_INSTANCE`:** a purported elliptic-curve candidate is singular,
+  malformed, or otherwise fails identity preconditions. The singular companion
+  has this object-level classification even though it remains useful for an
+  implementation-validation test.
 - **`IMPLEMENTATION_WEAK`:** the actual unchecked surface, fixed x-only oracle,
   end-to-end planted-key recovery, independent replay, and every control pass.
   The singular cubic is still not a weak elliptic or isogenous curve.
-- **`STRUCTURAL_CURVE_WEAK`:** a valid nonsingular curve identity, certified
-  map/attack, subgroup transport, verified solve, complete operation accounting,
-  and material advantage over a matched reference all pass. A small coefficient,
-  form relation, or walk alone is insufficient.
+- **`CLASS_WEAK`:** a certified attack applies across the declared valid
+  isogeny class, with subgroup transport, replay, and material advantage.
+- **`WEAK_REPRESENTATIVE_EXISTS`:** at least one valid class representative has
+  a certified weakness, without claiming every representative shares it.
+- **`SOURCE_TRANSFER_WEAK`:** a certified map transfers a concrete weakness
+  back to the named source curve with all conversion costs charged.
 - **`NO_WEAKNESS_FOUND_WITHIN_SCOPE`:** the frozen CM box is exhausted with
-  exact counts, proofs, and replay, and no candidate passes the buildability and
-  payoff gates. This is not a proof of global security or absence beyond the box.
-- **`INCOMPLETE`:** any mandatory certificate, map, cost, control, or replay is
-  missing. Resource exhaustion is not strength evidence.
+  exact counts, independently bindable set identity, proofs, and replay, and no
+  candidate passes the buildability and payoff gates. This gate was not met in
+  the present CM review; it is a criterion, not the result.
+- **`INDETERMINATE`:** mandatory map, cost, control, or replay evidence is
+  unavailable. Resource exhaustion or unsupported tooling is not strength
+  evidence.
+
+The safe public ECDH path's rejection of every singular probe is recorded as a
+passing control, not as a separate final verdict.
 
 P-192's roughly 96-bit generic security level and legacy status are baseline
 properties, not discoveries of this campaign.
@@ -345,10 +422,11 @@ from self-contained certificates, exact counts/digests, a second enumeration
 order, mutation-negative controls, and an independent verifier that does not
 trust the producer's intermediate state.
 
-An exhaustive negative statement is therefore conditional but crisp:
-*given the certified order and the exact generator/boundary definition, every
-state in that finite set was enumerated and no state passed the declared gate*.
-It cannot be widened by a confidence interval.
+The CM producer artifacts support a finite-census observation and independently
+reproduced counts, but the review does not support the stronger complete-set
+statement because the digest encoding was not frozen. No confidence interval
+can repair an underspecified deterministic identity check; a new additive
+protocol must define the bytes and rerun or re-digest them independently.
 
 ## Timing and implementation variability
 
@@ -357,7 +435,9 @@ baseline and candidate for at least five paired rounds under the repository's
 isolated runner. Report counted native operations as primary, plus median,
 minimum, contention flags, and a 95% paired confidence interval. A runtime
 improvement is supported only if the interval excludes no improvement and all
-outputs/digests match. No such comparison is present yet.
+outputs/digests match. The recorded 20.809-second recovery and 39.734-second CM
+pipeline are single executions, so no timing comparison or confidence interval
+is asserted.
 
 ## Generalizing beyond one fixture
 
@@ -389,14 +469,19 @@ the CM payoff gate and the red “NOT an isogeny” separation in the diagram.
 
 # Open obligations
 
-- Execute and independently replay `EXP-SCURVE-29040c` at the committed native
-  revision; fill the result table from immutable artifacts.
-- Execute the full exact census for `EXP-SCURVE-647ade`; preserve the second
-  enumeration-order digest and every excluded relation class.
-- Treat explicit global maps and HOT/COLD calibration as open if the backend
-  reports them unsupported. Do not fabricate them from the degree-linear proxy.
-- Regenerate this report and PDF after evidence lands, then hash and inspect all
-  derived artifacts as described in the artifact index.
+- Independently accept or reject additive custody correction
+  `CORR-20261006-cfc18a`; do not edit the immutable snapshot receipt or erase
+  the historical review break.
+- Freeze the CM canonical-vector byte encoding, domain separator, digest
+  aggregation, and byte order in a prospective amendment, then rerun or
+  independently re-digest the complete set.
+- Keep explicit global maps, terminal isomorphisms, HOT/COLD calibration, and
+  fully charged payoff open. Do not fabricate them from degree or wall time.
+- Preserve separate evidence records and the post-result `revise` decision;
+  never merge the singular implementation conclusion into the valid
+  CM/isogeny conclusion.
+- Regenerate and visually inspect this report PDF after the final archive
+  hashes are incorporated.
 - Do not extend the conclusion to sect113r1, other standardized curves, other
   APIs, or a population of implementations without separately frozen inputs
   and evidence.
@@ -412,9 +497,20 @@ the CM payoff gate and the red “NOT an isogeny” separation in the diagram.
 3. Prior P-192 walk: [`research/isogeny_walk_p192_20261004/README.md`](../isogeny_walk_p192_20261004/README.md),
    with report, run, and store hashes in the artifact index.
 4. Frozen experiment records `EXP-SCURVE-29040c` and `EXP-SCURVE-647ade`,
-   approved by `DEC-20261006-af8214`; exact inspected hashes are recorded above.
-5. Evidence and accounting rules: [`AGENTS.md`](../../AGENTS.md), SHA-256
+   their v2 amendments, archive correction `CORR-20261006-9ef467`, and the
+   additive origin overlay `CORR-20261006-cfc18a`, approved or recorded under
+   the campaign ledger; exact hashes are recorded above and in the artifact
+   index.
+5. Independent review `TASK-20261006-7d34e7`, evidence records
+   `EV-SCURVE-44f051` and `EV-SCURVE-8e5c70`, and post-result decision
+   `DEC-20261006-581065`; their exact hashes and archive commit are recorded in
+   the artifact index.
+6. Evidence and accounting rules: [`AGENTS.md`](../../AGENTS.md), SHA-256
    recorded in the artifact index.
+7. The canonical `audit-curve` skill and `KN-TECH-6a2ef9` weak-curve audit
+   synthesis in `crypto-autoresearcher`; these define the verdict taxonomy and
+   keep invalid-input, representative, class-wide, transfer, and implementation
+   claims separate.
 
 ## External parameter and terminology sources
 
@@ -426,5 +522,5 @@ the CM payoff gate and the red “NOT an isogeny” separation in the diagram.
   for isogeny-volcano terminology. The report does not treat terminology as a
   certificate for any new edge.
 
-The complete expected artifact set and all PENDING receipts are in
+The complete artifact set and remaining technical obligations are in
 [`ARTIFACT_INDEX.md`](ARTIFACT_INDEX.md).

@@ -9,7 +9,7 @@ digraph p192_weak_curve_study {
     fontname="DejaVu Sans",
     fontsize=12,
     labelloc="t",
-    label="P-192 weak-object study: two mathematically distinct lanes (evidence status: PENDING)"
+    label="P-192 weak-object study: two mathematically distinct lanes (independent review complete; overall BREAKS)"
   ];
   node [
     shape=box,
@@ -38,23 +38,23 @@ digraph p192_weak_curve_study {
     frobenius [
       fillcolor="#eff6ff",
       color="#2563eb",
-      label="[DERIVED; certificate pending]\nFrobenius order candidate\nD = t² - 4p\n= -5·11·31·C"
+      label="[VALIDATED SUBCLAIM]\nOrder / CM facts reproduce\nD = t² - 4p\n= -5·11·31·C"
     ];
     census [
       fillcolor="#eff6ff",
       color="#2563eb",
-      label="[PENDING RUN]\nExact class-relation census\nℓ ≤ 113; ∏ℓ^|eℓ| ≤ 2^48\n4,974,347 canonical nonzero vectors expected"
+      label="[PARTIALLY VALIDATED]\nCounts reproduce; 103 emitted scalar relations replay\nℓ ≤ 113; ∏ℓ^|eℓ| ≤ 2^48\nset identity INCONCLUSIVE: digest bytes not frozen"
     ];
     map_gate [
       shape=diamond,
       fillcolor="#fef3c7",
       color="#b45309",
-      label="Oriented kernels + explicit maps\n+ subgroup transport + replay\n+ HOT/COLD and whole-attack cost?"
+      label="OPEN: oriented kernels + explicit maps\n+ subgroup transport + replay\n+ HOT/COLD and whole-attack cost"
     ];
     valid_verdict [
       fillcolor="#dcfce7",
       color="#15803d",
-      label="Only then assess a valid-curve weakness\nOtherwise: NO_WEAKNESS_FOUND_WITHIN_SCOPE\nor INCOMPLETE — never infer one from a form identity"
+      label="CM result: INDETERMINATE\nNo P-192 weakness or speedup established\nComplete-set negative not licensed"
     ];
 
     frobenius -> census [color="#2563eb", penwidth=1.6, label="certified ideal-class arithmetic"];
@@ -87,22 +87,22 @@ digraph p192_weak_curve_study {
     reject [
       fillcolor="#dcfce7",
       color="#15803d",
-      label="HIGH-LEVEL CONTROL\necdh_raw must reject R\n[PENDING RUN]"
+      label="HIGH-LEVEL CONTROL\necdh_raw rejection predicate reproduced\n[VALIDATED HOLDS]"
     ];
     oracle [
       fillcolor="#fee2e2",
       color="#b91c1c",
-      label="UNCHECKED LOW-LEVEL SURFACE\nx-only confirmation tags\n72 nested-composite probes\n[PENDING RUN]"
+      label="UNCHECKED LOW-LEVEL SURFACE\nx-only confirmation tags\n72 probes; scalar recovered\n[VALIDATED HOLDS]"
     ];
     residual [
       fillcolor="#fee2e2",
       color="#b91c1c",
-      label="Legitimate P-192 Q=[d]G\nresolves qmax residual with interval BSGS\nexact final replay required\n[PENDING RUN]"
+      label="Legitimate P-192 Q=[d]G\nqmax residual resolved by interval BSGS\nexact final replay reproduced\n[VALIDATED HOLDS]"
     ];
     impl_verdict [
       fillcolor="#fef3c7",
       color="#b45309",
-      label="Possible verdict ceiling:\nIMPLEMENTATION_WEAK\nNever 'weak isogenous curve'"
+      label="Scoped verdict:\nIMPLEMENTATION_WEAK\nfixed synthetic interface; never 'weak isogenous curve'"
     ];
 
     singular -> parameter [color="#7e22ce", penwidth=1.6, label="birational torus law"];
@@ -126,6 +126,6 @@ digraph p192_weak_curve_study {
     shape=note,
     fillcolor="#ffffff",
     color="#94a3b8",
-    label="Legend\nblue = valid elliptic/CM evidence flow\npurple = exact singular-torus algebra\nred dashed = forbidden equivalence inference\ngreen = validation/replay gate\nPENDING = no experiment output yet"
+    label="Legend\nblue = valid elliptic/CM evidence flow\npurple = exact singular-torus algebra\nred dashed = forbidden equivalence inference\ngreen = validation/replay gate\nVALIDATED SUBCLAIM does not override overall BREAKS"
   ];
 }
