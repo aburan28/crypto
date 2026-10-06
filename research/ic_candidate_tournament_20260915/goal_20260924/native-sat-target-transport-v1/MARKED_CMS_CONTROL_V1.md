@@ -51,6 +51,12 @@ applies the pinned post-buffer patch, and retains compiler output and binary
 hashes. A successful build receipt says `BUILT_UNVALIDATED`; only the nine
 disclosed solver roles and a separate data-only replay can pass transport
 parity. The build recipe is never a target execution or speed measurement.
+The source-committed `ic_marked_cms_control` Cargo example runs the three
+roles in the fixed order for each disclosed point. It uses create-once output,
+fixed source hashes and expected classes, bounded process groups, exact stdin
+READY markers, and retains every role's raw output and watchdog/drain receipt.
+It can report provisional parity only; its result explicitly requires a
+separate data-only replay before transport admission.
 
 The run passes transport parity only if all nine roles finish within their
 fixed watchdogs, all three roles for each point return the same recognized
