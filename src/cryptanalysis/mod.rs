@@ -121,6 +121,7 @@ pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod crossbred;
 pub mod curve_catalog;
+pub mod curve_construction;
 pub mod curve_id;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
