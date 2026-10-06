@@ -26,8 +26,10 @@ own path-specific rebuild separately and selects the exact validated exporter
 for the worker. The one-use controller checks the
 scientific publication and exact CMS source descriptor before it consumes the
 claim; its frozen audit rechecks runtime receipts and the five online phases
-as data. These new paths still need their own clean-commit validation capsule
-and scientific publication. The other three source publications must also
-exist before a fresh point card is drawn. No speedup follows from this build.
+as data. The other three source publications must also exist before a fresh
+point card is drawn. No speedup follows from this build.
 The [scientific sequence](SCIENTIFIC.md) names the exact admission checks and
-one-use commands.
+one-use commands. Steps 1–3 now have a [passing target-free scientific
+publication](result-v2/RESULT.md), independently replayed from this repository.
+The registration is unconsumed. Steps 4–5 still wait for the other three arm
+publications and the first fresh card.

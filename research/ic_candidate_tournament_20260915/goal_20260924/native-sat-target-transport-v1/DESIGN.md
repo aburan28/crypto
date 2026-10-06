@@ -16,10 +16,13 @@ passed an independent data-only audit. A
 committed source, the complete preparation binding, the marked binary, build
 invocations and full archive custody. Its exact-built exporter passed new
 disclosed parity controls and an independent data-only audit. The validation
-registration still refuses scientific use. A one-use controller and a
-scientific freeze with exact-source exporter-audit binding are implemented but
-have not yet passed their own frozen validation and publication. No one-use SAT
-target capsule, fresh public-point card or target solve has been admitted.
+registration still refuses scientific use. A separate
+[target-free scientific registration](source-freeze-v1/result-v2/RESULT.md)
+now binds the same source commit, a fresh validation archive, three exact-built
+exporter controls and the parity-tested exporter executable. Its full archive
+passed independent data-only replay. The frozen one-use controller has not yet
+been exercised on a fresh public-point card. No SAT target solve or speedup
+has been admitted.
 
 ## Question and bounded scope
 
