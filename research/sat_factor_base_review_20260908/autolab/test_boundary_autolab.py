@@ -198,6 +198,37 @@ class MeasurementSchemaTests(unittest.TestCase):
 
 
 class HelperTests(unittest.TestCase):
+    def test_nested_collection_is_rejected_and_exclusive_precompute_is_charged_once(self) -> None:
+        row = {
+            "fixture_setup_ms": 0.5,
+            "collection_ms": 10.0,
+            "linear_solve_ms": 2.0,
+            "solution_validation_ms": 1.0,
+            "reference_validation_ms": 4.0,
+            "target_online_wall_ms": 14.5,
+            "timing_breakdown_ms": {
+                "target_generation": 1.0,
+                "packed_verification": 0.5,
+            },
+            "target_online_phase_ms": {
+                "target_query": 1.5,
+                "target_pdp": 5.5,
+                "target_relation_check": 4.5,
+                "target_descent": 0.0,
+                "target_recovery_check": 3.0,
+            },
+        }
+        self.assertTrue(lab.exclusive_online_timing_ok(row))
+        historical = dict(row)
+        historical["target_online_phase_ms"] = dict(row["target_online_phase_ms"], target_pdp=10.0)
+        historical["target_online_wall_ms"] = 17.5
+        self.assertFalse(lab.exclusive_online_timing_ok(historical))
+        self.assertEqual(
+            lab.exclusive_precomputation_ms(dict(row, setup_ms=20.0)),
+            34.5,
+        )
+        self.assertIsNone(lab.exclusive_precomputation_ms({"setup_ms": 20.0}))
+
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
             lab.seed_for("koblitz.vs_rho.n37_wall", "direct", 0),

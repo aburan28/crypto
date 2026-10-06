@@ -1812,6 +1812,24 @@ fn solve_full_column_rank_system(
     Some((0..columns).map(|row| matrix[row][columns]).collect())
 }
 
+/// `collection_ms` contains target generation, group checks, final linear
+/// solve, and scalar replay. Return its residual PDP/rank/receipt work.
+fn exclusive_pdp_ms(
+    collection_ms: f64,
+    target_generation_ms: f64,
+    packed_verification_ms: f64,
+    linear_solve_ms: f64,
+    solution_validation_ms: f64,
+) -> f64 {
+    let exclusive = collection_ms
+        - target_generation_ms
+        - packed_verification_ms
+        - linear_solve_ms
+        - solution_validation_ms;
+    assert!(exclusive.is_finite() && exclusive >= -1e-9);
+    exclusive.max(0.0)
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
@@ -2199,9 +2217,9 @@ fn main() {
     let d0 = rng.gen_range(1..modulus);
     let q = curve.mul(curve.generator(), &BigUint::from(d0));
     let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
+    let fixture_setup_started = Instant::now();
     let generator_raw = to_raw_point(curve.generator());
     let q_raw = to_raw_point(&q);
-    let fixture_setup_started = Instant::now();
     let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
         match target_mode {
         TargetMode::CoefficientWalk => {
@@ -2235,7 +2253,6 @@ fn main() {
             (0, 0, 0, 0, None, None)
         }
     };
-    let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
     let mut echelon = Echelon::new(columns + 1);
     let mut reverse_echelon = ReverseEchelon::new(columns + 1);
     let mut rows = Vec::new();
@@ -2281,6 +2298,7 @@ fn main() {
     let mut packed_verification_ns = 0u128;
     let mut rank_diagnostics_ns = 0u128;
     let mut receipt_construction_ns = 0u128;
+    let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
     let collection_started = Instant::now();
     let relation_cap = 2 * columns + 64 + relation_cap_extra;
     let target_cap = 100_000usize;
@@ -2930,22 +2948,26 @@ fn main() {
         assert_eq!(sum, target, "independent reference relation validation");
     }
     let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let target_generation_ms = target_generation_ns as f64 / 1_000_000.0;
+    let packed_verification_ms = packed_verification_ns as f64 / 1_000_000.0;
+    let target_pdp_ms = exclusive_pdp_ms(
+        collection_ms,
+        target_generation_ms,
+        packed_verification_ms,
+        linear_solve_ms,
+        solution_validation_ms,
+    );
     let online_phase_ms = uses_retained_factor_logs.then(|| {
         json!({
-            "target_query":fixture_setup_ms,
-            "target_pdp":collection_ms,
-            "target_relation_check":reference_validation_ms,
+            "target_query":fixture_setup_ms+target_generation_ms,
+            "target_pdp":target_pdp_ms,
+            "target_relation_check":packed_verification_ms+reference_validation_ms,
             "target_descent":0.0,
             "target_recovery_check":linear_solve_ms+solution_validation_ms
         })
     });
-    let target_online_ms = uses_retained_factor_logs.then_some(
-        fixture_setup_ms
-            + collection_ms
-            + reference_validation_ms
-            + linear_solve_ms
-            + solution_validation_ms,
-    );
+    let target_online_ms = uses_retained_factor_logs
+        .then_some(fixture_setup_ms + collection_ms + reference_validation_ms);
     let q_key = point_key(&q);
     let generator_key = point_key(curve.generator());
     let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
@@ -2964,7 +2986,7 @@ fn main() {
     } else {
         "TARGET_CAP"
     };
-    batch_online_charged_ms += fixture_setup_ms + collection_ms;
+    batch_online_charged_ms += fixture_setup_ms + collection_ms + reference_validation_ms;
     batch_fixture_generation_ms += fixture_generation_ms;
     batch_reference_validation_ms += reference_validation_ms;
     batch_target_trials += trials;
@@ -3020,13 +3042,14 @@ fn main() {
             "relation_cap_without_rank":relation_cap,
             "relation_cap_extra":relation_cap_extra,
             "collection_ms":collection_ms,
+            "collection_exclusive_ms":collection_ms-linear_solve_ms-solution_validation_ms,
             "linear_solve_ms":linear_solve_ms,
             "solution_validation_ms":solution_validation_ms,
             "setup_ms":setup_ms,
             "curve_setup_ms":curve_setup_ms,
             "fixture_setup_ms":fixture_setup_ms,
             "fixture_generation_ms":fixture_generation_ms,
-            "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms,
+            "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms+reference_validation_ms,
             "pair_group_additions":pair_additions,
             "pair_index_mode":pair_mode.name(),
             "pair_canonicalization_maps":pair_canonicalization_maps,
@@ -3144,6 +3167,29 @@ fn main() {
 #[cfg(test)]
 mod packed_tests {
     use super::*;
+
+    #[test]
+    fn online_timer_phases_exclude_nested_solve_and_validation() {
+        let collection_ms = 10.0;
+        let target_generation_ms = 1.0;
+        let packed_verification_ms = 0.5;
+        let linear_solve_ms = 2.0;
+        let solution_validation_ms = 1.0;
+        let external_relation_check_ms = 4.0;
+        let query_ms = 0.5;
+        let target_pdp_ms = exclusive_pdp_ms(
+            collection_ms,
+            target_generation_ms,
+            packed_verification_ms,
+            linear_solve_ms,
+            solution_validation_ms,
+        );
+        let recovery_check_ms = linear_solve_ms + solution_validation_ms;
+        let online_ms = query_ms + collection_ms + external_relation_check_ms;
+        assert_eq!(target_pdp_ms, 5.5);
+        assert_eq!(query_ms + target_generation_ms + target_pdp_ms
+            + packed_verification_ms + external_relation_check_ms + recovery_check_ms, online_ms);
+    }
 
     #[test]
     fn quotient_pair_witness_packs_48_bit_coefficients_losslessly() {
