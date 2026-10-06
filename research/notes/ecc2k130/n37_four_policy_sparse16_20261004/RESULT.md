@@ -87,9 +87,17 @@ construction and pair each completed target with automorphism-aware rho.
 Repeating this exact K16 eager table as a speed claim would conflate its
 stage coverage with the required end-to-end attack cost.
 
-Reproduce from the repository root with the committed source lock:
+Reproduce in a disposable checkout from the repository root with the
+committed source lock. `SOURCE_Cargo.toml` preserves the exact manifest from
+source commit `7039ab0b2940ac55809da62c91361b8082625716`, SHA-256
+`f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721`.
+The current root manifest gained later binaries, so the historical replay
+restores its measured manifest and lockfile before checking the unchanged
+source lock. The old measurement and result remain unchanged.
 
 ```sh
+cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/SOURCE_Cargo.toml Cargo.toml
+cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/Cargo.lock Cargo.lock
 sha256sum --check research/notes/ecc2k130/n37_four_policy_sparse16_20261004/SOURCE_LOCK.sha256
 cargo build --release --locked --example n37_four_policy_sparse16_inputs_replay --example n37_four_policy_sparse16_pdp_replay
 target/release/examples/n37_four_policy_sparse16_inputs_replay research/notes/ecc2k130/n37_four_policy_sparse16_20261004/inputs /tmp/n37-sparse16-input-replay.json

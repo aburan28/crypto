@@ -22,9 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The archived source lock describes this PR head, while the
-          # synthetic pull-request merge can contain a newer Cargo.toml.
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
@@ -45,8 +42,11 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_four_policy_sparse16_20261004
-      - name: Restore the measured Cargo lockfile
-        run: cp research/notes/ecc2k130/n37_four_policy_sparse16_20261004/Cargo.lock Cargo.lock
+      - name: Restore the measured Cargo manifest and lockfile
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          cp "$note/SOURCE_Cargo.toml" Cargo.toml
+          cp "$note/Cargo.lock" Cargo.lock
       - name: Check source lock and formatting
         run: |
           note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
