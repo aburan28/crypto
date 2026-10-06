@@ -59,6 +59,13 @@ here. `KIC_F4_ACTIVE_MULTIPLIERS` changes a different decisive
 workload. The next F6 matrix-build change must act on support-local row
 generation and preserve its exact row space and final one-target result.
 
+After this measurement, the stacked Linux generic-admission check found
+that newly added default-false worker configuration fields appeared in
+`effective_config` although older jobs did not supply them. The PR head
+now omits those fields when false, while preserving explicit opt-in true
+values. The eight target measurements remain tied to their frozen
+pre-fix worker binary and source commit.
+
 Run `sh research/f6_ic_generic_direct_pack_20261006/derive.sh` to rebuild
 [measurement rows](measurements.jsonl), [paired correctness check](DERIVATION_CHECK.json),
 and [derived hashes](DERIVED_SHA256SUMS) from the raw successful runs.
