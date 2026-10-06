@@ -59,11 +59,19 @@ fn point_json(point: &BinaryPoint) -> serde_json::Value {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
-        args.len() == 3 || args.len() == 4,
-        "usage: probe planted K | ordinary OFFSET(0..3) K"
+        args.len() == 3 || args.len() == 4 || args.len() == 5,
+        "usage: probe planted K | ordinary OFFSET(0..3) K [core16]"
     );
-    let k: usize = args.last().unwrap().parse().expect("integer k");
+    let run_core16 = args.len() == 5 && args[4] == "core16";
+    assert!(args.len() != 5 || run_core16);
+    let k_arg = if run_core16 {
+        &args[3]
+    } else {
+        args.last().unwrap()
+    };
+    let k: usize = k_arg.parse().expect("integer k");
     assert!([16, 90].contains(&k));
+    assert!(!run_core16 || k == 16);
     let source_variables: Vec<usize> = (0..18)
         .flat_map(|bit| (0..5).map(move |summand| bit + 18 * summand))
         .collect();
@@ -235,6 +243,13 @@ fn main() {
     }
     let witness_digest = hasher.finalize().to_hex().to_string();
     let unresolved_count = certificate.unresolved_rows.len();
+    if run_core16 {
+        assert_eq!(unresolved_count, 1_928, "frozen core size changed");
+        assert_eq!(
+            witness_digest, "ba12cc6bb138b135f514f6bb6198db21286101b4a55eeb6f42a5af12e4a49d74",
+            "frozen private witness set changed"
+        );
+    }
     println!(
         "{}",
         json!({
@@ -253,7 +268,7 @@ fn main() {
     std::io::stdout()
         .flush()
         .expect("flush certificate receipt");
-    if k != 90 || unresolved_count > 2_000 {
+    if (k != 90 && !run_core16) || unresolved_count > 2_000 {
         return;
     }
     let core_build = Instant::now();

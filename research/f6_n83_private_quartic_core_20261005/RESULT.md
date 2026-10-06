@@ -54,9 +54,27 @@ The [build log](build.log.gz), [focused test](helper_test.log.gz),
 [runner](run.sh), [status](status.tsv), planted and ordinary JSONL,
 stderr, and [SHA-256 manifest](SHA256SUMS) preserve the evidence.
 
+## Amendment 1: exact k=16 core reduction
+
+[Amendment 1](AMENDMENT_1.md) was committed before the new probe was
+built or run. Its frozen guard reproduced the 1,928 unresolved rows
+and the original `k=16` witness digest. The 1,928 rows plus all 332
+original equations produced a 2,260-row core with 6,376,371 term
+occurrences. The ordinary reducer stopped at its registered
+1,500,000-column cap (`column_limit` at 1,500,001), before rank or
+affine consequences could be computed. Peak observed RSS was
+746,438,656 bytes. Both the repeated planted control and ordinary
+process exited zero; the ordinary cap is an inconclusive structural
+outcome, not evidence that no source constraint exists.
+
+The amended probe source SHA-256 was
+`775dd89f1c060d08b403871117750e4d94d2ace3fcc96d4643ff23240dec6f7c`;
+the frozen release binary SHA-256 was
+`37326e268752341ebac1d361cd7614336b7e039de52f6b20e882bc46a8def441`.
+The [amended runner](run_core16.sh), [status](core16_status.tsv),
+raw `core16_*` JSONL/stderr and build log preserve the new run.
+
 This result narrows the exact degree-four search space but has no
 ordinary full-group relation, complete F6 decomposition, one-target IC
 online interval, target scalar recovery, or same-point rho reference.
-The complete candidate ID and speedup remain unknown. A versioned
-follow-on may test the `k=16` unresolved core under the same resource
-and correctness gates; it is not part of this first result.
+The complete candidate ID and speedup remain unknown.
