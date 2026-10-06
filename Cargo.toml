@@ -40,6 +40,14 @@ path = "src/bin/jacobian_certificate.rs"
 name = "cryptopro-b-glv-bench"
 path = "src/bin/cryptopro_b_glv_bench.rs"
 
+# `cryptopro-b-chain-sweep` — every chain realisation of the CryptoPro-B
+# GLV endomorphisms (frozen chain set) with the scalar-multiplication
+# parameters around them; counting run with --features cryptopro-b-opcount
+# (research/cryptopro_b_chain_sweep_20261006).
+[[bin]]
+name = "cryptopro-b-chain-sweep"
+path = "src/bin/cryptopro_b_chain_sweep.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
@@ -51,6 +59,9 @@ f4-wide-tables = []
 redis-cache = ["dep:redis"]
 # Verbose tracing in the isogeny rho attack's linear-algebra step.
 rho_debug = []
+# Field-operation counters in the CryptoPro-B field (`cryptopro_b_field::opcount`),
+# for the counting run of `cryptopro-b-chain-sweep`; timing builds leave it off.
+cryptopro-b-opcount = []
 
 [lints.rust]
 # `hashclash_linked` is set by a downstream build script that links the

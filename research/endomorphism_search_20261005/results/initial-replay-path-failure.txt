@@ -1,0 +1,8 @@
+No such file or directory (os error 2)
+endomorphism-search scan --discriminant=-619 [--degree-bound 1000] [--out FILE]
+endomorphism-search sweep [--max-abs-discriminant 1000] [--max-orders 5000]
+endomorphism-search probe --p 167 --a 25 --b 36 [--count-ops]
+endomorphism-search demo [--count-ops] [--out FILE]
+endomorphism-search replay --historical-dir DIR
+Limits: --max-work, --max-candidates, --seconds; probe also --max-kernels.
+Native counters are scalar stage diagnostics. Native timing and ECDLP speedup remain unset.
