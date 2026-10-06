@@ -1,17 +1,19 @@
 # Draft for a fresh n17 external-SAT one-target transport
 
 Status: target design draft, not a registered target experiment or dispatch
-authority. Both original 512-query ordinary panels have been audited:
-MatrixF5 reached rank 29/29; the registered CryptoMiniSat arm reached 22/29
-and has no complete log table. The three historical confirmation sets and
-consumed registrations remain closed. The disclosed
+authority. The original MatrixF5 panel reached rank 29/29; the first
+100,000-conflict CryptoMiniSat panel reached 22/29, and the separately frozen
+[one-million-conflict panel](../native-sat-million-registration-v1/result-v1/RESULT.md)
+reached 29/29 with all logs independently replayed. Both SAT registrations
+are consumed and closed. The three historical confirmation sets remain closed. The disclosed
 [transport controls](controls-v1/RESULT.md) passed exporter parity on all
 three points; accepted-CMS stdin parity passed two of the three frozen
 60-second controls and a separately labeled longer diagnostic for the third.
-The first frozen control failure remains. Source for a post-buffer-marker CMS
-build and a target-free SAT worker is staged, but neither has been built or
-admitted. The new 512-query natural SAT preparation is still running; its
-final rank and yield are unknown.
+The first frozen control failure remains. A distinct post-buffer-marker CMS
+binary was built, and its [nine-role disclosed transport result](result-v1/RESULT.md)
+passed an independent data-only audit. The target-free SAT worker source is
+staged, but no one-use SAT target capsule, fresh public-point card or target
+solve has been admitted.
 
 ## Question and bounded scope
 
@@ -63,9 +65,9 @@ unchanged accepted executable. Source review found that the earlier
 `fread`. The stricter [post-buffer patch](cms-stdin-ready-postbuffer.patch)
 constructs the buffer without reading, emits READY only after that allocation,
 then primes the stream and parses the target CNF. Its file-input default keeps
-the original eager-read path. The patch applies to the accepted source archive
-but remains unbuilt and unverified; the
-[fixed three-way control](MARKED_CMS_CONTROL_V1.md) must pass before use.
+the original eager-read path. The distinct marked binary passed the
+[fixed three-way disclosed control](result-v1/RESULT.md); the exact binary and
+exporter still need a new one-use target capsule and its own audit.
 Start **one stdin-piped CMS child for
 each of the `max_queries` permitted attempts** in distinct process groups
 with only target-independent flags. Wait for every child to complete the

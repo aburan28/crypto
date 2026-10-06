@@ -450,7 +450,7 @@ mod tests {
                 export_nonce: 11,
                 conflict_budget: 1_000_000,
                 exporter_timeout_ms: 30_000,
-                solver_timeout_ms: 60_000,
+                solver_timeout_ms: 120_000,
                 controller_timeout_ms: 900_000,
             },
             worker_timeout_ms: 900_000,

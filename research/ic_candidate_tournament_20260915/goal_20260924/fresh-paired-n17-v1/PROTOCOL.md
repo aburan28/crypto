@@ -1,9 +1,12 @@
 # Fresh paired n17 one-target campaign, version 1
 
-Status: predeclared protocol only. No source publications, point card, target
-registration, four-arm result or isolated-host receipt exists under this
-protocol. The three earlier confirmation sets and every consumed controller
-remain closed. A stage control or a partial natural panel is never a complete
+Status: entry gates 1–2 passed: the separate
+[one-million-conflict natural preparation](../native-sat-million-registration-v1/result-v1/RESULT.md)
+reached rank 29/29, and the [nine-role marked-CMS transport control](../native-sat-target-transport-v1/result-v1/RESULT.md)
+passed its independent data-only audit. No four-arm source publications,
+point card, target registration, four-arm result or isolated-host receipt
+exists under this protocol. The three earlier confirmation sets and every
+consumed controller remain closed. A stage control is never a complete
 one-target result.
 
 ## Entry gates and point custody

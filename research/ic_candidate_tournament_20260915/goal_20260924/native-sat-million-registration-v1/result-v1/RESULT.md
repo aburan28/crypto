@@ -36,6 +36,12 @@ for the primary one-target online interval.
 
 The original [frozen audit](original-audit.json) is 13,188 bytes, SHA-256
 `e2e9caa59ffa61713e4ffd47d98a05850fe4e22bef9594d9431c2c7b24d283be`.
+The [canonical mathematical input](mathematical-input.json) is a data-only
+extraction from that original producer, SHA-256
+`d5a428b182ef32f9f7e2b7408befa0bf41c4d194bc3a4bd13cf34d2cd38f6c83`.
+That is the same mathematical-input digest recorded by the frozen audit. A
+target-constructor regression replays this exact table without launching a
+solver or exposing a new target.
 The [original execution archive](execution-original.tar.gz) contains the
 terminal, producer, 512 progress records, raw native-role outputs, source
 files and PID/drain receipts: 8,716 tar entries, 21,444,320 compressed bytes,
