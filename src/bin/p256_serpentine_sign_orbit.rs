@@ -1029,7 +1029,8 @@ fn fit_exponent(xs: &[f64], ys: &[f64]) -> f64 {
 
 fn verify_dependencies(round33: &Value, round31: &Value, round290: &Value) -> Result<(), String> {
     if json_u64(round33, &["cutoff_sweep", "selected", "cutoff_capacity"])? != CUTOFF
-        || json_u64(round33, &["relation_model", "arity"])? != ARITY as u64
+        || json_str(round33, &["relation_model"])?
+            != "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation"
         || json_str(round33, &["native_replay", "coefficient_sha256"])? != COEFFICIENT_SHA256
         || json_bool(round33, &["promotion_gates", "promoted"])?
     {
