@@ -477,16 +477,21 @@ fn load_degree_evidence(path: &Path) -> Result<ResidualDegreeEvidence, String> {
     let cells = value["cells"]
         .as_array()
         .ok_or("round-6 cells are missing")?;
-    let mut maxima = Vec::new();
+    let mut maxima = vec![(1u32, 0u32), (2, 0), (3, 0)];
     let mut complete = true;
     for cell in cells {
         let depth = cell["residual_depth"]
             .as_u64()
             .ok_or("round-6 residual depth is missing")? as u32;
-        let maximum = cell["max_degree_of_regularity"]
+        let degree = cell["max_solving_degree"]
             .as_u64()
-            .ok_or("round-6 degree maximum is missing")? as u32;
-        maxima.push((depth, maximum));
+            .ok_or("round-6 solving degree is missing")? as u32;
+        if let Some((_, maximum)) = maxima
+            .iter_mut()
+            .find(|(residual_depth, _)| *residual_depth == depth)
+        {
+            *maximum = (*maximum).max(degree);
+        }
         let components = cell["components"]
             .as_u64()
             .ok_or("round-6 component count is missing")?;
