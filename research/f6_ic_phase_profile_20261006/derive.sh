@@ -43,6 +43,10 @@ done < "$out/runs/INDEX.tsv"
 jq -e -s '
     length == 12 and all(.[];
       .exit_status == 0 and .status == "complete" and .scalar_verified == true and
+      .f4_stage_profile.calls > 0 and
+      .f4_stage_ns <= .online_phases_ns.target_pdp and
+      .oracle_ns <= .online_phases_ns.target_pdp and
+      (if .arm == "inherited_f4" then .oracle_calls == 0 else .oracle_calls > 0 end) and
       (.online_phases_ns.target_query + .online_phases_ns.target_pdp +
        .online_phases_ns.target_relation_check + .online_phases_ns.target_descent +
        .online_phases_ns.recovery_check) == .online_wall_ns
