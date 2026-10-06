@@ -1,6 +1,8 @@
 # P-256 multi-prime isogeny walk: 65,536-curve expansion
 
-Status: **preregistered; execution not started**
+Status: **executed; local replay passed; large-artifact publication blocked**
+
+Results: [`RESULTS.md`](RESULTS.md) and [`MANIFEST.json`](MANIFEST.json)
 
 Date frozen: 2026-10-06
 
