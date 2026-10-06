@@ -1,0 +1,146 @@
+diff --git a/src/cryptanalysis/f6_wide_geometry.rs b/src/cryptanalysis/f6_wide_geometry.rs
+index c888f0ad6..ccef888be 100644
+--- a/src/cryptanalysis/f6_wide_geometry.rs
++++ b/src/cryptanalysis/f6_wide_geometry.rs
+@@ -579,6 +579,98 @@ struct SignedPairSum {
+     neg_pair: (u32, u32),
+ }
+ 
++/// Most misses compare only an in-slot fingerprint. A matching fingerprint
++/// always checks the full x coordinate owned by the signed-sum array.
++struct FingerprintXIndex {
++    slots: Vec<u64>,
++}
++
++impl FingerprintXIndex {
++    const EMPTY: u64 = u64::MAX;
++    const FINGERPRINT: u64 = 0xffff_ffff_0000_0000;
++
++    fn new(pair_count: usize) -> Option<Self> {
++        let capacity = pair_count
++            .div_ceil(2)
++            .checked_mul(2)?
++            .max(8)
++            .checked_next_power_of_two()?;
++        Some(Self {
++            slots: vec![Self::EMPTY; capacity],
++        })
++    }
++
++    #[inline]
++    fn hash(x: u128) -> u64 {
++        let mut value = (x as u64) ^ ((x >> 64) as u64).rotate_left(23);
++        value ^= value >> 30;
++        value = value.wrapping_mul(0xbf58_476d_1ce4_e5b9);
++        value ^= value >> 27;
++        value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
++        value ^= value >> 31;
++        value
++    }
++
++    #[inline]
++    fn probe(&self, x: u128, sums: &[SignedPairSum]) -> (usize, bool) {
++        let mask = self.slots.len() - 1;
++        let hash = Self::hash(x);
++        let mut slot = (hash as usize) & mask;
++        loop {
++            let entry = self.slots[slot];
++            if entry == Self::EMPTY {
++                return (slot, false);
++            }
++            if (entry & Self::FINGERPRINT) == (hash & Self::FINGERPRINT)
++                && sums[(entry as u32) as usize]
++                    .point
++                    .is_some_and(|(stored_x, _)| stored_x == x)
++            {
++                return (slot, true);
++            }
++            slot = (slot + 1) & mask;
++        }
++    }
++
++    #[inline]
++    fn get(&self, x: u128, sums: &[SignedPairSum]) -> Option<usize> {
++        let (slot, found) = self.probe(x, sums);
++        found.then_some((self.slots[slot] as u32) as usize)
++    }
++
++    fn grow(&mut self, sums: &[SignedPairSum]) -> Option<()> {
++        let capacity = self.slots.len().checked_mul(2)?;
++        let mut replacement = Self {
++            slots: vec![Self::EMPTY; capacity],
++        };
++        for &entry in &self.slots {
++            if entry != Self::EMPTY {
++                let index = entry as u32;
++                let x = sums[index as usize].point?.0;
++                let (slot, found) = replacement.probe(x, sums);
++                debug_assert!(!found);
++                replacement.slots[slot] = entry;
++            }
++        }
++        *self = replacement;
++        Some(())
++    }
++
++    fn insert_first(&mut self, x: u128, sums: &[SignedPairSum]) -> Option<bool> {
++        let (mut slot, found) = self.probe(x, sums);
++        if found {
++            return Some(false);
++        }
++        if sums.len().checked_add(1)? > self.slots.len() * 7 / 10 {
++            self.grow(sums)?;
++            slot = self.probe(x, sums).0;
++        }
++        let index = u32::try_from(sums.len()).ok()?;
++        self.slots[slot] = (Self::hash(x) & Self::FINGERPRINT) | u64::from(index);
++        Some(true)
++    }
++}
++
+ /// Exact sign-quotient pair index for a distinct, negation-closed base.
+ /// Each stored pair sum also represents its negative via the negated source
+ /// points. A query checks both signs and verifies every returned witness.
+@@ -586,7 +678,7 @@ pub struct F6SignedPairIndex {
+     curve: BinaryCurve,
+     points: Vec<BinaryPoint>,
+     sums: Vec<SignedPairSum>,
+-    lookup: HashMap<u128, usize>,
++    lookup: FingerprintXIndex,
+     infinity_index: Option<usize>,
+     pair_count: usize,
+ }
+@@ -615,7 +707,7 @@ impl F6SignedPairIndex {
+             .collect::<Option<_>>()?;
+         let capacity = pair_count.div_ceil(2);
+         let mut sums = Vec::with_capacity(capacity);
+-        let mut lookup = HashMap::with_capacity(capacity);
++        let mut lookup = FingerprintXIndex::new(pair_count)?;
+         let mut infinity_index = None;
+         #[cfg(target_arch = "aarch64")]
+         let use_packed = curve.m == 83
+@@ -643,14 +735,7 @@ impl F6SignedPairIndex {
+                             false
+                         }
+                     }
+-                    PointXKey::Affine(x) => {
+-                        if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+-                            entry.insert(sums.len());
+-                            true
+-                        } else {
+-                            false
+-                        }
+-                    }
++                    PointXKey::Affine(x) => lookup.insert_first(x, &sums)?,
+                 };
+                 if first_of_x_orbit {
+                     let j = i + offset;
+@@ -683,7 +768,7 @@ impl F6SignedPairIndex {
+     fn lookup_index(&self, x: PointXKey) -> Option<usize> {
+         match x {
+             PointXKey::Infinity => self.infinity_index,
+-            PointXKey::Affine(x) => self.lookup.get(&x).copied(),
++            PointXKey::Affine(x) => self.lookup.get(x, &self.sums),
+         }
+     }
+ 

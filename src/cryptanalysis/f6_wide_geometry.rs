@@ -586,7 +586,8 @@ pub struct F6SignedPairIndex {
     curve: BinaryCurve,
     points: Vec<BinaryPoint>,
     sums: Vec<SignedPairSum>,
-    lookup: HashMap<PointXKey, usize>,
+    lookup: HashMap<u128, usize>,
+    infinity_index: Option<usize>,
     pair_count: usize,
 }
 
@@ -615,6 +616,7 @@ impl F6SignedPairIndex {
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
         let mut lookup = HashMap::with_capacity(capacity);
+        let mut infinity_index = None;
         #[cfg(target_arch = "aarch64")]
         let use_packed = curve.m == 83
             && curve.irreducible.degree == 83
@@ -632,10 +634,26 @@ impl F6SignedPairIndex {
             #[cfg(not(target_arch = "aarch64"))]
             let row = batch_add_fixed(curve, &points[i], &points[i..]);
             for (offset, sum) in row.into_iter().enumerate() {
-                let x = x_key(&sum)?;
-                if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+                let first_of_x_orbit = match x_key(&sum)? {
+                    PointXKey::Infinity => {
+                        if infinity_index.is_none() {
+                            infinity_index = Some(sums.len());
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    PointXKey::Affine(x) => {
+                        if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+                            entry.insert(sums.len());
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                };
+                if first_of_x_orbit {
                     let j = i + offset;
-                    entry.insert(sums.len());
                     sums.push(SignedPairSum {
                         point: stored_point(&sum)?,
                         pair: (i as u32, j as u32),
@@ -649,6 +667,7 @@ impl F6SignedPairIndex {
             points: points.to_vec(),
             sums,
             lookup,
+            infinity_index,
             pair_count,
         })
     }
@@ -661,8 +680,15 @@ impl F6SignedPairIndex {
         self.sums.len()
     }
 
+    fn lookup_index(&self, x: PointXKey) -> Option<usize> {
+        match x {
+            PointXKey::Infinity => self.infinity_index,
+            PointXKey::Affine(x) => self.lookup.get(&x).copied(),
+        }
+    }
+
     fn lookup_pair(&self, residual: &BinaryPoint) -> Option<(usize, usize)> {
-        let index = *self.lookup.get(&x_key(residual)?)?;
+        let index = self.lookup_index(x_key(residual)?)?;
         self.pair_at(index, residual)
     }
 
@@ -735,7 +761,7 @@ impl F6SignedPairIndex {
                 .collect();
             let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
             for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                if let Some(&index) = self.lookup.get(&minus_key) {
+                if let Some(index) = self.lookup_index(minus_key) {
                     let point = restore_point(entry.point, self.curve.m);
                     let residual = point_add(&self.curve, target, &point_neg(&point));
                     if let Some(pair) = self.pair_at(index, &residual) {
@@ -744,7 +770,7 @@ impl F6SignedPairIndex {
                         }
                     }
                 }
-                if let Some(&index) = self.lookup.get(&plus_key) {
+                if let Some(index) = self.lookup_index(plus_key) {
                     let point = restore_point(entry.point, self.curve.m);
                     let residual = point_add(&self.curve, target, &point);
                     if let Some(pair) = self.pair_at(index, &residual) {
@@ -783,7 +809,7 @@ impl F6SignedPairIndex {
                 // were checked above. The result is verified in the group.
                 let keys = unsafe { packed83::batch_x_keys_stored(&self.curve, target, chunk) }?;
                 for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                    if let Some(&index) = self.lookup.get(&minus_key) {
+                    if let Some(index) = self.lookup_index(minus_key) {
                         let point = restore_point(entry.point, self.curve.m);
                         let residual = point_add(&self.curve, target, &point_neg(&point));
                         if let Some(pair) = self.pair_at(index, &residual) {
@@ -792,7 +818,7 @@ impl F6SignedPairIndex {
                             }
                         }
                     }
-                    if let Some(&index) = self.lookup.get(&plus_key) {
+                    if let Some(index) = self.lookup_index(plus_key) {
                         let point = restore_point(entry.point, self.curve.m);
                         let residual = point_add(&self.curve, target, &point);
                         if let Some(pair) = self.pair_at(index, &residual) {

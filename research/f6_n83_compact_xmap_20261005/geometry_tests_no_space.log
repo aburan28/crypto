@@ -1,0 +1,88 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/f6-n83-batch-size-20261004)
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2262:13
+     |
+2262 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/keccak4.rs:500:13
+    |
+500 |         let mut v = vec![Backend::Portable];
+    |             ----^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/ml_kem.rs:420:13
+    |
+420 |         let mut buf = buf;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: constant `RC` is never used
+  --> src/pqc/fast/keccak4.rs:27:7
+   |
+27 | const RC: [u64; 24] = [
+   |       ^^
+
+warning: function `use_avx2` is never used
+   --> src/pqc/fast/ml_kem.rs:343:4
+    |
+343 | fn use_avx2() -> bool {
+    |    ^^^^^^^^
+
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+warning: `crypto` (lib test) generated 9 warnings (run `cargo fix --lib -p crypto --tests` to apply 5 suggestions)
+error: could not compile `crypto` (lib test); 9 warnings emitted
+
+Caused by:
+  process didn't exit successfully: `rustc --crate-name crypto_lib --edition=2021 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--allow=clippy::unusual_byte_groupings' --warn=unexpected_cfgs '--allow=clippy::type_complexity' '--allow=clippy::too_many_arguments' '--allow=clippy::result_unit_err' '--allow=clippy::needless_range_loop' '--allow=clippy::manual_memcpy' '--allow=clippy::chunks_exact_to_as_chunks' --check-cfg 'cfg(hashclash_linked)' --test --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("f4-five-tables", "f4-four-tables", "f4-wide-tables", "redis-cache", "rho_debug"))' -C metadata=a1a0a1be0ec02639 -C extra-filename=-08b83df96119cc86 --out-dir /Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps -C strip=debuginfo -L dependency=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps --extern base64=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libbase64-d132bdb602aaecbb.rlib --extern blake3=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libblake3-4fe11fae8f1178ce.rlib --extern clap=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libclap-929d351cda054ec2.rlib --extern flate2=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libflate2-4eb282ceb941b67c.rlib --extern getrandom=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libgetrandom-aab9effda8600848.rlib --extern hex=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libhex-f654d77a99d9f368.rlib --extern libc=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/liblibc-34af9988a9ad958c.rlib --extern num_bigint=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libnum_bigint-f2713106759135cb.rlib --extern num_integer=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libnum_integer-ea58e9e0dc980150.rlib --extern num_traits=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libnum_traits-1118944c7e05d8dd.rlib --extern rand=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/librand-5153ce4fafd72c74.rlib --extern rayon=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/librayon-0925808c16017e4d.rlib --extern serde=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libserde-1f2b4a53f18eebbb.rlib --extern serde_json=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libserde_json-4423a4fa2b249143.rlib --extern subtle=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libsubtle-09e2018a103e3565.rlib --extern zeroize=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/deps/libzeroize-124c02830c506096.rlib -L native=/Volumes/SSD990/crypto/worktrees/f6-n83-geometric-20261004/target/release/build/blake3-1baada617b1f129e/out` (exit status: 101)
