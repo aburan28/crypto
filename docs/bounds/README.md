@@ -178,7 +178,7 @@ epoch is named.
 | `session` | directory, session id, its spec id, the spec id the challenge yields for this epoch and candidate, whether they match, status, binary hash, commit, levels earned |
 | `audit` | the audit run by the verdict itself: `ok`, problems, records, verified, replays and how many reproduced, whether every run was replayed, and the SHA-256 of every session file |
 | `incumbent`, `candidate`, `control` | arm names and method ids; the control's A/A ratio and interval (`1.000 [1.000, 1.000]` for a deterministic method under shared seeds) |
-| `axes[]` | per axis: both means, `Σ candidate / Σ incumbent` over matched `(workload, round)` pairs, its interval, pairs, `better` / `worse` / `indistinguishable` / `unknown`, and whether the axis decides; `ops`, `memory`, `uncharged` and the three field axes are always reported, the field axes `unknown` unless every measured run of both arms carries `field_ops` |
+| `axes[]` | per axis: both means, `Σ candidate / Σ incumbent` over matched `(workload, round)` pairs, its interval, pairs, `better` / `worse` / `indistinguishable` / `unknown`, and whether the axis decides; `ops`, `memory` and `uncharged` always, and the three field axes when a measured run of either arm carries `field_ops` or the challenge names one — `unknown` unless every measured run of both arms carries it — so a verdict over a session that counted nothing re-derives as it always did |
 | `per_curve[]` | the ratio per size, the rows a scaling claim reads |
 | `fits` | both arms' `α` with intervals, and `exponent_moved` |
 | `stages[]` | per phase: each arm's share and the paired ratio — which sub-algorithm moved (§7) |
@@ -220,7 +220,7 @@ and across families. It is the `ops` axis.
 | `ops` | mean `S / √(π / 2A)` | `cost.total_gae`, `r`, `A` | decides |
 | `memory` | mean table entries per `√r` | the first of `inserts_uncharged`, `table_inserts_uncharged`, `table_entries`, `distinguished_points` the record carries | decides |
 | `uncharged` | mean `Σ *_uncharged` counters per `√r` | every counter the unit counts and does not price | reported; decides when a challenge names it |
-| `field_muls` | mean modular multiplications per `√r` | `field_ops.muls` | on a bound only when every verified run carries the block; on every verdict; decides when a challenge names it |
+| `field_muls` | mean modular multiplications per `√r` | `field_ops.muls` | on a bound only when every verified run carries the block; on a verdict when a run of either arm carries it or the challenge names it; decides when a challenge names it |
 | `field_sqrs` | mean modular squarings per `√r` | `field_ops.sqrs` | as `field_muls` |
 | `field_invs` | mean modular inversions per `√r` | `field_ops.invs` | as `field_muls` |
 
@@ -234,9 +234,12 @@ walks and tables on prime-field curves — and a bound without them has no such
 key at all, so the committed records fitted before the axes existed are
 unchanged. On a frontier an axis one entry lacks is left out of comparisons
 with it, as `memory` is for index calculus, and the page shows the columns in
-a domain only when some entry there has them. In a verdict they are reported
-always and `unknown` unless every measured run of both arms carries the block.
-They are not a unit: `ops` still decides in `ecbench.gae`, and a candidate
+a domain only when some entry there has them. A verdict carries them when a
+measured run of either arm counted them or the challenge names one, `unknown`
+unless every measured run of both arms carries the block, and deciding only
+when named; a session that counted nothing under a challenge that asked
+nothing gives the verdict it always gave, byte for byte. They are not a unit:
+`ops` still decides in `ecbench.gae`, and a candidate
 that is clearly better on `field_sqrs` and indistinguishable on `ops` has
 moved the primitive level, not the constant.
 

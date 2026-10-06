@@ -22,8 +22,11 @@
 //! fitted α intervals are disjoint across four or more sizes, `constant`
 //! otherwise when `ops` moved, and `primitive` when `ops` did not move but
 //! a field-operation axis (`field_muls`, `field_sqrs`, `field_invs`) did.
-//! Counted-but-unpriced work and the field-operation axes are reported
-//! beside the result and become axes only when the challenge says so.
+//! Counted-but-unpriced work is reported beside the result and decides only
+//! when the challenge says so; the field-operation axes are carried when a
+//! run of either arm counted them or the challenge names one, and decide
+//! only when named, so a verdict over a session that counted nothing is the
+//! verdict it always was.
 //!
 //! An admissible `advances` or `trade` verdict yields the candidate's
 //! bound with `improves_on` set, and the frontier is rebuilt from the
@@ -863,10 +866,14 @@ pub fn verdict(inputs: &VerdictInputs) -> Result<VerdictOutput, String> {
         .into(),
         decides: true,
     }];
-    // Memory and unpriced work as before; then the field-operation axes,
-    // reported always and unknown unless every measured run of both arms
-    // carries the block.  Their seeds are distinct from the first two
-    // axes' (`seed ^ name.len()`: 6 and 9), which stay as they were.
+    // Memory and unpriced work as before.  The field-operation axes ride
+    // on a verdict only when a measured run of either arm counted them or
+    // the challenge names one: a session that counted nothing under a
+    // challenge that asked nothing gives the verdict it always gave, so a
+    // committed verdict re-derives byte for byte.  Named but uncounted, an
+    // axis is `unknown` and decides nothing (unknown is not zero).  Their
+    // seeds are distinct from the first two axes' (`seed ^ name.len()`: 6
+    // and 9), which stay as they were.
     let mut reads: Vec<(&str, Box<dyn Fn(&Record) -> Option<f64>>, u64)> = vec![
         ("memory", Box::new(memory_entries), inputs.seed ^ 6),
         (
@@ -875,12 +882,24 @@ pub fn verdict(inputs: &VerdictInputs) -> Result<VerdictOutput, String> {
             inputs.seed ^ 9,
         ),
     ];
-    for (i, name) in FIELD_AXES.iter().enumerate() {
-        reads.push((
-            name,
-            Box::new(move |r: &Record| field_axis(r, name)),
-            inputs.seed ^ (11 + i as u64),
-        ));
+    let field_counted = recs.iter().any(|r| {
+        !r.warmup
+            && (r.arm == inputs.incumbent_arm || r.arm == inputs.candidate_arm)
+            && r.field_ops.is_some()
+    });
+    let field_named = ch
+        .acceptance
+        .axes
+        .iter()
+        .any(|a| FIELD_AXES.contains(&a.as_str()));
+    if field_counted || field_named {
+        for (i, name) in FIELD_AXES.iter().enumerate() {
+            reads.push((
+                name,
+                Box::new(move |r: &Record| field_axis(r, name)),
+                inputs.seed ^ (11 + i as u64),
+            ));
+        }
     }
     for (name, f, seed) in reads {
         let (known, ma, mb, ratio, ci, method, pairs) = paired_axis(

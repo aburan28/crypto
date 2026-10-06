@@ -1508,5 +1508,93 @@ fn field_operations_are_counted_bounded_and_judged() {
     let kb = read_json(&kout);
     let dims: Vec<&String> = kb["dimensions"].as_object().unwrap().keys().collect();
     assert_eq!(dims, vec!["memory", "ops", "uncharged"], "{dims:?}");
+
+    // A Koblitz challenge that names no field axis, judged on a session
+    // that counted none: the verdict carries exactly the axes it always
+    // carried, so a committed verdict re-derives under this binary.
+    let kdraft = dir.join("kdraft.json");
+    std::fs::write(
+        &kdraft,
+        r#"{
+  "label": "test: koblitz, no field axes",
+  "domain": {"problem": "ecdlp.single_target", "family": "koblitz", "target_kind": "planted",
+             "unit": "ecbench.gae", "tier": "toy",
+             "envelope": {"targets": 1, "precomputation": "none", "threads": 1}},
+  "incumbent": {"bound_id": null, "method": {"id": "rho.negation"}},
+  "workloads": {"curves": [{"kind": "koblitz", "a": 1, "n": 17},
+                           {"kind": "koblitz", "a": 0, "n": 19},
+                           {"kind": "koblitz", "a": 0, "n": 23},
+                           {"kind": "koblitz", "a": 1, "n": 29}],
+                "targets_per_curve": 2, "nonce": 5},
+  "measurement": {"rounds": 1, "warmup": 0, "isolation_required": "L0", "timeout_seconds": 60},
+  "acceptance": {"min_runs_per_size": 2}
+}"#,
+    )
+    .unwrap();
+    let kchallenge = dir.join("kchallenge.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "seal",
+        "--draft",
+        &s(&kdraft),
+        "--out",
+        &s(&kchallenge),
+    ]);
+    assert!(ok, "koblitz challenge seal: {err}");
+    let kspec1 = dir.join("kspec1.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "spec",
+        "--challenge",
+        &s(&kchallenge),
+        "--candidate",
+        r#"{"id":"bsgs.negation"}"#,
+        "--epoch",
+        "1",
+        "--out",
+        &s(&kspec1),
+    ]);
+    assert!(ok, "koblitz challenge spec: {err}");
+    let k1 = dir.join("k1");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&kspec1),
+        "--out",
+        &s(&k1),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "koblitz run k1: {err}");
+    let kv1 = dir.join("kverdict1.json");
+    let (_, _, err) = ecbench(&[
+        "challenge",
+        "verdict",
+        "--challenge",
+        &s(&kchallenge),
+        "--dir",
+        &s(&k1),
+        "--epoch",
+        "1",
+        "--replay-all",
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&kv1),
+    ]);
+    assert!(kv1.exists(), "koblitz verdict was not written: {err}");
+    let kv = read_json(&kv1);
+    assert_ne!(kv["outcome"], "inadmissible", "{}", kv["statement"]);
+    let names: Vec<&str> = kv["axes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|a| a["axis"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, vec!["ops", "memory", "uncharged"], "{names:?}");
+    assert!(!kv["statement"].as_str().unwrap().contains("field_"));
     let _ = std::fs::remove_dir_all(&dir);
 }

@@ -73,10 +73,11 @@ design is a measurement; it is not a frontier move.
    `primitive`: the group-operation count held and the field work behind it
    fell. A field axis decides only when the challenge's `acceptance.axes`
    names it (a cheaper formula is a claim on `field_sqrs`, so name it);
-   otherwise the three are reported beside the result and do not decide, and
-   they are `unknown` unless every run of both arms counted them, which today
-   means prime-field curves. `trade` is a new Pareto point, not a
-   replacement. `matches` is a null result and is still committed.
+   otherwise the three are reported, not deciding, whenever a run of either
+   arm counted them (prime-field curves today), and left out when nothing
+   counted them and nothing asked. Named but uncounted, an axis is `unknown`
+   and decides nothing. `trade` is a new Pareto point, not a replacement.
+   `matches` is a null result and is still committed.
    `inadmissible` names why; fix the cause, never the rule. Read `stages` to
    say which sub-algorithm moved, and `accounting` before claiming an advance
    that comes with more unpriced work.
