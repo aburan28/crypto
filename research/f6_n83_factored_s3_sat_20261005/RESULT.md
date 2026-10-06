@@ -93,3 +93,8 @@ raw solver outputs, verifier receipts and [SHA-256 manifest](SHA256SUMS)
 preserve the panel. Native XOR representation alone did not complete
 an ordinary n83 decomposition under these limits; F6 and end-to-end IC
 speedups remain unknown.
+
+The two 1,041,420-byte planted SAT model outputs are retained as
+byte-verified gzip files; [SAT_MODEL_HASHES.tsv](SAT_MODEL_HASHES.tsv)
+records each original SHA-256 and compressed SHA-256. The ordinary
+timeout outputs remain as their exact original files.
