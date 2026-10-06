@@ -12735,6 +12735,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-two-pass-router-round41-20261006 -->
+<!-- BEGIN p256-direct-address-round42-20261006 -->
+<section class="panel" id="p256-direct-address-round42-20261006">
+  <div class="panel-head">
+    <h2>P-256 direct addressing: storage collapses, replay dominates <span class="chip">stage measurement / negative</span></h2>
+    <p class="panel-summary">A fixed seen map and value table cut projected state to 557.31 GB, but exact two-pass replay is 2.496&times; slower than materialised radix, costs 26.55&times; its routing budget, and remains at least 1.036558&times; rho optimistically.</p>
+    <p>The measurement is for the round-33 known-log family on scaled dense tables. It does not transfer the separate degree-4 result for <code>FB1h2f8621cda105</code>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Fixed-universe representation boundary; projected full-table rows are not measured.</caption>
+    <thead><tr><th>Row</th><th class="n">Router additions / start</th><th class="n">Ratio to rho</th><th class="n">State</th><th class="n">Traffic</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Measured materialised reference</td><td class="n">3.557042</td><td class="n">1.013790</td><td class="n">35.65 MB</td><td class="n">167.77 MB</td><td>one request-generation pass; scaled 2<sup>20</sup> universe</td></tr>
+      <tr><td>Measured direct replay</td><td class="n">8.877771</td><td class="n">1.036558 router-only</td><td class="n">16.91 MB</td><td class="n">61.15 / 252.64 MB</td><td>semantic / cache-line models; two generation passes</td></tr>
+      <tr><td>Full table, 2<sup>38</sup> starts</td><td class="n">8.877771</td><td class="n">1.037096</td><td class="n">557.31 GB</td><td class="n">106.39 / 356.27 TB</td><td>optimistic stage projection; tier unmeasured</td></tr>
+      <tr><td>Full table, 2<sup>40</sup> starts</td><td class="n">8.877771</td><td class="n">1.036692</td><td class="n">557.31 GB</td><td class="n">423.87 TB / 1.412 PB</td><td>optimistic stage projection; tier unmeasured</td></tr>
+      <tr><td>Saturated limit</td><td class="n">8.877771</td><td class="n"><strong>1.036558</strong></td><td class="n">557.31 GB</td><td class="n">linear in starts</td><td>pair construction vanishes; replay does not</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exactness</span> nine toys, six load-one cells, four saturation cells, 1,395,284 negative controls; zero FP/FN</span>
+    <span><span class="chip">scaling</span> direct time exponent 1.1066 versus 1.0198 materialised; state exponent 1 in universe and 0 in starts</span>
+    <span><span class="chip">scope</span> no full-table timing, 138,031-row Dickson projection, sparse linear algebra, or unplanted relation</span>
+    <span><span class="chip">decision</span> storage gate passes; timing, degree, and relation gates fail or remain unset</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_direct_address_round42_20261006/RESULT.md</code>; result SHA-256 <code>82adf1c47c60a9004a83ac061d9a75ce908f3bb9c28f537260b43b7d5016aa2a</code></span>
+  </div>
+</section>
+<!-- END p256-direct-address-round42-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
