@@ -62,10 +62,11 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
         args.len() == 3 || args.len() == 4 || args.len() == 5,
-        "usage: probe planted K | ordinary OFFSET(0..3) K [core16|core16wide|cubic90]"
+        "usage: probe planted K | ordinary OFFSET(0..3) K [core16|core16wide|cubic90|cubic90all]"
     );
     let run_core16 = args.len() == 5 && (args[4] == "core16" || args[4] == "core16wide");
-    let run_cubic90 = args.len() == 5 && args[4] == "cubic90";
+    let run_cubic90 = args.len() == 5 && (args[4] == "cubic90" || args[4] == "cubic90all");
+    let all_cubic = args.len() == 5 && args[4] == "cubic90all";
     let wide_cap = args.len() == 5 && (args[4] == "core16wide" || run_cubic90);
     assert!(args.len() != 5 || run_core16 || run_cubic90);
     let k_arg = if run_core16 || run_cubic90 {
@@ -286,7 +287,11 @@ fn main() {
             .private_degree_three_after_quartic(
                 &source_variables[..k],
                 &certificate.unresolved_rows,
-                CANDIDATES_PER_ROW,
+                if all_cubic {
+                    usize::MAX
+                } else {
+                    CANDIDATES_PER_ROW
+                },
             )
             .expect("ordered exact quartic-unresolved rows");
         let mut cubic_hasher = blake3::Hasher::new();
@@ -301,6 +306,7 @@ fn main() {
             "{}",
             json!({
                 "phase":"private_cubic_certificate", "offset":offset, "k":k,
+                "candidate_limit":if all_cubic {"all"} else {"32"},
                 "status":"complete", "input_rows":cubic.input_rows,
                 "rows_with_degree_three":cubic.rows_with_degree_three,
                 "degree_three_occurrences":cubic.degree_three_occurrences,

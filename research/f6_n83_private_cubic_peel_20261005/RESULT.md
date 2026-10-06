@@ -39,3 +39,31 @@ consequences. There is no ordinary decomposition, complete F6 solver,
 one-target IC online interval, recovered target or paired rho run.
 The complete candidate ID and speedup remain unknown. All wall-time
 figures on this contended host are exploratory structural diagnostics.
+
+## Amendment 1: exact one-pass cubic ceiling
+
+[Amendment 1](AMENDMENT_1.md) was committed before running the
+all-candidate pass. It reproduced the frozen quartic certificate and
+counted **every** cubic monomial in the 15,822 surviving product rows
+against those rows and all 332 original equations. The 11,578,544 cubic
+term occurrences contained 1,161,168 distinct columns. Exactly
+**1,440** rows had a private cubic monomial, 721 more than the sampled
+pass. The exact one-pass residual is **14,382** rows, still above the
+2,000-row reduction gate. The exhaustive cubic witness digest was
+`48c06fe9143ab216cd9e985abde0699084b6defb17704f4bba45a317936bf38e`.
+No core reduction was run.
+
+Both release processes exited zero; the repeated planted control
+checked all 29,880 products and the full group sum. The wrapper's
+maximum sampled RSS was 1,239,952 KiB and the process-reported peak
+was 1,269,760,000 bytes, below the 7-GiB limit. The amended probe
+source SHA-256 was
+`e7b1b250e6948b1a5b20daf87234609b0272131aae41f55ac130c9031f7189ef`;
+the new frozen binary SHA-256 was
+`47aa0eed2f372c3f90f6c34f3291cee30b17e89ce1a39cd77bf8789a1e04ad6f`.
+The [amended runner](run_all.sh), [status](all_status.tsv),
+[RSS samples](all_rss.tsv), raw `all_*` JSONL/stderr and build log
+preserve this follow-on. The exact residual is a negative bound for
+**this single private-cubic pass after the sampled quartic pass**;
+further algebraic elimination or a more complete quartic certificate
+was not tested.
