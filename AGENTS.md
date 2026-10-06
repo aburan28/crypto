@@ -9,6 +9,20 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
+## Research searches must leave visual reports
+
+For every substantive search for new isogenies, curves, scalar rules,
+endomorphisms, or related ECDLP mechanisms, follow
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
+Deliver a source-linked report, an explanatory diagram, and a PDF
+containing the report and visual. Include negative and inconclusive findings.
+Update every affected canonical graph, chart, and rendered copy in the same
+change as a new verified finding or correction; record why a graph was left
+unchanged when the search yields no graphable result. Keep proposed routes and
+unverified rules visibly separate from proved or measured ones. This visual
+record supplements the evidence, curve-identity, scoreboard, and PR rules
+below; it does not promote a hypothesis or replace a verified run.
+
 ## Implementation language: no Python
 
 **Do not use Python for cryptographic research or performance work in this
