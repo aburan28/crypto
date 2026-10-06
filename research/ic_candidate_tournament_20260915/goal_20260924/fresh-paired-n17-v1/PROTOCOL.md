@@ -7,7 +7,9 @@ passed its independent data-only audit. No four-arm source publications,
 point card, target registration, four-arm result or isolated-host receipt
 exists under this protocol. The three earlier confirmation sets and every
 consumed controller remain closed. A stage control is never a complete
-one-target result.
+one-target result. The SAT arm has a validation-only source/build freeze and
+data-only publication path; its exact-built exporter parity and scientific
+one-use target controller remain admission gates.
 
 ## Entry gates and point custody
 

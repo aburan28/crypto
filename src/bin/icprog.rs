@@ -79,6 +79,10 @@ mod sat_control_publication;
 mod sat_query_law;
 #[path = "icprog/sat_source.rs"]
 mod sat_source;
+#[path = "icprog/sat_target_build.rs"]
+mod sat_target_build;
+#[path = "icprog/sat_target_custody.rs"]
+mod sat_target_custody;
 #[path = "icprog/stats.rs"]
 mod stats;
 #[path = "icprog/suite.rs"]
@@ -129,6 +133,51 @@ enum Comparison {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Freeze target-free SAT source, prepared exporter/CMS, and original logs; no target or solver run.
+    SatTargetFreeze {
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        preparation_binding: PathBuf,
+        #[arg(long)]
+        marked_cms: PathBuf,
+        #[arg(long)]
+        cargo: PathBuf,
+        #[arg(long)]
+        rustc: PathBuf,
+        #[arg(long)]
+        host_context: PathBuf,
+        #[arg(long)]
+        validation_only: bool,
+    },
+    /// Publish a target-free SAT build or scientific registration as a full archive.
+    SatTargetPublish {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        scientific: bool,
+    },
+    /// Independently replay a SAT publication as data, without executing it.
+    SatTargetReplay {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        scientific: bool,
+    },
     /// Freeze the complete native n17 target source/build; never runs a solve.
     TargetControlFreeze {
         #[arg(long, default_value = ".")]
@@ -919,6 +968,59 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::SatTargetFreeze {
+            root,
+            out,
+            config,
+            preparation_binding,
+            marked_cms,
+            cargo,
+            rustc,
+            host_context,
+            validation_only,
+        } => sat_target_build::freeze(sat_target_build::FreezeRequest {
+            root: &root,
+            out: &out,
+            config: &config,
+            preparation_binding: &preparation_binding,
+            marked_cms: &marked_cms,
+            cargo: &cargo,
+            rustc: &rustc,
+            host_context: &host_context,
+            validation_only,
+        }),
+        Command::SatTargetPublish {
+            capsule,
+            publication,
+            registration_sha256,
+            out,
+            scientific,
+        } => sat_target_custody::publish(
+            &capsule,
+            &publication,
+            &registration_sha256,
+            &out,
+            if scientific {
+                sat_target_custody::Kind::Scientific
+            } else {
+                sat_target_custody::Kind::Validation
+            },
+        ),
+        Command::SatTargetReplay {
+            publication,
+            registration_sha256,
+            out,
+            scientific,
+        } => sat_target_custody::replay(
+            &publication,
+            &registration_sha256,
+            &out,
+            if scientific {
+                sat_target_custody::Kind::Scientific
+            } else {
+                sat_target_custody::Kind::Validation
+            },
+        ),
         Command::TargetControlFreeze {
             root,
             out,
