@@ -44,6 +44,13 @@ create-only output tree. Retain raw stdout/stderr, exact stdin bytes and
 write-count/hash, startup/READY timestamps, PID and group-drain receipts,
 exit code, timeout flag and status for every role, including failures.
 Perform all solver work after the ongoing natural panel releases the host.
+The checked [build recipe](build-marked-cms.sh) also waits for that panel's
+original terminal and a passing, full-rank original audit. It creates a new
+output directory, extracts only the accepted archived source/dependencies,
+applies the pinned post-buffer patch, and retains compiler output and binary
+hashes. A successful build receipt says `BUILT_UNVALIDATED`; only the nine
+disclosed solver roles and a separate data-only replay can pass transport
+parity. The build recipe is never a target execution or speed measurement.
 
 The run passes transport parity only if all nine roles finish within their
 fixed watchdogs, all three roles for each point return the same recognized
