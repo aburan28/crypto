@@ -5390,6 +5390,69 @@
      "sources": [
       "docs/curves/sources/generated.json"
      ]
+   }
+  ]
+ },
+  {
+   "slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+   "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
+   "family": "binary",
+   "params": {
+    "m": 113,
+    "modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "b": "0xe8bee4d3e2260744188be0e9c723"
+   },
+   "model_json": "{\"a\":\"0x3088250ca6e7c7fe649ce85820f7\",\"b\":\"0xe8bee4d3e2260744188be0e9c723\",\"field\":\"f2m-113-99967757\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000201\",\"v\":\"1\"}",
+   "trace": -122610772499221213,
+   "order": "10384593717069655379671765157661406",
+   "j": "0x6942e38fc45c62366c09aa8204cd",
+   "end": "unk",
+   "aliases": [
+    "sect113r1"
+   ],
+   "standard_names": [
+    "sect113r1"
+   ],
+   "sources": [
+    "src/binary_ecc/curve.rs"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1N113Csect113r1hf529f17bd191",
+     "curve_uid": "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+     "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3",
+     "field": {
+      "characteristic": 2,
+      "degree": 113,
+      "representation": "polynomial",
+      "modulus_exponents": [
+       113,
+       9,
+       0
+      ],
+      "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+     },
+     "curve": {
+      "model": "binary Weierstrass",
+      "coefficients": [
+       1,
+       984342157317881800509153672175863,
+       0,
+       0,
+       4720643197658441292834747278018339
+      ],
+      "subgroup_order": "5192296858534827689835882578830703",
+      "cofactor": 2,
+      "generator": [
+       "0x9d73616f35f4ab1407d73562c10f",
+       "0xa52830277958ee84d1315ed31886"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "src/binary_ecc/curve.rs"
+     ]
     }
    ]
   },

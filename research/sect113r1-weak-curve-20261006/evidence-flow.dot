@@ -1,0 +1,187 @@
+digraph sect113r1_weak_curve_audit {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.25",
+    nodesep="0.48",
+    ranksep="0.58",
+    splines=polyline,
+    fontname="DejaVu Sans",
+    fontsize=12,
+    labelloc="t",
+    label="sect113r1 weak-curve audit — prospective evidence gates (no admitted run)"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#f8fafc",
+    color="#475569",
+    fontname="DejaVu Sans",
+    fontsize=9,
+    margin="0.12,0.08"
+  ];
+  edge [fontname="DejaVu Sans", fontsize=8, color="#475569", arrowsize=0.7];
+
+  source [
+    shape=box3d,
+    fillcolor="#dbeafe",
+    color="#1d4ed8",
+    label="VALID SOURCE CURVE\nsect113r1 / GF(2^113)\nICV1 …97df4ac6\nN=2n; candidate n prime\nALL CLAIMS PENDING ADMITTED CERTIFICATES"
+  ];
+
+  subgraph cluster_class {
+    label="Class-wide analytic lane";
+    color="#60a5fa";
+    penwidth=1.4;
+    style="rounded";
+
+    certs [
+      fillcolor="#eff6ff",
+      color="#2563eb",
+      label="Exact certificate gate\nfield irreducible; G order n\nn prime; trace; D_pi factors\nembedding degree; subfield traces"
+    ];
+    generic [
+      fillcolor="#eff6ff",
+      color="#2563eb",
+      label="Frozen 80-bit policy threshold\nexpected generic work ≈ 2^56.326\n95% birthday quantile ≈ 2^57.291"
+    ];
+    legacy [
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="Allowed analytic verdict after certification\nCLASS_WEAK_LEGACY_SIZE\nclass-wide order fact; not a new isogeny break"
+    ];
+
+    certs -> generic [color="#2563eb", penwidth=1.5, label="certified n"];
+    generic -> legacy [color="#b45309", penwidth=1.5, label="below frozen threshold"];
+  }
+
+  subgraph cluster_valid {
+    label="Valid isogenous-representative lane";
+    color="#22c55e";
+    penwidth=1.4;
+    style="rounded";
+
+    frob5 [
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="Candidate Frobenius mod 5\n(X-3)(X-4)\ntwo predicted rational kernel lines"
+    ];
+    kernel [
+      shape=diamond,
+      fillcolor="#fefce8",
+      color="#a16207",
+      label="Derive + certify psi_5 kernels\nnot expected coefficients"
+    ];
+    maps [
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="Two nonsingular codomains\nfull maps + separate duals\nsubgroup order and [5] composition replay"
+    ];
+    cost [
+      shape=diamond,
+      fillcolor="#fefce8",
+      color="#a16207",
+      label="Whole-path matched cost\nconstruct + map + attack\n+ recover + verify"
+    ];
+    transfer_only [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      label="If maps pass but no cheaper attack:\nVALID ISOGENY TRANSFER CONTROL\nnot representative weakness"
+    ];
+    representative [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      label="Only if a charged route wins:\nREPRESENTATIVE_WEAK / TRANSFER_SPEEDUP\nwith exact scope and uncertainty"
+    ];
+
+    frob5 -> kernel [color="#15803d", penwidth=1.4];
+    kernel -> maps [color="#15803d", penwidth=1.4, label="explicit h1,h2"];
+    maps -> cost [color="#15803d", penwidth=1.4];
+    cost -> transfer_only [color="#15803d", label="no win"];
+    cost -> representative [color="#b91c1c", penwidth=1.5, label="predeclared win"];
+  }
+
+  subgraph cluster_invalid {
+    label="Implementation-input lanes (not valid isogenous representatives)";
+    color="#c084fc";
+    penwidth=1.4;
+    style="rounded";
+
+    singular [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="SINGULAR CONTROL\nsame a, b=0, discriminant 0\nP=(a,0); candidate smooth-locus order q+1\nNO ICV1 / EC1 / curve UID"
+    ];
+    singular_order [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="Exact order + factor certificates\nBSGS on 3·227·48817·636190001\nCRT recovers fixed public demo scalar"
+    ];
+    low_api [
+      shape=diamond,
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="Attacker-controlled point reaches\nunchecked low-level multiplier\nand output is distinguishable?"
+    ];
+    impl [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      label="Scoped maximum verdict\nIMPLEMENTATION_WEAK\nconditional if wrapper exposure is open"
+    ];
+    reject [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      label="Checked-path control\noff-curve / subgroup rejection\nbefore secret multiplication"
+    ];
+
+    torsion [
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="NOMINAL WRONG-SUBGROUP CONTROL\norder-2 point T=(0,sqrt(b))\nraw result may reveal parity"
+    ];
+
+    singular -> singular_order [color="#7e22ce", penwidth=1.4];
+    singular_order -> low_api [color="#7e22ce", penwidth=1.4];
+    low_api -> impl [color="#b91c1c", penwidth=1.5, label="yes + exact replay"];
+    low_api -> reject [color="#15803d", penwidth=1.4, label="validated entry"];
+    torsion -> low_api [color="#b45309", label="subgroup probe"];
+  }
+
+  twist [
+    fillcolor="#fff7ed",
+    color="#c2410c",
+    label="QUADRATIC TWIST\ndifferent trace and order\ncandidate largest prime ≈ 2^71.99\ntwist-safety lane; NOT source isogeny class"
+  ];
+
+  open_search [
+    shape=note,
+    fillcolor="#ffffff",
+    color="#64748b",
+    label="Bounded walk rule\nreport exact visited set and routes\nno class-prevalence claim without mixing evidence\nzero hits => NO_WEAKNESS_FOUND_WITHIN_SCOPE only"
+  ];
+
+  source -> certs [color="#2563eb", penwidth=1.7, label="exact source arithmetic"];
+  source -> frob5 [color="#15803d", penwidth=1.7, label="valid 5-isogeny search"];
+  source -> singular [
+    style=dashed,
+    color="#dc2626",
+    fontcolor="#b91c1c",
+    penwidth=2,
+    label="same formulas only\nNOT an isogeny"
+  ];
+  source -> torsion [color="#b45309", penwidth=1.4, label="on-curve, outside <G>"];
+  source -> twist [
+    style=dashed,
+    color="#c2410c",
+    penwidth=1.6,
+    label="twist, different trace class"
+  ];
+  maps -> open_search [style=dotted, color="#64748b", label="optional wider walk"];
+
+  legend [
+    shape=note,
+    fillcolor="#ffffff",
+    color="#94a3b8",
+    label="Legend\nblue = exact class-wide arithmetic\ngreen = valid elliptic/isogeny transfer\npurple = singular algebra\norange = twist or subgroup input\nred dashed = forbidden equivalence inference\nall result gates are pending"
+  ];
+}

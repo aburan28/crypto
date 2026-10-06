@@ -67,7 +67,7 @@ nothing under another modulus.
 |:--|:--|
 | Koblitz `K_a`, `n < 64` | the least `x^n + low` with `low` odd of weight at most four that is irreducible (`koblitz_index_calculus::find_irreducible_sparse`) — what `KoblitzCurve::new` and `ic` build |
 | random binary curves (`ic_boundary::random_binary_instance`) | the same rule |
-| a standard or challenge curve | its published polynomial: ECC2K-95 `x^97+x^6+1`, ECC2K-130 `x^131+x^13+x^2+x+1`, sect163k1 `x^163+x^7+x^6+x^3+1`, and SEC 2's for the other `sect*k1` |
+| a standard or challenge curve | its published polynomial: ECC2K-95 `x^97+x^6+1`, ECC2K-130 `x^131+x^13+x^2+x+1`, sect113r1 `x^113+x^9+1`, sect163k1 `x^163+x^7+x^6+x^3+1`, and SEC 2's for the other `sect*` curves |
 | the m = 83 confidence gate (`AGENTS.md` §8a) | `x^83+x^45+x^2+x+1`, the polynomial §8a designates |
 | any other Koblitz degree `≥ 64` | the least sparse irreducible by the same rule, searched without the 64-bit cap |
 
