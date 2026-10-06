@@ -24,9 +24,14 @@ contains `sat-target-execute` and `sat-target-audit`.
    `--validation-registration-sha256`, `--exporter-controls`,
    `--exporter-probe`, and `--exporter-audit`. Use
    `host-context-scientific.json`. This freeze rejects a changed Git commit,
-   source inventory, parity result, or prepared-exporter binary. Save its new
-   external seal; publish and data-only replay it with `--scientific` before
-   any public point exists.
+   source inventory, parity result, or original validation-exporter bytes.
+   The scientific rebuild is retained separately as
+   `immutable/assets/bin/rebuilt-exporter-scientific`: capsule-specific source
+   paths make its executable bytes differ from the parity-tested validation
+   build. The worker is pinned to the exact original validation-built exporter,
+   copied only after full capsule, publication and raw-control replay. Save the
+   new external seal; publish and data-only replay it with `--scientific`
+   before any public point exists.
 4. The campaign must independently inspect this full archive and the other
    three source publications, then publish all four strict source descriptors.
    Only then may it draw one scalar-free `hash_to_subgroup_v1` point card. The

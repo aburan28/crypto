@@ -45,7 +45,7 @@ pub(super) struct FreezeRequest<'a> {
 fn scientific_control(
     request: &FreezeRequest<'_>,
     commit: &str,
-) -> Result<Option<(Value, Vec<u8>)>, String> {
+) -> Result<Option<(Value, Vec<u8>, Vec<u8>)>, String> {
     let supplied = [
         request.validation_publication.is_some(),
         request.validation_registration_sha256.is_some(),
@@ -86,7 +86,39 @@ fn scientific_control(
         target_math::parse(&bytes)? == checked,
         "SAT scientific exporter audit differs from independent data-only replay",
     )?;
-    Ok(Some((checked, bytes)))
+    // Release binaries embed their capsule-specific source path. Preserve the
+    // scientific rebuild separately, and select the exact validation-built
+    // executable whose original bytes passed the disclosed parity controls.
+    let header = load(&publication.join("PUBLICATION.json"))?;
+    let validation_root = Path::new(
+        header["capsule_root"]
+            .as_str()
+            .ok_or("SAT validation publication lacks original capsule root")?,
+    )
+    .canonicalize()
+    .map_err(|e| e.to_string())?;
+    require(
+        header["capsule_root"] == json!(validation_root),
+        "SAT validation publication original root is not canonical",
+    )?;
+    let original = capsule::check_capsule(&validation_root, seal)?;
+    require(
+        original.validation_only
+            && original.source_commit == commit
+            && original.source_manifest_sha256 == checked["source_manifest_sha256"]
+            && original.prepared_exporter_sha256 == checked["prepared_exporter_sha256"],
+        "SAT original validation capsule differs from parity publication",
+    )?;
+    verify(&validation_root, &original)?;
+    let exporter = read(
+        &validation_root.join("immutable/assets/bin/prepared-exporter"),
+        8 * 1024 * 1024,
+    )?;
+    require(
+        sha256(&exporter) == original.prepared_exporter_sha256,
+        "SAT original validation exporter changed after parity replay",
+    )?;
+    Ok(Some((checked, bytes, exporter)))
 }
 
 fn source_commit(root: &Path) -> Result<String, String> {
@@ -290,7 +322,7 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
         &control_dir.join("preparation-audit.json"),
         &preparation_audit,
     )?;
-    if let Some((_, bytes)) = &scientific {
+    if let Some((_, bytes, _)) = &scientific {
         native::create(&control_dir.join("exporter-parity-audit.json"), bytes)?;
     }
     let path = std::env::var("PATH").map_err(|e| e.to_string())?;
@@ -314,7 +346,7 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
     files::reject_ancestor_config(&source)?;
     let source_inventory = native::inventory(&source)?;
     let source_sha = canonical_sha(&source_inventory)?;
-    if let Some((checked, _)) = &scientific {
+    if let Some((checked, _, _)) = &scientific {
         require(
             checked["source_manifest_sha256"] == source_sha,
             "SAT scientific source manifest differs from exporter validation build",
@@ -329,7 +361,7 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
         "algorithm_flags":"none","hardware":{"os":"macos","architecture":"aarch64"},
         "marked_cms_sha256":MARKED_CMS_SHA,"marked_control_sha256":MARKED_AUDIT_SHA,
         "preparation_audit_sha256":ORIGINAL_PREPARATION_AUDIT_SHA});
-    if let Some((checked, bytes)) = &scientific {
+    if let Some((checked, bytes, _)) = &scientific {
         build["exporter_control_sha256"] = json!(sha256(bytes));
         build["validation_archive_sha256"] = checked["publication_archive_sha256"].clone();
     }
@@ -396,19 +428,30 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
         &target.join("release/examples/koblitz_pdp_export"),
         &assets.join("prepared-exporter"),
     )?;
-    let prepared_exporter_sha = sha256(&read(&assets.join("prepared-exporter"), 8 * 1024 * 1024)?);
-    if let Some((checked, _)) = &scientific {
+    let rebuilt_exporter_sha = sha256(&read(&assets.join("prepared-exporter"), 8 * 1024 * 1024)?);
+    if let Some((checked, _, exporter)) = &scientific {
+        files::executable_copy(
+            &assets.join("prepared-exporter"),
+            &assets.join("rebuilt-exporter-scientific"),
+        )?;
+        fs::write(assets.join("prepared-exporter"), exporter).map_err(|e| e.to_string())?;
         require(
-            checked["prepared_exporter_sha256"] == prepared_exporter_sha,
-            "SAT scientific exporter binary differs from disclosed exact-built parity",
+            checked["prepared_exporter_sha256"]
+                == sha256(&read(&assets.join("prepared-exporter"), 8 * 1024 * 1024)?),
+            "SAT selected scientific exporter differs from disclosed exact-built parity",
         )?;
     }
+    let prepared_exporter_sha = sha256(&read(&assets.join("prepared-exporter"), 8 * 1024 * 1024)?);
     save(
         &receipts.join("build-artifacts.json"),
         &json!({"schema_version":1,"scope":capsule::SCOPE,
             "worker_sha256":sha256(&read(&bin.join(capsule::WORKER),128*1024*1024)?),
             "icprog_sha256":sha256(&read(&bin.join("icprog"),128*1024*1024)?),
             "prepared_exporter_sha256":prepared_exporter_sha,
+            "rebuilt_exporter_sha256":scientific.as_ref().map(|_| rebuilt_exporter_sha),
+            "prepared_exporter_origin":if scientific.is_some() {
+                "parity-verified-original-validation-capsule"
+            } else { "this-validation-build" },
             "prepared_cms_sha256":MARKED_CMS_SHA,
             "build_command_receipt_sha256":sha256(&read(&receipts.join("build.receipt.json"),65536)?)}),
     )?;
@@ -426,7 +469,7 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
     save(&out.join("host-context.json"), &host)?;
     let validation_archive_sha256 = scientific
         .as_ref()
-        .map(|(checked, _)| {
+        .map(|(checked, _, _)| {
             checked["publication_archive_sha256"]
                 .as_str()
                 .ok_or_else(|| "verified SAT validation archive digest missing".to_string())
@@ -446,7 +489,7 @@ pub(super) fn freeze(request: FreezeRequest<'_>) -> Result<String, String> {
         auditor_sha256: sha256(&read(&bin.join("icprog"), 128 * 1024 * 1024)?),
         prepared_exporter_sha256: prepared_exporter_sha,
         prepared_cms_sha256: MARKED_CMS_SHA.into(),
-        exporter_control_sha256: scientific.as_ref().map(|(_, bytes)| sha256(bytes)),
+        exporter_control_sha256: scientific.as_ref().map(|(_, bytes, _)| sha256(bytes)),
         validation_archive_sha256,
         worker_build_identity: identity,
         runtime_environment: capsule::environment(),
@@ -581,6 +624,21 @@ pub(super) fn verify_from(
                 == sha256(&read(&receipts.join("build.receipt.json"), 65536)?),
         "SAT copied artifacts differ from frozen build receipt",
     )?;
+    if record.validation_only {
+        require(
+            artifacts["rebuilt_exporter_sha256"].is_null()
+                && (artifacts["prepared_exporter_origin"].is_null()
+                    || artifacts["prepared_exporter_origin"] == "this-validation-build"),
+            "SAT validation exporter origin differs",
+        )?;
+    } else {
+        require(
+            artifacts["prepared_exporter_origin"] == "parity-verified-original-validation-capsule"
+                && artifacts["rebuilt_exporter_sha256"]
+                    == record.immutable_files["assets/bin/rebuilt-exporter-scientific"]["sha256"],
+            "SAT scientific rebuilt/selected exporter custody differs",
+        )?;
+    }
     for name in ["vendor", "rustc", "cargo", "build", "worker-identity"] {
         let receipt = load(&receipts.join(format!("{name}.receipt.json")))?;
         let bytes = read(&receipts.join(format!("{name}.log")), 16 * 1024 * 1024)?;

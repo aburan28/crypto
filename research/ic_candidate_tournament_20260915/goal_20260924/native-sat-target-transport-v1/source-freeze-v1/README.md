@@ -21,7 +21,9 @@ source-byte and transport controls and a separate data-only audit. The
 validation registration remains validation-only. The scientific freeze now
 requires an independently replayed, exact-source validation publication and
 three-control exporter audit. It rejects a different source commit, source
-manifest or prepared-exporter binary. The one-use controller checks the
+manifest or original parity-tested prepared-exporter bytes. It retains its
+own path-specific rebuild separately and selects the exact validated exporter
+for the worker. The one-use controller checks the
 scientific publication and exact CMS source descriptor before it consumes the
 claim; its frozen audit rechecks runtime receipts and the five online phases
 as data. These new paths still need their own clean-commit validation capsule
