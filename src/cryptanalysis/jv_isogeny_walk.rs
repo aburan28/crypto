@@ -479,7 +479,6 @@ pub fn run_walk(
     }
 }
 
-
 // ── §17: the walk, rebuilt ───────────────────────────────────────────────
 //
 // `RESEARCH_COVER_DECOMPOSITION_LEDGER.md` §17, registered before this code:
@@ -518,13 +517,23 @@ impl WalkCtx {
             .expect("a non-residue of F_q");
         let z_odd = f.f.pow(&z, odd);
         f.reset_muls();
-        WalkCtx { f, q, s, odd, z_odd }
+        WalkCtx {
+            f,
+            q,
+            s,
+            odd,
+            z_odd,
+        }
     }
     /// `N_{F_q/F_p}(a) = a₀² − ω a₁²`: three products.
     fn norm_q_p(&self, a: &E2) -> u64 {
         let p = self.f.f.p;
         self.f.f.count_public(3);
-        sm(mm(a.0[0], a.0[0], p), mm(self.f.f.w, mm(a.0[1], a.0[1], p), p), p)
+        sm(
+            mm(a.0[0], a.0[0], p),
+            mm(self.f.f.w, mm(a.0[1], a.0[1], p), p),
+            p,
+        )
     }
     /// Euler's criterion in `F_p`, counted at one product per exponent bit
     /// and a half (square-and-multiply).
@@ -803,7 +812,6 @@ impl Curve2 {
         out
     }
 }
-
 
 fn isqrt_u128(n: u128) -> u128 {
     if n < 2 {
@@ -1238,8 +1246,7 @@ pub fn run_walk2(
                 .map(|r| r.first_component as f64)
                 .collect::<Vec<_>>(),
         ),
-        frac_first_component_weak: rows.iter().filter(|r| r.first_component_weak).count()
-            as f64
+        frac_first_component_weak: rows.iter().filter(|r| r.first_component_weak).count() as f64
             / rows.len().max(1) as f64,
         mean_components: mean(&rows.iter().map(|r| r.components as f64).collect::<Vec<_>>()),
         total_jumps,
@@ -1367,7 +1374,14 @@ mod tests {
                 };
                 assert!(c.weak_by_norms(&f));
                 // every ordering of the triple
-                let perms = [[0, 1, 2], [1, 2, 0], [2, 0, 1], [0, 2, 1], [1, 0, 2], [2, 1, 0]];
+                let perms = [
+                    [0, 1, 2],
+                    [1, 2, 0],
+                    [2, 0, 1],
+                    [0, 2, 1],
+                    [1, 0, 2],
+                    [2, 1, 0],
+                ];
                 for pm in perms {
                     let d = Curve2 {
                         e: [c.e[pm[0]], c.e[pm[1]], c.e[pm[2]]],
@@ -1409,7 +1423,10 @@ mod tests {
                     assert!(f.sqrt(&w, &mut rng).is_none());
                 }
             }
-            assert!(squares > 60 && squares < 140, "p = {p}: {squares} squares of 200");
+            assert!(
+                squares > 60 && squares < 140,
+                "p = {p}: {squares} squares of 200"
+            );
             // the fast root is cheaper than Tonelli–Shanks in F_{q³}
             let w = loop {
                 let w = f.random(&mut rng);
@@ -1436,7 +1453,11 @@ mod tests {
         let mut edges = 0;
         for _ in 0..30 {
             let c = random_curve(f, &mut rng);
-            let old: Vec<E6> = c.two_isogenies(f, &mut rng).iter().map(|m| m.j(f)).collect();
+            let old: Vec<E6> = c
+                .two_isogenies(f, &mut rng)
+                .iter()
+                .map(|m| m.j(f))
+                .collect();
             let new = c.two_edges(&ctx, None);
             let mut nj: Vec<E6> = new.iter().map(|e| e.curve.j(f)).collect();
             let mut oj = old.clone();
@@ -1475,8 +1496,16 @@ mod tests {
         for _ in 0..40 {
             let c = random_curve(f, &mut rng);
             // ℓ = 3: the same j-set as the old three_isogenies
-            let mut oj: Vec<E6> = c.three_isogenies(f, &mut rng).iter().map(|m| m.j(f)).collect();
-            let mut nj: Vec<E6> = c.ell_targets(&ctx, 3, &mut rng).iter().map(|m| m.j(f)).collect();
+            let mut oj: Vec<E6> = c
+                .three_isogenies(f, &mut rng)
+                .iter()
+                .map(|m| m.j(f))
+                .collect();
+            let mut nj: Vec<E6> = c
+                .ell_targets(&ctx, 3, &mut rng)
+                .iter()
+                .map(|m| m.j(f))
+                .collect();
             oj.sort();
             oj.dedup();
             nj.sort();
@@ -1486,12 +1515,22 @@ mod tests {
                 for t in c.ell_targets(&ctx, *ell, &mut rng) {
                     counts[i] += 1;
                     // the dual ℓ-isogeny of the image leads back to the start's class
-                    let back: Vec<E6> = t.ell_targets(&ctx, *ell, &mut rng).iter().map(|m| m.j(f)).collect();
-                    assert!(back.contains(&c.j(f)), "ℓ = {ell}: no dual back, {c:?} -> {t:?}");
+                    let back: Vec<E6> = t
+                        .ell_targets(&ctx, *ell, &mut rng)
+                        .iter()
+                        .map(|m| m.j(f))
+                        .collect();
+                    assert!(
+                        back.contains(&c.j(f)),
+                        "ℓ = {ell}: no dual back, {c:?} -> {t:?}"
+                    );
                 }
             }
         }
-        assert!(counts[0] >= 5 && counts[1] >= 3 && counts[2] >= 2, "{counts:?}");
+        assert!(
+            counts[0] >= 5 && counts[1] >= 3 && counts[2] >= 2,
+            "{counts:?}"
+        );
     }
 
     #[test]
@@ -1500,15 +1539,26 @@ mod tests {
             let r = run_walk2(p, 1, trials, 3 * p * p, &[3, 5, 7], 1000, false);
             // every walk ends found, capped or exhausted; at these sizes many
             // closures hold no weak curve, so exhaustion is common
-            assert_eq!(r.found + r.capped + r.exhausted + r.start_weak - r.rows.iter().filter(|t| t.start_weak && t.found).count(), trials, "{r:?}");
+            assert_eq!(
+                r.found + r.capped + r.exhausted + r.start_weak
+                    - r.rows.iter().filter(|t| t.start_weak && t.found).count(),
+                trials,
+                "{r:?}"
+            );
             assert!(r.found >= 2, "p = {p}: found {} of {}", r.found, r.trials);
-            assert!(r.weak_fraction_times_q > 1.0 && r.weak_fraction_times_q < 6.0, "{}", r.weak_fraction_times_q);
+            assert!(
+                r.weak_fraction_times_q > 1.0 && r.weak_fraction_times_q < 6.0,
+                "{}",
+                r.weak_fraction_times_q
+            );
             assert!(r.c_curve < 20_000.0, "p = {p}: c_curve {}", r.c_curve);
             for t in &r.rows {
-                assert!(t.order % 4 == 0 && t.trace.unsigned_abs() <= 2 * (p as u128).pow(3), "{t:?}");
+                assert!(
+                    t.order % 4 == 0 && t.trace.unsigned_abs() <= 2 * (p as u128).pow(3),
+                    "{t:?}"
+                );
             }
         }
-    }
     }
 
     #[test]
