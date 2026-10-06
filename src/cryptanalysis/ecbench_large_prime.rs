@@ -6,8 +6,9 @@
 //! allocation when `max_states` is too small.  In particular, `m = n - 1`
 //! means exactly that; it is never replaced by a cheaper decomposition.
 
-use std::collections::{BTreeMap, HashMap};
-use std::fs;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 use std::time::Instant;
 
@@ -29,12 +30,20 @@ use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
 pub const MANIFEST_SCHEMA: &str = "ecbench.curve-corpus/v1";
+pub const MAX_MANIFEST_BYTES: u64 = 16 * 1024 * 1024;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CorpusManifest {
     #[serde(default)]
     pub schema: Option<String>,
     pub families: Vec<CorpusFamily>,
+}
+
+/// The parsed corpus and the identity of the exact bytes that supplied it.
+pub struct LoadedManifest {
+    pub manifest: CorpusManifest,
+    pub sha256: String,
+    pub bytes: usize,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -107,12 +116,9 @@ pub struct ValidationFacts {
     pub checks: Vec<String>,
 }
 
-/// Parse the external corpus without accepting a silently different shape.
-pub fn load_manifest(path: &Path) -> Result<CorpusManifest, String> {
-    let text = fs::read_to_string(path)
-        .map_err(|e| format!("read corpus manifest {}: {e}", path.display()))?;
+fn parse_manifest(bytes: &[u8]) -> Result<CorpusManifest, String> {
     let manifest: CorpusManifest =
-        serde_json::from_str(&text).map_err(|e| format!("parse corpus manifest: {e}"))?;
+        serde_json::from_slice(bytes).map_err(|e| format!("parse corpus manifest: {e}"))?;
     if manifest.families.is_empty() {
         return Err("corpus manifest contains no families".into());
     }
@@ -121,7 +127,49 @@ pub fn load_manifest(path: &Path) -> Result<CorpusManifest, String> {
             return Err(format!("unsupported corpus schema `{schema}`"));
         }
     }
+    let mut ids = BTreeSet::new();
+    for family in &manifest.families {
+        if family.id.trim().is_empty() {
+            return Err("corpus manifest contains an empty family id".into());
+        }
+        if !ids.insert(family.id.as_str()) {
+            return Err(format!(
+                "corpus manifest contains duplicate family id `{}`",
+                family.id
+            ));
+        }
+    }
     Ok(manifest)
+}
+
+/// Parse the external corpus and retain the identity of the bytes read.
+pub fn load_manifest_with_source(path: &Path) -> Result<LoadedManifest, String> {
+    let file =
+        File::open(path).map_err(|e| format!("read corpus manifest {}: {e}", path.display()))?;
+    let mut bytes = Vec::new();
+    file.take(MAX_MANIFEST_BYTES + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|e| format!("read corpus manifest {}: {e}", path.display()))?;
+    if bytes.len() as u64 > MAX_MANIFEST_BYTES {
+        return Err(format!(
+            "corpus manifest {} exceeds the {} byte limit",
+            path.display(),
+            MAX_MANIFEST_BYTES
+        ));
+    }
+    let sha256 = hex::encode(crate::hash::sha256::sha256(&bytes));
+    let manifest = parse_manifest(&bytes)?;
+    Ok(LoadedManifest {
+        manifest,
+        sha256,
+        bytes: bytes.len(),
+    })
+}
+
+/// Parse an external corpus. Call [`load_manifest_with_source`] when a report
+/// must retain the input's content identity.
+pub fn load_manifest(path: &Path) -> Result<CorpusManifest, String> {
+    Ok(load_manifest_with_source(path)?.manifest)
 }
 
 /// Construct an exact explicit binary instance and check every fact that can
@@ -895,4 +943,23 @@ fn solve_with_verification(
         solve_wall_ns: start.elapsed().as_nanos() as u64,
         relation_samples: samples,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_manifest;
+
+    const SMALL_MANIFEST: &[u8] =
+        include_bytes!("../../tests/fixtures/ecbench_manifest_small.json");
+
+    #[test]
+    fn manifest_rejects_duplicate_family_ids() {
+        let mut value: serde_json::Value = serde_json::from_slice(SMALL_MANIFEST).unwrap();
+        let families = value["families"].as_array_mut().unwrap();
+        let duplicate = families[0].clone();
+        families.push(duplicate);
+        let encoded = serde_json::to_vec(&value).unwrap();
+        let error = parse_manifest(&encoded).unwrap_err();
+        assert!(error.contains("duplicate family id `koblitz-n11-l4`"));
+    }
 }

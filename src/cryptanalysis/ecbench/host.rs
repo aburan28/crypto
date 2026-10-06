@@ -74,8 +74,19 @@ pub struct BuildFacts {
     pub binary_path: Option<String>,
     pub binary_sha256: Option<String>,
     pub git_commit: Option<String>,
-    /// `git status --porcelain` was nonempty.
+    /// Whether the selected source tree was dirty, as declared at build time
+    /// or observed in the runtime-worktree fallback.
     pub git_dirty: Option<bool>,
+    /// How `git_commit` was obtained: a compile-time input or a runtime
+    /// worktree fallback used by unbound developer builds.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub git_commit_source: Option<String>,
+    /// The worktree found beside the executable at capture time. This is
+    /// diagnostic only and never overrides embedded build provenance.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub runtime_git_commit: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub runtime_git_dirty: Option<bool>,
     /// Built with debug assertions: an unoptimised build times nothing.
     pub debug_assertions: bool,
     pub target_os: String,
@@ -339,6 +350,19 @@ pub fn is_virtual(s: &StableFacts) -> Option<bool> {
     None
 }
 
+fn select_git_facts(
+    embedded_commit: Option<&str>,
+    embedded_dirty: Option<bool>,
+    runtime_commit: Option<String>,
+    runtime_dirty: Option<bool>,
+) -> (Option<String>, Option<bool>, bool) {
+    if let Some(commit) = embedded_commit {
+        (Some(commit.to_owned()), embedded_dirty, true)
+    } else {
+        (runtime_commit, runtime_dirty, false)
+    }
+}
+
 fn build_facts() -> BuildFacts {
     let exe = std::env::current_exe().ok();
     let binary_sha256 = exe
@@ -357,8 +381,22 @@ fn build_facts() -> BuildFacts {
         full.extend_from_slice(args);
         run("git", &full)
     };
-    let git_commit = git(&["rev-parse", "HEAD"]);
-    let git_dirty = git(&["status", "--porcelain", "--untracked-files=no"]).map(|s| !s.is_empty());
+    let runtime_git_commit = git(&["rev-parse", "HEAD"]);
+    let runtime_git_dirty =
+        git(&["status", "--porcelain", "--untracked-files=no"]).map(|s| !s.is_empty());
+    let (git_commit, git_dirty, embedded) = select_git_facts(
+        crate::build_provenance::git_commit(),
+        crate::build_provenance::git_dirty(),
+        runtime_git_commit.clone(),
+        runtime_git_dirty,
+    );
+    let git_commit_source = if embedded {
+        crate::build_provenance::source().map(str::to_owned)
+    } else {
+        runtime_git_commit
+            .as_ref()
+            .map(|_| "runtime_worktree".to_owned())
+    };
     let build_env = [
         "RUSTFLAGS",
         "CARGO_ENCODED_RUSTFLAGS",
@@ -374,6 +412,9 @@ fn build_facts() -> BuildFacts {
         binary_sha256,
         git_commit,
         git_dirty,
+        git_commit_source,
+        runtime_git_commit,
+        runtime_git_dirty,
         debug_assertions: cfg!(debug_assertions),
         target_os: std::env::consts::OS.into(),
         target_arch: std::env::consts::ARCH.into(),
@@ -517,5 +558,37 @@ mod tests {
         assert!(a.env_class_id.starts_with("ECBENV2h"));
         assert_eq!(recompute_class(&a).unwrap(), a.env_class_id);
         assert!(!a.stable.os.is_empty());
+    }
+
+    #[test]
+    fn embedded_commit_wins_over_runtime_worktree() {
+        let selected = select_git_facts(
+            Some("1111111111111111111111111111111111111111"),
+            Some(false),
+            Some("2222222222222222222222222222222222222222".into()),
+            Some(true),
+        );
+        assert_eq!(
+            selected.0.as_deref(),
+            Some("1111111111111111111111111111111111111111")
+        );
+        assert_eq!(selected.1, Some(false));
+        assert!(selected.2);
+    }
+
+    #[test]
+    fn unbound_build_falls_back_to_runtime_worktree() {
+        let selected = select_git_facts(
+            None,
+            None,
+            Some("2222222222222222222222222222222222222222".into()),
+            Some(true),
+        );
+        assert_eq!(
+            selected.0.as_deref(),
+            Some("2222222222222222222222222222222222222222")
+        );
+        assert_eq!(selected.1, Some(true));
+        assert!(!selected.2);
     }
 }

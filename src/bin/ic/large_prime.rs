@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Args;
 use crypto_lib::cryptanalysis::ecbench_large_prime::{
-    import_family, load_manifest, solve, SolveConfig,
+    import_family, load_manifest_with_source, solve, SolveConfig,
 };
 use serde_json::{json, Value};
 
@@ -41,7 +41,11 @@ pub struct LargePrimeArgs {
 }
 
 pub fn run(args: LargePrimeArgs) -> Result<Value, String> {
-    let manifest = load_manifest(&args.manifest)?;
+    let loaded = load_manifest_with_source(&args.manifest)?;
+    let manifest_sha256 = loaded.sha256;
+    let manifest_bytes = loaded.bytes;
+    let manifest_schema = loaded.manifest.schema.clone();
+    let manifest = loaded.manifest;
     let wanted = args
         .family
         .clone()
@@ -70,6 +74,9 @@ pub fn run(args: LargePrimeArgs) -> Result<Value, String> {
             "operation": "large-prime",
             "status": "checks_passed",
             "manifest": args.manifest,
+            "manifest_sha256": manifest_sha256,
+            "manifest_bytes": manifest_bytes,
+            "manifest_schema": manifest_schema,
             "battery": battery,
             "run": Value::Null,
         }));
@@ -113,6 +120,9 @@ pub fn run(args: LargePrimeArgs) -> Result<Value, String> {
         "operation": "large-prime",
         "status": status,
         "manifest": args.manifest,
+        "manifest_sha256": manifest_sha256,
+        "manifest_bytes": manifest_bytes,
+        "manifest_schema": manifest_schema,
         "battery": battery,
         "run": {
             "family": imported.id,
