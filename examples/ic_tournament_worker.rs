@@ -93,6 +93,7 @@ struct Config {
     factor_base_cube_root: bool,
     factor_base: Option<FactorBaseSpec>,
     groebner_degree: u32,
+    direct_fused_pack: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -111,6 +112,7 @@ impl Default for Config {
             factor_base_cube_root: false,
             factor_base: None,
             groebner_degree: 3,
+            direct_fused_pack: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -677,6 +679,10 @@ fn run_prepared_target(
     let solver = IndividualLogSolver::new(c, fb, &table, opts, None)
         .ok_or("prepared column coverage differs from the projected base")?;
     let dispatch = solver.admission_dispatch();
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f4_direct_fused_pack(
+        job.config.direct_fused_pack,
+    );
+    let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
@@ -686,6 +692,7 @@ fn run_prepared_target(
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
     let f4_stage_profile = crypto_lib::cryptanalysis::koblitz_groebner::f4_profile();
+    let layout_after = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     let verified = replay == Some(true);
     Ok(
         json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
@@ -702,6 +709,8 @@ fn run_prepared_target(
             "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}],
         "online_timing_schema":1,"online_wall_ns":online_ns,
         "f4_stage_profile":f4_stage_profile,
+        "f4_layout_hits_online":layout_after.0-layout_before.0,
+        "f4_layout_misses_online":layout_after.1-layout_before.1,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
         "scalar_replay_included":replay.is_some(),"scalar_verified":verified,
         "elapsed_seconds":start.elapsed().as_secs_f64()}),
