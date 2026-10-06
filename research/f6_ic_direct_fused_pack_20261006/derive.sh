@@ -60,6 +60,18 @@ jq -e -s '
       ([.[].target_point]|unique|length) == 1 and
       ([.[].recovered_scalar]|unique|length) == 1 and
       ([.[].attempts]|unique|length) == 1
+    )) and
+    (group_by(.target,.repetition,(.arm|sub("_direct$";""))) | all(.[];
+      length == 2 and
+      ([.[].direct_fused_pack]|sort) == [false,true] and
+      ([.[].reductions]|unique|length) == 1 and
+      ([.[].geometric_additions]|unique|length) == 1 and
+      ([.[].f4_layout_hits_online]|unique|length) == 1 and
+      ([.[].f4_layout_misses_online]|unique|length) == 1 and
+      ([.[].f4_stage_profile.calls]|unique|length) == 1 and
+      ([.[].f4_stage_profile.rows]|unique|length) == 1 and
+      ([.[].f4_stage_profile.cols]|unique|length) == 1 and
+      ([.[].f4_stage_profile.word_ops]|unique|length) == 1
     ))
 ' "$rows" > "$out/DERIVATION_CHECK.json"
 shasum -a 256 "$rows" "$out/DERIVATION_CHECK.json" > "$out/DERIVED_SHA256SUMS"
