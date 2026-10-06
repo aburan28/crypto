@@ -349,6 +349,10 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
+#    The Rust port takes the same arguments and writes the same bytes; CI's
+#    merge-parity job holds the two together until merge.py is retired:
+cargo build --release --bin ecc2k-merge    # from the repository root
+../../target/release/ecc2k-merge --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 
 # 6. done
 ./fleet.sh down                  # workers checkpoint on the way out
