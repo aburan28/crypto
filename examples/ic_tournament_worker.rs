@@ -677,6 +677,7 @@ fn run_prepared_target(
     let solver = IndividualLogSolver::new(c, fb, &table, opts, None)
         .ok_or("prepared column coverage differs from the projected base")?;
     let dispatch = solver.admission_dispatch();
+    crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
     let answer = solver.solve_observed(q);
@@ -684,6 +685,7 @@ fn run_prepared_target(
     let replay = scalar_replay(c, q, answer.log.as_ref());
     let online_ns = online_start.elapsed().as_nanos();
     measurement::end_online();
+    let f4_stage_profile = crypto_lib::cryptanalysis::koblitz_groebner::f4_profile();
     let verified = replay == Some(true);
     Ok(
         json!({"schema_version":1,"query_schema_version":1,"mode":"ic",
@@ -699,6 +701,7 @@ fn run_prepared_target(
         "solutions":[{"index":0,"recovered":answer.log.as_ref().map(ToString::to_string),
             "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}],
         "online_timing_schema":1,"online_wall_ns":online_ns,
+        "f4_stage_profile":f4_stage_profile,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
         "scalar_replay_included":replay.is_some(),"scalar_verified":verified,
         "elapsed_seconds":start.elapsed().as_secs_f64()}),

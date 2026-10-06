@@ -4345,6 +4345,13 @@ pub struct SolveStats {
     /// Exact pair-sum hash lookups made by the opt-in IC node oracle.
     #[serde(default)]
     pub geometric_pair_index_lookups: u64,
+    /// Calls to the exact IC node oracle. Profiling diagnostics only.
+    #[serde(default)]
+    pub geometric_oracle_calls: u64,
+    /// Time inside the exact IC node oracle, including its witness replay.
+    /// This is nested in target PDP and is not a sixth online phase.
+    #[serde(default)]
+    pub geometric_oracle_ns: u64,
     /// The IC gate could not prove that its coordinate encoding matched
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]
