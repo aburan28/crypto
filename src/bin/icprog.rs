@@ -41,6 +41,8 @@ mod f5_control_publication;
 mod f5_target;
 #[path = "icprog/identity.rs"]
 mod identity;
+#[path = "icprog/marked_cms_audit.rs"]
+mod marked_cms_audit;
 #[path = "icprog/oracle.rs"]
 mod oracle;
 #[path = "icprog/ordinary_build.rs"]
@@ -257,6 +259,19 @@ enum Command {
         card: PathBuf,
         #[arg(long)]
         registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Independently replay the nine disclosed CMS transport roles as data.
+    MarkedCmsTransportAudit {
+        #[arg(long)]
+        root: PathBuf,
+        #[arg(long)]
+        accepted_cms: PathBuf,
+        #[arg(long)]
+        marked_build: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
         #[arg(long)]
         out: PathBuf,
     },
@@ -1061,6 +1076,13 @@ fn main() -> ExitCode {
             registration_sha256,
             out,
         } => target_sat_transport::run(&capsule, &execution, &card, &registration_sha256, &out),
+        Command::MarkedCmsTransportAudit {
+            root,
+            accepted_cms,
+            marked_build,
+            execution,
+            out,
+        } => marked_cms_audit::run(&root, &accepted_cms, &marked_build, &execution, &out),
         Command::TargetCardGenerate { publications, out } => {
             target_card::generate(&publications, &out)
         }

@@ -57,6 +57,12 @@ fixed source hashes and expected classes, bounded process groups, exact stdin
 READY markers, and retains every role's raw output and watchdog/drain receipt.
 It can report provisional parity only; its result explicitly requires a
 separate data-only replay before transport admission.
+The `icprog marked-cms-transport-audit` command is that data-only replay. It
+checks the original nine role receipts, stdout/stderr and PID ledgers, exact
+READY-before-stdin records, disclosed source hashes, native exit/status,
+source-valid SAT models, and full-point geometry. It runs no solver. A pass
+admits only the disclosed transport parity; it still sets target execution,
+natural yield and online speedup to unadmitted or null.
 
 The run passes transport parity only if all nine roles finish within their
 fixed watchdogs, all three roles for each point return the same recognized
