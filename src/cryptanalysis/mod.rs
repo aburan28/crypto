@@ -230,6 +230,7 @@ pub mod native_signed_mitm;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod orbit_pair_table;
+pub mod p192_cm_norm_sieve;
 pub mod p192_cm_relation_search;
 pub mod p192_interval_bsgs;
 pub mod p192_native;
