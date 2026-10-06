@@ -10,13 +10,21 @@ paired update; compare their SHA-256 before merging either update.
 
 Run `python3 docs/curves/ic/validate_semantics.py` to check the mirrored YAML,
 JSON Schemas, exact EC1/UID hashes, ICV1 crosswalk, trait statuses and typed
-link references. `mirror-lock.json` pins the three mirrored source files.
+link references. `mirror-lock.json` pins the four mirrored source files.
 The `ic-semantic-metadata` CI job runs these checks and compares their bytes
 and the validator implementation against cryptanalysis `main`; its daily run
 also detects later mirror drift. Keep the negative tests mirrored as well.
 Merge a cryptanalysis source change before updating this mirror. The check
 validates metadata and evidence references, not mathematical certificates or
 measured performance.
+
+The mirrored [scalar multiplication policy](SCALAR_MULTIPLICATION.md) and
+[schema](scalar-multiplication.schema.json) define the exact method choice for
+new `ic-candidate/2` manifests in cryptanalysis. An endomorphism conductor
+does not prove a usable scalar action; a verified map, subgroup eigenvalue,
+and replay are required. Crypto keeps the same action inventory and schema so
+its curve crosswalk can distinguish unknown capability from a measured
+algorithm choice.
 
 `ICV1` is crypto's model/display name. `EC1` plus the full
 `urn:ec-record:1:sha256:...` UID identifies the field representation,
