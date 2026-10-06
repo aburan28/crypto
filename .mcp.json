@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "conductor": {
+      "args": [
+        "--project",
+        "crypto"
+      ],
+      "command": "conductor-mcp",
+      "type": "stdio"
+    }
+  }
+}
