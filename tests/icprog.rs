@@ -172,7 +172,7 @@ fn holdouts(round_dir: &Path, sizes: &[&str], seeds: &str, first: &str, check: b
     cmd.output().expect("icprog runs")
 }
 
-/// R02b's and R05's holdouts were drawn by suite v1's `make_suite.py`
+/// The rounds' holdouts were drawn by suite v1's `make_suite.py`
 /// construction; `icprog holdouts --check` must re-derive every file and
 /// each `SHA256SUMS` byte for byte, as it must every suite v1 row.
 #[test]
@@ -189,6 +189,12 @@ fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
             &["0,53", "1,59", "0,61"][..],
             "210,211,212,213",
             "111",
+        ),
+        (
+            "R07-main-head",
+            &["0,53", "1,59", "0,61"][..],
+            "214,215,216,217",
+            "119",
         ),
     ] {
         let out = holdouts(&round(dir), sizes, seeds, first, true);
