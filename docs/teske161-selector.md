@@ -28,7 +28,7 @@ For uniformly sampled `u` in `K`, the selector applies one of these linear maps:
 | `W1` | `1+sigma^2+sigma^3+sigma^4` | `1+sigma^2+sigma^3` |
 | `W2` | `1+sigma+sigma^2+sigma^4` | `1+sigma+sigma^3` |
 
-These maps are surjective onto the respective 69-dimensional spaces. The selector rejects zero. For genus 8, it also samples a nonzero `W0` component by the relative trace `sum_i sigma^i(u)` for i=0..6; genus 7 uses `W0=0`. It then checks that `b` is in `W0 + (Wi minus zero)`, computes Teske's actual magic number as the `GF(2)`-rank of the **pairs** ((1,\sqrt{\sigma^i`b`})), and checks the relative trace of `b`. Theorem 1 makes trace zero equivalent to genus 7 for these candidates; otherwise the genus is 8.
+These maps are surjective onto the respective 69-dimensional spaces. The selector rejects zero. For genus 8, it also samples a nonzero `W0` component by the relative trace `sum_i sigma^i(u)` for i=0..6; genus 7 uses `W0=0`. It then checks that `b` is in `W0 + (Wi minus zero)`, computes Teske's actual magic number as the `GF(2)`-rank of the **pairs** `(1, sqrt(sigma^i(b)))`, and checks the relative trace of `b`. Theorem 1 makes trace zero equivalent to genus 7 for these candidates; otherwise the genus is 8.
 
 **Existing generic-helper caveat:** `ec_trapdoor::magic_number_full` ranks only the square-root orbit (plus a separate coefficient contribution). Its `ghs_genus_with_type` uses the orbit length as its type test. Those are not Teske's augmented-pair rank and relative-trace branch, so `ghs_screen` can report a different genus for the very same 161-bit coefficient. Use the selector's paper-specific checks for this construction; reconcile the general helper with a separate mathematical audit before treating its genus as exact here.
 
