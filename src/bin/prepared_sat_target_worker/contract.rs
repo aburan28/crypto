@@ -108,6 +108,8 @@ pub struct Registration {
     pub host_context_sha256: String,
     pub worker_sha256: String,
     pub auditor_sha256: String,
+    pub prepared_exporter_sha256: String,
+    pub prepared_cms_sha256: String,
     pub worker_build_identity: Value,
     pub runtime_environment: BTreeMap<String, String>,
     pub preparation: PreparationBinding,
@@ -139,6 +141,8 @@ pub fn registration(capsule: &Path, external: &str) -> Result<Registration, Stri
                 &record.host_context_sha256,
                 &record.worker_sha256,
                 &record.auditor_sha256,
+                &record.prepared_exporter_sha256,
+                &record.prepared_cms_sha256,
                 &p.registration_sha256,
                 &p.auditor_sha256,
                 &p.producer_sha256,
@@ -177,20 +181,22 @@ pub fn check_capsule(capsule: &Path, external: &str) -> Result<Registration, Str
             )?) == record.auditor_sha256,
         "SAT target source or executable binding differs",
     )?;
-    check_roles(capsule)?;
+    check_roles(capsule, &record)?;
     Ok(record)
 }
-pub fn check_roles(capsule: &Path) -> Result<(), String> {
+pub fn check_roles(capsule: &Path, record: &Registration) -> Result<(), String> {
     native::require(
         sha256(&native::read(
-            &capsule.join("immutable/assets/bin/cms"),
-            4 * 1024 * 1024,
-        )?) == native::CMS_SHA
+            &capsule.join("immutable/assets/bin/prepared-cms"),
+            16 * 1024 * 1024,
+        )?) == record.prepared_cms_sha256
             && sha256(&native::read(
-                &capsule.join("immutable/assets/bin/exporter"),
-                2 * 1024 * 1024,
-            )?) == native::EXPORTER_SHA,
-        "SAT target native role binary differs",
+                &capsule.join("immutable/assets/bin/prepared-exporter"),
+                8 * 1024 * 1024,
+            )?) == record.prepared_exporter_sha256
+            && record.prepared_cms_sha256 != native::CMS_SHA
+            && record.prepared_exporter_sha256 != native::EXPORTER_SHA,
+        "SAT target prepared role binary differs from frozen pin",
     )
 }
 #[derive(Clone, Deserialize, Serialize)]
@@ -346,76 +352,29 @@ pub struct Query {
     pub trial: usize,
     pub point: [u64; 2],
 }
-pub fn helper_context(
-    capsule: &Path,
-    card_path: &Path,
-    attempt: &Path,
-    parent: u32,
-) -> Result<(Config, Query, Claim), String> {
-    let bytes = native::read(&capsule.join("consumed.json"), 65536)?;
-    let claimed: Claim = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
-    let execution = claimed
-        .execution
-        .canonicalize()
-        .map_err(|e| e.to_string())?;
-    let seal = claimed.registration_sha256.clone();
-    // Full source inventory is checked by the parent before and after the
-    // online interval. The role launch checks its sealed sidecars and native
-    // binary pins without rehashing the whole source tree per target attempt.
-    let record = registration(capsule, &seal)?;
-    check_roles(capsule)?;
-    let (card, hash) = claim(capsule, &execution, card_path, &record, &seal)?;
-    let started = native::load(&execution.join("worker-started.json"))?;
-    native::require(
-        parent > 1
-            && started["pid"] == parent
-            && started["registration_sha256"] == seal
-            && started["worker_sha256"] == record.worker_sha256
-            && started["card_sha256"] == hash,
-        "SAT native role is not a child of the claimed worker",
-    )?;
-    let cfg = config(capsule)?;
-    let query: Query = serde_json::from_slice(&native::read(&attempt.join("query.json"), 65536)?)
-        .map_err(|e| e.to_string())?;
-    native::require(
-        query.trial < cfg.plan.max_queries
-            && query.point.iter().all(|&v| v < 1 << 17)
-            && attempt.canonicalize().map_err(|e| e.to_string())?
-                == execution
-                    .join(format!("query-{:03}", query.trial))
-                    .canonicalize()
-                    .map_err(|e| e.to_string())?
-            && card.target.iter().all(|&v| v < 1 << 17),
-        "SAT native query lies outside claimed execution or plan",
-    )?;
-    let start = native::load(
-        &execution
-            .join("attempts")
-            .join(format!("start-{:03}.json", query.trial)),
-    )?;
-    native::require(
-        start["body"]["trial"] == query.trial
-            && start["body"]["public_query"] == json!(query.point)
-            && start["body"]["backend_called"] == false,
-        "SAT native query lacks its durable matching start",
-    )?;
-    Ok((cfg, query, claimed))
+pub struct PreparedRole {
+    pub program: PathBuf,
+    pub args: Vec<String>,
+    pub pin: String,
+    pub marker: &'static str,
 }
-pub fn role(
+pub fn prepared_role(
     capsule: &Path,
     cfg: &Config,
-    query: &Query,
+    trial: usize,
     role: &str,
-) -> Result<(PathBuf, Vec<String>, &'static str), String> {
+    exporter_pin: &str,
+    cms_pin: &str,
+) -> Result<PreparedRole, String> {
     cfg.validate()?;
     native::require(
-        query.trial < cfg.plan.max_queries,
-        "SAT native role outside plan",
+        trial < cfg.plan.max_queries && journal::digest(exporter_pin) && journal::digest(cms_pin),
+        "SAT prepared role outside frozen plan or pin",
     )?;
     match role {
-        "exporter" => Ok((
-            capsule.join("immutable/assets/bin/exporter"),
-            vec![
+        "exporter" => Ok(PreparedRole {
+            program: capsule.join("immutable/assets/bin/prepared-exporter"),
+            args: vec![
                 "17".into(),
                 "6".into(),
                 "standard".into(),
@@ -424,19 +383,15 @@ pub fn role(
                 "instance".into(),
                 "1".into(),
                 "0".into(),
-                "--target-x".into(),
-                query.point[0].to_string(),
-                "--target-y".into(),
-                query.point[1].to_string(),
-                "--blind-instance-id".into(),
-                format!("native-sat-target-{:03}", query.trial),
                 "--export-only".into(),
+                "--prestart-stdin".into(),
             ],
-            native::EXPORTER_SHA,
-        )),
-        "cms" => Ok((
-            capsule.join("immutable/assets/bin/cms"),
-            vec![
+            pin: exporter_pin.into(),
+            marker: "c EXPORTER_PREPARED_STDIN_READY_v1",
+        }),
+        "cms" => Ok(PreparedRole {
+            program: capsule.join("immutable/assets/bin/prepared-cms"),
+            args: vec![
                 "--verb".into(),
                 "1".into(),
                 "--threads".into(),
@@ -447,10 +402,10 @@ pub fn role(
                 "1".into(),
                 "--maxconfl".into(),
                 cfg.plan.conflict_budget.to_string(),
-                "instance/instance.xor.cnf".into(),
             ],
-            native::CMS_SHA,
-        )),
+            pin: cms_pin.into(),
+            marker: "c PREPARED_STDIN_READY_v1",
+        }),
         _ => Err("unsupported SAT target native role".into()),
     }
 }
@@ -492,20 +447,41 @@ mod tests {
         config.worker_timeout_ms = 899_999;
         assert!(config.validate().is_err());
         let config = cfg();
-        let query = Query {
-            trial: 0,
-            point: [61889, 74818],
-        };
-        let (_, exporter, pin) = role(Path::new("/sealed"), &config, &query, "exporter").unwrap();
-        assert_eq!(pin, native::EXPORTER_SHA);
-        assert_eq!(
-            exporter[8..12],
-            ["--target-x", "61889", "--target-y", "74818"]
-        );
-        let (_, cms, pin) = role(Path::new("/sealed"), &config, &query, "cms").unwrap();
-        assert_eq!(pin, native::CMS_SHA);
-        assert_eq!(cms.last().unwrap(), "instance/instance.xor.cnf");
-        assert!(role(Path::new("/sealed"), &config, &query, "f5").is_err());
+        let exporter = prepared_role(
+            Path::new("/sealed"),
+            &config,
+            0,
+            "exporter",
+            &"a".repeat(64),
+            &"b".repeat(64),
+        )
+        .unwrap();
+        assert_eq!(exporter.pin, "a".repeat(64));
+        assert_eq!(exporter.args.last().unwrap(), "--prestart-stdin");
+        assert!(!exporter
+            .args
+            .iter()
+            .any(|arg| arg.contains("61889") || arg.contains("74818")));
+        let cms = prepared_role(
+            Path::new("/sealed"),
+            &config,
+            0,
+            "cms",
+            &"a".repeat(64),
+            &"b".repeat(64),
+        )
+        .unwrap();
+        assert_eq!(cms.pin, "b".repeat(64));
+        assert_eq!(cms.marker, "c PREPARED_STDIN_READY_v1");
+        assert!(prepared_role(
+            Path::new("/sealed"),
+            &config,
+            0,
+            "f5",
+            &"a".repeat(64),
+            &"b".repeat(64)
+        )
+        .is_err());
     }
 
     #[test]

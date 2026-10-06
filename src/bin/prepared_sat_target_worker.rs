@@ -14,16 +14,13 @@ mod preparation;
 use clap::{Parser, Subcommand};
 use crypto_lib::cryptanalysis::{
     prepared_n17_target::{PreparedN17Target, SatTargetBackend, SatTargetPlan},
-    prepared_sat_control::{canonical_sha, sha256, QueryOutput},
+    prepared_sat_control::{sha256, QueryOutput},
 };
 use serde_json::{json, Value};
-#[cfg(unix)]
-use std::os::unix::process::CommandExt;
 use std::{
     fs,
-    io::Read,
     path::{Path, PathBuf},
-    process::{Command, ExitCode, Stdio},
+    process::ExitCode,
 };
 
 #[derive(Parser)]
@@ -43,17 +40,6 @@ enum Action {
         card: PathBuf,
         #[arg(long)]
         registration_sha256: String,
-    },
-    /// Internal parent/PID handshake for an accepted native role only.
-    Child {
-        #[arg(long)]
-        capsule: PathBuf,
-        #[arg(long)]
-        card: PathBuf,
-        #[arg(long)]
-        attempt: PathBuf,
-        #[arg(long)]
-        role: String,
     },
     /// Retain structure of the original attempt prefix; never admit runtime.
     Inspect {
@@ -130,12 +116,41 @@ fn recheck_preparation(
     Ok(math)
 }
 struct Backend {
-    capsule: PathBuf,
     execution: PathBuf,
-    card: PathBuf,
-    worker: PathBuf,
     cfg: contract::Config,
     journal: journal::Journal,
+    exporters: Vec<Option<native::PreparedChild>>,
+    solvers: Vec<Option<native::PreparedChild>>,
+}
+impl Backend {
+    fn cancel_unused(&mut self) -> Result<(), String> {
+        let mut rows = Vec::new();
+        let mut errors = Vec::new();
+        for (role, pool) in [
+            ("exporter", &mut self.exporters),
+            ("cms", &mut self.solvers),
+        ] {
+            for (trial, slot) in pool.iter_mut().enumerate() {
+                if let Some(child) = slot.take() {
+                    match child.cancel() {
+                        Ok(receipt) => {
+                            rows.push(json!({"role":role,"trial":trial,"receipt":receipt}))
+                        }
+                        Err(error) => errors.push(json!({"role":role,"trial":trial,"error":error})),
+                    }
+                }
+            }
+        }
+        native::save(
+            &self.execution.join("prepared-pool-cancellation.json"),
+            &json!({"schema_version":1,"cancelled":rows,"errors":errors,
+                "all_unused_children_drained":errors.is_empty()}),
+        )?;
+        native::require(
+            errors.is_empty(),
+            "an unused SAT prepared role failed to drain",
+        )
+    }
 }
 impl SatTargetBackend for Backend {
     fn started(&mut self, row: &Value) -> Result<(), String> {
@@ -154,68 +169,103 @@ impl SatTargetBackend for Backend {
             "SAT target native query differs from frozen plan",
         )?;
         let dir = self.execution.join(format!("query-{trial:03}"));
-        fs::create_dir(&dir).map_err(|e| e.to_string())?;
         native::save(
             &dir.join("query.json"),
             &json!(contract::Query { trial, point }),
         )?;
-        contract::check_roles(&self.capsule)?;
-        let args = |role: &str| {
-            vec![
-                "child".into(),
-                "--capsule".into(),
-                self.capsule.to_string_lossy().into_owned(),
-                "--card".into(),
-                self.card.to_string_lossy().into_owned(),
-                "--attempt".into(),
-                dir.to_string_lossy().into_owned(),
-                "--role".into(),
-                role.into(),
-            ]
-        };
-        let ledger = self.execution.join("child-pids");
-        let exporter = native::measured_child(
-            &self.worker,
-            &args("exporter"),
-            &dir,
-            &dir.join("exporter"),
-            plan.exporter_timeout_ms,
-            &ledger,
-            true,
-        )?;
+        let mut request = serde_json::to_vec(&json!({
+            "target_x":point[0].to_string(),"target_y":point[1].to_string(),
+            "blind_instance_id":format!("native-sat-target-{trial:03}")
+        }))
+        .map_err(|e| e.to_string())?;
+        request.push(b'\n');
+        let exporter = self
+            .exporters
+            .get_mut(trial)
+            .and_then(Option::take)
+            .ok_or("SAT prepared exporter slot missing")?
+            .deliver(&request, plan.exporter_timeout_ms)?;
         native::require(
             exporter.exit_code == Some(0) && !exporter.timed_out,
-            "SAT target exporter failed; original output retained",
+            "SAT prepared exporter failed; original output retained",
         )?;
         let (manifest, anf, cnf, before) = native::validate_exports(&dir.join("instance"), point)?;
-        let output = native::measured_child(
-            &self.worker,
-            &args("cms"),
-            &dir,
-            &dir.join("cms"),
-            plan.solver_timeout_ms,
-            &ledger,
-            true,
-        )?;
+        let output = self
+            .solvers
+            .get_mut(trial)
+            .and_then(Option::take)
+            .ok_or("SAT prepared CMS slot missing")?
+            .deliver(cnf.as_bytes(), plan.solver_timeout_ms)?;
         let (manifest_after, anf_after, cnf_after, after) =
             native::validate_exports(&dir.join("instance"), point)?;
         native::require(
             manifest == manifest_after && anf == anf_after && cnf == cnf_after && before == after,
             "SAT target native source changed during solver run",
         )?;
-        contract::check_roles(&self.capsule)?;
         Ok(QueryOutput {
             native: output,
             manifest,
             anf,
             cnf,
             source_receipt: json!({"files":before,"files_unchanged_before_after":true,
-                "exporter":exporter.receipt}),
+                "exporter":exporter.receipt,
+                "exporter_ready":native::load(&dir.join("exporter.ready.json"))?,
+                "cms_ready":native::load(&dir.join("cms.ready.json"))?}),
         })
     }
     fn completed(&mut self, row: &Value) -> Result<(), String> {
         self.journal.complete(row)
     }
+}
+fn prestart_roles(
+    capsule: &Path,
+    execution: &Path,
+    record: &contract::Registration,
+    cfg: &contract::Config,
+) -> Result<
+    (
+        Vec<Option<native::PreparedChild>>,
+        Vec<Option<native::PreparedChild>>,
+    ),
+    String,
+> {
+    contract::check_roles(capsule, record)?;
+    let mut exporters = Vec::new();
+    let mut solvers = Vec::new();
+    let environment = vec![("LC_ALL".to_string(), "C".to_string())];
+    let ledger = execution.join("child-pids");
+    for trial in 0..cfg.plan.max_queries {
+        let dir = execution.join(format!("query-{trial:03}"));
+        fs::create_dir(&dir).map_err(|e| e.to_string())?;
+        for role in ["exporter", "cms"] {
+            let spec = contract::prepared_role(
+                capsule,
+                cfg,
+                trial,
+                role,
+                &record.prepared_exporter_sha256,
+                &record.prepared_cms_sha256,
+            )?;
+            let child = native::PreparedChild::launch(native::PreparedLaunch {
+                program: &spec.program,
+                expected_sha256: &spec.pin,
+                args: &spec.args,
+                cwd: &dir,
+                stem: &dir.join(role),
+                ledger: &ledger,
+                environment: &environment,
+                marker: spec.marker,
+                ready_deadline_ms: 30_000,
+            })?;
+            if role == "exporter" {
+                exporters.push(Some(child));
+            } else {
+                solvers.push(Some(child));
+            }
+        }
+    }
+    contract::check_roles(capsule, record)?;
+    Ok((exporters, solvers))
 }
 fn run(capsule: &Path, execution: &Path, card_path: &Path, seal: &str) -> Result<(), String> {
     native::enforce_hardware()?;
@@ -228,7 +278,7 @@ fn run(capsule: &Path, execution: &Path, card_path: &Path, seal: &str) -> Result
         std::env::vars().collect::<std::collections::BTreeMap<_, _>>() == contract::environment(),
         "SAT target worker environment differs from frozen envelope",
     )?;
-    let worker = self_binding(&capsule, &record)?;
+    self_binding(&capsule, &record)?;
     let cfg = contract::config(&capsule)?;
     native::save(
         &execution.join("worker-started.json"),
@@ -245,20 +295,28 @@ fn run(capsule: &Path, execution: &Path, card_path: &Path, seal: &str) -> Result
             .map_err(|e| e.to_string())?;
         let math = recheck_preparation(&record, &cfg, &execution)?;
         let prepared = PreparedN17Target::from_ordinary_math(&math)?;
+        let (exporters, solvers) = prestart_roles(&capsule, &execution, &record, &cfg)?;
         let journal = journal::Journal::create(
             &execution,
             cfg.journal_binding(seal, &record.worker_sha256, card.target),
         )?;
         let plan = cfg.plan.clone();
         let mut backend = Backend {
-            capsule: capsule.clone(),
             execution: execution.clone(),
-            card: card_path.clone(),
-            worker,
             cfg,
             journal,
+            exporters,
+            solvers,
         };
-        prepared.solve_external_sat(card.target, &plan, &mut backend)
+        let producer = prepared.solve_external_sat(card.target, &plan, &mut backend);
+        let cancellation = backend.cancel_unused();
+        if let Err(error) = cancellation {
+            if let Ok(report) = &producer {
+                native::save(&execution.join("producer-unadmitted.json"), report)?;
+            }
+            return Err(format!("prepared pool cancellation failed: {error}"));
+        }
+        producer
     })();
     let child_drain = native::drain_ledger(&execution.join("child-pids"));
     let prep_drain = native::drain_ledger(&execution.join("preparation-auditor-pids"));
@@ -301,54 +359,6 @@ fn run(capsule: &Path, execution: &Path, card_path: &Path, seal: &str) -> Result
     native::require(recovered, "SAT target did not recover a verified scalar")?;
     Ok(())
 }
-fn child(capsule: &Path, card: &Path, attempt: &Path, role: &str) -> Result<(), String> {
-    native::enforce_hardware()?;
-    let mut handshake = String::new();
-    std::io::stdin()
-        .take(4)
-        .read_to_string(&mut handshake)
-        .map_err(|e| e.to_string())?;
-    native::require(
-        handshake == "GO\n",
-        "SAT target helper lacks launch handshake",
-    )?;
-    let capsule = capsule.canonicalize().map_err(|e| e.to_string())?;
-    #[cfg(unix)]
-    let (cfg, query, claimed) =
-        contract::helper_context(&capsule, card, attempt, unsafe { libc::getppid() } as u32)?;
-    #[cfg(not(unix))]
-    return Err("SAT target native helper requires Unix".into());
-    #[cfg(unix)]
-    {
-        let record = contract::registration(&capsule, &claimed.registration_sha256)?;
-        self_binding(&capsule, &record)?;
-        native::require(
-            unsafe { libc::setpgid(0, 0) } == 0,
-            "SAT target helper process group isolation failed",
-        )?;
-        let (program, args, pin) = contract::role(&capsule, &cfg, &query, role)?;
-        native::require(
-            sha256(&native::read(&program, 4 * 1024 * 1024)?) == pin,
-            "SAT target native role changed before exec",
-        )?;
-        native::save(
-            &attempt.join(format!("{role}.launch.json")),
-            &json!({"role":role,"program":program,"argv":args,
-                "binary_sha256_before_exec":pin,"config_sha256":canonical_sha(&json!(cfg))?,
-                "query_sha256":canonical_sha(&json!(query))?,
-                "card_sha256":claimed.card_sha256,
-                "environment":{"LC_ALL":"C"},"cwd":attempt,"pid":std::process::id()}),
-        )?;
-        let mut command = Command::new(program);
-        command
-            .args(args)
-            .current_dir(attempt)
-            .env_clear()
-            .env("LC_ALL", "C")
-            .stdin(Stdio::null());
-        Err(command.exec().to_string())
-    }
-}
 fn main() -> ExitCode {
     let result = match Cli::parse().command {
         Action::BuildIdentity => {
@@ -361,12 +371,6 @@ fn main() -> ExitCode {
             registration_sha256,
         } => run(&capsule, &execution, &card, &registration_sha256)
             .map(|_| "SAT target producer terminated; independent admission pending".into()),
-        Action::Child {
-            capsule,
-            card,
-            attempt,
-            role,
-        } => child(&capsule, &card, &attempt, &role).map(|_| String::new()),
         Action::Inspect {
             execution,
             registration_sha256,
