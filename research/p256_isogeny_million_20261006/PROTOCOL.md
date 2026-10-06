@@ -1,6 +1,6 @@
 # P-256 million-curve isogeny grid
 
-Status: **preregistered; implementation and execution pending**
+Status: **complete; independently replayed; durable publication blocked**
 
 Date frozen: 2026-10-06
 
