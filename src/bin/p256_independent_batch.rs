@@ -159,6 +159,9 @@ struct TimingEvidence {
     baseline_median_ns_per_addition: f64,
     candidate_median_ns_per_start: f64,
     candidate_median_addition_equivalents_per_start: f64,
+    candidate_budget_multiple: f64,
+    candidate_projected_ratio_to_rho: f64,
+    candidate_logical_throughput_bytes_per_second: f64,
     candidate_checksums_identical: bool,
     complete_ram_route_below_allowed_additions: bool,
     scope: String,
@@ -739,6 +742,11 @@ fn timing_evidence() -> TimingEvidence {
         baseline_median_ns_per_addition: baseline_ns_per_addition,
         candidate_median_ns_per_start: candidate_ns_per_start,
         candidate_median_addition_equivalents_per_start: addition_equivalents,
+        candidate_budget_multiple: addition_equivalents / ALLOWED_ADDITIONS,
+        candidate_projected_ratio_to_rho: pair_ratio(addition_equivalents),
+        candidate_logical_throughput_bytes_per_second:
+            (REQUESTS_PER_START * LOGICAL_BYTES_PER_REQUEST) as f64
+                / (candidate_ns_per_start * 1e-9),
         candidate_checksums_identical,
         complete_ram_route_below_allowed_additions: addition_equivalents <= ALLOWED_ADDITIONS,
         scope: "Matched single-core RAM routing diagnostic at 2^16 starts. It includes SHA-256 request generation, allocation, three radix passes and reconstruction; it is not an external-memory or end-to-end selector measurement."
