@@ -154,6 +154,7 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_n17_target::recording_tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_target_worker -- --test-threads=1 --nocapture
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_math::tests -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_sat_math::tests -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog target_custody -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --lib prepared_control_archive -- --test-threads=1
