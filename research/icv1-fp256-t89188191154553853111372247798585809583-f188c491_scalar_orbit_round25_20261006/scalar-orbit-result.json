@@ -1,0 +1,458 @@
+{
+  "schema": "p256.scalar_orbit_factor_base_screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "relation_model": "17 distinct variable columns; signed 8+9 cross-colour collision modulo global negation",
+  "dependency_sha256": "d1e2fe33e1abbae8a9bf6885ca7cfef8012233363f4cd43e0d30d468a381fc9c",
+  "external_factor_discovery_trusted": false,
+  "cm_screen": {
+    "trace": "89188191154553853111372247798585809583",
+    "discriminant": "-455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "discriminant_abs": "455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "factorization": [
+      {
+        "prime": "3",
+        "exponent": 1
+      },
+      {
+        "prime": "5",
+        "exponent": 1
+      },
+      {
+        "prime": "456597257999",
+        "exponent": 1
+      },
+      {
+        "prime": "1428624589419343516204097",
+        "exponent": 1
+      },
+      {
+        "prime": "46523541035814968339936406074986559003387",
+        "exponent": 1
+      }
+    ],
+    "factorization_product_verified": true,
+    "deterministic_u64_prime_factors": [
+      "3",
+      "5",
+      "456597257999",
+      "1669",
+      "13374631042347059581",
+      "269",
+      "643",
+      "215531",
+      "333814693",
+      "23",
+      "3911",
+      "5195037399650551"
+    ],
+    "large_prime_certificates": [
+      {
+        "n": "1869236796843064056413",
+        "n_minus_one_factorization": [
+          {
+            "prime": "2",
+            "exponent": 2
+          },
+          {
+            "prime": "23",
+            "exponent": 1
+          },
+          {
+            "prime": "3911",
+            "exponent": 1
+          },
+          {
+            "prime": "5195037399650551",
+            "exponent": 1
+          }
+        ],
+        "witness": "2",
+        "criterion": "Lucas: a^(n-1)=1 and gcd(a^((n-1)/q)-1,n)=1 for every prime q | n-1",
+        "verified": true
+      },
+      {
+        "n": "1428624589419343516204097",
+        "n_minus_one_factorization": [
+          {
+            "prime": "2",
+            "exponent": 6
+          },
+          {
+            "prime": "1669",
+            "exponent": 1
+          },
+          {
+            "prime": "13374631042347059581",
+            "exponent": 1
+          }
+        ],
+        "witness": "3",
+        "criterion": "Lucas: a^(n-1)=1 and gcd(a^((n-1)/q)-1,n)=1 for every prime q | n-1",
+        "verified": true
+      },
+      {
+        "n": "46523541035814968339936406074986559003387",
+        "n_minus_one_factorization": [
+          {
+            "prime": "2",
+            "exponent": 1
+          },
+          {
+            "prime": "269",
+            "exponent": 1
+          },
+          {
+            "prime": "643",
+            "exponent": 1
+          },
+          {
+            "prime": "215531",
+            "exponent": 1
+          },
+          {
+            "prime": "333814693",
+            "exponent": 1
+          },
+          {
+            "prime": "1869236796843064056413",
+            "exponent": 1
+          }
+        ],
+        "witness": "2",
+        "criterion": "Lucas: a^(n-1)=1 and gcd(a^((n-1)/q)-1,n)=1 for every prime q | n-1",
+        "verified": true
+      }
+    ],
+    "all_factors_distinct_prime": true,
+    "fundamental_discriminant": true,
+    "frobenius_conductor": "1",
+    "endomorphism_ring": "End(E)=Z[pi]=O_K (maximal order)",
+    "minimum_noninteger_endomorphism_degree": "113803455850000939221184217417134865912224979432774427118812385991533214195479",
+    "minimum_noninteger_endomorphism_degree_log2": 255.97500767470916,
+    "rational_point_action": "Every alpha=a+b*pi restricts on E(F_p) to the known scalar [a+b], because pi(P)=P; noninteger CM maps supply no non-generic rational-point action.",
+    "low_degree_noninteger_transport_exists": false
+  },
+  "scalar_order_screen": {
+    "n_minus_one_factorization": [
+      {
+        "prime": "2",
+        "exponent": 4
+      },
+      {
+        "prime": "3",
+        "exponent": 1
+      },
+      {
+        "prime": "71",
+        "exponent": 1
+      },
+      {
+        "prime": "131",
+        "exponent": 1
+      },
+      {
+        "prime": "373",
+        "exponent": 1
+      },
+      {
+        "prime": "3407",
+        "exponent": 1
+      },
+      {
+        "prime": "17449",
+        "exponent": 1
+      },
+      {
+        "prime": "38189",
+        "exponent": 1
+      },
+      {
+        "prime": "187019741",
+        "exponent": 1
+      },
+      {
+        "prime": "622491383",
+        "exponent": 1
+      },
+      {
+        "prime": "1002328039319",
+        "exponent": 1
+      },
+      {
+        "prime": "2624747550333869278416773953",
+        "exponent": 1
+      }
+    ],
+    "factorization_product_verified": true,
+    "large_factor_certificate": {
+      "n": "2624747550333869278416773953",
+      "n_minus_one_factorization": [
+        {
+          "prime": "2",
+          "exponent": 6
+        },
+        {
+          "prime": "3",
+          "exponent": 2
+        },
+        {
+          "prime": "1297",
+          "exponent": 1
+        },
+        {
+          "prime": "16879",
+          "exponent": 1
+        },
+        {
+          "prime": "208150935158385979",
+          "exponent": 1
+        }
+      ],
+      "witness": "7",
+      "criterion": "Lucas: a^(n-1)=1 and gcd(a^((n-1)/q)-1,n)=1 for every prime q | n-1",
+      "verified": true
+    },
+    "n_prime_certificate": {
+      "n": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+      "n_minus_one_factorization": [
+        {
+          "prime": "2",
+          "exponent": 4
+        },
+        {
+          "prime": "3",
+          "exponent": 1
+        },
+        {
+          "prime": "71",
+          "exponent": 1
+        },
+        {
+          "prime": "131",
+          "exponent": 1
+        },
+        {
+          "prime": "373",
+          "exponent": 1
+        },
+        {
+          "prime": "3407",
+          "exponent": 1
+        },
+        {
+          "prime": "17449",
+          "exponent": 1
+        },
+        {
+          "prime": "38189",
+          "exponent": 1
+        },
+        {
+          "prime": "187019741",
+          "exponent": 1
+        },
+        {
+          "prime": "622491383",
+          "exponent": 1
+        },
+        {
+          "prime": "1002328039319",
+          "exponent": 1
+        },
+        {
+          "prime": "2624747550333869278416773953",
+          "exponent": 1
+        }
+      ],
+      "witness": "7",
+      "criterion": "Lucas: a^(n-1)=1 and gcd(a^((n-1)/q)-1,n)=1 for every prime q | n-1",
+      "verified": true
+    },
+    "least_primitive_root": "7",
+    "primitive_root_verified": true,
+    "divisors_enumerated": 10240,
+    "enumeration_exhaustive": true,
+    "target_columns": 131458,
+    "closest_widths": [
+      {
+        "order": "279184",
+        "negation_folded_columns": "139592",
+        "absolute_distance_from_target": "8134"
+      },
+      {
+        "order": "146589",
+        "negation_folded_columns": "146589",
+        "absolute_distance_from_target": "15131"
+      },
+      {
+        "order": "293178",
+        "negation_folded_columns": "146589",
+        "absolute_distance_from_target": "15131"
+      },
+      {
+        "order": "114567",
+        "negation_folded_columns": "114567",
+        "absolute_distance_from_target": "16891"
+      },
+      {
+        "order": "229134",
+        "negation_folded_columns": "114567",
+        "absolute_distance_from_target": "16891"
+      },
+      {
+        "order": "223224",
+        "negation_folded_columns": "111612",
+        "absolute_distance_from_target": "19846"
+      },
+      {
+        "order": "305512",
+        "negation_folded_columns": "152756",
+        "absolute_distance_from_target": "21298"
+      },
+      {
+        "order": "211864",
+        "negation_folded_columns": "105932",
+        "absolute_distance_from_target": "25526"
+      },
+      {
+        "order": "209388",
+        "negation_folded_columns": "104694",
+        "absolute_distance_from_target": "26764"
+      },
+      {
+        "order": "317796",
+        "negation_folded_columns": "158898",
+        "absolute_distance_from_target": "27440"
+      },
+      {
+        "order": "195452",
+        "negation_folded_columns": "97726",
+        "absolute_distance_from_target": "33732"
+      },
+      {
+        "order": "163536",
+        "negation_folded_columns": "81768",
+        "absolute_distance_from_target": "49690"
+      },
+      {
+        "order": "79449",
+        "negation_folded_columns": "79449",
+        "absolute_distance_from_target": "52009"
+      },
+      {
+        "order": "158898",
+        "negation_folded_columns": "79449",
+        "absolute_distance_from_target": "52009"
+      },
+      {
+        "order": "152756",
+        "negation_folded_columns": "76378",
+        "absolute_distance_from_target": "55080"
+      },
+      {
+        "order": "148816",
+        "negation_folded_columns": "74408",
+        "absolute_distance_from_target": "57050"
+      }
+    ],
+    "selected_order": "279184",
+    "selected_negation_folded_columns": 139592,
+    "selected_width_delta": 8134,
+    "exact_order_generators_screened": 139584,
+    "selected_scalar": "379483656589291393959605088584129393463128953089898693989044430844151895048",
+    "selected_scalar_signed_binary_bits": 248,
+    "selected_scalar_signed_binary_weight": 96,
+    "selected_scalar_binary_operations": 344,
+    "selected_scalar_exact_order_verified": true
+  },
+  "factor_base": {
+    "fb_id": "FB1he6b6b6e25de6",
+    "fb_sha256": "e6b6b6e25de6823fd408b66716c6d041465a5193ca7c31ce74d12f65ca03d5cf",
+    "family": "scalar-orbit",
+    "columns": 139592,
+    "signed_points": 279184,
+    "points_sha256": "7b2df8a9acc38cd338847abb215c007bd03a28243244451acb36f93131e3fde3",
+    "point_key_encoding": "prime-affine-x-plus-one-shift-sign/be33/v1",
+    "anchor_x": "0x5aab3630d2b91b15e3425559a73610896d3c761eee21766e7d0926d00641cc3e",
+    "anchor_y": "0x2e8c9383a013c8656eff13cdb729a809026ae8576994fdf1d9c616fdd8b1f371",
+    "anchor_derivation_counter": 1,
+    "anchor_construction_log_recorded": false,
+    "all_points_nonidentity": true,
+    "all_points_on_curve": true,
+    "unique_up_to_sign": true,
+    "adjacent_transport_relations": 139592,
+    "wrap_relation_uses_negation": true,
+    "transport_replay_failures": 0,
+    "all_reported_transport_relations_replayed": true,
+    "independent_log_quotient_dimension": 1,
+    "ordinary_zero_relations_supply_anchor_information": false,
+    "dump_schema": "ecbench.factor_base_dump/v1-wide",
+    "dump_bytes": 70236610,
+    "dump_sha256": "1613190ec5cc3e0bd83c1c51984334cae2dababf116bb1480f23920f7080cb4d",
+    "rebuild_identity_verified": true,
+    "operations": {
+      "fixed_base_table_additions": 8160,
+      "fixed_base_table_doublings": 256,
+      "fixed_base_output_additions": 4449455,
+      "transport_replay_additions": 13400832,
+      "transport_replay_doublings": 34618816,
+      "normalization_field_multiplications": 697942,
+      "normalization_inversions": 18
+    }
+  },
+  "projections": [
+    {
+      "case": "known anchor H=G",
+      "required_target_collisions": 1,
+      "disjoint_probability": 0.999484314579227,
+      "oracle_s": 1.2536374202692353,
+      "oracle_ratio_to_rho": 0.964336477130181,
+      "log2_oracle_samples": 128.3261201489153,
+      "direct_additions_per_sample": 8.0,
+      "log2_direct_group_additions": 131.3261201489153,
+      "direct_ratio_to_rho": 7.714691817041447,
+      "log2_one_list_bytes": 133.3261201489153,
+      "below_rho": false,
+      "classification": "The ideal K=1 constant is rho parity only; with known scalar labels the target representation is a generic claw/rho search, and direct sample construction is above rho."
+    },
+    {
+      "case": "unknown hash-derived anchor",
+      "required_target_collisions": 2,
+      "disjoint_probability": 0.999484314579227,
+      "oracle_s": 1.8804561304038532,
+      "oracle_ratio_to_rho": 1.4465047156952717,
+      "log2_oracle_samples": 128.91108264963646,
+      "direct_additions_per_sample": 8.0,
+      "log2_direct_group_additions": 131.91108264963646,
+      "direct_ratio_to_rho": 11.572037725562172,
+      "log2_one_list_bytes": 133.91108264963646,
+      "below_rho": false,
+      "classification": "At least two independent target equations are required to eliminate the unknown anchor log; even the free-oracle boundary is above rho."
+    }
+  ],
+  "degree_screen": {
+    "exact_support_polynomial_degree": 139592,
+    "multiplication_map_degree": "144007845618379241605518857659073060301003294604834036315483836223688427512000071733848159926364313191977691662937419788409104982930387193129606922304",
+    "multiplication_map_degree_log2": 495.49343355076235,
+    "short_scalar_evaluation_chain_is_low_degree_membership": false,
+    "structured_residual_degree_of_regularity": null,
+    "degree_gate_passed": false,
+    "classification": "The orbit has an exact one-class log quotient, but coordinate membership is a support polynomial of degree B (or a rational multiplication map of degree m^2). No structured residual degree <=5 was measured."
+  },
+  "false_positives": 0,
+  "false_negatives": 0,
+  "promotion_gates": {
+    "zero_false_positives": true,
+    "zero_false_negatives": true,
+    "exact_transport_replay": true,
+    "structured_residual_degree_at_most_5": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_row_below_2_103": false,
+    "materialized_storage_below_2_50": false,
+    "complete_cost_below_rho": false,
+    "selector_and_anchor_non_generic": false,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "decision": "An exact native P-256 scalar-orbit factor base reaches one unknown log class, but it does not improve index calculus end to end. Every CM endomorphism restricts to a known scalar on E(F_p); an unknown anchor needs two target collisions, a known anchor is generic rho/claw search, direct generation and storage fail, and no low-degree coordinate membership or residual regularity is obtained."
+}
