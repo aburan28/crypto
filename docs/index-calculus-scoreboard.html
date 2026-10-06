@@ -1478,7 +1478,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         bit-identical trajectories, so the saving is a subtraction rather than an estimate &mdash;
         537 of 537 rows identical in every counter but the pool&rsquo;s, zero trajectories moved,
         zero rows whose saving differs from the offsets they stopped drawing.</p>
-      <p><strong>P-256 S17 boundary, corrected for the finite representation domain.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications; Round 19&rsquo;s exact global 8+9 frontier lowered that to 2<sup>165.156</sup>. Round 20 initially reported 2<sup>144.625</sup>, but that symmetric projection demanded 2<sup>136.538</sup> distinct left images from a domain containing only 2<sup>128.734</sup> and is withdrawn. Materialising the complete finite left domain and charging streamed right images plus duplicate occupancy gives 2<sup>151.885</sup> P-256 field-multiplication equivalents, <strong>19.419 bits above rho</strong>. Even the corrected one-addition-per-image boundary is 16.203 bits above rho. This remains a rejected stage projection and is not inserted into the end-to-end table.</p>
+      <p><strong>P-256 S17 boundary, corrected for the finite representation domain.</strong> This route is not a fourth comparable whole-pipeline row: it has no recovered public logarithm. Round 18 rejected fixed-atom enumeration at 2<sup>272.404</sup> field multiplications; Round 19&rsquo;s exact global 8+9 frontier lowered that to 2<sup>165.156</sup>. Round 20 initially reported 2<sup>144.625</sup>, but that symmetric projection demanded 2<sup>136.538</sup> distinct left images from a domain containing only 2<sup>128.734</sup> and is withdrawn. Materialising the complete finite left domain and charging streamed right images plus duplicate occupancy gives 2<sup>151.885</sup> P-256 field-multiplication equivalents, <strong>19.419 bits above rho</strong>. Round 21 exhausts 14,399,656 exact small-multiple and Dickson-block images without finding one cross-column relation: the quotient remains all 131,458 dimensions, and even an ideal unimplemented memoryless quotient boundary is 349.646&times; rho. These remain rejected stage projections and are not inserted into the end-to-end table.</p>
     </div>
     <div class="table-scroll">
       <table>
@@ -1969,7 +1969,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
           ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
-        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>. Round 20 measures a projected-key birthday ladder whose counted-work slope is 0.499979 per key bit and whose logical-memory slope is 0.5; none is a multi-size exponent in subgroup order. Its initial symmetric 2<sup>144.625</sup> projection is withdrawn because it exceeds the signed-eight domain. Corrected finite-domain accounting projects the collector to 2<sup>151.885</sup> FME, 19.419 bits above rho, while its optimistic image floor remains 16.203 bits above rho.</p>
+        <p>The P-256 S17 diagnostics are intentionally not plotted on this group-order axis. Round 18 measures a fixed-atom depth-prefix slope; Round 19 measures local <code>B=17..20</code> list growth, with slopes 11.650 and 11.684 against <code>log B</code>. Round 20 measures a projected-key birthday ladder whose counted-work slope is 0.499979 per key bit and whose logical-memory slope is 0.5; none is a multi-size exponent in subgroup order. Its initial symmetric 2<sup>144.625</sup> projection is withdrawn because it exceeds the signed-eight domain. Corrected finite-domain accounting projects the collector to 2<sup>151.885</sup> FME, 19.419 bits above rho, while its optimistic image floor remains 16.203 bits above rho. Round 21 is an exact fixed-P-256 transport census, not a size ladder: zero relations leave quotient dimension 131,458 and an ideal memoryless lower boundary 349.646&times; rho.</p>
       </div>
       <div class="exp">
         <div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
@@ -12139,6 +12139,45 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-s17-batch-collision-round20-20261005 -->
+<!-- BEGIN p256-fb-log-transport-round21-20261006 -->
+<section class="panel" id="p256-fb-log-transport-round21-20261006">
+  <div class="panel-head">
+    <h2>P-256 FB1 transport census: zero relations leave the ideal boundary 350&times; rho <span class="chip">no rank compression</span></h2>
+    <p class="panel-summary">An exhaustive 14,399,656-image actual-P-256 census finds no small-multiple or depth-1&ndash;4 Dickson-block transport in FB1. The exact quotient stays at 131,458 dimensions, so even an ideal unimplemented memoryless boundary remains 349.646&times; rho.</p>
+    <p>Round 21 tests the non-generic escape hatch required by Round 20: exact elliptic relations between factor-base columns. It sorts all <code>[a]P_i</code> for <code>1 &le; a &le; 64</code>, then every globally-negation-folded signed sum in each completed Dickson block through depth 4. Complete affine coordinates orient every equality, weighted quotient arithmetic is modulo the registered P-256 order, and every emitted relation must replay in the group.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Complete registered image families. All keys are full affine P-256 abscissae; no truncated or discarded branch is credited.</caption>
+    <thead><tr><th>Family</th><th>Images</th><th>Equal-x candidates</th><th>Relations</th><th>Independent rank</th><th>Peak logical bytes</th></tr></thead>
+    <tbody>
+      <tr><td><code>[1..64] * FB1</code></td><td class="n">8,413,312</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">378,599,040</td></tr>
+      <tr><td>Dickson depth 1</td><td class="n">65,724</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">3,154,792</td></tr>
+      <tr><td>Dickson depth 2</td><td class="n">147,936</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">6,443,272</td></tr>
+      <tr><td>Dickson depth 3</td><td class="n">420,904</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">17,361,992</td></tr>
+      <tr><td>Dickson depth 4</td><td class="n">5,351,780</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">214,597,032</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>One P-256 group-addition-equivalent unit, <code>S=total/sqrt(n)</code>. Candidate boundaries omit overhead and therefore favour the rejected route.</caption>
+    <thead><tr><th>Variant</th><th>Class</th><th>log<sub>2</sub> additions</th><th>S</th><th>Candidate / rho</th><th>Scope</th></tr></thead>
+    <tbody>
+      <tr><td>Pollard rho</td><td><span class="chip">reference</span></td><td class="n">128.379</td><td class="n">1.300</td><td class="n">1.000</td><td>registered reference</td></tr>
+      <tr><td>Round-20 direct finite-domain S17</td><td><span class="chip">projected engineering</span></td><td class="n">147.798</td><td class="n">911,265.310</td><td class="n">700,973.316</td><td>projected full collection</td></tr>
+      <tr><td>Round-20 optimistic finite-domain floor</td><td><span class="chip">generic floor</span></td><td class="n">144.581</td><td class="n">98,069.141</td><td class="n">75,437.801</td><td>unimplemented lower boundary</td></tr>
+      <tr><td>Round-21 quotient two-list floor</td><td><span class="chip">generic floor</span></td><td class="n">137.503</td><td class="n">725.341</td><td class="n"><strong>557.955</strong></td><td>exact K; unimplemented boundary</td></tr>
+      <tr><td>Round-21 ideal memoryless floor</td><td><span class="chip">unimplemented</span></td><td class="n">136.828</td><td class="n">454.540</td><td class="n"><strong>349.646</strong></td><td>ideal birthday constant</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">positive control</span> 257,928 exact equalities connect a 4,096-point P-256 doubling orbit into one component; all 4,095 adjacent doubling edges and every reported equality replay</span>
+    <span><span class="chip">references</span> direct multiplier scan and complete maximum-width depth-1&ndash;4 Gray/direct block comparisons have zero false positives and zero false negatives</span>
+    <span><span class="chip">quotient</span> pairwise rank 0, block rank 0, dimension 131,458; none of the 131,457 relations required for the parity route is found</span>
+    <span><span class="chip">degree</span> inherited structured residual maxima 3 / 3 / 4 and local split degree 2; unsplit S17 regularity remains unknown</span>
+    <span><span class="chip">decision</span> degree and exactness pass; quotient, per-row, total-cost, projected-storage and rho-parity gates fail; no full-depth unplanted attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_fb_log_transport_round21_20261006/RESULT.md</code>; deterministic result SHA-256 <code>4aaf5fde72257ed1f262d5674ab2fe81c7b4f90698fa3767615adfed6524e757</code></span>
+  </div>
+</section>
+<!-- END p256-fb-log-transport-round21-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
