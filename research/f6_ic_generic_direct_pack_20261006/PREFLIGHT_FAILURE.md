@@ -16,3 +16,13 @@ variables during exclusive measurement. The repair adds an explicit
 override or an undeclared one. Both comparison inputs now declare the
 setting. The changed worker, inputs, binary, and candidate identities are
 frozen anew before any rerun.
+
+The second freeze used worker SHA-256
+`a9c997a36caf1134628f32f5c3f1edfedf6f6563dbaf94fe3b4799f6c787677f`.
+Again all eight processes exited 2 before the solve: the reserved-name
+predicate still rejected every `KIC_*` variable even when it matched
+the declaration. `preflight-freeze-v2/`, `preflight-failure-v2/`, and
+`PREFLIGHT_V2_FAILURE_SHA256SUMS` retain this failure. The predicate was
+factored into a pure function, corrected to check the declaration for
+every reserved prefix, and given a direct unit test for accepted and
+rejected values. A third exact freeze follows this tested correction.
