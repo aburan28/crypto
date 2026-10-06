@@ -63,6 +63,13 @@ pilot (§10, 2026-09-24).
   - At one thread, isolated, `m = 4`, `N = 12` runs in 0.67 of the baseline's
     time.
   - `D` and memory are unchanged. This is engineering, not a finding.
+- **Round 7 (§16, 2026-10-06) runs `m = 3` at `N = 18` with F4.**
+  - §§16.1–16.6 pre-register it. A sizing stage repeats round 2's stopped run,
+    then both targets run with the `B'` cap raised as far as this host's memory
+    allows.
+  - The checks move to a native checker, which must first reproduce the Python
+    scripts' output on every committed row.
+  - The results are pending.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -2770,6 +2777,193 @@ It does not show three things.
    attempt (§§13–14), and none is ranked now.
 4. **`m = 2` at `N = 28`**, and the independent replication of §12.10's items
    3–4.
+
+## 16. Round 7, 2026-10-06: `m = 3` at `N = 18`
+
+§§16.1–16.6 were written and committed before the round's runs. The results
+follow as §16.7 onward. The data are in `research/pkm_tower_round7_20261006/`.
+
+### 16.1 The question, and what the round can return
+
+§12.10 (item 2), §14.8 (item 2) and §15.12 (item 1) rank this next.
+- **The line.** The Kummer `m = 3` line at `p₁` (M3) has `D = 6, 6, 7` at
+  `N = 9, 12, 15`.
+  - Round 2 stopped both `N = 18` systems for size (§11.7). After 23 steps,
+    step 24 is at degree 7 over 104,600 columns, and its `B'` passed the
+    `--max-nnz` cap of `2·10⁹`.
+  - So `D ≥ 7` is all that is known at `N = 18`.
+- **Why it matters.** A fourth size makes this the first line at `m ≥ 3` that A1
+  can read, since the upper-half slope needs four values of `N` (§11.6). At
+  `m = 3`, §3.7 rules out beating rho with any oracle, so the line measures the
+  mechanism, not the verdict.
+- **What each outcome reads under A1** (§11.6). The values are at
+  `N = 9, 12, 15, 18`, so the upper half is `N = 15–18`.
+
+  | `D` at `N = 18` | final plateau `L` | upper-half slope | reading |
+  |:--|--:|--:|:--|
+  | 7 | 3 | 0 | inconclusive |
+  | 8 or more | 0 | at least 1/3 | H0 |
+  | stopped with `D ≥ 7` | — | — | inconclusive (three sizes) |
+  | stopped after a productive step at degree 8 or more | 0 | at least 1/3 | H0, from a lower bound |
+
+  - A stopped run gives `D ≥ d` only from a step that added elements to the
+    basis at degree `d`. Up to its stop, a run is the uncapped run's first
+    steps, so that step comes no later than the uncapped run's last productive
+    step.
+  - A lower bound of 8 counts because every value it allows reads H0. A lower
+    bound of 7 allows both readings.
+  - H1a needs `L > 10`, which no outcome of this round can give.
+- **For §3.6**, stated now and read after the runs.
+  - **`D = 7`:** one level without a rise at `m = 3` (`t = 5` to 6), as at
+    `m = 4` (`t = 3` to 4). That fits slow growth and closes nothing.
+  - **`D ≥ 8`:** rises at `t = 5` and at `t = 6`. Read as a rate over the upper
+    half, that is one rise per 3 in `N`, `β = 1/3`, and a width of
+    `p^{H(1/3)} ≈ p^{0.92}` per target by §3.6. That is the rule's reading of
+    two rises, not a fitted exponent, and it measures nothing at `m ≥ 4`.
+
+### 16.2 The engine: three additions, and nothing it computes changes
+
+- **The stopped step.** When a stop cuts a step off (`--max-nnz`, `--max-dense`
+  or the budget), the report now keeps that step as far as it got
+  (`stopped_step`).
+  - That is its matrix, its columns without a divisor and the planned size of
+    its `B'`, if the stop came in the elimination.
+  - An `on_stop` callback passes it on the moment the stop happens, before the
+    report's basis is built. For a large stopped run, that basis is the
+    largest allocation left.
+  - The example prints it as a `tower stop in step K` line. The line carries
+    the process's resident memory, its address space and peak (`VmSize`,
+    `VmPeak`, which `ulimit -v` caps) and the live heap (glibc's `mallinfo2`).
+- **A bound on `B'` alone.** `--max-nnz` bounds both a step's nonzeros and its
+  `B'`.
+  - Only `B'` is held in memory, at 4 bytes an entry. A step's rows are
+    formed when they are reduced.
+  - At `N = 15`, steps 21–23 had 1.6, 3.4 and 10 times as many nonzeros as
+    `B'` entries. A raised `--max-nnz` could therefore stop a step for
+    nonzeros that take no memory.
+  - `--max-dense` (`max_dense` in the engine) bounds `B'` alone. Without it,
+    `--max-nnz` bounds both, as before.
+- **`--targets`.** It measures the listed target indices only. Every target
+  and system is still drawn in order, so each one measured is the system a full
+  run gives it. Each target can then run as its own process.
+- **Rows** add `max_dense_entries` (the largest `B'`, counting a step stopped
+  for it) and `stopped_step`.
+- **Tests.** A twelfth unit test runs 24 small systems with every cap just
+  below a step's nonzeros or `B'`.
+  - A capped run must stop at the uncapped run's step, after the same steps,
+    reporting that step's matrix.
+  - `--max-dense` must stop it only at the first step whose `B'` passes the
+    cap.
+  - The other eleven tests pass unchanged.
+
+### 16.3 Stages
+
+**Stage 1: sizing, and an identity check.** Target 0 runs with round 2's flags
+at `t = 6`, under `ulimit -v 14000000`, at the host's four threads:
+
+```
+--engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6
+--max-t-m3 6 --planted 0 --random 2 --targets 0 --ladder-t none --budget 7200
+--max-nnz 2000000000 --trace
+```
+
+- **Identity.** It must stop for size in step 24, as round 2 did. It must
+  reproduce round 2's target-0 row on every field but these:
+  - the wall clock;
+  - the multiply-adds and `max_residual_rows`, which may only fall (§15.1);
+  - the fields added since round 2.
+- **Sizing.** Its stop line gives three numbers for step 24: the entries of its
+  `B'`, `E`; its columns without a divisor, `q`; and the live heap at the stop,
+  `H`.
+
+**Stage 2: the measurement.** Both targets run, each in its own process
+(`--targets 0`, then `--targets 1`). They take stage 1's flags with
+`--budget 43200`, and `--max-dense C` in place of `--max-nnz`.
+- `C` is the largest multiple of `10⁸` with `H + 4C ≤ A − 2.5·10⁹` bytes.
+  - `A = 1.4336·10¹⁰` bytes is the address-space cap, `ulimit -v 14000000` in
+    KiB.
+  - The `2.5·10⁹` bytes are for the step's echelon, which becomes the next
+    basis, the residue chunks, the threads' arenas and stacks, and the
+    allocator's slack.
+  - At `N = 15` the echelons of the two degree-7 steps took 11% and 15% as many
+    entries as their `B'`. That is the growth of the kept entries across each
+    step.
+- If `C ≥ E`, step 24 fits by this rule.
+- If `C < E`, stage 2 runs once anyway with `--max-dense E`, so that step 24 is
+  tried, and the note records that the rule did not expect it to fit.
+- A run that the machine ends with an allocation failure, rather than the
+  engine, is reported as such, with the lower bound its trace gives. It is not
+  re-run.
+
+**Confirmation.** A system that finishes with `D` is re-run with the degree
+bound at `D − 1` (`--cap`) and otherwise stage 2's flags. Each must end with
+pairs above the bound, without refuting and without a staircase stop.
+
+**Checks: a native checker.** `AGENTS.md` now rules out Python for research
+tooling, and `verify.py` and `analyze.py` are Python. They are replaced by
+`examples/pkm_tower_check.rs`, which keeps their contracts.
+- `verify` checks every finished tower row against exhaustive search over
+  `V^m`, as `verify.py` does. At `N = 18` that is `64³ = 262,144` triples.
+- `analyze` prints what `analyze.py` prints:
+  - the per-cell tables, the fits and the A1 quantities and reading;
+  - the repeated-measurement, planted and engine checks;
+  - the confirmation table.
+
+  Its bootstrap draws from the same Mersenne Twister, seeded as the script
+  seeds it.
+- `compare` makes stage 1's identity check, and checks that stage 2 repeats
+  stage 1's 23 steps.
+- **The port is checked first.** On every committed row of rounds 1–6, it must
+  print what `verify.py` and `analyze.py` printed in CI on `main` at
+  `63a09ff7`, line for line. A difference is explained before the checker
+  reads round 7.
+
+### 16.4 What was run before this section (a disclosure)
+
+- **Read, not run:** round 6's committed traces of M3 at `N = 9`–15. They are
+  the source of §16.2's and §16.3's ratios.
+- **Run with the new build, all at `N ≤ 12`:**
+  - the twelve unit tests;
+  - M3 at `N = 9` and 12, both targets. Target 1 alone was also run with
+    `--targets 1`. Its rows match the full run's on every field but the wall
+    clock, and the multiply-adds equal round 6's committed counts
+    (158,988,902 and 10,595,732,141);
+  - M3 at `N = 12`, target 0, once with `--max-nnz 3000000` and once with
+    `--max-dense 3000000`. Both stop in step 12, whose `B'` has 3,051,952
+    entries, and print its stop line.
+- **Nothing at `N = 18`** has run on any build since round 2.
+
+### 16.5 Predictions, before the runs
+
+1. **Identity.** Stage 1 stops in step 24 for size and reproduces round 2's row
+   as §16.3 requires.
+2. **Sizing.** `E` is between `2·10⁹` and `3·10⁹`, and `C ≥ E`, so stage 2
+   fits by the rule.
+   - The confidence is low.
+   - The estimate comes from `N = 15`'s degree-7 steps, where `q` was 29–38% of
+     the columns and `B'` had 0.85–0.93 times (pivot rows × `q`) entries.
+     Scaled to step 24's 104,600 columns, that gives `1.7·10⁹` to `2.7·10⁹`,
+     and round 2 showed `E > 2·10⁹`.
+3. **`D = 7` on both targets, and both refute.**
+   - The confidence is low.
+   - It rests on an analogy with `m = 4`, whose `D` was 6, 7, 7 at
+     `t = 2, 3, 4`. The `m = 3` line has risen once in two levels, at `t = 4`
+     to 5.
+4. **Both targets give the same `D`, width and step count**, as every cell so
+   far has.
+
+### 16.6 Decision rule, fixed now
+
+- **A1, per §16.1's table.**
+- **Instrument first.** These void the round's reading until they are
+  explained:
+  - a verdict that the native checker's `verify` contradicts;
+  - a stage-1 difference from round 2 beyond §16.3's allowance.
+- **Inadmissible:**
+  - changing the engine, the cell, the budgets, the seeds or the rule for `C`
+    after stage 1 starts;
+  - dropping a target;
+  - re-running a system in the hope of a different answer.
 
 ---
 
