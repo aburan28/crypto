@@ -27,6 +27,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Pin the dependency set the archive was profiled with
+        # Cargo.lock is not tracked (.gitignore), so a fresh resolution follows
+        # crates.io: zerocopy 0.8.59 -> 0.8.60 on 2026-10-06 made the
+        # `cmp "$replay/Cargo.lock" Cargo.lock` check below fail for every pull
+        # request, whatever it changed. Build with the lock the archive was
+        # profiled with, as the compact-ir workflows do; cargo keeps a lock that
+        # satisfies Cargo.toml, so the later cmp still catches a dependency set
+        # that moved away from the profiled one.
+        if: ${{ hashFiles('research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip') != '' }}
+        run: |
+          unzip -p research/ecbench_n37_online_ir_20261004/RAW-CALLGRIND.zip Cargo.lock > Cargo.lock
+          sha256sum Cargo.lock
       - name: Build frozen ecbench and check the independent analyzer
         run: |
           cargo test --release --lib cryptanalysis::ecbench::callgrind
