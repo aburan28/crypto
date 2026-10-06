@@ -24,7 +24,9 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use num_bigint::BigUint;
-use sha2::{Digest, Sha256};
+use rayon::prelude::*;
+
+use crate::hash::sha256::{sha256, Sha256};
 
 // ── JSON as Python reads and writes it ─────────────────────────────
 
@@ -502,7 +504,7 @@ fn walk_description(walk: &str) -> Option<&'static str> {
 }
 
 fn hex_sha256(bytes: &[u8]) -> String {
-    hex::encode(Sha256::digest(bytes))
+    hex::encode(sha256(bytes))
 }
 
 /// `protocol.sha256File`.
@@ -1056,33 +1058,43 @@ pub fn bucket_total(work: &Path) -> u64 {
         / RECORD_BYTES
 }
 
-/// `merge.verifyBuckets`.
+/// `merge.verifyBuckets`.  Buckets are hashed in parallel; the failure
+/// reported is still the first in `state.json` order, as in the Python.
 fn verify_buckets(state: &Obj, work: &Path) -> Result<(), String> {
     let Some(Json::Obj(hashes)) = state.get("bucketHashes") else {
         return Ok(());
     };
-    for (name, digest) in hashes.iter() {
-        let path = work.join("buckets").join(name);
-        let ok = path.is_file() && sha256_file(&path).is_ok_and(|d| Json::Str(d) == *digest);
-        if !ok {
-            return Err(format!(
-                "bucket integrity failure; rebuild merge state from immutable source corpora: {name}"
-            ));
-        }
+    let entries: Vec<&(String, Json)> = hashes.iter().collect();
+    let intact: Vec<bool> = entries
+        .par_iter()
+        .map(|(name, digest)| {
+            let path = work.join("buckets").join(name);
+            path.is_file() && sha256_file(&path).is_ok_and(|d| Json::Str(d) == *digest)
+        })
+        .collect();
+    match intact.iter().position(|ok| !ok) {
+        Some(i) => Err(format!(
+            "bucket integrity failure; rebuild merge state from immutable source corpora: {}",
+            entries[i].0
+        )),
+        None => Ok(()),
     }
-    Ok(())
 }
 
-/// `merge.hashBuckets`.
+/// `merge.hashBuckets`, in parallel.
 fn hash_buckets(state: &mut Obj, work: &Path) -> Result<(), String> {
     let dir = work.join("buckets");
     if !dir.is_dir() {
         return Err(format!("{}: no such directory", dir.display()));
     }
+    let names = bucket_files(work);
+    let digests: Vec<io::Result<String>> = names
+        .par_iter()
+        .map(|name| sha256_file(&dir.join(name)))
+        .collect();
     let mut hashes = Obj::new();
-    for name in bucket_files(work) {
-        let digest = sha256_file(&dir.join(&name)).map_err(|e| e.to_string())?;
-        hashes.set(&name, Json::Str(digest));
+    for (name, digest) in names.iter().zip(digests) {
+        hashes.set(name, Json::Str(digest.map_err(|e| e.to_string())?));
     }
     state.set("bucketHashes", Json::Obj(hashes));
     Ok(())
@@ -1983,9 +1995,10 @@ mod tests {
     }
 
     #[test]
-    fn sha2_agrees_with_the_from_scratch_sha256() {
+    fn file_hash_agrees_with_the_reference_sha256() {
+        let dir = scratch("filehash");
         let mut x = 0x9E37_79B9_7F4A_7C15u64;
-        for len in [0usize, 1, 55, 56, 64, 1000, 65_537] {
+        for len in [0usize, 1, 55, 56, 64, 1000, 65_537, (1 << 20) + 7] {
             let data: Vec<u8> = (0..len)
                 .map(|_| {
                     x ^= x << 13;
@@ -1994,12 +2007,15 @@ mod tests {
                     x as u8
                 })
                 .collect();
+            let path = dir.join(format!("{len}.bin"));
+            fs::write(&path, &data).unwrap();
             assert_eq!(
-                hex_sha256(&data),
-                hex::encode(crate::hash::sha256::sha256(&data)),
+                sha256_file(&path).unwrap(),
+                hex::encode(sha256(&data)),
                 "{len} bytes"
             );
         }
+        fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]

@@ -117,10 +117,6 @@ rayon = "1.10"
 # BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
 # reimplement educationally without obscuring the learning goal.
 blake3 = "1.5"
-# SHA-256 at hardware speed (SHA-NI) for the ECC2K-130 merge, which hashes
-# every bucket file of a tens-of-GB corpus on each pass. The from-scratch
-# `hash::sha256` stays the reference it is tested against.
-sha2 = "0.10"
 # DEFLATE compression. Used only by the cryptopals Set-7 CRIME demo
 # (challenge 51): the attack treats compressed-output length as a
 # side channel, so we need a real LZ77-style compressor for the

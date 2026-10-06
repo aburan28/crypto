@@ -90,6 +90,7 @@ class MergeParity(unittest.TestCase):
             out[name] = subprocess.run([*cmd, "--work", str(self.works[name]), "--client", str(CLIENT), *args],
                                        capture_output=True, timeout=300)
         py, rs = out["python"], out["rust"]
+        self.stderr = {name: p.stderr for name, p in out.items()}
         self.assertEqual(py.returncode, rs.returncode,
                          "python %d, rust %d\n%s\n%s" % (py.returncode, rs.returncode, py.stderr[-2000:], rs.stderr[-2000:]))
         self.assertEqual(self.normal("python", py.stdout), self.normal("rust", rs.stdout))
@@ -178,13 +179,19 @@ class MergeParity(unittest.TestCase):
         self.assertEqual(json.loads(p.stdout)["solution"]["k"], self.fixture["k"])
 
     def test_failures_are_the_same_failures(self):
-        self.v1("a.bin", [(1, 2, 3, 4)])
+        self.v1("a.bin", [(1, 2, 3, 4)] + [(i, i, 7 * i, 3) for i in range(5, 40)])
         self.legacy("--detect-only")
         for work in self.works.values():
-            bucket = next((work / "buckets").glob("*.bin"))
-            data = bytearray(bucket.read_bytes()); data[3] ^= 1; bucket.write_bytes(bytes(data))
+            buckets = sorted((work / "buckets").glob("*.bin"))
+            self.assertGreater(len(buckets), 2)
+            for bucket in buckets[-2:]:
+                data = bytearray(bucket.read_bytes()); data[3] ^= 1; bucket.write_bytes(bytes(data))
         p = self.legacy("--detect-only")                     # bucket integrity
         self.assertEqual(p.returncode, 1)
+        # Two buckets are bad; both name the first of them in state order.
+        named = {name: re.findall(rb"corpora: ([0-9a-f]{4}\.bin)", err) for name, err in self.stderr.items()}
+        self.assertEqual(named["rust"], [buckets[-2].name.encode()])
+        self.assertEqual(set(named["python"]), set(named["rust"]))
         for name, work in self.works.items():
             shutil.rmtree(work)
         self.legacy("--detect-only")
