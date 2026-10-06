@@ -44,8 +44,11 @@ use super::suite::{self, Row};
 
 pub const ROUNDS: u32 = 5;
 
-/// The chain's arms in the queue's order: the baseline, then each step.
-pub const CHAIN_ORDER: [&str; 9] = ["base", "B0", "B1", "B3", "B2", "B2b", "B7a", "B3b", "B4"];
+/// The chain's arms in the queue's order: the baseline, then each step
+/// (B5a after B4, as B5a's declaration appends it).
+pub const CHAIN_ORDER: [&str; 10] = [
+    "base", "B0", "B1", "B3", "B2", "B2b", "B7a", "B3b", "B4", "B5a",
+];
 
 /// A run's settings.
 pub struct Run {

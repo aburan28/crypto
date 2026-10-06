@@ -99,6 +99,11 @@ fn rejects_invalid_fields_singular_models_and_noncanonical_coefficients() {
         model(&prime(3, 1, 1)),
         Err(ModelError::Unsupported(_))
     ));
+    // ICV1's extension part: listed coefficients over GF(p^k), unsupported
+    // rather than invalid.
+    let ext = json!({"v":"1","form":"y^2=x^3+a*x+b","p":"5","k":"2","modulus":["2","0"],
+        "field":"fpk-5-2-90ac2fda","a":["1","0"],"b":["1","0"]});
+    assert!(matches!(model(&ext), Err(ModelError::Unsupported(_))));
 }
 #[test]
 fn rejects_tampered_certificates() {
@@ -158,16 +163,24 @@ fn entire_catalog_replays_deterministically() {
     let first = catalog(input).unwrap();
     assert_eq!(first, catalog(input).unwrap());
     let registry: Value = serde_json::from_slice(input).unwrap();
+    // Every curve but the extension fields' (ICV1's extension part, B5a),
+    // for which no construction here exists, has a verified cover.
+    let rows = registry["curves"].as_array().unwrap();
+    let extension = rows.iter().filter(|r| r["family"] == "extension").count();
     assert_eq!(
         first["summary"]["verified"].as_u64().unwrap() as usize,
-        registry["curves"].as_array().unwrap().len()
+        rows.len() - extension
     );
-    for (row, finding) in registry["curves"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .zip(first["curves"].as_array().unwrap())
-    {
+    assert_eq!(
+        first["summary"]["unsupported"].as_u64().unwrap() as usize,
+        extension
+    );
+    for (row, finding) in rows.iter().zip(first["curves"].as_array().unwrap()) {
+        if row["family"] == "extension" {
+            assert_eq!(finding["status"], "unsupported");
+            assert!(finding["exists"].is_null());
+            continue;
+        }
         let m = checked(&serde_json::from_str(row["model_json"].as_str().unwrap()).unwrap());
         let c: Certificate = serde_json::from_value(finding["certificate"].clone()).unwrap();
         verify(&m, &c).unwrap();

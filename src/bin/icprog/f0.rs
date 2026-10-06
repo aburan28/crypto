@@ -21,6 +21,7 @@ use std::path::{Path, PathBuf};
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
+use super::b5a;
 use super::bench::Bench;
 use super::json::{self, obj, J};
 use super::runs;
@@ -163,9 +164,13 @@ fn point(v: &J) -> Result<Point, String> {
     Ok(Some((as_int(v.at("x")?)?, as_int(v.at("y")?)?)))
 }
 
-/// `[scalar]G = Q` on the document's curve, and the known logarithm.
+/// `[scalar]G = Q` on the document's curve, and the known logarithm: a
+/// binary document here, a `prime_extension` one in B5a's arithmetic.
 pub fn replay(doc: &J, scalar: Option<&BigUint>) -> Result<J, String> {
     let field = doc.at("field")?;
+    if field.get("kind").and_then(J::as_str) == Some("prime_extension") {
+        return b5a::replay(doc, scalar);
+    }
     let n = field
         .at("degree")?
         .as_i128()
@@ -218,6 +223,9 @@ pub struct Instance {
     pub document: PathBuf,
     pub method: Option<J>,
     pub timeout_s: u64,
+    /// Whether the run passes `--repeats 1 --repeats-fast 1`: every set's
+    /// runs but B5a's `solve: rho` documents, as its `run.py` declared.
+    pub repeats_one: bool,
 }
 
 /// B4's `HOUR_S`; the tool's own default budget for the others.
@@ -255,12 +263,14 @@ pub fn instances(programme: &Path, set: &str) -> Result<Vec<Instance>, String> {
                 document: known,
                 method: None,
                 timeout_s,
+                repeats_one: true,
             });
             out.push(Instance {
                 run_id: format!("{slug}/{cid}-T001"),
                 document: params.join(format!("{cid}-T001-n{n}.json")),
                 method: None,
                 timeout_s,
+                repeats_one: true,
             });
         }
         Ok::<_, String>(out)
@@ -312,10 +322,43 @@ pub fn instances(programme: &Path, set: &str) -> Result<Vec<Instance>, String> {
                     ),
                 ])),
                 timeout_s: DAY_S,
+                repeats_one: true,
             }])
         }
+        "b5a" => {
+            // B5a's measurement 5: each instance's two documents, keyed by
+            // its slug, then C050's on its own known-answer target.  Only
+            // the paired documents pass the repetition flags.
+            let params = conf.join("v2-b5a").join("params");
+            let mut out = Vec::new();
+            for id in ["G1", "G2", "G3", "E2", "E5", "E11", "B2"] {
+                for which in ["known", "T001"] {
+                    let document = params.join(format!("{id}-{which}.json"));
+                    let paired = json::read(&document)?.at("method")?.at("solve")?.as_str()
+                        == Some("paired");
+                    out.push(Instance {
+                        run_id: format!("{}/{id}-{which}", slug_of(&document)?),
+                        document,
+                        method: None,
+                        timeout_s: HOUR_S,
+                        repeats_one: paired,
+                    });
+                }
+            }
+            out.push(Instance {
+                run_id: "icv1-fp10k3-t41822-dfa3991d/C050-known".into(),
+                document: conf
+                    .join("v2-b2")
+                    .join("params")
+                    .join("C050-cubic-extension.json"),
+                method: None,
+                timeout_s: HOUR_S,
+                repeats_one: false,
+            });
+            Ok(out)
+        }
         other => Err(format!(
-            "unknown instance set {other:?}; the sets are b3-gate, b3b and b4"
+            "unknown instance set {other:?}; the sets are b3-gate, b3b, b4 and b5a"
         )),
     }
 }
@@ -359,7 +402,7 @@ pub fn run(b: &Bench, ic: &Path, list: &[Instance], runs_dir: &Path) -> Result<J
                     std::fs::create_dir_all(parent)
                         .map_err(|e| format!("{}: {e}", parent.display()))?;
                 }
-                let cmd: Vec<String> = vec![
+                let mut cmd: Vec<String> = vec![
                     "timeout".into(),
                     inst.timeout_s.to_string(),
                     ic.to_string_lossy().into_owned(),
@@ -369,11 +412,10 @@ pub fn run(b: &Bench, ic: &Path, list: &[Instance], runs_dir: &Path) -> Result<J
                     "--json".into(),
                     "--out".into(),
                     attempt.to_string_lossy().into_owned(),
-                    "--repeats".into(),
-                    "1".into(),
-                    "--repeats-fast".into(),
-                    "1".into(),
                 ];
+                if inst.repeats_one {
+                    cmd.extend(["--repeats", "1", "--repeats-fast", "1"].map(String::from));
+                }
                 b.launch(&cmd, &attempt, &tree)?;
             }
             rep = runs::load(&attempt);
@@ -431,7 +473,16 @@ fn row(programme: &Path, inst: &Instance, tree: &Path) -> Result<J, String> {
         .and_then(J::as_str)
         == Some("rho");
     let ic_scalar = scalar_of(&rep, "ic")?;
-    let rho_scalar = scalar_of(&rep, "rho")?;
+    // A `solve: rho` report may name its scalar only in its result.
+    let rho_scalar = match scalar_of(&rep, "rho")? {
+        None if rho_only => rep
+            .get("result")
+            .and_then(|r| r.get("scalar"))
+            .filter(|s| !matches!(s, J::Null))
+            .map(as_int)
+            .transpose()?,
+        s => s,
+    };
     let ic_replay = if rho_only {
         J::Null
     } else {
@@ -645,5 +696,15 @@ mod tests {
             "icv1-f2m83-tm6151469093347-debefd74/gate-T001-rho"
         );
         assert!(instances(&programme(), "b5").is_err());
+        // B5a: two runs an instance and C050's, only the paired ones with
+        // the repetition flags, every document on file.
+        let b5a = instances(&programme(), "b5a").unwrap();
+        assert_eq!(b5a.len(), 15);
+        assert!(b5a
+            .iter()
+            .all(|i| i.document.exists() && i.timeout_s == HOUR_S));
+        assert_eq!(b5a.iter().filter(|i| i.repeats_one).count(), 6);
+        assert_eq!(b5a[0].run_id, "icv1-fp9k3-tm4575-aba104ba/G1-known");
+        assert_eq!(b5a[14].run_id, "icv1-fp10k3-t41822-dfa3991d/C050-known");
     }
 }

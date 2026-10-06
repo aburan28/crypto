@@ -186,6 +186,13 @@ pub(super) fn model(v: &Value) -> Result<Model, ModelError> {
     }
     let form = v["form"].as_str().unwrap_or("");
     let field = match form {
+        // ICV1's extension part (B5a): its coefficients are lists over
+        // GF(p^k), and no construction here covers them.
+        "y^2=x^3+a*x+b" if v.get("k").is_some() => {
+            return Err(ModelError::Unsupported(
+                "an extension field GF(p^k): no cover construction for it here".into(),
+            ));
+        }
         "y^2=x^3+a*x+b" => {
             let p = get_number(v, "p")?;
             if p.bits() > 4096 || p < BigUint::from(2u32) {

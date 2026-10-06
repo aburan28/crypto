@@ -38,6 +38,8 @@ mod b2;
 mod b2b;
 #[path = "icprog/b3b.rs"]
 mod b3b;
+#[path = "icprog/b5a.rs"]
+mod b5a;
 #[path = "icprog/b7a.rs"]
 mod b7a;
 #[path = "icprog/bench.rs"]
@@ -467,6 +469,31 @@ enum Command {
         /// B3b's `ic` (`run`).
         #[arg(long)]
         cand: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B5a's generators (`instances.py` and `make_cases.py`, ported):
+    /// `instances` searches design §4's curves into `instances.json`, and
+    /// `cases` writes `conformance/v2-b5a/` from them.  Each refuses to
+    /// overwrite its files; with `--check` it derives them again and
+    /// compares the bytes.
+    /// Its measurement 6 (no harness before): `calibrate` runs each
+    /// calibration instance five times, isolated, and `estimates` reads the
+    /// constants from them.
+    B5a {
+        step: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        check: bool,
+        /// The run tree (`calibrate`, `estimates`).
+        #[arg(long)]
+        runs: Option<PathBuf>,
+        /// B5a's `ic` (`calibrate`).
+        #[arg(long)]
+        ic: Option<PathBuf>,
         /// The isolation tool (default: `isolated_bench` beside this binary).
         #[arg(long)]
         isolate: Option<PathBuf>,
@@ -1340,6 +1367,37 @@ fn main() -> ExitCode {
             cand,
             isolate,
         } => b3b_cmd(&step, &root, &runs, cand, isolate),
+        Command::B5a {
+            step,
+            root,
+            check,
+            runs,
+            ic,
+            isolate,
+        } => {
+            let done = match step.as_str() {
+                "instances" => b5a::write_instances(&root, check),
+                "cases" => b5a::cases(&root, check),
+                "calibrate" | "estimates" => b5a_measure(&step, &root, runs, ic, isolate),
+                _ => Err(format!(
+                    "unknown step `{step}`: instances, cases, calibrate or estimates"
+                )),
+            };
+            return match done {
+                Ok((summary, ok)) => {
+                    println!("{}", json::dumps(&summary, 1));
+                    if ok {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(e) => {
+                    eprintln!("icprog: {e}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
         Command::B7a {
             step,
             steps,
@@ -1576,4 +1634,38 @@ fn main() -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+/// B5a's measurement 6: `calibrate` (the runs) or `estimates` (the
+/// constants from them).
+fn b5a_measure(
+    step: &str,
+    root: &std::path::Path,
+    runs: Option<PathBuf>,
+    ic: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<(json::J, bool), String> {
+    let runs = runs.ok_or_else(|| format!("`{step}` needs --runs"))?;
+    std::fs::create_dir_all(&runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let runs = std::path::absolute(&runs).map_err(|e| e.to_string())?;
+    let root = std::path::absolute(root).map_err(|e| e.to_string())?;
+    if step == "estimates" {
+        return Ok((b5a::estimates(&root, &runs)?, true));
+    }
+    let ic = ic.ok_or("`calibrate` needs --ic")?;
+    if !ic.exists() {
+        return Err(format!("no binary at {}", ic.display()));
+    }
+    let ic = std::path::absolute(&ic).map_err(|e| e.to_string())?;
+    let isolate = match isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    if !isolate.exists() {
+        return Err(format!("no isolation tool at {}", isolate.display()));
+    }
+    b5a::calibrate(&root, &bench::Bench { isolate }, &ic, &runs)?;
+    Ok((json::J::Null, true))
 }

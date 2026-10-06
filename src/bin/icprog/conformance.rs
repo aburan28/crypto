@@ -26,9 +26,11 @@ use std::time::{Duration, Instant};
 use super::json::{self, obj, J};
 use super::suite;
 
-/// The steps, in the scripts' order (`conformance/run.py`'s `STEPS`).
-pub const STEPS: [&str; 12] = [
-    "B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B6", "B7", "B7a", "B7b",
+/// The steps, in the scripts' order (`conformance/run.py`'s `STEPS`), with
+/// B5's two halves after it (B5a's declaration): C050 names B5 as its
+/// `until`, and C103 supersedes it from B5a on.
+pub const STEPS: [&str; 14] = [
+    "B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B5a", "B5b", "B6", "B7", "B7a", "B7b",
 ];
 
 /// A panicking Rust binary exits with this status.
