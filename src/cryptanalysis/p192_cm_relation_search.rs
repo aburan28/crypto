@@ -2005,6 +2005,24 @@ mod tests {
     }
 
     #[test]
+    fn full_exact_search_reaches_frozen_relation_inventory() {
+        let (_, _, generators) = fixtures();
+        let weights = unsupported_weights("0x50313932434d5231", 16, 11, 1);
+        let report = run_exact_search(&generators, Some(&weights), HARD_STATE_CAP, 16).unwrap();
+        assert_eq!(
+            report.enumeration_forward.canonical_vectors_including_zero,
+            EXPECTED_CANONICAL
+        );
+        assert_eq!(
+            report.scalar_ramified_relation_count,
+            EXPECTED_SCALAR_NONZERO
+        );
+        assert_eq!(report.non_scalar_relation_count, 0);
+        assert_eq!(report.exact_search_status, "complete-exact-algebra-box");
+        verify_search_report(&report, true, true).unwrap();
+    }
+
+    #[test]
     fn hnf_controls_reject_alpha_and_root_mutations() {
         let (_, _, generators) = fixtures();
         let mut vector = [0i16; 13];
