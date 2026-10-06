@@ -248,8 +248,8 @@
       "k_candidates_by_tune_targets": {
         "1024": {
           "4096": [700, 800, 1000, 1200],
-          "16384": [1000, 1200, 1400],
-          "65536": [1000, 1200, 1400, 1480]
+          "16384": [700, 800, 1000, 1200, 1400],
+          "65536": [700, 800, 1000, 1200, 1400, 1480]
         }
       },
       "k_selection": "lowest whole-process wall on a disjoint tune corpus; candidates whose estimated IC RSS (ic_rss_model) plus headroom exceeds available memory are skipped and recorded. By default the tune corpus has the panel's L targets (corpora.tune at L); launch-panel --tune-targets T tunes on corpora.tune at L=T instead (grid from k_candidates_by_tune_targets), records tune_targets in state.json, k_tune.json and candidate.json, and checks the tune corpus is disjoint from the panel corpus. Runs before the option have no tune_targets field and tuned at the panel's L.",
