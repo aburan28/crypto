@@ -157,6 +157,31 @@ fn main() {
             }
         }
     }
+    // The table searches l in 4..70, as the 2026-09-30 model did, and the
+    // fit rows' minima sit at l = 4.  Disclose what lies below that range:
+    // the w = 1 cost of the fits at l = 1..4, with the target count, which
+    // passes the 2^129 subgroup there.
+    println!();
+    for (m, fit) in [(3usize, "ceil(l/2) + 4"), (4, "l + 4")] {
+        let rows: Vec<String> = (1..=4usize)
+            .map(|l| {
+                let d = if m == 3 {
+                    (l as u32).div_ceil(2) + 4
+                } else {
+                    l as u32 + 4
+                };
+                let c = cost(m, l, d, 1);
+                format!(
+                    "l={l} (D={d}): 2^{:.2} (targets 2^{:.2})",
+                    c.total, c.targets
+                )
+            })
+            .collect();
+        println!(
+            "below the search range, m = {m}, {fit}, w = 1: {}",
+            rows.join("; ")
+        );
+    }
     println!();
     for m in [3usize, 4] {
         let ls: [usize; 5] = [20, 26, 27, 33, 43];

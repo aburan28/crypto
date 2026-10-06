@@ -717,7 +717,7 @@ ECC2K-130 is below rho. Every degree before this one was `m = 3`'s.
 |--:|---|---|---|---|
 | 1 | (4,1) (5,1) (6,1) (12–16) | 5 in every draw | 5 5 5 | — |
 | 2 | (5,2) (6,2) (7,2) (8,2) (18–24) | **6 in every draw** | 6 7 7 7 | 5 in every draw (11–18) |
-| 3 | (9,3) (10,3) (30, 32) | **≥7 ≥7 ≥7 ≥7; M4_10_3** (degree 6 built in full) | 8, 9 | 5 at S = −5, else 6 |
+| 3 | (9,3) (10,3) (30, 32) | **≥7 in all eight draws** (degree 6 built in full; degree 7 out of reach) | 8, 9 | 5 at S = −5, else 6 |
 
 - **Q7, as registered: `m = 4` refutes above `m = 3` at the same `ℓ`.**
   Every `ℓ = 2` cell reads 6, where `m = 3` reads 5. The prediction held.
@@ -726,7 +726,8 @@ ECC2K-130 is below rho. Every degree before this one was `m = 3`'s.
   - It is equal in four of the seven registered cells.
   - It is one below at `(6, 2)`–`(8, 2)`, where my exact predictions of 7
     missed.
-- **Q10, amendment 1: M4_Q10.**
+- **Q10, amendment 1: rises with `ℓ`.** Both `ℓ = 3` cells read ≥7 on
+  every draw, as predicted.
 - **The degree is flat in `n` at fixed `ℓ`, for both `m`.**
   - `m = 4` at `ℓ = 2` reads 6 from 18 to 24 unknowns, and `m = 3` at
     `ℓ = 2` reads 5 from 11 to 18.

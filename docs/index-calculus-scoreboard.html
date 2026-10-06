@@ -3598,7 +3598,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr class="group"><td colspan="5">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
         <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td></tr>
         <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td></tr>
-        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; M4_10_3_HTML</b> (degree 6 in full)</td><td>8; 9</td></tr>
+        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; &ge;7 &ge;7 &ge;7 &ge;7</b> (degree 6 in full)</td><td>8; 9</td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -3619,7 +3619,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>3</td><td>&lceil;&ell;/2&rceil;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;3 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">158.96</td><td class="n">+98.15</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>free oracle (the floor, integer &ell;)</td><td class="n">&mdash;</td><td class="n">56.46</td><td class="n">&minus;4.35</td><td><span class="chip">boundary</span></td></tr>
         <tr><td>4</td><td>D&thinsp;=&thinsp;2, any Macaulay matrix</td><td class="n">1</td><td class="n">62.88</td><td class="n">+2.07</td><td><span class="chip">extrapolation</span></td></tr>
-        <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (borrowed from m&thinsp;=&thinsp;3; m&thinsp;=&thinsp;4 already reads &ge;7 at &ell;&thinsp;=&thinsp;3, so this row is optimistic)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (borrowed from m&thinsp;=&thinsp;3; m&thinsp;=&thinsp;4 already reaches 7 at &ell;&thinsp;=&thinsp;3, far below the &ell;&thinsp;=&thinsp;34 priced here, so this row assumes its rise stops at once)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>&ell;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;4 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">173.13</td><td class="n">+112.32</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>semi-regular D<sub>reg</sub>(N) of the m&thinsp;=&thinsp;4 shape (55 at &ell;&thinsp;=&thinsp;27) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">275.14</td><td class="n">+214.33</td><td><span class="chip">extrapolation</span></td></tr>
       </tbody>
@@ -3643,8 +3643,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         degree is set by m and &ell;, and the semi-regular reference, within one everywhere, overstates its growth in n.
         Any degree that rises with &ell; collapses the route: under either measured fit the optimum is the smallest factor
         base, where the route is a target search costing 2<sup>158.96</sup> (m&thinsp;=&thinsp;3) or 2<sup>173.13</sup>
-        (m&thinsp;=&thinsp;4), above an exhaustive search of the subgroup. Those are extrapolations of three-rung fits,
-        marked as such; the verdict against rho is unchanged.</p>
+        (m&thinsp;=&thinsp;4), above an exhaustive search of the subgroup; below the searched range (&ell;&thinsp;&lt;&thinsp;4)
+        they price 2<sup>158.12</sup>&ndash;2<sup>170.90</sup> with target counts past the 2<sup>129</sup> subgroup, still above
+        that search. Those are extrapolations of three-rung fits, marked as such; the verdict against rho is unchanged.</p>
     </div>
   </div>
 

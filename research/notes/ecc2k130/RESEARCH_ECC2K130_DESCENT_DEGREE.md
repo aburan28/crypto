@@ -58,8 +58,11 @@ version, plus the new rows of §2's table. The cost model is now native
      range, where the route is a search over targets:
      - `m = 3`: `2^158.96`;
      - `m = 4`: `2^173.13`.
-     Both are above an exhaustive search of the subgroup. These are
-     extrapolations of three-rung fits.
+     Both are above an exhaustive search of the subgroup.
+   - Below the range the model searches (`ℓ < 4`), the fits price
+     `2^158.12` to `2^170.90`, with target counts at or past the subgroup's
+     `2^129`. So every `ℓ` is above exhaustive search.
+   - These are extrapolations of three-rung fits.
 
 ## 1. What is measured
 
@@ -181,15 +184,26 @@ Each row is minimised over integer `ℓ`. The rho reference is `2^60.81`
   summand.
   - On 2026-09-30 these rows were unmeasured and called the optimistic
     case.
-  - §5 now measures `m = 4`: 6 at `ℓ = 2` and ≥7 at `ℓ = 3`. The `D = 6`
-    and `D = 7` rows are already exceeded at `ℓ = 3`, far below the
-    `ℓ ≈ 34` they are priced at, so they are confirmed as optimistic.
+  - §5 now measures `m = 4`: 6 at `ℓ = 2` and ≥7 at `ℓ = 3`.
+  - The `D = 6` rows are already exceeded at `ℓ = 3`, and `D = 7` is
+    already reached there. Both are priced at `ℓ ≈ 34`.
+  - Holding the degree at 7 from `ℓ = 3` to `ℓ = 34` would need the
+    measured rise of one degree per `ℓ` to stop at once. So both rows
+    remain the optimistic case.
+  - A ≥7 is a bound, so this does not show 7 exceeded.
 - **The fit rows' minima sit at the bottom of the search range,
-  `ℓ = 4`.**
+  `ℓ = 4`.** The range `4..70` is the 2026-09-30 model's, kept so the
+  existing rows reproduce.
   - Once the degree grows with `ℓ`, a larger factor base costs more than
     it saves in targets. The optimiser therefore shrinks the base until
     the target count, `2^125.6` here, is nearly the whole group.
   - The route has then turned into an expensive search over targets.
+  - The tool also prints the fits below the range, at `ℓ = 1`–`3`:
+    - `m = 3`: `2^158.12` to `2^160.78`;
+    - `m = 4`: `2^165.93` to `2^170.90`.
+  - There the target count is at or past the `2^129` subgroup, so the
+    model has stopped describing index calculus. Every value is still above
+    exhaustive search.
 
 ### What the table says
 
@@ -291,7 +305,7 @@ held.
 |--:|---|---|---|---|
 | 1 | (4,1) (5,1) (6,1), 12–16 | 5 in every draw | 5 | — |
 | 2 | (5,2) (6,2) (7,2) (8,2), 18–24 | 6 in every draw | 6, 7, 7, 7 | 5 in every draw |
-| 3 | (9,3) (10,3), 30 and 32 | ≥7 ×4; M4_10_3 | 8, 9 | 6 (5 at surplus −5) |
+| 3 | (9,3) (10,3), 30 and 32 | ≥7 in all eight draws | 8, 9 | 6 (5 at surplus −5) |
 
 - **`m = 4` sits one degree above `m = 3` at the same `ℓ`**, and the gap
   does not close as `n` grows.
@@ -302,11 +316,14 @@ held.
   - The semi-regular reference, which counts unknowns and equations, is
     within one in every cell but overstates the growth in `n`.
 - **What it does to §2.**
-  - The `m = 4` constant-degree rows are now known to be optimistic: 7 is
-    exceeded at `ℓ = 3`, against the `ℓ ≈ 34` they assume.
+  - The `m = 4` constant-degree rows are the optimistic case. 6 is
+    exceeded and 7 is reached at `ℓ = 3`, against the `ℓ ≈ 34` they
+    assume.
   - The new `ℓ + 4` row prices `m = 4` at `2^173.13` at `w = 1`, with its
     minimum at the smallest factor base. That is `2^+112` over rho, and
     above an exhaustive search of the subgroup.
+  - Below the searched range it is `2^165.93` at `ℓ = 1`, still above that
+    search.
   - It is an extrapolation of a fit to three rungs, one of them a bound.
     What it shows robustly is the shape: a degree that rises with `ℓ` makes
     the factor base shrink until the route is a search.
