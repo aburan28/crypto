@@ -55,6 +55,11 @@
 //!   points where a thin-product primitive could in principle be tried,
 //!   each assessed as a **proposal** with the frozen experiment that would be
 //!   needed to promote it. None is wired into the end-to-end `S` accounting.
+//! - [`WorkloadShape`] / [`screen_workload`] / [`Screening`]: a reusable
+//!   O(1) gate that other workstreams call before claiming a thin-product
+//!   transfer. It checks shape (shared bilinear middle), ring (small
+//!   integers), then size (`N >= D^18`, `|W| <= N^2/sqrt(D)`), and names
+//!   the first failing gate.
 //!
 //! ## What this module does not do
 //!
@@ -409,6 +414,105 @@ pub fn all_insertion_points() -> [IcInsertionPoint; 4] {
     ]
 }
 
+/// A workload shape presented to the thin-product screening gate.
+///
+/// The gate decides whether a batch of work even has the *shape* the paper's
+/// technique accelerates — many wanted outputs sharing one thin integer
+/// middle — before any regime arithmetic is attempted. Most pipeline
+/// workloads fail at the shape gate (hash probes, group operations, sparse
+/// algebra over `Z/rZ`), which is itself the finding: it names exactly what
+/// a future candidate must exhibit to pass.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct WorkloadShape {
+    /// `N`: number of outer rows (queries, relations, targets batched).
+    pub n_outer: usize,
+    /// `D`: shared middle dimension; `0` when there is no shared middle.
+    pub middle_dim: usize,
+    /// `|W|`: number of wanted outputs.
+    pub wanted: usize,
+    /// Whether the batch's per-output work is an inner product over one
+    /// shared middle (as opposed to hash probes or group operations).
+    pub has_shared_middle: bool,
+    /// Whether entries are small integers (as opposed to curve points,
+    /// field elements, or residues modulo the subgroup order).
+    pub small_integer_entries: bool,
+}
+
+/// Verdict of [`screen_workload`].
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Screening {
+    /// Passes both gates of the paper's concrete theorem: a shared thin
+    /// integer middle with `N >= D^18` and `|W| <= N^2/sqrt(D)`.
+    /// Carries `(epsilon, kappa)`.
+    FitsConcrete {
+        /// `epsilon = ln D / ln N`.
+        epsilon: f64,
+        /// `kappa` defined by `|W| = N^2/D^kappa`.
+        kappa: f64,
+    },
+    /// Has a shared integer middle but misses the size gates.
+    /// Carries `(epsilon, kappa)`; at least one gate fails.
+    FailsRegime {
+        /// `epsilon = ln D / ln N` (`None` when degenerate).
+        epsilon: Option<f64>,
+        /// `kappa` from `|W| = N^2/D^kappa` (`None` when undefined).
+        kappa: Option<f64>,
+    },
+    /// No shared middle: the work is hash probes, group operations, or
+    /// other non-bilinear batch work, so the paper's recursion has nothing
+    /// to prune.
+    NoSharedMiddle,
+    /// A shared middle exists but over the wrong ring: curve points, field
+    /// elements, or residues modulo `r`, rather than small integers.
+    WrongRing,
+}
+
+impl Screening {
+    /// Whether the shape passes both gates.
+    pub fn passes(&self) -> bool {
+        matches!(self, Screening::FitsConcrete { .. })
+    }
+}
+
+/// Screen one workload shape against the paper's concrete regime.
+///
+/// The checks run in order: shape (shared bilinear middle), ring (small
+/// integers), then size (`N >= D^18` and `|W| <= N^2/sqrt(D)`). Only scalar
+/// arithmetic is used; no wanted set is materialised. A shape that fails
+/// early never reaches the arithmetic, and its verdict names the failing
+/// gate so a future candidate knows what must change.
+pub fn screen_workload(shape: &WorkloadShape) -> Screening {
+    if !shape.has_shared_middle {
+        return Screening::NoSharedMiddle;
+    }
+    if !shape.small_integer_entries {
+        return Screening::WrongRing;
+    }
+    let n = shape.n_outer as f64;
+    let d = shape.middle_dim as f64;
+    let w = shape.wanted as f64;
+    let epsilon = if shape.n_outer >= 2 && shape.middle_dim >= 1 {
+        Some(d.ln() / n.ln())
+    } else {
+        None
+    };
+    let kappa = if shape.wanted >= 1 && shape.middle_dim >= 2 && w <= n * n && n >= 1.0 {
+        Some((n * n / w).ln() / d.ln())
+    } else {
+        None
+    };
+    let in_regime =
+        shape.n_outer >= 1 && shape.middle_dim >= 1 && n >= d.powf(18.0) && epsilon.is_some();
+    let wanted_ok = shape.middle_dim >= 1 && (shape.wanted as f64) <= n * n / d.sqrt();
+    match (in_regime, wanted_ok, epsilon, kappa) {
+        (true, true, Some(eps), Some(kap)) => Screening::FitsConcrete {
+            epsilon: eps,
+            kappa: kap,
+        },
+        _ => Screening::FailsRegime { epsilon, kappa },
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -579,5 +683,102 @@ mod tests {
             assert!(!a.blocking_difference.is_empty());
             assert!(!a.required_experiment.is_empty());
         }
+    }
+
+    #[test]
+    fn screening_passes_a_thin_integer_shape() {
+        // N = 2^18, D = 2 (2^18 = N meets the gate exactly),
+        // |W| = N^2/2 (kappa = 1 >= 1/2).
+        let n: usize = 1 << 18;
+        let w = n * n / 2;
+        let verdict = screen_workload(&WorkloadShape {
+            n_outer: n,
+            middle_dim: 2,
+            wanted: w,
+            has_shared_middle: true,
+            small_integer_entries: true,
+        });
+        match verdict {
+            Screening::FitsConcrete { epsilon, kappa } => {
+                assert!((epsilon - 1.0 / 18.0).abs() < 1e-12);
+                assert!((kappa - 1.0).abs() < 1e-9);
+            }
+            other => panic!("expected FitsConcrete, got {other:?}"),
+        }
+        assert!(verdict.passes());
+    }
+
+    #[test]
+    fn screening_rejects_hash_probe_work() {
+        // Pair-table / MITM / BSGS / rho probes: hash lookups over an
+        // unstructured key space, no shared bilinear middle.
+        let verdict = screen_workload(&WorkloadShape {
+            n_outer: 1 << 20,
+            middle_dim: 64,
+            wanted: 1 << 20,
+            has_shared_middle: false,
+            small_integer_entries: true,
+        });
+        assert_eq!(verdict, Screening::NoSharedMiddle);
+        assert!(!verdict.passes());
+    }
+
+    #[test]
+    fn screening_rejects_wrong_ring() {
+        // Sparse Wiedemann matvecs share a middle but over Z/rZ.
+        let verdict = screen_workload(&WorkloadShape {
+            n_outer: 1 << 20,
+            middle_dim: 4,
+            wanted: 1 << 20,
+            has_shared_middle: true,
+            small_integer_entries: false,
+        });
+        assert_eq!(verdict, Screening::WrongRing);
+        assert!(!verdict.passes());
+    }
+
+    #[test]
+    fn screening_rejects_dense_regime() {
+        // Batch MSM relation verification at the standard operating point:
+        // R relations over an F-point base with R ~= F gives epsilon ~= 1,
+        // far above the 1/18 thinness the technique needs. Scale-free:
+        // doubling both keeps epsilon at 1.
+        for scale in [64_usize, 1024] {
+            let verdict = screen_workload(&WorkloadShape {
+                n_outer: scale,
+                middle_dim: scale,
+                wanted: scale,
+                has_shared_middle: true,
+                small_integer_entries: true,
+            });
+            match verdict {
+                Screening::FailsRegime {
+                    epsilon: Some(eps),
+                    kappa: _,
+                } => assert!((eps - 1.0).abs() < 1e-12),
+                other => panic!("expected FailsRegime(eps=1), got {other:?}"),
+            }
+            assert!(!verdict.passes());
+        }
+    }
+
+    #[test]
+    fn screening_rejects_oversized_wanted_set() {
+        // Thin integer middle, but every output wanted: kappa = 0 < 1/2.
+        let verdict = screen_workload(&WorkloadShape {
+            n_outer: 1 << 18,
+            middle_dim: 2,
+            wanted: (1 << 18) * (1 << 18),
+            has_shared_middle: true,
+            small_integer_entries: true,
+        });
+        match verdict {
+            Screening::FailsRegime {
+                epsilon: _,
+                kappa: Some(kap),
+            } => assert!(kap < 0.5),
+            other => panic!("expected FailsRegime(kappa<1/2), got {other:?}"),
+        }
+        assert!(!verdict.passes());
     }
 }
