@@ -232,6 +232,7 @@ fn prestart_roles(
     contract::check_roles(capsule, record)?;
     let mut exporters = Vec::new();
     let mut solvers = Vec::new();
+    let mut readiness = Vec::new();
     let environment = vec![("LC_ALL".to_string(), "C".to_string())];
     let ledger = execution.join("child-pids");
     for trial in 0..cfg.plan.max_queries {
@@ -257,6 +258,18 @@ fn prestart_roles(
                 marker: spec.marker,
                 ready_deadline_ms: 30_000,
             })?;
+            let receipt_path = dir.join(format!("{role}.ready.json"));
+            let ready = native::load(&receipt_path)?;
+            native::require(
+                ready["state"] == "ready-without-input"
+                    && ready["stdin_written_bytes"] == 0
+                    && ready["executable_sha256"] == spec.pin
+                    && ready["marker"] == spec.marker
+                    && ready["cwd"] == json!(dir),
+                "SAT role readiness lacks a pinned zero-input boundary",
+            )?;
+            readiness.push(json!({"trial":trial,"role":role,"receipt":ready,
+                "receipt_sha256":sha256(&native::read(&receipt_path,65536)?)}));
             if role == "exporter" {
                 exporters.push(Some(child));
             } else {
@@ -265,6 +278,14 @@ fn prestart_roles(
         }
     }
     contract::check_roles(capsule, record)?;
+    native::save(
+        &execution.join("pool-ready.json"),
+        &json!({
+            "schema_version":1,"scope":contract::SCOPE,"max_queries":cfg.plan.max_queries,
+            "prepared_roles":readiness,"all_roles_ready_without_input":true,
+            "source_bound_execution_admitted":false
+        }),
+    )?;
     Ok((exporters, solvers))
 }
 fn run(capsule: &Path, execution: &Path, card_path: &Path, seal: &str) -> Result<(), String> {

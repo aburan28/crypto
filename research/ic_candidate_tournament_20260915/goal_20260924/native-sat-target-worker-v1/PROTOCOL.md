@@ -22,6 +22,9 @@ preparation, reconstructs the independent full-rank log table, and starts one
 prepared exporter and one prepared CMS process for **each** of the frozen
 `max_queries` attempts. Each role has a unique process group, PID ledger,
 binary pin, target-free argv, and a durable no-input READY receipt. The
+worker also writes one `pool-ready.json` after every role has reached READY
+and before the target journal or online clock starts; it pins each individual
+readiness receipt hash and rejects a role that reports any stdin byte. The
 exporter marker is `c EXPORTER_PREPARED_STDIN_READY_v1`. The CMS marker must be
 `c PREPARED_STDIN_READY_v1` emitted after its stdin parser is constructed; the
 unmodified CMS reader line is not a sufficient readiness marker. The
