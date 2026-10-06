@@ -124,6 +124,21 @@ fn icprog_reproduces_r05s_committed_analysis_byte_for_byte() {
     );
 }
 
+/// R07's `analysis.json` is `icprog analyse r07`'s output from R07's
+/// `runs.tar.xz`, and stays so.
+#[test]
+fn icprog_reproduces_r07s_committed_analysis_byte_for_byte() {
+    let round = round("R07-main-head");
+    let dir = unpack(&round, "r07");
+    let out = analyse("r07", &dir.join("runs"));
+    std::fs::remove_dir_all(&dir).ok();
+    let committed = std::fs::read(round.join("analysis.json")).unwrap();
+    assert!(
+        out.stdout == committed,
+        "icprog's R07 analysis differs from the committed analysis.json"
+    );
+}
+
 /// R05's pin was written by the declared `run.py pin`; with its record
 /// removed, `icprog run r05 pin` must write the same bytes from the
 /// candidate's outputs in the run tree (no binary runs: every output is

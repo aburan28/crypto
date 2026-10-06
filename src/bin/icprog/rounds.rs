@@ -730,10 +730,43 @@ pub mod speed {
             ("holdouts".into(), holdouts),
         ]);
         if let Some(cg) = control {
-            doc.push(("callgrind".into(), cg));
+            doc.push(("callgrind".into(), callgrind_for_role(cg, s.callgrind_role)));
         }
         doc.push(("decision".into(), decision));
         Ok(J::Obj(doc))
+    }
+
+    /// The callgrind block as the round's role reads it.  A control keeps
+    /// [`callgrind::control`]'s verdict and rule.  A cross-check (plan
+    /// §5) decides one thing, the same logarithm from both arms, so its
+    /// block says that and nothing about a control it is not.
+    fn callgrind_for_role(cg: J, role: CallgrindRole) -> J {
+        match role {
+            CallgrindRole::Control => cg,
+            CallgrindRole::CrossCheck => {
+                let pairs = cg.get("pairs").cloned().unwrap_or(J::Obj(Vec::new()));
+                let held = pairs.as_obj().is_some_and(|ps| {
+                    !ps.is_empty()
+                        && ps
+                            .iter()
+                            .all(|(_, p)| p.get("same_log").is_some_and(J::truthy))
+                });
+                obj([
+                    ("pairs", pairs),
+                    ("role", J::Str("cross-check".into())),
+                    ("cross_check_held", J::Bool(held)),
+                    (
+                        "rule",
+                        J::Str(
+                            "both arms recover the same logarithm at every profiled row; the instruction \
+                             counts and the functions that differ are reported, not tested \
+                             (PROTOCOL.md, plan §5)"
+                                .into(),
+                        ),
+                    ),
+                ])
+            }
+        }
     }
 
     // ── the declared runs, natively (each PROTOCOL.md's "Rows") ──────

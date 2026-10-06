@@ -1,0 +1,14 @@
+{
+ "baseline": "v3",
+ "previous": "v2",
+ "round": "R07",
+ "class": "engineering",
+ "commit": "995ea207",
+ "built_from": "995ea2071cc7453877a503d30eb561ae82cddab9",
+ "base": "v2 edcb0bec",
+ "src_tree": "8d256c652fe1f95d685c8ec4443f2c9252a3c6c5",
+ "binary_sha256": "9c3320390d74ae48b74382d2ec3f8b4b5b1585e5e8aa2448c0d78369807a26b4",
+ "source": "research/ic_tool_program/rounds/R07-main-head/analysis.json",
+ "what_changed": "main's head, about 700 commits past v2's lineage, chiefly #1242 (every Gf2 product reduced by two carry-less folds with the modulus's sparse tail); the programme's own levers v1 and v2 reached it through #1166 and #1187; every pinned output is v0's",
+ "measured": "R07's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each, paired with v2 in the same runs; s_cold is the candidate's median in v0's unit"
+}

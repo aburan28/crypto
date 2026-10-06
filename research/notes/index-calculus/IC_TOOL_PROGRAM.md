@@ -217,7 +217,7 @@ A Track B round may change no speed at all. It must then show:
 ## 7. The baseline ledger
 
 Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01),
-R03 v1 and R05 v2 (both 2026-10-01). A baseline's `S` comes from the round that made
+R03 v1 and R05 v2 (both 2026-10-01), and R07 v3 (2026-10-06). A baseline's `S` comes from the round that made
 it, beside its base's `S` in the same runs: runs hours apart on this host
 differ by several per cent, so only a paired ratio compares across
 rounds.
@@ -227,6 +227,7 @@ rounds.
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 | v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, #1166 |
 | v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, #1187 |
+| v3 | `995ea207`, main's head | engineering | 3.12, 3.67, 4.38, 5.82, 5.48, 8.09 (R07's runs; v2 there: 4.12, 4.37, 5.11, 6.66, 8.11, 12.26) | 1.135 [1.104, 1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.170 [1.141, 1.201], 1.483 [1.445, 1.523] and 1.539 [1.521, 1.557]; 1.110–1.287 at the eight other sizes | not re-measured (rule v3 declared) | not re-measured (rule v3 declared) | none yet | 61 | #1395, #1414 |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
@@ -398,6 +399,37 @@ predicted false-positive rate from 0.17–0.21 to 0.019–0.031
 - **A standing rule from here on:** each round's declaration names the
   main commit its base is built from. When main has moved under that
   base, a drift round like R07 runs before the next declared round.
+
+**R07 made v3 (2026-10-06).** Main's head, `995ea207`, is the
+programme's baseline, accepted on its pin and the round's own A/A bands,
+with no minimum gain
+([protocol](../../ic_tool_program/rounds/R07-main-head/PROTOCOL.md),
+[results](../../ic_tool_program/rounds/R07-main-head/README.md)).
+- **Main is faster than v2 at every size.** Cold time is 1.135 [1.104,
+  1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] times faster at
+  `2^44.3`, `2^44.5` and `2^47.2`; the fresh holdouts read 1.170, 1.483
+  and 1.539. The eight smaller sizes read 1.110–1.287. Every pinned output
+  is v0's.
+- **The wide-tail penalty is gone.** At `2^44.5` and `2^47.2` a scanned
+  summand falls from 1.85 and 1.80 units to 1.15 and 1.14, the 8-lane
+  kernel's cost at `2^44.3`: #1242's carry-less folds made the scalar
+  subtraction there about 2.4 times cheaper a product. `S` at `2^44.5` is
+  now below `S` at `2^44.3`.
+- **`2^44.3` gains least,** 1.135 cold and 1.049 in collection: its scan
+  runs the 8-lane kernel, which #1242 does not touch.
+- **Rho's online interval is faster too,** 1.110–1.818: main rewrote the
+  walk after v2 (#1334, #1360), and it shares the field arithmetic. The
+  rule's comparison at v3 ([`rule/v3`](../../ic_tool_program/rule/v3/PROTOCOL.md),
+  declared with R07's results) measures where that leaves the index
+  calculus against rho.
+- **Under callgrind,** on the portable paths, main runs 29% and 27% fewer
+  instructions at `2^44.3` and `2^47.2`, and both arms recover the same
+  logarithm, the cross-check's one decision.
+- **The class is engineering,** credited to main (#1242 and the rest of
+  the drift), not to a lever of the programme's.
+- **What runs next on v3:** the rule's comparison, then R06 (the scan's
+  key by GFNI and funnel shifts, declared with R07's results), and R02b's
+  go/no-go exploration under its amendment 3.
 
 ## 9. Track B: generality and robustness
 
