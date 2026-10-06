@@ -43,7 +43,8 @@ fn completion(b: &Binding, trial: usize) -> Value {
             "attempt":QueryAttempt {trial:trial as u64,a,b:c,pdp:PdpAttempt {outcome:PdpOutcome::ProvedUnsat,points:None,stats:PdpSolverStats::None}}})
         }
         Family::Cryptominisat => {
-            json!({"trial":trial,"a":a,"b":c,"outcome":"timeout","backend_called":true})
+            json!({"trial":trial,"a":a,"b":c,"public_query":[1,2],
+                "outcome":"timeout","source_model_valid":false,"backend_called":true})
         }
     }
 }
@@ -119,6 +120,26 @@ fn wrong_target_coefficients_family_and_completion_are_rejected() {
             assert!(writer.complete(&completion(&b, 1)).is_err());
             assert!(writer.complete(&completion(&b, 0)).is_err());
         }
+        fs::remove_dir_all(p).unwrap();
+    }
+}
+#[test]
+fn sat_completion_cannot_change_started_query_or_native_call_claim() {
+    for mutation in 0..3 {
+        let p = temp("sat-query-binding");
+        let b = binding(Family::Cryptominisat);
+        let mut writer = Journal::create(&p, b.clone()).unwrap();
+        writer.start(&start(&b, 0)).unwrap();
+        let mut row = completion(&b, 0);
+        match mutation {
+            0 => row["public_query"] = json!([3, 4]),
+            1 => row["backend_called"] = json!(false),
+            _ => row["public_query"] = json!([1 << 17, 2]),
+        }
+        assert!(writer.complete(&row).is_err());
+        assert!(writer.complete(&completion(&b, 0)).is_err());
+        let prefix = inspect(&p, &b.registration_sha256).unwrap();
+        assert_eq!(prefix["pending_start"]["trial"], 0);
         fs::remove_dir_all(p).unwrap();
     }
 }

@@ -82,6 +82,15 @@ fn keys(value: &Value, expected: &[&str]) -> Result<(), String> {
         "target record fields differ",
     )
 }
+fn public_query(value: &Value) -> bool {
+    value.is_null()
+        || value.as_array().is_some_and(|point| {
+            point.len() == 2
+                && point
+                    .iter()
+                    .all(|coordinate| coordinate.as_u64().is_some_and(|v| v < 1 << 17))
+        })
+}
 fn header(
     binding: &Binding,
     coefficients: &[[u64; 2]],
@@ -154,7 +163,14 @@ fn header(
             matches!(
                 body["outcome"].as_str(),
                 Some("query_planned" | "identity_query")
-            ) && body["source_model_valid"] == false
+            ) && public_query(&body["public_query"])
+                && body["outcome"]
+                    == if body["public_query"].is_null() {
+                        "identity_query"
+                    } else {
+                        "query_planned"
+                    }
+                && body["source_model_valid"] == false
                 && body["backend_called"] == false
                 && body["witness_indices"].is_null()
                 && body["candidate_scalar"].is_null(),
@@ -162,8 +178,11 @@ fn header(
         )?;
     } else {
         native::require(
-            body["outcome"].is_string() && body["backend_called"].is_boolean(),
-            "SAT completion lacks disposition",
+            body["outcome"].is_string()
+                && body["backend_called"].is_boolean()
+                && body["source_model_valid"].is_boolean()
+                && public_query(&body["public_query"]),
+            "SAT completion lacks bounded query or disposition",
         )?;
     }
     Ok(h)
@@ -256,6 +275,13 @@ impl Journal {
             .ok_or("target completion lacks start")?;
         let h = header(&self.binding, &self.coefficients, body, true)?;
         native::require(h == start.header, "target completion differs from start")?;
+        if self.binding.family == Family::Cryptominisat {
+            native::require(
+                body["public_query"] == start.body["public_query"]
+                    && body["backend_called"] == !start.body["public_query"].is_null(),
+                "SAT completion changed the started public query or native-call claim",
+            )?;
+        }
         let record = Envelope {
             schema_version: 1,
             binding_sha256: self.binding_sha256.clone(),
