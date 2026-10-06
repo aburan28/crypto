@@ -10,6 +10,9 @@ arm has a separate [target-free source publication](f5-source-v1/result-v1/RESUL
 from a new, unconsumed validation capsule, with all 6,968 archived members
 independently replayed. F5 card adoption remains unexercised. The incumbent IC
 and rho arms still lack equivalent independent pre-card source publications.
+A separate [disclosed strong-rho readiness control](rho-readiness-v1/RESULT.md)
+recovered and replayed one already exposed public point; it is neither a
+source publication nor a fresh paired arm.
 No point card, fresh target registration, four-arm result or isolated-host
 receipt exists under this protocol. The three earlier confirmation sets and
 every consumed controller remain closed. A stage control is never a complete
@@ -59,12 +62,31 @@ manifests. Keep all IDs null until those records exist.
 
 ## Frozen four-arm execution
 
-The proposed common point is supplied to F5, SAT, the registered incumbent
-and the strongest compatible one-target rho reference. Freeze the arm order,
+The proposed common point is supplied to F5, SAT, the qualified pair-table
+incumbent and the strong one-target signed-Frobenius rho implementation
+(`rho.signed_frobenius_strong`, 32 lockstep lanes, `dp_bits=4`,
+`step_cap_factor=2000`). The older pair-table worker's requested four rho
+walks collapsed to one effective walk on n17; it cannot silently replace this
+strong reference. The incumbent's sampled subgroup-orbit base has 272 actual
+usable points and eight folded columns on its earlier disclosed n17 inventory;
+re-inventory the exact pre-card source before assigning its new candidate ID.
+F5 and SAT use their separately registered standard-subspace base, so the
+comparison changes both decomposition and factor-base policies. Freeze the arm order,
 algorithm seeds, source/binary pins, resource envelope and timeout policies
 before dispatch. Randomize or alternate arm order across independently drawn
 future cards; never choose the order after seeing a result. For this first
 card, every arm gets exactly one irreversible run, including failures.
+
+The older ecbench curve registry's `EC1N17Ce1hdfbf24105ef5` uses hex
+polynomial-bit strings; the IC manifests' `EC1N17Ckb1hbbe2b5b6b1e6` use
+decimal integers. Admit their point-level pairing only after checking the
+exact shared field polynomial `x^17+x^3+1`, coefficients `[1,1,0,0,1]`,
+subgroup order 65587, cofactor 2, generator `[43693,23339]`, and public Q.
+Retain input parsing/conversion and subgroup validation as separately timed
+setup outside every online interval; no arm receives a scalar. The rho
+method's group-addition-equivalent count leaves hashing and distinguished-
+point table work unpriced, so an `S` ratio based on it is a lower-bound
+diagnostic unless a matched complete operation boundary is registered first.
 
 The F5 target policy is its disclosed degree-three MatrixF5 search with at
 most eight seeded queries and the 900-second outer watchdog, supplied with

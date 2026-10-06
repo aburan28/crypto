@@ -1,0 +1,71 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h9e1dad35a8e3",
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "family": "rho",
+        "params": {
+          "dp_bits": "4",
+          "lanes": "32",
+          "step_cap_factor": "2000"
+        },
+        "method_id": "ECM1hb6123afffc07",
+        "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
+        "entry": "koblitz_strong_rho::StrongRho::solve"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wfcd1b6a7cdd4",
+      "workload_sha256": "fcd1b6a7cdd4aa00f991f844b6bda3ffd2fcddc6b791fa2787eedb5aebf79e7d",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "curve": {
+        "slug": "icv1-f2m17-tm101-00378d4e",
+        "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(1, 17)",
+        "field_degree": 17,
+        "field_bits": null,
+        "group_order": 131174,
+        "r": 65587,
+        "cofactor": 2,
+        "generator": [
+          "0xaaad",
+          "0x5b2b"
+        ],
+        "automorphisms_available": 34,
+        "registered": true,
+        "ec1": "EC1N17Ce1hdfbf24105ef5",
+        "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 11,
+      "target_index": 0,
+      "target": [
+        "0x131ff",
+        "0x1c6fb"
+      ],
+      "planted": null,
+      "target_counter": 2
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 14674375121182755328
+    }
+  ]
+}

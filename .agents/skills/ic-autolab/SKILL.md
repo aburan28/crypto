@@ -211,6 +211,11 @@ have independently checked source publications and a public card exists,
 card to the same F5 capsule before the ordinary one-use scientific publication
 and dispatch. The adoption path has not yet been exercised; the old consumed
 F5 capsule cannot be adopted. Incumbent IC and rho source gates remain open.
+The [disclosed strong-rho readiness control](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/rho-readiness-v1/RESULT.md)
+passed scalar replay and deterministic session audit on one already exposed
+public point. It is L0, source-unpublished and unpaired. Use its exact
+hex/decimal curve crosswalk and unpriced-operation caveat before registering
+the rho reference for a fresh card.
 Do not charge child startup to the online interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation
