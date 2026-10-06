@@ -4,8 +4,10 @@ Status: frozen disclosed-input compatibility design. The natural SAT
 preparation finished and its independent original audit passed at rank 29/29.
 A distinct post-buffer-marked CMS binary was built with status
 `BUILT_UNVALIDATED`; see [its build receipt](marked-build-v1/README.md) and
-the preserved [first failed build](BUILD_ATTEMPTS.md). No nine-role transport
-result, SAT target registration or speed claim exists yet. This control
+the preserved [first failed build](BUILD_ATTEMPTS.md). The subsequently
+executed, independently audited [nine-role result](result-v1/RESULT.md)
+passed disclosed-input transport parity. No SAT target registration or speed
+claim exists yet. This control
 cannot change, refill, or reopen that preparation or the three closed
 confirmation sets.
 

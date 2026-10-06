@@ -34,7 +34,7 @@ Use a new output path: replay refuses to overwrite evidence. This command checks
 the retained source witness, ordinary rows, exact geometric negatives, rank and
 logs. It launches no solver and establishes neither new yield nor performance.
 The [native migration gates](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-v1/PROTOCOL.md)
-separate this replay from the pending native controller and fresh comparison.
+separate this replay from the later native controllers and fresh comparison.
 The [native controller protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-prepared-sat-control-v1/PROTOCOL.md)
 describes `icprog sat-control-freeze`, `sat-control-execute`, and
 `sat-control-audit`. Freeze builds the producer and independent checker from
@@ -102,9 +102,9 @@ strict target-free n17 transcripts. It independently reconstructs the whole
 geometric base, input law, exact negatives, projected rows, rank and logs,
 preserving failed attempts and incomplete panels. It executes no solver and
 admits neither source-bound production nor new natural yield or performance.
-Native target-free F5 and external CryptoMiniSat producers, their own one-use
-registrations and per-attempt costs remain pending. Never use the worker's Rust
-CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
+The later target-free F5 and external CryptoMiniSat producers, their one-use
+registrations and per-attempt costs are recorded below. Never use the worker's
+Rust CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
 The [native target-free preparation API](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-target-free-preparation-v1/PROTOCOL.md)
 now constructs fresh n17 geometry and the matrix without Q or imported logs,
 retains the fixed panel and exclusive attempt costs, and runs one final LA
@@ -177,17 +177,19 @@ before parser initialization, so even passing compatibility does not establish
 the online boundary. A new post-buffer-marker CMS binary needs its own
 source/build pin and the predeclared three-way parity protocol in
 [`MARKED_CMS_CONTROL_V1.md`](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/MARKED_CMS_CONTROL_V1.md).
-The source patch and guarded build recipe are committed, but the marked binary
-remains unbuilt. The new, separately sealed 512-query, one-million-conflict
-natural SAT preparation registration is consumed: inspect its original
-execution and run its frozen auditor once it terminates; never restart, refill
-or treat partial progress as final rank or yield. Build the marked binary only
-if that original audit admits a complete 29-column SAT log table, then run the
-three-way disclosed control and its independent data-only audit before using
-the binary in a target candidate. The staged SAT target worker and public-point
-card are not a dispatch authority. Freeze and publish a target-free SAT
-registration before creating the card, bind the exact card to a one-use claim,
-and independently audit native source/model receipts and execution custody.
+The separately sealed [512-query, one-million-conflict natural SAT preparation](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-million-registration-v1/result-v1/RESULT.md)
+is consumed and closed. Its original frozen auditor admitted 145 witnesses,
+339 geometric negatives, 15 incomplete attempts and 13 timeouts; it verified
+all 29 folded logs. Never restart or refill it. The guarded build then made a
+distinct post-buffer-marked binary, and the [nine-role disclosed control](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/result-v1/RESULT.md)
+passed an independent data-only transport audit. This is disclosed-input
+compatibility, not natural target yield or a one-target speed measurement; the
+historical 60-second control failure remains. The staged SAT target worker and
+public-point card are not a dispatch authority. Freeze and publish a
+target-free SAT registration before creating the card, bind the exact card to a
+one-use claim, and independently audit native source/model receipts and
+execution custody. Repeat exporter/solver parity with the exact target-capsule
+build rather than treating the disclosed control as a blanket admission.
 The [fresh paired n17 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/PROTOCOL.md)
 predeclares the four source-publication roles, native public-point workload,
 one-use four-arm execution and non-promotion of exploratory wall ratios.

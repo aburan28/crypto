@@ -19,6 +19,7 @@ independently audited one-million-conflict SAT preparation. Its
 [mobile view](mobile-readiness-updated.png) and [updated browser receipt](browser-check-updated.json)
 check that the three distinct solver-budget rows remain readable at 390px.
 The [updated overview](desktop-overview-updated.png) leads with the actual
-decision: SAT has all 29 reusable logs, but no fresh target result or speed
-claim. The added counts are pinned to the immutable original audit; the
+decision: SAT has all 29 reusable logs and passing disclosed marked-stdin
+transport, but no fresh target result or speed claim. The added counts and
+transport status are pinned to their separate original audits; the
 earlier 100,000-conflict SAT row remains visible as a separate experiment.

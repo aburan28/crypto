@@ -1,0 +1,54 @@
+{
+  "audit_wall_ns": "213348292",
+  "audited_roles": 9,
+  "disclosed_transport_parity_admitted": true,
+  "fresh_paired_qualification": false,
+  "native_solver_calls_by_auditor": 0,
+  "natural_relation_yield": null,
+  "online_speedup": null,
+  "rows": [
+    {
+      "point": [
+        40991,
+        73355
+      ],
+      "statuses": [
+        "SOURCE_UNSAT",
+        "SOURCE_UNSAT",
+        "SOURCE_UNSAT"
+      ],
+      "three_way_transport_pass": true,
+      "trial": 0
+    },
+    {
+      "point": [
+        73003,
+        104622
+      ],
+      "statuses": [
+        "SOURCE_UNSAT",
+        "SOURCE_UNSAT",
+        "SOURCE_UNSAT"
+      ],
+      "three_way_transport_pass": true,
+      "trial": 1
+    },
+    {
+      "point": [
+        59775,
+        2910
+      ],
+      "statuses": [
+        "SAT_MODEL",
+        "SAT_MODEL",
+        "SAT_MODEL"
+      ],
+      "three_way_transport_pass": true,
+      "trial": 2
+    }
+  ],
+  "schema_version": 1,
+  "source_binary_pins_checked": true,
+  "source_bound_target_admitted": false,
+  "status": "PASS_DISCLOSED_CMS_TRANSPORT_PARITY"
+}

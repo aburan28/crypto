@@ -31,6 +31,10 @@
       "sha256": "e2e9caa59ffa61713e4ffd47d98a05850fe4e22bef9594d9431c2c7b24d283be"
     },
     {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/result-v1/original-audit.json",
+      "sha256": "1cecc6161179445317644a92a4ecc9e13fa714f3d2dc015ea5862818f79e3da5"
+    },
+    {
       "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-f5-one-target-registration-v1/result-v1/audit-original.json",
       "sha256": "6754ae85061d60d240cd3d8cb50efd8649354255533fc3b7f49ce654486aeb31"
     },
@@ -450,6 +454,13 @@
     "independently_recovered_logs": 29,
     "source_bound_preparation_admitted": true,
     "target_solve_admitted": false,
+    "online_speedup": null
+  },
+  "marked_cms_transport": {
+    "status": "PASS_DISCLOSED_CMS_TRANSPORT_PARITY",
+    "audited_roles": 9,
+    "disclosed_transport_parity_admitted": true,
+    "source_bound_target_admitted": false,
     "online_speedup": null
   },
   "native_f5_one_target": {
