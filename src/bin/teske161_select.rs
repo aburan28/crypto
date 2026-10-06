@@ -187,7 +187,10 @@ fn select(args: &Args) -> Result<Report, String> {
             schema: "teske161-select/v1",
             source: "Teske 2006, Section 2.1 and Theorem 1; DOI 10.1007/s00145-004-0328-3",
             field: "F_(2^161) = F_((2^23)^7)",
-            modulus: format!("0x{:x}", (BigUint::one() << 161usize) | (BigUint::one() << 18usize) | BigUint::one()),
+            modulus: format!(
+                "0x{:x}",
+                (BigUint::one() << 161usize) | (BigUint::one() << 18usize) | BigUint::one()
+            ),
             curve_model: "y^2 + x*y = x^3 + a*x^2 + b",
             a: args.a,
             b: format!("0x{:x}", b.to_biguint()),
@@ -255,7 +258,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn teske_published_source_has_magic_four_and_genus_eight() {
         // Teske 2006, Appendix A, E_s,1 over z^161 + z^18 + 1.
@@ -272,7 +274,9 @@ mod tests {
         let w0 = trace(&t, &b);
         assert!(!w0.is_zero());
         let w = b.add(&w0);
-        assert!(in_component(&t, &w, Component::W1) || in_component(&t, &w, Component::W2));
+        assert!(
+            in_component(&t, &w, Component::W1) || in_component(&t, &w, Component::W2)
+        );
         assert_eq!(magic_number(&t, &b), 4);
     }
 
