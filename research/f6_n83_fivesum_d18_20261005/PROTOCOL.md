@@ -23,7 +23,9 @@ not ordinary relation yield.
 For the ordinary public T001, construct the four source preimages
 `[4^{-1} mod r]T001 + T_i`, where the `T_i` are the four checked rational
 4-torsion points in the existing six-summand probe. For each offset,
-record source-system variables, equation and monomial counts, an
+record geometric source points, actual distinct cofactor-projected
+subgroup-usable points and sign-folded columns, source-system variables,
+equation and monomial counts, an
 own-degree root reduction under the existing 1,500,000-column cap,
 rank, contradictions, all affine rows and their support, XOR count,
 resource observations, raw stdout/stderr, and exit code. Use one
