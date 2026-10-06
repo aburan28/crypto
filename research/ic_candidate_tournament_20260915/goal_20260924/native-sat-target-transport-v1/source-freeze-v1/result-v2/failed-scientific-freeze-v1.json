@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "status": "FAILED_PRECARD_SCIENTIFIC_FREEZE_EXPORTER_BYTE_MISMATCH",
+  "source_commit": "3f733388373cd3ca2891a222576a6d5f0261c241",
+  "validation_registration_sha256": "59b5ab706b538ce3908a5303677432eb186935db51c33300c78da82ca7489985",
+  "validation_prepared_exporter_sha256": "0ddf07a78bd33a2542a6492896d4d898c2abfa473501a593064e8a33db5b4142",
+  "scientific_rebuild_prepared_exporter_sha256": "392c547ee51c28e9f75cca6caefb6d7ac3cbaac52886fb2710143c6bd862c3cf",
+  "retained_rebuilt_exporter": "failed-scientific-rebuilt-exporter",
+  "retained_build_receipt": "failed-scientific-build.receipt.json",
+  "retained_build_log": "failed-scientific-build.log",
+  "failure": "SAT scientific exporter binary differs from disclosed exact-built parity",
+  "science_registration_created": false,
+  "public_point_created": false,
+  "target_worker_calls": 0,
+  "online_speedup": null
+}
