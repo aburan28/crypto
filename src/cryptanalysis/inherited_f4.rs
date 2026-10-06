@@ -85,9 +85,91 @@ use crate::cryptanalysis::pq_groebner_f2::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::time::Instant;
 
 static COMPACT_REFUTED_BASIS: AtomicBool = AtomicBool::new(false);
+static SPECIALISE_PROFILE_ENABLED: AtomicBool = AtomicBool::new(false);
+static SPECIALISE_CALLS: AtomicU64 = AtomicU64::new(0);
+static SPECIALISE_TOTAL_NS: AtomicU64 = AtomicU64::new(0);
+static SPECIALISE_PHASE_NS: [AtomicU64; 6] = [const { AtomicU64::new(0) }; 6];
+static SPECIALISE_DISPLACED_ROWS: AtomicU64 = AtomicU64::new(0);
+
+/// Nested wall-time attribution for inherited child specialisation.
+/// All fields are diagnostics and are zero unless explicitly enabled.
+#[derive(Clone, Copy, Debug, Default, serde::Serialize)]
+pub struct SpecialiseProfile {
+    pub calls: u64,
+    pub total_ns: u64,
+    pub layout_ns: u64,
+    pub bookkeeping_ns: u64,
+    pub rewrite_ns: u64,
+    pub reduction_ns: u64,
+    pub completion_ns: u64,
+    pub closure_ns: u64,
+    pub displaced_rows: u64,
+}
+
+pub fn set_specialise_profile(enabled: bool) {
+    SPECIALISE_PROFILE_ENABLED.store(enabled, Ordering::Relaxed);
+}
+
+pub fn specialise_profile_reset() {
+    SPECIALISE_CALLS.store(0, Ordering::Relaxed);
+    SPECIALISE_TOTAL_NS.store(0, Ordering::Relaxed);
+    SPECIALISE_DISPLACED_ROWS.store(0, Ordering::Relaxed);
+    for counter in &SPECIALISE_PHASE_NS {
+        counter.store(0, Ordering::Relaxed);
+    }
+}
+
+pub fn specialise_profile() -> SpecialiseProfile {
+    let phase = |i: usize| SPECIALISE_PHASE_NS[i].load(Ordering::Relaxed);
+    SpecialiseProfile {
+        calls: SPECIALISE_CALLS.load(Ordering::Relaxed),
+        total_ns: SPECIALISE_TOTAL_NS.load(Ordering::Relaxed),
+        layout_ns: phase(0),
+        bookkeeping_ns: phase(1),
+        rewrite_ns: phase(2),
+        reduction_ns: phase(3),
+        completion_ns: phase(4),
+        closure_ns: phase(5),
+        displaced_rows: SPECIALISE_DISPLACED_ROWS.load(Ordering::Relaxed),
+    }
+}
+
+struct SpecialiseTrace {
+    started: Instant,
+    phase_ns: [u64; 6],
+    displaced_rows: u64,
+}
+
+impl SpecialiseTrace {
+    fn new() -> Self {
+        Self {
+            started: Instant::now(),
+            phase_ns: [0; 6],
+            displaced_rows: 0,
+        }
+    }
+
+    fn record(&mut self, phase: usize, started: Option<Instant>) {
+        if let Some(started) = started {
+            self.phase_ns[phase] += started.elapsed().as_nanos() as u64;
+        }
+    }
+}
+
+impl Drop for SpecialiseTrace {
+    fn drop(&mut self) {
+        SPECIALISE_CALLS.fetch_add(1, Ordering::Relaxed);
+        SPECIALISE_TOTAL_NS.fetch_add(self.started.elapsed().as_nanos() as u64, Ordering::Relaxed);
+        SPECIALISE_DISPLACED_ROWS.fetch_add(self.displaced_rows, Ordering::Relaxed);
+        for (counter, &ns) in SPECIALISE_PHASE_NS.iter().zip(&self.phase_ns) {
+            counter.fetch_add(ns, Ordering::Relaxed);
+        }
+    }
+}
 
 /// Keep only the decisive constant row after a basis proves `1`.
 pub fn set_compact_refuted_basis(enabled: bool) {
@@ -1276,15 +1358,23 @@ impl ReducedBasis {
         value: bool,
         child: &ChildSystem,
     ) -> (Self, InheritCost) {
+        let mut trace = SPECIALISE_PROFILE_ENABLED
+            .load(Ordering::Relaxed)
+            .then(SpecialiseTrace::new);
         let mut cost = InheritCost::default();
         let bit = 1u64 << var;
         if self.refuted {
+            let started = trace.as_ref().map(|_| Instant::now());
             let mut out = self.clone();
             out.system = child.system.clone();
             out.generator_degrees = child.degrees.clone();
             out.assigned |= bit;
+            if let Some(trace) = &mut trace {
+                trace.record(1, started);
+            }
             return (out, cost);
         }
+        let started = trace.as_ref().map(|_| Instant::now());
         let dropped: Vec<(usize, u32, u32)> = child
             .dropped
             .iter()
@@ -1315,9 +1405,13 @@ impl ReducedBasis {
             cmp_mono(F2BoolMono::from_mask(w[0]), F2BoolMono::from_mask(w[1]))
                 == std::cmp::Ordering::Greater
         }));
+        if let Some(trace) = &mut trace {
+            trace.record(0, started);
+        }
 
         // The child starts as a copy of the parent's bookkeeping — rows by
         // reference — minus the displaced rows, then adopts the new layout.
+        let started = trace.as_ref().map(|_| Instant::now());
         let mut out = Self {
             degree: self.degree,
             n_vars: self.n_vars,
@@ -1361,6 +1455,10 @@ impl ReducedBasis {
         }
         out.adopt_layout(new_columns, map);
         cost.displaced_rows = displaced.len() as u64;
+        if let Some(trace) = &mut trace {
+            trace.record(1, started);
+            trace.displaced_rows += cost.displaced_rows;
+        }
         // Lowest pivot first.  The order changes neither the child's row
         // space nor, measurably, the cost of building it; it changes how
         // soon a refutation is found.  A row pivoting near the tail has
@@ -1369,12 +1467,24 @@ impl ReducedBasis {
         // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
         displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
         for (_, row) in displaced {
-            if let Some(image) = out.rewrite(&row, &mut cost) {
+            let started = trace.as_ref().map(|_| Instant::now());
+            let image = out.rewrite(&row, &mut cost);
+            if let Some(trace) = &mut trace {
+                trace.record(2, started);
+            }
+            if let Some(image) = image {
+                let started = trace.as_ref().map(|_| Instant::now());
                 let inserted = out.insert(image, &mut cost);
                 if out.refutes(inserted) {
+                    if let Some(trace) = &mut trace {
+                        trace.record(3, started);
+                    }
                     return (out, cost);
                 }
                 out.note_fall(inserted);
+                if let Some(trace) = &mut trace {
+                    trace.record(3, started);
+                }
             }
         }
 
@@ -1386,6 +1496,7 @@ impl ReducedBasis {
         // basis multiplies each dropped generator only within its own
         // support, as its root did.
         if !dropped.is_empty() {
+            let started = trace.as_ref().map(|_| Instant::now());
             let multiplier_mask = out
                 .system
                 .iter()
@@ -1424,12 +1535,19 @@ impl ReducedBasis {
                     }
                     let inserted = out.insert(Draft::full(row), &mut cost);
                     if out.refutes(inserted) {
+                        if let Some(trace) = &mut trace {
+                            trace.record(4, started);
+                        }
                         return (out, cost);
                     }
                     out.note_fall(inserted);
                 }
             }
+            if let Some(trace) = &mut trace {
+                trace.record(4, started);
+            }
         }
+        let started = trace.as_ref().map(|_| Instant::now());
         if Self::close_children() {
             out.close(&mut cost);
         } else {
@@ -1438,6 +1556,9 @@ impl ReducedBasis {
         let every = Self::rref_every();
         if every > 0 && out.depth().is_multiple_of(every) {
             out.reduce_fully(&mut cost);
+        }
+        if let Some(trace) = &mut trace {
+            trace.record(5, started);
         }
         (out, cost)
     }
