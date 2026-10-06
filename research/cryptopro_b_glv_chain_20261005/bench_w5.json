@@ -1,0 +1,363 @@
+{
+  "arms": [
+    {
+      "chain": null,
+      "class": "reference",
+      "correct": true,
+      "correctness": "baseline == textbook BigUint reference on all 256 pairs: yes",
+      "kind": "baseline",
+      "label": "baseline: width-5 NAF (affine odd-multiple table, mixed additions)",
+      "median_ns_per_op": 111157.779296875,
+      "min_ns_per_op": 107219.69140625,
+      "ns_per_op_per_round": [
+        118134.76953125,
+        112510.375,
+        108042.6875,
+        109630.08984375,
+        108163.78515625,
+        109795.6875,
+        107698.078125,
+        114450.6796875,
+        108024.2109375,
+        122933.05859375,
+        121069.43359375,
+        110433.7890625,
+        111881.76953125,
+        112338.796875,
+        116048.02734375,
+        107219.69140625,
+        109528.015625,
+        119598.76171875,
+        121809.69921875,
+        107229.23046875
+      ],
+      "ratio_baseline_over_arm": {
+        "median": 1.0,
+        "min": 1.0
+      }
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 5 * 7 (element 4 + 1 w, degree 175)",
+      "class": "engineering",
+      "correct": true,
+      "correctness": "GLV == baseline on all 256 pairs: yes",
+      "kind": "glv_total",
+      "label": "GLV-2 total via chain 5·5·7 (element 4 + 1 w, degree 175): decomposition + phi(P) + interleaved width-5 NAF",
+      "median_ns_per_op": 88759.134765625,
+      "min_ns_per_op": 80199.21484375,
+      "ns_per_op_per_round": [
+        90266.34375,
+        89146.83203125,
+        81761.42578125,
+        80371.28515625,
+        80199.21484375,
+        82685.75,
+        83118.7421875,
+        88371.4375,
+        81854.8515625,
+        92971.9609375,
+        90139.45703125,
+        80316.6171875,
+        90193.99609375,
+        91155.53515625,
+        91522.9453125,
+        81113.5546875,
+        90163.2421875,
+        92565.61328125,
+        95235.6875,
+        81139.87890625
+      ],
+      "ratio_baseline_over_arm": {
+        "median": 1.2523531193763353,
+        "min": 1.3369169712589242
+      }
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 5 * 7 (element 4 + 1 w, degree 175)",
+      "class": "stage diagnostic",
+      "correct": true,
+      "correctness": "k1 + k2·λ ≡ k (mod n) and |k1|,|k2| ≤ 128 bits on all 256 scalars: yes",
+      "kind": "stage_decomposition",
+      "label": "stage diagnostic: decomposition alone, basis of chain 5·5·7 (num-bigint Babai rounding)",
+      "median_ns_per_op": 1005.650390625,
+      "min_ns_per_op": 875.31640625,
+      "ns_per_op_per_round": [
+        1112.95703125,
+        1002.50390625,
+        968.328125,
+        947.54296875,
+        928.1015625,
+        1038.00390625,
+        1148.0390625,
+        889.94921875,
+        902.984375,
+        1147.17578125,
+        963.71875,
+        875.31640625,
+        1008.796875,
+        1044.28515625,
+        1359.43359375,
+        911.66796875,
+        1024.7578125,
+        1292.59375,
+        1074.875,
+        960.28125
+      ],
+      "ratio_baseline_over_arm": null
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 5 * 7 (element 4 + 1 w, degree 175)",
+      "class": "stage diagnostic",
+      "correct": true,
+      "correctness": "phi(P) == λ·P on all 256 points: yes",
+      "kind": "stage_phi",
+      "label": "stage diagnostic: phi(P) alone, chain 5·5·7 (element 4 + 1 w, degree 175; projective Horner, no inversion)",
+      "median_ns_per_op": 4269.091796875,
+      "min_ns_per_op": 3841.453125,
+      "ns_per_op_per_round": [
+        4326.5390625,
+        4221.6015625,
+        3866.61328125,
+        4042.62890625,
+        3881.046875,
+        4339.73046875,
+        4623.16796875,
+        3841.453125,
+        3871.37109375,
+        4395.328125,
+        4320.61328125,
+        3899.8671875,
+        4227.47265625,
+        4310.7109375,
+        4429.6953125,
+        3933.34375,
+        4206.0703125,
+        4593.19921875,
+        4510.50390625,
+        4374.01171875
+      ],
+      "ratio_baseline_over_arm": null
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 31 (element 0 + 1 w, degree 155)",
+      "class": "engineering",
+      "correct": true,
+      "correctness": "GLV == baseline on all 256 pairs: yes",
+      "kind": "glv_total",
+      "label": "GLV-2 total via chain 5·31 (element 0 + 1 w, degree 155): decomposition + phi(P) + interleaved width-5 NAF",
+      "median_ns_per_op": 91799.451171875,
+      "min_ns_per_op": 84543.76953125,
+      "ns_per_op_per_round": [
+        91452.79296875,
+        92146.109375,
+        87220.1015625,
+        85231.38671875,
+        84964.2265625,
+        94459.421875,
+        92712.24609375,
+        86669.01953125,
+        87513.0390625,
+        99788.19140625,
+        88038.75,
+        84543.76953125,
+        88226.0078125,
+        101397.234375,
+        100065.89453125,
+        94185.5859375,
+        96415.8359375,
+        98578.8046875,
+        93388.1953125,
+        88111.75
+      ],
+      "ratio_baseline_over_arm": {
+        "median": 1.2108762947695149,
+        "min": 1.268215174231358
+      }
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 31 (element 0 + 1 w, degree 155)",
+      "class": "stage diagnostic",
+      "correct": true,
+      "correctness": "k1 + k2·λ ≡ k (mod n) and |k1|,|k2| ≤ 128 bits on all 256 scalars: yes",
+      "kind": "stage_decomposition",
+      "label": "stage diagnostic: decomposition alone, basis of chain 5·31 (num-bigint Babai rounding)",
+      "median_ns_per_op": 1006.5625,
+      "min_ns_per_op": 862.671875,
+      "ns_per_op_per_round": [
+        862.671875,
+        980.7578125,
+        976.02734375,
+        926.21484375,
+        916.94921875,
+        1058.28125,
+        929.2578125,
+        1035.203125,
+        1117.7109375,
+        1136.265625,
+        1002.70703125,
+        921.9453125,
+        982.93359375,
+        1070.87890625,
+        1025.13671875,
+        1020.6328125,
+        1215.49609375,
+        1123.66796875,
+        1010.41796875,
+        958.85546875
+      ],
+      "ratio_baseline_over_arm": null
+    },
+    {
+      "chain": "GOST CryptoPro-B chain 5 * 31 (element 0 + 1 w, degree 155)",
+      "class": "stage diagnostic",
+      "correct": true,
+      "correctness": "phi(P) == λ·P on all 256 points: yes",
+      "kind": "stage_phi",
+      "label": "stage diagnostic: phi(P) alone, chain 5·31 (element 0 + 1 w, degree 155; projective Horner, no inversion)",
+      "median_ns_per_op": 9510.298828125,
+      "min_ns_per_op": 8478.8203125,
+      "ns_per_op_per_round": [
+        8731.734375,
+        9239.73046875,
+        9425.9453125,
+        8548.4921875,
+        8520.26171875,
+        9284.94921875,
+        9491.0234375,
+        9529.57421875,
+        10046.42578125,
+        9969.7578125,
+        9643.34375,
+        8615.58203125,
+        8478.8203125,
+        10067.51953125,
+        9734.1953125,
+        9711.359375,
+        9576.91796875,
+        10157.5859375,
+        9608.9375,
+        9253.08203125
+      ],
+      "ratio_baseline_over_arm": null
+    },
+    {
+      "chain": null,
+      "class": "A/A control",
+      "correct": true,
+      "correctness": "same routine as the baseline, so baseline == textbook BigUint reference on all 256 pairs: yes",
+      "kind": "aa_control",
+      "label": "A/A control: the baseline arm timed again as a separate arm (identical code and inputs; its ratio to the baseline is the noise floor)",
+      "median_ns_per_op": 118769.296875,
+      "min_ns_per_op": 108889.90234375,
+      "ns_per_op_per_round": [
+        113972.125,
+        122696.4140625,
+        113777.2578125,
+        108889.90234375,
+        116490.80859375,
+        110332.33984375,
+        118937.70703125,
+        116589.33984375,
+        124676.94140625,
+        123523.46484375,
+        119052.4921875,
+        116057.82421875,
+        118600.88671875,
+        120376.36328125,
+        120434.43359375,
+        120286.57421875,
+        124476.80078125,
+        125205.96484375,
+        112354.51953125,
+        109006.37109375
+      ],
+      "ratio_baseline_over_arm": {
+        "median": 0.9359134239370313,
+        "min": 0.9846614708843491
+      }
+    }
+  ],
+  "bench": "cryptopro-b-glv-bench",
+  "build": {
+    "crate": "crypto",
+    "crate_version": "0.1.0",
+    "git_commit": "e1df564168943f7d03f9462503feb63b218fa392",
+    "git_dirty": true,
+    "profile": "release",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)"
+  },
+  "chains": [
+    {
+      "babai_bound_bits": 128,
+      "degree": 175,
+      "name": "GOST CryptoPro-B chain 5 * 5 * 7 (element 4 + 1 w, degree 175)",
+      "steps": [
+        5,
+        5,
+        7
+      ],
+      "test_vectors": 4
+    },
+    {
+      "babai_bound_bits": 128,
+      "degree": 155,
+      "name": "GOST CryptoPro-B chain 5 * 31 (element 0 + 1 w, degree 155)",
+      "steps": [
+        5,
+        31
+      ],
+      "test_vectors": 4
+    }
+  ],
+  "correctness": {
+    "all": true,
+    "baseline_equals_textbook_on_all_pairs": true,
+    "per_chain": [
+      {
+        "chain": "GOST CryptoPro-B chain 5 * 5 * 7 (element 4 + 1 w, degree 175)",
+        "decomposition_valid_on_all_scalars": true,
+        "glv_equals_baseline_on_all_pairs": true,
+        "phi_equals_lambda_p_on_all_points": true
+      },
+      {
+        "chain": "GOST CryptoPro-B chain 5 * 31 (element 0 + 1 w, degree 155)",
+        "decomposition_valid_on_all_scalars": true,
+        "glv_equals_baseline_on_all_pairs": true,
+        "phi_equals_lambda_p_on_all_points": true
+      }
+    ]
+  },
+  "curve": "GOST R 34.10-2001 CryptoPro-B (RFC 4357 section 11.4.4)",
+  "host": {
+    "arch": "x86_64",
+    "cpu_flags_of_interest": [
+      "pclmulqdq",
+      "sse4_2",
+      "popcnt",
+      "aes",
+      "avx",
+      "bmi1",
+      "avx2",
+      "bmi2",
+      "avx512f",
+      "adx"
+    ],
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "kernel": "6.18.44-fc-v70",
+    "logical_cpus": 1,
+    "os": "linux"
+  },
+  "protocol": {
+    "arm_order": "forward on even rounds, reversed on odd rounds",
+    "pairs_m": 256,
+    "rounds_r": 20,
+    "seed": 20261005,
+    "statistic": "median and minimum over rounds of (round wall time / M)",
+    "timed_output": "Jacobian point; the final affine conversion is outside every arm",
+    "timing_wall_seconds": 2.174635801,
+    "untimed_setup": "GlvContext per chain (Montgomery-form chain constants, lambda, reduced basis) built once",
+    "w": 5
+  },
+  "timestamp_unix": 1791238614,
+  "unit": "nanoseconds per scalar multiplication (per operation for stage diagnostics)"
+}

@@ -159,6 +159,93 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
     assert!(again == frozen, "the native pin differs from R05's");
 }
 
+fn holdouts(round_dir: &Path, sizes: &[&str], seeds: &str, first: &str, check: bool) -> Output {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_icprog"));
+    cmd.arg("holdouts").arg(round_dir).arg("--root").arg(root());
+    for s in sizes {
+        cmd.args(["--size", s]);
+    }
+    cmd.args(["--seeds", seeds, "--first-target", first]);
+    if check {
+        cmd.arg("--check");
+    }
+    cmd.output().expect("icprog runs")
+}
+
+/// R02b's and R05's holdouts were drawn by suite v1's `make_suite.py`
+/// construction; `icprog holdouts --check` must re-derive every file and
+/// each `SHA256SUMS` byte for byte, as it must every suite v1 row.
+#[test]
+fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
+    for (dir, sizes, seeds, first) in [
+        (
+            "R02b-wide-tail-retest",
+            &["1,59", "0,61"][..],
+            "206,207,208,209",
+            "103",
+        ),
+        (
+            "R05-presence-filter",
+            &["0,53", "1,59", "0,61"][..],
+            "210,211,212,213",
+            "111",
+        ),
+    ] {
+        let out = holdouts(&round(dir), sizes, seeds, first, true);
+        assert!(
+            out.status.success(),
+            "{dir}: {}{}",
+            String::from_utf8_lossy(&out.stdout),
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+    // Suite v1's own rows: seeds 201–204 from target 1, file for file.
+    let tmp = std::env::temp_dir().join(format!("icprog-holdouts-{}", std::process::id()));
+    let suite = root().join("research/ic_tool_program/suite/v1/params/S");
+    for (a, n) in [
+        (1, 19),
+        (1, 23),
+        (1, 45),
+        (0, 37),
+        (1, 43),
+        (1, 47),
+        (0, 57),
+        (0, 41),
+        (0, 53),
+        (1, 59),
+        (0, 61),
+    ] {
+        let dir = tmp.join(format!("k{a}n{n}"));
+        let size = format!("{a},{n}");
+        let out = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let drawn = dir.join("holdouts");
+        let slug = std::fs::read_dir(&drawn)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .find(|e| e.path().is_dir())
+            .expect("a slug directory")
+            .path();
+        for i in 1..=8u32 {
+            let m = i.div_ceil(2);
+            let ours = std::fs::read(slug.join(format!("M{m}-T{i}.json"))).unwrap();
+            let frozen = std::fs::read(suite.join(format!("k{a}n{n}/M{m}-T{i:02}.json"))).unwrap();
+            assert!(
+                ours == frozen,
+                "k{a}n{n} M{m}-T{i:02} differs from suite v1's"
+            );
+        }
+        // Drawn once: a second draw into the same round refuses.
+        let again = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(!again.status.success());
+    }
+    std::fs::remove_dir_all(&tmp).ok();
+}
+
 /// The extension rule is re-tested from the runs: a record of extended
 /// sizes that the rule's test does not give is a reason to reject.
 #[test]

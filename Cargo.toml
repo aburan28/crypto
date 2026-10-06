@@ -33,6 +33,13 @@ path = "src/bin/ecc2k_guard.rs"
 name = "jacobian-certificate"
 path = "src/bin/jacobian_certificate.rs"
 
+# `cryptopro-b-glv-bench` — GLV-2 with the degree-175 isogeny-chain
+# endomorphism against width-w NAF on GOST CryptoPro-B, same Jacobian
+# arithmetic in both arms (research/cryptopro_b_glv_chain_20261005).
+[[bin]]
+name = "cryptopro-b-glv-bench"
+path = "src/bin/cryptopro_b_glv_bench.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
