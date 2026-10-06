@@ -186,6 +186,21 @@ fn has_lift_for_xs(
                 })
         })
 }
+fn reported_witness_lifts(
+    curve: &Curve,
+    base: &[super::oracle::Point],
+    query: super::oracle::Point,
+    xs: [u64; 3],
+    indices: [usize; 3],
+) -> bool {
+    indices.iter().enumerate().all(|(i, &index)| {
+        base.get(index)
+            .is_some_and(|p| p.is_some_and(|p| p.0 == xs[i]))
+    }) && indices
+        .iter()
+        .fold(None, |sum, &index| curve.add(sum, base[index]))
+        == query
+}
 
 fn verify_sources(
     root: &Path,
@@ -284,11 +299,8 @@ fn verify_sources(
                             serde_json::from_value(row["witness_indices"].clone())
                                 .map_err(|e| e.to_string())?;
                         require(
-                            indices.iter().enumerate().all(|(i, &index)| {
-                                base.get(index)
-                                    .is_some_and(|p| p.is_some_and(|p| p.0 == xs[i]))
-                            }) && has_lift_for_xs(&curve, &base, query, xs),
-                            "SAT model does not lift to the reported full-point witness",
+                            reported_witness_lifts(&curve, &base, query, xs, indices),
+                            "SAT reported full-point witness does not lift its source-valid model",
                         )?;
                     }
                     Some("nonlifting_model") => require(
@@ -496,6 +508,24 @@ pub(super) fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn reported_witness_rejects_other_sign_with_same_x() {
+        let fixture = json!({"degree":17,"curve_a":1,"subgroup_order":65587,
+            "group_order":131174,"cofactor":2,"generator":[43693,23339],
+            "lambda":17184,"irreducible":{"degree":17,"low_terms":[0,3]},
+            "targets":[],"target_seeds":[],"target_scalar_constructed":false});
+        let curve = Curve::new(&strict_json::parse(&fixture.to_string()).unwrap()).unwrap();
+        let base = [[3, 95624], [3, 95627], [0, 1]].map(|point| {
+            curve
+                .decode(&strict_json::parse(&json!(point).to_string()).unwrap())
+                .unwrap()
+        });
+        let query = base[0];
+        let xs = [3, 0, 0];
+        assert!(has_lift_for_xs(&curve, &base, query, xs));
+        assert!(reported_witness_lifts(&curve, &base, query, xs, [0, 2, 2]));
+        assert!(!reported_witness_lifts(&curve, &base, query, xs, [1, 2, 2]));
+    }
     #[test]
     fn marker_prefix_requires_one_exact_complete_line() {
         let bytes = b"c banner\nc PREPARED_STDIN_READY_v1\ns SATISFIABLE\n";
