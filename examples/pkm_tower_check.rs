@@ -1655,9 +1655,7 @@ fn trace_table(log: &str) -> ExitCode {
             .and_then(|(_, rest)| rest.split_once(" ms"))
             .and_then(|(ms, _)| ms.parse::<f64>().ok())
             .map_or("—".to_string(), |ms| format!("{:.1}", ms / 1e3));
-        let pivots = n("S-rows + ")
-            .zip(n("reducers + "))
-            .map(|(r, p)| r + p);
+        let pivots = n("S-rows + ").zip(n("reducers + ")).map(|(r, p)| r + p);
         println!(
             "| {}{} | {} | {} | {} | {} | {q} | {} | {} | {} | {} | {} | {seconds} | {} |",
             show(step),
