@@ -83,6 +83,8 @@ mod stats;
 mod suite;
 #[path = "icprog/target_build.rs"]
 mod target_build;
+#[path = "icprog/target_card.rs"]
+mod target_card;
 #[path = "icprog/target_control.rs"]
 mod target_control;
 #[path = "icprog/target_custody.rs"]
@@ -240,6 +242,22 @@ enum Command {
         config: PathBuf,
         #[arg(long)]
         producer: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Create one postpublication n17 public-point card; no target logarithm is generated.
+    TargetCardGenerate {
+        #[arg(long)]
+        publications: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay the public point and source-descriptor hashes without invoking any solver.
+    TargetCardAudit {
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        publications: PathBuf,
         #[arg(long)]
         out: PathBuf,
     },
@@ -1021,6 +1039,14 @@ fn main() -> ExitCode {
             producer,
             out,
         } => target_sat_math::run(&preparation, &config, &producer, &out),
+        Command::TargetCardGenerate { publications, out } => {
+            target_card::generate(&publications, &out)
+        }
+        Command::TargetCardAudit {
+            card,
+            publications,
+            out,
+        } => target_card::audit(&card, &publications, &out),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,
