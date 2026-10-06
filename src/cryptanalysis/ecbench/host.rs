@@ -363,6 +363,32 @@ fn select_git_facts(
     }
 }
 
+// Keep these probes local to this long-lived module. Frozen-source replay
+// materializes historical crate roots together with the current host capsule,
+// so adding a new crate-root module as a dependency would make old evidence
+// stop compiling.
+fn embedded_git_commit() -> Option<&'static str> {
+    option_env!("CRYPTO_BUILD_GIT_COMMIT").or(option_env!("GITHUB_SHA"))
+}
+
+fn embedded_git_dirty() -> Option<bool> {
+    match option_env!("CRYPTO_BUILD_GIT_DIRTY")? {
+        "1" | "true" | "TRUE" => Some(true),
+        "0" | "false" | "FALSE" => Some(false),
+        _ => None,
+    }
+}
+
+fn embedded_git_source() -> Option<&'static str> {
+    if option_env!("CRYPTO_BUILD_GIT_COMMIT").is_some() {
+        Some("CRYPTO_BUILD_GIT_COMMIT")
+    } else if option_env!("GITHUB_SHA").is_some() {
+        Some("GITHUB_SHA")
+    } else {
+        None
+    }
+}
+
 fn build_facts() -> BuildFacts {
     let exe = std::env::current_exe().ok();
     let binary_sha256 = exe
@@ -385,13 +411,13 @@ fn build_facts() -> BuildFacts {
     let runtime_git_dirty =
         git(&["status", "--porcelain", "--untracked-files=no"]).map(|s| !s.is_empty());
     let (git_commit, git_dirty, embedded) = select_git_facts(
-        crate::build_provenance::git_commit(),
-        crate::build_provenance::git_dirty(),
+        embedded_git_commit(),
+        embedded_git_dirty(),
         runtime_git_commit.clone(),
         runtime_git_dirty,
     );
     let git_commit_source = if embedded {
-        crate::build_provenance::source().map(str::to_owned)
+        embedded_git_source().map(str::to_owned)
     } else {
         runtime_git_commit
             .as_ref()
