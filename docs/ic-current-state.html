@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 305 panels, one line each</summary>
+    <summary>Show all 306 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -491,6 +491,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-radix-portfolio-round43-290-20261006">P-256 rounds 43–290: every radix width misses before generation</a> <span class="chip">finite portfolio / negative</span><br>Across 248 preregistered width/depth cells, 76 are exact with zero FP/FN; the best measured Round 108 width-9 router consumes 1.344× its entire allowance, while one-pass Round 290 is formula-only and needs a 549.76-GB counter table.</li>
       <li><a href="./#p256-serpentine-sign-orbit-round291-20261006">P-256 Round 291: serpentine signs remove the table and cross the stage boundary</a> <span class="chip">advance / stage only</span><br>A complete 217-sign P-256 orbit emits 29.88 million exactly replayed states at 1.004439 additions/state and 0.968617× rho in counted construction work, with 9.8 KB live state; achieved coverage, degree and end-to-end collection remain unset.</li>
       <li><a href="./#p256-orbit-coverage-round292-20261006">P-256 Round 292: exact coverage reverses the stage crossover</a> <span class="chip">negative / accounting</span><br>The 29.88-million-state primary orbit covers only 5.85 million distinct P-256 elements, correcting the selector-stage ratio from 0.968617× to 4.951724× rho. Four tuples worsen it to 11.349928× before degree, relation testing, collection, linear algebra or recovery.</li>
+      <li><a href="./#p256-executed-screen-round2-290-20261006">P-256 rounds 2–290: 289 actual factor-base screens, zero projections</a> <span class="chip">advance / negative</span><br>All 289 registered rounds executed complete 131,072-sign orbits with separate hashed receipts. Sign-oriented monotone traversal improves the exact selector-stage boundary from 4.951724× to 2.320918× rho, but no candidate reaches parity.</li>
     </ol>
   </details>
 <!-- END panel-index -->
