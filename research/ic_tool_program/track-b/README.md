@@ -140,6 +140,32 @@ The reports, the script that ran them, its log and the binaries' SHA-256
 are in [`arms-check-20261005/`](arms-check-20261005/), with their
 `SHA256SUMS`.
 
+## B5a's arm on main (2026-10-06)
+
+B5a's re-declaration
+([`../rounds/B5a-extension-fields/PROTOCOL.md`](../rounds/B5a-extension-fields/PROTOCOL.md))
+puts its arm after B4's, built the same way.
+- **The arm:** `tbarm-B5a` (`97ade3d0`), one merge of B5a's branch
+  (`b5a-int`, `538afdce`) into arm B4, by the rules above. Two conflicts
+  were resolved by hand:
+  - `src/cryptanalysis/mod.rs`: the arm's `koblitz_two_word` kept beside
+    B5a's modules;
+  - `src/cryptanalysis/gaudry_cubic.rs`: main had added
+    `Fp3::with_cube_nonresidue` for the field B5a's `Fp3::with_c` builds,
+    under the same conditions, so `with_c` returns its result.
+- **On record** in [`stack-20261006-b5a.bundle`](stack-20261006-b5a.bundle)
+  (its SHA-256 beside it), with B5a's two commits and the merge; arm B4,
+  its prerequisite, is in `stack-20261005-main.bundle`. Its listing is
+  [`stack-20261006-b5a.txt`](stack-20261006-b5a.txt). Restore it as
+  above, after the earlier bundles.
+- **Checked at its level,** as the other arms were, with its commit
+  embedded: 259 library tests (`fpk_curve`, `curve_id`, `gaudry_cubic`,
+  `rho_bignum` and the Koblitz pipelines'), 50 of `ic`'s and 8 of
+  `tests/curve_id.rs` pass, and the conformance suite through B5a passes
+  110 of 110 cases (C050 superseded by C103). The report, script, log
+  and binaries' SHA-256 are in
+  [`arms-check-20261006-b5a/`](arms-check-20261006-b5a/).
+
 ## What this is not
 
 - **Not accepted code.** No step here has been measured. Each is judged

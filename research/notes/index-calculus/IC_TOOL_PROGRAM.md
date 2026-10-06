@@ -532,6 +532,32 @@ measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
   corrected before any measurement: C098's document, at `n = 577`, is
   refused by schema v2's degree range (2..=571) before any gate.
 
+**B5 is split in two, and B5a is declared** (first 2026-10-01 in #1178,
+closed before anything ran because its generators were Python; declared
+again 2026-10-06 on native tools, before any B5a measurement;
+[protocol](../../ic_tool_program/rounds/B5a-extension-fields/PROTOCOL.md),
+[design](../../ic_tool_program/design/extension-fields.md)).
+- **B5a is extension fields `GF(p^k)`,** which the tool validates and
+  routes nowhere. Every valid instance gets a route:
+  - `rho-negation` for `q ≤ 2^62`;
+  - `rho-bignum` for any `q`;
+  - Gaudry's index calculus on `E(GF(p³))`, imported from the
+    residual-walk thread as `ic-gaudry-cubic`, for the modulus `t³ − c`
+    and a prime group order.
+- **Its instances:** eight, from `q ≈ 2^24` to `2^70`, found by
+  `icprog b5a instances` in arithmetic that shares nothing with the tool,
+  and B2's C050 document, which B5a's C103 supersedes. The native
+  generators write #1178's instance records and parameter files again,
+  byte for byte.
+- **ICV1 gains an extension kind first:** `docs/curves/ICV1.md`, its
+  reference implementation and the names check. No existing identity
+  changes. The registry names B5a's instances and C050's curve.
+- **Its arm on main** is B4's with B5a's code merged, checked at its level
+  (110 of 110 cases); B5a joins the chain after B4.
+- **B5b**, prime fields past one word (a multi-limb `rho-negation`), is
+  declared on its own later. The row above is done when both are
+  accepted.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an
@@ -589,7 +615,7 @@ from R03's `runs.tar.xz`, byte for byte.
 | the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4: `icprog conformance` runs every case set (v1, v2 and each `v2-*`) with the scripts' selection rules (`step`, `until`, `supersedes`) and checks. No run of the scripts was ever committed, so there is no frozen report to reproduce. Instead, each rule is checked on a stub `ic` (`tests/icprog.rs`), and Track B's arm B4 on main passes all 95 cases through B4 |
 | Track B's chain | `harness/bround.py` | Track B's measurements | N5: `icprog bround` (`manifest`, `aa`, `conformance`, `pin`, `translate`, `timing`, `v2timing`, `chain`, `analyse`). The translation's reference, C009's generator ported, writes C009's frozen document again byte for byte. Its parts are checked against point counts, trial division and the library's modulus search at every one-word degree |
 | the fuzz generator and its replays | `fuzz/fuzz_v2.py` | B6, whose replays in "independent Python arithmetic" become independent native arithmetic by an amendment | N6 |
-| each step's harness | `rounds/B*/run.py`, `analyse.py`, `instances.py`, `sweep.py` | that step's measurement | with each step. The F0 runs first: `icprog f0` runs B3's gate rho, B3b's two-word instances and B4's three-word instances, and replays every arm's answer in a GF(2^n) arithmetic of its own (B4's `run.py` and `analyse.py`, ported). B7a's measurements 5–7 run on `icprog b7a` (its `run.py` and `analyse.py`, ported). B2's measurements 6–7 run on `icprog b2`, and B2b's sweep on `icprog b2b-sweep` (it writes C059 and C063 again byte for byte). B3b's premium, a stage diagnostic, runs on `icprog b3b-premium` |
+| each step's harness | `rounds/B*/run.py`, `analyse.py`, `instances.py`, `sweep.py` | that step's measurement | with each step. The F0 runs first: `icprog f0` runs B3's gate rho, B3b's two-word instances and B4's three-word instances, and replays every arm's answer in a GF(2^n) arithmetic of its own (B4's `run.py` and `analyse.py`, ported). B7a's measurements 5–7 run on `icprog b7a` (its `run.py` and `analyse.py`, ported). B2's measurements 6–7 run on `icprog b2`, and B2b's sweep on `icprog b2b-sweep` (it writes C059 and C063 again byte for byte). B3b's premium, a stage diagnostic, runs on `icprog b3b-premium`. B5a's generators, `instances.py` and `make_cases.py` from #1178, are `icprog b5a instances` and `icprog b5a cases`: they write #1178's instance records and all 18 parameter files again byte for byte. Its measurement 5 runs on `icprog f0 --set b5a`, replayed in a GF(p^k) arithmetic of its own, and its measurement 6, which had no harness, on `icprog b5a calibrate` and `estimates` |
 
 **What is not ported.** Suite v1's construction
 (`suite/v1/make_suite.py`) stays as it is. Suite v1 and every holdout set

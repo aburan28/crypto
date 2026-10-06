@@ -84,7 +84,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3"
+   "sha256": "e6ca1e52be30304b5ae49dd95c5e24059a8dd60c929b7a4f6928f3b255b6a8a0"
   }
  },
  "families": {
@@ -7372,6 +7372,132 @@
    "legacy": [
     "secp256k1"
    ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp6k11-tm527622722-07ccd925",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['18', '2', '14', '25', '8', '30', '31', '18', '12', '21', '25'], b = ['27', '36', '7', '5', '6', '18', '26', '26', '16', '14', '34']",
+   "order_bits": 58,
+   "standard": [],
+   "ec1": [
+    "EC1Q37D11Cfpkh06d0f78d2fde"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp9k3-t1227-55c8d640",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['88', '60', '158'], b = ['233', '70', '211']",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [
+    "EC1Q271D3Cfpkhd6a8a65a8a4c"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp9k3-tm4575-aba104ba",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['168', '59', '35'], b = ['212', '72', '29']",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [
+    "EC1Q271D3Cfpkh800837f403ee"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['345', '215', '106'], b = ['424', '373', '36']",
+   "order_bits": 28,
+   "standard": [],
+   "ec1": [
+    "EC1Q523D3Cfpkhfb90ff16ed62"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp10k3-t41822-dfa3991d",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['670', '300', '374'], b = ['47', '257', '560']",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1Q1009D3Cfpkh957c64a1ac0d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp11k3-tm30789-3c2726bc",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['335', '1030', '289'], b = ['701', '99', '145']",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1Q1039D3Cfpkh1d1f8afd3a95"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp12k5-tm296780010-475f4271",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['420', '738', '2017', '1352', '1667'], b = ['1807', '597', '1599', '912', '658']",
+   "order_bits": 56,
+   "standard": [],
+   "ec1": [
+    "EC1Q2053D5Cfpkhe85f97f97912"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['459164876', '1077033002'], b = ['87384810', '1624838696']",
+   "order_bits": 62,
+   "standard": [],
+   "ec1": [
+    "EC1Q2147483647D2Cfpkhf7a0a063fa34"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['14233520128', '7914896054'], b = ['26838110637', '17581638592']",
+   "order_bits": 71,
+   "standard": [],
+   "ec1": [
+    "EC1Q34359738421D2Cfpkh988322aa091b"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [],
    "on_board": false
   }
  ],
