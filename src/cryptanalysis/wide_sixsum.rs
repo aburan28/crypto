@@ -494,11 +494,17 @@ impl System512 {
 
     /// One own-degree Macaulay reduction; a column-cap stop is inconclusive.
     pub fn root_reduce(&self) -> RootReduction {
+        self.root_reduce_with_column_cap(MAX_ROOT_COLS)
+    }
+
+    /// The same exact reduction with an explicit resource cap. The cap only
+    /// decides whether to attempt the matrix; it does not truncate columns.
+    pub fn root_reduce_with_column_cap(&self, column_cap: usize) -> RootReduction {
         let mut index: FxMap<Mono512, usize> = FxMap::default();
         for p in &self.equations {
             for &m in &p.terms {
                 index.entry(m).or_insert(0);
-                if index.len() > MAX_ROOT_COLS {
+                if index.len() > column_cap {
                     return RootReduction::ColumnLimit {
                         columns: index.len(),
                     };

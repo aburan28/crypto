@@ -74,6 +74,34 @@ the frozen release binary SHA-256 was
 The [amended runner](run_core16.sh), [status](core16_status.tsv),
 raw `core16_*` JSONL/stderr and build log preserve the new run.
 
+## Amendment 2: the same core completes
+
+[Amendment 2](AMENDMENT_2.md) was committed before adding the explicit
+6,500,000-column cap to the reducer. The default cap remains 1,500,000.
+The repeated private certificate passed the frozen row-count and
+witness-digest guards. The same 2,260-row, 6,376,371-term core had
+**1,881,674 distinct columns** and reduced to **rank 2,260**. It left
+one affine row, the inherited mixed intermediate/source row, and zero
+nonconstant source-only rows or contradictions. Thus this particular
+`k=16`, one-round source-variable prolongation did not improve source
+pruning on ordinary T001 offset zero. It does not rule out more
+multipliers, more rounds, or a different solver.
+
+The planted control and ordinary process both exited zero. The live
+RSS sampler reached 1,834,272 KiB, below the registered 7-GiB kill
+threshold; the process-reported peak was 1,886,830,592 bytes. The
+reduction counted 702,364,047 64-bit XOR operations. Its 1.427-second
+interval is a contended-host diagnostic, not a CPU speedup. The
+amended helper source SHA-256 was
+`9ea54011648e6f3eadb6b18b20b46cf09ce6bf8e573b9d77dc64668b81a50eff`;
+probe source SHA-256 was
+`ae2057b0c9c6ee5380177cf0f7494b3bdcfb7705774c132fcf9ddf3c9ac73b86`;
+frozen binary SHA-256 was
+`0f661231c038e7edeff566e172debb817914c2325107fbb22885c23ba3808fa4`.
+The [runner](run_core16wide.sh), [RSS samples](core16wide_rss.tsv),
+[status](core16wide_status.tsv), build log, and raw JSONL/stderr retain
+both processes. This is a bounded negative structural result.
+
 This result narrows the exact degree-four search space but has no
 ordinary full-group relation, complete F6 decomposition, one-target IC
 online interval, target scalar recovery, or same-point rho reference.

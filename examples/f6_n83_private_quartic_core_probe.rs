@@ -7,7 +7,9 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, cofactor_project_factor_base, KoblitzCurve,
 };
 use crypto_lib::cryptanalysis::wide_groebner::TwoWordFieldStructure;
-use crypto_lib::cryptanalysis::wide_sixsum::{Mono512, Poly512, RootReduction, System512};
+use crypto_lib::cryptanalysis::wide_sixsum::{
+    Mono512, Poly512, RootReduction, System512, MAX_ROOT_COLS,
+};
 use num_bigint::BigUint;
 use serde_json::json;
 
@@ -60,9 +62,10 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
         args.len() == 3 || args.len() == 4 || args.len() == 5,
-        "usage: probe planted K | ordinary OFFSET(0..3) K [core16]"
+        "usage: probe planted K | ordinary OFFSET(0..3) K [core16|core16wide]"
     );
-    let run_core16 = args.len() == 5 && args[4] == "core16";
+    let run_core16 = args.len() == 5 && (args[4] == "core16" || args[4] == "core16wide");
+    let wide_cap = args.len() == 5 && args[4] == "core16wide";
     assert!(args.len() != 5 || run_core16);
     let k_arg = if run_core16 {
         &args[3]
@@ -299,7 +302,11 @@ fn main() {
         return;
     }
     let reduce = Instant::now();
-    let result = core.root_reduce();
+    let result = if wide_cap {
+        core.root_reduce_with_column_cap(6_500_000)
+    } else {
+        core.root_reduce()
+    };
     let (status, columns, rank, linear, linear_equations, source_only, contradiction, xor_ops) =
         match result {
             RootReduction::ColumnLimit { columns } => {
@@ -353,6 +360,7 @@ fn main() {
         "{}",
         json!({
             "phase":"core_reduction", "offset":offset, "k":k,
+            "column_cap":if wide_cap {6_500_000} else {MAX_ROOT_COLS},
             "status":status, "columns":columns, "rank":rank,
             "linear":linear, "linear_equations":linear_equations,
             "source_only_nonconstant":source_only,
