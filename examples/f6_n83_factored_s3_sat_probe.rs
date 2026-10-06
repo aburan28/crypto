@@ -55,6 +55,42 @@ struct Circuit {
     ands: usize,
 }
 
+struct FieldRep {
+    terms: Vec<(Bit, u128)>,
+    source: bool,
+}
+
+impl FieldRep {
+    fn dense(bits: &[Bit]) -> Self {
+        assert_eq!(bits.len(), N);
+        Self {
+            terms: bits
+                .iter()
+                .enumerate()
+                .map(|(i, &bit)| (bit, 1u128 << i))
+                .collect(),
+            source: false,
+        }
+    }
+
+    fn source(start: usize, basis: &[F2mElement]) -> Self {
+        assert_eq!(basis.len(), 18);
+        Self {
+            terms: basis
+                .iter()
+                .enumerate()
+                .map(|(i, element)| {
+                    let words = element.raw_bits();
+                    let coefficient =
+                        words[0] as u128 | ((words.get(1).copied().unwrap_or(0) as u128) << 64);
+                    (Circuit::input(start + i), coefficient)
+                })
+                .collect(),
+            source: true,
+        }
+    }
+}
+
 impl Circuit {
     fn new() -> Self {
         Self {
@@ -164,6 +200,81 @@ impl Circuit {
             }
         }
         terms.into_iter().map(|bits| self.xor_many(bits)).collect()
+    }
+
+    fn coefficient_product(mut a: u128, b: u128, table: &impl WideFieldTable) -> u128 {
+        let mut result = 0u128;
+        while a != 0 {
+            let i = a.trailing_zeros() as usize;
+            a &= a - 1;
+            let mut other = b;
+            while other != 0 {
+                let j = other.trailing_zeros() as usize;
+                other &= other - 1;
+                result ^= table.product_bits(i, j);
+            }
+        }
+        result
+    }
+
+    fn field_mul_rep(
+        &mut self,
+        a: &FieldRep,
+        b: &FieldRep,
+        table: &impl WideFieldTable,
+    ) -> Vec<Bit> {
+        let mut terms = vec![Vec::new(); N];
+        for &(left, left_coefficient) in &a.terms {
+            if left == Bit::Const(false) {
+                continue;
+            }
+            for &(right, right_coefficient) in &b.terms {
+                if right == Bit::Const(false) {
+                    continue;
+                }
+                let product = self.and(left, right);
+                if product == Bit::Const(false) {
+                    continue;
+                }
+                let mut mask =
+                    Self::coefficient_product(left_coefficient, right_coefficient, table);
+                while mask != 0 {
+                    let output = mask.trailing_zeros() as usize;
+                    mask &= mask - 1;
+                    terms[output].push(product);
+                }
+            }
+        }
+        terms.into_iter().map(|bits| self.xor_many(bits)).collect()
+    }
+
+    fn s3_basis(
+        &mut self,
+        x: &FieldRep,
+        y: &FieldRep,
+        z: &FieldRep,
+        b: &[Bit],
+        table: &impl WideFieldTable,
+    ) {
+        let xy = self.field_mul_rep(x, y, table);
+        let xz = self.field_mul_rep(x, z, table);
+        let yz = self.field_mul_rep(y, z, table);
+        let sum = self.field_add(&xy, &xz);
+        let sum = self.field_add(&sum, &yz);
+        let square = self.field_square(&sum, table);
+        let xyz = if x.source {
+            self.field_mul_rep(x, &FieldRep::dense(&yz), table)
+        } else if y.source {
+            self.field_mul_rep(y, &FieldRep::dense(&xz), table)
+        } else {
+            assert!(z.source);
+            self.field_mul_rep(z, &FieldRep::dense(&xy), table)
+        };
+        for i in 0..N {
+            let output = self.xor(square[i], xyz[i]);
+            let output = self.xor(output, b[i]);
+            self.outputs.push(output);
+        }
     }
 
     fn s3(&mut self, x: &[Bit], y: &[Bit], z: &[Bit], b: &[Bit], table: &impl WideFieldTable) {
@@ -433,6 +544,37 @@ fn construct_circuit(
     circuit
 }
 
+fn construct_basis_circuit(
+    basis: &[F2mElement],
+    target: &F2mElement,
+    b: &F2mElement,
+    table: &impl WideFieldTable,
+) -> Circuit {
+    let mut circuit = Circuit::new();
+    let source: Vec<_> = (0..5)
+        .map(|summand| FieldRep::source(summand * 18, basis))
+        .collect();
+    let intermediate: Vec<_> = (0..3)
+        .map(|index| {
+            let bits: Vec<_> = (0..N)
+                .map(|bit| Circuit::input(90 + index * N + bit))
+                .collect();
+            FieldRep::dense(&bits)
+        })
+        .collect();
+    let target = FieldRep::dense(&bits_of(target));
+    let b = bits_of(b);
+    circuit.s3_basis(&source[0], &source[1], &intermediate[0], &b, table);
+    circuit.s3_basis(&intermediate[0], &source[2], &intermediate[1], &b, table);
+    circuit.s3_basis(&intermediate[1], &source[3], &intermediate[2], &b, table);
+    circuit.s3_basis(&intermediate[2], &source[4], &target, &b, table);
+    assert_eq!(circuit.outputs.len(), 332);
+    circuit
+        .units
+        .extend(circuit.outputs.iter().copied().map(Bit::not));
+    circuit
+}
+
 fn compare_expanded(circuit: &Circuit, system: &System512, planted: Mono512) {
     let mut cases = vec![planted];
     let mut state = 0xf6_83_5a_7c_1020_2605u64;
@@ -493,14 +635,17 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
         args.len() == 5 || args.len() == 6,
-        "usage: probe emit|emit_xor|verify planted|ordinary OFFSET PATH [all|source|none]"
+        "usage: probe emit|emit_xor|emit_xor_basis|verify planted|ordinary OFFSET PATH [all|source|none]"
     );
     let action = args[1].as_str();
     let mode = args[2].as_str();
     let offset: usize = args[3].parse().expect("integer torsion offset");
     let path = &args[4];
-    assert!(action == "emit" || action == "emit_xor" || action == "verify");
-    assert!(args.len() == 5 || action == "emit_xor");
+    assert!(matches!(
+        action,
+        "emit" | "emit_xor" | "emit_xor_basis" | "verify"
+    ));
+    assert!(args.len() == 5 || matches!(action, "emit_xor" | "emit_xor_basis"));
     assert!(mode == "planted" || mode == "ordinary");
     assert!(offset < 4);
     let start = Instant::now();
@@ -513,15 +658,18 @@ fn main() {
     let target = target_for(&kc, &base.points, mode, offset);
     let setup_ns = start.elapsed().as_nanos();
 
-    if action == "emit" || action == "emit_xor" {
+    if matches!(action, "emit" | "emit_xor" | "emit_xor_basis") {
         let begin = Instant::now();
         let system = System512::build(&base.subspace_basis, x_of(&target), &kc.curve.b, 5, &table)
             .expect("exact five-summand system");
-        let mut circuit =
-            construct_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table);
+        let mut circuit = if action == "emit_xor_basis" {
+            construct_basis_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table)
+        } else {
+            construct_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table)
+        };
         let planted = input_assignment(&base.points, &PLANTED, &kc);
         compare_expanded(&circuit, &system, planted);
-        let pin = if action == "emit_xor" {
+        let pin = if matches!(action, "emit_xor" | "emit_xor_basis") {
             args.get(5).expect("pin mode").as_str()
         } else if mode == "planted" {
             "source"
@@ -552,7 +700,7 @@ fn main() {
                 });
             }
         }
-        let (clauses, unit_clauses, literals) = if action == "emit_xor" {
+        let (clauses, unit_clauses, literals) = if matches!(action, "emit_xor" | "emit_xor_basis") {
             circuit.write_xcnf(path).expect("write extended DIMACS")
         } else {
             circuit.write_cnf(path).expect("write DIMACS")
@@ -561,7 +709,7 @@ fn main() {
             "{}",
             json!({
                 "phase":"emitted", "mode":mode, "offset":offset,
-                "encoding":if action == "emit_xor" {"native_xor"} else {"cnf"},
+                "encoding":if action == "emit_xor_basis" {"basis_native_xor"} else if action == "emit_xor" {"native_xor"} else {"cnf"},
                 "pin":pin,
                 "curve_id":kc.label(), "target":point_json(&target),
                 "source_points":base.points.len(), "input_variables":INPUTS,
