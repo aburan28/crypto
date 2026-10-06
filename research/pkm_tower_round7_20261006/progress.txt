@@ -1,3 +1,9 @@
 2026-10-06T02:02:14Z start M3b-sizing-t0: --engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6 --max-t-m3 6 --planted 0 --random 2 --ladder-t none --trace --targets 0 --budget 7200 --max-nnz 2000000000
 2026-10-06T02:41:53Z end M3b-sizing-t0 exit 0
 2026-10-06T02:42:11Z start M3b-t0: --engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6 --max-t-m3 6 --planted 0 --random 2 --ladder-t none --trace --targets 0 --budget 43200 --max-dense 2500000000
+2026-10-06T03:59:54Z restart: the container was reclaimed and restarted (up since 03:59Z); M3b-t0 ended without an exit status, its log ending at step 22 (02:59:58Z) in step 23. Its files are kept as runs/M3b-t0.restart1.{log,jsonl}, and the run is repeated whole with the same flags.
+2026-10-06T03:59:54Z start M3b-t0: --engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6 --max-t-m3 6 --planted 0 --random 2 --ladder-t none --trace --targets 0 --budget 43200 --max-dense 2500000000
+2026-10-06T06:56:21Z end M3b-t0 exit 0
+2026-10-06T06:56:21Z start M3b-t1: --engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6 --max-t-m3 6 --planted 0 --random 2 --ladder-t none --trace --targets 1 --budget 43200 --max-dense 2500000000
+2026-10-06T06:56:51Z start C-M3b-t0-cap6: --engine tower --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 6 --max-t-m3 6 --planted 0 --random 2 --ladder-t none --trace --targets 0 --budget 43200 --max-dense 2500000000 --cap 6
+2026-10-06T06:57:03Z end C-M3b-t0-cap6 exit 0
