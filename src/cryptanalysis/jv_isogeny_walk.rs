@@ -598,7 +598,7 @@ impl WalkCtx {
         let f = &self.f;
         let n = norm_q3(f, w);
         let rn = self.sqrt_q(&n.0[0]);
-        let y = f.mul(&f.sigma(&f.pow(w, (self.q + 1) / 2)), w);
+        let y = f.mul(&f.sigma(&f.pow(w, self.q.div_ceil(2))), w);
         let r = f.scale(&y, &f.f.inv(&rn));
         debug_assert_eq!(f.sq(&r), *w);
         Some(r)
@@ -661,19 +661,6 @@ impl Curve2 {
 }
 
 // polynomial helpers over F_{q³} for the division polynomials
-fn padd6(f: &Fq3, a: &[E6], b: &[E6]) -> P6 {
-    let n = a.len().max(b.len());
-    let mut out: P6 = (0..n)
-        .map(|i| match (a.get(i), b.get(i)) {
-            (Some(x), Some(y)) => f.add(x, y),
-            (Some(x), None) => *x,
-            (None, Some(y)) => *y,
-            _ => E6::ZERO,
-        })
-        .collect();
-    ptrim(&mut out);
-    out
-}
 fn pscale6(f: &Fq3, a: &[E6], k: &E6) -> P6 {
     let mut out: P6 = a.iter().map(|x| f.mul(x, k)).collect();
     ptrim(&mut out);
