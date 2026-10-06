@@ -62,12 +62,13 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
         args.len() == 3 || args.len() == 4 || args.len() == 5,
-        "usage: probe planted K | ordinary OFFSET(0..3) K [core16|core16wide]"
+        "usage: probe planted K | ordinary OFFSET(0..3) K [core16|core16wide|cubic90]"
     );
     let run_core16 = args.len() == 5 && (args[4] == "core16" || args[4] == "core16wide");
-    let wide_cap = args.len() == 5 && args[4] == "core16wide";
-    assert!(args.len() != 5 || run_core16);
-    let k_arg = if run_core16 {
+    let run_cubic90 = args.len() == 5 && args[4] == "cubic90";
+    let wide_cap = args.len() == 5 && (args[4] == "core16wide" || run_cubic90);
+    assert!(args.len() != 5 || run_core16 || run_cubic90);
+    let k_arg = if run_core16 || run_cubic90 {
         &args[3]
     } else {
         args.last().unwrap()
@@ -75,6 +76,7 @@ fn main() {
     let k: usize = k_arg.parse().expect("integer k");
     assert!([16, 90].contains(&k));
     assert!(!run_core16 || k == 16);
+    assert!(!run_cubic90 || k == 90);
     let source_variables: Vec<usize> = (0..18)
         .flat_map(|bit| (0..5).map(move |summand| bit + 18 * summand))
         .collect();
@@ -253,6 +255,13 @@ fn main() {
             "frozen private witness set changed"
         );
     }
+    if run_cubic90 {
+        assert_eq!(unresolved_count, 15_822, "frozen quartic core size changed");
+        assert_eq!(
+            witness_digest, "153342de74d4e40a2ea5f96ba35d24b7bdf2726700ed9b04714c9c89ca49dbdd",
+            "frozen quartic witness set changed"
+        );
+    }
     println!(
         "{}",
         json!({
@@ -271,12 +280,53 @@ fn main() {
     std::io::stdout()
         .flush()
         .expect("flush certificate receipt");
-    if (k != 90 && !run_core16) || unresolved_count > 2_000 {
+    let cubic_certificate = if run_cubic90 {
+        let begin = Instant::now();
+        let cubic = system
+            .private_degree_three_after_quartic(
+                &source_variables[..k],
+                &certificate.unresolved_rows,
+                CANDIDATES_PER_ROW,
+            )
+            .expect("ordered exact quartic-unresolved rows");
+        let mut cubic_hasher = blake3::Hasher::new();
+        cubic_hasher.update(b"f6-private-degree-three-after-four-v1");
+        for (row, monomial) in &cubic.private_witnesses {
+            cubic_hasher.update(&(*row as u64).to_le_bytes());
+            for word in monomial.0 {
+                cubic_hasher.update(&word.to_le_bytes());
+            }
+        }
+        println!(
+            "{}",
+            json!({
+                "phase":"private_cubic_certificate", "offset":offset, "k":k,
+                "status":"complete", "input_rows":cubic.input_rows,
+                "rows_with_degree_three":cubic.rows_with_degree_three,
+                "degree_three_occurrences":cubic.degree_three_occurrences,
+                "candidate_columns":cubic.candidate_columns,
+                "certified_rows":cubic.private_witnesses.len(),
+                "unresolved_rows":&cubic.unresolved_rows,
+                "witness_digest_blake3":cubic_hasher.finalize().to_hex().to_string(),
+                "certificate_ns":begin.elapsed().as_nanos(),
+                "peak_rss_bytes":peak_rss_bytes(),
+                "claim_scope":"algebraic_feasibility_only"
+            })
+        );
+        std::io::stdout().flush().expect("flush cubic certificate");
+        Some(cubic)
+    } else {
+        None
+    };
+    let core_rows = cubic_certificate
+        .as_ref()
+        .map_or(&certificate.unresolved_rows, |cubic| &cubic.unresolved_rows);
+    if (k != 90 && !run_core16) || core_rows.len() > 2_000 {
         return;
     }
     let core_build = Instant::now();
     let core = system
-        .source_prolongation_core(&source_variables[..k], &certificate.unresolved_rows)
+        .source_prolongation_core(&source_variables[..k], core_rows)
         .expect("ordered unresolved row IDs");
     let core_build_ns = core_build.elapsed().as_nanos();
     println!(
