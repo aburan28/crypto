@@ -1,0 +1,142 @@
+diff --git a/src/cryptanalysis/f6_wide_geometry.rs b/src/cryptanalysis/f6_wide_geometry.rs
+index c888f0ad6..eb068e89d 100644
+--- a/src/cryptanalysis/f6_wide_geometry.rs
++++ b/src/cryptanalysis/f6_wide_geometry.rs
+@@ -579,6 +579,94 @@ struct SignedPairSum {
+     neg_pair: (u32, u32),
+ }
+ 
++/// The signed sum array already owns every full x coordinate. Keep only its
++/// index in each hash slot, then compare the full coordinate on a probe.
++/// This avoids a second, randomly accessed copy of millions of x values.
++struct FlatXIndex {
++    slots: Vec<u32>,
++}
++
++impl FlatXIndex {
++    const EMPTY: u32 = u32::MAX;
++
++    fn new(pair_count: usize) -> Option<Self> {
++        let capacity = pair_count
++            .div_ceil(2)
++            .checked_mul(2)?
++            .max(8)
++            .checked_next_power_of_two()?;
++        Some(Self {
++            slots: vec![Self::EMPTY; capacity],
++        })
++    }
++
++    #[inline]
++    fn bucket(x: u128, mask: usize) -> usize {
++        let mut value = (x as u64) ^ ((x >> 64) as u64).rotate_left(23);
++        value ^= value >> 30;
++        value = value.wrapping_mul(0xbf58_476d_1ce4_e5b9);
++        value ^= value >> 27;
++        value = value.wrapping_mul(0x94d0_49bb_1331_11eb);
++        value ^= value >> 31;
++        (value as usize) & mask
++    }
++
++    #[inline]
++    fn probe(&self, x: u128, sums: &[SignedPairSum]) -> (usize, bool) {
++        let mask = self.slots.len() - 1;
++        let mut slot = Self::bucket(x, mask);
++        loop {
++            let index = self.slots[slot];
++            if index == Self::EMPTY {
++                return (slot, false);
++            }
++            if sums[index as usize]
++                .point
++                .is_some_and(|(stored_x, _)| stored_x == x)
++            {
++                return (slot, true);
++            }
++            slot = (slot + 1) & mask;
++        }
++    }
++
++    #[inline]
++    fn get(&self, x: u128, sums: &[SignedPairSum]) -> Option<usize> {
++        let (slot, found) = self.probe(x, sums);
++        found.then_some(self.slots[slot] as usize)
++    }
++
++    fn grow(&mut self, sums: &[SignedPairSum]) -> Option<()> {
++        let capacity = self.slots.len().checked_mul(2)?;
++        let mut replacement = Self {
++            slots: vec![Self::EMPTY; capacity],
++        };
++        for &index in &self.slots {
++            if index != Self::EMPTY {
++                let x = sums[index as usize].point?.0;
++                let (slot, found) = replacement.probe(x, sums);
++                debug_assert!(!found);
++                replacement.slots[slot] = index;
++            }
++        }
++        *self = replacement;
++        Some(())
++    }
++
++    fn insert_first(&mut self, x: u128, sums: &[SignedPairSum]) -> Option<bool> {
++        let (mut slot, found) = self.probe(x, sums);
++        if found {
++            return Some(false);
++        }
++        if sums.len().checked_add(1)? > self.slots.len() * 7 / 10 {
++            self.grow(sums)?;
++            slot = self.probe(x, sums).0;
++        }
++        self.slots[slot] = u32::try_from(sums.len()).ok()?;
++        Some(true)
++    }
++}
++
+ /// Exact sign-quotient pair index for a distinct, negation-closed base.
+ /// Each stored pair sum also represents its negative via the negated source
+ /// points. A query checks both signs and verifies every returned witness.
+@@ -586,7 +674,7 @@ pub struct F6SignedPairIndex {
+     curve: BinaryCurve,
+     points: Vec<BinaryPoint>,
+     sums: Vec<SignedPairSum>,
+-    lookup: HashMap<u128, usize>,
++    lookup: FlatXIndex,
+     infinity_index: Option<usize>,
+     pair_count: usize,
+ }
+@@ -615,7 +703,7 @@ impl F6SignedPairIndex {
+             .collect::<Option<_>>()?;
+         let capacity = pair_count.div_ceil(2);
+         let mut sums = Vec::with_capacity(capacity);
+-        let mut lookup = HashMap::with_capacity(capacity);
++        let mut lookup = FlatXIndex::new(pair_count)?;
+         let mut infinity_index = None;
+         #[cfg(target_arch = "aarch64")]
+         let use_packed = curve.m == 83
+@@ -643,14 +731,7 @@ impl F6SignedPairIndex {
+                             false
+                         }
+                     }
+-                    PointXKey::Affine(x) => {
+-                        if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+-                            entry.insert(sums.len());
+-                            true
+-                        } else {
+-                            false
+-                        }
+-                    }
++                    PointXKey::Affine(x) => lookup.insert_first(x, &sums)?,
+                 };
+                 if first_of_x_orbit {
+                     let j = i + offset;
+@@ -683,7 +764,7 @@ impl F6SignedPairIndex {
+     fn lookup_index(&self, x: PointXKey) -> Option<usize> {
+         match x {
+             PointXKey::Infinity => self.infinity_index,
+-            PointXKey::Affine(x) => self.lookup.get(&x).copied(),
++            PointXKey::Affine(x) => self.lookup.get(x, &self.sums),
+         }
+     }
+ 
