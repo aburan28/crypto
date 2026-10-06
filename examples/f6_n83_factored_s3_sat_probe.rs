@@ -248,6 +248,68 @@ impl Circuit {
         terms.into_iter().map(|bits| self.xor_many(bits)).collect()
     }
 
+    fn polynomial_mul_recursive(&mut self, a: &[Bit], b: &[Bit]) -> Vec<Bit> {
+        assert_eq!(a.len(), b.len());
+        assert!(a.len().is_power_of_two());
+        if a.len() == 1 {
+            return vec![self.and(a[0], b[0])];
+        }
+        let half = a.len() / 2;
+        let low = self.polynomial_mul_recursive(&a[..half], &b[..half]);
+        let high = self.polynomial_mul_recursive(&a[half..], &b[half..]);
+        let a_sum: Vec<_> = (0..half).map(|i| self.xor(a[i], a[half + i])).collect();
+        let b_sum: Vec<_> = (0..half).map(|i| self.xor(b[i], b[half + i])).collect();
+        let middle = self.polynomial_mul_recursive(&a_sum, &b_sum);
+        let mut result = vec![Bit::Const(false); 2 * a.len() - 1];
+        for i in 0..low.len() {
+            let cross = self.xor(middle[i], low[i]);
+            let cross = self.xor(cross, high[i]);
+            result[i] = self.xor(result[i], low[i]);
+            result[i + half] = self.xor(result[i + half], cross);
+            result[i + 2 * half] = self.xor(result[i + 2 * half], high[i]);
+        }
+        result
+    }
+
+    fn field_mul_karatsuba(
+        &mut self,
+        a: &FieldRep,
+        b: &FieldRep,
+        table: &impl WideFieldTable,
+    ) -> Vec<Bit> {
+        assert!(!a.source && !b.source);
+        assert_eq!(a.terms.len(), N);
+        assert_eq!(b.terms.len(), N);
+        let mut left: Vec<_> = a.terms.iter().map(|&(bit, _)| bit).collect();
+        let mut right: Vec<_> = b.terms.iter().map(|&(bit, _)| bit).collect();
+        left.resize(128, Bit::Const(false));
+        right.resize(128, Bit::Const(false));
+        let product = self.polynomial_mul_recursive(&left, &right);
+        let mut residue = vec![0u128; product.len()];
+        residue[0] = 1;
+        for degree in 1..residue.len() {
+            let mut mask = residue[degree - 1];
+            while mask != 0 {
+                let i = mask.trailing_zeros() as usize;
+                mask &= mask - 1;
+                residue[degree] ^= table.product_bits(i, 1);
+            }
+        }
+        let mut terms = vec![Vec::new(); N];
+        for (degree, &bit) in product.iter().enumerate() {
+            if bit == Bit::Const(false) {
+                continue;
+            }
+            let mut mask = residue[degree];
+            while mask != 0 {
+                let output = mask.trailing_zeros() as usize;
+                mask &= mask - 1;
+                terms[output].push(bit);
+            }
+        }
+        terms.into_iter().map(|bits| self.xor_many(bits)).collect()
+    }
+
     fn s3_basis(
         &mut self,
         x: &FieldRep,
@@ -255,9 +317,14 @@ impl Circuit {
         z: &FieldRep,
         b: &[Bit],
         table: &impl WideFieldTable,
+        karatsuba_xz: bool,
     ) {
         let xy = self.field_mul_rep(x, y, table);
-        let xz = self.field_mul_rep(x, z, table);
+        let xz = if karatsuba_xz {
+            self.field_mul_karatsuba(x, z, table)
+        } else {
+            self.field_mul_rep(x, z, table)
+        };
         let yz = self.field_mul_rep(y, z, table);
         let sum = self.field_add(&xy, &xz);
         let sum = self.field_add(&sum, &yz);
@@ -549,6 +616,7 @@ fn construct_basis_circuit(
     target: &F2mElement,
     b: &F2mElement,
     table: &impl WideFieldTable,
+    karatsuba: bool,
 ) -> Circuit {
     let mut circuit = Circuit::new();
     let source: Vec<_> = (0..5)
@@ -564,10 +632,24 @@ fn construct_basis_circuit(
         .collect();
     let target = FieldRep::dense(&bits_of(target));
     let b = bits_of(b);
-    circuit.s3_basis(&source[0], &source[1], &intermediate[0], &b, table);
-    circuit.s3_basis(&intermediate[0], &source[2], &intermediate[1], &b, table);
-    circuit.s3_basis(&intermediate[1], &source[3], &intermediate[2], &b, table);
-    circuit.s3_basis(&intermediate[2], &source[4], &target, &b, table);
+    circuit.s3_basis(&source[0], &source[1], &intermediate[0], &b, table, false);
+    circuit.s3_basis(
+        &intermediate[0],
+        &source[2],
+        &intermediate[1],
+        &b,
+        table,
+        karatsuba,
+    );
+    circuit.s3_basis(
+        &intermediate[1],
+        &source[3],
+        &intermediate[2],
+        &b,
+        table,
+        karatsuba,
+    );
+    circuit.s3_basis(&intermediate[2], &source[4], &target, &b, table, false);
     assert_eq!(circuit.outputs.len(), 332);
     circuit
         .units
@@ -635,7 +717,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
         args.len() == 5 || args.len() == 6,
-        "usage: probe emit|emit_xor|emit_xor_basis|verify planted|ordinary OFFSET PATH [all|source|none]"
+        "usage: probe emit|emit_xor|emit_xor_basis|emit_xor_karatsuba|verify planted|ordinary OFFSET PATH [all|source|none]"
     );
     let action = args[1].as_str();
     let mode = args[2].as_str();
@@ -643,9 +725,11 @@ fn main() {
     let path = &args[4];
     assert!(matches!(
         action,
-        "emit" | "emit_xor" | "emit_xor_basis" | "verify"
+        "emit" | "emit_xor" | "emit_xor_basis" | "emit_xor_karatsuba" | "verify"
     ));
-    assert!(args.len() == 5 || matches!(action, "emit_xor" | "emit_xor_basis"));
+    assert!(
+        args.len() == 5 || matches!(action, "emit_xor" | "emit_xor_basis" | "emit_xor_karatsuba")
+    );
     assert!(mode == "planted" || mode == "ordinary");
     assert!(offset < 4);
     let start = Instant::now();
@@ -658,18 +742,27 @@ fn main() {
     let target = target_for(&kc, &base.points, mode, offset);
     let setup_ns = start.elapsed().as_nanos();
 
-    if matches!(action, "emit" | "emit_xor" | "emit_xor_basis") {
+    if matches!(
+        action,
+        "emit" | "emit_xor" | "emit_xor_basis" | "emit_xor_karatsuba"
+    ) {
         let begin = Instant::now();
         let system = System512::build(&base.subspace_basis, x_of(&target), &kc.curve.b, 5, &table)
             .expect("exact five-summand system");
-        let mut circuit = if action == "emit_xor_basis" {
-            construct_basis_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table)
+        let mut circuit = if matches!(action, "emit_xor_basis" | "emit_xor_karatsuba") {
+            construct_basis_circuit(
+                &base.subspace_basis,
+                x_of(&target),
+                &kc.curve.b,
+                &table,
+                action == "emit_xor_karatsuba",
+            )
         } else {
             construct_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table)
         };
         let planted = input_assignment(&base.points, &PLANTED, &kc);
         compare_expanded(&circuit, &system, planted);
-        let pin = if matches!(action, "emit_xor" | "emit_xor_basis") {
+        let pin = if matches!(action, "emit_xor" | "emit_xor_basis" | "emit_xor_karatsuba") {
             args.get(5).expect("pin mode").as_str()
         } else if mode == "planted" {
             "source"
@@ -700,16 +793,17 @@ fn main() {
                 });
             }
         }
-        let (clauses, unit_clauses, literals) = if matches!(action, "emit_xor" | "emit_xor_basis") {
-            circuit.write_xcnf(path).expect("write extended DIMACS")
-        } else {
-            circuit.write_cnf(path).expect("write DIMACS")
-        };
+        let (clauses, unit_clauses, literals) =
+            if matches!(action, "emit_xor" | "emit_xor_basis" | "emit_xor_karatsuba") {
+                circuit.write_xcnf(path).expect("write extended DIMACS")
+            } else {
+                circuit.write_cnf(path).expect("write DIMACS")
+            };
         println!(
             "{}",
             json!({
                 "phase":"emitted", "mode":mode, "offset":offset,
-                "encoding":if action == "emit_xor_basis" {"basis_native_xor"} else if action == "emit_xor" {"native_xor"} else {"cnf"},
+                "encoding":if action == "emit_xor_karatsuba" {"karatsuba_native_xor"} else if action == "emit_xor_basis" {"basis_native_xor"} else if action == "emit_xor" {"native_xor"} else {"cnf"},
                 "pin":pin,
                 "curve_id":kc.label(), "target":point_json(&target),
                 "source_points":base.points.len(), "input_variables":INPUTS,
