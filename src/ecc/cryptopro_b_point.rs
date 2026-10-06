@@ -38,6 +38,15 @@
 //! degree-155 chain `5·31` (the element `ω` itself, a 5-isogeny then a
 //! 31-isogeny), and each is a GLV arm of the measurement with its own
 //! `λ`, reduced basis and test vectors.
+//!
+//! The chain sweep (`research/cryptopro_b_chain_sweep_20261006`) adds
+//! chains loaded at run time ([`PreparedChain::from_steps`],
+//! [`GlvContext::from_parts`], fed by
+//! [`crate::ecc::cryptopro_b_chain_set`]), a second chain evaluator
+//! ([`ChainEval::Optimised`]: Jacobian steps with an affine first step) and
+//! Jacobian odd-multiple tables for both arms ([`TableMode::Jacobian`]:
+//! no inversion, full additions), through [`scalar_mul_wnaf_with`] and
+//! [`scalar_mul_glv_with`].  The arms above are unchanged.
 
 use super::cryptopro_b_chain_consts::{Chain, ChainStep, A, B, N};
 use super::cryptopro_b_field::{CryptoProBFieldElement, P};
@@ -569,7 +578,7 @@ impl PreparedChain {
 
     /// Validate and prepare a chain given as borrowed constants: every
     /// coefficient a canonical value below `p`, each polynomial of the degree
-    /// its step's `ell` dictates, the kernel polynomial monic, the steps
+    /// its step's `ell` dictates, `ψ`, `N` and `M` monic, the steps
     /// composing from `E` back to a curve that `iso_u` maps onto `E`, and
     /// `degree` the product of the steps.
     pub fn from_steps(
