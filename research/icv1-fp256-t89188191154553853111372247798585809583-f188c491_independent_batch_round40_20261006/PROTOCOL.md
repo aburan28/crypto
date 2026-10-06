@@ -12,11 +12,34 @@ more than exact routing, reconstruction, and storage cost.
 This is a selector-stage experiment.  It is not an end-to-end speedup unless
 every promotion gate below passes.
 
+## Amendment 1: factor-base scope correction (before execution)
+
+The initial protocol text identified the 131,458-column pair universe as
+`FB1h2f8621cda105`.  That is not a valid composition.  The near-rho constants
+imported from round 36 descend from round 33's known-log low-delta/scalar
+family; round 19's structured residual maximum of 4 belongs only to
+`FB1h2f8621cda105`.
+
+This amendment was committed before implementation or execution.  The
+experiment therefore has two explicitly separate readings:
+
+1. the radix router is measured for the round-33/36 131,458-column known-log
+   selector family, whose structured residual degree remains unknown;
+2. `FB1h2f8621cda105` is a comparison boundary only.  Its degree-4 residual is
+   preserved, but no round-33 rho constant is transferred to it.
+
+Consequently this round cannot discharge the original 138,031-row Dickson-base
+relation-collection gate.  Any sub-rho row is a routing-stage result for the
+known-log selector and must leave the Dickson-base end-to-end cost unset.
+
 ## Frozen curve, factor base, and dependencies
 
 - curve:
   `icv1-fp256-t89188191154553853111372247798585809583-f188c491`;
-- factor base: `FB1h2f8621cda105`, 131,458 columns;
+- measured selector family: round-33 known-log low-delta/scalar construction,
+  modelled with 131,458 columns;
+- comparison factor base: `FB1h2f8621cda105`, 131,458 columns, not composed
+  with the round-33 cost constants;
 - relation model: 17 distinct variable columns, signed balanced `8+9`;
 - signed pair universe: 34,562,148,612 entries;
 - pair requests per independent start: 8;
@@ -135,7 +158,8 @@ Promotion requires all of:
 
 - zero false positives and false negatives on complete checked instances;
 - exact group replay of every reported native routing control;
-- structured residual degree no greater than 5 for `FB1h2f8621cda105`;
+- structured residual degree no greater than 5 for the measured round-33
+  family; the comparison base's degree-4 result is not transferable;
 - projected relation collection below `2^120` field/group-equivalent
   operations and below `2^103` per usable relation;
 - peak materialised storage below `2^50` bytes;
@@ -145,4 +169,3 @@ Promotion requires all of:
 Attempt no full-depth unplanted P-256 relation unless all gates pass.  If pair
 construction crosses rho only after unmeasured multi-terabyte routing, publish
 that split result and keep parity unestablished.
-
