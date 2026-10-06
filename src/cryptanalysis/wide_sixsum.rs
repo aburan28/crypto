@@ -245,6 +245,19 @@ pub struct System512 {
     pub summand_bits: usize,
 }
 
+/// A one-round degree-four row certificate. Every listed witness occurs in
+/// exactly one prolonged row, so that row cannot participate in a
+/// combination whose degree-four part vanishes.
+#[derive(Clone, Debug)]
+pub struct PrivateDegreeFour {
+    pub prolonged_rows: usize,
+    pub rows_with_degree_four: usize,
+    pub degree_four_occurrences: u64,
+    pub candidate_columns: usize,
+    pub private_witnesses: Vec<(usize, Mono512)>,
+    pub unresolved_rows: Vec<usize>,
+}
+
 impl System512 {
     pub fn build(
         basis: &[F2mElement],
@@ -357,6 +370,119 @@ impl System512 {
                 if !product.terms.is_empty() {
                     equations.push(product);
                 }
+            }
+        }
+        Some(Self {
+            equations,
+            n_vars: self.n_vars,
+            summand_bits: self.summand_bits,
+        })
+    }
+
+    /// Two exact passes over one-round source products. Only a small,
+    /// deterministic set of degree-four monomials per row is indexed;
+    /// pass two counts each candidate across *all* rows. Missing a
+    /// private monomial leaves a row unresolved, never falsely certified.
+    pub fn private_degree_four(
+        &self,
+        variables: &[usize],
+        candidates_per_row: usize,
+    ) -> Option<PrivateDegreeFour> {
+        if candidates_per_row == 0 || variables.iter().any(|&v| v >= self.summand_bits) {
+            return None;
+        }
+        let mut seen_variables = vec![false; self.summand_bits];
+        for &variable in variables {
+            if std::mem::replace(&mut seen_variables[variable], true) {
+                return None;
+            }
+        }
+        let prolonged_rows = self.equations.len().checked_mul(variables.len())?;
+        let mut row_candidates = Vec::with_capacity(prolonged_rows);
+        let mut candidate_counts: FxMap<Mono512, u32> = FxMap::default();
+        let mut rows_with_degree_four = 0;
+        let mut degree_four_occurrences = 0u64;
+        for &variable in variables {
+            let multiplier = Poly512::var(variable);
+            for equation in &self.equations {
+                let product = equation.mul(&multiplier);
+                let degree_four: Vec<_> = product
+                    .terms
+                    .iter()
+                    .copied()
+                    .filter(|monomial| monomial.degree() == 4)
+                    .collect();
+                degree_four_occurrences =
+                    degree_four_occurrences.checked_add(degree_four.len() as u64)?;
+                rows_with_degree_four += usize::from(!degree_four.is_empty());
+                let count = degree_four.len().min(candidates_per_row);
+                let mut choices = Vec::with_capacity(count);
+                for j in 0..count {
+                    let monomial = degree_four[j * degree_four.len() / count];
+                    candidate_counts.entry(monomial).or_insert(0);
+                    choices.push(monomial);
+                }
+                row_candidates.push(choices);
+            }
+        }
+        for &variable in variables {
+            let multiplier = Poly512::var(variable);
+            for equation in &self.equations {
+                let product = equation.mul(&multiplier);
+                for monomial in product.terms {
+                    if let Some(count) = candidate_counts.get_mut(&monomial) {
+                        *count = count.checked_add(1)?;
+                    }
+                }
+            }
+        }
+        let candidate_columns = candidate_counts.len();
+        let mut private_witnesses = Vec::new();
+        let mut unresolved_rows = Vec::new();
+        for (row, choices) in row_candidates.into_iter().enumerate() {
+            if let Some(monomial) = choices
+                .into_iter()
+                .find(|monomial| candidate_counts[monomial] == 1)
+            {
+                private_witnesses.push((row, monomial));
+            } else {
+                unresolved_rows.push(row);
+            }
+        }
+        Some(PrivateDegreeFour {
+            prolonged_rows,
+            rows_with_degree_four,
+            degree_four_occurrences,
+            candidate_columns,
+            private_witnesses,
+            unresolved_rows,
+        })
+    }
+
+    /// Keep every original equation and only the prolonged rows that lack a
+    /// private degree-four certificate. This preserves all consequences of
+    /// degree at most three from the complete one-round row span.
+    pub fn source_prolongation_core(
+        &self,
+        variables: &[usize],
+        unresolved_rows: &[usize],
+    ) -> Option<Self> {
+        if variables.iter().any(|&v| v >= self.summand_bits) {
+            return None;
+        }
+        let base_rows = self.equations.len();
+        let total = base_rows.checked_mul(variables.len())?;
+        let mut equations = self.equations.clone();
+        let mut previous = None;
+        for &row in unresolved_rows {
+            if row >= total || previous.is_some_and(|last| last >= row) {
+                return None;
+            }
+            previous = Some(row);
+            let product =
+                self.equations[row % base_rows].mul(&Poly512::var(variables[row / base_rows]));
+            if !product.terms.is_empty() {
+                equations.push(product);
             }
         }
         Some(Self {
@@ -575,5 +701,32 @@ mod tests {
         assert_eq!(prolonged.equations.len(), 3);
         assert!(prolonged.all_vanish(&assignment));
         assert!(original.prolongate_source_variables(&[2]).is_none());
+    }
+
+    #[test]
+    fn private_degree_four_distinguishes_unique_and_shared_columns() {
+        let cubic = Poly512::var(0).mul(&Poly512::var(1)).mul(&Poly512::var(2));
+        let unique = System512 {
+            equations: vec![cubic.clone()],
+            n_vars: 5,
+            summand_bits: 5,
+        };
+        let certificate = unique.private_degree_four(&[3], 32).unwrap();
+        assert_eq!(certificate.prolonged_rows, 1);
+        assert_eq!(certificate.private_witnesses.len(), 1);
+        assert!(certificate.unresolved_rows.is_empty());
+        let shared = System512 {
+            equations: vec![cubic.clone(), cubic],
+            n_vars: 5,
+            summand_bits: 5,
+        };
+        let certificate = shared.private_degree_four(&[3], 32).unwrap();
+        assert!(certificate.private_witnesses.is_empty());
+        assert_eq!(certificate.unresolved_rows, vec![0, 1]);
+        let core = shared
+            .source_prolongation_core(&[3], &certificate.unresolved_rows)
+            .unwrap();
+        assert_eq!(core.equations.len(), 4);
+        assert!(shared.source_prolongation_core(&[3], &[1, 0]).is_none());
     }
 }
