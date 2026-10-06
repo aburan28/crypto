@@ -14,6 +14,8 @@ on:
       - 'src/bin/icprog/**'
       - 'src/bin/prepared_sat_worker.rs'
       - 'src/bin/prepared_sat_worker/**'
+      - 'src/bin/prepared_sat_target_worker.rs'
+      - 'src/bin/prepared_sat_target_worker/**'
       - 'src/bin/prepared_ordinary_worker.rs'
       - 'src/bin/prepared_ordinary_worker/**'
       - 'src/cryptanalysis/prepared_sat_control.rs'
@@ -60,6 +62,8 @@ on:
       - 'src/bin/icprog/**'
       - 'src/bin/prepared_sat_worker.rs'
       - 'src/bin/prepared_sat_worker/**'
+      - 'src/bin/prepared_sat_target_worker.rs'
+      - 'src/bin/prepared_sat_target_worker/**'
       - 'src/bin/prepared_ordinary_worker.rs'
       - 'src/bin/prepared_ordinary_worker/**'
       - 'src/cryptanalysis/prepared_sat_control.rs'
@@ -107,9 +111,9 @@ jobs:
       - name: Fetch ledger §23's build commit, whose sources its claims hash
         run: git fetch --no-tags --depth=1 origin 0bf67f169f0762c8bd225760196803379cabdcb9
       - name: Build the harness
-        run: cargo build --release --bin icprog --bin isolated_bench --bin prepared_sat_worker
+        run: cargo build --release --bin icprog --bin isolated_bench --bin prepared_sat_worker --bin prepared_sat_target_worker
       - name: Unit tests, and every frozen output a port reproduces byte for byte
-        run: cargo test --release --bin icprog --bin isolated_bench --bin prepared_sat_worker --test icprog -- --include-ignored
+        run: cargo test --release --bin icprog --bin isolated_bench --bin prepared_sat_worker --bin prepared_sat_target_worker --test icprog -- --include-ignored
       - name: The isolation tool's busy mode passes the command's status through
         run: |
           set +e
@@ -162,9 +166,10 @@ jobs:
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_control -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin icprog sat_query_law -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_sat_worker -- --test-threads=1
+          "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_sat_target_worker -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin prepared_ordinary_worker -- --test-threads=1
           "$RUNNER_TEMP/native-busy" busy -- cargo test --locked --bin isolated_bench busy_unix -- --test-threads=1
-          "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker
+          "$RUNNER_TEMP/native-busy" busy -- cargo build --locked --bin icprog --bin isolated_bench --bin prepared_sat_worker --bin prepared_sat_target_worker
           "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog ordinary-control-replay-build \
             --publication research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/build-validation-v2 \
             --validation-registration-sha256 02e12b456947c8034f096b47c16dd7b73eb6c15cedb6c0b79164f887ec1406f3 \
