@@ -79,6 +79,10 @@ struct PreparedColumn {
 
 const PREPARED_N17_STATE: &str = "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107";
 
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 struct Config {
@@ -93,6 +97,7 @@ struct Config {
     factor_base_cube_root: bool,
     factor_base: Option<FactorBaseSpec>,
     groebner_degree: u32,
+    #[serde(skip_serializing_if = "is_false")]
     direct_fused_pack: bool,
     node_budget: usize,
     conflict_budget: u64,
@@ -759,6 +764,16 @@ fn main() {
 #[cfg(test)]
 mod prepared_target_tests {
     use super::*;
+
+    #[test]
+    fn default_direct_packing_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("direct_fused_pack").is_none());
+        config.direct_fused_pack = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("direct_fused_pack"), Some(&json!(true)));
+    }
 
     fn prepared_job(cap: u64) -> Job {
         // Shared mathematical fixture only. Historical preparation receipts,

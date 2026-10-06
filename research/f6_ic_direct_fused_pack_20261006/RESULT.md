@@ -45,9 +45,9 @@ reported online wall time. No rho solve was run in this stage study.
 
 The direct option is checked only inside
 `build_inherited_macaulay_with_layout` after a cached layout is found.
-For this n17 F6 workload, `matrix_f4_f2_counted_impl` disables active
-multipliers and layout reuse by default below 24 variables, so its F6
-calls use the generic materialized-row builder. The F6 timing movement
+The later source trace established that this F6-IC workload uses the
+inherited engine's support-local builder, which bypasses this cached
+layout path. The F6 timing movement
 cannot be credited to this direct packer; it illustrates ordinary host
 noise. Inherited F4 did have three T7 layout hits, but one complete-call
 pair regressed and the other improved only 6.5%, below the 15% retention
@@ -58,9 +58,17 @@ the physical CPU model through `sysctl`. These are exploratory paired
 times, not controlled CPU speedup claims. Peak RSS was unavailable, so
 `memory_peak_bytes` is `null`. The result says nothing about n83 ordinary
 relation yield or verified IC-versus-rho one-target speedup. The next
-matrix-build experiment must act on the actual generic F6 row builder
-at n17 or the active-multiplier builder at n83 and retain exact column
+matrix-build experiment must act on the support-local F6 row builder
+and retain exact column
 support and complete-call checks.
+
+After measurement, Linux generic-admission CI found that the new
+default-false `direct_fused_pack` field appeared in the worker's
+serialized `effective_config`, while older jobs did not supply it.
+The PR head now omits this field only when false, restoring the existing
+configuration contract; an opt-in true value remains visible. The
+target measurements above remain tied to their frozen pre-fix worker
+binary and source commit, not to this post-measurement CI fix.
 
 Run `sh research/f6_ic_direct_fused_pack_20261006/derive.sh` to regenerate
 [measurement rows](measurements.jsonl), the [derivation check](DERIVATION_CHECK.json),
