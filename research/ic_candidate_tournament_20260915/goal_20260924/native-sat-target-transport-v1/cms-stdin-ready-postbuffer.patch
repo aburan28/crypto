@@ -1,0 +1,68 @@
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -117,7 +117,7 @@ void Main::readInStandardInput(SATSolver* solver2)
+     DimacsParser<StreamBuffer<gzFile, GZ>, SATSolver> parser(solver2, &debugLib, conf.verbosity, fg);
+     #endif
+ 
+-    if (!parser.parse_DIMACS(in, false)) exit(-1);
++    if (!parser.parse_DIMACS(in, false, 0, true)) exit(-1);
+     #ifdef USE_ZLIB
+         gzclose(in);
+     #endif
+--- a/src/dimacsparser.h
++++ b/src/dimacsparser.h
+@@ -53,7 +53,8 @@ class DimacsParser
+         template <class T> bool parse_DIMACS(
+             T input_stpeam,
+             const bool strict_header,
+-            uint32_t offset_vars = 0);
++            uint32_t offset_vars = 0,
++            bool prepared_stdin = false);
+         uint64_t max_var = numeric_limits<uint64_t>::max();
+         map<int32_t, std::unique_ptr<Field>> weights;
+         const std::string dimacs_spec = "http://www.satcompetition.org/2009/format-benchmarks2009.html";
+@@ -683,14 +684,20 @@ bool DimacsParser<C, S>::parse_DIMACS(
+ bool DimacsParser<C, S>::parse_DIMACS(
+     T input_stream,
+     const bool _strict_header,
+-    uint32_t _offset_vars)
++    uint32_t _offset_vars,
++    bool prepared_stdin)
+ {
+     debugLibPart = 1;
+     strict_header = _strict_header;
+     offset_vars = _offset_vars;
+     const uint32_t origNumVars = solver->nVars();
+ 
+-    C in(input_stream);
++    // Finish allocation and parser setup without consuming a target CNF byte.
++    C in(input_stream, !prepared_stdin);
++    if (prepared_stdin) {
++        if (verbosity) cout << "c PREPARED_STDIN_READY_v1" << endl;
++        in.prime();
++    }
+     if ( !parse_DIMACS_main(in)) return false;
+ 
+     if (verbosity) {
+--- a/src/streambuffer.h
++++ b/src/streambuffer.h
+@@ -93,15 +93,17 @@ class StreamBuffer
+     }
+ 
+ public:
+-    StreamBuffer(A i) :
++    StreamBuffer(A i, bool eager_read = true) :
+         in(i)
+         , pos(0)
+         , size(0)
+         , buf(new char[chunk_limit]())
+     {
+-        assureLookahead();
++        if (eager_read) assureLookahead();
+     }
+ 
++    void prime() { assureLookahead(); }
++
+     int  operator *  () {
+         return (pos >= size) ? EOF : buf[pos];
+     }

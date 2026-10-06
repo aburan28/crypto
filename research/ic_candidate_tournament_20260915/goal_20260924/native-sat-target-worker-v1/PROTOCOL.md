@@ -26,7 +26,7 @@ exporter marker is `c EXPORTER_PREPARED_STDIN_READY_v1`. The CMS marker must be
 `c PREPARED_STDIN_READY_v1` emitted after its stdin parser is constructed; the
 unmodified CMS reader line is not a sufficient readiness marker. The
 [transport design](../native-sat-target-transport-v1/DESIGN.md) and its
-[minimal CMS patch](../native-sat-target-transport-v1/cms-stdin-ready.patch)
+[post-buffer CMS patch](../native-sat-target-transport-v1/cms-stdin-ready-postbuffer.patch)
 describe the remaining source review and binary-compatibility gate. The
 patched CMS binary is **not yet built or validated**. A controller must freeze
 its exact source, build receipt and executable hash before any dispatch.

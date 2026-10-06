@@ -16,13 +16,16 @@ must hash to
 `6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af`.
 The marked variant is built from the retained CMS source commit
 `7ae1b4a74259cdce223a584281fb8f090bbd3eed` and the exact
-[one-line patch](cms-stdin-ready.patch). The accepted source archive has
+[post-buffer patch](cms-stdin-ready-postbuffer.patch). The earlier
+[one-line sketch](cms-stdin-ready.patch) is not an eligible primary-online
+readiness implementation: `StreamBuffer` allocation would still occur after
+its marker. The accepted source archive has
 SHA-256 `467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323`.
 Retain that archive, patch, toolchain, dependencies, build command/log,
 binary and all hashes before the first solver role. It is a **new** candidate binary, never the
 accepted CMS executable under a changed label. Review that the marker is
-flushed after stdin stream and DIMACS parser construction, before the first
-CNF read. If source review or build provenance fails, stop with that failure
+flushed after stdin stream, DIMACS parser and stream-buffer construction,
+before the first CNF read. If source review or build provenance fails, stop with that failure
 and do not launch a control solver.
 
 For each source instance run these three roles once, in this order:

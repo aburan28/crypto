@@ -52,10 +52,16 @@ reader/parser initialization and before the first read, prove byte- and
 model-equivalence to the accepted binary on disclosed controls, or supply an
 equally auditable post-initialization handshake. A new marked binary has its
 own source and binary hashes in the target candidate; never call it the
-unchanged accepted executable. The [minimal marker patch](cms-stdin-ready.patch)
-shows one candidate insertion into the accepted `src/main.cpp`; it is unbuilt
-and unverified and needs an independent review of parser initialization before
-use. Start **one stdin-piped CMS child for
+unchanged accepted executable. Source review found that the earlier
+[one-line sketch](cms-stdin-ready.patch) emits READY before
+`StreamBuffer` allocates its 148,576-byte buffer; that constructor also calls
+`fread`. The stricter [post-buffer patch](cms-stdin-ready-postbuffer.patch)
+constructs the buffer without reading, emits READY only after that allocation,
+then primes the stream and parses the target CNF. Its file-input default keeps
+the original eager-read path. The patch applies to the accepted source archive
+but remains unbuilt and unverified; the
+[fixed three-way control](MARKED_CMS_CONTROL_V1.md) must pass before use.
+Start **one stdin-piped CMS child for
 each of the `max_queries` permitted attempts** in distinct process groups
 with only target-independent flags. Wait for every child to complete the
 post-initialization handshake before opening the online interval. A child exits after one

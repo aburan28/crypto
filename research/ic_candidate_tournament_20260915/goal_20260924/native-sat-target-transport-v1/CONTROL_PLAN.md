@@ -73,7 +73,9 @@ future marked-CMS three-way gate needs a new, explicit control protocol; the
 longer post-hoc diagnostic cannot silently replace the failed 60-second row.
 Under that new protocol, build a **new** instrumented binary from
 the retained CMS source commit `7ae1b4a74259cdce223a584281fb8f090bbd3eed`
-plus [the one-line marker patch](cms-stdin-ready.patch). Archive the complete
+plus [the post-buffer marker patch](cms-stdin-ready-postbuffer.patch). The
+earlier [one-line sketch](cms-stdin-ready.patch) is superseded because it
+leaves `StreamBuffer` allocation after READY. Archive the complete
 source, dependencies, build receipt and new binary hash before any target
 registration. For each of the same three disclosed inputs, require three-way
 agreement among accepted file mode, accepted stdin mode and marked stdin mode
