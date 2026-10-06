@@ -478,7 +478,7 @@ pub(super) fn verify(preparation: &Value, cfg: &Config, producer: &Value) -> Res
     )
 }
 
-fn verify_costs(producer: &Value) -> Result<Value, String> {
+pub(super) fn verify_costs(producer: &Value) -> Result<Value, String> {
     let clock = &producer["costs"];
     keys(
         clock,

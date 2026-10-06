@@ -89,6 +89,8 @@ mod target_control;
 mod target_custody;
 #[path = "icprog/target_math.rs"]
 mod target_math;
+#[path = "icprog/target_sat_math.rs"]
+mod target_sat_math;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -227,6 +229,17 @@ enum Command {
         registration_sha256: String,
         #[arg(long)]
         worker_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay SAT one-target mathematics only; no solver, native-source or runtime admission.
+    TargetSatMathematicsAudit {
+        #[arg(long)]
+        preparation: PathBuf,
+        #[arg(long)]
+        config: PathBuf,
+        #[arg(long)]
+        producer: PathBuf,
         #[arg(long)]
         out: PathBuf,
     },
@@ -1002,6 +1015,12 @@ fn main() -> ExitCode {
             &worker_sha256,
             &out,
         ),
+        Command::TargetSatMathematicsAudit {
+            preparation,
+            config,
+            producer,
+            out,
+        } => target_sat_math::run(&preparation, &config, &producer, &out),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,
