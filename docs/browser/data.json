@@ -11016,7 +11016,28 @@
    ],
    "on_leaderboard": false,
    "leaderboard": [],
-   "ecbench": [],
+   "ecbench": [
+    {
+     "session_id": "ECBS1h487c13e3a766",
+     "arm": "claw-c1",
+     "method": "claw.pair_table",
+     "method_id": "ECM1h76c786dca40e",
+     "runs": 2,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    },
+    {
+     "session_id": "ECBS1h487c13e3a766",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1h2400af10ecaa",
+     "runs": 2,
+     "verified": 0,
+     "mean_s": null,
+     "mean_ratio_to_floor": null
+    }
+   ],
    "factor_bases": [],
    "tournament_cells": [],
    "hyperelliptic_cover": {
@@ -30148,28 +30169,7 @@
    ],
    "on_leaderboard": false,
    "leaderboard": [],
-   "ecbench": [
-    {
-     "session_id": "ECBS1h487c13e3a766",
-     "arm": "claw-c1",
-     "method": "claw.pair_table",
-     "method_id": "ECM1h76c786dca40e",
-     "runs": 2,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    },
-    {
-     "session_id": "ECBS1h487c13e3a766",
-     "arm": "rho-strong",
-     "method": "rho.signed_frobenius_strong",
-     "method_id": "ECM1h2400af10ecaa",
-     "runs": 2,
-     "verified": 0,
-     "mean_s": null,
-     "mean_ratio_to_floor": null
-    }
-   ],
+   "ecbench": [],
    "factor_bases": [],
    "tournament_cells": [],
    "hyperelliptic_cover": {
@@ -47388,8 +47388,8 @@
    "descent": "pdp",
    "isogeny": 0,
    "record_sha12": "84b504d19844",
-   "mentions": 25,
-   "files": 14,
+   "mentions": 26,
+   "files": 15,
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/AUDIT.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/results-20260930/receipt.json",
