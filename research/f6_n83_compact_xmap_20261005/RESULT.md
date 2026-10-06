@@ -77,8 +77,38 @@ The small-replay runner and amendment hashes are
 `7c4f8ef43a0a037e380aaf7782c7445471b275d48d96a8ba13c01521a399fd5b`
 and `4c974adf9614f7827952a2071f5c8cacfa1636f3ba5d7467601d1231d1a147b5`.
 
+## Direct #1399-to-final gate
+
+The [second amendment](AMENDMENT_2.md) froze a direct matched comparison
+so the separate #1399→#1416 and #1416→final ratios would not be
+multiplied across sessions. The unchanged #1399 full binary and final
+full binary ran baseline, final, final, baseline on the same public T001.
+All four processes exited zero, produced 4,108,723 signed sums, and
+returned the same exact miss. The raw [direct panel](direct_status.tsv),
+its four `direct_*.jsonl` files, empty stderr files and
+[runner](direct_panel.sh) are preserved.
+
+| Direct order | Arm | Index build (ms) | Exact query (ms) | Peak RSS (B) |
+| ---: | --- | ---: | ---: | ---: |
+| 1 | #1399 baseline | 15,123.246 | 4,263.074 | 1,214,693,376 |
+| 2 | final raw x map | 4,314.180 | 2,187.778 | 544,587,776 |
+| 3 | final raw x map | 7,616.908 | 3,428.531 | 542,752,768 |
+| 4 | #1399 baseline | 14,148.535 | 4,431.044 | 1,268,269,056 |
+
+The direct medians are **4,347.059 versus 2,808.154 ms exact query**
+(**1.548×** exploratory baseline/final), and **14,635.890 versus
+5,965.544 ms index build** (2.453× exploratory). The adjacent query
+ratios are **1.949× and 1.292×**; neither clears the preregistered
+requirement that both exceed 2.0. Maximum RSS fell 57.1%. This panel
+therefore **does not establish a twofold query speedup**. Its wide
+adjacent spread is another reason not to promote a controlled CPU
+ratio. The baseline full binary hash was
+`8923553ad79d2647383fd8a929b12fd4ddbfe0f880d95b9d641de295fc6e541b`;
+the final hash is recorded above. The direct runner hash is
+`bfff0f2efc3ada3d2d61afbc5ad06ef2362d3e127f1ab59484f6c65a3bbda046`.
+
 Host: physical Apple M4 Pro, arm64 macOS 26.6, Rust 1.93.1. It had no
-auditable exclusive CPU partition and other work ran during both
+auditable exclusive CPU partition and other work ran during the
 panels. All wall ratios are **exploratory four-summand component
 diagnostics**, not controlled complete-call speedups. Index building
 is reusable target-independent preparation; exact query is a
@@ -90,6 +120,7 @@ scalar, paired one-target rho run, or IC online speedup. Those remain
 unknown.
 
 Decision: retain the raw-key map after the amended smaller-case gate.
+The direct twofold query gate was not met.
 The next algorithmic task remains a higher-arity ordinary relation
 solver; further four-summand lookup constants alone cannot establish
 an F6 or IC crossover.
