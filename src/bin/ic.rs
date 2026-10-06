@@ -11,6 +11,8 @@ mod descent;
 mod experiment;
 #[path = "ic/fixed.rs"]
 mod fixed;
+#[path = "ic/large_prime.rs"]
+mod large_prime;
 #[path = "ic/params.rs"]
 mod params;
 #[path = "ic/price.rs"]
@@ -90,6 +92,9 @@ enum Action {
     Rho(rho::RhoArgs),
     /// Price the workflow's pipeline phase by phase: the same calls in memory on one thread, each phase on its own clock, converted at one batched addition measured in the same process, beside batch rho on the same targets with its step priced.
     Price(price::PriceArgs),
+    /// Import the ECBench binary-curve battery and run bounded exact
+    /// n−1 index calculus with the zero/single/double-large-prime variation.
+    LargePrime(large_prime::LargePrimeArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -142,6 +147,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
         Some(Action::Rho(args)) => rho::run(args.clone(), cli.json),
         Some(Action::Price(args)) => price::run(args.clone(), cli.json),
+        Some(Action::LargePrime(args)) => large_prime::run(args.clone()),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -172,19 +178,19 @@ pub fn binary_hash() -> Option<String> {
     BINARY_HASH.get_or_init(compute_binary_hash).clone()
 }
 
-/// The working tree's commit when this process started.
+/// The source commit embedded when this executable was built.
 pub fn git_commit() -> Option<String> {
     GIT_COMMIT.get_or_init(compute_git_commit).clone()
 }
 
 fn compute_git_commit() -> Option<String> {
-    let out = std::process::Command::new("git")
-        .args(["rev-parse", "HEAD"])
-        .output()
-        .ok()?;
-    out.status
-        .success()
-        .then(|| String::from_utf8_lossy(&out.stdout).trim().to_string())
+    // Release/install jobs set the repository-neutral override explicitly.
+    // GitHub Actions already exports its exact checkout SHA.  Keeping this in
+    // `option_env!` avoids a root build script, whose inputs would otherwise
+    // need to enter every source-bound research manifest in the repository.
+    option_env!("CRYPTO_BUILD_GIT_COMMIT")
+        .or(option_env!("GITHUB_SHA"))
+        .map(str::to_owned)
 }
 
 fn compute_binary_hash() -> Option<String> {
@@ -484,6 +490,29 @@ fn display(report: &Value) {
                 println!("{name}");
             }
         }
+        Some("large-prime") => {
+            println!(
+                "Large-prime IC: {}; imported {} families",
+                report["status"],
+                report["battery"].as_array().map_or(0, |v| v.len())
+            );
+            if let Some(run) = report.get("run").filter(|v| !v.is_null()) {
+                println!(
+                    "  {}: recovered {}; expected {}; fast {}; independent {}",
+                    run["family"],
+                    run["report"]["recovered"],
+                    run["expected"],
+                    run["report"]["verified_fast"],
+                    run["report"]["verified_independent"]
+                );
+                println!(
+                    "  trials {}; accepted {}; LP histogram {}",
+                    run["report"]["counters"]["trials"],
+                    run["report"]["counters"]["accepted_relations"],
+                    run["report"]["counters"]["relation_histogram"]
+                );
+            }
+        }
         _ => println!("{}", serde_json::to_string_pretty(report).unwrap()),
     }
 }
@@ -508,7 +537,7 @@ fn main() -> ExitCode {
     // Generated parameter documents remain directly importable under their strict schema.
     if report.get("operation").is_some() {
         report["software"] = json!({"version":env!("CARGO_PKG_VERSION"),"os":std::env::consts::OS,
-            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash()});
+            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash(),"git_commit":git_commit()});
     }
     let success = matches!(
         report["status"].as_str(),

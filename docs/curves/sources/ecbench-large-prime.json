@@ -1,0 +1,247 @@
+{
+  "schema": "ecbench.curve-source/v1",
+  "curves": [
+    {
+      "name": "ecbench-koblitz-n11-l4",
+      "field": {
+        "kind": "binary",
+        "degree": 11,
+        "polynomial_low_terms": [
+          0,
+          1,
+          4,
+          8
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 1982,
+      "subgroup_order": 991,
+      "cofactor": 2,
+      "generator": {
+        "x": 1193,
+        "y": 1007
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n11-l4",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n13-l4",
+      "field": {
+        "kind": "binary",
+        "degree": 13,
+        "polynomial_low_terms": [
+          0,
+          1,
+          4,
+          5,
+          8,
+          10,
+          11,
+          12
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 8374,
+      "subgroup_order": 79,
+      "cofactor": 106,
+      "generator": {
+        "x": 4397,
+        "y": 3043
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n13-l4",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n15-l5",
+      "field": {
+        "kind": "binary",
+        "degree": 15,
+        "polynomial_low_terms": [
+          0,
+          2,
+          4,
+          5
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 32494,
+      "subgroup_order": 211,
+      "cofactor": 154,
+      "generator": {
+        "x": 2276,
+        "y": 8250
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n15-l5",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n17-l6",
+      "field": {
+        "kind": "binary",
+        "degree": 17,
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 131174,
+      "subgroup_order": 65587,
+      "cofactor": 2,
+      "generator": {
+        "x": 129539,
+        "y": 55316
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n17-l6",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n19-l6",
+      "field": {
+        "kind": "binary",
+        "degree": 19,
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 525086,
+      "subgroup_order": 262543,
+      "cofactor": 2,
+      "generator": {
+        "x": 517098,
+        "y": 148801
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n19-l6",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n23-l7",
+      "field": {
+        "kind": "binary",
+        "degree": 23,
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          5,
+          6,
+          7,
+          8,
+          10,
+          12,
+          13,
+          14,
+          15,
+          18,
+          19,
+          20,
+          22
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 8393806,
+      "subgroup_order": 4196903,
+      "cofactor": 2,
+      "generator": {
+        "x": 3039945,
+        "y": 5630220
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n23-l7",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n29-l8",
+      "field": {
+        "kind": "binary",
+        "degree": 29,
+        "polynomial_low_terms": [
+          0,
+          3,
+          4,
+          5,
+          7,
+          10,
+          11,
+          12,
+          13,
+          14,
+          16,
+          17,
+          19,
+          25,
+          27,
+          28
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 536911222,
+      "subgroup_order": 42457,
+      "cofactor": 12646,
+      "generator": {
+        "x": 444898211,
+        "y": 78861358
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n29-l8",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    },
+    {
+      "name": "ecbench-koblitz-n31-l8",
+      "field": {
+        "kind": "binary",
+        "degree": 31,
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          3,
+          8,
+          14,
+          17,
+          18,
+          19,
+          20,
+          24,
+          26
+        ]
+      },
+      "a": 1,
+      "b": 1,
+      "group_order": 2147392942,
+      "subgroup_order": 41231,
+      "cofactor": 52082,
+      "generator": {
+        "x": 1665648486,
+        "y": 204801008
+      },
+   "koblitz": true,
+   "suppress_koblitz_aliases": true,
+      "corpus_family": "koblitz-n31-l8",
+      "source_manifest_sha256": "ff1174299d4d89c88501482b2cc61dd5ca783591f703f90aaf95609b96a9d362"
+    }
+  ]
+}

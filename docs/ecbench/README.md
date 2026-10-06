@@ -47,6 +47,23 @@ cargo build --release --bin ecbench
 ./target/release/ecbench plan --spec docs/ecbench/specs/smoke-prime.json
 ```
 
+The exact binary-field correctness fixture pairs `ic.large_prime` with
+the matched `rho.signed_frobenius` on the same explicit Koblitz curve and targets:
+
+```bash
+./target/release/ecbench plan --spec docs/ecbench/specs/smoke-binary-large-prime.json
+```
+
+The companion `ic large-prime` command imports and validates every curve,
+base point, and challenge point in an external ECBench corpus before solving
+one selected challenge. `--summands n-1` is literal and a run is refused when
+its exact combination table would exceed `--max-states`:
+
+```bash
+ic --json large-prime --manifest corpus/manifest.json --family koblitz-n11-l4 \
+  --summands n-1 --large-primes 2
+```
+
 ```bash
 ./target/release/ecbench run --spec docs/ecbench/specs/smoke-prime.json --out /tmp/ecbench/smoke-1
 ```
@@ -295,6 +312,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
