@@ -135,6 +135,7 @@ pub mod ec_trapdoor;
 pub mod ecbench;
 pub mod ecbench_large_prime;
 pub mod ecc2k130_guard;
+pub mod ecc2k130_merge;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;

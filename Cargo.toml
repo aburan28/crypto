@@ -28,6 +28,12 @@ path = "src/bin/icx.rs"
 name = "ecc2k-guard"
 path = "src/bin/ecc2k_guard.rs"
 
+# `ecc2k-merge` — the ECC2K-130 distinguished-point merge, byte-for-byte
+# with ecc2k130/aws/merge.py.
+[[bin]]
+name = "ecc2k-merge"
+path = "src/bin/ecc2k_merge.rs"
+
 # Exact CM polarization checker with a standalone catalog/database CLI.
 [[bin]]
 name = "jacobian-certificate"
