@@ -113,6 +113,33 @@ Choose the primes `ℓ` with `--max-ell N` (every odd prime up to N) or
 | `--prune-local` | after a successful publish, delete the local `curves.yaml` and `isogeny_routes.json` |
 | `--include-atkin` | also try Atkin primes (they find nothing) |
 
+## Compact P-256 grids
+
+The generic `isogeny_walk walk` output keeps the explored multigraph and a
+complete root route for every curve.  For a million-curve screening prefix,
+use the specialised streaming certificate instead:
+
+```bash
+cargo build --release --bin p256_isogeny_million
+M=./target/release/p256_isogeny_million
+C=$(git rev-parse HEAD)
+
+$M --threads 4 generate --side 1000 --source-commit "$C" \
+  --output runs/p256-grid-1m.jsonl.gz
+$M --threads 4 verify --input runs/p256-grid-1m.jsonl.gz \
+  --audit-points 2 --audit-seed-x 7
+```
+
+The fixed 1,000 by 1,000 grid has a degree-13 spine and degree-11 rows.  It
+records exactly one explicit kernel-certified parent isogeny for every
+non-root curve, streams deterministic gzip JSON Lines, and independently
+replays root choices, models, generators, identities, detector values, order
+proofs, kernels and target isomorphisms.  Any repeated j-invariant aborts the
+run; it is not replaced by an adaptively selected curve.  This compact grid is
+a registered P-256 screening experiment, not a replacement for the generic
+multigraph walker and not evidence of an ECDLP speedup.  Its frozen protocol is
+[`research/p256_isogeny_million_20261006/PROTOCOL.md`](../../research/p256_isogeny_million_20261006/PROTOCOL.md).
+
 ## Sizing
 
 Measured on a 14-core Apple M4 Pro, unisolated.  Treat these as estimates
@@ -132,8 +159,9 @@ for your machine.
 | 100,000 | ~9 GB | ~2 GB | a 16 GB laptop |
 | 300,000 | ~26 GB | ~6 GB | a 32–48 GB machine |
 
-Beyond that, use more machines on different roots or `ℓ` sets rather than
-one bigger walk, until a resumable, streaming walk exists.
+Beyond that, use more machines on different roots or `ℓ` sets for full
+multigraph output.  The compact P-256 grid above is streaming, but deliberately
+retains only one parent edge per curve and has a different coverage contract.
 
 ## Running offline
 
