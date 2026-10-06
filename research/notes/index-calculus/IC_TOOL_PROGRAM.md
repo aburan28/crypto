@@ -446,6 +446,32 @@ three target sizes, and acceptance needs each interval above 1.03 on the
 suite rows and on fresh holdouts. It runs after the rule's comparison at
 v3.
 
+**R02b withdrawn on v3 (2026-10-06)**
+([record](../../ic_tool_program/explorations/R02b-go-no-go-20261006/README.md)).
+The go/no-go its amendment 3 declared ran after R07's last step: v3
+against v3 plus R02's kernel, which applied unchanged, on `M1`'s two rows
+at each target size, three rounds, isolated.
+- **Cold time read 0.962 and 0.918,** base over candidate, at `2^44.5`
+  and `2^47.2` (five clean pairs each). On v3 the kernel is slower than
+  the scalar path it replaces, and collection is 12% and 8% slower with
+  it.
+- **So R02b was withdrawn without running,** by its rule (below 1.05 at
+  both sizes; its amendment 4), and the kernel is retired. The withdrawal
+  is neither an acceptance nor a failed round on the scan (§11).
+
+**The scan's stages on v3 (2026-10-06)**
+([record](../../ic_tool_program/explorations/scan-stages-v3-20261006/README.md)),
+R04's probes on main's head, two rounds of `M1`'s rows. This is a stage
+diagnostic, not a speedup.
+- **The wide-tail premium is gone.** The subtraction costs 11.3 and
+  12.1 ns a summand at `2^44.5` and `2^47.2`, against R04's 32.5 and
+  33.3 on v0′.
+- **The scan is about 35 ns a summand at all three sizes,** in three
+  roughly equal parts: the subtraction (11–12 ns), the key (11–13 ns),
+  and the filter with the admitted keys (10–12 ns).
+- **The key is R06's target, and the subtraction the next lever's:**
+  a vectorised kernel on main's two-fold reduction.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
