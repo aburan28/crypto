@@ -1014,3 +1014,111 @@ isogeny classes, and anything about a generic or deployed curve.
 accounting (the price, and the caveat of §9/§13 discharged or not by P3).
 Not an advance: the algorithm is [JV12]'s suggestion priced, and the class
 is the weak class.
+
+### 17.5 Measured (2026-10-05; `experiments/39_jv_isogeny_walk_v2*.{json,log}`; every number below is printed by `cargo run --release --example jv_isogeny_walk -- --summarize FILE.json` or is the run's own log line)
+
+**Code:** `src/cryptanalysis/jv_isogeny_walk.rs` (`WalkCtx`, `Curve2::{weak_by_norms, two_edges, ell_targets}`, `curve_order`, `run_walk2`, `exact_census`), driver `examples/jv_isogeny_walk.rs --v2`.  Nine unit tests pin the norm test against §13's cross-ratio test on every ordering of the constructed weak curves and on random triples, the fast character and root against the slow ones, the 2-edges against §13's neighbours with the carried dual root, the `ℓ = 3` targets against §13's, the `ℓ = 5, 7` targets by their duals, and the point count against the cover instances' `4ℓ`.
+
+**One amendment, made on the pilot and before the registered run** (recorded here because §17.4 promised none after it): §17.1 said a curve with no rational `ℓ`-isogeny *restarts from a random curve, counted, as in §13*.  The pilot showed what a restart is: a change of instance.  A walk that restarts lands in a fresh isogeny class, and whether *that* class holds a weak curve has nothing to do with the curve the attacker was given.  So the registered run has no restarts: a walk whose reachable set under `{2} ∪ jumps` closes without a weak curve ends `exhausted`, and the search over components is breadth first (a component's unexplored jumps are kept and resumed), so `exhausted` means the closure is closed, not that a sample of it was.  The exact closure mode (every `ℓ`-neighbour of every curve of every component) was run beside it at `p ≤ 31` to check that: it finds the same `found` and the same `exhausted` counts at every size (`22 / 18`, `15 / 25`, `17 / 23`, `13 / 26`, `17 / 23`, `15 / 25` at `p = 7 … 31`, against `22 / 18`, `15 / 24`, `17 / 22`, `13 / 24`, `17 / 21`, `15 / 23` for the lazy search, the one-to-two differences being walks the lazy search `capped` first).  A second change of the same kind: one source curve per degree and component suffices (a horizontal `ℓ`-isogeny from any curve of a 2-component lands in the same neighbouring component), so the pilot's eight were cut to one; this is cost, not outcome.
+
+**The registered run was stopped after `p = 101`.**  §17.3 named `p = 251, 503, 1009`.  By `p = 101` P3 was falsified (below) and the walks that fail do so by exhausting a closure of thousands of components at `3·10⁵`–`10⁶` multiplications a jump, hours per walk at `p = 251` and days at `503`; the budget went instead to the diagnostics that explain the failure (§17.5.2–17.5.4), which are post hoc and labelled so.  `experiments/39_jv_isogeny_walk_v2.json` holds `p = 7 … 101`, forty walks each, seed `1`, as frozen.
+
+#### 17.5.1 The registered run: random full-2-torsion start curves
+
+| p | q | walks (start weak) | success | success by admitted degrees 0 / 1 / 2 / 3 (walks) | exhausted / capped | curves met, median of found (q/3) | first component mean | c_order | c_curve | c_jump | jumps per found walk | walk / rho, found | walk / rho, all |
+|---:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| 7 | 49 | 40 (1) | 0.54 | – / 0.50 (2) / 0.44 (18) / 0.63 (19) | 18 / 0 | 5 (16) | 4.7 | 5.90e4 | 2519 | 3.26e5 | 1.5 | 3.3675 | 58.0645 |
+| 11 | 121 | 40 (1) | 0.36 | 1.00 (1) / 0.12 (8) / 0.39 (18) / 0.42 (12) | 24 / 1 | 12 (40) | 6.5 | 8.43e4 | 2539 | 2.84e5 | 2.9 | 5.9758 | 21.0231 |
+| 13 | 169 | 40 (1) | 0.41 | – / 0.00 (7) / 0.53 (19) / 0.46 (13) | 22 / 1 | 21 (56) | 10.8 | 1.02e5 | 2605 | 5.01e5 | 4.6 | 4.6610 | 39.8819 |
+| 17 | 289 | 40 (0) | 0.33 | – / 0.12 (8) / 0.32 (19) / 0.46 (13) | 24 / 3 | 19 (96) | 50.3 | 1.33e5 | 2675 | 4.15e5 | 3.5 | 2.2999 | 27.7903 |
+| 23 | 529 | 40 (0) | 0.42 | 0.00 (1) / 0.57 (7) / 0.50 (20) / 0.25 (12) | 21 / 2 | 22 (176) | 9.0 | 1.75e5 | 2295 | 6.77e5 | 2.8 | 0.2957 | 52.0835 |
+| 31 | 961 | 40 (0) | 0.38 | – / 0.27 (11) / 0.50 (12) / 0.35 (17) | 23 / 2 | 207 (320) | 102.1 | 2.41e5 | 2834 | 1.12e6 | 9.1 | 0.8306 | 61.4546 |
+| 53 | 2809 | 40 (0) | 0.25 | – / 0.38 (8) / 0.26 (23) / 0.11 (9) | 29 / 1 | 443 (936) | 23.1 | 4.62e5 | 2765 | 5.07e5 | 71.4 | 1.7483 | 8.0189 |
+| 101 | 10201 | 40 (0) | 0.20 | – / 0.12 (8) / 0.24 (17) / 0.20 (15) | 29 / 3 | 1700 (3400) | 91.5 | 1.12e6 | 2757 | 7.64e5 | 412.9 | 3.6435 | 9.7598 |
+
+(`c_order`, `c_curve`, `c_jump` in `F_p` multiplications: the point count per walk, the enumeration per curve met, a root-finding of `ψ_ℓ` per jump attempted; `walk / rho` on `1.3 · (p³/2) · 331`, over the walks that found a weak curve and over all of them.  "Admitted degrees" is how many of `3, 5, 7` are not inert in the class's order.)
+
+**Against the registration.**
+
+- **P1 holds.**  `c_curve = 2,295`–`2,834` at every size, flat in `p` (`∝ p^{0.07}` over `p ≥ 53`): `15×` below §13's 2-step at `p = 53` (`4.1·10⁴`) and `246×` below its 2,3-step (`6.8·10⁵`), against the registered `5×` and `30×`.  The square root by descent is `2.8–3.5×` cheaper than Tonelli–Shanks in `F_{q³}` on the same inputs (pinned by a test), and the character by the norm costs a Legendre symbol.
+- **P2 holds, with one marginal cell.**  The start curve's 2-isogeny component has `4.7`–`102` curves on average (`q/10` is `53` at `p = 23`, `96` at `31`, `281` at `53`, `1,020` at `101`): below `q/10` everywhere except `p = 31` (`102` against `96`).  Its chance of holding a weak curve is `0.07`–`0.38`, below `1/2` at every size.  §13's walks did fail because the components are small — but not only because of that (P3).
+- **P3 is falsified, and the median part of it holds.**  Success is `0.54, 0.36, 0.41, 0.33, 0.42, 0.38, 0.25, 0.20` at `p = 7 … 101`, against the registered `≥ 0.9`, and it falls with `p`.  The walks that succeed do so after a median of `5`–`1,700` distinct curves, inside `[q/9, q]` at every size as registered.  The failures are not the walk's: the exact closure mode reproduces every one of them.  The jumps are not the cause either, in the sense that admitting more degrees barely moves the rate (`0.12`–`0.50` with one degree, `0.24`–`0.53` with two, `0.11`–`0.63` with three; no monotone trend).  The cause is where the weak curves are (§17.5.2–3).
+- **P4 is not met on random starts, and is unmeasured at `p ≥ 251` on them.**  Over the walks that found a weak curve, `walk / rho` is `0.30`–`6.0` at `p ≤ 101`, above `1` at six of eight sizes, because the jumps dominate: `2.8`–`413` root-findings per found walk at `3`–`11·10⁵` each, against `c_curve · curves met` of `10⁴`–`5·10⁶`.  Over all walks it is `8`–`61×` rho.  The registered `≤ 0.1` at `p = 251` was not measured on random starts; on starts inside a weak class (§17.5.4) it is `0.0038`.
+- **P5 is conditional** (§17.5.4): for a curve whose class holds a weak curve, the walk's share at `p = 1009` is `1 %` of the route's cost (`0.0002×` against `0.021×` rho), inside the registered `< 0.05×` total.  For a curve whose class holds none, there is no route.
+
+#### 17.5.2 Where the weak curves are: a sampled census (post hoc; `39_jv_isogeny_walk_v2_census.*`)
+
+`1,000` random weak curves (`y² = (x − ρ)(x − α)(x − σα)`) and `1,000` random full-2-torsion curves, each with its trace by the point count; the trace is the isogeny class (Tate).
+
+| p | q | distinct traces, weak / random | weak traces by frequency (t: weak, random) | t mod 4, weak / random |
+|---:|--:|:--|:--|:--|
+| 7 | 49 | 124 / 263 | −110: 38, 11; 146: 34, 10; 430: 34, 6; 110: 33, 5; −146: 30, 11; −430: 24, 5 | 2 always / 2 always |
+| 11 | 121 | 387 / 626 | 554: 13, 1; −470: 12, 3; −1238: 11, 3; −938: 11, 3; −982: 10, 1; 470: 10, 5 | 2 always / 2 always |
+| 13 | 169 | 525 / 750 | 1990: 8, 0; −2234: 7, 4; 570: 7, 2; −2630: 6, 1; −1990: 6, 1; −1594: 6, 2 | 2 always / 2 always |
+| 17 | 289 | 719 / 877 | −1310: 7, 2; −3746: 5, 2; −674: 5, 2; 286: 5, 0; 674: 5, 0; 866: 5, 1 | 2 always / 2 always |
+| 23 | 529 | 863 / 947 | −1742: 4, 0; 13298: 4, 0; −15118: 3, 0; −13966: 3, 0; −10546: 3, 0; −6194: 3, 0 | 2 always / 2 always |
+
+The weak curves fall in far fewer classes than random curves do, and some classes hold many of them: at `p = 7` one class holds `3.8 %` of all weak curves against `1.1 %` of random ones, i.e. a weak density `3.5×` the mean, while others hold none.  No residue condition on `t` separates them (`t ≡ 2 (mod 4)` for every full-2-torsion curve, as it must; the residues mod `8` are `0.47–0.53` on both sides).  A sampled census cannot say how many classes hold *no* weak curve, so:
+
+#### 17.5.3 The exact census (post hoc; `39_jv_isogeny_walk_v2_exact_census*.{json,log}`)
+
+Every weak curve up to the isomorphisms that keep the form (`x ↦ x − ρ`, `x ↦ s²x`) is `y² = x(x − α)(x − σα)` with `α ∈ F_{q³} ∖ F_q` modulo `F_q^{×2}`: `2q² + 2q` representatives, each with its trace.  The set of their traces is the set of isogeny classes that hold a weak curve, exactly.  `4,000` random full-2-torsion curves are then drawn and the fraction whose trace is in the set is the chance that a random such curve's class holds a weak curve.
+
+| p | q | weak representatives | weak classes | random curves: distinct classes | **random curves in a weak class** | largest weak classes (t: representatives) |
+|---:|--:|--:|--:|--:|--:|:--|
+| 7 | 49 | 4,900 | 121 | 293 | **0.528** | 110: 192; 146: 192; −110: 155; −146: 144; 430: 132; 466: 120 |
+| 11 | 121 | 29,524 | 539 | 1,079 | **0.592** | 470: 348; 1450: 276; −1258: 270; −938: 258; −470: 252; 554: 240 |
+| 13 | 169 | 57,460 | 875 | 1,582 | **0.570** | 2374: 432; −826: 408; −3130: 372; −2630: 346; 826: 336; −1990: 324 |
+| 17 | 289 | 167,620 | 2,186 | 2,500 | **0.608** | −3746: 630; −610: 504; 610: 504; −3170: 462; 2914: 456; −674: 402 |
+| 23 | 529 | 560,740 | 5,594 | 3,251 | **0.618** | −3890: 726; 3890: 702; 7666: 624; −7666: 600; 13070: 594; −13070: 558 |
+| 31 | 961 | EXACT31 |
+
+**About `53–62 %` of random full-2-torsion curves over `F_{q³}` lie in an isogeny class that holds a weak curve, and the rest lie in one that holds none**, at every `p` the exact count reaches (`0.528, 0.592, 0.570, 0.608, 0.618` at `p = 7, 11, 13, 17, 23`), rising slowly if at all.  The weak classes are the large ones (`121` of `≈ 293` classes carry `53 %` of the curves at `p = 7`), which is why a random *curve* is in one more often than a random *class* is.  So the registered run's success rates (`0.20`–`0.54`) have two factors: a class with no weak curve (`≈ 40 %` of starts, exact), and, inside a weak class, a closure under `{2, 3, 5, 7}` that misses the weak curves (`0.33 / 0.61 ≈ 55 %` of the remainder at `p = 17`, falling to `0.20 / ≈ 0.6` at `p = 101` where the classes are larger and three degrees generate less of them).  Only the second factor is the walk's to fix (more degrees); the first is a property of the target.
+
+#### 17.5.4 The walk from inside a weak class (post hoc; `39_jv_isogeny_walk_v2_weakclass*.{json,log}`)
+
+The attack's own question is the second factor: given a curve whose class holds a weak curve, what does reaching one cost?  Start: a random weak curve moved by `≥ 8` random moves (a 2-edge or an `ℓ`-jump) until it is not weak; the walk then runs as registered, with the start's cost excluded.  The start is **not** a uniform curve of its class (it is eight moves from a weak one), and §17.5.5 checks how much that matters.
+
+| p | q | walks | success | exhausted / capped | curves met, median of found (q/3) | first component mean | c_order | c_curve | c_jump | jumps per found walk | walk / rho |
+|---:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| 7 | 49 | 40 | 1.00 | 0 / 0 | 3 (16) | 10.1 | 5.87e4 | 2779 | 7.85e4 | 0.3 | 1.6803 |
+| 11 | 121 | 40 | 1.00 | 0 / 0 | 7 (40) | 10.2 | 8.45e4 | 2810 | 1.41e5 | 1.1 | 0.9736 |
+| 13 | 169 | 40 | 1.00 | 0 / 0 | 6 (56) | 7.6 | 1.03e5 | 2663 | 1.32e5 | 0.5 | 0.4282 |
+| 17 | 289 | 40 | 1.00 | 0 / 0 | 6 (96) | 6.7 | 1.32e5 | 2724 | 2.57e5 | 1.1 | 0.4470 |
+| 23 | 529 | 40 | 1.00 | 0 / 0 | 8 (176) | 14.9 | 1.74e5 | 3056 | 3.46e5 | 2.4 | 0.5707 |
+| 31 | 961 | 40 | 1.00 | 0 / 0 | 13 (320) | 14.6 | 2.45e5 | 3199 | 3.48e5 | 1.2 | 0.1332 |
+| 53 | 2,809 | 40 | 1.00 | 0 / 0 | 8 (936) | 48.9 | 4.61e5 | 3671 | 3.05e5 | 1.1 | 0.0382 |
+| 101 | 10,201 | 40 | 1.00 | 0 / 0 | 9 (3,400) | 37.5 | 1.15e6 | 3835 | 3.27e5 | 1.1 | 0.0079 |
+| 251 | 63,001 | 40 | 1.00 | 0 / 0 | 16 (21,000) | 395.6 | 3.98e6 | 4084 | 4.26e5 | 10.5 | 0.0038 |
+| 503 | 253,009 | 40 | 1.00 | 0 / 0 | 11 (84,336) | 1,697.0 | 1.14e7 | 4306 | 4.83e5 | 65.0 | 0.0027 |
+| 1009 | 1,018,081 | 20 | 1.00 | 0 / 0 | 10 (339,360) | 4,889.3 | 3.05e7 | 4509 | 8.28e5 | 0.8 | 0.0002 |
+
+`walk / rho ∝ p^{−1.48}` over `p ≥ 53`; `c_jump ∝ p^{0.32}`, `c_curve ∝ p^{0.07}`.
+
+Every walk finds a weak curve, after a median of `3`–`16` distinct curves at every size — not `q/3`, and not growing with `p`.  Inside a weak class the weak curves are not a `3/q` sprinkling: the start's own 2-component holds one `47`–`80 %` of the time.  The whole walk, point count included, costs `1.7×` rho at `p = 7` and falls through parity at `p ≈ 11` to `0.0002×` at `p = 1009`, where the point count (`3·10⁷`) is more than half of it.  Set beside the sieved route of §§14–16 (`0.021×` rho at `p = 1009` on the measured reference; `0.0068`–`0.012×` at `1511`): **for a curve in a weak class, the walk adds about one per cent to the route's cost at `p = 1009`, and the route with the walk inside it still crosses rho near `p ≈ 333`–`371`** (the walk is `0.0038×` at `251` and `0.0027×` at `503`, against the route's `≈ 3×` and `≈ 0.4×` there: the crossover moves by less than the spread between instances in §16).
+
+#### 17.5.5 How far from a weak curve the start is (post hoc; `39_jv_isogeny_walk_v2_weakclass_m64.*`)
+
+Same walk, the start moved `≥ 64` random moves from the weak curve instead of `≥ 8` (seed `1`, forty walks a size):
+
+| p | start moves | success | curves met, median of found | first component mean, weak share | jumps per found walk | c_jump | walk / rho |
+|---:|--:|--:|--:|--:|--:|--:|--:|
+| 23 | ≥ 8 | 1.00 | 8 | 14.9, 0.60 | 2.4 | 3.46e5 | 0.5707 |
+| 23 | ≥ 64 | 1.00 | 23 | 21.9, 0.40 | 4.1 | 2.59e5 | 0.7846 |
+| 53 | ≥ 8 | 1.00 | 8 | 48.9, 0.80 | 1.1 | 3.05e5 | 0.0382 |
+| 53 | ≥ 64 | 1.00 | 38 | 224.7, 0.65 | 5.3 | 5.38e5 | 0.2038 |
+| 101 | ≥ 8 | 1.00 | 9 | 37.5, 0.60 | 1.1 | 3.27e5 | 0.0079 |
+| 101 | ≥ 64 | 1.00 | 21 | 167.2, 0.55 | 4.1 | 3.88e5 | 0.0185 |
+| 251 | ≥ 8 | 1.00 | 16 | 395.6, 0.62 | 10.5 | 4.26e5 | 0.0038 |
+| 251 | ≥ 64 | 1.00 | 26 | 1,176.9, 0.47 | 116.9 | 1.90e6 | 0.1504 |
+
+The distance matters: eight times farther from a weak curve, the walk meets `2`–`5×` more curves and costs `1.4`–`40×` more (the `40×` at `p = 251` is `117` jumps per walk at a `c_jump` four times the `≥ 8` run's, one class's large components dominating), and the start's own component still holds a weak curve `40`–`65 %` of the time.  So weak curves are dense around weak curves and §17.5.4's figures are those of a start near one; a uniform start in a weak class is not sampled here, and its cost lies somewhere above the `≥ 64` row.  Every walk still succeeds, and the walk is still below rho at every `p ≥ 23` (`0.78×` there, `0.15×` at `p = 251` against the route's `≈ 3×`): the conclusion of §17.5.4 survives with a wider margin of ignorance on the constant.
+
+#### 17.5.6 What this changes, and what it does not
+
+- **§9's caveat is answered in two parts, not one.**  *The cost* of reaching the weak class from a curve whose class holds one is now measured and is negligible beside the route (`≤ 1 %` at `p = 1009`; the step is `246×` cheaper than §13's and the walk needs tens of curves, not `q/3`).  *The reach* is not what [JV12]'s "`≈ q` steps for a curve of order divisible by `4`" suggests: about `40 %` of full-2-torsion curves over `F_{q³}` are in a class with no weak curve at all (exact at `p ≤ 23`), and for them no walk of any length helps.  The route applies to a curve exactly when its class holds a weak curve, and §17.5.3's census is the first measurement of how often that is.
+- **§13's "`q/3` steps, above rho below `p ≈ 8,000`" is superseded**, and it was wrong in both directions: the price per curve was `246×` too high, and the number of curves to meet was `q/3` only on the premise, false, that weak curves are a uniform `3/q` of every class.
+- **The cited `≈ q` is refuted as a description of the walk** inside a weak class (tens of curves) and is not the relevant quantity outside one (no number of steps suffices).
+- **Open, and not claimed:** whether the `55–60 %` holds as `p` grows (the exact census stops at `p = 31`; the registered run's success at `p = 53`–`101` is a lower bound only, since three jump degrees do not generate the larger classes); what distinguishes the weak classes (the largest classes are weak, and no congruence on `t` was found); a uniform start inside a weak class (§17.5.5 is the only check, and it moves the constant by up to `40×`); the transport of the logarithm along the path (§17.4); and anything about a curve of order divisible by `4` without full rational 2-torsion.
+
+**Class.**  Engineering (the step: `246×`; the search: exact exhaustion instead of a heuristic) and accounting (the reach and the price, both measured where §13 had estimated).  Not an advance: no number on the route's own rows moves, and the class it applies to is now *smaller* than §9 and §13 implied, not larger.

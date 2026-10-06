@@ -903,6 +903,7 @@ fn kronecker(d: i128, ell: u64) -> i8 {
 
 /// One walk of §17.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Walk2Trial {
     pub seed: u64,
     pub start_weak: bool,
@@ -944,6 +945,7 @@ pub struct Walk2Trial {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Walk2Report {
     pub p: u64,
     pub q: u64,
@@ -952,6 +954,7 @@ pub struct Walk2Report {
     pub jump_degrees: Vec<u64>,
     pub closure_mode: bool,
     pub from_weak_class: bool,
+    pub weak_class_moves: usize,
     pub found: usize,
     pub capped: usize,
     pub exhausted: usize,
@@ -1026,11 +1029,11 @@ fn enumerate_component(
     (comp, None, false)
 }
 
-/// A random weak curve moved away from the weak locus: `≥ 8` random moves
+/// A random weak curve moved away from the weak locus: `≥ min_moves` random moves
 /// (a 2-edge, or an `ℓ`-jump for `ℓ` in `jumps` when the curve has one)
 /// and then further until the curve is not weak.  Same class as the weak
 /// curve it started from.
-fn weak_class_start(ctx: &WalkCtx, jumps: &[u64], rng: &mut StdRng) -> Curve2 {
+fn weak_class_start(ctx: &WalkCtx, jumps: &[u64], min_moves: usize, rng: &mut StdRng) -> Curve2 {
     let f = &ctx.f;
     loop {
         let mut cur = loop {
@@ -1048,9 +1051,9 @@ fn weak_class_start(ctx: &WalkCtx, jumps: &[u64], rng: &mut StdRng) -> Curve2 {
         };
         let mut moves = 0;
         let mut tries = 0;
-        while moves < 8 || cur.weak_by_norms(f) {
+        while moves < min_moves || cur.weak_by_norms(f) {
             tries += 1;
-            if tries > 200 {
+            if tries > 25 * min_moves {
                 break;
             }
             let pick = rng.gen_range(0..4);
@@ -1090,6 +1093,7 @@ pub fn run_walk2(
     samples: u64,
     closure_mode: bool,
     from_weak_class: bool,
+    weak_class_moves: usize,
 ) -> Walk2Report {
     let start = Instant::now();
     let ctx = WalkCtx::new(p);
@@ -1114,10 +1118,10 @@ pub fn run_walk2(
         let mut cur = if from_weak_class {
             // a non-weak curve of a class known to hold a weak curve: from a
             // random weak curve, a random path of 2-steps and ℓ-jumps until
-            // a non-weak curve at least eight moves away; its cost is not
+            // a non-weak curve at least `weak_class_moves` moves away; its cost is not
             // the walk's and is subtracted below
             let m0 = f.muls();
-            let c = weak_class_start(&ctx, jumps, &mut rng);
+            let c = weak_class_start(&ctx, jumps, weak_class_moves, &mut rng);
             f.reset_muls();
             let _ = m0;
             c
@@ -1293,6 +1297,7 @@ pub fn run_walk2(
         jump_degrees: jumps.to_vec(),
         closure_mode,
         from_weak_class,
+        weak_class_moves,
         found,
         capped,
         exhausted,
@@ -1870,7 +1875,7 @@ mod tests {
     #[test]
     fn the_rebuilt_walk_reaches_weak_curves_at_p7_and_p13() {
         for (p, trials) in [(7u64, 20usize), (13, 12)] {
-            let r = run_walk2(p, 1, trials, 3 * p * p, &[3, 5, 7], 1000, false, false);
+            let r = run_walk2(p, 1, trials, 3 * p * p, &[3, 5, 7], 1000, false, false, 8);
             // every walk ends found, capped or exhausted; at these sizes many
             // closures hold no weak curve, so exhaustion is common
             assert_eq!(

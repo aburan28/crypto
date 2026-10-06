@@ -34,6 +34,7 @@ fn main() {
     let mut census = false;
     let mut exact = false;
     let mut from_weak_class = false;
+    let mut moves = 8usize;
     let mut cap_mult = 3u64;
     let mut jumps: Vec<u64> = vec![3, 5, 7];
     let mut json: Option<String> = None;
@@ -61,6 +62,7 @@ fn main() {
             "--census" => census = true,
             "--exact-census" => exact = true,
             "--from-weak-class" => from_weak_class = true,
+            "--moves" => moves = next(&mut i).parse().expect("--moves"),
             "--cap-mult" => cap_mult = next(&mut i).parse().expect("--cap-mult"),
             "--jumps" => {
                 jumps = next(&mut i)
@@ -181,6 +183,7 @@ fn main() {
                 samples,
                 closure,
                 from_weak_class,
+                moves,
             );
             eprintln!(
                 "p={:>5} q={:>8} | weak×q {:.2} ({}) | found {} capped {} exhausted {} start-weak {} of {} | success {:.2} | curves median {:.0} mean {:.0} (q/3 {:.0}) | first comp {:.1} weak {:.2} | comps {:.1} | jumps {:?} wasted {} | c_curve {:.0} c_jump {:.3e} | muls/found walk {:.3e} all {:.3e} | walk/rho {:.4} all {:.4} | {:.0} s",
