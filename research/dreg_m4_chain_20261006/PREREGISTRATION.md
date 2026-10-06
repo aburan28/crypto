@@ -185,3 +185,32 @@ held constant, both borrowed from `m = 3`.
   is not an F4/F5 solving degree, and not a certified first fall degree.
 - **Class: stage diagnostic.** No `S`, no rho ratio, no speed claim. It
   says nothing about `n = 131` by itself.
+
+## Amendment 1, 2026-10-06: `ℓ = 3`, registered after the cells above and before measuring these
+
+This is additive. The seven registered cells are measured and committed:
+5 at `ℓ = 1`, and 6 at `ℓ = 2` on every draw. Q7 and Q8 both hold. At
+fixed `ℓ` the degree is flat in `n`, although the reference rises from 6
+to 7 across `ℓ = 2`.
+
+That leaves the question the ECC2K-130 extrapolation needs: **does
+`m = 4`'s degree rise with `ℓ`**, as `m = 3`'s does? The two smallest
+`ℓ = 3` cells fit this machine at degree 6:
+
+| cell | `N` | `S` | equations | `d_max` | degree-6 matrix | `D_reg` | run as |
+|---|--:|--:|---|--:|---|--:|---|
+| (9, 3) | 30 | −3 | 18 cubic + 9 quadratic | 6 | 368,847 × 768,212 | 8 | one process a draw |
+| (10, 3) | 32 | −2 | 20 cubic + 10 quadratic | 6 | 524,270 × 1,149,017 | 9 | one process a draw |
+
+- Degree 7 is out of reach: about 2.1M × 2.8M at `(9, 3)`. So these cells
+  tell only "6" from "≥7".
+- **Prediction: ≥7 at both.**
+  - `m = 4` reads 5, then 6, over `ℓ = 1, 2`.
+  - `m = 3` rose a degree from `ℓ = 2` to `ℓ = 3` at every matched surplus.
+  - Confidence: moderate.
+- **Q10, rule.**
+  - **rises with `ℓ`:** both testable cells read ≥7;
+  - **flat at 6:** both read an exact 6;
+  - **mixed:** otherwise, reported as is.
+- The seed, engine, binary, scoring and stop conditions are unchanged.
+  `run.sh` takes the jobs `9-3-6.u0`–`u3`, then `10-3-6.u0`–`u3`.
