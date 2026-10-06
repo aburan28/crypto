@@ -39,6 +39,23 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
     }
 }
 
+fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
+    match point {
+        BinaryPoint::Infinity => Some(None),
+        BinaryPoint::Affine { x, y } => Some(Some((packed(x)?, packed(y)?))),
+    }
+}
+
+fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
+    let Some((x, y)) = point else {
+        return BinaryPoint::Infinity;
+    };
+    BinaryPoint::Affine {
+        x: F2mElement::from_words(&[x as u64, (x >> 64) as u64], m),
+        y: F2mElement::from_words(&[y as u64, (y >> 64) as u64], m),
+    }
+}
+
 fn x_key(point: &BinaryPoint) -> Option<PointXKey> {
     match point {
         BinaryPoint::Infinity => Some(PointXKey::Infinity),
@@ -345,6 +362,72 @@ mod packed83 {
         Some(keys)
     }
 
+    /// The signed index stores affine coordinates as raw field words. This
+    /// query path avoids rebuilding heap-backed points for every batch.
+    /// # Safety
+    /// The caller must check the pinned polynomial and ARM64 AES/PMULL.
+    #[target_feature(enable = "aes")]
+    pub(super) unsafe fn batch_x_keys_stored(
+        curve: &BinaryCurve,
+        fixed: &BinaryPoint,
+        others: &[SignedPairSum],
+    ) -> Option<Vec<(PointXKey, PointXKey)>> {
+        let BinaryPoint::Affine { x: x1, y: y1 } = fixed else {
+            return others
+                .iter()
+                .map(|entry| {
+                    let x = entry
+                        .point
+                        .map_or(PointXKey::Infinity, |(x, _)| PointXKey::Affine(x));
+                    Some((x, x))
+                })
+                .collect();
+        };
+        let x1 = packed(x1)?;
+        let y1 = packed(y1)?;
+        let a = packed(&curve.a)?;
+        let mut keys = vec![(PointXKey::Infinity, PointXKey::Infinity); others.len()];
+        let mut positions = Vec::new();
+        let mut denominators = Vec::new();
+        for (i, entry) in others.iter().enumerate() {
+            match entry.point {
+                Some((x2, _)) if x1 != x2 => {
+                    positions.push(i);
+                    denominators.push(x1 ^ x2);
+                }
+                _ => {
+                    let other = restore_point(entry.point, 83);
+                    let plus = point_add(curve, fixed, &other);
+                    let minus = point_add(curve, fixed, &point_neg(&other));
+                    keys[i] = (x_key(&plus)?, x_key(&minus)?);
+                }
+            }
+        }
+        if denominators.is_empty() {
+            return Some(keys);
+        }
+        let mut prefix = Vec::with_capacity(denominators.len() + 1);
+        prefix.push(1u128);
+        for &denominator in &denominators {
+            prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+        }
+        let product = *prefix.last()?;
+        let product = F2mElement::from_words(&[product as u64, (product >> 64) as u64], 83);
+        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
+        for j in (0..positions.len()).rev() {
+            let i = positions[j];
+            let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+            inverse = unsafe { mul(inverse, denominators[j]) };
+            let (x2, y2) = others[i].point.expect("ordinary addition");
+            let lambda = unsafe { mul(y1 ^ y2, denominator_inverse) };
+            let delta = unsafe { mul(x2, denominator_inverse) };
+            let x_plus = unsafe { square(lambda) } ^ lambda ^ x1 ^ x2 ^ a;
+            let x_minus = x_plus ^ unsafe { square(delta) } ^ delta;
+            keys[i] = (PointXKey::Affine(x_plus), PointXKey::Affine(x_minus));
+        }
+        Some(keys)
+    }
+
     /// # Safety
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
@@ -489,9 +572,11 @@ impl F6WidePairIndex {
 }
 
 struct SignedPairSum {
-    point: BinaryPoint,
-    pair: (usize, usize),
-    neg_pair: (usize, usize),
+    // No heap allocations per sum. `None` is the identity and is distinct
+    // from every affine point even when the curve admits (0, 0).
+    point: Option<(u128, u128)>,
+    pair: (u32, u32),
+    neg_pair: (u32, u32),
 }
 
 /// Exact sign-quotient pair index for a distinct, negation-closed base.
@@ -510,6 +595,7 @@ impl F6SignedPairIndex {
         if curve.m > 128 || points.is_empty() || points.iter().any(|p| !curve.is_on_curve(p)) {
             return None;
         }
+        u32::try_from(points.len()).ok()?;
         let pair_count = points.len().checked_mul(points.len().checked_add(1)?)? / 2;
         if pair_count > max_pairs {
             return None;
@@ -522,9 +608,9 @@ impl F6SignedPairIndex {
         if point_index.len() != points.len() {
             return None;
         }
-        let negatives: Vec<usize> = points
+        let negatives: Vec<u32> = points
             .iter()
-            .map(|point| point_index.get(&key(&point_neg(point))?).copied())
+            .map(|point| u32::try_from(*point_index.get(&key(&point_neg(point))?)?).ok())
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
@@ -551,8 +637,8 @@ impl F6SignedPairIndex {
                     let j = i + offset;
                     entry.insert(sums.len());
                     sums.push(SignedPairSum {
-                        point: sum,
-                        pair: (i, j),
+                        point: stored_point(&sum)?,
+                        pair: (i as u32, j as u32),
                         neg_pair: (negatives[i], negatives[j]),
                     });
                 }
@@ -582,10 +668,11 @@ impl F6SignedPairIndex {
 
     fn pair_at(&self, index: usize, residual: &BinaryPoint) -> Option<(usize, usize)> {
         let entry = &self.sums[index];
-        if *residual == entry.point {
-            Some(entry.pair)
-        } else if *residual == point_neg(&entry.point) {
-            Some(entry.neg_pair)
+        let residual = stored_point(residual)?;
+        if residual == entry.point {
+            Some((entry.pair.0 as usize, entry.pair.1 as usize))
+        } else if residual == entry.point.map(|(x, y)| (x, x ^ y)) {
+            Some((entry.neg_pair.0 as usize, entry.neg_pair.1 as usize))
         } else {
             None
         }
@@ -594,10 +681,10 @@ impl F6SignedPairIndex {
     fn verify(
         &self,
         target: &BinaryPoint,
-        first: (usize, usize),
+        first: (u32, u32),
         second: (usize, usize),
     ) -> Option<[usize; 4]> {
-        let indices = [first.0, first.1, second.0, second.1];
+        let indices = [first.0 as usize, first.1 as usize, second.0, second.1];
         let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
             point_add(&self.curve, &acc, &self.points[index])
         });
@@ -610,7 +697,10 @@ impl F6SignedPairIndex {
         }
         const BATCH: usize = 256;
         for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+            let points: Vec<_> = chunk
+                .iter()
+                .map(|entry| restore_point(entry.point, self.curve.m))
+                .collect();
             let (plus, minus) = batch_add_fixed_both_signs(&self.curve, target, &points);
             for ((entry, plus_residual), minus_residual) in
                 chunk.iter().zip(plus.iter()).zip(minus.iter())
@@ -639,11 +729,15 @@ impl F6SignedPairIndex {
         }
         const BATCH: usize = 256;
         for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+            let points: Vec<_> = chunk
+                .iter()
+                .map(|entry| restore_point(entry.point, self.curve.m))
+                .collect();
             let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
             for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
                 if let Some(&index) = self.lookup.get(&minus_key) {
-                    let residual = point_add(&self.curve, target, &point_neg(&entry.point));
+                    let point = restore_point(entry.point, self.curve.m);
+                    let residual = point_add(&self.curve, target, &point_neg(&point));
                     if let Some(pair) = self.pair_at(index, &residual) {
                         if let Some(witness) = self.verify(target, entry.pair, pair) {
                             return Some(witness);
@@ -651,7 +745,8 @@ impl F6SignedPairIndex {
                     }
                 }
                 if let Some(&index) = self.lookup.get(&plus_key) {
-                    let residual = point_add(&self.curve, target, &entry.point);
+                    let point = restore_point(entry.point, self.curve.m);
+                    let residual = point_add(&self.curve, target, &point);
                     if let Some(pair) = self.pair_at(index, &residual) {
                         if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
                             return Some(witness);
@@ -684,13 +779,13 @@ impl F6SignedPairIndex {
             }
             const BATCH: usize = 256;
             for chunk in self.sums.chunks(BATCH) {
-                let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
                 // SAFETY: the field polynomial and ARM64 AES/PMULL feature
                 // were checked above. The result is verified in the group.
-                let keys = unsafe { packed83::batch_x_keys(&self.curve, target, &points) }?;
+                let keys = unsafe { packed83::batch_x_keys_stored(&self.curve, target, chunk) }?;
                 for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
                     if let Some(&index) = self.lookup.get(&minus_key) {
-                        let residual = point_add(&self.curve, target, &point_neg(&entry.point));
+                        let point = restore_point(entry.point, self.curve.m);
+                        let residual = point_add(&self.curve, target, &point_neg(&point));
                         if let Some(pair) = self.pair_at(index, &residual) {
                             if let Some(witness) = self.verify(target, entry.pair, pair) {
                                 return Some(witness);
@@ -698,7 +793,8 @@ impl F6SignedPairIndex {
                         }
                     }
                     if let Some(&index) = self.lookup.get(&plus_key) {
-                        let residual = point_add(&self.curve, target, &entry.point);
+                        let point = restore_point(entry.point, self.curve.m);
+                        let residual = point_add(&self.curve, target, &point);
                         if let Some(pair) = self.pair_at(index, &residual) {
                             if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
                                 return Some(witness);
@@ -808,11 +904,26 @@ mod tests {
         // SAFETY: ARM64 AES/PMULL support and the pinned polynomial were checked.
         let observed = unsafe { packed83::batch_x_keys(&curve, fixed, &inputs) }.unwrap();
         assert_eq!(observed, expected);
+        let stored: Vec<_> = inputs
+            .iter()
+            .map(|point| SignedPairSum {
+                point: stored_point(point).unwrap(),
+                pair: (0, 0),
+                neg_pair: (0, 0),
+            })
+            .collect();
+        let observed_stored =
+            unsafe { packed83::batch_x_keys_stored(&curve, fixed, &stored) }.unwrap();
+        assert_eq!(observed_stored, expected);
         let expected_inf =
             batch_x_keys_fixed_both_signs(&curve, &BinaryPoint::Infinity, &inputs).unwrap();
         let observed_inf =
             unsafe { packed83::batch_x_keys(&curve, &BinaryPoint::Infinity, &inputs) }.unwrap();
         assert_eq!(observed_inf, expected_inf);
+        let observed_stored_inf =
+            unsafe { packed83::batch_x_keys_stored(&curve, &BinaryPoint::Infinity, &stored) }
+                .unwrap();
+        assert_eq!(observed_stored_inf, expected_inf);
     }
 
     #[test]
