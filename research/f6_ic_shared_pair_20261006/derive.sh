@@ -38,10 +38,15 @@ done < "$out/runs/INDEX.tsv"
 jq -e -s '
     length == 16 and all(.[];
       .exit_status == 0 and .status == "complete" and .scalar_verified == true and
+      .memory_peak_bytes > 0 and
       (.online_phases_ns.target_query + .online_phases_ns.target_pdp +
        .online_phases_ns.target_relation_check + .online_phases_ns.target_descent +
        .online_phases_ns.recovery_check) == .online_wall_ns
     ) and
-    (group_by(.target) | all(.[]; ([.[].target_point]|unique|length) == 1))
+    (group_by(.target) | all(.[];
+      ([.[].target_point]|unique|length) == 1 and
+      ([.[].recovered_scalar]|unique|length) == 1 and
+      ([.[].attempts]|unique|length) == 1
+    ))
 ' "$rows" > "$out/DERIVATION_CHECK.json"
 shasum -a 256 "$rows" "$out/DERIVATION_CHECK.json" > "$out/DERIVED_SHA256SUMS"
