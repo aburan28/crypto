@@ -75,6 +75,8 @@ mod runs;
 mod sat_control;
 #[path = "icprog/sat_control_publication.rs"]
 mod sat_control_publication;
+#[path = "icprog/sat_exporter_audit.rs"]
+mod sat_exporter_audit;
 #[path = "icprog/sat_query_law.rs"]
 mod sat_query_law;
 #[path = "icprog/sat_source.rs"]
@@ -177,6 +179,19 @@ enum Command {
         out: PathBuf,
         #[arg(long)]
         scientific: bool,
+    },
+    /// Audit exact-built prepared-exporter parity on three disclosed points as data.
+    SatExporterAudit {
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        controls: PathBuf,
+        #[arg(long)]
+        probe: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
     },
     /// Freeze the complete native n17 target source/build; never runs a solve.
     TargetControlFreeze {
@@ -1021,6 +1036,13 @@ fn main() -> ExitCode {
                 sat_target_custody::Kind::Validation
             },
         ),
+        Command::SatExporterAudit {
+            publication,
+            registration_sha256,
+            controls,
+            probe,
+            out,
+        } => sat_exporter_audit::audit(&publication, &registration_sha256, &controls, &probe, &out),
         Command::TargetControlFreeze {
             root,
             out,

@@ -170,7 +170,7 @@ pub(super) fn publish(
     replay(publication, expected, out, kind)
 }
 
-fn verify(publication: &Path, expected: &str, kind: Kind) -> Result<Value, String> {
+pub(super) fn verify(publication: &Path, expected: &str, kind: Kind) -> Result<Value, String> {
     let header = load(&publication.join("PUBLICATION.json"))?;
     claims(&header, kind)?;
     let record = capsule::registration(publication, expected)?;

@@ -12,11 +12,12 @@ three points; accepted-CMS stdin parity passed two of the three frozen
 The first frozen control failure remains. A distinct post-buffer-marker CMS
 binary was built, and its [nine-role disclosed transport result](result-v1/RESULT.md)
 passed an independent data-only audit. A
-[target-free validation build](source-freeze-v1/README.md) now freezes committed
-source, the complete preparation binding, the marked binary, build invocations
-and full archive custody. It explicitly refuses a scientific registration
-until the exporter built from those exact bytes passes a new disclosed parity
-control and a one-use controller exists. No one-use SAT target capsule, fresh
+[target-free validation build](source-freeze-v1/result-v1/RESULT.md) now freezes
+committed source, the complete preparation binding, the marked binary, build
+invocations and full archive custody. Its exact-built exporter passed new
+disclosed parity controls and an independent data-only audit. The validation
+registration still refuses scientific use until a one-use controller and a
+scientific freeze bind that evidence. No one-use SAT target capsule, fresh
 public-point card or target solve has been admitted.
 
 ## Question and bounded scope

@@ -15,8 +15,10 @@ one-use claim is performed. Use `--validation-only` for the first build.
 `icprog sat-target-replay` checks that archive as data without executing any
 archived binary. Both require the capsule's external registration seal.
 
-This freeze does **not** admit the prepared exporter built from this exact
-snapshot. Its binary hash must pass a new disclosed byte/model parity control
-before a scientific publication. A future one-use controller, original frozen
-runtime audit and the other three source publications are also required before
-the fresh point card can be drawn. No speedup follows from this build.
+The first [validation result](result-v1/RESULT.md) passed complete archive
+replay. The exporter built by that capsule also passed the three disclosed
+source-byte and transport controls and a separate data-only audit. The
+validation registration remains validation-only. A scientific source freeze,
+one-use controller, original frozen runtime audit and the other three source
+publications are required before a fresh point card can be drawn. No speedup
+follows from this build.
