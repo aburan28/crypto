@@ -494,6 +494,19 @@ pub fn find_one_relation(
     factor_base: &[FactorBaseEntry],
     max_trials: usize,
 ) -> Option<Relation> {
+    find_one_relation_counted(curve, g, q, factor_base, max_trials).map(|(rel, _)| rel)
+}
+
+/// Counted twin of [`find_one_relation`]: identical search, additionally
+/// reporting how many random `(a, b)` trials were consumed so callers can
+/// publish trials-per-relation yield.
+pub fn find_one_relation_counted(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    factor_base: &[FactorBaseEntry],
+    max_trials: usize,
+) -> Option<(Relation, usize)> {
     use crate::utils::random::random_scalar;
 
     let a_fe = curve.a_fe();
@@ -506,7 +519,7 @@ pub fn find_one_relation(
         }
     }
 
-    for _ in 0..max_trials {
+    for trial in 1..=max_trials {
         let a = random_scalar(&curve.n);
         let b = random_scalar(&curve.n);
         // R = aG + bQ.  Use the variable-time ladder (public k, fine).
@@ -547,7 +560,7 @@ pub fn find_one_relation(
                     &a,
                     &b,
                 ) {
-                    return Some(rel);
+                    return Some((rel, trial));
                 }
                 continue;
             }
@@ -578,7 +591,7 @@ pub fn find_one_relation(
                     &a,
                     &b,
                 ) {
-                    return Some(rel);
+                    return Some((rel, trial));
                 }
             }
         }
@@ -798,6 +811,147 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
     }
 }
 
+// ── Staged (split-timer) end-to-end driver ───────────────────────────
+
+/// Split-stage timing report for the generic prime-field IC pipeline.
+///
+/// Every field is wall-clock milliseconds measured inside
+/// [`ec_index_calculus_dlp_staged`]; the relation counters let callers
+/// publish a trials-per-relation yield curve from the same run.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EcIcStageReport {
+    pub factor_base_ms: f64,
+    pub relations_ms: f64,
+    pub linear_algebra_ms: f64,
+    pub verify_ms: f64,
+    pub total_ms: f64,
+    pub factor_base_size: usize,
+    pub relations_collected: usize,
+    pub relation_attempts_exhausted: usize,
+    pub trials_total: usize,
+    pub trials_per_relation_min: usize,
+    pub trials_per_relation_median: f64,
+    pub trials_per_relation_max: usize,
+}
+
+/// Staged twin of [`ec_index_calculus_dlp`]: same mathematics and row
+/// policy, but each stage is timed separately (factor base → relations
+/// → linear algebra → verify) and relation-search trials are counted.
+///
+/// `max_relation_attempts` bounds how many `max_trials_per_relation`
+/// search calls a single relation may consume before the whole solve
+/// gives up (`None`); the single-attempt original returns `None`
+/// immediately where this one retries.
+pub fn ec_index_calculus_dlp_staged(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb_size: usize,
+    extra_relations: usize,
+    max_trials_per_relation: usize,
+    max_relation_attempts: usize,
+) -> Option<(BigUint, EcIcStageReport)> {
+    use std::time::Instant;
+    let total_started = Instant::now();
+
+    let fb_started = Instant::now();
+    let fb = build_factor_base(curve, fb_size);
+    let factor_base_ms = fb_started.elapsed().as_secs_f64() * 1e3;
+    if fb.is_empty() {
+        return None;
+    }
+    let target = fb.len() + extra_relations;
+
+    let relations_started = Instant::now();
+    let mut relations = Vec::with_capacity(target);
+    let mut attempts_exhausted = 0usize;
+    let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target);
+    let mut trials_total = 0usize;
+    while relations.len() < target {
+        let found = 'attempt: {
+            for _ in 0..max_relation_attempts {
+                if let Some(found) = find_one_relation_counted(
+                    curve,
+                    g,
+                    q,
+                    &fb,
+                    max_trials_per_relation,
+                ) {
+                    break 'attempt Some(found);
+                }
+                attempts_exhausted += 1;
+            }
+            None
+        };
+        let Some((rel, trials)) = found else {
+            return None;
+        };
+        trials_total += trials;
+        trials_per_relation.push(trials);
+        relations.push(rel);
+    }
+    let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
+
+    // Build the linear system.  Unknowns: (y_1, …, y_m, x = log_G Q).
+    // Row r:   Σ entries[j].value y_j  − coef_b · x  ≡ coef_a (mod n)
+    // i.e.    entries  ‖ −coef_b   ·   (y, x)  =  coef_a.
+    let m = fb.len();
+    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in &relations {
+        let mut row = vec![BigUint::zero(); m + 1];
+        for &(j, mult) in &rel.entries {
+            let val = signed_mod(mult, &curve.n);
+            row[j] = (&row[j] + &val) % &curve.n;
+        }
+        // last column: −coef_b
+        let neg_b = (&curve.n - &(&rel.coef_b % &curve.n)) % &curve.n;
+        row[m] = neg_b;
+        matrix.push(row);
+        rhs.push(rel.coef_a.clone() % &curve.n);
+    }
+
+    let la_started = Instant::now();
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
+    let x = solution[m].clone();
+
+    let verify_started = Instant::now();
+    let a_fe = curve.a_fe();
+    let candidate = g.scalar_mul(&x, &a_fe);
+    let verified = &candidate == q;
+    let verify_ms = verify_started.elapsed().as_secs_f64() * 1e3;
+    if !verified {
+        return None;
+    }
+
+    let mut sorted_trials = trials_per_relation.clone();
+    sorted_trials.sort_unstable();
+    let median = if sorted_trials.is_empty() {
+        0.0
+    } else if sorted_trials.len() % 2 == 1 {
+        sorted_trials[sorted_trials.len() / 2] as f64
+    } else {
+        (sorted_trials[sorted_trials.len() / 2 - 1] + sorted_trials[sorted_trials.len() / 2]) as f64
+            / 2.0
+    };
+    let report = EcIcStageReport {
+        factor_base_ms,
+        relations_ms,
+        linear_algebra_ms,
+        verify_ms,
+        total_ms: total_started.elapsed().as_secs_f64() * 1e3,
+        factor_base_size: m,
+        relations_collected: relations.len(),
+        relation_attempts_exhausted: attempts_exhausted,
+        trials_total,
+        trials_per_relation_min: sorted_trials.first().copied().unwrap_or(0),
+        trials_per_relation_median: median,
+        trials_per_relation_max: sorted_trials.last().copied().unwrap_or(0),
+    };
+    Some((x, report))
+}
+
 // ── Baseline: textbook Pollard rho for ECDLP ───────────────────────────
 
 /// **Pollard rho** for the elliptic-curve discrete log.  Walks a single
@@ -894,6 +1048,33 @@ pub fn pollard_rho_ecdlp(
 mod tests {
     use super::*;
     use num_bigint::BigUint;
+
+    /// Staged twin recovers the same log as the plain driver on the tiny
+    /// curve and reports split stage timers whose sum is consistent with
+    /// the total (factor_base + relations + LA each separately positive).
+    #[test]
+    fn staged_dlp_recovers_and_splits_stages() {
+        let curve = tiny_curve();
+        let a_fe = curve.a_fe();
+        let g = curve.generator();
+        let q = g.scalar_mul(&BigUint::from(190u32), &a_fe);
+        let plain = ec_index_calculus_dlp(&curve, &g, &q, 8, 4, 5000);
+        let staged = ec_index_calculus_dlp_staged(&curve, &g, &q, 8, 4, 5000, 64);
+        let (staged_x, report) = staged.expect("staged solve succeeds on the tiny curve");
+        let plain_x = plain.expect("plain solve succeeds on the tiny curve");
+        assert_eq!(staged_x, plain_x);
+        assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
+        assert_eq!(report.factor_base_size, 8);
+        assert_eq!(report.relations_collected, 8 + 4);
+        assert!(report.factor_base_ms >= 0.0);
+        assert!(report.relations_ms >= 0.0);
+        assert!(report.linear_algebra_ms >= 0.0);
+        assert!(report.verify_ms >= 0.0);
+        assert!(report.total_ms >= report.relations_ms);
+        assert!(report.trials_total >= report.relations_collected);
+        assert!(report.trials_per_relation_median >= 1.0);
+        assert!(report.relation_attempts_exhausted == 0);
+    }
 
     /// **Small curve for tests**: y² = x³ + x + 19 (mod 271).  Curve
     /// has 281 points (prime), so cofactor 1 and `G = (3, 7)` is a
