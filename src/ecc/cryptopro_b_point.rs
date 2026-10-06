@@ -483,12 +483,49 @@ struct PreparedStep {
 /// the kernel polynomial is monic, and the steps compose (the codomain
 /// of step `i` is the domain of step `i+1`, the first domain is `E`).
 pub struct PreparedChain {
-    pub name: &'static str,
+    pub name: String,
     pub degree: u64,
     steps: Vec<PreparedStep>,
     /// `u²` and `u³` of the final isomorphism `(x, y) -> (u²x, u³y)`.
     u2: Fe,
     u3: Fe,
+    /// `u⁻¹`: in Jacobian coordinates `(u²X, u³Y, Z)` and `(X, Y, Z/u)` are
+    /// the same point, so [`ChainEval::Optimised`] applies the isomorphism
+    /// as one multiplication of `Z`.
+    u_inv: Fe,
+}
+
+/// One step's frozen constants, borrowed, as [`PreparedChain::from_steps`]
+/// validates them: canonical little-endian limbs (not Montgomery form),
+/// polynomials low degree first.
+pub struct StepConstants<'a> {
+    pub ell: u32,
+    pub domain_a: &'a [u64; 4],
+    pub domain_b: &'a [u64; 4],
+    pub codomain_a: &'a [u64; 4],
+    pub codomain_b: &'a [u64; 4],
+    /// Monic kernel polynomial, degree `(ell-1)/2`.
+    pub psi: &'a [[u64; 4]],
+    /// Numerator of the x-map, degree `ell`.
+    pub n: &'a [[u64; 4]],
+    /// Numerator of the y-map, degree `(3·ell-3)/2`.
+    pub m: &'a [[u64; 4]],
+}
+
+/// Which chain evaluator computes `φ(P)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChainEval {
+    /// The evaluator of `research/cryptopro_b_glv_chain_20261005`:
+    /// projective `P²` steps, homogeneous Horner over powers of `Z` with
+    /// every coefficient multiplied, no special first step, the isomorphism
+    /// as `u²X, u³Y`, then projective to Jacobian.
+    Generic,
+    /// Jacobian steps (`x = X/Z²`): with the polynomials homogenised in
+    /// `(X, Z²)` a step is `X' = N, Y' = Y·M, Z' = Z·ψ`, with no `ψ³` and no
+    /// `N·ψ`; Horner starts from `X + c_(d-1)·Z²` because `ψ`, `N` and `M`
+    /// are monic; the first step takes the affine input (`Z = 1`) with plain
+    /// Horner; the isomorphism is `Z·u⁻¹`.
+    Optimised,
 }
 
 fn checked_fe(limbs: &[u64; 4], what: &str) -> Fe {
@@ -513,23 +550,51 @@ fn prepared_poly(coeffs: &[[u64; 4]], want_degree: usize, what: &str) -> Vec<Fe>
 
 impl PreparedChain {
     pub fn new(chain: &Chain) -> Self {
-        assert!(!chain.steps.is_empty(), "a chain has at least one step");
-        let mut steps = Vec::with_capacity(chain.steps.len());
+        let steps: Vec<StepConstants<'_>> = chain
+            .steps
+            .iter()
+            .map(|s: &ChainStep| StepConstants {
+                ell: s.ell,
+                domain_a: &s.domain_a,
+                domain_b: &s.domain_b,
+                codomain_a: &s.codomain_a,
+                codomain_b: &s.codomain_b,
+                psi: s.psi,
+                n: s.n,
+                m: s.m,
+            })
+            .collect();
+        Self::from_steps(chain.name, chain.degree, &steps, &chain.iso_u)
+    }
+
+    /// Validate and prepare a chain given as borrowed constants: every
+    /// coefficient a canonical value below `p`, each polynomial of the degree
+    /// its step's `ell` dictates, the kernel polynomial monic, the steps
+    /// composing from `E` back to a curve that `iso_u` maps onto `E`, and
+    /// `degree` the product of the steps.
+    pub fn from_steps(
+        name: &str,
+        degree: u64,
+        chain_steps: &[StepConstants<'_>],
+        iso_u: &[u64; 4],
+    ) -> Self {
+        assert!(!chain_steps.is_empty(), "a chain has at least one step");
+        let mut steps = Vec::with_capacity(chain_steps.len());
         let mut expect_a = A;
         let mut expect_b = B;
-        let mut degree = 1u64;
-        for (idx, step) in chain.steps.iter().enumerate() {
-            let ChainStep { ell, .. } = *step;
+        let mut product = 1u64;
+        for (idx, step) in chain_steps.iter().enumerate() {
+            let ell = step.ell;
             assert!(
                 ell >= 3 && ell % 2 == 1,
                 "step {idx}: ell must be an odd prime"
             );
             assert_eq!(
-                step.domain_a, expect_a,
+                *step.domain_a, expect_a,
                 "step {idx}: domain a does not compose"
             );
             assert_eq!(
-                step.domain_b, expect_b,
+                *step.domain_b, expect_b,
                 "step {idx}: domain b does not compose"
             );
             let ell_us = ell as usize;
@@ -541,23 +606,36 @@ impl PreparedChain {
                 Some(Fe::ONE),
                 "step {idx}: kernel polynomial is not monic"
             );
+            // N = x·psi² + V·psi + U and M = N'·psi - 2·N·psi' are monic as
+            // well (leading coefficients 1 and ell - 2·(ell-1)/2 = 1);
+            // ChainEval::Optimised skips their leading multiplications.
+            assert_eq!(
+                n.last().copied(),
+                Some(Fe::ONE),
+                "step {idx}: x-map numerator N is not monic"
+            );
+            assert_eq!(
+                m.last().copied(),
+                Some(Fe::ONE),
+                "step {idx}: y-map numerator M is not monic"
+            );
             steps.push(PreparedStep {
                 ell,
                 psi,
                 n,
                 m,
-                codomain_a: checked_fe(&step.codomain_a, "codomain a"),
-                codomain_b: checked_fe(&step.codomain_b, "codomain b"),
+                codomain_a: checked_fe(step.codomain_a, "codomain a"),
+                codomain_b: checked_fe(step.codomain_b, "codomain b"),
             });
-            expect_a = step.codomain_a;
-            expect_b = step.codomain_b;
-            degree *= u64::from(ell);
+            expect_a = *step.codomain_a;
+            expect_b = *step.codomain_b;
+            product *= u64::from(ell);
         }
         assert_eq!(
-            degree, chain.degree,
+            product, degree,
             "chain degree is not the product of the steps"
         );
-        let u = checked_fe(&chain.iso_u, "iso_u");
+        let u = checked_fe(iso_u, "iso_u");
         assert!(!u.is_zero(), "iso_u must be a unit");
         let u2 = u.sqr();
         let u3 = u2.mul(&u);
@@ -576,11 +654,12 @@ impl PreparedChain {
             "iso_u does not map b back to E"
         );
         PreparedChain {
-            name: chain.name,
-            degree: chain.degree,
+            name: name.to_string(),
+            degree,
             steps,
             u2,
             u3,
+            u_inv: u.inv(),
         }
     }
 
@@ -610,6 +689,46 @@ impl PreparedChain {
             y: y.mul(&z2),
             z,
         }
+    }
+
+    /// `φ(P)` in Jacobian coordinates by [`ChainEval::Optimised`].
+    ///
+    /// For an input `(X : Y : Z)` with `x = X/Z²`, `y = Y/Z³` and `W = Z²`,
+    /// the homogenised polynomials `ψ_h = W^s·ψ(x)`, `N_h = W^ℓ·N(x)`,
+    /// `M_h = W^(3s)·M(x)` give the image `X' = N_h`, `Y' = Y·M_h`,
+    /// `Z' = Z·ψ_h`: then `X'/Z'² = N(x)/ψ(x)²` because `ℓ = 2s + 1`, and
+    /// `Y'/Z'³ = y·M(x)/ψ(x)³`.  The first step sees the affine input, so
+    /// it is `X' = N(x)`, `Y' = y·M(x)`, `Z' = ψ(x)` by plain Horner.  The
+    /// isomorphism back to `E` is `Z·u⁻¹`.  Field operations for steps
+    /// `ℓ_1, ℓ_2, …`: `3ℓ_1 - 4` M for the first, `11s + 2ℓ - 2` M and one S
+    /// for each later step, and one M for the isomorphism.
+    pub fn apply_optimised(&self, p: &Aff) -> Jac {
+        let (first, rest) = self.steps.split_first().expect("non-empty chain");
+        let psi = horner_monic(&first.psi, &p.x);
+        let num = horner_monic(&first.n, &p.x);
+        let mnum = horner_monic(&first.m, &p.x);
+        let (mut x, mut y, mut z) = (num, p.y.mul(&mnum), psi);
+        for step in rest {
+            (x, y, z) = step_jacobian(step, &x, &y, &z);
+        }
+        CryptoProBJacobian {
+            x,
+            y,
+            z: z.mul(&self.u_inv),
+        }
+    }
+
+    /// `φ(P)` by the chosen evaluator.
+    pub fn apply_with(&self, p: &Aff, eval: ChainEval) -> Jac {
+        match eval {
+            ChainEval::Generic => self.apply(p),
+            ChainEval::Optimised => self.apply_optimised(p),
+        }
+    }
+
+    /// The prime degrees of the steps, in order.
+    pub fn step_degrees(&self) -> Vec<u32> {
+        self.steps.iter().map(|s| s.ell).collect()
     }
 
     /// The affine image of `P` after each step, with that step's codomain
@@ -645,6 +764,51 @@ fn horner_homogeneous(coeffs: &[Fe], x: &Fe, zpow: &[Fe]) -> Fe {
         acc = acc.mul(x).add(&coeffs[i].mul(&zpow[d - i]));
     }
     acc
+}
+
+/// `Σ c_i·x^i` for a monic polynomial (`c_d = 1`, `d >= 1`): Horner from
+/// `x + c_(d-1)`, `d - 1` multiplications.
+#[inline]
+fn horner_monic(coeffs: &[Fe], x: &Fe) -> Fe {
+    let d = coeffs.len() - 1;
+    debug_assert!(d >= 1 && coeffs[d] == Fe::ONE);
+    let mut acc = x.add(&coeffs[d - 1]);
+    for i in (0..d - 1).rev() {
+        acc = acc.mul(x).add(&coeffs[i]);
+    }
+    acc
+}
+
+/// `Σ c_i·X^i·W^(d-i)` for a monic polynomial, with `wpow[j] = W^j`:
+/// Horner from `X + c_(d-1)·W`, `2d - 1` multiplications.
+#[inline]
+fn horner_monic_homogeneous(coeffs: &[Fe], x: &Fe, wpow: &[Fe]) -> Fe {
+    let d = coeffs.len() - 1;
+    debug_assert!(d >= 1 && coeffs[d] == Fe::ONE);
+    let mut acc = x.add(&coeffs[d - 1].mul(&wpow[1]));
+    for i in (0..d - 1).rev() {
+        acc = acc.mul(x).add(&coeffs[i].mul(&wpow[d - i]));
+    }
+    acc
+}
+
+/// One step of [`ChainEval::Optimised`] on a Jacobian input:
+/// `W = Z²` (one S), `W^2 … W^(3s)` (`3s - 1` M), monic homogeneous Horner
+/// for `ψ`, `N`, `M` (`2s - 1`, `2ℓ - 1`, `6s - 1` M), and `Y·M_h`, `Z·ψ_h`.
+fn step_jacobian(step: &PreparedStep, x: &Fe, y: &Fe, z: &Fe) -> (Fe, Fe, Fe) {
+    let max_deg = step.m.len() - 1; // 3s
+    let w = z.sqr();
+    let mut wpow = Vec::with_capacity(max_deg + 1);
+    wpow.push(Fe::ONE);
+    wpow.push(w);
+    for i in 2..=max_deg {
+        let next = wpow[i - 1].mul(&w);
+        wpow.push(next);
+    }
+    let psi = horner_monic_homogeneous(&step.psi, x, &wpow);
+    let num = horner_monic_homogeneous(&step.n, x, &wpow);
+    let mnum = horner_monic_homogeneous(&step.m, x, &wpow);
+    (num, y.mul(&mnum), z.mul(&psi))
 }
 
 fn step_projective(step: &PreparedStep, x: &Fe, y: &Fe, z: &Fe) -> (Fe, Fe, Fe) {
@@ -695,23 +859,53 @@ fn round_div(num: &BigInt, den: &BigInt) -> BigInt {
 
 impl GlvContext {
     pub fn new(chain: &Chain) -> Self {
+        Self::from_parts(
+            PreparedChain::new(chain),
+            &chain.lambda,
+            chain.glv_basis,
+            chain.babai_bound_bits,
+        )
+    }
+
+    /// A context from a prepared chain, its eigenvalue `λ` (canonical
+    /// little-endian limbs, below `n`), the reduced basis as signed decimal
+    /// strings and the Babai bound.  Checks that `λ < n`, that the basis is
+    /// non-singular and that both rows lie in the lattice
+    /// `{(v1, v2) : v1 + v2·λ ≡ 0 (mod n)}`.
+    pub fn from_parts(
+        chain: PreparedChain,
+        lambda: &[u64; 4],
+        glv_basis: [[&str; 2]; 2],
+        babai_bound_bits: u32,
+    ) -> Self {
         let parse = |s: &str| -> BigInt {
             BigInt::parse_bytes(s.as_bytes(), 10)
                 .unwrap_or_else(|| panic!("glv_basis entry {s:?} is not a signed decimal"))
         };
         let basis = [
-            [parse(chain.glv_basis[0][0]), parse(chain.glv_basis[0][1])],
-            [parse(chain.glv_basis[1][0]), parse(chain.glv_basis[1][1])],
+            [parse(glv_basis[0][0]), parse(glv_basis[0][1])],
+            [parse(glv_basis[1][0]), parse(glv_basis[1][1])],
         ];
         let det = &basis[0][0] * &basis[1][1] - &basis[0][1] * &basis[1][0];
         assert!(!det.is_zero(), "glv_basis is singular");
+        let order = Uint(N).to_biguint();
+        let lambda = Uint(*lambda).to_biguint();
+        assert!(lambda < order, "lambda must be reduced below n");
+        let n_int = BigInt::from(order.clone());
+        let lam_int = BigInt::from(lambda.clone());
+        for row in &basis {
+            assert!(
+                (&row[0] + &row[1] * &lam_int).mod_floor(&n_int).is_zero(),
+                "a glv_basis row is not in the lattice of lambda"
+            );
+        }
         GlvContext {
-            chain: PreparedChain::new(chain),
-            lambda: Uint(chain.lambda).to_biguint(),
-            order: Uint(N).to_biguint(),
+            chain,
+            lambda,
+            order,
             basis,
             det,
-            babai_bound_bits: chain.babai_bound_bits,
+            babai_bound_bits,
         }
     }
 
@@ -786,6 +980,109 @@ pub fn scalar_mul_glv(ctx: &GlvContext, p: &Aff, k: &BigUint, w: u32) -> Jac {
     let (k1, k2) = ctx.decompose(k);
     let phi_p = ctx.chain.apply(p);
     glv_combine(p, &phi_p, &k1, &k2, w)
+}
+
+// ── the chain sweep's variants (research/cryptopro_b_chain_sweep_20261006) ──
+
+/// How the odd-multiple tables of a scalar multiplication are kept.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TableMode {
+    /// Converted to affine with one batched inversion, then mixed
+    /// additions (`madd-2007-bl`, 7M + 4S) in the main loop: the arms of
+    /// `research/cryptopro_b_glv_chain_20261005`.
+    Affine,
+    /// Left in Jacobian coordinates, no inversion, full additions
+    /// (`add-2007-bl`, 11M + 5S) in the main loop.
+    Jacobian,
+}
+
+/// The Jacobian table point for a non-zero wNAF digit, negated when the
+/// digit is negative, and negated again when the scalar itself is negative.
+#[inline]
+fn table_entry_jac(table: &[Jac], digit: i8, negate: bool) -> Jac {
+    let entry = table[(digit.unsigned_abs() >> 1) as usize];
+    if (digit < 0) != negate {
+        entry.neg()
+    } else {
+        entry
+    }
+}
+
+/// **Baseline arm** with the table kept as `table` says:
+/// [`TableMode::Affine`] is [`scalar_mul_wnaf`]; [`TableMode::Jacobian`]
+/// skips the batched inversion and uses full additions.
+pub fn scalar_mul_wnaf_with(p: &Aff, k: &BigUint, w: u32, table: TableMode) -> Jac {
+    match table {
+        TableMode::Affine => scalar_mul_wnaf(p, k, w),
+        TableMode::Jacobian => {
+            assert!(k.bits() <= 256, "scalar must fit in 256 bits");
+            let digits = wnaf_digits(&U256::from_biguint(k), w);
+            let table = odd_multiples(&Jac::from_affine(p), w);
+            let mut q = Jac::IDENTITY;
+            for &d in digits.iter().rev() {
+                if !q.is_identity() {
+                    q = q.double();
+                }
+                if d != 0 {
+                    q = q.add(&table_entry_jac(&table, d, false));
+                }
+            }
+            q
+        }
+    }
+}
+
+/// [`glv_combine`] with the tables kept as `table` says.
+pub fn glv_combine_with(
+    p: &Aff,
+    phi_p: &Jac,
+    k1: &BigInt,
+    k2: &BigInt,
+    w: u32,
+    table: TableMode,
+) -> Jac {
+    match table {
+        TableMode::Affine => glv_combine(p, phi_p, k1, k2, w),
+        TableMode::Jacobian => {
+            let (neg1, m1) = split_sign(k1);
+            let (neg2, m2) = split_sign(k2);
+            let d1 = wnaf_digits(&m1, w);
+            let d2 = wnaf_digits(&m2, w);
+            let t1 = odd_multiples(&Jac::from_affine(p), w);
+            let t2 = odd_multiples(phi_p, w);
+            let len = d1.len().max(d2.len());
+            let mut q = Jac::IDENTITY;
+            for i in (0..len).rev() {
+                if !q.is_identity() {
+                    q = q.double();
+                }
+                let a = d1.get(i).copied().unwrap_or(0);
+                if a != 0 {
+                    q = q.add(&table_entry_jac(&t1, a, neg1));
+                }
+                let b = d2.get(i).copied().unwrap_or(0);
+                if b != 0 {
+                    q = q.add(&table_entry_jac(&t2, b, neg2));
+                }
+            }
+            q
+        }
+    }
+}
+
+/// **GLV arm** with a chosen chain evaluator and table mode:
+/// decomposition, `φ(P)` by `eval`, then [`glv_combine_with`].
+pub fn scalar_mul_glv_with(
+    ctx: &GlvContext,
+    p: &Aff,
+    k: &BigUint,
+    w: u32,
+    table: TableMode,
+    eval: ChainEval,
+) -> Jac {
+    let (k1, k2) = ctx.decompose(k);
+    let phi_p = ctx.chain.apply_with(p, eval);
+    glv_combine_with(p, &phi_p, &k1, &k2, w, table)
 }
 
 #[cfg(test)]
@@ -1182,5 +1479,179 @@ mod tests {
             }
             assert!(scalar_mul_glv(&ctx, &g, &BigUint::zero(), 5).is_identity());
         }
+    }
+
+    // ── chain sweep variants ───────────────────────────────────────────────
+
+    #[test]
+    fn optimised_chain_equals_generic_and_lambda_p() {
+        let mut rng = StdRng::seed_from_u64(0x5ee9_0001);
+        for chain in CHAINS {
+            let ctx = GlvContext::new(chain);
+            for i in 0..24 {
+                let p = if i == 0 {
+                    generator()
+                } else {
+                    random_point(&mut rng)
+                };
+                let generic = ctx.chain.apply(&p);
+                let optimised = ctx.chain.apply_optimised(&p);
+                assert!(
+                    optimised.eq_point(&generic),
+                    "{}: optimised evaluator differs from the generic one",
+                    chain.name
+                );
+                assert!(optimised.eq_point(&scalar_mul_wnaf(&p, &ctx.lambda, 5)));
+                assert!(ctx
+                    .chain
+                    .apply_with(&p, ChainEval::Optimised)
+                    .eq_point(&generic));
+            }
+            for v in chain.vectors {
+                let p = Aff::from_limbs(&v.p[0], &v.p[1]);
+                let want = Jac::from_affine(&Aff::from_limbs(&v.phi_p[0], &v.phi_p[1]));
+                assert!(ctx.chain.apply_optimised(&p).eq_point(&want));
+            }
+        }
+    }
+
+    #[test]
+    fn jacobian_tables_match_affine_tables_and_textbook() {
+        let mut rng = StdRng::seed_from_u64(0x5ee9_0002);
+        let c = curve();
+        let a_fe = c.a_fe();
+        for w in 2..=7u32 {
+            for _ in 0..6 {
+                let p = random_point(&mut rng);
+                let k = random_scalar(&mut rng);
+                let want = p.to_textbook().scalar_mul_vartime(&k, &a_fe);
+                let affine = scalar_mul_wnaf_with(&p, &k, w, TableMode::Affine);
+                let jacobian = scalar_mul_wnaf_with(&p, &k, w, TableMode::Jacobian);
+                assert!(jac_eq_textbook(&affine, &want), "affine table, w = {w}");
+                assert!(jac_eq_textbook(&jacobian, &want), "Jacobian table, w = {w}");
+            }
+            // edge scalars
+            let p = random_point(&mut rng);
+            for k in [BigUint::one(), BigUint::from(2u8), order() - 1u8] {
+                let want = p.to_textbook().scalar_mul_vartime(&k, &a_fe);
+                assert!(jac_eq_textbook(
+                    &scalar_mul_wnaf_with(&p, &k, w, TableMode::Jacobian),
+                    &want
+                ));
+            }
+        }
+    }
+
+    #[test]
+    fn glv_variants_match_baseline() {
+        let mut rng = StdRng::seed_from_u64(0x5ee9_0003);
+        for chain in CHAINS {
+            let ctx = GlvContext::new(chain);
+            for w in 3..=7u32 {
+                for _ in 0..4 {
+                    let p = random_point(&mut rng);
+                    let k = random_scalar(&mut rng);
+                    let want = scalar_mul_wnaf(&p, &k, 5);
+                    for table in [TableMode::Affine, TableMode::Jacobian] {
+                        for eval in [ChainEval::Generic, ChainEval::Optimised] {
+                            let got = scalar_mul_glv_with(&ctx, &p, &k, w, table, eval);
+                            assert!(
+                                got.eq_point(&want),
+                                "{}: w = {w}, {table:?}, {eval:?}",
+                                chain.name
+                            );
+                        }
+                    }
+                }
+            }
+            let g = generator();
+            for k in [BigUint::zero(), BigUint::one(), order() - 1u8] {
+                let want = scalar_mul_wnaf(&g, &k, 5);
+                let got =
+                    scalar_mul_glv_with(&ctx, &g, &k, 4, TableMode::Jacobian, ChainEval::Optimised);
+                assert!(got.eq_point(&want));
+            }
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "not in the lattice")]
+    fn glv_context_rejects_a_basis_outside_the_lattice() {
+        let chain = &CHAIN_5_5_7;
+        let bad = [
+            [chain.glv_basis[0][0], chain.glv_basis[0][1]],
+            [chain.glv_basis[1][0], "1"],
+        ];
+        GlvContext::from_parts(
+            PreparedChain::new(chain),
+            &chain.lambda,
+            bad,
+            chain.babai_bound_bits,
+        );
+    }
+
+    /// The counted field operations of both chain evaluators are exactly the
+    /// chain sweep's model: `generic` `Σ(11s + 2ℓ + 3)` M plus one S per
+    /// step and `4M + 1S` after the last; `optimised` `3ℓ₁ - 4` M for the
+    /// first step, `11s + 2ℓ - 2` M and one S for each later step, and one M
+    /// for the isomorphism.
+    #[cfg(feature = "cryptopro-b-opcount")]
+    #[test]
+    fn chain_evaluator_counts_match_the_model() {
+        use crate::ecc::cryptopro_b_field::opcount;
+        fn model(steps: &[u32], eval: ChainEval) -> (u64, u64) {
+            let (mut m, mut s) = (0u64, 0u64);
+            for (i, &ell) in steps.iter().enumerate() {
+                let ell = u64::from(ell);
+                let h = (ell - 1) / 2;
+                match eval {
+                    ChainEval::Generic => {
+                        m += 11 * h + 2 * ell + 3;
+                        s += 1;
+                    }
+                    ChainEval::Optimised if i == 0 => m += 3 * ell - 4,
+                    ChainEval::Optimised => {
+                        m += 11 * h + 2 * ell - 2;
+                        s += 1;
+                    }
+                }
+            }
+            match eval {
+                ChainEval::Generic => (m + 4, s + 1),
+                ChainEval::Optimised => (m + 1, s),
+            }
+        }
+        let p = generator();
+        for chain in CHAINS {
+            let ctx = GlvContext::new(chain);
+            let steps = ctx.chain.step_degrees();
+            for eval in [ChainEval::Generic, ChainEval::Optimised] {
+                opcount::reset();
+                let _ = ctx.chain.apply_with(&p, eval);
+                let got = opcount::read();
+                assert_eq!(
+                    (got.mul, got.sqr, got.inv),
+                    (model(&steps, eval).0, model(&steps, eval).1, 0),
+                    "{} {eval:?}",
+                    chain.name
+                );
+            }
+        }
+        // the textbook check of the scalar-multiplication counts: one
+        // doubling 3M + 5S, one full addition 11M + 5S, one mixed 7M + 4S
+        let q = Jac::from_affine(&p).double();
+        opcount::reset();
+        let _ = q.double();
+        assert_eq!((opcount::read().mul, opcount::read().sqr), (3, 5));
+        opcount::reset();
+        let _ = q.add(&q.double());
+        assert_eq!((opcount::read().mul, opcount::read().sqr), (11 + 3, 5 + 5));
+        opcount::reset();
+        let _ = q.add_affine(&p);
+        assert_eq!((opcount::read().mul, opcount::read().sqr), (7, 4));
+        opcount::reset();
+        let _ = Fe::ONE.inv();
+        let o = opcount::read();
+        assert_eq!((o.mul, o.sqr, o.inv), (8, 256, 1));
     }
 }

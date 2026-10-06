@@ -57,6 +57,66 @@ pub const R_SQUARED_MOD_P: U256 = Uint([
     0x0000_0000_0000_0000,
 ]);
 
+/// Field-operation counters for the chain-sweep measurement
+/// (`research/cryptopro_b_chain_sweep_20261006`), compiled in only with the
+/// `cryptopro-b-opcount` cargo feature.  Without the feature none of this
+/// exists and the arithmetic below is unchanged, so timing builds never pay
+/// for the counting.
+///
+/// Every [`CryptoProBFieldElement::mul`], [`CryptoProBFieldElement::sqr`],
+/// [`CryptoProBFieldElement::inv`] and every addition, subtraction or
+/// negation on the current thread is counted; an inversion is also counted
+/// through the squarings and multiplications it performs.  Conversions into
+/// and out of Montgomery form are not field operations of an algorithm and
+/// are not counted.
+#[cfg(feature = "cryptopro-b-opcount")]
+pub mod opcount {
+    use std::cell::Cell;
+
+    /// Field operations on this thread since the last [`reset`].
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+    pub struct OpCounts {
+        /// Montgomery multiplications, including those inside inversions.
+        pub mul: u64,
+        /// Montgomery squarings, including those inside inversions.
+        pub sqr: u64,
+        /// Inversions.
+        pub inv: u64,
+        /// Additions, subtractions and negations.
+        pub add: u64,
+    }
+
+    thread_local! {
+        static COUNTS: Cell<OpCounts> = const {
+            Cell::new(OpCounts {
+                mul: 0,
+                sqr: 0,
+                inv: 0,
+                add: 0,
+            })
+        };
+    }
+
+    #[inline]
+    pub(crate) fn bump(f: impl FnOnce(&mut OpCounts)) {
+        COUNTS.with(|c| {
+            let mut v = c.get();
+            f(&mut v);
+            c.set(v);
+        });
+    }
+
+    /// Zero this thread's counters.
+    pub fn reset() {
+        COUNTS.with(|c| c.set(OpCounts::default()));
+    }
+
+    /// This thread's counters.
+    pub fn read() -> OpCounts {
+        COUNTS.with(|c| c.get())
+    }
+}
+
 /// A field element over the CryptoPro-B prime, stored in Montgomery form.
 #[derive(Copy, Clone, Debug)]
 pub struct CryptoProBFieldElement(U256);
@@ -100,22 +160,32 @@ impl CryptoProBFieldElement {
     }
 
     pub fn add(&self, other: &Self) -> Self {
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.add += 1);
         CryptoProBFieldElement(self.0.add_mod(&other.0, &P))
     }
 
     pub fn sub(&self, other: &Self) -> Self {
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.add += 1);
         CryptoProBFieldElement(self.0.sub_mod(&other.0, &P))
     }
 
     pub fn mul(&self, other: &Self) -> Self {
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.mul += 1);
         CryptoProBFieldElement(U256::mont_mul(&self.0, &other.0, &P, P_INV_LOW))
     }
 
     pub fn sqr(&self) -> Self {
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.sqr += 1);
         CryptoProBFieldElement(U256::mont_sqr(&self.0, &P, P_INV_LOW))
     }
 
     pub fn neg(&self) -> Self {
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.add += 1);
         CryptoProBFieldElement(U256::ZERO.sub_mod(&self.0, &P))
     }
 
@@ -130,6 +200,8 @@ impl CryptoProBFieldElement {
     pub fn inv(&self) -> Self {
         // exp = p - 2.  P[0] = 0xC99, so subtract 2 from the low limb
         // without affecting the higher ones.
+        #[cfg(feature = "cryptopro-b-opcount")]
+        opcount::bump(|c| c.inv += 1);
         let exp = Uint([P.0[0] - 2, P.0[1], P.0[2], P.0[3]]);
         let mut acc = CryptoProBFieldElement::ONE;
         for i in (0..256).rev() {
