@@ -127,20 +127,80 @@ fn compress(state: &mut [u32; 8], block: &[u8]) {
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
+/// Incremental SHA-256 state for streams that cannot be buffered in memory.
+#[derive(Clone)]
+pub struct Sha256 {
+    state: [u32; 8],
+    block: [u8; 64],
+    buffered: usize,
+    bytes: u64,
+}
+
+impl Default for Sha256 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Sha256 {
+    pub fn new() -> Self {
+        Self {
+            state: H0,
+            block: [0; 64],
+            buffered: 0,
+            bytes: 0,
+        }
+    }
+
+    pub fn update(&mut self, mut data: &[u8]) {
+        self.bytes = self.bytes.wrapping_add(data.len() as u64);
+        if self.buffered != 0 {
+            let take = (64 - self.buffered).min(data.len());
+            self.block[self.buffered..self.buffered + take].copy_from_slice(&data[..take]);
+            self.buffered += take;
+            data = &data[take..];
+            if self.buffered < 64 {
+                return;
+            }
+            compress(&mut self.state, &self.block);
+            self.buffered = 0;
+        }
+        let mut chunks = data.chunks_exact(64);
+        for chunk in &mut chunks {
+            compress(&mut self.state, chunk);
+        }
+        let remainder = chunks.remainder();
+        self.block[..remainder.len()].copy_from_slice(remainder);
+        self.buffered = remainder.len();
+    }
+
+    pub fn finalize(mut self) -> [u8; 32] {
+        let bit_len = self.bytes.wrapping_mul(8);
+        self.block[self.buffered] = 0x80;
+        self.buffered += 1;
+        if self.buffered > 56 {
+            self.block[self.buffered..].fill(0);
+            compress(&mut self.state, &self.block);
+            self.block = [0; 64];
+        } else {
+            self.block[self.buffered..56].fill(0);
+        }
+        self.block[56..].copy_from_slice(&bit_len.to_be_bytes());
+        compress(&mut self.state, &self.block);
+
+        let mut out = [0u8; 32];
+        for (i, word) in self.state.iter().enumerate() {
+            out[i * 4..i * 4 + 4].copy_from_slice(&word.to_be_bytes());
+        }
+        out
+    }
+}
+
 /// Compute SHA-256 of `data`, returning a 32-byte digest.
 pub fn sha256(data: &[u8]) -> [u8; 32] {
-    let padded = pad(data);
-    let mut state = H0;
-
-    for block in padded.chunks_exact(64) {
-        compress(&mut state, block);
-    }
-
-    let mut out = [0u8; 32];
-    for (i, word) in state.iter().enumerate() {
-        out[i * 4..i * 4 + 4].copy_from_slice(&word.to_be_bytes());
-    }
-    out
+    let mut state = Sha256::new();
+    state.update(data);
+    state.finalize()
 }
 
 /// Compute SHA-224 (truncated SHA-256 with different IV).
@@ -243,6 +303,19 @@ mod tests {
             sha256(&[b'B'; 64]).as_slice(),
             h("c422e7070cb1cb455b5de9afee0d975e303d0239c72030cd7414ab5c382d3ae8").as_slice(),
         );
+    }
+
+    #[test]
+    fn sha256_incremental_chunk_boundaries() {
+        let msg: Vec<u8> = (0..1_003).map(|i| (i * 37) as u8).collect();
+        let expected = sha256(&msg);
+        for width in [1, 2, 7, 31, 55, 56, 63, 64, 65, 127, 256] {
+            let mut state = Sha256::new();
+            for chunk in msg.chunks(width) {
+                state.update(chunk);
+            }
+            assert_eq!(state.finalize(), expected, "chunk width {width}");
+        }
     }
 
     // ── SHA-224 known-answer tests (FIPS 180-4) ───────────────────────────────

@@ -125,9 +125,30 @@ M=./target/release/p256_isogeny_million
 C=$(git rev-parse HEAD)
 
 $M --threads 4 generate --side 1000 --source-commit "$C" \
-  --output runs/p256-grid-1m.jsonl.gz
+  --output runs/p256-grid-1m.jsonl.gz > runs/GENERATE.json
 $M --threads 4 verify --input runs/p256-grid-1m.jsonl.gz \
-  --audit-points 2 --audit-seed-x 7
+  --audit-points 2 --audit-seed-x 7 > runs/VERIFY.json
+
+# After the receipts agree, derive deterministic on-demand cache slices.
+$M stage-cache --input runs/p256-grid-1m.jsonl.gz \
+  --generation-receipt runs/GENERATE.json \
+  --verification-receipt runs/VERIFY.json \
+  --run p256-grid-1m-20261006 --output runs/cache
+
+# Uses only the AWS CLI's ambient worker identity. The exact certificate,
+# receipts, and 127 cache parts are content-addressed; complete.json is last.
+$M publish --store s3://BUCKET/p256-isogeny-grid --cache runs/cache \
+  --input runs/p256-grid-1m.jsonl.gz \
+  --generation-receipt runs/GENERATE.json \
+  --verification-receipt runs/VERIFY.json --scratch runs/s3-scratch
+
+# Hydrate the full canonical evidence or one low-latency eight-row slice.
+$M fetch --store s3://BUCKET/p256-isogeny-grid \
+  --run p256-grid-1m-20261006 --output cache/p256-grid-1m.jsonl.gz \
+  --scratch cache/s3-scratch
+$M fetch --store s3://BUCKET/p256-isogeny-grid \
+  --run p256-grid-1m-20261006 --part part-0002-rows-0008-0015 \
+  --output cache/rows-0008-0015.jsonl.gz --scratch cache/s3-scratch
 ```
 
 The fixed 1,000 by 1,000 grid has a degree-13 spine and degree-11 rows.  It
@@ -139,6 +160,22 @@ run; it is not replaced by an adaptively selected curve.  This compact grid is
 a registered P-256 screening experiment, not a replacement for the generic
 multigraph walker and not evidence of an ECDLP speedup.  Its frozen protocol is
 [`research/p256_isogeny_million_20261006/PROTOCOL.md`](../../research/p256_isogeny_million_20261006/PROTOCOL.md).
+
+The cache keeps the canonical gzip as the archival byte sequence and derives a
+preamble, 125 eight-row slices, and a summary member.  Concatenating the 127
+members after decompression reproduces the canonical uncompressed bytes.  S3
+objects live at `objects/sha256/<first-two>/<digest>` and are uploaded with a
+declared SHA-256 plus `If-None-Match: *`; `runs/<run>/complete.json` is the only
+authoritative completion record and is created last.  Fetches use a partial
+file, check both stored and decompressed SHA-256, then rename atomically.
+
+`publish` can also commit the compact completion receipt through Cairn by
+adding `--cairn URL --objective ID --identity FILE --cairn-state FILE` (or the
+explicit Stage-0 `--submitter NAME`).  Run it again after the configured Cairn
+epoch to reveal the persisted commitment.  Cairn carries a
+`coordination-receipt` labelled `s3-content-address-only`; S3 remains the byte
+authority, and the receipt is not an ECDLP result or a claim that Cairn replayed
+the million curve certificates.
 
 ## Sizing
 

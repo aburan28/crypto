@@ -9,7 +9,15 @@ use clap::{Parser, Subcommand};
 use crypto_lib::cryptanalysis::isogeny_walk::million::{
     generate_jsonl, verify_jsonl, GridConfig, PRODUCTION_SIDE,
 };
+use crypto_lib::cryptanalysis::isogeny_walk::million_store::{
+    self, fetch_object, publish_cache, stage_cache, DEFAULT_CHUNK_ROWS,
+};
+use crypto_lib::cryptanalysis::isogeny_walk::store::S3Loc;
+use crypto_lib::cryptanalysis::pollard_collab::cairn::{
+    wall_clock, CairnConfig, CairnTransport, Submitter,
+};
 use flate2::{read::GzDecoder, Compression, GzBuilder};
+use serde_json::json;
 
 #[derive(Debug, Parser)]
 #[command(about = "Generate and replay a streaming million-curve P-256 isogeny grid")]
@@ -53,6 +61,69 @@ enum Command {
         /// Complete rows held for parallel replay at once.
         #[arg(long)]
         batch_rows: Option<usize>,
+    },
+    /// Derive deterministic row slices after generation and replay agree.
+    StageCache {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        generation_receipt: PathBuf,
+        #[arg(long)]
+        verification_receipt: PathBuf,
+        /// Safe, stable semantic run id used by S3 and Cairn.
+        #[arg(long)]
+        run: String,
+        #[arg(long, default_value_t = DEFAULT_CHUNK_ROWS)]
+        chunk_rows: u32,
+        #[arg(long)]
+        output: PathBuf,
+    },
+    /// Upload exact bytes and slices, then create the immutable marker last.
+    Publish {
+        /// S3 root, for example s3://bucket/p256-isogeny-grid.
+        #[arg(long)]
+        store: String,
+        #[arg(long)]
+        cache: PathBuf,
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        generation_receipt: PathBuf,
+        #[arg(long)]
+        verification_receipt: PathBuf,
+        #[arg(long)]
+        scratch: PathBuf,
+        /// Optional Cairn node; S3 remains the byte authority.
+        #[arg(long)]
+        cairn: Option<String>,
+        /// Cairn objective whose checker accepts the coordination receipt.
+        #[arg(long)]
+        objective: Option<String>,
+        /// Stage-0 Cairn nickname. Prefer --identity for signed submissions.
+        #[arg(long)]
+        submitter: Option<String>,
+        /// Identity file created by `cairn identity --out FILE`.
+        #[arg(long)]
+        identity: Option<PathBuf>,
+        /// Persisted commit-reveal outbox; required with --cairn.
+        #[arg(long)]
+        cairn_state: Option<PathBuf>,
+        #[arg(long, default_value_t = 600)]
+        cairn_epoch_secs: u64,
+    },
+    /// Fetch and hash-check the canonical certificate or one cache slice.
+    Fetch {
+        #[arg(long)]
+        store: String,
+        #[arg(long)]
+        run: String,
+        /// Cache part name; omit for the canonical certificate.
+        #[arg(long)]
+        part: Option<String>,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long)]
+        scratch: PathBuf,
     },
 }
 
@@ -158,6 +229,145 @@ fn verify(
     Ok(())
 }
 
+fn stage(
+    input: &Path,
+    generation_receipt: &Path,
+    verification_receipt: &Path,
+    run: &str,
+    output: &Path,
+    chunk_rows: u32,
+) -> Result<(), String> {
+    let manifest = stage_cache(
+        input,
+        generation_receipt,
+        verification_receipt,
+        run,
+        output,
+        chunk_rows,
+    )?;
+    let manifest_path = output.join(million_store::CACHE_MANIFEST_FILE);
+    let digest = million_store::digest_file(&manifest_path)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "status": "pass",
+            "run_id": manifest.run_id,
+            "unique_curves": manifest.unique_curves,
+            "parts": manifest.parts.len(),
+            "canonical": manifest.canonical,
+            "manifest_sha256": digest.sha256,
+            "manifest_bytes": digest.bytes,
+            "output": output,
+        }))
+        .map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn publish(
+    store_uri: &str,
+    cache: &Path,
+    input: &Path,
+    generation_receipt: &Path,
+    verification_receipt: &Path,
+    scratch: &Path,
+    cairn: Option<String>,
+    objective: Option<String>,
+    submitter: Option<String>,
+    identity: Option<PathBuf>,
+    cairn_state: Option<PathBuf>,
+    cairn_epoch_secs: u64,
+) -> Result<(), String> {
+    let loc = S3Loc::parse(store_uri)?;
+    let published = publish_cache(
+        &loc,
+        cache,
+        input,
+        generation_receipt,
+        verification_receipt,
+        scratch,
+    )?;
+    let cairn_status = if let Some(url) = cairn {
+        let objective_id = objective.ok_or("--cairn requires --objective")?;
+        let state_path = cairn_state.ok_or("--cairn requires --cairn-state")?;
+        let who = match (identity, submitter) {
+            (Some(path), None) => Submitter::from_identity_file(&path)?,
+            (None, Some(name)) => Submitter::Nickname(name),
+            (Some(_), Some(_)) => {
+                return Err("use either --identity or --submitter, not both".into())
+            }
+            (None, None) => return Err("--cairn requires --identity or --submitter".into()),
+        };
+        let mut transport = CairnTransport::open(CairnConfig {
+            url,
+            objective_id,
+            submitter: who,
+            answer_objective: None,
+            epoch_secs: cairn_epoch_secs,
+            state_path: Some(state_path),
+            clock: wall_clock(),
+        })?;
+        let (revealed, refused) = transport.reveal_pending()?;
+        let report = transport.publish_artifact(
+            published.cairn_receipt.artifact()?,
+            published.cairn_receipt.claim_key(),
+        )?;
+        json!({
+            "committed": report.committed,
+            "skipped": report.skipped,
+            "revealed": revealed,
+            "refused": refused,
+            "pending": transport.pending(),
+            "submitter": transport.submitter(),
+        })
+    } else {
+        if objective.is_some() || submitter.is_some() || identity.is_some() || cairn_state.is_some()
+        {
+            return Err("Cairn options require --cairn".into());
+        }
+        serde_json::Value::Null
+    };
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "status": "pass",
+            "marker_uri": published.marker_uri,
+            "marker_sha256": published.marker_sha256,
+            "marker_created": published.created,
+            "canonical": published.marker.canonical,
+            "parts": published.marker.parts.len(),
+            "cairn_receipt": published.cairn_receipt,
+            "cairn": cairn_status,
+        }))
+        .map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
+fn fetch(
+    store_uri: &str,
+    run: &str,
+    part: Option<&str>,
+    output: &Path,
+    scratch: &Path,
+) -> Result<(), String> {
+    let loc = S3Loc::parse(store_uri)?;
+    let object = fetch_object(&loc, run, part, output, scratch)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "status": "pass",
+            "run_id": run,
+            "part": part,
+            "output": output,
+            "object": object,
+        }))
+        .map_err(|error| error.to_string())?
+    );
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let cli = Cli::parse();
     if let Some(threads) = cli.threads {
@@ -194,6 +404,55 @@ fn run() -> Result<(), String> {
             audit_seed_x,
             batch_rows.unwrap_or_else(default_batch_rows),
         ),
+        Command::StageCache {
+            input,
+            generation_receipt,
+            verification_receipt,
+            run,
+            chunk_rows,
+            output,
+        } => stage(
+            &input,
+            &generation_receipt,
+            &verification_receipt,
+            &run,
+            &output,
+            chunk_rows,
+        ),
+        Command::Publish {
+            store,
+            cache,
+            input,
+            generation_receipt,
+            verification_receipt,
+            scratch,
+            cairn,
+            objective,
+            submitter,
+            identity,
+            cairn_state,
+            cairn_epoch_secs,
+        } => publish(
+            &store,
+            &cache,
+            &input,
+            &generation_receipt,
+            &verification_receipt,
+            &scratch,
+            cairn,
+            objective,
+            submitter,
+            identity,
+            cairn_state,
+            cairn_epoch_secs,
+        ),
+        Command::Fetch {
+            store,
+            run,
+            part,
+            output,
+            scratch,
+        } => fetch(&store, &run, part.as_deref(), &output, &scratch),
     }
 }
 
