@@ -1,0 +1,131 @@
+digraph p192_weak_curve_study {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.25",
+    nodesep="0.55",
+    ranksep="0.58",
+    splines=polyline,
+    fontname="DejaVu Sans",
+    fontsize=12,
+    labelloc="t",
+    label="P-192 weak-object study: two mathematically distinct lanes (evidence status: PENDING)"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#f8fafc",
+    color="#475569",
+    fontname="DejaVu Sans",
+    fontsize=9,
+    margin="0.12,0.08"
+  ];
+  edge [fontname="DejaVu Sans", fontsize=8, color="#475569", arrowsize=0.7];
+
+  p192 [
+    shape=box3d,
+    fillcolor="#dbeafe",
+    color="#1d4ed8",
+    label="VALID ELLIPTIC CURVE\nP-192\nicv1-fp192-t31607402316713927207482677199-52e4af59\nEC1P192Cp192h5531c4a08bdb\nUID sha256:5531c4a0…2f646"
+  ];
+
+  subgraph cluster_valid {
+    label="Valid CM / isogeny-class lane";
+    color="#60a5fa";
+    penwidth=1.5;
+    style="rounded";
+
+    frobenius [
+      fillcolor="#eff6ff",
+      color="#2563eb",
+      label="[DERIVED; certificate pending]\nFrobenius order candidate\nD = t² - 4p\n= -5·11·31·C"
+    ];
+    census [
+      fillcolor="#eff6ff",
+      color="#2563eb",
+      label="[PENDING RUN]\nExact class-relation census\nℓ ≤ 113; ∏ℓ^|eℓ| ≤ 2^48\n4,974,347 canonical nonzero vectors expected"
+    ];
+    map_gate [
+      shape=diamond,
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="Oriented kernels + explicit maps\n+ subgroup transport + replay\n+ HOT/COLD and whole-attack cost?"
+    ];
+    valid_verdict [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      label="Only then assess a valid-curve weakness\nOtherwise: NO_WEAKNESS_FOUND_WITHIN_SCOPE\nor INCOMPLETE — never infer one from a form identity"
+    ];
+
+    frobenius -> census [color="#2563eb", penwidth=1.6, label="certified ideal-class arithmetic"];
+    census -> map_gate [color="#2563eb", penwidth=1.6, label="candidate relation"];
+    map_gate -> valid_verdict [color="#15803d", penwidth=1.6, label="all gates pass"];
+  }
+
+  subgraph cluster_singular {
+    label="Singular implementation-validation lane (not an isogeny-class member)";
+    color="#c084fc";
+    penwidth=1.5;
+    style="rounded";
+
+    singular [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="[DERIVED]\nSingular nodal cubic S\ny² = x³ - 3x - 2 = (x+1)²(x-2)\nnode (-1,0); Δ=0\nsingular-model/v1 sha256:30512948…72b3"
+    ];
+    parameter [
+      fillcolor="#f3e8ff",
+      color="#7e22ce",
+      label="[DERIVED]\nSmooth-locus torus parameter\nt = y/(x+1)\nP(t)=(t²+2, t(t²+3))\nN=p+1; R=P(8)=(66,536)"
+    ];
+    api_gate [
+      shape=diamond,
+      fillcolor="#ecfdf5",
+      color="#15803d",
+      label="Input validation before\nsecret multiplication?"
+    ];
+    reject [
+      fillcolor="#dcfce7",
+      color="#15803d",
+      label="HIGH-LEVEL CONTROL\necdh_raw must reject R\n[PENDING RUN]"
+    ];
+    oracle [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      label="UNCHECKED LOW-LEVEL SURFACE\nx-only confirmation tags\n72 nested-composite probes\n[PENDING RUN]"
+    ];
+    residual [
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      label="Legitimate P-192 Q=[d]G\nresolves qmax residual with interval BSGS\nexact final replay required\n[PENDING RUN]"
+    ];
+    impl_verdict [
+      fillcolor="#fef3c7",
+      color="#b45309",
+      label="Possible verdict ceiling:\nIMPLEMENTATION_WEAK\nNever 'weak isogenous curve'"
+    ];
+
+    singular -> parameter [color="#7e22ce", penwidth=1.6, label="birational torus law"];
+    parameter -> api_gate [color="#7e22ce", penwidth=1.6, label="probe R"];
+    api_gate -> reject [color="#15803d", penwidth=1.6, label="validated path"];
+    api_gate -> oracle [color="#b91c1c", penwidth=1.6, label="unchecked path"];
+    oracle -> residual [color="#b91c1c", penwidth=1.6, label="coherent ± class mod M"];
+    residual -> impl_verdict [color="#b45309", penwidth=1.6, label="only after replay + controls"];
+  }
+
+  p192 -> frobenius [color="#2563eb", penwidth=1.8, label="t, p; valid CM lane"];
+  p192 -> singular [
+    color="#dc2626",
+    fontcolor="#b91c1c",
+    style=dashed,
+    penwidth=2.0,
+    label="same field and a=-3 only\nNOT an isogeny; S is singular"
+  ];
+
+  legend [
+    shape=note,
+    fillcolor="#ffffff",
+    color="#94a3b8",
+    label="Legend\nblue = valid elliptic/CM evidence flow\npurple = exact singular-torus algebra\nred dashed = forbidden equivalence inference\ngreen = validation/replay gate\nPENDING = no experiment output yet"
+  ];
+}
