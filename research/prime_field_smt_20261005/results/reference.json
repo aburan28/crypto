@@ -1,0 +1,32 @@
+{
+  "schema": "prime-field-smt.exhaustive/v1",
+  "field_bits": 20,
+  "x_values_enumerated": 4096,
+  "factor_points": 3992,
+  "candidate_probes": 146,
+  "status": "sat",
+  "witness": {
+    "x1": "137",
+    "y1": "533365",
+    "x2": "3709",
+    "y2": "528803",
+    "lambda": "500576"
+  },
+  "verification": {
+    "schema": "prime-field-smt.verification/v1",
+    "branch": "ordinary",
+    "canonical_field_values": true,
+    "factor_base_bounds": true,
+    "symmetry": true,
+    "points_on_curve": true,
+    "encoded_branch_equations": true,
+    "independent_sum_finite": true,
+    "independent_sum_matches_target": true,
+    "lambda_matches_independent_addition": true,
+    "recomputed_sum": {
+      "x": "36271",
+      "y": "187981"
+    },
+    "verified": true
+  }
+}
