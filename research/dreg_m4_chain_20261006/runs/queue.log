@@ -39,3 +39,10 @@
 2026-10-06T02:01:39Z 9-3-6.u3: start budget_mb=11000 f5=1 threads=4 cmd=/tmp/claude-0/-home-user/d5d16f7b-fbe5-52ba-afbc-240e3be25f4a/scratchpad/m4/dreg_ladder.4fd7c282 --m 4 --cells 9:3:6 --ffd-max 5 --seed 20261006 --unsat-index 3
 2026-10-06T02:08:34Z 9-3-6.u3: exit 0 after 415 s
 2026-10-06T02:08:34Z 10-3-6.u0: start budget_mb=11000 f5=1 threads=4 cmd=/tmp/claude-0/-home-user/d5d16f7b-fbe5-52ba-afbc-240e3be25f4a/scratchpad/m4/dreg_ladder.4fd7c282 --m 4 --cells 10:3:6 --ffd-max 5 --seed 20261006 --unsat-index 0
+2026-10-06T02:25:56Z 10-3-6.u0: exit 0 after 1042 s
+2026-10-06T02:25:56Z 10-3-6.u1: start budget_mb=11000 f5=1 threads=4 cmd=/tmp/claude-0/-home-user/d5d16f7b-fbe5-52ba-afbc-240e3be25f4a/scratchpad/m4/dreg_ladder.4fd7c282 --m 4 --cells 10:3:6 --ffd-max 5 --seed 20261006 --unsat-index 1
+2026-10-06T02:44:20Z 10-3-6.u1: exit 0 after 1104 s
+2026-10-06T02:44:20Z 10-3-6.u2: start budget_mb=11000 f5=1 threads=4 cmd=/tmp/claude-0/-home-user/d5d16f7b-fbe5-52ba-afbc-240e3be25f4a/scratchpad/m4/dreg_ladder.4fd7c282 --m 4 --cells 10:3:6 --ffd-max 5 --seed 20261006 --unsat-index 2
+2026-10-06T03:02:58Z 10-3-6.u2: exit 0 after 1118 s
+2026-10-06T03:02:58Z 10-3-6.u3: start budget_mb=11000 f5=1 threads=4 cmd=/tmp/claude-0/-home-user/d5d16f7b-fbe5-52ba-afbc-240e3be25f4a/scratchpad/m4/dreg_ladder.4fd7c282 --m 4 --cells 10:3:6 --ffd-max 5 --seed 20261006 --unsat-index 3
+2026-10-06T03:32:10Z 10-3-6.u3: killed by a container restart (no output; started 03:02:58Z, host up since about 03:31Z). A resource limit, not evidence; rerun from the start per the protocol's stop conditions.
