@@ -30,6 +30,8 @@ unmodified CMS reader line is not a sufficient readiness marker. The
 describe the remaining source review and binary-compatibility gate. The
 patched CMS binary is **not yet built or validated**. A controller must freeze
 its exact source, build receipt and executable hash before any dispatch.
+The [marked-CMS control protocol](../native-sat-target-transport-v1/MARKED_CMS_CONTROL_V1.md)
+fixes the disclosed instances, role order and watchdog before that build.
 
 For each seeded `[a]G+[b]Q` query, the worker fsyncs a durable start record,
 delivers one bounded point request to the matching prepared exporter, validates
