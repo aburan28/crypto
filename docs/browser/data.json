@@ -3,7 +3,7 @@
  "generated_by": "scripts/build_lab_browser.py",
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
-  "curves": 115,
+  "curves": 121,
   "methods": 49,
   "factor_bases": 29,
   "candidates": 258,
@@ -12,9 +12,9 @@
   "yields": 1956
  },
  "sources": {
-  "docs/curves/registry.json": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3",
-  "docs/curves/covers.json": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
-  "docs/ic/leaderboard.json": "d956e355d0fcf56770ebd02a33e1c4ce13c24f67a45a90e66e22d1881b86dfa5",
+  "docs/curves/registry.json": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+  "docs/curves/covers.json": "b1634d75fff27add2e27adf996ba820a8852ea72468088d9eb3c88bb69759a39",
+  "docs/ic/leaderboard.json": "866d198acfeaea22f9a3613e53bbfaacb122a168e970489c2676775d4bf3a334",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -754,6 +754,102 @@
    }
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "icv1": "ICV1:f2m-11-4c26487e:67:1982:0x1:-7:unk:r:ae0facd240e8",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 11,
+    "degree": 11,
+    "modulus": "0x913"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "67",
+   "order": "1982",
+   "order_bits": 10.936,
+   "r": "991",
+   "r_bits": 9.936,
+   "cofactor": 2,
+   "generator": [
+    "0x4a9",
+    "0x3ef"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-4c26487e\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x913\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:41243ed45ca391b7b99cc37e02cfcd9ad4ae329b034049781a11c9701f91ab59"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "ae0facd240e84e43254c1fb74f0851b186e405bce8ed4a264913dd67d2d9a894",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m11-t67-ae0facd2",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
    "family": "koblitz",
@@ -1409,6 +1505,102 @@
    }
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "icv1": "ICV1:f2m-13-517bd51f:-181:8374:0x1:-7:unk:r:e4cd523ec44f",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 13,
+    "degree": 13,
+    "modulus": "0x3d33"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-181",
+   "order": "8374",
+   "order_bits": 13.022,
+   "r": "79",
+   "r_bits": 6.234,
+   "cofactor": 106,
+   "generator": [
+    "0x112d",
+    "0xbe3"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-517bd51f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3d33\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:98fd3bab3884fa9d550cb6f4afeb86a8ce5cb7b973875cf7ecfe1197de65338c"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "e4cd523ec44fc00eb103a3ea48f2c4b6b6d11634ca16b0a83f0043565dd88a5e",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m13-tm181-e4cd523e",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
    "family": "koblitz",
@@ -1507,6 +1699,102 @@
     "model_sha256": "2d22ff5d351f96e9c028bb789f008bfcb31c6f84d9c1aa2868e957ec1bfaca90",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-f2m15-tm275-2d22ff5d",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "icv1": "ICV1:f2m-15-bcb514a8:275:32494:0x1:-7:unk:r:25edae8389f1",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 15,
+    "degree": 15,
+    "modulus": "0x8035"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "275",
+   "order": "32494",
+   "order_bits": 14.983,
+   "r": "211",
+   "r_bits": 7.648,
+   "cofactor": 154,
+   "generator": [
+    "0x8e4",
+    "0x203a"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-bcb514a8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8035\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:68b09ca2a6f858390f7dfbd1021e3b41ff530d8c7d0161893a0693b9fdfd8a56"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n15-l5"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "25edae8389f13e4f7ba13ea611b2ae6c61d85c6409a79c7f39e3582c2535219c",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m15-t275-25edae83",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -1718,7 +2006,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 17)",
+   "construction": null,
    "trace": "-101",
    "order": "131174",
    "order_bits": 17.001,
@@ -1726,33 +2014,36 @@
    "r_bits": 16.001,
    "cofactor": 2,
    "generator": [
-    "0xaaad",
-    "0x5b2b"
+    "0x1fa03",
+    "0xd814"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:381f66e2762a47b4af4fe5a8b915914be8cbc242ecad57198264dc254c63d57e",
     "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
     "K_1/2^17",
     "K_1/F_2^17"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": false,
    "leaderboard": [],
@@ -3511,7 +3802,7 @@
    },
    "a": "1",
    "b": "0x1",
-   "construction": "KoblitzCurve::new(1, 19)",
+   "construction": null,
    "trace": "-797",
    "order": "525086",
    "order_bits": 19.002,
@@ -3519,33 +3810,36 @@
    "r_bits": 18.002,
    "cofactor": 2,
    "generator": [
-    "0x6001e",
-    "0x798a"
+    "0x7e3ea",
+    "0x24541"
    ],
    "target_group": "prime-order subgroup",
    "j": "0x1",
    "endomorphism_discriminant": "-7",
    "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "curve_uid": [
+    "urn:ec-record:1:sha256:6186a62ebfaa1d11afc99ffa6ef0b9067190b7a03bc67150c379ffbf30e6a7d9",
     "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23"
    ],
    "ec1_unresolved": null,
    "retired_names": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
     "K_1/2^19",
     "K_1/F_2^19"
    ],
    "sources": [
+    "docs/curves/sources/ecbench-large-prime.json",
     "docs/curves/sources/generated.json",
     "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
     "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
-    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
    ],
    "on_leaderboard": true,
    "leaderboard": [
@@ -4798,6 +5092,102 @@
     }
    ],
    "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "icv1": "ICV1:f2m-23-bb3650c7:-5197:8393806:0x1:-7:unk:r:a023238e6474",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 23,
+    "degree": 23,
+    "modulus": "0xdcf5eb"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-5197",
+   "order": "8393806",
+   "order_bits": 23.001,
+   "r": "4196903",
+   "r_bits": 22.001,
+   "cofactor": 2,
+   "generator": [
+    "0x2e62c9",
+    "0x55e90c"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-bb3650c7\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0xdcf5eb\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:e238479aae6dae6c48e4c249888db39e58360f2d9d6fd36418f9648bcc0d8b80"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
    "tournament_cells": [
     {
      "round": "round-0016",
@@ -4949,9 +5339,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "1f85e9e1acf0b54c82e59864e98b40388bae7bcdf9755833b924a88f108dae4b",
+    "model_sha256": "a023238e6474f945bd8be7ddb502618b652064406ac23760b8ab5560b58ac039",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m23-tm5197-1f85e9e1",
+    "slug": "icv1-f2m23-tm5197-a023238e",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5215,6 +5605,102 @@
     "FB1h280d69cfbf38",
     "FB1h3a3262d6867f"
    ],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "icv1": "ICV1:f2m-29-797da7cf:-40309:536911222:0x1:-7:unk:r:6aecea52fac9",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 29,
+    "degree": 29,
+    "modulus": "0x3a0b7cb9"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "-40309",
+   "order": "536911222",
+   "order_bits": 29.0,
+   "r": "42457",
+   "r_bits": 15.296,
+   "cofactor": 12646,
+   "generator": [
+    "0x1a849ba3",
+    "0x4b3542e"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-797da7cf\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x3a0b7cb9\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:7fed23ba87eaf8303f4a16985bb0e665733faae9285069c5a430a9bdd9fab8a7"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
    "tournament_cells": [
     {
      "round": "round-0016",
@@ -5330,9 +5816,9 @@
     "map_direction": "H -> E",
     "minimal_degree": null,
     "minimal_genus": null,
-    "model_sha256": "30c52b963005be85e5c063553e3555af4488c97a7739da9aec4355dd53b74219",
+    "model_sha256": "6aecea52fac93749eeedfd85e1121feaed9eb35764396fcadf862d8411b40307",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
-    "slug": "icv1-f2m29-tm40309-30c52b96",
+    "slug": "icv1-f2m29-tm40309-6aecea52",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -5546,6 +6032,102 @@
     "model_sha256": "c95f16f54aa95e23065ed2e72c2218efda6871445c9bd20c18b9cf77765a880a",
     "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
     "slug": "icv1-f2m31-tm90707-c95f16f5",
+    "status": "verified_over_declared_field",
+    "subfield_descent": "not_tested",
+    "subgroup_transfer": "not_tested"
+   }
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "icv1": "ICV1:f2m-31-eaa21191:90707:2147392942:0x1:-7:unk:r:5fc996f03a86",
+   "family": "koblitz",
+   "standard_names": [],
+   "field": {
+    "characteristic": 2,
+    "p": null,
+    "bits": 31,
+    "degree": 31,
+    "modulus": "0x851e410f"
+   },
+   "a": "1",
+   "b": "0x1",
+   "construction": null,
+   "trace": "90707",
+   "order": "2147392942",
+   "order_bits": 31.0,
+   "r": "41231",
+   "r_bits": 15.258,
+   "cofactor": 52082,
+   "generator": [
+    "0x6347c766",
+    "0xc3503f0"
+   ],
+   "target_group": "prime-order subgroup",
+   "j": "0x1",
+   "endomorphism_discriminant": "-7",
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-eaa21191\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x851e410f\",\"v\":\"1\"}",
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "curve_uid": [
+    "urn:ec-record:1:sha256:6be2d6a625f9a828dca420147995b710ca572754e3fde55313ff248ee4ec42cc"
+   ],
+   "ec1_unresolved": null,
+   "retired_names": [
+    "ecbench-koblitz-n31-l8"
+   ],
+   "sources": [
+    "docs/curves/sources/ecbench-large-prime.json"
+   ],
+   "on_leaderboard": false,
+   "leaderboard": [],
+   "ecbench": [],
+   "factor_bases": [],
+   "tournament_cells": [],
+   "hyperelliptic_cover": {
+    "certificate": {
+     "construction": "binary_cubic_pullback_v1",
+     "degree": 3,
+     "f": [
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "genus": 3,
+     "h": [
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "x": [
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x1"
+     ],
+     "y_0": [
+      "0x1"
+     ],
+     "y_v": [
+      "0x0",
+      "0x1"
+     ]
+    },
+    "dlp_advantage": null,
+    "exists": true,
+    "field_check": "irreducibility_proved_by_Rabin",
+    "field_relation": "same_field",
+    "map_direction": "H -> E",
+    "minimal_degree": null,
+    "minimal_genus": null,
+    "model_sha256": "5fc996f03a86af22aab8a078ea9e1e59ea1c188a4ca0ab837b81ee91fb31b322",
+    "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+    "slug": "icv1-f2m31-t90707-5fc996f0",
     "status": "verified_over_declared_field",
     "subfield_descent": "not_tested",
     "subgroup_transfer": "not_tested"
@@ -22099,7 +22681,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hcd55ee54e17e",
@@ -22118,7 +22700,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hd273669a2623",
@@ -22137,7 +22719,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb138PDP3pairRCwalkLAgaussTDpdpISO0hda5509efef7a",
@@ -22156,7 +22738,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hd7032a1281fe",
@@ -22175,7 +22757,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hdbfd01e36445",
@@ -22194,7 +22776,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb184PDP3pairRCwalkLAgaussTDpdpISO0hf5bb0071678f",
@@ -22213,7 +22795,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb230PDP3pairRCwalkLAgaussTDpdpISO0h3bc48f3497ee",
@@ -22232,7 +22814,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0h05b61e8db4bb",
@@ -22251,7 +22833,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0h37ba41c8ccd0",
@@ -22270,7 +22852,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hcc07600f3441",
@@ -22289,7 +22871,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hd48a73ea8906",
@@ -22308,7 +22890,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb276PDP3pairRCwalkLAgaussTDpdpISO0hfc53d2a6f29d",
@@ -22327,7 +22909,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb322PDP3pairRCwalkLAgaussTDpdpISO0h789e2889acc5",
@@ -22346,7 +22928,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAbwTDpdpISO0hb95b67cfded7",
@@ -22365,7 +22947,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAbwTDpdpISO0hf41777c1fea6",
@@ -22384,7 +22966,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-readiness/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAgaussTDpdpISO0h9d5586f52481",
@@ -22403,7 +22985,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCsampleLAgaussTDpdpISO0hbd7dc559e75a",
@@ -22422,7 +23004,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-readiness/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h03da90065b67",
@@ -22441,7 +23023,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1",
@@ -22460,7 +23042,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0f14cffe097b",
@@ -22479,7 +23061,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h27e53cef191f",
@@ -22498,7 +23080,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-both.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h2baa00a720b0",
@@ -22517,7 +23099,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h3cb1b77bbe4d",
@@ -22536,7 +23118,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h3cf9e3807c82",
@@ -22555,7 +23137,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h4d79c8ae6114",
@@ -22574,7 +23156,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h5d512b8f7cad",
@@ -22593,7 +23175,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h6829c633f771",
@@ -22612,7 +23194,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/producer-admission/audits/pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h693bc45574f0",
@@ -22634,7 +23216,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h73838861ba27",
@@ -22653,7 +23235,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h77b568eadee1",
@@ -22672,7 +23254,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548",
@@ -22691,7 +23273,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/initial-scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hb0fb0791a0a7",
@@ -22710,7 +23292,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hc4acc940885a",
@@ -22731,7 +23313,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hd0e5bdac820a",
@@ -22750,7 +23332,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-pairinv.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hdc4a7de66899",
@@ -22769,7 +23351,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0he67ac9e439c3",
@@ -22788,7 +23370,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071",
@@ -22807,7 +23389,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/audits/final-scaled.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hfb32d1e3c09e",
@@ -22826,7 +23408,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3f4RCsampleLAgaussTDpdpISO0h130cbe989b4c",
@@ -22845,7 +23427,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3f5RCsampleLAgaussTDpdpISO0hab2bc24e8b55",
@@ -22864,7 +23446,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3satcnfRCsampleLAgaussTDpdpISO0h1c2837b86f70",
@@ -22883,7 +23465,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb52PDP3satxorRCsampleLAgaussTDpdpISO0hd6b8fed60562",
@@ -22902,7 +23484,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/generic-exact-yield-audit/RESULT.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb92PDP3pairRCwalkLAgaussTDpdpISO0h146200cc5891",
@@ -22921,7 +23503,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N23Ckb1fb92PDP3pairRCwalkLAgaussTDpdpISO0hefc02b943487",
@@ -22940,7 +23522,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m23-tm5197-1f85e9e1"
+   "slug": "icv1-f2m23-tm5197-a023238e"
   },
   {
    "candidate_id": "IC1N29Ckb1fb290PDP3pairRCwalkLAgaussTDpdpISO0h320e15bc865f",
@@ -22959,7 +23541,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb348PDP3pairRCwalkLAgaussTDpdpISO0h48ce6a7778f3",
@@ -22978,7 +23560,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb464PDP3pairRCwalkLAgaussTDpdpISO0h2126e644a548",
@@ -22997,7 +23579,7 @@
    "where": [
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N29Ckb1fb464PDP3pairRCwalkLAgaussTDpdpISO0h4dd57dfe6cd7",
@@ -23017,7 +23599,7 @@
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json",
     "research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json"
    ],
-   "slug": "icv1-f2m29-tm40309-30c52b96"
+   "slug": "icv1-f2m29-tm40309-6aecea52"
   },
   {
    "candidate_id": "IC1N31Ckb0fb124PDP3pairRCwalkLAgaussTDpdpISO0h05a8422d4768",
@@ -27189,7 +27771,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27201,7 +27783,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27380,7 +27962,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27392,7 +27974,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27571,7 +28153,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27583,7 +28165,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27762,7 +28344,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27774,7 +28356,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -27927,7 +28509,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -27939,7 +28521,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28092,7 +28674,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28104,7 +28686,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28257,7 +28839,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28269,7 +28851,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28478,7 +29060,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28490,7 +29072,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",
@@ -28699,7 +29281,7 @@
      "curve_a": 1,
      "subgroup_order": "4196903",
      "cofactor": "2",
-     "slug": "icv1-f2m23-tm5197-1f85e9e1"
+     "slug": "icv1-f2m23-tm5197-a023238e"
     },
     {
      "cell": "n29a1",
@@ -28711,7 +29293,7 @@
      "curve_a": 1,
      "subgroup_order": "42457",
      "cofactor": "12646",
-     "slug": "icv1-f2m29-tm40309-30c52b96"
+     "slug": "icv1-f2m29-tm40309-6aecea52"
     },
     {
      "cell": "n31a0",

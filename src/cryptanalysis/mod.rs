@@ -133,6 +133,7 @@ pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
 pub mod ecbench;
+pub mod ecbench_large_prime;
 pub mod ecc2k130_guard;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
@@ -281,6 +282,7 @@ pub mod wdsat_oracle;
 pub mod weil_charts;
 pub mod wide_gf2m;
 pub mod wide_groebner;
+pub mod wide_sixsum;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
