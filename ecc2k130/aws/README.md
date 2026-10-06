@@ -330,7 +330,8 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 #    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 #    cheapest SKU and research-credit route: RESEARCH-CREDITS.md
 #    (GCP L4 spot is cheaper than Modal; leftover AWS g6 is cheaper than both)
-ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
+cargo build --release --bin ecc2k-status   # once
+ECC_BUCKET=ecc2k130-<account> ../../target/release/ecc2k-status --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
 #    masks) and checks that they report the preset's arithmetic before any
@@ -508,9 +509,18 @@ every boot after it.
   share a row (default `slot-NNNNN`). A heartbeat is not a record and pays
   nothing; a node that is down or refuses costs one bounded request a minute
   and a log line, never the lease (`test_worker_cairn.py`).
-* `status.py` sums live workers' rates, each slot's checkpointed iterations ×
+* `ecc2k-status` (the Rust port of `status.py`, `cargo build --release --bin
+  ecc2k-status`) sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
-  fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
+  fraction of 2^60.9. It also prints each slot's **steps per walk**, its
+  iterations over its points: every point ends a walk, so this is the mean walk
+  length, 2^28.41 at the campaign's weight 32. A slot with 50,000 points that
+  is more than 2× from that is flagged off weight (`!` in the column), the rule
+  the ingest host applies; `?` marks a slot whose walks are assumed. The
+  pooled figure covers the slots that report their walks, and with off-weight
+  slots present a second figure leaves them out. The JSON carries the same as
+  `stepsPerWalk*` and `offWeightSlots`.
+  The walk count is not a campaign constant: a checkpoint
   holds the per-walk iteration base, and Ada slots omit `--threads` so the
   client sizes the grid (`usesCampaignWorkers`), which makes their base climb
   by the ratio of the two grids — about 26× on an L4-sized grid — for the same

@@ -34,6 +34,12 @@ path = "src/bin/ecc2k_guard.rs"
 name = "ecc2k-merge"
 path = "src/bin/ecc2k_merge.rs"
 
+# `ecc2k-status` — the ECC2K-130 campaign dashboard from the slot table,
+# ported from ecc2k130/aws/status.py.
+[[bin]]
+name = "ecc2k-status"
+path = "src/bin/ecc2k_status.rs"
+
 # Exact CM polarization checker with a standalone catalog/database CLI.
 [[bin]]
 name = "jacobian-certificate"
