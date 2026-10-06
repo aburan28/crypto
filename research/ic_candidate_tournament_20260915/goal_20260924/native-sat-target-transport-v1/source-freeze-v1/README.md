@@ -18,7 +18,14 @@ archived binary. Both require the capsule's external registration seal.
 The first [validation result](result-v1/RESULT.md) passed complete archive
 replay. The exporter built by that capsule also passed the three disclosed
 source-byte and transport controls and a separate data-only audit. The
-validation registration remains validation-only. A scientific source freeze,
-one-use controller, original frozen runtime audit and the other three source
-publications are required before a fresh point card can be drawn. No speedup
-follows from this build.
+validation registration remains validation-only. The scientific freeze now
+requires an independently replayed, exact-source validation publication and
+three-control exporter audit. It rejects a different source commit, source
+manifest or prepared-exporter binary. The one-use controller checks the
+scientific publication and exact CMS source descriptor before it consumes the
+claim; its frozen audit rechecks runtime receipts and the five online phases
+as data. These new paths still need their own clean-commit validation capsule
+and scientific publication. The other three source publications must also
+exist before a fresh point card is drawn. No speedup follows from this build.
+The [scientific sequence](SCIENTIFIC.md) names the exact admission checks and
+one-use commands.

@@ -315,6 +315,17 @@ pub(super) fn audit(
     probe: &Path,
     out: &Path,
 ) -> Result<String, String> {
+    let result = verify(publication, seal, controls, probe)?;
+    save(out, &result)?;
+    serde_json::to_string_pretty(&result).map_err(|e| e.to_string())
+}
+
+pub(super) fn verify(
+    publication: &Path,
+    seal: &str,
+    controls: &Path,
+    probe: &Path,
+) -> Result<Value, String> {
     let custody =
         sat_target_custody::verify(publication, seal, sat_target_custody::Kind::Validation)?;
     let record = capsule::registration(publication, seal)?;
@@ -384,6 +395,5 @@ pub(super) fn audit(
         "audited_controls":rows,"source_bound_target_admitted":false,
         "fresh_paired_qualification":false,"native_executables_called_by_auditor":0,
         "online_speedup":null});
-    save(out, &result)?;
-    serde_json::to_string_pretty(&result).map_err(|e| e.to_string())
+    Ok(result)
 }

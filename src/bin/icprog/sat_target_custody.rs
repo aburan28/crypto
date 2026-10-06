@@ -77,12 +77,18 @@ fn sidecars(root: &Path) -> Result<Map<String, Value>, String> {
     {
         files.insert(format!("immutable/build-receipts/{name}"), value.clone());
     }
-    for name in ["marked-audit.json", "preparation-audit.json"] {
+    for name in [
+        "marked-audit.json",
+        "preparation-audit.json",
+        "exporter-parity-audit.json",
+    ] {
         let path = format!("immutable/assets/controls/{name}");
-        files.insert(
-            path.clone(),
-            desc(&read(&root.join(path), 16 * 1024 * 1024)?),
-        );
+        if root.join(&path).try_exists().map_err(|e| e.to_string())? {
+            files.insert(
+                path.clone(),
+                desc(&read(&root.join(path), 16 * 1024 * 1024)?),
+            );
+        }
     }
     Ok(files)
 }
@@ -255,6 +261,29 @@ pub(super) fn replay(
     let result = verify(publication, expected, kind)?;
     save(out, &result)?;
     serde_json::to_string_pretty(&result).map_err(|e| e.to_string())
+}
+
+/// Recheck the entire scientific publication before a one-use claim.
+/// The archived programs remain data and are never extracted.
+pub(super) fn scientific_preflight(
+    publication: &Path,
+    capsule_root: &Path,
+    seal: &str,
+) -> Result<Value, String> {
+    let publication = publication.canonicalize().map_err(|e| e.to_string())?;
+    let result = verify(&publication, seal, Kind::Scientific)?;
+    let bytes = read(&publication.join("PUBLICATION.json"), 16 * 1024 * 1024)?;
+    let header: Value = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
+    require(
+        header["capsule_root"] == json!(capsule_root),
+        "SAT scientific publication names a different original capsule",
+    )?;
+    Ok(json!({"schema_version":1,"question":SCIENTIFIC_QUESTION,
+        "stage":"scientific-registered-not-dispatched",
+        "publication_root":publication,"publication_descriptor_sha256":sha256(&bytes),
+        "registration_sha256":seal,"source_manifest_sha256":result["source_manifest_sha256"],
+        "archive_sha256":result["archive_sha256"],"scientific_worker_calls":0,
+        "execution_admitted":false}))
 }
 
 #[cfg(test)]

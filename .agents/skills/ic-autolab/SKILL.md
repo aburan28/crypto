@@ -184,12 +184,21 @@ all 29 folded logs. Never restart or refill it. The guarded build then made a
 distinct post-buffer-marked binary, and the [nine-role disclosed control](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/result-v1/RESULT.md)
 passed an independent data-only transport audit. This is disclosed-input
 compatibility, not natural target yield or a one-target speed measurement; the
-historical 60-second control failure remains. The staged SAT target worker and
-public-point card are not a dispatch authority. Freeze and publish a
-target-free SAT registration before creating the card, bind the exact card to a
-one-use claim, and independently audit native source/model receipts and
-execution custody. Repeat exporter/solver parity with the exact target-capsule
-build rather than treating the disclosed control as a blanket admission.
+historical 60-second control failure remains. The
+[validation-only SAT source build](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/source-freeze-v1/result-v1/RESULT.md)
+passed a 6,974-file data-only archive replay; its exact-built exporter passed
+three new disclosed controls and an independent raw-file/receipt audit. This
+validation capsule cannot dispatch. `icprog sat-target-freeze` now requires
+the matching validation publication, exact exporter controls and audit before
+it can issue a separate scientific registration. Publish that new unconsumed
+capsule with `sat-target-publish --scientific`, replay it as data with
+`sat-target-replay --scientific`, and check the CMS source descriptor against
+the public card before `sat-target-execute` consumes the one-use claim. Use the
+frozen `sat-target-inspect` for interrupted prefixes and `sat-target-audit` for
+original runtime/source/math admission. None of these new scientific paths has
+yet passed a frozen registration or target run. The public-point card requires
+all four independently checked source publications before creation; old
+registrations and disclosed controls cannot substitute for a fresh target.
 The [fresh paired n17 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/PROTOCOL.md)
 predeclares the four source-publication roles, native public-point workload,
 one-use four-arm execution and non-promotion of exploratory wall ratios.

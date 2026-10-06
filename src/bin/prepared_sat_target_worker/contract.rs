@@ -110,6 +110,10 @@ pub struct Registration {
     pub auditor_sha256: String,
     pub prepared_exporter_sha256: String,
     pub prepared_cms_sha256: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exporter_control_sha256: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub validation_archive_sha256: Option<String>,
     pub worker_build_identity: Value,
     pub runtime_environment: BTreeMap<String, String>,
     pub preparation: PreparationBinding,
@@ -151,6 +155,21 @@ pub fn registration(capsule: &Path, external: &str) -> Result<Registration, Stri
             .into_iter()
             .all(|value| journal::digest(value)),
         "SAT target registration/source/preparation pins differ",
+    )?;
+    native::require(
+        if record.validation_only {
+            record.exporter_control_sha256.is_none() && record.validation_archive_sha256.is_none()
+        } else {
+            record
+                .exporter_control_sha256
+                .as_deref()
+                .is_some_and(journal::digest)
+                && record
+                    .validation_archive_sha256
+                    .as_deref()
+                    .is_some_and(journal::digest)
+        },
+        "SAT scientific registration lacks exact exporter control and validation archive",
     )?;
     require_identity(&record.worker_build_identity, &record.worker_build_identity)?;
     native::require(
@@ -197,7 +216,31 @@ pub fn check_roles(capsule: &Path, record: &Registration) -> Result<(), String> 
             && record.prepared_cms_sha256 != native::CMS_SHA
             && record.prepared_exporter_sha256 != native::EXPORTER_SHA,
         "SAT target prepared role binary differs from frozen pin",
-    )
+    )?;
+    if let (Some(control_sha), Some(archive_sha)) = (
+        &record.exporter_control_sha256,
+        &record.validation_archive_sha256,
+    ) {
+        let bytes = native::read(
+            &capsule.join("immutable/assets/controls/exporter-parity-audit.json"),
+            65536,
+        )?;
+        let audit: Value = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
+        native::require(
+            sha256(&bytes) == *control_sha
+                && audit["status"] == "PASS_DISCLOSED_EXACT_BUILT_EXPORTER_PARITY"
+                && audit["source_manifest_sha256"] == record.source_manifest_sha256
+                && audit["publication_archive_sha256"] == *archive_sha
+                && audit["prepared_exporter_sha256"] == record.prepared_exporter_sha256
+                && audit["audited_controls"]
+                    .as_array()
+                    .is_some_and(|rows| rows.len() == 3)
+                && audit["source_bound_target_admitted"] == false
+                && audit["online_speedup"].is_null(),
+            "SAT scientific prepared exporter parity control differs",
+        )?;
+    }
+    Ok(())
 }
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]

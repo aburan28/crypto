@@ -9,8 +9,8 @@ exists under this protocol. The three earlier confirmation sets and every
 consumed controller remain closed. A stage control is never a complete
 one-target result. The SAT arm has a
 [validated source/build archive and exact-built exporter parity](../native-sat-target-transport-v1/source-freeze-v1/result-v1/RESULT.md).
-Its scientific source freeze and one-use target controller remain admission
-gates.
+Its scientific source freeze and one-use target controller are implemented but
+remain unvalidated admission gates; no fresh card exists.
 
 ## Entry gates and point custody
 

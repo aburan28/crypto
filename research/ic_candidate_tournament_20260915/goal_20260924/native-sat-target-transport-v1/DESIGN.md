@@ -16,9 +16,10 @@ passed an independent data-only audit. A
 committed source, the complete preparation binding, the marked binary, build
 invocations and full archive custody. Its exact-built exporter passed new
 disclosed parity controls and an independent data-only audit. The validation
-registration still refuses scientific use until a one-use controller and a
-scientific freeze bind that evidence. No one-use SAT target capsule, fresh
-public-point card or target solve has been admitted.
+registration still refuses scientific use. A one-use controller and a
+scientific freeze with exact-source exporter-audit binding are implemented but
+have not yet passed their own frozen validation and publication. No one-use SAT
+target capsule, fresh public-point card or target solve has been admitted.
 
 ## Question and bounded scope
 

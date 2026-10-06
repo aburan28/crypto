@@ -83,6 +83,8 @@ mod sat_query_law;
 mod sat_source;
 #[path = "icprog/sat_target_build.rs"]
 mod sat_target_build;
+#[path = "icprog/sat_target_control.rs"]
+mod sat_target_control;
 #[path = "icprog/sat_target_custody.rs"]
 mod sat_target_custody;
 #[path = "icprog/stats.rs"]
@@ -155,6 +157,16 @@ enum Command {
         host_context: PathBuf,
         #[arg(long)]
         validation_only: bool,
+        #[arg(long)]
+        validation_publication: Option<PathBuf>,
+        #[arg(long)]
+        validation_registration_sha256: Option<String>,
+        #[arg(long)]
+        exporter_controls: Option<PathBuf>,
+        #[arg(long)]
+        exporter_probe: Option<PathBuf>,
+        #[arg(long)]
+        exporter_audit: Option<PathBuf>,
     },
     /// Publish a target-free SAT build or scientific registration as a full archive.
     SatTargetPublish {
@@ -192,6 +204,49 @@ enum Command {
         probe: PathBuf,
         #[arg(long)]
         out: PathBuf,
+    },
+    /// Consume one scientific SAT target capsule after publication/card preflight.
+    SatTargetExecute {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        publication: PathBuf,
+        #[arg(long)]
+        source_descriptor: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+    },
+    /// Inspect a consumed SAT attempt prefix without executing a child.
+    SatTargetInspect {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Audit original SAT worker, transport, mathematics and five-phase clock.
+    SatTargetAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        transport_out: PathBuf,
     },
     /// Freeze the complete native n17 target source/build; never runs a solve.
     TargetControlFreeze {
@@ -993,6 +1048,11 @@ fn main() -> ExitCode {
             rustc,
             host_context,
             validation_only,
+            validation_publication,
+            validation_registration_sha256,
+            exporter_controls,
+            exporter_probe,
+            exporter_audit,
         } => sat_target_build::freeze(sat_target_build::FreezeRequest {
             root: &root,
             out: &out,
@@ -1003,6 +1063,11 @@ fn main() -> ExitCode {
             rustc: &rustc,
             host_context: &host_context,
             validation_only,
+            validation_publication: validation_publication.as_deref(),
+            validation_registration_sha256: validation_registration_sha256.as_deref(),
+            exporter_controls: exporter_controls.as_deref(),
+            exporter_probe: exporter_probe.as_deref(),
+            exporter_audit: exporter_audit.as_deref(),
         }),
         Command::SatTargetPublish {
             capsule,
@@ -1043,6 +1108,43 @@ fn main() -> ExitCode {
             probe,
             out,
         } => sat_exporter_audit::audit(&publication, &registration_sha256, &controls, &probe, &out),
+        Command::SatTargetExecute {
+            capsule,
+            publication,
+            source_descriptor,
+            card,
+            execution,
+            registration_sha256,
+        } => sat_target_control::execute(
+            &capsule,
+            &publication,
+            &source_descriptor,
+            &card,
+            &execution,
+            &registration_sha256,
+        ),
+        Command::SatTargetInspect {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+        } => sat_target_control::inspect(&capsule, &execution, &card, &registration_sha256, &out),
+        Command::SatTargetAudit {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+            transport_out,
+        } => sat_target_control::audit(
+            &capsule,
+            &execution,
+            &card,
+            &registration_sha256,
+            &out,
+            &transport_out,
+        ),
         Command::TargetControlFreeze {
             root,
             out,
