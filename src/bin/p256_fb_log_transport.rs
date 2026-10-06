@@ -182,9 +182,21 @@ struct PrefixReference {
     multiplier_false_negatives: u64,
     block_gray_images: Vec<(u8, u64)>,
     block_direct_images: Vec<(u8, u64)>,
+    nontrivial_block_controls: Vec<BlockReferenceCell>,
     block_false_positives: u64,
     block_false_negatives: u64,
     passed: bool,
+}
+
+#[derive(Serialize)]
+struct BlockReferenceCell {
+    depth: u8,
+    ancestor: String,
+    leaves: u64,
+    gray_images: u64,
+    direct_images: u64,
+    false_positives: u64,
+    false_negatives: u64,
 }
 
 #[derive(Serialize)]
@@ -1229,6 +1241,7 @@ fn prefix_reference(
 
     let mut block_gray_images = Vec::new();
     let mut block_direct_images = Vec::new();
+    let mut nontrivial_block_controls = Vec::new();
     let mut block_false_positives = 0;
     let mut block_false_negatives = 0;
     for depth in BLOCK_DEPTHS {
@@ -1242,6 +1255,42 @@ fn prefix_reference(
         block_false_negatives += direct_set.difference(&gray_set).count() as u64;
         block_gray_images.push((depth, gray.len() as u64));
         block_direct_images.push((depth, direct.len() as u64));
+
+        let all_columns = (0..points.len() as u32).collect::<Vec<_>>();
+        let full_blocks = block_defs(points, &all_columns, depth, &mut ignored);
+        let maximum = full_blocks
+            .iter()
+            .map(|block| block.columns.len())
+            .max()
+            .unwrap_or(0);
+        let selected = full_blocks
+            .iter()
+            .filter(|block| block.columns.len() == maximum)
+            .min_by_key(|block| {
+                let mut bytes = format!("{DOMAIN}/block-reference/{depth}/").into_bytes();
+                bytes.extend_from_slice(&block.ancestor);
+                sha256(&bytes)
+            })
+            .ok_or("no block available for nontrivial reference")?
+            .clone();
+        let selected_blocks = vec![selected.clone()];
+        let gray = block_reference_keys(&selected_blocks, points, true)?;
+        let direct = block_reference_keys(&selected_blocks, points, false)?;
+        let gray_set = gray.iter().copied().collect::<BTreeSet<_>>();
+        let direct_set = direct.iter().copied().collect::<BTreeSet<_>>();
+        let false_positives = gray_set.difference(&direct_set).count() as u64;
+        let false_negatives = direct_set.difference(&gray_set).count() as u64;
+        block_false_positives += false_positives;
+        block_false_negatives += false_negatives;
+        nontrivial_block_controls.push(BlockReferenceCell {
+            depth,
+            ancestor: hex::encode(selected.ancestor),
+            leaves: selected.columns.len() as u64,
+            gray_images: gray.len() as u64,
+            direct_images: direct.len() as u64,
+            false_positives,
+            false_negatives,
+        });
     }
     let passed = multiplier_false_positives == 0
         && multiplier_false_negatives == 0
@@ -1256,6 +1305,7 @@ fn prefix_reference(
         multiplier_false_negatives,
         block_gray_images,
         block_direct_images,
+        nontrivial_block_controls,
         block_false_positives,
         block_false_negatives,
         passed,
