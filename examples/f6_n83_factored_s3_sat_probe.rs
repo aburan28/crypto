@@ -250,6 +250,49 @@ impl Circuit {
         out.flush()?;
         Ok((clauses, unit, literals))
     }
+
+    fn write_xcnf(&self, path: &str) -> std::io::Result<(usize, usize, u64)> {
+        let unit = self
+            .units
+            .iter()
+            .filter(|&&constraint| constraint != Bit::Const(true))
+            .count();
+        let unit_literals = self
+            .units
+            .iter()
+            .filter(|&&constraint| matches!(constraint, Bit::Lit(_)))
+            .count();
+        let constraints = self.xors + self.ands * 3 + unit;
+        let literals = (self.xors * 3 + self.ands * 7 + unit_literals) as u64;
+        let mut out = BufWriter::new(File::create(path)?);
+        writeln!(out, "p cnf {} {constraints}", self.next_var - 1)?;
+        for gate in &self.gates {
+            let (a, b, o) = (gate.a, gate.b, gate.out);
+            match gate.kind {
+                Kind::Xor => {
+                    // Extended DIMACS uses odd parity for all-positive
+                    // literals. Negating the first literal makes it even.
+                    let parity = (a < 0) ^ (b < 0);
+                    let first = if parity { a.abs() } else { -a.abs() };
+                    writeln!(out, "x {first} {} {o} 0", b.abs())?;
+                }
+                Kind::And => {
+                    writeln!(out, "{} {} {o} 0", -a, -b)?;
+                    writeln!(out, "{a} {} 0", -o)?;
+                    writeln!(out, "{b} {} 0", -o)?;
+                }
+            }
+        }
+        for &bit in &self.units {
+            match bit {
+                Bit::Const(true) => {}
+                Bit::Const(false) => writeln!(out, "0")?,
+                Bit::Lit(lit) => writeln!(out, "{lit} 0")?,
+            }
+        }
+        out.flush()?;
+        Ok((constraints, unit, literals))
+    }
 }
 
 fn bits_of(element: &F2mElement) -> Vec<Bit> {
@@ -449,14 +492,15 @@ fn parse_model(path: &str) -> Option<Vec<bool>> {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     assert!(
-        args.len() == 5,
-        "usage: probe emit|verify planted|ordinary OFFSET PATH"
+        args.len() == 5 || args.len() == 6,
+        "usage: probe emit|emit_xor|verify planted|ordinary OFFSET PATH [all|source|none]"
     );
     let action = args[1].as_str();
     let mode = args[2].as_str();
     let offset: usize = args[3].parse().expect("integer torsion offset");
     let path = &args[4];
-    assert!(action == "emit" || action == "verify");
+    assert!(action == "emit" || action == "emit_xor" || action == "verify");
+    assert!(args.len() == 5 || action == "emit_xor");
     assert!(mode == "planted" || mode == "ordinary");
     assert!(offset < 4);
     let start = Instant::now();
@@ -469,7 +513,7 @@ fn main() {
     let target = target_for(&kc, &base.points, mode, offset);
     let setup_ns = start.elapsed().as_nanos();
 
-    if action == "emit" {
+    if action == "emit" || action == "emit_xor" {
         let begin = Instant::now();
         let system = System512::build(&base.subspace_basis, x_of(&target), &kc.curve.b, 5, &table)
             .expect("exact five-summand system");
@@ -477,6 +521,15 @@ fn main() {
             construct_circuit(&base.subspace_basis, x_of(&target), &kc.curve.b, &table);
         let planted = input_assignment(&base.points, &PLANTED, &kc);
         compare_expanded(&circuit, &system, planted);
+        let pin = if action == "emit_xor" {
+            args.get(5).expect("pin mode").as_str()
+        } else if mode == "planted" {
+            "source"
+        } else {
+            "none"
+        };
+        assert!(matches!(pin, "all" | "source" | "none"));
+        assert!(mode == "planted" || pin == "none");
         if mode == "planted" {
             assert!(system.all_vanish(&planted));
             assert_eq!(
@@ -484,7 +537,13 @@ fn main() {
                 PLANTED.iter().fold(BinaryPoint::Infinity, |sum, &i| kc
                     .add(&sum, &base.points[i]))
             );
-            for i in 0..90 {
+            let fixed_bits = match pin {
+                "all" => INPUTS,
+                "source" => 90,
+                "none" => 0,
+                _ => unreachable!(),
+            };
+            for i in 0..fixed_bits {
                 let value = planted.0[i / 64] >> (i % 64) & 1 != 0;
                 circuit.units.push(if value {
                     Circuit::input(i)
@@ -493,11 +552,17 @@ fn main() {
                 });
             }
         }
-        let (clauses, unit_clauses, literals) = circuit.write_cnf(path).expect("write DIMACS");
+        let (clauses, unit_clauses, literals) = if action == "emit_xor" {
+            circuit.write_xcnf(path).expect("write extended DIMACS")
+        } else {
+            circuit.write_cnf(path).expect("write DIMACS")
+        };
         println!(
             "{}",
             json!({
                 "phase":"emitted", "mode":mode, "offset":offset,
+                "encoding":if action == "emit_xor" {"native_xor"} else {"cnf"},
+                "pin":pin,
                 "curve_id":kc.label(), "target":point_json(&target),
                 "source_points":base.points.len(), "input_variables":INPUTS,
                 "expanded_equations":system.equations.len(),
@@ -557,7 +622,8 @@ fn main() {
                 .collect(),
         );
     }
-    let mut witness = None;
+    let mut group_witness = None;
+    let mut usable_witness = None;
     if equations_zero && choices.iter().all(|points| !points.is_empty()) {
         for mask in 0..32 {
             let selected: Vec<_> = choices
@@ -568,24 +634,40 @@ fn main() {
             let sum = selected
                 .iter()
                 .fold(BinaryPoint::Infinity, |acc, (_, point)| kc.add(&acc, point));
-            if sum == target
-                && selected
+            if sum == target {
+                let indices = selected.iter().map(|(index, _)| *index).collect::<Vec<_>>();
+                if group_witness.is_none() {
+                    group_witness = Some(indices.clone());
+                }
+                if selected
                     .iter()
                     .all(|(_, point)| kc.mul(point, &BigUint::from(4u32)) != BinaryPoint::Infinity)
-            {
-                witness = Some(selected.iter().map(|(index, _)| *index).collect::<Vec<_>>());
-                break;
+                {
+                    usable_witness = Some(indices);
+                    break;
+                }
             }
         }
     }
+    let status = if usable_witness.is_some() {
+        "verified_relation"
+    } else if group_witness.is_some() && mode == "planted" {
+        "verified_planted"
+    } else if group_witness.is_some() {
+        "group_witness_unusable"
+    } else {
+        "algebraic_model_only"
+    };
     println!(
         "{}",
         json!({
             "phase":"verified", "mode":mode, "offset":offset,
-            "status":if witness.is_some() {"verified_relation"} else {"algebraic_model_only"},
+            "status":status,
             "equations_zero":equations_zero, "source_codes":source_codes,
             "source_choice_counts":choices.iter().map(Vec::len).collect::<Vec<_>>(),
-            "witness_indices":witness, "target":point_json(&target),
+            "group_witness_indices":group_witness,
+            "usable_witness_indices":usable_witness,
+            "target":point_json(&target),
             "setup_ns":setup_ns, "claim_scope":"decomposition_feasibility_only"
         })
     );
