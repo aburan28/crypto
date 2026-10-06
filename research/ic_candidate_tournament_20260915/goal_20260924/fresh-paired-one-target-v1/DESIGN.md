@@ -23,6 +23,11 @@ The first comparison is an admissibility and correctness test. A performance
 claim additionally needs an isolated-host receipt satisfying the
 `cryptanalysis` repository's `docs/ISOLATED_BENCHMARKS.md`. Mac timings may
 diagnose stage costs but cannot establish a controlled CPU speedup.
+Freeze the operation-count boundary and conversion calibration before the
+holdout. Report `S = total_operations / sqrt(r)` with every counted stage,
+and label any setup-inclusive or cold-start measure separately from the
+primary one-target online wall interval. A missing phase or unpriced native
+operation makes the corresponding total and ratio unknown, not zero.
 
 ## Source, preparation and point custody
 
@@ -64,7 +69,7 @@ solve on that point is likewise exploratory.
 
 | Stage | Recorded evidence | Gate |
 | --- | --- | --- |
-| Factor base and preparation | Geometric points, distinct usable subgroup points, orbit columns, construction cost/memory, all ordinary-query outcomes, verified relations, novel-rank trajectory, complete logs | Exact base digest and rank/log replay; failed and zero-yield queries remain in the denominator |
+| Factor base and preparation | Geometric points, distinct usable subgroup points, orbit columns, construction cost and peak memory, all ordinary-query outcomes, verified relations, novel-rank trajectory, complete logs | Exact base digest and rank/log replay; failed and zero-yield queries remain in the denominator |
 | Target PDP and descent | Every seeded query, exporter and F4/F5/SAT status, native output, full-point lift, recursive attempts, exclusive online phases | Verified scalar on the supplied point; incomplete and timed-out attempts are charged |
 | Final relation LA | Exact sparse matrix, modulus, rank, solver family, setup and solve costs | Independent row and recovered-log replay; internal F4/F5 Macaulay reduction is charged to PDP |
 | Paired comparison | Same point, order-balanced arm runs, worker count, resource limits, source hashes, host receipt, rho certificate | Compare verified one-target online wall times; missing costs or failed solves give no speedup |
