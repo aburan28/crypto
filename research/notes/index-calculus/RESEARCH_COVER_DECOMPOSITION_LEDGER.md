@@ -883,3 +883,134 @@ is `n = 3`, `k = 2`.  The others:
 route, two more sizes, and a boundary for the construction's parameters;
 the class stays the weak class, and nothing about a generic or deployed
 curve follows.
+
+## 17. The walk, rebuilt: Legendre steps, enumerated components, larger-degree jumps — registered before it is built (2026-10-05)
+
+§13 priced the walk to a weak curve at `≈ (q/3) · c_step` with `c_step`
+measured at `2.6–6.8·10⁵` `F_p` multiplications for a 2,3-step and
+`1.9–4.1·10⁴` for a 2-step, above rho below `p ≈ 8,000`, and left one
+caveat: no walk of that round sampled a whole isogeny class, `60–90 %` of
+them ending in a component with no weak curve.  This section registers a
+rebuilt walk in the manner of §§3, 11 and 14: the construction as it will
+be built, the accounting, numbered predictions with falsification lines,
+and the class — fixed before the first line of code, with §17.5 the
+measured part.  Everything in it is in the service of one question: *what
+does reaching the weak class from a given curve cost, in the ledger's
+unit, at the sizes where §§14–16 measured the route below rho?*
+
+### 17.1 The construction, as it will be built
+
+- **State.**  A curve with full rational 2-torsion is carried as its triple
+  of 2-torsion abscissae `(e₀, e₁, e₂) ∈ F_{q³}³`, never normalised (no
+  inversion per step).  Its class is the `j`-invariant of §13, computed
+  once per curve met, for the visited set.
+- **The weak test, by norms.**  `N((e₃ − e₁)/(e₂ − e₁)) = 1` is
+  `N(e₃ − e₁) = N(e₂ − e₁)`, three norms `F_{q³} → F_q` of the differences
+  and no inversion; the sign `N(−1) = −1` is kept in the three orderings.
+  It is checked against §13's `weak_root` on random triples and on the
+  constructed weak curves before any run.
+- **A 2-isogeny edge.**  Kernel `(e_k, 0)`, `u = e_i − e_k`, `v = e_j − e_k`,
+  `w = uv`; the image `y² = x(x² + 2(u + v)x + (u − v)²)` has full 2-torsion
+  iff `w` is a square (§13).  The character of `w` is read off the norm
+  down to `F_p` and one Legendre symbol, not an exponentiation in
+  `F_{q³}`.  The root is taken by the odd-degree descent
+  `√w = w · σ(w^{(q+1)/2}) / √N_{q³/q}(w)`, one exponentiation of
+  `(q + 1)/2` in `F_{q³}` and one square root in `F_q`, instead of
+  Tonelli–Shanks in `F_{q³}`.  The dual edge's root is `±(u − v)` and is
+  carried, not recomputed, so a newly met curve costs two square roots,
+  not three.
+- **Components, enumerated.**  Instead of a random walk with a stopping
+  heuristic (§13's "no new `j` for `50 · distinct` steps", which on a
+  cycle-shaped crater stops long before the cycle is covered), the
+  2-isogeny component of the current curve among full-2-torsion curves is
+  enumerated breadth first, keyed by `j`, each curve met exactly once and
+  tested on arrival.  A component is the upper levels of one 2-volcano:
+  its size is a fact about the class, and it is reported.
+- **Jumps.**  When a component holds no weak curve, the walk leaves it by
+  a rational `ℓ`-isogeny, `ℓ ∈ {3, 5, 7}` in that order of preference,
+  from a random curve of the component: a root `x₁` of the division
+  polynomial `ψ_ℓ` of the model `y² = x³ + a₂x² + a₄x` (`e₀` moved to `0`,
+  `a₂ = −(u + v)`, `a₄ = uv`) over `F_{q³}`, the kernel abscissae
+  `x([k]T)` from `ψ₂, ψ₃, ψ₄`, and Vélu's `x`-map applied to the three
+  2-torsion points, which gives the image's triple directly (§13 factored
+  the image cubic a second time).  `ψ₅` and `ψ₇` are built by the standard
+  recursion from `ψ₃` and `ψ₄`.  A jump that lands on a curve already met
+  is counted as wasted and another is tried; a curve with no rational
+  `ℓ`-isogeny for any `ℓ` of the list restarts from a random curve, and
+  that restart is counted, as in §13.
+- **Budget.**  A walk stops when it meets a weak curve or when it has met
+  `3q` distinct curves; the latter is reported as `capped`, never as a
+  partial success.
+
+### 17.2 The accounting
+
+As §13: every `F_p` multiplication of the tower, through the one counter,
+including the `j`-invariants, the visited set's keys, every character
+test, every wasted jump and every restart.  Rho at `p` is
+`1.3 · (p³/2) · 331` as in section G.  The reported price is the whole
+walk, `curves met · c_curve + jumps · c_jump`, with the two constants
+also reported separately.
+
+### 17.3 Predictions and falsification lines
+
+**P1.  The step.**  `c_curve`, the cost per curve met in the enumeration,
+is at most `8,000` `F_p` multiplications at every `p ≤ 1,511` (two square
+roots of `≈ 3 log₂ p` multiplications in `F_{q³}` each, three character
+tests, the norm test, one `j`), growing as `log p`: at least `5×` below
+§13's 2-step and at least `30×` below its 2,3-step at `p = 53`.
+*Falsified if* `c_curve > 12,000` at `p = 1009`, or the ratio to §13's
+2,3-step at `p = 53` (`6.8·10⁵`) is below `10×`.
+
+**P2.  The components are small, and that is why §13's walks failed.**
+The mean size of a 2-isogeny component among full-2-torsion curves is
+below `q/10` at every `p ≥ 23`, and the fraction of start curves whose own
+component holds a weak curve is below `1/2` at every `p ≥ 31`.
+*Falsified if* the fraction is `≥ 1/2` at some `p ≥ 31` (then §13's
+exhaustion was the heuristic's artefact, not the graph's).
+
+**P3.  Jumps make the class reachable.**  With `ℓ ∈ {3, 5, 7}` jumps,
+at least `90 %` of `40` walks reach a weak curve within the `3q` budget at
+every `p ≤ 251`, and the median number of distinct curves met lies in
+`[q/9, q]` (`q/3` within `3×`, the weak density `3/q` of §13 seen through
+whole volcanoes).  *Falsified if* fewer than `75 %` find one at some
+`p ≤ 251`, or the median leaves `[q/12, 2q]`.
+
+**P4.  The price.**  The whole walk, jumps and restarts included, costs
+below rho at every `p ≥ 53`: `walk / rho ≤ 0.1` at `p = 251` and
+`≤ 0.02` at `p = 1009`.  *Falsified if* `walk / rho > 0.3` at `p = 251`
+or `> 0.1` at `p = 1009`.
+
+**P5.  The route with the walk inside it.**  Adding the measured walk to
+the sieved route's cost at `p = 1009` (§14–§16: `0.021×` rho on the
+measured reference) keeps the total below `0.05×` rho, and the route's
+crossover with rho, walk included, stays below `p ≈ 450` (`ℓ ≈ 2^{50}`),
+against `p ≈ 333` without it.  *Falsified if* the walk's share at
+`p = 1009` exceeds the route's own cost.
+
+**Sizes and seeds.**  `p ∈ {7, 11, 13, 17, 23, 31, 53, 101, 251, 503}`
+with `40` walks each and `p = 1009` with `20`; seed `1`; `p ≢ 0 (mod 3)`
+as the tower requires.  The §13 runs are kept and reprinted beside the
+new ones.
+
+### 17.4 Inadmissible moves, and what the section is not
+
+Not admissible: changing the weak test or the unit; leaving the
+`j`-invariants, the visited set, wasted jumps or restarts out of the
+count; reading a `capped` walk as a partial success; choosing seeds; a
+start curve that is already weak (those are counted and excluded from the
+medians, as in §13).
+
+**Out of scope, stated so as not to be mistaken for done.**  (i) The
+transport of the logarithm along the path found: one isogeny evaluation
+per step on the path, `O(ℓ)` per point, charged when the route is run end
+to end from a non-weak start curve, which this round does not do.
+(ii) Start curves with order divisible by `4` but only one rational
+2-torsion point over `F_{q³}`: the walk starts, as §13's did, at full
+2-torsion, and whether a 2-isogeny climb from such a curve reaches full
+2-torsion is not measured here.  (iii) Any curve outside the weak class's
+isogeny classes, and anything about a generic or deployed curve.
+
+**Class, registered.**  Engineering (the step and the enumeration) and
+accounting (the price, and the caveat of §9/§13 discharged or not by P3).
+Not an advance: the algorithm is [JV12]'s suggestion priced, and the class
+is the weak class.
