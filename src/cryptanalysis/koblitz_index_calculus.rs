@@ -1165,6 +1165,7 @@ pub(crate) struct DerivedConstructions {
     projected: OnceLock<(u64, Arc<ProjectedSignedOrbitMap>)>,
     index: OnceLock<(u64, Arc<HashMap<(BigUint, BigUint), usize>>)>,
     classes: OnceLock<(u64, Arc<Vec<BinaryPoint>>)>,
+    f6_pairs: OnceLock<(u64, Arc<F6PairIndex>)>,
 }
 
 impl Clone for DerivedConstructions {
@@ -5765,6 +5766,8 @@ struct F6FastGeometry {
     codes: Vec<u64>,
 }
 
+type F6PairIndex = HashMap<FastPoint, Vec<(usize, usize)>>;
+
 impl F6CoordinateEncoder {
     fn field_word(element: &F2mElement) -> Option<u128> {
         let bits = element.raw_bits();
@@ -5824,7 +5827,8 @@ struct F6GeometricGate<'a> {
     fast: Option<F6FastGeometry>,
     batch_fast: bool,
     pair_index_enabled: bool,
-    pair_index: Option<HashMap<FastPoint, Vec<(usize, usize)>>>,
+    shared_pair_index: bool,
+    pair_index: Option<Arc<F6PairIndex>>,
     pair_index_builds: u64,
     pair_index_lookups: u64,
     one_fixed_additions: u64,
@@ -5913,6 +5917,7 @@ impl<'a> F6GeometricGate<'a> {
             fast,
             batch_fast: true,
             pair_index_enabled: false,
+            shared_pair_index: false,
             pair_index: None,
             pair_index_builds: 0,
             pair_index_lookups: 0,
@@ -5984,7 +5989,11 @@ impl<'a> F6GeometricGate<'a> {
                 && self.one_fixed_additions >= size.saturating_mul(size + 1)
                 && self.by_x.contains_key(&fixed.1)
             {
-                self.build_pair_index();
+                if self.shared_pair_index {
+                    self.build_or_reuse_shared_pair_index();
+                } else {
+                    self.build_pair_index();
+                }
             }
             if self.pair_index.is_some() {
                 return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
@@ -6004,7 +6013,7 @@ impl<'a> F6GeometricGate<'a> {
         let Some(fast) = self.fast.as_ref() else {
             return;
         };
-        let mut index: HashMap<FastPoint, Vec<(usize, usize)>> = HashMap::new();
+        let mut index: F6PairIndex = HashMap::new();
         let mut scratch = BatchScratch::default();
         let mut sums = Vec::new();
         for first in 0..fast.points.len() {
@@ -6022,8 +6031,24 @@ impl<'a> F6GeometricGate<'a> {
                 index.entry(sum).or_default().push((first, first + offset));
             }
         }
-        self.pair_index = Some(index);
+        self.pair_index = Some(Arc::new(index));
         self.pair_index_builds += 1;
+    }
+
+    fn build_or_reuse_shared_pair_index(&mut self) {
+        let key = self.fb.projection_fingerprint(self.kc);
+        if let Some((built_for, index)) = self.fb.derived.f6_pairs.get() {
+            if *built_for == key {
+                self.pair_index = Some(Arc::clone(index));
+                return;
+            }
+        }
+        // Build outside the cell, like the other derived constructions.
+        // A changed public base gets a local index and never a stale hit.
+        self.build_pair_index();
+        if let Some(index) = &self.pair_index {
+            let _ = self.fb.derived.f6_pairs.set((key, Arc::clone(index)));
+        }
     }
 
     fn close_one_fixed_fast_pair(
@@ -6405,6 +6430,7 @@ pub fn groebner_decompose(
         node_budget,
         false,
         false,
+        false,
         Some(sys),
     )
 }
@@ -6444,6 +6470,7 @@ pub fn groebner_decompose_f6_ic(
         node_budget,
         true,
         false,
+        false,
         None,
     )
 }
@@ -6482,6 +6509,47 @@ pub fn groebner_decompose_f6_ic_pair_index(
         node_budget,
         true,
         true,
+        false,
+        None,
+    )
+}
+
+/// Opt-in F6-IC pair closure whose exact index is retained on the base
+/// across decomposition attempts in one target solve. The first build is
+/// still charged to online PDP work.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic_shared_pair_index(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        true,
+        true,
         None,
     )
 }
@@ -6498,6 +6566,7 @@ fn groebner_decompose_with_geometry(
     node_budget: usize,
     f6_ic: bool,
     pair_index_enabled: bool,
+    shared_pair_index: bool,
     prebuilt: Option<crate::cryptanalysis::koblitz_groebner::DecompositionSystem>,
 ) -> (Option<Vec<usize>>, SolveStats) {
     let unsupported = || SolveStats {
@@ -6571,6 +6640,7 @@ fn groebner_decompose_with_geometry(
         if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
         {
             gate.pair_index_enabled = pair_index_enabled;
+            gate.shared_pair_index = shared_pair_index;
             let (_, mut stats) = solve_boolean_system_with_node_oracle(
                 equations,
                 sys.n_vars,
@@ -7698,6 +7768,9 @@ pub struct KoblitzIcOptions {
     /// Opt-in adaptive exact pair-sum closure for the three-summand F6-IC
     /// node oracle. Its index build is charged inside each PDP attempt.
     pub f6_pair_index: bool,
+    /// Opt-in exact pair index shared by attempts on one factor base.
+    /// The first build remains charged to online PDP work.
+    pub f6_shared_pair_index: bool,
     /// Experimental exact S3 decomposition on a validated Frobenius chart
     /// cover. Applies only to two-summand Groebner collection/descent. Plan
     /// construction is caller-owned precomputation and must be charged.
@@ -7777,6 +7850,7 @@ impl Default for KoblitzIcOptions {
             engine: SolverEngine::default(),
             f6_ic: false,
             f6_pair_index: false,
+            f6_shared_pair_index: false,
             weil_charts: None,
             node_budget: 4096,
             max_models: 64,
@@ -8346,7 +8420,9 @@ fn koblitz_index_calculus_dlp_observed(
                         return RelationAttemptOutcome::Groebner(idxs, stats.solver);
                     }
                     let decompose = if opts.f6_ic {
-                        if opts.f6_pair_index {
+                        if opts.f6_shared_pair_index {
+                            groebner_decompose_f6_ic_shared_pair_index
+                        } else if opts.f6_pair_index {
                             groebner_decompose_f6_ic_pair_index
                         } else {
                             groebner_decompose_f6_ic
@@ -10072,7 +10148,9 @@ fn decompose_once(
                 return attempt;
             }
             let decompose = if opts.f6_ic {
-                if opts.f6_pair_index {
+                if opts.f6_shared_pair_index {
+                    groebner_decompose_f6_ic_shared_pair_index
+                } else if opts.f6_pair_index {
                     groebner_decompose_f6_ic_pair_index
                 } else {
                     groebner_decompose_f6_ic
@@ -16976,6 +17054,52 @@ mod tests {
             }
         }
         assert!(witnessed > 0 && refuted > 0 && duplicate_sums);
+    }
+
+    #[test]
+    fn f6_ic_shared_pair_index_reuses_and_invalidates_by_base_identity() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let mut fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let target = kc.mul(kc.generator(), &BigUint::from(5u32));
+        let check = |base: &FrobeniusFactorBase, expect_build: u64| {
+            let index_of = base.index_map();
+            let mut shared = F6GeometricGate::new(&kc, base, &index_of, &target, 3, None).unwrap();
+            let code = shared.fast.as_ref().unwrap().codes[0];
+            let ell = base.subspace_basis.len();
+            let mut assignment = vec![None; 3 * ell];
+            for j in 0..ell {
+                assignment[j] = Some(code & (1 << j) != 0);
+            }
+            let mut legacy = F6GeometricGate::new(&kc, base, &index_of, &target, 3, None).unwrap();
+            let expected = legacy.decide(&assignment, 0);
+            shared.pair_index_enabled = true;
+            shared.shared_pair_index = true;
+            shared.one_fixed_additions = (base.points.len() * (base.points.len() + 1)) as u64;
+            let actual = shared.decide(&assignment, 0);
+            assert_eq!(actual, expected);
+            assert_eq!(shared.pair_index_builds, expect_build);
+            if actual == NodeOracleDecision::Witness {
+                let sum = shared
+                    .witness
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |acc, &i| {
+                        kc.add(&acc, &base.points[i])
+                    });
+                assert_eq!(sum, target);
+            }
+            Arc::clone(shared.pair_index.as_ref().unwrap())
+        };
+        let first = check(&fb, 1);
+        let reused = check(&fb, 0);
+        assert!(Arc::ptr_eq(&first, &reused));
+        let cloned = fb.clone();
+        let clone_index = check(&cloned, 1);
+        assert!(!Arc::ptr_eq(&first, &clone_index));
+        fb.points.swap(0, 1);
+        let edited_index = check(&fb, 1);
+        assert!(!Arc::ptr_eq(&first, &edited_index));
     }
 
     #[test]

@@ -200,7 +200,7 @@ fn run(job: &Job) -> Result<Value, String> {
             || job.curve_a != 1
             || !matches!(
                 job.config.solver.as_str(),
-                "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair"
+                "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" | "f6_ic_shared_pair"
             )
             || job.config.summands != 3
             || job.config.groebner_degree != 3
@@ -394,7 +394,9 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     let strategy = match cfg.solver.as_str() {
         "pair_table" => DecompositionStrategy::PairTable,
         "enumerate" => DecompositionStrategy::Enumerate,
-        "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" => DecompositionStrategy::Groebner,
+        "f4" | "f5" | "inherited_f4" | "f6_ic" | "f6_ic_pair" | "f6_ic_shared_pair" => {
+            DecompositionStrategy::Groebner
+        }
         "sat_xor" | "sat_cnf" => DecompositionStrategy::Sat,
         _ => return Err("unsupported decomposition backend".into()),
     };
@@ -412,17 +414,23 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         node_budget: cfg.node_budget,
         collection_window: cfg.collection_window,
         allow_direct_relation: false,
-        f6_ic: matches!(cfg.solver.as_str(), "f6_ic" | "f6_ic_pair"),
+        f6_ic: matches!(
+            cfg.solver.as_str(),
+            "f6_ic" | "f6_ic_pair" | "f6_ic_shared_pair"
+        ),
         f6_pair_index: cfg.solver == "f6_ic_pair",
+        f6_shared_pair_index: cfg.solver == "f6_ic_shared_pair",
         ..KoblitzIcOptions::default()
     };
     opts.engine = match cfg.solver.as_str() {
         "f5" => SolverEngine::MatrixF5 {
             max_degree: cfg.groebner_degree,
         },
-        "inherited_f4" | "f6_ic" | "f6_ic_pair" => SolverEngine::InheritedF4 {
-            max_degree: cfg.groebner_degree,
-        },
+        "inherited_f4" | "f6_ic" | "f6_ic_pair" | "f6_ic_shared_pair" => {
+            SolverEngine::InheritedF4 {
+                max_degree: cfg.groebner_degree,
+            }
+        }
         _ => SolverEngine::MatrixF4 {
             max_degree: cfg.groebner_degree,
         },
@@ -705,6 +713,26 @@ fn run_prepared_target(
     )
 }
 
+#[cfg(unix)]
+fn peak_rss_bytes() -> Option<u64> {
+    let mut usage = std::mem::MaybeUninit::<libc::rusage>::uninit();
+    if unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) } != 0 {
+        return None;
+    }
+    let usage = unsafe { usage.assume_init() };
+    let native = u64::try_from(usage.ru_maxrss).ok()?;
+    if cfg!(target_os = "macos") {
+        Some(native)
+    } else {
+        native.checked_mul(1024)
+    }
+}
+
+#[cfg(not(unix))]
+fn peak_rss_bytes() -> Option<u64> {
+    None
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
     if arguments == ["--build-identity"] {
@@ -732,8 +760,9 @@ fn main() {
                 run(&job)
             })
     };
-    let report = result
+    let mut report = result
         .unwrap_or_else(|reason| json!({"schema_version":1,"status":"error","reason":reason}));
+    report["peak_rss_bytes"] = json!(peak_rss_bytes());
     let success = matches!(
         report["status"].as_str(),
         Some("complete" | "fixture" | "inventory")

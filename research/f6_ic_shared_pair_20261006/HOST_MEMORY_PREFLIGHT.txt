@@ -1,0 +1,8 @@
+Before any shared-index timing, `/usr/bin/time -l true` exited 1 in the
+sandbox with `time: sysctl kern.clockrate: Operation not permitted`.
+The ordinary `/usr/bin/time true` exited 0 but omitted peak RSS. The native
+worker now records process peak RSS with `getrusage(RUSAGE_SELF)` after the
+online interval. macOS reports `ru_maxrss` in bytes; other Unix systems
+report KiB and the worker converts them to bytes. No speedup claim relies on
+this host probe. CPU model `sysctl` may also be denied; the runner labels
+the host unisolated and preserves that stderr.
