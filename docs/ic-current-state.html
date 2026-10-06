@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 302 panels, one line each</summary>
+    <summary>Show all 303 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -488,6 +488,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-independent-batch-round40-20261006">P-256 independent pair batching: construction crosses, routing does not</a> <span class="chip">stage measurement / negative</span><br>Deduplicating every request without discarding starts makes pair construction alone touch rho at a 103.35-billion-start batch, but the complete measured RAM router costs 3.4326 additions per start against a 0.3344 allowance and projects to 1.013257× rho.</li>
       <li><a href="./#p256-two-pass-router-round41-20261006">P-256 two-pass routing: 20% less traffic, no stable time win</a> <span class="chip">stage measurement / negative</span><br>The exact 2x18 radix router moves 128 rather than 160 bytes per request, but is 1.526× slower than the matched 3x12 control at the primary 65,536-start cell and has the worse fitted exponent, 1.376 versus 1.337.</li>
       <li><a href="./#p256-direct-address-round42-20261006">P-256 direct addressing: storage collapses, replay dominates</a> <span class="chip">stage measurement / negative</span><br>A fixed seen map and value table cut projected state to 557.31 GB, but exact two-pass replay is 2.496× slower than materialised radix, costs 26.55× its routing budget, and remains at least 1.036558× rho optimistically.</li>
+      <li><a href="./#p256-radix-portfolio-round43-290-20261006">P-256 rounds 43–290: every radix width misses before generation</a> <span class="chip">finite portfolio / negative</span><br>Across 248 preregistered width/depth cells, 76 are exact with zero FP/FN; the best measured Round 108 width-9 router consumes 1.344× its entire allowance, while one-pass Round 290 is formula-only and needs a 549.76-GB counter table.</li>
     </ol>
   </details>
 <!-- END panel-index -->

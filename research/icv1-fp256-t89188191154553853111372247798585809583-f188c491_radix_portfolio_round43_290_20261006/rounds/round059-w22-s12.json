@@ -1,0 +1,73 @@
+{
+  "schema": "p256-radix-portfolio-round-v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "round": 59,
+  "family": "round-33 known-log selector radix routing",
+  "comparison_factor_base": "FB1h2f8621cda105",
+  "radix_width": 22,
+  "start_bits": 12,
+  "starts": 4096,
+  "requests": 32768,
+  "pass_count": 2,
+  "histogram_bits": [
+    22,
+    14
+  ],
+  "histogram_buckets": [
+    4194304,
+    16384
+  ],
+  "largest_histogram_counters": 4194304,
+  "complete_checked": true,
+  "evidence_class": "complete_checked",
+  "applicable_memory_tier_measured": true,
+  "distinct_pairs": 32768,
+  "expected_distinct_pairs": 32767.984466985417,
+  "sorted_mismatches": 0,
+  "accumulator_mismatches": 0,
+  "regenerated_failures": 0,
+  "negative_controls": 4096,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "sorted_blake3": "0bcf3eec5cda159ade712fe0f0af587ad058b33db1028b845a4efb8c5bfefccd",
+  "accumulator_blake3": "44289df0f6aa4e8bd019017d56a57f01103bc6f990f62d1fd078ca83ee303b58",
+  "reference_sorted_blake3": "0bcf3eec5cda159ade712fe0f0af587ad058b33db1028b845a4efb8c5bfefccd",
+  "reference_accumulator_blake3": "44289df0f6aa4e8bd019017d56a57f01103bc6f990f62d1fd078ca83ee303b58",
+  "one_shot_wall_ns": 14930059,
+  "one_shot_routing_addition_equivalents_per_start": 4.103872699739416,
+  "operation_counts": {
+    "request_generations_algorithmic": 32768,
+    "request_generations_timed": 0,
+    "histogram_increments": 65536,
+    "scatter_writes": 65536,
+    "histogram_bucket_scans": 4210688,
+    "sorted_record_scans": 32768,
+    "accumulator_updates": 32768,
+    "native_field_operations": 0,
+    "native_group_operations": 0
+  },
+  "traffic": {
+    "record_bytes": "4194304",
+    "histogram_bytes": "101056512",
+    "total_logical_bytes": "105250816",
+    "disk_bytes": 0
+  },
+  "peak_algorithmic_bytes": 34668544,
+  "peak_log2_bytes": 25.047123912114024,
+  "time_exponent_across_complete_depths": 0.6369253219289093,
+  "memory_exponent_across_registered_depths": 0.867245972706255,
+  "shortlist_timing": null,
+  "structured_residual_degree_for_measured_family": null,
+  "gates": {
+    "zero_false_positives_and_false_negatives_for_this_cell": true,
+    "structured_residual_degree_at_most_5_for_measured_family": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "materialized_storage_below_2_50": true,
+    "measured_complete_selector_below_rho_in_applicable_tier": false,
+    "no_discarded_branch_counted_as_exhaustive": true,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "interpretation": "Complete checked routing-kernel cell. Timing includes clone, allocation, radix passes, scan, and reconstruction but excludes the shared deterministic request generation."
+}

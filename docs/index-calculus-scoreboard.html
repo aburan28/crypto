@@ -12762,6 +12762,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-direct-address-round42-20261006 -->
+<!-- BEGIN p256-radix-portfolio-round43-290-20261006 -->
+<section class="panel" id="p256-radix-portfolio-round43-290-20261006">
+  <div class="panel-head">
+    <h2>P-256 rounds 43–290: every radix width misses before generation <span class="chip">finite portfolio / negative</span></h2>
+    <p class="panel-summary">Across 248 preregistered width/depth cells, 76 are exact with zero FP/FN; the best measured Round 108 width-9 router consumes 1.344&times; its entire allowance, while one-pass Round 290 is formula-only and needs a 549.76-GB counter table.</p>
+    <p>This closes widths 6–36 for the round-33 known-log routing representation. It neither transfers the separate degree-4 result for <code>FB1h2f8621cda105</code> nor supplies a complete relation-collection cost.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact shortlist and formula-only minimum-traffic boundary.</caption>
+    <thead><tr><th>Round</th><th class="n">Width / starts</th><th class="n">Router additions / start</th><th class="n">Budget multiple</th><th class="n">Peak state</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>107</td><td class="n">8 / 2<sup>16</sup></td><td class="n">0.478280</td><td class="n">1.430&times;</td><td class="n">17.83 MB</td><td>seven-run exact shortlist</td></tr>
+      <tr><td><strong>108</strong></td><td class="n"><strong>9 / 2<sup>16</sup></strong></td><td class="n"><strong>0.449605</strong></td><td class="n"><strong>1.344&times;</strong></td><td class="n">17.83 MB</td><td>fastest robust kernel; excludes request generation</td></tr>
+      <tr><td>111</td><td class="n">12 / 2<sup>16</sup></td><td class="n">0.469556</td><td class="n">1.404&times;</td><td class="n">17.85 MB</td><td>seven-run exact shortlist</td></tr>
+      <tr><td>112</td><td class="n">13 / 2<sup>16</sup></td><td class="n">0.478434</td><td class="n">1.431&times;</td><td class="n">17.96 MB</td><td>seven-run exact shortlist</td></tr>
+      <tr><td>114</td><td class="n">15 / 2<sup>16</sup></td><td class="n">0.492684</td><td class="n">1.473&times;</td><td class="n">18.09 MB</td><td>seven-run exact shortlist</td></tr>
+      <tr><td>290</td><td class="n">36 / 2<sup>40</sup></td><td class="n">not measured</td><td class="n">not measured</td><td class="n">299.62 TB</td><td>one-pass formula only; 846.07-TB traffic</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exactness</span> all 76 registered complete cells executed with zero sorted, accumulator, regeneration, FP or FN failures</span>
+    <span><span class="chip">projection boundary</span> 172 cells retain null timing and exactness fields; no projection is called exhaustive</span>
+    <span><span class="chip">degree scope</span> measured-family dreg remains unknown; <code>FB1h2f8621cda105</code> residual maximum 4 is comparison evidence only</span>
+    <span><span class="chip">decision</span> reject promotion and full-depth relation attempt; generator-native coalescence is the remaining representation target</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_radix_portfolio_round43_290_20261006/RESULT.md</code>; manifest SHA-256 <code>41cdec6ad5265464cc512b2f026f6fa77b333aa209f163e7e77ab78ba665b876</code></span>
+  </div>
+</section>
+<!-- END p256-radix-portfolio-round43-290-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
