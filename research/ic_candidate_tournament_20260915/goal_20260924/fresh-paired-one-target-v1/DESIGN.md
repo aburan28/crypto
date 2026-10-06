@@ -35,12 +35,14 @@ diagnose stage costs but cannot establish a controlled CPU speedup.
    scalar**. Publish and replay the complete unconsumed archives as data,
    then commit and push their external seals. A published source hash must
    precede every point exposure.
-3. Only after publication, make one target card containing the exact public
-   point, curve ID, point-generation receipt, frozen workload law and source
-   publication hashes. The fixture scalar is generated outside timing and
-   is never given to a solver; retain it separately for an independent
-   postrun check. Record the card hash before any arm launches. The same card
-   is the sole input to SAT, F5, the incumbent and strong rho.
+3. Only after publication, make a card for each fresh public point containing
+   the exact point, curve ID, point-generation receipt, frozen workload law
+   and source publication hashes. Derive each point from a newly recorded
+   seed by a declared hash-to-x, curve lift and subgroup-cofactor procedure;
+   verify that it is nonidentity and in the declared subgroup. No known
+   scalar is needed or given to a solver. Record each card hash before any
+   arm launches. For each one-target solve, the same card is the sole input
+   to SAT, F5, the incumbent and strong rho.
 4. Give each candidate/run a separate create-only consumption claim. Each
    worker must load only its sealed preparation and the public point, retain
    a durable start/completion record before and after every native attempt,
