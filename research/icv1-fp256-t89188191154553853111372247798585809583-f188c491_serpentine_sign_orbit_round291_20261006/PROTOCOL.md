@@ -24,6 +24,8 @@ Date frozen: 2026-10-06
 - signs per unsigned tuple `2^17=131072`;
 - round-33 result SHA-256:
   `9931bccbd9e2821f4498f465ce65f83efb400e7fb3740a239bdb40d3275ffbd8`;
+- round-31 coefficient source, transitively bound by round 33, SHA-256:
+  `9b9ee16c5a24e868d1b9304f08aa80ca39ac23b1b4586ef730534e739172c435`;
 - rounds-43--290 manifest SHA-256:
   `41cdec6ad5265464cc512b2f026f6fa77b333aa209f163e7e77ab78ba665b876`;
 - local-oracle ratio `0.964336477130181` rho;
