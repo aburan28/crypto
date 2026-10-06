@@ -29,10 +29,11 @@ use num_traits::{One, ToPrimitive, Zero};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub const REPORT_SCHEMA: &str = "crypto.sect113r1-audit/v1";
+pub const REPORT_SCHEMA: &str = "crypto.sect113r1-audit/v2";
 pub const SOURCE_URL: &str = "https://www.secg.org/SEC2-Ver-1.0.pdf";
 pub const SOURCE_SHA256: &str = "d1b16728ad83888fd656d16b99dc71bcd5541d42d848ffd0de7c62c19010d8c3";
 pub const CURVE_ICV1: &str = "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb";
+pub const CURVE_ID: &str = "EC1N113Csect113r1hf529f17bd191";
 pub const CURVE_UID: &str =
     "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97";
 
@@ -45,6 +46,8 @@ const DEMO_DIGEST: &str = "fa4be280c9e9f1e2112ae090729ed3b4faf78e0c1133db4a71836
 const DEMO_SCALAR: u64 = 6_599_291_615_786_184;
 const SINGULAR_FACTORS: [u64; 5] = [3, 227, 48_817, 636_190_001, 491_003_369_344_660_409];
 const EXECUTED_FACTORS: [u64; 4] = [3, 227, 48_817, 636_190_001];
+const BINARY_FIELD_ENCODING: &str =
+    "hex polynomial coefficient bitset, least significant bit is constant";
 
 fn decimal(value: &str) -> BigUint {
     BigUint::parse_bytes(value.as_bytes(), 10).expect("valid frozen decimal")
@@ -66,6 +69,129 @@ fn fixed_field_bytes(value: &F2mElement) -> [u8; 15] {
     let mut out = [0u8; 15];
     out[15 - source.len()..].copy_from_slice(&source);
     out
+}
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    hex::encode(sha256(bytes))
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct CurveIdentityCertificate {
+    pub icv1: String,
+    pub icv1_slug: String,
+    pub model_sha256: String,
+    pub curve_id: String,
+    pub curve_uid: String,
+    pub curve_sha256: String,
+    pub field_sha256: String,
+}
+
+/// Recompute both repository curve identities from the exact binary model and
+/// representation.  The byte strings below mirror the canonical, sorted-key,
+/// compact JSON contracts in `scripts/curve_id.py` and
+/// `tools/curve_identity.py`; tests pin the two independently generated
+/// endpoint vectors so a serialization drift fails closed.
+fn binary_curve_identity(
+    curve: &BinaryCurve,
+    curve_tag: &str,
+) -> Result<CurveIdentityCertificate, String> {
+    if curve.b.is_zero() {
+        return Err("a singular binary model has no curve identity".into());
+    }
+    if !curve_tag
+        .bytes()
+        .enumerate()
+        .all(|(index, byte)| byte.is_ascii_lowercase() || (index > 0 && byte.is_ascii_digit()))
+    {
+        return Err("curve identity tag must match [a-z][a-z0-9]*".into());
+    }
+    let BinaryPoint::Affine { x: gx, y: gy } = &curve.generator else {
+        return Err("curve identity requires an affine subgroup generator".into());
+    };
+    if gx.m_value() != curve.m || gy.m_value() != curve.m {
+        return Err("curve identity generator has the wrong field width".into());
+    }
+
+    let mut modulus = BigUint::one() << curve.m as usize;
+    for exponent in &curve.irreducible.low_terms {
+        modulus |= BigUint::one() << *exponent as usize;
+    }
+    let modulus_hex = format!("0x{modulus:x}");
+    let field_contract = format!("f2m-modulus:{modulus_hex}");
+    let field = format!(
+        "f2m-{}-{}",
+        curve.m,
+        &sha256_hex(field_contract.as_bytes())[..8]
+    );
+
+    let a = curve.a.to_biguint();
+    let b = curve.b.to_biguint();
+    let a_hex = format!("0x{a:x}");
+    let b_hex = format!("0x{b:x}");
+    let model_json = format!(
+        "{{\"a\":\"{a_hex}\",\"b\":\"{b_hex}\",\"field\":\"{field}\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"{modulus_hex}\",\"v\":\"1\"}}"
+    );
+    let model_sha256 = sha256_hex(model_json.as_bytes());
+
+    let q = BigUint::one() << curve.m as usize;
+    let group_order = &curve.order * &curve.cofactor;
+    let trace = BigInt::from_biguint(Sign::Plus, &q + BigUint::one())
+        - BigInt::from_biguint(Sign::Plus, group_order.clone());
+    if &trace * &trace > BigInt::from_biguint(Sign::Plus, &q * 4u8) {
+        return Err("curve identity group order violates Hasse".into());
+    }
+    let j = curve
+        .b
+        .flt_inverse(&curve.irreducible)
+        .ok_or("nonsingular binary model has no inverse for b")?;
+    let j_hex = format!("0x{:x}", j.to_biguint());
+    let icv1 = format!(
+        "ICV1:{field}:{trace}:{group_order}:{j_hex}:unk:unk:r:{}",
+        &model_sha256[..12]
+    );
+    let trace_slug = if trace.sign() == Sign::Minus {
+        format!("tm{}", trace.magnitude())
+    } else {
+        format!("t{trace}")
+    };
+    let icv1_slug = format!("icv1-f2m{}-{trace_slug}-{}", curve.m, &model_sha256[..8]);
+
+    let mut modulus_exponents = Vec::with_capacity(curve.irreducible.low_terms.len() + 1);
+    modulus_exponents.push(curve.m);
+    modulus_exponents.extend(curve.irreducible.low_terms.iter().copied());
+    modulus_exponents.sort_unstable_by(|left, right| right.cmp(left));
+    let modulus_exponents_json = modulus_exponents
+        .iter()
+        .map(u32::to_string)
+        .collect::<Vec<_>>()
+        .join(",");
+    let field_json = format!(
+        "{{\"characteristic\":2,\"degree\":{},\"element_encoding\":\"{}\",\"modulus_exponents\":[{}],\"representation\":\"polynomial\"}}",
+        curve.m, BINARY_FIELD_ENCODING, modulus_exponents_json
+    );
+    let curve_json = format!(
+        "{{\"coefficients\":[1,{a},0,0,{b}],\"cofactor\":{},\"generator\":[\"0x{:x}\",\"0x{:x}\"],\"model\":\"binary Weierstrass\",\"subgroup_order\":\"{}\",\"target_group\":\"prime-order subgroup\"}}",
+        curve.cofactor,
+        gx.to_biguint(),
+        gy.to_biguint(),
+        curve.order
+    );
+    let curve_record_json = format!("{{\"curve\":{curve_json},\"field\":{field_json}}}");
+    let curve_sha256 = sha256_hex(curve_record_json.as_bytes());
+    let field_sha256 = sha256_hex(field_json.as_bytes());
+    let curve_id = format!("EC1N{}C{curve_tag}h{}", curve.m, &curve_sha256[..12]);
+    let curve_uid = format!("urn:ec-record:1:sha256:{curve_sha256}");
+
+    Ok(CurveIdentityCertificate {
+        icv1,
+        icv1_slug,
+        model_sha256,
+        curve_id,
+        curve_uid,
+        curve_sha256,
+        field_sha256,
+    })
 }
 
 fn gcd_big(mut left: BigUint, mut right: BigUint) -> BigUint {
@@ -134,12 +260,14 @@ fn is_prime_u64(value: u64) -> bool {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct LucasWitness {
     pub prime_factor: String,
     pub witness: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct PrimalityCertificate {
     pub value: String,
     pub factorization_of_value_minus_one: Vec<(String, u32)>,
@@ -262,11 +390,11 @@ fn field_sqrt(value: &F2mElement, curve: &BinaryCurve) -> F2mElement {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct SourceCertificate {
     pub source_url: String,
     pub source_sha256: String,
-    pub icv1: String,
-    pub curve_uid: String,
+    pub identity: CurveIdentityCertificate,
     pub q: String,
     pub subgroup_order_n: String,
     pub curve_order: String,
@@ -287,7 +415,8 @@ pub struct SourceCertificate {
     pub no_f2_descent_representative: bool,
     pub f2_base_change_traces: Vec<String>,
     pub order_of_2_mod_113: u32,
-    pub generalized_ghs_minimum_genus: u64,
+    pub ghs_magic_number_computed: bool,
+    pub ghs_screen_status: String,
 }
 
 fn trace_recurrence(base_trace: i64, degree: usize) -> BigInt {
@@ -309,6 +438,13 @@ fn trace_recurrence(base_trace: i64, degree: usize) -> BigInt {
 }
 
 fn certify_source(curve: &BinaryCurve) -> Result<SourceCertificate, String> {
+    let identity = binary_curve_identity(curve, "sect113r1")?;
+    if identity.icv1 != CURVE_ICV1
+        || identity.curve_id != CURVE_ID
+        || identity.curve_uid != CURVE_UID
+    {
+        return Err("sect113r1 source identity differs from the frozen registry identity".into());
+    }
     let q = BigUint::one() << curve.m as usize;
     let n = curve.order.clone();
     let order = &n * 2u8;
@@ -386,8 +522,7 @@ fn certify_source(curve: &BinaryCurve) -> Result<SourceCertificate, String> {
     Ok(SourceCertificate {
         source_url: SOURCE_URL.into(),
         source_sha256: SOURCE_SHA256.into(),
-        icv1: CURVE_ICV1.into(),
-        curve_uid: CURVE_UID.into(),
+        identity,
         q: q.to_string(),
         subgroup_order_n: n.to_string(),
         curve_order: order.to_string(),
@@ -408,7 +543,8 @@ fn certify_source(curve: &BinaryCurve) -> Result<SourceCertificate, String> {
         no_f2_descent_representative,
         f2_base_change_traces,
         order_of_2_mod_113,
-        generalized_ghs_minimum_genus: (1u64 << order_of_2_mod_113) - 1,
+        ghs_magic_number_computed: false,
+        ghs_screen_status: "NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED".into(),
     })
 }
 
@@ -506,6 +642,7 @@ fn crt(residues: &[(u64, u64)]) -> Result<(u128, u128), String> {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct PohligHellmanComponent {
     pub prime: u64,
     pub residue: u64,
@@ -515,6 +652,7 @@ pub struct PohligHellmanComponent {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct SingularCompanionCertificate {
     pub equation: String,
     pub discriminant_zero: bool,
@@ -856,7 +994,7 @@ fn certify_singular_companion(
         order_two_exact,
         parity_observable_verified,
         validator_rejects_order_two_point: !nominal.is_valid_public_point(&order_two),
-        verdict: "IMPLEMENTATION_WEAK".into(),
+        verdict: "CONDITIONAL_IMPLEMENTATION_WEAK".into(),
         applicability: "conditional on attacker-selected BinaryPoint reaching unchecked scalar_mul and a distinguishable full-point result; no production protocol exposure is asserted".into(),
     })
 }
@@ -953,25 +1091,32 @@ fn kernel_certificate_ok(kernel: &F2mPoly, psi5: &F2mPoly, curve: &BinaryCurve) 
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct IsogenyCertificate {
     pub degree: u64,
+    pub map_implementation: String,
     pub kernel_coefficients_low_first: Vec<String>,
     pub kernel_sha256: String,
     pub kernel_certificate_exact: bool,
     pub codomain_b: String,
     pub codomain_nonsingular: bool,
+    pub codomain_identity: CurveIdentityCertificate,
     pub generator_image: String,
     pub generator_image_on_codomain: bool,
     pub generator_image_exact_order_n: bool,
-    pub planted_scalar_transport: bool,
+    pub planted_target_forward_homomorphism: bool,
     pub dual_kernel_sha256: String,
+    pub dual_kernel_certificate_exact: bool,
     pub dual_returns_exact_source_model: bool,
     pub dual_composition_on_generator_is_times_five: bool,
+    pub dual_composition_on_planted_target_is_times_five: bool,
+    pub planted_target_pullback_to_source: bool,
     pub dlp_pullback_formula: String,
     pub verdict: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct IsogenyClassCertificate {
     pub frobenius_factor_degrees_q_q2_q4: Vec<usize>,
     pub rational_degree_five_kernel_count: usize,
@@ -1011,15 +1156,22 @@ fn certify_isogenies(
             velu_point_map_binary(&source.generator, &kernel, source.m, &source.irreducible)
                 .ok_or("failed to map source generator")?;
         let codomain = make_codomain(source, codomain_b.clone(), generator_image.clone());
+        let codomain_identity = binary_curve_identity(&codomain, "rb")?;
         let target_image =
             velu_point_map_binary(&source_target, &kernel, source.m, &source.irreducible)
                 .ok_or("failed to map planted target")?;
-        let planted_scalar_transport =
+        let planted_target_forward_homomorphism =
             scalar_mul(&codomain, &generator_image, full_scalar) == target_image;
 
         let (dual1, dual2, _) = degree_five_kernels(&codomain)?;
+        let codomain_psi5 = division_polynomial(&codomain.b, 5, codomain.m, &codomain.irreducible);
         let mut dual_result = None;
         for dual in [dual1, dual2] {
+            let dual_kernel_certificate_exact =
+                kernel_certificate_ok(&dual, &codomain_psi5, &codomain);
+            if !dual_kernel_certificate_exact {
+                continue;
+            }
             let back_b = velu_codomain(&codomain.b, &dual, codomain.m, &codomain.irreducible);
             if back_b == source.b {
                 let composed = velu_point_map_binary(
@@ -1029,15 +1181,24 @@ fn certify_isogenies(
                     &codomain.irreducible,
                 )
                 .ok_or("failed to map through dual")?;
-                dual_result = Some((dual, back_b, composed));
+                dual_result = Some((dual, back_b, composed, dual_kernel_certificate_exact));
                 break;
             }
         }
-        let (dual, back_b, composed) =
+        let (dual, back_b, composed, dual_kernel_certificate_exact) =
             dual_result.ok_or("no degree-5 dual returned to source model")?;
         let times_five = scalar_mul(source, &source.generator, &BigUint::from(5u8));
+        let composed_target =
+            velu_point_map_binary(&target_image, &dual, source.m, &source.irreducible)
+                .ok_or("failed to map planted target through dual")?;
+        let target_times_five = scalar_mul(source, &source_target, &BigUint::from(5u8));
+        let inverse_five =
+            BigUint::from(5u8).modpow(&(&source.order - BigUint::from(2u8)), &source.order);
+        let planted_target_pullback_to_source =
+            scalar_mul(source, &composed_target, &inverse_five) == source_target;
         representatives.push(IsogenyCertificate {
             degree: 5,
+            map_implementation: "binary-velu/v1".into(),
             kernel_coefficients_low_first: (0..=2)
                 .map(|index| field_hex(&kernel.coeff(index)))
                 .collect(),
@@ -1045,6 +1206,7 @@ fn certify_isogenies(
             kernel_certificate_exact,
             codomain_b: field_hex(&codomain_b),
             codomain_nonsingular: !codomain_b.is_zero(),
+            codomain_identity,
             generator_image: point_hex(&generator_image),
             generator_image_on_codomain: codomain.is_on_curve(&generator_image),
             generator_image_exact_order_n: !matches!(generator_image, BinaryPoint::Infinity)
@@ -1052,12 +1214,15 @@ fn certify_isogenies(
                     scalar_mul(&codomain, &generator_image, &source.order),
                     BinaryPoint::Infinity
                 ),
-            planted_scalar_transport,
+            planted_target_forward_homomorphism,
             dual_kernel_sha256: kernel_digest(&dual),
+            dual_kernel_certificate_exact,
             dual_returns_exact_source_model: back_b == source.b,
             dual_composition_on_generator_is_times_five: composed == times_five,
-            dlp_pullback_formula: "P=[5^{-1} mod (2n)]*dual(R)".into(),
-            verdict: "TRANSFER_ONLY_NO_SPEEDUP".into(),
+            dual_composition_on_planted_target_is_times_five: composed_target == target_times_five,
+            planted_target_pullback_to_source,
+            dlp_pullback_formula: "P=[5^{-1} mod n]*dual(phi(P)) for P in <G>".into(),
+            verdict: "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED".into(),
         });
     }
     Ok(IsogenyClassCertificate {
@@ -1071,6 +1236,7 @@ fn certify_isogenies(
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct ClassWeaknessCertificate {
     pub frozen_classical_threshold_bits: u32,
     pub subgroup_bits: u64,
@@ -1104,8 +1270,10 @@ fn certify_class_weakness(n: &BigUint) -> ClassWeaknessCertificate {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct TwistCertificate {
     pub order: String,
+    pub derived_from_source_order: bool,
     pub factorization_exact: bool,
     pub largest_prime: String,
     pub largest_prime_primality: PrimalityCertificate,
@@ -1113,8 +1281,14 @@ pub struct TwistCertificate {
     pub classification: String,
 }
 
-fn certify_twist() -> Result<TwistCertificate, String> {
-    let order = decimal("10384593717069655134450220159218980");
+fn certify_twist(source: &BinaryCurve) -> Result<TwistCertificate, String> {
+    let q = BigUint::one() << source.m as usize;
+    let source_order = &source.order * &source.cofactor;
+    // Quadratic twisting negates the trace, hence
+    // #E + #E_twist = 2(q+1). Derive the control order from the certified
+    // source tuple instead of accepting the expected decimal as an input.
+    let order = (&q + BigUint::one()) * 2u8 - &source_order;
+    let derived_from_source_order = &source_order + &order == (&q + BigUint::one()) * 2u8;
     let largest = decimal("4690844705882931102817");
     let factors = [
         (2u64, 2u32),
@@ -1148,6 +1322,7 @@ fn certify_twist() -> Result<TwistCertificate, String> {
         .log2();
     Ok(TwistCertificate {
         order: order.to_string(),
+        derived_from_source_order,
         factorization_exact: product == order,
         largest_prime: largest.to_string(),
         largest_prime_primality,
@@ -1157,6 +1332,7 @@ fn certify_twist() -> Result<TwistCertificate, String> {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct AuditReport {
     pub schema: String,
     pub admitted_scientific_run: bool,
@@ -1167,7 +1343,7 @@ pub struct AuditReport {
     pub valid_isogenies: IsogenyClassCertificate,
     pub quadratic_twist: TwistCertificate,
     pub statistical_policy: String,
-    pub success: bool,
+    pub implemented_diagnostic_gates_passed: bool,
     pub certificate_sha256: String,
 }
 
@@ -1191,6 +1367,8 @@ fn mandatory_gates(report: &AuditReport) -> bool {
         && report.source.discriminant_fundamental
         && report.source.no_f2_descent_representative
         && report.source.order_of_2_mod_113 == 28
+        && !report.source.ghs_magic_number_computed
+        && report.source.ghs_screen_status == "NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED"
         && report.class_weakness.below_threshold
         && report.singular_companion.factorization_exact
         && report.singular_companion.factor_primes_exact
@@ -1235,14 +1413,21 @@ fn mandatory_gates(report: &AuditReport) -> bool {
             .representatives
             .iter()
             .all(|certificate| {
-                certificate.kernel_certificate_exact
+                certificate.map_implementation == "binary-velu/v1"
+                    && certificate.kernel_certificate_exact
                     && certificate.codomain_nonsingular
+                    && certificate.codomain_identity.field_sha256
+                        == "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3"
                     && certificate.generator_image_on_codomain
                     && certificate.generator_image_exact_order_n
-                    && certificate.planted_scalar_transport
+                    && certificate.planted_target_forward_homomorphism
+                    && certificate.dual_kernel_certificate_exact
                     && certificate.dual_returns_exact_source_model
                     && certificate.dual_composition_on_generator_is_times_five
+                    && certificate.dual_composition_on_planted_target_is_times_five
+                    && certificate.planted_target_pullback_to_source
             })
+        && report.quadratic_twist.derived_from_source_order
         && report.quadratic_twist.factorization_exact
         && report
             .quadratic_twist
@@ -1261,7 +1446,7 @@ pub fn run_audit() -> Result<AuditReport, String> {
     let singular_companion = certify_singular_companion(&curve)?;
     let full_scalar = decimal(FULL_SCALAR);
     let valid_isogenies = certify_isogenies(&curve, &full_scalar)?;
-    let quadratic_twist = certify_twist()?;
+    let quadratic_twist = certify_twist(&curve)?;
     let mut report = AuditReport {
         schema: REPORT_SCHEMA.into(),
         admitted_scientific_run: false,
@@ -1272,19 +1457,19 @@ pub fn run_audit() -> Result<AuditReport, String> {
         valid_isogenies,
         quadratic_twist,
         statistical_policy: "exact algebra and replayed discrete logs need no p-value; randomized rho runtime is a model and its unexecuted large component remains explicitly unexecuted; no prevalence claim is made".into(),
-        success: false,
+        implemented_diagnostic_gates_passed: false,
         certificate_sha256: String::new(),
     };
-    report.success = mandatory_gates(&report);
+    report.implemented_diagnostic_gates_passed = mandatory_gates(&report);
     report.certificate_sha256 = report_digest(&report)?;
-    if !report.success {
+    if !report.implemented_diagnostic_gates_passed {
         return Err("one or more mandatory sect113r1 audit gates failed".into());
     }
     Ok(report)
 }
 
-/// Independently recompute the complete deterministic report and compare it
-/// byte-for-byte at the typed-data level.
+/// Deterministically recompute the complete report in the same implementation
+/// and compare it byte-for-byte at the typed-data level.
 pub fn verify_report(report: &AuditReport) -> Result<(), String> {
     if report.schema != REPORT_SCHEMA {
         return Err("unknown sect113r1 report schema".into());
@@ -1312,6 +1497,9 @@ mod tests {
     fn exact_source_and_singular_certificates_pass() {
         let curve = BinaryCurve::sect113r1();
         let source = certify_source(&curve).unwrap();
+        assert_eq!(source.identity.icv1, CURVE_ICV1);
+        assert_eq!(source.identity.curve_id, CURVE_ID);
+        assert_eq!(source.identity.curve_uid, CURVE_UID);
         assert!(source.n_primality.verified_prime);
         assert!(source.embedding_degree_exact);
         assert!(source.discriminant_fundamental);
@@ -1329,7 +1517,48 @@ mod tests {
         assert!(certificate
             .representatives
             .iter()
-            .all(|item| item.dual_composition_on_generator_is_times_five));
+            .all(|item| item.dual_kernel_certificate_exact
+                && item.dual_composition_on_generator_is_times_five
+                && item.dual_composition_on_planted_target_is_times_five
+                && item.planted_target_pullback_to_source));
+        let identities: Vec<_> = certificate
+            .representatives
+            .iter()
+            .map(|item| {
+                (
+                    item.codomain_identity.icv1.as_str(),
+                    item.codomain_identity.curve_id.as_str(),
+                    item.codomain_identity.curve_uid.as_str(),
+                )
+            })
+            .collect();
+        assert_eq!(
+            identities,
+            vec![
+                (
+                    "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+                    "EC1N113Crbh921ab2cd913f",
+                    "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+                ),
+                (
+                    "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+                    "EC1N113Crbh2ee3581888f2",
+                    "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+                ),
+            ]
+        );
+        assert!(certificate
+            .representatives
+            .iter()
+            .all(|item| item.map_implementation == "binary-velu/v1"));
+    }
+
+    #[test]
+    fn twist_order_is_derived_from_the_source_order() {
+        let curve = BinaryCurve::sect113r1();
+        let certificate = certify_twist(&curve).unwrap();
+        assert!(certificate.derived_from_source_order);
+        assert_eq!(certificate.order, "10384593717069655134450220159218980");
     }
 
     #[test]
@@ -1353,5 +1582,23 @@ mod tests {
         report.class_weakness.verdict = "NO_WEAKNESS_FOUND_WITHIN_SCOPE".into();
         report.certificate_sha256 = report_digest(&report).unwrap();
         assert!(verify_report(&report).is_err());
+    }
+
+    #[test]
+    fn unknown_report_fields_are_rejected_at_every_level() {
+        let report = run_audit().unwrap();
+        let mut top_level = serde_json::to_value(&report).unwrap();
+        top_level
+            .as_object_mut()
+            .unwrap()
+            .insert("unknown".into(), serde_json::Value::Bool(true));
+        assert!(serde_json::from_value::<AuditReport>(top_level).is_err());
+
+        let mut nested = serde_json::to_value(&report).unwrap();
+        nested["source"]
+            .as_object_mut()
+            .unwrap()
+            .insert("unknown".into(), serde_json::Value::Bool(true));
+        assert!(serde_json::from_value::<AuditReport>(nested).is_err());
     }
 }
