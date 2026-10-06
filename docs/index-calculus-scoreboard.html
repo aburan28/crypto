@@ -12579,6 +12579,31 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-projective-locality-round35-20261006 -->
+<!-- BEGIN p256-mont-affine-round36-20261006 -->
+<section class="panel" id="p256-mont-affine-round36-20261006">
+  <div class="panel-head">
+    <h2>P-256 Montgomery-affine tables: one-third smaller, still above rho <span class="chip">measurement / negative</span></h2>
+    <p class="panel-summary">Directly usable 64-byte Montgomery-affine entries reduce the complete projection from 3.318 TB to 2.212 TB, but the selected 256-MiB row is 1.003503&times; rho at the median and 1.005283&times; at the interval upper endpoint.</p>
+    <p>The complete and exact <code>z2 = 1</code> mixed-add paths use matched hot-operand denominators, so the mixed formula&rsquo;s one saved field multiplication is also available to rho and is not counted as selector-only progress.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Best affine row at each registered working set. Ratios include Round 33&rsquo;s target correction.</caption>
+    <thead><tr><th>Affine table</th><th>Selected formula</th><th>Prefetch distance</th><th>Median extra additions</th><th>Interval upper</th><th>Median / rho</th><th>Upper / rho</th></tr></thead>
+    <tbody>
+      <tr><td class="n">2 MiB</td><td>Mixed</td><td class="n">2</td><td class="n">0.000000</td><td class="n">0.486243</td><td class="n">0.998569</td><td class="n">1.000650</td></tr>
+      <tr><td class="n">64 MiB</td><td>Complete</td><td class="n">16</td><td class="n">0.883469</td><td class="n">1.275452</td><td class="n">1.002349</td><td class="n">1.004027</td></tr>
+      <tr><td class="n"><strong>256 MiB</strong></td><td><strong>Complete</strong></td><td class="n"><strong>1</strong></td><td class="n"><strong>1.152984</strong></td><td class="n">1.569031</td><td class="n"><strong>1.003503</strong></td><td class="n">1.005283</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">complete sweep</span> complete and mixed affine additions; prefetch distances 1, 2, 4, 8, 16, 32 and 64; 2-, 64- and 256-MiB affine working sets</span>
+    <span><span class="chip">exact replay</span> 15 variants and eight identity/doubling/inverse/distinct checks; zero group, range, addition-count, curve, false-positive or false-negative failures</span>
+    <span><span class="chip">storage</span> 34,562,148,612 entries &times; 64 bytes = 2,211,977,511,168 bytes (<code>2^41.008</code>), projected rather than materialized</span>
+    <span><span class="chip">decision</span> every selected interval crosses rho; no promotion and no full-depth relation attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_mont_affine_round36_20261006/RESULT.md</code>; measured result SHA-256 <code>f145231c098da83878e890d340f8ae921598519b0f2626bcc7c4cd8f9446d015</code></span>
+  </div>
+</section>
+<!-- END p256-mont-affine-round36-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
