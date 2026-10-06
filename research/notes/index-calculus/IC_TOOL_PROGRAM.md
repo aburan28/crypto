@@ -431,6 +431,21 @@ with no minimum gain
   key by GFNI and funnel shifts, declared with R07's results), and R02b's
   go/no-go exploration under its amendment 3.
 
+**R06 declared on v3 (2026-10-06)**
+([protocol](../../ic_tool_program/rounds/R06-scan-key/PROTOCOL.md)),
+before any R06 timed run. It changes A11, the scan's canonical key, in
+both of its kernels, with the same keys by construction:
+- **the basis change by GFNI** (`vgf2p8affineqb` on byte-transposed
+  keys), 0.82–0.94 ns a key alone against the tables' 2.9–4.3 ns;
+- **the least rotation by funnel shifts** (`vpshldq`), 2.4–2.8 ns a key
+  alone against the chained loop's 5.4–7.1 ns.
+
+Both are detected at run time, and every other CPU runs today's code.
+The prediction is 1.08–1.15×, 1.07–1.13× and 1.15–1.22× cold at the
+three target sizes, and acceptance needs each interval above 1.03 on the
+suite rows and on fresh holdouts. It runs after the rule's comparison at
+v3.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**

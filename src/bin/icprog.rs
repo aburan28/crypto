@@ -628,7 +628,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R02b => "R02b-wide-tail-retest",
         Round::R03 => "R03-curve-construction",
         Round::R05 => "R05-presence-filter",
-        Round::R06 => "R06-funnel-key",
+        Round::R06 => "R06-scan-key",
         Round::R07 => "R07-main-head",
     };
     let round_dir = programme.join("rounds").join(dir);

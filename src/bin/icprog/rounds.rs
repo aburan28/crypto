@@ -1340,18 +1340,19 @@ pub mod r07 {
     }
 }
 
-// ── R06: the scan's canonical key by funnel shifts ───────────────────
+// ── R06: the scan's canonical key by GFNI and funnel shifts ──────────
 
 pub mod r06 {
     use super::*;
 
-    /// R06's declaration: the two sizes the exploration found the key
+    /// R06's declaration: the target sizes the explorations found the key
     /// worth most at, eight fresh holdouts at each (recipe seeds 218 to
-    /// 221, `T127` to `T134`), and an interval above 1.03 at both, on the
+    /// 221, `T127` to `T134`), and an interval above 1.03 at each, on the
     /// suite rows and the holdouts separately.  Valgrind cannot run the
-    /// candidate's VBMI2 kernel, so there are no callgrind profiles.
+    /// candidate's VBMI2 and GFNI kernels, so there are no callgrind
+    /// profiles.
     pub const SPEC: Spec = Spec {
-        targets: &[(1, 59), (0, 61)],
+        targets: &[(0, 53), (1, 59), (0, 61)],
         holdouts: &[
             (218, 127),
             (218, 128),
@@ -1362,7 +1363,7 @@ pub mod r06 {
             (221, 133),
             (221, 134),
         ],
-        what_this_is: "R06, the scan's canonical key by funnel shifts: every figure the README, the ledger and the scoreboard quote",
+        what_this_is: "R06, the scan's canonical key by GFNI and funnel shifts: every figure the README, the ledger and the scoreboard quote",
         callgrind: &[],
         callgrind_role: CallgrindRole::CrossCheck,
         accept: Accept::Above(1.03),

@@ -211,6 +211,12 @@ fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
             "214,215,216,217",
             "119",
         ),
+        (
+            "R06-scan-key",
+            &["0,53", "1,59", "0,61"][..],
+            "218,219,220,221",
+            "127",
+        ),
     ] {
         let out = holdouts(&round(dir), sizes, seeds, first, true);
         assert!(
