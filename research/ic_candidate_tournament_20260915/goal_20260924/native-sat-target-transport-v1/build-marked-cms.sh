@@ -58,6 +58,21 @@ require_sha "$bundle" a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac3
 script_dir=$(cd "$(dirname "$0")" && pwd -P)
 patch_file="$script_dir/cms-stdin-ready-postbuffer.patch"
 require_sha "$patch_file" b335c52f6673fd6a17d32d0c5506699058b3ee04f0089200305f2c89fe9fde82
+source_root=$(cd "$script_dir/../../../.." && pwd -P)
+output_parent=$(cd "$(dirname "$output")" && pwd -P)
+preparation_parent=$(cd "$(dirname "$preparation_terminal")" && pwd -P)
+bundle_parent=$(cd "$(dirname "$bundle")" && pwd -P)
+if [[ $bundle == */immutable/native-archive/assets.tar.gz ]]; then
+  capsule_root=$(cd "$bundle_parent/../.." && pwd -P)
+else
+  capsule_root=$bundle_parent
+fi
+for protected in "$source_root" "$preparation_parent" "$capsule_root"; do
+  if [[ $output_parent == "$protected" || $output_parent == "$protected/"* ]]; then
+    echo 'build output must be outside source, registration and original execution evidence' >&2
+    exit 2
+  fi
+done
 mkdir "$output"
 phase=extract
 finish() {
