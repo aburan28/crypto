@@ -718,6 +718,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-03</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n61 compact orbit vs strong rho rung 3, 256 one-target workloads, hosted isolated</td><td class="n">0.0682&times; <small>isolated wall time; median per workload</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-10-04</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n37 compact-orbit K7, one frozen public point, six paired repeats</td><td class="n">0.927691&times; <small>unisolated online wall diagnostic; controlled speedup unknown</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#n37-compact-orbit-online-20261004">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/experiments/koblitz-n37-single-target-20261004/RESULT.md">source</a></td></tr>
 <tr><td>2026-10-06</td><td>Elliptic curve, selector construction stage only</td><td>P-256 Round 291 serpentine sign-orbit construction</td><td class="n">0.968617&times; <small>counted P-256 addition equivalents; stage only</small></td><td>stage-boundary</td><td><span class="chip">advance</span></td><td><a href="#p256-serpentine-sign-orbit-round291-20261006">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md">source</a></td></tr>
+<tr><td>2026-10-06</td><td>Elliptic curve, selector construction stage only</td><td>P-256 Round 292 exact primary-orbit coverage correction</td><td class="n">4.951724&times; <small>counted P-256 addition equivalents per exact distinct state; stage only</small></td><td>stage-boundary</td><td><span class="chip">accounting</span></td><td><a href="#p256-orbit-coverage-round292-20261006">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_orbit_coverage_round292_20261006/RESULT.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 4,096, K = 700, hosted isolated</td><td class="n">0.213&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-10-03</td><td>Elliptic curve, n61 batch of L &ge; 1,024 targets vs frozen KS v2 rho (historical diagnostic)</td><td>n61 L = 16,384, K = 700, hosted isolated</td><td class="n">0.323&times; <small>isolated wall time</small></td><td>unmatched</td><td><span class="chip">accounting</span></td><td><a href="#n61-compact-orbit-hosted-20261003">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab/evidence/20261003-koblitz-n61-hosted-isolated/README.md">source</a></td></tr>
 <tr><td>2026-09-19</td><td>Not an elliptic curve: hyperelliptic Jacobian, genus 4, toy size</td><td>Genus-4 crossover exponent</td><td class="n">0.21&times;</td><td>matched</td><td><span class="chip">advance, exponent</span></td><td><a href="#genus-crossover">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/docs/index-calculus-scoreboard.html#genus-crossover">source</a></td></tr>
@@ -830,9 +831,10 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       "id": "ec-selector-stage",
       "label": "Elliptic curve, selector construction stage only",
       "role": "context",
-      "note": "Counted P-256 selector-generation work against the frozen rho boundary. Coverage, collision detection, relation solving and scalar recovery are excluded, so values below one are stage diagnostics rather than speedups.",
+      "note": "Counted P-256 selector-generation work against the frozen rho boundary. Round 292 exactly corrects Round 291 for distinct covered group elements. Collision detection, relation solving and scalar recovery remain excluded, so this is still a stage diagnostic rather than end-to-end speed.",
       "points": [
-        {"date": "2026-10-06", "value": 0.9686171464465044, "reference": "stage-boundary", "unit": "counted P-256 addition equivalents", "label": "P-256 Round 291 serpentine sign-orbit construction", "detail": "Complete 2^17-sign primary orbit: 29,884,416 exactly replayed states, 1.004439 additions/state and 9,808 bytes live state. The pair table and radix router are removed. Achieved correlated-stream coverage, same-family degree, relation collection, sparse linear algebra and a complete DLP remain unset.", "class": "advance", "anchor": "#p256-serpentine-sign-orbit-round291-20261006", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md"}
+        {"date": "2026-10-06", "value": 0.9686171464465044, "reference": "stage-boundary", "unit": "counted P-256 addition equivalents", "label": "P-256 Round 291 serpentine sign-orbit construction", "detail": "Complete 2^17-sign primary orbit: 29,884,416 exactly replayed emissions, 1.004439 additions/emission and 9,808 bytes live state. Round 292 subsequently proves that only 19.56% are distinct and corrects this stage ratio to 4.951724.", "class": "advance", "anchor": "#p256-serpentine-sign-orbit-round291-20261006", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_serpentine_sign_orbit_round291_20261006/RESULT.md"},
+        {"date": "2026-10-06", "value": 4.951723549971528, "reference": "stage-boundary", "unit": "counted P-256 addition equivalents per exact distinct state", "label": "P-256 Round 292 exact primary-orbit coverage correction", "detail": "The primary orbit emits 29,884,416 states but exactly covers 5,845,754 group elements (19.56%). Correcting the frozen Round 291 construction charge for distinct coverage raises the stage ratio to 4.951724; four tuples worsen it to 11.349928. Direct controls have zero FP/FN. Degree, relations, linear algebra and scalar recovery remain unset.", "class": "accounting", "anchor": "#p256-orbit-coverage-round292-20261006", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_orbit_coverage_round292_20261006/RESULT.md"}
       ]
     },
     {
@@ -929,7 +931,7 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
     var last = pts[pts.length - 1];
     var lx = X(day(last.date)), flip = lx > W - R - 110;
     var lab = mk('text', { x: flip ? lx - 10 : lx + 9, y: Y(last.value) + 4, 'class': 'dlabel ' + cls, 'text-anchor': flip ? 'end' : 'start' }, svg);
-    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
+    lab.textContent = ser.role === 'emphasis' ? 'whole method, cold' : ser.id === 'ec-batch' ? '32 targets together' : ser.id === 'ec-batch-n61' ? 'n61 batch vs KS v2' : ser.id === 'ec-online' ? 'online only' : ser.id === 'ec-selector-stage' ? 'P-256 selector stage' : ser.id === 'genus4' ? 'genus-4 Jacobian' : 'E(F_p^6) cover';
     var li = document.createElement('span'); li.className = 'lg ' + cls; var sw = document.createElement('i'); li.appendChild(sw); li.appendChild(document.createTextNode(ser.label)); legend.appendChild(li);
   });
   var hol = document.createElement('span'); hol.className = 'lg emph hollow'; var sw2 = document.createElement('i'); hol.appendChild(sw2); hol.appendChild(document.createTextNode('hollow: later shown measured against an unmatched rho')); legend.appendChild(hol);
@@ -12828,6 +12830,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-serpentine-sign-orbit-round291-20261006 -->
+<!-- BEGIN p256-orbit-coverage-round292-20261006 -->
+<section class="panel" id="p256-orbit-coverage-round292-20261006">
+  <div class="panel-head">
+    <h2>P-256 Round 292: exact coverage reverses the stage crossover <span class="chip">negative / accounting</span></h2>
+    <p class="panel-summary">The 29.88-million-state primary orbit covers only 5.85 million distinct P-256 elements, correcting the selector-stage ratio from 0.968617&times; to 4.951724&times; rho. Four tuples worsen it to 11.349928&times; before degree, relation testing, collection, linear algebra or recovery.</p>
+    <p>Every sign segment is a nearest-neighbour coefficient walk, so its exact support is one modular interval. Exact interval union separates path backtracking from cross-segment and cross-tuple overlap without probabilistic fingerprints.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One addition-equivalent boundary per exact distinct covered state; all candidate rows remain selector-stage evidence.</caption>
+    <thead><tr><th>Variant</th><th class="n">Emitted</th><th class="n">Exact distinct</th><th class="n">Distinct fraction</th><th class="n">Corrected ratio to rho</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Pollard rho</td><td class="n">reference</td><td class="n">reference</td><td class="n">1.000000</td><td class="n"><strong>1.000000</strong></td><td>complete-method boundary</td></tr>
+      <tr><td>Round 291 uncorrected</td><td class="n">29,884,416</td><td class="n">unset</td><td class="n">assumed 1.000000</td><td class="n">0.968617</td><td>superseded emitted-state row</td></tr>
+      <tr><td><strong>Round 292 primary</strong></td><td class="n"><strong>29,884,416</strong></td><td class="n"><strong>5,845,754</strong></td><td class="n"><strong>0.195612</strong></td><td class="n"><strong>4.951724</strong></td><td>exact support; coverage gate fails</td></tr>
+      <tr><td>Round 292, four tuples</td><td class="n">121,634,816</td><td class="n">10,380,468</td><td class="n">0.085341</td><td class="n">11.349928</td><td>cross-tuple alignment worsens the ratio</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exactness</span> two exhaustive toys and native direct controls through 933,888 emissions have zero FP/FN; six primary boundary digests match Round 291</span>
+    <span><span class="chip">duplicate split</span> primary: 18,998,656 within-segment plus 5,040,006 cross-segment duplicates; four tuples: 78,027,376 plus 33,226,972</span>
+    <span><span class="chip">resources</span> 1.821 s isolated wall, 171,884 KiB peak RSS, 32 MiB logical interval endpoints for four tuples</span>
+    <span><span class="chip">degree scope</span> same-family structured degree remains unknown; no summation-polynomial relation is reported</span>
+    <span><span class="chip">decision</span> reject this two-delta serpentine orbit as a parity route; no promotion or full-depth unplanted relation attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_orbit_coverage_round292_20261006/RESULT.md</code>; result SHA-256 <code>19d546fd2e53728f029d349080edbf7337ac2ada785446978b91a62eabbe3821</code></span>
+  </div>
+</section>
+<!-- END p256-orbit-coverage-round292-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
