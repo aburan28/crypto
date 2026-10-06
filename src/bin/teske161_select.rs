@@ -35,7 +35,7 @@ impl Component {
 #[command(about = "Select and certify a Teske-style genus-7/8 structural candidate")]
 struct Args {
     /// Frobenius component of b.
-    #[arg(long, value_enum, default_value_t = Component::W1)]
+    #[arg(long, value_enum, default_value = "w1")]
     component: Component,
     /// Desired genus (7: pure W1/W2; 8: add nonzero W0).
     #[arg(long, default_value_t = 7)]
