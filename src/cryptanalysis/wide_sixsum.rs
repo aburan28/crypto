@@ -339,6 +339,33 @@ impl System512 {
         })
     }
 
+    /// One selective Macaulay prolongation by original source variables.
+    /// Products are formed only from the original equations; newly added
+    /// rows are never multiplied again. Boolean idempotence and duplicate
+    /// cancellation are handled by `Poly512::mul`.
+    pub fn prolongate_source_variables(&self, variables: &[usize]) -> Option<Self> {
+        if variables.iter().any(|&v| v >= self.summand_bits) {
+            return None;
+        }
+        let extra = self.equations.len().checked_mul(variables.len())?;
+        let mut equations = Vec::with_capacity(self.equations.len().checked_add(extra)?);
+        equations.extend_from_slice(&self.equations);
+        for &variable in variables {
+            let multiplier = Poly512::var(variable);
+            for equation in &self.equations {
+                let product = equation.mul(&multiplier);
+                if !product.terms.is_empty() {
+                    equations.push(product);
+                }
+            }
+        }
+        Some(Self {
+            equations,
+            n_vars: self.n_vars,
+            summand_bits: self.summand_bits,
+        })
+    }
+
     /// One own-degree Macaulay reduction; a column-cap stop is inconclusive.
     pub fn root_reduce(&self) -> RootReduction {
         let mut index: FxMap<Mono512, usize> = FxMap::default();
@@ -532,5 +559,21 @@ mod tests {
             .assign_summand_code(3, 16, 0)
             .expect("v63 is in summand 3");
         assert_eq!(fixed.equations[0], reduced);
+    }
+
+    #[test]
+    fn selective_source_prolongation_preserves_planted_zero() {
+        let original = System512 {
+            equations: vec![Poly512::var(0).add(&Poly512::var(1)).add(&Poly512::one())],
+            n_vars: 3,
+            summand_bits: 2,
+        };
+        let mut assignment = Mono512::default();
+        assignment.0[0] = 1;
+        assert!(original.all_vanish(&assignment));
+        let prolonged = original.prolongate_source_variables(&[0, 1]).unwrap();
+        assert_eq!(prolonged.equations.len(), 3);
+        assert!(prolonged.all_vanish(&assignment));
+        assert!(original.prolongate_source_variables(&[2]).is_none());
     }
 }
