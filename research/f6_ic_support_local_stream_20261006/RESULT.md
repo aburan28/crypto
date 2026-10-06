@@ -54,6 +54,13 @@ column support and the full one-target result. The requested 2×
 end-to-end IC improvement remains unestablished, and n83 ordinary
 relation yield and same-target rho are still separate gates.
 
+After measurement, Linux generic-admission CI exposed that a new
+default-false worker configuration field changed serialized
+`effective_config` for older jobs. The PR head now omits the three
+new pilot fields when false; explicit opt-in true values remain visible.
+This is a post-measurement compatibility fix. All timings above remain
+tied to the frozen earlier worker and candidate IDs.
+
 Run `sh research/f6_ic_support_local_stream_20261006/derive.sh` to
 rebuild [measurement rows](measurements.jsonl), the [paired derivation
 check](DERIVATION_CHECK.json), and [derived hashes](DERIVED_SHA256SUMS)

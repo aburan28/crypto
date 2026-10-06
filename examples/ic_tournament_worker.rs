@@ -101,6 +101,7 @@ struct Config {
     direct_fused_pack: bool,
     #[serde(skip_serializing_if = "is_false")]
     active_multipliers: bool,
+    #[serde(skip_serializing_if = "is_false")]
     support_local_stream: bool,
     node_budget: usize,
     conflict_budget: u64,
@@ -835,6 +836,16 @@ mod prepared_target_tests {
         config.active_multipliers = true;
         let opted_in = serde_json::to_value(&config).unwrap();
         assert_eq!(opted_in.get("active_multipliers"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_support_local_stream_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("support_local_stream").is_none());
+        config.support_local_stream = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("support_local_stream"), Some(&json!(true)));
     }
 
     fn prepared_job(cap: u64) -> Job {
