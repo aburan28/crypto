@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 294 panels, one line each</summary>
+    <summary>Show all 295 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -480,6 +480,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-delta-histogram-round32-20261006">P-256 delta histograms: extra classes cannot improve the uniform local selector</a> <span class="chip">classification / negative</span><br>A complete 131,457-row multiplicity sweep combines the best possible folded-delta collision concentration with the most generous arithmetic-run S17 support. The universal relaxed minimum is still the two-class row at 1.016460× rho.</li>
       <li><a href="./#p256-biased-restart-round33-20261006">P-256 biased restarts cross rho in additions, not end to end</a> <span class="chip">stage candidate</span><br>The exact 17-column capacity distribution selects cutoff 219 at 0.994290× rho, or 0.998569× with target correction. The 0.143% margin still omits random traffic from a 1.140-TB pair table and credits a support upper bound as full coverage.</li>
       <li><a href="./#p256-pair-table-round34-20261006">P-256 pair tables: only a 96-KiB projective cache stays below rho</a> <span class="chip">stage candidate / locality blocker</span><br>Exact representation replay rejects compressed, affine and coefficient tables for Round 33’s 0.334-addition segment budget. A projective 96-KiB row reaches 0.998631× rho, but its 384-MiB row is already 1.014028× and the projected 3.318-TB table is unmeasured.</li>
+      <li><a href="./#p256-projective-locality-round35-20261006">P-256 projective locality: prefetch narrows the gap but misses rho</a> <span class="chip">measurement / negative</span><br>Software prefetch cuts the 384-MiB table overhead from 3.150 to 0.681 P-256 additions per segment, but the budget is 0.334. The selected row is 1.001483× rho at the median and 1.005622× at the interval upper endpoint.</li>
     </ol>
   </details>
 <!-- END panel-index -->

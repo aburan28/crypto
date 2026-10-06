@@ -1,0 +1,4938 @@
+{
+  "schema": "p256-projective-locality-v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "family": "round-33 biased-restart projective pair-table locality",
+  "dependency": {
+    "round": 34,
+    "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_pair_table_round34_20261006/pair-table-result.json",
+    "sha256": "df68204433a4abf408ac2c39f86d801da7db296056f030360fae8f719bca6a4b",
+    "schema": "p256-pair-table-audit-v1"
+  },
+  "frozen_model": {
+    "round33_ratio_to_rho_with_target_correction": 0.998569034150286,
+    "local_oracle_ratio_to_rho": 0.964336477130181,
+    "mean_capacity": 224.36124930751055,
+    "allowed_extra_additions_per_segment": 0.33441050842298764,
+    "pair_entries": 34562148612,
+    "entry_bytes": 96,
+    "full_table_bytes": 3317966266752
+  },
+  "host": {
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "target_arch": "x86_64",
+    "target_os": "linux",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "release_profile": true,
+    "timing_repetitions": 9,
+    "prefetch_supported": true,
+    "confidence_interval_rule": "sorted ranks 1,4,7 (zero-indexed) from nine repetitions"
+  },
+  "correctness": {
+    "pool_points": 4096,
+    "segments": 4096,
+    "variants_checked": 13,
+    "group_mismatches": 0,
+    "missing_requests": 0,
+    "duplicate_requests": 0,
+    "out_of_range_accesses": 0,
+    "wrong_addition_counts": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "pool_sha256": "2426363dfee219f092cf88778966c8e7de5dee45b05a83c52dac824a1bc6dd65",
+    "index_sha256": "6465aff9b9ca1d60c98c021f86a63645209d8b183ae59cb4095ac6e21d355a90",
+    "sorted_request_sha256": "91e8f8c55af9eef7142d114cd3b095b2f11bc5c248c7782bdd7b5a863256467c",
+    "output_sha256": "48f7f05287998eb0598728a4a116b65db44a7f7e39417afa522f87d8f01bea2c"
+  },
+  "timing_tables": [
+    {
+      "table_entries": 32768,
+      "table_bytes": 3145728,
+      "index_stream_sha256": "7721b2ece9c037511f719efe0c3b405a11398661291419d7358f0cedc3c3d71d",
+      "repetitions": [
+        {
+          "repetition": 0,
+          "execution_order": [
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions"
+          ],
+          "operations": [
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 509539747,
+              "process_cpu_ns": 509449845,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 490598005,
+              "process_cpu_ns": 490591631,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 482706215,
+              "process_cpu_ns": 482636703,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 487086296,
+              "process_cpu_ns": 487035626,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 491310451,
+              "process_cpu_ns": 491264516,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 484589883,
+              "process_cpu_ns": 484584750,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 494586939,
+              "process_cpu_ns": 494529277,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 485013988,
+              "process_cpu_ns": 484990033,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 520582145,
+              "process_cpu_ns": 520509688,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 525049705,
+              "process_cpu_ns": 525036058,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 495226368,
+              "process_cpu_ns": 495183466,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 506069608,
+              "process_cpu_ns": 506060873,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 555152226,
+              "process_cpu_ns": 555112996,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 479533506,
+              "process_cpu_ns": 479489484,
+              "segments": 65536,
+              "checksum": 0
+            }
+          ]
+        },
+        {
+          "repetition": 1,
+          "execution_order": [
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 490214476,
+              "process_cpu_ns": 490147978,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 472724117,
+              "process_cpu_ns": 472724420,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 483383775,
+              "process_cpu_ns": 483335783,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 529656843,
+              "process_cpu_ns": 529640253,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 503175370,
+              "process_cpu_ns": 503039111,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 506864953,
+              "process_cpu_ns": 506868265,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 518050086,
+              "process_cpu_ns": 517922403,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 561262313,
+              "process_cpu_ns": 561265328,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 481902260,
+              "process_cpu_ns": 481830564,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 574344476,
+              "process_cpu_ns": 574301738,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 529509275,
+              "process_cpu_ns": 529464143,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 488547232,
+              "process_cpu_ns": 488540883,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 478739175,
+              "process_cpu_ns": 478672870,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 480202927,
+              "process_cpu_ns": 480184877,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "execution_order": [
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 483464797,
+              "process_cpu_ns": 483380535,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 521535471,
+              "process_cpu_ns": 521538016,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 532750544,
+              "process_cpu_ns": 532660966,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 473368660,
+              "process_cpu_ns": 473369464,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 543983264,
+              "process_cpu_ns": 543665268,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 535331017,
+              "process_cpu_ns": 535280718,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 481044803,
+              "process_cpu_ns": 480990765,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 457581903,
+              "process_cpu_ns": 457574579,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 456171958,
+              "process_cpu_ns": 456129546,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 446208236,
+              "process_cpu_ns": 446198273,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 448935438,
+              "process_cpu_ns": 448881162,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 450375403,
+              "process_cpu_ns": 450360812,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 494972548,
+              "process_cpu_ns": 494871705,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 486559543,
+              "process_cpu_ns": 486569777,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "execution_order": [
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 456898770,
+              "process_cpu_ns": 456842895,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 454602969,
+              "process_cpu_ns": 454612263,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 481939803,
+              "process_cpu_ns": 481786925,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 485487061,
+              "process_cpu_ns": 485468744,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 491705224,
+              "process_cpu_ns": 491643417,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 466932290,
+              "process_cpu_ns": 466933073,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 474105201,
+              "process_cpu_ns": 474067903,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 516555371,
+              "process_cpu_ns": 516499567,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 526513992,
+              "process_cpu_ns": 526500856,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 467033019,
+              "process_cpu_ns": 466995325,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 488708053,
+              "process_cpu_ns": 488717826,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 545109297,
+              "process_cpu_ns": 545051395,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 475121120,
+              "process_cpu_ns": 475088420,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 515882648,
+              "process_cpu_ns": 515766495,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "execution_order": [
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 468573031,
+              "process_cpu_ns": 468538348,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 470055267,
+              "process_cpu_ns": 469985173,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 517723975,
+              "process_cpu_ns": 517735623,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 481809036,
+              "process_cpu_ns": 481761965,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 497935637,
+              "process_cpu_ns": 497900330,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 508341149,
+              "process_cpu_ns": 508252552,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 562398159,
+              "process_cpu_ns": 562368288,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 463248991,
+              "process_cpu_ns": 463196623,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 499158235,
+              "process_cpu_ns": 499066044,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 454744555,
+              "process_cpu_ns": 454660476,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 454389720,
+              "process_cpu_ns": 454384595,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 454352554,
+              "process_cpu_ns": 454253408,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 458834948,
+              "process_cpu_ns": 458832319,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 455718117,
+              "process_cpu_ns": 455644587,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "execution_order": [
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 502614039,
+              "process_cpu_ns": 502582296,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 560051611,
+              "process_cpu_ns": 560003383,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 468232638,
+              "process_cpu_ns": 468234739,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 545791897,
+              "process_cpu_ns": 545718291,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 482487159,
+              "process_cpu_ns": 482453726,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 462621065,
+              "process_cpu_ns": 462577293,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 511692406,
+              "process_cpu_ns": 511668393,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 483347263,
+              "process_cpu_ns": 483240691,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 499658642,
+              "process_cpu_ns": 499601575,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 479902119,
+              "process_cpu_ns": 479838634,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 464444774,
+              "process_cpu_ns": 464435619,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 521860747,
+              "process_cpu_ns": 521755441,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 495436747,
+              "process_cpu_ns": 495373022,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 477948085,
+              "process_cpu_ns": 477890397,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "execution_order": [
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 456892347,
+              "process_cpu_ns": 456849901,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 482466984,
+              "process_cpu_ns": 482421413,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 464411625,
+              "process_cpu_ns": 464401339,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 473004637,
+              "process_cpu_ns": 472010352,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 468091582,
+              "process_cpu_ns": 468092302,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 464061798,
+              "process_cpu_ns": 464040192,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 505868038,
+              "process_cpu_ns": 505792438,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 474767289,
+              "process_cpu_ns": 474747724,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 456733332,
+              "process_cpu_ns": 456688421,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 482493401,
+              "process_cpu_ns": 482452419,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 527038586,
+              "process_cpu_ns": 526987966,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 490809805,
+              "process_cpu_ns": 490716768,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 539183183,
+              "process_cpu_ns": 539127783,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 467478931,
+              "process_cpu_ns": 467471344,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            }
+          ]
+        },
+        {
+          "repetition": 7,
+          "execution_order": [
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 461564294,
+              "process_cpu_ns": 461498783,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 487759955,
+              "process_cpu_ns": 487749167,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 480501178,
+              "process_cpu_ns": 480449060,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 468684479,
+              "process_cpu_ns": 468621529,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 517493240,
+              "process_cpu_ns": 517420305,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 523938053,
+              "process_cpu_ns": 523929572,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 483340962,
+              "process_cpu_ns": 483292910,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 567763027,
+              "process_cpu_ns": 567706592,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 488783770,
+              "process_cpu_ns": 488718175,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 484262216,
+              "process_cpu_ns": 484253378,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 451980737,
+              "process_cpu_ns": 451935604,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 473622512,
+              "process_cpu_ns": 473615039,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 466375915,
+              "process_cpu_ns": 466341193,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 465778592,
+              "process_cpu_ns": 465761390,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            }
+          ]
+        },
+        {
+          "repetition": 8,
+          "execution_order": [
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 563099183,
+              "process_cpu_ns": 563041214,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 460483152,
+              "process_cpu_ns": 460482561,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 539383955,
+              "process_cpu_ns": 539298122,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 463010524,
+              "process_cpu_ns": 462970636,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 488701398,
+              "process_cpu_ns": 488645539,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 457361787,
+              "process_cpu_ns": 457369704,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 461837595,
+              "process_cpu_ns": 461781093,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 447499323,
+              "process_cpu_ns": 447507559,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 449372794,
+              "process_cpu_ns": 449324901,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 454093334,
+              "process_cpu_ns": 454057818,
+              "segments": 65536,
+              "checksum": 16007853806678186349
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 500620379,
+              "process_cpu_ns": 500507657,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 473643622,
+              "process_cpu_ns": 473479688,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 448977738,
+              "process_cpu_ns": 448961833,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 462118445,
+              "process_cpu_ns": 462077583,
+              "segments": 65536,
+              "checksum": 9304934971498525415
+            }
+          ]
+        }
+      ],
+      "summaries": [
+        {
+          "variant": "direct-eight-additions",
+          "class": "direct",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 7068.618637084961,
+            "median": 7249.77294921875,
+            "upper": 7375.197784423828
+          },
+          "incremental_addition_equivalents": null,
+          "projected_ratio_to_rho": null,
+          "upper_endpoint_within_parity_budget": null
+        },
+        {
+          "variant": "random",
+          "class": "random",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 7774.959518432617,
+            "median": 8230.345993041992,
+            "upper": 8663.376266479492
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.4336282179204165,
+            "median": 1.0820455213609534,
+            "upper": 1.8048874455076795
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0004245594872219,
+            "median": 1.0031991822763282,
+            "upper": 1.0062922731994377
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-1",
+          "class": "prefetch",
+          "parameter": 1,
+          "wall_ns_per_segment": {
+            "lower": 6971.721954345703,
+            "median": 7362.169784545898,
+            "upper": 8079.670333862305
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.12402797838159607,
+            "upper": 1.1442707535222674
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.9990997585055406,
+            "upper": 1.0034654483773346
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-2",
+          "class": "prefetch",
+          "parameter": 2,
+          "wall_ns_per_segment": {
+            "lower": 6936.690811157227,
+            "median": 7340.161178588867,
+            "upper": 7454.63916015625
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.09974185950731851,
+            "upper": 0.436883688754758
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.9989958365118954,
+            "upper": 1.0004384898735923
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-4",
+          "class": "prefetch",
+          "parameter": 4,
+          "wall_ns_per_segment": {
+            "lower": 6932.869781494141,
+            "median": 7304.980087280273,
+            "upper": 7432.3470458984375
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.060920129166222026,
+            "upper": 0.41165430190866914
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.9988297156247053,
+            "upper": 1.0003305315706186
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-8",
+          "class": "prefetch",
+          "parameter": 8,
+          "wall_ns_per_segment": {
+            "lower": 7001.265686035156,
+            "median": 7226.906005859375,
+            "upper": 7407.94465637207
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.0,
+            "upper": 0.38403658390267204
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.998569034150286,
+            "upper": 1.0002123534323177
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-16",
+          "class": "prefetch",
+          "parameter": 16,
+          "wall_ns_per_segment": {
+            "lower": 6828.297775268555,
+            "median": 7217.477981567383,
+            "upper": 7502.8262939453125
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.0,
+            "upper": 0.4914200968005993
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.998569034150286,
+            "upper": 1.0006718549608549
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-32",
+          "class": "prefetch",
+          "parameter": 32,
+          "wall_ns_per_segment": {
+            "lower": 6856.884674072266,
+            "median": 7142.510711669922,
+            "upper": 7322.725204467773
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.0,
+            "upper": 0.2875883738298306
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.998569034150286,
+            "upper": 0.9997996448259671
+          },
+          "upper_endpoint_within_parity_budget": true
+        },
+        {
+          "variant": "prefetch-64",
+          "class": "prefetch",
+          "parameter": 64,
+          "wall_ns_per_segment": {
+            "lower": 6928.914398193359,
+            "median": 7086.864837646484,
+            "upper": 7375.851058959961
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.0,
+            "upper": 0.34771424251197125
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.998569034150286,
+            "upper": 1.0000569276044726
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-256",
+          "class": "radix-global",
+          "parameter": 256,
+          "wall_ns_per_segment": {
+            "lower": 7552.681701660156,
+            "median": 7882.00944519043,
+            "upper": 7962.96305847168
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.1925197641328822,
+            "median": 0.6976621203452282,
+            "upper": 1.0121857944856263
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9993928396256829,
+            "median": 1.0015543789397217,
+            "upper": 1.0029002476408697
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-1024",
+          "class": "radix-global",
+          "parameter": 1024,
+          "wall_ns_per_segment": {
+            "lower": 7244.373916625977,
+            "median": 7424.309432983398,
+            "upper": 8011.622695922852
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.19259801374436947,
+            "upper": 1.0672569646244519
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.9993931744612189,
+            "upper": 1.0031359010123624
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-4096",
+          "class": "radix-global",
+          "parameter": 4096,
+          "wall_ns_per_segment": {
+            "lower": 6969.197570800781,
+            "median": 7292.90901184082,
+            "upper": 7597.89485168457
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.04759990463063346,
+            "upper": 0.599015158999018
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 0.9987727174564635,
+            "upper": 1.0011322617235787
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-16384",
+          "class": "radix-global",
+          "parameter": 16384,
+          "wall_ns_per_segment": {
+            "lower": 7362.265029907227,
+            "median": 7722.0093994140625,
+            "upper": 7904.816986083984
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.0,
+            "median": 0.5211048163887142,
+            "upper": 0.9463782296721721
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.998569034150286,
+            "median": 1.0007988779428456,
+            "upper": 1.0026186524890157
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-65536",
+          "class": "radix-global",
+          "parameter": 65536,
+          "wall_ns_per_segment": {
+            "lower": 8041.970611572266,
+            "median": 8470.950714111328,
+            "upper": 8581.514877319336
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.7232596024005105,
+            "median": 1.3475487008449551,
+            "upper": 1.7122397661088478
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0016639123477251,
+            "median": 1.0043352888676664,
+            "upper": 1.0058958273284626
+          },
+          "upper_endpoint_within_parity_budget": false
+        }
+      ]
+    },
+    {
+      "table_entries": 1048576,
+      "table_bytes": 100663296,
+      "index_stream_sha256": "f4cefa2b1a8164b86bf969b1386a0c14db1c45f526ec4089d2032fd7da9ca279",
+      "repetitions": [
+        {
+          "repetition": 0,
+          "execution_order": [
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 511347582,
+              "process_cpu_ns": 511294205,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 514838445,
+              "process_cpu_ns": 514833619,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 533039256,
+              "process_cpu_ns": 533042283,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 653650916,
+              "process_cpu_ns": 653582147,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 708103652,
+              "process_cpu_ns": 708093536,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 611563972,
+              "process_cpu_ns": 611564941,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 561622648,
+              "process_cpu_ns": 561613815,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 549672139,
+              "process_cpu_ns": 549672160,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 471228334,
+              "process_cpu_ns": 471198606,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 713991858,
+              "process_cpu_ns": 713966439,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 529263659,
+              "process_cpu_ns": 529253419,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 577973446,
+              "process_cpu_ns": 577965110,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 631900614,
+              "process_cpu_ns": 631822772,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 537040958,
+              "process_cpu_ns": 537034062,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        },
+        {
+          "repetition": 1,
+          "execution_order": [
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 600314334,
+              "process_cpu_ns": 600314741,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 552338928,
+              "process_cpu_ns": 552330568,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 590019929,
+              "process_cpu_ns": 590022758,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 500203190,
+              "process_cpu_ns": 500164085,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 664455838,
+              "process_cpu_ns": 664433312,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 532955989,
+              "process_cpu_ns": 532964537,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 514602467,
+              "process_cpu_ns": 514593080,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 516746644,
+              "process_cpu_ns": 516721590,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 518950428,
+              "process_cpu_ns": 518944299,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 509109273,
+              "process_cpu_ns": 509131309,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 503579195,
+              "process_cpu_ns": 503572875,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 519845923,
+              "process_cpu_ns": 519853863,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 612084972,
+              "process_cpu_ns": 612075329,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 633383215,
+              "process_cpu_ns": 633369917,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "execution_order": [
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 507403429,
+              "process_cpu_ns": 507390662,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 570685732,
+              "process_cpu_ns": 570695160,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 528220093,
+              "process_cpu_ns": 528173874,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 515152480,
+              "process_cpu_ns": 515161481,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 510850167,
+              "process_cpu_ns": 510851588,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 518375937,
+              "process_cpu_ns": 518376866,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 490369103,
+              "process_cpu_ns": 490371534,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 590533550,
+              "process_cpu_ns": 590533818,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 583076766,
+              "process_cpu_ns": 583012225,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 593322728,
+              "process_cpu_ns": 593297262,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 554313544,
+              "process_cpu_ns": 554322420,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 533868867,
+              "process_cpu_ns": 533774572,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 444347860,
+              "process_cpu_ns": 444356303,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 577354121,
+              "process_cpu_ns": 577347803,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "execution_order": [
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 480637042,
+              "process_cpu_ns": 480646054,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 494627529,
+              "process_cpu_ns": 494619491,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 578392197,
+              "process_cpu_ns": 578374798,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 606370253,
+              "process_cpu_ns": 606338972,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 642957696,
+              "process_cpu_ns": 642930093,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 599573088,
+              "process_cpu_ns": 599528492,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 527864110,
+              "process_cpu_ns": 527830262,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 448752897,
+              "process_cpu_ns": 448752771,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 574190985,
+              "process_cpu_ns": 574191930,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 491486508,
+              "process_cpu_ns": 491485901,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 493441569,
+              "process_cpu_ns": 493441270,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 496248830,
+              "process_cpu_ns": 496248284,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 493974738,
+              "process_cpu_ns": 493940472,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 491013309,
+              "process_cpu_ns": 491011126,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "execution_order": [
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 534920274,
+              "process_cpu_ns": 534902459,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 510521755,
+              "process_cpu_ns": 510521185,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 458277596,
+              "process_cpu_ns": 458242607,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 588881850,
+              "process_cpu_ns": 588874282,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 506627208,
+              "process_cpu_ns": 506626394,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 503770967,
+              "process_cpu_ns": 503771389,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 518376535,
+              "process_cpu_ns": 518377677,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 509692785,
+              "process_cpu_ns": 507950628,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 481020458,
+              "process_cpu_ns": 481001061,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 482960326,
+              "process_cpu_ns": 482958491,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 506496284,
+              "process_cpu_ns": 506488699,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 610275524,
+              "process_cpu_ns": 610268601,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 623853053,
+              "process_cpu_ns": 623784830,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 568510082,
+              "process_cpu_ns": 568498237,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "execution_order": [
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 500609623,
+              "process_cpu_ns": 500600695,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 536834246,
+              "process_cpu_ns": 536843545,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 521328239,
+              "process_cpu_ns": 521318621,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 515578297,
+              "process_cpu_ns": 515544625,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 493595449,
+              "process_cpu_ns": 493540882,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 489248373,
+              "process_cpu_ns": 489257658,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 601494316,
+              "process_cpu_ns": 601469539,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 606367996,
+              "process_cpu_ns": 606314163,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 598018118,
+              "process_cpu_ns": 598012830,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 559965070,
+              "process_cpu_ns": 559967498,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 580057521,
+              "process_cpu_ns": 580060746,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 456070574,
+              "process_cpu_ns": 456070781,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 629927276,
+              "process_cpu_ns": 629928635,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 552986492,
+              "process_cpu_ns": 552975733,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "execution_order": [
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 536797694,
+              "process_cpu_ns": 536808994,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 679995044,
+              "process_cpu_ns": 679941341,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 625623615,
+              "process_cpu_ns": 625586313,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 610090017,
+              "process_cpu_ns": 610091755,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 553535297,
+              "process_cpu_ns": 553527864,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 521918791,
+              "process_cpu_ns": 521929860,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 458733092,
+              "process_cpu_ns": 458733312,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 626740288,
+              "process_cpu_ns": 626692083,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 547259623,
+              "process_cpu_ns": 547227941,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 526147251,
+              "process_cpu_ns": 526159028,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 533842295,
+              "process_cpu_ns": 533811457,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 541480772,
+              "process_cpu_ns": 541447699,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 507004496,
+              "process_cpu_ns": 506995313,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 502422043,
+              "process_cpu_ns": 502430745,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        },
+        {
+          "repetition": 7,
+          "execution_order": [
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 525415744,
+              "process_cpu_ns": 525348153,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 443642277,
+              "process_cpu_ns": 443650083,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 582687399,
+              "process_cpu_ns": 582677396,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 497258178,
+              "process_cpu_ns": 497267538,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 498852164,
+              "process_cpu_ns": 498814058,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 530449225,
+              "process_cpu_ns": 530424475,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 583547989,
+              "process_cpu_ns": 583443086,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 528604807,
+              "process_cpu_ns": 528613698,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 515002192,
+              "process_cpu_ns": 514991332,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 519591584,
+              "process_cpu_ns": 519601247,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 613866695,
+              "process_cpu_ns": 613859060,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 638857365,
+              "process_cpu_ns": 638846726,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 623737046,
+              "process_cpu_ns": 623700104,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 590636077,
+              "process_cpu_ns": 590626076,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            }
+          ]
+        },
+        {
+          "repetition": 8,
+          "execution_order": [
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 541448410,
+              "process_cpu_ns": 541457175,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 519024501,
+              "process_cpu_ns": 518955301,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 507897449,
+              "process_cpu_ns": 507906297,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 488925615,
+              "process_cpu_ns": 488916592,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 512198982,
+              "process_cpu_ns": 512207708,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 584597435,
+              "process_cpu_ns": 584587686,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 586641945,
+              "process_cpu_ns": 586651475,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 581609093,
+              "process_cpu_ns": 581580816,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 547929389,
+              "process_cpu_ns": 547929790,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 527849192,
+              "process_cpu_ns": 527849422,
+              "segments": 65536,
+              "checksum": 3316839183226951771
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 444480022,
+              "process_cpu_ns": 444464056,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 579360179,
+              "process_cpu_ns": 579322809,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 492640226,
+              "process_cpu_ns": 492641130,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 487629629,
+              "process_cpu_ns": 487602949,
+              "segments": 65536,
+              "checksum": 8284571978639654760
+            }
+          ]
+        }
+      ],
+      "summaries": [
+        {
+          "variant": "direct-eight-additions",
+          "class": "direct",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 6780.210266113281,
+            "median": 6959.084686279297,
+            "upper": 7190.373748779297
+          },
+          "incremental_addition_equivalents": null,
+          "projected_ratio_to_rho": null,
+          "upper_endpoint_within_parity_budget": null
+        },
+        {
+          "variant": "random",
+          "class": "random",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 8809.724746704102,
+            "median": 8985.623931884766,
+            "upper": 10138.791473388672
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.801687705816093,
+            "median": 2.3296618299254703,
+            "upper": 3.9628047809209654
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0062785812905075,
+            "median": 1.0085378193290966,
+            "upper": 1.0155261517280887
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-1",
+          "class": "prefetch",
+          "parameter": 1,
+          "wall_ns_per_segment": {
+            "lower": 7517.093292236328,
+            "median": 7742.361892700195,
+            "upper": 8350.519149780273
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.36350771725878417,
+            "median": 0.9004370450789043,
+            "upper": 1.8528143783566318
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0001245089825748,
+            "median": 1.0024220669613708,
+            "upper": 1.0064973558821315
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-2",
+          "class": "prefetch",
+          "parameter": 2,
+          "wall_ns_per_segment": {
+            "lower": 7529.320816040039,
+            "median": 7686.934921264648,
+            "upper": 8707.973205566406
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.37711204352156,
+            "median": 0.8367195029776244,
+            "upper": 2.274575995482458
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0001827228418885,
+            "median": 1.0021494151622254,
+            "upper": 1.0083021032080255
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-4",
+          "class": "prefetch",
+          "parameter": 4,
+          "wall_ns_per_segment": {
+            "lower": 7884.928039550781,
+            "median": 8094.012832641602,
+            "upper": 8261.847076416016
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.7727601541039757,
+            "median": 1.304686690880434,
+            "upper": 1.748189807868096
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0018757286550646,
+            "median": 1.004151879342653,
+            "upper": 1.0060496600602624
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-8",
+          "class": "prefetch",
+          "parameter": 8,
+          "wall_ns_per_segment": {
+            "lower": 7777.294692993164,
+            "median": 7919.68537902832,
+            "upper": 8262.340881347656
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.6530074399134076,
+            "median": 1.1042839523340966,
+            "upper": 1.7487724504850775
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0013632984529595,
+            "median": 1.0032943420708689,
+            "upper": 1.0060521532285884
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-16",
+          "class": "prefetch",
+          "parameter": 16,
+          "wall_ns_per_segment": {
+            "lower": 7492.268508911133,
+            "median": 7768.391006469727,
+            "upper": 7867.100479125977
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.33588769727925616,
+            "median": 0.9303595017730739,
+            "upper": 1.2824265565271311
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.000006320993969,
+            "median": 1.0025501072369913,
+            "upper": 1.0040566266778375
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-32",
+          "class": "prefetch",
+          "parameter": 32,
+          "wall_ns_per_segment": {
+            "lower": 7369.389739990234,
+            "median": 7666.351974487305,
+            "upper": 7858.309814453125
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.19917294701553345,
+            "median": 0.8130578317030377,
+            "upper": 1.2720544125046533
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9994213090584825,
+            "median": 1.0020481652233382,
+            "upper": 1.0040122435513787
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-64",
+          "class": "prefetch",
+          "parameter": 64,
+          "wall_ns_per_segment": {
+            "lower": 7482.438705444336,
+            "median": 7815.536224365234,
+            "upper": 8133.5335693359375
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.32495107138442947,
+            "median": 0.9845565348840069,
+            "upper": 1.5967921348827918
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.999959522410275,
+            "median": 1.0027820201152777,
+            "upper": 1.0054018188761147
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-256",
+          "class": "radix-global",
+          "parameter": 256,
+          "wall_ns_per_segment": {
+            "lower": 8920.248947143555,
+            "median": 9312.065490722656,
+            "upper": 9973.921447753906
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.9246567800823282,
+            "median": 2.704931364416421,
+            "upper": 3.768273910444849
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0068047745213236,
+            "median": 1.010143623796268,
+            "upper": 1.0146937405886207
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-1024",
+          "class": "radix-global",
+          "parameter": 1024,
+          "wall_ns_per_segment": {
+            "lower": 8951.445693969727,
+            "median": 9519.242141723633,
+            "upper": 9748.18977355957
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.9593662379393333,
+            "median": 2.9430967672998793,
+            "upper": 3.501932112377002
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0069532987082268,
+            "median": 1.0111627501380709,
+            "upper": 1.0135540454899712
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-4096",
+          "class": "radix-global",
+          "parameter": 4096,
+          "wall_ns_per_segment": {
+            "lower": 8874.650466918945,
+            "median": 9160.069793701172,
+            "upper": 9517.47201538086
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.8739239733407036,
+            "median": 2.5302006877558387,
+            "upper": 3.2297072118227366
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0065876853088769,
+            "median": 1.0093959390647749,
+            "upper": 1.0123891761861568
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-16384",
+          "class": "radix-global",
+          "parameter": 16384,
+          "wall_ns_per_segment": {
+            "lower": 8360.738967895508,
+            "median": 8458.153442382812,
+            "upper": 9012.391311645508
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.302146742305185,
+            "median": 1.7232941671873796,
+            "upper": 2.6337602616112523
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0041410107258493,
+            "median": 1.005943129880368,
+            "upper": 1.0098390776918977
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-65536",
+          "class": "radix-global",
+          "parameter": 65536,
+          "wall_ns_per_segment": {
+            "lower": 7963.848739624023,
+            "median": 8054.567108154297,
+            "upper": 8850.975357055664
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.8605672170807956,
+            "median": 1.259340814213548,
+            "upper": 2.443304864796694
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0022514611913298,
+            "median": 1.0039578411790748,
+            "upper": 1.0090241057879925
+          },
+          "upper_endpoint_within_parity_budget": false
+        }
+      ]
+    },
+    {
+      "table_entries": 4194304,
+      "table_bytes": 402653184,
+      "index_stream_sha256": "bf9290538cb69fd39696a51949c149576d2eb93357b5b69d1ef768fbf2464d6b",
+      "repetitions": [
+        {
+          "repetition": 0,
+          "execution_order": [
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 572188538,
+              "process_cpu_ns": 572116672,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 696010416,
+              "process_cpu_ns": 696011115,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 648801535,
+              "process_cpu_ns": 648793365,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 643146573,
+              "process_cpu_ns": 643140020,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 600996517,
+              "process_cpu_ns": 600997607,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 565881875,
+              "process_cpu_ns": 565800555,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 490172659,
+              "process_cpu_ns": 490172825,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 673246557,
+              "process_cpu_ns": 673236480,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 519573059,
+              "process_cpu_ns": 519513806,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 512321375,
+              "process_cpu_ns": 512290105,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 507983196,
+              "process_cpu_ns": 507981315,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 503863821,
+              "process_cpu_ns": 503853551,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 501649878,
+              "process_cpu_ns": 501648822,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 498183614,
+              "process_cpu_ns": 498176250,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            }
+          ]
+        },
+        {
+          "repetition": 1,
+          "execution_order": [
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 554528763,
+              "process_cpu_ns": 554528060,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 442570040,
+              "process_cpu_ns": 442562429,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 636696507,
+              "process_cpu_ns": 636698051,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 520872416,
+              "process_cpu_ns": 520826310,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 533498802,
+              "process_cpu_ns": 533438440,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 517416477,
+              "process_cpu_ns": 517367556,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 525807399,
+              "process_cpu_ns": 525808452,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 547271845,
+              "process_cpu_ns": 547251981,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 552224362,
+              "process_cpu_ns": 552224695,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 509482874,
+              "process_cpu_ns": 509468774,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 646373022,
+              "process_cpu_ns": 646323766,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 668817285,
+              "process_cpu_ns": 668816999,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 617871789,
+              "process_cpu_ns": 617867172,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 608449843,
+              "process_cpu_ns": 608373694,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "execution_order": [
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 511280315,
+              "process_cpu_ns": 511263659,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 593601407,
+              "process_cpu_ns": 593601556,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 607010656,
+              "process_cpu_ns": 606985351,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 522115654,
+              "process_cpu_ns": 522103267,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 506577103,
+              "process_cpu_ns": 506578083,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 631630611,
+              "process_cpu_ns": 631601424,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 631968805,
+              "process_cpu_ns": 631078455,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 651111298,
+              "process_cpu_ns": 651072298,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 634217317,
+              "process_cpu_ns": 634194779,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 596548159,
+              "process_cpu_ns": 596558927,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 477767912,
+              "process_cpu_ns": 477757469,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 663872374,
+              "process_cpu_ns": 663842753,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 526239698,
+              "process_cpu_ns": 526194982,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 519017039,
+              "process_cpu_ns": 518973344,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "execution_order": [
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 649600166,
+              "process_cpu_ns": 649592654,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 655037534,
+              "process_cpu_ns": 654984402,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 656115327,
+              "process_cpu_ns": 656033721,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 617744013,
+              "process_cpu_ns": 617718430,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 595253476,
+              "process_cpu_ns": 595252875,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 457585867,
+              "process_cpu_ns": 457584479,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 651281686,
+              "process_cpu_ns": 651282938,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 551050436,
+              "process_cpu_ns": 551052303,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 551495655,
+              "process_cpu_ns": 551489863,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 588368556,
+              "process_cpu_ns": 588378323,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 544968962,
+              "process_cpu_ns": 544922038,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 517777693,
+              "process_cpu_ns": 517787169,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 511154089,
+              "process_cpu_ns": 511125916,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 515685442,
+              "process_cpu_ns": 515694388,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "execution_order": [
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536"
+          ],
+          "operations": [
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 467799101,
+              "process_cpu_ns": 467792210,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 661296672,
+              "process_cpu_ns": 661306833,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 516175375,
+              "process_cpu_ns": 516130305,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 514354676,
+              "process_cpu_ns": 514329939,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 519236688,
+              "process_cpu_ns": 519229125,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 507170218,
+              "process_cpu_ns": 507178530,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 502684227,
+              "process_cpu_ns": 502611265,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 496701264,
+              "process_cpu_ns": 496711863,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 500915002,
+              "process_cpu_ns": 500891964,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 627353500,
+              "process_cpu_ns": 627365894,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 608874635,
+              "process_cpu_ns": 608869162,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 610286804,
+              "process_cpu_ns": 610284165,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 589521491,
+              "process_cpu_ns": 589534092,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 559783824,
+              "process_cpu_ns": 559776443,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "execution_order": [
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 517521783,
+              "process_cpu_ns": 517530398,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 505639024,
+              "process_cpu_ns": 505195128,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 505901817,
+              "process_cpu_ns": 505878878,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 634547385,
+              "process_cpu_ns": 634406805,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 765032495,
+              "process_cpu_ns": 765010221,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 604328011,
+              "process_cpu_ns": 604337544,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 595225167,
+              "process_cpu_ns": 595151103,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 576169823,
+              "process_cpu_ns": 576184071,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 581744129,
+              "process_cpu_ns": 581741535,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 480723443,
+              "process_cpu_ns": 480697851,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 651990676,
+              "process_cpu_ns": 651989029,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 520797398,
+              "process_cpu_ns": 520780069,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 520940318,
+              "process_cpu_ns": 520942568,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 519305533,
+              "process_cpu_ns": 519306474,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "execution_order": [
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256"
+          ],
+          "operations": [
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 629542397,
+              "process_cpu_ns": 629515330,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 632371890,
+              "process_cpu_ns": 632367868,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 586444119,
+              "process_cpu_ns": 586434633,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 567697764,
+              "process_cpu_ns": 567690883,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 453783186,
+              "process_cpu_ns": 453756643,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 625145083,
+              "process_cpu_ns": 625140485,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 507775931,
+              "process_cpu_ns": 507771667,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 501098129,
+              "process_cpu_ns": 501091745,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 498453034,
+              "process_cpu_ns": 498461985,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 501070002,
+              "process_cpu_ns": 501039181,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 507620379,
+              "process_cpu_ns": 507573673,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 499550063,
+              "process_cpu_ns": 499537484,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 503958663,
+              "process_cpu_ns": 503943666,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 647668193,
+              "process_cpu_ns": 647641844,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            }
+          ]
+        },
+        {
+          "repetition": 7,
+          "execution_order": [
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8",
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions"
+          ],
+          "operations": [
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 639776898,
+              "process_cpu_ns": 639744376,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 498871191,
+              "process_cpu_ns": 498880367,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 507025505,
+              "process_cpu_ns": 507000696,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 512887716,
+              "process_cpu_ns": 512897589,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 515395258,
+              "process_cpu_ns": 515386760,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 501379154,
+              "process_cpu_ns": 501388737,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 522231476,
+              "process_cpu_ns": 522223842,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 543122638,
+              "process_cpu_ns": 543132727,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 699399448,
+              "process_cpu_ns": 699391923,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 695324286,
+              "process_cpu_ns": 695271439,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 643269043,
+              "process_cpu_ns": 643270944,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 602304181,
+              "process_cpu_ns": 602279924,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 610016429,
+              "process_cpu_ns": 610027414,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 495923202,
+              "process_cpu_ns": 495914907,
+              "segments": 65536,
+              "checksum": 0
+            }
+          ]
+        },
+        {
+          "repetition": 8,
+          "execution_order": [
+            "prefetch-16",
+            "prefetch-32",
+            "prefetch-64",
+            "radix-global-256",
+            "radix-global-1024",
+            "radix-global-4096",
+            "radix-global-16384",
+            "radix-global-65536",
+            "direct-eight-additions",
+            "random",
+            "prefetch-1",
+            "prefetch-2",
+            "prefetch-4",
+            "prefetch-8"
+          ],
+          "operations": [
+            {
+              "variant": "prefetch-16",
+              "class": "prefetch",
+              "parameter": 16,
+              "wall_ns": 544217201,
+              "process_cpu_ns": 544162221,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-32",
+              "class": "prefetch",
+              "parameter": 32,
+              "wall_ns": 540766420,
+              "process_cpu_ns": 540756203,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-64",
+              "class": "prefetch",
+              "parameter": 64,
+              "wall_ns": 546454419,
+              "process_cpu_ns": 546464140,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "radix-global-256",
+              "class": "radix-global",
+              "parameter": 256,
+              "wall_ns": 784156326,
+              "process_cpu_ns": 784100046,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-1024",
+              "class": "radix-global",
+              "parameter": 1024,
+              "wall_ns": 723265009,
+              "process_cpu_ns": 723256007,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-4096",
+              "class": "radix-global",
+              "parameter": 4096,
+              "wall_ns": 690515394,
+              "process_cpu_ns": 690508398,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-16384",
+              "class": "radix-global",
+              "parameter": 16384,
+              "wall_ns": 633300180,
+              "process_cpu_ns": 633302318,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "radix-global-65536",
+              "class": "radix-global",
+              "parameter": 65536,
+              "wall_ns": 603868732,
+              "process_cpu_ns": 603862313,
+              "segments": 65536,
+              "checksum": 7040238427850847698
+            },
+            {
+              "variant": "direct-eight-additions",
+              "class": "direct",
+              "parameter": null,
+              "wall_ns": 467287636,
+              "process_cpu_ns": 467296199,
+              "segments": 65536,
+              "checksum": 0
+            },
+            {
+              "variant": "random",
+              "class": "random",
+              "parameter": null,
+              "wall_ns": 673980604,
+              "process_cpu_ns": 673973506,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-1",
+              "class": "prefetch",
+              "parameter": 1,
+              "wall_ns": 539074409,
+              "process_cpu_ns": 539084782,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-2",
+              "class": "prefetch",
+              "parameter": 2,
+              "wall_ns": 554814849,
+              "process_cpu_ns": 554734592,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-4",
+              "class": "prefetch",
+              "parameter": 4,
+              "wall_ns": 536387894,
+              "process_cpu_ns": 536389229,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            },
+            {
+              "variant": "prefetch-8",
+              "class": "prefetch",
+              "parameter": 8,
+              "wall_ns": 528339576,
+              "process_cpu_ns": 528319811,
+              "segments": 65536,
+              "checksum": 14272509116435185113
+            }
+          ]
+        }
+      ],
+      "summaries": [
+        {
+          "variant": "direct-eight-additions",
+          "class": "direct",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 6924.181915283203,
+            "median": 7138.047805786133,
+            "upper": 7479.441207885742
+          },
+          "incremental_addition_equivalents": null,
+          "projected_ratio_to_rho": null,
+          "upper_endpoint_within_parity_budget": null
+        },
+        {
+          "variant": "random",
+          "class": "random",
+          "parameter": null,
+          "wall_ns_per_segment": {
+            "lower": 9715.217697143555,
+            "median": 9948.588195800781,
+            "upper": 10272.927200317383
+          },
+          "incremental_addition_equivalents": {
+            "lower": 2.391383449234773,
+            "median": 3.1499261047104916,
+            "upper": 3.8690436802565884
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0088019304356441,
+            "median": 1.0120477872738634,
+            "upper": 1.0151249414499934
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-1",
+          "class": "prefetch",
+          "parameter": 1,
+          "wall_ns_per_segment": {
+            "lower": 7748.045822143555,
+            "median": 7946.737640380859,
+            "upper": 8225.622695922852
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.28729912493956533,
+            "median": 0.9063428619115701,
+            "upper": 1.503647127198759
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9997984071098259,
+            "median": 1.0024473383628052,
+            "upper": 1.0050032449027795
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-2",
+          "class": "prefetch",
+          "parameter": 2,
+          "wall_ns_per_segment": {
+            "lower": 7736.595230102539,
+            "median": 7919.571517944336,
+            "upper": 8415.155868530273
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.27505158748562586,
+            "median": 0.8758963048969175,
+            "upper": 1.7226282861877564
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.999745999044295,
+            "median": 1.0023170554254213,
+            "upper": 1.005940280529207
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-4",
+          "class": "prefetch",
+          "parameter": 4,
+          "wall_ns_per_segment": {
+            "lower": 7751.208435058594,
+            "median": 7895.148880004883,
+            "upper": 8184.629730224609
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.2906818513514846,
+            "median": 0.848524520785686,
+            "upper": 1.4562850374099146
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9998128820316734,
+            "median": 1.00219992965538,
+            "upper": 1.0048005792228685
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-8",
+          "class": "prefetch",
+          "parameter": 8,
+          "wall_ns_per_segment": {
+            "lower": 7688.351760864258,
+            "median": 7896.755722045898,
+            "upper": 8315.566436767578
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.22345043932774722,
+            "median": 0.8503253964141333,
+            "upper": 1.6075655302045497
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9995251941384679,
+            "median": 1.0022076357275846,
+            "upper": 1.0054479189848213
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-16",
+          "class": "prefetch",
+          "parameter": 16,
+          "wall_ns_per_segment": {
+            "lower": 7654.569671630859,
+            "median": 7745.672286987305,
+            "upper": 8350.705642700195
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.18731716327735803,
+            "median": 0.6809979397544836,
+            "upper": 1.648164354859988
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9993705773343781,
+            "median": 1.0014830717506884,
+            "upper": 1.0056216441823171
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-32",
+          "class": "prefetch",
+          "parameter": 32,
+          "wall_ns_per_segment": {
+            "lower": 7601.678680419922,
+            "median": 7799.592422485352,
+            "upper": 8251.440734863281
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.1307450320275816,
+            "median": 0.7414291803010542,
+            "upper": 1.53347654445707
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9991285012457835,
+            "median": 1.001741661236664,
+            "upper": 1.005130887056176
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "prefetch-64",
+          "class": "prefetch",
+          "parameter": 64,
+          "wall_ns_per_segment": {
+            "lower": 7689.798934936523,
+            "median": 7868.735382080078,
+            "upper": 8730.904205322266
+          },
+          "incremental_addition_equivalents": {
+            "lower": 0.22499833471944086,
+            "median": 0.8189214711637511,
+            "upper": 2.0874348041621804
+          },
+          "projected_ratio_to_rho": {
+            "lower": 0.9995318176906249,
+            "median": 1.002073256144861,
+            "upper": 1.0075013130201902
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-256",
+          "class": "radix-global",
+          "parameter": 256,
+          "wall_ns_per_segment": {
+            "lower": 9637.918258666992,
+            "median": 9912.111907958984,
+            "upper": 11673.469467163086
+          },
+          "incremental_addition_equivalents": {
+            "lower": 2.3087040764548235,
+            "median": 3.1090451368781054,
+            "upper": 5.48718980522121
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0084481396427596,
+            "median": 1.0118728547660685,
+            "upper": 1.0220491013862076
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-1024",
+          "class": "radix-global",
+          "parameter": 1024,
+          "wall_ns_per_segment": {
+            "lower": 9290.68962097168,
+            "median": 9899.925765991211,
+            "upper": 10609.806610107422
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.937308804488012,
+            "median": 3.095387462063549,
+            "upper": 4.258264430273536
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0068589134146844,
+            "median": 1.011814412624587,
+            "upper": 1.016790444139789
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-4096",
+          "class": "radix-global",
+          "parameter": 4096,
+          "wall_ns_per_segment": {
+            "lower": 9312.237609863281,
+            "median": 9813.637893676758,
+            "upper": 10011.525375366211
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.960356503686592,
+            "median": 2.9986799311955075,
+            "upper": 3.567027553991391
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.006957536124309,
+            "median": 1.0114005943664979,
+            "upper": 1.0138325934170729
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-16384",
+          "class": "radix-global",
+          "parameter": 16384,
+          "wall_ns_per_segment": {
+            "lower": 8948.427108764648,
+            "median": 9190.43244934082,
+            "upper": 9663.393859863281
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.5712252934939812,
+            "median": 2.3002195551461746,
+            "upper": 3.164806445693209
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0052924165816564,
+            "median": 1.0084118337853236,
+            "upper": 1.0121114612890096
+          },
+          "upper_endpoint_within_parity_budget": false
+        },
+        {
+          "variant": "radix-global-65536",
+          "class": "radix-global",
+          "parameter": 65536,
+          "wall_ns_per_segment": {
+            "lower": 8541.623291015625,
+            "median": 8876.710952758789,
+            "upper": 9214.305603027344
+          },
+          "incremental_addition_equivalents": {
+            "lower": 1.1361084911102726,
+            "median": 1.9486147409248655,
+            "upper": 2.6459428313855593
+          },
+          "projected_ratio_to_rho": {
+            "lower": 1.0034305214881556,
+            "median": 1.006907292303902,
+            "upper": 1.009891207756204
+          },
+          "upper_endpoint_within_parity_budget": false
+        }
+      ]
+    }
+  ],
+  "selected_decision_row": {
+    "table_entries": 4194304,
+    "table_bytes": 402653184,
+    "variant": "prefetch-16",
+    "class": "prefetch",
+    "parameter": 16,
+    "incremental_addition_equivalents": {
+      "lower": 0.18731716327735803,
+      "median": 0.6809979397544836,
+      "upper": 1.648164354859988
+    },
+    "projected_ratio_to_rho": {
+      "lower": 0.9993705773343781,
+      "median": 1.0014830717506884,
+      "upper": 1.0056216441823171
+    },
+    "correctness_gate": true,
+    "timing_gate": false,
+    "advances_projective_stage": false
+  },
+  "semantic_evidence_sha256": "a69c1c504c8fc2286d10d1409b849f03e92eb213263af597aedc2c8b94090f35",
+  "raw_timing_sha256": "06c7bda51d24d9ec397b788d78fe6902fe9b67cd42c212892e42538ce680decd",
+  "imported_gates": {
+    "full_table_materialized_or_measured": false,
+    "complete_time_at_or_below_rho": false,
+    "proved_p256_usable_relation_probability": false,
+    "structured_residual_degree_at_most_5": false,
+    "relation_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "materialized_storage_below_2_50": true,
+    "non_generic_end_to_end": false,
+    "promoted": false
+  },
+  "full_depth_unplanted_attempted": false,
+  "interpretation": "No registered locality schedule preserves the round-33 stage margin on the 384-MiB decision row. This rejects these prefetch and radix implementations, not all possible memory systems.",
+  "decision": "reject the registered projective locality schedules; do not promote or run a full-depth relation"
+}
