@@ -11,7 +11,7 @@
 //! changes the code it measures.
 //!
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
-//!   tree only.  `r05`, `r02b` and `r07` are native; `r03` reproduces R03's
+//!   tree only.  `r05`, `r02b`, `r06` and `r07` are native; `r03` reproduces R03's
 //!   frozen `analysis.json` from its frozen runs.
 //! - `icprog holdouts`: a round's fresh holdouts by suite v1's own
 //!   construction (`suite/v1/make_suite.py`, ported), drawn once, or
@@ -116,6 +116,7 @@ enum Round {
     R02b,
     R03,
     R05,
+    R06,
     R07,
 }
 
@@ -589,12 +590,12 @@ enum Command {
         #[arg(long)]
         check: bool,
     },
-    /// One of a round's declared steps, natively (R05, R02b, R07).
+    /// One of a round's declared steps, natively (R05, R02b, R06, R07).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
         /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
-        /// callgrind or manifest-resumed.
+        /// callgrind or manifest-resumed; R06 the same but callgrind.
         step: String,
         /// The repository checkout (default: the current directory).
         #[arg(long, default_value = ".")]
@@ -627,6 +628,7 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R02b => "R02b-wide-tail-retest",
         Round::R03 => "R03-curve-construction",
         Round::R05 => "R05-presence-filter",
+        Round::R06 => "R06-funnel-key",
         Round::R07 => "R07-main-head",
     };
     let round_dir = programme.join("rounds").join(dir);
@@ -704,6 +706,7 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let doc = match round {
         Round::R02b => rounds::r02b::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R05 => rounds::r05::run(&ctx, step, &b, &arms, &root)?,
+        Round::R06 => rounds::r06::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
@@ -859,6 +862,7 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R02b => rounds::r02b::analyse(&ctx)?,
         Round::R03 => rounds::r03::analyse(&ctx)?,
         Round::R05 => rounds::r05::analyse(&ctx)?,
+        Round::R06 => rounds::r06::analyse(&ctx)?,
         Round::R07 => rounds::r07::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
@@ -1585,7 +1589,7 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b | Round::R07 => report::r05(&doc),
+            Round::R05 | Round::R02b | Round::R06 | Round::R07 => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Holdouts {

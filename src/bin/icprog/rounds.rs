@@ -1339,3 +1339,67 @@ pub mod r07 {
         }
     }
 }
+
+// ── R06: the scan's canonical key by funnel shifts ───────────────────
+
+pub mod r06 {
+    use super::*;
+
+    /// R06's declaration: the two sizes the exploration found the key
+    /// worth most at, eight fresh holdouts at each (recipe seeds 218 to
+    /// 221, `T127` to `T134`), and an interval above 1.03 at both, on the
+    /// suite rows and the holdouts separately.  Valgrind cannot run the
+    /// candidate's VBMI2 kernel, so there are no callgrind profiles.
+    pub const SPEC: Spec = Spec {
+        targets: &[(1, 59), (0, 61)],
+        holdouts: &[
+            (218, 127),
+            (218, 128),
+            (219, 129),
+            (219, 130),
+            (220, 131),
+            (220, 132),
+            (221, 133),
+            (221, 134),
+        ],
+        what_this_is: "R06, the scan's canonical key by funnel shifts: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.03),
+        resumed_note: "the host R06 resumed on after its container changed",
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R06's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R06 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
+            )),
+        }
+    }
+}
