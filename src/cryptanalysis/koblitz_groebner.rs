@@ -4339,6 +4339,12 @@ pub struct SolveStats {
     /// the IC node oracle.
     #[serde(default)]
     pub geometric_group_additions: u64,
+    /// Exact unordered pair-sum indexes built by the opt-in IC node oracle.
+    #[serde(default)]
+    pub geometric_pair_index_builds: u64,
+    /// Exact pair-sum hash lookups made by the opt-in IC node oracle.
+    #[serde(default)]
+    pub geometric_pair_index_lookups: u64,
     /// The IC gate could not prove that its coordinate encoding matched
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]

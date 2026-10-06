@@ -5823,6 +5823,11 @@ struct F6GeometricGate<'a> {
     by_x: HashMap<BigUint, Vec<usize>>,
     fast: Option<F6FastGeometry>,
     batch_fast: bool,
+    pair_index_enabled: bool,
+    pair_index: Option<HashMap<FastPoint, Vec<(usize, usize)>>>,
+    pair_index_builds: u64,
+    pair_index_lookups: u64,
+    one_fixed_additions: u64,
     witness: Option<Vec<usize>>,
     support_checks: u64,
     residual_lookups: u64,
@@ -5907,6 +5912,11 @@ impl<'a> F6GeometricGate<'a> {
             by_x,
             fast,
             batch_fast: true,
+            pair_index_enabled: false,
+            pair_index: None,
+            pair_index_builds: 0,
+            pair_index_lookups: 0,
+            one_fixed_additions: 0,
             witness: None,
             support_checks: 0,
             residual_lookups: 0,
@@ -5963,6 +5973,108 @@ impl<'a> F6GeometricGate<'a> {
     /// exact branch decision: try its usable point lifts against every
     /// second base point, then look up the uniquely determined third point.
     fn close_one_fixed(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if self.pair_index_enabled && self.fast.is_some() {
+            let size = self.fb.points.len() as u64;
+            if self.pair_index.is_none()
+                && self.one_fixed_additions >= size.saturating_mul(size + 1)
+                && self.by_x.contains_key(&fixed.1)
+            {
+                self.build_pair_index();
+            }
+            if self.pair_index.is_some() {
+                return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
+                    Some(chosen) if self.verify_witness(&chosen) => true,
+                    Some(_) => self.close_one_fixed_legacy(fixed, assignment, defined_mask),
+                    None => false,
+                };
+            }
+        }
+        let before = self.group_additions;
+        let found = self.close_one_fixed_legacy(fixed, assignment, defined_mask);
+        self.one_fixed_additions += self.group_additions - before;
+        found
+    }
+
+    fn build_pair_index(&mut self) {
+        let Some(fast) = self.fast.as_ref() else {
+            return;
+        };
+        let mut index: HashMap<FastPoint, Vec<(usize, usize)>> = HashMap::new();
+        let mut scratch = BatchScratch::default();
+        let mut sums = Vec::new();
+        for first in 0..fast.points.len() {
+            sums.clear();
+            fast.curve.add_many(
+                fast.points[first],
+                &fast.points[first..],
+                &mut sums,
+                &mut scratch,
+            );
+            assert_eq!(sums.len(), fast.points.len() - first);
+            self.group_additions += sums.len() as u64;
+            self.batch_groups += 1;
+            for (offset, &sum) in sums.iter().enumerate() {
+                index.entry(sum).or_default().push((first, first + offset));
+            }
+        }
+        self.pair_index = Some(index);
+        self.pair_index_builds += 1;
+    }
+
+    fn close_one_fixed_fast_pair(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let index = self.pair_index.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1)?;
+        for &first in choices {
+            self.group_additions += 1;
+            let residual = fast
+                .curve
+                .add(fast.target, fast.curve.neg(fast.points[first]));
+            self.pair_index_lookups += 1;
+            let Some(pairs) = index.get(&residual) else {
+                continue;
+            };
+            for &(left, right) in pairs {
+                for &(second_index, third_index) in &[(left, right), (right, left)] {
+                    if Self::code_matches(
+                        &self.vars[second],
+                        fast.codes[second_index],
+                        assignment,
+                        defined_mask,
+                    ) && Self::code_matches(
+                        &self.vars[third],
+                        fast.codes[third_index],
+                        assignment,
+                        defined_mask,
+                    ) {
+                        let mut chosen = [usize::MAX; 3];
+                        chosen[fixed.0] = first;
+                        chosen[second] = second_index;
+                        chosen[third] = third_index;
+                        return Some(chosen);
+                    }
+                    if left == right {
+                        break;
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn close_one_fixed_legacy(
         &mut self,
         fixed: &(usize, BigUint),
         assignment: &[Option<bool>],
@@ -6292,6 +6404,7 @@ pub fn groebner_decompose(
         engine,
         node_budget,
         false,
+        false,
         Some(sys),
     )
 }
@@ -6330,6 +6443,45 @@ pub fn groebner_decompose_f6_ic(
         engine,
         node_budget,
         true,
+        false,
+        None,
+    )
+}
+
+/// Opt-in F6-IC geometric closure with an adaptively built exact pair-sum
+/// index. The original F6-IC path remains the reference.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic_pair_index(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        true,
         None,
     )
 }
@@ -6345,6 +6497,7 @@ fn groebner_decompose_with_geometry(
     engine: SolverEngine,
     node_budget: usize,
     f6_ic: bool,
+    pair_index_enabled: bool,
     prebuilt: Option<crate::cryptanalysis::koblitz_groebner::DecompositionSystem>,
 ) -> (Option<Vec<usize>>, SolveStats) {
     let unsupported = || SolveStats {
@@ -6417,6 +6570,7 @@ fn groebner_decompose_with_geometry(
     if f6_ic {
         if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
         {
+            gate.pair_index_enabled = pair_index_enabled;
             let (_, mut stats) = solve_boolean_system_with_node_oracle(
                 equations,
                 sys.n_vars,
@@ -6429,6 +6583,8 @@ fn groebner_decompose_with_geometry(
             stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
             stats.geometric_batch_groups = gate.batch_groups;
             stats.geometric_group_additions = gate.group_additions;
+            stats.geometric_pair_index_builds = gate.pair_index_builds;
+            stats.geometric_pair_index_lookups = gate.pair_index_lookups;
             return (gate.witness.or(found), stats);
         }
     }
@@ -7539,6 +7695,9 @@ pub struct KoblitzIcOptions {
     /// inherited F4. Only the ordinary Gröbner decomposition path supports
     /// it; chart plans retain their separate, explicit implementation.
     pub f6_ic: bool,
+    /// Opt-in adaptive exact pair-sum closure for the three-summand F6-IC
+    /// node oracle. Its index build is charged inside each PDP attempt.
+    pub f6_pair_index: bool,
     /// Experimental exact S3 decomposition on a validated Frobenius chart
     /// cover. Applies only to two-summand Groebner collection/descent. Plan
     /// construction is caller-owned precomputation and must be charged.
@@ -7617,6 +7776,7 @@ impl Default for KoblitzIcOptions {
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
             f6_ic: false,
+            f6_pair_index: false,
             weil_charts: None,
             node_budget: 4096,
             max_models: 64,
@@ -8186,7 +8346,11 @@ fn koblitz_index_calculus_dlp_observed(
                         return RelationAttemptOutcome::Groebner(idxs, stats.solver);
                     }
                     let decompose = if opts.f6_ic {
-                        groebner_decompose_f6_ic
+                        if opts.f6_pair_index {
+                            groebner_decompose_f6_ic_pair_index
+                        } else {
+                            groebner_decompose_f6_ic
+                        }
                     } else {
                         groebner_decompose
                     };
@@ -9908,7 +10072,11 @@ fn decompose_once(
                 return attempt;
             }
             let decompose = if opts.f6_ic {
-                groebner_decompose_f6_ic
+                if opts.f6_pair_index {
+                    groebner_decompose_f6_ic_pair_index
+                } else {
+                    groebner_decompose_f6_ic
+                }
             } else {
                 groebner_decompose
             };
@@ -16751,6 +16919,63 @@ mod tests {
         );
         assert!(packed_lookups > 0);
         assert!(batch_groups > 0);
+    }
+
+    #[test]
+    fn f6_ic_pair_index_matches_legacy_closure_with_partial_codes() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let ell = fb.subspace_basis.len();
+        let mut witnessed = 0;
+        let mut refuted = 0;
+        let mut duplicate_sums = false;
+        for scalar in 1..=12u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            for code in 0..(1u64 << ell) {
+                for second_bit in [false, true] {
+                    for third_bit in [None, Some(false), Some(true)] {
+                        let mut assignment = vec![None; 3 * ell];
+                        for j in 0..ell {
+                            assignment[j] = Some(code & (1 << j) != 0);
+                        }
+                        assignment[ell] = Some(second_bit);
+                        assignment[2 * ell] = third_bit;
+                        let mut legacy =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        let expected = legacy.decide(&assignment, 0);
+                        let mut indexed =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        indexed.pair_index_enabled = true;
+                        indexed.one_fixed_additions =
+                            (fb.points.len() * (fb.points.len() + 1)) as u64;
+                        let actual = indexed.decide(&assignment, 0);
+                        assert_eq!(actual, expected, "scalar={scalar}, code={code}");
+                        if indexed.pair_index_builds != 0 {
+                            let table = indexed.pair_index.as_ref().unwrap();
+                            assert_eq!(
+                                table.values().map(Vec::len).sum::<usize>(),
+                                fb.points.len() * (fb.points.len() + 1) / 2
+                            );
+                            duplicate_sums |= table.values().any(|bucket| bucket.len() > 1);
+                        }
+                        if actual == NodeOracleDecision::Witness {
+                            witnessed += 1;
+                            let sum = indexed
+                                .witness
+                                .as_ref()
+                                .unwrap()
+                                .iter()
+                                .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                            assert_eq!(sum, target);
+                        } else {
+                            refuted += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert!(witnessed > 0 && refuted > 0 && duplicate_sums);
     }
 
     #[test]
