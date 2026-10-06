@@ -433,7 +433,10 @@ mod tests {
         let receipt =
             CairnWalkReceipt::from_verified(&pilot, &result, &artifact, &certificate).unwrap();
         receipt.validate(&pilot, &result).unwrap();
-        assert_eq!(receipt.claim_key(), format!("p256-isogeny-walk:{}", result.work_sha256));
+        assert_eq!(
+            receipt.claim_key(),
+            format!("p256-isogeny-walk:{}", result.work_sha256)
+        );
 
         let relabelled = task("another-run", "another-task", 2);
         let relabelled_result = build_result(&relabelled, &artifact, &certificate).unwrap();
@@ -446,16 +449,22 @@ mod tests {
         .unwrap();
         assert_eq!(receipt, relabelled_receipt);
 
-        let mut tampered = result;
+        let mut tampered = result.clone();
         let replacement = if tampered.certificate_sha256.starts_with('f') {
             "e"
         } else {
             "f"
         };
-        tampered
-            .certificate_sha256
-            .replace_range(0..1, replacement);
+        tampered.certificate_sha256.replace_range(0..1, replacement);
         assert!(verify_result(&pilot, &tampered, &artifact, &certificate).is_err());
+
+        let mut tampered = certificate.clone();
+        tampered.header.record = "not-a-header".into();
+        assert!(verify_result(&pilot, &result, &artifact, &tampered).is_err());
+
+        let mut tampered = certificate;
+        tampered.summary.bytes_per_edge += 1.0;
+        assert!(verify_result(&pilot, &result, &artifact, &tampered).is_err());
     }
 
     #[test]

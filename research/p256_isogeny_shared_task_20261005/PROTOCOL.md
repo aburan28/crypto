@@ -60,8 +60,18 @@ diagnostic but is neither trusted nor part of semantic acceptance.
 Acceptance re-reads all three files, requires the task bytes to name the
 expected task, decompresses the certificate, runs the independent Gate-1
 replay over every edge, recomputes every digest and count, and compares the
-entire result record.  A task or result with unknown fields is rejected by
-Serde's `deny_unknown_fields` contract.  Existing output files are never
+entire result record.  Task, result, and certificate records with unknown
+fields are rejected by Serde's `deny_unknown_fields` contract.  The replay
+also checks every JSON Lines record tag and the deterministic bytes-per-edge
+value rather than treating them as worker assertions.
+
+Untrusted input has fixed resource ceilings: 1 MiB for each JSON metadata
+file, 16 MiB for the compressed certificate, and 64 MiB after decompression.
+The decoded ceiling is enforced while streaming from gzip, before JSON Lines
+parsing, so a compression bomb cannot allocate without bound.  Acceptance
+also recompresses the decoded bytes and requires the canonical deterministic
+gzip encoding, rejecting trailing data or alternate encodings.  The result
+directory must be empty before execution and existing files are never
 overwritten.
 
 ## TaskQ and Cairn boundaries
@@ -99,6 +109,8 @@ The implementation gate passes only if:
 - two differently labelled copies of the same work have one `work_sha256`;
 - a short native task generates and independently replays successfully;
 - certificate, result and task tampering are rejected;
+- oversized metadata, oversized compressed input and excessive gzip expansion
+  are rejected before replay;
 - the TaskQ spec pins the task's commit and semantic idempotency key; and
 - the Cairn receipt contains only deterministic integer/string evidence and
   validates against the replayed result.

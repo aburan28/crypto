@@ -19,6 +19,10 @@ use std::fs::{self, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
+const MAX_JSON_BYTES: u64 = 1 << 20;
+const MAX_CERTIFICATE_GZIP_BYTES: u64 = 16 << 20;
+const MAX_CERTIFICATE_JSONL_BYTES: u64 = 64 << 20;
+
 #[derive(Debug, Parser)]
 #[command(about = "Portable, fully replayed work unit for the bounded P-256 isogeny walk")]
 struct Cli {
@@ -43,7 +47,11 @@ enum Command {
     },
     /// Generate, internally replay and write one task result.
     Run {
-        #[arg(long, conflicts_with = "task_json", required_unless_present = "task_json")]
+        #[arg(
+            long,
+            conflicts_with = "task_json",
+            required_unless_present = "task_json"
+        )]
         task: Option<PathBuf>,
         #[arg(long, conflicts_with = "task", required_unless_present = "task")]
         task_json: Option<String>,
@@ -90,9 +98,17 @@ enum Command {
         node: String,
         #[arg(long)]
         objective: String,
-        #[arg(long, conflicts_with = "submitter", required_unless_present = "submitter")]
+        #[arg(
+            long,
+            conflicts_with = "submitter",
+            required_unless_present = "submitter"
+        )]
         identity: Option<PathBuf>,
-        #[arg(long, conflicts_with = "identity", required_unless_present = "identity")]
+        #[arg(
+            long,
+            conflicts_with = "identity",
+            required_unless_present = "identity"
+        )]
         submitter: Option<String>,
         #[arg(long)]
         state: PathBuf,
@@ -110,13 +126,41 @@ struct LoadedResult {
     artifact_bytes: Vec<u8>,
 }
 
+fn read_bounded(path: &Path, max_bytes: u64, kind: &str) -> Result<Vec<u8>, String> {
+    let file = fs::File::open(path).map_err(|error| format!("open {}: {error}", path.display()))?;
+    let length = file
+        .metadata()
+        .map_err(|error| format!("stat {}: {error}", path.display()))?
+        .len();
+    if length > max_bytes {
+        return Err(format!(
+            "{kind} {} is {length} bytes; limit is {max_bytes}",
+            path.display()
+        ));
+    }
+    let mut bytes = Vec::new();
+    file.take(max_bytes + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|error| format!("read {}: {error}", path.display()))?;
+    if bytes.len() as u64 > max_bytes {
+        return Err(format!(
+            "{kind} {} exceeds the {max_bytes}-byte limit",
+            path.display()
+        ));
+    }
+    Ok(bytes)
+}
+
 fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
-    let bytes = fs::read(path).map_err(|error| format!("read {}: {error}", path.display()))?;
+    let bytes = read_bounded(path, MAX_JSON_BYTES, "JSON input")?;
     serde_json::from_slice(&bytes).map_err(|error| format!("parse {}: {error}", path.display()))
 }
 
 fn write_new(path: &Path, bytes: &[u8]) -> Result<(), String> {
-    if let Some(parent) = path.parent().filter(|parent| !parent.as_os_str().is_empty()) {
+    if let Some(parent) = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
         fs::create_dir_all(parent)
             .map_err(|error| format!("create {}: {error}", parent.display()))?;
     }
@@ -148,10 +192,25 @@ fn compress(bytes: &[u8]) -> Result<Vec<u8>, String> {
 }
 
 fn decompress(bytes: &[u8]) -> Result<Vec<u8>, String> {
+    if bytes.len() as u64 > MAX_CERTIFICATE_GZIP_BYTES {
+        return Err(format!(
+            "compressed certificate exceeds the {MAX_CERTIFICATE_GZIP_BYTES}-byte limit"
+        ));
+    }
+    decompress_bounded(bytes, MAX_CERTIFICATE_JSONL_BYTES)
+}
+
+fn decompress_bounded(bytes: &[u8], max_bytes: u64) -> Result<Vec<u8>, String> {
     let mut output = Vec::new();
     GzDecoder::new(bytes)
+        .take(max_bytes + 1)
         .read_to_end(&mut output)
         .map_err(|error| format!("decompress certificate: {error}"))?;
+    if output.len() as u64 > max_bytes {
+        return Err(format!(
+            "decoded certificate exceeds the {max_bytes}-byte limit"
+        ));
+    }
     Ok(output)
 }
 
@@ -159,10 +218,16 @@ fn task_from_inputs(
     task: Option<PathBuf>,
     task_json: Option<String>,
 ) -> Result<P256IsogenyTask, String> {
-    let task = match (task, task_json) {
+    let task: P256IsogenyTask = match (task, task_json) {
         (Some(path), None) => read_json(&path)?,
-        (None, Some(text)) => serde_json::from_str(&text)
-            .map_err(|error| format!("parse --task-json: {error}"))?,
+        (None, Some(text)) => {
+            if text.len() as u64 > MAX_JSON_BYTES {
+                return Err(format!(
+                    "--task-json exceeds the {MAX_JSON_BYTES}-byte limit"
+                ));
+            }
+            serde_json::from_str(&text).map_err(|error| format!("parse --task-json: {error}"))?
+        }
         _ => return Err("pass exactly one of --task or --task-json".into()),
     };
     task.validate()?;
@@ -176,11 +241,14 @@ fn result_dir(out: Option<PathBuf>) -> Result<PathBuf, String> {
 
 fn preflight_fresh(dir: &Path) -> Result<(), String> {
     fs::create_dir_all(dir).map_err(|error| format!("create {}: {error}", dir.display()))?;
-    for name in [TASK_FILE, CERTIFICATE_FILE, RESULT_FILE] {
-        let path = dir.join(name);
-        if path.exists() {
-            return Err(format!("refusing to overwrite {}", path.display()));
-        }
+    let mut entries =
+        fs::read_dir(dir).map_err(|error| format!("list {}: {error}", dir.display()))?;
+    if let Some(entry) = entries.next() {
+        let entry = entry.map_err(|error| format!("list {}: {error}", dir.display()))?;
+        return Err(format!(
+            "result directory must be empty; found {}",
+            entry.path().display()
+        ));
     }
     Ok(())
 }
@@ -192,9 +260,16 @@ fn load_verified(task: &P256IsogenyTask, dir: &Path) -> Result<LoadedResult, Str
         return Err("result task.json does not match the requested task".into());
     }
     let result: P256IsogenyTaskResult = read_json(&dir.join(RESULT_FILE))?;
-    let artifact_bytes = fs::read(dir.join(CERTIFICATE_FILE))
-        .map_err(|error| format!("read {}/{}: {error}", dir.display(), CERTIFICATE_FILE))?;
-    let certificate = from_json_lines(&decompress(&artifact_bytes)?)?;
+    let artifact_bytes = read_bounded(
+        &dir.join(CERTIFICATE_FILE),
+        MAX_CERTIFICATE_GZIP_BYTES,
+        "compressed certificate",
+    )?;
+    let decoded = decompress(&artifact_bytes)?;
+    if compress(&decoded)? != artifact_bytes {
+        return Err("certificate is not in the canonical deterministic gzip encoding".into());
+    }
+    let certificate = from_json_lines(&decoded)?;
     verify_result(task, &result, &artifact_bytes, &certificate)?;
     Ok(LoadedResult {
         result,
@@ -256,8 +331,7 @@ fn run() -> Result<(), String> {
             let loaded = load_verified(&task, &dir)?;
             println!(
                 "{}",
-                serde_json::to_string_pretty(&loaded.result)
-                    .map_err(|error| error.to_string())?
+                serde_json::to_string_pretty(&loaded.result).map_err(|error| error.to_string())?
             );
         }
         Command::PlanTaskq {
@@ -301,6 +375,14 @@ fn run() -> Result<(), String> {
                         .into(),
                 );
             }
+            let node = node.trim_end_matches('/');
+            if node.trim().is_empty() {
+                return Err("--node must be nonempty".into());
+            }
+            let objective = objective.trim();
+            if objective.is_empty() {
+                return Err("--objective must be nonempty".into());
+            }
             let task: P256IsogenyTask = read_json(&task)?;
             let receipt = receipt_for(&task, &dir)?;
             let who = match (identity, submitter) {
@@ -308,13 +390,16 @@ fn run() -> Result<(), String> {
                 (None, Some(name)) if !name.trim().is_empty() => Submitter::Nickname(name),
                 _ => return Err("pass exactly one nonempty --identity or --submitter".into()),
             };
-            if let Some(parent) = state.parent().filter(|parent| !parent.as_os_str().is_empty()) {
+            if let Some(parent) = state
+                .parent()
+                .filter(|parent| !parent.as_os_str().is_empty())
+            {
                 fs::create_dir_all(parent)
                     .map_err(|error| format!("create {}: {error}", parent.display()))?;
             }
             let mut transport = CairnTransport::open(CairnConfig {
-                url: node.trim_end_matches('/').to_string(),
-                objective_id: objective,
+                url: node.to_string(),
+                objective_id: objective.to_string(),
                 submitter: who,
                 answer_objective: None,
                 epoch_secs: epoch_seconds,
@@ -347,5 +432,23 @@ fn main() {
     if let Err(error) = run() {
         eprintln!("p256-isogeny-task: {error}");
         std::process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bounded_reads_and_gzip_expansion_fail_closed() {
+        let executable = std::env::current_exe().unwrap();
+        assert!(read_bounded(&executable, 1, "test input")
+            .unwrap_err()
+            .contains("limit"));
+
+        let compressed = compress(&vec![0; 1_025]).unwrap();
+        assert!(decompress_bounded(&compressed, 1_024)
+            .unwrap_err()
+            .contains("decoded certificate exceeds"));
     }
 }

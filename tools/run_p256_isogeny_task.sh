@@ -1,6 +1,7 @@
 #!/bin/sh
 # Build and execute one content-addressed P-256 walk task locally.
-# This script never contacts TaskQ, Cairn, AWS, S3, or any other network.
+# This script never submits to TaskQ, Cairn, AWS, or S3. Cargo may contact its
+# configured registry when the pinned dependencies are not already cached.
 set -eu
 
 usage() {
@@ -52,8 +53,8 @@ if [ "$source_commit" != "$head_commit" ]; then
     printf 'p256-isogeny-task: SOURCE_COMMIT must equal the checked-out HEAD (%s)\n' "$head_commit" >&2
     exit 1
 fi
-if ! git -C "$repo_root" diff --quiet || ! git -C "$repo_root" diff --cached --quiet; then
-    printf 'p256-isogeny-task: tracked source is dirty; commit it before creating a pinned task\n' >&2
+if [ -n "$(git -C "$repo_root" status --porcelain --untracked-files=normal)" ]; then
+    printf 'p256-isogeny-task: source tree is dirty; commit it before creating a pinned task\n' >&2
     exit 1
 fi
 
@@ -62,8 +63,18 @@ run_id=local-$(date -u +%Y%m%dT%H%M%SZ)
 task_path=$out_dir/input-task.json
 receipt_path=$out_dir/cairn-receipt.json
 
-cargo build --manifest-path "$repo_root/Cargo.toml" --locked --release --bin p256_isogeny_task
-binary=$repo_root/target/release/p256_isogeny_task
+target_dir=${CARGO_TARGET_DIR:-"$repo_root/target"}
+case "$target_dir" in
+    /*) ;;
+    *) target_dir=$PWD/$target_dir ;;
+esac
+cargo build \
+    --manifest-path "$repo_root/Cargo.toml" \
+    --target-dir "$target_dir" \
+    --locked \
+    --release \
+    --bin p256_isogeny_task
+binary=$target_dir/release/p256_isogeny_task
 
 "$binary" manifest \
     --run-id "$run_id" \
