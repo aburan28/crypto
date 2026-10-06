@@ -1,6 +1,6 @@
 ---
 name: ecbench-bounds
-description: Record what an ECDLP method costs as a sealed, re-derivable bound (constant and exponent with intervals, per phase, in ecbench's counted unit), read the frontier of methods nobody has beaten, and challenge an incumbent with a frozen paired spec whose verdict says whether a candidate advances, trades, matches or regresses and at which level (exponent or constant). Use whenever someone asks what the established cost of a method is, whether a change beat it, or how to try.
+description: Record what an ECDLP method costs as a sealed, re-derivable bound (constant and exponent with intervals, per phase, in ecbench's counted unit, with the field multiplications, squarings and inversions behind the group operations where the curve counts them), read the frontier of methods nobody has beaten, and challenge an incumbent with a frozen paired spec whose verdict says whether a candidate advances, trades, matches or regresses and at which level (exponent, constant or primitive). Use whenever someone asks what the established cost of a method is, whether a change beat it, or how to try.
 ---
 
 # Bounds, frontiers and challenges
@@ -15,7 +15,11 @@ there. This skill is the procedure. Native `ecbench` only; no Python harness.
    kind, unit, tier). Quote the row's `ops` (× floor) with its interval, its
    memory, its `α` with its interval and the sizes it was measured on. Never
    quote a point without the interval, and never carry a `toy` figure to
-   another tier.
+   another tier. Where the domain's table has `field muls`, `field sqrs` and
+   `field invs` columns (the primitive level, README §2 and §5: modular
+   multiplications, squarings and inversions behind the group operations,
+   per `√r`), quote them the same way; a row showing `unknown` there did not
+   count them, and unknown is not zero.
 2. If the method has no record, fit one from a committed session:
 
    ```bash
@@ -64,7 +68,14 @@ design is a measurement; it is not a frontier move.
 
 5. Read the statement. `advances` names the axes and, when `ops` is among
    them, the level: `exponent` only with disjoint `α` intervals over four or
-   more sizes, otherwise `constant`. `trade` is a new Pareto point, not a
+   more sizes, otherwise `constant`. When `ops` is not among them but a field
+   axis is (`field_muls`, `field_sqrs`, `field_invs`), the level is
+   `primitive`: the group-operation count held and the field work behind it
+   fell. A field axis decides only when the challenge's `acceptance.axes`
+   names it (a cheaper formula is a claim on `field_sqrs`, so name it);
+   otherwise the three are reported beside the result and do not decide, and
+   they are `unknown` unless every run of both arms counted them, which today
+   means prime-field curves. `trade` is a new Pareto point, not a
    replacement. `matches` is a null result and is still committed.
    `inadmissible` names why; fix the cause, never the rule. Read `stages` to
    say which sub-algorithm moved, and `accounting` before claiming an advance
@@ -77,7 +88,11 @@ design is a measurement; it is not a frontier move.
 
 - Do not edit a record, a verdict or the page by hand; regenerate.
 - Do not call a primitive-level change (a cheaper formula) a constant or
-  exponent change in `ecbench.gae`; the unit does not see it (README §2, §7).
+  exponent change in `ecbench.gae`; the `gae` figure does not see it (README
+  §2, §7). On prime-field curves it shows on the `field_muls`, `field_sqrs`
+  and `field_invs` axes at an unchanged `ops`, and that is the `primitive`
+  level; on binary and Koblitz curves and for index calculus those axes are
+  unknown, never zero, and the change is not measured here at all.
 - Do not average verdicts across epochs or pool a `toy` row with a `medium`
   one. One verdict is one session; one domain is one tier.
 - Do not report wall time as a bound. It is a practicality note, graded by

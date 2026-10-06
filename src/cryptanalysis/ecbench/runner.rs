@@ -795,6 +795,7 @@ fn assemble(
             .unwrap_or(serde_json::Value::Null),
         online: report.as_ref().and_then(|r| r.online.clone()),
         solver: report.as_ref().and_then(|r| r.solver.clone()),
+        field_ops: report.as_ref().and_then(|r| r.field_ops),
         time: reaped.timing.clone(),
         isolation: IsolationRecord {
             level: g.level,

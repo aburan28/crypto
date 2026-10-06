@@ -23,6 +23,7 @@ use crate::cryptanalysis::ecbench::methods::{
 };
 use crate::cryptanalysis::ecbench::spec::Level;
 use crate::cryptanalysis::ecbench::workload::{CurveSpec, TargetKind, Workload};
+use crate::cryptanalysis::ic_boundary::FieldOps;
 use crate::cryptanalysis::ic_measurement;
 
 pub const RECORD_SCHEMA: &str = "ecbench.record/v1";
@@ -320,6 +321,15 @@ pub struct Record {
     /// replay comparison.
     #[serde(default)]
     pub solver: Option<SolverStats>,
+    /// The field operations behind the group operations
+    /// (`SolveReport::field_ops`): modular multiplications, squarings and
+    /// inversions over the whole solve, when the method's group counted
+    /// them.  Absent means unknown, never zero.  Written only when
+    /// counted, so a record written before the block existed is byte for
+    /// byte what it was and its seal still checks; the audit compares it
+    /// on replay only when both the record and the replay carry it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_ops: Option<FieldOps>,
     pub time: Timing,
     pub isolation: IsolationRecord,
     pub env_class_id: String,

@@ -1116,3 +1116,397 @@ fn bounds_a_frontier_and_challenge_verdicts_round_trip() {
         .any(|r| r.as_str().unwrap().contains("replay-all")));
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+const FIELD_SPEC: &str = r#"{
+  "schema": "ecbench.spec/v1",
+  "label": "field operations integration test: four prime sizes",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 12, "seed": 59297},
+               {"kind": "prime_search", "bits": 14, "seed": 59297},
+               {"kind": "prime_search", "bits": 16, "seed": 59297},
+               {"kind": "prime_search", "bits": 18, "seed": 59297}],
+    "targets_per_curve": 2,
+    "target_seed": 13
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "bsgs-neg", "role": "candidate", "method": {"id": "bsgs.negation"}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "seed": 9, "isolation_required": "L0", "timeout_seconds": 60}
+}"#;
+
+const KOBLITZ_FIELD_SPEC: &str = r#"{
+  "schema": "ecbench.spec/v1",
+  "label": "field operations integration test: a Koblitz curve counts none",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+    "targets_per_curve": 1,
+    "target_seed": 13
+  },
+  "arms": [
+    {"name": "bsgs-neg", "role": "reference", "method": {"id": "bsgs.negation"}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "seed": 9, "isolation_required": "L0", "timeout_seconds": 60}
+}"#;
+
+/// The primitive level, end to end: prime-field curves count the
+/// multiplications, squarings and inversions behind their group
+/// operations; the block rides on every record outside `counters` and
+/// `phases`; a bound carries the three field axes with intervals; the
+/// frontier page grows their columns; a challenge may name one, and the
+/// verdict then decides on it and reports the other two.  A Koblitz curve
+/// counts none and its record and bound say nothing, not zero.
+#[test]
+fn field_operations_are_counted_bounded_and_judged() {
+    let dir = scratch("field-ops");
+    let s = |p: &Path| p.to_str().unwrap().to_string();
+    let spec = dir.join("spec.json");
+    std::fs::write(&spec, FIELD_SPEC).unwrap();
+    let session = dir.join("s0");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&spec),
+        "--out",
+        &s(&session),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "run failed: {err}");
+
+    // Every record carries the block, and nothing the replay of a
+    // committed record compares.  Every addition or doubling that did
+    // field work did exactly one inversion, at least two multiplications
+    // and at least one squaring (`PrimeCurve::FIELD_OPS_PER_ADD`,
+    // `FIELD_OPS_PER_DOUBLE`); the special cases did none.  The group
+    // operations are `total_gae` (additions plus doublings): the tuned
+    // rho's `search` phase carries its gae without an operation split.
+    let lines = std::fs::read_to_string(session.join("records.jsonl")).unwrap();
+    let mut records = 0;
+    for line in lines.lines().filter(|l| !l.trim().is_empty()) {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{}", r["run_id"]);
+        let f = &r["field_ops"];
+        let (muls, sqrs, invs) = (
+            f["muls"].as_u64().unwrap(),
+            f["sqrs"].as_u64().unwrap(),
+            f["invs"].as_u64().unwrap(),
+        );
+        let group_ops = r["cost"]["total_gae"].as_f64().unwrap();
+        assert!(
+            invs > 0 && invs as f64 <= group_ops && muls >= 2 * invs && sqrs >= invs,
+            "{}: {f} over {group_ops} group operations",
+            r["run_id"]
+        );
+        assert!(r["counters"]
+            .as_object()
+            .unwrap()
+            .keys()
+            .all(|k| !k.contains("field")));
+        assert!(r["phases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|p| p.get("field_ops").is_none()));
+        records += 1;
+    }
+    assert_eq!(records, 16);
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        &s(&session),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+
+    // Each arm's bound carries the three field axes, known, with the
+    // two-stage interval the other axes have, and re-derives.
+    let records_dir = dir.join("records");
+    std::fs::create_dir_all(&records_dir).unwrap();
+    let mut ids = std::collections::BTreeMap::new();
+    for arm in ["rho-neg", "bsgs-neg"] {
+        let out = records_dir.join(format!("{arm}.json"));
+        let (ok, _, err) = ecbench(&[
+            "bound",
+            "fit",
+            "--dir",
+            &s(&session),
+            "--arm",
+            arm,
+            "--root",
+            &s(&dir),
+            "--out",
+            &s(&out),
+        ]);
+        assert!(ok, "bound fit {arm}: {err}");
+        let b = read_json(&out);
+        assert_eq!(b["fit"]["sizes"], 4);
+        for axis in ["field_muls", "field_sqrs", "field_invs"] {
+            let d = &b["dimensions"][axis];
+            assert_eq!(d["known"], true, "{arm} {axis}: {d}");
+            assert!(d["value"].as_f64().unwrap() > 0.0, "{arm} {axis}: {d}");
+            assert_eq!(d["ci95"].as_array().unwrap().len(), 2, "{arm} {axis}: {d}");
+            assert_eq!(d["lower_is_better"], true);
+        }
+        // Per `√r`: at most one inversion per group operation, so the
+        // inversions axis is bounded by `S`, and two multiplications each.
+        let dim = |axis: &str| b["dimensions"][axis]["value"].as_f64().unwrap();
+        assert!(dim("field_invs") <= b["constant"]["s"]["value"].as_f64().unwrap());
+        assert!(dim("field_muls") >= 2.0 * dim("field_invs"));
+        assert!(dim("field_sqrs") >= dim("field_invs"));
+        ids.insert(arm, b["bound_id"].as_str().unwrap().to_string());
+    }
+    let (ok, _, err) = ecbench(&[
+        "bound",
+        "check",
+        "--root",
+        &s(&dir),
+        "--record",
+        &s(&records_dir.join("rho-neg.json")),
+        &s(&records_dir.join("bsgs-neg.json")),
+    ]);
+    assert!(ok, "bound check: {err}");
+
+    // The frontier carries the axes and the page their columns; the axes
+    // are in the vocabulary dominance may read.
+    let fjson = dir.join("frontier.json");
+    let fmd = dir.join("FRONTIER.md");
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records_dir),
+        "--out",
+        &s(&fjson),
+        "--markdown",
+        &s(&fmd),
+    ]);
+    assert!(ok, "frontier build: {err}");
+    let f = read_json(&fjson);
+    let entries = f["domains"][0]["entries"].as_array().unwrap();
+    assert_eq!(entries.len(), 2);
+    for e in entries {
+        for axis in ["field_muls", "field_sqrs", "field_invs"] {
+            assert_eq!(e["axes"][axis]["known"], true, "{}", e["bound_id"]);
+        }
+    }
+    let page = std::fs::read_to_string(&fmd).unwrap();
+    assert!(page.contains("| field muls (/√r) | field sqrs (/√r) | field invs (/√r) |"));
+    assert!(page.contains("the primitive level"));
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records_dir),
+        "--out",
+        &s(&fjson),
+        "--markdown",
+        &s(&fmd),
+        "--check",
+    ]);
+    assert!(ok, "frontier check: {err}");
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records_dir),
+        "--axes",
+        "ops,field_sqrs",
+        "--json",
+    ]);
+    assert!(ok, "frontier on a field axis: {err}");
+
+    // A challenge naming `field_sqrs`: the verdict decides on it and
+    // reports the other two field axes.
+    let draft = dir.join("draft.json");
+    std::fs::write(
+        &draft,
+        format!(
+            r#"{{
+  "label": "test: fewer squarings than rho.negation",
+  "domain": {{"problem": "ecdlp.single_target", "family": "prime", "target_kind": "planted",
+             "unit": "ecbench.gae", "tier": "toy",
+             "envelope": {{"targets": 1, "precomputation": "none", "threads": 1}}}},
+  "incumbent": {{"bound_id": "{}", "method": {{"id": "rho.negation"}}}},
+  "workloads": {{"curves": [{{"kind": "prime_search", "bits": 12, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 14, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 16, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 18, "seed": 59297}}],
+                "targets_per_curve": 2, "nonce": 3}},
+  "measurement": {{"rounds": 1, "warmup": 0, "isolation_required": "L0", "timeout_seconds": 60}},
+  "acceptance": {{"axes": ["ops", "memory", "field_sqrs"], "min_runs_per_size": 2}}
+}}"#,
+            ids["rho-neg"]
+        ),
+    )
+    .unwrap();
+    let challenge = dir.join("challenge.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "seal",
+        "--draft",
+        &s(&draft),
+        "--out",
+        &s(&challenge),
+    ]);
+    assert!(ok, "challenge seal: {err}");
+    let (ok, _, err) = ecbench(&["challenge", "check", "--file", &s(&challenge)]);
+    assert!(ok, "challenge check: {err}");
+    let c = read_json(&challenge);
+    assert_eq!(
+        c["acceptance"]["axes"],
+        serde_json::json!(["ops", "memory", "field_sqrs"])
+    );
+    let spec1 = dir.join("spec1.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "spec",
+        "--challenge",
+        &s(&challenge),
+        "--candidate",
+        r#"{"id":"bsgs.negation"}"#,
+        "--epoch",
+        "1",
+        "--out",
+        &s(&spec1),
+    ]);
+    assert!(ok, "challenge spec: {err}");
+    let s1 = dir.join("s1");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&spec1),
+        "--out",
+        &s(&s1),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "run s1: {err}");
+    let v1 = dir.join("verdict1.json");
+    let b1 = dir.join("bound1.json");
+    let (_, _, err) = ecbench(&[
+        "challenge",
+        "verdict",
+        "--challenge",
+        &s(&challenge),
+        "--dir",
+        &s(&s1),
+        "--epoch",
+        "1",
+        "--replay-all",
+        "--bounds",
+        &s(&records_dir),
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&v1),
+        "--bound-out",
+        &s(&b1),
+    ]);
+    assert!(v1.exists(), "verdict 1 was not written: {err}");
+    let v = read_json(&v1);
+    assert_eq!(v["schema"], "ecbench.verdict/v1");
+    assert_ne!(v["outcome"], "inadmissible", "{}", v["statement"]);
+    assert_eq!(v["audit"]["ok"], true);
+    assert_eq!(v["audit"]["replays"], v["audit"]["replays_reproduced"]);
+    assert_eq!(
+        v["acceptance"]["axes"],
+        serde_json::json!(["ops", "memory", "field_sqrs"])
+    );
+    let axes = v["axes"].as_array().unwrap();
+    let axis = |name: &str| {
+        axes.iter()
+            .find(|a| a["axis"] == name)
+            .unwrap_or_else(|| panic!("no axis {name} in {axes:?}"))
+    };
+    let ops_pairs = axis("ops")["pairs"].as_u64().unwrap();
+    assert_eq!(ops_pairs, 8);
+    for (name, decides) in [
+        ("field_sqrs", true),
+        ("field_muls", false),
+        ("field_invs", false),
+    ] {
+        let a = axis(name);
+        assert_eq!(a["known"], true, "{a}");
+        assert_eq!(a["decides"], decides, "{a}");
+        assert_eq!(a["pairs"], ops_pairs, "{a}");
+        assert!(a["ratio_candidate_over_incumbent"].as_f64().unwrap() > 0.0);
+        assert!(
+            ["better", "worse", "indistinguishable"].contains(&a["verdict"].as_str().unwrap()),
+            "{a}"
+        );
+    }
+    // The axes named in the statement include the field ones, deciding or
+    // reported; the level, if any, is one of the three.
+    let statement = v["statement"].as_str().unwrap();
+    assert!(statement.contains("field_sqrs"), "{statement}");
+    assert!(
+        statement.contains("field_muls") && statement.contains("reported, not deciding"),
+        "{statement}"
+    );
+    match v["level_moved"].as_str() {
+        None => assert_ne!(v["outcome"], "advances"),
+        Some(l) => {
+            assert_eq!(v["outcome"], "advances");
+            assert!(["exponent", "constant", "primitive"].contains(&l), "{l}");
+        }
+    }
+    if b1.exists() {
+        let nb = read_json(&b1);
+        assert_eq!(nb["dimensions"]["field_sqrs"]["known"], true);
+        assert_eq!(nb["verdict_id"], v["verdict_id"]);
+    }
+
+    // A Koblitz curve does not count: no block on the record, no axis on
+    // the bound.  Unknown is not zero.
+    let kspec = dir.join("kspec.json");
+    std::fs::write(&kspec, KOBLITZ_FIELD_SPEC).unwrap();
+    let ksession = dir.join("k0");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&kspec),
+        "--out",
+        &s(&ksession),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "koblitz run failed: {err}");
+    let lines = std::fs::read_to_string(ksession.join("records.jsonl")).unwrap();
+    let krecords: Vec<Value> = lines
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|l| serde_json::from_str(l).unwrap())
+        .collect();
+    assert_eq!(krecords.len(), 1);
+    assert_eq!(krecords[0]["outcome"]["status"], "verified");
+    assert!(krecords[0].get("field_ops").is_none(), "absent, never zero");
+    let kout = dir.join("koblitz-bound.json");
+    let (ok, _, err) = ecbench(&[
+        "bound",
+        "fit",
+        "--dir",
+        &s(&ksession),
+        "--arm",
+        "bsgs-neg",
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&kout),
+    ]);
+    assert!(ok, "koblitz bound fit: {err}");
+    let kb = read_json(&kout);
+    let dims: Vec<&String> = kb["dimensions"].as_object().unwrap().keys().collect();
+    assert_eq!(dims, vec!["memory", "ops", "uncharged"], "{dims:?}");
+    let _ = std::fs::remove_dir_all(&dir);
+}

@@ -28,8 +28,8 @@ use crate::cryptanalysis::ecbench::generic::{
 use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance, WideInstance};
 use crate::cryptanalysis::ic_boundary::{
     rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
-    PrimePoint, RhoResult, RhoWalk,
+    Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost, PointClasses,
+    PrimeInstance, PrimePoint, RhoResult, RhoWalk,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
@@ -570,6 +570,20 @@ pub struct SolveReport {
     /// oracles; `None` for table oracles and generic methods.
     #[serde(default)]
     pub solver: Option<SolverStats>,
+    /// The field operations behind the group operations — modular
+    /// multiplications, squarings and inversions — summed over every
+    /// phase of the solve, when the group counted them
+    /// ([`CountedGroup::counts_field_ops`]: the prime-field curve
+    /// arithmetic the generic walks and tables run on).  `None` is
+    /// unknown, never zero: binary and Koblitz curves do not count, and
+    /// the index-calculus pipeline does field arithmetic outside the
+    /// group law (square roots, Legendre symbols, the oracles, the
+    /// elimination) that this tally would not see, so it reports none.
+    /// Kept out of `counters` and `phases`, so what a committed record's
+    /// replay compares is unchanged; the audit compares the block only
+    /// when both the record and the replay carry it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_ops: Option<FieldOps>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -598,7 +612,18 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
         .map_err(|_| format!("parameter `{name}` is not an integer: `{}`", m.params[name]))
 }
 
-fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
+/// The field operations of a solve from its ledgers, when the group
+/// counts them; `None` (unknown) when it does not.
+fn field_ops_of<G: CountedGroup>(g: &G, ledgers: &[GroupOps]) -> Option<FieldOps> {
+    g.counts_field_ops().then(|| FieldOps::total(ledgers))
+}
+
+fn generic_report(
+    out: GenericOutcome,
+    wall: u64,
+    a: u32,
+    field_ops: Option<FieldOps>,
+) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
         recovered: out.recovered.map(u128::from),
@@ -619,12 +644,13 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
 /// Split a tuned rho run into set-up, walk and verification from its own
 /// counters; the frozen walk has none and stays one phase.
-fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
+fn rho_report(res: RhoResult, wall: u64, field_ops: Option<FieldOps>) -> SolveReport {
     let c = &res.counters;
     let get = |k: &str| c.get(k).copied().unwrap_or(0);
     let phases = if c.is_empty() {
@@ -666,6 +692,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
@@ -683,10 +710,22 @@ fn solve_generic<G: CountedGroup>(
     // Everything these methods do depends on the target (rho's jump table
     // is [a]G + [b]Q), so the whole solve is the online window.
     measurement::begin_online(Phase::RhoSolve);
+    // The rho walks keep one ledger for the whole solve; the tables and
+    // the kangaroo keep set-up and search apart.  Either way the field
+    // operations reported are the solve's total, known only when the
+    // group counts them.
+    let rho = |res: RhoResult, wall: u64| {
+        let f = field_ops_of(g, &[res.group_ops]);
+        rho_report(res, wall, f)
+    };
+    let generic = |o: GenericOutcome, wall: u64, a: u32| {
+        let f = field_ops_of(g, &[o.setup, o.search]);
+        generic_report(o, wall, a, f)
+    };
     let rep = match m.id.as_str() {
         "rho.frozen_reference" => {
             let res = rho_reference(g, gen, target, r, seed, cap()?);
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.plain" => {
             let res = rho_walk_with(
@@ -699,7 +738,7 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::plain(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.negation" => {
             let res = rho_walk_with(
@@ -712,23 +751,23 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::negation(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "bsgs.textbook" => {
             let o = bsgs_textbook(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.interleaved" => {
             let o = bsgs_interleaved(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.negation" => {
             let o = bsgs_negation(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 2)
+            generic(o, t.elapsed().as_nanos() as u64, 2)
         }
         "kangaroo.vow" => {
             let o = kangaroo(g, gen, target, r, seed, cap()?);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         other => return Err(format!("`{other}` is not a generic method")),
     };
@@ -835,7 +874,8 @@ fn solve_inner(
             )
             .ok_or("not a Koblitz instance")?;
             measurement::end_online();
-            Ok(rho_report(res, t.elapsed().as_nanos() as u64))
+            // A Koblitz walk does not count its field operations: unknown.
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, None))
         }
         (Instance::Prime(i), _) => solve_generic(
             m,
@@ -1001,6 +1041,7 @@ fn claw_report(o: ClawOutcome, shape: ClawShape, r: u128, n: u32, wall: u64) -> 
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     }
 }
 
@@ -1097,6 +1138,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
             online: None,
             online_error: None,
             solver: None,
+            field_ops: None,
         });
     };
     let c = o.charges;
@@ -1147,6 +1189,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -1287,6 +1330,11 @@ fn ic_report(
         online: None,
         online_error: None,
         solver,
+        // The pipeline's field arithmetic outside the group law (square
+        // roots, Legendre symbols, oracle inversions, the elimination) is
+        // counted natively and priced apart; the group-law tally alone
+        // would understate it, so the figure stays unknown.
+        field_ops: None,
     }
 }
 
@@ -1714,6 +1762,7 @@ fn solve_shared_rank(
         online: Some(online),
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -1997,6 +2046,76 @@ mod tests {
         );
         assert_eq!(s.sat_conflicts, None);
         assert_eq!(s.n_vars, None);
+    }
+
+    /// A prime-curve solve reports the field operations behind its group
+    /// operations; a Koblitz solve, whose arithmetic does not count them,
+    /// reports none — and never a zero.
+    #[test]
+    fn field_operations_are_reported_on_prime_curves_and_unknown_elsewhere() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let m = resolve(&MethodSpec {
+            id: "bsgs.negation".into(),
+            params: BTreeMap::new(),
+        })
+        .unwrap();
+        let spec = CurveSpec::PrimeSearch {
+            bits: 12,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 97);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(97));
+        let f = rep
+            .field_ops
+            .expect("a prime curve counts its field operations");
+        let group_ops = rep.total_gae;
+        // Every addition or doubling that did field work did exactly one
+        // inversion, at least two multiplications and at least one
+        // squaring; the special cases (∞ + P, P + (−P)) did none.
+        assert!(
+            f.invs > 0 && f.invs as f64 <= group_ops,
+            "{f:?} over {group_ops} group operations"
+        );
+        assert!(f.muls >= 2 * f.invs && f.sqrs >= f.invs, "{f:?}");
+        // The block is its own: counters and phases, which committed
+        // replays compare, do not carry it.
+        assert!(rep.counters.keys().all(|k| !k.contains("field")));
+        let v = serde_json::to_value(&rep).unwrap();
+        assert_eq!(v["field_ops"]["invs"], f.invs);
+
+        let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Binary(binary) = &inst else {
+            unreachable!()
+        };
+        let target = binary.fast.mul_u64(binary.generator, 113);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(u128::from(113 % binary.r)));
+        assert!(rep.field_ops.is_none(), "unknown is not zero");
+        let v = serde_json::to_value(&rep).unwrap();
+        assert!(v.get("field_ops").is_none(), "absent, not null");
     }
 
     #[test]
