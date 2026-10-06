@@ -58,14 +58,11 @@ done
 printf 'target\tarm\tinput_sha256\tcandidate_id\tcandidate_sha256\n' > "$out/FREEZE.tsv"
 for target in 1 7; do
     for arm in f6_ic f6_ic_direct; do
-        if [ "$arm" = f6_ic_direct ]; then
-            source_arm=${arm%_direct}
-            jq -S -c '.config.direct_fused_pack=true' \
-              "$archived/T$target/input-$source_arm.json" > "$out/inputs/T$target-$arm.json"
-            input="$out/inputs/T$target-$arm.json"
-        else
-            input="$archived/T$target/input-$arm.json"
-        fi
+        if [ "$arm" = f6_ic_direct ]; then direct=true; else direct=false; fi
+        jq -S -c --argjson direct "$direct" \
+          '.config.active_multipliers=true | .config.direct_fused_pack=$direct' \
+          "$archived/T$target/input-f6_ic.json" > "$out/inputs/T$target-$arm.json"
+        input="$out/inputs/T$target-$arm.json"
         candidate="$out/candidates/$arm.json"
         printf '%s\t%s\t%s\t%s\t%s\n' "$target" "$arm" "$(sha "$input")" \
           "$(jq -r .candidate_id "$candidate")" "$(sha "$candidate")" >> "$out/FREEZE.tsv"

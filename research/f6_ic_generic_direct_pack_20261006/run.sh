@@ -12,8 +12,7 @@ shasum -a 256 -c "$out/SOURCE_SHA256SUMS"
 while IFS="$(printf '\t')" read -r target arm input_sha candidate_id candidate_sha; do
     [ "$target" = target ] && continue
     case "$arm" in
-        f6_ic_direct) input="$out/inputs/T${target}-$arm.json" ;;
-        f6_ic) input="$archived/T$target/input-$arm.json" ;;
+        f6_ic|f6_ic_direct) input="$out/inputs/T${target}-$arm.json" ;;
         *) exit 2 ;;
     esac
     candidate="$out/candidates/$arm.json"
@@ -28,6 +27,7 @@ while IFS="$(printf '\t')" read -r target arm input_sha candidate_id candidate_s
     workload="$archived/T$target/workload.json"
     test -f "$workload"
     test "$(jq -r .config.solver "$input")" = "${arm%_direct}"
+    test "$(jq -r .config.active_multipliers "$input")" = true
     if [ "$arm" = "${arm%_direct}" ]; then
         test "$(jq -r '.config.direct_fused_pack // false' "$input")" = false
     else
@@ -52,10 +52,7 @@ for target in 1 7; do
     for item in $schedule; do
         arm=${item%:*}
         repetition=${item#*:}
-        case "$arm" in
-            f6_ic_direct) input="$out/inputs/T${target}-$arm.json" ;;
-            *) input="$archived/T$target/input-$arm.json" ;;
-        esac
+        input="$out/inputs/T${target}-$arm.json"
         candidate="$out/candidates/$arm.json"
         candidate_id=$(jq -r .candidate_id "$candidate")
         run_id="${candidate_id}W${workload_id#W}R${repetition}"

@@ -94,6 +94,7 @@ struct Config {
     factor_base: Option<FactorBaseSpec>,
     groebner_degree: u32,
     direct_fused_pack: bool,
+    active_multipliers: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -113,6 +114,7 @@ impl Default for Config {
             factor_base: None,
             groebner_degree: 3,
             direct_fused_pack: false,
+            active_multipliers: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -219,7 +221,10 @@ fn run(job: &Job) -> Result<Value, String> {
     for (name, value) in std::env::vars_os() {
         let name = name.to_string_lossy();
         let declared_default = (name == "IC_ARTIFACT_CACHE" && value == "off")
-            || (name == "IC_F2_BACKEND" && value == "cpu");
+            || (name == "IC_F2_BACKEND" && value == "cpu")
+            || (name == "KIC_F4_ACTIVE_MULTIPLIERS"
+                && value == "1"
+                && job.config.active_multipliers);
         if name.starts_with("KIC_")
             || name.starts_with("F4_")
             || name.starts_with("SOLVER_")
@@ -227,6 +232,11 @@ fn run(job: &Job) -> Result<Value, String> {
         {
             return Err(format!("undeclared algorithm environment override: {name}"));
         }
+    }
+    if job.config.active_multipliers
+        && std::env::var("KIC_F4_ACTIVE_MULTIPLIERS").as_deref() != Ok("1")
+    {
+        return Err("declared active-multiplier override is missing".into());
     }
     if rayon::current_num_threads() != 1 {
         return Err("exclusive phases require one Rayon thread".into());
@@ -242,7 +252,11 @@ fn run(job: &Job) -> Result<Value, String> {
     report["generic_phase_timing"] = json!(snapshot);
     report["generic_phase_policy"] = json!("exclusive-owner-thread-v1");
     report["generic_build"] = build_identity();
-    report["generic_runtime_policy"] = json!("default-environment-one-rayon-v1");
+    report["generic_runtime_policy"] = json!(if job.config.active_multipliers {
+        "declared-active-multipliers-one-rayon-v1"
+    } else {
+        "default-environment-one-rayon-v1"
+    });
     Ok(report)
 }
 
