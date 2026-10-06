@@ -3568,30 +3568,37 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   <div class="panel" id="ecc2k130-descent-degree-20260930">
     <div class="panel-head">
       <h2>ECC2K-130 descent route: the solving degree grows with &ell; and tracks the semi-regular reference, so the route has no crossover to wait for</h2>
-  <p class="panel-summary">Finds the refutation degree rises with chain length and tracks the semi-regular reference, leaving m = 3 above rho with a free oracle, n = 131 prices derived not measured.</p>
+  <p class="panel-summary">Finds the refutation degree rises with &ell; at m = 3 and, measured since 2026-10-06, at m = 4 (one degree higher, flat in n), leaving m = 3 above rho with a free oracle; n = 131 prices derived not measured.</p>
       <p>Class <span class="chip">accounting</span>. There is no new <code>S</code> and no cost moves: the ECC2K-130
         verdict was already set by the product law and the oracle budget above. This panel adds what the
         refutation degree of the <code>m</code>&thinsp;=&thinsp;3 chained S<sub>3</sub> system does as &ell; grows,
-        measured in <code>RESEARCH_DREG_MEASUREMENT.md</code> Results&nbsp;4&ndash;9, and the price that implies at
+        measured in <code>RESEARCH_DREG_MEASUREMENT.md</code> Results&nbsp;4&ndash;9, the m&thinsp;=&thinsp;4 chain added on
+        2026-10-06 (Result&nbsp;10), and the price that implies at
         n&thinsp;=&thinsp;131 under each degree model. Every n&thinsp;=&thinsp;131 figure is <b>derived, not
-        measured</b>. Sources: <code>research/dreg_degree7_ell5_20260930/</code> and
+        measured</b>. Sources: <code>research/dreg_degree7_ell5_20260930/</code>,
+        <code>research/dreg_m4_chain_20261006/</code> and
         <code>research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md</code>.</p>
     </div>
     <div class="table-scroll"><table>
       <caption>The refutation degree, four unsatisfiable draws per cell: the degree at which the constant 1
         enters the Macaulay row space. &ldquo;&ge;D&rdquo; is a lower bound. The first fall degree is 3 in every
         cell. D<sub>reg</sub> is the semi-regular degree of regularity of the cell's shape, a formula
-        (<code>semireg.py</code>).</caption>
+        (<code>dreg_score semireg</code>, native; <code>semireg.py</code> was the 2026-09-30 tool and agrees on every cell).</caption>
       <thead>
         <tr><th scope="col">&ell;</th><th scope="col">cells (n, &ell;)</th><th scope="col">unknowns</th>
           <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th></tr>
       </thead>
       <tbody>
+        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;3, the chained S<sub>3</sub> with one intermediate point</td></tr>
         <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td></tr>
         <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td></tr>
         <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td></tr>
         <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td></tr>
         <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td></tr>
+        <tr class="group"><td colspan="5">m&thinsp;=&thinsp;4, two intermediate points (2026-10-06)</td></tr>
+        <tr><td>1</td><td>(4,1) (5,1) (6,1)</td><td class="n">12&ndash;16</td><td>5 in every draw</td><td>5</td></tr>
+        <tr><td>2</td><td>(5,2) (6,2) (7,2) (8,2)</td><td class="n">18&ndash;24</td><td><b>6 in every draw</b>: one above m&thinsp;=&thinsp;3</td><td>6; 7; 7; 7</td></tr>
+        <tr><td>3</td><td>(9,3) (10,3)</td><td class="n">30, 32</td><td><b>&ge;7 &ge;7 &ge;7 &ge;7; M4_10_3_HTML</b> (degree 6 in full)</td><td>8; 9</td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -3600,7 +3607,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         C(N,&thinsp;&le;D)<sup>w</sup> of the degree-D Macaulay matrix. w&thinsp;=&thinsp;1 is one touch per column, which
         no elimination beats; w&thinsp;=&thinsp;2 is the usual &omega;&thinsp;=&thinsp;2 estimate. Oracle units are column
         touches, rho units are group operations, and the two are not converted.
-        <code>descent_degree_cost_20260930.py</code>.</caption>
+        <code>examples/descent_degree_cost</code>, the native port of <code>descent_degree_cost_20260930.py</code>, whose rows it reproduces exactly.</caption>
       <thead>
         <tr><th scope="col">m</th><th scope="col">degree model</th><th scope="col" class="n">w</th><th scope="col" class="n">log<sub>2</sub> total</th><th scope="col" class="n">vs rho</th><th scope="col">Class</th></tr>
       </thead>
@@ -3609,9 +3616,12 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>3</td><td>D&thinsp;=&thinsp;7, constant</td><td class="n">1</td><td class="n">90.53</td><td class="n">+29.72</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>3</td><td>D&thinsp;=&thinsp;7, constant</td><td class="n">2</td><td class="n">133.02</td><td class="n">+72.21</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>3</td><td>semi-regular D<sub>reg</sub>(N) (28 at &ell;&thinsp;=&thinsp;26)</td><td class="n">1</td><td class="n">196.95</td><td class="n">+136.14</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>3</td><td>&lceil;&ell;/2&rceil;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;3 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">158.96</td><td class="n">+98.15</td><td><span class="chip">extrapolation</span></td></tr>
         <tr><td>4</td><td>free oracle (the floor, integer &ell;)</td><td class="n">&mdash;</td><td class="n">56.46</td><td class="n">&minus;4.35</td><td><span class="chip">boundary</span></td></tr>
         <tr><td>4</td><td>D&thinsp;=&thinsp;2, any Macaulay matrix</td><td class="n">1</td><td class="n">62.88</td><td class="n">+2.07</td><td><span class="chip">extrapolation</span></td></tr>
-        <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (m&thinsp;=&thinsp;4 unmeasured)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (borrowed from m&thinsp;=&thinsp;3; m&thinsp;=&thinsp;4 already reads &ge;7 at &ell;&thinsp;=&thinsp;3, so this row is optimistic)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>&ell;&thinsp;+&thinsp;4, the measured m&thinsp;=&thinsp;4 fit (minimum at &ell;&thinsp;=&thinsp;4) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">173.13</td><td class="n">+112.32</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>semi-regular D<sub>reg</sub>(N) of the m&thinsp;=&thinsp;4 shape (55 at &ell;&thinsp;=&thinsp;27) &mdash; 2026-10-06</td><td class="n">1</td><td class="n">275.14</td><td class="n">+214.33</td><td><span class="chip">extrapolation</span></td></tr>
       </tbody>
     </table></div>
     <div class="panel-head">
@@ -3627,6 +3637,14 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         2<sup>196.95</sup>, which is worse than an exhaustive search of the 2<sup>129</sup> subgroup. That rests on
         the agreement seen at n&thinsp;&le;&thinsp;15 persisting to about 209 unknowns, and it is not measured. The discriminating next cell is (15,5), where the reference says 8; its degree-7 matrix needs a
         larger machine.</p>
+      <p><b>m&thinsp;=&thinsp;4, measured (2026-10-06).</b> The decomposition size whose free-oracle floor is below rho
+        refutes at &ell;&thinsp;+&thinsp;4 for &ell;&thinsp;&le;&thinsp;2 (one degree above m&thinsp;=&thinsp;3 at the same &ell;)
+        and at &ge;7 for &ell;&thinsp;=&thinsp;3, as pre-registered. Like m&thinsp;=&thinsp;3 it is flat in n at fixed &ell;, so the
+        degree is set by m and &ell;, and the semi-regular reference, within one everywhere, overstates its growth in n.
+        Any degree that rises with &ell; collapses the route: under either measured fit the optimum is the smallest factor
+        base, where the route is a target search costing 2<sup>158.96</sup> (m&thinsp;=&thinsp;3) or 2<sup>173.13</sup>
+        (m&thinsp;=&thinsp;4), above an exhaustive search of the subgroup. Those are extrapolations of three-rung fits,
+        marked as such; the verdict against rho is unchanged.</p>
     </div>
   </div>
 

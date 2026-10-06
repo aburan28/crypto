@@ -114,6 +114,19 @@ fn main() {
             "semi-regular D_reg(N)",
             Box::new(move |l, dreg: &mut dyn FnMut(usize, usize) -> u32| dreg(m, l)),
         ));
+        // The measured degree is flat in n at fixed l and rises with l
+        // (RESEARCH_DREG_MEASUREMENT.md Results 5-10).  The two small-l
+        // fits, extrapolated: m = 3 reads ceil(l/2) + 4 at l = 2..5 except
+        // (4,3) and (7,4) at surplus -5 and half of (8,4)'s draws; m = 4
+        // reads l + 4 at l = 1, 2 and >= 7 at l = 3.
+        if m == 3 {
+            scenarios.push((
+                "ceil(l/2) + 4, the m = 3 fit",
+                Box::new(|l, _| (l as u32).div_ceil(2) + 4),
+            ));
+        } else {
+            scenarios.push(("l + 4, the m = 4 fit", Box::new(|l, _| l as u32 + 4)));
+        }
         for (name, degree_of) in &scenarios {
             let ws: &[u32] = if name.starts_with("free") {
                 &[1]

@@ -704,6 +704,58 @@ It builds degree 7 on the committed `≥7` draws, replayed with `--d-min 7`.
   route at `n = 131` under a constant degree and under `D_reg`. Every
   figure there is an extrapolation.
 
+## Result 10: the `m = 4` chain — one degree above `m = 3`, flat in `n`, rising with `ℓ`
+
+`research/dreg_m4_chain_20261006/` holds everything. It was pre-registered
+before any `m = 4` cell ran; its `ℓ = 3` amendment was registered before
+those cells ran.
+
+`m = 4` is the smallest decomposition whose free-oracle floor at
+ECC2K-130 is below rho. Every degree before this one was `m = 3`'s.
+
+| `ℓ` | `m = 4` cells (`N`) | measured | semi-regular `D_reg` | `m = 3` at the same `ℓ` |
+|--:|---|---|---|---|
+| 1 | (4,1) (5,1) (6,1) (12–16) | 5 in every draw | 5 5 5 | — |
+| 2 | (5,2) (6,2) (7,2) (8,2) (18–24) | **6 in every draw** | 6 7 7 7 | 5 in every draw (11–18) |
+| 3 | (9,3) (10,3) (30, 32) | **≥7 ≥7 ≥7 ≥7; M4_10_3** (degree 6 built in full) | 8, 9 | 5 at S = −5, else 6 |
+
+- **Q7, as registered: `m = 4` refutes above `m = 3` at the same `ℓ`.**
+  Every `ℓ = 2` cell reads 6, where `m = 3` reads 5. The prediction held.
+- **Q8, as registered: `m = 4` tracks its reference.** Every cell is within
+  one of `D_reg`.
+  - It is equal in four of the seven registered cells.
+  - It is one below at `(6, 2)`–`(8, 2)`, where my exact predictions of 7
+    missed.
+- **Q10, amendment 1: M4_Q10.**
+- **The degree is flat in `n` at fixed `ℓ`, for both `m`.**
+  - `m = 4` at `ℓ = 2` reads 6 from 18 to 24 unknowns, and `m = 3` at
+    `ℓ = 2` reads 5 from 11 to 18.
+  - The reference rises with `N` meanwhile. So it fits within one here but
+    overstates the growth in `n`.
+  - On this evidence the degree is set by `m` and `ℓ`. Two small-`ℓ` fits:
+    - **`m = 3`: `⌈ℓ/2⌉ + 4`.** It matches every exactly measured cell
+      except `(4, 3)` and `(7, 4)` at surplus −5, and the two `(8, 4)`
+      draws at −4 that read 7.
+    - **`m = 4`: `ℓ + 4`.** It matches every cell, and the `ℓ = 3` bounds
+      are consistent with it.
+  - They are fits to three or four rungs, not laws.
+- **The FFD is 3** (two draws at 2).
+- **Cost.** The `ℓ ≤ 2` draws resolve in seconds. The `ℓ = 3` draws took
+  6–7 min at `(9, 3)` and about 17 min at `(10, 3)`, with peaks of 2.9 and
+  5.4 GB. Those are practicality notes on the four-core container.
+- **Harness.** It is native, per `AGENTS.md`'s no-Python rule:
+  - `chained_solution_count` is tested against an exhaustive evaluation at
+    `m = 4`;
+  - `dreg_ladder --m`, with the `m = 3` identity check at 328 rows and 0
+    mismatches;
+  - `examples/dreg_score` for scoring, comparison, the reference and matrix
+    shapes;
+  - `examples/descent_degree_cost`, the native `n = 131` cost model, which
+    reproduces the committed Python table exactly.
+- **For ECC2K-130**:
+  `research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md` §5. Every
+  figure there is an extrapolation.
+
 ## Reproducing
 
 ```sh
@@ -776,6 +828,12 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - *Done (Result 9):* **the size of the growth.** `(10, 5)` refutes at
   exactly 7, one degree above 6. It needed a memory-budgeted dense switch
   and F5-criterion rows.
+- *Done (Result 10):* **`m = 4`**, the decomposition size ECC2K-130's
+  floor needs. It reads `ℓ + 4` at `ℓ ≤ 2`, one above `m = 3`, and ≥7 at
+  `ℓ = 3`.
+- **Next: `m = 4` at `ℓ = 3` and degree 7**, which tells whether its slope
+  stays at one per `ℓ`. `(9, 3)`'s degree-7 matrix is about 2.1M × 2.8M,
+  so it needs a large host, like `(15, 5)` below.
 - **Next: `(15, 5)` at degree 7**, the cell where the semi-regular
   reference (8) and a degree levelled off at 7 disagree.
   - At `(10, 5)`'s F5 fraction and band-7 rank ratio, its block after
