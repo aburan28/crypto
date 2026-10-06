@@ -1197,6 +1197,57 @@ struct Frame {
     values: u128,
 }
 
+/// A branch choice keeps the reduced parent shared until this child is
+/// visited. Point splits can have thousands of children at n=83; eagerly
+/// substituting every one copies the whole equation system thousands of
+/// times even when the node budget stops after the first child.
+struct DeferredFrame {
+    parent: std::sync::Arc<Frame>,
+    fixed: u128,
+    values: u128,
+    choice: BranchChoice,
+}
+
+enum BranchChoice {
+    Point {
+        i: usize,
+        ell: usize,
+        c: u32,
+        free: u32,
+    },
+    Bit {
+        v: usize,
+        value: bool,
+    },
+}
+
+impl DeferredFrame {
+    fn materialize(self) -> Frame {
+        let assignment: Vec<(usize, bool)> = match self.choice {
+            BranchChoice::Point { i, ell, c, free } => (0..ell)
+                .filter(|&t| free >> t & 1 == 1)
+                .map(|t| (i * ell + t, c >> t & 1 == 1))
+                .collect(),
+            BranchChoice::Bit { v, value } => vec![(v, value)],
+        };
+        assign(&self.parent, self.fixed, self.values, &assignment)
+    }
+}
+
+enum PendingFrame {
+    Ready(Frame),
+    Deferred(DeferredFrame),
+}
+
+impl PendingFrame {
+    fn materialize(self) -> Frame {
+        match self {
+            Self::Ready(frame) => frame,
+            Self::Deferred(frame) => frame.materialize(),
+        }
+    }
+}
+
 /// What processing one node gave.
 enum Step {
     /// No root below: refuted by the linearisation or the order test.
@@ -1204,7 +1255,7 @@ enum Step {
     /// A leaf: `is_head` for the last-summand shortcut.
     Leaf { values: u128, is_head: bool },
     /// Children, pushed in this order (the last is explored first).
-    Split(Vec<Frame>),
+    Split(Vec<DeferredFrame>),
 }
 
 /// The search's fixed shape, shared by every thread.
@@ -1284,17 +1335,19 @@ impl Shape<'_> {
                 0
             };
             let start = self.valid.partition_point(|&c| c < low);
-            let children: Vec<Frame> = self.valid[start..]
+            let parent = std::sync::Arc::new(f);
+            let children: Vec<DeferredFrame> = self.valid[start..]
                 .iter()
                 .rev()
                 .filter(|&&c| c & fixed_i == values_i & fixed_i)
                 .map(|&c| {
                     let free = !fixed_i & summand_mask as u32;
-                    let assignment: Vec<(usize, bool)> = (0..ell)
-                        .filter(|&t| free >> t & 1 == 1)
-                        .map(|t| (i * ell + t, c >> t & 1 == 1))
-                        .collect();
-                    assign(&f, fixed, values, &assignment)
+                    DeferredFrame {
+                        parent: parent.clone(),
+                        fixed,
+                        values,
+                        choice: BranchChoice::Point { i, ell, c, free },
+                    }
                 })
                 .collect();
             if children.is_empty() {
@@ -1316,9 +1369,20 @@ impl Shape<'_> {
                 is_head: false,
             };
         };
+        let parent = std::sync::Arc::new(f);
         Step::Split(vec![
-            assign(&f, fixed, values, &[(v, true)]),
-            assign(&f, fixed, values, &[(v, false)]),
+            DeferredFrame {
+                parent: parent.clone(),
+                fixed,
+                values,
+                choice: BranchChoice::Bit { v, value: true },
+            },
+            DeferredFrame {
+                parent,
+                fixed,
+                values,
+                choice: BranchChoice::Bit { v, value: false },
+            },
         ])
     }
 }
@@ -1420,21 +1484,21 @@ fn search(
     let stop = AtomicBool::new(false);
     // Serial breadth-first expansion into a frontier.
     let want = SUBTREES_PER_THREAD * rayon::current_num_threads().max(1);
-    let mut frontier = vec![Frame {
+    let mut frontier = vec![PendingFrame::Ready(Frame {
         eqs: sys.equations.clone(),
         subs: Vec::new(),
         fixed: 0,
         values: 0,
-    }];
+    })];
     while !frontier.is_empty() && frontier.len() < want {
         let mut next = Vec::with_capacity(frontier.len() * 2);
-        for f in frontier {
+        for pending in frontier {
             if nodes.fetch_add(1, Ordering::Relaxed) >= node_budget {
                 stats.exhausted = true;
                 stats.nodes = nodes.load(Ordering::Relaxed);
                 return None;
             }
-            match shape.step(f, stats) {
+            match shape.step(pending.materialize(), stats) {
                 Step::Closed => {}
                 Step::Leaf { values, is_head } => {
                     stats.leaves += 1;
@@ -1446,7 +1510,9 @@ fn search(
                         return None;
                     }
                 }
-                Step::Split(children) => next.extend(children.into_iter().rev()),
+                Step::Split(children) => {
+                    next.extend(children.into_iter().rev().map(PendingFrame::Deferred))
+                }
             }
         }
         frontier = next;
@@ -1467,7 +1533,7 @@ fn search(
                     stop.store(true, Ordering::Relaxed);
                     break;
                 }
-                match shape.step(f, &mut local) {
+                match shape.step(f.materialize(), &mut local) {
                     Step::Closed => {}
                     Step::Leaf { values, is_head } => {
                         local.leaves += 1;
@@ -1480,7 +1546,9 @@ fn search(
                             break;
                         }
                     }
-                    Step::Split(children) => stack.extend(children),
+                    Step::Split(children) => {
+                        stack.extend(children.into_iter().map(PendingFrame::Deferred))
+                    }
                 }
             }
             (None, local)
