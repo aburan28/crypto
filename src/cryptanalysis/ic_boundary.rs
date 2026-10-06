@@ -4342,7 +4342,7 @@ pub struct OracleCounters {
 /// choice of signs sums to the target, or when an abscissa has no point
 /// in the base: the witness does not lift, and a pipeline must not turn
 /// it into a relation.
-pub(crate) fn lift_abscissae<G: CountedGroup>(
+pub fn lift_abscissae<G: CountedGroup>(
     g: &G,
     fb: &FactorBase<G::Elt>,
     ops: &mut GroupOps,

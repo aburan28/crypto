@@ -28,9 +28,10 @@ use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::f4_fp::{self, F4Options, Ordering as F4Ordering};
+use super::f4_fp::{self, F4Options, F4Trace, Ordering as F4Ordering};
 use super::gaudry_cubic::{am, mm, sm, square_core, wiedemann_u64, PolyRing, SparseRel, UPoly};
 use super::residual_walk::{inv_mod, is_prime_u64, mix64, pow_mod};
+use std::sync::{Arc, Mutex, OnceLock};
 
 // ── A field, abstractly ──────────────────────────────────────────────────
 
@@ -712,6 +713,21 @@ impl<'a> EllE<'a> {
     pub fn sub(&self, p: &PtE6, q: &PtE6) -> PtE6 {
         self.add(p, &self.neg(q))
     }
+    /// [`EllE::mul`] for a scalar above 2⁶⁴ (the group order itself).
+    pub fn mul_u128(&self, pt: &PtE6, mut k: u128) -> PtE6 {
+        let mut acc = PtE6::INF;
+        let mut base = *pt;
+        while k > 0 {
+            if k & 1 == 1 {
+                acc = self.add(&acc, &base);
+            }
+            k >>= 1;
+            if k > 0 {
+                base = self.add(&base, &base);
+            }
+        }
+        acc
+    }
     pub fn mul(&self, pt: &PtE6, mut k: u64) -> PtE6 {
         let mut acc = PtE6::INF;
         let mut base = *pt;
@@ -738,29 +754,21 @@ impl<'a> EllE<'a> {
     }
 }
 
-fn isqrt(n: u64) -> u64 {
-    let mut r = (n as f64).sqrt() as u64;
-    while r * r > n {
-        r -= 1;
-    }
-    while (r + 1) * (r + 1) <= n {
-        r += 1;
-    }
-    r
-}
-
 /// `#E(F_{q³})` by baby-step giant-step on a random point, accepted when it
 /// is four times a prime (the group is then `Z/2 × Z/2ℓ` and the DLP lives
 /// in the subgroup of order `ℓ`).
 fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
-    let p = ec.f.f.p;
+    // returns ℓ = #E/4 when #E = 4ℓ with ℓ prime;
+    // the order is near p⁶, which passes 2⁶⁴ at p = 1,622 while ℓ = #E/4 stays
+    // below it up to p = 2,039: the search runs in u128 (note §16)
+    let p = ec.f.f.p as u128;
     let q3 = p.pow(6);
-    let two_sqrt = 2 * isqrt(q3) + 2;
+    let two_sqrt = 2 * isqrt128(q3) + 2;
     let lo = q3 + 1 - two_sqrt;
     let width = 2 * two_sqrt;
     let pt = ec.random_point(rng);
-    let steps = isqrt(width) + 1;
-    let mut table: HashMap<PtE6, u64> = HashMap::new();
+    let steps = isqrt128(width) + 1;
+    let mut table: HashMap<PtE6, u128> = HashMap::new();
     let mut jp = PtE6::INF;
     for j in 0..steps {
         if !jp.inf {
@@ -768,9 +776,9 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         }
         jp = ec.add(&jp, &pt);
     }
-    let giant = ec.mul(&pt, steps);
-    let mut t = ec.mul(&pt, lo);
-    let mut i = 0u64;
+    let giant = ec.mul_u128(&pt, steps);
+    let mut t = ec.mul_u128(&pt, lo);
+    let mut i = 0u128;
     let mut found = None;
     while i * steps <= width + steps {
         let m = if t.inf {
@@ -786,11 +794,22 @@ fn group_order_4_prime(ec: &EllE, rng: &mut StdRng) -> Option<u64> {
         i += 1;
     }
     let m = found?;
-    if m % 4 != 0 || !is_prime_u64(m / 4) {
+    if m % 4 != 0 || m / 4 > u64::MAX as u128 || !is_prime_u64((m / 4) as u64) {
         return None;
     }
     let other = ec.random_point(rng);
-    ec.mul(&other, m).inf.then_some(m)
+    ec.mul_u128(&other, m).inf.then_some((m / 4) as u64)
+}
+
+fn isqrt128(n: u128) -> u128 {
+    let mut r = (n as f64).sqrt() as u128;
+    while r * r > n {
+        r -= 1;
+    }
+    while (r + 1) * (r + 1) <= n {
+        r += 1;
+    }
+    r
 }
 
 // ── The genus-3 cover H : y² = F(x)·N(x) over F_q ─────────────────────────
@@ -1171,6 +1190,34 @@ pub struct ZeroDimStats {
     pub lin_ms: f64,
     /// F4 stopped early at this staircase (`F4Options::stop_staircase`).
     pub stopped_at: Option<usize>,
+    /// F4 replayed a recorded trace (the useful rows of an earlier system
+    /// of the same shape) instead of selecting pairs.
+    pub replayed: bool,
+    /// The replay found other leading monomials and the full run was done.
+    pub trace_mismatch: bool,
+}
+
+/// A recorded trace with its record: replays that held, replays that
+/// diverged.  A trace recorded on a system of an uncommon shape diverges on
+/// most of the rest; once it has diverged three times and more often than
+/// it held, it is dropped and the next full run records a new one.
+pub struct TraceEntry {
+    pub trace: Arc<F4Trace>,
+    pub held: u64,
+    pub diverged: u64,
+}
+
+/// Traces of stopped F4 runs on the six-quadric systems, one per `p`
+/// (every residual's system has the same shape up to rare variants),
+/// recorded by a full run and replayed on the rest when a context asks.
+fn trace_cache() -> &'static Mutex<HashMap<u64, TraceEntry>> {
+    static CACHE: OnceLock<Mutex<HashMap<u64, TraceEntry>>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// Forget the recorded traces (tests).
+pub fn clear_traces() {
+    trace_cache().lock().unwrap().clear();
 }
 
 /// All solutions over `F_p` of a system whose ideal is zero-dimensional: F4 to
@@ -1184,8 +1231,70 @@ pub fn solve_zero_dim(
     opts: &F4Options,
     rng: &mut StdRng,
 ) -> (Vec<Vec<u64>>, ZeroDimStats) {
+    solve_zero_dim_traced(input, n, p, opts, rng, false)
+}
+
+/// [`solve_zero_dim`] with F4's trace recorded on the first system of a
+/// `p` and replayed on the later ones when `trace` is set; a replay whose
+/// shape diverges falls back to the full run (both counted).
+pub fn solve_zero_dim_traced(
+    input: &[f4_fp::Poly],
+    n: usize,
+    p: u64,
+    opts: &F4Options,
+    rng: &mut StdRng,
+    trace: bool,
+) -> (Vec<Vec<u64>>, ZeroDimStats) {
     let mut st = ZeroDimStats::default();
-    let r = f4_fp::f4(input, n, p, opts);
+    let r = if !trace {
+        f4_fp::f4(input, n, p, opts)
+    } else {
+        let have = trace_cache()
+            .lock()
+            .unwrap()
+            .get(&p)
+            .map(|e| e.trace.clone());
+        match have {
+            Some(t) => {
+                // a diverging replay finishes as a full run inside the engine
+                let r = f4_fp::f4_replay(input, n, p, opts, &t);
+                let mut cache = trace_cache().lock().unwrap();
+                if let Some(e) = cache.get_mut(&p) {
+                    if Arc::ptr_eq(&e.trace, &t) {
+                        if r.trace_mismatch {
+                            e.diverged += 1;
+                            if e.diverged >= 3 && e.diverged > e.held {
+                                cache.remove(&p);
+                            }
+                        } else {
+                            e.held += 1;
+                        }
+                    }
+                }
+                if r.trace_mismatch {
+                    st.trace_mismatch = true;
+                } else {
+                    st.replayed = true;
+                }
+                r
+            }
+            None => {
+                let (r, t) = f4_fp::f4_record(input, n, p, opts);
+                if !r.timed_out && !r.inconsistent && r.pairs_above_bound == 0 {
+                    trace_cache()
+                        .lock()
+                        .unwrap()
+                        .entry(p)
+                        .or_insert_with(|| TraceEntry {
+                            trace: Arc::new(t),
+                            held: 0,
+                            diverged: 0,
+                        });
+                }
+                r
+            }
+        }
+    };
     let t_lin = Instant::now();
     st.f4_muls = r.field_ops;
     st.degree_reached = r.degree_reached;
@@ -1525,15 +1634,25 @@ pub struct Ctx {
     pub f: Fq3,
     pub cov: Cover,
     pub reim: ReIm,
+    /// Replay F4's trace on the six-quadric systems (§12 of the note).
+    pub trace: bool,
 }
 
 impl Ctx {
     pub fn new(spec: &Spec) -> Ctx {
+        Self::with_trace(spec, false)
+    }
+    pub fn with_trace(spec: &Spec, trace: bool) -> Ctx {
         let f = Fq3::new(spec.p);
         let cov = Cover::new(&f, &spec.alpha).expect("cover");
         let reim = ReIm::new(spec.p, f.f.w);
         f.reset_muls();
-        Ctx { f, cov, reim }
+        Ctx {
+            f,
+            cov,
+            reim,
+            trace,
+        }
     }
     pub fn jac(&self) -> Hyp<'_, Fq> {
         Hyp {
@@ -1553,10 +1672,9 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
             continue;
         }
         let ec = EllE::new(&f, &alpha);
-        let Some(m) = group_order_4_prime(&ec, &mut rng) else {
+        let Some(l) = group_order_4_prime(&ec, &mut rng) else {
             continue;
         };
-        let l = m / 4;
         let Some(cov) = Cover::new(&f, &alpha) else {
             continue;
         };
@@ -1671,6 +1789,8 @@ pub struct NagaoCost {
     pub degenerate: bool,
     pub nonseparating: usize,
     pub stopped_at: Option<usize>,
+    pub replayed: bool,
+    pub trace_mismatch: bool,
     /// Solutions over `F_p` of the six quadrics, and those whose sextic
     /// splits into six distinct roots with admissible ordinates.
     pub fp_solutions: usize,
@@ -1733,7 +1853,7 @@ pub fn nagao_decompose(
     let polys = forms.polys(&ctx.reim, p);
     f.count_public(6 * 10 * 8);
     cost.weil_muls = f.muls() - m0;
-    let (sols, st) = solve_zero_dim(&polys, 6, p, opts, rng);
+    let (sols, st) = solve_zero_dim_traced(&polys, 6, p, opts, rng, ctx.trace);
     cost.f4_muls = st.f4_muls;
     cost.lin_muls = st.lin_muls;
     cost.delta = st.delta;
@@ -1747,6 +1867,8 @@ pub fn nagao_decompose(
     cost.timed_out = st.timed_out;
     cost.nonseparating = st.nonseparating;
     cost.stopped_at = st.stopped_at;
+    cost.replayed = st.replayed;
+    cost.trace_mismatch = st.trace_mismatch;
     cost.fp_solutions = sols.len();
     let m1 = f.muls();
     let ring = PolyRing::new(p);
@@ -1989,6 +2111,162 @@ pub fn rho_e(spec: &Spec, seed: u64) -> RhoRunE {
     }
 }
 
+/// [`rho_e`] without the stored walk (note §15): the same r-adding walk,
+/// `threads` walkers from random starts, a point distinguished when `dp_bits`
+/// bits of its mixed hash vanish, the distinguished points shared between
+/// the walkers; a walker that meets no distinguished point in `40·2^dp_bits`
+/// steps restarts from a new random point.  Every group operation of every
+/// walker is charged, the walk's multipliers once per walker.
+pub fn rho_e_dp(spec: &Spec, seed: u64, dp_bits: u32, threads: usize) -> RhoRunE {
+    use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+    use std::sync::Mutex;
+    let n = spec.l;
+    let r = 32usize;
+    let scalars: Vec<(u64, u64)> = {
+        let mut rng = StdRng::seed_from_u64(seed ^ 0x8D06);
+        (0..r)
+            .map(|_| (rng.gen_range(0..n), rng.gen_range(1..n)))
+            .collect()
+    };
+    let table: Mutex<HashMap<PtE6, (u64, u64)>> = Mutex::new(HashMap::new());
+    let found: Mutex<Option<u64>> = Mutex::new(None);
+    let stop = AtomicBool::new(false);
+    let steps = AtomicU64::new(0);
+    let ops = AtomicU64::new(0);
+    let cap = 64 * (n as f64).sqrt() as u64 + 1_000_000;
+    let mask = (1u64 << dp_bits) - 1;
+    let tail_cap = 40u64 << dp_bits;
+    let progress = std::env::var("JV_RHO_PROGRESS").is_ok();
+    let start = Instant::now();
+    std::thread::scope(|sc| {
+        for w in 0..threads.max(1) {
+            let (table, found, stop, steps, ops, scalars) =
+                (&table, &found, &stop, &steps, &ops, &scalars);
+            sc.spawn(move || {
+                let f = Fq3::new(spec.p);
+                let ec = EllE::new(&f, &spec.alpha);
+                let mults: Vec<PtE6> = scalars
+                    .iter()
+                    .map(|&(al, be)| ec.add(&ec.mul(&spec.g, al), &ec.mul(&spec.q, be)))
+                    .collect();
+                let mut rng = StdRng::seed_from_u64(
+                    seed ^ 0x8D06 ^ (w as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15),
+                );
+                let mut local = 0u64;
+                'outer: while !stop.load(Ordering::Relaxed) {
+                    let mut a = rng.gen_range(0..n);
+                    let mut b = rng.gen_range(1..n);
+                    let mut l = ec.add(&ec.mul(&spec.g, a), &ec.mul(&spec.q, b));
+                    let mut tail = 0u64;
+                    loop {
+                        let h = l.x.0[0].0[0]
+                            ^ l.x.0[0].0[1].wrapping_mul(0x9E37_79B9)
+                            ^ l.x.0[1].0[0].rotate_left(17)
+                            ^ l.x.0[2].0[1].rotate_left(33);
+                        let idx = mix64(h);
+                        if (idx >> 20) & mask == 0 {
+                            let mut t = table.lock().unwrap();
+                            if let Some(&(a2, b2)) = t.get(&l) {
+                                let db = (b + n - b2) % n;
+                                if db != 0 {
+                                    let da = (a2 + n - a) % n;
+                                    *found.lock().unwrap() = Some(mm(da, inv_mod(db, n), n));
+                                    stop.store(true, Ordering::Relaxed);
+                                    break 'outer;
+                                }
+                                drop(t);
+                                break; // the same walk met its own point: restart
+                            }
+                            t.insert(l, (a, b));
+                            drop(t);
+                            tail = 0;
+                        }
+                        let j = (idx % r as u64) as usize;
+                        l = ec.add(&l, &mults[j]);
+                        a = (a + scalars[j].0) % n;
+                        b = (b + scalars[j].1) % n;
+                        local += 1;
+                        tail += 1;
+                        if local & ((1 << 20) - 1) == 0 {
+                            let tot = steps.fetch_add(1 << 20, Ordering::Relaxed) + (1 << 20);
+                            if progress && w == 0 && tot & ((1 << 26) - 1) < (1 << 20) {
+                                eprintln!(
+                                    "  [rho-dp p={} seed={}] steps {:.3e} ({:.2} sqrt l) dps {} {:.0} s",
+                                    spec.p,
+                                    seed,
+                                    tot as f64,
+                                    tot as f64 / (n as f64).sqrt(),
+                                    table.lock().unwrap().len(),
+                                    start.elapsed().as_secs_f64()
+                                );
+                            }
+                            if tot > cap || stop.load(Ordering::Relaxed) {
+                                stop.store(true, Ordering::Relaxed);
+                                break 'outer;
+                            }
+                        }
+                        if tail > tail_cap {
+                            break;
+                        }
+                    }
+                }
+                steps.fetch_add(local & ((1 << 20) - 1), Ordering::Relaxed);
+                ops.fetch_add(ec.ops(), Ordering::Relaxed);
+            });
+        }
+    });
+    let ops = ops.load(Ordering::Relaxed);
+    let correct = *found.lock().unwrap() == Some(spec.d);
+    RhoRunE {
+        seed,
+        steps: steps.load(Ordering::Relaxed),
+        group_ops: ops,
+        s: ops as f64 / (n as f64).sqrt(),
+        correct,
+    }
+}
+
+/// One distinguished-point rho run on the instance `(p, seed)` (note §15).
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct RhoDpReport {
+    pub p: u64,
+    pub seed: u64,
+    pub run: u64,
+    pub l: u64,
+    pub bits: f64,
+    pub dp_bits: u32,
+    pub threads: usize,
+    pub c_add_e: f64,
+    pub steps: u64,
+    pub group_ops: u64,
+    pub s: f64,
+    pub correct: bool,
+    pub wall_ms: f64,
+}
+
+pub fn run_rho_dp(p: u64, seed: u64, run: u64, dp_bits: u32, threads: usize) -> RhoDpReport {
+    let spec = generate_spec(p, seed);
+    let ctx = Ctx::new(&spec);
+    let (c_e, _) = unit_costs(&spec, &ctx);
+    let start = Instant::now();
+    let r = rho_e_dp(&spec, seed.wrapping_mul(1000) + run, dp_bits, threads);
+    RhoDpReport {
+        p,
+        seed,
+        run,
+        l: spec.l,
+        bits: (spec.l as f64).log2(),
+        dp_bits,
+        threads,
+        c_add_e: c_e,
+        steps: r.steps,
+        group_ops: r.group_ops,
+        s: r.s,
+        correct: r.correct,
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
+    }
+}
+
 /// `F_p` multiplications per affine addition on `E(F_{q³})` and per addition
 /// on `Jac_H(F_q)`, measured.
 pub fn unit_costs(spec: &Spec, ctx: &Ctx) -> (f64, f64) {
@@ -2044,6 +2322,10 @@ pub struct CcovReport {
     /// F4 stopped at this staircase, or run to a certified basis.
     pub stop_staircase: Option<usize>,
     pub stopped: usize,
+    /// F4's trace replayed (the first system of a `p` records it).
+    pub trace: bool,
+    pub replayed: usize,
+    pub trace_mismatches: usize,
     pub random_residuals: usize,
     pub constructed_residuals: usize,
     pub random_decomposable: usize,
@@ -2113,10 +2395,11 @@ pub fn run_cover_ccov(
     budget_secs: f64,
     oracle_up_to_base: usize,
     stop: Option<usize>,
+    trace: bool,
 ) -> CcovReport {
     let start = Instant::now();
     let spec = generate_spec(p, seed);
-    let ctx = Ctx::new(&spec);
+    let ctx = Ctx::with_trace(&spec, trace);
     let mut rng = StdRng::seed_from_u64(seed ^ 0xC0C0);
     let base = factor_base(&ctx, &mut rng);
     let by_x: HashMap<u64, usize> = base.iter().enumerate().map(|(i, b)| (b.x, i)).collect();
@@ -2134,6 +2417,7 @@ pub fn run_cover_ccov(
         max_degree,
         budget_secs,
         stop_staircase: stop,
+        trace,
         random_residuals: random,
         constructed_residuals: constructed,
         expected_rate: 1.0 / 720.0,
@@ -2194,6 +2478,12 @@ pub fn run_cover_ccov(
         if cost.stopped_at.is_some() {
             rep.stopped += 1;
         }
+        if cost.replayed {
+            rep.replayed += 1;
+        }
+        if cost.trace_mismatch {
+            rep.trace_mismatches += 1;
+        }
         if k < random {
             if !found.is_empty() {
                 rep.random_decomposable += 1;
@@ -2242,6 +2532,9 @@ pub struct CoverDlpReport {
     pub c_add_j: f64,
     pub stop_staircase: Option<usize>,
     pub stopped: u64,
+    pub trace: bool,
+    pub replayed: u64,
+    pub trace_mismatches: u64,
     pub residuals: u64,
     pub decompositions: u64,
     pub decomposition_rate: f64,
@@ -2300,10 +2593,11 @@ pub fn run_cover_dlp(
     check_every: u64,
     rho_s_ref: f64,
     stop: Option<usize>,
+    trace: bool,
 ) -> CoverDlpReport {
     let start = Instant::now();
     let spec = generate_spec(p, seed);
-    let ctx = Ctx::new(&spec);
+    let ctx = Ctx::with_trace(&spec, trace);
     let jac = ctx.jac();
     let l = spec.l;
     let mut rng = StdRng::seed_from_u64(seed ^ 0x3D1F6);
@@ -2337,6 +2631,7 @@ pub fn run_cover_dlp(
         c_add_e: c_e,
         c_add_j: c_j,
         stop_staircase: stop,
+        trace,
         expected_rate: 1.0 / 720.0,
         floor_residuals: unknowns as f64 * 720.0,
         base_muls,
@@ -2362,7 +2657,7 @@ pub fn run_cover_dlp(
         let found: Vec<(u64, u64, Div<E2>, Vec<Dec6>, NagaoCost, u64, bool, bool)> = batch
             .par_iter()
             .map_init(
-                || Ctx::new(&spec),
+                || Ctx::with_trace(&spec, trace),
                 |c, (a, b, r, idx)| {
                     // the deadline is absolute: one budget per test, not per run
                     let opts = opts_for(24, 600.0, stop);
@@ -2404,6 +2699,12 @@ pub fn run_cover_dlp(
             }
             if cost.stopped_at.is_some() {
                 rep.stopped += 1;
+            }
+            if cost.replayed {
+                rep.replayed += 1;
+            }
+            if cost.trace_mismatch {
+                rep.trace_mismatches += 1;
             }
             if was_checked {
                 rep.cross_checked += 1;
@@ -2886,12 +3187,109 @@ mod tests {
             if cb.stopped_at == Some(64) {
                 stopped += 1;
             }
-            if cb.f4_muls < ca.f4_muls {
+            // "cheaper" by the F4 degree and matrix the stop saves, which are
+            // per-run facts; `f4_muls` is a difference of the process-wide
+            // counter and interleaves with other tests' F4 runs under
+            // `cargo test`'s parallelism.
+            if cb.degree_reached < ca.degree_reached && cb.max_rows < ca.max_rows {
                 cheaper += 1;
             }
         }
         assert!(n >= 25, "{n}");
         assert_eq!(stopped, n, "every system stops at the Bézout staircase");
-        assert_eq!(cheaper, n);
+        assert_eq!(
+            cheaper, n,
+            "every stopped run ends at a lower degree with a smaller matrix"
+        );
+    }
+
+    #[test]
+    fn distinguished_point_rho_finds_the_planted_logarithm() {
+        // p = 53: l ≈ 2^32, sqrt l ≈ 6.5·10⁴ steps; three runs, two walkers
+        let spec = generate_spec(53, 1);
+        for run in 0..3u64 {
+            let r = rho_e_dp(&spec, 100 + run, 6, 2);
+            assert!(r.correct, "run {run}: {r:?}");
+            assert!(r.s > 0.2 && r.s < 8.0, "run {run}: S = {}", r.s);
+        }
+    }
+
+    #[test]
+    fn replayed_f4_agrees_with_the_full_solver_and_the_oracle() {
+        let (spec, ctx, base, by_x, mut rng) = small_ctx(53, 7);
+        let traced = Ctx::with_trace(&spec, true);
+        clear_traces();
+        let jac = ctx.jac();
+        let t = table3(&jac, &base);
+        let stop = jv_options_stopped(24, 120.0, 64);
+        let (mut replayed, mut cheaper, mut n, mut mismatches) = (0, 0, 0, 0);
+        for k in 0..40 {
+            let r = if k % 2 == 0 {
+                planted(&jac, &base, &mut rng).0
+            } else {
+                let a = rng.gen_range(0..spec.l);
+                jac.add(&jac.mul(&spec.gj, a as u128), &spec.qj)
+            };
+            let (fa, ca) = nagao_decompose(&ctx, &base, &by_x, &r, &stop, &mut rng);
+            let (fb, cb) = nagao_decompose(&traced, &base, &by_x, &r, &stop, &mut rng);
+            if ca.degenerate || ca.incomplete || cb.incomplete {
+                continue;
+            }
+            n += 1;
+            let oracle = mitm6(&jac, &t, &r);
+            assert_eq!(fa, oracle, "stopped solver vs oracle, residual {k}");
+            assert_eq!(fb, oracle, "replayed solver vs oracle, residual {k}");
+            assert!(fb.iter().all(|d| verify_dec(&jac, &base, &r, d)));
+            assert_eq!(cb.stopped_at, Some(64));
+            if cb.replayed {
+                replayed += 1;
+                // the replay keeps only the rows that produced a pivot, so its
+                // matrices are smaller at the same degree (per-run facts; the
+                // multiplication counter interleaves with other tests' runs)
+                if cb.max_rows < ca.max_rows && cb.degree_reached <= ca.degree_reached {
+                    cheaper += 1;
+                }
+                if replayed <= 3 {
+                    eprintln!(
+                        "full f4 {} ({} × {}, degree {}) vs replay {} ({} × {}, degree {})",
+                        ca.f4_muls,
+                        ca.max_rows,
+                        ca.max_cols,
+                        ca.degree_reached,
+                        cb.f4_muls,
+                        cb.max_rows,
+                        cb.max_cols,
+                        cb.degree_reached
+                    );
+                }
+            }
+            if cb.trace_mismatch {
+                mismatches += 1;
+            }
+        }
+        assert!(n >= 30, "{n}");
+        assert!(
+            replayed >= n - 1 - mismatches,
+            "replayed {replayed} of {n} ({mismatches} mismatches)"
+        );
+        eprintln!("replayed {replayed} of {n}, cheaper {cheaper}, mismatches {mismatches}");
+        let t = trace_cache()
+            .lock()
+            .unwrap()
+            .get(&53)
+            .map(|e| e.trace.clone())
+            .unwrap();
+        for (i, st) in t.steps.iter().enumerate() {
+            eprintln!(
+                "  trace step {i}: degree {} useful rows {} new lms {}",
+                st.degree,
+                st.rows.len(),
+                st.new_lms.len()
+            );
+        }
+        assert!(
+            cheaper * 10 >= replayed * 9,
+            "cheaper {cheaper} of {replayed} replays"
+        );
     }
 }

@@ -373,6 +373,32 @@ predicted false-positive rate from 0.17–0.21 to 0.019–0.031
   amendment 1). R02b now runs on v2, and the scan is not set aside
   (§11).
 
+**Main moved under the programme (2026-10-05).**
+- **The lineage.** The baselines v1 and v2 are candidates on v0's
+  lineage. Their code reached main through their results PRs (#1166,
+  #1187), but main has since gained about 700 commits of its own.
+- **#1242 matters most.** It reduces every Gf2 product by two
+  carry-less folds with the modulus's sparse tail. It reached main on
+  2026-10-02 as `809a7318`, after v2.
+- **A diagnostic, one process per arm** (R07's protocol, disclosed
+  there), compared main's head `995ea207` with v2:
+  - the outputs were identical at four sizes;
+  - set-up was 1.05×, 1.38× and 1.54× faster at `2^44.3`, `2^44.5`
+    and `2^47.2`;
+  - a scanned summand cost 35–38 ns on main at all three sizes, the
+    scalar wide-tail scan now as fast as the 8-lane kernel.
+- **What follows.**
+  - R02b stopped and is suspended (its amendment 3).
+  - **R07** re-bases the programme on main's head
+    ([protocol](../../ic_tool_program/rounds/R07-main-head/PROTOCOL.md)).
+    It is accepted on its pin and its A/A bands, with no minimum gain,
+    because the programme's tool is the one main builds.
+  - R06, the scan's key by funnel shifts, is declared on the newest
+    baseline after R07's decision.
+- **A standing rule from here on:** each round's declaration names the
+  main commit its base is built from. When main has moved under that
+  base, a drift round like R07 runs before the next declared round.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
@@ -558,6 +584,7 @@ from R03's `runs.tar.xz`, byte for byte.
 | isolation | `tools/isolated_bench.py` | every timed run from N1 on | N1: modes, refusals, the widened mask and the record's keys checked against the Python tool |
 | the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped. N2: `icprog run r02b` adds a fresh round's `manifest`, the `pin`, whose output reproduces R05's `pin.json` byte for byte from R05's run tree, and the round's own A/A (`aa`) |
 | the callgrind phase split, and R02b's control | `harness/callgrind_phases.py`, R02b's `analyse.py` | R02b's control | N2: `icprog callgrind-phases` reproduces R02's six phase splits and R01's two byte for byte; `icprog callgrind-control`, new code with no frozen output, reads R02's profiles as R02's README reports them |
+| a round's fresh holdouts | `suite/v1/make_suite.py`'s construction, for the rows a round draws | R07's holdouts | `icprog holdouts` reproduces suite v1's 88 S rows and R02b's and R05's holdouts, with their `SHA256SUMS`, byte for byte (`tests/icprog.rs`); it draws a round's set once and checks it after |
 | the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3: `icprog rule claims` and `icprog rule analyse` reproduce §23's 408 claims, their replays, 396 manifests, `summary.json` and `analysis.json` byte for byte (only each replay's checker name differs: the replays are now `icprog`'s own arithmetic); `icprog rule` runs the rows (`manifest`, `pin`, `size`, `all`) and the reference check against the strong rho (`reference`) |
 | the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
 | Track B's chain | `harness/bround.py` | Track B's measurements | N5 |

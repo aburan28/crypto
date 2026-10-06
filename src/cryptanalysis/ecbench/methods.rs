@@ -21,10 +21,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::cryptanalysis::ecbench::canonical::{derive_u64, sha256_hex, short_id};
+use crate::cryptanalysis::ecbench::claw::{pair_claw, pair_claw_wide, ClawOutcome, ClawShape};
 use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
-use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance};
+use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance, WideInstance};
 use crate::cryptanalysis::ic_boundary::{
     rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
     Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
@@ -45,7 +46,8 @@ use crate::cryptanalysis::ic_framework::{run_pipeline, PipelineSpec, RunReport};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase, Snapshot};
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_strong_rho::{
-    RawPoint as StrongPoint, StrongRho, StrongRhoCharges, StrongRhoParams,
+    RawPoint as StrongPoint, RawPointG, RhoField, RhoScalar, StrongRho, StrongRhoCharges,
+    StrongRhoG, StrongRhoParams,
 };
 use rand::{rngs::StdRng, SeedableRng};
 
@@ -178,6 +180,30 @@ pub fn registry() -> &'static [MethodDecl] {
             params: RHO_PARAMS,
         },
         MethodDecl {
+            id: "claw.pair_table",
+            family: "claw",
+            summary: "four-point signed-Frobenius pair claw of aburan28/cryptanalysis#175: known-log orbit base, target-independent quotient pair table of M = c·√(r/n) classes, unique query pairs Q − (F_k + F_l); generic, mean S ≈ (c + 1/c)/√n, Koblitz curves only",
+            entry: "ecbench::claw::pair_claw",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "base_scale",
+                    default: None,
+                    help: "seed orbits S = ⌈base_scale · r^(1/4) · n^(−3/4)⌉; the PR's n=83 base is ≈ 1.06",
+                },
+                ParamDecl {
+                    name: "table_scale",
+                    default: None,
+                    help: "table classes M = ⌈table_scale · √(r/n)⌉; 1 minimises additions, the PR's n=83 tables are ≈ 1/32",
+                },
+                ParamDecl {
+                    name: "cap_multiple",
+                    default: Some("64"),
+                    help: "charged-addition budget as a multiple of √r before the run counts as exhausted",
+                },
+            ],
+        },
+        MethodDecl {
             id: "ic.pipeline",
             family: "ic",
             summary: "index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged",
@@ -187,12 +213,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "factor_base",
                     default: None,
-                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M",
+                    help: "plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, koblitz-standard-subspace:dimension=D",
                 },
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
@@ -409,10 +435,112 @@ pub struct OnlineWindow {
     pub mapping: String,
 }
 
+/// What an algebraic or SAT decomposition oracle's solver did over a
+/// run: the shape of the system it solved, the work it counted in its
+/// own unit, and the matrix and search statistics the ICMS registry
+/// names (`docs/ic/measurement/registry.json`, `pdp_metrics`).
+///
+/// Informational: nothing here is priced into `S` beyond what the
+/// relations phase already carries as `solver_*` counters, and the audit
+/// replay does not compare it (a budgeted solver is nondeterministic by
+/// construction, and the block records exactly that).  A table oracle
+/// has no solver and the record's block is `null`.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct SolverStats {
+    pub name: String,
+    pub calls: u64,
+    pub ops: u64,
+    pub op_unit: String,
+    pub wall_ns: u64,
+    pub peak_bytes: u64,
+    /// Calls that ran out of budget, counted apart from refutations.
+    pub budget_exceeded: u64,
+    /// The system every call solved on this base: variables, equations,
+    /// their degrees, and the semi-regular degree such a system reaches
+    /// without exploitable structure.
+    pub n_vars: Option<u64>,
+    pub n_equations: Option<u64>,
+    pub degrees: Vec<u32>,
+    pub semi_regular_degree: Option<u32>,
+    pub solving_degree_mean: Option<f64>,
+    pub solving_degree_max: Option<u32>,
+    /// Mean solving degree over the semi-regular bound.
+    pub degree_over_bound: Option<f64>,
+    /// Macaulay (or F4/F5) matrix figures, the maximum over calls where
+    /// the solver reports a maximum and the sum where it reports a sum.
+    pub macaulay_rows: Option<u64>,
+    pub macaulay_columns: Option<u64>,
+    pub macaulay_degree: Option<u32>,
+    pub macaulay_rank: Option<u64>,
+    /// SAT figures: variables and clauses are the maximum over calls,
+    /// conflicts, decisions, propagations, restarts and learnt clauses
+    /// are totals over the run.
+    pub sat_variables: Option<u64>,
+    pub sat_clauses: Option<u64>,
+    pub sat_conflicts: Option<u64>,
+    pub sat_decisions: Option<u64>,
+    pub sat_propagations: Option<u64>,
+    pub sat_restarts: Option<u64>,
+    pub sat_learnt_clauses: Option<u64>,
+    /// Every solver-specific counter, verbatim.
+    pub extra: BTreeMap<String, u64>,
+}
+
+impl SolverStats {
+    /// Build the block from the framework's run report.
+    pub fn from_report(
+        solver: &crate::cryptanalysis::ic_framework::SolverReport,
+        system: Option<&crate::cryptanalysis::ic_framework::stages::SystemShape>,
+    ) -> Self {
+        let x = &solver.extra;
+        let get = |keys: &[&str]| keys.iter().find_map(|k| x.get(*k).copied());
+        let sat = solver.op_unit == "conflicts";
+        SolverStats {
+            name: solver.name.clone(),
+            calls: solver.calls,
+            ops: solver.ops,
+            op_unit: solver.op_unit.clone(),
+            wall_ns: solver.wall_ns,
+            peak_bytes: solver.peak_bytes,
+            budget_exceeded: solver.budget_exceeded,
+            n_vars: system.map(|s| s.n_vars as u64),
+            n_equations: system.map(|s| s.n_equations as u64),
+            degrees: system.map(|s| s.degrees.clone()).unwrap_or_default(),
+            semi_regular_degree: solver
+                .semi_regular_degree
+                .or_else(|| system.and_then(|s| s.semi_regular_degree)),
+            solving_degree_mean: solver.solving_degree_mean,
+            solving_degree_max: (solver.solving_degree_max > 0)
+                .then_some(solver.solving_degree_max),
+            degree_over_bound: solver.degree_over_bound,
+            macaulay_rows: get(&["matrix_rows_max", "macaulay_rows"]),
+            macaulay_columns: get(&["matrix_cols_max", "macaulay_cols"]),
+            macaulay_degree: get(&["max_degree", "max_poly_degree"])
+                .map(|d| d as u32)
+                .or((solver.solving_degree_max > 0).then_some(solver.solving_degree_max)),
+            macaulay_rank: get(&["matrix_rank_max", "macaulay_rank"]),
+            sat_variables: if sat { get(&["variables_max"]) } else { None },
+            sat_clauses: if sat { get(&["clauses_max"]) } else { None },
+            sat_conflicts: sat.then_some(solver.ops),
+            sat_decisions: if sat { get(&["decisions"]) } else { None },
+            sat_propagations: if sat { get(&["propagations"]) } else { None },
+            sat_restarts: if sat { get(&["restarts"]) } else { None },
+            sat_learnt_clauses: if sat { get(&["learnt_clauses"]) } else { None },
+            extra: x.clone(),
+        }
+    }
+}
+
 /// What a solve reports.  The runner adds verification and timing.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct SolveReport {
-    pub recovered: Option<u64>,
+    /// The candidate logarithm, unverified.  Wide enough for a subgroup
+    /// order past `2^64`; written as a number while it fits a `u64`.
+    #[serde(
+        default,
+        with = "crate::cryptanalysis::ecbench::canonical::compat_u128::option"
+    )]
+    pub recovered: Option<u128>,
     /// The budget ran out before an answer.
     pub exhausted: bool,
     pub phases: Vec<PhaseRecord>,
@@ -438,6 +566,10 @@ pub struct SolveReport {
     pub online: Option<OnlineWindow>,
     #[serde(default)]
     pub online_error: Option<String>,
+    /// The decomposition solver's statistics, for algebraic and SAT
+    /// oracles; `None` for table oracles and generic methods.
+    #[serde(default)]
+    pub solver: Option<SolverStats>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -469,7 +601,7 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
 fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
-        recovered: out.recovered,
+        recovered: out.recovered.map(u128::from),
         exhausted: out.exhausted,
         phases: vec![
             ops_phase("setup", out.setup),
@@ -486,6 +618,7 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         detail: Value::Null,
         online: None,
         online_error: None,
+        solver: None,
     }
 }
 
@@ -518,7 +651,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
     counters.insert("walks".into(), res.walks);
     counters.insert("distinguished_points".into(), res.distinguished_points);
     SolveReport {
-        recovered: res.recovered,
+        recovered: res.recovered.map(u128::from),
         exhausted: res.recovered.is_none(),
         total_gae: res.gae,
         automorphisms_used: res.automorphisms,
@@ -532,6 +665,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         detail: json!({"method": res.method, "expected_steps": res.expected_steps}),
         online: None,
         online_error: None,
+        solver: None,
     }
 }
 
@@ -602,6 +736,29 @@ fn solve_generic<G: CountedGroup>(
     Ok(rep)
 }
 
+fn parse_hex_wide(s: &str) -> Result<u128, String> {
+    u128::from_str_radix(s.trim_start_matches("0x"), 16).map_err(|_| format!("bad hex `{s}`"))
+}
+
+/// The methods that have a wide-field (`64 ≤ n ≤ 127`) implementation.
+/// Any other method refuses a wide curve rather than run on a truncation.
+fn solve_wide(
+    m: &ResolvedMethod,
+    wi: &WideInstance,
+    tx: u128,
+    ty: u128,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    match m.id.as_str() {
+        "rho.signed_frobenius_strong" => solve_strong_wide(m, wi, tx, ty, seed),
+        "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
+        other => Err(format!(
+            "`{other}` has no wide-field implementation; on a curve past one word (n = {}) only rho.signed_frobenius_strong and claw.pair_table run",
+            wi.kc.n
+        )),
+    }
+}
+
 fn parse_hex(s: &str) -> Result<u64, String> {
     u64::from_str_radix(s.trim_start_matches("0x"), 16).map_err(|_| format!("bad hex `{s}`"))
 }
@@ -622,11 +779,16 @@ pub fn solve(
             m.id, curve.slug, curve.family
         ));
     }
-    let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
     // The phase clock: the methods open and close the online window, the
     // session turns it into exclusive phase times.
     let session = measurement::Session::begin().ok();
-    let mut rep = solve_inner(m, inst, curve, d, tx, ty, seed)?;
+    let mut rep = if let Instance::Wide(wi) = inst {
+        let (tx, ty) = (parse_hex_wide(&target[0])?, parse_hex_wide(&target[1])?);
+        solve_wide(m, wi, tx, ty, seed)?
+    } else {
+        let (tx, ty) = (parse_hex(&target[0])?, parse_hex(&target[1])?);
+        solve_inner(m, inst, curve, d, tx, ty, seed)?
+    };
     match session.map(|s| s.finish()) {
         Some(Ok(snap)) if rep.online.is_none() => {
             rep.online = online_window(d.family, &m.id, &snap)
@@ -647,6 +809,9 @@ fn solve_inner(
     ty: u64,
     seed: u64,
 ) -> Result<SolveReport, String> {
+    if let Instance::Wide(_) = inst {
+        return Err("a wide instance goes through solve_wide".into());
+    }
     match (inst, d.family) {
         (Instance::Binary(i), _) if m.id == "ic.shared_rank" => {
             solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
@@ -658,6 +823,7 @@ fn solve_inner(
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
         }
+        (Instance::Binary(i), "claw") => solve_claw(m, i, FastPoint::affine(tx, ty), seed),
         (Instance::Binary(i), _) if m.id == "rho.signed_frobenius" => {
             let t = Instant::now();
             measurement::begin_online(Phase::RhoSolve);
@@ -683,6 +849,7 @@ fn solve_inner(
             let g = BinaryGroup(&i.fast);
             solve_generic(m, &g, i.generator, FastPoint::affine(tx, ty), i.r, seed)
         }
+        (Instance::Wide(_), _) => unreachable!("returned above"),
     }
 }
 
@@ -738,6 +905,7 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
         w.included_stages = match family {
             "rho" => vec!["walk".into(), "collision".into(), "recovery_check".into()],
             "kangaroo" => vec!["jumps".into(), "collision".into(), "recovery_check".into()],
+            "claw" => vec!["queries".into(), "collision".into(), "recovery".into()],
             _ => vec![
                 "baby_steps".into(),
                 "giant_steps".into(),
@@ -747,6 +915,93 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
         w.mapping = format!("{family}: the whole target-dependent solve, one exclusive phase");
     }
     Some(w)
+}
+
+fn param_f64(m: &ResolvedMethod, name: &str) -> Result<f64, String> {
+    let v: f64 = m.params[name]
+        .parse()
+        .map_err(|_| format!("parameter `{name}` is not a number: `{}`", m.params[name]))?;
+    if v.is_finite() && v > 0.0 {
+        Ok(v)
+    } else {
+        Err(format!("parameter `{name}` must be positive: `{v}`"))
+    }
+}
+
+/// The pair claw ([`crate::cryptanalysis::ecbench::claw`]).  The base and
+/// the table are target-independent set-up; the online window opens at
+/// the first query `Q − (F_k + F_l)`.
+fn solve_claw(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let shape = ClawShape {
+        base_scale: param_f64(m, "base_scale")?,
+        table_scale: param_f64(m, "table_scale")?,
+        max_adds: rho_cap(inst.r, param_u64(m, "cap_multiple")? as f64),
+    };
+    let t = Instant::now();
+    let o = pair_claw(inst, target, seed, shape).ok_or("not a Koblitz instance")?;
+    let wall = t.elapsed().as_nanos() as u64;
+    Ok(claw_report(o, shape, u128::from(inst.r), inst.n, wall))
+}
+
+/// The claw on a wide Koblitz curve; the step budget is [`rho_cap`]'s rule
+/// in floating point, since the order does not fit its `u64`.
+fn solve_claw_wide(
+    m: &ResolvedMethod,
+    wi: &WideInstance,
+    tx: u128,
+    ty: u128,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let multiple = param_u64(m, "cap_multiple")? as f64;
+    let shape = ClawShape {
+        base_scale: param_f64(m, "base_scale")?,
+        table_scale: param_f64(m, "table_scale")?,
+        max_adds: (crate::cryptanalysis::ic_boundary::generic_floor_ops(wi.kc.r as f64, 1.0)
+            * multiple) as u64
+            + 4096,
+    };
+    let t = Instant::now();
+    let o = pair_claw_wide(wi, RawPointG::Affine { x: tx, y: ty }, seed, shape);
+    let wall = t.elapsed().as_nanos() as u64;
+    Ok(claw_report(o, shape, wi.kc.r, wi.kc.n, wall))
+}
+
+fn claw_report(o: ClawOutcome, shape: ClawShape, r: u128, n: u32, wall: u64) -> SolveReport {
+    let total = o.base.gae() + o.table.gae() + o.search.gae() + o.recover.gae();
+    let detail = json!({
+        "source": "aburan28/cryptanalysis#175, experiments/koblitz-pair-claw-20260929 (known-log orbit base, quotient pair table, unique query schedule)",
+        "seed_orbits": shape.seeds(r, n),
+        "table_classes_target": shape.table(r, n),
+        "expected_s": (shape.table_scale + 1.0 / shape.table_scale) / (n as f64).sqrt(),
+        "expected_s_law": "(c + 1/c)/√n with c = table_scale, from a hit probability of 2nM/r per query at two additions each; finite base support and duplicate classes not modelled",
+    });
+    SolveReport {
+        recovered: o.recovered,
+        exhausted: o.exhausted,
+        phases: vec![
+            ops_phase("base", o.base),
+            ops_phase("table", o.table),
+            ops_phase("search", o.search),
+            ops_phase("recover", o.recover),
+        ],
+        total_gae: total,
+        automorphisms_used: 2 * n,
+        unpriced: unpriced_of(&o.counters),
+        counters: o.counters,
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: wall,
+        factor_base: None,
+        detail,
+        online: None,
+        online_error: None,
+        solver: None,
+    }
 }
 
 /// The strong reference: `koblitz_strong_rho` as the admissible fixture
@@ -761,6 +1016,39 @@ fn solve_strong(
     seed: u64,
 ) -> Result<SolveReport, String> {
     let kc = inst.koblitz.as_ref().ok_or("not a Koblitz instance")?;
+    let t = Instant::now();
+    let rho = StrongRho::new(kc);
+    let q = StrongPoint::from_binary(&inst.fast.lower(target));
+    strong_run(m, &rho, q, inst.r as f64, inst.n, seed, t)
+}
+
+/// The strong reference on a wide Koblitz curve: the same walk, on the
+/// instance's `u128` arithmetic.  The clock starts where the one-word path
+/// starts it, before the reference's own precomputation.
+fn solve_strong_wide(
+    m: &ResolvedMethod,
+    wi: &WideInstance,
+    tx: u128,
+    ty: u128,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let t = Instant::now();
+    let rho = wi.kc.strong_rho();
+    let q = RawPointG::Affine { x: tx, y: ty };
+    strong_run(m, &rho, q, wi.kc.r as f64, wi.kc.n, seed, t)
+}
+
+/// Seed, walk and report one strong-reference solve, at either width.
+fn strong_run<F: RhoField, S: RhoScalar>(
+    m: &ResolvedMethod,
+    rho: &StrongRhoG<F, S>,
+    q: RawPointG<F::E>,
+    r: f64,
+    n: u32,
+    seed: u64,
+    t: Instant,
+) -> Result<SolveReport, String> {
+    let profile_online = std::env::var("ECBENCH_CALLGRIND_TARGET").as_deref() == Ok("1");
     let params = StrongRhoParams {
         lanes: param_u64(m, "lanes")?.max(1) as usize,
         dp_bits: param_u64(m, "dp_bits")? as u32,
@@ -769,18 +1057,21 @@ fn solve_strong(
     if params.dp_bits >= 32 {
         return Err("dp_bits must be below 32".into());
     }
-    let mul_gae = 1.5 * (inst.r as f64).log2();
-    let t = Instant::now();
-    let rho = StrongRho::new(kc);
+    let mul_gae = 1.5 * r.log2();
     let mut charges = StrongRhoCharges::default();
     let jump_seed = derive_u64("ecbench.strong_rho.jumps", &[seed]);
     let jumps = rho.jumps(jump_seed, &mut charges);
     let setup_mults = charges.scalar_multiplications;
     let mut start_rng = StdRng::seed_from_u64(seed);
-    let q = StrongPoint::from_binary(&inst.fast.lower(target));
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_before_online\0");
+    }
     measurement::begin_online(Phase::RhoSolve);
     let outcome = rho.solve(q, &jumps, &mut start_rng, &params, charges);
     measurement::end_online();
+    if profile_online {
+        measurement::callgrind_dump(b"ecbench_online\0");
+    }
     let wall = t.elapsed().as_nanos() as u64;
     let detail = json!({
         "reference": "koblitz_strong_rho::StrongRho, the single-target reference of docs/ic/boundary_targets.json since 2026-10-01",
@@ -795,7 +1086,7 @@ fn solve_strong(
             exhausted: true,
             phases: vec![],
             total_gae: 0.0,
-            automorphisms_used: 2 * inst.n,
+            automorphisms_used: 2 * n,
             counters: BTreeMap::new(),
             unpriced: vec!["counts_lost_at_the_step_cap_uncharged".into()],
             deterministic: true,
@@ -805,6 +1096,7 @@ fn solve_strong(
             detail,
             online: None,
             online_error: None,
+            solver: None,
         });
     };
     let c = o.charges;
@@ -840,7 +1132,7 @@ fn solve_strong(
         counters.insert(k.to_string(), v);
     }
     Ok(SolveReport {
-        recovered: Some(o.scalar),
+        recovered: Some(o.scalar.to_u128()),
         exhausted: false,
         total_gae: setup.gae + search.gae,
         phases: vec![setup, search],
@@ -854,6 +1146,7 @@ fn solve_strong(
         detail,
         online: None,
         online_error: None,
+        solver: None,
     })
 }
 
@@ -918,12 +1211,16 @@ fn ic_report(
     let mut unpriced = Vec::new();
     let mut nondeterminism = Vec::new();
     // Solver work: run_pipeline prices it from this host's wall time,
-    // which is not a count.  Take it back out and list it unpriced.
+    // which is not a count.  Take it back out and list it unpriced.  The
+    // figure is rebuilt from the pre-solver phase, never by subtracting
+    // the wall term: `(x + w) - w` rounds `x` to `w`'s binade and so
+    // leaked host timing into the low bits of a "deterministic" record
+    // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
         if s.gae > 0.0 && s.priced_by != "pinned" {
-            phases[2].gae -= s.gae;
-            total -= s.gae;
+            phases[2].gae = rep.decomposition.gae_before_solver;
+            total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
         }
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
@@ -956,6 +1253,11 @@ fn ic_report(
     counters.insert("matrix_rank".into(), rep.linear_algebra.rank);
     counters.insert("matrix_dependent".into(), rep.linear_algebra.dependent);
     counters.insert("matrix_work".into(), rep.linear_algebra.work);
+    let solver = rep
+        .decomposition
+        .solver
+        .as_ref()
+        .map(|sr| SolverStats::from_report(sr, rep.decomposition.system.as_ref()));
     let detail = json!({
         "label": rep.label,
         "decomposition": {
@@ -970,7 +1272,7 @@ fn ic_report(
         "framework_total_gae_before_solver_removal": rep.total_gae,
     });
     SolveReport {
-        recovered: rep.recovered,
+        recovered: rep.recovered.map(u128::from),
         exhausted: rep.exhausted,
         phases,
         total_gae: total,
@@ -984,6 +1286,7 @@ fn ic_report(
         detail,
         online: None,
         online_error: None,
+        solver,
     }
 }
 
@@ -1109,6 +1412,48 @@ fn solve_ic_prime(
     Ok(ic_report(m, rep, &calib, facts, wall, 2))
 }
 
+/// A binary-curve factor base that a linking binary adds to `ic.pipeline`
+/// by name, or `None` when the name is not its.
+pub type BinaryBasePlugin = for<'i> fn(
+    &str,
+    &'i BinaryInstance,
+) -> Option<Box<dyn FactorBaseBuilder<BinaryGroup<'i>> + 'i>>;
+
+/// A binary-curve decomposition oracle that a linking binary adds to
+/// `ic.pipeline` by name, given the summand count `m`, or `None`.
+pub type BinaryOraclePlugin =
+    for<'i> fn(
+        &str,
+        u32,
+        &'i BinaryInstance,
+    ) -> Option<Box<dyn DecompositionOracle<BinaryGroup<'i>> + 'i>>;
+
+/// Plug-ins a binary registers at start-up.
+///
+/// The library cannot name everything a binary may link. The `ecbench`
+/// binary's `pdp3-koblitz` oracle calls a `koblitz_index_calculus`
+/// function that the frozen-source replays' snapshots of that file lack,
+/// and those replays rebuild this library (never the `ecbench` binary)
+/// against them. Keeping such an oracle in the binary and resolving it here
+/// by name lets both builds compile, without a Cargo feature (`Cargo.toml`
+/// is pinned by other frozen evaluations) or a build script.
+#[derive(Clone, Copy)]
+pub struct BinaryPlugins {
+    pub base: BinaryBasePlugin,
+    pub oracle: BinaryOraclePlugin,
+}
+
+static BINARY_PLUGINS: std::sync::OnceLock<BinaryPlugins> = std::sync::OnceLock::new();
+
+/// Register a binary's plug-ins; the first registration wins.
+pub fn register_binary_plugins(plugins: BinaryPlugins) {
+    let _ = BINARY_PLUGINS.set(plugins);
+}
+
+fn binary_plugins() -> Option<&'static BinaryPlugins> {
+    BINARY_PLUGINS.get()
+}
+
 fn solve_ic_binary(
     m: &ResolvedMethod,
     inst: &BinaryInstance,
@@ -1121,21 +1466,26 @@ fn solve_ic_binary(
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
     let compact = CompactOrbitScanBase { instance: inst };
+    let plugin_base = binary_plugins().and_then(|p| (p.base)(fb_name.as_str(), inst));
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "compact-orbit-scan" => &compact,
-        other => {
-            return Err(format!(
-                "factor base `{other}` does not run on a binary curve"
-            ))
-        }
+        other => match plugin_base.as_deref() {
+            Some(b) => b,
+            None => {
+                return Err(format!(
+                    "factor base `{other}` does not run on a binary curve"
+                ))
+            }
+        },
     };
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
             let name = spec
@@ -1160,7 +1510,10 @@ fn solve_ic_binary(
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
-        other => return Err(format!("oracle `{other}` does not run on a binary curve")),
+        other => match plugin_oracle.as_deref_mut() {
+            Some(o) => o,
+            None => return Err(format!("oracle `{other}` does not run on a binary curve")),
+        },
     };
     let ctx = InstanceCtx {
         group: &g,
@@ -1248,7 +1601,7 @@ fn solve_shared_rank(
         .targets
         .first()
         .ok_or("shared rank returned no target")?;
-    let recovered = row.recovered_log;
+    let recovered = row.recovered_log.map(u128::from);
     let phases = vec![
         phase_of("factor_base", &report.rank.base),
         phase_of("oracle_setup", &report.rank.table),
@@ -1360,6 +1713,7 @@ fn solve_shared_rank(
         detail: serde_json::to_value(&report).map_err(|e| e.to_string())?,
         online: Some(online),
         online_error: None,
+        solver: None,
     })
 }
 
@@ -1400,7 +1754,7 @@ mod shared_rank_tests {
             19,
         )
         .unwrap();
-        assert_eq!(report.recovered, Some(113 % binary.r));
+        assert_eq!(report.recovered, Some(u128::from(113 % binary.r)));
         assert_eq!(report.factor_base.as_ref().unwrap().columns, 4);
         assert!(report
             .unpriced
@@ -1471,6 +1825,9 @@ pub fn dump_factor_base(
     let inst = curve.build()?;
     let facts = inst.facts(curve);
     let (name, params) = Params::parse_spec(fb_spec)?;
+    if let Instance::Wide(_) = &inst {
+        return Err("no factor-base plug-in runs on a wide (n > 62) curve yet".into());
+    }
     match &inst {
         Instance::Prime(i) => {
             let abscissa = PrimeAbscissaBase { instance: i };
@@ -1516,15 +1873,19 @@ pub fn dump_factor_base(
             let subspace = BinarySubspaceBase { instance: i };
             let orbit = KoblitzOrbitBase { instance: i };
             let compact = CompactOrbitScanBase { instance: i };
+            let plugin_base = binary_plugins().and_then(|p| (p.base)(name.as_str(), i));
             let base: &dyn FactorBaseBuilder<BinaryGroup> = match name.as_str() {
                 "binary-subspace" => &subspace,
                 "koblitz-orbit" => &orbit,
                 "compact-orbit-scan" => &compact,
-                other => {
-                    return Err(format!(
-                        "factor base `{other}` does not run on a binary curve"
-                    ))
-                }
+                other => match plugin_base.as_deref() {
+                    Some(b) => b,
+                    None => {
+                        return Err(format!(
+                            "factor base `{other}` does not run on a binary curve"
+                        ))
+                    }
+                },
             };
             let ctx = InstanceCtx {
                 group: &g,
@@ -1553,6 +1914,7 @@ pub fn dump_factor_base(
                 build_doubles: total.doubles,
             })
         }
+        Instance::Wide(_) => unreachable!("returned above"),
     }
 }
 
@@ -1576,6 +1938,65 @@ mod tests {
         .unwrap();
         assert_eq!(a.method_id, b.method_id);
         assert!(a.method_id.starts_with("ECM1h"));
+    }
+
+    #[test]
+    fn solver_stats_read_the_sat_and_macaulay_figures_by_their_names() {
+        use crate::cryptanalysis::ic_framework::stages::SystemShape;
+        use crate::cryptanalysis::ic_framework::SolverReport;
+        let shape = SystemShape {
+            n_vars: 10,
+            n_equations: 13,
+            degrees: vec![2; 13],
+            semi_regular_degree: Some(3),
+        };
+        let mut extra = BTreeMap::new();
+        extra.insert("variables_max".to_string(), 132);
+        extra.insert("clauses_max".to_string(), 2157);
+        extra.insert("decisions".to_string(), 53_360);
+        extra.insert("propagations".to_string(), 2_214_306);
+        let sat = SolverReport {
+            name: "sat-cdcl".into(),
+            calls: 179,
+            ops: 48_872,
+            op_unit: "conflicts".into(),
+            extra,
+            ..Default::default()
+        };
+        let s = SolverStats::from_report(&sat, Some(&shape));
+        assert_eq!(s.sat_conflicts, Some(48_872));
+        assert_eq!(s.sat_variables, Some(132));
+        assert_eq!(s.sat_clauses, Some(2157));
+        assert_eq!(s.sat_decisions, Some(53_360));
+        assert_eq!(
+            (s.n_vars, s.n_equations, s.semi_regular_degree),
+            (Some(10), Some(13), Some(3))
+        );
+        assert_eq!(s.macaulay_rows, None);
+        // A round trip through the record's JSON keeps every field.
+        let back: SolverStats = serde_json::from_str(&serde_json::to_string(&s).unwrap()).unwrap();
+        assert_eq!(back, s);
+
+        let mut extra = BTreeMap::new();
+        extra.insert("matrix_rows_max".to_string(), 4096);
+        extra.insert("matrix_cols_max".to_string(), 8192);
+        extra.insert("max_poly_degree".to_string(), 4);
+        let f4 = SolverReport {
+            name: "f4-f2".into(),
+            calls: 3,
+            ops: 10,
+            op_unit: "word XORs".into(),
+            solving_degree_max: 3,
+            extra,
+            ..Default::default()
+        };
+        let s = SolverStats::from_report(&f4, None);
+        assert_eq!(
+            (s.macaulay_rows, s.macaulay_columns, s.macaulay_degree),
+            (Some(4096), Some(8192), Some(4))
+        );
+        assert_eq!(s.sat_conflicts, None);
+        assert_eq!(s.n_vars, None);
     }
 
     #[test]

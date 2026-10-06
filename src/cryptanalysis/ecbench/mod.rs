@@ -12,6 +12,7 @@
 //! | [`workload`] | curve constructions → ICV1-named single-target workloads |
 //! | [`methods`] | the method registry and the one `solve` every method goes through |
 //! | [`generic`] | counted BSGS (three forms) and the kangaroo on any [`CountedGroup`] |
+//! | [`claw`] | the four-point signed-Frobenius pair claw (aburan28/cryptanalysis#175) on a Koblitz curve |
 //! | [`spec`] | the experiment spec and its deterministic expansion |
 //! | [`host`] | the host capsule and its environment class |
 //! | [`isolation`] | CPU reservation, eviction, pinning, NUMA binding, kernel counters |
@@ -23,14 +24,22 @@
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
 //! | [`isolab`] | an `isolab.job/v1` that runs a spec on an independent lab worker |
+//! | [`bounds`] | bound records: the fitted cost of a method on a domain, sealed and re-derivable |
+//! | [`frontier`] | the Pareto frontier of a domain's bounds, and its page |
+//! | [`challenge`] | challenges (frozen paired specs) and verdicts (how a frontier moves) |
 //!
 //! [`CountedGroup`]: crate::cryptanalysis::ic_boundary::CountedGroup
 
 pub mod audit;
+pub mod bounds;
+pub mod callgrind;
 pub mod canonical;
+pub mod challenge;
 pub mod claim;
+pub mod claw;
 pub mod compare;
 pub mod db;
+pub mod frontier;
 pub mod generic;
 pub mod host;
 pub mod isolab;

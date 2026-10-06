@@ -22,6 +22,7 @@ use crate::cryptanalysis::ic_boundary::{
     price_phase, BinaryGroup, BinaryInstance, Calibration, CountedGroup, FactorBase, GroupOps,
     OracleCounters, PhaseCost, RowStatus,
 };
+use crate::cryptanalysis::ic_measurement;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 
 /// Frozen target-independent setup policy. The source base and oracle are
@@ -354,6 +355,10 @@ pub fn run_shared_rank_targets(
     if target_spec.max_attempts == 0 || points.is_empty() {
         return Err("target gate needs points and a positive attempt cap".into());
     }
+    let profile_online = std::env::var("ECBENCH_CALLGRIND_TARGET").as_deref() == Ok("1");
+    if profile_online && points.len() != 1 {
+        return Err("target-only Callgrind profile requires exactly one target".into());
+    }
     let (rank, fb, mut oracle) = prepare_shared_rank(inst, rank_spec, calib)?;
     if !rank.verified || rank.column_logs.len() != fb.columns {
         return Err("target-blind rank setup did not verify every base column".into());
@@ -376,6 +381,9 @@ pub fn run_shared_rank_targets(
             name: inst.name.clone(),
             field_degree: Some(inst.n),
         };
+        if profile_online {
+            ic_measurement::callgrind_dump(b"ecbench_before_online\0");
+        }
         let started = Instant::now();
         let mut query = PhaseCost::default();
         let mut pdp = PhaseCost::default();
@@ -471,6 +479,9 @@ pub fn run_shared_rank_targets(
         pdp.count("frobfold_mismatches", counters.frobfold_mismatches);
         pdp.count("lift_failures", counters.lift_failures);
         let mut online_wall_ns = started.elapsed().as_nanos() as u64;
+        if profile_online {
+            ic_measurement::callgrind_dump(b"ecbench_online\0");
+        }
         let timed_phases = query.wall_ns
             + pdp.wall_ns
             + relation_check.wall_ns

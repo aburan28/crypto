@@ -536,6 +536,40 @@ impl CairnTransport {
         self.cfg.submitter.name()
     }
 
+    /// Commit an artifact for the configured objective through the same
+    /// signed, persisted commit-reveal outbox as rho distinguished points.
+    ///
+    /// This is the narrow generic bridge used by other native campaigns. The
+    /// caller supplies a stable semantic key for local idempotency and remains
+    /// responsible for matching the artifact to the objective's checker. A
+    /// successful commit says nothing about the later checker verdict.
+    pub fn publish_artifact(
+        &mut self,
+        artifact: Json,
+        key: String,
+    ) -> Result<PublishReport, String> {
+        if key.is_empty() {
+            return Err("artifact key must not be empty".into());
+        }
+        if self.submitted.contains(&key) || self.log_keys.contains(&key) {
+            return Ok(PublishReport {
+                committed: 0,
+                skipped: 1,
+            });
+        }
+        self.commit(&self.cfg.objective_id.clone(), artifact, key)?;
+        Ok(PublishReport {
+            committed: 1,
+            skipped: 0,
+        })
+    }
+
+    /// Reveal generic artifacts whose commitment epoch has closed without
+    /// interpreting the objective log as a rho distinguished-point table.
+    pub fn reveal_pending(&mut self) -> Result<(usize, usize), String> {
+        self.reveal_due()
+    }
+
     fn save(&self) -> Result<(), String> {
         let Some(p) = &self.cfg.state_path else {
             return Ok(());
@@ -1403,6 +1437,53 @@ mod tests {
             },
             &|| false,
         );
+    }
+
+    #[test]
+    fn generic_artifacts_use_the_persisted_commit_reveal_outbox() {
+        let fake = FakeCairn::start();
+        let clock = Arc::new(AtomicU64::new(1_785_196_800));
+        let mut transport = transport(&fake, Submitter::Nickname("alice".into()), &clock, None);
+        let artifact = json!({
+            "schema": "p256.isogeny.cairn.shard-receipt/v1",
+            "run_id": "p256-2p40-v1",
+            "shard_id": 7,
+        });
+
+        assert_eq!(
+            transport
+                .publish_artifact(artifact.clone(), "p256-2p40-v1:00000007".into())
+                .unwrap(),
+            PublishReport {
+                committed: 1,
+                skipped: 0,
+            }
+        );
+        assert_eq!(transport.pending(), 1);
+        assert!(fake.drain().is_empty());
+
+        // The same semantic shard cannot be committed twice locally, even if
+        // a caller rebuilt the JSON object after an S3 retry.
+        assert_eq!(
+            transport
+                .publish_artifact(artifact.clone(), "p256-2p40-v1:00000007".into())
+                .unwrap(),
+            PublishReport {
+                committed: 0,
+                skipped: 1,
+            }
+        );
+
+        clock.fetch_add(10, Ordering::Relaxed);
+        assert_eq!(transport.reveal_pending().unwrap(), (1, 0));
+        assert!(fake.drain().is_empty());
+        let claims: Vec<Json> = fake
+            .log()
+            .into_iter()
+            .filter(|entry| entry["kind"] == "claim")
+            .collect();
+        assert_eq!(claims.len(), 1);
+        assert_eq!(claims[0]["payload"]["artifact"], artifact);
     }
 
     #[test]

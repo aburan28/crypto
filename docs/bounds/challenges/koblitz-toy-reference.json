@@ -1,0 +1,70 @@
+{
+  "acceptance": {
+    "axes": [
+      "ops",
+      "memory"
+    ],
+    "min_runs_per_size": 8,
+    "min_sizes": 4,
+    "require_audit": true,
+    "require_replay_all": true,
+    "uncharged_tolerance": 0.05
+  },
+  "challenge_id": "ECCH1h76d71da2a89c",
+  "description": "Standing challenge against the strong single-target reference the IC claim rules require (docs/ic/boundary_targets.json, since 2026-10-01): rho.signed_frobenius_strong at its registry defaults, 16.794 x the generic floor over degrees 17 to 29, 72 percent of it set-up (docs/bounds/records/koblitz-rho-strong.json). Index-calculus candidates on Koblitz curves are judged here before any vs_rho claim at larger sizes.",
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "koblitz",
+    "problem": "ecdlp.single_target",
+    "target_kind": "planted",
+    "tier": "toy",
+    "unit": "ecbench.gae"
+  },
+  "domain_id": "ECDOM1h080dd3dc639e",
+  "incumbent": {
+    "bound_id": "ECBND1h1573ea580e89",
+    "method": {
+      "id": "rho.signed_frobenius_strong",
+      "params": {}
+    }
+  },
+  "label": "beat the strong signed-Frobenius rho on toy Koblitz curves",
+  "measurement": {
+    "isolation_required": "L2",
+    "rounds": 3,
+    "timeout_seconds": 300,
+    "warmup": 1
+  },
+  "schema": "ecbench.challenge/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 17
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 19
+      },
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 29
+      }
+    ],
+    "nonce": 20261008,
+    "target_kind": "planted",
+    "targets_per_curve": 8
+  }
+}

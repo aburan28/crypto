@@ -67,6 +67,25 @@ cargo build --release --bin ecbench
 ./target/release/ecbench db sql /tmp/ecbench/smoke-1 | sqlite3 -bail ecbench.db
 ```
 
+Wide registered curves whose coordinates do not fit the measured harness's
+`u64` group types can still carry canonical factor-base inventories.  The
+native P-256 Dickson builder writes the same object layout and FB1 preimage,
+with its unavoidable wide integers labelled explicitly:
+
+```bash
+./target/release/p256_factor_base \
+  --curve icv1-fp256-t89188191154553853111372247798585809583-f188c491 \
+  --factor-base dickson-torus:depth=18 \
+  --out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.json \
+  --sql-out /tmp/icv1-fp256-t89188191154553853111372247798585809583-f188c491.factor-base.sql \
+  --relation-length 17 \
+  --verify
+```
+
+The standalone builder keeps the sealed `ecbench` measurement path unchanged.
+Its `ecbench.factor_base_dump/v1-wide` inventory and SQL companion use the
+same factor-base tables, but neither is an `ic.pipeline` measurement.
+
 `ecbench methods` lists every method and its parameters; `ecbench host`
 prints the host capsule; `ecbench claim build` turns an IC run and a
 strong-rho run on a public target into a checked `vs_rho` claim (§9). On Linux `run` reserves a whole core by default
@@ -176,6 +195,14 @@ different fact sets. The two claim identities are hashed the way
 against its values in `claim.rs`'s tests, so a claim built here and a
 tournament candidate with the same inputs carry the same id.
 
+Ordinary factor-base dumps encode group keys as eight-byte big-endian
+integers and coefficients as `u64`.  `factor_base_dump/v1-wide` preserves the
+table and identity layout but stores curve integers and coefficients as
+decimal strings.  Its family declares its fixed-width key encoding as an
+identity-bound parameter; the P-256 Dickson family uses 33-byte big-endian
+`((x+1)<<1)|sign` keys.  A wide dump may use an FB1 identity because the FB1
+preimage is unchanged; it may not claim the ordinary v1 dump schema.
+
 ## 5. Confounders, and how each one is controlled
 
 Every row of this table is something that has moved a figure in this
@@ -266,6 +293,7 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `rho.signed_frobenius_strong` | group additions exactly; each scalar multiplication (jump table, walk start stride, candidate checks) at `1.5·log₂ r` additions, `ic_boundary::signed_frobenius_rho`'s convention | canonicalisations, partition hashes, distinguished-point table queries and inserts |
 | `bsgs.*` | baby steps, the giant stride, giant steps | table inserts and lookups |
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
+| `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
@@ -292,6 +320,30 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`koblitz-standard-subspace:dimension=d` with
+`pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
+PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no
+default for any parameter that changes the search. The base is every point
+whose abscissa lies in `span(1, z, …, z^{d−1})`, folded by negation only. It
+is the base #1333's workers used.
+
+- **Charged:** every point addition the decomposition performs, including
+  F6-IC's `geometric_group_additions` (support closure, residual arithmetic
+  and witness replay), plus the framework's sign lift of each witness.
+- **Counted, not charged:** the Boolean solver's word XORs, under the
+  inherited-F4 adapters' unit string, so `S` is a lower bound and names
+  that unit in `unpriced`. Reductions, splits, propagations and every F6
+  gate counter ride in the record's `solver.extra`.
+
+Both engines are exact on the same base and seed, so the two arms issue the
+same queries until one exhausts its node budget. The base and oracle live in the
+`ecbench` binary (`src/bin/ecbench/pdp3_koblitz.rs`) and reach `ic.pipeline`
+through `methods::register_binary_plugins`. The library cannot name them:
+frozen-source replays rebuild it against pre-F6 snapshots of
+`koblitz_index_calculus.rs`, `Cargo.toml` is pinned by other frozen
+evaluations, and the tournament admits no root build script. It also
+refuses to run while a `KIC_*`, `F4_*` or `SOLVER_*` tuning override is set.
+
 **Calibration.** The unit has been checked against theory in
 [`research/ecbench_calibration_20261002`](../../research/ecbench_calibration_20261002/README.md).
 Over 2 384 verified runs, preregistered and replayed, every generic
@@ -309,6 +361,13 @@ Two consequences to read every table with:
   larger method at any interesting size. The records keep `max_rss_kib`
   and the lookup counts. This is the known time–memory trade, never a
   finding.
+- **The pair claw's `S` omits its memory too.** `claw.pair_table`, ported
+  from `aburan28/cryptanalysis#175`, holds `M = table_scale·√(r/n)` classes.
+  Every base logarithm is known, so it is a generic method (a randomised
+  BSGS on signed Frobenius classes) whose mean is about
+  `(c + 1/c)/√n` at `c = table_scale`, at best `2/√n` against rho's
+  `√(π/4n)`. It is in the `claw` family, not `ic`, and it is not an
+  index-calculus candidate for a `vs_rho` claim.
 - **A lower bound is marked.** `cost.lower_bound` is set whenever
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
@@ -366,7 +425,14 @@ and the seed, never on the host. `ecbench verify --replay N` re-executes
 N measured runs (`--replay-all`, every deterministic one) and requires
 the same answer, total, phase counts, counters, unpriced work and factor
 base, bit for bit. Run on another machine, it is an independent check of
-the figure. The audit also recomputes every derived figure from the
+the figure. Records written before 2026-10-05 by an `ic.pipeline` arm
+whose solver work was wall-priced (the descent-algebraic arms of
+`research/ecbench_yield_sweep_20261004/sessions/koblitz`) carry gae
+figures rounded to the binade of that wall term, because the term was
+removed by subtraction; the audit reproduces that rounding from the
+solver term and pre-removal total the record itself carries, reports the
+replay as `identical (legacy gae rounding, …)`, and new records carry the
+exact figure. The audit also recomputes every derived figure from the
 record's own counts (`S = total/√r`, the floor, the ratio, the
 lower-bound flag) and, for a session graded under the current rules,
 regrades every run from its recorded observations. A figure edited by
@@ -454,6 +520,14 @@ field the schema requires, from the session's own files:
   bytes, or that did not reproduce both runs is refused. Without one the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
+- **Late receipt attachment.** If the measuring binary is no longer
+  available when the other-host receipt arrives, `ecbench claim attach`
+  reconstructs the entire previously saved diagnostic report from the frozen
+  session and the current claim sources. It requires exact equality before
+  adding the receipt; a changed source, target, time, candidate, or other
+  report field is refused. The new report retains the original binary hash.
+  `claim build` still requires the measuring binary itself. Archive both the
+  original report and the attached one.
 - **Admissibility.** The verdict states the speedup `rho / IC` only when
   both runs earned the spec's isolation level; otherwise it is marked
   descriptive. The levels are in the report either way.
@@ -489,13 +563,28 @@ on another hash) is stopped by the schema's identity triggers.
 | `factor_bases`, `factor_base_points` | every factor base a run used, by `FB1h…`; with its points when an `ecbench fb` dump is loaded |
 | `hosts`, `sessions`, `arms` | the host class and capsule, the session's build and reservation, its arms |
 | `runs`, `phases`, `run_counters`, `isolation_blockers` | one row per execution, its phases, its counters, and why it did not reach a higher level |
+| `run_solver` | the decomposition solver's statistics for an algebraic or SAT IC run (the record's `solver` block): the system's variables, equations and semi-regular degree, the solving degree reached, Macaulay rows, columns, degree and rank where the solver reports them, SAT variables, clauses, conflicts, decisions and propagations, and every solver-specific counter verbatim. Absent for table oracles. Informational: outside `S` beyond the relations phase's `solver_*` counters, and outside the replay comparison |
 | `comparisons` | every saved comparison |
 | `claims` | every loaded `vs_rho` claim, keyed by its IC1 `run_id`, with the checker's status at load time; a claim rebuilt with an independent receipt replaces its earlier form |
 
 Views: `arm_workload_summary` (the AGENTS.md §2 table, per workload),
 `method_by_curve` (each method's mean `S` and ratio to the floor per curve,
 across sessions), `ic_phase_split` (each IC run's phase shares with its
-factor base).
+factor base), `ic_yield` (the yield ledger: one row per IC run with its
+curve, target, factor base, oracle, trials, relations, `yield` =
+relations / trials, lookups, lift failures, matrix rank and rows, and the
+`run_solver` statistics; `ic.pipeline`'s `relations` and
+`ic.shared_rank`'s `hits` are read as the same count).
+
+```sql
+SELECT fb_family, oracle, count(*), round(avg(yield), 4), round(avg(lookups * 1.0 / relations), 1)
+FROM ic_yield WHERE status = 'verified' GROUP BY fb_family, oracle ORDER BY avg(yield) DESC;
+```
+
+The same ledger, joined with the curve registry and the tournament's
+rounds, is the Yield view of the lab browser (`docs/browser/`,
+AGENTS.md §7c). A yield is a stage diagnostic: it ranks bases and oracles
+on the same targets, and only the whole-pipeline `S` decides speed.
 
 ```sql
 SELECT method, curve_slug, verified_runs, round(mean_s, 3), round(mean_ratio_to_floor, 2)
@@ -530,10 +619,24 @@ Stated so that nothing here is read as more than it is:
   is a passing audit of these exact files, run elsewhere, that
   reproduced both runs, and a reader checks the receipt itself at the
   pointer the claim cites.
-- **Word-size curves only.** The counted group types hold `GF(p)` with
-  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
-  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it.
+- **Wide curves run two methods.** Prime curves need `p < 2^62`. Binary
+  curves run every method for `m ≤ 62`. Koblitz curves with `64 ≤ m ≤ 127`
+  (`koblitz_wide`, over the registry's modulus, so the m = 83 gate curve
+  `icv1-f2m83-tm6151469093347-debefd74` of AGENTS.md §8a builds) run only
+  `rho.signed_frobenius_strong` and `claw.pair_table`. Both are the one-word
+  code made generic over the word, and the committed sessions' replays pin
+  that the one-word walk did not change. Every other method refuses a wide
+  curve. A subgroup order past `2^64` is written as a decimal string
+  (`canonical::compat_u128`) and gets the `_v2` target laws
+  (`uniform_scalar_sha256_v2`, `hash_to_subgroup_v2`). Of the registered
+  wide Koblitz curves only m = 83 and m = 97 have a prime `#E/h`, so the
+  cheapest wide solve is m = 83 itself: about `2^37` strong-rho steps,
+  some 20 single-core hours at the 0.49 µs per step measured on Apple
+  silicon. The claw's cost-minimising table there is about `2^37` entries,
+  out of reach of one host's memory. `p256_factor_base` only constructs
+  and inventories a factor base on the registered wide prime curve; it
+  does not make that curve runnable by `ic.pipeline` and produces no
+  operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a
@@ -544,6 +647,29 @@ Stated so that nothing here is read as more than it is:
   through `perf_event_open` on Linux. macOS, the QEMU guest and most cloud
   VMs expose no hardware counters, and their records carry the reason
   instead of a count.
+- **A separate Callgrind solve count is available on Linux x86-64.** Export
+  a frozen child input with `ecbench profile-input --spec SPEC --seq N`, run
+  `ECBENCH_CALLGRIND_SOLVE=1 valgrind --tool=callgrind --cache-sim=no
+  --branch-sim=no --callgrind-out-file=PREFIX ecbench exec < INPUT.json`,
+  then read it with `ecbench callgrind-ir --prefix PREFIX`. The parser counts
+  every numbered part after the pre-solve reset through the post-solve reset,
+  including internal phase dumps, and rejects missing markers. This is a
+  complete user-space **implementation** instruction count for the one solve;
+  it has its own `callgrind.Ir` unit. It is not a PMU count or an isolated
+  native wall-time result. Keep its binary, Valgrind version, CPU feature
+  dispatch, input, child output, and raw parts together. The
+  [n37 protocol](../../research/ecbench_callgrind_solve_20261004/PROTOCOL.md)
+  freezes a same-target IC/rho census using this path.
+- **A target-only Callgrind interval is opt-in for the shared-rank IC and
+  strong signed-Frobenius rho.** Set `ECBENCH_CALLGRIND_TARGET=1` alongside
+  `ECBENCH_CALLGRIND_SOLVE=1`, then run `ecbench callgrind-online-ir
+  --prefix PREFIX`. The parser requires one target interval inside the
+  complete solve and reports pre-online, online and post-online Ir with
+  their sum checked against the complete solve. It rejects profiles
+  missing either boundary. This is simulated instruction attribution,
+  not an isolated online wall claim; the
+  [preregistered n37 gate](../../research/ecbench_n37_online_ir_20261004/PROTOCOL.md)
+  defines its first comparison.
 - **Rho's distinguished-point table is not counted.** Its stores happen
   once per distinguished point, a vanishing fraction of steps. BSGS and
   the kangaroo count their table operations.

@@ -674,3 +674,445 @@ fn copy_dir(from: &Path, to: &Path) {
         }
     }
 }
+
+#[test]
+fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
+    // #1333's inherited-F4 and F6-IC decomposers inside ic.pipeline on the
+    // E_0 m = 13 curve: every run verifies; both arms, being exact solvers
+    // on the same base and seed, issue the same queries and find the same
+    // relations; F6-IC's gate additions are charged and the solver's word
+    // XORs are counted but left out of S, which is therefore a lower bound.
+    let dir = scratch("pdp3");
+    let spec = r#"{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-koblitz test",
+      "workloads": {"curves": [{"kind": "koblitz", "a": 0, "n": 13}],
+                    "targets_per_curve": 2, "target_seed": 7, "target_kind": "public"},
+      "arms": [
+        {"name": "ic-f4", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192"}}},
+        {"name": "ic-f6", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=3,node_budget=8192"}}}
+      ],
+      "measurement": {"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 120}
+    }"#;
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_workload: std::collections::BTreeMap<String, Vec<Value>> = Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+        let unpriced = r["cost"]["unpriced"].to_string();
+        assert!(unpriced.contains("word_XORs"), "{unpriced}");
+        let extra = &r["solver"]["extra"];
+        let geometry = extra["geometric_group_additions"].as_u64().unwrap();
+        assert_eq!(extra["geometric_fallbacks"], 0, "{line}");
+        if r["arm"] == "ic-f6" {
+            assert!(geometry > 0, "F6-IC charged no geometry: {line}");
+        } else {
+            assert_eq!(geometry, 0, "{line}");
+        }
+        assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        let w = r["workload"]["workload_id"].as_str().unwrap().to_string();
+        by_workload.entry(w).or_default().push(r);
+    }
+    assert_eq!(by_workload.len(), 2);
+    for (w, rs) in by_workload {
+        assert_eq!(rs.len(), 2, "{w}");
+        for key in ["targets_tried", "relations_found", "matrix_rank"] {
+            assert_eq!(
+                rs[0]["counters"][key], rs[1]["counters"][key],
+                "{w}: the arms' query streams diverged at {key}"
+            );
+        }
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
+const BOUNDS_SPEC: &str = r#"{
+  "schema": "ecbench.spec/v1",
+  "label": "bounds integration test: four sizes",
+  "workloads": {
+    "curves": [{"kind": "prime_search", "bits": 12, "seed": 59297},
+               {"kind": "prime_search", "bits": 14, "seed": 59297},
+               {"kind": "prime_search", "bits": 16, "seed": 59297},
+               {"kind": "prime_search", "bits": 18, "seed": 59297}],
+    "targets_per_curve": 4,
+    "target_seed": 11
+  },
+  "arms": [
+    {"name": "rho-plain", "role": "reference", "method": {"id": "rho.plain"}},
+    {"name": "rho-neg", "role": "candidate", "method": {"id": "rho.negation"}},
+    {"name": "bsgs-neg", "role": "candidate", "method": {"id": "bsgs.negation"}},
+    {"name": "rho-plain-aa", "role": "control", "method": {"id": "rho.plain"}}
+  ],
+  "measurement": {"rounds": 2, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 60}
+}"#;
+
+fn read_json(p: &Path) -> Value {
+    serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap()
+}
+
+#[test]
+fn bounds_a_frontier_and_challenge_verdicts_round_trip() {
+    let dir = scratch("bounds");
+    let s = |p: &Path| p.to_str().unwrap().to_string();
+    let spec = dir.join("spec.json");
+    std::fs::write(&spec, BOUNDS_SPEC).unwrap();
+    let session = dir.join("s0");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&spec),
+        "--out",
+        &s(&session),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "run failed: {err}");
+
+    // Bounds of three arms, sealed, re-derivable, and refused when touched.
+    let records = dir.join("records");
+    std::fs::create_dir_all(&records).unwrap();
+    let mut ids = std::collections::BTreeMap::new();
+    for arm in ["rho-plain", "rho-neg", "bsgs-neg"] {
+        let out = records.join(format!("{arm}.json"));
+        let (ok, _, err) = ecbench(&[
+            "bound",
+            "fit",
+            "--dir",
+            &s(&session),
+            "--arm",
+            arm,
+            "--root",
+            &s(&dir),
+            "--out",
+            &s(&out),
+        ]);
+        assert!(ok, "bound fit {arm}: {err}");
+        let b = read_json(&out);
+        assert_eq!(b["schema"], "ecbench.bound/v1");
+        let id = b["bound_id"].as_str().unwrap().to_string();
+        assert!(id.starts_with("ECBND1h") && id.len() == 7 + 12, "{id}");
+        assert_eq!(b["domain"]["family"], "prime");
+        assert_eq!(b["domain"]["tier"], "toy");
+        assert_eq!(b["fit"]["sizes"], 4);
+        assert_eq!(b["fit"]["scaling_claim"], true);
+        assert_eq!(b["fit"]["declared_alpha"], 0.5);
+        assert_eq!(b["level"], "exponent");
+        assert_eq!(b["admissibility"]["status"], "admissible");
+        assert_eq!(b["dimensions"]["memory"]["known"], true);
+        assert_eq!(b["provenance"]["verified"], 32);
+        assert_eq!(b["provenance"]["sessions"][0]["dir"], "s0");
+        ids.insert(arm, id);
+    }
+    let (ok, _, err) = ecbench(&[
+        "bound",
+        "check",
+        "--root",
+        &s(&dir),
+        "--record",
+        &s(&records.join("rho-plain.json")),
+        &s(&records.join("rho-neg.json")),
+    ]);
+    assert!(ok, "bound check: {err}");
+    let touched = dir.join("touched.json");
+    let text = std::fs::read_to_string(records.join("rho-neg.json")).unwrap();
+    std::fs::write(
+        &touched,
+        text.replacen("\"verified\": 32", "\"verified\": 33", 1),
+    )
+    .unwrap();
+    let (ok, _, err) = ecbench(&[
+        "bound",
+        "check",
+        "--root",
+        &s(&dir),
+        "--record",
+        &s(&touched),
+    ]);
+    assert!(!ok && err.contains("seal mismatch"), "{err}");
+
+    // The frontier: BSGS leads on ops, the rho walks on memory; the page
+    // is current right after it is built and stale once edited.
+    let fjson = dir.join("frontier.json");
+    let fmd = dir.join("FRONTIER.md");
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records),
+        "--out",
+        &s(&fjson),
+        "--markdown",
+        &s(&fmd),
+    ]);
+    assert!(ok, "frontier build: {err}");
+    let f = read_json(&fjson);
+    assert_eq!(f["schema"], "ecbench.frontier/v1");
+    assert_eq!(f["domains"].as_array().unwrap().len(), 1);
+    let d = &f["domains"][0];
+    assert_eq!(d["entries"].as_array().unwrap().len(), 3);
+    assert_eq!(d["ops_leader"], ids["bsgs-neg"]);
+    let frontier_ids: Vec<&str> = d["entries"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|e| e["is_frontier"] == true)
+        .map(|e| e["bound_id"].as_str().unwrap())
+        .collect();
+    assert!(
+        frontier_ids.contains(&ids["bsgs-neg"].as_str()),
+        "{frontier_ids:?}"
+    );
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records),
+        "--out",
+        &s(&fjson),
+        "--markdown",
+        &s(&fmd),
+        "--check",
+    ]);
+    assert!(ok, "frontier check: {err}");
+    std::fs::write(&fmd, "edited\n").unwrap();
+    let (ok, _, err) = ecbench(&[
+        "frontier",
+        "build",
+        "--bounds",
+        &s(&records),
+        "--out",
+        &s(&fjson),
+        "--markdown",
+        &s(&fmd),
+        "--check",
+    ]);
+    assert!(!ok && err.contains("stale"), "{err}");
+
+    // A challenge against rho.plain, holding the bound fitted above.
+    let draft = dir.join("draft.json");
+    std::fs::write(
+        &draft,
+        format!(
+            r#"{{
+  "label": "test: beat rho.plain",
+  "domain": {{"problem": "ecdlp.single_target", "family": "prime", "target_kind": "planted",
+             "unit": "ecbench.gae", "tier": "toy",
+             "envelope": {{"targets": 1, "precomputation": "none", "threads": 1}}}},
+  "incumbent": {{"bound_id": "{}", "method": {{"id": "rho.plain"}}}},
+  "workloads": {{"curves": [{{"kind": "prime_search", "bits": 12, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 14, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 16, "seed": 59297}},
+                           {{"kind": "prime_search", "bits": 18, "seed": 59297}}],
+                "targets_per_curve": 4, "nonce": 7}},
+  "measurement": {{"rounds": 2, "warmup": 0, "isolation_required": "L0", "timeout_seconds": 60}},
+  "acceptance": {{"min_runs_per_size": 8}}
+}}"#,
+            ids["rho-plain"]
+        ),
+    )
+    .unwrap();
+    let challenge = dir.join("challenge.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "seal",
+        "--draft",
+        &s(&draft),
+        "--out",
+        &s(&challenge),
+    ]);
+    assert!(ok, "challenge seal: {err}");
+    let (ok, _, err) = ecbench(&["challenge", "check", "--file", &s(&challenge)]);
+    assert!(ok, "challenge check: {err}");
+    let c = read_json(&challenge);
+    assert!(c["challenge_id"].as_str().unwrap().starts_with("ECCH1h"));
+    assert_eq!(
+        c["acceptance"]["axes"],
+        serde_json::json!(["ops", "memory"])
+    );
+
+    // Epoch 1: BSGS with the negation map.  Fewer operations, a √r table:
+    // a trade, and a new bound that names the incumbent's.
+    let spec1 = dir.join("spec1.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "spec",
+        "--challenge",
+        &s(&challenge),
+        "--candidate",
+        r#"{"id":"bsgs.negation"}"#,
+        "--epoch",
+        "1",
+        "--out",
+        &s(&spec1),
+    ]);
+    assert!(ok, "challenge spec: {err}");
+    let s1 = dir.join("s1");
+    let (ok, _, err) = ecbench(&[
+        "run",
+        "--spec",
+        &s(&spec1),
+        "--out",
+        &s(&s1),
+        "--cpus",
+        "none",
+        "--lock",
+        &lock(&dir),
+        "--quiet",
+    ]);
+    assert!(ok, "run s1: {err}");
+    let v1 = dir.join("verdict1.json");
+    let b1 = dir.join("bound1.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "verdict",
+        "--challenge",
+        &s(&challenge),
+        "--dir",
+        &s(&s1),
+        "--epoch",
+        "1",
+        "--replay-all",
+        "--bounds",
+        &s(&records),
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&v1),
+        "--bound-out",
+        &s(&b1),
+        "--exit-code",
+    ]);
+    assert!(ok, "verdict 1: {err}");
+    let v = read_json(&v1);
+    assert_eq!(v["schema"], "ecbench.verdict/v1");
+    assert_eq!(v["outcome"], "trade", "{}", v["statement"]);
+    assert_eq!(v["advances_on"], serde_json::json!(["ops"]));
+    assert_eq!(v["regresses_on"], serde_json::json!(["memory"]));
+    assert_eq!(v["level_moved"], Value::Null);
+    assert_eq!(v["session"]["spec_matches"], true);
+    assert_eq!(v["audit"]["ok"], true);
+    assert_eq!(v["audit"]["replay_all"], true);
+    assert_eq!(v["audit"]["replays"], v["audit"]["replays_reproduced"]);
+    assert_eq!(v["axes"][0]["axis"], "ops");
+    assert_eq!(v["axes"][0]["pairs"], 32);
+    assert_eq!(v["control"]["ratio"], 1.0);
+    assert!(v["incumbent_drift"]["recorded_bound_id"] == ids["rho-plain"]);
+    assert_eq!(v["fits"]["candidate"]["sizes"], 4);
+    let nb = read_json(&b1);
+    assert_eq!(nb["improves_on"], serde_json::json!([ids["rho-plain"]]));
+    assert_eq!(nb["verdict_id"], v["verdict_id"]);
+    assert_eq!(nb["method"]["id"], "bsgs.negation");
+
+    // Epoch 2: the incumbent against itself.  Same seeds, same counts:
+    // the ratio is exactly 1, the outcome `matches`, no bound is written.
+    let spec2 = dir.join("spec2.json");
+    assert!(
+        ecbench(&[
+            "challenge",
+            "spec",
+            "--challenge",
+            &s(&challenge),
+            "--candidate",
+            r#"{"id":"rho.plain"}"#,
+            "--epoch",
+            "2",
+            "--out",
+            &s(&spec2),
+        ])
+        .0
+    );
+    let s2 = dir.join("s2");
+    assert!(
+        ecbench(&[
+            "run",
+            "--spec",
+            &s(&spec2),
+            "--out",
+            &s(&s2),
+            "--cpus",
+            "none",
+            "--lock",
+            &lock(&dir),
+            "--quiet",
+        ])
+        .0
+    );
+    let v2 = dir.join("verdict2.json");
+    let b2 = dir.join("bound2.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "verdict",
+        "--challenge",
+        &s(&challenge),
+        "--dir",
+        &s(&s2),
+        "--epoch",
+        "2",
+        "--replay-all",
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&v2),
+        "--bound-out",
+        &s(&b2),
+        "--exit-code",
+    ]);
+    assert!(ok, "verdict 2: {err}");
+    let v = read_json(&v2);
+    assert_eq!(v["outcome"], "matches", "{}", v["statement"]);
+    assert_eq!(v["axes"][0]["ratio_candidate_over_incumbent"], 1.0);
+    assert!(!b2.exists(), "a match writes no bound");
+
+    // The wrong epoch is somebody else's spec: inadmissible, exit 1, and
+    // the paired ratio is still reported for information.
+    let v3 = dir.join("verdict3.json");
+    let (ok, _, err) = ecbench(&[
+        "challenge",
+        "verdict",
+        "--challenge",
+        &s(&challenge),
+        "--dir",
+        &s(&s2),
+        "--epoch",
+        "3",
+        "--root",
+        &s(&dir),
+        "--out",
+        &s(&v3),
+        "--exit-code",
+    ]);
+    assert!(!ok, "{err}");
+    let v = read_json(&v3);
+    assert_eq!(v["outcome"], "inadmissible");
+    assert_eq!(v["session"]["spec_matches"], false);
+    assert!(v["reasons"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|r| r.as_str().unwrap().contains("not the challenge's spec")));
+    assert!(v["reasons"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|r| r.as_str().unwrap().contains("replay-all")));
+    let _ = std::fs::remove_dir_all(&dir);
+}

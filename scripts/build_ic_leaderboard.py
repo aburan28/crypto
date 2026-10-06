@@ -57,6 +57,16 @@ SOURCES = {
     "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "koblitz_s23": "research/ic_single_target_20260930/analysis.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+    "n37_rank_columns": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+    "n37_k8_k16": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+    "n37_online_ir": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+    "n37_online_k8_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+    "n37_online_k16_claim": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+    "n37_native_wall": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+    "n37_native_wall_evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+    "f6_small_cold_rows": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+    "f6_small_cold_replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+    "f6_ecbench_ladder": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
     "registry": "docs/curves/registry.json",
 }
 S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
@@ -493,6 +503,195 @@ def families(board: list[dict]) -> dict:
 
 def build() -> dict:
     names = Names()
+    small_rows = [json.loads(line) for line in (REPO / SOURCES["f6_small_cold_rows"]).read_text().splitlines() if line]
+    small_replay = load(SOURCES["f6_small_cold_replay"])
+    small_by_arm = {row["arm"]: row for row in small_rows}
+    if (len(small_rows) != 3
+            or set(small_by_arm) != {"inherited_f4", "f6_ic", "f5"}
+            or small_replay["status"] != "verified"
+            or len(small_replay["runs"]) != 3
+            or any(row["status"] != "complete" or row["exit_status"] != 0
+                   or row["workload_id"] != "f6d79f6dd9f2"
+                   or row["target"] != [305, 466]
+                   or row["recovered"] != "4"
+                   or row["actual_usable_base_points"] != 14
+                   or row["folded_columns"] != 2
+                   or row["verified_relations"] != 8
+                   or row["cold_inside_worker_ns"] != row["cold_phase_sum_ns"]
+                   or row["online_wall_ns"] != row["online_phase_sum_ns"]
+                   for row in small_rows)
+            or any(not all(replay[key] for key in (
+                "group_replay", "phase_closure", "relation_certified",
+                "relations_replayed", "column_logs_replayed"))
+                for replay in small_replay["runs"])):
+        raise SystemExit("review the n9 F6-IC cold result before updating the leaderboard")
+    for arm, row in small_by_arm.items():
+        replay = next((r for r in small_replay["runs"]
+                       if r["run_file"].endswith(f"R1-{arm}.stdout.json")), None)
+        if (replay is None or replay["cold_inside_worker_ns"] != row["cold_inside_worker_ns"]
+                or replay["online_ns"] != row["online_wall_ns"]):
+            raise SystemExit("n9 F6-IC replay and measurement disagree")
+    small_cold_diagnostic = {
+        "curve": names("icv1-f2m9-tm5-4a3ea183")["slug"],
+        "source": SOURCES["f6_small_cold_rows"],
+        "replay": SOURCES["f6_small_cold_replay"],
+        "workload_id": "f6d79f6dd9f2",
+        "target": [305, 466],
+        "usable_points": 14,
+        "folded_columns": 2,
+        "verified_relations": 8,
+        "arms": {arm: {"candidate_id": row["candidate_id"],
+                       "cold_inside_worker_ns": row["cold_inside_worker_ns"],
+                       "online_wall_ns": row["online_wall_ns"]}
+                 for arm, row in small_by_arm.items()},
+        "rho_online_ms": None,
+        "online_speedup": None,
+        "cpu_isolation": "L0-unverified-mac",
+    }
+    ladder = load(SOURCES["f6_ecbench_ladder"])
+    if (ladder["schema"] != "f6-ic-ladder-analysis/v2"
+            or not ladder["decision"].startswith("not decidable")):
+        raise SystemExit("review the F6-IC ladder decision before updating the leaderboard")
+    ladder_diagnostic = {
+        "source": SOURCES["f6_ecbench_ladder"],
+        "decision": ladder["decision"],
+        "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+        "sizes": [
+            {
+                "m": z["m"],
+                "curve": names(z["slug"])["slug"],
+                "targets": z["targets_completed_both_ic_arms"],
+                "rho_s": z["rho_median_s"],
+                "f4_s_lower_over_rho": z["arms"]["ic-f4"]["median_s_lower_over_rho"],
+                "f6_s_lower_over_rho": z["arms"]["ic-f6"]["median_s_lower_over_rho"],
+                "median_log2_w4_over_w6": z["median_log2_w4_over_w6"],
+            }
+            for z in ladder["per_size"] if z["targets_completed_both_ic_arms"] > 0
+        ],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
+    rank_columns = load(SOURCES["n37_rank_columns"])
+    if (rank_columns["status"] != "independently_replayed_l0_bounded_diagnostic"
+            or rank_columns["selection"]["decision"] != "COUNTED_ENGINEERING_LEAD"
+            or rank_columns["selection"]["selected_k"] != 16
+            or rank_columns["online_speedup"] is not None
+            or rank_columns["fully_priced_cold_speedup"] is not None):
+        raise SystemExit("review the n37 bounded result before updating the leaderboard")
+    selected = next(c for c in rank_columns["candidates"] if c["folded_columns"] == 16)
+    bounded_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_rank_columns"],
+        "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+        "candidate_id": selected["candidate_id"],
+        "usable_points": selected["usable_points"],
+        "folded_columns": selected["folded_columns"],
+        "measured_runs": selected["measured_runs"],
+        "mean_cold_s_lower_bound": selected["mean_cold_s_lower_bound"],
+        "cold_counted_over_rho_diagnostic": selected["cold_counted_over_rho_diagnostic"],
+        "cold_counted_over_k42_diagnostic": selected["cold_counted_over_k42_diagnostic"],
+        "online_speedup": None,
+        "fully_priced_cold_speedup": None,
+    }
+    k8_decision = load(SOURCES["n37_k8_k16"])
+    if (k8_decision["schema"] != "ecbench.k8_k16_callgrind_decision/v1"
+            or k8_decision["decision"] != "select_k8_for_larger_field_gate"
+            or k8_decision["workloads"] != 16
+            or k8_decision["profiles"] != 64
+            or not k8_decision["all_archived_and_profiled_scalars_verified"]
+            or k8_decision["comparisons"][0]["numerator"] != "ic-k16"
+            or k8_decision["comparisons"][0]["denominator"] != "ic-k8"
+            or k8_decision["comparisons"][1]["denominator"] != "rho-strong"):
+        raise SystemExit("review the untouched K8/K16 instruction result before updating the leaderboard")
+    k8_prior = next(c for c in rank_columns["candidates"] if c["folded_columns"] == 8)
+    k8_confirmation = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_k8_k16"],
+        "candidate_id": k8_prior["candidate_id"],
+        "usable_points": k8_prior["usable_points"],
+        "folded_columns": k8_prior["folded_columns"],
+        "workloads": k8_decision["workloads"],
+        "profiles": k8_decision["profiles"],
+        "decision": k8_decision["decision"],
+        "k16_over_k8_ir": k8_decision["comparisons"][0]["ratio_of_sums"],
+        "k16_over_k8_ir_ci95": k8_decision["comparisons"][0]["bootstrap_95"],
+        "k8_over_rho_ir": k8_decision["comparisons"][1]["ratio_of_sums"],
+        "k8_over_rho_ir_ci95": k8_decision["comparisons"][1]["bootstrap_95"],
+        "online_speedup": None,
+        "cold_wall_speedup": None,
+    }
+    online_ir_decision = load(SOURCES["n37_online_ir"])
+    online_k8_claim = load(SOURCES["n37_online_k8_claim"])
+    online_k16_claim = load(SOURCES["n37_online_k16_claim"])
+    if (online_ir_decision["schema"] != "ecbench.n37_online_ir_decision/v1"
+            or online_ir_decision["decision"] != "prioritize_k16_for_isolated_n37_online_wall_gate"
+            or online_ir_decision["workloads"] != 16
+            or online_ir_decision["profiles"] != 64
+            or not online_ir_decision["all_archived_and_profiled_scalars_verified"]
+            or online_ir_decision["online"]["aa_max_absolute_relative_deviation"] != 0
+            or online_ir_decision["online"]["comparisons"][0]["numerator"] != "ic-k8"
+            or online_ir_decision["online"]["comparisons"][0]["denominator"] != "ic-k16"
+            or online_ir_decision["online"]["comparisons"][2]["denominator"] != "rho-strong"
+            or online_ir_decision["online"]["comparisons"][0]["bootstrap_95"][0] <= 1.10):
+        raise SystemExit("review the target-only n37 instruction decision before updating the leaderboard")
+    for claim, count, columns in [(online_k8_claim, 592, 8), (online_k16_claim, 1184, 16)]:
+        fb = claim["candidate_manifest"]["factor_base"]["inventory"]
+        if (not claim["independent_validation"] or not claim["ic_scalar_verified"]
+                or not claim["rho_scalar_verified"]
+                or claim["isolation_levels"]["ic"] != "L0"
+                or claim["isolation_levels"]["rho"] != "L0"
+                or fb["usable_point_count"] != count
+                or fb["effective_columns"] != columns):
+            raise SystemExit("review the exact n37 IC1 claims before updating the leaderboard")
+    online_ir_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_online_ir"],
+        "k8_candidate_id": online_k8_claim["candidate_id"],
+        "k16_candidate_id": online_k16_claim["candidate_id"],
+        "workloads": online_ir_decision["workloads"],
+        "profiles": online_ir_decision["profiles"],
+        "decision": online_ir_decision["decision"],
+        "k8_over_k16_online_ir": online_ir_decision["online"]["comparisons"][0]["ratio_of_sums"],
+        "k8_over_k16_online_ir_ci95": online_ir_decision["online"]["comparisons"][0]["bootstrap_95"],
+        "k16_over_rho_online_ir": online_ir_decision["online"]["comparisons"][2]["ratio_of_sums"],
+        "k16_over_rho_online_ir_ci95": online_ir_decision["online"]["comparisons"][2]["bootstrap_95"],
+        "k8_over_k16_cold_ir": online_ir_decision["complete_solve"]["comparisons"][0]["ratio_of_sums"],
+        "online_wall_speedup": None,
+    }
+    native_wall_decision = load(SOURCES["n37_native_wall"])
+    native_wall_evidence = load(SOURCES["n37_native_wall_evidence"])
+    if (native_wall_decision["schema"] != "ecbench.native_online_wall_decision/v1"
+            or native_wall_decision["status"] != "complete_exploratory_hosted"
+            or native_wall_decision["decision"] != "carry_both_host_noise_exceeds_gate"
+            or native_wall_decision["measured_verified_runs"] != 320
+            or native_wall_decision["same_target_paired_rounds"] != 80
+            or native_wall_decision["isolation_levels"] != {"L1": 320}
+            or native_wall_decision["all_measured_L2"]
+            or native_wall_decision["online_speedup"] is not None
+            or native_wall_decision["k16_aa_max_relative_deviation"] <= .05
+            or native_wall_decision["primary_one_target"]["target_index"] != 0
+            or native_wall_decision["candidate_ids"]["ic-k8"] != online_k8_claim["candidate_id"]
+            or native_wall_decision["candidate_ids"]["ic-k16"] != online_k16_claim["candidate_id"]
+            or native_wall_evidence["decision_sha256"] != sha256(SOURCES["n37_native_wall"])
+            or native_wall_evidence["records_sha256"] != native_wall_decision["records_sha256"]
+            or native_wall_evidence["independent_receipt_sha256"] != native_wall_decision["independent_receipt_sha256"]):
+        raise SystemExit("review the L1 native wall decision before updating the leaderboard")
+    native_wall_diagnostic = {
+        "curve": names("icv1-f2m37-tm534059-32aad96b")["slug"],
+        "source": SOURCES["n37_native_wall"],
+        "evidence": SOURCES["n37_native_wall_evidence"],
+        "k8_candidate_id": native_wall_decision["candidate_ids"]["ic-k8"],
+        "k16_candidate_id": native_wall_decision["candidate_ids"]["ic-k16"],
+        "primary_workload_id": native_wall_decision["primary_one_target"]["workload_id"],
+        "measured_verified_runs": native_wall_decision["measured_verified_runs"],
+        "isolation_levels": native_wall_decision["isolation_levels"],
+        "decision": native_wall_decision["decision"],
+        "aa_max_relative_deviation": native_wall_decision["k16_aa_max_relative_deviation"],
+        "primary_rho_over_k16_online_wall": native_wall_decision["primary_one_target"]["descriptive_rho_over_k16"],
+        "panel_k8_over_k16_online_wall": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["ratio_of_sums"],
+        "panel_k8_over_k16_online_wall_ci95": native_wall_decision["panel_descriptive_ratios"]["k8_over_k16"]["target_block_bootstrap_95"],
+        "admitted_online_speedup": None,
+    }
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -525,6 +724,12 @@ def build() -> dict:
         "sources": {k: {"path": v, "sha256": sha256(v)} for k, v in SOURCES.items()},
         "families": families(board),
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
+        "bounded_diagnostics": [bounded_diagnostic],
+        "n37_k8_k16_confirmation": k8_confirmation,
+        "n37_online_ir_diagnostic": online_ir_diagnostic,
+        "n37_native_wall_diagnostic": native_wall_diagnostic,
+        "f6_small_cold_diagnostic": small_cold_diagnostic,
+        "f6_ecbench_ladder_diagnostic": ladder_diagnostic,
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
     }
@@ -604,6 +809,105 @@ def markdown(doc: dict) -> str:
             ph, s = r["best"]["phases_s"], r["best"]["s"]
             L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
                 (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+    d = doc["bounded_diagnostics"][0]
+    L += ["", "## Bounded n37 diagnostic outside tables A–C", "",
+          f"The separately calibrated `{d['curve']}` shared-rank K16 candidate "
+          f"(`{d['candidate_id']}`) has {d['usable_points']:,} usable points and "
+          f"{d['folded_columns']} folded columns. Across {d['measured_runs']} verified "
+          f"one-target runs, its mean cold counted `S` lower bound is "
+          f"{d['mean_cold_s_lower_bound']:.3f}; its counted IC/rho quotient is "
+          f"{d['cold_counted_over_rho_diagnostic']:.3f} and K16/K42 is "
+          f"{d['cold_counted_over_k42_diagnostic']:.3f}. Native work is unpriced "
+          "for both arms, and L0 timing cannot establish an online speedup. "
+          "This row is intentionally outside the three fully priced unit families; "
+          f"read the [frozen decision](../../{d['source']}).", ""]
+    c = doc["n37_k8_k16_confirmation"]
+    L += [f"The untouched {c['workloads']}-target K8/K16 confirmation selected "
+          f"`{c['candidate_id']}` for the cold implementation route: K16/K8 "
+          f"whole-solve Callgrind Ir is {c['k16_over_k8_ir']:.3f} "
+          f"[{c['k16_over_k8_ir_ci95'][0]:.3f}, {c['k16_over_k8_ir_ci95'][1]:.3f}], "
+          f"and K8/rho is {c['k8_over_rho_ir']:.3f} "
+          f"[{c['k8_over_rho_ir_ci95'][0]:.3f}, {c['k8_over_rho_ir_ci95'][1]:.3f}]. "
+          "All 64 profiles and 320 independent measured replays verified. "
+          "The unit is simulated whole-solve instructions, not isolated online "
+          "wall time; K16 remains a target-only candidate. "
+          f"Read the [raw instruction decision](../../{c['source']}).", ""]
+    q = doc["n37_online_ir_diagnostic"]
+    L += [f"The fresh {q['workloads']}-target panel reverses the base choice inside "
+          "the **target-only simulated-instruction** interval: "
+          f"`{q['k16_candidate_id']}` is prioritized for an isolated n37 online "
+          f"wall test because K8/K16 target-only Callgrind Ir is "
+          f"{q['k8_over_k16_online_ir']:.3f} "
+          f"[{q['k8_over_k16_online_ir_ci95'][0]:.3f}, "
+          f"{q['k8_over_k16_online_ir_ci95'][1]:.3f}]. "
+          f"K16/rho is {q['k16_over_rho_online_ir']:.3f} "
+          f"[{q['k16_over_rho_online_ir_ci95'][0]:.3f}, "
+          f"{q['k16_over_rho_online_ir_ci95'][1]:.3f}] in the same instruction "
+          f"unit, while K8/K16 complete-solve Ir is {q['k8_over_k16_cold_ir']:.3f}. "
+          "All 64 profile scalars and 320 independent measured replays verified. "
+          "Mac L0 timing leaves the primary online wall speedup unknown; both "
+          "bases remain live at n41/n53. "
+          f"Read the [raw target-only decision](../../{q['source']}).", ""]
+    w = doc["n37_native_wall_diagnostic"]
+    L += [f"The next native hosted n37 screen independently replayed "
+          f"{w['measured_verified_runs']}/{w['measured_verified_runs']} measured executions. "
+          f"For preregistered one-target workload `{w['primary_workload_id']}`, "
+          f"descriptive rho/K16 online wall is {w['primary_rho_over_k16_online_wall']:.3f}. "
+          f"The separate 16-target panel has K8/K16 online wall "
+          f"{w['panel_k8_over_k16_online_wall']:.3f} "
+          f"[{w['panel_k8_over_k16_online_wall_ci95'][0]:.3f}, "
+          f"{w['panel_k8_over_k16_online_wall_ci95'][1]:.3f}]. "
+          f"All measured rows earned L1 and the identical K16 A/A maximum "
+          f"deviation was {100*w['aa_max_relative_deviation']:.2f}%, above "
+          "the frozen 5% gate. The admitted online speedup remains unknown; "
+          "both K8 and K16 carry to the L2 host gate and n41/n53. "
+          f"Read the [sealed native decision](../../{w['source']}).", ""]
+    z = doc["f6_small_cold_diagnostic"]
+    f4, f6, f5 = (z["arms"][arm] for arm in ("inherited_f4", "f6_ic", "f5"))
+    L += ["## Complete n9 F6-IC control outside tables A–C", "",
+          f"The preregistered one-target workload `{z['workload_id']}` on "
+          f"`{z['curve']}` recovered the logarithm of public point "
+          f"`{z['target']}` with inherited F4, F6-IC and matrix F5. "
+          f"Each cold run built {z['usable_points']} usable base points, "
+          f"collected {z['verified_relations']} verified ordinary relations, "
+          f"solved {z['folded_columns']} folded columns and independently replayed "
+          "the scalar, relations, column logs and phase totals. "
+          f"Inside-worker cold times were {f4['cold_inside_worker_ns']/1e6:.3f}, "
+          f"{f6['cold_inside_worker_ns']/1e6:.3f} and "
+          f"{f5['cold_inside_worker_ns']/1e6:.3f} ms respectively; one-target "
+          f"online times were {f4['online_wall_ns']/1e6:.3f}, "
+          f"{f6['online_wall_ns']/1e6:.3f} and "
+          f"{f5['online_wall_ns']/1e6:.3f} ms. These are exploratory L0 Mac "
+          "wall observations on a tiny subgroup. No same-target rho reference "
+          "or fully priced operation count exists, so IC/rho speedup and `S` "
+          "are unknown; this control cannot enter tables A–C. "
+          f"Read the [keyed measurements](../../{z['source']}) and "
+          f"[independent replay](../../{z['replay']}).", ""]
+    L += ["| solver | candidate | cold ms | online ms |",
+          "|:--|:--|--:|--:|"]
+    for arm, label in (("inherited_f4", "Inherited F4"), ("f6_ic", "F6-IC"), ("f5", "Matrix F5")):
+        row = z["arms"][arm]
+        L.append(f"| {label} | `{row['candidate_id']}` | "
+                 f"{row['cold_inside_worker_ns']/1e6:.3f} | "
+                 f"{row['online_wall_ns']/1e6:.3f} |")
+    L.append("")
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    L += ["## F6-IC E_0 ladder in ecbench, outside tables A–C", "",
+          "#1333's inherited-F4 and F6-IC decomposers ran unmodified in `ic.pipeline` "
+          "beside same-target strong rho on eight public one-target workloads per size. "
+          "IC `S` is a lower bound: the solver's word XORs are counted but unpriced, and "
+          "F6-IC's geometric point additions are charged. The F6-IC word-XOR saving "
+          "vanishes once the base exceeds #1333's 256-point closure cap; charging its "
+          "geometry makes the trade a relabelling. "
+          f"Decision: {y['decision']} (m = 31 incomplete). "
+          f"Read the [analysis](../../{y['source']}).", "",
+          "| m | curve | targets | rho S | F4 S/rho (lower bound) | F6-IC S/rho (lower bound) | median log2(W4/W6) |",
+          "|--:|:--|--:|--:|--:|--:|--:|"]
+    for z in y["sizes"]:
+        L.append(f"| {z['m']} | `{z['curve']}` | {z['targets']} | {z['rho_s']:.3f} | "
+                 f"{z['f4_s_lower_over_rho']:.3f} | {z['f6_s_lower_over_rho']:.3f} | "
+                 f"{z['median_log2_w4_over_w6']:.3f} |")
+    L.append("")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -785,6 +1089,99 @@ def page(doc: dict, standalone: bool) -> str:
                  f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
+    d = doc["bounded_diagnostics"][0]
+    P.append(f'<section class="card" id="bounded-n37-diagnostic"><h2>New n37 counted diagnostic, outside the priced tables</h2>'
+             f'<p>On <code>{esc(d["curve"])}</code>, shared-rank K16 has {d["usable_points"]:,} actual usable '
+             f'points and {d["folded_columns"]} folded columns. In {d["measured_runs"]} verified '
+             f'one-target runs, mean cold counted S is {d["mean_cold_s_lower_bound"]:.3f} as a lower '
+             f'bound; its counted IC/rho quotient is {d["cold_counted_over_rho_diagnostic"]:.3f}, '
+             f'and K16/K42 is {d["cold_counted_over_k42_diagnostic"]:.3f}. Both arms leave native '
+             'work unpriced, and L0 timing gives no admitted online speedup. These figures are not '
+             'comparable to tables A–C. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(d["source"])}">Frozen decision</a>. '
+             'A separate whole-solve Callgrind census finds K16/K42 = 0.367 and K16/rho = 4.461 '
+             'in simulated instructions on eight paired points; native wall and online speed remain unknown. '
+             '<a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_callgrind_solve_20261004/RESULT.md">Raw instruction replay</a>.</p></section>')
+    c = doc["n37_k8_k16_confirmation"]
+    P.append(f'<section class="card" id="bounded-n37-k8-confirmation"><h2>Untouched n37 K8/K16 instruction confirmation</h2>'
+             f'<p>On <code>{esc(c["curve"])}</code>, K8 has {c["usable_points"]:,} usable points '
+             f'and {c["folded_columns"]} folded columns. Across {c["workloads"]} new same-point '
+             f'public workloads, K16/K8 whole-solve Callgrind Ir is {c["k16_over_k8_ir"]:.3f} '
+             f'[{c["k16_over_k8_ir_ci95"][0]:.3f}, {c["k16_over_k8_ir_ci95"][1]:.3f}], '
+             f'selecting K8 for the cold implementation route. K8/rho is '
+             f'{c["k8_over_rho_ir"]:.3f} [{c["k8_over_rho_ir_ci95"][0]:.3f}, '
+             f'{c["k8_over_rho_ir_ci95"][1]:.3f}] in the same instruction unit. '
+             'All 64 profiles and 320 independently replayed measured records verified. '
+             'This is not isolated online wall speed; K16 remains a target-only candidate. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(c["source"])}">Frozen decision</a>.</p></section>')
+    q = doc["n37_online_ir_diagnostic"]
+    P.append(f'<section class="card" id="bounded-n37-online-ir"><h2>Fresh n37 K8/K16 target-only instruction gate</h2>'
+             f'<p>On <code>{esc(q["curve"])}</code>, K8/K16 target-only Callgrind Ir is '
+             f'{q["k8_over_k16_online_ir"]:.3f} '
+             f'[{q["k8_over_k16_online_ir_ci95"][0]:.3f}, '
+             f'{q["k8_over_k16_online_ir_ci95"][1]:.3f}], so the frozen gate '
+             'prioritizes K16 for an isolated n37 online wall test. K16/rho '
+             f'target-only Ir is {q["k16_over_rho_online_ir"]:.3f} '
+             f'[{q["k16_over_rho_online_ir_ci95"][0]:.3f}, '
+             f'{q["k16_over_rho_online_ir_ci95"][1]:.3f}], but K8/K16 '
+             f'complete-solve Ir is {q["k8_over_k16_cold_ir"]:.3f}. '
+             'All 64 profiles and 320 independent native replays verified. '
+             'Callgrind Ir is simulated instruction work, not isolated wall '
+             'speed; n41/n53 and ECC2K-130 transfer stay open. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(q["source"])}">Frozen decision and raw replay</a>.</p></section>')
+    w = doc["n37_native_wall_diagnostic"]
+    P.append(f'<section class="card" id="bounded-n37-native-wall"><h2>Hosted n37 native wall screen: L1 diagnostic</h2>'
+             f'<p>On <code>{esc(w["curve"])}</code>, all {w["measured_verified_runs"]} measured '
+             f'executions replayed on another host class. For preregistered one-target workload '
+             f'<code>{esc(w["primary_workload_id"])}</code>, descriptive rho/K16 online wall is '
+             f'{w["primary_rho_over_k16_online_wall"]:.3f}. Across the separate 16-target panel, '
+             f'K8/K16 online wall is {w["panel_k8_over_k16_online_wall"]:.3f} '
+             f'[{w["panel_k8_over_k16_online_wall_ci95"][0]:.3f}, '
+             f'{w["panel_k8_over_k16_online_wall_ci95"][1]:.3f}]. '
+             f'All rows earned L1, and the identical K16 A/A maximum deviation was '
+             f'{100*w["aa_max_relative_deviation"]:.2f}%, above the frozen 5% gate. '
+             'No online speedup is admitted; carry K8 and K16 to an L2 host and n41/n53. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(w["source"])}">Frozen decision</a>.</p></section>')
+    z = doc["f6_small_cold_diagnostic"]
+    f4, f6, f5 = (z["arms"][arm] for arm in ("inherited_f4", "f6_ic", "f5"))
+    P.append(f'<section class="card" id="bounded-f6-small-cold"><h2>Complete n9 F6-IC control, outside the priced tables</h2>'
+             f'<p>On <code>{esc(z["curve"])}</code>, all three arms recovered the logarithm of '
+             f'public point <code>{esc(z["target"])}</code> after building {z["usable_points"]} usable '
+             f'base points, collecting {z["verified_relations"]} verified ordinary relations and '
+             f'solving {z["folded_columns"]} folded columns. Inherited F4, F6-IC and matrix F5 '
+             f'inside-worker cold times were {f4["cold_inside_worker_ns"]/1e6:.3f}, '
+             f'{f6["cold_inside_worker_ns"]/1e6:.3f} and {f5["cold_inside_worker_ns"]/1e6:.3f} ms; '
+             f'their one-target online times were {f4["online_wall_ns"]/1e6:.3f}, '
+             f'{f6["online_wall_ns"]/1e6:.3f} and {f5["online_wall_ns"]/1e6:.3f} ms. '
+             'Independent replay checked all scalars, relations, column logs and phase totals. '
+             'These are exploratory L0 Mac wall observations on a tiny subgroup. With no '
+             'same-target rho reference or fully priced operation count, IC/rho speedup and S '
+             'remain unknown. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(z["source"])}">Keyed measurements</a> · '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(z["replay"])}">independent replay</a>.</p>')
+    P.append('<table><thead><tr><th>Solver</th><th>Candidate ID</th><th>Cold ms</th><th>Online ms</th></tr></thead><tbody>')
+    for arm, label in (("inherited_f4", "Inherited F4"), ("f6_ic", "F6-IC"), ("f5", "Matrix F5")):
+        row = z["arms"][arm]
+        P.append(f'<tr><td>{label}</td><td><code>{esc(row["candidate_id"])}</code></td>'
+                 f'<td>{row["cold_inside_worker_ns"]/1e6:.3f}</td>'
+                 f'<td>{row["online_wall_ns"]/1e6:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
+    y = doc["f6_ecbench_ladder_diagnostic"]
+    P.append(f'<section class="card" id="bounded-f6-ecbench-ladder"><h2>F6-IC E_0 ladder in ecbench, outside the priced tables</h2>'
+             '<p>#1333\'s inherited-F4 and F6-IC decomposers ran unmodified in <code>ic.pipeline</code> '
+             'beside same-target strong rho on eight public one-target workloads per size. IC S is a '
+             'lower bound: the solver\'s word XORs are counted but unpriced, and F6-IC\'s geometric point '
+             'additions are charged. The F6-IC word-XOR saving vanishes once the base exceeds #1333\'s '
+             '256-point closure cap; charging its geometry makes the trade a relabelling. '
+             f'Decision: {esc(y["decision"])} (m = 31 incomplete). '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(y["source"])}">Analysis</a>.</p>')
+    P.append('<table><thead><tr><th>m</th><th>Curve</th><th>Targets</th><th>Rho S</th>'
+             '<th>F4 S/rho (lower bound)</th><th>F6-IC S/rho (lower bound)</th><th>Median log₂(W4/W6)</th></tr></thead><tbody>')
+    for z in y["sizes"]:
+        P.append(f'<tr><td>{z["m"]}</td><td><code>{esc(z["curve"])}</code></td><td>{z["targets"]}</td>'
+                 f'<td>{z["rho_s"]:.3f}</td><td>{z["f4_s_lower_over_rho"]:.3f}</td>'
+                 f'<td>{z["f6_s_lower_over_rho"]:.3f}</td><td>{z["median_log2_w4_over_w6"]:.3f}</td></tr>')
+    P.append('</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

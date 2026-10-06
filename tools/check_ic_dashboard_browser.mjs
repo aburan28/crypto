@@ -82,6 +82,7 @@ try {
   assert.equal(await evaluate("document.querySelectorAll('#evidence-results li').length"),0,'Unrequested evidence results clutter overview');
   assert.equal(await evaluate("document.querySelectorAll('#lab-readiness .status.good').length"),6);
   assert.ok(await evaluate("document.querySelector('#lab-readiness tbody tr:last-child').textContent.includes('Source-bound, audited')"));
+  assert.ok(await evaluate("document.querySelector('#lab-readiness tbody tr:nth-child(2)').textContent.includes('Source-bound, audited')"));
   assert.equal(await evaluate("document.getElementById('historical-regimes').open"),false);
   assert.equal(await evaluate("document.getElementById('evidence-library').open"),false);
   await screenshot('desktop-overview');
@@ -106,7 +107,14 @@ try {
   for (const width of [390,320]) {
     await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:false});
     await frame();
-    assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'Page overflows at '+width);
+    const pageWidth = await evaluate('document.documentElement.scrollWidth');
+    if (pageWidth > width + 1) {
+      const offenders = await evaluate(`Array.from(document.querySelectorAll('body *'))
+        .map(el => ({tag:el.tagName.toLowerCase(), id:el.id, className:typeof el.className==='string'?el.className:'', right:Math.round(el.getBoundingClientRect().right), scrollWidth:el.scrollWidth}))
+        .filter(el => el.right > innerWidth + 1).sort((a,b) => b.right-a.right).slice(0,12)`);
+      console.error(JSON.stringify({viewport:width,pageWidth,offenders},null,2));
+    }
+    assert.ok(pageWidth <= width + 1, 'Page overflows at '+width);
     if (width===390) {
       await screenshot('mobile-overview');
       await evaluate("document.getElementById('lab-results').scrollIntoView()");

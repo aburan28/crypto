@@ -204,6 +204,52 @@ class NativeEvidenceTests(unittest.TestCase):
         with self.assertRaises(InvalidEvidence):
             summarize(contract, rows)
 
+    def test_same_jobs_with_different_completion_orders_verify_equal(self):
+        # Verify rebuilds receipts in case/arm/repetition order. The screen
+        # writes the summary from shuffled completion order. Those lists must
+        # compare equal, including single_target_online run IDs.
+        contract = {'scientific_admission': True, 'comparison_kind': 'fixed-support',
+                    'repetitions': 2,
+                    'cases': [{'id': 'c0', 'job': {'degree': 13, 'curve_a': 0},
+                               'fixture': {'targets': [['1', '2']]}},
+                              {'id': 'c1', 'job': {'degree': 17, 'curve_a': 1},
+                               'fixture': {'targets': [['3', '4']]}}],
+                    'arms': [{'id': 'incumbent', 'mode': 'ic'},
+                             {'id': 'rho_w1', 'mode': 'rho'}]}
+        rows = []
+        for case in contract['cases']:
+            for arm in contract['arms']:
+                for repetition in range(contract['repetitions']):
+                    identity = 'IC1hinc' if arm['mode'] == 'ic' else 'RHO1hrho'
+                    number = repetition + (0 if arm['mode'] == 'ic' else 8)
+                    measurement = {'workload_id': 'W'+case['id'],
+                                   'run_id': f"{identity}W{case['id']}R{number}",
+                                   'native_timing': {'online': {'wall_ns': 1_000_000 + number}},
+                                   'certificate': {'ok': True}}
+                    if arm['mode'] == 'ic':
+                        measurement['candidate_id'] = identity
+                    else:
+                        measurement['reference_id'] = identity
+                        measurement['rho_context'] = {'requested_walks': 1}
+                    rows.append(dict(case=case['id'], arm=arm['id'], repetition=repetition,
+                                     status='VERIFIED',
+                                     process={'whole_process_wall_seconds': 0.001},
+                                     certificate={'rank': 3 if arm['mode'] == 'ic' else None,
+                                                  'signed_base_size': 55 if arm['mode'] == 'ic' else None,
+                                                  'factor_base_sha256': 'base' if arm['mode'] == 'ic' else None},
+                                     measurement=measurement))
+        completed = list(reversed(rows))
+        self.assertNotEqual([r['measurement']['run_id'] for r in rows],
+                            [r['measurement']['run_id'] for r in completed])
+        scheduled = summarize(contract, rows)
+        executed = summarize(contract, completed)
+        self.assertEqual(scheduled, executed)
+        self.assertTrue(scheduled['all_jobs_verified'])
+        self.assertFalse(scheduled['promotion_eligible'])
+        for pair in scheduled['single_target_online']:
+            self.assertEqual(pair['run_ids'], sorted(pair['run_ids']))
+            self.assertEqual(len(pair['run_ids']), 4)
+
     def test_trial_replay_rejects_corruption_and_wrong_job(self):
         from oracle import verify
         with tempfile.TemporaryDirectory() as tmp:

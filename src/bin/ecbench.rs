@@ -10,12 +10,24 @@
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
 //! ecbench fb --curve C --factor-base F a factor base with its points
 //! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
+//! ecbench claim attach --base-report R --independent-receipt A   attach a later replay
 //! ecbench claim check --report R       the vs_rho checker
 //! ecbench db sql PATHS... | sqlite3 ecbench.db
 //! ecbench isolab-job --spec S --binary B    an isolab.job/v1 for an independent runner
+//! ecbench bound fit --dir D... --arm A --out B.json     a sealed bound: the method's fitted cost
+//! ecbench bound check --record B.json      re-derive a committed bound from its sessions
+//! ecbench frontier build --bounds DIR --out F.json --markdown FRONTIER.md [--check]
+//! ecbench challenge seal --draft C.json --out C.json    validate and seal a challenge
+//! ecbench challenge spec --challenge C --candidate '{"id":"..."}' --epoch N --out spec.json
+//! ecbench challenge verdict --challenge C --dir D --epoch N --replay-all --out V.json
 //! ```
 //!
+//! Bounds, frontiers and challenges are `docs/bounds/README.md`.
+//!
 //! The standard is `docs/ecbench/README.md`.
+
+#[path = "ecbench/pdp3_koblitz.rs"]
+mod pdp3_koblitz;
 
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
@@ -24,8 +36,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
-    audit, canonical, claim, compare, db, host, isolab, isolation, methods, record, runner,
-    signals, spec, stats, workload,
+    audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, host, isolab,
+    isolation, methods, record, runner, signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -88,6 +100,25 @@ enum Cmd {
     /// The measured child: reads a job on stdin, prints its output.
     #[command(hide = true)]
     Exec,
+    /// Export one exact measured-child input from a frozen spec and sequence.
+    ProfileInput {
+        #[arg(long)]
+        spec: PathBuf,
+        #[arg(long)]
+        seq: u64,
+    },
+    /// Sum the Callgrind Ir parts inside the solve markers.
+    CallgrindIr {
+        /// The value supplied to --callgrind-out-file.
+        #[arg(long)]
+        prefix: PathBuf,
+    },
+    /// Split one profiled solve into reusable, one-target online and tail Ir.
+    CallgrindOnlineIr {
+        /// The value supplied to --callgrind-out-file.
+        #[arg(long)]
+        prefix: PathBuf,
+    },
     /// Audit a session from its own files.
     Verify {
         #[arg(long)]
@@ -187,6 +218,157 @@ enum Cmd {
         #[arg(long, default_value_t = 0)]
         timeout_seconds: u64,
     },
+    /// Bound records: what a method costs on a domain, fitted across
+    /// sizes, sealed and re-derivable (`docs/bounds/README.md`).
+    Bound {
+        #[command(subcommand)]
+        cmd: BoundCmd,
+    },
+    /// The frontier of every domain's bounds, and its page.
+    Frontier {
+        #[command(subcommand)]
+        cmd: FrontierCmd,
+    },
+    /// Challenges: the frozen paired spec a candidate runs against an
+    /// incumbent, and the verdict that moves (or does not move) the frontier.
+    Challenge {
+        #[command(subcommand)]
+        cmd: ChallengeCmd,
+    },
+}
+
+#[derive(Subcommand)]
+enum BoundCmd {
+    /// Fit the bound of one arm from one or more sessions of it.
+    Fit {
+        #[arg(long, num_args = 1..)]
+        dir: Vec<PathBuf>,
+        #[arg(long)]
+        arm: String,
+        /// Keep only curves of this tier (toy, medium, crypto).
+        #[arg(long)]
+        tier: Option<String>,
+        /// Keep only these curve slugs.
+        #[arg(long)]
+        curve: Vec<String>,
+        /// Audit receipts of the sessions, cited in the provenance.
+        #[arg(long)]
+        audit: Vec<PathBuf>,
+        #[arg(long)]
+        label: Option<String>,
+        #[arg(long, default_value = "")]
+        notes: String,
+        /// Paths in the record are written relative to this directory.
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long, default_value_t = bounds::RESAMPLES)]
+        resamples: usize,
+        #[arg(long, default_value_t = bounds::SEED)]
+        seed: u64,
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Re-derive committed bounds from the sessions they name and require
+    /// the same ids.
+    Check {
+        #[arg(long, num_args = 1..)]
+        record: Vec<PathBuf>,
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum FrontierCmd {
+    /// Build the frontier from bound records (files or directories).
+    Build {
+        #[arg(long, num_args = 1..)]
+        bounds: Vec<PathBuf>,
+        /// Dominance axes, comma-separated: ops, memory, uncharged.
+        #[arg(long, default_value = "ops,memory")]
+        axes: String,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long)]
+        markdown: Option<PathBuf>,
+        /// Write nothing; fail if --out or --markdown is stale.
+        #[arg(long)]
+        check: bool,
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum ChallengeCmd {
+    /// Validate a drafted challenge (its curves build, lie in its domain,
+    /// and number enough sizes) and seal it.
+    Seal {
+        #[arg(long)]
+        draft: PathBuf,
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Check committed challenges: seals, domain ids, curves.
+    Check {
+        #[arg(long, num_args = 1..)]
+        file: Vec<PathBuf>,
+    },
+    /// The spec a candidate runs against the challenge in an epoch.
+    Spec {
+        #[arg(long)]
+        challenge: PathBuf,
+        /// The candidate as a method spec, e.g. '{"id":"rho.plain"}'.
+        #[arg(long)]
+        candidate: String,
+        #[arg(long)]
+        epoch: u64,
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Judge a session run from `challenge spec`: audit, pair, fit, decide.
+    Verdict {
+        #[arg(long)]
+        challenge: PathBuf,
+        #[arg(long)]
+        dir: PathBuf,
+        #[arg(long)]
+        epoch: u64,
+        #[arg(long, default_value = challenge::CANDIDATE_ARM)]
+        candidate: String,
+        #[arg(long, default_value = challenge::INCUMBENT_ARM)]
+        incumbent: String,
+        #[arg(long, default_value = challenge::CONTROL_ARM)]
+        control: String,
+        /// Runs to replay in the audit.
+        #[arg(long, default_value_t = 0)]
+        replay: usize,
+        /// Replay every measured deterministic run (what acceptance
+        /// requires by default).
+        #[arg(long)]
+        replay_all: bool,
+        /// Committed bound records, to compare the incumbent's recorded
+        /// figure with what it measured here.
+        #[arg(long)]
+        bounds: Option<PathBuf>,
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long, default_value_t = bounds::RESAMPLES)]
+        resamples: usize,
+        #[arg(long, default_value_t = bounds::SEED)]
+        seed: u64,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Write the candidate's new bound here on an advance or trade.
+        #[arg(long)]
+        bound_out: Option<PathBuf>,
+        /// Write the audit receipt here.
+        #[arg(long)]
+        audit_out: Option<PathBuf>,
+        /// Exit 1 when the verdict is inadmissible.
+        #[arg(long)]
+        exit_code: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -223,6 +405,31 @@ enum ClaimCmd {
         #[arg(long)]
         exit_code: bool,
     },
+    /// Attach a later other-host replay to an unchanged claim produced by
+    /// the measuring binary. The entire original report is reconstructed
+    /// from the frozen session before provenance is added.
+    Attach {
+        #[arg(long)]
+        dir: PathBuf,
+        #[arg(long)]
+        ic: String,
+        #[arg(long)]
+        rho: String,
+        #[arg(long)]
+        workload: String,
+        #[arg(long)]
+        round: Option<u32>,
+        #[arg(long)]
+        base_report: PathBuf,
+        #[arg(long)]
+        independent_receipt: PathBuf,
+        #[arg(long)]
+        pointer: String,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long)]
+        exit_code: bool,
+    },
     /// Check a report against the `vs_rho` schema, as
     /// `boundary_autolab.py claim-check --stage vs_rho` does; exit 1 on
     /// any problem.
@@ -244,6 +451,9 @@ enum DbCmd {
 }
 
 fn main() -> ExitCode {
+    // Oracles this binary links that the library cannot name (see
+    // `pdp3_koblitz`); registered before any run, child or replay.
+    crypto_lib::cryptanalysis::ecbench::methods::register_binary_plugins(pdp3_koblitz::plugins());
     match run(Cli::parse()) {
         Ok(code) => code,
         Err(e) => {
@@ -274,6 +484,41 @@ fn print_json(v: &impl serde::Serialize) -> Result<(), String> {
         serde_json::to_string_pretty(v).map_err(|e| e.to_string())?
     );
     Ok(())
+}
+
+fn load_independent(path: &Path, pointer: String) -> Result<claim::Independent, String> {
+    let bytes = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(claim::Independent {
+        receipt: serde_json::from_slice(&bytes).map_err(|e| format!("{}: {e}", path.display()))?,
+        receipt_sha256: canonical::sha256_hex(&bytes),
+        pointer,
+    })
+}
+
+fn emit_claim(
+    report: serde_json::Value,
+    out: Option<PathBuf>,
+    exit_code: bool,
+) -> Result<ExitCode, String> {
+    let problems = claim::check_problems(&claim::check_vs_rho(&report)?);
+    let text = serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n";
+    match out {
+        Some(o) => {
+            std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
+            eprintln!(
+                "claim {} sha256 {}",
+                o.display(),
+                canonical::sha256_hex(text.as_bytes())
+            );
+        }
+        None => print!("{text}"),
+    }
+    eprintln!("{}", report["verdict"].as_str().unwrap_or(""));
+    report_problems(&problems);
+    if exit_code && !problems.is_empty() {
+        return Ok(ExitCode::from(1));
+    }
+    Ok(ExitCode::SUCCESS)
 }
 
 fn run(cli: Cli) -> Result<ExitCode, String> {
@@ -472,6 +717,40 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 serde_json::to_string(&out).map_err(|e| e.to_string())?
             );
         }
+        Cmd::ProfileInput { spec: path, seq } => {
+            let source =
+                std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+            let p = spec::plan(spec::Spec::from_json(&source)?)?;
+            let ex = p
+                .executions
+                .get(usize::try_from(seq).map_err(|_| "sequence does not fit usize")?)
+                .filter(|ex| ex.seq == seq)
+                .ok_or_else(|| format!("sequence {seq} is not in the plan"))?;
+            let arm = &p.arms[ex.arm];
+            let w = &p.workloads[ex.workload];
+            let input = record::ChildInput {
+                schema: record::CHILD_INPUT_SCHEMA.into(),
+                curve: workload::CurveSpec::explicit(p.instance(ex.workload))
+                    .unwrap_or_else(|| w.curve_spec.clone()),
+                target_seed: w.target_seed,
+                target_index: w.target_index,
+                target_kind: w.kind(),
+                expected_workload_id: w.workload_id.clone(),
+                method: methods::MethodSpec {
+                    id: arm.method.id.clone(),
+                    params: arm.method.params.clone(),
+                },
+                expected_method_id: arm.method.method_id.clone(),
+                algorithm_seed: ex.algorithm_seed,
+            };
+            print_json(&input)?;
+        }
+        Cmd::CallgrindIr { prefix } => {
+            print_json(&callgrind::solve_ir(&prefix)?)?;
+        }
+        Cmd::CallgrindOnlineIr { prefix } => {
+            print_json(&callgrind::online_ir(&prefix)?)?;
+        }
         Cmd::Verify {
             dir,
             replay,
@@ -606,37 +885,37 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 exit_code,
             } => {
                 let independent = match (independent_receipt, pointer) {
-                    (Some(p), Some(pointer)) => {
-                        let bytes =
-                            std::fs::read(&p).map_err(|e| format!("{}: {e}", p.display()))?;
-                        Some(claim::Independent {
-                            receipt: serde_json::from_slice(&bytes)
-                                .map_err(|e| format!("{}: {e}", p.display()))?,
-                            receipt_sha256: canonical::sha256_hex(&bytes),
-                            pointer,
-                        })
-                    }
+                    (Some(p), Some(pointer)) => Some(load_independent(&p, pointer)?),
                     _ => None,
                 };
                 let report = claim::build(&dir, &ic, &rho, &workload, round, independent.as_ref())?;
-                let problems = claim::check_problems(&claim::check_vs_rho(&report)?);
-                let text = serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n";
-                match out {
-                    Some(o) => {
-                        std::fs::write(&o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
-                        eprintln!(
-                            "claim {} sha256 {}",
-                            o.display(),
-                            canonical::sha256_hex(text.as_bytes())
-                        );
-                    }
-                    None => print!("{text}"),
-                }
-                eprintln!("{}", report["verdict"].as_str().unwrap_or(""));
-                report_problems(&problems);
-                if exit_code && !problems.is_empty() {
-                    return Ok(ExitCode::from(1));
-                }
+                return emit_claim(report, out, exit_code);
+            }
+            ClaimCmd::Attach {
+                dir,
+                ic,
+                rho,
+                workload,
+                round,
+                base_report,
+                independent_receipt,
+                pointer,
+                out,
+                exit_code,
+            } => {
+                let original: serde_json::Value = serde_json::from_str(&read(&base_report)?)
+                    .map_err(|e| format!("{}: {e}", base_report.display()))?;
+                let independent = load_independent(&independent_receipt, pointer)?;
+                let report = claim::attach_independent(
+                    &dir,
+                    &ic,
+                    &rho,
+                    &workload,
+                    round,
+                    &original,
+                    &independent,
+                )?;
+                return emit_claim(report, out, exit_code);
             }
             ClaimCmd::Check { report } => {
                 let v: serde_json::Value = serde_json::from_str(&read(&report)?)
@@ -691,8 +970,292 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             )?;
             print_json(&job)?;
         }
+        Cmd::Bound { cmd } => match cmd {
+            BoundCmd::Fit {
+                dir,
+                arm,
+                tier,
+                curve,
+                audit,
+                label,
+                notes,
+                root,
+                resamples,
+                seed,
+                out,
+            } => {
+                let b = bounds::bound_from_sessions(&bounds::FitInputs {
+                    dirs: &dir,
+                    arm: &arm,
+                    audits: &audit,
+                    label: label.as_deref(),
+                    notes: &notes,
+                    root: &root,
+                    options: bounds::FitOptions {
+                        tier,
+                        curves: curve,
+                        resamples,
+                        seed,
+                    },
+                })?;
+                let mut b = b;
+                let text = b.seal()?;
+                write_or_print(out.as_deref(), &text)?;
+                eprintln!(
+                    "{} {} ({}): {} on {} size(s), {} verified runs; ops {:.3}× floor, α {} ; {}",
+                    b.bound_id,
+                    b.method.id,
+                    b.domain.tier,
+                    b.level,
+                    b.fit.sizes,
+                    b.provenance.verified,
+                    b.constant.ratio_to_floor.value,
+                    b.fit
+                        .alpha
+                        .map(|a| format!("{a:.3}"))
+                        .unwrap_or_else(|| "–".into()),
+                    b.admissibility.status
+                );
+                for r in &b.admissibility.reasons {
+                    eprintln!("  - {r}");
+                }
+            }
+            BoundCmd::Check { record, root } => {
+                let mut failed = 0;
+                for r in &record {
+                    match bounds::check(r, &root) {
+                        Ok(b) => eprintln!("{}: re-derived {} OK", r.display(), b.bound_id),
+                        Err(e) => {
+                            failed += 1;
+                            eprintln!("{e}");
+                        }
+                    }
+                }
+                if failed > 0 {
+                    return Ok(ExitCode::from(1));
+                }
+            }
+        },
+        Cmd::Frontier { cmd } => match cmd {
+            FrontierCmd::Build {
+                bounds: paths,
+                axes,
+                out,
+                markdown,
+                check,
+                json,
+            } => {
+                let loaded = frontier::load_bounds(&paths)?;
+                let axes: Vec<String> = axes
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+                let mut f = frontier::build(&loaded, &axes)?;
+                let text = f.seal()?;
+                let records_dir = paths
+                    .first()
+                    .map(|p| p.display().to_string())
+                    .unwrap_or_default();
+                let page = frontier::render_markdown(&f, &records_dir);
+                if check {
+                    let mut stale = Vec::new();
+                    if let Some(o) = &out {
+                        if read(o)? != text {
+                            stale.push(o.display().to_string());
+                        }
+                    }
+                    if let Some(m) = &markdown {
+                        if read(m)? != page {
+                            stale.push(m.display().to_string());
+                        }
+                    }
+                    if !stale.is_empty() {
+                        eprintln!(
+                            "stale: {}; rebuild with `ecbench frontier build`",
+                            stale.join(", ")
+                        );
+                        return Ok(ExitCode::from(1));
+                    }
+                    eprintln!("frontier {} is current", f.frontier_id);
+                } else {
+                    if let Some(o) = &out {
+                        std::fs::write(o, &text).map_err(|e| format!("{}: {e}", o.display()))?;
+                    }
+                    if let Some(m) = &markdown {
+                        std::fs::write(m, &page).map_err(|e| format!("{}: {e}", m.display()))?;
+                    }
+                    if json || (out.is_none() && markdown.is_none()) {
+                        print!("{text}");
+                    }
+                }
+                for d in &f.domains {
+                    eprintln!(
+                        "{} {} {} {}: {} bound(s), {} on the frontier; ops leader {}",
+                        d.domain.family,
+                        d.domain.target_kind,
+                        d.domain.tier,
+                        d.domain_id,
+                        d.entries.len(),
+                        d.entries.iter().filter(|e| e.is_frontier).count(),
+                        d.ops_leader.as_deref().unwrap_or("–")
+                    );
+                }
+                if !f.inadmissible.is_empty() {
+                    eprintln!("{} inadmissible bound(s) listed", f.inadmissible.len());
+                }
+            }
+        },
+        Cmd::Challenge { cmd } => match cmd {
+            ChallengeCmd::Seal { draft, out } => {
+                let mut v: serde_json::Value = serde_json::from_str(&read(&draft)?)
+                    .map_err(|e| format!("{}: {e}", draft.display()))?;
+                let domain: bounds::Domain = serde_json::from_value(
+                    v.get("domain").cloned().ok_or("the draft has no domain")?,
+                )
+                .map_err(|e| format!("domain: {e}"))?;
+                v["domain_id"] = serde_json::Value::String(domain.id()?);
+                v["challenge_id"] = serde_json::Value::String(String::new());
+                v["schema"] = serde_json::Value::String(challenge::CHALLENGE_SCHEMA.into());
+                let mut c: challenge::Challenge =
+                    serde_json::from_value(v).map_err(|e| format!("{}: {e}", draft.display()))?;
+                challenge::validate(&c)?;
+                let text = c.seal()?;
+                write_or_print(out.as_deref(), &text)?;
+                eprintln!(
+                    "challenge {} ({}): {} on {} curve(s), incumbent {}",
+                    c.challenge_id,
+                    c.domain.tier,
+                    c.domain.family,
+                    c.workloads.curves.len(),
+                    c.incumbent.method.id
+                );
+            }
+            ChallengeCmd::Check { file } => {
+                let mut failed = 0;
+                for f in &file {
+                    match challenge::Challenge::read(f)
+                        .and_then(|c| challenge::validate(&c).map(|_| c))
+                    {
+                        Ok(c) => eprintln!(
+                            "{}: challenge {} OK ({} {} {}, {} curves, incumbent {})",
+                            f.display(),
+                            c.challenge_id,
+                            c.domain.family,
+                            c.domain.target_kind,
+                            c.domain.tier,
+                            c.workloads.curves.len(),
+                            c.incumbent.method.id
+                        ),
+                        Err(e) => {
+                            failed += 1;
+                            eprintln!("{e}");
+                        }
+                    }
+                }
+                if failed > 0 {
+                    return Ok(ExitCode::from(1));
+                }
+            }
+            ChallengeCmd::Spec {
+                challenge: path,
+                candidate,
+                epoch,
+                out,
+            } => {
+                let c = challenge::Challenge::read(&path)?;
+                challenge::validate(&c)?;
+                let m: methods::MethodSpec =
+                    serde_json::from_str(&candidate).map_err(|e| format!("--candidate: {e}"))?;
+                let s = challenge::spec_for(&c, &m, epoch);
+                let p = spec::plan(s.clone())?;
+                let text = serde_json::to_string_pretty(&s).map_err(|e| e.to_string())? + "\n";
+                write_or_print(out.as_deref(), &text)?;
+                eprintln!(
+                    "spec {} for challenge {} epoch {epoch}: {} executions, target seed {}",
+                    p.spec_id,
+                    c.challenge_id,
+                    p.executions.len(),
+                    s.workloads.target_seed
+                );
+            }
+            ChallengeCmd::Verdict {
+                challenge: path,
+                dir,
+                epoch,
+                candidate,
+                incumbent,
+                control,
+                replay,
+                replay_all,
+                bounds: bdir,
+                root,
+                resamples,
+                seed,
+                out,
+                bound_out,
+                audit_out,
+                exit_code,
+            } => {
+                let c = challenge::Challenge::read(&path)?;
+                let o = challenge::verdict(&challenge::VerdictInputs {
+                    challenge: &c,
+                    dir: &dir,
+                    epoch,
+                    candidate_arm: &candidate,
+                    incumbent_arm: &incumbent,
+                    control_arm: Some(&control),
+                    replay: if replay_all {
+                        audit::REPLAY_ALL
+                    } else {
+                        replay
+                    },
+                    bounds: bdir.as_deref(),
+                    root: &root,
+                    resamples,
+                    seed,
+                })?;
+                if let Some(a) = &audit_out {
+                    std::fs::write(a, &o.audit_text)
+                        .map_err(|e| format!("{}: {e}", a.display()))?;
+                }
+                write_or_print(out.as_deref(), &o.verdict_text)?;
+                if let (Some(b), Some(text)) = (&bound_out, &o.candidate_bound_text) {
+                    std::fs::write(b, text).map_err(|e| format!("{}: {e}", b.display()))?;
+                    eprintln!(
+                        "new bound {} -> {}",
+                        o.candidate_bound
+                            .as_ref()
+                            .map(|x| x.bound_id.as_str())
+                            .unwrap_or(""),
+                        b.display()
+                    );
+                } else if bound_out.is_some() {
+                    eprintln!("no new bound: the verdict is {}", o.verdict.outcome);
+                }
+                eprintln!("verdict {}: {}", o.verdict.verdict_id, o.verdict.statement);
+                if exit_code && o.verdict.outcome == "inadmissible" {
+                    return Ok(ExitCode::from(1));
+                }
+            }
+        },
     }
     Ok(ExitCode::SUCCESS)
+}
+
+fn write_or_print(out: Option<&Path>, text: &str) -> Result<(), String> {
+    match out {
+        Some(o) => {
+            std::fs::write(o, text).map_err(|e| format!("{}: {e}", o.display()))?;
+            eprintln!(
+                "wrote {} (sha256 {})",
+                o.display(),
+                canonical::sha256_hex(text.as_bytes())
+            );
+        }
+        None => print!("{text}"),
+    }
+    Ok(())
 }
 
 /// One row per (session, arm, curve): mean S over verified measured runs
