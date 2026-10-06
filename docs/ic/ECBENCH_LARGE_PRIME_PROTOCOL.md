@@ -20,7 +20,7 @@ with `m = n − 1` when requested can be collected over a nested factor base. Af
 
 ## Success conditions
 
-1. Exact manifest import checks the field polynomial, curve membership, `#E = h r`, `[r]P = O`, and the planted public equality without giving the planted scalar to the solver.
+1. Exact manifest import records the raw file's SHA-256 and byte length, rejects duplicate family ids, and checks the field polynomial, curve membership, `#E = h r`, `[r]P = O`, and the planted public equality without giving the planted scalar to the solver.
 2. Bounded `m = n − 1` decomposition runs on a tractable small fixture and refuses, with a state-count explanation, when its configured state cap is exceeded.
 3. Zero-, one-, and two-large-prime modes recover the same scalar on the smallest imported family; the double-large-prime mode records and eliminates genuine two-large-prime rows.
 4. The recovered scalar passes both fast and independent point verification.

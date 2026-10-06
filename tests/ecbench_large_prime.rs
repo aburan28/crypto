@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::process::Command;
 
 use crypto_lib::cryptanalysis::ecbench::methods::{resolve, solve as ecbench_solve, MethodSpec};
 use crypto_lib::cryptanalysis::ecbench::workload::{CurveSpec, Workload};
 use crypto_lib::cryptanalysis::ecbench_large_prime::{
-    import_family, load_manifest, solve, SolveConfig,
+    import_family, load_manifest, load_manifest_with_source, solve, SolveConfig,
 };
 
 fn fixture() -> crypto_lib::cryptanalysis::ecbench_large_prime::ImportedFamily {
@@ -12,6 +13,44 @@ fn fixture() -> crypto_lib::cryptanalysis::ecbench_large_prime::ImportedFamily {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/ecbench_manifest_small.json");
     let manifest = load_manifest(&path).unwrap();
     import_family(&manifest.families[0]).unwrap().0
+}
+
+#[test]
+fn corpus_source_identity_is_recorded_from_exact_bytes() {
+    let path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/ecbench_manifest_small.json");
+    let loaded = load_manifest_with_source(&path).unwrap();
+    assert_eq!(loaded.bytes, 568);
+    assert_eq!(
+        loaded.sha256,
+        "235f49a6d07a5f7afb18a37f574ebc7ee1ae0b69dc9d4a33cd0b8ff15556b5b7"
+    );
+    assert_eq!(loaded.manifest.families.len(), 1);
+}
+
+#[test]
+fn ic_report_binds_the_exact_manifest_bytes() {
+    let path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/ecbench_manifest_small.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_ic"))
+        .args(["--json", "large-prime", "--manifest"])
+        .arg(&path)
+        .arg("--validate-only")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["status"], "checks_passed");
+    assert_eq!(report["manifest_bytes"], 568);
+    assert_eq!(
+        report["manifest_sha256"],
+        "235f49a6d07a5f7afb18a37f574ebc7ee1ae0b69dc9d4a33cd0b8ff15556b5b7"
+    );
+    assert_eq!(report["manifest_schema"], "ecbench.curve-corpus/v1");
 }
 
 #[test]
