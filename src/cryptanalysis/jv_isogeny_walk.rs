@@ -33,7 +33,7 @@ use std::time::Instant;
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::gaudry_cubic::{mm, sm};
 use super::jv_cover::{EllE, Fld, Fq3, PtE6, E2, E6};
@@ -902,7 +902,7 @@ fn kronecker(d: i128, ell: u64) -> i8 {
 }
 
 /// One walk of §17.
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Walk2Trial {
     pub seed: u64,
     pub start_weak: bool,
@@ -943,7 +943,7 @@ pub struct Walk2Trial {
     pub ms: f64,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Walk2Report {
     pub p: u64,
     pub q: u64,
@@ -951,6 +951,7 @@ pub struct Walk2Report {
     pub cap_curves: u64,
     pub jump_degrees: Vec<u64>,
     pub closure_mode: bool,
+    pub from_weak_class: bool,
     pub found: usize,
     pub capped: usize,
     pub exhausted: usize,
@@ -1025,6 +1026,55 @@ fn enumerate_component(
     (comp, None, false)
 }
 
+/// A random weak curve moved away from the weak locus: `≥ 8` random moves
+/// (a 2-edge, or an `ℓ`-jump for `ℓ` in `jumps` when the curve has one)
+/// and then further until the curve is not weak.  Same class as the weak
+/// curve it started from.
+fn weak_class_start(ctx: &WalkCtx, jumps: &[u64], rng: &mut StdRng) -> Curve2 {
+    let f = &ctx.f;
+    loop {
+        let mut cur = loop {
+            let rho = f.from_fq(f.f.random(rng));
+            let alpha = f.random(rng);
+            if alpha.in_fq() {
+                continue;
+            }
+            let sa = f.sigma(&alpha);
+            if alpha != rho && sa != rho {
+                break Curve2 {
+                    e: [rho, alpha, sa],
+                };
+            }
+        };
+        let mut moves = 0;
+        let mut tries = 0;
+        while moves < 8 || cur.weak_by_norms(f) {
+            tries += 1;
+            if tries > 200 {
+                break;
+            }
+            let pick = rng.gen_range(0..4);
+            if pick == 0 && !jumps.is_empty() {
+                let ell = jumps[rng.gen_range(0..jumps.len())];
+                let t = cur.ell_targets(ctx, ell, rng);
+                if !t.is_empty() {
+                    cur = t[rng.gen_range(0..t.len())];
+                    moves += 1;
+                }
+            } else {
+                let e = cur.two_edges(ctx, None);
+                if !e.is_empty() {
+                    cur = e[rng.gen_range(0..e.len())].curve;
+                    moves += 1;
+                }
+            }
+        }
+        if !cur.weak_by_norms(f) {
+            return cur;
+        }
+    }
+}
+
 /// `trials` walks of §17 at `p`: enumerate the 2-isogeny component, jump by
 /// an `ℓ`-isogeny (`jumps`, in order of preference, the degrees inert in
 /// the class's order skipped, one source curve per degree and component)
@@ -1039,6 +1089,7 @@ pub fn run_walk2(
     jumps: &[u64],
     samples: u64,
     closure_mode: bool,
+    from_weak_class: bool,
 ) -> Walk2Report {
     let start = Instant::now();
     let ctx = WalkCtx::new(p);
@@ -1060,7 +1111,19 @@ pub fn run_walk2(
             ..Default::default()
         };
         let mut seen: HashSet<E6> = HashSet::new();
-        let mut cur = random_curve(f, &mut rng);
+        let mut cur = if from_weak_class {
+            // a non-weak curve of a class known to hold a weak curve: from a
+            // random weak curve, a random path of 2-steps and ℓ-jumps until
+            // a non-weak curve at least eight moves away; its cost is not
+            // the walk's and is subtracted below
+            let m0 = f.muls();
+            let c = weak_class_start(&ctx, jumps, &mut rng);
+            f.reset_muls();
+            let _ = m0;
+            c
+        } else {
+            random_curve(f, &mut rng)
+        };
         seen.insert(cur.j(f));
         row.start_weak = cur.weak_by_norms(f);
         // the class's order, trace and discriminant: degrees inert in the
@@ -1229,6 +1292,7 @@ pub fn run_walk2(
         cap_curves,
         jump_degrees: jumps.to_vec(),
         closure_mode,
+        from_weak_class,
         found,
         capped,
         exhausted,
@@ -1266,6 +1330,276 @@ pub fn run_walk2(
         rows,
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
+}
+
+/// A diagnostic for §17.5 (post hoc, labelled so): are the weak curves
+/// spread over the isogeny classes, or concentrated in a few?  `n` random
+/// weak curves (the construction `y² = (x − ρ)(x − α)(x − σα)`) and `n`
+/// random full-2-torsion curves, each with its trace by [`curve_order`];
+/// the traces are the isogeny classes (Tate).
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct TraceCensus {
+    pub p: u64,
+    pub q: u64,
+    pub n: u64,
+    /// Distinct traces among the weak and among the random curves.
+    pub weak_distinct: u64,
+    pub random_distinct: u64,
+    /// Fraction of the random curves whose trace is one some weak curve
+    /// of the census has: an estimate (from below, the census being finite)
+    /// of the chance that a random full-2-torsion curve's class holds a
+    /// weak curve.
+    pub random_in_weak_classes: f64,
+    /// The weak traces by frequency: `(t, weak count, random count)`.
+    pub top_weak: Vec<(i128, u64, u64)>,
+    /// Residues of the weak traces: fraction with `t ≡ r (mod m)` for
+    /// `m = 3, 4, 8`, against the random curves' fractions.
+    pub weak_mod: Vec<(u64, Vec<f64>)>,
+    pub random_mod: Vec<(u64, Vec<f64>)>,
+    pub muls: u64,
+    pub wall_ms: f64,
+}
+
+pub fn trace_census(p: u64, seed: u64, n: u64) -> TraceCensus {
+    let start = Instant::now();
+    let f = Fq3::new(p);
+    let q = p * p;
+    let q3 = (p as i128).pow(6);
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xCE1505);
+    f.reset_muls();
+    let mut weak_t: HashMap<i128, u64> = HashMap::new();
+    let mut rand_t: HashMap<i128, u64> = HashMap::new();
+    for _ in 0..n {
+        // a weak curve: ρ ∈ F_q, α ∈ F_{q³} ∖ F_q with ρ, α, σα distinct
+        let c = loop {
+            let rho = f.from_fq(f.f.random(&mut rng));
+            let alpha = f.random(&mut rng);
+            if alpha.in_fq() {
+                continue;
+            }
+            let sa = f.sigma(&alpha);
+            if alpha != rho && sa != rho {
+                break Curve2 {
+                    e: [rho, alpha, sa],
+                };
+            }
+        };
+        debug_assert!(c.weak_by_norms(&f));
+        let t = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+        *weak_t.entry(t).or_insert(0) += 1;
+        let r = random_curve(&f, &mut rng);
+        let t = q3 + 1 - curve_order(&f, &r, &mut rng) as i128;
+        *rand_t.entry(t).or_insert(0) += 1;
+    }
+    let in_weak: u64 = rand_t
+        .iter()
+        .filter(|(t, _)| weak_t.contains_key(t))
+        .map(|(_, c)| *c)
+        .sum();
+    let mut top: Vec<(i128, u64, u64)> = weak_t
+        .iter()
+        .map(|(t, c)| (*t, *c, *rand_t.get(t).unwrap_or(&0)))
+        .collect();
+    top.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    top.truncate(12);
+    let residues = |m: &HashMap<i128, u64>| -> Vec<(u64, Vec<f64>)> {
+        [3u64, 4, 8]
+            .iter()
+            .map(|&md| {
+                let mut v = vec![0u64; md as usize];
+                for (t, c) in m {
+                    let r = ((t % md as i128) + md as i128) % md as i128;
+                    v[r as usize] += c;
+                }
+                (md, v.iter().map(|&x| x as f64 / n as f64).collect())
+            })
+            .collect()
+    };
+    TraceCensus {
+        p,
+        q,
+        n,
+        weak_distinct: weak_t.len() as u64,
+        random_distinct: rand_t.len() as u64,
+        random_in_weak_classes: in_weak as f64 / n as f64,
+        top_weak: top,
+        weak_mod: residues(&weak_t),
+        random_mod: residues(&rand_t),
+        muls: f.muls(),
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
+    }
+}
+
+/// The exact census (post hoc diagnostic of §17.5): **every** weak curve's
+/// isogeny class at a small `p`.  Up to the isomorphisms that keep the
+/// weak form (`x ↦ x − ρ` with `ρ ∈ F_q`, `x ↦ s²x` with `s ∈ F_q^×`), a
+/// weak curve is `y² = x(x − α)(x − σα)` with `α ∈ F_{q³} ∖ F_q` taken up
+/// to `F_q^{×2}`: the representatives have the first non-zero of
+/// `(α₁, α₂)` in `{1, w}`, `w` the non-residue of `F_q`, `2q² + 2q` of
+/// them.  Each gets its trace by [`curve_order`]; the set of traces is the
+/// set of isogeny classes that hold a weak curve.  Then `n` random
+/// full-2-torsion curves are drawn and the fraction whose trace is in that
+/// set is the exact chance that a random such curve's class holds a weak
+/// curve at this `p`.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct ExactCensus {
+    pub p: u64,
+    pub q: u64,
+    pub weak_representatives: u64,
+    pub weak_classes: u64,
+    /// Among the `n` random curves: distinct traces, and the fraction in a
+    /// weak class.
+    pub n: u64,
+    pub random_distinct: u64,
+    pub random_in_weak_classes: f64,
+    /// The weak classes by the number of representatives in them, top 12:
+    /// `(t, representatives)`.
+    pub top_weak: Vec<(i128, u64)>,
+    pub muls: u64,
+    pub wall_ms: f64,
+}
+
+pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
+    let start = Instant::now();
+    let f = Fq3::new(p);
+    let q = p * p;
+    let q3 = (p as i128).pow(6);
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
+    f.reset_muls();
+    let w = E2([f.f.w % p, 0]);
+    let mut weak_t: HashMap<i128, u64> = HashMap::new();
+    let mut reps = 0u64;
+    let all_q: Vec<E2> = (0..p * p).map(|k| E2([k % p, k / p])).collect();
+    let mut tally = |alpha: E6, rng: &mut StdRng| {
+        let c = Curve2 {
+            e: [E6::ZERO, alpha, f.sigma(&alpha)],
+        };
+        debug_assert!(c.weak_by_norms(&f));
+        let t = q3 + 1 - curve_order(&f, &c, rng) as i128;
+        *weak_t.entry(t).or_insert(0) += 1;
+        reps += 1;
+    };
+    for &a1 in &[E2::ONE, w] {
+        for &a0 in &all_q {
+            for &a2 in &all_q {
+                tally(E6([a0, a1, a2]), &mut rng);
+            }
+        }
+    }
+    for &a2 in &[E2::ONE, w] {
+        for &a0 in &all_q {
+            tally(E6([a0, E2::ZERO, a2]), &mut rng);
+        }
+    }
+    let mut rand_t: HashMap<i128, u64> = HashMap::new();
+    let mut in_weak = 0u64;
+    for _ in 0..n {
+        let r = random_curve(&f, &mut rng);
+        let t = q3 + 1 - curve_order(&f, &r, &mut rng) as i128;
+        *rand_t.entry(t).or_insert(0) += 1;
+        if weak_t.contains_key(&t) {
+            in_weak += 1;
+        }
+    }
+    let mut top: Vec<(i128, u64)> = weak_t.iter().map(|(t, c)| (*t, *c)).collect();
+    top.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    top.truncate(12);
+    ExactCensus {
+        p,
+        q,
+        weak_representatives: reps,
+        weak_classes: weak_t.len() as u64,
+        n,
+        random_distinct: rand_t.len() as u64,
+        random_in_weak_classes: in_weak as f64 / n.max(1) as f64,
+        top_weak: top,
+        muls: f.muls(),
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
+    }
+}
+
+/// The derived tables of ledger §17.5, printed from frozen `Walk2Report`s
+/// (so that every number in the note is printed by this code from the
+/// experiment file, never computed by hand): per size, the success rate
+/// overall and by the number of jump degrees the class admits, the median
+/// curves met, the three constants, and the price against rho; then the
+/// fits the predictions P1 and P4 ask for.
+pub fn summarize_walk2(reports: &[Walk2Report]) -> String {
+    use std::fmt::Write;
+    let mut out = String::new();
+    let _ = writeln!(out, "| p | q | walks (start weak) | success | success by admitted degrees 0 / 1 / 2 / 3 (walks) | exhausted / capped | curves met, median of found (q/3) | first component mean | c_order | c_curve | c_jump | jumps per found walk | walk / rho, found | walk / rho, all |");
+    let _ = writeln!(
+        out,
+        "|---:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|"
+    );
+    for r in reports {
+        let proper: Vec<&Walk2Trial> = r.rows.iter().filter(|t| !t.start_weak).collect();
+        let by_deg: Vec<String> = (0..=3)
+            .map(|k| {
+                let rows: Vec<&&Walk2Trial> = proper
+                    .iter()
+                    .filter(|t| t.degrees_used.len() == k)
+                    .collect();
+                if rows.is_empty() {
+                    "–".to_string()
+                } else {
+                    let f = rows.iter().filter(|t| t.found).count();
+                    format!("{:.2} ({})", f as f64 / rows.len() as f64, rows.len())
+                }
+            })
+            .collect();
+        let found: Vec<&&Walk2Trial> = proper.iter().filter(|t| t.found).collect();
+        let mean_jumps = if found.is_empty() {
+            0.0
+        } else {
+            found
+                .iter()
+                .map(|t| t.jumps.iter().sum::<u64>() as f64)
+                .sum::<f64>()
+                / found.len() as f64
+        };
+        let _ = writeln!(
+            out,
+            "| {} | {} | {} ({}) | {:.2} | {} | {} / {} | {:.0} ({:.0}) | {:.1} | {:.2e} | {:.0} | {:.2e} | {:.1} | {:.4} | {:.4} |",
+            r.p, r.q, r.trials, r.start_weak, r.success_fraction, by_deg.join(" / "), r.exhausted, r.capped,
+            r.median_curves, r.q_over_3, r.mean_first_component, r.c_order, r.c_curve, r.c_jump, mean_jumps,
+            r.walk_over_rho, r.walk_over_rho_all
+        );
+    }
+    // fits: c_curve against log p; walk/rho (found) against p, sizes ≥ 53
+    let fit = |xs: &[f64], ys: &[f64]| -> (f64, f64) {
+        let n = xs.len() as f64;
+        let mx = xs.iter().sum::<f64>() / n;
+        let my = ys.iter().sum::<f64>() / n;
+        let sxx: f64 = xs.iter().map(|x| (x - mx) * (x - mx)).sum();
+        let sxy: f64 = xs.iter().zip(ys).map(|(x, y)| (x - mx) * (y - my)).sum();
+        let a = sxy / sxx;
+        let b = my - a * mx;
+        (a, b)
+    };
+    let big: Vec<&Walk2Report> = reports
+        .iter()
+        .filter(|r| r.p >= 53 && r.found > 0)
+        .collect();
+    if big.len() >= 3 {
+        let xs: Vec<f64> = big.iter().map(|r| (r.p as f64).ln()).collect();
+        let ys: Vec<f64> = big.iter().map(|r| r.walk_over_rho.ln()).collect();
+        let (a, _) = fit(&xs, &ys);
+        let _ = writeln!(
+            out,
+            "\nwalk / rho (found walks) ∝ p^{a:.2} over p ≥ 53 ({} sizes).",
+            big.len()
+        );
+        let ys2: Vec<f64> = big.iter().map(|r| r.c_curve.ln()).collect();
+        let (a2, _) = fit(&xs, &ys2);
+        let ys3: Vec<f64> = big.iter().map(|r| r.c_jump.ln()).collect();
+        let (a3, _) = fit(&xs, &ys3);
+        let _ = writeln!(
+            out,
+            "c_curve ∝ p^{a2:.2}, c_jump ∝ p^{a3:.2} over the same sizes."
+        );
+    }
+    out
 }
 
 #[cfg(test)]
@@ -1536,7 +1870,7 @@ mod tests {
     #[test]
     fn the_rebuilt_walk_reaches_weak_curves_at_p7_and_p13() {
         for (p, trials) in [(7u64, 20usize), (13, 12)] {
-            let r = run_walk2(p, 1, trials, 3 * p * p, &[3, 5, 7], 1000, false);
+            let r = run_walk2(p, 1, trials, 3 * p * p, &[3, 5, 7], 1000, false, false);
             // every walk ends found, capped or exhausted; at these sizes many
             // closures hold no weak curve, so exhaustion is common
             assert_eq!(
