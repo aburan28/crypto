@@ -116,7 +116,10 @@ Preserve without overwriting:
 
 - `curves.yaml`, `isogeny_routes.json`, and `walk.json` from construction;
 - `VERIFY.json` from independent replay;
-- `/usr/bin/time -v` logs for construction and replay;
+- GNU `/usr/bin/time -v` logs for construction and replay, or, when that
+  executable is absent, a Python standard-library `subprocess`/`resource`
+  wrapper recording exit status, wall time, user time, system time, and
+  `ru_maxrss` without inspecting or changing the Rust workload;
 - SHA-256 and byte length for every file;
 - the exact source commit, Rust version, host CPU count, and peak RSS; and
 - a compact result note containing the boundary table, graph counts, detector
