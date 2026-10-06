@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source_archive_sha256": "467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323",
+  "cadical_archive_sha256": "8264713f3dc1c4455162d2912238712bd8030fceabec0f4b430d106b5a58058d",
+  "cadiback_archive_sha256": "e0aa8f5d67c04527135dde5fe5f943e672d6af11a6f7f924e9f0c07ad3bffba0",
+  "postbuffer_patch_sha256": "b335c52f6673fd6a17d32d0c5506699058b3ee04f0089200305f2c89fe9fde82",
+  "build_script_sha256": "1e676d4e7afe3eba7ada725d8d9750cef8bfdb783b714240a64ef6bc8550115b",
+  "accepted_asset_bundle_sha256": "a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac318bd96",
+  "preparation_audit_sha256": "e2e9caa59ffa61713e4ffd47d98a05850fe4e22bef9594d9431c2c7b24d283be",
+  "preparation_terminal_sha256": "7b91839758623c28c70c8b2031eeb8feee6b6d0354cc30cf5cf43a744ff3c221",
+  "toolchain_sha256": {
+    "cmake": "0e7b8ce34151f3b4e2d8fa2f62c04db0239cb331119020d49a95afe5386cd4a8",
+    "cc": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698",
+    "cxx": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+  },
+  "build_profile": "Release",
+  "generator": "Unix Makefiles",
+  "parallel_jobs": 2,
+  "source_bound_execution_admitted": false
+}

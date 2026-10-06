@@ -1,10 +1,13 @@
 # Marked CryptoMiniSat stdin control, version 1
 
-Status: frozen *design* for a future disclosed-input compatibility run. No
-marked CMS binary, result, SAT target registration or speed claim exists yet.
-Do not launch these roles while the separately frozen natural SAT preparation
-is running. This control cannot change, refill, or reopen that preparation or
-the three closed confirmation sets.
+Status: frozen disclosed-input compatibility design. The natural SAT
+preparation finished and its independent original audit passed at rank 29/29.
+A distinct post-buffer-marked CMS binary was built with status
+`BUILT_UNVALIDATED`; see [its build receipt](marked-build-v1/README.md) and
+the preserved [first failed build](BUILD_ATTEMPTS.md). No nine-role transport
+result, SAT target registration or speed claim exists yet. This control
+cannot change, refill, or reopen that preparation or the three closed
+confirmation sets.
 
 ## Inputs fixed before building the marked binary
 

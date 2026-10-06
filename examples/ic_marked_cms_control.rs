@@ -26,7 +26,7 @@ const ACCEPTED_CMS_SHA: &str = "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8a
 const ACCEPTED_BUNDLE_SHA: &str =
     "a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac318bd96";
 const SOURCE_SHA: &str = "467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323";
-const CADICAL_SHA: &str = "8264713f3dc1c4455162d2912238712bd8030fceab0f4b430d106b5a58058d";
+const CADICAL_SHA: &str = "8264713f3dc1c4455162d2912238712bd8030fceabec0f4b430d106b5a58058d";
 const CADIBACK_SHA: &str = "e0aa8f5d67c04527135dde5fe5f943e672d6af11a6f7f924e9f0c07ad3bffba0";
 const PATCH_SHA: &str = "b335c52f6673fd6a17d32d0c5506699058b3ee04f0089200305f2c89fe9fde82";
 const BUILD_SCRIPT: &str = "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-target-transport-v1/build-marked-cms.sh";
@@ -73,7 +73,7 @@ const CONTROLS: [Control; 3] = [
 fn require(ok: bool, why: &str) -> Result<(), String> {
     native::require(ok, why)
 }
-fn pinned(path: &Path, limit: usize, expected: &str) -> Result<Vec<u8>, String> {
+fn pinned(path: &Path, limit: u64, expected: &str) -> Result<Vec<u8>, String> {
     let bytes = native::read(path, limit)?;
     require(
         sha256(&bytes) == expected,

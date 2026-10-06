@@ -93,7 +93,7 @@ tar -xOzf "$bundle" cms/source.tar > "$output/source.tar"
 tar -xOzf "$bundle" cms/cadical.tar > "$output/cadical.tar"
 tar -xOzf "$bundle" cms/cadiback.tar > "$output/cadiback.tar"
 require_sha "$output/source.tar" 467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323
-require_sha "$output/cadical.tar" 8264713f3dc1c4455162d2912238712bd8030fceab0f4b430d106b5a58058d
+require_sha "$output/cadical.tar" 8264713f3dc1c4455162d2912238712bd8030fceabec0f4b430d106b5a58058d
 require_sha "$output/cadiback.tar" e0aa8f5d67c04527135dde5fe5f943e672d6af11a6f7f924e9f0c07ad3bffba0
 cp "$patch_file" "$output/postbuffer.patch"
 mkdir "$output/source" "$output/cadical" "$output/cadiback"

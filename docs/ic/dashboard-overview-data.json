@@ -27,6 +27,10 @@
       "sha256": "4a2689bedfdb5443c72239067b7a2997f30c20794c1e774db6b76019892e4d84"
     },
     {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-sat-million-registration-v1/result-v1/original-audit.json",
+      "sha256": "e2e9caa59ffa61713e4ffd47d98a05850fe4e22bef9594d9431c2c7b24d283be"
+    },
+    {
       "path": "research/ic_candidate_tournament_20260915/goal_20260924/native-f5-one-target-registration-v1/result-v1/audit-original.json",
       "sha256": "6754ae85061d60d240cd3d8cb50efd8649354255533fc3b7f49ce654486aeb31"
     },
@@ -430,6 +434,22 @@
       "folded_columns": 29,
       "feasible_inconclusive_queries": 107
     },
+    "online_speedup": null
+  },
+  "native_sat_million_stage": {
+    "ordinary_queries": 512,
+    "outcome_mix": {
+      "incomplete": 15,
+      "proved_unsat": 339,
+      "timeout": 13,
+      "witness": 145
+    },
+    "accepted_rows": 145,
+    "final_rank": 29,
+    "folded_columns": 29,
+    "independently_recovered_logs": 29,
+    "source_bound_preparation_admitted": true,
+    "target_solve_admitted": false,
     "online_speedup": null
   },
   "native_f5_one_target": {
