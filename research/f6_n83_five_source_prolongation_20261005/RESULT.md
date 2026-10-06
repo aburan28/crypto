@@ -56,7 +56,7 @@ The helper source SHA-256 was
 `999e5a5e4240d69c422c37c3b9a81cdec920b9dd341b7a2b18647b684e060d6f`;
 the probe source SHA-256 was
 `e43479be234ddf034a1056bf2e84c17527cf341d118c01d753296e7ea2a72a6f`.
-The [release build](build.log), [focused test](helper_test.log),
+The [release build](build.log), [focused test](helper_test.log.gz),
 [runner](run.sh), [status table](status.tsv), raw outputs and
 [`SHA256SUMS`](SHA256SUMS) provide the reproducibility receipt. A
 future gate needs a different column representation or a better
