@@ -109,6 +109,8 @@ struct Config {
     support_local_profile: bool,
     #[serde(skip_serializing_if = "is_false")]
     inherited_basis_profile: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    early_oracle: bool,
     node_budget: usize,
     conflict_budget: u64,
     rho_parallel_walks: usize,
@@ -133,6 +135,7 @@ impl Default for Config {
             support_local_bitmap_columns: false,
             support_local_profile: false,
             inherited_basis_profile: false,
+            early_oracle: false,
             node_budget: 4096,
             conflict_budget: 100_000,
             rho_parallel_walks: 32,
@@ -728,6 +731,7 @@ fn run_prepared_target(
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_inherited_basis_profile(
         job.config.inherited_basis_profile,
     );
+    crypto_lib::cryptanalysis::koblitz_groebner::set_f6_early_node_oracle(job.config.early_oracle);
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
     crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile_reset();
@@ -905,6 +909,16 @@ mod prepared_target_tests {
         config.inherited_basis_profile = true;
         let opted_in = serde_json::to_value(&config).unwrap();
         assert_eq!(opted_in.get("inherited_basis_profile"), Some(&json!(true)));
+    }
+
+    #[test]
+    fn default_early_oracle_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("early_oracle").is_none());
+        config.early_oracle = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("early_oracle"), Some(&json!(true)));
     }
 
     fn prepared_job(cap: u64) -> Job {

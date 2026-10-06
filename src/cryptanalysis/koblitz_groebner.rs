@@ -3095,6 +3095,8 @@ static F4_SUPPORT_LOCAL_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 static F4_INHERITED_BASIS_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
+static F6_EARLY_NODE_ORACLE: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 mod inherited_basis_counters {
     use std::sync::atomic::AtomicU64;
     pub(super) static ROOT_CALLS: AtomicU64 = AtomicU64::new(0);
@@ -3307,6 +3309,11 @@ pub fn inherited_basis_profile() -> InheritedBasisProfile {
         basis_specialise_calls: inherited_basis_counters::BASIS_SPECIALISE_CALLS.load(Relaxed),
         basis_specialise_ns: inherited_basis_counters::BASIS_SPECIALISE_NS.load(Relaxed),
     }
+}
+
+/// Evaluate a node oracle before inherited-basis specialisation at entry.
+pub fn set_f6_early_node_oracle(enabled: bool) {
+    F6_EARLY_NODE_ORACLE.store(enabled, std::sync::atomic::Ordering::Relaxed);
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -5442,6 +5449,25 @@ fn solve_rec(
         return;
     }
 
+    let early_oracle = F6_EARLY_NODE_ORACLE.load(std::sync::atomic::Ordering::Relaxed);
+    if early_oracle {
+        let defined_mask = defined
+            .iter()
+            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+        match node_oracle(&assignment, defined_mask) {
+            NodeOracleDecision::Continue => {}
+            NodeOracleDecision::Refute => {
+                stats.geometric_refutations += 1;
+                return;
+            }
+            NodeOracleDecision::Witness => {
+                stats.geometric_witnesses += 1;
+                *stop = true;
+                return;
+            }
+        }
+    }
+
     // Under the inherited engine the node's bases are its parent's,
     // specialised by the branch assignment; the root starts with none and
     // builds them at its first reduction.  A system that already contains
@@ -5459,20 +5485,25 @@ fn solve_rec(
     let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
 
     // Reduce, propagate, repeat until the algebra stops learning.
+    let mut skip_first_oracle = early_oracle;
     loop {
-        let defined_mask = defined
-            .iter()
-            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
-        match node_oracle(&assignment, defined_mask) {
-            NodeOracleDecision::Continue => {}
-            NodeOracleDecision::Refute => {
-                stats.geometric_refutations += 1;
-                return;
-            }
-            NodeOracleDecision::Witness => {
-                stats.geometric_witnesses += 1;
-                *stop = true;
-                return;
+        if skip_first_oracle {
+            skip_first_oracle = false;
+        } else {
+            let defined_mask = defined
+                .iter()
+                .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+            match node_oracle(&assignment, defined_mask) {
+                NodeOracleDecision::Continue => {}
+                NodeOracleDecision::Refute => {
+                    stats.geometric_refutations += 1;
+                    return;
+                }
+                NodeOracleDecision::Witness => {
+                    stats.geometric_witnesses += 1;
+                    *stop = true;
+                    return;
+                }
             }
         }
         drop_zeros(&mut system);
@@ -5933,6 +5964,55 @@ mod tests {
             },
         );
         assert!(stats.eliminated > 0 && saw_placeholder);
+    }
+
+    #[test]
+    #[ignore = "global oracle-order toggle requires an isolated test process"]
+    fn early_node_oracle_preserves_decision_trace_and_solutions() {
+        let equations = vec![F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b0011), F2BoolMono::var(2)],
+            4,
+        )];
+        let opts = SolveOptions {
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            max_solutions: 16,
+            node_budget: 128,
+            split_rule: SplitRule::Auto,
+        };
+        let run = |early| {
+            set_f6_early_node_oracle(early);
+            let mut trace = Vec::new();
+            let (roots, stats) = solve_boolean_system_with_node_oracle(
+                &equations,
+                4,
+                &opts,
+                |_| false,
+                |assignment, defined_mask| {
+                    let decision = if assignment
+                        .iter()
+                        .enumerate()
+                        .any(|(v, bit)| defined_mask & (1u64 << v) == 0 && *bit == Some(true))
+                    {
+                        NodeOracleDecision::Refute
+                    } else {
+                        NodeOracleDecision::Continue
+                    };
+                    trace.push((assignment.to_vec(), defined_mask, decision));
+                    decision
+                },
+            );
+            (roots, stats, trace)
+        };
+        let original = run(false);
+        let early = run(true);
+        set_f6_early_node_oracle(false);
+        assert_eq!(original.0, early.0);
+        assert_eq!(
+            original.1.geometric_refutations,
+            early.1.geometric_refutations
+        );
+        assert_eq!(original.2, early.2);
+        assert!(early.2.len() > 1);
     }
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
