@@ -1,5 +1,5 @@
 ---
-title: "sect113r1 weak-curve audit: prospective report"
+title: "sect113r1 weak-curve audit: exact pre-admission diagnostic"
 author: "crypto research harness"
 date: "2026-10-06"
 lang: en-US
@@ -16,50 +16,74 @@ urlcolor: blue
 
 # Status
 
-**DRAFT — NO ADMITTED SCIENTIFIC RUN, PRODUCER ARTIFACT, OR INDEPENDENT
-VERDICT EXISTS.** This report records the question, exact candidate arithmetic,
-and evidence gates before execution. It must not be cited as a completed
-experiment. The authoritative prospective contract is
-[`README.md`](README.md), and the editable object/claim diagram is
-[`evidence-flow.dot`](evidence-flow.dot).
+**PRE-ADMISSION DIAGNOSTIC COMPLETE — NO ADMITTED SCIENTIFIC RUN OR
+INDEPENDENT IMPLEMENTATION VALIDATION EXISTS.** A native diagnostic emitted
+deterministic exact certificates and replayed them with the same implementation.
+Its machine-readable artifact is
+[`diagnostics/pre-admission-certificate.json`](diagnostics/pre-admission-certificate.json),
+with embedded semantic certificate SHA-256
+`1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8`.
+The artifact index separately records the raw JSON byte SHA-256. The artifact
+explicitly records `admitted_scientific_run=false` and
+`evidence_status=PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES`.
+Its `implemented_diagnostic_gates_passed=true` field means only that the
+bounded gates implemented by this diagnostic replayed; it is not an admission,
+coverage, exploitability, or independent-validation verdict.
 
-Pre-admission calculations predict one unsurprising class-wide result and one
-potential implementation result:
+This is a completed **diagnostic**, not a completed experiment. The protocol
+and admission requirements remain in [`README.md`](README.md). Exact endpoint
+records and ordered routes are recorded in
+[`degree5_curve_records.json`](degree5_curve_records.json) and
+[`isogeny-routes.json`](isogeny-routes.json). Reproduction commands, artifact
+hashes, toolchain details, and validation receipts are indexed in
+[`ARTIFACT_INDEX.md`](ARTIFACT_INDEX.md). The editable diagram is
+[`evidence-flow.dot`](evidence-flow.dot), with rendered
+[`SVG`](evidence-flow.svg) and [`PDF`](evidence-flow.pdf) views.
 
-- At a frozen 80-bit classical threshold, the prime subgroup with `log2(n)` just
-  above 112 has only about 56 bits of generic collision security. If the order
-  certificate passes,
-  the entire rational isogeny class is `CLASS_WEAK_LEGACY_SIZE`. This is a
+![Evidence lanes for the exact source-class result, valid degree-5 transfer,
+and implementation-input findings. Solid green edges are exact certificate
+obligations; dashed amber edges remain modeled or conditional.](evidence-flow.svg){width=95%}
+
+The diagnostic supports one unsurprising class-wide result, two exact transfer
+controls, and one conditional implementation result:
+
+- At a frozen 80-bit classical threshold, the exactly certified prime subgroup
+  has 56.325748 bits of modeled generic collision work (55.825379 with the
+  stated negation optimization). The diagnostic verdict is `CLASS_WEAK`. This is a
   legacy parameter-size classification, independently corroborated by the
   published 2015 `sect113r1` discrete-log computation. It is not a new
   isogeny-induced break.
+- Exactly two rational degree-5 kernels, codomains, full-coordinate map
+  implementations, order-`n` images,
+  forward planted-target homomorphisms, duals, and dual composition on both
+  `G` and the planted target replayed. Both routes are
+  `TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED`; no codomain DLP was solved and no
+  representative-specific attack or measured performance advantage was
+  supplied.
 - The repository's low-level binary point formulas do not use `b` during
-  addition/doubling. An unchecked input on the singular same-`a`, `b=0` cubic
-  is therefore a candidate invalid-curve/singular-input oracle. A successful
-  planted recovery would be `IMPLEMENTATION_WEAK` at that interface, conditional
-  on reachability and observable output. The singular cubic is not an elliptic
-  curve and is not isogenous to `sect113r1`.
-
-Two explicit degree-5 neighbors are expected. Their purpose is to prove actual
-valid isogeny transport and test whether any representative-specific advantage
-survives full accounting. Merely finding a codomain or sharing an order does
-not establish such an advantage.
+  addition/doubling. One actual unchecked multiplier call on the singular
+  same-`a`, `b=0` cubic was followed by exact BSGS/CRT recovery of the bounded
+  planted scalar. This supports `CONDITIONAL_IMPLEMENTATION_WEAK` only if an
+  attacker can
+  reach that low-level API with a chosen point and distinguish its full-point
+  output. No production protocol exposure was established. The singular cubic
+  is not an elliptic curve and is not isogenous to `sect113r1`.
 
 # Evidence vocabulary
 
-- **FROZEN:** fixed in the admitted protocol before producer execution.
-- **CANDIDATE DERIVATION:** pre-admission arithmetic to be independently
-  recomputed; not yet certified evidence.
-- **PRODUCER:** emitted by the admitted native run and bound to its content
-  snapshot.
-- **VALIDATED:** independently rederived against the snapshot.
+- **EXACT DIAGNOSTIC:** deterministic algebraic equality, certificate, or replay
+  emitted and checked locally before admission.
+- **MODELED:** analytic work estimate; not an executed attack or timing sample.
 - **PRIOR ART:** a claim made by a cited external source, not measured here.
-- **OPEN:** required evidence or implementation is unavailable.
-- **PENDING:** no admitted result exists.
+- **CONDITIONAL:** depends on an interface exposure not established here.
+- **ADMITTED / INDEPENDENTLY VALIDATED:** absent. The verifier replays the
+  artifact through the same native implementation and is not an independent
+  implementation.
 
-The words “proved,” “certified,” and “measured” are reserved for artifacts that
-pass the admitted producer and independent review. Candidate numbers in this
-draft are expectations and falsifiable test vectors.
+The diagnostic can establish exact equalities within its implementation, but
+it cannot promote them to admitted or independently reproduced scientific
+evidence. No wall-clock performance result, randomized rho run, prevalence
+estimate, or independent verdict is reported.
 
 # Exact source object
 
@@ -81,27 +105,40 @@ h  = 2
 ```
 
 The source is [SEC 2 version
-1.0](https://www.secg.org/SEC2-Ver-1.0.pdf), §3.2.1; the frozen PDF SHA-256 is
-`d1b16728ad83888fd656d16b99dc71bcd5541d42d848ffd0de7c62c19010d8c3`.
+1.0](https://www.secg.org/SEC2-Ver-1.0.pdf), §3.2.1. The frozen PDF SHA-256
+is:
 
-Proposed representation identity:
+```text
+d1b16728ad83888fd656d16b99dc71bcd5541d42d848ffd0de7c62c19010d8c3
+```
+
+Resolved source representation identity:
 
 ```text
 icv1-f2m113-tm122610772499221213-97df4ac6
-ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb
+ICV1 (join wrapped lines without spaces):
+ICV1:f2m-113-99967757:
+-122610772499221213:
+10384593717069655379671765157661406:
+0x6942e38fc45c62366c09aa8204cd:
+unk:unk:r:97df4ac684cb
 EC1N113Csect113r1hf529f17bd191
-urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97
+curve UID (join wrapped lines without spaces):
+urn:ec-record:1:sha256:
+f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97
 ```
 
-The registry must resolve these strings before admission. Each valid codomain
-gets a different representation identity. The twist gets a different curve
-identity. The singular control receives no curve identity.
+The diagnostic resolved these source strings. Each valid codomain has a
+different representation identity in
+[`degree5_curve_records.json`](degree5_curve_records.json), and the ordered
+maps are bound in [`isogeny-routes.json`](isogeny-routes.json). The twist has a
+different curve identity. The singular control receives no curve identity.
 
-# Pre-admission analytic baseline
+# Exact diagnostic source/class certificates
 
 ## Order and generic security
 
-Candidate exact arithmetic:
+The diagnostic exactly recomputed:
 
 ```text
 q = 2^113
@@ -112,19 +149,19 @@ N = #E(F_q) = 2*n
 t = q + 1 - N = -122610772499221213
 ```
 
-`n` is expected prime and must receive a complete primality certificate. The
-identity `#E(F_q)=2n` needs an independently replayable point-count certificate,
-not only the standard's stated cofactor. If certified, squarefree `2n` and the
-elliptic-group invariant-factor constraint imply that `E(F_q)` is cyclic. The
-generic references, computed without benchmarking, are:
+The native diagnostic verified a complete `n-1` primality certificate for `n`,
+the generator's exact order, and the unique Hasse-interval multiple supporting
+`#E(F_q)=2n`. It also verified irreducibility of `z^113+z^9+1`. These checks
+were replayed by the same implementation, not an independent point counter or
+validator. The generic references below are formulas, not benchmarks:
 
-| reference | candidate log2 group operations |
+| reference | modeled log2 group operations |
 |---|---:|
 | `sqrt(pi*n/2)` expected collision work | 56.32574806473616 |
 | `sqrt(2*n*ln(20))` 95% birthday quantile | 57.29145434846796 |
 | frozen policy threshold | 80 |
 
-Thus the candidate classification is `CLASS_WEAK_LEGACY_SIZE`. Because a
+Thus the diagnostic classification is `CLASS_WEAK`. Because a
 rational isogeny preserves the trace and point count, the size classification
 applies to every valid representative in this class. A representative can be
 worse for a special attack, but it cannot restore more than the class's generic
@@ -138,7 +175,7 @@ published observations as measurements from the present run.
 
 ## Frobenius and endomorphism order
 
-Candidate arithmetic:
+Exact diagnostic arithmetic:
 
 ```text
 D_pi = t^2 - 4*q
@@ -146,47 +183,47 @@ D_pi = t^2 - 4*q
      = -7 * 47 * 411643769 * 195708607903277035369399
 ```
 
-If all four factors are certified prime, `D_pi` is squarefree and fundamental.
-Then `Z[pi]` is maximal, so there are no conductor levels to hunt anywhere in
-the class. The minimum candidate norm of a non-integer endomorphism is
+The diagnostic's exact factor/primality certificates make `D_pi` squarefree
+and fundamental. Thus `Z[pi]` is maximal and the diagnostic found no conductor
+levels to hunt in the class. The minimum exact norm of a non-integer
+endomorphism is
 
 ```text
 (abs(D_pi)+1)/4 = 6626243333855710032402319781142350
                  = approximately 2^112.35181831539929.
 ```
 
-That would exclude a cheap non-scalar CM/GLV endomorphism. It does not exclude
-unmodeled algorithms.
+This excludes a cheap non-scalar CM/GLV endomorphism under the checked model.
+It does not exclude unmodeled algorithms.
 
 ## Structural attack ledger
 
-| Attack family | Candidate exact result | Pending evidence boundary |
+| Attack family | Exact diagnostic result | Evidence boundary |
 |---|---|---|
-| Pohlig–Hellman | `n` prime | complete primality/order certificates |
-| MOV/Frey–Rück | `ord_n(q)=(n-1)/2=2596148429267413844917941289415351` | exact modular-order proof |
-| anomalous | `N != q` | recompute from frozen parameters |
-| supersingular | ordinary; `t` is odd | explicit ordinary criterion |
-| subfield/GLS | 113 is prime; no degree-113 trace from an `F_2` curve equals `t` | independent recurrence over base traces `-2..2` |
-| GHS/Hess | `ord_113(2)=28`; candidate minimum genus `2^28-1` under the stated model | theorem assumptions and independent derivation |
-| CM/GLV | no low-norm non-scalar element | fundamental-discriminant and norm certificates |
-| direct Semaev/index calculus | no end-to-end result | explicit solver, recovery, and charged reference required |
-| cover/Jacobian/extension transfer | no supplied beneficial map | explicit map, subgroup preservation, inverse, and cost required |
+| Pohlig–Hellman | `n` prime with complete `n-1` certificate | exact in diagnostic; no independent replay |
+| MOV/Frey–Rück | `ord_n(q)=(n-1)/2` exactly | exact in diagnostic; no independent replay |
+| anomalous | `N != q` | exact arithmetic |
+| supersingular | ordinary; `t` is odd | exact arithmetic |
+| subfield/GLS | 113 is prime; no degree-113 trace from an `F_2` curve equals `t` | exact recurrence in diagnostic |
+| GHS/Hess | `ord_113(2)=28` | exact orbit parameter only; magic number, type, genus, and applicability were not computed, so no attack conclusion |
+| CM/GLV | fundamental `D_pi`; no low-norm non-scalar element | exact in diagnostic; scoped to checked model |
+| direct Semaev/index calculus | no end-to-end result | unavailable; no negative claim |
+| cover/Jacobian/extension transfer | generated catalog contains same-field degree-3 `H -> E` cover certificates for the source and both endpoints | cover existence only; subgroup transfer, inverse/recovery, end-to-end cost, and DLP advantage are untested (`dlp_advantage=null`) |
 
 No row may be converted from “not demonstrated” to “impossible” without the
 corresponding proof. In particular, equation counts or asymptotic discussion
 do not establish an executable index-calculus attack.
 
-# Valid-isogeny experiment
+# Valid-isogeny diagnostic
 
-Modulo 5, the candidate Frobenius polynomial factors as
+Modulo 5, the exact Frobenius polynomial factors as
 
 $$
 X^2-tX+q=(X-3)(X-4)\pmod 5.
 $$
 
-The two eigenlines predict two rational cyclic order-5 kernels. The run must
-derive them from the fifth division polynomial rather than from expected
-coefficients:
+The diagnostic derived exactly two rational cyclic order-5 kernels from the
+fifth division polynomial rather than accepting expected coefficients:
 
 ```text
 Xq  = x^q mod psi_5
@@ -195,49 +232,66 @@ Xq2 = Xq^q mod psi_5
 h2  = gcd(psi_5, Xq2 + x) / h1
 ```
 
-Both expected degree-2 factors require squarefreeness, divisibility,
-Frobenius, and point-order certificates. Each route then requires a
-nonsingular Vélu codomain, full-point map, order-`n` image of `G`, separately
-constructed dual, and composition `[dual] o [map]=[5]` on a deterministic
-test set. The planted logarithm must transport and replay end to end.
+Both degree-2 factors passed squarefreeness, divisibility, Frobenius, and
+point-order checks. Each route produced a nonsingular Vélu codomain, full-point
+map, order-`n` image of `G`, and separately constructed dual. The diagnostic
+checked `dual(phi(G))=[5]G`, `dual(phi([d]G))=[5d]G`, and recovered the original
+planted target point as `[5^{-1} mod n]dual(phi([d]G))`. This is an exact
+homomorphism and point-pullback control; it is not a discrete-log solve on the
+codomain. The native certificate recomputes each full ICV1/EC1/UID from the
+codomain model and generator. The endpoint and route JSON files are derived
+views cross-referenced to that certificate; their byte hashes and the source
+revision are bound by the artifact index, not by a separate native bundle
+verifier.
 
-The route cost is
+The diagnostic evaluated dual composition on `G` and the planted target, not
+on the broader protocol set of kernel points, infinity, and sign partners.
+Kernel/formula certificates and those two subgroup checks are strong transfer
+evidence, but they do not discharge that broader full-morphism validation
+obligation for a later admitted run.
+
+Any future speedup claim must still charge the route cost
 
 $$
 C^*=C_{\rm construct}+C_{\rm map\ in}+C_{\rm attack}
    +C_{\rm map\ out}+C_{\rm recover}+C_{\rm verify}.
 $$
 
-No component may be silently treated as free. The comparison is to a matched
-source-curve attack in the same operation unit. The identity route remains the
-incumbent unless a valid routed attack beats it by the preregistered effect
-size.
+No component may be silently treated as free. The diagnostic did not execute a
+matched source/codomain attack or collect timing samples, so it makes no
+performance claim.
 
-Pending result table:
+Exact diagnostic route table:
 
-| route | valid curve/map certificate | subgroup replay | charged advantage |
+Endpoint A has `b=0109267245489e254e8f14002629a1`; endpoint B has
+`b=0162b1a595685a1387c82647bf44cf`. Their complete identities and kernel
+digests are in the linked record and route JSON files.
+
+| route | valid curve/map certificate | subgroup replay | result |
 |---|---|---|---|
-| source identity | `PENDING` | `PENDING` | `PENDING` |
-| eigenvalue-4 degree-5 neighbor | `PENDING` | `PENDING` | `PENDING` |
-| eigenvalue-3 degree-5 neighbor | `PENDING` | `PENDING` | `PENDING` |
+| source | source order and generator | exact | incumbent; no timing claim |
+| endpoint A | forward/dual kernels and formulas | order `n`; target composition and pullback; broader point-set check pending | transfer only; speedup not established |
+| endpoint B | forward/dual kernels and formulas | order `n`; target composition and pullback; broader point-set check pending | transfer only; speedup not established |
 
-An explicit valid neighbor with no cheaper attack is a successful transfer
-control, not a failed experiment and not a new weak curve.
+These are successful transfer controls, not new weak curves. The diagnostic
+found no representative-specific advantage in the tested routes, but it did
+not exhaust the isogeny class and cannot assert that no such representative
+exists.
 
 # Twist safety experiment
 
-The candidate twist order is
+The exact diagnostic twist order is
 
 ```text
 10384593717069655134450220159218980
 = 2^2 * 5 * 11 * 17 * 449 * 883 * 1493 * 4690844705882931102817.
 ```
 
-The largest factor is about `2^71.99034`; its expected generic collision work
-is about `2^36.32092`. The twist therefore deserves an exact invalid-input
-check. It is a different trace class and cannot be described as a weak
-isogenous representative. A security finding additionally requires a reachable
-interface that fails to validate the curve or subgroup.
+The diagnostic certified the factorization and primality of the largest factor
+`4690844705882931102817`. Its generic collision work of about `2^36.32092` is
+a model, not an executed solve. The twist is a different trace class and is
+classified `OFF_CLASS_CONTROL_NOT_AN_ISOGENOUS_REPRESENTATIVE`; no interface
+exposure was established.
 
 # Singular-input experiment
 
@@ -250,21 +304,22 @@ S:\ y^2+xy=x^3+ax^2
 $$
 
 has `b=0` and discriminant zero. It is a singular cubic, not an elliptic curve.
-Candidate `Tr(a)=1` makes the smooth locus a nonsplit torus with order
+The exact diagnostic found `Tr(a)=1`, making the smooth locus a nonsplit torus
+with order
 
 ```text
 q+1 = 10384593717069655257060992658440193
     = 3 * 227 * 48817 * 636190001 * 491003369344660409.
 ```
 
-The candidate full-order point is `P=(a,0)`. Its exact-order proof must check
-`[q+1]P=O` and `[(q+1)/r]P != O` for every prime factor `r`. The largest factor
-has about 58.769 bits; its generic reference is about `2^29.710` expected work,
-26.616 bits below the nominal subgroup's expected generic reference.
+The point `P=(a,0)` passed `[q+1]P=O` and `[(q+1)/r]P != O` for every certified
+prime factor `r`. The largest factor has about 58.769 bits; its generic
+reference is about `2^29.710` expected work, 26.616 bits below the nominal
+subgroup's modeled generic reference.
 
-That comparison is an algebraic work model, not a wall-clock speedup. The run
-must count the projection, each discrete-log solve, CRT, transcript operations,
-and final replay.
+That comparison is an algebraic work model, not a wall-clock speedup. Any
+future end-to-end performance claim must count the projection, each
+discrete-log solve, CRT, transcript operations, and final replay.
 
 ## Fixed public fixtures
 
@@ -282,9 +337,20 @@ d_demo = 1 + OS2IP_BE(SHA256(domain)) mod (floor(M/2)-1)
 d_demo = 6599291615786184 = 0x177205508734c8
 ```
 
-Native BSGS on all four factors plus CRT must recover `d_demo` exactly. The
-producer may not read the expected scalar while solving. A validator must
-independently replay every group equation.
+Native BSGS on all four factors plus CRT recovered `d_demo` exactly from one
+actual call to the unchecked multiplier. The recovered residues were:
+
+| factor | residue | BSGS giant steps | exact replay |
+|---:|---:|---:|---|
+| 3 | 0 | 1 | yes |
+| 227 | 58 | 4 | yes |
+| 48817 | 26624 | 121 | yes |
+| 636190001 | 487863039 | 19342 | yes |
+
+CRT returned `6599291615786184`, and the final nominal public-key replay
+matched. The expected scalar was not used by the solver path. The same native
+implementation replayed each equation; an independent implementation has not
+yet done so.
 
 The full-width fixture is:
 
@@ -304,24 +370,29 @@ Uy = 0x00D567FA101A19AF65CE7F58C0D4A4
 The public key `Q` and unchecked singular result `U` are post-search replay
 controls. They must not be used to prune BSGS or future rho candidates.
 
-Solving only the four small factors supports recovery modulo `M`, not a full
-secret recovery. A projected 30-bit solve for the largest factor is a model
-until that solve executes under a frozen budget.
+For the full-width fixture, one unchecked call produced the frozen output and
+the four executed components recovered
+`d_full mod M = 13735027495063591`. The remaining prime is
+`491003369344660409`; its solve was explicitly **not executed**. The reported
+29.710003-bit rho work is modeled. This is residue recovery, not full secret
+recovery.
 
 ## Implementation boundary and controls
 
-The candidate code-level issue is that low-level binary addition, doubling,
-and scalar multiplication depend on `a` but do not validate `b` or subgroup
-membership. A supported `IMPLEMENTATION_WEAK` finding requires all of:
+The checked code-level issue is that low-level binary addition, doubling, and
+scalar multiplication depend on `a` but do not validate `b` or subgroup
+membership. The diagnostic supports `CONDITIONAL_IMPLEMENTATION_WEAK` at this low-level
+surface because:
 
-- the actual low-level multiplier accepts `P`;
-- its result agrees with independent singular smooth-locus arithmetic;
-- the fixed scalar or declared residue is recovered and exactly replayed;
-- the nominal equation rejects `P` before checked multiplication;
-- the public-point predicate rejects infinity, off-curve inputs, and points
-  outside the order-`n` subgroup; and
-- a caller-controlled input and distinguishing output are either demonstrated
-  or explicitly left as an exposure obligation.
+- the actual low-level multiplier accepted `P`;
+- its result agreed with a separate torus-law implementation, including an
+  exhaustive `GF(2^8)` control;
+- the bounded scalar and the declared full-width residue were exactly replayed;
+- the nominal equation and checked public-point predicate rejected `P`;
+- the predicate also rejected infinity and points outside the order-`n`
+  subgroup; and
+- caller reachability and a distinguishing production-protocol output remain
+  explicit exposure obligations.
 
 No result here licenses “weak isogenous curve.” The strongest result without a
 reachable wrapper is “conditional implementation weakness at the tested
@@ -329,23 +400,26 @@ low-level surface.”
 
 # Nominal wrong-subgroup control
 
-The candidate on-curve point
+The on-curve point
 
 ```text
 T = (0, 0x01DF93AA20579D377F97203F385B11)
 ```
 
-has expected order 2. The run must prove `[2]T=O`, `[n]T=T`, and rejection by
-the subgroup predicate. If raw multiplication output is distinguishable, this
-point reveals scalar parity. This is a standard subgroup-validation issue on
-the nominal curve, not evidence that the prime-order subgroup is easier.
+has exact order 2 in the diagnostic: `[2]T=O`, `[n]T=T`, and the subgroup
+predicate rejected it. Raw multiplication distinguished scalar parity. This is
+a standard unchecked-surface/wrong-subgroup control on the nominal curve, not
+evidence that the prime-order subgroup is easier; production exposure was not
+established.
 
 # How confidence will be earned
 
-Exact algebra dominates this study. Confidence comes from machine-checkable
-certificates, mutation tests, source-independent recomputation, and final point
-replay. Repeating deterministic arithmetic does not create statistical
-confidence if both runs share the same bug.
+Exact algebra dominates this study. The diagnostic gains implementation-level
+confidence from machine-checkable certificates, mutation tests, a separate
+torus law, and final point replay. It does **not** have source-independent
+implementation validation: producer and replay verifier share the native code
+base. Repeating deterministic arithmetic does not create statistical
+confidence if both paths share a bug.
 
 For any performance comparison, the admitted design must pin hardware and
 software, use isolated cores, randomize paired execution order, retain warmups
@@ -362,17 +436,24 @@ or defensible effective sample size, the report will state only the exact
 visited set, route coverage, and sample yield. A zero-hit walk is not evidence
 that the whole class contains no special representative.
 
-# Prospective verdict matrix
+# Diagnostic verdict matrix
 
-| Object / claim | Maximum verdict after its own evidence passes | Current state |
+| Object / claim | Diagnostic result | Boundary |
 |---|---|---|
-| prime subgroup at frozen 80-bit threshold | `CLASS_WEAK_LEGACY_SIZE` | `PENDING` |
-| explicit valid degree-5 neighbor | `VALID_ISOGENOUS_REPRESENTATIVE` | `PENDING` |
-| cheaper attack through a valid neighbor | `REPRESENTATIVE_WEAK` or `TRANSFER_SPEEDUP` | `PENDING` |
-| singular same-`a` cubic accepted by unchecked multiplier | `IMPLEMENTATION_WEAK` | `PENDING` |
-| checked entry point rejects invalid/wrong-subgroup points | validation control `HOLDS` | `PENDING` |
-| finite valid-neighbor search with no advantage | `NO_WEAKNESS_FOUND_WITHIN_SCOPE` | `PENDING` |
-| entire class has no other special attack | no finite-walk verdict allowed | `OPEN` |
+| prime subgroup at frozen 80-bit threshold | class weak; exact `n`, modeled 56.325748-bit rho work | legacy size; prior full DLP is external |
+| two explicit valid degree-5 neighbors | exact kernels, maps, order-`n` images, duals, forward target homomorphism, and point pullback | same-implementation diagnostic; no codomain DLP solve |
+| cheaper attack through a valid neighbor | not demonstrated; transfer only | no matched attack or timing study |
+| singular same-`a` cubic accepted by unchecked multiplier | bounded scalar exactly recovered; full-width residue recovered | conditional implementation weakness at the tested low-level surface; attacker reachability/output remain obligations |
+| full-width singular recovery | not completed | 59-bit component unexecuted; rho cost modeled |
+| public-point validation predicate rejects invalid/wrong-subgroup points | exact diagnostic control holds | no checked multiplier or production wrapper integration asserted |
+| entire class has no other special attack | no claim | finite degree-5 controls are not exhaustive |
+
+The canonical scoreboard and progress timeline were checked but not updated:
+this diagnostic is neither an admitted IC/performance result nor a benchmark
+measurement. The registry-driven IC leaderboard and lab-browser data were
+regenerated because the two exact endpoint identities expand their curve
+roster. The study-local evidence-flow diagram was updated to show exact,
+modeled, external-prior-art, and conditional lanes.
 
 # References
 

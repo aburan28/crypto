@@ -1,16 +1,24 @@
-# sect113r1 weak-curve audit protocol (prospective draft)
+# sect113r1 weak-curve audit protocol and diagnostic record
 
-Status: **DRAFT — NO SCIENTIFIC RUN HAS BEEN ADMITTED OR EXECUTED**
+Status: **PRE-ADMISSION DIAGNOSTIC COMPLETE — NO SCIENTIFIC RUN HAS BEEN
+ADMITTED AND NO INDEPENDENT IMPLEMENTATION VALIDATION EXISTS**
 
 Date drafted: 2026-10-06
 
 This directory specifies a reproducible audit of `sect113r1`, its rational
 degree-5 isogeny neighbors, its quadratic twist, and two deliberately invalid
-or wrong-subgroup inputs.  Numbers marked **candidate derivation** below came
-from pre-admission arithmetic used to design the test.  They are not producer
-results.  The native producer and an independent validator must rederive them
-from the frozen parameters before the report can promote them to certified
-facts.
+or wrong-subgroup inputs. A native pre-admission diagnostic has now executed
+and replayed deterministic exact certificates. Its artifact is
+[`diagnostics/pre-admission-certificate.json`](diagnostics/pre-admission-certificate.json),
+with embedded semantic certificate SHA-256
+`1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8`.
+The artifact index separately binds the literal JSON bytes. The certificate
+records `admitted_scientific_run=false`; producer and replay verifier use the
+same implementation, so this is not independent validation. Candidate
+derivations retained below remain the frozen protocol context.
+`implemented_diagnostic_gates_passed=true` means only that the explicitly
+implemented bounded gates replayed; it does not mean admission, complete
+attack coverage, production exploitability, or independent validation.
 
 The audit asks three different questions and never substitutes one for
 another:
@@ -29,10 +37,46 @@ another:
    at that interface.  A singular cubic is not an elliptic curve and cannot be
    called an isogenous weak curve.
 
-The editable evidence-flow diagram is
-[`evidence-flow.dot`](evidence-flow.dot).  [`REPORT.md`](REPORT.md) is a
-prospective report shell; its result cells must remain pending until admitted
-artifacts exist.
+The detailed outcome is in [`REPORT.md`](REPORT.md). Exact endpoint records and
+ordered route bindings are in
+[`degree5_curve_records.json`](degree5_curve_records.json) and
+[`isogeny-routes.json`](isogeny-routes.json). Reproduction commands, hashes,
+and validation receipts are in [`ARTIFACT_INDEX.md`](ARTIFACT_INDEX.md). The
+editable evidence-flow
+diagram is [`evidence-flow.dot`](evidence-flow.dot), with rendered
+[`SVG`](evidence-flow.svg) and [`PDF`](evidence-flow.pdf) views.
+
+## Diagnostic snapshot (not an admitted scientific run)
+
+Keep the evidence types separate:
+
+- **Exact diagnostic:** deterministic arithmetic and replay within the native
+  implementation.
+- **Modeled:** analytic generic-operation costs, including the unexecuted rho
+  estimate; these are not timings or completed attacks.
+- **External prior art:** Wenger and Wolfger's published full `sect113r1` DLP;
+  it is not a result measured by this repository.
+- **Conditional implementation finding:** relevant only if an attacker-selected
+  point reaches the unchecked low-level multiplier and its full-point result is
+  distinguishable. No production protocol exposure was established.
+
+The completed diagnostic reports:
+
+| Object | Result | Evidence boundary |
+|---|---|---|
+| source class | exact prime/order/trace/CM certificates; `CLASS_WEAK` at the frozen 80-bit threshold | 56.325748-bit generic work is modeled; legacy-size result |
+| two degree-5 neighbors | exact kernels, codomains, native endpoint identities, full-coordinate map implementations, order-`n` images, forward homomorphism on the planted target, dual composition on `G` and the target, and exact pullback | `TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED`; broader point-set composition, a codomain DLP solve, attack timing, and representative-specific speedup remain absent |
+| singular bounded fixture | one unchecked call; exact BSGS/CRT recovery of `d_demo=6599291615786184` and final replay | `CONDITIONAL_IMPLEMENTATION_WEAK` only at the conditional low-level exposure boundary |
+| singular full-width fixture | one unchecked call; exact residue `13735027495063591 mod 21149740236874377` | remaining 59-bit prime component unexecuted; 29.710003-bit rho cost modeled |
+| nominal order-2 point | exact parity control and public-point validation-predicate rejection | wrong-subgroup control, not weaker prime-subgroup arithmetic |
+| quadratic twist | exact order/factor certificates | off-class control, not an isogenous representative |
+
+There is no admitted result, performance measurement, prevalence estimate, or
+independent implementation verdict. The canonical scoreboard and progress
+graphs were checked but not updated because this is not an admitted
+IC/performance result. The registry-driven leaderboard, lab-browser data, and
+cover catalog were regenerated because the two exact endpoint identities join
+the curve roster; the study-local evidence-flow visual was also updated.
 
 ## 1. Admission gate
 
@@ -84,7 +128,7 @@ pages 30–31).  The source PDF must be pinned as SHA-256
 `d1b16728ad83888fd656d16b99dc71bcd5541d42d848ffd0de7c62c19010d8c3`
 by the admitted archive.
 
-The proposed repository identity is:
+The repository identity resolved by the diagnostic is:
 
 ```text
 slug: icv1-f2m113-tm122610772499221213-97df4ac6
@@ -102,9 +146,9 @@ The exact ICV1 model-hash preimage is sorted-key, compact UTF-8 JSON:
 
 Its candidate SHA-256 is
 `97df4ac684cbe5e6ab7686805d46ec4aa74945314512fd4ed79598337d243117`.
-The admitted run must resolve this identity through the committed registry.
-The identity is representation-specific; it is not proof of any mathematical
-property.
+A later admitted run must resolve the same identity through its committed
+registry snapshot. The identity is representation-specific; it is not proof
+of any mathematical property.
 
 ### 2.2 Objects that must keep separate identities
 
@@ -185,7 +229,7 @@ confidence interval.  An implementation using negation has a smaller constant;
 the audit records, but does not disguise, that distinction.
 
 At the frozen 80-bit threshold, a certified `n` is sufficient for the analytic
-verdict `CLASS_WEAK_LEGACY_SIZE`.  This is not a newly discovered special
+verdict `CLASS_WEAK` (descriptively: legacy size). This is not a newly discovered special
 structure: Wenger and Wolfger report the historical full `sect113r1` discrete
 log computation using ten Kintex-7 FPGAs in [ePrint
 2015/143](https://eprint.iacr.org/2015/143).  The audit must report that prior
@@ -203,7 +247,7 @@ gates:
 | anomalous | check `N != q` | anomalous attack not applicable |
 | supersingular | check `t` odd and ordinary criteria | supersingular transfer not applicable |
 | subfield/GLS | prove the only proper subfield is `F_2`; enumerate the five possible degree-113 traces from base traces `-2..2` and show none equals `t` | no `F_2`-defined representative or GLS orbit gain |
-| GHS/Hess | prove `ord_113(2)=28`; derive the prime-degree model's minimum candidate genus `2^28-1=268435455` with its exact theorem/model assumptions | standard GHS route is not competitive |
+| GHS/Hess | prove `ord_113(2)=28`; compute the curve-specific magic number and type before deriving any genus | no conclusion while the magic number and genus remain uncomputed |
 | low-norm CM/GLV | certify fundamental `D_pi` and the norm bound above | no low-degree non-scalar endomorphism in the class |
 | Semaev/direct index calculus | provide an end-to-end charged solver or label unavailable | no conclusion from equation generation alone |
 | field extension, cover, or Jacobian transfer | explicit homomorphisms, subgroup preservation, inverse/recovery, and whole-path cost | no speedup from representation change alone |
@@ -215,9 +259,10 @@ extension are
 -2^57, -1267584991505179, 0, 1267584991505179, 2^57.
 ```
 
-The admitted report must say that the GHS value is a derivation under the cited
-Menezes–Teske model, not a theorem quoted for this exact parameter outside the
-paper's displayed range.
+The pre-admission certificate intentionally records
+`NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED`. The exact multiplicative order alone
+does not determine the magic number, curve type, or Weil-descent genus, so it
+cannot support a competitive or noncompetitive GHS conclusion.
 
 ### 3.4 Twist
 
@@ -270,15 +315,18 @@ For each `h_i`, require all of:
   and sign partners;
 - route artifacts bind ordered source/destination curve UIDs, degree,
   direction, kernel polynomial, map formula/version, and SHA-256;
-- a planted discrete-log instance transported to the codomain and back keeps
-  the same scalar; and
+- the map is a homomorphism on the planted target, the dual composition is
+  `[5]` on both `G` and that target, and multiplying the dual image by
+  `5^{-1} mod n` pulls the target back to the source; and
 - all construction, mapping, recovery, and verification costs are charged in
   one declared unit before any speedup claim.
 
-The expected outcome is a transfer control: valid neighbors preserve the
-already-small prime subgroup and do not by themselves make the logarithm
-easier.  If explicit routes pass, the allowed statement is “two valid
-degree-5 neighbors were certified and the subgroup was transported.”  It is
+The pre-admission diagnostic obtained the expected transfer control: two valid
+neighbors preserved the already-small prime subgroup, mapped the planted
+target homomorphically, replayed the dual compositions, and pulled the target
+back exactly. It did not solve a DLP on either codomain or supply a cheaper
+attack. The allowed diagnostic statement is “two valid degree-5 neighbors and
+their subgroup transfer replayed exactly in the native implementation.” It is
 not “an isogeny broke sect113r1.”
 
 ## 5. Invalid-input and wrong-subgroup experiment
@@ -443,21 +491,22 @@ subgroup order; it needs no timing hypothesis test.  Any claim that one valid
 representative is faster to attack than another requires matched end-to-end
 costs, a preregistered effect size, and uncertainty on the paired difference.
 
-## 8. Result schema (initial state)
+## 8. Result schema and diagnostic state
 
-Every admitted producer artifact must populate these rows without deleting
-failures:
+The diagnostic populates these rows without promoting them to admitted or
+independently validated evidence. Any later admitted producer must retain
+failures and use a distinct run identity.
 
-| Claim | Required evidence | Initial state |
+| Claim | Required evidence | Pre-admission diagnostic state |
 |---|---|---|
-| legacy class below 80-bit threshold | certified `n`; frozen generic formula | `PENDING_ADMITTED_RUN` |
-| nominal order and CM facts | exact certificates and independent replay | `PENDING_ADMITTED_RUN` |
-| two rational 5-isogenies | kernels, codomains, full maps, duals, subgroup replay | `PENDING_ADMITTED_RUN` |
-| special valid representative weakness | charged end-to-end attack below matched source reference | `PENDING_ADMITTED_RUN` |
-| singular small-factor scalar recovery | actual unchecked surface, exact BSGS/CRT replay, controls | `PENDING_ADMITTED_RUN` |
-| full-width singular recovery | actual solve and final replay, not projected cost | `PENDING_ADMITTED_RUN` |
-| checked-path rejection | nominal curve and subgroup predicate controls | `PENDING_ADMITTED_RUN` |
-| twist safety | exact twist order/factors and explicit interface relevance | `PENDING_ADMITTED_RUN` |
+| legacy class below 80-bit threshold | certified `n`; frozen generic formula | exact diagnostic `CLASS_WEAK`; cost modeled; prior art external |
+| nominal order and CM facts | exact certificates and independent replay | exact native certificate; independent implementation replay absent |
+| two rational 5-isogenies | kernels, codomains, native identities, full maps, duals, subgroup replay and exact target pullback | exact diagnostic `TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED` for both routes |
+| special valid representative weakness | charged end-to-end attack below matched source reference | not demonstrated; no timing experiment |
+| singular small-factor scalar recovery | actual unchecked surface, exact BSGS/CRT replay, controls | exact bounded recovery from one unchecked call |
+| full-width singular recovery | actual solve and final replay, not projected cost | not completed; residue only, large component unexecuted |
+| validation-predicate rejection | nominal curve and subgroup predicate controls | exact diagnostic control holds; no checked multiplier or wrapper integration asserted |
+| twist safety | exact twist order/factors and explicit interface relevance | exact off-class arithmetic; interface exposure absent |
 
 ## 9. Primary references
 
