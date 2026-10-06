@@ -29,7 +29,9 @@ done < "$out/FREEZE.tsv"
 test ! -e "$out/runs"
 mkdir "$out/runs"
 uname -srm > "$out/runs/host.txt"
-sysctl -n machdep.cpu.brand_string > "$out/runs/cpu.txt"
+if ! sysctl -n machdep.cpu.brand_string > "$out/runs/cpu.txt" 2> "$out/runs/cpu.stderr.txt"; then
+    printf 'CPU model unavailable from sysctl in this sandbox\n' > "$out/runs/cpu.txt"
+fi
 printf 'unisolated-macos-exploratory\n' > "$out/runs/isolation.txt"
 printf 'target\trepetition\tarm\trun_id\tinput_sha256\tcandidate_sha256\tworkload_id\n' > "$out/runs/INDEX.tsv"
 for target in 1 7; do
