@@ -2965,6 +2965,69 @@ tooling, and `verify.py` and `analyze.py` are Python. They are replaced by
   - dropping a target;
   - re-running a system in the hope of a different answer.
 
+### 16.7 The native checker, before it read this round
+
+`examples/pkm_tower_check.rs` was written while stage 1 ran, and checked
+before it read any round-7 row.
+- **The reference.** A dispatch of the workflow on `main` was refused (HTTP
+  403), so the reference is round 6's last CI run (workflow run 36689898077,
+  job 109804351090, ubuntu-24.04, Python 3.12) at `a8b1e7ad`. Its rows and
+  scripts are `main`'s: no PKM file changed on `main` between that commit,
+  `63a09ff7` and `85be1540`.
+- **The result: identical.** On every committed row of rounds 1–6 the checker
+  prints what the scripts printed there, line for line, with the same exit
+  status.
+  - That is the six `verify` lines: 176, 198, 2, 38, 34 and 200 rows checked,
+    every one agreeing.
+  - It is also the 667 lines of `analyze` over rounds 1–5.
+  - `research/pkm_tower_pilot_20260924/legacy_output/` freezes that output.
+    Its `check.sh` diffs against it, and CI runs it in place of the Python
+    steps.
+- **What the reference does not reach.** Every bootstrap interval in it is
+  degenerate, so it does not exercise the checker's Mersenne Twister. A unit
+  test does: Python's first draws for seeds 0 and 42.
+- **Unit tests.** Five tests in all:
+  - `test_verify.py`'s fixtures: planted decompositions on random curves over
+    `F_1009` for `m = 2, 3, 4`, and both orders of eliminating the `m = 4`
+    chain;
+  - the `m = 2` counter against the group law;
+  - the twister, and the Python semantics `analyze` relies on.
+
+### 16.8 Stage 1: the identity check and the sizing
+
+`run.sh stage1` ran from 02:02 to 02:42 UTC, and exited 0.
+- **Identity: confirmed.** It stopped for size in step 24, as round 2 did.
+  `pkm_tower_check compare-rows` finds its row equal to round 2's target-0 row
+  on every field it compares, multiply-adds included (`2.12·10¹³`). The
+  full-rank exit did not fire in steps 1–23.
+- **The steps round 2 did not trace.** `pkm_tower_check trace-table` gives
+  steps 18–24 as follows; the whole table is in the round's README.
+
+  | step | degree | S-rows | columns | without a divisor | new elements (lowest degree) | `B'` entries | multiply-adds | time | memory |
+  |--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|
+  | 18 | 6 | 16 | 16,401 | 10,494 | 15 (6) | 5.2·10⁷ | 6.3·10⁹ | 0.9 s | 283 MB |
+  | 19 | 7 | 22,318 | 45,792 | 23,792 | 2,354 (5) | 4.5·10⁸ | 1.4·10¹² | 151 s | 2.0 GB |
+  | 20 | 6 | 23 | 26,660 | 18,369 | 17 (5) | 1.3·10⁸ | 4.6·10¹⁰ | 4.7 s | 2.0 GB |
+  | 21 | 6 | 7 | 227 | 129 | 1 (6) | 1.1·10⁴ | 4.7·10⁴ | 0 s | 2.0 GB |
+  | 22 | 7 | 29,963 | 88,958 | 44,066 | 4,343 (6) | 1.62·10⁹ | 8.2·10¹² | 15.2 min | 7.2 GB |
+  | 23 | 7 | 33,337 | 98,183 | 43,909 | 5,453 (6) | 1.98·10⁹ | 1.15·10¹³ | 21.2 min | 9.2 GB |
+  | 24, stopped | 7 | 28,321 | 104,600 | 40,311 | — | 2.23·10⁹ | — | — | 9.3 GB |
+
+  - Steps 1–18 climb to degree 6 over at most 16,419 columns.
+  - Step 19 is the first at degree 7, and steps 22–24 all stay at 7.
+  - Steps 22 and 23 carry 93% of the multiply-adds.
+  - At `N = 15` (round 6's trace), step 19 is also the first step at
+    degree 7, with almost the same S-rows (22,325), over 31,397 columns. There
+    the run falls back to degree 6 after its second degree-7 step and refutes
+    in step 24.
+- **The sizing.** Step 24's stop line gives `E = 2,227,368,915` entries of
+  `B'` (8.9 GB) and `q = 40,311`. At the stop, resident memory was 9,300 MB
+  (peak 9,636 MB), the address space 9,460 MB (peak 9,844 MB), and the live heap
+  `H` 1,583 MB.
+- **The rule of §16.3** (`pkm_tower_check size-cap`) gives `C = 2.5·10⁹ ≥ E`.
+  Step 24 fits, and stage 2 runs with `--max-dense 2500000000`. It started at
+  02:42 UTC.
+
 ---
 
 ## References

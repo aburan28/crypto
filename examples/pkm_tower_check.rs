@@ -1623,6 +1623,74 @@ fn number_after(line: &str, prefix: &str) -> Option<u64> {
     digits.parse().ok()
 }
 
+/// A log's `tower step` lines, and its `tower stop in step` line, as a
+/// Markdown table: what each step reduced, what it found, what it cost.
+fn trace_table(log: &str) -> ExitCode {
+    let text = std::fs::read_to_string(log).unwrap_or_else(|e| panic!("{log}: {e}"));
+    println!("| step | degree | S-rows | pivot rows | columns | without a divisor | residues | new elements (lowest degree) | `B'` entries | kept entries | multiply-adds | s | memory MB |");
+    println!("|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|");
+    let mut rows = 0;
+    for line in text.lines() {
+        let stop = line.starts_with("tower stop in step ");
+        if !stop && !line.starts_with("tower step ") {
+            continue;
+        }
+        let n = |prefix: &str| number_after(line, prefix);
+        let show = |v: Option<u64>| v.map_or("—".to_string(), |x| x.to_string());
+        let step = if stop {
+            n("tower stop in step ")
+        } else {
+            n("tower step ")
+        };
+        let residues = line
+            .split_once("residue ")
+            .map(|(_, rest)| rest.split_whitespace().collect::<Vec<_>>());
+        let (res, q) = match residues.as_deref() {
+            Some([r, "x", q, ..]) => (r.to_string(), q.trim_end_matches(',').to_string()),
+            _ => ("—".to_string(), "—".to_string()),
+        };
+        let seconds = line
+            .split_once("pairs left ")
+            .and_then(|(_, rest)| rest.split_once(", "))
+            .and_then(|(_, rest)| rest.split_once(" ms"))
+            .and_then(|(ms, _)| ms.parse::<f64>().ok())
+            .map_or("—".to_string(), |ms| format!("{:.1}", ms / 1e3));
+        let pivots = n("S-rows + ")
+            .zip(n("reducers + "))
+            .map(|(r, p)| r + p);
+        println!(
+            "| {}{} | {} | {} | {} | {} | {q} | {} | {} | {} | {} | {} | {seconds} | {} |",
+            show(step),
+            if stop { " (stopped)" } else { "" },
+            show(n(": degree ")),
+            show(n("pairs, ")),
+            show(pivots),
+            show(n("promoted x ")),
+            if stop { "—".to_string() } else { res },
+            if stop {
+                "—".to_string()
+            } else {
+                format!("{} ({})", show(n("fresh ")), show(n("lowest degree ")))
+            },
+            show(n("B' ")),
+            show(n("elements with ")),
+            if stop {
+                "—".to_string()
+            } else {
+                show(n("muladds "))
+            },
+            show(n("memory ")),
+        );
+        rows += 1;
+    }
+    if rows > 0 {
+        ExitCode::SUCCESS
+    } else {
+        println!("{log}: no tower step lines");
+        ExitCode::FAILURE
+    }
+}
+
 /// Note §16.3's rule for stage 2's cap, from the `tower stop in step` line
 /// of a stage-1 log: `C` is the largest multiple of `10⁸` with
 /// `H + 4C ≤ A − 2.5·10⁹` bytes, where `A` is the address-space cap
@@ -1656,7 +1724,7 @@ fn size_cap(log: &str) -> ExitCode {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let usage = "usage: pkm_tower_check verify FILE… | analyze FILE… | compare-rows REF NEW [--may-fall F,…] [--ignore F,…] | compare-trace REF NEW [--steps K] | size-cap LOG";
+    let usage = "usage: pkm_tower_check verify FILE… | analyze FILE… | compare-rows REF NEW [--may-fall F,…] [--ignore F,…] | compare-trace REF NEW [--steps K] | size-cap LOG | trace-table LOG";
     let files = |from: usize| -> Vec<String> {
         args[from..]
             .iter()
@@ -1670,6 +1738,7 @@ fn main() -> ExitCode {
         Some("compare-rows") if args.len() >= 3 => compare_rows(&args[1], &args[2], &args[3..]),
         Some("compare-trace") if args.len() >= 3 => compare_trace(&args[1], &args[2], &args[3..]),
         Some("size-cap") if args.len() == 2 => size_cap(&args[1]),
+        Some("trace-table") if args.len() == 2 => trace_table(&args[1]),
         _ => {
             eprintln!("{usage}");
             ExitCode::from(2)
