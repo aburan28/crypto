@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "build-identity"
+  ],
+  "cwd": "/Volumes/SSD990/llm/tmp/ic-f5-source-validation-20261006-v1",
+  "environment": [
+    [
+      "LC_ALL",
+      "C"
+    ],
+    [
+      "RAYON_NUM_THREADS",
+      "1"
+    ]
+  ],
+  "exit_code": 0,
+  "log_sha256": "2bf28998751b9badc33c5afe4694df84c21982f6cfc97d332b68751589f83e35",
+  "program": "/Volumes/SSD990/llm/tmp/ic-f5-source-validation-20261006-v1/immutable/bin/prepared_target_worker",
+  "program_sha256_after": "f8d64b9b9daf9097dce73d020bb196c3e73be85a765e07985913b6d33c14b749",
+  "program_sha256_before": "f8d64b9b9daf9097dce73d020bb196c3e73be85a765e07985913b6d33c14b749",
+  "wall_ns": "427975458"
+}

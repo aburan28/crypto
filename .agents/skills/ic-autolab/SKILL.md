@@ -202,6 +202,15 @@ registrations and disclosed controls cannot substitute for a fresh target.
 The [fresh paired n17 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/PROTOCOL.md)
 predeclares the four source-publication roles, native public-point workload,
 one-use four-arm execution and non-promotion of exploratory wall ratios.
+Its [MatrixF5 source result](../../../research/ic_candidate_tournament_20260915/goal_20260924/fresh-paired-n17-v1/f5-source-v1/result-v1/RESULT.md)
+retains the new unconsumed validation capsule's target-free source seal and
+complete data-only archive replay. `icprog target-control-publish-source` and
+`target-control-replay-source` handle this pre-card gate. After all four arms
+have independently checked source publications and a public card exists,
+`target-control-adopt-card` and `target-control-audit-adoption` may bind that
+card to the same F5 capsule before the ordinary one-use scientific publication
+and dispatch. The adoption path has not yet been exercised; the old consumed
+F5 capsule cannot be adopted. Incumbent IC and rho source gates remain open.
 Do not charge child startup to the online interval by stopwatch subtraction.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as
 the historical wrapper; macOS supports busy only. Timed affinity/reservation

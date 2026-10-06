@@ -1,5 +1,9 @@
 # MatrixF5 source gate for the fresh n17 card
 
+The [first target-free publication and independent replay](f5-source-v1/result-v1/RESULT.md)
+passed. This is source custody only: card adoption, fresh target execution and
+the original post-run audit have not occurred.
+
 The earlier complete F5 control recovered one disclosed point, but its target
 capsule was consumed and its full publication included that old target config.
 It cannot be reused as a fresh-point registration. This gate builds a **new**

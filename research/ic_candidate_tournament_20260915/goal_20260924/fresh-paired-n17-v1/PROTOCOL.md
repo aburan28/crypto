@@ -3,15 +3,17 @@
 Status: entry gates 1–2 passed: the separate
 [one-million-conflict natural preparation](../native-sat-million-registration-v1/result-v1/RESULT.md)
 reached rank 29/29, and the [nine-role marked-CMS transport control](../native-sat-target-transport-v1/result-v1/RESULT.md)
-passed its independent data-only audit. The SAT arm now also has a
+passed its independent data-only audit. The SAT arm has a
 [scientific target-free source publication](../native-sat-target-transport-v1/source-freeze-v1/result-v2/RESULT.md)
-with complete archive replay and exact-built exporter parity. The other
-three arms still lack equivalent independent pre-card source publications. No
-point card, target registration, four-arm result or isolated-host receipt
-exists under this protocol. The three earlier confirmation sets and every
-consumed controller remain closed. A stage control is never a complete
-one-target result. The SAT one-use controller has not been exercised on a
-fresh card.
+with complete archive replay and exact-built exporter parity. The MatrixF5
+arm has a separate [target-free source publication](f5-source-v1/result-v1/RESULT.md)
+from a new, unconsumed validation capsule, with all 6,968 archived members
+independently replayed. F5 card adoption remains unexercised. The incumbent IC
+and rho arms still lack equivalent independent pre-card source publications.
+No point card, fresh target registration, four-arm result or isolated-host
+receipt exists under this protocol. The three earlier confirmation sets and
+every consumed controller remain closed. A stage control is never a complete
+one-target result. Neither SAT nor F5 has run a fresh card.
 
 ## Entry gates and point custody
 
@@ -36,9 +38,10 @@ fresh card.
    point. A later edit to a frozen source input requires a new pre-card
    publication; postpublication evidence reports outside that source inventory
    may be appended without changing the frozen executable identity.
-   The F5 worker may use a post-card target config in a new one-use capsule if
-   the independently audited final source manifest and executable bytes match
-   its pre-card publication. Its old target capsule is never reused.
+   The F5 worker may adopt a post-card target config in its new, unconsumed
+   validation capsule only when the independently audited source manifest and
+   executable bytes match its pre-card publication. Its old consumed target
+   capsule is never reused.
 4. Only then draw one random 64-bit seed with `icprog target-card-generate`.
    Its native `ecbench` `hash_to_subgroup_v1` workload fixes the public point,
    index zero, derivation counter, one target and no known scalar. Preserve
