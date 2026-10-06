@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 299 panels, one line each</summary>
+    <summary>Show all 300 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -485,6 +485,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-pair-entropy-round37-20261006">P-256 conditioned pair entropy: a perfect 256-MiB cache still misses 7.87 of eight pairs</a> <span class="chip">exact bound / negative</span><br>An exact cutoff-219 co-presence census grants adaptive global pairing and free hot access, yet a perfect 256-MiB table covers at most 0.128826 expected pairs and leaves a 1.032250×-rho lower bound.</li>
       <li><a href="./#p256-codebook-support-round38-20261006">P-256 correlated pair codebooks: reuse loses too much start support</a> <span class="chip">exact bound / negative</span><br>The best 256-MiB codebook keeps four pairs hot and constructs four, leaving a 1.015685×-rho floor; making all eight hot collapses support and needs at least 28.23 GB merely to touch parity optimistically.</li>
       <li><a href="./#p256-affine-log-orbit-round39-20261006">P-256 affine-log orbits: free pair differences erase relation information</a> <span class="chip">exact obstruction / negative</span><br>For P_i=[a_i]H+[b_i]G, every true relation is either an anchor-independent coefficient identity or directly returns the anchor discrete log; common translates make pair differences free only in the uninformative branch.</li>
+      <li><a href="./#p256-independent-batch-round40-20261006">P-256 independent pair batching: construction crosses, routing does not</a> <span class="chip">stage measurement / negative</span><br>Deduplicating every request without discarding starts makes pair construction alone touch rho at a 103.35-billion-start batch, but the complete measured RAM router costs 3.4326 additions per start against a 0.3344 allowance and projects to 1.013257× rho.</li>
     </ol>
   </details>
 <!-- END panel-index -->
