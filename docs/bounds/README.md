@@ -315,37 +315,98 @@ kept apart.
 
 ## 9. Reading the seed frontier
 
-`records/` holds the bounds fitted from two committed sessions
-(`research/ecbench_all_candidates_20261003/sessions/{prime,koblitz}`: four
-sizes each, eight targets, three rounds, audited with 12 replays). What they
-say, read honestly:
+`records/` holds the bounds fitted from five committed sessions and two
+challenge sessions: `research/ecbench_all_candidates_20261003/sessions/{prime,koblitz}`
+(four sizes each, eight targets, three rounds, audited with 12 replays);
+`research/ecbench_calibration_20261002/sessions/{prime,koblitz}` (six sizes
+each, same targets and rounds; the Koblitz session spans tiers — degrees 17,
+19, 23 are toy, 37, 41, 43 medium — so it is fitted once per tier, three
+sizes each, and those are `constant` bounds);
+`research/ecbench_pair_claw_20261003/sessions/koblitz` (six Koblitz degrees
+41 to 61, all medium); and the two epoch-1 sessions of
+`research/ecbench_bounds_challenges_20261006/`. The page has three domains.
+What they say, read honestly:
 
-- **Prime, toy.** `bsgs.negation` leads on operations (`1.154 ×` the floor,
-  `[1.048, 1.254]`) with a `0.5 √r` table; `rho.negation` is the memory-light
-  walk at `1.466 ×` the floor, `[1.278, 1.653]`, storing `0.034 √r` points.
+- **Prime, toy.** `bsgs.negation` leads on operations — `1.100 ×` the floor
+  `[0.978, 1.225]` over six sizes (16 to 26 bits), `1.154 ×` `[1.048, 1.254]`
+  and `1.160 ×` `[1.068, 1.248]` over four — with a `0.5 √r` table;
+  `rho.negation` is the memory-light walk at `1.453 ×` `[1.184, 1.772]` (six
+  sizes) and `1.466 ×` `[1.278, 1.653]` (four), storing `0.034 √r` points.
   Both are on the frontier: the time–memory trade, as `docs/ecbench/README.md`
-  §7 says, and not a finding. So is the frozen reference walk
-  (`rho.frozen_reference`, `4.066 ×`), through memory alone: it stores the
-  fewest distinguished points of any entry, and the rule does not let a worse
-  operations figure knock a better memory figure off. `rho.plain` (`1.990 ×`)
-  is dominated by `rho.negation`: the negation map's `√2`, measured, with the
-  canonicalisation it costs counted under `uncharged` and shown beside it.
-- **Koblitz, toy.** Three entries stand: `bsgs.negation` on operations
-  (`5.877 ×` the floor `√(π / 4n)`), `rho.signed_frobenius` on memory
-  (`0.016 √r`), and `rho.negation` between them. The strong lockstep rho is
-  dominated at these sizes because its set-up is 72 % of its total and its `α`
-  fits at `0.13` — a fixed cost at `2^16` to `2^21`, not a law. Its `search`
-  phase alone is the number to read, and the record carries it. The signed
-  Frobenius walk's own operations interval, `[2.9, 19.9]`, is as wide as the
-  four curves' cofactors are different; it holds its place on memory, not on
-  a precise operations figure.
+  §7 says, and not a finding. The same method measured in different sessions
+  holds overlapping intervals, and ties stand, so the page carries every
+  session's entry; eight rows are on this frontier. So is the frozen reference
+  walk (`rho.frozen_reference`, `4.066 ×` and `4.293 ×`), through memory alone:
+  it stores the fewest distinguished points of any entry, and the rule does
+  not let a worse operations figure knock a better memory figure off. The
+  four-size `rho.plain` (`1.990 ×`) is dominated by `rho.negation`: the
+  negation map's `√2`, measured, with the canonicalisation it costs counted
+  under `uncharged` and shown beside it. The six-size `rho.plain` (`1.920 ×`
+  `[1.633, 2.221]`) stands only because its operations interval overlaps the
+  six-size `rho.negation`'s and no memory interval separates them: a tie, not
+  a merit.
+- **Koblitz, toy.** Three entries stand and all are `rho.signed_frobenius`:
+  `3.306 ×` the floor `√(π / 4n)` `[2.329, 4.288]` over degrees 17, 19, 23
+  (three sizes, a constant bound), `4.996 ×` `[2.985, 7.374]` from the epoch-1
+  challenge session and `9.455 ×` `[2.933, 19.898]` from the all-candidates
+  session, storing `0.014` to `0.017 √r`. `bsgs.negation` (`5.003 ×`,
+  `5.877 ×`) and `rho.negation` (`6.792 ×`, `9.041 ×`), on the frontier before
+  the calibration and challenge records joined, are dominated by the
+  three-size walk on both axes. The strong lockstep rho is dominated at these
+  sizes because its set-up is 72 % of its total and its `α` fits at `0.13` —
+  a fixed cost at `2^15` to `2^21`, not a law. Its `search` phase alone is the
+  number to read, and the record carries it. The signed Frobenius walk's
+  intervals are as wide as the curves' cofactors are different; it holds its
+  place on memory as much as on a precise operations figure.
+- **Koblitz, medium** (`ECDOM1h3962632c9fe8`; degrees 37 to 61, `r` from
+  `2^27.8` to `2^47.2`): the first medium-tier domain, ten bounds, two on the
+  frontier. `rho.signed_frobenius_strong` leads on operations at `1.089 ×` the
+  floor `[0.927, 1.261]` over six degrees (41 to 61, 144 runs, `α 0.451`
+  `[0.399, 0.512]`), storing `0.008 √r`; here its set-up is 0.4 % of its total
+  and the toy-tier reading above does not carry over. `rho.signed_frobenius`
+  holds the memory lead at `0.001 √r` with `1.188 ×` `[0.954, 1.464]` over
+  three degrees (37, 41, 43; a constant bound). `bsgs.negation` reads
+  `7.669 ×` `[6.981, 8.375]` over six sizes and `7.143 ×` `[6.643, 7.682]` over
+  three: `S ≈ 1.0` against a floor of `√(π / 4n) ≈ 0.13`, the Frobenius
+  classes a generic table cannot use. The pair claw at `c = 1` is `2.390 ×`
+  `[2.160, 2.639]` and dominated by both walks; at the shape of
+  cryptanalysis#175 it is `35.6 ×` `[28.6, 42.8]`. `kangaroo.vow` reads
+  `15.6 ×` `[13.7, 17.6]`. Only the six-size entries carry a scaling claim.
 - **Index calculus** is inadmissible on the Koblitz session (half its runs did
   not verify at the two largest sizes) and far from the floor on the prime
   session (`22.7 ×` and `1258 ×`). Both are listed; neither is on a frontier.
   Its memory is unknown (no table counter), which is a gap in the pipeline's
   reporting, not a strength.
-- **Every `α` interval contains 0.5** except where set-up dominates. Nothing
-  in these records is a scaling result; they are constants with their scope.
+- **Two verdicts** (`research/ecbench_bounds_challenges_20261006/`; epoch 1
+  each, every run replayed, every run L0). `ECVD1h0b0f5e0d7f67` on
+  `prime-toy-reference` reads `trade`: `bsgs.negation / rho.negation = 0.8250
+  [0.725, 0.945]` on operations and `15.79 [13.38, 19.06]` on memory
+  (`0.50 √r` against `0.03 √r`); it wrote `ECBND1he0aea8671f10` (`1.160 ×`
+  `[1.068, 1.248]`), which names `ECBND1h7b69b9787056` under `improves_on`.
+  `ECVD1h53a3dfe36118` on `koblitz-toy-reference` reads `advances` at the
+  constant level: `rho.signed_frobenius / rho.signed_frobenius_strong = 0.2991
+  [0.235, 0.402]` on operations and `0.560 [0.483, 0.656]` on memory. The
+  `setup` stage carries the move (paired `0.163`; 71 % of the incumbent's
+  total against 36 % of the candidate's), `search` reads `0.664`, and
+  `α 0.229 [-0.013, 0.491]` against `0.126 [0.097, 0.266]` moves no exponent.
+  It wrote `ECBND1hbc8602528f48` (`4.996 ×` `[2.985, 7.374]`), naming
+  `ECBND1h1573ea580e89`. Both incumbents measured inside their recorded
+  intervals (`1.406 [1.270, 1.531]` against `1.466 [1.278, 1.653]`; `16.886
+  [9.156, 25.275]` against `16.794 [9.107, 25.310]`). One epoch each, toy
+  tier, no wall-clock figure. The strong walk stays the reference the IC claim
+  rules name; a verdict does not change a rule.
+- **`α` is a description here, not a result.** Where an interval excludes
+  `0.5` it lies below it, and the stage rows say why: a fixed cost that is a
+  large share of the total at toy sizes (the strong lockstep walk's set-up,
+  `0.132 [0.104, 0.190]`; the frozen reference walk; the toy signed-Frobenius
+  fits, whose set-up is 24 to 42 % of the total), or a 16-bit curve in a
+  six-size fit (`rho.negation` `0.398 [0.308, 0.476]` and `rho.plain` `0.431
+  [0.382, 0.489]` on the prime calibration session, whose `search` phases fit
+  at `0.458 [0.380, 0.533]` and `0.483 [0.427, 0.560]` while the walk reads
+  `2.22 ×` the floor at 16 bits and `1.06 ×` at 26). The one interval above
+  `0.5` is the fixed-base `ic.pipeline` with the `subtract` oracle (`1.005
+  [0.786, 1.099]`), a 32-element base at growing `r`. Nothing in these records
+  is a scaling result; they are constants with their scope.
 
 ## 10. Commands
 
@@ -362,7 +423,8 @@ ecbench challenge verdict --challenge C.json --dir SESSION --epoch N [--replay-a
 ```
 
 `refit.sh` regenerates every seed record and the frontier from the committed
-sessions; CI runs `bound check` on every record, `challenge check` on every
+sessions, and runs the two committed verdicts again so the records they wrote
+re-derive with the rest; CI runs `bound check` on every record, `challenge check` on every
 challenge and `frontier build --check` on the page.
 
 ## 11. Layout
@@ -372,9 +434,18 @@ docs/bounds/
   README.md          this protocol
   FRONTIER.md        generated page, checked in CI
   frontier.json      its machine-readable twin
-  records/*.json     bound records, write-once, named by id
+  records/*.json     bound records, write-once: <session>-<arm>.json from a fit,
+                     challenge-<name>-e<N>-<candidate>.json written by a verdict
   challenges/*.json  standing challenges, one per domain and axis leader
   refit.sh           regenerate records and frontier from committed sessions
+
+research/ecbench_bounds_challenges_<date>/
+  specs/<name>-e<N>.json     the spec `challenge spec` wrote for one epoch
+  sessions/<name>-e<N>/      the session; evidence, replayed by CI, never edited
+  verdict-<name>-e<N>.json   the verdict, re-derivable byte for byte
+  audit-<name>-e<N>.json     the receipt the verdict wrote (carries a timestamp)
+  table-<name>-e<N>.md       `ecbench table` over the session
+  README.md                  the question, the host, the levels, each statement
 ```
 
 ## 12. Beyond this repository
