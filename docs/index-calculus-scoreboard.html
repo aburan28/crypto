@@ -12629,6 +12629,32 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-pair-entropy-round37-20261006 -->
+<!-- BEGIN p256-codebook-support-round38-20261006 -->
+<section class="panel" id="p256-codebook-support-round38-20261006">
+  <div class="panel-head">
+    <h2>P-256 correlated pair codebooks: reuse loses too much start support <span class="chip">exact bound / negative</span></h2>
+    <p class="panel-summary">The best 256-MiB codebook keeps four pairs hot and constructs four, leaving a 1.015685&times;-rho floor; making all eight hot collapses support and needs at least 28.23 GB merely to touch parity optimistically.</p>
+    <p>The support bound counts ordered repeats, overlapping columns, inconsistent signs, starts below cutoff and maximum-length paths as valid. Cold pairs cost only one addition and all codebook access is free.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Selected support/cost row at each registered codebook depth.</caption>
+    <thead><tr><th>Codebook</th><th>Hot / cold pair slots</th><th>Support upper bits</th><th>Coverage upper</th><th>Complete / rho lower bound</th></tr></thead>
+    <tbody>
+      <tr><td>2 MiB</td><td class="n">2 / 6</td><td class="n">271.124535</td><td class="n">1.000000</td><td class="n">1.024243</td></tr>
+      <tr><td>64 MiB</td><td class="n">3 / 5</td><td class="n">267.116061</td><td class="n">1.000000</td><td class="n">1.019964</td></tr>
+      <tr><td><strong>256 MiB</strong></td><td class="n"><strong>4 / 4</strong></td><td class="n"><strong>260.429516</strong></td><td class="n"><strong>1.000000</strong></td><td class="n"><strong>1.015685</strong></td></tr>
+      <tr><td>Necessary all-hot threshold (28.23 GB)</td><td class="n">8 / 0</td><td class="n">255.997934</td><td class="n">0.998569</td><td class="n">0.999999987</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">necessary, not sufficient</span> the 441,075,261-entry threshold is 1.276180% of the full table and grants invalid starts as support</span>
+    <span><span class="chip">mixtures closed</span> every probabilistic mixture is a coverage-weighted average of the 27 pure ratios and cannot beat their minimum</span>
+    <span><span class="chip">exact controls</span> six exhaustive toy cells credit 61,334 invalid sequences deliberately; zero formula, upper-bound, arithmetic, selection, FP or FN failures</span>
+    <span><span class="chip">decision</span> reject correlated codebooks at the registered depths; no implementation, benchmark or full-depth relation attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_codebook_support_round38_20261006/RESULT.md</code>; deterministic result SHA-256 <code>4297328eee07822331c68bddd65d8b0155ba1c72c6e0dda044dc97d42aba5cce</code></span>
+  </div>
+</section>
+<!-- END p256-codebook-support-round38-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
