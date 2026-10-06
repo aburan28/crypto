@@ -93,6 +93,8 @@ mod target_custody;
 mod target_math;
 #[path = "icprog/target_sat_math.rs"]
 mod target_sat_math;
+#[path = "icprog/target_sat_transport.rs"]
+mod target_sat_transport;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -242,6 +244,19 @@ enum Command {
         config: PathBuf,
         #[arg(long)]
         producer: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// Replay prepared SAT role files and source models as data; no execution admission.
+    TargetSatTransportAudit {
+        #[arg(long)]
+        capsule: PathBuf,
+        #[arg(long)]
+        execution: PathBuf,
+        #[arg(long)]
+        card: PathBuf,
+        #[arg(long)]
+        registration_sha256: String,
         #[arg(long)]
         out: PathBuf,
     },
@@ -1039,6 +1054,13 @@ fn main() -> ExitCode {
             producer,
             out,
         } => target_sat_math::run(&preparation, &config, &producer, &out),
+        Command::TargetSatTransportAudit {
+            capsule,
+            execution,
+            card,
+            registration_sha256,
+            out,
+        } => target_sat_transport::run(&capsule, &execution, &card, &registration_sha256, &out),
         Command::TargetCardGenerate { publications, out } => {
             target_card::generate(&publications, &out)
         }

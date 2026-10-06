@@ -56,3 +56,12 @@ one-use controller, source publication and same-point F5/incumbent/rho arms
 exist, candidate/workload/run IDs, online speedup and promotion remain null.
 On an ordinary Mac, even a correctly audited timing is exploratory without
 the required isolated-host receipt.
+
+
+The `icprog target-sat-transport-audit` command is a data-only development
+replay of the retained preparation mathematics, pool readiness, exact native
+source/model bytes, independent exit/status classification, per-attempt stdin
+and cancelled-role receipts, and PID ledger. It invokes no exporter or SAT
+solver and always leaves `source_bound_execution_admitted: false`. Its result
+does not replace the original frozen controller's execution inventory,
+publication chronology, worker watchdog and build-custody checks.
