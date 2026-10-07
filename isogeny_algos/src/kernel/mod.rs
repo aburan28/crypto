@@ -1,5 +1,6 @@
 pub mod chain;
 pub mod kohel;
+pub mod models;
 pub mod montgomery;
 pub mod radical;
 pub mod sqrt_velu;

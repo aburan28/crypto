@@ -2084,6 +2084,109 @@ fn bench_relation(o: &mut Out) {
     }
 }
 
+/// Alternate models (Moody-Shumow): Edwards and Huff isogenies vs Weierstrass Velu.
+fn bench_models(o: &mut Out) {
+    use isogeny_algos::kernel::models::*;
+    use isogeny_algos::kernel::montgomery;
+    let fq = Zp::new(prime_bits(61));
+    let mut rng = Rng::new(22_000);
+    let budget = if o.quick { 100 } else { 300 };
+    let ells: &[u64] = if o.quick { &[3, 7] } else { &[3, 5, 7, 11, 13, 31] };
+    let point_of_order = |ew: &Curve<u64>, n: u64, ell: u64, rng: &mut Rng| {
+        let mut lv = 1u64;
+        while n % (lv * ell) == 0 {
+            lv *= ell;
+        }
+        loop {
+            let r = ew.random_point(&fq, rng);
+            let mut t = pmul(&fq, ew, &r, (n / lv) as u128);
+            if t == Pt::Inf {
+                continue;
+            }
+            loop {
+                let nt = pmul(&fq, ew, &t, ell as u128);
+                if nt == Pt::Inf {
+                    return t;
+                }
+                t = nt;
+            }
+        }
+    };
+    for &ell in ells {
+        // Montgomery curve with A + 2 a square and an l-torsion point
+        let (a, ew, n, sa) = loop {
+            let a = fq.random(&mut rng);
+            let ed = edwards_from_montgomery(&fq, a);
+            if ed.d == 0 || ed.a == 0 {
+                continue;
+            }
+            let Some(sa) = fq.sqrt(ed.a) else { continue };
+            let ew = montgomery::to_weierstrass(&fq, a);
+            if !is_smooth(&fq, &ew) {
+                continue;
+            }
+            let n = order(&fq, &ew, &mut rng);
+            if n % ell == 0 {
+                break (a, ew, n, sa);
+            }
+        };
+        let k = point_of_order(&ew, n, ell, &mut rng);
+        let third = fq.div(a, 3);
+        let ed = edwards_from_montgomery(&fq, a);
+        let e1 = Edwards { a: 1u64, d: fq.div(ed.d, ed.a) };
+        let Pt::Aff(xw, yw) = k else { unreachable!() };
+        let (x0, y0) = mont_to_edwards_point(&fq, fq.sub(xw, third), yw);
+        let k1 = (fq.mul(x0, sa), y0);
+        let q = ew.random_point(&fq, &mut rng);
+        let Pt::Aff(qx, qy) = q else { continue };
+        let (x, y) = mont_to_edwards_point(&fq, fq.sub(qx, third), qy);
+        let pt = (fq.mul(x, sa), y);
+        let iso = edwards_isogeny(&fq, &e1, k1, ell);
+        let ok = iso.eval_explicit(&fq, pt) == iso.eval_def(&fq, pt) && iso.cod.on_curve(&fq, iso.eval_explicit(&fq, pt));
+        let params = vec![("field", "Zp61".to_string()), ("ell", ell.to_string())];
+        let rec = |o: &mut Out, algo: &str, ok: bool, (m, mn, r): (f64, f64, usize)| {
+            o.rec("models", algo, &params, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "");
+        };
+        rec(o, "edwards_kernel_and_codomain", ok, time_it(budget, 2000, || edwards_isogeny(&fq, &e1, k1, ell)));
+        rec(o, "edwards_eval_definition", ok, time_it(budget, 2000, || iso.eval_def(&fq, pt)));
+        rec(o, "edwards_eval_theorem2", ok, time_it(budget, 2000, || iso.eval_explicit(&fq, pt)));
+        rec(o, "edwards_eval_x_only", ok, time_it(budget, 2000, || iso.eval_x_only(&fq, pt.0)));
+        let wv = isogeny_algos::kernel::velu::velu_cyclic(&fq, &ew, &k, ell);
+        let okw = iso.cod.j(&fq) == jinv(&fq, &wv.cod);
+        rec(o, "weierstrass_velu_kernel_and_codomain", okw, time_it(budget, 2000, || isogeny_algos::kernel::velu::velu_cyclic(&fq, &ew, &k, ell)));
+        rec(o, "weierstrass_velu_eval", okw, time_it(budget, 2000, || wv.eval(&fq, &q)));
+        // Huff with the same group: y^2 = x(x + a)(x + b) needs full rational 2-torsion; use a
+        // fresh Huff curve with an l-torsion point
+        let (h, hw, hn) = loop {
+            let h = Huff { a: fq.random(&mut rng), b: fq.random(&mut rng) };
+            if h.a == h.b || h.a == 0 || h.b == 0 {
+                continue;
+            }
+            let hw = h.short_weierstrass(&fq);
+            if !is_smooth(&fq, &hw) {
+                continue;
+            }
+            let hn = order(&fq, &hw, &mut rng);
+            if hn % ell == 0 {
+                break (h, hw, hn);
+            }
+        };
+        let hk = point_of_order(&hw, hn, ell, &mut rng);
+        let shift = fq.div(fq.add(h.a, h.b), 3);
+        let Pt::Aff(hx, hy) = hk else { unreachable!() };
+        let kh = h.from_weierstrass_point(&fq, (fq.sub(hx, shift), hy));
+        if let Some(hiso) = huff_isogeny(&fq, &h, kh, ell) {
+            let hq = hw.random_point(&fq, &mut rng);
+            if let Pt::Aff(a1, b1) = hq {
+                let hp = h.from_weierstrass_point(&fq, (fq.sub(a1, shift), b1));
+                let okh = hiso.cod.on_curve(&fq, hiso.eval(&fq, hp));
+                rec(o, "huff_kernel_and_codomain", okh, time_it(budget, 2000, || huff_isogeny(&fq, &h, kh, ell)));
+                rec(o, "huff_eval", okh, time_it(budget, 2000, || hiso.eval(&fq, hp)));
+            }
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -2124,6 +2227,7 @@ fn main() {
             "phi" => bench_phi(&mut o),
             "radical" => bench_radical(&mut o),
             "relation" => bench_relation(&mut o),
+            "models" => bench_models(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
