@@ -1431,13 +1431,32 @@ def page(doc: dict, standalone: bool) -> str:
     return head + body + "\n"
 
 
+def stable(o):
+    """Round every float to 12 significant figures.
+
+    Phase totals are sums and means of many frozen readings, and their last
+    one or two digits differ between Python builds (summation and mean
+    rounding), which made `--check` call the committed file stale on a
+    runner whose interpreter differed from the author's.  Twelve figures is
+    far below anything the page or a ratio reads, and identical everywhere.
+    """
+    if isinstance(o, float):
+        return float(f"{o:.12g}") if math.isfinite(o) else o
+    if isinstance(o, dict):
+        return {k: stable(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [stable(v) for v in o]
+    return o
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--artifact", type=Path)
     args = ap.parse_args()
     doc = build()
-    outs = {OUT_JSON: json.dumps(doc, indent=1, ensure_ascii=False) + "\n",
+    # Round only the JSON: rendering compares recipe rows by identity.
+    outs = {OUT_JSON: json.dumps(stable(doc), indent=1, ensure_ascii=False) + "\n",
             OUT_MD: markdown(doc), OUT_HTML: page(doc, standalone=True)}
     if args.check:
         sections = [int(m) for m in re.findall(r"^## (\d+)\.", (REPO / LEDGER).read_text(), re.M)]

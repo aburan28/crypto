@@ -1,0 +1,20 @@
+{
+  "schema": "prime-field-smt.instance/v1",
+  "curve": {
+    "p": "630043",
+    "a": "208302",
+    "b": "341202"
+  },
+  "target": {
+    "x": "36271",
+    "y": "187981"
+  },
+  "x_bound": "4096",
+  "source": {
+    "repository": "https://github.com/aburan28/cryptanalysis",
+    "last_fixture_commit": "a14ca487a5659fc6e6572133f7c89a3326b3e1b5",
+    "path": "challenges/ecc/curves/fp-random-b20.json",
+    "git_blob": "40b380492c7a250babaa2b5ae86a4cb5592fe598",
+    "translation": "hex integers converted to exact decimal integers; curve, target, and bound otherwise unchanged"
+  }
+}

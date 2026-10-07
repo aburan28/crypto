@@ -895,6 +895,35 @@ class Envelopes(unittest.TestCase):
         self.assertIn("2026-09-19 00:00:00+00", stamps[0])
 
 
+class CorpusFormats(unittest.TestCase):
+    """The store reads the campaign's 32-byte records and refuses what it would misread."""
+
+    def ingest(self, body, inserted):
+        conn = CollisionConn(inserted=inserted)
+        result = dp_ingest.ingestObject(conn, CollisionS3(body), "bucket",
+                                        ORBIT, "2026-10-06 00:00:00+00")
+        return conn, result
+
+    def test_a_witness_corpus_is_refused_before_anything_is_written(self):
+        v2 = dp_ingest.DP_MAGIC_V2 + struct.pack("<II", 2, 72) + bytes(72) * 2
+        conn = CollisionConn()
+        with self.assertRaisesRegex(ValueError, "WITNESS=1"):
+            dp_ingest.ingestObject(conn, CollisionS3(v2), "bucket", ORBIT,
+                                   "2026-10-06 00:00:00+00")
+        self.assertEqual(conn.queries, [])
+        self.assertEqual(conn.commits, 0)
+
+    def test_campaign_records_are_still_read(self):
+        conn, (added, seen, hits) = self.ingest(record(1) + record(2) + record(3), 3)
+        self.assertEqual((added, seen, hits), (3, 3, 0))
+        self.assertEqual(conn.commits, 1)
+
+    def test_a_table_v3_corpus_is_still_read(self):
+        body = b"ECC2KDT3" + struct.pack("<II", 3, dp_ingest.RECORD_BYTES) + record(4) + record(5)
+        conn, (added, seen, hits) = self.ingest(body, 2)
+        self.assertEqual((added, seen, hits), (2, 2, 0))
+
+
 class RollupCursor:
     """Records the SQL a rollup path runs, and answers the reads it makes."""
 

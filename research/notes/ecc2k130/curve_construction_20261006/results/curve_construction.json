@@ -1,0 +1,3115 @@
+{
+  "schema": "ecc2k130_curve_construction/v1",
+  "question": "can a curve over F_2 whose Jacobian carries the ECC2K-130 subgroup be produced, and at what genus?",
+  "verdict": "No construction reaches the window [130, 290..300]. Best explicit curve carrying A: the modular curve X_H(30503529) mod 2, genus 508799809 (2^28.92); geometrically cyclic degree-131 covers of any curve of genus <= 1 over F_2 need genus >= 1300. Whether A is isogenous to a Jacobian of genus <= ~300 remains open.",
+  "unit": "log2 operations (model); S = ops / sqrt(r)",
+  "protocol": "research/notes/ecc2k130/curve_construction_20261006/PROTOCOL.md",
+  "legacy_replay": {
+    "target": {
+      "curve": "y^2 + x y = x^3 + 1 over F_2, used over F_2^131 (ECC2K-130)",
+      "order": "2722258935367507707729280517973639940516",
+      "cofactor": 4,
+      "r": "680564733841876926932320129493409985129",
+      "r_is_prime": true,
+      "log2_r": 129.0,
+      "rho_automorphism_order": 262,
+      "log2_rho_plain": 64.82574806473616,
+      "log2_rho_reference": 60.80903656396744,
+      "s_rho_reference": 0.07743000598903164
+    },
+    "trace_zero": {
+      "s_131": "-22283658519494248867",
+      "degree": 260,
+      "points_on_a_equal_r": true,
+      "functional_equation_holds": true,
+      "conductor_7_divides_131": false
+    },
+    "ghs": {
+      "field_modulus": "z^131 + z^8 + z^3 + z^2 + 1 (IrreduciblePoly::deg_131)",
+      "ecc2k130_magic_number": 1,
+      "ecc2k130_descent_genus": "0",
+      "seed": 20261006,
+      "samples": 400,
+      "census": {
+        "m=130,trace=0": 196,
+        "m=131,trace=1": 204
+      },
+      "genus_by_magic_number": {
+        "130": "680564733841876926926749214863536422912 (type II)",
+        "131": "1361129467683753853853498429727072845823 (type I)"
+      },
+      "trichotomy_holds": true
+    },
+    "trace_kill": {
+      "lambda": "196511074115861092422032515080945363956",
+      "lambda_satisfies_char_poly": true,
+      "lambda_pow_131_is_one": true,
+      "sum_lambda_i_is_zero_mod_r": true
+    },
+    "window": {
+      "exact_genus_130_jac_a": {
+        "genus": 130,
+        "model": "exact: place counts from the zeta function of A",
+        "smoothness_bound_b": 17,
+        "log2_factor_base": 14.012799104179676,
+        "log2_smooth_probability": -22.153025444972954,
+        "log2_relations": 36.16582454915263,
+        "log2_linear_algebra": 35.04796602138781,
+        "log2_total": 37.16582454915263,
+        "log2_ratio_to_rho": -23.643212014814807,
+        "beats_rho": true
+      },
+      "cells": [
+        {
+          "genus": 130,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 17,
+          "log2_factor_base": 14.011139880257986,
+          "log2_smooth_probability": -21.936943148078583,
+          "log2_relations": 35.94808302833657,
+          "log2_linear_algebra": 35.044647573544424,
+          "log2_total": 36.94808302833657,
+          "log2_ratio_to_rho": -23.86095353563087,
+          "beats_rho": true
+        },
+        {
+          "genus": 140,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 18,
+          "log2_factor_base": 14.921980366068773,
+          "log2_smooth_probability": -22.61583822678614,
+          "log2_relations": 37.53781859285491,
+          "log2_linear_algebra": 36.97324374908251,
+          "log2_total": 38.53781859285491,
+          "log2_ratio_to_rho": -22.271217971112527,
+          "beats_rho": true
+        },
+        {
+          "genus": 150,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 19,
+          "log2_factor_base": 15.839523673405928,
+          "log2_smooth_probability": -23.22479770659335,
+          "log2_relations": 39.06432137999928,
+          "log2_linear_algebra": 38.907866037307734,
+          "log2_total": 40.06432137999928,
+          "log2_ratio_to_rho": -20.74471518396816,
+          "beats_rho": true
+        },
+        {
+          "genus": 175,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 21,
+          "log2_factor_base": 17.68600801839288,
+          "log2_smooth_probability": -25.416722563067168,
+          "log2_relations": 43.10273058146005,
+          "log2_linear_algebra": 42.82322714861809,
+          "log2_total": 44.10273058146005,
+          "log2_ratio_to_rho": -16.706305982507388,
+          "beats_rho": true
+        },
+        {
+          "genus": 200,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 23,
+          "log2_factor_base": 19.547269234057197,
+          "log2_smooth_probability": -27.26945800750363,
+          "log2_relations": 46.81672724156083,
+          "log2_linear_algebra": 46.73839465788912,
+          "log2_total": 47.81672724156083,
+          "log2_ratio_to_rho": -12.992309322406612,
+          "beats_rho": true
+        },
+        {
+          "genus": 225,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 25,
+          "log2_factor_base": 21.420698880395957,
+          "log2_smooth_probability": -28.85453145128912,
+          "log2_relations": 50.27523033168508,
+          "log2_linear_algebra": 50.65517895200895,
+          "log2_total": 51.65517895200895,
+          "log2_ratio_to_rho": -9.153857611958486,
+          "beats_rho": true
+        },
+        {
+          "genus": 250,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 26,
+          "log2_factor_base": 22.36131627803662,
+          "log2_smooth_probability": -31.985287482239812,
+          "log2_relations": 54.34660376027644,
+          "log2_linear_algebra": 52.68841684073533,
+          "log2_total": 55.34660376027644,
+          "log2_ratio_to_rho": -5.4624328036910015,
+          "beats_rho": true
+        },
+        {
+          "genus": 275,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 28,
+          "log2_factor_base": 24.2495523591532,
+          "log2_smooth_probability": -33.11483441524513,
+          "log2_relations": 57.36438677439833,
+          "log2_linear_algebra": 56.60239252671842,
+          "log2_total": 58.36438677439833,
+          "log2_ratio_to_rho": -2.4446497895691124,
+          "beats_rho": true
+        },
+        {
+          "genus": 290,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 29,
+          "log2_factor_base": 25.19678734178048,
+          "log2_smooth_probability": -34.06982032886816,
+          "log2_relations": 59.26660767064864,
+          "log2_linear_algebra": 58.5734837735759,
+          "log2_total": 60.26660767064864,
+          "log2_ratio_to_rho": -0.5424288933187995,
+          "beats_rho": true
+        },
+        {
+          "genus": 300,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 30,
+          "log2_factor_base": 26.145857611805695,
+          "log2_smooth_probability": -34.10327948943376,
+          "log2_relations": 60.249137101239455,
+          "log2_linear_algebra": 60.520533914107276,
+          "log2_total": 61.520533914107276,
+          "log2_ratio_to_rho": 0.7114973501398367,
+          "beats_rho": false
+        },
+        {
+          "genus": 325,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 31,
+          "log2_factor_base": 27.096697844919866,
+          "log2_smooth_probability": -36.66000133682411,
+          "log2_relations": 63.756699181743976,
+          "log2_linear_algebra": 62.53769159775555,
+          "log2_total": 64.75669918174398,
+          "log2_ratio_to_rho": 3.947662617776544,
+          "beats_rho": false
+        },
+        {
+          "genus": 350,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 33,
+          "log2_factor_base": 29.00313493089147,
+          "log2_smooth_probability": -37.36530139795042,
+          "log2_relations": 66.36843632884188,
+          "log2_linear_algebra": 66.45748097361528,
+          "log2_total": 67.45748097361528,
+          "log2_ratio_to_rho": 6.648444409647837,
+          "beats_rho": false
+        },
+        {
+          "genus": 400,
+          "model": "random-polynomial",
+          "smoothness_bound_b": 36,
+          "log2_factor_base": 31.87331275909501,
+          "log2_smooth_probability": -40.14195363842936,
+          "log2_relations": 72.01526639752437,
+          "log2_linear_algebra": 72.39048170796475,
+          "log2_total": 73.39048170796475,
+          "log2_ratio_to_rho": 12.581445143997314,
+          "beats_rho": false
+        }
+      ],
+      "crossover_between": [
+        290,
+        300
+      ]
+    }
+  },
+  "toy_ladder": {
+    "targets": [
+      {
+        "name": "A3(E0)",
+        "n": 3,
+        "koblitz_a": 0,
+        "kind": "trace-zero A",
+        "dimension": 2,
+        "char_poly": [
+          4,
+          -2,
+          -1,
+          -1,
+          1
+        ]
+      },
+      {
+        "name": "W3(E0)",
+        "n": 3,
+        "koblitz_a": 0,
+        "kind": "Weil restriction W",
+        "dimension": 3,
+        "char_poly": [
+          8,
+          0,
+          0,
+          -5,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "A3(E1)",
+        "n": 3,
+        "koblitz_a": 1,
+        "kind": "trace-zero A",
+        "dimension": 2,
+        "char_poly": [
+          4,
+          2,
+          -1,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "W3(E1)",
+        "n": 3,
+        "koblitz_a": 1,
+        "kind": "Weil restriction W",
+        "dimension": 3,
+        "char_poly": [
+          8,
+          0,
+          0,
+          5,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "A5(E0)",
+        "n": 5,
+        "koblitz_a": 0,
+        "kind": "trace-zero A",
+        "dimension": 4,
+        "char_poly": [
+          16,
+          -8,
+          -4,
+          6,
+          -1,
+          3,
+          -1,
+          -1,
+          1
+        ]
+      },
+      {
+        "name": "W5(E0)",
+        "n": 5,
+        "koblitz_a": 0,
+        "kind": "Weil restriction W",
+        "dimension": 5,
+        "char_poly": [
+          32,
+          0,
+          0,
+          0,
+          0,
+          11,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "A5(E1)",
+        "n": 5,
+        "koblitz_a": 1,
+        "kind": "trace-zero A",
+        "dimension": 4,
+        "char_poly": [
+          16,
+          8,
+          -4,
+          -6,
+          -1,
+          -3,
+          -1,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "W5(E1)",
+        "n": 5,
+        "koblitz_a": 1,
+        "kind": "Weil restriction W",
+        "dimension": 5,
+        "char_poly": [
+          32,
+          0,
+          0,
+          0,
+          0,
+          -11,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    ],
+    "families": [
+      {
+        "family": "hyperelliptic",
+        "genus": 2,
+        "models_enumerated": 1920,
+        "models_admitted": 768,
+        "complete_for_genus": true,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      },
+      {
+        "family": "hyperelliptic",
+        "genus": 3,
+        "models_enumerated": 15872,
+        "models_admitted": 6144,
+        "complete_for_genus": false,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 96,
+            "cofactors": {
+              "2,-1,1": 96
+            },
+            "examples": [
+              "h=0xb,f=0xc1",
+              "h=0xb,f=0xcb",
+              "h=0xb,f=0xd3",
+              "h=0xb,f=0xd9",
+              "h=0xb,f=0xe5",
+              "h=0xb,f=0xef",
+              "h=0xb,f=0xf7",
+              "h=0xb,f=0xfd"
+            ]
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 96,
+            "cofactors": {
+              "2,1,1": 96
+            },
+            "examples": [
+              "h=0xb,f=0x84",
+              "h=0xb,f=0x8e",
+              "h=0xb,f=0x96",
+              "h=0xb,f=0x9c",
+              "h=0xb,f=0xa0",
+              "h=0xb,f=0xaa",
+              "h=0xb,f=0xb2",
+              "h=0xb,f=0xb8"
+            ]
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      },
+      {
+        "family": "hyperelliptic",
+        "genus": 4,
+        "models_enumerated": 129024,
+        "models_admitted": 49152,
+        "complete_for_genus": false,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      },
+      {
+        "family": "plane quartic",
+        "genus": 3,
+        "models_enumerated": 32767,
+        "models_admitted": 32767,
+        "complete_for_genus": true,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 56,
+            "cofactors": {
+              "2,-2,1": 56
+            },
+            "examples": [
+              "form=0x4c17",
+              "form=0x4c1d",
+              "form=0x4c55",
+              "form=0x4c5f",
+              "form=0x4c87",
+              "form=0x4c8d",
+              "form=0x4cc5",
+              "form=0x4ccf"
+            ]
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 224,
+            "cofactors": {
+              "2,-1,1": 56,
+              "2,0,1": 168
+            },
+            "examples": [
+              "form=0x0a02",
+              "form=0x0a1c",
+              "form=0x0a67",
+              "form=0x0a7a",
+              "form=0x0a8d",
+              "form=0x0a97",
+              "form=0x0ae1",
+              "form=0x0af9"
+            ]
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 56,
+            "cofactors": {
+              "1": 56
+            },
+            "examples": [
+              "form=0x0a02",
+              "form=0x0a67",
+              "form=0x0a97",
+              "form=0x0af9",
+              "form=0x0f1d",
+              "form=0x0f79",
+              "form=0x0fad",
+              "form=0x0fc2"
+            ]
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      },
+      {
+        "family": "canonical (2,3) complete intersection",
+        "genus": 4,
+        "models_enumerated": 196605,
+        "models_admitted": 196605,
+        "complete_for_genus": true,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 80,
+            "cofactors": {
+              "4,-4,4,-2,1": 80
+            },
+            "examples": [
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x0057",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x005d",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x0073",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x00f1",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x0159",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x01d1",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x0447",
+              "elliptic x0x1+x2^2+x2x3+x3^2; K=0x05c1"
+            ]
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 304,
+            "cofactors": {
+              "4,-2,1,-1,1": 40,
+              "4,-4,2,-2,1": 48,
+              "4,-4,3,-2,1": 96,
+              "4,-4,4,-2,1": 36,
+              "4,-6,5,-3,1": 72,
+              "4,4,4,2,1": 12
+            },
+            "examples": [
+              "hyperbolic x0x1+x2x3; K=0x007f",
+              "hyperbolic x0x1+x2x3; K=0x01f9",
+              "hyperbolic x0x1+x2x3; K=0x0e47",
+              "hyperbolic x0x1+x2x3; K=0x0fc1",
+              "hyperbolic x0x1+x2x3; K=0x12fd",
+              "hyperbolic x0x1+x2x3; K=0x14fd",
+              "hyperbolic x0x1+x2x3; K=0x1677",
+              "hyperbolic x0x1+x2x3; K=0x1dd9"
+            ]
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      },
+      {
+        "family": "hyperelliptic",
+        "genus": 5,
+        "models_enumerated": 1040384,
+        "models_admitted": 393216,
+        "complete_for_genus": false,
+        "targets": [
+          {
+            "target": "A3(E0)",
+            "hit_models": 896,
+            "cofactors": {
+              "8,-8,12,-7,6,-2,1": 192,
+              "8,-8,8,-4,4,-2,1": 128,
+              "8,-8,8,-5,4,-2,1": 384,
+              "8,0,8,1,4,0,1": 192
+            },
+            "examples": [
+              "h=0x43,f=0x101b",
+              "h=0x43,f=0x1059",
+              "h=0x43,f=0x1099",
+              "h=0x43,f=0x10db",
+              "h=0x43,f=0x1107",
+              "h=0x43,f=0x1145",
+              "h=0x43,f=0x1185",
+              "h=0x43,f=0x11c7"
+            ]
+          },
+          {
+            "target": "W3(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A3(E1)",
+            "hit_models": 896,
+            "cofactors": {
+              "8,0,8,-1,4,0,1": 192,
+              "8,8,12,7,6,2,1": 192,
+              "8,8,8,4,4,2,1": 128,
+              "8,8,8,5,4,2,1": 384
+            },
+            "examples": [
+              "h=0x43,f=0x1e",
+              "h=0x43,f=0x5c",
+              "h=0x43,f=0x9c",
+              "h=0x43,f=0xde",
+              "h=0x43,f=0x102",
+              "h=0x43,f=0x140",
+              "h=0x43,f=0x180",
+              "h=0x43,f=0x1c2"
+            ]
+          },
+          {
+            "target": "W3(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E0)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "A5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          },
+          {
+            "target": "W5(E1)",
+            "hit_models": 0,
+            "cofactors": {},
+            "examples": []
+          }
+        ]
+      }
+    ],
+    "quartic_hits_for_w3_e1": 56,
+    "quartic_hits_are_one_klein_orbit": true
+  },
+  "route1_modular": {
+    "klein": {
+      "counts_over_f2k": [
+        3,
+        5,
+        24,
+        17,
+        33,
+        38,
+        129,
+        257
+      ],
+      "predicted_res_f8_f2_of_e1": [
+        3,
+        5,
+        24,
+        17,
+        33,
+        38,
+        129,
+        257
+      ],
+      "matches_weil_restriction": true,
+      "smooth_checked_through_k": 8,
+      "smooth": true,
+      "gl3_orbit_size": 56,
+      "stabiliser_order": 3,
+      "cyclic_automorphism_preserves_form": true,
+      "cyclic_automorphism_fixed_points": 2,
+      "fixed_points_first_field_degree": 2,
+      "quotient_genus_by_riemann_hurwitz": 1,
+      "over_q": {
+        "primes_checked": 93,
+        "largest_prime": 499,
+        "mismatches": 0,
+        "sample": [
+          [
+            3,
+            4,
+            0,
+            4
+          ],
+          [
+            5,
+            6,
+            0,
+            6
+          ],
+          [
+            11,
+            12,
+            4,
+            12
+          ],
+          [
+            13,
+            14,
+            0,
+            14
+          ],
+          [
+            17,
+            18,
+            0,
+            18
+          ],
+          [
+            19,
+            20,
+            0,
+            20
+          ],
+          [
+            23,
+            24,
+            8,
+            24
+          ],
+          [
+            29,
+            24,
+            2,
+            24
+          ],
+          [
+            31,
+            32,
+            0,
+            32
+          ],
+          [
+            37,
+            38,
+            -6,
+            38
+          ],
+          [
+            41,
+            42,
+            0,
+            42
+          ],
+          [
+            43,
+            80,
+            -12,
+            80
+          ]
+        ]
+      }
+    },
+    "cusp_validation": [
+      {
+        "level": 49,
+        "ell": 7,
+        "enumerated": {
+          "level": 49,
+          "ell": 7,
+          "index_mu": 168,
+          "e2": 0,
+          "e3": 0,
+          "cusps": 24,
+          "genus": 3
+        },
+        "gamma0_formula": {
+          "level": 49,
+          "mu0": 56,
+          "e2": 0,
+          "e3": 2,
+          "cusps0": 8,
+          "genus0": 1
+        },
+        "gamma0_enumerated_genus": 1,
+        "cusps_split_completely": true
+      },
+      {
+        "level": 121,
+        "ell": 11,
+        "enumerated": {
+          "level": 121,
+          "ell": 11,
+          "index_mu": 660,
+          "e2": 0,
+          "e3": 0,
+          "cusps": 60,
+          "genus": 26
+        },
+        "gamma0_formula": {
+          "level": 121,
+          "mu0": 132,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 12,
+          "genus0": 6
+        },
+        "gamma0_enumerated_genus": 6,
+        "cusps_split_completely": true
+      },
+      {
+        "level": 441,
+        "ell": 7,
+        "enumerated": {
+          "level": 441,
+          "ell": 7,
+          "index_mu": 2016,
+          "e2": 0,
+          "e3": 0,
+          "cusps": 96,
+          "genus": 121
+        },
+        "gamma0_formula": {
+          "level": 441,
+          "mu0": 672,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 32,
+          "genus0": 41
+        },
+        "gamma0_enumerated_genus": 41,
+        "cusps_split_completely": true
+      },
+      {
+        "level": 539,
+        "ell": 11,
+        "enumerated": {
+          "level": 539,
+          "ell": 11,
+          "index_mu": 3360,
+          "e2": 0,
+          "e3": 0,
+          "cusps": 80,
+          "genus": 241
+        },
+        "gamma0_formula": {
+          "level": 539,
+          "mu0": 672,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 16,
+          "genus0": 49
+        },
+        "gamma0_enumerated_genus": 49,
+        "cusps_split_completely": true
+      },
+      {
+        "level": 5929,
+        "ell": 11,
+        "enumerated": {
+          "level": 5929,
+          "ell": 11,
+          "index_mu": 36960,
+          "e2": 0,
+          "e3": 0,
+          "cusps": 480,
+          "genus": 2841
+        },
+        "gamma0_formula": {
+          "level": 5929,
+          "mu0": 7392,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 96,
+          "genus0": 569
+        },
+        "gamma0_enumerated_genus": 569,
+        "cusps_split_completely": true
+      }
+    ],
+    "rows": [
+      {
+        "n": 3,
+        "koblitz_a": 1,
+        "ell": 7,
+        "newform_level": 49,
+        "level": 49,
+        "index_over_gamma0": 3,
+        "gamma0": {
+          "level": 49,
+          "mu0": 56,
+          "e2": 0,
+          "e3": 2,
+          "cusps0": 8,
+          "genus0": 1
+        },
+        "elliptic_free": false,
+        "genus_split_cusps": null,
+        "genus_upper_bound": null,
+        "genus_exact_by_enumeration": 3,
+        "log2_genus": 1.584962500721156,
+        "dim_target": 2
+      },
+      {
+        "n": 3,
+        "koblitz_a": 0,
+        "ell": 7,
+        "newform_level": 441,
+        "level": 441,
+        "index_over_gamma0": 3,
+        "gamma0": {
+          "level": 441,
+          "mu0": 672,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 32,
+          "genus0": 41
+        },
+        "elliptic_free": true,
+        "genus_split_cusps": 121,
+        "genus_upper_bound": 153,
+        "genus_exact_by_enumeration": 121,
+        "log2_genus": 6.918863237274595,
+        "dim_target": 2
+      },
+      {
+        "n": 5,
+        "koblitz_a": 1,
+        "ell": 11,
+        "newform_level": 49,
+        "level": 5929,
+        "index_over_gamma0": 5,
+        "gamma0": {
+          "level": 5929,
+          "mu0": 7392,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 96,
+          "genus0": 569
+        },
+        "elliptic_free": true,
+        "genus_split_cusps": 2841,
+        "genus_upper_bound": 3033,
+        "genus_exact_by_enumeration": 2841,
+        "log2_genus": 11.472183116189541,
+        "dim_target": 4
+      },
+      {
+        "n": 5,
+        "koblitz_a": 0,
+        "ell": 11,
+        "newform_level": 441,
+        "level": 53361,
+        "index_over_gamma0": 5,
+        "gamma0": {
+          "level": 53361,
+          "mu0": 88704,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 384,
+          "genus0": 7201
+        },
+        "elliptic_free": true,
+        "genus_split_cusps": 36001,
+        "genus_upper_bound": 36769,
+        "genus_exact_by_enumeration": null,
+        "log2_genus": 15.135749360410061,
+        "dim_target": 4
+      },
+      {
+        "n": 131,
+        "koblitz_a": 1,
+        "ell": 263,
+        "newform_level": 49,
+        "level": 3389281,
+        "index_over_gamma0": 131,
+        "gamma0": {
+          "level": 3389281,
+          "mu0": 3888192,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 2112,
+          "genus0": 322961
+        },
+        "elliptic_free": true,
+        "genus_split_cusps": 42307761,
+        "genus_upper_bound": 42445041,
+        "genus_exact_by_enumeration": null,
+        "log2_genus": 25.334419002005333,
+        "dim_target": 130
+      },
+      {
+        "n": 131,
+        "koblitz_a": 0,
+        "ell": 263,
+        "newform_level": 441,
+        "level": 30503529,
+        "index_over_gamma0": 131,
+        "gamma0": {
+          "level": 30503529,
+          "mu0": 46658304,
+          "e2": 0,
+          "e3": 0,
+          "cusps0": 8448,
+          "genus0": 3883969
+        },
+        "elliptic_free": true,
+        "genus_split_cusps": 508799809,
+        "genus_upper_bound": 509348929,
+        "genus_exact_by_enumeration": null,
+        "log2_genus": 28.922522888143327,
+        "dim_target": 130
+      }
+    ],
+    "weil_match_131": {
+      "a2_conductor49_curve": 1,
+      "kronecker_minus3_at_2": -1,
+      "a2_after_twist": -1,
+      "koblitz_trace_e0": -1,
+      "order_of_2_mod_263_up_to_sign": 131,
+      "two_inert_in_real_subfield": true,
+      "product_vs_trace_zero_poly": [
+        [
+          1,
+          128.99999999999997,
+          129.0
+        ],
+        [
+          2,
+          259.00000000000006,
+          259.0
+        ],
+        [
+          3,
+          411.4528202668853,
+          411.45282026688534
+        ]
+      ]
+    }
+  },
+  "route2_cyclic": {
+    "cyclic_bounds_e0": [
+      {
+        "n": 3,
+        "base": {
+          "Elliptic": -1
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 2,
+            "min_genus": 3
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 4,
+            "min_genus": 5
+          }
+        ],
+        "min_genus": 3,
+        "argmin_d": 1,
+        "two_branch_points_excluded": false
+      },
+      {
+        "n": 5,
+        "base": {
+          "Elliptic": -1
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 4,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 4,
+            "min_genus": 9
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 4,
+            "min_genus": 9
+          },
+          {
+            "d": 4,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 8,
+            "min_branch_points": 8,
+            "min_genus": 17
+          }
+        ],
+        "min_genus": 9,
+        "argmin_d": 1,
+        "two_branch_points_excluded": true
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": -1
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      }
+    ],
+    "cyclic_bounds_all_bases_131": [
+      {
+        "n": 131,
+        "base": "ProjectiveLine",
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 130,
+            "min_genus": 8320
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 6,
+            "min_branch_points": 65,
+            "min_genus": 4095
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 12,
+            "min_branch_points": 26,
+            "min_genus": 1560
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 22,
+            "min_branch_points": 22,
+            "min_genus": 1300
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 28,
+            "min_branch_points": 28,
+            "min_genus": 1690
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 54,
+            "min_branch_points": 54,
+            "min_genus": 3380
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 132,
+            "min_branch_points": 132,
+            "min_genus": 8450
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 262,
+            "min_branch_points": 262,
+            "min_genus": 16900
+          }
+        ],
+        "min_genus": 1300,
+        "argmin_d": 10,
+        "two_branch_points_excluded": false
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": -2
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": -1
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": 0
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": true,
+            "cft_min_branch_points": 0,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": true,
+            "cft_min_branch_points": 0,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": 1
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      },
+      {
+        "n": 131,
+        "base": {
+          "Elliptic": 2
+        },
+        "rows": [
+          {
+            "d": 1,
+            "picard_part_available": false,
+            "cft_min_branch_points": 130,
+            "mu_d_min_branch_points": 2,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 2,
+            "picard_part_available": false,
+            "cft_min_branch_points": 65,
+            "mu_d_min_branch_points": 4,
+            "min_branch_points": 65,
+            "min_genus": 4226
+          },
+          {
+            "d": 5,
+            "picard_part_available": false,
+            "cft_min_branch_points": 26,
+            "mu_d_min_branch_points": 10,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 10,
+            "picard_part_available": false,
+            "cft_min_branch_points": 13,
+            "mu_d_min_branch_points": 20,
+            "min_branch_points": 20,
+            "min_genus": 1301
+          },
+          {
+            "d": 13,
+            "picard_part_available": false,
+            "cft_min_branch_points": 10,
+            "mu_d_min_branch_points": 26,
+            "min_branch_points": 26,
+            "min_genus": 1691
+          },
+          {
+            "d": 26,
+            "picard_part_available": false,
+            "cft_min_branch_points": 5,
+            "mu_d_min_branch_points": 52,
+            "min_branch_points": 52,
+            "min_genus": 3381
+          },
+          {
+            "d": 65,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 130,
+            "min_branch_points": 130,
+            "min_genus": 8451
+          },
+          {
+            "d": 130,
+            "picard_part_available": false,
+            "cft_min_branch_points": 2,
+            "mu_d_min_branch_points": 260,
+            "min_branch_points": 260,
+            "min_genus": 16901
+          }
+        ],
+        "min_genus": 1301,
+        "argmin_d": 10,
+        "two_branch_points_excluded": true
+      }
+    ],
+    "min_genus_all_bases_131": 1300,
+    "e0_order_mod_131_over_f2d": [
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        8
+      ],
+      [
+        5,
+        44
+      ],
+      [
+        10,
+        51
+      ],
+      [
+        13,
+        21
+      ],
+      [
+        26,
+        52
+      ],
+      [
+        65,
+        18
+      ],
+      [
+        130,
+        69
+      ]
+    ],
+    "kummer": [
+      {
+        "ell": 3,
+        "d": 2,
+        "branch_points": 2,
+        "genus": 3,
+        "covers": 6,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": false,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 3,
+            "counts": [
+              4,
+              14,
+              4
+            ],
+            "char_poly": [
+              8,
+              4,
+              10,
+              3,
+              5,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              2
+            ],
+            "weights": [
+              -2,
+              2
+            ],
+            "genus": 3,
+            "counts": [
+              4,
+              8,
+              4
+            ],
+            "char_poly": [
+              8,
+              4,
+              4,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              1,
+              2
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 3,
+            "counts": [
+              4,
+              14,
+              4
+            ],
+            "char_poly": [
+              8,
+              4,
+              10,
+              3,
+              5,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              3
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 3,
+            "counts": [
+              4,
+              14,
+              4
+            ],
+            "char_poly": [
+              8,
+              4,
+              10,
+              3,
+              5,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      },
+      {
+        "ell": 3,
+        "d": 2,
+        "branch_points": 3,
+        "genus": 4,
+        "covers": 4,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": false,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2
+            ],
+            "weights": [
+              -1,
+              2,
+              -1
+            ],
+            "genus": 4,
+            "counts": [
+              4,
+              6,
+              4,
+              6
+            ],
+            "char_poly": [
+              16,
+              8,
+              4,
+              -2,
+              -4,
+              -1,
+              1,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              3
+            ],
+            "weights": [
+              -2,
+              1,
+              1
+            ],
+            "genus": 4,
+            "counts": [
+              4,
+              6,
+              4,
+              6
+            ],
+            "char_poly": [
+              16,
+              8,
+              4,
+              -2,
+              -4,
+              -1,
+              1,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              -1,
+              2
+            ],
+            "genus": 4,
+            "counts": [
+              4,
+              6,
+              4,
+              6
+            ],
+            "char_poly": [
+              16,
+              8,
+              4,
+              -2,
+              -4,
+              -1,
+              1,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              2,
+              -1
+            ],
+            "genus": 4,
+            "counts": [
+              4,
+              6,
+              4,
+              6
+            ],
+            "char_poly": [
+              16,
+              8,
+              4,
+              -2,
+              -4,
+              -1,
+              1,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      },
+      {
+        "ell": 3,
+        "d": 2,
+        "branch_points": 4,
+        "genus": 5,
+        "covers": 3,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": true,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              -1,
+              1,
+              1
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              10,
+              4,
+              34,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              24,
+              4,
+              14,
+              5,
+              7,
+              1,
+              3,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              1,
+              1,
+              -1
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              10,
+              4,
+              34,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              24,
+              4,
+              14,
+              5,
+              7,
+              1,
+              3,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -4,
+              1,
+              2,
+              1
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              16,
+              4,
+              16,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              48,
+              16,
+              32,
+              8,
+              16,
+              4,
+              6,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      },
+      {
+        "ell": 5,
+        "d": 4,
+        "branch_points": 2,
+        "genus": 5,
+        "covers": 6,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": false,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              8,
+              4,
+              32,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              16,
+              0,
+              8,
+              4,
+              4,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              2
+            ],
+            "weights": [
+              -2,
+              2
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              8,
+              4,
+              32,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              16,
+              0,
+              8,
+              4,
+              4,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              1,
+              2
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              8,
+              4,
+              32,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              16,
+              0,
+              8,
+              4,
+              4,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              3
+            ],
+            "weights": [
+              -4,
+              4
+            ],
+            "genus": 5,
+            "counts": [
+              4,
+              8,
+              4,
+              32,
+              44
+            ],
+            "char_poly": [
+              32,
+              16,
+              16,
+              0,
+              8,
+              4,
+              4,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      },
+      {
+        "ell": 5,
+        "d": 4,
+        "branch_points": 3,
+        "genus": 7,
+        "covers": 12,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": false,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2
+            ],
+            "weights": [
+              -1,
+              2,
+              -1
+            ],
+            "genus": 7,
+            "counts": [
+              4,
+              8,
+              4,
+              28,
+              44,
+              56,
+              116
+            ],
+            "char_poly": [
+              128,
+              64,
+              64,
+              0,
+              24,
+              12,
+              12,
+              0,
+              6,
+              3,
+              3,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2
+            ],
+            "weights": [
+              -3,
+              2,
+              1
+            ],
+            "genus": 7,
+            "counts": [
+              4,
+              8,
+              4,
+              48,
+              44,
+              56,
+              116
+            ],
+            "char_poly": [
+              128,
+              64,
+              64,
+              0,
+              64,
+              32,
+              32,
+              0,
+              16,
+              8,
+              8,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2
+            ],
+            "weights": [
+              -1,
+              -2,
+              3
+            ],
+            "genus": 7,
+            "counts": [
+              4,
+              8,
+              4,
+              48,
+              44,
+              56,
+              116
+            ],
+            "char_poly": [
+              128,
+              64,
+              64,
+              0,
+              64,
+              32,
+              32,
+              0,
+              16,
+              8,
+              8,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              3
+            ],
+            "weights": [
+              -2,
+              1,
+              1
+            ],
+            "genus": 7,
+            "counts": [
+              4,
+              8,
+              4,
+              28,
+              44,
+              56,
+              116
+            ],
+            "char_poly": [
+              128,
+              64,
+              64,
+              0,
+              24,
+              12,
+              12,
+              0,
+              6,
+              3,
+              3,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      },
+      {
+        "ell": 5,
+        "d": 4,
+        "branch_points": 4,
+        "genus": 9,
+        "covers": 13,
+        "all_weil": true,
+        "all_e0_split": true,
+        "all_prym_mu_d_stable": true,
+        "covers_containing_target": 0,
+        "structural_bound_allows": false,
+        "examples": [
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              -1,
+              1,
+              1
+            ],
+            "genus": 9,
+            "counts": [
+              4,
+              8,
+              4,
+              24,
+              44,
+              56,
+              116,
+              344,
+              508
+            ],
+            "char_poly": [
+              512,
+              256,
+              256,
+              0,
+              64,
+              32,
+              32,
+              0,
+              18,
+              9,
+              9,
+              0,
+              4,
+              2,
+              2,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -1,
+              1,
+              1,
+              -1
+            ],
+            "genus": 9,
+            "counts": [
+              4,
+              8,
+              4,
+              24,
+              44,
+              56,
+              116,
+              344,
+              508
+            ],
+            "char_poly": [
+              512,
+              256,
+              256,
+              0,
+              64,
+              32,
+              32,
+              0,
+              18,
+              9,
+              9,
+              0,
+              4,
+              2,
+              2,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -4,
+              1,
+              2,
+              1
+            ],
+            "genus": 9,
+            "counts": [
+              4,
+              8,
+              4,
+              24,
+              44,
+              56,
+              116,
+              144,
+              508
+            ],
+            "char_poly": [
+              512,
+              256,
+              256,
+              0,
+              64,
+              32,
+              32,
+              0,
+              -32,
+              -16,
+              -16,
+              0,
+              4,
+              2,
+              2,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          },
+          {
+            "support_multiples_of_p": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "weights": [
+              -3,
+              -1,
+              3,
+              1
+            ],
+            "genus": 9,
+            "counts": [
+              4,
+              8,
+              4,
+              44,
+              44,
+              56,
+              116,
+              284,
+              508
+            ],
+            "char_poly": [
+              512,
+              256,
+              256,
+              0,
+              224,
+              112,
+              112,
+              0,
+              48,
+              24,
+              24,
+              0,
+              14,
+              7,
+              7,
+              0,
+              2,
+              1,
+              1
+            ],
+            "weil": true,
+            "e0_splits_off": true,
+            "prym_in_z_t_d": true,
+            "contains_target": false
+          }
+        ]
+      }
+    ],
+    "stickelberger": [
+      {
+        "m": 7,
+        "ordered_pairs_scanned": 36,
+        "matches_by_level": {
+          "7": 12
+        },
+        "examples": [
+          [
+            1,
+            2,
+            4,
+            1
+          ],
+          [
+            1,
+            4,
+            2,
+            1
+          ],
+          [
+            2,
+            1,
+            4,
+            1
+          ],
+          [
+            2,
+            4,
+            1,
+            1
+          ],
+          [
+            3,
+            5,
+            6,
+            -1
+          ],
+          [
+            3,
+            6,
+            5,
+            -1
+          ],
+          [
+            4,
+            1,
+            2,
+            1
+          ],
+          [
+            4,
+            2,
+            1,
+            1
+          ]
+        ],
+        "genus_full_level_curve": 3
+      },
+      {
+        "m": 1841,
+        "ordered_pairs_scanned": 3385600,
+        "matches_by_level": {
+          "7": 12
+        },
+        "examples": [
+          [
+            263,
+            526,
+            1052,
+            1
+          ],
+          [
+            263,
+            1052,
+            526,
+            1
+          ],
+          [
+            526,
+            263,
+            1052,
+            1
+          ],
+          [
+            526,
+            1052,
+            263,
+            1
+          ],
+          [
+            789,
+            1315,
+            1578,
+            -1
+          ],
+          [
+            789,
+            1578,
+            1315,
+            -1
+          ],
+          [
+            1052,
+            263,
+            526,
+            1
+          ],
+          [
+            1052,
+            526,
+            263,
+            1
+          ]
+        ],
+        "genus_full_level_curve": 920
+      }
+    ]
+  },
+  "route3_search": {
+    "log2_hyperelliptic_models_genus_130": 395,
+    "dim_moduli_of_curves_genus_130": 387,
+    "dim_hyperelliptic_locus_genus_130": 259,
+    "note": "models y^2 + h y = f with deg h <= g+1, deg f <= 2g+2 number 2^(3g+5); the toy ladder is this search run to completion at genus <= 4"
+  },
+  "route4_no_curve": {
+    "verdict_cited": "ECC2K-130 itself: every route tried on the challenge family (decomposition targets, Weil-descent SAT, residual walks, m >= 4 algebra) is bounded above rho or closed; the m = 4 algebraic audit reads a cost slope of 0.985-1.06 bits per unit n against the 0.25 it would need",
+    "source": "docs/index-calculus-scoreboard.html, best-of table row 'ECC2K-130 itself'"
+  },
+  "cost_calibration": [
+    {
+      "genus": 130,
+      "exact_model_bits": 36.94808302833657,
+      "l_half_bits": 41.0893705770936
+    },
+    {
+      "genus": 140,
+      "exact_model_bits": 38.53781859285491,
+      "l_half_bits": 42.990053039278976
+    },
+    {
+      "genus": 150,
+      "exact_model_bits": 40.06432137999928,
+      "l_half_bits": 44.83319858392099
+    },
+    {
+      "genus": 175,
+      "exact_model_bits": 44.10273058146005,
+      "l_half_bits": 49.22251170562714
+    },
+    {
+      "genus": 200,
+      "exact_model_bits": 47.81672724156083,
+      "l_half_bits": 53.34825139338619
+    },
+    {
+      "genus": 225,
+      "exact_model_bits": 51.65517895200895,
+      "l_half_bits": 57.2560622835911
+    },
+    {
+      "genus": 250,
+      "exact_model_bits": 55.34660376027644,
+      "l_half_bits": 60.97957818695202
+    },
+    {
+      "genus": 275,
+      "exact_model_bits": 58.36438677439833,
+      "l_half_bits": 64.54445591611194
+    },
+    {
+      "genus": 290,
+      "exact_model_bits": 60.26660767064864,
+      "l_half_bits": 66.61578473530595
+    },
+    {
+      "genus": 300,
+      "exact_model_bits": 61.520533914107276,
+      "l_half_bits": 67.97081278409573
+    },
+    {
+      "genus": 325,
+      "exact_model_bits": 64.75669918174398,
+      "l_half_bits": 71.27477953477722
+    },
+    {
+      "genus": 350,
+      "exact_model_bits": 67.45748097361528,
+      "l_half_bits": 74.46953281189029
+    },
+    {
+      "genus": 400,
+      "exact_model_bits": 73.39048170796475,
+      "l_half_bits": 80.57339420344573
+    },
+    {
+      "genus": 920,
+      "exact_model_bits": 121.08195583875896,
+      "l_half_bits": 130.9304073449672
+    },
+    {
+      "genus": 1300,
+      "exact_model_bits": 148.92068246514546,
+      "l_half_bits": 159.75098369313534
+    }
+  ],
+  "constructions": [
+    {
+      "route": 0,
+      "construction": "target: genus-130 curve over F_2 with Jac ~ A (hypothetical)",
+      "genus": "130",
+      "log2_genus": 7.022367813028454,
+      "carries_a": "by definition; existence unknown",
+      "cost_model": "exact zeta-function model (stage model of a hypothetical curve)",
+      "log2_ic_cost": 37.16582454915263,
+      "log2_ratio_to_rho": -23.643212014814807
+    },
+    {
+      "route": 0,
+      "construction": "GHS / Hess descent to F_2, ECC2K-130 itself (magic number 1)",
+      "genus": "0 (2^(m-1) - 1, type I; 2^(m-1) = 1 in the generic formula)",
+      "log2_genus": 0.0,
+      "carries_a": "no: the transfer is the zero map on <G>",
+      "cost_model": "none",
+      "log2_ic_cost": null,
+      "log2_ratio_to_rho": null
+    },
+    {
+      "route": 0,
+      "construction": "GHS / Hess descent to F_2, any curve over F_2^131 (magic 130 or 131)",
+      "genus": "2^129 or 2^130",
+      "log2_genus": 129.0,
+      "carries_a": "not established",
+      "cost_model": "floor: bits to write one divisor",
+      "log2_ic_cost": 129.0,
+      "log2_ratio_to_rho": 68.19096343603256
+    },
+    {
+      "route": 1,
+      "construction": "modular curve X_H(30503529) mod 2 (CM newform of level 441 twisted by an order-131 character of conductor 263)",
+      "genus": "508799809",
+      "log2_genus": 28.922522888143327,
+      "carries_a": "yes: A_g mod 2 has the Weil numbers of A (Eichler-Shimura)",
+      "cost_model": "L_{2^g}(1/2, sqrt 2) extrapolation",
+      "log2_ic_cost": 169980.81004469577,
+      "log2_ratio_to_rho": 169920.0010081318
+    },
+    {
+      "route": 2,
+      "construction": "geometrically cyclic degree-131 cover of any curve of genus <= 1 over F_2 (best: P^1, d = 10)",
+      "genus": ">= 1300",
+      "log2_genus": 10.344295907915816,
+      "carries_a": "necessary bound only (class field theory + mu_d-stability)",
+      "cost_model": "exact zeta-function model, random-polynomial counts",
+      "log2_ic_cost": 148.92068246514546,
+      "log2_ratio_to_rho": 88.11164590117802
+    },
+    {
+      "route": 2,
+      "construction": "cyclic degree-131 cover of E_0 with F_2-rational group (Klein mechanism, d = 1)",
+      "genus": ">= 8451",
+      "log2_genus": 13.044906349096086,
+      "carries_a": "necessary bound only",
+      "cost_model": "L_{2^g}(1/2, sqrt 2) extrapolation",
+      "log2_ic_cost": 459.9432550618689,
+      "log2_ratio_to_rho": 399.1342184979015
+    },
+    {
+      "route": 2,
+      "construction": "Kummer cover y^131 = f of E_0 (d = 130)",
+      "genus": ">= 16901",
+      "log2_genus": 14.044820990101837,
+      "carries_a": "necessary bound only",
+      "cost_model": "L_{2^g}(1/2, sqrt 2) extrapolation",
+      "log2_ic_cost": 675.9213550178297,
+      "log2_ratio_to_rho": 615.1123184538623
+    },
+    {
+      "route": 2,
+      "construction": "cyclic degree-131 cover of E_0 with two branch points",
+      "genus": "131",
+      "log2_genus": 7.03342300153745,
+      "carries_a": "excluded for every twist",
+      "cost_model": "none",
+      "log2_ic_cost": null,
+      "log2_ratio_to_rho": null
+    },
+    {
+      "route": 2,
+      "construction": "Fermat quotient y^1841 = x^a (1-x)^b",
+      "genus": "920",
+      "log2_genus": 9.845490050944376,
+      "carries_a": "excluded: no factor of level 263 or 1841 has CM type induced from Q(sqrt -7)",
+      "cost_model": "exact zeta-function model, random-polynomial counts",
+      "log2_ic_cost": 121.08195583875896,
+      "log2_ratio_to_rho": 60.27291927479152
+    }
+  ],
+  "legacy_check": {
+    "file": "experiments/ecc2k130_hyperelliptic_cover_boundary.json",
+    "compared": 20,
+    "max_abs_diff": 0.00482104799104377,
+    "tolerance": 0.006,
+    "exact_values_match": true,
+    "agrees": true
+  },
+  "runtime_seconds": 19.109856796,
+  "command": "./target/release/ecc2k130_curve_construction --out research/notes/ecc2k130/curve_construction_20261006/results/curve_construction.json --legacy experiments/ecc2k130_hyperelliptic_cover_boundary.json"
+}
