@@ -57,8 +57,9 @@ radical isogenies, relation lattice, curve models). Module paths are under `src/
 | Radical isogenies of other degrees (N = 2, 4, 7, …; Onuki–Moriya's CSIDH variants) | CDV 2020; Onuki–Moriya 2022; Castryck–Decru–Houben–Vercauteren 2022 | not implemented – implementation gap | — | — |
 | Montgomery 2- and 4-isogenies (SIKE formulas, projective (A24+ : C24)), 2^e chains with optimal strategies | Costello–Longa–Naehrig 2016; SIKE specification | implemented V3 (over any field, incl. F_{p²} over 434-bit p) | `kernel/two_power.rs`, `fp2.rs` | 4-chain (two strategies) = 2-chain = Weierstrass Vélu chain (j), e = 20; at 434 bits the bench checks the same three |
 | Twisted Hessian ℓ-isogenies (product of translates, explicit form; codomain a′ = aˡ, d′ = (ℓd − 6a Σ s_Q)/∏ s_Q derived here) | Bernstein–Kohel–Lange 2015; Dang–Moody 2019 | implemented V3 (odd ℓ prime to 3) | `kernel/hessian.rs` | ℓ = 5, 7, 11, 13, 17 at p = 1009: kernel → identity, images on the codomain, homomorphism, equal point counts; j formula vs a Weierstrass curve |
+| General Weierstrass Vélu (any characteristic, incl. char 2, 3 forms) | Vélu 1971 | implemented V3 (odd cyclic kernel) | `weier.rs::gw_velu_cyclic` | y-map by the normalised-differential identity 2Y + A₁X + A₃ = (2y + a₁x + a₃) X′(x) |
 | Jacobi-quartic models | various | not implemented – implementation gap | — | — |
-| Vélu in characteristic 3 | Vélu 1971 | not implemented – implementation gap | — | — |
+| Vélu in characteristic 3 (general Weierstrass, over GF(3ⁿ)) | Vélu 1971 | implemented V3 | `weier.rs`, `gf3n.rs` | = short-form Vélu in large char (j and x-map); over GF(3ⁿ): kernel → O, images on the codomain, homomorphism, equal point counts (ℓ = 5..13) |
 
 ### P2 — (E, Ẽ) → isogeny: the BMSS family (Table 1 of the paper ✔)
 
@@ -150,6 +151,7 @@ division polynomials, not from (E, Ẽ).
 | sqrt by one exponentiation when q ≡ 3 mod 4; sliding-window exponentiation | `field.rs` | 512-bit sqrt 370 → 57 µs |
 | Karatsuba (threshold measured per field), lazy wide reduction for convolutions, monic division without inversion | `poly.rs`, `fpm.rs` | 256-term poly product over F_{P-256}: 1.05 ms (threshold 4) vs 0.79 ms (16) vs 1.91 ms (schoolbook) |
 | GF(2ⁿ), n ≤ 63, PCLMULQDQ | `gf2n.rs` | mul 4.9–5.8 ns; sqrt as a linear map 6.2–8.4 ns; z² + z = c 1.7–5.3 ns (n = 23, 41, 61) |
+| GF(3ⁿ), n ≤ 40, packed base-3 digits, low-weight irreducible (Rabin) | `gf3n.rs` | field axioms, Fermat, sqrt checked n ≤ 12 |
 | Signed big integers, Miller–Rabin in Montgomery form, Pollard–Brent | `int.rs`, `bigint.rs`, `field.rs` | — |
 | F_{p²} = F_p[i]/(i² + 1) over any prime field (p ≡ 3 mod 4), Karatsuba | `fp2.rs` | 434-bit multiplication 259 ns |
 
