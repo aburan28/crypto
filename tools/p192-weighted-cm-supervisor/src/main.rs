@@ -72,6 +72,14 @@ const VERIFIER_CHECKS: [&str; 15] = [
     "ref0_certificates_replayed",
     "source_commit_consistent",
 ];
+const FORBIDDEN_VERIFIER_SOURCE_MARKERS: [&str; 6] = [
+    "extern crate crypto_lib",
+    "use crypto_lib",
+    "crypto_lib::",
+    "include!",
+    "#[path",
+    "../producer/",
+];
 
 #[derive(Clone, Debug)]
 struct Arguments {
@@ -459,7 +467,7 @@ fn dependency_audit(
     for (relative, _) in &verifier_files {
         let text = fs::read_to_string(verifier_source.join(relative))
             .map_err(|error| format!("read verifier source {relative}: {error}"))?;
-        for forbidden in ["crypto_lib", "include!", "#[path", "../producer/"] {
+        for forbidden in FORBIDDEN_VERIFIER_SOURCE_MARKERS {
             if text.contains(forbidden) {
                 return Err(format!(
                     "verifier source {relative} contains forbidden marker {forbidden:?}"
@@ -883,5 +891,15 @@ mod tests {
         let mut bad = values;
         bad[0] = "--verifier".to_owned();
         assert!(parse_args(bad).is_err());
+    }
+
+    #[test]
+    fn dependency_scan_allows_schema_names_but_rejects_root_crate_use() {
+        let allowed = "pub crypto_lib_dependency: bool; // no `crypto_lib` dependency";
+        for marker in FORBIDDEN_VERIFIER_SOURCE_MARKERS {
+            assert!(!allowed.contains(marker));
+        }
+        assert!("use crypto_lib::cryptanalysis;".contains("use crypto_lib"));
+        assert!("let x = crypto_lib::foo();".contains("crypto_lib::"));
     }
 }
