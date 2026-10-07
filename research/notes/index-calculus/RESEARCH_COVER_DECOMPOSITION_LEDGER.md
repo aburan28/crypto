@@ -1299,3 +1299,22 @@ bottom line: the class is still the weak class, `C` is still one of the `≈ 55�
 of full-2-torsion curves whose isogeny class holds a weak curve (§18.5), and no
 generic or deployed curve is in it.  **Class: accounting** (the first end-to-end
 pricing; the algorithm is [JV12]'s and §§11–17's).
+
+### 18.5 Measured: the reach at larger p (2026-10-07; `experiments/40_jv_cover_reach_*.json`)
+
+§18.2's exact census (every weak curve's trace among `2q² + 2q`
+representatives, against `4,000` random full-2-torsion curves) extends
+§17.5.3's `p ≤ 31`.  **In progress.**
+
+| p | q | weak representatives | weak classes | random curves in a weak class | status |
+|--:|--:|--:|--:|--:|:--|
+| 7–31 | | | | 0.528–0.609 | §17.5.3 |
+| 37 | 1,369 | | | | running |
+| 41 | 1,681 | | | | pending |
+| 43 | 1,849 | | | | pending |
+
+**R1** (the weak-class fraction stays in `[0.50, 0.68]` at `p = 37, 41, 43`)
+is evaluated as the rows land; `p = 31` read `0.609`.  The census at these
+sizes costs hours each (`p = 31` took `3,258` s), and `p = 41, 43` run under
+the §18.2 twelve-hour stop; their rows and §18.3's characterization are the
+remaining pending items of this thread.
