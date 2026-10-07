@@ -55,7 +55,9 @@ radical isogenies, relation lattice, curve models). Module paths are under `src/
 | Vélu / Kohel in characteristic 2 | Vélu 1971; Kohel 1996 | implemented V3 (ordinary binary curves y² + xy = x³ + a₂x² + a₄x + a₆) | `binary.rs` | codomain from t = Σx_Q; Kohel x-map; Φ_ℓ mod 2 neighbours = kernel-polynomial neighbours |
 | Vélu over F_{p⁴} | — | implemented V3 for the Deuring correspondence (u64 p) | `ext.rs`, `quat/deuring.rs` | j-invariants projected back to F_{p²} and checked |
 | Radical isogenies of other degrees (N = 2, 4, 7, …; Onuki–Moriya's CSIDH variants) | CDV 2020; Onuki–Moriya 2022; Castryck–Decru–Houben–Vercauteren 2022 | not implemented – implementation gap | — | — |
-| Montgomery 2-/4-isogeny special formulas; Hessian, Jacobi-quartic models | various | not implemented – implementation gap | — | — |
+| Montgomery 2- and 4-isogenies (SIKE formulas, projective (A24+ : C24)), 2^e chains with optimal strategies | Costello–Longa–Naehrig 2016; SIKE specification | implemented V3 (over any field, incl. F_{p²} over 434-bit p) | `kernel/two_power.rs`, `fp2.rs` | 4-chain (two strategies) = 2-chain = Weierstrass Vélu chain (j), e = 20; at 434 bits the bench checks the same three |
+| Twisted Hessian ℓ-isogenies (product of translates, explicit form; codomain a′ = aˡ, d′ = (ℓd − 6a Σ s_Q)/∏ s_Q derived here) | Bernstein–Kohel–Lange 2015; Dang–Moody 2019 | implemented V3 (odd ℓ prime to 3) | `kernel/hessian.rs` | ℓ = 5, 7, 11, 13, 17 at p = 1009: kernel → identity, images on the codomain, homomorphism, equal point counts; j formula vs a Weierstrass curve |
+| Jacobi-quartic models | various | not implemented – implementation gap | — | — |
 | Vélu in characteristic 3 | Vélu 1971 | not implemented – implementation gap | — | — |
 
 ### P2 — (E, Ẽ) → isogeny: the BMSS family (Table 1 of the paper ✔)
@@ -95,8 +97,9 @@ division polynomials, not from (E, Ẽ).
 | Integer coefficients of Φ_ℓ by CRT; Φ_ℓ over any field from them (also mod 2) | implemented V3 | `find/modpoly.rs::integer_coeffs`, `Phi::via_crt` | Φ mod 2 roots = kernel-oracle neighbours on binary curves |
 | Division-polynomial factoring (Schoof / Elkies / Couveignes ℓ-torsion style) | implemented V1; char 2 V3 | `find/divpoly.rs`, `binary.rs::kernel_polys` | 0.46 ms (ℓ = 5) to 2.10 s (ℓ = 23) at 61 bits, V1 run |
 | Frobenius eigenvalue on an Elkies kernel, ± separated via y | implemented V3 | `find/sea.rs::elkies_eigenvalue` | computed in F_q[x, y]/(h, y² − f) |
-| **Schoof–Elkies–Atkin point counting** (t mod 2, Elkies primes, Atkin candidate sets from the factor degree of Φ_ℓ(j, Y), recombination by walk or BSGS) | implemented V3 | `find/sea.rs::sea` | equals BSGS orders at 40 and 61 bits; [#E]P = 0 for random P at 127 bits |
-| Isogeny cycles for Atkin primes / t mod ℓᵏ (Couveignes–Morain 1994 ✔, Couveignes 1996 ✔) | not implemented – implementation gap | — | SEA uses Atkin candidate *sets*, not cycles |
+| **Schoof–Elkies–Atkin point counting** (t mod 2, Elkies primes with isogeny cycles, Atkin candidate sets from the factor degree of Φ_ℓ(j, Y), recombination by baby-step giant-step) | implemented V3 | `find/sea.rs::sea`, `sea_opts` | equals BSGS orders at 40 and 61 bits; [#E]P = 0 for random P at 127 bits, same order for every cycle bound |
+| Isogeny cycles for Elkies primes: Frobenius eigenvalue mod ℓᵏ on the rational cyclic ℓᵏ-subgroup (pull-back of the next kernel along the non-backtracking chain) | implemented V3 | `find/sea.rs::eigenvalue_cycle` | t mod 3⁴, 5³, 7², 11² = BSGS trace; used by SEA up to kernel degree 40 |
+| Isogeny cycles for Atkin primes (Couveignes–Morain 1994 ✔, Couveignes 1996 ✔; needs F_{q^r}) | not implemented – implementation gap | — | SEA uses Atkin candidate *sets* |
 | Sutherland's CRT/volcano Φ_ℓ (Bröker–Lauter–Sutherland), Enge's quasi-linear evaluation | not implemented – implementation gap | — | Hecke/Newton covers ℓ ≤ 127 at 61 bits |
 | Hilbert class polynomial / CM method | not implemented here; exists in the main crate (`src/cryptanalysis/hilbert_class_poly.rs`) | — | — |
 
@@ -132,7 +135,9 @@ division polynomials, not from (E, Ẽ).
 | **Richelot (2,2)-isogeny** of genus-2 Jacobians: codomain and image of points | implemented V3 | `genus2.rs::richelot` | L-polynomial preserved; images lie on the codomain |
 | **Splitting** (Δ = 0: J(C) → E₁ × E₂) and **gluing** (E₁ × E₂ → J(C), Howe–Leprevost–Poonen) | implemented V3 | `genus2.rs::split`, `glue` | L(C) = L(E₁) L(E₂); the published −1 normalisation gives a quadratic twist for these models and is dropped (tested at p ≡ 1 and 3 mod 4) |
 | Superspecial Richelot graph over F_{p²}, vertices by Igusa–Clebsch invariants | implemented V3 | `genus2.rs::superspecial_graph` | vertex counts = Ibukiyama–Katsura–Oort for 11 primes 11..83 (tests) and 131, 199 (bench); products h(h+1)/2 |
-| Theta-model (2,2)-isogenies (Dartois–Maino–Pope–Robert), (ℓ,ℓ)-isogenies, Kani-lemma methods (SIDH attacks, SQIsign2D, IS-CUBE) | not implemented – implementation gap | — | the Richelot chain is the Mumford-coordinate equivalent of the (2,2) step |
+| **Theta-model (2,2)-isogenies** in level-2 coordinates: codomain from 8-torsion above the kernel (no square roots or inversions), evaluation, gluing E₁ × E₂ → J(C) with the vanishing dual coordinate recovered from x + T′, Rosenhain invariants, split detection with the two j-invariants (formulas re-derived here from the duplication formula) | implemented V3 | `theta.rs` | gluing = Howe–Leprévost–Poonen (Igusa–Clebsch, 12 instances); each theta step is one of the 15 Richelot neighbours (12 steps) |
+| **Kani-lemma (2ᵃ, 2ᵃ)-chains**: C × E with kernel {(γP, φP)} for deg φ + deg γ = 2ᵃ, split decision (the core test of the Castryck–Decru / MMPPW / Robert SIDH attacks) | implemented V3 at toy size (u64 p, a ≤ 16; both degrees smooth) | `theta.rs::chain`, `testdata.rs::kani_instance` | splits exactly at E₀ × X, X = E₀/(ker φ + ker γ) by Vélu (a = 8, 10, 12, 16); a twisted isotropic kernel does not split |
+| Key recovery on top of the split test (CD digit guessing; Robert's evaluation of F on torsion points), (ℓ,ℓ)-isogenies for odd ℓ, dimension 4/8 embeddings, SQIsign2D, cryptographic-size Kani instances (need an endomorphism-based auxiliary isogeny) | not implemented – implementation gap | — | |
 
 ### Field arithmetic underneath (V3)
 
@@ -145,19 +150,22 @@ division polynomials, not from (E, Ẽ).
 | Karatsuba (threshold measured per field), lazy wide reduction for convolutions, monic division without inversion | `poly.rs`, `fpm.rs` | 256-term poly product over F_{P-256}: 1.05 ms (threshold 4) vs 0.79 ms (16) vs 1.91 ms (schoolbook) |
 | GF(2ⁿ), n ≤ 63, PCLMULQDQ | `gf2n.rs` | mul 4.9–5.8 ns; sqrt as a linear map 6.2–8.4 ns; z² + z = c 1.7–5.3 ns (n = 23, 41, 61) |
 | Signed big integers, Miller–Rabin in Montgomery form, Pollard–Brent | `int.rs`, `bigint.rs`, `field.rs` | — |
+| F_{p²} = F_p[i]/(i² + 1) over any prime field (p ≡ 3 mod 4), Karatsuba | `fp2.rs` | 434-bit multiplication 259 ns |
 
 ## Mapping to the names in the request
 
 * **Couveignes**: hard homogeneous space / class-group action (V1 ordinary; V2 CSIDH-style + MITM + cycle
   orders; V3 CSIDH-512, tree strategy, relation lattice, radical steps).
-  Not covered: the 1996 p-torsion method (small characteristic) and isogeny cycles for Atkin primes.
+  Isogeny cycles (Couveignes–Morain) for Elkies primes are implemented (V3); not covered: the 1996
+  p-torsion method (small characteristic) and cycles for Atkin primes.
 * **Kohel**: kernel-polynomial formulas (V1 odd, V2 even, V3 char 2), volcano navigation (V1), ordinary
   End(E) (V2), and the supersingular half of the thesis: quaternion orders, Brandt matrices and the
   Deuring correspondence (V3); KLPT (Kohel–Lauter–Petit–Tignol, V3).
 * **Galbraith**: BFS (V1), GHS (V1; char 2 in V3), Galbraith–Stolbunov (V2, weighted walk only),
   Delfs–Galbraith (V1).
 * **Kernel-only methods**: Vélu general, Kohel even, x-only Vélu, Montgomery x-only Vélu, ℓⁿ chains
-  (V2); √élu (Weierstrass and Montgomery), Edwards, Huff, char-2 Vélu, radical isogenies (V3).
+  (V2); √élu (Weierstrass and Montgomery), Edwards, Huff, Hessian, char-2 Vélu, radical isogenies,
+  Montgomery 2-/4-isogeny chains, theta (2,2)-isogenies and gluing (V3).
 
 ## Duplication note
 

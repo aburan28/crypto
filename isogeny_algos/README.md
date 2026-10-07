@@ -16,16 +16,16 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 
 | Problem | Algorithms (module under `src/`) |
 |---|---|
-| kernel → isogeny | Vélu, odd (V1) and any subgroup (V2) `kernel/velu.rs` · Kohel, odd (V1) and even (V2) `kernel/kohel.rs` · x-only Vélu `kernel/xonly.rs` · Montgomery x-only Vélu, affine (V2) and projective (A24:C24) (V3) `kernel/montgomery.rs` · ℓⁿ chains with naive / balanced / cost-model strategies `kernel/chain.rs` (V2) · **√élu with product and remainder trees, Weierstrass `kernel/sqrt_velu.rs` and Montgomery `kernel/sqrt_velu_mont.rs`** · **twisted Edwards and Huff isogenies (Moody–Shumow)** `kernel/models.rs` · **radical 3- and 5-isogenies (Castryck–Decru–Vercauteren)** `kernel/radical.rs` · **char-2 Vélu and Kohel** `binary.rs` (V3) |
+| kernel → isogeny | Vélu, odd (V1) and any subgroup (V2) `kernel/velu.rs` · Kohel, odd (V1) and even (V2) `kernel/kohel.rs` · x-only Vélu `kernel/xonly.rs` · Montgomery x-only Vélu, affine (V2) and projective (A24:C24) (V3) `kernel/montgomery.rs` · ℓⁿ chains with naive / balanced / cost-model strategies `kernel/chain.rs` (V2) · **√élu with product and remainder trees, Weierstrass `kernel/sqrt_velu.rs` and Montgomery `kernel/sqrt_velu_mont.rs`** · **twisted Edwards and Huff isogenies (Moody–Shumow)** `kernel/models.rs` · **radical 3- and 5-isogenies (Castryck–Decru–Vercauteren)** `kernel/radical.rs` · **twisted Hessian isogenies** `kernel/hessian.rs` · **Montgomery 2-/4-isogeny 2ᵉ chains with optimal strategies (SIKE formulas)** `kernel/two_power.rs` · **char-2 Vélu and Kohel** `binary.rs` (V3) |
 | (E, Ẽ) → isogeny | Padé on the ℘-series (V1) `find/elkies.rs` · the BMSS family: linear algebra, Stark, Atkin, Atkin + modular composition, Elkies 1992, Elkies 1998, fastElkies, fastElkies′, and σ from Φ's second derivatives (V2) `find/bmss.rs` |
-| (E, ℓ) → ℓ-isogenies | Φ_ℓ roots + Elkies codomain (V1) · division-polynomial factoring (V1; char 2 V3) · **Φ_ℓ by Hecke operators and Newton's identities; integer Φ_ℓ by CRT, Φ_ℓ mod 2** `find/modpoly.rs` (V3) · **Schoof–Elkies–Atkin point counting** `find/sea.rs` (V3) |
+| (E, ℓ) → ℓ-isogenies | Φ_ℓ roots + Elkies codomain (V1) · division-polynomial factoring (V1; char 2 V3) · **Φ_ℓ by Hecke operators and Newton's identities; integer Φ_ℓ by CRT, Φ_ℓ mod 2** `find/modpoly.rs` (V3) · **Schoof–Elkies–Atkin point counting with isogeny cycles (t mod ℓᵏ) and BSGS recombination** `find/sea.rs` (V3) |
 | (E₁, E₂) → isogeny | Galbraith BFS, GHS, Kohel volcano walk, Couveignes MITM (ordinary), Delfs–Galbraith (V1) · Galbraith–Stolbunov weighted walk, CSIDH action + MITM + ideal orders (V2) `path/*` · **CSIDH-512 with CLMPR batching and a projective tree strategy; relation lattice / class-group structure; paths on binary curves through any neighbour oracle** (V3) `path/csidh.rs`, `path/relation.rs`, `path/graph.rs` |
 | supersingular, endomorphism side (V3) | **B_{p,∞}, O₀, ideals, LLL, Fincke–Pohst** `quat/mod.rs` · **KLPT (ℓ = 2)** `quat/klpt.rs` · **class sets, Brandt matrices, Mestre's graph, Eichler mass formula** `quat/brandt.rs` · **Deuring correspondence ideal ↔ kernel over F_{p⁴}** `quat/deuring.rs` |
-| genus 2 (V3) | **Richelot (2,2)-isogenies (codomain, points), splitting J(C) → E₁ × E₂, gluing E₁ × E₂ → J(C), Igusa–Clebsch invariants, superspecial Richelot graph** `genus2.rs` |
+| genus 2 (V3) | **Richelot (2,2)-isogenies (codomain, points), splitting J(C) → E₁ × E₂, gluing E₁ × E₂ → J(C), Igusa–Clebsch invariants, superspecial Richelot graph** `genus2.rs` · **theta-model (2,2)-isogenies, theta gluing, split detection, Kani-lemma (2ᵃ, 2ᵃ)-chains** `theta.rs` |
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
-| arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `gf2n.rs` GF(2ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
+| arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 74 tests, all pass)
+## Correctness checks (`cargo test --release`: 82 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -47,7 +47,14 @@ Added in V3:
   coefficients; SEA = BSGS group order at 40 and 61 bits;
 * radical chains on CSIDH-512 = the CSIDH action 𝔩₃ᵏ, 𝔩₅ᵏ; relation-lattice vectors act trivially;
 * Edwards and Huff codomains have the j of the Weierstrass/Montgomery Vélu codomain; images lie on
-  the codomain; the maps are homomorphisms.
+  the codomain; the maps are homomorphisms; Hessian isogenies (ℓ = 5..17) send the kernel to the
+  identity, land on the codomain given by the derived formula, are homomorphisms, and the codomain
+  has the same point count;
+* theta: gluing = Howe–Leprévost–Poonen gluing (Igusa–Clebsch invariants); every theta step is one
+  of the 15 Richelot neighbours; Kani chains split exactly at E₀ × X with X computed by Vélu, and a
+  twisted isotropic kernel does not split;
+* isogeny cycles: t mod 3⁴, 5³, 7², 11² equal the BSGS trace; Montgomery 4-isogeny chain = 2-isogeny
+  chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²}.
 
 The benchmark re-verifies each result before timing and stores `verified` in every record.
 
@@ -58,6 +65,7 @@ cargo test --release
 cargo run --release --bin bench -- --out results/run.jsonl                 # V1 groups: kernel find path
 cargo run --release --bin bench -- v2 --out results/run-v2.jsonl           # V2 groups: kernel2 chain bmss csidh v2path
 cargo run --release --bin bench -- --out results/run-v3.jsonl p1kernel big char2 quat genus2 phi radical relation models
+cargo run --release --bin bench -- --out results/run-v3b.jsonl theta twopow sea                # sea = SEA part of phi
 cargo run --release --bin bench -- --quick kernel2                         # smoke test of one group
 cargo run --release --bin micro -- --out results/micro.jsonl               # field / polynomial / GF(2^n) micro benchmarks
 python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
@@ -78,6 +86,9 @@ python3 scripts/report.py results/run-v2.jsonl > results/run-v2.md
 | `results/p5-genus2.jsonl` | Richelot, gluing, superspecial graph |
 | `results/p6-*.jsonl` | Φ_ℓ and SEA, radical isogenies, relation lattice, Edwards/Huff |
 | `results/p7-csidh-adx.jsonl` | `csidh` group re-run with the assembly multiplier |
+| `results/p8-theta.jsonl`, `p8-models.jsonl` | theta (2,2)-isogenies, Kani chains, Richelot on the same field; `models` with Hessian |
+| `results/p8-sea.jsonl`, `p8-sea-walk.jsonl` | SEA with cycle bounds 0/20/40/80, BSGS recombination; the earlier run with the linear walk |
+| `results/p8-twopow.jsonl` | 2^216-isogeny chains over the SIKEp434 F_{p²} |
 
 Selected V3 measurements (medians unless stated; all records `verified: true`):
 
@@ -97,9 +108,20 @@ Selected V3 measurements (medians unless stated; all records `verified: true`):
 * **Φ_ℓ mod p (61 bits), Hecke/Newton vs dense linear algebra**: ℓ = 11 0.56 vs 1.94 ms (3.5×), ℓ = 23
   10.4 vs 86.8 ms (8.4×), ℓ = 31 31 vs 414 ms (13.4×), ℓ = 43 75 ms vs 2.52 s (33.4×); ℓ = 127 6.1 s
   (linear algebra not run). The commit message of `856b162c` quotes 3.8×–36.6× from an earlier run.
-* **SEA** with Φ_ℓ precomputed: 61 bits 7.2–18.5 ms vs BSGS 175–204 ms (5 curves); 40 bits 1.7–9.2 ms vs
-  BSGS 2.7–2.9 ms (SEA slower on 4 of 5); 127 bits 0.76–3.77 s (3 curves). Precomputing Φ_ℓ for ℓ ≤ 89
-  over the 127-bit field took 35 s and is not included.
+* **SEA** with Φ_ℓ precomputed (`p8-sea.jsonl`, one run per setting): with baby-step giant-step on the
+  candidate progression (above 1024 candidates) and isogeny cycles up to degree 40, 61-bit curves take
+  1.2–2.2 ms (1.3–4.5 ms without cycles; 6–33 ms with the earlier linear walk; BSGS point counting
+  175–204 ms); 40-bit 0.3–0.8 ms; 127-bit 0.26–0.90 s with cycles vs 0.28–5.0 s without (3 curves).
+  Cycle bound 80 was slower at 61 bits (2.4–6.6 ms). Precomputing Φ_ℓ for ℓ ≤ 89 over the 127-bit
+  field took 34 s and is not included.
+* **Theta model** (`p8-theta.jsonl`, 50-bit F_{p²}): (2,2) codomain 0.64 µs and image 0.17 µs vs Richelot
+  codomain 1.75 µs and point image 13.5 µs on the same field; Kani (2ᵃ, 2ᵃ)-chain including the split
+  test 57 µs (a = 8) to 0.24 ms (a = 16).
+* **2^216-isogeny over the SIKEp434 F_{p²}** (`p8-twopow.jsonl`, 3 points pushed): Montgomery 4-isogeny
+  chain 2.67 ms with the optimal strategy (18.6 ms multiply-only, 13.1 ms push-only), 2-isogeny chain
+  3.13 ms, affine Weierstrass Vélu chain 20.8 ms; F_{p²} multiplication 259 ns.
+* **Hessian** (61-bit, `p8-models.jsonl`): kernel + codomain 0.44–1.70 µs vs Weierstrass Vélu 0.57–3.96 µs
+  (ℓ = 5..31; projective, one inversion); evaluation 0.18–0.89 µs (projective output) vs 0.35–0.96 µs (affine).
 * **KLPT (ℓ = 2)**, mean of 5: e/log₂p = 4.61 (31-bit p), 4.10 (60), 3.87 (100), 3.79 (128); 12.6–33.2 ms.
 * **Class sets of O₀** (BFS on 2-neighbours): p = 3499, 292 classes, 0.93 s; Deuring ideal → curve
   16 ms per class (p = 1259), 30 ms (p = 3499).
@@ -123,17 +145,21 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
 
 ## Known gaps and limitations (details in `docs/SURVEY.md`)
 
-* **Not implemented** (implementation gaps): theta-model (2,2)- and (ℓ,ℓ)-isogenies and Kani-lemma methods
-  (SIDH attacks, SQIsign2D); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and
-  torsion over F_{p⁴}); isogeny cycles for Atkin primes (SEA uses candidate sets); Couveignes 1996 p-torsion,
-  Lercier, Lercier–Sirvent for (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5;
-  Hessian and Jacobi-quartic models; characteristic 3; Sutherland-style Φ_ℓ. Not implementable here
-  (resource limit): quantum algorithms.
+* **Not implemented** (implementation gaps): (ℓ,ℓ)-isogenies for odd ℓ, higher-dimensional (4, 8) Kani
+  embeddings, SQIsign2D, and a key-recovery layer on top of the Kani split test; Kani instances at
+  cryptographic size (they need an endomorphism-based auxiliary isogeny; here both diamond degrees are
+  smooth and p is a u64); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
+  over F_{p⁴}); isogeny cycles for Atkin primes; Couveignes 1996 p-torsion, Lercier, Lercier–Sirvent for
+  (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5; Jacobi-quartic models;
+  characteristic 3; Sutherland-style Φ_ℓ. Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.
-* Hecke/Newton Φ_ℓ needs char > ℓ + 1; its cost grows quickly (ℓ = 127 in 6.1 s at 61 bits, ℓ ≤ 89 in 35 s
-  at 127 bits); SEA is therefore benchmarked with Φ_ℓ precomputed.
+* Hecke/Newton Φ_ℓ needs char > ℓ + 1; its cost grows quickly (ℓ = 127 in 6.1 s at 61 bits, ℓ ≤ 89 in 34 s
+  at 127 bits); SEA is therefore benchmarked with Φ_ℓ precomputed. The SEA stopping rule and cycle bound
+  are tuned on 13 curves; the per-curve spread is large.
+* Theta: formulas derived here from the duplication formula and validated against the Mumford-side code;
+  the Rosenhain formula as remembered had t₁ and t₃ exchanged in μ and ν (the test caught it).
 * Relation lattices are computed for 20–50-bit p only (class-group computation is BSGS, not subexponential).
 * From V1/V2, unchanged: Elkies/BMSS reject j ∈ {0, 1728}; Couveignes (ordinary) uses planted exponents;
   Kohel volcano paths stay in one ℓ-volcano; GHS with volcano normalisation failed on 3 of 15 conductor > 1
