@@ -303,6 +303,7 @@ fn main() {
         engine: SolverEngine::default(),
         f6_ic: false,
         f6_pair_index: false,
+        f6_shared_pair_index: false,
         weil_charts: None,
         node_budget: 0,
         max_models: 64,
