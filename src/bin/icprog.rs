@@ -590,6 +590,11 @@ enum Command {
         #[arg(long)]
         check: bool,
     },
+    /// Whether this host is of a round's hardware class: the CPU features
+    /// the class requires and the ones this host lacks.  Exits 0 in the
+    /// class and 3 outside it, so a chain can check before it starts a
+    /// round; `run` refuses outside it.
+    HostClass { round: Round },
     /// One of a round's declared steps, natively (R05, R02b, R06, R07).
     Run {
         round: Round,
@@ -660,6 +665,47 @@ struct RunArgs {
     commits: [Option<String>; 2],
 }
 
+/// A round's declared shape, for the rounds `run` drives; R03's runs are
+/// frozen and it has none.
+fn round_spec(round: Round) -> Option<&'static rounds::Spec> {
+    match round {
+        Round::R02b => Some(&rounds::r02b::SPEC),
+        Round::R03 => None,
+        Round::R05 => Some(&rounds::r05::SPEC),
+        Round::R06 => Some(&rounds::r06::SPEC),
+        Round::R07 => Some(&rounds::r07::SPEC),
+    }
+}
+
+/// The round's hardware class against this host: the report, and whether
+/// the host is in the class.
+fn host_class(round: Round) -> Result<(String, bool), String> {
+    let requires: &[&'static str] = round_spec(round).map_or(&[], |s| s.requires);
+    let missing = rounds::missing_features(requires)?;
+    let cpu = std::fs::read_to_string("/proc/cpuinfo")
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|l| l.split_once(':'))
+        .find(|(k, _)| k.trim() == "model name")
+        .map_or(json::J::Null, |(_, v)| json::J::Str(v.trim().into()));
+    let names = |fs: &[&str]| json::J::Arr(fs.iter().map(|f| json::J::Str((*f).into())).collect());
+    let doc = json::J::Obj(vec![
+        (
+            "round".into(),
+            json::J::Str(
+                round
+                    .to_possible_value()
+                    .map_or(String::new(), |v| v.get_name().into()),
+            ),
+        ),
+        ("requires".into(), names(requires)),
+        ("missing".into(), names(&missing)),
+        ("in_class".into(), json::J::Bool(missing.is_empty())),
+        ("cpu_model".into(), cpu),
+    ]);
+    Ok((json::dumps(&doc, 1), missing.is_empty()))
+}
+
 fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let RunArgs {
         root,
@@ -668,6 +714,23 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
         isolate,
         commits,
     } = args;
+    // A round measures its hardware class and no other: refuse every timed
+    // step on a host outside it, before the run tree is touched.  The plan
+    // times nothing, and the pin's outputs are the same on every class (the
+    // kernels detect their features at run time and compute the same
+    // values), so those two run anywhere.
+    if !["plan", "pin"].contains(&step) {
+        if let Some(spec) = round_spec(round) {
+            let missing = rounds::missing_features(spec.requires)?;
+            if !missing.is_empty() {
+                return Err(format!(
+                    "this host is outside the round's hardware class: it lacks {} of {} (see `icprog host-class`)",
+                    missing.join(", "),
+                    spec.requires.join(", ")
+                ));
+            }
+        }
+    }
     // A fresh round's first step makes its run tree; R03's is frozen.
     let runs = match runs {
         Some(r) => r,
@@ -1313,6 +1376,22 @@ fn f0_cmd(
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    if let Command::HostClass { round } = cli.command {
+        return match host_class(round) {
+            Ok((text, in_class)) => {
+                println!("{text}");
+                if in_class {
+                    ExitCode::SUCCESS
+                } else {
+                    ExitCode::from(3)
+                }
+            }
+            Err(e) => {
+                eprintln!("icprog: {e}");
+                ExitCode::FAILURE
+            }
+        };
+    }
     if let Command::Conformance {
         ic,
         steps,
@@ -1337,7 +1416,7 @@ fn main() -> ExitCode {
         };
     }
     let result = match cli.command {
-        Command::Conformance { .. } => unreachable!("handled above"),
+        Command::Conformance { .. } | Command::HostClass { .. } => unreachable!("handled above"),
         Command::B2 {
             step,
             steps,

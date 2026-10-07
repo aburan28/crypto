@@ -450,6 +450,83 @@ fn icprog_refuses_a_missing_run_tree() {
     assert!(String::from_utf8_lossy(&out.stderr).contains("is not a run tree"));
 }
 
+/// Whether this host has a feature, as `rounds::host_has` detects it.
+fn host_has(feature: &str) -> bool {
+    #[cfg(target_arch = "x86_64")]
+    {
+        match feature {
+            "avx512f" => is_x86_feature_detected!("avx512f"),
+            "avx512bw" => is_x86_feature_detected!("avx512bw"),
+            "avx512vbmi" => is_x86_feature_detected!("avx512vbmi"),
+            "avx512vbmi2" => is_x86_feature_detected!("avx512vbmi2"),
+            "gfni" => is_x86_feature_detected!("gfni"),
+            "pclmulqdq" => is_x86_feature_detected!("pclmulqdq"),
+            "vpclmulqdq" => is_x86_feature_detected!("vpclmulqdq"),
+            other => panic!("no detection for {other}"),
+        }
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = feature;
+        false
+    }
+}
+
+/// `icprog host-class` reports each round's hardware class against this
+/// host, and `run` refuses a round's steps on a host outside its class,
+/// before it touches the run tree.  Whatever host the test runs on, the
+/// report must name exactly the features that host lacks.
+#[test]
+fn icprog_reports_and_enforces_each_round_s_hardware_class() {
+    let reference: &[&str] = &["avx512f", "pclmulqdq", "vpclmulqdq", "gfni"];
+    let r06: &[&str] = &[
+        "avx512f",
+        "pclmulqdq",
+        "vpclmulqdq",
+        "gfni",
+        "avx512bw",
+        "avx512vbmi",
+        "avx512vbmi2",
+    ];
+    for (round, class) in [("r05", reference), ("r07", reference), ("r06", r06)] {
+        let missing: Vec<&str> = class.iter().copied().filter(|f| !host_has(f)).collect();
+        let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .args(["host-class", round])
+            .output()
+            .expect("icprog runs");
+        let text = String::from_utf8_lossy(&out.stdout);
+        let doc: serde_json::Value = serde_json::from_str(&text).expect("a JSON report");
+        assert_eq!(doc["round"], round);
+        assert_eq!(doc["requires"], serde_json::json!(class), "{round}");
+        assert_eq!(doc["missing"], serde_json::json!(missing), "{round}");
+        assert_eq!(doc["in_class"], missing.is_empty(), "{round}");
+        assert_eq!(
+            out.status.code(),
+            Some(if missing.is_empty() { 0 } else { 3 }),
+            "{round}"
+        );
+        if !missing.is_empty() {
+            let runs =
+                std::env::temp_dir().join(format!("icprog-class-{round}-{}", std::process::id()));
+            let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+                .args(["run", round, "manifest", "--root"])
+                .arg(root())
+                .arg("--runs")
+                .arg(&runs)
+                .args(["--base", "/nonexistent/ic", "--cand", "/nonexistent/ic"])
+                .output()
+                .expect("icprog runs");
+            assert!(!out.status.success(), "{round}");
+            let err = String::from_utf8_lossy(&out.stderr);
+            assert!(
+                err.contains("outside the round's hardware class"),
+                "{round}: {err}"
+            );
+            assert!(!runs.exists(), "{round}: the run tree was touched");
+        }
+    }
+}
+
 /// A stub `ic`: each case's first argument says what it does.
 const STUB_IC: &str = r#"#!/bin/sh
 case "$1" in

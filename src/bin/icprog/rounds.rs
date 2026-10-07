@@ -392,6 +392,68 @@ pub struct Spec {
     pub accept: Accept,
     /// The note `manifest-resumed` writes into `host-resumed.json`.
     pub resumed_note: &'static str,
+    /// The CPU features of the round's hardware class, by the names
+    /// `is_x86_feature_detected!` takes: the ones its arms' kernels detect.
+    /// `icprog run` refuses every timed step on a host without one of them,
+    /// so a container that moves to another class cannot measure the round
+    /// there.  The plan and the pin, which time nothing, run anywhere.
+    pub requires: &'static [&'static str],
+}
+
+/// The programme's reference class (IC_TOOL_PROGRAM.md §5): x86-64 with
+/// AVX-512, PCLMULQDQ, VPCLMULQDQ and GFNI.  Its rounds ran there.
+pub const REFERENCE_CLASS: &[&str] = &["avx512f", "pclmulqdq", "vpclmulqdq", "gfni"];
+
+/// Every feature name a round may require.
+const KNOWN_FEATURES: &[&str] = &[
+    "avx2",
+    "avx512f",
+    "avx512bw",
+    "avx512vbmi",
+    "avx512vbmi2",
+    "gfni",
+    "pclmulqdq",
+    "vpclmulqdq",
+];
+
+/// Whether this host has `feature`, by the runtime detection the `ic`
+/// binaries' kernels use.  A name outside [`KNOWN_FEATURES`] is an error,
+/// so a misspelt requirement cannot pass unchecked.
+pub fn host_has(feature: &str) -> Result<bool, String> {
+    if !KNOWN_FEATURES.contains(&feature) {
+        return Err(format!(
+            "unknown CPU feature `{feature}` in a round's class"
+        ));
+    }
+    #[cfg(target_arch = "x86_64")]
+    {
+        Ok(match feature {
+            "avx2" => is_x86_feature_detected!("avx2"),
+            "avx512f" => is_x86_feature_detected!("avx512f"),
+            "avx512bw" => is_x86_feature_detected!("avx512bw"),
+            "avx512vbmi" => is_x86_feature_detected!("avx512vbmi"),
+            "avx512vbmi2" => is_x86_feature_detected!("avx512vbmi2"),
+            "gfni" => is_x86_feature_detected!("gfni"),
+            "pclmulqdq" => is_x86_feature_detected!("pclmulqdq"),
+            "vpclmulqdq" => is_x86_feature_detected!("vpclmulqdq"),
+            _ => unreachable!("checked against KNOWN_FEATURES"),
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        Ok(false)
+    }
+}
+
+/// The features of a round's class this host lacks, in the class's order.
+pub fn missing_features(requires: &[&'static str]) -> Result<Vec<&'static str>, String> {
+    let mut missing = Vec::new();
+    for &f in requires {
+        if !host_has(f)? {
+            missing.push(f);
+        }
+    }
+    Ok(missing)
 }
 
 /// What a round's target sizes must show to be accepted, beyond the pin
@@ -1189,6 +1251,7 @@ pub mod r05 {
         callgrind_role: CallgrindRole::Control,
         accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R05 resumed on after its container was rebuilt mid-holdouts",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1239,6 +1302,7 @@ pub mod r02b {
         callgrind_role: CallgrindRole::Control,
         accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R02b resumed on after its container changed",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1301,6 +1365,7 @@ pub mod r07 {
         callgrind_role: CallgrindRole::CrossCheck,
         accept: Accept::Pinned,
         resumed_note: "the host R07 resumed on after its container changed",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1345,6 +1410,19 @@ pub mod r07 {
 pub mod r06 {
     use super::*;
 
+    /// R06's class (its amendment 1): the reference class, and what the
+    /// candidate's key kernels detect beyond it, VBMI2 for the funnel
+    /// shifts and BW, VBMI and GFNI for the basis change.
+    pub const CLASS: &[&str] = &[
+        "avx512f",
+        "pclmulqdq",
+        "vpclmulqdq",
+        "gfni",
+        "avx512bw",
+        "avx512vbmi",
+        "avx512vbmi2",
+    ];
+
     /// R06's declaration: the target sizes the explorations found the key
     /// worth most at, eight fresh holdouts at each (recipe seeds 218 to
     /// 221, `T127` to `T134`), and an interval above 1.03 at each, on the
@@ -1368,6 +1446,7 @@ pub mod r06 {
         callgrind_role: CallgrindRole::CrossCheck,
         accept: Accept::Above(1.03),
         resumed_note: "the host R06 resumed on after its container changed",
+        requires: CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
