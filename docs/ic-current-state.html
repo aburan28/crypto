@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 309 panels, one line each</summary>
+    <summary>Show all 310 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -495,6 +495,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-hash-jump-round293-20261007">P-256 Round 293: exact selector crossover destroys the degree structure</a> <span class="chip">stage crossover / relabelling</span><br>A 4,093-jump base exactly covers all 48.89 million emitted states at a 0.997995× corrected selector lower bound, but its explicit membership degree is at least 131,458 and its +G path is generic translation; end-to-end parity remains unestablished.</li>
       <li><a href="./#p256-variable-arity-round294-20261007">P-256 Round 294: variable arity still misses rho before solving</a> <span class="chip">exact generic closure / negative</span><br>Exact enumeration removes the fixed-17 restriction, but the first covering fixed arity still has a 13.920747× rho collision floor under a free perfect oracle; the smallest executed covering Dickson base is 17.734068×.</li>
       <li><a href="./#p256-dickson-union-round295-20261007">P-256 Round 295: complete Dickson union reaches the width floor</a> <span class="chip">factor-base advance / promotion negative</span><br>FB1hc72514a2a8d3 exactly realizes the 164-column theoretical minimum with two complete quadratic-chain fibres, improving the prior native boundary by 1.273931× to 13.920747× rho but still failing parity.</li>
+      <li><a href="./#p256-rr-selector-round296-20261007">P-256 Round 296: quadratic RR selector reaches degree 6 at 13 variables</a> <span class="chip">structured diagnostic / negative</span><br>The 164-column Dickson union has an exact one-chain quadratic circuit and a normalized 273-variable divisor selector, but the global degree gate fails on the m=5 toy control and larger cells time out.</li>
     </ol>
   </details>
 <!-- END panel-index -->

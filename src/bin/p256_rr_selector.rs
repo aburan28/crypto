@@ -129,7 +129,7 @@ struct TargetReceipt {
     max_rows: usize,
     max_cols: usize,
     max_cols_to_solution: usize,
-    field_operations: u64,
+    field_operations: Option<u64>,
     false_positive: bool,
     false_negative: bool,
 }
@@ -140,6 +140,7 @@ struct TargetTelemetry {
     columns: usize,
     kind: String,
     wall_ms: f64,
+    partial_field_operations: u64,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -1255,7 +1256,7 @@ fn target_receipt(
     planted: Option<(&[usize], u64)>,
     b: u64,
     square_roots: &[Vec<u64>],
-) -> Result<(TargetReceipt, f64), String> {
+) -> Result<(TargetReceipt, f64, u64), String> {
     let reference = reference_relations(support, m, target, b, square_roots)?;
     let witness = planted
         .map(|(columns, mask)| rr_witness(support, columns, mask, target, b, square_roots))
@@ -1283,6 +1284,7 @@ fn target_receipt(
     let expected = !reference.witnesses.is_empty();
     let false_positive = algebraic_classification == Some(true) && !expected;
     let false_negative = algebraic_classification == Some(false) && expected;
+    let partial_field_operations = report.field_ops;
     Ok((
         TargetReceipt {
             kind: kind.into(),
@@ -1308,11 +1310,12 @@ fn target_receipt(
             max_rows: report.max_rows,
             max_cols: report.max_cols,
             max_cols_to_solution: report.max_cols_to_solution,
-            field_operations: report.field_ops,
+            field_operations: (!report.timed_out).then_some(report.field_ops),
             false_positive,
             false_negative,
         },
         wall_ms,
+        partial_field_operations,
     ))
 }
 
@@ -1397,7 +1400,7 @@ fn run(cli: Cli) -> Result<(), String> {
         let support_sha256 = sha256_hex(&stream_u64(&support));
         let (planted_point, planted_columns, planted_mask) =
             planted_target(&support, m, toy_b, &roots)?;
-        let (planted, planted_ms) = target_receipt(
+        let (planted, planted_ms, planted_partial_ops) = target_receipt(
             "planted",
             &support,
             m,
@@ -1411,9 +1414,10 @@ fn run(cli: Cli) -> Result<(), String> {
             columns,
             kind: "planted".into(),
             wall_ms: planted_ms,
+            partial_field_operations: planted_partial_ops,
         });
         let unplanted_point = unplanted_target(&support, m, toy_b, &roots)?;
-        let (unplanted, unplanted_ms) = target_receipt(
+        let (unplanted, unplanted_ms, unplanted_partial_ops) = target_receipt(
             "unplanted",
             &support,
             m,
@@ -1427,6 +1431,7 @@ fn run(cli: Cli) -> Result<(), String> {
             columns,
             kind: "unplanted".into(),
             wall_ms: unplanted_ms,
+            partial_field_operations: unplanted_partial_ops,
         });
         let signed_domain = binomial(columns, m)
             .to_u64()
@@ -1484,7 +1489,12 @@ fn run(cli: Cli) -> Result<(), String> {
                 case.planted.variables as f64,
                 case.planted
                     .field_operations
-                    .max(case.unplanted.field_operations) as f64,
+                    .expect("complete planted target has an operation count")
+                    .max(
+                        case.unplanted
+                            .field_operations
+                            .expect("complete unplanted target has an operation count"),
+                    ) as f64,
             )
         })
         .collect::<Vec<_>>();
