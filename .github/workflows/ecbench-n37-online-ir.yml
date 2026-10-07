@@ -159,7 +159,11 @@ jobs:
           cmp "$replay/CENSUS.json" "$dir/CENSUS.json"
           cmp "$replay/PROVENANCE.txt" "$dir/PROVENANCE.txt"
           cmp "$replay/INDEPENDENT-AUDIT.json" "$dir/independent_validation/RECEIPT.json"
-          cmp "$replay/Cargo.lock" Cargo.lock
+          # This is the historical profiler's frozen dependency graph, not
+          # the current release lock. The enclosing archive is already pinned
+          # above; keep the lock's own content identity explicit as well.
+          test "$(sha256sum "$replay/Cargo.lock" | cut -d' ' -f1)" = \
+            53ad716677068cfc71a6e70d726a3be930c27e5314d1503f8fd9af8f9d1bb0fb
           cargo build --release --example ecbench_n37_online_ir_analyze
           target/release/examples/ecbench_n37_online_ir_analyze \
             "$replay" "$dir/JOBS.json" \
