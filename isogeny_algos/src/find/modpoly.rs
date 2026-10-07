@@ -129,9 +129,143 @@ impl<F: Field> Phi<F> {
         Phi { ell, c }
     }
 
-    /// Phi_l over F (characteristic must be large compared with the coefficients' denominators:
-    /// we require a field of size > 10^4 and > 4l).
+    /// Phi_l over F: the Hecke/Newton construction (`compute_hecke`), valid for char F > l + 1.
     pub fn compute(f: &F, ell: usize) -> Phi<F> {
+        Self::compute_hecke(f, ell)
+    }
+
+    /// Phi_l from the factorisation Phi_l(j(q), Y) = (Y - j(q^l)) G(Y), where G's roots are the l
+    /// conjugates j(zeta^r q^{1/l}). Their power sums are s_m = l U_l(j^m) (keep the coefficients
+    /// of q^{l n} of j^m, as a series in q^n), so Newton's identities give the coefficients of G as
+    /// Laurent series with at most a simple pole, to precision q^l; then
+    /// E_k = e_k + j(q^l) e_{k-1} is a polynomial of degree <= l + 1 in j, read off its polar part
+    /// and constant term. Cost: l + 1 products of series of length ~l^2 plus O(l^2) short
+    /// products, against the O(l^6) dense solve of `compute_linear_algebra`.
+    pub fn compute_hecke(f: &F, ell: usize) -> Phi<F> {
+        assert!(f.char() > ell as u64 + 1 || f.char() == 0, "characteristic must exceed l + 1");
+        let l = ell;
+        let l1 = l + 1;
+        let prec = l + 1; // non-negative powers q^0 .. q^l of the e_k(j_r)
+        let len = l * prec + l1 + 2; // indices of S^m needed: n + m with n <= l (prec - 1), m <= l + 1
+        let s = s_series(f, len);
+        // S^m, m = 0..=l+1 (j^m = q^{-m} S^m)
+        let mut sp: Vec<Vec<F::E>> = vec![vec![f.zero(); len]];
+        sp[0][0] = f.one();
+        for m in 1..=l1 {
+            let next = series::mul(f, &sp[m - 1], &s, len);
+            sp.push(next);
+        }
+        // Laurent series with offset 1: index i <-> q^{i-1}, i = 0 ..= prec
+        let w = prec + 1;
+        let lf = f.from_u64(l as u64);
+        // s_m(q) = l * sum_{n: l | n} [j^m]_n q^{n/l}; [j^m]_n = [S^m]_{n+m}
+        let mut pw: Vec<Vec<F::E>> = vec![vec![f.zero(); w]]; // pw[m], m = 1..=l
+        for m in 1..=l {
+            let mut v = vec![f.zero(); w];
+            for (i, slot) in v.iter_mut().enumerate() {
+                let e = i as i64 - 1; // exponent n/l
+                let n = e * l as i64;
+                let idx = n + m as i64;
+                if idx >= 0 && (idx as usize) < len {
+                    *slot = f.mul(lf, sp[m][idx as usize]);
+                }
+            }
+            pw.push(v);
+        }
+        let lmul = |a: &[F::E], b: &[F::E]| -> Vec<F::E> {
+            // offset-1 Laurent product truncated to q^{prec-1}: (q^{i-1})(q^{k-1}) = q^{i+k-2}
+            let mut r = vec![f.zero(); w];
+            for (i, &x) in a.iter().enumerate() {
+                if f.is_zero(x) {
+                    continue;
+                }
+                for (k, &y) in b.iter().enumerate() {
+                    let t = i + k;
+                    if t >= 1 && t - 1 < w {
+                        r[t - 1] = f.add(r[t - 1], f.mul(x, y));
+                    }
+                }
+            }
+            r
+        };
+        // Newton: k e_k = sum_{i=1}^k (-1)^{i-1} e_{k-i} s_i
+        let mut e: Vec<Vec<F::E>> = vec![{
+            let mut one = vec![f.zero(); w];
+            one[1] = f.one();
+            one
+        }];
+        for k in 1..=l {
+            let mut acc = vec![f.zero(); w];
+            for i in 1..=k {
+                let t = lmul(&e[k - i], &pw[i]);
+                for (a, b) in acc.iter_mut().zip(t) {
+                    *a = if i % 2 == 1 { f.add(*a, b) } else { f.sub(*a, b) };
+                }
+            }
+            let ki = f.inv(f.from_u64(k as u64));
+            e.push(acc.into_iter().map(|x| f.mul(x, ki)).collect());
+        }
+        e.push(vec![f.zero(); w]); // e_{l+1} of l conjugates = 0
+        // j(q^l) = sum_n [j]_n q^{l n}, n >= -1
+        // E_k = e_k + j(q^l) e_{k-1}: polar order <= l + 1; represent with offset l+1, up to q^0
+        let wo = l1 + 1;
+        let jpow = |d: usize, ex: i64| -> F::E {
+            // coefficient of q^ex in j^d
+            let idx = ex + d as i64;
+            if idx >= 0 && (idx as usize) < len {
+                sp[d][idx as usize]
+            } else {
+                f.zero()
+            }
+        };
+        let mut cmat = vec![vec![f.zero(); l1 + 1]; l1 + 1];
+        cmat[0][l1] = f.one();
+        for k in 1..=l1 {
+            let mut big = vec![f.zero(); wo]; // index i <-> q^{i - (l+1)}
+            for i in 0..w {
+                let ex = i as i64 - 1;
+                if ex <= 0 {
+                    let pos = (ex + l1 as i64) as usize;
+                    big[pos] = f.add(big[pos], e[k][i]);
+                }
+            }
+            // j(q^l) e_{k-1}: terms [j]_n q^{l n} times q^{ex}
+            for n in -1i64..=1 {
+                let c = jpow(1, n);
+                if f.is_zero(c) {
+                    continue;
+                }
+                for i in 0..w {
+                    let ex = i as i64 - 1 + l as i64 * n;
+                    if ex <= 0 && ex >= -(l1 as i64) {
+                        let pos = (ex + l1 as i64) as usize;
+                        big[pos] = f.add(big[pos], f.mul(c, e[k - 1][i]));
+                    }
+                }
+            }
+            // polynomial in X: subtract c_d j^d from the top pole down
+            let mut coef = vec![f.zero(); l1 + 1];
+            for d in (0..=l1).rev() {
+                let c = big[l1 - d]; // coefficient of q^{-d}
+                coef[d] = c;
+                if !f.is_zero(c) {
+                    for ex in -(d as i64)..=0 {
+                        let pos = (ex + l1 as i64) as usize;
+                        big[pos] = f.sub(big[pos], f.mul(c, jpow(d, ex)));
+                    }
+                }
+            }
+            let sign_neg = k % 2 == 1;
+            for (d, &c) in coef.iter().enumerate() {
+                cmat[d][l1 - k] = if sign_neg { f.neg(c) } else { c };
+            }
+        }
+        Phi { ell, c: cmat }
+    }
+
+    /// Phi_l by dense linear algebra on q-expansions (the original method; field of size > 10^4
+    /// and > 4l).
+    pub fn compute_linear_algebra(f: &F, ell: usize) -> Phi<F> {
         assert!(f.q() > crate::bigint::Big::from_u64(10_000.max(4 * ell as u64)));
         let l1 = ell + 1;
         let top = l1 * l1; // max pole order

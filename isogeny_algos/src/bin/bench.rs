@@ -1824,6 +1824,123 @@ fn bench_genus2(o: &mut Out) {
     }
 }
 
+/// Classical modular polynomials: Hecke/Newton construction vs dense linear algebra; SEA.
+fn bench_phi(o: &mut Out) {
+    let fp = Zp::new(prime_bits(61));
+    let f2 = FpM::<2>::from_dec("170141183460469231731687303715884105727");
+    let ells: &[usize] = if o.quick { &[11, 23] } else { &[11, 23, 31, 43, 61, 83, 101, 127] };
+    for &ell in ells {
+        let t0 = Instant::now();
+        let a = Phi::compute_hecke(&fp, ell);
+        let th = t0.elapsed().as_nanos() as f64;
+        let (tl, ok) = if ell <= 43 {
+            let t0 = Instant::now();
+            let b = Phi::compute_linear_algebra(&fp, ell);
+            (t0.elapsed().as_nanos() as f64, a.c == b.c)
+        } else {
+            // spot check: Phi(j, j') = 0 for an l-isogenous pair from Velu
+            let mut rng = Rng::new(19_000 + ell as u64);
+            let ok = (|| {
+                for _ in 0..200 {
+                    let e = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
+                    let ks = a.neighbors(&fp, jinv(&fp, &e), &mut rng);
+                    if let Some(&jn) = ks.first() {
+                        return a.eval(&fp, jinv(&fp, &e), jn) == 0 && a.eval(&fp, jn, jinv(&fp, &e)) == 0;
+                    }
+                }
+                false
+            })();
+            (-1.0, ok)
+        };
+        o.rec(
+            "phi",
+            "phi_hecke_newton",
+            &[("field", "Zp61".to_string()), ("ell", ell.to_string())],
+            &[("ns", th), ("linear_algebra_ns", tl)],
+            ok,
+            "equal to the linear-algebra Phi_l (l <= 43); symmetric root check above",
+        );
+        if ell <= 61 {
+            let t0 = Instant::now();
+            let _ = Phi::compute_hecke(&f2, ell);
+            let th2 = t0.elapsed().as_nanos() as f64;
+            o.rec("phi", "phi_hecke_newton", &[("field", "FpM2_127".to_string()), ("ell", ell.to_string())], &[("ns", th2)], true, "");
+        }
+    }
+    // SEA, with the modular polynomials precomputed (as from a database) and timed separately
+    use isogeny_algos::find::sea::sea;
+    fn prefill<F: Field>(f: &F, max_ell: usize) -> (std::collections::HashMap<usize, Phi<F>>, f64) {
+        let t0 = Instant::now();
+        let mut m = std::collections::HashMap::new();
+        for l in 3..=max_ell {
+            if is_prime(l as u64) {
+                m.insert(l, Phi::compute(f, l));
+            }
+        }
+        (m, t0.elapsed().as_nanos() as f64)
+    }
+    let mut rng = Rng::new(19_500);
+    let cases: Vec<(&str, u32)> = if o.quick { vec![("Zp", 61)] } else { vec![("Zp", 40), ("Zp", 61), ("FpM2", 127)] };
+    for (fld, bits) in cases {
+        if fld == "Zp" {
+            let fp = Zp::new(next_prime((1u64 << (bits - 1)) + 12345));
+            let (mut phis, tpre) = prefill(&fp, 61);
+            o.rec("phi", "sea_phi_precompute", &[("field", format!("Zp{bits}")), ("max_ell", "61".to_string())], &[("ns", tpre)], true, "Phi_l for all primes l <= 61 (Hecke/Newton)");
+            for t in 0..5 {
+                let e = loop {
+                    let e = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
+                    let j = jinv(&fp, &e);
+                    if is_smooth(&fp, &e) && j != 0 && j != 1728 {
+                        break e;
+                    }
+                };
+                let t0 = Instant::now();
+                let r = sea(&fp, &e, 61, &mut phis, &mut rng);
+                let ns = t0.elapsed().as_nanos() as f64;
+                let t1 = Instant::now();
+                let reference = order(&fp, &e, &mut rng);
+                let ns_bsgs = t1.elapsed().as_nanos() as f64;
+                let ok = r.as_ref().map_or(false, |(n, _)| *n == isogeny_algos::bigint::Big::from_u64(reference));
+                let st = r.map(|x| x.1).unwrap_or_default();
+                o.rec(
+                    "phi",
+                    "sea_point_count",
+                    &[("field", format!("Zp{bits}")), ("instance", t.to_string())],
+                    &[("ns", ns), ("bsgs_ns", ns_bsgs), ("elkies_primes", st.elkies.len() as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
+                    ok,
+                    "Phi_l precomputed; equals the BSGS order",
+                );
+            }
+        } else {
+            let f = FpM::<2>::from_dec("170141183460469231731687303715884105727");
+            let (mut phis, tpre) = prefill(&f, 89);
+            o.rec("phi", "sea_phi_precompute", &[("field", "FpM2_127".to_string()), ("max_ell", "89".to_string())], &[("ns", tpre)], true, "Phi_l for all primes l <= 89 (Hecke/Newton)");
+            for t in 0..3 {
+                let e = loop {
+                    let e = Curve::new(f.random(&mut rng), f.random(&mut rng));
+                    let j = jinv(&f, &e);
+                    if is_smooth(&f, &e) && j != f.zero() && j != f.from_u64(1728) {
+                        break e;
+                    }
+                };
+                let t0 = Instant::now();
+                let r = sea(&f, &e, 89, &mut phis, &mut rng);
+                let ns = t0.elapsed().as_nanos() as f64;
+                let ok = r.as_ref().map_or(false, |(n, _)| (0..5).all(|_| pmul_big(&f, &e, &random_point_f(&f, &e, &mut rng), n) == Pt::Inf));
+                let st = r.map(|x| x.1).unwrap_or_default();
+                o.rec(
+                    "phi",
+                    "sea_point_count",
+                    &[("field", "FpM2_127".to_string()), ("instance", t.to_string())],
+                    &[("ns", ns), ("elkies_primes", st.elkies.len() as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
+                    ok,
+                    "Phi_l precomputed; [#E]P = 0 for 5 random points",
+                );
+            }
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1861,6 +1978,7 @@ fn main() {
             "char2" => bench_char2(&mut o),
             "quat" => bench_quat(&mut o),
             "genus2" => bench_genus2(&mut o),
+            "phi" => bench_phi(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);

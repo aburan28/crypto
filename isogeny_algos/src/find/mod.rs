@@ -3,3 +3,4 @@ pub mod divpoly;
 pub mod dual;
 pub mod elkies;
 pub mod modpoly;
+pub mod sea;
