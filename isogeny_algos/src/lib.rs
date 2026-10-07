@@ -10,6 +10,7 @@ pub mod ext;
 pub mod field;
 pub mod find;
 pub mod fpm;
+pub mod genus2;
 pub mod gf2n;
 pub mod int;
 pub mod kernel;

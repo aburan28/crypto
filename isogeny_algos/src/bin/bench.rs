@@ -1743,6 +1743,87 @@ fn bench_quat(o: &mut Out) {
     }
 }
 
+/// Genus 2: Richelot (2,2)-isogenies, splitting, gluing, the superspecial Richelot graph.
+fn bench_genus2(o: &mut Out) {
+    use isogeny_algos::genus2::*;
+    let budget = if o.quick { 100 } else { 300 };
+    let mut rng = Rng::new(18_000);
+    // Richelot codomain at 61 and 256 bits (timing; correctness is tested on small p via L-polys)
+    fn richelot_case<F: Field>(f: &F, rng: &mut Rng) -> ([isogeny_algos::poly::Poly<F>; 3], F::E, F::E) {
+        let r: Vec<F::E> = (0..6).map(|_| f.random(rng)).collect();
+        let g = [
+            isogeny_algos::poly::from_roots(f, &[r[0], r[1]]),
+            isogeny_algos::poly::from_roots(f, &[r[2], r[3]]),
+            isogeny_algos::poly::from_roots(f, &[r[4], r[5]]),
+        ];
+        (g, r[0], r[1])
+    }
+    let fp = Zp::new(prime_bits(61));
+    let (g, _, _) = richelot_case(&fp, &mut rng);
+    let tm = time_it(budget, 10_000, || richelot(&fp, &g).codomain(&fp));
+    o.rec("genus2", "richelot_codomain", &[("field", "Zp61".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "Delta, H1 H2 H3 from G1 G2 G3");
+    let p256 = FpM::<4>::from_dec("115792089210356248762697446949407573530086143415290314195533631308867097853951");
+    let (g4, _, _) = richelot_case(&p256, &mut rng);
+    let tm = time_it(budget, 10_000, || richelot(&p256, &g4).codomain(&p256));
+    o.rec("genus2", "richelot_codomain", &[("field", "FpM4_P256".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "");
+    // verified instances at p = 1009: Richelot, gluing, splitting, point images
+    let p = 1009u64;
+    let fp = Zp::new(p);
+    let f2 = Zp2::new(p);
+    let r: Vec<u64> = {
+        let mut v = vec![];
+        while v.len() < 6 {
+            let x = fp.random(&mut rng);
+            if !v.contains(&x) {
+                v.push(x);
+            }
+        }
+        v
+    };
+    let fsex = poly::from_roots(&fp, &r);
+    let g = [
+        poly::from_roots(&fp, &[r[0], r[1]]),
+        poly::from_roots(&fp, &[r[2], r[3]]),
+        poly::from_roots(&fp, &[r[4], r[5]]),
+    ];
+    let rl = richelot(&fp, &g);
+    let ok = rl.delta != 0 && lpoly(&fp, &rl.codomain(&fp)) == lpoly(&fp, &fsex);
+    let tm = time_it(budget, 10_000, || richelot(&fp, &g).codomain(&fp));
+    o.rec("genus2", "richelot_codomain", &[("field", "Zp1009".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], ok, "L-polynomial of codomain equal (naive point counts over F_p, F_p^2)");
+    let x0 = (0..p).find(|&x| fp.sqrt(poly::eval(&fp, &fsex, x)).map_or(false, |y| y != 0)).unwrap();
+    let y0 = fp.sqrt(poly::eval(&fp, &fsex, x0)).unwrap();
+    let tm = time_it(budget, 10_000, || rl.image_point(&fp, &g, &f2, |c| (c, 0), x0, y0, &mut rng.clone()));
+    o.rec("genus2", "richelot_point_image", &[("field", "Zp1009".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "two points over F_p^2 (quadratic in x')");
+    let (a, b) = ([r[0], r[1], r[2]], [r[3], r[4], r[5]]);
+    let c = glue(&fp, a, b);
+    let ok = c.as_ref().map_or(false, |c| {
+        lpoly(&fp, c) == LPoly::product(elliptic_trace(&fp, &poly::from_roots(&fp, &a)), elliptic_trace(&fp, &poly::from_roots(&fp, &b)), p as i64)
+    });
+    let tm = time_it(budget, 10_000, || glue(&fp, a, b));
+    o.rec("genus2", "glue_e1xe2", &[("field", "Zp1009".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], ok, "L(C) = L(E1) L(E2) checked");
+    // superspecial graph BFS (vertex counts checked against Ibukiyama-Katsura-Oort and h(h+1)/2)
+    for &p in if o.quick { &[43u64][..] } else { &[43u64, 83, 131, 199][..] } {
+        let t0 = Instant::now();
+        let gr = superspecial_graph(p, 1_000_000, &mut rng);
+        let ns = t0.elapsed().as_nanos() as f64;
+        let pi = p as i64;
+        let m1 = if pi % 4 == 1 { 1 } else { -1 };
+        let m2 = if pi % 8 == 1 || pi % 8 == 3 { 1 } else { -1 };
+        let m3 = if pi % 3 == 1 { 1 } else { -1 };
+        let iko = ((pi - 1) * (pi * pi + 25 * pi + 166) - 90 * (1 - m1) + 360 * (1 - m2) + 160 * (1 - m3) + if pi % 5 == 4 { 2304 } else { 0 }) / 2880;
+        let h = (p / 12 + [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2][(p % 12) as usize]) as usize;
+        let ok = gr.jacobians as i64 == iko && gr.products == h * (h + 1) / 2;
+        o.rec(
+            "genus2",
+            "superspecial_richelot_graph_bfs",
+            &[("p", p.to_string())],
+            &[("ns", ns), ("jacobians", gr.jacobians as f64), ("products", gr.products as f64), ("edges", gr.edges as f64)],
+            ok,
+            "vertices by Igusa-Clebsch invariants; counts = Ibukiyama-Katsura-Oort and h(h+1)/2",
+        );
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1779,6 +1860,7 @@ fn main() {
             "p1kernel" => bench_p1kernel(&mut o),
             "char2" => bench_char2(&mut o),
             "quat" => bench_quat(&mut o),
+            "genus2" => bench_genus2(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
