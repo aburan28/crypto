@@ -16,6 +16,7 @@ on:
       - "src/cryptanalysis/ec_index_calculus.rs"
       - "src/cryptanalysis/curve_catalog.rs"
       - "src/cryptanalysis/ic_engine.rs"
+      - "src/cryptanalysis/matmul_exponent.rs"
       - "src/cryptanalysis/ic_progress.rs"
       - "src/cryptanalysis/ic_run.rs"
       - "src/cryptanalysis/semaev_decomp.rs"
@@ -56,7 +57,7 @@ jobs:
       - name: Build icx
         run: cargo build --release --bin icx
       - name: Unit tests (catalog, engine, progress, run, field backend, fes-gpu)
-        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::fes_gpu cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::matmul_exponent cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::fes_gpu cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
       - name: Build the host-emulation FES worker (drives the GPU offload path)
         run: make -C gpu/fes host-worker
       - name: Integration tests (catalog + FES worker subprocess path)
