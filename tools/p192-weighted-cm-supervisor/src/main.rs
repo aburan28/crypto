@@ -375,9 +375,59 @@ fn collect_rs(root: &Path) -> Result<Vec<(String, String)>> {
     Ok(output)
 }
 
-fn dependency_audit(producer_source: &Path, verifier_source: &Path) -> Result<Vec<u8>> {
+fn git_text(root: &Path, arguments: &[&str]) -> Result<String> {
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(root)
+        .args(arguments)
+        .output()
+        .map_err(|error| format!("execute git in {}: {error}", root.display()))?;
+    if !output.status.success() {
+        return Err(format!(
+            "git {:?} failed in {}: {}",
+            arguments,
+            root.display(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    String::from_utf8(output.stdout)
+        .map_err(|_| format!("git {:?} output is not UTF-8", arguments))
+        .map(|text| text.trim().to_owned())
+}
+
+fn clean_git_binding(root: &Path, expected_commit: &str, label: &str) -> Result<Value> {
+    let top_level = PathBuf::from(git_text(root, &["rev-parse", "--show-toplevel"])?);
+    directory_nonsymlink(&top_level, &format!("{label} Git top level"))?;
+    let head = git_text(root, &["rev-parse", "HEAD"])?;
+    if head != expected_commit {
+        return Err(format!(
+            "{label} source HEAD {head} differs from bound commit {expected_commit}"
+        ));
+    }
+    let status = git_text(
+        root,
+        &["status", "--porcelain=v1", "--untracked-files=normal"],
+    )?;
+    if !status.is_empty() {
+        return Err(format!("{label} source worktree is dirty"));
+    }
+    Ok(json!({
+        "git_head": head,
+        "git_top_level": top_level,
+        "worktree_clean": true,
+    }))
+}
+
+fn dependency_audit(
+    producer_source: &Path,
+    verifier_source: &Path,
+    source_commit: &str,
+    verifier_commit: &str,
+) -> Result<Vec<u8>> {
     directory_nonsymlink(producer_source, "producer source")?;
     directory_nonsymlink(verifier_source, "verifier source")?;
+    let producer_git = clean_git_binding(producer_source, source_commit, "producer")?;
+    let verifier_git = clean_git_binding(verifier_source, verifier_commit, "verifier")?;
     let producer_manifest = fs::read(producer_source.join("Cargo.toml"))
         .map_err(|error| format!("read producer Cargo.toml: {error}"))?;
     let verifier_manifest = fs::read(verifier_source.join("Cargo.toml"))
@@ -420,12 +470,14 @@ fn dependency_audit(producer_source: &Path, verifier_source: &Path) -> Result<Ve
     canonical_json(&json!({
         "identical_source_hashes": identical_source_hashes,
         "producer_cargo_toml_sha256": hex::encode(sha256(&producer_manifest)),
+        "producer_git": producer_git,
         "producer_rust_sources": producer_files,
         "schema": "p192-wcm-dependency-audit-v1",
         "shared_implementation_components": [],
         "verifier_cargo_lock_sha256": hex::encode(sha256(&verifier_lock)),
         "verifier_cargo_toml_sha256": hex::encode(sha256(&verifier_manifest)),
         "verifier_crypto_lib_found": false,
+        "verifier_git": verifier_git,
         "verifier_rust_sources": verifier_files,
     }))
 }
@@ -573,7 +625,12 @@ fn execute(arguments: &Arguments) -> Result<Value> {
             "audit output must be a normalized absolute path that does not exist".to_owned(),
         );
     }
-    let audit_bytes = dependency_audit(&arguments.producer_source, &arguments.verifier_source)?;
+    let audit_bytes = dependency_audit(
+        &arguments.producer_source,
+        &arguments.verifier_source,
+        &arguments.source_commit,
+        &arguments.verifier_commit,
+    )?;
     write_atomic(&arguments.audit_out, &audit_bytes)?;
     let audit_sha256 = hex::encode(sha256(&audit_bytes));
 
@@ -658,8 +715,12 @@ fn execute(arguments: &Arguments) -> Result<Value> {
         arguments,
     )?;
     validate_role_specific_fields(&producer_verification, &independent_verification)?;
-    let audit_bytes_after =
-        dependency_audit(&arguments.producer_source, &arguments.verifier_source)?;
+    let audit_bytes_after = dependency_audit(
+        &arguments.producer_source,
+        &arguments.verifier_source,
+        &arguments.source_commit,
+        &arguments.verifier_commit,
+    )?;
     if audit_bytes_after != audit_bytes {
         return Err("producer or verifier source changed during the run".to_owned());
     }
