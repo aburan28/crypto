@@ -24,16 +24,22 @@
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
 //! | [`isolab`] | an `isolab.job/v1` that runs a spec on an independent lab worker |
+//! | [`bounds`] | bound records: the fitted cost of a method on a domain, sealed and re-derivable |
+//! | [`frontier`] | the Pareto frontier of a domain's bounds, and its page |
+//! | [`challenge`] | challenges (frozen paired specs) and verdicts (how a frontier moves) |
 //!
 //! [`CountedGroup`]: crate::cryptanalysis::ic_boundary::CountedGroup
 
 pub mod audit;
+pub mod bounds;
 pub mod callgrind;
 pub mod canonical;
+pub mod challenge;
 pub mod claim;
 pub mod claw;
 pub mod compare;
 pub mod db;
+pub mod frontier;
 pub mod generic;
 pub mod host;
 pub mod isolab;

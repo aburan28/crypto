@@ -63,6 +63,7 @@ its old name still identify it.
 | [`RESEARCH_ECC2K130_RELATION_SWEEPS.md`](ecc2k130/RESEARCH_ECC2K130_RELATION_SWEEPS.md) | Homogeneous relation sweeps and what rank is worth |
 | [`RESEARCH_ECC2K130_EXTENSION.md`](ecc2k130/RESEARCH_ECC2K130_EXTENSION.md) | Raising ECC2K-130 to an extension field |
 | [`RESEARCH_ECC2K130_HYPERELLIPTIC.md`](ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md) | Hyperelliptic covers of ECC2K-130 |
+| [`RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`](ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md) | Producing a curve that carries the ECC2K-130 subgroup |
 | [`RESEARCH_GROEBNER_STAGE.md`](ecc2k130/RESEARCH_GROEBNER_STAGE.md) | Optimising the Gröbner stage of the decomposition oracle |
 | [`RESEARCH_ISOGENY_CLASS_SEARCH.md`](ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md) / [`RESEARCH_ISOGENY_DEGREE_SEARCH.md`](ecc2k130/RESEARCH_ISOGENY_DEGREE_SEARCH.md) | Searching the isogeny class for an easier Gröbner problem |
 | [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) | Frobenius-invariant factor bases on Koblitz curves |
