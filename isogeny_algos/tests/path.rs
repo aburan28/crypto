@@ -122,3 +122,30 @@ fn delfs_galbraith_supersingular() {
         st.bfs_nodes
     );
 }
+
+#[test]
+fn galbraith_stolbunov_weighted_walk() {
+    use isogeny_algos::path::ghs::galbraith_stolbunov;
+    let mut rng = Rng::new(15);
+    let p = next_prime(1u64 << 24);
+    let fp = Zp::new(p);
+    let ells = [3usize, 5, 7, 11];
+    let cache = PhiCache::new(p, &ells);
+    let (e1, _t) = curve_with_trace(&fp, &mut rng, |t| {
+        let d = (t * t - 4 * p as i64).abs();
+        ells.iter().all(|&l| d % (l as i64 * l as i64) != 0)
+    });
+    let j1 = jinv(&fp, &e1);
+    let walk = random_walk(&fp, &cache, &ells, j1, 60, &mut rng);
+    let j2 = *walk.js.last().unwrap();
+    for weights in [[1u32, 1, 1, 1], [8, 4, 2, 1], [1, 1, 1, 8]] {
+        let (r, _) = galbraith_stolbunov(&fp, &cache, &ells, &weights, j1, j2, 1_000_000, &mut rng);
+        check_chain(
+            &fp,
+            &cache,
+            &e1,
+            &r.expect("galbraith-stolbunov failed"),
+            &mut rng,
+        );
+    }
+}

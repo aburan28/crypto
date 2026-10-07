@@ -1,5 +1,7 @@
 pub mod couveignes;
+pub mod csidh;
 pub mod delfs_galbraith;
+pub mod endo;
 pub mod galbraith;
 pub mod ghs;
 pub mod graph;
