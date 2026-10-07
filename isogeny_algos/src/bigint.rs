@@ -131,6 +131,103 @@ impl Big {
     pub fn rem_small(&self, d: u64) -> u64 {
         self.divrem_small(d).1
     }
+    pub fn shl(&self, k: usize) -> Big {
+        if self.is_zero() {
+            return Big::zero();
+        }
+        let (w, b) = (k / 64, k % 64);
+        let mut r = vec![0u64; self.0.len() + w + 1];
+        for (i, &x) in self.0.iter().enumerate() {
+            r[i + w] |= x << b;
+            if b > 0 {
+                r[i + w + 1] |= x >> (64 - b);
+            }
+        }
+        Big::norm(r)
+    }
+    /// (quotient, remainder) by Knuth's Algorithm D (64-bit limbs, normalised divisor).
+    pub fn divrem(&self, d: &Big) -> (Big, Big) {
+        assert!(!d.is_zero(), "division by zero");
+        if self < d {
+            return (Big::zero(), self.clone());
+        }
+        if d.0.len() == 1 {
+            let (q, r) = self.divrem_small(d.0[0]);
+            return (q, Big::from_u64(r));
+        }
+        let n = d.0.len();
+        let m = self.0.len() - n;
+        let s = d.0[n - 1].leading_zeros();
+        let shift = |v: &[u64], len: usize| -> Vec<u64> {
+            let mut r = vec![0u64; len];
+            for i in 0..v.len() {
+                r[i] |= v[i] << s;
+                if s > 0 && i + 1 < len {
+                    r[i + 1] |= v[i] >> (64 - s);
+                }
+            }
+            r
+        };
+        let vn = shift(&d.0, n);
+        let mut un = shift(&self.0, m + n + 1);
+        let mut q = vec![0u64; m + 1];
+        let b: u128 = 1 << 64;
+        for j in (0..=m).rev() {
+            let num = ((un[j + n] as u128) << 64) | un[j + n - 1] as u128;
+            let mut qhat = num / vn[n - 1] as u128;
+            let mut rhat = num % vn[n - 1] as u128;
+            while qhat >= b || qhat * vn[n - 2] as u128 > ((rhat << 64) | un[j + n - 2] as u128) {
+                qhat -= 1;
+                rhat += vn[n - 1] as u128;
+                if rhat >= b {
+                    break;
+                }
+            }
+            // un[j..j+n+1] -= qhat * vn
+            let mut k: i128 = 0;
+            for i in 0..n {
+                let p = qhat * vn[i] as u128;
+                let t = un[i + j] as i128 - k - (p as u64) as i128;
+                un[i + j] = t as u64;
+                k = (p >> 64) as i128 - (t >> 64);
+            }
+            let t = un[j + n] as i128 - k;
+            un[j + n] = t as u64;
+            if t < 0 {
+                qhat -= 1;
+                let mut c = 0u128;
+                for i in 0..n {
+                    let s2 = un[i + j] as u128 + vn[i] as u128 + c;
+                    un[i + j] = s2 as u64;
+                    c = s2 >> 64;
+                }
+                un[j + n] = un[j + n].wrapping_add(c as u64);
+            }
+            q[j] = qhat as u64;
+        }
+        let mut r = vec![0u64; n];
+        for i in 0..n {
+            r[i] = un[i] >> s;
+            if s > 0 {
+                r[i] |= un[i + 1] << (64 - s);
+            }
+        }
+        (Big::norm(q), Big::norm(r))
+    }
+    /// floor(sqrt(self)) by Newton's iteration.
+    pub fn isqrt(&self) -> Big {
+        if self.is_zero() {
+            return Big::zero();
+        }
+        let mut x = Big::from_u64(1).shl(self.bits().div_ceil(2));
+        loop {
+            let y = x.add(&self.divrem(&x).0).shr(1);
+            if y >= x {
+                return x;
+            }
+            x = y;
+        }
+    }
     pub fn from_dec(s: &str) -> Big {
         let mut r = Big::zero();
         for ch in s.chars().filter(|c| !c.is_whitespace() && *c != '_') {

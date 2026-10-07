@@ -68,7 +68,67 @@ fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
     series::mul(f, &e4_3, &series::inv(f, &e24, len), len)
 }
 
+/// Integer coefficients of Phi_l (symmetric residues of a CRT over 62-bit primes; the
+/// Bröker–Sutherland height bound log|c| <= 6 l log l + 16 l + 14 sqrt(l) log l sets the count).
+pub fn integer_coeffs(ell: usize) -> Vec<Vec<crate::int::Int>> {
+    use crate::bigint::Big;
+    use crate::field::{is_prime, Zp};
+    use crate::int::Int;
+    let l = ell as f64;
+    let nats = 6.0 * l * l.ln() + 16.0 * l + 14.0 * l.sqrt() * l.ln();
+    let bits = (nats / std::f64::consts::LN_2) as usize + 16;
+    let mut primes = vec![];
+    let mut p = (1u64 << 62) - 57;
+    while primes.len() * 61 < bits {
+        if is_prime(p) {
+            primes.push(p);
+        }
+        p -= 2;
+    }
+    let phis: Vec<Phi<Zp>> = primes.iter().map(|&p| Phi::compute(&Zp::new(p), ell)).collect();
+    let (rows, cols) = (phis[0].c.len(), phis[0].c[0].len());
+    let mut m = Big::from_u64(1);
+    for &p in &primes {
+        m = m.mul_small(p);
+    }
+    let mi = Int::from_big(&m);
+    (0..rows)
+        .map(|i| {
+            (0..cols)
+                .map(|k| {
+                    let mut x = Big::zero();
+                    let mut mm = Big::from_u64(1);
+                    for (t, &p) in primes.iter().enumerate() {
+                        let fp = Zp::new(p);
+                        let r = phis[t].c[i][k];
+                        let delta = fp.mul(fp.sub(r, x.rem_small(p)), fp.inv(mm.rem_small(p)));
+                        x = x.add(&mm.mul_small(delta));
+                        mm = mm.mul_small(p);
+                    }
+                    let xi = Int::from_big(&x);
+                    if x.add(&x) > m {
+                        &xi - &mi
+                    } else {
+                        xi
+                    }
+                })
+                .collect()
+        })
+        .collect()
+}
+
 impl<F: Field> Phi<F> {
+    /// Phi_l over any field, from the integer coefficients reduced by the characteristic
+    /// (valid in every characteristic, including small p and 2).
+    pub fn via_crt(f: &F, ell: usize) -> Phi<F> {
+        let ch = f.char();
+        let c = integer_coeffs(ell)
+            .iter()
+            .map(|row| row.iter().map(|x| f.from_u64(x.mod_u64(ch))).collect())
+            .collect();
+        Phi { ell, c }
+    }
+
     /// Phi_l over F (characteristic must be large compared with the coefficients' denominators:
     /// we require a field of size > 10^4 and > 4l).
     pub fn compute(f: &F, ell: usize) -> Phi<F> {

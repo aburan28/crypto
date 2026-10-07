@@ -411,45 +411,7 @@ impl crate::path::graph::Oracle<u64> for BinKernelOracle<'_> {
     }
 }
 
-/// Phi_l modulo 2 (from Phi_l over Z by CRT over 62-bit primes, Bröker–Sutherland height bound),
-/// as a modular polynomial over GF(2^n).
+/// Phi_l modulo 2 (integer coefficients by CRT over 62-bit primes), over GF(2^n).
 pub fn phi_mod2(f: &GF2n, ell: usize) -> crate::find::modpoly::Phi<GF2n> {
-    use crate::bigint::Big;
-    use crate::field::{is_prime, Zp};
-    use crate::find::modpoly::Phi;
-    let l = ell as f64;
-    let nats = 6.0 * l * l.ln() + 16.0 * l + 14.0 * l.sqrt() * l.ln();
-    let bits = (nats / std::f64::consts::LN_2) as usize + 16;
-    let mut primes = vec![];
-    let mut p = (1u64 << 62) - 57;
-    while primes.len() * 61 < bits {
-        if is_prime(p) {
-            primes.push(p);
-        }
-        p -= 2;
-    }
-    let phis: Vec<Phi<Zp>> = primes.iter().map(|&p| Phi::compute(&Zp::new(p), ell)).collect();
-    let rows = phis[0].c.len();
-    let mut c = vec![vec![0u64; phis[0].c[0].len()]; rows];
-    for (i, row) in c.iter_mut().enumerate() {
-        for (k, out) in row.iter_mut().enumerate() {
-            // Garner: x = sum, M = prod
-            let mut x = Big::zero();
-            let mut m = Big::from_u64(1);
-            for (t, &p) in primes.iter().enumerate() {
-                let fp = Zp::new(p);
-                let r = phis[t].c[i][k];
-                let xm = x.rem_small(p);
-                let mm = m.rem_small(p);
-                let delta = fp.mul(fp.sub(r, xm), fp.inv(mm));
-                x = x.add(&m.mul_small(delta));
-                m = m.mul_small(p);
-            }
-            // symmetric representative: negative iff 2x > M; parity flips for negatives (M odd)
-            let neg = x.add(&x) > m;
-            *out = (x.bit(0) as u64) ^ (neg as u64);
-        }
-    }
-    let _ = f;
-    Phi { ell, c }
+    crate::find::modpoly::Phi::via_crt(f, ell)
 }

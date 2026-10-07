@@ -1638,6 +1638,111 @@ fn bench_char2(o: &mut Out) {
     }
 }
 
+/// Quaternion side: KLPT, class sets / Brandt matrices, Deuring (ideal -> curve).
+fn bench_quat(o: &mut Out) {
+    use isogeny_algos::bigint::Big;
+    use isogeny_algos::int::Int;
+    use isogeny_algos::quat::brandt::{class_set, supersingular_graph};
+    use isogeny_algos::quat::deuring::Deuring;
+    use isogeny_algos::quat::klpt::{ideal_from, klpt};
+    use isogeny_algos::quat::*;
+    let mut rng = Rng::new(17_000);
+    // random left O_0-ideal of prime norm n: alpha with a = sqrt(-(b^2 + p(c^2+d^2))) mod n
+    let rand_ideal = |alg: &Alg, o0: &Lattice, n: &Int, rng: &mut Rng| loop {
+        let (b, c, d) = (Int::from(rng.next() >> 2), Int::from(rng.next() >> 2), Int::from(rng.next() >> 2));
+        let t = -&(&(&b * &b) + &(&alg.p * &(&(&c * &c) + &(&d * &d))));
+        if let Some(a) = Int::sqrt_mod_prime(&t, n) {
+            let i = ideal_from(alg, o0, n, &Quat::new([a, b, c, d], Int::one()));
+            if i.norm(o0) == (n.clone(), Int::one()) {
+                return i;
+            }
+        }
+    };
+    let ps: &[&str] = if o.quick {
+        &["2147483647", "1152921504606847067"]
+    } else {
+        &["2147483647", "1152921504606847067", "1267650600228229401496703205707", "340282366920938463463374607431768211507"]
+    };
+    for ps in ps {
+        let p = Int::from_big(&Big::from_dec(ps));
+        if p.mod_u64(4) != 3 || !p.is_probable_prime() {
+            continue;
+        }
+        let alg = Alg::new(&p);
+        let o0 = alg.o0();
+        let mut n = &p + &Int::from(2i64);
+        while !n.is_probable_prime() {
+            n = &n + &Int::from(2i64);
+        }
+        let mut es = vec![];
+        let mut ok = true;
+        let ideals: Vec<Lattice> = (0..5).map(|_| rand_ideal(&alg, &o0, &n, &mut rng)).collect();
+        let t0 = Instant::now();
+        for i in &ideals {
+            match klpt(&alg, i, 2, &mut rng) {
+                Some(r) => {
+                    ok &= r.j.norm(&o0) == (Int::from(2i64).pow(r.e), Int::one()) && i.rmul(&alg, &r.xi) == r.j;
+                    es.push(r.e as f64);
+                }
+                None => ok = false,
+            }
+        }
+        let per = t0.elapsed().as_nanos() as f64 / ideals.len() as f64;
+        let logp = p.to_f64().log2();
+        let mean_e = es.iter().sum::<f64>() / es.len().max(1) as f64;
+        o.rec(
+            "quat",
+            "klpt_l2",
+            &[("p_bits", format!("{logp:.0}")), ("input", "prime norm ~ p".to_string())],
+            &[("mean_ns", per), ("mean_e", mean_e), ("e_over_log2p", mean_e / logp), ("runs", es.len() as f64)],
+            ok,
+            "output J ~ I with N(J) = 2^e; J = I xi checked exactly",
+        );
+    }
+    // class sets and Brandt matrices
+    for &p in if o.quick { &[431i64][..] } else { &[431i64, 1019, 1259, 3499][..] } {
+        let alg = Alg::new(&Int::from(p));
+        let t0 = Instant::now();
+        let cs = class_set(&alg, 2, &mut rng);
+        let t_cs = t0.elapsed().as_nanos() as f64;
+        let t0 = Instant::now();
+        let (js, a) = supersingular_graph(p as u64, 2, &mut rng);
+        let t_g = t0.elapsed().as_nanos() as f64;
+        let ok = cs.reps.len() == js.len()
+            && isogeny_algos::quat::brandt::power_traces(&cs.brandt, js.len()) == isogeny_algos::quat::brandt::power_traces(&a, js.len());
+        o.rec(
+            "quat",
+            "class_set_brandt_l2",
+            &[("p", p.to_string())],
+            &[("ns", t_cs), ("classes", cs.reps.len() as f64), ("mestre_graph_ns", t_g)],
+            ok,
+            "classes of O_0 by BFS on 2-neighbours (equivalence by short vectors); mass formula asserted; spectrum vs Phi_2 graph",
+        );
+        // Deuring map on all classes (p with smooth p^2 - 1 only)
+        if p == 1259 || p == 3499 {
+            let d = Deuring::new(p as u64, &mut rng);
+            let t0 = Instant::now();
+            let mut img = vec![];
+            for i in &cs.reps {
+                img.push(d.ideal_to_j(i, &mut rng));
+            }
+            let t_d = t0.elapsed().as_nanos() as f64 / cs.reps.len() as f64;
+            let mut s: Vec<_> = img.iter().flatten().copied().collect();
+            s.sort();
+            s.dedup();
+            let ok = s.len() == js.len() && s.iter().all(|j| js.contains(j));
+            o.rec(
+                "quat",
+                "deuring_ideal_to_curve",
+                &[("p", p.to_string()), ("t_odd", d.t_odd.to_string())],
+                &[("mean_ns_per_class", t_d), ("classes", cs.reps.len() as f64)],
+                ok,
+                "smooth-norm equivalent ideal (N | odd part of p^2-1), kernel over F_p^4 by 2D Pohlig-Hellman, Velu chain; bijection onto supersingular j checked",
+            );
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1673,6 +1778,7 @@ fn main() {
             "v2path" => bench_v2path(&mut o),
             "p1kernel" => bench_p1kernel(&mut o),
             "char2" => bench_char2(&mut o),
+            "quat" => bench_quat(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
