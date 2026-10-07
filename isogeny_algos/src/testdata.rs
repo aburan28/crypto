@@ -227,3 +227,68 @@ pub fn kani_instance(a: u32, b: u32, seed: u64) -> KaniInstance {
         k_twisted: [(im_gam[0], im_phi[0]), (im_gam[1], q2)],
     }
 }
+
+/// Kani diamond with an endomorphism as the auxiliary isogeny, usable at cryptographic size:
+/// E0: y^2 = x^3 + x over F_{p^2} (p = 2^(a+2) 3^b c - 1), phi: E0 -> E of degree 3^b (Velu chain),
+/// gamma = u + v i in End(E0) of degree d2 = u^2 + v^2 = 2^a - 3^b (i: (x, y) -> (-x, iota y)).
+/// The (2^a, 2^a)-isogeny of E0 x E with kernel {(gamma P, phi P)} has codomain E0 x X.
+pub struct KaniEndoInstance<F: Field> {
+    pub e0: Curve<F::E>,
+    pub e: Curve<F::E>,
+    pub a: u32,
+    pub k: [(Pt<F::E>, Pt<F::E>); 2],
+    pub k_twisted: [(Pt<F::E>, Pt<F::E>); 2],
+}
+
+/// `p1` = p + 1; `iota` a square root of -1 in the field.
+#[allow(clippy::too_many_arguments)]
+pub fn kani_endomorphism_instance<F: Field>(
+    f: &F,
+    p1: &crate::bigint::Big,
+    a: u32,
+    b: u32,
+    u: &crate::bigint::Big,
+    v: &crate::bigint::Big,
+    iota: F::E,
+    rng: &mut Rng,
+) -> KaniEndoInstance<F> {
+    use crate::bigint::Big;
+    use crate::kernel::chain::{ell_power_isogeny, Strategy};
+    let e0 = Curve::new(f.one(), f.zero());
+    let two_e = Big::from_u64(1).shl((a + 2) as usize);
+    let three_b = (0..b).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let (cof2, _) = p1.divrem(&two_e);
+    let (cof3, _) = p1.divrem(&three_b);
+    let half = Big::from_u64(1).shl((a + 1) as usize);
+    let third = (0..b - 1).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let point2 = |rng: &mut Rng| loop {
+        let q = pmul_big(f, &e0, &random_point_f(f, &e0, rng), &cof2);
+        if pmul_big(f, &e0, &q, &half) != Pt::Inf {
+            return q;
+        }
+    };
+    let pp = point2(rng);
+    let pp_h = pmul_big(f, &e0, &pp, &half);
+    let qq = loop {
+        let q = point2(rng);
+        if pmul_big(f, &e0, &q, &half) != pp_h {
+            break q;
+        }
+    };
+    let k3 = loop {
+        let q = pmul_big(f, &e0, &random_point_f(f, &e0, rng), &cof3);
+        if pmul_big(f, &e0, &q, &third) != Pt::Inf {
+            break q;
+        }
+    };
+    let (ch, pushed, _) = ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[pp, qq], Strategy::Balanced);
+    let e = ch.cod;
+    let iota_map = |p: &Pt<F::E>| match *p {
+        Pt::Inf => Pt::Inf,
+        Pt::Aff(x, y) => Pt::Aff(f.neg(x), f.mul(iota, y)),
+    };
+    let gamma = |p: &Pt<F::E>| padd(f, &e0, &pmul_big(f, &e0, p, u), &pmul_big(f, &e0, &iota_map(p), v));
+    let (gp, gq) = (gamma(&pp), gamma(&qq));
+    let q2 = padd(f, &e, &pushed[1], &pmul(f, &e, &pushed[0], 2));
+    KaniEndoInstance { e0, e, a, k: [(gp, pushed[0]), (gq, pushed[1])], k_twisted: [(gp, pushed[0]), (gq, q2)] }
+}

@@ -152,6 +152,12 @@ fn theta_kani_chain_splits_at_e0_times_x() {
         for nl in &res.nulls[..res.nulls.len() - 1] {
             assert!(split_j(&f, nl).is_none());
         }
+        // the strategy (theta doublings) and pushing every multiple give the same codomains
+        let naive = chain_opts(&f, &c, &e, [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])], a, &[], false).expect("chain");
+        assert_eq!(naive.nulls.len(), res.nulls.len());
+        for (x, y) in naive.nulls.iter().zip(res.nulls.iter()) {
+            assert!(proj_eq(&f, x, y));
+        }
         let (j1, j2) = res.split.expect("Kani chain splits");
         let (ja, jb) = (jinv(&f, &e0), jinv(&f, &x));
         assert!((j1, j2) == (ja, jb) || (j1, j2) == (jb, ja), "a = {a}, b = {b}");
@@ -212,5 +218,33 @@ fn theta_step_is_a_richelot_neighbour() {
             }
             assert!(found, "step {s}");
         }
+    }
+}
+
+/// Kani with an endomorphism of E0: y^2 = x^3 + x as the auxiliary isogeny (no smoothness needed
+/// for its degree): a = 64, b = 35, p = 2^66 3^35 15 - 1 (126 bits), 2^64 - 3^35 = u^2 + v^2.
+/// The chain must split with a factor of j-invariant 1728 (E0); the twisted kernel must not.
+#[test]
+fn theta_kani_endomorphism_126_bit() {
+    use isogeny_algos::bigint::Big;
+    use isogeny_algos::fp2::Fp2;
+    use isogeny_algos::fpm::FpM;
+    use isogeny_algos::testdata::kani_endomorphism_instance;
+    let (a, b, c) = (64u32, 35u32, 15u64);
+    let three_b = (0..b).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let p1 = Big::from_u64(1).shl((a + 2) as usize).mul(&three_b).mul(&Big::from_u64(c));
+    let p = p1.sub_small(1);
+    let f = Fp2::new(FpM::<2>::new(&p));
+    let iota = (f.base.zero(), f.base.one());
+    let (u, v) = (Big::from_u64(3132210735), Big::from_u64(2930182322));
+    let mut rng = Rng::new(64);
+    for _ in 0..2 {
+        let inst = kani_endomorphism_instance(&f, &p1, a, b, &u, &v, iota, &mut rng);
+        let res = chain(&f, &inst.e0, &inst.e, inst.k, a, &[]).expect("chain");
+        let (j1, j2) = res.split.expect("splits");
+        let j1728 = f.from_u64(1728);
+        assert!(j1 == j1728 || j2 == j1728);
+        let res2 = chain(&f, &inst.e0, &inst.e, inst.k_twisted, a, &[]).expect("chain");
+        assert!(res2.split.is_none());
     }
 }

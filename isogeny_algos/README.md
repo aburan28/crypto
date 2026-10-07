@@ -52,7 +52,8 @@ Added in V3:
   has the same point count;
 * theta: gluing = Howe–Leprévost–Poonen gluing (Igusa–Clebsch invariants); every theta step is one
   of the 15 Richelot neighbours; Kani chains split exactly at E₀ × X with X computed by Vélu, and a
-  twisted isotropic kernel does not split;
+  twisted isotropic kernel does not split; with an endomorphism auxiliary isogeny (126-bit p) the chain
+  splits off j = 1728; the strategy (theta doublings) and push-everything chains give identical codomains;
 * isogeny cycles: t mod 3⁴, 5³, 7², 11² equal the BSGS trace; Montgomery 4-isogeny chain = 2-isogeny
   chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²}.
 
@@ -115,8 +116,12 @@ Selected V3 measurements (medians unless stated; all records `verified: true`):
   Cycle bound 80 was slower at 61 bits (2.4–6.6 ms). Precomputing Φ_ℓ for ℓ ≤ 89 over the 127-bit
   field took 34 s and is not included.
 * **Theta model** (`p8-theta.jsonl`, 50-bit F_{p²}): (2,2) codomain 0.64 µs and image 0.17 µs vs Richelot
-  codomain 1.75 µs and point image 13.5 µs on the same field; Kani (2ᵃ, 2ᵃ)-chain including the split
-  test 57 µs (a = 8) to 0.24 ms (a = 16).
+  codomain 1.81 µs and point image 13.0 µs on the same field; Kani (2ᵃ, 2ᵃ)-chain including the split
+  test 26 µs (a = 8) to 77 µs (a = 16). With an endomorphism γ = u + v·i of E₀ as the auxiliary isogeny
+  (no smoothness needed) the split test runs at cryptographic sizes: a = 64 / 126-bit p 1.09 ms, a = 128 /
+  261-bit 6.8 ms, a = 200 / 360-bit 15.6 ms (optimal strategy with theta doublings; pushing every multiple
+  instead: 3.1 / 28.9 / 87.4 ms; the first version, which also recomputed the multiples by affine doubling,
+  took 620 ms at a = 200).
 * **2^216-isogeny over the SIKEp434 F_{p²}** (`p8-twopow.jsonl`, 3 points pushed): Montgomery 4-isogeny
   chain 2.67 ms with the optimal strategy (18.6 ms multiply-only, 13.1 ms push-only), 2-isogeny chain
   3.13 ms, affine Weierstrass Vélu chain 20.8 ms; F_{p²} multiplication 259 ns.
@@ -146,9 +151,9 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
 ## Known gaps and limitations (details in `docs/SURVEY.md`)
 
 * **Not implemented** (implementation gaps): (ℓ,ℓ)-isogenies for odd ℓ, higher-dimensional (4, 8) Kani
-  embeddings, SQIsign2D, and a key-recovery layer on top of the Kani split test; Kani instances at
-  cryptographic size (they need an endomorphism-based auxiliary isogeny; here both diamond degrees are
-  smooth and p is a u64); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
+  embeddings, SQIsign2D, and a key-recovery layer on top of the Kani split test (the split decision runs
+  up to 360-bit p, with parameters chosen so that 2ᵃ > 3ᵇ; the SIKE parameters themselves have 2ᵃ < 3ᵇ and
+  need the attacks' guessing or higher-dimensional tricks); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
   over F_{p⁴}); isogeny cycles for Atkin primes; Couveignes 1996 p-torsion, Lercier, Lercier–Sirvent for
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5; Jacobi-quartic models;
   characteristic 3; Sutherland-style Φ_ℓ. Not implementable here (resource limit): quantum algorithms.

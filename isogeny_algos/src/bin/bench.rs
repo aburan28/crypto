@@ -2335,6 +2335,38 @@ fn bench_theta(o: &mut Out) {
         let tm = time_it(budget, 2000, || chain(f, &inst.c, &inst.e, inst.k_twisted, a, &[]));
         o.rec("theta", "kani_chain_twisted", &[("a", a.to_string()), ("b", b.to_string()), ("p_bits", pbits.to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], ok2, "isotropic kernel not from a diamond: no split");
     }
+    // Kani with an endomorphism auxiliary isogeny at 126, 261 and 360 bits
+    fn kani_big<const N: usize>(o: &mut Out, a: u32, b: u32, c: u64, u: &str, v: &str, budget: u64) {
+        use isogeny_algos::bigint::Big;
+        use isogeny_algos::fp2::Fp2;
+        use isogeny_algos::testdata::kani_endomorphism_instance;
+        use isogeny_algos::theta::chain;
+        let three_b = (0..b).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+        let p1 = Big::from_u64(1).shl((a + 2) as usize).mul(&three_b).mul(&Big::from_u64(c));
+        let p = p1.sub_small(1);
+        let f = Fp2::new(FpM::<N>::new(&p));
+        let iota = (f.base.zero(), f.base.one());
+        let mut rng = Rng::new(21_500 + a as u64);
+        let t0 = Instant::now();
+        let inst = kani_endomorphism_instance(&f, &p1, a, b, &Big::from_dec(u), &Big::from_dec(v), iota, &mut rng);
+        let setup = t0.elapsed().as_nanos() as f64;
+        let res = chain(&f, &inst.e0, &inst.e, inst.k, a, &[]);
+        let j1728 = f.from_u64(1728);
+        let ok = res.as_ref().and_then(|r| r.split).map_or(false, |(j1, j2)| j1 == j1728 || j2 == j1728);
+        let res2 = chain(&f, &inst.e0, &inst.e, inst.k_twisted, a, &[]);
+        let ok2 = res2.as_ref().map_or(false, |r| r.split.is_none());
+        let params = vec![("a", a.to_string()), ("b", b.to_string()), ("p_bits", p.bits().to_string())];
+        let tm = time_it(budget, 50, || chain(&f, &inst.e0, &inst.e, inst.k, a, &[]));
+        o.rec("theta", "kani_endomorphism_chain_split", &params, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("ns_per_step", tm.0 / a as f64), ("setup_ns", setup)], ok && ok2, "E0 x E, gamma = u + v i of degree 2^a - 3^b; split with a j = 1728 factor; twisted kernel does not split; strategy with theta doublings; setup = torsion basis + 3^b Velu chain");
+        let tm = time_it(budget, 20, || isogeny_algos::theta::chain_opts(&f, &inst.e0, &inst.e, inst.k, a, &[], false));
+        o.rec("theta", "kani_endomorphism_chain_push_all", &params, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("ns_per_step", tm.0 / a as f64)], ok, "same chain pushing every multiple [2^j] K_i (O(n^2) evaluations)");
+    }
+    let quick_budget = if o.quick { 200 } else { 1500 };
+    kani_big::<2>(o, 64, 35, 15, "3132210735", "2930182322", quick_budget);
+    if !o.quick {
+        kani_big::<5>(o, 128, 79, 50, "15835853968460231258", "6343381291216761945", quick_budget);
+        kani_big::<6>(o, 200, 97, 19, "974444828147419130332802849738", "810799186701440879819637402363", quick_budget);
+    }
     // single steps at the a = 16 instance; Richelot on the same field F_{p^2}
     let inst = kani_instance(16, 10, 21_016);
     let f = &inst.f;
