@@ -1,0 +1,39 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "correctness: exact binary n-1 and double-large-prime IC",
+  "description": "Correctness and accounting smoke test on the smallest imported ECBench curve. Native combinatorics and modular elimination remain explicitly unpriced; this is not a performance claim.",
+  "workloads": {
+    "curves": [{
+      "kind": "binary_explicit",
+      "n": 11,
+      "modulus": 2323,
+      "a": 1,
+      "b": 1,
+      "group_order": 1982,
+      "r": 991,
+      "gx": 1193,
+      "gy": 1007
+    }],
+    "targets_per_curve": 4,
+    "target_seed": 20261004
+  },
+  "arms": [
+    {"name": "rho-frob", "role": "reference", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-nminus1-dlp", "role": "candidate", "method": {"id": "ic.large_prime", "params": {
+      "small_dimension": "3",
+      "envelope_dimension": "4",
+      "summands": "n-1",
+      "large_primes": "2",
+      "max_trials": "20000",
+      "max_states": "100000"
+    }}}
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 7,
+    "isolation_required": "L0",
+    "timeout_seconds": 60
+  }
+}
