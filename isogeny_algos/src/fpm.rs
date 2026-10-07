@@ -7,6 +7,11 @@ use crate::field::{Field, Rng};
 
 const MAXN: usize = 16;
 
+thread_local! {
+    /// Override of the multi-limb Karatsuba threshold (for tuning runs; None = built-in default).
+    pub static KARATSUBA_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+}
+
 #[derive(Clone, Debug)]
 pub struct FpM<const N: usize> {
     pub p: [u64; N],
@@ -19,6 +24,8 @@ pub struct FpM<const N: usize> {
     fast1: bool,
     /// p[N-1] < 2^63 - 2: the no-carry CIOS variant applies (top bit of the top limb free).
     nocarry: bool,
+    /// Montgomery form of 2^64, the correction factor of `redc_wide`.
+    s64: [u64; N],
 }
 
 #[inline(always)]
@@ -100,6 +107,7 @@ impl<const N: usize> FpM<N> {
             pbits: p.bits() as u32,
             fast1: N == 1 && p.bits() <= 63,
             nocarry: N > 1 && pl[N - 1] < (1u64 << 63) - 2,
+            s64: [0; N],
         };
         // R mod p, R^2 mod p, R^3 mod p by repeated doubling of 1
         let mut x = [0u64; N];
@@ -114,6 +122,12 @@ impl<const N: usize> FpM<N> {
         f.one = out[0];
         f.r2 = out[1];
         f.r3 = out[2];
+        // 2^64 R mod p: 64 more doublings of R
+        let mut x = f.one;
+        for _ in 0..64 {
+            x = f.add_mod(&x, &x);
+        }
+        f.s64 = x;
         f
     }
     pub fn from_u64_modulus(p: u64) -> Self {
@@ -209,6 +223,54 @@ impl<const N: usize> FpM<N> {
             t = sub_raw(&t, &self.p).0;
         }
         t
+    }
+    /// acc += a * b (full 2N-limb product, no reduction); acc has 2N + 2 limbs.
+    #[inline(always)]
+    fn mul_acc(acc: &mut [u64; 2 * MAXN + 2], a: &[u64; N], b: &[u64; N]) {
+        for i in 0..N {
+            let ai = a[i] as u128;
+            let mut c = 0u64;
+            for j in 0..N {
+                let s = acc[i + j] as u128 + ai * b[j] as u128 + c as u128;
+                acc[i + j] = s as u64;
+                c = (s >> 64) as u64;
+            }
+            let mut t = i + N;
+            while c != 0 {
+                let (s, o) = acc[t].overflowing_add(c);
+                acc[t] = s;
+                c = o as u64;
+                t += 1;
+            }
+        }
+    }
+    /// For T = sum of fewer than 2^64 products of reduced Montgomery residues (T < 2^64 p R):
+    /// N + 1 word-by-word Montgomery steps give T / (2^64 R) + (< p) < 2p; one subtraction and a
+    /// multiplication by the Montgomery form of 2^64 restore T R^{-1} mod p.
+    #[inline(always)]
+    fn redc_wide(&self, acc: &mut [u64; 2 * MAXN + 2]) -> [u64; N] {
+        for i in 0..=N {
+            let m = acc[i].wrapping_mul(self.pinv) as u128;
+            let mut c = 0u64;
+            for j in 0..N {
+                let s = acc[i + j] as u128 + m * self.p[j] as u128 + c as u128;
+                acc[i + j] = s as u64;
+                c = (s >> 64) as u64;
+            }
+            let mut t = i + N;
+            while c != 0 && t < 2 * N + 2 {
+                let (s, o) = acc[t].overflowing_add(c);
+                acc[t] = s;
+                c = o as u64;
+                t += 1;
+            }
+        }
+        let mut r = [0u64; N];
+        r.copy_from_slice(&acc[N + 1..2 * N + 1]);
+        if acc[2 * N + 1] != 0 || geq(&r, &self.p) {
+            r = sub_raw(&r, &self.p).0;
+        }
+        self.mont_mul(&r, &self.s64)
     }
     /// Canonical residue (out of Montgomery form).
     pub fn to_canonical(&self, a: &[u64; N]) -> [u64; N] {
@@ -454,11 +516,11 @@ impl<const N: usize> Field for FpM<N> {
             return self.mont_mul(&t, &one);
         }
         let n = a.len().min(b.len());
-        let mut s = [0u64; N];
+        let mut acc = [0u64; 2 * MAXN + 2];
         for i in 0..n {
-            s = self.add_mod(&s, &self.mont_mul(&a[i], &b[b.len() - 1 - i]));
+            Self::mul_acc(&mut acc, &a[i], &b[b.len() - 1 - i]);
         }
-        s
+        self.redc_wide(&mut acc)
     }
     fn conv_trunc(&self, a: &[Self::E], b: &[Self::E], nout: usize) -> Vec<Self::E> {
         if N == 1 && self.pbits <= 62 {
@@ -478,13 +540,21 @@ impl<const N: usize> Field for FpM<N> {
                 })
                 .collect();
         }
-        let mut r = vec![[0u64; N]; nout];
-        for (i, x) in a.iter().enumerate().take(nout) {
-            for (j, y) in b.iter().enumerate().take(nout - i) {
-                r[i + j] = self.add_mod(&r[i + j], &self.mont_mul(x, y));
+        // lazy reduction: one wide Montgomery reduction per output coefficient
+        let mut r = Vec::with_capacity(nout);
+        for k in 0..nout {
+            let lo = k.saturating_sub(b.len() - 1);
+            let hi = k.min(a.len() - 1);
+            let mut acc = [0u64; 2 * MAXN + 2];
+            for i in lo..=hi {
+                Self::mul_acc(&mut acc, &a[i], &b[k - i]);
             }
+            r.push(if lo > hi { [0u64; N] } else { self.redc_wide(&mut acc) });
         }
         r
+    }
+    fn karatsuba_threshold(&self) -> usize {
+        KARATSUBA_N.with(|k| k.get()).unwrap_or(if N == 1 { 32 } else { 16 })
     }
     fn size(&self) -> u128 {
         self.pbig

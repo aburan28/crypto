@@ -231,12 +231,33 @@ fn main() {
             }),
         );
     }
+    // polynomial products over multi-limb fields, by Karatsuba threshold
+    fn big_poly<const N: usize>(
+        name: &str,
+        f: &isogeny_algos::fpm::FpM<N>,
+        rng: &mut Rng,
+        rec: &mut impl FnMut(&str, usize, f64),
+    ) {
+        for n in [8usize, 16, 32, 64, 128, 256] {
+            let a: Vec<[u64; N]> = (0..n).map(|_| f.random(rng)).collect();
+            let b: Vec<[u64; N]> = (0..n).map(|_| f.random(rng)).collect();
+            let reps = (400_000 / (n * n)).max(3);
+            for th in [4usize, 8, 16, 32, 1 << 20] {
+                isogeny_algos::fpm::KARATSUBA_N.with(|k| k.set(Some(th)));
+                let t = per_op(reps, || poly::mul(f, &a, &b));
+                rec(&format!("{name}_polymul_kth{th}"), n, t);
+            }
+            isogeny_algos::fpm::KARATSUBA_N.with(|k| k.set(None));
+        }
+    }
     let p256 = isogeny_algos::fpm::FpM::<4>::from_dec(
         "115792089210356248762697446949407573530086143415290314195533631308867097853951",
     );
     big_field("fpm4_p256", &p256, &mut rng, &mut rec);
+    big_poly("fpm4_p256", &p256, &mut rng, &mut rec);
     let c512 = isogeny_algos::path::csidh::Csidh::<isogeny_algos::fpm::FpM<8>>::csidh512().fp;
     big_field("fpm8_csidh512", &c512, &mut rng, &mut rec);
+    big_poly("fpm8_csidh512", &c512, &mut rng, &mut rec);
     if let Some(o) = out {
         let mut f = std::fs::File::create(o).unwrap();
         for l in lines {

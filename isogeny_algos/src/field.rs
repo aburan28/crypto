@@ -44,6 +44,10 @@ pub trait Field: Clone + Send + Sync + 'static {
     fn sq(&self, a: Self::E) -> Self::E {
         self.mul(a, a)
     }
+    /// Operand length below which polynomial products are schoolbook (`conv`).
+    fn karatsuba_threshold(&self) -> usize {
+        32
+    }
     fn pow(&self, a: Self::E, mut e: u128) -> Self::E {
         let mut r = self.one();
         let mut b = a;

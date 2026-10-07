@@ -1379,6 +1379,147 @@ fn bench_p1kernel(o: &mut Out) {
     }
 }
 
+/// Kernel-to-isogeny, BMSS, Phi_l and the j-line neighbour oracle over 256- and 511-bit primes
+/// (supersingular workloads: p = 4 prod(l) c - 1, so every listed l has rational kernels).
+fn bench_big_field<const N: usize>(o: &mut Out, bits: usize, ells: &[u64], seed: u64) {
+    let mut rng = Rng::new(seed);
+    let w = isogeny_algos::testdata::supersingular_workload::<N>(ells, bits, &mut rng);
+    let f = &w.f;
+    let budget = if o.quick { 100 } else { 300 };
+    let field = format!("FpM{N}");
+    for &(ell, p) in &w.pts {
+        let Pt::Aff(x0, _) = p else { unreachable!() };
+        let reference = velu_xonly_fast(f, &w.e, x0, ell).unwrap();
+        let t = random_point_f(f, &w.e, &mut rng);
+        let img = reference.eval(f, &t);
+        let params = vec![
+            ("p_bits", bits.to_string()),
+            ("ell", ell.to_string()),
+            ("field", field.clone()),
+        ];
+        let rec = |o: &mut Out, algo: &str, task: &str, ok: bool, (m, mn, r): (f64, f64, usize)| {
+            let mut pr = params.clone();
+            pr.push(("task", task.to_string()));
+            o.rec("big", algo, &pr, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "");
+        };
+        let tm = time_it(budget, 500, || velu_xonly_fast(f, &w.e, x0, ell));
+        rec(o, "velu_xonly_fast", "codomain", true, tm);
+        let sv = sqrt_velu_fast(f, &w.e, x0, ell).unwrap();
+        let ok = sv.cod == reference.cod && sv.eval(f, &t) == img;
+        let tm = time_it(budget, 500, || sqrt_velu_fast(f, &w.e, x0, ell));
+        rec(o, "sqrt_velu_fast", "codomain", ok, tm);
+        let tm = time_it(budget, 500, || reference.eval(f, &t));
+        rec(o, "velu_xonly_fast", "eval_point", true, tm);
+        let tm = time_it(budget, 500, || sv.eval(f, &t));
+        rec(o, "sqrt_velu_fast", "eval_point", ok, tm);
+        if ell <= 1009 {
+            let ok = velu_cyclic(f, &w.e, &p, ell).cod == reference.cod;
+            let tm = time_it(budget, 500, || velu_cyclic(f, &w.e, &p, ell));
+            rec(o, "velu_points_affine", "codomain", ok, tm);
+            let (g, _) = kernel_poly_from_point_f(f, &w.e, &p, ell);
+            let ok = kohel(f, &w.e, &g, ell).cod == reference.cod;
+            let tm = time_it(budget, 500, || kohel(f, &w.e, &g, ell));
+            rec(o, "kohel_given_h", "codomain", ok, tm);
+            if ell <= 101 {
+                let et = reference.cod;
+                let d = g.len() - 1;
+                let sigma = f.neg(f.add(g[d - 1], g[d - 1]));
+                for m in [
+                    bmss::Method::LinearAlgebra,
+                    bmss::Method::Elkies1998,
+                    bmss::Method::FastElkies,
+                    bmss::Method::FastElkiesPrime,
+                ] {
+                    let s = if m.needs_sigma() { Some(sigma) } else { None };
+                    let ok = bmss::isogeny(f, m, &w.e, &et, ell as usize, s).map_or(false, |i| i.ker == g);
+                    let tm = time_it(budget, 200, || bmss::isogeny(f, m, &w.e, &et, ell as usize, s));
+                    rec(o, m.name(), "kernel_from_codomain", ok, tm);
+                }
+            }
+        }
+    }
+    // Montgomery curve y^2 = x^3 + x (A = 0, p + 1 points): projective Vélu vs sqrt-Velu
+    {
+        use isogeny_algos::kernel::montgomery as mg;
+        use isogeny_algos::kernel::sqrt_velu_mont::SqrtVeluMont;
+        let a = f.zero();
+        let k24 = mg::proj24(f, a);
+        let p1 = f.modulus().add_small(1);
+        for &(ell, _) in &w.pts {
+            let cof = p1.divrem_small(ell).0;
+            let kp = loop {
+                let x = f.random(&mut rng);
+                let k = mg::ladder_p(f, k24, (x, f.one()), &cof);
+                if !f.is_zero(k.1) {
+                    break k;
+                }
+            };
+            let d = ((ell - 1) / 2) as usize;
+            let velu = || {
+                let ms = mg::multiples_p(f, k24, kp, d);
+                let pre = mg::kernel_pre(f, &ms);
+                (mg::velu_codomain_p(f, k24, &pre, ell), pre)
+            };
+            let (kc, pre) = velu();
+            let a_ref = mg::affine_a(f, kc);
+            let u = f.random(&mut rng);
+            let img = mg::isog_xz_pre(f, &pre, (u, f.one()));
+            let img_aff = f.div(img.0, img.1);
+            let params = vec![
+                ("p_bits", bits.to_string()),
+                ("ell", ell.to_string()),
+                ("field", field.clone()),
+            ];
+            let rec = |o: &mut Out, algo: &str, task: &str, ok: bool, (m, mn, r): (f64, f64, usize)| {
+                let mut pr = params.clone();
+                pr.push(("task", task.to_string()));
+                pr.push(("model", "montgomery".to_string()));
+                o.rec("big", algo, &pr, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "");
+            };
+            let tm = time_it(budget, 500, velu);
+            rec(o, "velu_montgomery_projective", "codomain", true, tm);
+            let tm = time_it(budget, 500, || mg::isog_xz_pre(f, &pre, (u, f.one())));
+            rec(o, "velu_montgomery_projective", "eval_point", true, tm);
+            let sv = SqrtVeluMont::new(f, a, kp, ell).unwrap();
+            let ok = sv.codomain(f) == a_ref && sv.eval(f, u) == img_aff;
+            let tm = time_it(budget, 500, || {
+                let sv = SqrtVeluMont::new(f, a, kp, ell).unwrap();
+                sv.codomain_proj(f)
+            });
+            rec(o, "sqrt_velu_montgomery", "codomain", ok, tm);
+            let tm = time_it(budget, 500, || sv.eval_nd(f, u));
+            rec(o, "sqrt_velu_montgomery", "eval_point", ok, tm);
+        }
+    }
+    // Phi_l over the big field, and the neighbour oracle (roots of Phi_l(j, Y)) at a random j
+    if N <= 4 {
+        let j = jinv(f, &w.e);
+        for &ell in &[2usize, 3, 5, 7, 11, 13] {
+            let t0 = Instant::now();
+            let phi = Phi::compute(f, ell);
+            let t_phi = t0.elapsed().as_nanos() as f64;
+            let ns = phi.neighbors(f, j, &mut rng);
+            // supersingular over F_p: the F_p-rational neighbours are ell-isogenous: check Phi = 0
+            let ok = ns.iter().all(|&jn| f.is_zero(phi.eval(f, j, jn)));
+            let tm = time_it(budget, 200, || phi.neighbors(f, j, &mut rng.clone()));
+            o.rec(
+                "big",
+                "phi_neighbors",
+                &[("p_bits", bits.to_string()), ("ell", ell.to_string()), ("field", field.clone())],
+                &[
+                    ("median_ns", tm.0),
+                    ("min_ns", tm.1),
+                    ("reps", tm.2 as f64),
+                    ("phi_compute_ns", t_phi),
+                    ("rational_neighbors", ns.len() as f64),
+                ],
+                ok,
+                "roots of Phi_l(j, Y) by gcd with Y^p - Y and equal-degree splitting",
+            );
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1413,6 +1554,11 @@ fn main() {
             "csidh" => bench_csidh(&mut o),
             "v2path" => bench_v2path(&mut o),
             "p1kernel" => bench_p1kernel(&mut o),
+            "big" => {
+                let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
+                bench_big_field::<4>(&mut o, 256, ells, 14_000);
+                bench_big_field::<8>(&mut o, 511, ells, 14_001);
+            }
             "v2" => {
                 bench_kernel2(&mut o);
                 bench_chain(&mut o);

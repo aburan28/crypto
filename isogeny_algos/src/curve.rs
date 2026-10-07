@@ -90,6 +90,18 @@ pub fn pmul<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, mut k: u128) -> Pt<F
     r
 }
 
+/// [k]P for a big scalar.
+pub fn pmul_big<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, k: &crate::bigint::Big) -> Pt<F::E> {
+    let mut r = Pt::Inf;
+    for i in (0..k.bits()).rev() {
+        r = padd(f, c, &r, &r);
+        if k.bit(i) {
+            r = padd(f, c, &r, p);
+        }
+    }
+    r
+}
+
 /// Random affine point over any field of odd size.
 pub fn random_point_f<F: Field>(f: &F, c: &Curve<F::E>, rng: &mut Rng) -> Pt<F::E> {
     loop {
@@ -327,6 +339,16 @@ pub fn kernel_poly_from_point(
     p: &Pt<u64>,
     ell: u64,
 ) -> (Poly<Zp>, Vec<Pt<u64>>) {
+    kernel_poly_from_point_f(fp, c, p, ell)
+}
+
+/// `kernel_poly_from_point` over any field.
+pub fn kernel_poly_from_point_f<F: Field>(
+    fp: &F,
+    c: &Curve<F::E>,
+    p: &Pt<F::E>,
+    ell: u64,
+) -> (Poly<F>, Vec<Pt<F::E>>) {
     let n = ((ell - 1) / 2) as usize;
     let mut pts = Vec::with_capacity(n);
     let mut cur = *p;
@@ -334,7 +356,7 @@ pub fn kernel_poly_from_point(
         pts.push(cur);
         cur = padd(fp, c, &cur, p);
     }
-    let xs: Vec<u64> = pts
+    let xs: Vec<F::E> = pts
         .iter()
         .map(|q| match q {
             Pt::Aff(x, _) => *x,

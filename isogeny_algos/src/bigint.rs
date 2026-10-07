@@ -177,41 +177,149 @@ impl Ord for Big {
     }
 }
 
-/// Miller-Rabin for big integers (bases 2..=37 plus `extra` random bases); `n` odd > 3.
+/// Montgomery arithmetic with a runtime limb count (for primality tests on candidates of any size).
+struct MontRt {
+    n: Vec<u64>,
+    ninv: u64,
+}
+impl MontRt {
+    fn new(n: &Big) -> Self {
+        let mut inv = 1u64;
+        for _ in 0..6 {
+            inv = inv.wrapping_mul(2u64.wrapping_sub(n.0[0].wrapping_mul(inv)));
+        }
+        MontRt { n: n.0.clone(), ninv: inv.wrapping_neg() }
+    }
+    fn geq(a: &[u64], b: &[u64]) -> bool {
+        for i in (0..b.len()).rev() {
+            if a[i] != b[i] {
+                return a[i] > b[i];
+            }
+        }
+        true
+    }
+    fn sub_in(a: &mut [u64], b: &[u64]) {
+        let mut br = false;
+        for i in 0..b.len() {
+            let (d1, o1) = a[i].overflowing_sub(b[i]);
+            let (d2, o2) = d1.overflowing_sub(br as u64);
+            a[i] = d2;
+            br = o1 || o2;
+        }
+    }
+    /// 2a mod n for a < n.
+    fn dbl(&self, a: &mut [u64]) {
+        let mut c = 0u64;
+        for x in a.iter_mut() {
+            let nc = *x >> 63;
+            *x = (*x << 1) | c;
+            c = nc;
+        }
+        if c == 1 || Self::geq(a, &self.n) {
+            Self::sub_in(a, &self.n);
+        }
+    }
+    fn mul(&self, a: &[u64], b: &[u64]) -> Vec<u64> {
+        let k = self.n.len();
+        let mut t = vec![0u64; k + 2];
+        for i in 0..k {
+            let mut c: u128 = 0;
+            for j in 0..k {
+                let s = t[j] as u128 + a[j] as u128 * b[i] as u128 + c;
+                t[j] = s as u64;
+                c = s >> 64;
+            }
+            let s = t[k] as u128 + c;
+            t[k] = s as u64;
+            t[k + 1] = (s >> 64) as u64;
+            let m = t[0].wrapping_mul(self.ninv);
+            let mut c = (t[0] as u128 + m as u128 * self.n[0] as u128) >> 64;
+            for j in 1..k {
+                let s = t[j] as u128 + m as u128 * self.n[j] as u128 + c;
+                t[j - 1] = s as u64;
+                c = s >> 64;
+            }
+            let s = t[k] as u128 + c;
+            t[k - 1] = s as u64;
+            t[k] = t[k + 1] + (s >> 64) as u64;
+        }
+        let top = t[k];
+        t.truncate(k);
+        if top != 0 || Self::geq(&t, &self.n) {
+            Self::sub_in(&mut t, &self.n);
+        }
+        t
+    }
+}
+
+/// Small odd primes for trial division before Miller-Rabin.
+fn small_odd_primes() -> &'static [u64] {
+    use std::sync::OnceLock;
+    static P: OnceLock<Vec<u64>> = OnceLock::new();
+    P.get_or_init(|| (3u64..2000).step_by(2).filter(|&q| crate::field::is_prime(q)).collect())
+}
+
+/// Miller-Rabin for big integers (bases 2..=37) after trial division by the primes below 2000;
+/// Montgomery arithmetic with the candidate's own limb count. `n` odd > 3.
 pub fn is_probable_prime(n: &Big) -> bool {
     if let Some(v) = n.to_u128() {
         if v < (1u128 << 63) {
             return crate::field::is_prime(v as u64);
         }
     }
-    for &q in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+    if !n.bit(0) {
+        return false;
+    }
+    for &q in small_odd_primes() {
         if n.rem_small(q) == 0 {
             return false;
         }
     }
-    // n - 1 = d 2^s
+    let mt = MontRt::new(n);
+    let k = n.0.len();
+    // R mod n (Montgomery one) by doubling 1 64k times
+    let mut one = vec![0u64; k];
+    one[0] = 1;
+    for _ in 0..64 * k {
+        mt.dbl(&mut one);
+    }
+    // n - 1 = d 2^s; in Montgomery form, -1 is n - R
     let nm1 = n.sub_small(1);
     let mut s = 0;
     while !nm1.bit(s) {
         s += 1;
     }
     let d = nm1.shr(s);
-    let modmul = |a: &Big, b: &Big| -> Big { big_mod(&a.mul(b), n) };
+    let mut minus_one = n.0.clone();
+    MontRt::sub_in(&mut minus_one, &one);
     'outer: for &base in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        let mut x = Big::from_u64(1);
-        let b = Big::from_u64(base);
-        for i in (0..d.bits()).rev() {
-            x = modmul(&x, &x);
-            if d.bit(i) {
-                x = modmul(&x, &b);
+        // base R mod n = base * (R mod n) by additions
+        let mut b = vec![0u64; k];
+        for _ in 0..base {
+            let mut c = false;
+            for i in 0..k {
+                let (s1, o1) = b[i].overflowing_add(one[i]);
+                let (s2, o2) = s1.overflowing_add(c as u64);
+                b[i] = s2;
+                c = o1 || o2;
+            }
+            if c || MontRt::geq(&b, &mt.n) {
+                MontRt::sub_in(&mut b, &mt.n);
             }
         }
-        if x == Big::from_u64(1) || x == nm1 {
+        let mut x = one.clone();
+        for i in (0..d.bits()).rev() {
+            x = mt.mul(&x, &x);
+            if d.bit(i) {
+                x = mt.mul(&x, &b);
+            }
+        }
+        if x == one || x == minus_one {
             continue;
         }
         for _ in 0..s - 1 {
-            x = modmul(&x, &x);
-            if x == nm1 {
+            x = mt.mul(&x, &x);
+            if x == minus_one {
                 continue 'outer;
             }
         }
@@ -220,20 +328,25 @@ pub fn is_probable_prime(n: &Big) -> bool {
     true
 }
 
-/// a mod n by shift-and-subtract (slow; for setup only).
+/// a mod n by shift-and-subtract on preallocated limbs (setup only).
 pub fn big_mod(a: &Big, n: &Big) -> Big {
     if a < n {
         return a.clone();
     }
-    let mut r = Big::zero();
+    let k = n.0.len();
+    let mut r = vec![0u64; k + 1];
+    let mut nn = n.0.clone();
+    nn.push(0);
     for i in (0..a.bits()).rev() {
-        r = r.add(&r);
-        if a.bit(i) {
-            r = r.add_small(1);
+        let mut c = a.bit(i) as u64;
+        for x in r.iter_mut() {
+            let nc = *x >> 63;
+            *x = (*x << 1) | c;
+            c = nc;
         }
-        if r >= *n {
-            r = r.sub(n);
+        if MontRt::geq(&r, &nn) {
+            MontRt::sub_in(&mut r, &nn);
         }
     }
-    r
+    Big::from_limbs(&r)
 }

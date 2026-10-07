@@ -38,3 +38,27 @@ fn bingcd_inverse_matches_fermat() {
     // 64-bit prime with the top bit set (N = 1 but not the fast path)
     inv_checks(&FpM::<1>::from_dec("18446744073709551557"), &mut rng);
 }
+
+#[test]
+fn miller_rabin_known_values() {
+    use isogeny_algos::bigint::{is_probable_prime, Big};
+    let primes = [
+        "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+        "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+        "340282366920938463463374607431768211297",
+        "18446744073709551557",
+    ];
+    for p in primes {
+        assert!(is_probable_prime(&Big::from_dec(p)), "{p}");
+    }
+    let csidh = isogeny_algos::path::csidh::Csidh::<FpM<8>>::csidh512();
+    assert!(is_probable_prime(csidh.fp.modulus()));
+    // composites: products of two large primes, a strong pseudoprime to small bases scaled up
+    let p = Big::from_dec("18446744073709551557");
+    let q = Big::from_dec("340282366920938463463374607431768211297");
+    assert!(!is_probable_prime(&p.mul(&q)));
+    assert!(!is_probable_prime(&q.mul(&q)));
+    // 3825123056546413051: strong pseudoprime to bases 2..23 (below 2^63, so the u64 path decides)
+    assert!(!is_probable_prime(&Big::from_dec("3825123056546413051")));
+    assert!(!is_probable_prime(&csidh.fp.modulus().mul(&Big::from_dec("18446744073709551557"))));
+}

@@ -62,7 +62,7 @@ fn school<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
 /// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1.
 pub fn mul_raw<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
     let (a, b) = if a.len() >= b.len() { (a, b) } else { (b, a) };
-    if b.len() < KARATSUBA_THRESHOLD {
+    if b.len() < f.karatsuba_threshold() {
         return school(f, a, b);
     }
     if a.len() >= 2 * b.len() {
@@ -236,11 +236,15 @@ pub fn divrem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> (Poly<F>, Poly<F>) {
     if a.len() < b.len() {
         return (vec![], a.clone());
     }
-    let li = f.inv(*b.last().unwrap());
+    // monic divisors (subproduct-tree nodes, moduli) skip the inversion: ~90 multiplications'
+    // worth at 512 bits, paid once per node of a remainder tree
+    let lead = *b.last().unwrap();
+    let monic = lead == f.one();
+    let li = if monic { lead } else { f.inv(lead) };
     let mut r = a.clone();
     let mut q = vec![f.zero(); a.len() - b.len() + 1];
     for i in (0..q.len()).rev() {
-        let c = f.mul(r[i + b.len() - 1], li);
+        let c = if monic { r[i + b.len() - 1] } else { f.mul(r[i + b.len() - 1], li) };
         q[i] = c;
         if !f.is_zero(c) {
             for j in 0..b.len() {
