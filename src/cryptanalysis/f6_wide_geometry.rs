@@ -724,13 +724,9 @@ impl F6SignedPairIndex {
         per_chunk: impl Fn(&[SignedPairSum]) -> Option<[usize; 4]> + Sync,
     ) -> Option<[usize; 4]> {
         if self.sums.len() >= PARALLEL_QUERY_SUMS {
-            self.sums
-                .par_chunks(QUERY_BATCH)
-                .find_map_first(|chunk| per_chunk(chunk))
+            self.sums.par_chunks(QUERY_BATCH).find_map_first(&per_chunk)
         } else {
-            self.sums
-                .chunks(QUERY_BATCH)
-                .find_map(|chunk| per_chunk(chunk))
+            self.sums.chunks(QUERY_BATCH).find_map(&per_chunk)
         }
     }
 
