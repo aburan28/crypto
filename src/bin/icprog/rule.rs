@@ -1974,7 +1974,7 @@ impl Comparison {
         let mut rows = Vec::new();
         for (a, n) in SIZES {
             let slug = suite::curve_slug(a, n)?;
-            let path = self.runs.join(format!("pin/k{a}n{n}-T01.price.json"));
+            let path = self.runs.join(format!("pin/{slug}-T01.price.json"));
             let new = pin::untimed(&tools.ic, &self.row(a, n, 1)?, &path)?;
             let old = read(
                 &self

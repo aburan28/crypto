@@ -58,6 +58,9 @@ rho runs.
   given the same set-up as precomputation, the index calculus's online
   cost is 1.42–3.52 times that walk's (§23: 2.0–8.0×).
 - **Every target's online speedup is above 1,** at every size.
+- **In the progress chart's direction,** index calculus over rho, the
+  online cost is 0.038–0.098 of rho's, the reciprocals of the speedups
+  above: 0.0377 [0.0290, 0.0487] at `2^44.5`, the closest size.
 - **The A/A:** a target's second process over its first reads 0.63–1.60
   in online speedup. The online interval is short and noisy, which is why
   only the 64-target means are read.
@@ -107,7 +110,11 @@ figures move to v3's, with §23's kept beside them.
 | `manifests/` | the candidate, workload and rho manifests the claims cite |
 
 The claims point at their runs by path, so the tree is committed as it
-ran. `tests/icprog.rs` checks that `icprog rule analyse --comparison v3`
+ran, with one exception. The pin's six reports were written under each
+size's old directory stem. They are committed under their curves' slugs,
+as AGENTS.md §11 requires of new files, with their contents unchanged;
+nothing reads them by name, and `icprog rule pin` now writes the slug.
+`tests/icprog.rs` checks that `icprog rule analyse --comparison v3`
 writes [`analysis.json`](analysis.json) again, byte for byte.
 
 **The commands that ran,** from the protocol, with v3's `ic` and the

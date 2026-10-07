@@ -14,7 +14,7 @@
  "sources": {
   "docs/curves/registry.json": "d11d19fcb65175b8a8ad363b2c15ea87ccc733331d5c20b36cb0954901108c92",
   "docs/curves/covers.json": "e4d59ab26061ea2ab02a1f6e5f33c6cb02a4ae10277754a874cf1a4514887b79",
-  "docs/ic/leaderboard.json": "e05647cb0d8a79706e7f75b8ca86a470980a67a77e05629af69edc766b1e6b8c",
+  "docs/ic/leaderboard.json": "5d6acc5d268a5c33fe6e5d8eef9e88ffed8326feb37ee2f908d2e1fd92bdafb1",
   "research/ecbench_all_candidates_20261003/sessions/koblitz/records.jsonl": "f2f9037b630422aa5ccf4d2c268852bc87d491c4cfc5952fc8a0ff371100664c",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup/records.jsonl": "9777304a8050bf3ae4201dc985ca729e250117db4e00a97109889e6de64240d0",
   "research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/records.jsonl": "961d18b9c05face1afcf8e96db9cec8f45a0326319b2c65baecb27b633d72881",
@@ -6986,11 +6986,11 @@
     {
      "regime": "koblitz",
      "log2_r": 39.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 5.580644298617035,
-     "ratio_rho": 8.044290213253069,
-     "ratio_floor": 40.3210032810846,
+     "best_s": 11.16913986167439,
+     "ratio_rho": 7.657141173367715,
+     "ratio_floor": 80.69873314109438,
      "verified": true
     },
     {
@@ -7613,11 +7613,11 @@
     {
      "regime": "koblitz",
      "log2_r": 36.64,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 4.267748993706104,
-     "ratio_rho": 4.946769165949517,
-     "ratio_floor": 33.01435804053309,
+     "best_s": 9.506805780776906,
+     "ratio_rho": 5.2259258441371435,
+     "ratio_floor": 73.54253737303847,
      "verified": true
     },
     {
@@ -7789,11 +7789,11 @@
     {
      "regime": "koblitz",
      "log2_r": 44.26,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 7.398810637067995,
-     "ratio_rho": 14.703867319407847,
-     "ratio_floor": 60.779189777284564,
+     "best_s": 16.97618299454087,
+     "ratio_rho": 13.24099753697916,
+     "ratio_floor": 139.45466353062287,
      "verified": true
     },
     {
@@ -8002,11 +8002,11 @@
     {
      "regime": "koblitz",
      "log2_r": 38.0,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 8.12117350520502,
-     "ratio_rho": 1.9845626541276857,
-     "ratio_floor": 69.18489342115318,
+     "best_s": 11.014581514064941,
+     "ratio_rho": 6.121194064269396,
+     "ratio_floor": 93.8340558345144,
      "verified": true
     }
    ],
@@ -8115,11 +8115,11 @@
     {
      "regime": "koblitz",
      "log2_r": 44.52,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 9.032810277716749,
-     "ratio_rho": 15.668163853624774,
-     "ratio_floor": 78.2895782821557,
+     "best_s": 16.25703234767737,
+     "ratio_rho": 12.030889434458363,
+     "ratio_floor": 140.90367975056634,
      "verified": true
     }
    ],
@@ -8321,11 +8321,11 @@
     {
      "regime": "koblitz",
      "log2_r": 47.21,
-     "reference": "one-target rho on the same point, its set-up plus its walk (§23)",
+     "reference": "one-target rho on the same point, its set-up plus its walk (§23's rule, at baseline v3)",
      "best_recipe": "koblitz_one_target",
-     "best_s": 15.14900664715143,
-     "ratio_rho": 31.599405794913018,
-     "ratio_floor": 133.50702947303913,
+     "best_s": 24.931644865085715,
+     "ratio_rho": 20.970861959576446,
+     "ratio_floor": 219.72066706038663,
      "verified": true
     },
     {
