@@ -73,78 +73,71 @@ fn mod_u64(value: &BigInt, modulus: u64) -> u64 {
 
 fn sqrt_mod_prime(value: u64, prime: u64) -> Option<u64> {
     debug_assert!(prime > 2 && prime % 2 == 1);
-    let value = value % prime;
-    if value == 0 {
+    let residue = value % prime;
+    if residue == 0 {
         return Some(0);
     }
-    if pow_mod(value, (prime - 1) / 2, prime) != 1 {
+    if pow_mod(residue, (prime - 1) / 2, prime) != 1 {
         return None;
     }
     if prime % 4 == 3 {
-        let root = pow_mod(value, (prime + 1) / 4, prime);
+        let root = pow_mod(residue, (prime + 1) / 4, prime);
         return Some(root.min(prime - root));
     }
 
-    let mut odd = prime - 1;
-    let mut power = 0u32;
-    while odd.is_multiple_of(2) {
-        odd /= 2;
-        power += 1;
-    }
-    let non_residue =
+    let two_adic_order = (prime - 1).trailing_zeros();
+    let odd_part = (prime - 1) >> two_adic_order;
+    let quadratic_nonresidue =
         (2..prime).find(|candidate| pow_mod(*candidate, (prime - 1) / 2, prime) == prime - 1)?;
-    let mut c = pow_mod(non_residue, odd, prime);
-    let mut x = pow_mod(value, odd.div_ceil(2), prime);
-    let mut t = pow_mod(value, odd, prime);
-    let mut m = power;
-    while t != 1 {
-        let mut i = 1u32;
-        let mut probe = mul_mod(t, t, prime);
-        while probe != 1 {
-            probe = mul_mod(probe, probe, prime);
-            i += 1;
-            if i == m {
-                return None;
-            }
-        }
-        let b = pow_mod(c, 1u64 << (m - i - 1), prime);
-        x = mul_mod(x, b, prime);
-        let b_squared = mul_mod(b, b, prime);
-        t = mul_mod(t, b_squared, prime);
-        c = b_squared;
-        m = i;
+    let mut correction = pow_mod(quadratic_nonresidue, odd_part, prime);
+    let mut candidate = pow_mod(residue, odd_part.div_ceil(2), prime);
+    let mut residue_power = pow_mod(residue, odd_part, prime);
+    let mut active_order = two_adic_order;
+
+    while residue_power != 1 {
+        let vanishing_power =
+            (1..active_order).find(|power| pow_mod(residue_power, 1u64 << power, prime) == 1)?;
+        let adjustment = pow_mod(
+            correction,
+            1u64 << (active_order - vanishing_power - 1),
+            prime,
+        );
+        candidate = mul_mod(candidate, adjustment, prime);
+        correction = mul_mod(adjustment, adjustment, prime);
+        residue_power = mul_mod(residue_power, correction, prime);
+        active_order = vanishing_power;
     }
-    Some(x.min(prime - x))
+    Some(candidate.min(prime - candidate))
 }
 
 pub fn primes_through(limit: u64) -> Result<Vec<u64>> {
-    let len = usize::try_from(limit)
+    let maximum = usize::try_from(limit)
         .map_err(|_| "prime bound does not fit usize".to_owned())?
         .checked_add(1)
         .ok_or_else(|| "prime bound length overflow".to_owned())?;
-    let mut flags = vec![true; len];
-    if len > 0 {
-        flags[0] = false;
-    }
-    if len > 1 {
-        flags[1] = false;
-    }
-    let mut prime = 2usize;
-    while prime <= (len.saturating_sub(1)) / prime {
-        if flags[prime] {
-            let mut multiple = prime * prime;
-            while multiple < len {
-                flags[multiple] = false;
-                multiple += prime;
+    let mut composite = vec![false; maximum];
+    let mut primes = Vec::new();
+    for candidate in 2..maximum {
+        if !composite[candidate] {
+            primes.push(candidate);
+        }
+        for divisor in primes.iter().copied() {
+            let Some(multiple) = candidate.checked_mul(divisor) else {
+                break;
+            };
+            if multiple >= maximum {
+                break;
+            }
+            composite[multiple] = true;
+            if candidate.is_multiple_of(divisor) {
+                break;
             }
         }
-        prime += 1;
     }
-    Ok(flags
+    primes
         .into_iter()
-        .enumerate()
-        .filter_map(|(value, is_prime)| is_prime.then_some(value as u64))
-        .collect())
+        .map(|prime| u64::try_from(prime).map_err(|_| "prime does not fit u64".to_owned()))
+        .collect()
 }
 
 pub fn kronecker_at_prime(discriminant: &BigInt, prime: u64) -> i8 {

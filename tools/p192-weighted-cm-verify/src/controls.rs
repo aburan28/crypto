@@ -1,4 +1,4 @@
-use num_bigint::BigInt;
+use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use crate::{
         kronecker_at_prime, roots_for_prime, verify_manifest, FactorBaseEntry, VerifiedFactorBase,
     },
     ideal::{evaluate_candidate_segmented, factor_u64, is_prime_u64},
-    identity::C_DEC,
+    identity::{A_DEC, B_DEC, C_DEC, GX_HEX, GY_HEX},
     params::{self, CURVE_UID, LARGE_PRIME_BOUND},
     ref0::{pair_at, RegeneratedReference},
     Result,
@@ -140,7 +140,8 @@ pub struct VerifiedControls {
     pub results_sha256: [u8; 32],
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct D23Fixture {
     discriminant: i64,
     trace: i64,
@@ -159,7 +160,7 @@ struct D23Fixture {
     signed_coordinate: i64,
     principal_matrix: [[i64; 2]; 2],
     ideal_power_matrix: [[i64; 2]; 2],
-    signed_coordinate_sint: Vec<u8>,
+    signed_coordinate_sint_hex: String,
 }
 
 fn d23_fixture() -> D23Fixture {
@@ -181,7 +182,7 @@ fn d23_fixture() -> D23Fixture {
         signed_coordinate: -3,
         principal_matrix: [[1, -6], [1, 2]],
         ideal_power_matrix: [[8, -7], [0, 1]],
-        signed_coordinate_sint: hex::decode("020000000103").expect("frozen hex"),
+        signed_coordinate_sint_hex: "020000000103".to_owned(),
     }
 }
 
@@ -267,7 +268,7 @@ fn validate_d23(fixture: &D23Fixture) -> Result<()> {
     }
     let mut encoded = Vec::new();
     encode_sint(&BigInt::from(fixture.signed_coordinate), &mut encoded)?;
-    if encoded != fixture.signed_coordinate_sint {
+    if hex::encode(encoded) != fixture.signed_coordinate_sint_hex {
         return Err("D=-23 encoding replay failed".to_owned());
     }
     let expected_principal = [
@@ -309,6 +310,80 @@ fn validate_d23(fixture: &D23Fixture) -> Result<()> {
 
 fn verify_d23() -> Result<()> {
     validate_d23(&d23_fixture())
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MutationAlpha {
+    u: String,
+    v: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MutationRationalFactor {
+    ell: String,
+    exponent: u32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct D23MutationTarget {
+    selected_root: i64,
+    signed_coordinate: String,
+    alpha: MutationAlpha,
+    norm: String,
+    rational_factors: Vec<MutationRationalFactor>,
+    ideal_power_column_matrix_rows: [[i64; 2]; 2],
+    signed_coordinate_sint_hex: String,
+}
+
+fn d23_mutation_target() -> D23MutationTarget {
+    D23MutationTarget {
+        selected_root: 1,
+        signed_coordinate: "-3".to_owned(),
+        alpha: MutationAlpha {
+            u: "1".to_owned(),
+            v: "1".to_owned(),
+        },
+        norm: "8".to_owned(),
+        rational_factors: vec![MutationRationalFactor {
+            ell: "2".to_owned(),
+            exponent: 3,
+        }],
+        ideal_power_column_matrix_rows: [[8, -7], [0, 1]],
+        signed_coordinate_sint_hex: "020000000103".to_owned(),
+    }
+}
+
+fn d23_from_mutation_target(target: &D23MutationTarget) -> Result<D23Fixture> {
+    if target.rational_factors.len() != 1 || target.rational_factors[0].ell != "2" {
+        return Err("D=-23 mutation target has a noncanonical rational-factor list".to_owned());
+    }
+    let mut fixture = d23_fixture();
+    fixture.selected_root = target.selected_root;
+    fixture.signed_coordinate = target
+        .signed_coordinate
+        .parse()
+        .map_err(|_| "D=-23 signed coordinate is not an i64".to_owned())?;
+    fixture.alpha_u = target
+        .alpha
+        .u
+        .parse()
+        .map_err(|_| "D=-23 alpha.u is not an i64".to_owned())?;
+    fixture.alpha_v = target
+        .alpha
+        .v
+        .parse()
+        .map_err(|_| "D=-23 alpha.v is not an i64".to_owned())?;
+    fixture.norm = target
+        .norm
+        .parse()
+        .map_err(|_| "D=-23 norm is not an i64".to_owned())?;
+    fixture.rational_exponent = target.rational_factors[0].exponent;
+    fixture.ideal_power_matrix = target.ideal_power_column_matrix_rows;
+    fixture.signed_coordinate_sint_hex = target.signed_coordinate_sint_hex.clone();
+    Ok(fixture)
 }
 
 #[derive(Clone, Debug)]
@@ -381,17 +456,18 @@ fn verify_sqrt_d(factor_base: &VerifiedFactorBase) -> Result<()> {
         return Err("P-192 sqrt(D) alpha arithmetic failed".to_owned());
     }
     let c = params::bigint(C_DEC, "C")?;
+    let subgroup_order = params::subgroup_order();
     if abs_d != BigInt::from(5u8) * 11u8 * 31u8 * &c {
         return Err("P-192 sqrt(D) factorization failed".to_owned());
     }
-    if c <= BigInt::from(params::MAPPABLE_BOUND)
-        || factor_base
-            .manifest
-            .entries
-            .iter()
-            .any(|entry| BigInt::from(entry.ell) == c)
-        || v.is_zero()
-    {
+    let c_in_factor_base = factor_base
+        .manifest
+        .entries
+        .iter()
+        .any(|entry| BigInt::from(entry.ell) == c);
+    let action =
+        derive_sqrt_d_subgroup_action(&u, &v, &subgroup_order, &c, c_in_factor_base, false)?;
+    if action.action_admitted {
         return Err("unavailable C-degree edge/scalar action was not rejected".to_owned());
     }
     for prime in [5u64, 11, 31] {
@@ -418,6 +494,97 @@ fn verify_sqrt_d(factor_base: &VerifiedFactorBase) -> Result<()> {
         )?;
     }
     Ok(())
+}
+
+const SQRT_D_SUBGROUP_SCALAR_DEC: &str =
+    "6277101735386680763835789423144451611450480845975359606884";
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SqrtDActionAssessment {
+    scalar_action: BigInt,
+    action_admitted: bool,
+}
+
+fn p192_generator_is_fixed_by_frobenius() -> Result<bool> {
+    let p = params::biguint(params::P_DEC, "p")?;
+    let a = params::biguint(A_DEC, "a")?;
+    let b = params::biguint(B_DEC, "b")?;
+    let x = BigUint::parse_bytes(GX_HEX.as_bytes(), 16)
+        .ok_or_else(|| "invalid frozen P-192 generator x".to_owned())?;
+    let y = BigUint::parse_bytes(GY_HEX.as_bytes(), 16)
+        .ok_or_else(|| "invalid frozen P-192 generator y".to_owned())?;
+    if x >= p || y >= p {
+        return Ok(false);
+    }
+    let on_curve =
+        y.modpow(&BigUint::from(2u8), &p) == (x.modpow(&BigUint::from(3u8), &p) + &a * &x + b) % &p;
+    let frobenius_x = x.modpow(&p, &p);
+    let frobenius_y = y.modpow(&p, &p);
+    Ok(on_curve && frobenius_x == x && frobenius_y == y)
+}
+
+fn derive_sqrt_d_subgroup_action(
+    u: &BigInt,
+    v: &BigInt,
+    subgroup_order: &BigInt,
+    c: &BigInt,
+    c_in_factor_base: bool,
+    c_degree_map_available: bool,
+) -> Result<SqrtDActionAssessment> {
+    let p = params::p();
+    let t = params::t();
+    let d = params::d();
+    if subgroup_order <= &BigInt::one() || &p + 1u8 - &t != *subgroup_order {
+        return Err("sqrt(D) subgroup order does not equal p+1-t".to_owned());
+    }
+    if u != &-&t || v != &BigInt::from(2u8) {
+        return Err("sqrt(D) coordinates are not (-t,2) in the (1,pi) basis".to_owned());
+    }
+    let norm = u * u + &t * u * v + &p * v * v;
+    if norm != -&d {
+        return Err("sqrt(D) coordinate norm is not |D|".to_owned());
+    }
+
+    // Every point in the named subgroup is F_p-rational, so arithmetic
+    // Frobenius fixes it.  Check that fact on the independently compiled
+    // generator, then check lambda_pi=1 in X^2-tX+p modulo n rather than
+    // assuming the endomorphism's scalar label.
+    if !p192_generator_is_fixed_by_frobenius()? {
+        return Err("P-192 generator is not fixed by p-power Frobenius".to_owned());
+    }
+    let lambda_pi = BigInt::one();
+    let characteristic = &lambda_pi * &lambda_pi - &t * &lambda_pi + &p;
+    if !characteristic.mod_floor(subgroup_order).is_zero() {
+        return Err(
+            "Frobenius scalar 1 does not satisfy its characteristic polynomial mod n".to_owned(),
+        );
+    }
+
+    let scalar_action = (u + v * &lambda_pi).mod_floor(subgroup_order);
+    let expected = params::bigint(SQRT_D_SUBGROUP_SCALAR_DEC, "sqrt(D) subgroup scalar")?;
+    if scalar_action <= BigInt::zero()
+        || scalar_action >= *subgroup_order
+        || scalar_action != expected
+        || !(&scalar_action * &scalar_action - &d)
+            .mod_floor(subgroup_order)
+            .is_zero()
+    {
+        return Err("derived sqrt(D) subgroup scalar action is inconsistent".to_owned());
+    }
+
+    let large_prime_bound = BigInt::from(params::LARGE_PRIME_BOUND);
+    let large_prime_bound_squared = &large_prime_bound * &large_prime_bound;
+    if c <= &BigInt::from(params::MAPPABLE_BOUND)
+        || c <= &large_prime_bound_squared
+        || c_in_factor_base
+        || c_degree_map_available
+    {
+        return Err("C-degree sqrt(D) action unexpectedly became mappable or available".to_owned());
+    }
+    Ok(SqrtDActionAssessment {
+        scalar_action,
+        action_admitted: false,
+    })
 }
 
 fn verify_inert_rejection(factor_base: &VerifiedFactorBase) -> Result<()> {
@@ -471,7 +638,8 @@ fn validate_retained_residual_prime(prime: u64) -> Result<()> {
     Ok(())
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct LpFixture {
     q: u64,
     discriminant_residue: u64,
@@ -479,6 +647,38 @@ struct LpFixture {
     larger_root: u64,
     sign: u8,
     multiplicity: u64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LpMutationTarget {
+    q: u64,
+    smaller_root: u64,
+    larger_root: u64,
+    sign: u8,
+    multiplicity: u64,
+}
+
+fn lp_mutation_target() -> LpMutationTarget {
+    let fixture = lp_fixture(1);
+    LpMutationTarget {
+        q: fixture.q,
+        smaller_root: fixture.smaller_root,
+        larger_root: fixture.larger_root,
+        sign: fixture.sign,
+        multiplicity: fixture.multiplicity,
+    }
+}
+
+fn lp_from_mutation_target(target: &LpMutationTarget) -> LpFixture {
+    LpFixture {
+        q: target.q,
+        discriminant_residue: 2_121_375_023,
+        smaller_root: target.smaller_root,
+        larger_root: target.larger_root,
+        sign: target.sign,
+        multiplicity: target.multiplicity,
+    }
 }
 
 fn lp_fixture(sign: u8) -> LpFixture {
@@ -512,65 +712,482 @@ fn validate_lp(fixture: &LpFixture) -> Result<()> {
     Ok(())
 }
 
-fn mutation_envelope_hash<T: Serialize>(fixture_kind: &str, fixture: &T) -> Result<[u8; 32]> {
-    let value = serde_json::json!({
-        "fixture": fixture,
-        "fixture_kind": fixture_kind,
-        "schema": "p192-wcm-control-mutation-envelope-v1",
+const MUTATION_FILE_SCHEMA: &str = "p192-wcm-implementation-mutation-file-v1";
+const MUTATION_RECORD_DOMAIN: &[u8] = b"P192-WCM-MUTATION-RECORD-v1\0";
+const MUTATION_FILE_DOMAIN: &[u8] = b"P192-WCM-MUTATION-FILE-v1\0";
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MutationRecord {
+    mutation_id: String,
+    fixture_kind: String,
+    target_field_path: String,
+    fixture: serde_json::Value,
+    record_sha256: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MutationFile {
+    schema: String,
+    records: Vec<MutationRecord>,
+    file_sha256: String,
+}
+
+#[derive(Clone, Debug)]
+struct MutationSpec {
+    mutation_id: &'static str,
+    fixture_kind: &'static str,
+    target_field_path: &'static str,
+    carrier_field_path: &'static str,
+    before: serde_json::Value,
+    after: serde_json::Value,
+    base_fixture: serde_json::Value,
+    mutated_fixture: serde_json::Value,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+struct MutationReplayEvidence {
+    cases: u64,
+    mutation_identities: Vec<(&'static str, &'static str)>,
+    exact_single_scalar_changes: u64,
+    stale_record_hash_rejections: u64,
+    stale_file_hash_rejections: u64,
+    recomputed_hash_chain_acceptances: u64,
+    semantic_rejections_after_hash_acceptance: u64,
+}
+
+const EXPECTED_MUTATION_IDENTITIES: &[(&str, &str)] = &[
+    (
+        "root",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/selected_root",
+    ),
+    (
+        "orientation_sign",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate",
+    ),
+    (
+        "exponent",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate",
+    ),
+    (
+        "alpha_u",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/alpha/u",
+    ),
+    (
+        "norm",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/norm",
+    ),
+    (
+        "rational_factor_exponent",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/rational_factors/0/exponent",
+    ),
+    (
+        "lp_smaller_root",
+        "/role1_interface_addendum/role1_control_fixtures/LP-BOUNDARY/endpoint_fixtures/1/smaller_root",
+    ),
+    (
+        "hnf_matrix_entry",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/ideal_power_column_matrix_rows/0/1",
+    ),
+    (
+        "sint_sign_byte",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate_sint_hex",
+    ),
+];
+
+fn mutation_record_sha256(record: &MutationRecord) -> Result<String> {
+    let projection = serde_json::json!({
+        "fixture": &record.fixture,
+        "fixture_kind": &record.fixture_kind,
+        "mutation_id": &record.mutation_id,
+        "target_field_path": &record.target_field_path,
     });
-    Ok(sha256(&canonical_json(&value)?))
+    let mut bytes = MUTATION_RECORD_DOMAIN.to_vec();
+    bytes.extend_from_slice(&canonical_json(&projection)?);
+    Ok(hex::encode(sha256(&bytes)))
+}
+
+fn mutation_file_sha256(file: &MutationFile) -> Result<String> {
+    let projection = serde_json::json!({
+        "records": &file.records,
+        "schema": &file.schema,
+    });
+    let mut bytes = MUTATION_FILE_DOMAIN.to_vec();
+    bytes.extend_from_slice(&canonical_json(&projection)?);
+    Ok(hex::encode(sha256(&bytes)))
+}
+
+fn seal_mutation_file(spec: &MutationSpec, fixture: serde_json::Value) -> Result<Vec<u8>> {
+    let mut record = MutationRecord {
+        mutation_id: spec.mutation_id.to_owned(),
+        fixture_kind: spec.fixture_kind.to_owned(),
+        target_field_path: spec.target_field_path.to_owned(),
+        fixture,
+        record_sha256: String::new(),
+    };
+    record.record_sha256 = mutation_record_sha256(&record)?;
+    let mut file = MutationFile {
+        schema: MUTATION_FILE_SCHEMA.to_owned(),
+        records: vec![record],
+        file_sha256: String::new(),
+    };
+    file.file_sha256 = mutation_file_sha256(&file)?;
+    canonical_json(&serde_json::to_value(file).map_err(|error| error.to_string())?)
+}
+
+fn verify_mutation_hash_chain(bytes: &[u8]) -> Result<MutationFile> {
+    let value = parse_canonical_json(bytes)?;
+    let file: MutationFile =
+        serde_json::from_value(value).map_err(|error| format!("mutation file schema: {error}"))?;
+    if file.schema != MUTATION_FILE_SCHEMA || file.records.len() != 1 {
+        return Err("mutation file envelope is noncanonical".to_owned());
+    }
+    let record = &file.records[0];
+    if record.record_sha256 != mutation_record_sha256(record)? {
+        return Err("mutation record hash mismatch".to_owned());
+    }
+    if file.file_sha256 != mutation_file_sha256(&file)? {
+        return Err("mutation file hash mismatch".to_owned());
+    }
+    Ok(file)
+}
+
+fn json_pointer_escape(key: &str) -> String {
+    key.replace('~', "~0").replace('/', "~1")
+}
+
+fn scalar_differences(
+    before: &serde_json::Value,
+    after: &serde_json::Value,
+    path: &str,
+    differences: &mut Vec<(String, serde_json::Value, serde_json::Value)>,
+) -> Result<()> {
+    match (before, after) {
+        (serde_json::Value::Object(left), serde_json::Value::Object(right)) => {
+            if left.keys().collect::<Vec<_>>() != right.keys().collect::<Vec<_>>() {
+                return Err("mutation changed the carrier object shape".to_owned());
+            }
+            for (key, left_value) in left {
+                let right_value = right
+                    .get(key)
+                    .ok_or_else(|| "mutation removed a carrier field".to_owned())?;
+                scalar_differences(
+                    left_value,
+                    right_value,
+                    &format!("{path}/{}", json_pointer_escape(key)),
+                    differences,
+                )?;
+            }
+        }
+        (serde_json::Value::Array(left), serde_json::Value::Array(right)) => {
+            if left.len() != right.len() {
+                return Err("mutation changed the carrier array length".to_owned());
+            }
+            for (index, (left_value, right_value)) in left.iter().zip(right).enumerate() {
+                scalar_differences(
+                    left_value,
+                    right_value,
+                    &format!("{path}/{index}"),
+                    differences,
+                )?;
+            }
+        }
+        (left, right)
+            if left.is_object() || left.is_array() || right.is_object() || right.is_array() =>
+        {
+            return Err("mutation changed a scalar into a container or vice versa".to_owned());
+        }
+        (left, right) if left != right => {
+            differences.push((path.to_owned(), left.clone(), right.clone()));
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn exact_frozen_scalar_change(spec: &MutationSpec) -> Result<()> {
+    let mut differences = Vec::new();
+    scalar_differences(
+        &spec.base_fixture,
+        &spec.mutated_fixture,
+        "",
+        &mut differences,
+    )?;
+    if differences
+        != vec![(
+            spec.carrier_field_path.to_owned(),
+            spec.before.clone(),
+            spec.after.clone(),
+        )]
+    {
+        return Err(format!(
+            "mutation {} did not change exactly its frozen scalar",
+            spec.mutation_id
+        ));
+    }
+    Ok(())
+}
+
+fn mutation_semantically_rejected(record: &MutationRecord) -> Result<bool> {
+    match record.fixture_kind.as_str() {
+        "D23-ORDER3" => {
+            let target: D23MutationTarget = serde_json::from_value(record.fixture.clone())
+                .map_err(|error| format!("D=-23 mutation target schema: {error}"))?;
+            Ok(d23_from_mutation_target(&target)
+                .and_then(|fixture| validate_d23(&fixture))
+                .is_err())
+        }
+        "LP-BOUNDARY" => {
+            let target: LpMutationTarget = serde_json::from_value(record.fixture.clone())
+                .map_err(|error| format!("LP mutation target schema: {error}"))?;
+            Ok(validate_lp(&lp_from_mutation_target(&target)).is_err())
+        }
+        _ => Err("unknown mutation fixture kind".to_owned()),
+    }
+}
+
+fn mutation_specs(
+    d23_base: D23MutationTarget,
+    lp_base: LpMutationTarget,
+) -> Result<Vec<MutationSpec>> {
+    let d23_value = serde_json::to_value(&d23_base).map_err(|error| error.to_string())?;
+    let mut specs = Vec::new();
+    let push_d23 = |specs: &mut Vec<MutationSpec>,
+                    mutation_id,
+                    target_field_path,
+                    carrier_field_path,
+                    before,
+                    after,
+                    mutated: D23MutationTarget|
+     -> Result<()> {
+        specs.push(MutationSpec {
+            mutation_id,
+            fixture_kind: "D23-ORDER3",
+            target_field_path,
+            carrier_field_path,
+            before,
+            after,
+            base_fixture: d23_value.clone(),
+            mutated_fixture: serde_json::to_value(mutated).map_err(|error| error.to_string())?,
+        });
+        Ok(())
+    };
+
+    let mut mutated = d23_base.clone();
+    mutated.selected_root = 0;
+    push_d23(
+        &mut specs,
+        "root",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/selected_root",
+        "/selected_root",
+        serde_json::json!(1),
+        serde_json::json!(0),
+        mutated,
+    )?;
+    let mut mutated = d23_base.clone();
+    mutated.signed_coordinate = "3".to_owned();
+    push_d23(
+        &mut specs,
+        "orientation_sign",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate",
+        "/signed_coordinate",
+        serde_json::json!("-3"),
+        serde_json::json!("3"),
+        mutated,
+    )?;
+    let mut mutated = d23_base.clone();
+    mutated.signed_coordinate = "-2".to_owned();
+    push_d23(
+        &mut specs,
+        "exponent",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate",
+        "/signed_coordinate",
+        serde_json::json!("-3"),
+        serde_json::json!("-2"),
+        mutated,
+    )?;
+    let mut mutated = d23_base.clone();
+    mutated.alpha.u = "2".to_owned();
+    push_d23(
+        &mut specs,
+        "alpha_u",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/alpha/u",
+        "/alpha/u",
+        serde_json::json!("1"),
+        serde_json::json!("2"),
+        mutated,
+    )?;
+    let mut mutated = d23_base.clone();
+    mutated.norm = "4".to_owned();
+    push_d23(
+        &mut specs,
+        "norm",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/norm",
+        "/norm",
+        serde_json::json!("8"),
+        serde_json::json!("4"),
+        mutated,
+    )?;
+    let mut mutated = d23_base.clone();
+    mutated.rational_factors[0].exponent = 2;
+    push_d23(
+        &mut specs,
+        "rational_factor_exponent",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/rational_factors/0/exponent",
+        "/rational_factors/0/exponent",
+        serde_json::json!(3),
+        serde_json::json!(2),
+        mutated,
+    )?;
+
+    let lp_value = serde_json::to_value(&lp_base).map_err(|error| error.to_string())?;
+    let mut mutated = lp_base;
+    mutated.smaller_root = 1_109_020_143;
+    specs.push(MutationSpec {
+        mutation_id: "lp_smaller_root",
+        fixture_kind: "LP-BOUNDARY",
+        target_field_path: "/role1_interface_addendum/role1_control_fixtures/LP-BOUNDARY/endpoint_fixtures/1/smaller_root",
+        carrier_field_path: "/smaller_root",
+        before: serde_json::json!(1_109_020_142u64),
+        after: serde_json::json!(1_109_020_143u64),
+        base_fixture: lp_value,
+        mutated_fixture: serde_json::to_value(mutated).map_err(|error| error.to_string())?,
+    });
+
+    let mut mutated = d23_base.clone();
+    mutated.ideal_power_column_matrix_rows[0][1] = -6;
+    push_d23(
+        &mut specs,
+        "hnf_matrix_entry",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/ideal_power_column_matrix_rows/0/1",
+        "/ideal_power_column_matrix_rows/0/1",
+        serde_json::json!(-7),
+        serde_json::json!(-6),
+        mutated,
+    )?;
+    let mut mutated = d23_base;
+    mutated.signed_coordinate_sint_hex = "010000000103".to_owned();
+    push_d23(
+        &mut specs,
+        "sint_sign_byte",
+        "/role1_interface_addendum/role1_control_fixtures/D23-ORDER3/mutation_target_record/signed_coordinate_sint_hex",
+        "/signed_coordinate_sint_hex",
+        serde_json::json!("020000000103"),
+        serde_json::json!("010000000103"),
+        mutated,
+    )?;
+
+    Ok(specs)
+}
+
+fn replay_mutation_rejections() -> Result<MutationReplayEvidence> {
+    replay_mutation_rejections_with_bases(d23_mutation_target(), lp_mutation_target())
+}
+
+fn replay_mutation_rejections_with_bases(
+    d23_base: D23MutationTarget,
+    lp_base: LpMutationTarget,
+) -> Result<MutationReplayEvidence> {
+    validate_d23(&d23_fixture())?;
+    validate_lp(&lp_fixture(1))?;
+    validate_d23(&d23_from_mutation_target(&d23_base)?)
+        .map_err(|error| format!("frozen D23 mutation base fixture failed replay: {error}"))?;
+    validate_lp(&lp_from_mutation_target(&lp_base))
+        .map_err(|error| format!("frozen LP mutation base fixture failed replay: {error}"))?;
+    let mut evidence = MutationReplayEvidence::default();
+    for spec in mutation_specs(d23_base, lp_base)? {
+        evidence.cases += 1;
+        exact_frozen_scalar_change(&spec)?;
+        evidence.exact_single_scalar_changes += 1;
+
+        let base_bytes = seal_mutation_file(&spec, spec.base_fixture.clone())?;
+        let mut stale_record: MutationFile = serde_json::from_slice(&base_bytes)
+            .map_err(|error| format!("parse sealed mutation file: {error}"))?;
+        stale_record.records[0].fixture = spec.mutated_fixture.clone();
+        let stale_record_bytes = canonical_json(
+            &serde_json::to_value(stale_record).map_err(|error| error.to_string())?,
+        )?;
+        match verify_mutation_hash_chain(&stale_record_bytes) {
+            Err(error) if error == "mutation record hash mismatch" => {}
+            Ok(_) => {
+                return Err(format!(
+                    "mutation {} passed with a stale record hash",
+                    spec.mutation_id
+                ));
+            }
+            Err(error) => {
+                return Err(format!(
+                    "mutation {} stale record hash failed at the wrong gate: {error}",
+                    spec.mutation_id
+                ));
+            }
+        }
+        evidence.stale_record_hash_rejections += 1;
+
+        let mut stale_file: MutationFile = serde_json::from_slice(&base_bytes)
+            .map_err(|error| format!("parse sealed mutation file: {error}"))?;
+        stale_file.records[0].fixture = spec.mutated_fixture.clone();
+        stale_file.records[0].record_sha256 = mutation_record_sha256(&stale_file.records[0])?;
+        let stale_file_bytes =
+            canonical_json(&serde_json::to_value(stale_file).map_err(|error| error.to_string())?)?;
+        match verify_mutation_hash_chain(&stale_file_bytes) {
+            Err(error) if error == "mutation file hash mismatch" => {}
+            Ok(_) => {
+                return Err(format!(
+                    "mutation {} passed with a stale file hash",
+                    spec.mutation_id
+                ));
+            }
+            Err(error) => {
+                return Err(format!(
+                    "mutation {} stale file hash failed at the wrong gate: {error}",
+                    spec.mutation_id
+                ));
+            }
+        }
+        evidence.stale_file_hash_rejections += 1;
+
+        let rehashed_bytes = seal_mutation_file(&spec, spec.mutated_fixture.clone())?;
+        let rehashed = verify_mutation_hash_chain(&rehashed_bytes)?;
+        evidence.recomputed_hash_chain_acceptances += 1;
+        let record = &rehashed.records[0];
+        if record.mutation_id != spec.mutation_id
+            || record.fixture_kind != spec.fixture_kind
+            || record.target_field_path != spec.target_field_path
+            || record.fixture != spec.mutated_fixture
+        {
+            return Err(format!(
+                "mutation {} changed identity after hashing",
+                spec.mutation_id
+            ));
+        }
+        evidence
+            .mutation_identities
+            .push((spec.mutation_id, spec.target_field_path));
+        if !mutation_semantically_rejected(record)? {
+            return Err(format!(
+                "mutation {} passed semantic replay after its hash chain was recomputed",
+                spec.mutation_id
+            ));
+        }
+        evidence.semantic_rejections_after_hash_acceptance += 1;
+    }
+    Ok(evidence)
 }
 
 fn verify_mutation_rejection() -> Result<()> {
-    validate_d23(&d23_fixture())?;
-    let base = d23_fixture();
-    let base_hash = mutation_envelope_hash("D23-ORDER3", &base)?;
-    let mut mutations = Vec::new();
-    let mut fixture = base.clone();
-    fixture.selected_root = 0;
-    mutations.push(("root", fixture));
-    let mut fixture = base.clone();
-    fixture.signed_coordinate = 3;
-    mutations.push(("orientation_sign", fixture));
-    let mut fixture = base.clone();
-    fixture.signed_coordinate = -2;
-    mutations.push(("exponent", fixture));
-    let mut fixture = base.clone();
-    fixture.alpha_u = 2;
-    mutations.push(("alpha_u", fixture));
-    let mut fixture = base.clone();
-    fixture.norm = 4;
-    mutations.push(("norm", fixture));
-    let mut fixture = base.clone();
-    fixture.rational_exponent = 2;
-    mutations.push(("rational_factor_exponent", fixture));
-    let mut fixture = base.clone();
-    fixture.ideal_power_matrix[0][1] = -6;
-    mutations.push(("hnf_matrix_entry", fixture));
-    let mut fixture = base;
-    fixture.signed_coordinate_sint = hex::decode("010000000103").expect("frozen hex");
-    mutations.push(("sint_sign_byte", fixture));
-    for (mutation, fixture) in mutations {
-        let mutated_hash = mutation_envelope_hash("D23-ORDER3", &fixture)?;
-        if mutated_hash == base_hash {
-            return Err(format!(
-                "D=-23 mutation {mutation} did not change its recomputed envelope hash"
-            ));
-        }
-        if validate_d23(&fixture).is_ok() {
-            return Err(format!("D=-23 mutation {mutation} was accepted"));
-        }
-    }
-
-    let mut lp = lp_fixture(1);
-    validate_lp(&lp)?;
-    let lp_hash = mutation_envelope_hash("LP-BOUNDARY", &lp)?;
-    lp.smaller_root = 1_109_020_143;
-    if mutation_envelope_hash("LP-BOUNDARY", &lp)? == lp_hash {
-        return Err("LP mutation did not change its recomputed envelope hash".to_owned());
-    }
-    if validate_lp(&lp).is_ok() {
-        return Err("LP smaller-root endpoint mutation was accepted".to_owned());
+    let evidence = replay_mutation_rejections()?;
+    let expected = evidence.cases;
+    if expected != 9
+        || evidence.mutation_identities != EXPECTED_MUTATION_IDENTITIES
+        || evidence.exact_single_scalar_changes != expected
+        || evidence.stale_record_hash_rejections != expected
+        || evidence.stale_file_hash_rejections != expected
+        || evidence.recomputed_hash_chain_acceptances != expected
+        || evidence.semantic_rejections_after_hash_acceptance != expected
+    {
+        return Err("mutation replay evidence is incomplete".to_owned());
     }
     Ok(())
 }
@@ -971,11 +1588,37 @@ mod tests {
     fn d23_and_lp_boundary_replay() {
         verify_d23().unwrap();
         verify_mutation_rejection().unwrap();
+        let evidence = replay_mutation_rejections().unwrap();
+        assert_eq!(evidence.cases, 9);
+        assert_eq!(
+            evidence.mutation_identities.as_slice(),
+            EXPECTED_MUTATION_IDENTITIES
+        );
+        assert_eq!(evidence.exact_single_scalar_changes, 9);
+        assert_eq!(evidence.stale_record_hash_rejections, 9);
+        assert_eq!(evidence.stale_file_hash_rejections, 9);
+        assert_eq!(evidence.recomputed_hash_chain_acceptances, 9);
+        assert_eq!(evidence.semantic_rejections_after_hash_acceptance, 9);
         verify_lp_cancellation().unwrap();
         verify_lp_boundary().unwrap();
         let mut wrong_conjugate = lp_fixture(2);
         wrong_conjugate.larger_root -= 1;
         assert!(validate_lp_cancellation(&[lp_fixture(1), wrong_conjugate], true).is_err());
+
+        let mut held_fixed_d23 = d23_mutation_target();
+        held_fixed_d23.alpha.v = "2".to_owned();
+        assert!(
+            replay_mutation_rejections_with_bases(held_fixed_d23, lp_mutation_target())
+                .unwrap_err()
+                .starts_with("frozen D23 mutation base fixture failed replay:")
+        );
+        let mut held_fixed_lp = lp_mutation_target();
+        held_fixed_lp.larger_root -= 1;
+        assert!(
+            replay_mutation_rejections_with_bases(d23_mutation_target(), held_fixed_lp)
+                .unwrap_err()
+                .starts_with("frozen LP mutation base fixture failed replay:")
+        );
     }
 
     #[test]
@@ -998,6 +1641,31 @@ mod tests {
             sha256: [0u8; 32],
         };
         verify_sqrt_d(&factor_base).unwrap();
+        let c = params::bigint(C_DEC, "C").unwrap();
+        let u = -params::t();
+        let v = BigInt::from(2u8);
+        let action =
+            derive_sqrt_d_subgroup_action(&u, &v, &params::subgroup_order(), &c, false, false)
+                .unwrap();
+        assert_eq!(action.scalar_action.to_string(), SQRT_D_SUBGROUP_SCALAR_DEC);
+        assert!(!action.action_admitted);
+        let mut wrong_u = u.clone();
+        wrong_u += 1u8;
+        assert!(derive_sqrt_d_subgroup_action(
+            &wrong_u,
+            &v,
+            &params::subgroup_order(),
+            &c,
+            false,
+            false,
+        )
+        .is_err());
+        let wrong_n = params::subgroup_order() - 1u8;
+        assert!(derive_sqrt_d_subgroup_action(&u, &v, &wrong_n, &c, false, false).is_err());
+        assert!(
+            derive_sqrt_d_subgroup_action(&u, &v, &params::subgroup_order(), &c, false, true,)
+                .is_err()
+        );
         verify_inert_rejection(&factor_base).unwrap();
         let marks = segmented_factor_marks(&factor_base).unwrap();
         let marked_index = marks

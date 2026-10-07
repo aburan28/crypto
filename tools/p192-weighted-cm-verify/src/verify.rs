@@ -1,7 +1,7 @@
 use std::{
     collections::BTreeSet,
     fs::{self, OpenOptions},
-    io::Write,
+    io::{Read, Write},
     path::{Component, Path, PathBuf},
 };
 
@@ -54,6 +54,23 @@ const PRODUCER_CHECK_IDS: [&str; 11] = [
     "ref0_certificate_store",
     "source_commit_consistent",
 ];
+
+fn running_verifier_digest() -> Result<[u8; 32]> {
+    #[cfg(target_os = "linux")]
+    {
+        let mut image = fs::File::open("/proc/self/exe")
+            .map_err(|error| format!("open running verifier image: {error}"))?;
+        let mut bytes = Vec::new();
+        image
+            .read_to_end(&mut bytes)
+            .map_err(|error| format!("stream running verifier image: {error}"))?;
+        Ok(sha256(&bytes))
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Err("running verifier image hashing requires Linux /proc/self/exe".to_owned())
+    }
+}
 
 const INDEPENDENT_CHECK_IDS: [&str; 15] = [
     "source_inventory_complete",
@@ -425,14 +442,11 @@ pub fn run_preflight(source: &Path, output: &Path) -> Result<()> {
     if output.exists() {
         return Err("independent-verification.json already exists".to_owned());
     }
-    let executable =
-        std::env::current_exe().map_err(|error| format!("resolve verifier executable: {error}"))?;
-    let executable_bytes =
-        fs::read(&executable).map_err(|error| format!("read {}: {error}", executable.display()))?;
+    let verifier_binary_sha256 = running_verifier_digest()?;
     let result = verify_source(
         source,
         env!("P192_WCM_EMBEDDED_VERIFIER_COMMIT"),
-        sha256(&executable_bytes),
+        verifier_binary_sha256,
     )?;
     let value = serde_json::to_value(result).map_err(|error| error.to_string())?;
     let bytes = canonical_json(&value)?;

@@ -79,30 +79,46 @@ pub struct StatusCounts {
 
 impl StatusCounts {
     fn increment(&mut self, status: u8) -> Result<()> {
-        let count = match status {
-            0 => &mut self.nonprimitive_duplicate,
-            1 => &mut self.complete,
-            2 => &mut self.one_large_prime,
-            3 => &mut self.two_large_prime,
-            4 => &mut self.rejected,
-            5 => &mut self.invalid,
-            6 => &mut self.unresolved,
-            _ => return Err("unknown disposition status".to_owned()),
-        };
-        *count = count
+        let slot = usize::from(status);
+        if slot >= 7 {
+            return Err("unknown disposition status".to_owned());
+        }
+        let mut values = self.values();
+        values[slot] = values[slot]
             .checked_add(1)
             .ok_or_else(|| "status count overflow".to_owned())?;
+        *self = Self::from_values(values);
         Ok(())
     }
 
     pub fn total(&self) -> u64 {
-        self.nonprimitive_duplicate
-            + self.complete
-            + self.one_large_prime
-            + self.two_large_prime
-            + self.rejected
-            + self.invalid
-            + self.unresolved
+        self.values().into_iter().sum()
+    }
+
+    fn values(&self) -> [u64; 7] {
+        [
+            self.nonprimitive_duplicate,
+            self.complete,
+            self.one_large_prime,
+            self.two_large_prime,
+            self.rejected,
+            self.invalid,
+            self.unresolved,
+        ]
+    }
+
+    fn from_values(values: [u64; 7]) -> Self {
+        let [nonprimitive_duplicate, complete, one_large_prime, two_large_prime, rejected, invalid, unresolved] =
+            values;
+        Self {
+            nonprimitive_duplicate,
+            complete,
+            one_large_prime,
+            two_large_prime,
+            rejected,
+            invalid,
+            unresolved,
+        }
     }
 }
 

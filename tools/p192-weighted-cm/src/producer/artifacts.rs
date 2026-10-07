@@ -43,6 +43,20 @@ const WRITE_PATHS: [&str; 9] = [
     "reference-box.json",
 ];
 
+fn running_executable_bytes(label: &str) -> Result<Vec<u8>> {
+    #[cfg(target_os = "linux")]
+    {
+        fs::read("/proc/self/exe")
+            .map_err(|error| format!("read running {label} image through /proc/self/exe: {error}"))
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        Err(format!(
+            "running-image hashing for {label} requires Linux /proc/self/exe"
+        ))
+    }
+}
+
 fn artifact(path: &str, bytes: &[u8]) -> Value {
     json!({
         "byte_length": bytes.len() as u64,
@@ -342,10 +356,7 @@ pub fn write_preflight(args: &PreflightArgs, provenance: &BuildProvenance) -> Re
         "reference-box/certificates.bin",
         reference.certificates.clone(),
     );
-    let executable =
-        std::env::current_exe().map_err(|error| format!("resolve producer executable: {error}"))?;
-    let executable_bytes = fs::read(&executable)
-        .map_err(|error| format!("read producer executable {}: {error}", executable.display()))?;
+    let executable_bytes = running_executable_bytes("producer")?;
     let producer_binary_sha256 = sha256_hex(&executable_bytes);
     let binding_values = bindings(
         &identity,
