@@ -8,6 +8,7 @@ pub mod binary;
 pub mod curve;
 pub mod ext;
 pub mod field;
+pub mod fp2;
 pub mod find;
 pub mod fpm;
 pub mod genus2;

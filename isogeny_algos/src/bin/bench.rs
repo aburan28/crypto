@@ -1867,8 +1867,14 @@ fn bench_phi(o: &mut Out) {
             o.rec("phi", "phi_hecke_newton", &[("field", "FpM2_127".to_string()), ("ell", ell.to_string())], &[("ns", th2)], true, "");
         }
     }
-    // SEA, with the modular polynomials precomputed (as from a database) and timed separately
-    use isogeny_algos::find::sea::sea;
+    bench_sea(o);
+}
+
+/// SEA point counting with the modular polynomials precomputed (as from a database, timed
+/// separately), with and without isogeny cycles (cycle_degree bounds the degree of the
+/// l^k-kernel polynomials; 0 = t mod l only).
+fn bench_sea(o: &mut Out) {
+    use isogeny_algos::find::sea::sea_opts;
     fn prefill<F: Field>(f: &F, max_ell: usize) -> (std::collections::HashMap<usize, Phi<F>>, f64) {
         let t0 = Instant::now();
         let mut m = std::collections::HashMap::new();
@@ -1879,6 +1885,7 @@ fn bench_phi(o: &mut Out) {
         }
         (m, t0.elapsed().as_nanos() as f64)
     }
+    let degrees: &[usize] = &[0, 20, 40, 80];
     let mut rng = Rng::new(19_500);
     let cases: Vec<(&str, u32)> = if o.quick { vec![("Zp", 61)] } else { vec![("Zp", 40), ("Zp", 61), ("FpM2", 127)] };
     for (fld, bits) in cases {
@@ -1894,22 +1901,25 @@ fn bench_phi(o: &mut Out) {
                         break e;
                     }
                 };
-                let t0 = Instant::now();
-                let r = sea(&fp, &e, 61, &mut phis, &mut rng);
-                let ns = t0.elapsed().as_nanos() as f64;
                 let t1 = Instant::now();
                 let reference = order(&fp, &e, &mut rng);
                 let ns_bsgs = t1.elapsed().as_nanos() as f64;
-                let ok = r.as_ref().map_or(false, |(n, _)| *n == isogeny_algos::bigint::Big::from_u64(reference));
-                let st = r.map(|x| x.1).unwrap_or_default();
-                o.rec(
-                    "phi",
-                    "sea_point_count",
-                    &[("field", format!("Zp{bits}")), ("instance", t.to_string())],
-                    &[("ns", ns), ("bsgs_ns", ns_bsgs), ("elkies_primes", st.elkies.len() as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
-                    ok,
-                    "Phi_l precomputed; equals the BSGS order",
-                );
+                for &cd in degrees {
+                    let t0 = Instant::now();
+                    let r = sea_opts(&fp, &e, 61, &mut phis, &mut rng, cd);
+                    let ns = t0.elapsed().as_nanos() as f64;
+                    let ok = r.as_ref().map_or(false, |(n, _)| *n == isogeny_algos::bigint::Big::from_u64(reference));
+                    let st = r.map(|x| x.1).unwrap_or_default();
+                    let lifted = st.elkies.iter().filter(|(m, _)| !is_prime(*m)).count();
+                    o.rec(
+                        "phi",
+                        "sea_point_count",
+                        &[("field", format!("Zp{bits}")), ("instance", t.to_string()), ("cycle_degree", cd.to_string())],
+                        &[("ns", ns), ("bsgs_ns", ns_bsgs), ("elkies_primes", st.elkies.len() as f64), ("cycle_lifted", lifted as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
+                        ok,
+                        "Phi_l precomputed; equals the BSGS order",
+                    );
+                }
             }
         } else {
             let f = FpM::<2>::from_dec("170141183460469231731687303715884105727");
@@ -1923,19 +1933,29 @@ fn bench_phi(o: &mut Out) {
                         break e;
                     }
                 };
-                let t0 = Instant::now();
-                let r = sea(&f, &e, 89, &mut phis, &mut rng);
-                let ns = t0.elapsed().as_nanos() as f64;
-                let ok = r.as_ref().map_or(false, |(n, _)| (0..5).all(|_| pmul_big(&f, &e, &random_point_f(&f, &e, &mut rng), n) == Pt::Inf));
-                let st = r.map(|x| x.1).unwrap_or_default();
-                o.rec(
-                    "phi",
-                    "sea_point_count",
-                    &[("field", "FpM2_127".to_string()), ("instance", t.to_string())],
-                    &[("ns", ns), ("elkies_primes", st.elkies.len() as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
-                    ok,
-                    "Phi_l precomputed; [#E]P = 0 for 5 random points",
-                );
+                let mut first: Option<isogeny_algos::bigint::Big> = None;
+                for &cd in degrees {
+                    let t0 = Instant::now();
+                    let r = sea_opts(&f, &e, 89, &mut phis, &mut rng, cd);
+                    let ns = t0.elapsed().as_nanos() as f64;
+                    let ok = r.as_ref().map_or(false, |(n, _)| {
+                        (0..5).all(|_| pmul_big(&f, &e, &random_point_f(&f, &e, &mut rng), n) == Pt::Inf)
+                            && first.as_ref().map_or(true, |m| m == n)
+                    });
+                    if first.is_none() {
+                        first = r.as_ref().map(|x| x.0.clone());
+                    }
+                    let st = r.map(|x| x.1).unwrap_or_default();
+                    let lifted = st.elkies.iter().filter(|(m, _)| !is_prime(*m)).count();
+                    o.rec(
+                        "phi",
+                        "sea_point_count",
+                        &[("field", "FpM2_127".to_string()), ("instance", t.to_string()), ("cycle_degree", cd.to_string())],
+                        &[("ns", ns), ("elkies_primes", st.elkies.len() as f64), ("cycle_lifted", lifted as f64), ("atkin_primes", st.atkin.len() as f64), ("candidates", st.candidates as f64)],
+                        ok,
+                        "Phi_l precomputed; [#E]P = 0 for 5 random points; same order for every cycle_degree",
+                    );
+                }
             }
         }
     }
@@ -2272,10 +2292,12 @@ fn main() {
             "quat" => bench_quat(&mut o),
             "genus2" => bench_genus2(&mut o),
             "phi" => bench_phi(&mut o),
+            "sea" => bench_sea(&mut o),
             "radical" => bench_radical(&mut o),
             "relation" => bench_relation(&mut o),
             "models" => bench_models(&mut o),
             "theta" => bench_theta(&mut o),
+            "twopow" => bench_twopow(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
@@ -2368,4 +2390,76 @@ fn bench_theta(o: &mut Out) {
     };
     let tm = time_it(budget, 20_000, || rl.image_point(f, &g, f, |c| c, x0, y0, &mut rng.clone()));
     o.rec("theta", "richelot_point_image", &[("p_bits", pb)], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "one point of C -> its two image points (not a Jacobian element; Cantor reduction not included)");
+}
+
+/// 2^e-isogeny chains on Montgomery curves (4-isogenies / 2-isogenies, optimal strategy) vs the
+/// Weierstrass Velu chain, over F_{p^2} for the SIKEp434 prime p = 2^216 3^137 - 1.
+fn bench_twopow(o: &mut Out) {
+    use isogeny_algos::fp2::Fp2;
+    use isogeny_algos::kernel::chain::{ell_power_isogeny, Strategy};
+    use isogeny_algos::kernel::montgomery::{self, ladder_p, proj24};
+    use isogeny_algos::kernel::two_power::*;
+    let budget = if o.quick { 200 } else { 1000 };
+    let base = FpM::<7>::from_dec("24439423661345221551909145011457493619085780243761596511325807336205221239331976725970216671828618445898719026692884939342314733567");
+    let f = Fp2::new(base);
+    let e = 216usize;
+    let cof = (0..137).fold(isogeny_algos::bigint::Big::from_u64(1), |acc, _| acc.mul(&isogeny_algos::bigint::Big::from_u64(3)));
+    let a0 = f.from_u64(6);
+    let k0 = proj24(&f, a0);
+    let mut rng = Rng::new(23_000);
+    // kernel point of order 2^216 with 2^215 R != (0, 0)
+    let (rx, ry) = loop {
+        let x = f.random(&mut rng);
+        let rhs = f.mul(x, f.add(f.mul(x, f.add(x, a0)), f.one()));
+        if f.sqrt(rhs).is_none() {
+            continue;
+        }
+        let r = ladder_p(&f, k0, (x, f.one()), &cof);
+        let h = xdbl_e(&f, k0, r, e - 1);
+        if f.is_zero(h.1) || f.is_zero(h.0) || !f.is_zero(xdbl_e(&f, k0, h, 1).1) {
+            continue;
+        }
+        let rxa = f.div(r.0, r.1);
+        let rr = f.mul(rxa, f.add(f.mul(rxa, f.add(rxa, a0)), f.one()));
+        break (rxa, f.sqrt(rr).unwrap());
+    };
+    let pts: Vec<(_, _)> = (0..3).map(|_| (f.random(&mut rng), f.one())).collect();
+    let jm = |c: (_, _)| montgomery::j_invariant(&f, montgomery::affine_a(&f, c));
+    // field operation costs for the strategy: mul-by-4 = 2 xDBL, push = eval_4
+    let tm_mul = time_it(100, 200_000, || f.mul(rx, ry)).0;
+    o.rec("twopow", "fp2_mul", &[("p_bits", "434".to_string())], &[("median_ns", tm_mul)], true, "Karatsuba over FpM<7>");
+    let splits = optimal_splits(e / 2, 12.0, 8.0);
+    let mut st = TwoPowerStats::default();
+    let c4 = four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &splits, &mut st).unwrap();
+    let j4 = jm(c4);
+    let mut st2 = TwoPowerStats::default();
+    let c2 = two_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &optimal_splits(e, 6.0, 4.0), &mut st2).unwrap();
+    let ok2 = jm(c2) == j4;
+    // the two extremes: multiply down to the 4-torsion before every step (split 1) and push the
+    // current generator through every step (split m - 1)
+    let naive: Vec<usize> = vec![1; e / 2 + 1];
+    let mut stn = TwoPowerStats::default();
+    let cn = four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &naive, &mut stn).unwrap();
+    let okn = jm(cn) == j4;
+    let pushy: Vec<usize> = (0..=e / 2).map(|m| m.saturating_sub(1)).collect();
+    let mut stp = TwoPowerStats::default();
+    let cp = four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &pushy, &mut stp).unwrap();
+    let okp = jm(cp) == j4;
+    // Weierstrass Velu chain (affine, generic) with the same kernel
+    let w = montgomery::to_weierstrass(&f, a0);
+    let xw = f.add(rx, f.div(a0, f.from_u64(3)));
+    let t0 = Instant::now();
+    let (ch, _, stw) = ell_power_isogeny(&f, &w, &Pt::Aff(xw, ry), 2, e, &[], Strategy::Balanced);
+    let tw = t0.elapsed().as_nanos() as f64;
+    let okw = jinv(&f, &ch.cod) == j4;
+    let p434 = vec![("p_bits", "434".to_string()), ("e", e.to_string()), ("pushed", "3".to_string())];
+    let tm = time_it(budget, 200, || four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &splits, &mut TwoPowerStats::default()));
+    o.rec("twopow", "montgomery_4_isogeny_chain_optimal", &p434, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("doublings", st.doublings as f64), ("evals", st.evals as f64)], ok2 && okw, "j equals the 2-isogeny chain and the Weierstrass Velu chain");
+    let tm = time_it(budget, 50, || four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &naive, &mut TwoPowerStats::default()));
+    o.rec("twopow", "montgomery_4_isogeny_chain_multiply_only", &p434, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("doublings", stn.doublings as f64), ("evals", stn.evals as f64)], okn, "multiply down to the 4-torsion before every step (split 1)");
+    let tm = time_it(budget, 200, || four_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &pushy, &mut TwoPowerStats::default()));
+    o.rec("twopow", "montgomery_4_isogeny_chain_push_only", &p434, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("doublings", stp.doublings as f64), ("evals", stp.evals as f64)], okp, "push the generator through every step (split m - 1)");
+    let tm = time_it(budget, 200, || two_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &optimal_splits(e, 6.0, 4.0), &mut TwoPowerStats::default()));
+    o.rec("twopow", "montgomery_2_isogeny_chain_optimal", &p434, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("doublings", st2.doublings as f64), ("evals", st2.evals as f64)], ok2, "");
+    o.rec("twopow", "weierstrass_velu_chain_balanced", &[("p_bits", "434".to_string()), ("e", e.to_string()), ("pushed", "0".to_string())], &[("ns", tw), ("l_mults", stw.l_mults as f64), ("evals", stw.evals as f64)], okw, "kernel/chain.rs, affine Velu per 2-isogeny; one run");
 }

@@ -21,7 +21,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug, Default)]
 pub struct SeaStats {
-    pub elkies: Vec<(u64, u64)>, // (l, t mod l)
+    pub elkies: Vec<(u64, u64)>, // (l^k, t mod l^k); k > 1 from isogeny cycles
     pub atkin: Vec<(u64, usize, usize)>, // (l, r, number of t candidates mod l)
     pub m_elkies: u128,
     pub candidates: u128,
@@ -80,6 +80,136 @@ pub fn elkies_eigenvalue<F: Field>(f: &F, e: &Curve<F::E>, h: &Poly<F>, ell: u64
         b = b3;
     }
     None
+}
+
+/// [k](x, y) in F_q[x, y]/(g(x), y^2 - f(x)) as (A, B) with [k](x, y) = (A, y B) (k >= 1).
+pub fn ring_mul<F: Field>(f: &F, e: &Curve<F::E>, g: &Poly<F>, k: u64) -> Option<(Poly<F>, Poly<F>)> {
+    let fx = poly::rem(f, &vec![e.b, e.a, f.zero(), f.one()], g);
+    let one = poly::constant(f, f.one());
+    let mulg = |a: &Poly<F>, b: &Poly<F>| poly::mulmod(f, a, b, g);
+    let dbl = |p: &(Poly<F>, Poly<F>)| -> Option<(Poly<F>, Poly<F>)> {
+        let (a, b) = p;
+        // slope (3 A^2 + a)/(2 y B) = y S with S = (3 A^2 + a) / (2 f B);
+        // A3 = f S^2 - 2 A; B3 = S (A - A3) - B
+        let num = poly::add(f, &poly::scale(f, &mulg(a, a), f.from_u64(3)), &poly::constant(f, e.a));
+        let den = poly::scale(f, &mulg(&fx, b), f.from_u64(2));
+        let s = mulg(&num, &poly::invmod(f, &den, g)?);
+        let a3 = poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &poly::scale(f, a, f.from_u64(2)));
+        let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, a, &a3)), b);
+        Some((a3, b3))
+    };
+    let add = |p: &(Poly<F>, Poly<F>), q: &(Poly<F>, Poly<F>)| -> Option<(Poly<F>, Poly<F>)> {
+        if p.0 == q.0 {
+            return if p.1 == q.1 { dbl(p) } else { None };
+        }
+        // S = (B2 - B1)/(A2 - A1); A3 = f S^2 - A1 - A2; B3 = S (A1 - A3) - B1
+        let s = mulg(&poly::sub(f, &q.1, &p.1), &poly::invmod(f, &poly::sub(f, &q.0, &p.0), g)?);
+        let a3 = poly::sub(f, &poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &p.0), &q.0);
+        let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, &p.0, &a3)), &p.1);
+        Some((a3, b3))
+    };
+    let base = (poly::rem(f, &poly::x_poly(f), g), one);
+    let mut acc: Option<(Poly<F>, Poly<F>)> = None;
+    let mut b = base;
+    let mut k = k;
+    while k > 0 {
+        if k & 1 == 1 {
+            acc = Some(match acc {
+                None => b.clone(),
+                Some(a) => add(&a, &b)?,
+            });
+        }
+        k >>= 1;
+        if k > 0 {
+            b = dbl(&b)?;
+        }
+    }
+    acc
+}
+
+/// Numerator of h(N/D) for h of degree m: sum_i h_i N^i D^(m - i).
+pub fn compose_rational<F: Field>(f: &F, h: &Poly<F>, n: &Poly<F>, d: &Poly<F>) -> Poly<F> {
+    let m = h.len() - 1;
+    let mut npow = vec![poly::constant(f, f.one())];
+    for i in 1..=m {
+        npow.push(poly::mul(f, &npow[i - 1], n));
+    }
+    let mut dpow = vec![poly::constant(f, f.one())];
+    for i in 1..=m {
+        dpow.push(poly::mul(f, &dpow[i - 1], d));
+    }
+    let mut out: Poly<F> = vec![f.zero()];
+    for i in 0..=m {
+        out = poly::add(f, &out, &poly::scale(f, &poly::mul(f, &npow[i], &dpow[m - i]), h[i]));
+    }
+    out
+}
+
+/// Isogeny cycles (Couveignes–Morain 1994) for an Elkies prime: the Frobenius eigenvalue mod
+/// l^k. phi1: E -> E1 is the rational l-isogeny on whose kernel Frobenius acts by lam1 (mod l).
+/// Following the non-backtracking chain of rational l-isogenies E1 -> E2 -> ..., the preimage
+/// on E of the next kernel is a Frobenius-stable cyclic subgroup of order l^i, cut out by
+/// g_i = numerator of h_{psi}(x-map of the chain so far) (degree l^(i-1)(l-1)/2); Frobenius acts
+/// on it by lam_i = lam_{i-1} + c l^(i-1), found by comparing x^q with x([lam_i] P) mod g_i.
+/// Returns (lambda mod l^k, k) for the largest k reached (k <= k_max).
+pub fn eigenvalue_cycle<F: Field>(
+    f: &F,
+    phi: &Phi<F>,
+    e: &Curve<F::E>,
+    iso1: &RatIsogeny<F>,
+    ell: u64,
+    lam1: u64,
+    k_max: u32,
+    rng: &mut Rng,
+) -> (u64, u32) {
+    let mut lam = lam1;
+    let mut modulus = ell;
+    let mut k = 1u32;
+    let mut prev_j = jinv(f, e);
+    let mut cur = iso1.cod;
+    let (mut n, mut d) = (iso1.num.clone(), iso1.den.clone());
+    let q = f.q();
+    while k < k_max {
+        let jc = jinv(f, &cur);
+        let nbrs = phi.neighbors(f, jc, rng);
+        let Some(&jn) = nbrs.iter().find(|&&r| r != prev_j) else { break };
+        let Some(et) = crate::find::elkies::elkies_codomain(f, phi, &cur, jn) else { break };
+        let Some(psi) = bmss::isogeny(f, bmss::Method::FastElkiesPrime, &cur, &et, ell as usize, None) else { break };
+        let g = poly::monic(f, &compose_rational(f, &psi.ker, &n, &d));
+        let xq = poly::powmod_big(f, &poly::x_poly(f), &q, &g);
+        // [lam + c l^k] P for c = 0..l-1, by repeated addition of [l^k] P
+        let Some(mut cur_pt) = ring_mul(f, e, &g, lam) else { break };
+        let Some(step) = ring_mul(f, e, &g, modulus) else { break };
+        let mut found = None;
+        for c in 0..ell {
+            if cur_pt.0 == xq {
+                found = Some(lam + c * modulus);
+                break;
+            }
+            if c + 1 < ell {
+                // (A1, y B1) + (A2, y B2)
+                let mulg = |a: &Poly<F>, b: &Poly<F>| poly::mulmod(f, a, b, &g);
+                let fx = poly::rem(f, &vec![e.b, e.a, f.zero(), f.one()], &g);
+                let Some(inv) = poly::invmod(f, &poly::sub(f, &step.0, &cur_pt.0), &g) else { break };
+                let s = mulg(&poly::sub(f, &step.1, &cur_pt.1), &inv);
+                let a3 = poly::sub(f, &poly::sub(f, &mulg(&fx, &mulg(&s, &s)), &cur_pt.0), &step.0);
+                let b3 = poly::sub(f, &mulg(&s, &poly::sub(f, &cur_pt.0, &a3)), &cur_pt.1);
+                cur_pt = (a3, b3);
+            }
+        }
+        let Some(l2) = found else { break };
+        lam = l2;
+        modulus *= ell;
+        k += 1;
+        // extend the chain's x-map: psi_x(N/D) = psi.num(N/D) / psi.den(N/D)
+        let nn = compose_rational(f, &psi.num, &n, &d);
+        let dd = poly::mul(f, &compose_rational(f, &psi.den, &n, &d), &d);
+        n = nn;
+        d = dd;
+        prev_j = jc;
+        cur = psi.cod;
+    }
+    (lam % modulus, k)
 }
 
 /// Degree r of the irreducible factors of Phi_l(j, Y) when it has no root (Atkin prime).
@@ -146,13 +276,36 @@ pub fn atkin_candidates(ell: u64, q_mod_l: u64, r: usize) -> Vec<u64> {
     out
 }
 
-/// #E(F_q) by SEA with primes l <= max_ell (the Phi_l are computed on demand into `phis`).
+/// #E(F_q) by SEA with primes l <= max_ell (the Phi_l are computed on demand into `phis`),
+/// with isogeny cycles for Elkies primes up to kernel-polynomial degree `CYCLE_DEGREE`.
 pub fn sea<F: Field>(
     f: &F,
     e: &Curve<F::E>,
     max_ell: usize,
     phis: &mut HashMap<usize, Phi<F>>,
     rng: &mut Rng,
+) -> Option<(Big, SeaStats)> {
+    sea_opts(f, e, max_ell, phis, rng, CYCLE_DEGREE)
+}
+
+/// Stop adding primes once at most this many candidates for t remain.
+pub const SEA_STOP_CANDIDATES: f64 = 4_194_304.0;
+/// Candidate counts up to this are walked one point addition each; above, baby-step giant-step.
+pub const SEA_WALK_MAX: u128 = 1024;
+
+/// Default bound on the degree l^(k-1)(l-1)/2 of the polynomials used by isogeny cycles.
+pub const CYCLE_DEGREE: usize = 40;
+
+/// SEA with an explicit bound on the isogeny-cycle polynomial degree (0: no cycles; t mod l
+/// only). An Elkies prime with two rational l-isogenies contributes t mod l^k for the largest k
+/// with l^(k-1)(l-1)/2 <= cycle_degree.
+pub fn sea_opts<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    max_ell: usize,
+    phis: &mut HashMap<usize, Phi<F>>,
+    rng: &mut Rng,
+    cycle_degree: usize,
 ) -> Option<(Big, SeaStats)> {
     let q = Int::from_big(&f.q());
     let j = jinv(f, e);
@@ -181,15 +334,22 @@ pub fn sea<F: Field>(
             for jt in roots.iter().take(2) {
                 let Some(et) = crate::find::elkies::elkies_codomain(f, phi, e, *jt) else { continue };
                 let Some(iso) = bmss::isogeny(f, bmss::Method::FastElkiesPrime, e, &et, ell, None) else { continue };
-                if let Some(lam) = elkies_eigenvalue(f, e, &iso.ker, l) {
-                    let lam_inv = Int::from(lam as i64).inv_mod(&Int::from(l)).unwrap().mod_u64(l);
-                    let tl = (lam + ql * lam_inv) % l;
-                    st.elkies.push((l, tl));
+                if let Some(lam1) = elkies_eigenvalue(f, e, &iso.ker, l) {
+                    // isogeny cycles: eigenvalue mod l^k when the eigenvalues are distinct
+                    let mut kmax = 1u32;
+                    while roots.len() == 2 && (l.pow(kmax) * (l - 1) / 2) as usize <= cycle_degree {
+                        kmax += 1;
+                    }
+                    let (lam, k) = if kmax > 1 { eigenvalue_cycle(f, phi, e, &iso, l, lam1, kmax, rng) } else { (lam1, 1) };
+                    let lk = l.pow(k);
+                    let lam_inv = Int::from(lam as i64).inv_mod(&Int::from(lk)).unwrap().mod_u64(lk);
+                    let tl = ((lam as u128 + q.mod_u64(lk) as u128 * lam_inv as u128) % lk as u128) as u64;
+                    st.elkies.push((lk, tl));
                     // CRT
-                    let (_, u, _) = Int::xgcd(&m, &Int::from(l));
-                    let diff = (&Int::from(tl as i64) - &te).modulo(&Int::from(l));
-                    te = &te + &(&m * &(&diff * &u).modulo(&Int::from(l)));
-                    m = &m * &Int::from(l);
+                    let (_, u, _) = Int::xgcd(&m, &Int::from(lk));
+                    let diff = (&Int::from(tl as i64) - &te).modulo(&Int::from(lk));
+                    te = &te + &(&m * &(&diff * &u).modulo(&Int::from(lk)));
+                    m = &m * &Int::from(lk);
                     te = te.modulo(&m);
                     done = true;
                     break;
@@ -205,10 +365,10 @@ pub fn sea<F: Field>(
                 atkin_sets.push((l, cands));
             }
         }
-        // stop once the walk over the candidates (Hasse width / M_E point additions; the Atkin
-        // sets only filter the hits, they do not shorten the walk) is cheaper than another prime
-        // (a modular polynomial, a kernel polynomial, a Frobenius power)
-        if width.to_f64() / m.to_f64() < 65_536.0 {
+        // stop once the search over the candidates (Hasse width / M_E of them, ~2 sqrt(.) point
+        // additions by baby-step giant-step; the Atkin sets only filter the hits) is cheaper
+        // than another prime (roots of Phi_l(j, Y), a kernel polynomial, a Frobenius power)
+        if width.to_f64() / m.to_f64() < SEA_STOP_CANDIDATES {
             break;
         }
         ell += 2;
@@ -235,7 +395,7 @@ pub fn sea<F: Field>(
         let p = random_point_f(f, e, rng);
         let mut hits = vec![];
         let t0 = &te + &(&k_lo * &m);
-        if count <= 1 << 22 {
+        if count <= SEA_WALK_MAX {
             // walk R_k = [q + 1 - t_k] P, t_k = t0 + k m: R_{k+1} = R_k - [m] P
             let mut r = pmul_big(f, e, &p, &to_big(&(&q1 - &t0)));
             let neg_mp = neg(pmul_big(f, e, &p, &to_big(&m)));
