@@ -2298,6 +2298,7 @@ fn main() {
             "models" => bench_models(&mut o),
             "theta" => bench_theta(&mut o),
             "twopow" => bench_twopow(&mut o),
+            "theta4" => bench_theta4(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
@@ -2494,4 +2495,36 @@ fn bench_twopow(o: &mut Out) {
     let tm = time_it(budget, 200, || two_chain(&f, k0, (rx, f.one()), e, &mut pts.clone(), &optimal_splits(e, 6.0, 4.0), &mut TwoPowerStats::default()));
     o.rec("twopow", "montgomery_2_isogeny_chain_optimal", &p434, &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("doublings", st2.doublings as f64), ("evals", st2.evals as f64)], ok2, "");
     o.rec("twopow", "weierstrass_velu_chain_balanced", &[("p_bits", "434".to_string()), ("e", e.to_string()), ("pushed", "0".to_string())], &[("ns", tw), ("l_mults", stw.l_mults as f64), ("evals", stw.evals as f64)], okw, "kernel/chain.rs, affine Velu per 2-isogeny; one run");
+}
+
+/// Dimension-g theta chains (general code): dimension 2 vs the dedicated dimension-2 code, and
+/// dimension-4 Kani embeddings (a degree-3^b isogeny embedded in a 2^n-isogeny of E0^2 x E^2).
+fn bench_theta4(o: &mut Out) {
+    use isogeny_algos::bigint::Big;
+    use isogeny_algos::testdata::{kani4_instance, kani_instance};
+    use isogeny_algos::theta_g::{chain_g, split_score};
+    let budget = if o.quick { 100 } else { 400 };
+    let inst = kani_instance(16, 10, 21_016);
+    let f = &inst.f;
+    let iota = (0u64, 1u64);
+    let k2: Vec<Vec<Pt<(u64, u64)>>> = inst.k.iter().map(|(x, y)| vec![*x, *y]).collect();
+    let ok = chain_g(f, &[inst.c, inst.e], &k2, 16, &[], iota).map_or(false, |r| split_score(f, &r, &[]) > 0);
+    let tm = time_it(budget, 2000, || chain_g(f, &[inst.c, inst.e], &k2, 16, &[], iota));
+    o.rec("theta4", "theta_g_dim2_kani_chain", &[("n", "16".to_string()), ("p_bits", "50".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], ok, "general-dimension code with g = 2 (algorithmic change of basis)");
+    let tm = time_it(budget, 2000, || isogeny_algos::theta::chain(f, &inst.c, &inst.e, inst.k, 16, &[]));
+    o.rec("theta4", "theta_dim2_kani_chain", &[("n", "16".to_string()), ("p_bits", "50".to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "dedicated dimension-2 code, same instance");
+    for &(n, b) in &[(12u32, 7u32), (16, 9), (20, 12)] {
+        let base = (1u64 << (n + 2)) * 3u64.pow(b);
+        let p = (1..).map(|c| base * c - 1).find(|&p| is_prime(p)).unwrap();
+        let f = Zp2::new(p);
+        let mut rng = Rng::new(400 + n as u64);
+        let inst = kani4_instance(&f, &Big::from_u64(p + 1), n, b, iota, &mut rng);
+        let res = chain_g(&f, &inst.curves, &inst.k, n, &[], iota);
+        let res2 = chain_g(&f, &inst.curves, &inst.k_twisted, n, &[], iota);
+        let ok = res.as_ref().map_or(false, |r| split_score(&f, r, &[]) > 0) && res2.as_ref().map_or(false, |r| split_score(&f, r, &[]) == 0);
+        let gl = res.as_ref().map_or(0, |r| r.gluing_steps);
+        let tm = time_it(budget, 500, || chain_g(&f, &inst.curves, &inst.k, n, &[], iota));
+        let pb = 64 - p.leading_zeros();
+        o.rec("theta4", "theta_dim4_kani_chain", &[("n", n.to_string()), ("b", b.to_string()), ("p_bits", pb.to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("ns_per_step", tm.0 / n as f64), ("gluing_steps", gl as f64)], ok, "E0^2 x E^2, alpha in M2(Z[i]) of degree 2^n - 3^b (four squares); splits, twisted kernel does not");
+    }
 }

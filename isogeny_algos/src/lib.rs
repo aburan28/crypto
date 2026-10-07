@@ -21,3 +21,4 @@ pub mod quat;
 pub mod series;
 pub mod testdata;
 pub mod theta;
+pub mod theta_g;

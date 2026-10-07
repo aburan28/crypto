@@ -292,3 +292,136 @@ pub fn kani_endomorphism_instance<F: Field>(
     let q2 = padd(f, &e, &pushed[1], &pmul(f, &e, &pushed[0], 2));
     KaniEndoInstance { e0, e, a, k: [(gp, pushed[0]), (gq, pushed[1])], k_twisted: [(gp, pushed[0]), (gq, q2)] }
 }
+
+/// c = a1^2 + a2^2 + a3^2 + a4^2 (randomised: the remainder after two random squares is split by
+/// Cornacchia when it is a prime = 1 mod 4).
+pub fn four_squares(c: &crate::int::Int, rng: &mut Rng) -> [crate::int::Int; 4] {
+    use crate::int::Int;
+    use crate::quat::klpt::cornacchia_sum_two_squares;
+    let s = c.isqrt();
+    let bits = s.mag().bits().max(1);
+    loop {
+        let rand_below = |rng: &mut Rng| {
+            let mut v = Int::zero();
+            for _ in 0..(bits + 63) / 64 {
+                v = &(&v * &Int::from(1i64 << 32)) * &Int::from(1i64 << 32);
+                v = &v + &Int::from((rng.next() >> 1) as i64);
+            }
+            v.modulo(&(&s + &Int::one()))
+        };
+        let a1 = rand_below(rng);
+        let r1 = c - &(&a1 * &a1);
+        if r1.is_neg() {
+            continue;
+        }
+        let r1s = r1.isqrt();
+        let a2 = if r1s.is_zero() { Int::zero() } else { rand_below(rng).modulo(&(&r1s + &Int::one())) };
+        let r = &r1 - &(&a2 * &a2);
+        if r.is_neg() {
+            continue;
+        }
+        if (a1.is_zero() && a2.is_zero()) || r.is_zero() {
+            continue;
+        }
+        if let Some((a3, a4)) = cornacchia_sum_two_squares(&r) {
+            return [a1, a2, a3, a4];
+        }
+    }
+}
+
+/// [a] P + [b] i(P) on y^2 = x^3 + x (i: (x, y) -> (-x, iota y)), a, b signed.
+pub fn gaussian_action<F: Field>(f: &F, e0: &Curve<F::E>, a: &crate::int::Int, b: &crate::int::Int, iota: F::E, p: &Pt<F::E>) -> Pt<F::E> {
+    let smul = |k: &crate::int::Int, q: &Pt<F::E>| {
+        let r = pmul_big(f, e0, q, k.mag());
+        if k.is_neg() {
+            neg(f, &r)
+        } else {
+            r
+        }
+    };
+    let ip = match *p {
+        Pt::Inf => Pt::Inf,
+        Pt::Aff(x, y) => Pt::Aff(f.neg(x), f.mul(iota, y)),
+    };
+    padd(f, e0, &smul(a, p), &smul(b, &ip))
+}
+
+/// Dimension-4 Kani embedding (Robert 2022) of phi: E0 -> E of degree 3^b with
+/// c = 2^n - 3^b = |u|^2 + |w|^2, u, w in Z[i] acting on E0: alpha = [[u, -conj(w)], [w, conj(u)]]
+/// on E0^2, kernel {(alpha(P), Phi(P)) : P in E0^2[2^n]} in E0 x E0 x E x E (generators of order
+/// 2^(n+2)). The (2^n, ..., 2^n)-isogeny splits (codomain E0^2 x a surface).
+pub struct Kani4Instance<F: Field> {
+    pub curves: Vec<Curve<F::E>>,
+    pub k: Vec<Vec<Pt<F::E>>>,
+    /// Phi on the second basis point twisted by M = [[1, 2], [0, 1]] (still isotropic)
+    pub k_twisted: Vec<Vec<Pt<F::E>>>,
+}
+
+/// Generators of the dimension-4 Kani kernel from phi(B1), phi(B2) (B1, B2 a basis of
+/// E0[2^(n+2)]) and c = |u|^2 + |w|^2 given as [a1, a2, a3, a4] (u = a1 + a2 i, w = a3 + a4 i).
+#[allow(clippy::too_many_arguments)]
+pub fn kani4_kernel<F: Field>(
+    f: &F,
+    e0: &Curve<F::E>,
+    b1: &Pt<F::E>,
+    b2: &Pt<F::E>,
+    pb1: &Pt<F::E>,
+    pb2: &Pt<F::E>,
+    sq: &[crate::int::Int; 4],
+    iota: F::E,
+) -> Vec<Vec<Pt<F::E>>> {
+    let [a1, a2, a3, a4] = sq;
+    let (na2, na3) = (-a2, -a3);
+    let u = |p: &Pt<F::E>| gaussian_action(f, e0, a1, a2, iota, p);
+    let ub = |p: &Pt<F::E>| gaussian_action(f, e0, a1, &na2, iota, p);
+    let w = |p: &Pt<F::E>| gaussian_action(f, e0, a3, a4, iota, p);
+    let mwb = |p: &Pt<F::E>| gaussian_action(f, e0, &na3, a4, iota, p); // -conj(w) = -a3 + a4 i
+    vec![
+        vec![u(b1), w(b1), *pb1, Pt::Inf],
+        vec![u(b2), w(b2), *pb2, Pt::Inf],
+        vec![mwb(b1), ub(b1), Pt::Inf, *pb1],
+        vec![mwb(b2), ub(b2), Pt::Inf, *pb2],
+    ]
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn kani4_instance<F: Field>(f: &F, p1: &crate::bigint::Big, n: u32, b: u32, iota: F::E, rng: &mut Rng) -> Kani4Instance<F> {
+    use crate::bigint::Big;
+    use crate::int::Int;
+    use crate::kernel::chain::{ell_power_isogeny, Strategy};
+    let e0 = Curve::new(f.one(), f.zero());
+    let two_e = Big::from_u64(1).shl((n + 2) as usize);
+    let three_b = (0..b).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let (cof2, _) = p1.divrem(&two_e);
+    let (cof3, _) = p1.divrem(&three_b);
+    let half = Big::from_u64(1).shl((n + 1) as usize);
+    let third = (0..b.saturating_sub(1)).fold(Big::from_u64(1), |acc, _| acc.mul(&Big::from_u64(3)));
+    let point2 = |rng: &mut Rng| loop {
+        let q = pmul_big(f, &e0, &random_point_f(f, &e0, rng), &cof2);
+        if pmul_big(f, &e0, &q, &half) != Pt::Inf {
+            return q;
+        }
+    };
+    let b1 = point2(rng);
+    let h1 = pmul_big(f, &e0, &b1, &half);
+    let b2 = loop {
+        let q = point2(rng);
+        if pmul_big(f, &e0, &q, &half) != h1 {
+            break q;
+        }
+    };
+    let k3 = loop {
+        let q = pmul_big(f, &e0, &random_point_f(f, &e0, rng), &cof3);
+        if pmul_big(f, &e0, &q, &third) != Pt::Inf {
+            break q;
+        }
+    };
+    let (ch, pushed, _) = ell_power_isogeny(f, &e0, &k3, 3, b as usize, &[b1, b2], Strategy::Balanced);
+    let e = ch.cod;
+    let c = &Int::from_big(&Big::from_u64(1).shl(n as usize)) - &Int::from_big(&three_b);
+    let sq = four_squares(&c, rng);
+    let k = kani4_kernel(f, &e0, &b1, &b2, &pushed[0], &pushed[1], &sq, iota);
+    let tw = padd(f, &e, &pushed[1], &pmul(f, &e, &pushed[0], 2));
+    let k_twisted = kani4_kernel(f, &e0, &b1, &b2, &pushed[0], &tw, &sq, iota);
+    Kani4Instance { curves: vec![e0, e0, e, e], k, k_twisted }
+}
