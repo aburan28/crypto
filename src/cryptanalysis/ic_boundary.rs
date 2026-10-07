@@ -7213,7 +7213,7 @@ mod tests {
         assert_eq!(FieldOps::total(&[ops, ops]), both.field_ops);
 
         // The tally is not part of the ledger's serialised form …
-        let json = serde_json::to_value(&ops).unwrap();
+        let json = serde_json::to_value(ops).unwrap();
         assert!(json.get("field_ops").is_none());
         assert_eq!(json["adds"], 5);
         // … and a binary curve does not count: its zeros mean unknown.
