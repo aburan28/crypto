@@ -201,7 +201,7 @@ time and the S3 stage cost do not substitute for that primary comparison.
 
 | Requirement | Status | Evidence or remaining step |
 | --- | --- | --- |
-| N41 S3 path executable | Diagnostic pass | One local unisolated pair recovered scalar 123212651130; baseline 181.602292 ms, candidate 82.272583 ms; key relation fields matched. Independent Sage replay and host isolation pending. |
+| N41 S3 path executable | Diagnostic pass | One local unisolated pair recovered scalar 123212651130; baseline 181.602292 ms, candidate 82.272583 ms; key relation fields matched. Checked Sage independently replayed the point and scalar; relation witnesses and host isolation remain pending. |
 | N53 correctness across fresh targets | Verified historical control | PR #1518's twelve one-target pairs and checked Sage replay; its CPU ratios are exploratory. |
 | Pilot public inputs | Frozen, unmeasured | Twelve SHA-256-derived points per curve under `pilot/`; `SHA256SUMS` checks the files. Exact workload IDs await the Linux candidate/curve manifests. |
 | Physical-host receipt | Pending | Saved `runpod` SSH endpoint refused connection and no RunPod API key was present in this session at protocol preparation. |

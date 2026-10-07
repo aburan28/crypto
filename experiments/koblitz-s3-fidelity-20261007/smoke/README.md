@@ -2,9 +2,11 @@
 
 This pair preceded the larger-panel protocol freeze. It establishes that the
 existing S3 baseline and paired-inversion binaries both accept the N41 Koblitz
-instance and recover the same known fixture scalar. It is **not** a pilot,
-confirmatory sample, independently replayed relation certificate, or a
-controlled CPU speedup result.
+instance and recover the same known fixture scalar. Checked Sage independently
+replayed the public point and recovered scalar; the 252 relation witnesses were
+checked for agreement between the two binaries but were not independently
+replayed. It is **not** a pilot, confirmatory sample, or a controlled CPU
+speedup result.
 
 The fixture is `123212651130 * G` for `KoblitzCurve::new(0,41)`, where the
 constructor's generator is `[2056947637384,1635505394702]` and the prime
@@ -50,3 +52,10 @@ same smoke point with the frozen baseline binary. The command used the same
 reported an exact five-phase online interval and verified scalar 123212651130.
 This checks the adapter's translation on one input and is not an additional
 isolated benchmark pair.
+
+`replay_n41_point_sage.py` was run through the checked repository Sage launcher
+after saving `sage_runtime_info.json`. Its immutable-input hashes and scope are
+in `independent_point_replay.json`. The replay confirms the GF(2^41) model,
+subgroup membership, fixture target, both recovered scalars, and agreement of
+the rank and relation witness fields between arms. It does not validate the
+relation witnesses independently or change the exploratory timing status.
