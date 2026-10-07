@@ -248,3 +248,44 @@ fn theta_kani_endomorphism_126_bit() {
         assert!(res2.split.is_none());
     }
 }
+
+/// Round-trip: factor a product theta point back to the two x-coordinates.
+#[test]
+fn theta_factor_point_roundtrip() {
+    let p = find_prime(3 * 5 * 7 * (1 << 5));
+    let f = Zp2::new(p);
+    let e0 = Curve::new(f.one(), f.zero());
+    let mut rng = Rng::new(123);
+    let r5 = point_of_order(&f, &e0, p, 5, &mut rng);
+    let e1 = chain_iso(&f, &e0, &r5, 5, &[]).0;
+    let r7 = point_of_order(&f, &e0, p, 7, &mut rng);
+    let e2 = chain_iso(&f, &e0, &r7, 7, &[]).0;
+    let (a, b) = basis2(&f, &e1, p, 3, &mut rng);
+    let (c, d) = basis2(&f, &e2, p, 3, &mut rng);
+    let th = ProductTheta {
+        t1: theta1_structure(&f, &e1, &pmul(&f, &e1, &a, 2), &pmul(&f, &e1, &b, 2)).unwrap(),
+        t2: theta1_structure(&f, &e2, &pmul(&f, &e2, &c, 2), &pmul(&f, &e2, &d, 2)).unwrap(),
+    };
+    let mut checked = 0;
+    for _ in 0..40 {
+        let p1 = pmul(&f, &e1, &a, rng.below(243) as u128);
+        let p1 = padd(&f, &e1, &p1, &pmul(&f, &e1, &b, rng.below(243) as u128));
+        let p2 = pmul(&f, &e2, &c, rng.below(243) as u128);
+        let p2 = padd(&f, &e2, &p2, &pmul(&f, &e2, &d, rng.below(243) as u128));
+        let g = th.point(&f, &p1, &p2);
+        let (x1, x2) = th.factor_point(&f, &g);
+        let want = |p: &Pt<(u64, u64)>| match p {
+            Pt::Aff(x, _) => Some(*x),
+            Pt::Inf => None,
+        };
+        if let (Some(e), Some(w)) = (x1, want(&p1)) {
+            assert_eq!(e, w);
+            checked += 1;
+        }
+        if let (Some(e), Some(w)) = (x2, want(&p2)) {
+            assert_eq!(e, w);
+            checked += 1;
+        }
+    }
+    assert!(checked >= 30, "only {checked}");
+}

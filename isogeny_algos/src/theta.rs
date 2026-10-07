@@ -95,6 +95,33 @@ impl<E: Copy> Theta1<E> {
     }
 }
 
+impl<E: Copy> Theta1<E> {
+    /// x-coordinate of a point from its theta coordinates [u : v] ~ [x_m + 1 : s(x_m - 1)]:
+    /// x_m = (s u + v)/(s u - v), x = e0 + x_m / kappa. None at the identity (u = v = 0) or when
+    /// s u = v (the 2-torsion point 2 Q4, x_m = infinity: returns None).
+    pub fn x_of<F: Field<E = E>>(&self, f: &F, t: &[E; 2]) -> Option<E> {
+        let su = f.mul(self.s, t[0]);
+        let den = f.sub(su, t[1]);
+        if f.is_zero(den) {
+            return None;
+        }
+        let xm = f.div(f.add(su, t[1]), den);
+        Some(f.add(self.e0, f.div(xm, self.kappa)))
+    }
+}
+
+/// Factor the product theta coordinates [a0 b0 : a0 b1 : a1 b0 : a1 b1] (rank-1 2x2) into
+/// ([a0 : a1], [b0 : b1]) projectively. None if all zero.
+pub fn factor_product<F: Field>(f: &F, p: &Th<F::E>) -> Option<([F::E; 2], [F::E; 2])> {
+    // rows (a0 b*, a1 b*): [a0 : a1] from a non-zero column; [b0 : b1] from a non-zero row
+    let a = if !f.is_zero(p[0]) || !f.is_zero(p[2]) { [p[0], p[2]] } else { [p[1], p[3]] };
+    let b = if !f.is_zero(p[0]) || !f.is_zero(p[1]) { [p[0], p[1]] } else { [p[2], p[3]] };
+    if a.iter().chain(b.iter()).all(|&v| f.is_zero(v)) {
+        return None;
+    }
+    Some((a, b))
+}
+
 /// Legendre lambda and j-invariant of an elliptic curve from its level-2 theta null (a : b):
 /// theta[0,0]^2 = a^2 + b^2, theta[1/2,0]^2 = 2ab, lambda = theta[1/2,0]^4 / theta[0,0]^4.
 pub fn j_from_theta1<F: Field>(f: &F, n: &[F::E; 2]) -> F::E {
@@ -137,6 +164,19 @@ impl<E: Copy> ProductTheta<E> {
     }
     pub fn null<F: Field<E = E>>(&self, f: &F) -> Th<E> {
         self.point(f, &Pt::Inf, &Pt::Inf)
+    }
+    /// Inverse of glue_change: product coordinates from the K2-structure coordinates.
+    pub fn unglue<F: Field<E = E>>(f: &F, g: &Th<E>) -> Th<E> {
+        [f.add(g[0], g[1]), f.sub(g[2], g[3]), f.add(g[2], g[3]), f.sub(g[0], g[1])]
+    }
+    /// The (x1, x2) of a point from its K2-structure coordinates (x-coordinates on the two
+    /// factors; None where a factor coordinate is the identity or a troublesome 2-torsion point).
+    pub fn factor_point<F: Field<E = E>>(&self, f: &F, g: &Th<E>) -> (Option<E>, Option<E>) {
+        let prod = Self::unglue(f, g);
+        match factor_product(f, &prod) {
+            Some((a, b)) => (self.t1.x_of(f, &a), self.t2.x_of(f, &b)),
+            None => (None, None),
+        }
     }
 }
 

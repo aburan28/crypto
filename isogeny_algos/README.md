@@ -21,11 +21,12 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | (E, ℓ) → ℓ-isogenies | Φ_ℓ roots + Elkies codomain (V1) · division-polynomial factoring (V1; char 2 V3) · **Φ_ℓ by Hecke operators and Newton's identities; integer Φ_ℓ by CRT, Φ_ℓ mod 2** `find/modpoly.rs` (V3) · **Schoof–Elkies–Atkin point counting with isogeny cycles (t mod ℓᵏ) and BSGS recombination** `find/sea.rs` (V3) |
 | (E₁, E₂) → isogeny | Galbraith BFS, GHS, Kohel volcano walk, Couveignes MITM (ordinary), Delfs–Galbraith (V1) · Galbraith–Stolbunov weighted walk, CSIDH action + MITM + ideal orders (V2) `path/*` · **CSIDH-512 with CLMPR batching and a projective tree strategy; relation lattice / class-group structure; paths on binary curves through any neighbour oracle** (V3) `path/csidh.rs`, `path/relation.rs`, `path/graph.rs` |
 | supersingular, endomorphism side (V3) | **B_{p,∞}, O₀, ideals, LLL, Fincke–Pohst** `quat/mod.rs` · **KLPT (ℓ = 2)** `quat/klpt.rs` · **class sets, Brandt matrices, Mestre's graph, Eichler mass formula** `quat/brandt.rs` · **Deuring correspondence ideal ↔ kernel over F_{p⁴}** `quat/deuring.rs` |
-| genus 2 (V3) | **Richelot (2,2)-isogenies (codomain, points), splitting J(C) → E₁ × E₂, gluing E₁ × E₂ → J(C), Igusa–Clebsch invariants, superspecial Richelot graph** `genus2.rs` · **theta-model (2,2)-isogenies, theta gluing, split detection, Kani-lemma (2ᵃ, 2ᵃ)-chains** `theta.rs` |
+| genus 2 (V3) | **Richelot (2,2)-isogenies (codomain, points), splitting J(C) → E₁ × E₂, gluing E₁ × E₂ → J(C), Igusa–Clebsch invariants, superspecial Richelot graph** `genus2.rs` · **theta-model (2,2)-isogenies, theta gluing, split detection, theta doubling, Kani-lemma (2ᵃ, 2ᵃ)-chains** `theta.rs` |
+| higher dimension (V3) | **general-dimension theta (2,…,2)-chains and dimension-4 Kani embeddings** (auxiliary α ∈ M₂(ℤ[i]) of any degree via four squares; split decision) `theta_g.rs` |
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 83 tests, all pass)
+## Correctness checks (`cargo test --release`: 86 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -54,6 +55,9 @@ Added in V3:
   of the 15 Richelot neighbours; Kani chains split exactly at E₀ × X with X computed by Vélu, and a
   twisted isotropic kernel does not split; with an endomorphism auxiliary isogeny (126-bit p) the chain
   splits off j = 1728; the strategy (theta doublings) and push-everything chains give identical codomains;
+* theta_g: the general-dimension code with g = 2 reproduces the dimension-2 Kani split; a dimension-4
+  embedding of a 3ᵇ-isogeny (auxiliary degree 2ⁿ − 3ᵇ as four squares) splits for the true kernel and
+  not for a twisted one;
 * isogeny cycles: t mod 3⁴, 5³, 7², 11² equal the BSGS trace; Montgomery 4-isogeny chain = 2-isogeny
   chain = Weierstrass Vélu chain; generic F_{p²} = the u64 F_{p²}.
 
@@ -150,10 +154,11 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
 
 ## Known gaps and limitations (details in `docs/SURVEY.md`)
 
-* **Not implemented** (implementation gaps): (ℓ,ℓ)-isogenies for odd ℓ, higher-dimensional (4, 8) Kani
-  embeddings, SQIsign2D, and a key-recovery layer on top of the Kani split test (the split decision runs
-  up to 360-bit p, with parameters chosen so that 2ᵃ > 3ᵇ; the SIKE parameters themselves have 2ᵃ < 3ᵇ and
-  need the attacks' guessing or higher-dimensional tricks); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
+* **Not implemented** (implementation gaps): reading the secret isogeny off the embedding (Robert's
+  evaluation of F on torsion → full key recovery; needs extracting points from a generic split codomain),
+  the Castryck–Decru digit-guessing recovery for 2ᵃ < 3ᵇ, dimension-8 embeddings exercised on a concrete
+  instance, (ℓ,ℓ)-isogenies for odd ℓ, SQIsign2D. The Kani *split decision* is implemented in dimension 2
+  (up to 360-bit p) and dimension 4 (arbitrary auxiliary degree via four squares); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
   over F_{p⁴}); isogeny cycles for Atkin primes; Couveignes 1996 p-torsion, Lercier, Lercier–Sirvent for
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5; Jacobi-quartic models;
   characteristic 3; Sutherland-style Φ_ℓ. Not implementable here (resource limit): quantum algorithms.
