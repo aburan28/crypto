@@ -166,14 +166,23 @@ steps equal the full run's.
 
 ### Target 1
 
-**A second restart.** The first attempt at target 1 started at 06:56 UTC. The
-container was reclaimed again during its step 25: the run was last seen alive
-at 08:21 UTC, and the container was back at 00:09 UTC on 2026-10-07. The run
-ended without an exit status. Its files are `runs/M3b-t1.restart1.{log,jsonl}`,
-and `progress.txt` records the restart. Its 24 steps equal target 0's in every
-count but step 22's multiply-adds (`pkm_tower_check compare-trace
-runs/M3b-t0.log runs/M3b-t1.restart1.log --except muladds`). The run is
-repeated whole with the same flags and binary, from 00:12 UTC.
+**Two more restarts.** The container was reclaimed during each of the first
+two attempts at target 1. Neither ended with an exit status, and
+`progress.txt` records both restarts.
+
+| attempt | started (UTC) | last seen alive | container back | log ends at | files |
+|:--|:--|:--|:--|:--|:--|
+| 1 | 10-06 06:56 | 10-06 08:21, step 25 | 10-07 00:09 | step 24 | `runs/M3b-t1.restart1.{log,jsonl}` |
+| 2 | 10-07 00:12 | 10-07 01:06, step 24 | 10-07 14:04 | step 23 | `runs/M3b-t1.restart2.{log,jsonl}` |
+| 3 | 10-07 14:06 | | | | `runs/M3b-t1.{log,jsonl}` |
+
+- Attempt 2's 23 steps equal attempt 1's, multiply-adds included
+  (`pkm_tower_check compare-trace runs/M3b-t1.restart1.log
+  runs/M3b-t1.restart2.log`).
+- Attempt 1's 24 steps equal target 0's in every count but step 22's
+  multiply-adds (`pkm_tower_check compare-trace runs/M3b-t0.log
+  runs/M3b-t1.restart1.log --except muladds`).
+- Each attempt repeats the run whole with the same flags and binary.
 
 **Host.** The restarted container runs on an Intel Xeon at 2.80 GHz, 4 cores
 without SMT, AVX-512 (F, BW, CD, DQ, VL, VNNI) and AVX2, 16 GB without swap,

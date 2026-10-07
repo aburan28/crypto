@@ -3098,19 +3098,27 @@ It ended after 18 steps with 22,382 pairs above the bound, without refuting and
 without a staircase stop. Degree 6 does not suffice. Its 18 steps are the full
 run's.
 
-**Target 1, and a second restart.** Target 1 started at 06:56 UTC, and the
-container was reclaimed again during its step 25.
-- The run was last seen alive at 08:21 UTC; the container was back at 00:09
-  UTC on 2026-10-07. The run ended without an exit status, its log ending at
-  step 24.
-- Those 24 steps equal target 0's in every count but one: step 22's
-  multiply-adds, 8,249,356,791,928 against 8,249,356,789,831. A cancellation
-  that happens in one target and not the other moves that count and nothing
-  else (`compare-trace … --except muladds` finds all 24 identical).
-- Its files are kept as `M3b-t1.restart1.*`, and the run is repeated whole with
-  the same flags and binary from 00:12 UTC.
-- The restarted container runs on another host class, an Intel Xeon at
-  2.80 GHz, so no time of target 1's is compared with target 0's.
+**Target 1, and two more restarts.** The container was reclaimed twice more,
+each time during a run of target 1.
+- The first attempt started at 06:56 UTC. It was last seen alive at 08:21 UTC,
+  in step 25, and the container was back at 00:09 UTC on 2026-10-07. Its log
+  ends at step 24.
+- The second started at 00:12 UTC, on another host class: an Intel Xeon at
+  2.80 GHz. It was last seen alive at 01:06 UTC, in step 24, and the container
+  was back at 14:04 UTC. Its log ends at step 23.
+- Each ended without an exit status. Their files are kept as
+  `M3b-t1.restart1.*` and `M3b-t1.restart2.*`, and `progress.txt` records both
+  restarts.
+- The second attempt's 23 steps equal the first's, multiply-adds included. The
+  first's 24 steps equal target 0's in every count but step 22's
+  multiply-adds, 8,249,356,791,928 against 8,249,356,789,831
+  (`compare-trace … --except muladds` finds all 24 identical). The elimination
+  skips a row operation whose coefficient is zero, so a coefficient that
+  vanishes by accident in one target and not the other moves this count and no
+  other.
+- The run is repeated whole a third time, with the same flags and binary, from
+  14:06 UTC. No time of target 1's is compared with target 0's, since the host
+  class changed.
 
 It runs as this section is written.
 
