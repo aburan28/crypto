@@ -84,7 +84,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3"
+   "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
   }
  },
  "families": {
@@ -3749,7 +3749,7 @@
   {
    "regime": "koblitz_batch",
    "slug": "icv1-f2m19-tm797-9c54981b",
-   "ec1": "EC1N19Ce1h7e63aa468dcc",
+   "ec1": "EC1N19Ce1h6186a62ebfaa",
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
@@ -3777,14 +3777,14 @@
      "s": 4.872889458440391,
      "s_before": 6.783250946324698,
      "phases_s": {
-      "setup": 0.6237339814760797,
-      "constructions": 0.9143040099593411,
-      "factor_base": 0.5715249018442982,
+      "setup": 0.6237339814760795,
+      "constructions": 0.914304009959341,
+      "factor_base": 0.571524901844298,
       "table": 0.5043462314056679,
       "relations": 0.2581727942743142,
-      "linear_algebra": 0.1300231945875359,
+      "linear_algebra": 0.13002319458753586,
       "descent": 0.9139956272233088,
-      "verify": 0.9567887176698457
+      "verify": 0.9567887176698456
      },
      "ratio_rho": 14.896649773263793,
      "ratio_rho_ci": [
@@ -3824,14 +3824,14 @@
     "s": 4.872889458440391,
     "s_before": 6.783250946324698,
     "phases_s": {
-     "setup": 0.6237339814760797,
-     "constructions": 0.9143040099593411,
-     "factor_base": 0.5715249018442982,
+     "setup": 0.6237339814760795,
+     "constructions": 0.914304009959341,
+     "factor_base": 0.571524901844298,
      "table": 0.5043462314056679,
      "relations": 0.2581727942743142,
-     "linear_algebra": 0.1300231945875359,
+     "linear_algebra": 0.13002319458753586,
      "descent": 0.9139956272233088,
-     "verify": 0.9567887176698457
+     "verify": 0.9567887176698456
     },
     "ratio_rho": 14.896649773263793,
     "ratio_rho_ci": [
@@ -3888,7 +3888,7 @@
      "s_before": 1.9765001942778928,
      "phases_s": {
       "setup": 0.16446116776150432,
-      "constructions": 0.28861160085349774,
+      "constructions": 0.2886116008534978,
       "factor_base": 0.1684686994182842,
       "table": 0.13652435255426154,
       "relations": 0.11946648505974385,
@@ -3935,7 +3935,7 @@
     "s_before": 1.9765001942778928,
     "phases_s": {
      "setup": 0.16446116776150432,
-     "constructions": 0.28861160085349774,
+     "constructions": 0.2886116008534978,
      "factor_base": 0.1684686994182842,
      "table": 0.13652435255426154,
      "relations": 0.11946648505974385,
@@ -4002,8 +4002,8 @@
       "factor_base": 0.1300108689672182,
       "table": 0.06965563710625806,
       "relations": 0.04060455824877867,
-      "linear_algebra": 0.012480668153261886,
-      "descent": 0.15063656688310412,
+      "linear_algebra": 0.012480668153261888,
+      "descent": 0.15063656688310414,
       "verify": 0.07960719889983717
      },
      "ratio_rho": 7.190079591360827,
@@ -4049,8 +4049,8 @@
      "factor_base": 0.1300108689672182,
      "table": 0.06965563710625806,
      "relations": 0.04060455824877867,
-     "linear_algebra": 0.012480668153261886,
-     "descent": 0.15063656688310412,
+     "linear_algebra": 0.012480668153261888,
+     "descent": 0.15063656688310414,
      "verify": 0.07960719889983717
     },
     "ratio_rho": 7.190079591360827,
@@ -4110,11 +4110,11 @@
       "setup": 0.07562128195935067,
       "constructions": 0.06214807047463206,
       "factor_base": 0.04114115835264887,
-      "table": 0.02432361136640727,
+      "table": 0.024323611366407268,
       "relations": 0.08316503750296374,
       "linear_algebra": 0.004893805839784593,
       "descent": 0.16189097130470326,
-      "verify": 0.03209683958893579
+      "verify": 0.032096839588935784
      },
      "ratio_rho": 5.260801523504233,
      "ratio_rho_ci": [
@@ -4157,11 +4157,11 @@
      "setup": 0.07562128195935067,
      "constructions": 0.06214807047463206,
      "factor_base": 0.04114115835264887,
-     "table": 0.02432361136640727,
+     "table": 0.024323611366407268,
      "relations": 0.08316503750296374,
      "linear_algebra": 0.004893805839784593,
      "descent": 0.16189097130470326,
-     "verify": 0.03209683958893579
+     "verify": 0.032096839588935784
     },
     "ratio_rho": 5.260801523504233,
     "ratio_rho_ci": [
@@ -4219,10 +4219,10 @@
      "phases_s": {
       "setup": 0.03395506914921843,
       "constructions": 0.023034166887328986,
-      "factor_base": 0.019384788042774333,
-      "table": 0.01416451850857146,
+      "factor_base": 0.019384788042774336,
+      "table": 0.014164518508571462,
       "relations": 0.0971688146840351,
-      "linear_algebra": 0.0019617182033429244,
+      "linear_algebra": 0.001961718203342925,
       "descent": 0.12391483206638415,
       "verify": 0.011249466868672486
      },
@@ -4266,10 +4266,10 @@
     "phases_s": {
      "setup": 0.03395506914921843,
      "constructions": 0.023034166887328986,
-     "factor_base": 0.019384788042774333,
-     "table": 0.01416451850857146,
+     "factor_base": 0.019384788042774336,
+     "table": 0.014164518508571462,
      "relations": 0.0971688146840351,
-     "linear_algebra": 0.0019617182033429244,
+     "linear_algebra": 0.001961718203342925,
      "descent": 0.12391483206638415,
      "verify": 0.011249466868672486
     },
@@ -4329,12 +4329,12 @@
      "phases_s": {
       "setup": 0.022026209336272286,
       "constructions": 0.01568087091378731,
-      "factor_base": 0.01703870257189441,
-      "table": 0.03705563654823103,
+      "factor_base": 0.017038702571894413,
+      "table": 0.03705563654823104,
       "relations": 0.05791232891756848,
-      "linear_algebra": 0.0015295490447882385,
-      "descent": 0.07648273932107356,
-      "verify": 0.006686094296738499
+      "linear_algebra": 0.0015295490447882387,
+      "descent": 0.07648273932107358,
+      "verify": 0.0066860942967385
      },
      "ratio_rho": 3.8928784425876555,
      "ratio_rho_ci": [
@@ -4376,12 +4376,12 @@
     "phases_s": {
      "setup": 0.022026209336272286,
      "constructions": 0.01568087091378731,
-     "factor_base": 0.01703870257189441,
-     "table": 0.03705563654823103,
+     "factor_base": 0.017038702571894413,
+     "table": 0.03705563654823104,
      "relations": 0.05791232891756848,
-     "linear_algebra": 0.0015295490447882385,
-     "descent": 0.07648273932107356,
-     "verify": 0.006686094296738499
+     "linear_algebra": 0.0015295490447882387,
+     "descent": 0.07648273932107358,
+     "verify": 0.0066860942967385
     },
     "ratio_rho": 3.8928784425876555,
     "ratio_rho_ci": [
@@ -4437,13 +4437,13 @@
      "s": 0.24079642651229552,
      "s_before": 0.24982039203317233,
      "phases_s": {
-      "setup": 0.020918427650165213,
-      "constructions": 0.00845148974160727,
-      "factor_base": 0.009389432875206362,
-      "table": 0.029064516010166193,
-      "relations": 0.11961859469647401,
-      "linear_algebra": 0.001103131805338061,
-      "descent": 0.04790804218541379,
+      "setup": 0.02091842765016521,
+      "constructions": 0.008451489741607268,
+      "factor_base": 0.00938943287520636,
+      "table": 0.02906451601016619,
+      "relations": 0.119618594696474,
+      "linear_algebra": 0.0011031318053380608,
+      "descent": 0.047908042185413786,
       "verify": 0.004342791547924642
      },
      "ratio_rho": 3.6156712977275385,
@@ -4484,13 +4484,13 @@
     "s": 0.24079642651229552,
     "s_before": 0.24982039203317233,
     "phases_s": {
-     "setup": 0.020918427650165213,
-     "constructions": 0.00845148974160727,
-     "factor_base": 0.009389432875206362,
-     "table": 0.029064516010166193,
-     "relations": 0.11961859469647401,
-     "linear_algebra": 0.001103131805338061,
-     "descent": 0.04790804218541379,
+     "setup": 0.02091842765016521,
+     "constructions": 0.008451489741607268,
+     "factor_base": 0.00938943287520636,
+     "table": 0.02906451601016619,
+     "relations": 0.119618594696474,
+     "linear_algebra": 0.0011031318053380608,
+     "descent": 0.047908042185413786,
      "verify": 0.004342791547924642
     },
     "ratio_rho": 3.6156712977275385,
@@ -4657,14 +4657,14 @@
      "s": 0.4884575885497573,
      "s_before": 0.48140217766517623,
      "phases_s": {
-      "setup": 0.016734336446242993,
-      "constructions": 0.0029578587093882307,
+      "setup": 0.016734336446242996,
+      "constructions": 0.002957858709388231,
       "factor_base": 0.0035389964287900373,
-      "table": 0.036428805990492114,
+      "table": 0.03642880599049212,
       "relations": 0.3849898071771096,
       "linear_algebra": 0.00025765445893974597,
       "descent": 0.042519478831920324,
-      "verify": 0.001030650506874197
+      "verify": 0.0010306505068741973
      },
      "ratio_rho": 9.202036756044834,
      "ratio_rho_ci": [
@@ -4704,14 +4704,14 @@
     "s": 0.4884575885497573,
     "s_before": 0.48140217766517623,
     "phases_s": {
-     "setup": 0.016734336446242993,
-     "constructions": 0.0029578587093882307,
+     "setup": 0.016734336446242996,
+     "constructions": 0.002957858709388231,
      "factor_base": 0.0035389964287900373,
-     "table": 0.036428805990492114,
+     "table": 0.03642880599049212,
      "relations": 0.3849898071771096,
      "linear_algebra": 0.00025765445893974597,
      "descent": 0.042519478831920324,
-     "verify": 0.001030650506874197
+     "verify": 0.0010306505068741973
     },
     "ratio_rho": 9.202036756044834,
     "ratio_rho_ci": [
@@ -5526,6 +5526,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "family": "koblitz",
+   "field": "GF(2^11)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 11,
+   "standard": [],
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "family": "koblitz",
    "field": "GF(2^13)",
@@ -5562,6 +5578,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "family": "koblitz",
+   "field": "GF(2^13)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "family": "koblitz",
    "field": "GF(2^15)",
@@ -5577,6 +5609,22 @@
     "K_0 / GF(2^15)",
     "K_0/2^15",
     "K_0/F_2^15"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "family": "koblitz",
+   "field": "GF(2^15)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 15,
+   "standard": [],
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n15-l5"
    ],
    "on_board": false
   },
@@ -5624,14 +5672,15 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
-    "K_1/2^17",
-    "K_1/F_2^17"
+    "K_1/2^17"
    ],
    "on_board": false
   },
@@ -5662,14 +5711,15 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
-    "K_1/2^19",
-    "K_1/F_2^19"
+    "K_1/2^19"
    ],
    "on_board": true
   },
@@ -5729,6 +5779,22 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "family": "koblitz",
+   "field": "GF(2^23)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "family": "koblitz",
    "field": "GF(2^29)",
@@ -5748,6 +5814,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "family": "koblitz",
+   "field": "GF(2^29)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "family": "koblitz",
    "field": "GF(2^31)",
@@ -5763,6 +5845,22 @@
     "K_0 / GF(2^31)",
     "K_0/2^31",
     "K_0/F_2^31"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "family": "koblitz",
+   "field": "GF(2^31)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n31-l8"
    ],
    "on_board": false
   },
