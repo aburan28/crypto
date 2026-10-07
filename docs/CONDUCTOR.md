@@ -60,27 +60,56 @@ the hooks register it.
 
 ## In Claude Code on the web
 
-A cloud session runs in a fresh container, so Conductor has to be installed
-by the environment's **setup script**. Edit the environment from the cloud
-environment menu in the session's title bar and add:
+A cloud session runs in a fresh container, so nothing is installed until
+something installs it. The repository does that itself:
+`.claude/hooks/session-start.sh` is registered as a `SessionStart` hook in
+`.claude/settings.json`, and in a cloud session (`CLAUDE_CODE_REMOTE=true`)
+it does three things.
 
-```sh
-GOBIN=/usr/local/bin go install github.com/aburan28/conductor/cmd/...@main
-```
+- **Installs Conductor.** It runs
+  `GOBIN=/usr/local/bin go install github.com/aburan28/conductor/cmd/...@main`.
+  The release installer cannot be used here: the container reaches github.com
+  through a proxy that serves only the repositories attached to the session,
+  so the release download is refused with HTTP 403. The Go module proxy is
+  reachable directly; the image's Go 1.24.7 fetches go1.26.8 by itself.
+  `CONDUCTOR_VERSION` overrides `main`.
+- **Installs cairn.** It runs
+  `cargo install --locked --root /usr/local --git https://github.com/aburan28/cairn cairn`,
+  without the `ui` feature, so `cairn mcp` works and `cairn run` does not.
+  `CAIRN_REV` pins a commit. `.mcp.json` starts `cairn mcp` for every session,
+  on a ledger at `~/.cairn/cairn.jsonl` rather than in the repository; it can
+  post only unfunded objectives.
+- **Brings up a control plane.** If `CONDUCTOR_ENDPOINT` and `CONDUCTOR_TOKEN`
+  are set (see below), the session uses that shared one. Otherwise the hook
+  starts a control plane in the container: a Postgres 16 cluster from the
+  image on `127.0.0.1:55432`, then `conductor up --project crypto` on
+  `http://localhost:8080`. With it the pre-edit hook, `conductor check` and the
+  MCP tools work, but it coordinates nothing outside that container.
 
-Use `go install` here, not the release installer. The container reaches
-github.com through a proxy that serves only the repositories attached to the
-session, so the release download is refused with HTTP 403. The Go module
-proxy is reachable directly. Checked in this environment on 2026-10-07: the
-image's Go 1.24.7 fetched go1.26.8 by itself and installed
-`v0.1.1-0.20261006030053-3ff2fe450949`. The container runs as root, and
-`/usr/local/bin` is on the `PATH` the hooks see.
+The first launch is the slow one: 128 s when this was tested, mostly
+fetching Go's toolchain and building cairn. The container is cached after the
+hook finishes, so later launches skip the installs and only start the
+services, which took about a second. A container restored from that cache
+keeps a `postmaster.pid` from a server that no longer runs; the hook removes
+it when that pid is not a live `postgres`. Everything the hook prints goes to
+`~/.local/state/workspace-tools/session-start.log` (mode 0600, since
+`conductor up` prints a login token), except one summary line for the
+session. Outside the cloud the hook does nothing. On the very first launch,
+Conductor's own `conductor hook session-start` entry may run before the binary
+exists; it then fails once without blocking anything.
 
-Installing is not the same as coordinating. A cloud container has no control
-plane of its own, and `localhost:8080` there is not the one on your laptop.
-To connect a cloud session, set these as environment variables in the
-environment's settings. The CLI, the hooks and `conductor-mcp` all read them
-in place of `~/.conductor/credentials`.
+It starts no autonomous agent. `conductor worker` would claim queued tasks and
+run Claude on them with `acceptEdits`. `cairn agent run` would execute jobs
+other people submit, and this container has none of the sandboxes it uses
+(Kata, gVisor or bubblewrap). Start either by hand if you decide you want it.
+
+### Connecting to a shared control plane
+
+A control plane in the container cannot see other sessions. To coordinate
+with them, set these as environment variables in the environment's settings,
+under the cloud environment menu in the session's title bar, then Edit. The
+CLI, the hooks and `conductor-mcp` all read them in place of
+`~/.conductor/credentials`.
 
 | Variable | Value |
 | --- | --- |
@@ -93,10 +122,6 @@ keeping the package-manager defaults ticked. The endpoint must serve TLS:
 `conductord` refuses a reachable address in plaintext (`--tls-cert/--tls-key`,
 or `--behind-proxy` behind a proxy that terminates TLS). A loopback daemon on
 a laptop, or a Tailscale-only name, cannot be reached from the container.
-
-Without an endpoint, a cloud session with Conductor installed behaves as
-before: the hooks warn and let edits through, and `conductor check` exits 1
-("not logged in").
 
 ## Checking it works
 
