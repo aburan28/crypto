@@ -140,6 +140,13 @@ struct TwoDeltaCertificate {
     tuple_independent_fraction_ceiling: f64,
     ideal_ratio_floor: f64,
     corrected_ratio_floor: f64,
+    global_capacity_range: [u64; 2],
+    global_best_capacity: u64,
+    global_emitted_states: u64,
+    global_tuple_independent_support_ceiling: u64,
+    global_tuple_independent_fraction_ceiling: f64,
+    global_ideal_ratio_floor: f64,
+    global_corrected_ratio_floor: f64,
     tuple_search_can_reach_parity: bool,
     certificate_digest: String,
 }
@@ -388,6 +395,22 @@ fn binomial_17(k: u32) -> u64 {
     value
 }
 
+fn two_delta_capacity_ceiling(capacity: u64, rare_edges: u64, band_width: u64) -> (u64, u64) {
+    let mut support_ceiling = 0u64;
+    let mut emitted_states = 0u64;
+    for k in 0..=17u32 {
+        let patterns = binomial_17(k);
+        let emitted = patterns * (capacity + 1);
+        let band_multiplier = u64::from(k.min(17 - k));
+        let numerator = band_multiplier * band_width;
+        let quotient_span = numerator.div_ceil(rare_edges);
+        let arithmetic_ceiling = rare_edges * (capacity + quotient_span + 2);
+        support_ceiling += emitted.min(arithmetic_ceiling);
+        emitted_states += emitted;
+    }
+    (emitted_states, support_ceiling)
+}
+
 fn two_delta_certificate(
     round189: &Value,
     modulus: &BigUint,
@@ -492,6 +515,24 @@ fn two_delta_certificate(
         .ok_or("missing Round 189 hidden ratio")?;
     let ideal_ratio_floor = LOCAL_RATIO * ROUND189_CHARGED as f64 / support_ceiling as f64;
     let corrected_ratio_floor = hidden_ratio * ROUND189_CHARGED as f64 / support_ceiling as f64;
+    let global_capacity_max = capacities.iter().copied().max().unwrap_or(0) * ARITY as u64;
+    let mut global_best = None::<(u64, u64, u64, f64, f64)>;
+    for capacity in 0..=global_capacity_max {
+        let (emitted, ceiling) =
+            two_delta_capacity_ceiling(capacity, ROUND189_RARE, registered_band_width);
+        let charged = charged_additions(capacity);
+        let ideal = LOCAL_RATIO * charged as f64 / ceiling as f64;
+        let corrected = hidden_ratio * charged as f64 / ceiling as f64;
+        if global_best.as_ref().is_none_or(|best| corrected < best.4) {
+            global_best = Some((capacity, emitted, ceiling, ideal, corrected));
+        }
+    }
+    let (global_best_capacity, global_emitted, global_ceiling, global_ideal, global_corrected) =
+        global_best.ok_or("empty two-delta capacity sweep")?;
+    certificate_bytes.extend(global_capacity_max.to_be_bytes());
+    certificate_bytes.extend(global_best_capacity.to_be_bytes());
+    certificate_bytes.extend(global_ceiling.to_be_bytes());
+    certificate_bytes.extend(global_corrected.to_bits().to_be_bytes());
     Ok(TwoDeltaCertificate {
         rare_edges: ROUND189_RARE,
         columns_replayed: COLUMNS,
@@ -511,7 +552,14 @@ fn two_delta_certificate(
         tuple_independent_fraction_ceiling: support_ceiling as f64 / emitted_states as f64,
         ideal_ratio_floor,
         corrected_ratio_floor,
-        tuple_search_can_reach_parity: ideal_ratio_floor < 1.0 && corrected_ratio_floor < 1.0,
+        global_capacity_range: [0, global_capacity_max],
+        global_best_capacity,
+        global_emitted_states: global_emitted,
+        global_tuple_independent_support_ceiling: global_ceiling,
+        global_tuple_independent_fraction_ceiling: global_ceiling as f64 / global_emitted as f64,
+        global_ideal_ratio_floor: global_ideal,
+        global_corrected_ratio_floor: global_corrected,
+        tuple_search_can_reach_parity: global_ideal < 1.0 && global_corrected < 1.0,
         certificate_digest: hex::encode(sha256(&certificate_bytes)),
     })
 }
@@ -1165,7 +1213,12 @@ fn semantic_digest(
 ) -> String {
     let mut hasher = Hasher::new();
     hasher.update(&certificate.tuple_independent_support_ceiling.to_be_bytes());
-    hasher.update(&certificate.corrected_ratio_floor.to_bits().to_be_bytes());
+    hasher.update(
+        &certificate
+            .global_corrected_ratio_floor
+            .to_bits()
+            .to_be_bytes(),
+    );
     for candidate in candidates {
         hasher.update(candidate.id.as_bytes());
         hasher.update(&candidate.exact_distinct_states.to_be_bytes());
@@ -1300,7 +1353,7 @@ fn run(cli: Cli) -> Result<(), String> {
         dependencies_hash_checked: true,
         two_delta_certificate_exact: certificate_exact,
         two_delta_tuple_search_closed_above_rho: !certificate.tuple_search_can_reach_parity
-            && certificate.corrected_ratio_floor > 1.0,
+            && certificate.global_corrected_ratio_floor > 1.0,
         all_registered_candidates_complete: all_complete,
         zero_false_positives_and_false_negatives: controls_exact,
         peak_materialized_storage_below_2_50: storage_gate,
@@ -1412,5 +1465,24 @@ mod tests {
                 rare
             );
         }
+    }
+
+    #[test]
+    fn two_delta_global_capacity_sweep_includes_every_tuple_capacity() {
+        let capacities = residual_capacities(ROUND189_RARE);
+        let maximum = capacities.iter().copied().max().unwrap() * ARITY as u64;
+        assert_eq!(maximum, 306);
+        let hidden_ratio = 1.017_128_684_760_959_5;
+        let mut best = (0, f64::INFINITY);
+        for capacity in 0..=maximum {
+            let (_, ceiling) =
+                two_delta_capacity_ceiling(capacity, ROUND189_RARE, COLUMNS + ROUND189_RARE);
+            let ratio = hidden_ratio * charged_additions(capacity) as f64 / ceiling as f64;
+            if ratio < best.1 {
+                best = (capacity, ratio);
+            }
+        }
+        assert_eq!(best.0, 63);
+        assert!(best.1 > 1.033 && best.1 < 1.034);
     }
 }
