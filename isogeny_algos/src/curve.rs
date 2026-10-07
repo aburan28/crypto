@@ -90,6 +90,16 @@ pub fn pmul<F: Field>(f: &F, c: &Curve<F::E>, p: &Pt<F::E>, mut k: u128) -> Pt<F
     r
 }
 
+/// Random affine point over any field of odd size.
+pub fn random_point_f<F: Field>(f: &F, c: &Curve<F::E>, rng: &mut Rng) -> Pt<F::E> {
+    loop {
+        let x = f.random(rng);
+        if let Some(y) = f.sqrt(rhs(f, c, x)) {
+            return Pt::Aff(x, y);
+        }
+    }
+}
+
 impl Curve<u64> {
     pub fn random_point(&self, fp: &Zp, rng: &mut Rng) -> Pt<u64> {
         loop {

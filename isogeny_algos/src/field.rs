@@ -65,6 +65,49 @@ pub trait Field: Clone + Send + Sync + 'static {
     fn div(&self, a: Self::E, b: Self::E) -> Self::E {
         self.mul(a, self.inv(b))
     }
+    /// Square root in a field of odd size (generic Tonelli-Shanks); None for non-residues.
+    fn sqrt(&self, a: Self::E) -> Option<Self::E> {
+        if self.is_zero(a) {
+            return Some(a);
+        }
+        let q = self.size();
+        let half = (q - 1) / 2;
+        if self.pow(a, half) != self.one() {
+            return None;
+        }
+        let mut rng = Rng::new(0xC0FFEE);
+        let z = loop {
+            let z = self.random(&mut rng);
+            if !self.is_zero(z) && self.pow(z, half) != self.one() {
+                break z;
+            }
+        };
+        let (mut s, mut m) = (0u32, q - 1);
+        while m % 2 == 0 {
+            m /= 2;
+            s += 1;
+        }
+        let mut c = self.pow(z, m);
+        let mut t = self.pow(a, m);
+        let mut r = self.pow(a, m.div_ceil(2));
+        let mut mm = s;
+        while t != self.one() {
+            let (mut i, mut tt) = (0u32, t);
+            while tt != self.one() {
+                tt = self.sq(tt);
+                i += 1;
+            }
+            let mut b = c;
+            for _ in 0..(mm - i - 1) {
+                b = self.sq(b);
+            }
+            mm = i;
+            c = self.sq(b);
+            t = self.mul(t, c);
+            r = self.mul(r, b);
+        }
+        Some(r)
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -191,6 +234,9 @@ impl Field for Zp {
     }
     fn random(&self, rng: &mut Rng) -> u64 {
         rng.below(self.p)
+    }
+    fn sqrt(&self, a: u64) -> Option<u64> {
+        Zp::sqrt(self, a)
     }
 }
 
