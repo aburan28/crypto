@@ -62,3 +62,35 @@ fn miller_rabin_known_values() {
     assert!(!is_probable_prime(&Big::from_dec("3825123056546413051")));
     assert!(!is_probable_prime(&csidh.fp.modulus().mul(&Big::from_dec("18446744073709551557"))));
 }
+
+#[test]
+fn adx_multiplication_matches_portable() {
+    use isogeny_algos::bigint::Big;
+    let mut rng = Rng::new(95);
+    fn check<const N: usize>(f: &FpM<N>, rng: &mut Rng) {
+        let p = f.modulus().clone();
+        let pm1 = f.from_big(&p.sub_small(1));
+        let mut xs: Vec<[u64; N]> = (0..3000).map(|_| f.random(rng)).collect();
+        xs.extend([f.zero(), f.one(), pm1]);
+        for i in 0..xs.len() {
+            let a = xs[i];
+            let b = xs[(i * 7 + 3) % xs.len()];
+            assert_eq!(f.mul(a, b), f.mont_mul_portable(&a, &b), "N = {N}");
+        }
+        // raw (non-Montgomery-form) limbs near p as inputs
+        let near: [u64; N] = p.sub_small(1).limbs(N).try_into().unwrap();
+        assert_eq!(f.mul(near, near), f.mont_mul_portable(&near, &near));
+        assert_eq!(f.to_big(&f.mul(f.from_big(&Big::from_u64(3)), f.from_big(&Big::from_u64(5)))), Big::from_u64(15));
+    }
+    std::env::set_var("ISOGENY_ADX4", "1");
+    let p256 = FpM::<4>::from_dec("115792089210356248762697446949407573530086143415290314195533631308867097853951");
+    let k1 = FpM::<4>::from_dec("115792089237316195423570985008687907853269984665640564039457584007908834671663");
+    let c512 = isogeny_algos::path::csidh::Csidh::<FpM<8>>::csidh512().fp;
+    // a 512-bit prime with a full top limb: 2^512 - 569
+    let full8 = FpM::<8>::new(&Big::from_dec("13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006083527"));
+    eprintln!("adx in use: {} {} {} {}", p256.uses_adx(), k1.uses_adx(), c512.uses_adx(), full8.uses_adx());
+    check(&p256, &mut rng);
+    check(&k1, &mut rng);
+    check(&c512, &mut rng);
+    check(&full8, &mut rng);
+}
