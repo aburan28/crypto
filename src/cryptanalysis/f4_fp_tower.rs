@@ -701,9 +701,21 @@ pub struct TowerF4Options {
     /// this many non-zero entries, or a reduced reducer block with more
     /// than this many dense entries.
     pub max_nnz: Option<u64>,
+    /// When set, the bound on the reduced reducer block alone, in place of
+    /// `max_nnz`. The block is held in memory, 4 bytes an entry; a
+    /// matrix's rows are formed when they are reduced, so its nonzeros
+    /// never are.
+    pub max_dense: Option<u64>,
     /// Called with each step's number (from 1) and trace as soon as the step
     /// ends, so that a run that dies still leaves its trace.
     pub on_step: Option<fn(usize, &StepTrace)>,
+    /// Called once if a stop cuts a step off, at the moment it does, with
+    /// the step's number, whether the stop is `oversize` (else the
+    /// deadline), and the step as far as it got
+    /// ([`TowerF4Report::stopped_step`]). It comes before the report's basis
+    /// is built, which for a large stopped run can be the largest
+    /// allocation left.
+    pub on_stop: Option<fn(usize, bool, &StepTrace)>,
     /// The same for the signature engine's steps.
     pub on_sig_step: Option<fn(usize, &super::sig_fp_tower::SigStep)>,
     /// Stop reducing a step's S-rows once the echelon of their residues
@@ -720,7 +732,9 @@ impl TowerF4Options {
             deadline: None,
             stop_staircase: None,
             max_nnz: None,
+            max_dense: None,
             on_step: None,
+            on_stop: None,
             on_sig_step: None,
             full_rank_exit: true,
         }
@@ -739,6 +753,10 @@ impl TowerF4Options {
     }
     pub fn with_max_nnz(mut self, nnz: u64) -> Self {
         self.max_nnz = Some(nnz);
+        self
+    }
+    pub fn with_max_dense(mut self, entries: u64) -> Self {
+        self.max_dense = Some(entries);
         self
     }
 }
@@ -827,6 +845,14 @@ pub struct TowerF4Report {
     pub oversize: bool,
     pub ms: f64,
     pub trace: Vec<StepTrace>,
+    /// The step a stop (`timed_out` or `oversize`) cut off, as far as it
+    /// got. It is not in `trace`, and `on_step` never sees it. A stop in
+    /// symbolic preprocessing leaves only the degree, the pairs and the
+    /// nonzeros scanned; a stop in the elimination also leaves the matrix,
+    /// its columns without a divisor (`residual_cols`) and `B'`'s planned
+    /// entries (`dense_entries`). The basis fields are those before the
+    /// step, and `pairs_left` counts the step's pairs again.
+    pub stopped_step: Option<StepTrace>,
 }
 
 // ── Sparse rows and the two eliminations ─────────────────────────────
@@ -1993,6 +2019,13 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
                 rep.timed_out = true;
             }
             s.pairs.extend(selected);
+            tr.nnz = nnz;
+            kept(&s, &mut tr);
+            tr.ms = step_started.elapsed().as_secs_f64() * 1e3;
+            if let Some(f) = opts.on_stop {
+                f(rep.steps, rep.oversize, &tr);
+            }
+            rep.stopped_step = Some(tr);
             break;
         }
         rep.reducer_rows += r_desc.len() as u64;
@@ -2085,7 +2118,7 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
             s_list.len(),
             &s_row,
             opts.deadline,
-            opts.max_nnz,
+            opts.max_dense.or(opts.max_nnz),
             opts.full_rank_exit,
             &mut st,
         );
@@ -2109,6 +2142,12 @@ pub fn f4_tower(input: &[RPoly], ring: &TowerRing, opts: &TowerF4Options) -> Tow
                     Stop::Oversize => rep.oversize = true,
                 }
                 s.pairs.extend(selected);
+                kept(&s, &mut tr);
+                tr.ms = step_started.elapsed().as_secs_f64() * 1e3;
+                if let Some(f) = opts.on_stop {
+                    f(rep.steps, rep.oversize, &tr);
+                }
+                rep.stopped_step = Some(tr);
                 break;
             }
         };
@@ -3046,5 +3085,141 @@ mod tests {
         let rep = f4_tower(&[g], &ring, &TowerF4Options::new(2));
         assert!(rep.degree_reached <= 2);
         assert!(rep.inconsistent || rep.pairs_above_bound > 0);
+    }
+
+    /// A run the size cap stops reports the step it cut off: the step the
+    /// uncapped run took there, as far as the stop let it get, after the
+    /// same earlier steps. A run that ends reports none.
+    #[test]
+    fn the_size_cap_reports_the_stopped_step() {
+        use rand::SeedableRng;
+        use std::sync::atomic::AtomicUsize;
+        // `on_stop` is a plain function, so it reports through a static that
+        // only this test touches.
+        static STOPS: AtomicUsize = AtomicUsize::new(0);
+        fn on_stop(k: usize, oversize: bool, st: &StepTrace) {
+            assert!(k > 0 && oversize && st.fresh == 0);
+            STOPS.fetch_add(1, AtomicOrdering::Relaxed);
+        }
+        let mut rng = rand::rngs::StdRng::seed_from_u64(31);
+        let (mut in_elimination, mut in_preprocessing, mut dense_only) = (0, 0, 0);
+        for trial in 0..24 {
+            let p = 97u64;
+            let t = 2 + trial % 3;
+            let (r0, _) = kummer_block(p, t, 0);
+            let (r1, _) = kummer_block(p, t, t);
+            let ring = TowerRing {
+                p,
+                rules: [r0, r1].concat(),
+                n_free: 0,
+            };
+            let g = biquadratic(&mut rng, &ring, t, None);
+            let full = f4_tower(std::slice::from_ref(&g), &ring, &TowerF4Options::new(64));
+            assert!(full.stopped_step.is_none() && !full.oversize);
+            let caps: Vec<u64> = full
+                .trace
+                .iter()
+                .flat_map(|s| [s.nnz, s.dense_entries])
+                .filter(|&x| x > 0)
+                .map(|x| x - 1)
+                .collect();
+            for cap in caps {
+                // `max_dense` alone bounds `B'` and nothing else: the run
+                // stops at the first step whose `B'` passes it.
+                let mut dense = TowerF4Options::new(64).with_max_dense(cap);
+                dense.on_stop = Some(on_stop);
+                let rep = f4_tower(std::slice::from_ref(&g), &ring, &dense);
+                let first = full.trace.iter().position(|s| s.dense_entries > cap);
+                match (&rep.stopped_step, first) {
+                    (None, None) => assert_eq!(rep.basis, full.basis),
+                    (Some(st), Some(k)) => {
+                        dense_only += 1;
+                        assert!(rep.oversize && rep.trace.len() == k);
+                        let want = &full.trace[k];
+                        assert_eq!(
+                            (st.cols, st.nnz, st.residual_cols, st.dense_entries),
+                            (want.cols, want.nnz, want.residual_cols, want.dense_entries)
+                        );
+                    }
+                    _ => panic!("trial {trial} cap {cap}: max_dense stopped elsewhere"),
+                }
+                let mut opts = TowerF4Options::new(64).with_max_nnz(cap);
+                opts.on_stop = Some(on_stop);
+                let rep = f4_tower(std::slice::from_ref(&g), &ring, &opts);
+                let Some(st) = &rep.stopped_step else {
+                    assert!(!rep.oversize);
+                    assert_eq!(rep.basis, full.basis, "trial {trial} cap {cap}");
+                    continue;
+                };
+                assert!(rep.oversize && !rep.inconsistent, "trial {trial} cap {cap}");
+                let k = rep.trace.len();
+                assert_eq!(rep.steps, k + 1);
+                let want = &full.trace[k];
+                assert_eq!(st.degree, want.degree);
+                for (x, y) in rep.trace.iter().zip(&full.trace) {
+                    assert_eq!((x.cols, x.nnz, x.fresh), (y.cols, y.nnz, y.fresh));
+                }
+                // The basis before the step, and its pairs given back.
+                if let Some(b) = k.checked_sub(1).map(|j| &full.trace[j]) {
+                    assert_eq!(
+                        (
+                            st.basis_active,
+                            st.basis_kept,
+                            st.basis_entries,
+                            st.pairs_left
+                        ),
+                        (b.basis_active, b.basis_kept, b.basis_entries, b.pairs_left)
+                    );
+                }
+                assert!(st.pairs_left >= want.critical_pairs + want.tower_pairs);
+                assert_eq!((st.fresh, st.residual_rows, st.muladds), (0, 0, 0));
+                if st.cols > 0 {
+                    // Stopped by `B'`: the whole matrix was built.
+                    in_elimination += 1;
+                    assert_eq!(
+                        (
+                            st.s_rows,
+                            st.reducer_rows,
+                            st.promoted_rows,
+                            st.cols,
+                            st.nnz
+                        ),
+                        (
+                            want.s_rows,
+                            want.reducer_rows,
+                            want.promoted_rows,
+                            want.cols,
+                            want.nnz
+                        )
+                    );
+                    assert_eq!(
+                        (st.residual_cols, st.dense_entries),
+                        (want.residual_cols, want.dense_entries)
+                    );
+                    assert!(st.dense_entries > cap);
+                    assert_eq!(
+                        rep.max_dense_entries,
+                        full.trace[..=k]
+                            .iter()
+                            .map(|s| s.dense_entries)
+                            .max()
+                            .unwrap()
+                    );
+                } else {
+                    // Stopped while the rows were scanned.
+                    in_preprocessing += 1;
+                    assert!(st.nnz > cap && st.nnz <= want.nnz);
+                    assert_eq!(st.dense_entries, 0);
+                }
+            }
+        }
+        assert!(
+            in_elimination > 0 && in_preprocessing > 0 && dense_only > 0,
+            "{in_elimination} {in_preprocessing} {dense_only}"
+        );
+        assert_eq!(
+            STOPS.load(AtomicOrdering::Relaxed),
+            in_elimination + in_preprocessing + dense_only
+        );
     }
 }
