@@ -50,7 +50,11 @@
         "backend": "packed"
       },
       "resource_cap_bytes": 17179869184,
-      "note": "Confirms deps, lock, producers, and schema validation. Not a ledger promotion."
+      "note": "Confirms deps, lock, producers, and schema validation. Not a ledger promotion.",
+      "precompute_fixtures": 1,
+      "env": {
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION": "1"
+      }
     },
     "koblitz.vs_rho.n37_wall": {
       "label": "Supplementary: one-target whole-process wall measurement at n=37",
@@ -84,7 +88,8 @@
         "measurement_schema.vs_rho required fields present",
         "one target only; whole-process wall is supplementary and cannot replace single_target_online"
       ],
-      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target"
+      "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target",
+      "note": "Whole-process wall beat: measures wall including target generation, so it cannot satisfy the charged same-target vs_rho measurement schema (schema v2). Launch manually for wall evidence; the always-run driver skips it."
     },
     "koblitz.vs_rho.n41_charged": {
       "label": "Reproduction only: paired one-target online comparison at n=41 after reusable IC logs (record landed 2026-10-02)",
@@ -206,7 +211,7 @@
         "not a ledger promotion until independent validation and wall/charged gates"
       ],
       "ledger_next_target": "regimes.koblitz.stages.factor_base.next_target",
-      "note": "Past construction ceiling MAX_N=41. eta=1/16 + signed_quotient + pointwise + no incremental rank crosscheck. Avoid eta=1/2 signed_expanded (~4e8) and eta=1/1024 (too few hits)."
+      "note": "Feasibility probe beat (pre-schema-v2 PENDING runs 20260911; claims superseded by koblitz.vs_rho.n53_charged, landed 2026-10-02). Launch manually for probes; the always-run driver skips it."
     },
     "koblitz.factor_base.n53": {
       "label": "Priority #2: balanced/materialized factor base at n=53 under 16GiB resource gate",
