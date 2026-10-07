@@ -6,7 +6,7 @@
 //! extras) are pushed through them, giving the generator phi_1(P) of order l^{n-k} for the rest.
 //!   Naive:    k = 1 (one step at a time; O(n^2) l-multiplications, no extra pushing)
 //!   Balanced: k = n/2 (O(n log n) multiplications and pushes)
-//!   Optimal:  k minimising a cost model  C(n, m) = min_k  n*mul + C(k, m+1) + C(n-k, m)
+//!   Optimal:  k minimising a cost model  C(n, m) = min_k  (n-k)*mul + C(k, m+1) + C(n-k, m)
 //!             with C(1, m) = iso + m*eval  (m = number of points that must be pushed)
 use crate::curve::*;
 use crate::field::Field;
@@ -93,7 +93,8 @@ fn optimal_table(nmax: usize, mul: f64, eval: f64, iso: f64) -> Vec<Vec<usize>> 
             let mut bc = f64::INFINITY;
             for k in 1..n {
                 let mp = (m + 1).min(mmax);
-                let c = n as f64 * mul + cost[k][mp] + cost[n - k][m];
+                // only P1 = [l^{n-k}]P is computed at this node: n-k multiplications by l
+                let c = (n - k) as f64 * mul + cost[k][mp] + cost[n - k][m];
                 if c < bc {
                     bc = c;
                     best[n][m] = k;

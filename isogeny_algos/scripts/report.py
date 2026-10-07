@@ -71,4 +71,63 @@ if p:
         out.append("\nUnverified / failed instances (kept in the raw data):\n")
         for r in bad:
             out.append(f"- {r['algo']} p_bits={r['p_bits']} instance={r.get('instance')} ns={r.get('ns')} note: {r['note']}")
+
+# ---------------------------------------------------------------- V2 groups
+def pivot(title, recs, rowkey, colkey, valkey="median_ns", fmt=fmt_ns, rowname=None, sortrow=int):
+    rows = sorted({r[rowkey] for r in recs}, key=lambda v: sortrow(v))
+    cols = []
+    for r in recs:
+        if r[colkey] not in cols: cols.append(r[colkey])
+    body = []
+    for rw in rows:
+        line = [rw]
+        for c in cols:
+            m = [r for r in recs if r[rowkey] == rw and r[colkey] == c]
+            line.append(fmt(m[0][valkey]) if m else "-")
+        body.append(line)
+    table(title, [rowname or rowkey] + cols, body)
+
+k2 = [r for r in recs if r["group"] == "kernel2"]
+if k2: pivot("V2 kernel -> isogeny, odd degree, 32-bit p (median): general Velu from P, x-only Velu from x(P), Kohel with h given", k2, "ell", "algo", rowname="l")
+k2e = [r for r in recs if r["group"] == "kernel2_even"]
+if k2e: pivot("V2 kernel -> isogeny, even / composite cyclic degree n, 32-bit p (median)", k2e, "degree", "algo", rowname="n")
+k2m = [r for r in recs if r["group"] == "kernel2_mont"]
+if k2m: pivot("V2 Montgomery x-only Velu vs Weierstrass Velu for the same CSIDH kernel (median)", k2m, "ell", "algo", rowname="l")
+ch = [r for r in recs if r["group"] == "chain"]
+if ch:
+    rows = []
+    for r in sorted(ch, key=lambda r: (int(r["ell"]), int(r["e"]), r["p_bits"], r["strategy"])):
+        rows.append([r["ell"], r["e"], r["p_bits"], r["strategy"], fmt_ns(r["median_ns"]), int(r["l_mults"]), int(r["evals"]), int(r["builds"])])
+    table("V2 l^e-kernel chains over F_p^2 (median); identical codomain for all strategies", ["l", "e", "p bits", "strategy", "time", "l-mults", "point evals", "isogeny builds"], rows)
+bm = [r for r in recs if r["group"] == "bmss" and r["algo"] not in ("end_to_end_via_phi", "sigma_from_phi", "dual_isogeny")]
+if bm: pivot("V2 (E, E~) -> isogeny, 40-bit p (median; sigma supplied where required)", bm, "ell", "algo", rowname="l")
+ee = [r for r in recs if r["group"] == "bmss" and r["algo"] in ("sigma_from_phi", "dual_isogeny")]
+if ee: pivot("V2 sigma from Phi and dual isogeny (median)", ee, "ell", "algo", rowname="l")
+e2e = [r for r in recs if r["group"] == "bmss" and r["algo"] == "end_to_end_via_phi"]
+if e2e:
+    for r in e2e: r["algo2"] = "e2e_" + r["method"]
+    pivot("V2 end-to-end from (E, l) with Phi_l given (median)", e2e, "ell", "algo2", rowname="l")
+cs = [r for r in recs if r["group"] == "csidh"]
+if cs:
+    rows = []
+    for r in cs:
+        extra = {k: v for k, v in r.items() if k not in ("group", "algo", "verified", "note", "median_ns", "min_ns", "reps")}
+        t = r.get("median_ns", r.get("ns"))
+        rows.append([r["algo"], json.dumps(extra), fmt_ns(t) if t else "-", "yes" if r["verified"] else "NO"])
+    table("V2 CSIDH-style action", ["what", "parameters / counters", "time", "verified"], rows)
+en = [r for r in recs if r["group"] == "endo"]
+if en:
+    rows = [[r["p_bits"], r["instance"], r["height_3"], r["level_3"], fmt_ns(r["median_ns"]), "yes" if r["verified"] else "NO"] for r in en]
+    table("V2 Kohel End(E) conductor (median)", ["p bits", "instance", "height of 3-volcano", "level of E", "time", "verified"], rows)
+wk = [r for r in recs if r["group"] == "walks"]
+if wk:
+    by = defaultdict(list)
+    for r in wk: by[(r["algo"], r["p_bits"])].append(r)
+    rows = []
+    for (algo, bits), rs in sorted(by.items(), key=lambda kv: (int(kv[0][1]), kv[0][0])):
+        ok = [r for r in rs if r["verified"]]
+        med = fmt_ns(st.median(r["ns"] for r in ok)) if ok else "-"
+        steps = [r.get("steps", r.get("nodes_expanded")) for r in ok]
+        rows.append([algo, bits, f"{len(ok)}/{len(rs)}", med, f"{st.median(steps):.0f}" if steps else "-"])
+    table("V2 walks on identical instances (median over verified instances)", ["algorithm", "p bits", "verified", "median time", "median steps / nodes"], rows)
 print("\n".join(out))

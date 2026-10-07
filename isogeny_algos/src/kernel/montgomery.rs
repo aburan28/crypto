@@ -48,7 +48,8 @@ pub fn xadd(fp: &Zp, p: XZ, q: XZ, diff: XZ) -> XZ {
 pub fn ladder(fp: &Zp, a24: u64, x: u64, k: u128) -> XZ {
     let p = (x, 1);
     let (mut r0, mut r1) = ((1u64, 0u64), p);
-    for i in (0..128).rev() {
+    let top = 128 - k.leading_zeros() as usize; // start at the highest set bit
+    for i in (0..top).rev() {
         let bit = (k >> i) & 1;
         if bit == 0 {
             r1 = xadd(fp, r0, r1, p);
