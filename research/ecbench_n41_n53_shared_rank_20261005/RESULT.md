@@ -14,7 +14,7 @@ unchanged; no admitted speedup).
 | curve | log₂ r | arm | measured | verified | failures | mean cold S, lower bound |
 |:--|--:|:--|--:|--:|:--|--:|
 | `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | strong rho | 80 | 80 | — | 0.157 |
-| | | IC K8 (592-point target) | 80 | 0 | 80 rank setup did not verify every base column | unknown |
+| | | IC K8 | 80 | 0 | 80 rank setup did not verify every base column | unknown |
 | | | IC K16 (1,312 points, 16 columns) | 80 | 23 | 57 exhausted | 42.57 |
 | | | IC K16 control | 80 | 23 | 57 exhausted | 42.57 |
 | `icv1-f2m53-tm56619371-dac20a85` | 44.3 | strong rho | 80 | 80 | — | 0.141 |
@@ -43,8 +43,8 @@ workload-block interval at seed `202610055103`:
 - **Primary target-zero rows**: incomplete at both sizes (no paired verified
   IC round on the designated workload), so no primary quotient exists.
 
-**What it means.** At n37 the same arms solved every target at 4.6×
-(K8) and 5.0× (K16) rho in counted units. At n41 the K8 base no longer
+**What it means.** At n37 the same arms solved every target, at a counted
+IC/rho lower bound of 4.55× for K8 and 5.03× for K16. At n41 the K8 base no longer
 reaches full rank in 100,000 target-blind trials, and K16 reaches it but
 then exhausts its 512 target attempts on 57 of 80 runs; when K16 does solve,
 it costs 256× rho counted. At n53 neither base reaches full rank. The frozen
