@@ -443,6 +443,30 @@ fn icprog_reproduces_s23s_claims_and_analysis_byte_for_byte() {
     );
 }
 
+/// The rule's comparison at v3 (`research/ic_tool_program/rule/v3`):
+/// `icprog rule analyse` reads its committed runs, claims and manifests in
+/// place, since each claim points at its run by path, and must write the
+/// committed `analysis.json` byte for byte.
+#[test]
+fn icprog_reproduces_rule_v3s_committed_analysis_byte_for_byte() {
+    let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .args(["rule", "analyse", "--comparison", "v3", "--root"])
+        .arg(root())
+        .output()
+        .expect("icprog runs");
+    assert!(
+        out.status.success(),
+        "icprog failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let committed =
+        std::fs::read(root().join("research/ic_tool_program/rule/v3/analysis.json")).unwrap();
+    assert!(
+        out.stdout == committed,
+        "icprog's rule v3 analysis differs from the committed analysis.json"
+    );
+}
+
 /// A run tree that is not one is refused, with the reason.
 #[test]
 fn icprog_refuses_a_missing_run_tree() {

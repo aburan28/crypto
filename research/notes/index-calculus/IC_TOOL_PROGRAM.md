@@ -233,7 +233,7 @@ rounds.
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 | v1 | `30f6c153` on v0′ `c1a2e5f8` | engineering | 4.39, 4.45, 5.83, 8.16, 9.43, 15.61 (R03's runs; v0′ there: 4.45, 8.00, 5.90, 8.04, 9.17, 15.82) | 1.771 [1.694, 1.851] at `2^38.0`, holdouts 1.922 [1.756, 2.104]; 0.970–1.049 at the nine prime sizes | not re-measured | not re-measured | none yet | 61 | #1119, #1166 |
 | v2 | `edcb0bec` on v1 `30f6c153` | engineering | 4.47, 4.45, 5.28, 6.72, 8.13, 12.77 (R05's runs; v1 there: 4.80, 4.96, 5.88, 8.74, 10.12, 16.74) | 1.293 [1.270, 1.317], 1.238 [1.215, 1.262] and 1.303 [1.281, 1.324] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.276 [1.242, 1.311], 1.240 [1.208, 1.273] and 1.319 [1.298, 1.340]; 0.933–1.139 at the eight other sizes | not re-measured | not re-measured | none yet | 61 | #1164, #1187 |
-| v3 | `995ea207`, main's head | engineering | 3.12, 3.67, 4.38, 5.82, 5.48, 8.09 (R07's runs; v2 there: 4.12, 4.37, 5.11, 6.66, 8.11, 12.26) | 1.135 [1.104, 1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.170 [1.141, 1.201], 1.483 [1.445, 1.523] and 1.539 [1.521, 1.557]; 1.110–1.287 at the eight other sizes | not re-measured (rule v3 declared) | not re-measured (rule v3 declared) | none yet | 61 | #1395, #1414 |
+| v3 | `995ea207`, main's head | engineering | 3.12, 3.67, 4.38, 5.82, 5.48, 8.09 (R07's runs; v2 there: 4.12, 4.37, 5.11, 6.66, 8.11, 12.26) | 1.135 [1.104, 1.167], 1.483 [1.452, 1.514] and 1.526 [1.507, 1.546] at `2^44.3`, `2^44.5` and `2^47.2`; holdouts 1.170 [1.141, 1.201], 1.483 [1.445, 1.523] and 1.539 [1.521, 1.557]; 1.110–1.287 at the eight other sizes | IC 10.2–26.5× faster (rule v3) | IC 5.2–21.0× slower (rule v3) | none yet | 61 | #1395, #1414 |
 
 **Rounds that did not become baselines.** A rejected round keeps its
 numbers here and its code on record (§6, step 4). Its ratio is paired
@@ -477,6 +477,32 @@ diagnostic, not a speedup.
   and the filter with the admitted keys (10–12 ns).
 - **The key is R06's target, and the subtraction the next lever's:**
   a vectorised kernel on main's two-fold reduction.
+
+**The rule's comparison at v3 (2026-10-06)**
+([results](../../ic_tool_program/rule/v3/README.md)): ledger §23's
+single-target comparison on v3, with the same six sizes, 64 targets and
+four A/A repeats a size, against v3's own strong rho. It is accounting:
+it re-measures and changes no algorithm.
+- **408 of 408 rows checked,** every logarithm §23's, and the pin held.
+  No process was contended, failed or retried. The comparison's rho takes
+  0.50–0.62 of the strong walk's time a step, so the reference is
+  admissible.
+- **Online, the index calculus is 10.2–26.5× faster** than rho on the
+  same point (§23: 8.8–17.5×), or 4.55–13.3× with rho at the canonical
+  step.
+- **Cold, rho is still faster at every size:** the index calculus costs
+  5.2–21.0× rho's (§23: 2.0–31.6×).
+  - The ratio fell at the three largest sizes, where R05's filter and
+    main's folds made the set-up cheaper.
+  - It barely moved at `2^36.6` and `2^39.0`, where rho gained as much.
+  - At `2^38.0` it rose from 1.98 to 6.12×, because R03 removed the
+    curve construction that bound §23's figure.
+- **The gap still grows with the size,** as `r^0.18` [0.14, 0.21] over
+  the six sizes. §23's `r^0.30` included the construction-bound point, so
+  the two are not like for like.
+- **`S` is not compared with §23's.** Each process reports it in its own
+  batched addition, which is 2.3–3.2 times cheaper at v3. The ratios above
+  need no unit.
 
 **R08 declared (2026-10-07)**
 ([protocol](../../ic_tool_program/rounds/R08-scan-fold/PROTOCOL.md)),
