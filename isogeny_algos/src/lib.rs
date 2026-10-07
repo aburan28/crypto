@@ -9,4 +9,5 @@ pub mod find;
 pub mod kernel;
 pub mod path;
 pub mod poly;
+pub mod series;
 pub mod testdata;

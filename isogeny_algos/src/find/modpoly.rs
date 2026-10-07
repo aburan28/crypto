@@ -243,6 +243,35 @@ impl Phi {
         (px, py)
     }
 
+    /// (Phi_XX, Phi_XY, Phi_YY) at (x0, y0).
+    pub fn hessian<F: Field>(&self, f: &F, x0: F::E, y0: F::E) -> (F::E, F::E, F::E) {
+        let l1 = self.ell + 1;
+        let (mut xp, mut yp) = (vec![f.one()], vec![f.one()]);
+        for _ in 0..l1 {
+            xp.push(f.mul(*xp.last().unwrap(), x0));
+            yp.push(f.mul(*yp.last().unwrap(), y0));
+        }
+        let (mut pxx, mut pxy, mut pyy) = (f.zero(), f.zero(), f.zero());
+        for i in 0..=l1 {
+            for j in 0..=l1 {
+                let c = f.from_u64(self.c[i][j]);
+                if i > 1 {
+                    let w = f.mul(f.from_u64((i * (i - 1)) as u64), f.mul(xp[i - 2], yp[j]));
+                    pxx = f.add(pxx, f.mul(c, w));
+                }
+                if i > 0 && j > 0 {
+                    let w = f.mul(f.from_u64((i * j) as u64), f.mul(xp[i - 1], yp[j - 1]));
+                    pxy = f.add(pxy, f.mul(c, w));
+                }
+                if j > 1 {
+                    let w = f.mul(f.from_u64((j * (j - 1)) as u64), f.mul(xp[i], yp[j - 2]));
+                    pyy = f.add(pyy, f.mul(c, w));
+                }
+            }
+        }
+        (pxx, pxy, pyy)
+    }
+
     pub fn eval<F: Field>(&self, f: &F, x0: F::E, y0: F::E) -> F::E {
         poly::eval(f, &self.y_poly(f, x0), y0)
     }

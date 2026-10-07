@@ -8,7 +8,7 @@ use crate::field::Field;
 use crate::poly::{self, Poly};
 
 /// Coefficients c_k (k>=2) of wp(z) = z^-2 (1 + sum_{k>=2} c_k z^{2k}) as U(v) = 1 + sum c_k v^k.
-fn u_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
+pub fn u_series<F: Field>(f: &F, e: &Curve<F::E>, n: usize) -> Vec<F::E> {
     let mut u = vec![f.zero(); n + 1];
     u[0] = f.one();
     if n >= 2 {
