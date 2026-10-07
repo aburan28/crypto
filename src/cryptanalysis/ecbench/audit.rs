@@ -78,6 +78,90 @@ fn close(a: f64, b: f64) -> bool {
 pub const LEGACY_IDENTICAL: &str =
     "identical (legacy gae rounding, reproduced from the record's solver term)";
 
+/// Replay detail for a record whose GAE differs only because the repository
+/// switched serde_json from its former decimal parser to correctly rounded
+/// `float_roundtrip` parsing.
+pub const LEGACY_FLOAT_PARSE_IDENTICAL: &str =
+    "identical (legacy JSON float parse reproduced from both decimal values)";
+
+/// Reproduce the former serde_json decimal parser on the shortest JSON
+/// representation of `x`.
+///
+/// Before the crate enabled `float_roundtrip`, serde_json converted a decimal
+/// by accumulating its significand as an integer and then multiplying or
+/// dividing by a power of ten. Some sealed ecbench records therefore carry a
+/// one-ulp result of arithmetic performed on those formerly parsed inputs.
+/// This helper is deliberately limited to the small powers emitted for the
+/// GAE values in those records. Unsupported magnitudes get no compatibility
+/// allowance.
+fn legacy_json_float(x: f64) -> Option<f64> {
+    const POW10: [f64; 23] = [
+        1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16,
+        1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
+    ];
+
+    let encoded = serde_json::to_string(&x).ok()?;
+    let (negative, unsigned) = encoded
+        .strip_prefix('-')
+        .map_or((false, encoded.as_str()), |rest| (true, rest));
+    let (mantissa, explicit_exponent) =
+        unsigned
+            .split_once(['e', 'E'])
+            .map_or((unsigned, 0), |(mantissa, exponent)| {
+                exponent
+                    .parse::<i32>()
+                    .map(|value| (mantissa, value))
+                    .unwrap_or((mantissa, i32::MAX))
+            });
+    if explicit_exponent == i32::MAX {
+        return None;
+    }
+
+    let mut significand = 0u64;
+    let mut fractional_digits = 0i32;
+    let mut after_decimal = false;
+    for byte in mantissa.bytes() {
+        match byte {
+            b'.' if !after_decimal => after_decimal = true,
+            b'0'..=b'9' => {
+                significand = significand
+                    .checked_mul(10)?
+                    .checked_add(u64::from(byte - b'0'))?;
+                if after_decimal {
+                    fractional_digits = fractional_digits.checked_add(1)?;
+                }
+            }
+            _ => return None,
+        }
+    }
+    let exponent = explicit_exponent.checked_sub(fractional_digits)?;
+    let power = usize::try_from(exponent.unsigned_abs()).ok()?;
+    let pow = *POW10.get(power)?;
+    let mut value = significand as f64;
+    if exponent >= 0 {
+        value *= pow;
+    } else {
+        value /= pow;
+    }
+    Some(if negative { -value } else { value })
+}
+
+/// Compare a replayed GAE value with its sealed record. Exact equality is the
+/// normal path. The compatibility path is accepted only when applying the
+/// former parser independently to both current decimal values produces the
+/// same bits; this is not a numeric epsilon or a general one-ulp tolerance.
+fn replay_gae_matches(replayed: f64, recorded: f64) -> (bool, bool) {
+    let replayed = json_roundtrip(replayed);
+    if replayed.to_bits() == recorded.to_bits() {
+        return (true, false);
+    }
+    let legacy_matches = match (legacy_json_float(replayed), legacy_json_float(recorded)) {
+        (Some(left), Some(right)) => left.to_bits() == right.to_bits(),
+        _ => false,
+    };
+    (legacy_matches, legacy_matches)
+}
+
 /// The gae figures an `ic.pipeline` record written before the
 /// solver-rounding fix carries, from the replay's exact phases.
 ///
@@ -467,25 +551,41 @@ pub fn audit_with(
                     if rep.recovered.map(|k| k.to_string()) != r.outcome.recovered {
                         diffs.push("recovered");
                     }
-                    // Integer counts compare exactly; a float compares after
-                    // the same serialise-parse round trip the record's took.
+                    // Integer counts compare exactly. Floats compare exactly
+                    // after the current round trip, with a separately labelled
+                    // compatibility path only for decimals indistinguishable
+                    // under the former serde_json parser.
                     let same_gae = |phases: &[f64], total: f64| {
+                        let total_match = r
+                            .cost
+                            .total_gae
+                            .map(|recorded| replay_gae_matches(total, recorded))
+                            .unwrap_or((false, false));
+                        let phase_matches: Vec<(bool, bool)> = phases
+                            .iter()
+                            .zip(&r.phases)
+                            .map(|(replayed, recorded)| replay_gae_matches(*replayed, recorded.gae))
+                            .collect();
                         (
-                            Some(json_roundtrip(total).to_bits())
-                                == r.cost.total_gae.map(f64::to_bits),
-                            phases
-                                .iter()
-                                .map(|g| json_roundtrip(*g).to_bits())
-                                .eq(r.phases.iter().map(|p| p.gae.to_bits())),
+                            (
+                                total_match.0,
+                                phases.len() == r.phases.len()
+                                    && phase_matches.iter().all(|comparison| comparison.0),
+                            ),
+                            total_match.1 || phase_matches.iter().any(|comparison| comparison.1),
                         )
                     };
                     let exact: Vec<f64> = rep.phases.iter().map(|p| p.gae).collect();
-                    let (mut total_ok, mut phases_ok) = same_gae(&exact, rep.total_gae);
-                    let mut legacy = false;
+                    let ((mut total_ok, mut phases_ok), mut legacy_float_parse) =
+                        same_gae(&exact, rep.total_gae);
+                    let mut legacy_solver = false;
                     if !(total_ok && phases_ok) {
                         if let Some((ph, tot)) = legacy_solver_rounding(&exact, &r.detail) {
-                            if same_gae(&ph, tot) == (true, true) {
-                                (total_ok, phases_ok, legacy) = (true, true, true);
+                            let ((legacy_total_ok, legacy_phases_ok), parser_compatibility) =
+                                same_gae(&ph, tot);
+                            if legacy_total_ok && legacy_phases_ok {
+                                (total_ok, phases_ok, legacy_solver) = (true, true, true);
+                                legacy_float_parse |= parser_compatibility;
                             }
                         }
                     }
@@ -525,8 +625,13 @@ pub fn audit_with(
                     }
                     (
                         diffs.is_empty(),
-                        if diffs.is_empty() && legacy {
+                        if diffs.is_empty() && legacy_solver && legacy_float_parse {
+                            "identical (legacy solver and JSON float-parser rounding reproduced)"
+                                .into()
+                        } else if diffs.is_empty() && legacy_solver {
                             LEGACY_IDENTICAL.into()
+                        } else if diffs.is_empty() && legacy_float_parse {
+                            LEGACY_FLOAT_PARSE_IDENTICAL.into()
                         } else if diffs.is_empty() {
                             "identical".into()
                         } else {
@@ -620,5 +725,28 @@ mod tests {
         // Pinned solver work was never subtracted.
         assert!(legacy_solver_rounding(&exact, &detail(w, before, "pinned")).is_none());
         assert!(legacy_solver_rounding(&exact, &json!({})).is_none());
+    }
+
+    #[test]
+    fn legacy_float_parse_compatibility_is_not_a_numeric_tolerance() {
+        // These are the sealed and replayed search-phase values from the n37
+        // complete-table session's sequence 8 after enabling float_roundtrip.
+        let recorded: f64 = 3934.013766884967;
+        let replayed: f64 = 3934.0137668849675;
+        assert_ne!(recorded.to_bits(), replayed.to_bits());
+        assert_eq!(
+            legacy_json_float(recorded).map(f64::to_bits),
+            legacy_json_float(replayed).map(f64::to_bits)
+        );
+        assert_eq!(replay_gae_matches(replayed, recorded), (true, true));
+
+        // Moving another ulp changes the former parser's result, so the
+        // compatibility path still rejects a nearby mutation.
+        let two_ulp_mutation = f64::from_bits(recorded.to_bits() + 2);
+        assert_eq!(
+            replay_gae_matches(two_ulp_mutation, recorded),
+            (false, false)
+        );
+        assert_eq!(replay_gae_matches(recorded, recorded), (true, false));
     }
 }
