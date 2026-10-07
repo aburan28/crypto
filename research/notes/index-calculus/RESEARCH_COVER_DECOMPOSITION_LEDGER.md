@@ -1236,3 +1236,66 @@ measurement of the route from a non-weak curve; the algorithm is [JV12]'s
 and §§11–17's); §18.2 is accounting; §18.3 is exploratory.  Nothing here is
 an advance, and nothing concerns a generic or deployed curve: the curves
 are those whose isogeny class holds a weak curve over `F_{p⁶}`.
+
+### 18.4 Measured: the whole method from a non-weak curve (2026-10-07; `experiments/40_jv_cover_e2e_{251,fast}.{json,log}`)
+
+**Code:** `src/cryptanalysis/jv_isogeny_walk.rs` (`run_end_to_end`, `walk_to_weak_record`,
+`map_two`, `map_odd`, `model_change`, `Curve2::scalar_mul`), `spec_from_curve` and
+`run_cover_sieve_dlp_on` in `jv_cover.rs`/`jv_sieve.rs`, driver
+`examples/jv_isogeny_walk.rs --e2e`.  Eleven module tests pass, including
+`point_maps_preserve_the_curve_and_the_logarithm` (the 2- and ℓ-isogeny point maps
+are homomorphisms that commute with scalar multiplication) and
+`end_to_end_from_a_non_weak_curve_recovers_and_verifies`.  Grid: `p ∈ {251, 503,
+1009, 1511}`, seeds `1–4`, `M ∈ {8, 64}` moves off the weak locus, `32` runs, the
+route unchanged from §16 (sieve from `m = 9`, trace replay, no staircase stop,
+pooled rho `1.3609`).
+
+| p | log₂ ℓ | moves | runs | correct & verified on C | reach share (max) | S/rho end to end, min–max (mean) | route-only S/rho on W₀ | e2e / route-only |
+|--:|--:|--:|--:|:--|--:|:--|:--|:--|
+| 251 | 45.8 | 8 | 4 | 4/4 | 0.0042 | 3.97–9.50 (5.71) | 2.88–8.01 | 0.51–1.44 |
+| 251 | 45.8 | 64 | 4 | 4/4 | 0.0626 | 3.47–6.56 (5.61) | 2.88–8.01 | 0.43–2.19 |
+| 503 | 51.8 | 8 | 4 | 4/4 | 0.0012 | 0.35–0.80 (0.49) | 0.16–1.36 | 0.32–2.20 |
+| 503 | 51.8 | 64 | 4 | 4/4 | 0.0059 | 0.36–0.92 (0.65) | 0.16–1.36 | 0.42–3.48 |
+| 1009 | 57.9 | 8 | 4 | 4/4 | 0.0017 | 0.035–0.082 (0.056) | 0.011–0.120 | 0.69–3.18 |
+| 1009 | 57.9 | 64 | 4 | 4/4 | 0.0018 | 0.056–0.152 (0.100) | 0.011–0.120 | 0.94–8.37 |
+| 1511 | 61.4 | 8 | 4 | 4/4 | 0.0081 | 0.0049–0.019 (0.010) | 0.0062–0.021 | 0.25–1.33 |
+| 1511 | 61.4 | 64 | 4 | 4/4 | 0.0021 | 0.0063–0.021 (0.011) | 0.0062–0.021 | 0.42–1.00 |
+
+All 32 runs: the challenge curve `C` was not weak, the walk reached a weak curve,
+the route solved, and the recovered scalar verified `[d]·G = Q` **on `C` itself**.
+
+**Against the registration.**
+
+- **E1 (correctness) holds.** 32/32 recovered `d` and passed the verification on the
+  challenge curve.  No wrong answer; no run counted a failure as a cost.
+- **E2 (the walk is small) holds.** Walk plus transport plus model change is below
+  `0.9 %` of the run's total at every size for `M = 8` (max `0.0081`), and below
+  `6.3 %` for `M = 64` (one `p = 251` seed; the rest below `0.6 %`), inside the
+  registered `5 %`/`25 %`.  The transport is a few thousand multiplications; the
+  model change a constant `3.5·10⁴`–`2.4·10⁵`; the walk itself the only variable
+  part, and still small.
+- **E3 (the crossover survives) holds.** Every `M = 8` run at `p ≥ 1009` reads
+  below `0.1` (`0.035`–`0.082` at `1009`, `0.0049`–`0.019` at `1511`), and the
+  `M = 64` means are `0.100` and `0.011`, below `0.15`.  `p = 251` and `503` sit
+  above and around rho, as §16's crossover at `p ≈ 333` requires: the end-to-end
+  run does not move the crossover, because the walk is negligible.
+- **E4 (the paired ratio) is falsified**, at `p = 1009` seeds 3 and 4 for `M = 8`
+  (`3.18`, `3.18`... `2.43`, `3.18`), above the `1.5` line.  The cause is **not**
+  the walk (reach share `< 0.0001` on those runs).  It is that the route runs on
+  the *transported* curve, a different curve from the weak `W₀` of the same seed,
+  and the sieved route's cost swings with the instance's factor base — the same
+  instance-to-instance spread §16 measured (`0.04`–`0.67×` across ten primes near
+  `500`).  `W₀` happened to be a cheap instance for those two seeds
+  (`0.0255`, `0.0110×` rho), so a transported instance of ordinary cost reads high
+  against it.  E4 presumed the two instances were comparable; they are not, and
+  that is the finding.
+
+**What it establishes.**  The route's first whole-method measurement from a curve
+that is not weak: correct, verified on the challenge curve, and below rho at
+`p ≥ 1009` with the walk, the transport and the model change all priced inside it.
+The reach to the weak class costs `< 1 %` of the attack for a curve whose class
+holds a weak curve, confirming §17.5.4 inside a complete run.  Nothing changes the
+bottom line: the class is still the weak class, `C` is still one of the `≈ 55–60 %`
+of full-2-torsion curves whose isogeny class holds a weak curve (§18.5), and no
+generic or deployed curve is in it.  **Class: accounting** (the first end-to-end
+pricing; the algorithm is [JV12]'s and §§11–17's).
