@@ -22,11 +22,18 @@ on:
   pull_request:
     paths:
       - "src/cryptanalysis/ecbench/**"
+      - "src/cryptanalysis/ecbench_large_prime.rs"
       - "src/cryptanalysis/ic_boundary.rs"
       - "src/cryptanalysis/ic_framework/**"
+      - "src/build_provenance.rs"
       - "src/bin/ecbench.rs"
+      - "src/bin/ic.rs"
+      - "src/bin/ic/large_prime.rs"
       - "tests/ecbench.rs"
+      - "tests/ecbench_large_prime.rs"
+      - "tests/fixtures/ecbench_manifest_small.json"
       - "docs/ecbench/**"
+      - "docs/bounds/**"
       - "research/ecbench_*/**"
       - "research/notes/ecc2k130/cold_compact_orbit_ic_20261003/**"
       - "research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/**"
@@ -70,10 +77,26 @@ jobs:
         run: cargo test --release --lib ecbench
       - name: Integration tests
         run: cargo test --release --test ecbench
+      - name: Exact n-1 and large-prime integration tests
+        run: cargo test --release --test ecbench_large_prime
       - name: Build
         run: cargo build --release --bin ecbench
       - name: Host
         run: ./target/release/ecbench host | tee -a "$GITHUB_STEP_SUMMARY"
+      # Bounds are re-derivable from the sessions they name, challenges must
+      # still build in their domain, and the frontier page must be the one
+      # the records give (docs/bounds/README.md §8).
+      - name: Bound records re-derive, challenges check, the frontier is current
+        run: |
+          ./target/release/ecbench bound check --root . --record docs/bounds/records/*.json
+          ./target/release/ecbench challenge check --file docs/bounds/challenges/*.json
+          ./target/release/ecbench frontier build --bounds docs/bounds/records \
+            --out docs/bounds/frontier.json --markdown docs/bounds/FRONTIER.md --check
+          {
+            echo '## Frontier'
+            echo
+            sed -n '1,4p' docs/bounds/FRONTIER.md
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Independent all-run replay of the n37 shared-rank session
         run: |
           mkdir -p "$RUNNER_TEMP/ecbench-independent"
