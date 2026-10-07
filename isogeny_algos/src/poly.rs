@@ -1,5 +1,6 @@
 //! Dense univariate polynomials over a generic field, schoolbook arithmetic.
 //! Coefficients low-to-high; the zero polynomial is the empty vec.
+use crate::bigint::Big;
 use crate::field::{Field, Rng};
 
 pub type Poly<F> = Vec<<F as Field>::E>;
@@ -51,22 +52,152 @@ pub fn scale<F: Field>(f: &F, a: &Poly<F>, c: F::E) -> Poly<F> {
     trim(f, &mut r);
     r
 }
+/// Karatsuba threshold (schoolbook below this many coefficients).
+pub const KARATSUBA_THRESHOLD: usize = 32;
+
+fn school<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
+    f.conv(a, b)
+}
+
+/// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1.
+pub fn mul_raw<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
+    let (a, b) = if a.len() >= b.len() { (a, b) } else { (b, a) };
+    if b.len() < KARATSUBA_THRESHOLD {
+        return school(f, a, b);
+    }
+    if a.len() >= 2 * b.len() {
+        // unbalanced: chunk the longer operand
+        let mut r = vec![f.zero(); a.len() + b.len() - 1];
+        for (ci, chunk) in a.chunks(b.len()).enumerate() {
+            let pr = mul_raw(f, chunk, b);
+            let off = ci * b.len();
+            for (k, &v) in pr.iter().enumerate() {
+                r[off + k] = f.add(r[off + k], v);
+            }
+        }
+        return r;
+    }
+    let h = a.len().div_ceil(2);
+    let (a0, a1) = a.split_at(h.min(a.len()));
+    let (b0, b1) = b.split_at(h.min(b.len()));
+    let z0 = mul_raw(f, a0, b0);
+    let mut r = vec![f.zero(); a.len() + b.len() - 1];
+    for (k, &v) in z0.iter().enumerate() {
+        r[k] = f.add(r[k], v);
+    }
+    if b1.is_empty() {
+        // b fits in the low half: a1 * b
+        let z = mul_raw(f, a1, b);
+        for (k, &v) in z.iter().enumerate() {
+            r[h + k] = f.add(r[h + k], v);
+        }
+        return r;
+    }
+    let z2 = mul_raw(f, a1, b1);
+    let sa: Vec<F::E> = (0..h)
+        .map(|i| f.add(a0[i], if i < a1.len() { a1[i] } else { f.zero() }))
+        .collect();
+    let sb: Vec<F::E> = (0..h)
+        .map(|i| {
+            f.add(
+                if i < b0.len() { b0[i] } else { f.zero() },
+                if i < b1.len() { b1[i] } else { f.zero() },
+            )
+        })
+        .collect();
+    let mut z1 = mul_raw(f, &sa, &sb);
+    for (k, &v) in z0.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    for (k, &v) in z2.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    for (k, &v) in z1.iter().enumerate() {
+        if h + k < r.len() {
+            r[h + k] = f.add(r[h + k], v);
+        }
+    }
+    for (k, &v) in z2.iter().enumerate() {
+        r[2 * h + k] = f.add(r[2 * h + k], v);
+    }
+    r
+}
+
 pub fn mul<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
     if a.is_empty() || b.is_empty() {
         return vec![];
     }
-    let mut r = vec![f.zero(); a.len() + b.len() - 1];
-    for (i, &x) in a.iter().enumerate() {
-        if f.is_zero(x) {
-            continue;
-        }
-        for (j, &y) in b.iter().enumerate() {
-            r[i + j] = f.add(r[i + j], f.mul(x, y));
-        }
-    }
+    let mut r = mul_raw(f, a, b);
     trim(f, &mut r);
     r
 }
+
+/// Schoolbook product (kept for reference / benchmarks).
+pub fn mul_schoolbook<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
+    if a.is_empty() || b.is_empty() {
+        return vec![];
+    }
+    let mut r = school(f, a, b);
+    trim(f, &mut r);
+    r
+}
+
+/// Reducer for a fixed modulus: remainder by two multiplications with a precomputed
+/// inverse of the reversed modulus (Newton/Barrett style division).
+pub struct PolyModulus<F: Field> {
+    pub m: Poly<F>,
+    n: usize,
+    rinv: Vec<F::E>,
+}
+
+impl<F: Field> PolyModulus<F> {
+    pub fn new(f: &F, m: &Poly<F>) -> Self {
+        let m = monic(f, m);
+        let n = m.len() - 1;
+        let rev: Vec<F::E> = m.iter().rev().copied().collect();
+        let rinv = if n >= 2 {
+            crate::series::inv(f, &rev, n - 1)
+        } else {
+            vec![f.one()]
+        };
+        PolyModulus { m, n, rinv }
+    }
+    pub fn rem(&self, f: &F, a: &Poly<F>) -> Poly<F> {
+        let n = self.n;
+        if a.len() <= n {
+            let mut r = a.clone();
+            trim(f, &mut r);
+            return r;
+        }
+        if a.len() > 2 * n - 1 || n < 2 {
+            return rem(f, a, &self.m);
+        }
+        let k = a.len() - n; // number of quotient coefficients (<= n-1)
+        let rev_a: Vec<F::E> = a.iter().rev().take(k).copied().collect();
+        let mut qr = mul_raw(f, &rev_a, &self.rinv[..k]);
+        qr.truncate(k);
+        let q: Vec<F::E> = qr.into_iter().rev().collect();
+        let qm = mul_raw(f, &q, &self.m);
+        let mut r: Vec<F::E> = (0..n).map(|i| f.sub(a[i], qm[i])).collect();
+        trim(f, &mut r);
+        r
+    }
+    pub fn mulmod(&self, f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
+        self.rem(f, &mul(f, a, b))
+    }
+    pub fn powmod_big(&self, f: &F, a: &Poly<F>, e: &Big) -> Poly<F> {
+        let mut r = constant(f, f.one());
+        let b = self.rem(f, &rem(f, a, &self.m));
+        for i in (0..e.bits()).rev() {
+            r = self.mulmod(f, &r, &r);
+            if e.bit(i) {
+                r = self.mulmod(f, &r, &b);
+            }
+        }
+        r
+    }
+}
+
 pub fn derivative<F: Field>(f: &F, a: &Poly<F>) -> Poly<F> {
     let mut r: Poly<F> = (1..a.len())
         .map(|i| f.mul(a[i], f.from_u64(i as u64)))
@@ -111,6 +242,10 @@ pub fn divrem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> (Poly<F>, Poly<F>) {
     (q, r)
 }
 pub fn rem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
+    // large quotients: Newton/Barrett division (two multiplications); small: schoolbook
+    if b.len() >= 64 && a.len() >= b.len() + 32 && a.len() <= 2 * b.len() - 1 {
+        return PolyModulus::new(f, b).rem(f, a);
+    }
     divrem(f, a, b).1
 }
 pub fn gcd<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
@@ -126,6 +261,9 @@ pub fn mulmod<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>, m: &Poly<F>) -> Poly<F>
     rem(f, &mul(f, a, b), m)
 }
 pub fn powmod<F: Field>(f: &F, a: &Poly<F>, mut e: u128, m: &Poly<F>) -> Poly<F> {
+    if m.len() > 64 {
+        return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
+    }
     let mut r = constant(f, f.one());
     let mut b = rem(f, a, m);
     while e > 0 {
@@ -139,6 +277,21 @@ pub fn powmod<F: Field>(f: &F, a: &Poly<F>, mut e: u128, m: &Poly<F>) -> Poly<F>
     }
     r
 }
+pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F> {
+    if m.len() > 64 {
+        return PolyModulus::new(f, m).powmod_big(f, a, e);
+    }
+    let mut r = constant(f, f.one());
+    let b = rem(f, a, m);
+    for i in (0..e.bits()).rev() {
+        r = mulmod(f, &r, &r, m);
+        if e.bit(i) {
+            r = mulmod(f, &r, &b, m);
+        }
+    }
+    r
+}
+
 /// Product of (x - r) over the given roots.
 pub fn from_roots<F: Field>(f: &F, roots: &[F::E]) -> Poly<F> {
     let mut p = vec![f.one()];
@@ -162,11 +315,11 @@ fn split_roots<F: Field>(f: &F, g: &Poly<F>, rng: &mut Rng, out: &mut Vec<F::E>)
         out.push(f.neg(f.div(g[0], g[1])));
         return;
     }
-    let half = (f.size() - 1) / 2;
+    let half = f.q().sub_small(1).shr(1);
     loop {
         let r = f.random(rng);
         let base = vec![r, f.one()];
-        let w = sub(f, &powmod(f, &base, half, g), &constant(f, f.one()));
+        let w = sub(f, &powmod_big(f, &base, &half, g), &constant(f, f.one()));
         let dd = gcd(f, g, &w);
         let dd_deg = deg(f, &dd);
         if dd_deg > 0 && dd_deg < d {
@@ -184,7 +337,7 @@ pub fn roots<F: Field>(f: &F, p: &Poly<F>, rng: &mut Rng) -> Vec<F::E> {
     if deg(f, &p) <= 0 {
         return vec![];
     }
-    let xq = powmod(f, &x_poly(f), f.size(), &p);
+    let xq = powmod_big(f, &x_poly(f), &f.q(), &p);
     let g = gcd(f, &p, &sub(f, &xq, &x_poly(f)));
     let mut out = vec![];
     split_roots(f, &g, rng, &mut out);
@@ -198,7 +351,7 @@ pub fn ddf<F: Field>(f: &F, p: &Poly<F>) -> Vec<(usize, Poly<F>)> {
     let mut h = x_poly(f);
     let mut k = 1usize;
     while deg(f, &fp) >= 2 * k as isize {
-        h = powmod(f, &h, f.size(), &fp);
+        h = powmod_big(f, &h, &f.q(), &fp);
         let g = gcd(f, &fp, &sub(f, &h, &x_poly(f)));
         if deg(f, &g) > 0 {
             fp = monic(f, &divrem(f, &fp, &g).0);
@@ -220,7 +373,7 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
         out.push(monic(f, g));
         return;
     }
-    let half = (f.size() - 1) / 2;
+    let half = f.q().sub_small(1).shr(1);
     loop {
         let a: Poly<F> = {
             let mut a: Poly<F> = (0..d as usize).map(|_| f.random(rng)).collect();
@@ -234,10 +387,10 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
         let mut t = rem(f, &a, g);
         let mut s = t.clone();
         for _ in 1..k {
-            t = powmod(f, &t, f.size(), g);
+            t = powmod_big(f, &t, &f.q(), g);
             s = mulmod(f, &s, &t, g);
         }
-        let b = powmod(f, &s, half, g);
+        let b = powmod_big(f, &s, &half, g);
         let dd = gcd(f, g, &sub(f, &b, &constant(f, f.one())));
         let dd_deg = deg(f, &dd);
         if dd_deg > 0 && dd_deg < d {

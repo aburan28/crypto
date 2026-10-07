@@ -1,6 +1,7 @@
 //! Field abstraction. Baseline arithmetic is deliberately naive
 //! (u128 `%` reduction, extended-Euclid inversion) so later iterations have
 //! something to beat.
+use crate::bigint::Big;
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -55,6 +56,73 @@ pub trait Field: Clone + Send + Sync + 'static {
         }
         r
     }
+    /// Field size as a big integer (defaults to `size()`; big fields override).
+    fn q(&self) -> Big {
+        Big::from_u128(self.size())
+    }
+    fn pow_big(&self, a: Self::E, e: &Big) -> Self::E {
+        let mut r = self.one();
+        for i in (0..e.bits()).rev() {
+            r = self.sq(r);
+            if e.bit(i) {
+                r = self.mul(r, a);
+            }
+        }
+        r
+    }
+    /// Full product of two coefficient vectors (length a.len()+b.len()-1). Default: schoolbook;
+    /// single-word fields override it with lazy (accumulate-then-reduce) arithmetic.
+    fn conv(&self, a: &[Self::E], b: &[Self::E]) -> Vec<Self::E> {
+        let mut r = vec![self.zero(); a.len() + b.len() - 1];
+        for (i, &x) in a.iter().enumerate() {
+            if self.is_zero(x) {
+                continue;
+            }
+            for (j, &y) in b.iter().enumerate() {
+                r[i + j] = self.add(r[i + j], self.mul(x, y));
+            }
+        }
+        r
+    }
+    /// First `n` coefficients of the product (truncated power-series multiplication).
+    fn conv_trunc(&self, a: &[Self::E], b: &[Self::E], n: usize) -> Vec<Self::E> {
+        let mut r = vec![self.zero(); n];
+        for i in 0..a.len().min(n) {
+            if self.is_zero(a[i]) {
+                continue;
+            }
+            for j in 0..b.len().min(n - i) {
+                r[i + j] = self.add(r[i + j], self.mul(a[i], b[j]));
+            }
+        }
+        r
+    }
+    /// sum_i a[i] * b[len-1-i] over the common length (reversed dot product).
+    fn dot_rev(&self, a: &[Self::E], b: &[Self::E]) -> Self::E {
+        let n = a.len().min(b.len());
+        let mut s = self.zero();
+        for i in 0..n {
+            s = self.add(s, self.mul(a[i], b[b.len() - 1 - i]));
+        }
+        s
+    }
+    /// Inverses of all non-zero entries with one field inversion (Montgomery's trick).
+    fn batch_inv(&self, xs: &[Self::E]) -> Vec<Self::E> {
+        let n = xs.len();
+        let mut pre = Vec::with_capacity(n);
+        let mut acc = self.one();
+        for &x in xs {
+            pre.push(acc);
+            acc = self.mul(acc, x);
+        }
+        let mut inv = self.inv(acc);
+        let mut out = vec![self.zero(); n];
+        for i in (0..n).rev() {
+            out[i] = self.mul(inv, pre[i]);
+            inv = self.mul(inv, xs[i]);
+        }
+        out
+    }
     fn from_i64(&self, n: i64) -> Self::E {
         if n >= 0 {
             self.from_u64(n as u64)
@@ -70,26 +138,26 @@ pub trait Field: Clone + Send + Sync + 'static {
         if self.is_zero(a) {
             return Some(a);
         }
-        let q = self.size();
-        let half = (q - 1) / 2;
-        if self.pow(a, half) != self.one() {
+        let qm1 = self.q().sub_small(1);
+        let half = qm1.shr(1);
+        if self.pow_big(a, &half) != self.one() {
             return None;
         }
         let mut rng = Rng::new(0xC0FFEE);
         let z = loop {
             let z = self.random(&mut rng);
-            if !self.is_zero(z) && self.pow(z, half) != self.one() {
+            if !self.is_zero(z) && self.pow_big(z, &half) != self.one() {
                 break z;
             }
         };
-        let (mut s, mut m) = (0u32, q - 1);
-        while m % 2 == 0 {
-            m /= 2;
+        let mut s = 0u32;
+        while !qm1.bit(s as usize) {
             s += 1;
         }
-        let mut c = self.pow(z, m);
-        let mut t = self.pow(a, m);
-        let mut r = self.pow(a, m.div_ceil(2));
+        let m = qm1.shr(s as usize);
+        let mut c = self.pow_big(z, &m);
+        let mut t = self.pow_big(a, &m);
+        let mut r = self.pow_big(a, &m.add_small(1).shr(1));
         let mut mm = s;
         while t != self.one() {
             let (mut i, mut tt) = (0u32, t);
@@ -211,17 +279,7 @@ impl Field for Zp {
     }
     fn inv(&self, a: u64) -> u64 {
         assert!(a != 0, "inverse of zero");
-        let (mut t, mut nt) = (0i128, 1i128);
-        let (mut r, mut nr) = (self.p as i128, a as i128);
-        while nr != 0 {
-            let q = r / nr;
-            (t, nt) = (nt, t - q * nt);
-            (r, nr) = (nr, r - q * nr);
-        }
-        if t < 0 {
-            t += self.p as i128;
-        }
-        t as u64
+        crate::fpm::inv_u64(a, self.p)
     }
     fn from_u64(&self, n: u64) -> u64 {
         n % self.p
@@ -238,6 +296,64 @@ impl Field for Zp {
     fn sqrt(&self, a: u64) -> Option<u64> {
         Zp::sqrt(self, a)
     }
+    fn conv(&self, a: &[u64], b: &[u64]) -> Vec<u64> {
+        lazy_conv(a, b, self.p, a.len() + b.len() - 1, |acc| acc as u64)
+    }
+    fn conv_trunc(&self, a: &[u64], b: &[u64], n: usize) -> Vec<u64> {
+        lazy_conv(a, b, self.p, n, |acc| acc as u64)
+    }
+    fn dot_rev(&self, a: &[u64], b: &[u64]) -> u64 {
+        lazy_dot_rev(a, b, self.p) as u64
+    }
+}
+
+/// sum a[i] b[len-1-i] mod p with lazy u128 accumulation (p < 2^62).
+pub fn lazy_dot_rev(a: &[u64], b: &[u64], p: u64) -> u128 {
+    let n = a.len().min(b.len());
+    let pp = p as u128;
+    let mut acc: u128 = 0;
+    let mut cnt = 0;
+    let bl = b.len();
+    for i in 0..n {
+        acc += a[i] as u128 * b[bl - 1 - i] as u128;
+        cnt += 1;
+        if cnt == 15 {
+            acc %= pp;
+            cnt = 1;
+        }
+    }
+    acc % pp
+}
+
+/// Convolution with u128 accumulation: products are < p^2 < 2^124 for p < 2^62, so 15 of them can be
+/// summed before reducing; `fin` maps the reduced accumulator (< p) to the output representation.
+pub fn lazy_conv(a: &[u64], b: &[u64], p: u64, nout: usize, fin: impl Fn(u128) -> u64) -> Vec<u64> {
+    let (n, m) = (a.len(), b.len());
+    let mut r = Vec::with_capacity(nout);
+    let pp = p as u128;
+    if n == 0 || m == 0 {
+        return vec![fin(0); nout];
+    }
+    for k in 0..nout {
+        if k > n + m - 2 {
+            r.push(fin(0));
+            continue;
+        }
+        let lo = k.saturating_sub(m - 1);
+        let hi = k.min(n - 1);
+        let mut acc: u128 = 0;
+        let mut cnt = 0;
+        for i in lo..=hi {
+            acc += a[i] as u128 * b[k - i] as u128;
+            cnt += 1;
+            if cnt == 15 {
+                acc %= pp;
+                cnt = 1;
+            }
+        }
+        r.push(fin(acc % pp));
+    }
+    r
 }
 
 /// F_{p^2} = F_p[i]/(i^2 - nr), nr a non-residue.

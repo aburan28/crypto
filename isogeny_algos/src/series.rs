@@ -3,29 +3,49 @@
 use crate::field::Field;
 
 pub fn mul<F: Field>(f: &F, a: &[F::E], b: &[F::E], n: usize) -> Vec<F::E> {
-    let mut r = vec![f.zero(); n];
-    for i in 0..a.len().min(n) {
-        if f.is_zero(a[i]) {
-            continue;
-        }
-        for j in 0..b.len().min(n - i) {
-            r[i + j] = f.add(r[i + j], f.mul(a[i], b[j]));
-        }
+    let (la, lb) = (a.len().min(n), b.len().min(n));
+    if la >= 128 && lb >= 128 {
+        let mut r = crate::poly::mul_raw(f, &a[..la], &b[..lb]);
+        r.resize(n.max(r.len()), f.zero());
+        r.truncate(n);
+        return r;
     }
-    r
+    if la == 0 || lb == 0 {
+        return vec![f.zero(); n];
+    }
+    f.conv_trunc(&a[..la], &b[..lb], n)
 }
 
-/// 1/a (requires a[0] != 0).
+/// 1/a (requires a[0] != 0): Newton iteration g <- g (2 - a g), O(M(n)).
 pub fn inv<F: Field>(f: &F, a: &[F::E], n: usize) -> Vec<F::E> {
+    if n < 512 {
+        return inv_quadratic(f, a, n);
+    }
+    let mut g = inv_quadratic(f, a, 128);
+    let mut k = 128;
+    while k < n {
+        let k2 = (2 * k).min(n);
+        let ag = mul(f, &a[..a.len().min(k2)], &g, k2);
+        // 2 - a g
+        let mut t: Vec<F::E> = ag.iter().map(|&c| f.neg(c)).collect();
+        t[0] = f.add(t[0], f.from_u64(2));
+        g = mul(f, &g, &t, k2);
+        k = k2;
+    }
+    g.truncate(n);
+    g
+}
+
+/// Quadratic-time inverse (reference).
+pub fn inv_quadratic<F: Field>(f: &F, a: &[F::E], n: usize) -> Vec<F::E> {
     let a0i = f.inv(a[0]);
-    let mut r = vec![f.zero(); n];
-    r[0] = a0i;
+    let mut r = Vec::with_capacity(n);
+    r.push(a0i);
     for k in 1..n {
-        let mut s = f.zero();
-        for i in 1..=k.min(a.len() - 1) {
-            s = f.add(s, f.mul(a[i], r[k - i]));
-        }
-        r[k] = f.neg(f.mul(s, a0i));
+        // s = sum_{i=1}^{k} a[i] r[k-i]
+        let top = k.min(a.len() - 1);
+        let s = f.dot_rev(&a[1..=top], &r[k - top..k]);
+        r.push(f.neg(f.mul(s, a0i)));
     }
     r
 }
@@ -52,12 +72,15 @@ pub fn pow<F: Field>(f: &F, a: &[F::E], mut e: usize, n: usize) -> Vec<F::E> {
 pub fn exp<F: Field>(f: &F, fs: &[F::E], n: usize) -> Vec<F::E> {
     let mut g = vec![f.zero(); n];
     g[0] = f.one();
+    // k F_k, precomputed
+    let kf: Vec<F::E> = (0..fs.len().min(n))
+        .map(|k| f.mul(f.from_u64(k as u64), fs[k]))
+        .collect();
+    let invs = f.batch_inv(&(1..n).map(|m| f.from_u64(m as u64)).collect::<Vec<_>>());
     for m in 1..n {
-        let mut s = f.zero();
-        for k in 1..=m.min(fs.len() - 1) {
-            s = f.add(s, f.mul(f.mul(f.from_u64(k as u64), fs[k]), g[m - k]));
-        }
-        g[m] = f.div(s, f.from_u64(m as u64));
+        let top = m.min(kf.len() - 1);
+        let s = f.dot_rev(&kf[1..=top], &g[m - top..m]);
+        g[m] = f.mul(s, invs[m - 1]);
     }
     g
 }
