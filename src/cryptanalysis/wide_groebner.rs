@@ -41,7 +41,7 @@ use std::collections::HashMap;
 use num_bigint::BigUint;
 
 use crate::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::fx_hash::FxMap;
+use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::gf2_elim;
 use crate::cryptanalysis::koblitz_groebner::FieldStructure;
 use crate::cryptanalysis::koblitz_index_calculus::{
@@ -951,6 +951,15 @@ pub fn wide_groebner_decompose(
         &valid,
         &mut stats,
     );
+    if found.is_some() {
+        stats.exhausted = false;
+        stats.unsupported = false;
+    } else {
+        // Keep the public incomplete-result contract for callers that
+        // only check `exhausted`, while letting internal search continue
+        // past an unsupported branch to find a witness elsewhere.
+        stats.exhausted |= stats.unsupported;
+    }
     (found, stats)
 }
 
@@ -969,6 +978,36 @@ fn valid_coordinates(
     let ell = fb.subspace_basis.len();
     if ell > MAX_POINT_BRANCH_ELL {
         return Vec::new();
+    }
+    // The usual index is a map into this exact base. Reuse its already
+    // validated point lifts instead of solving the curve equation for
+    // every subspace abscissa on every query. Keep the reference path for
+    // arbitrary external index maps, whose keys could contain points not
+    // represented by `fb.points`.
+    let indexed_base = index_of
+        .iter()
+        .all(|(key, &i)| fb.points.get(i).is_some_and(|p| &point_key(p) == key));
+    if indexed_base {
+        let allowed_x: FxSet<u128> = index_of
+            .values()
+            .filter_map(|&i| match &fb.points[i] {
+                BinaryPoint::Affine { x, .. } => Some(element_bits(x)),
+                BinaryPoint::Infinity => None,
+            })
+            .collect();
+        let basis_bits: Vec<u128> = fb.subspace_basis.iter().map(element_bits).collect();
+        let mut x_by_code = vec![0u128; 1usize << ell];
+        let mut valid = Vec::new();
+        for code in 0..x_by_code.len() {
+            if code != 0 {
+                let bit = code.trailing_zeros() as usize;
+                x_by_code[code] = x_by_code[code & (code - 1)] ^ basis_bits[bit];
+            }
+            if allowed_x.contains(&x_by_code[code]) {
+                valid.push(code as u32);
+            }
+        }
+        return valid;
     }
     (0..1u32 << ell)
         .filter(|&c| {
@@ -1032,14 +1071,12 @@ fn decompose_rec(
     }
     if st.degree() != kc.n || st.degree() > st.max_degree() || st.degree() > 128 {
         stats.unsupported = true;
-        stats.exhausted = true;
         return None;
     }
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => {
             stats.unsupported = true;
-            stats.exhausted = true;
             return None;
         }
     };
@@ -1081,12 +1118,10 @@ fn decompose_rec(
         .find(|&k| k * (ell + st.degree() as usize) <= opts.max_vars)
     else {
         stats.unsupported = true;
-        stats.exhausted = true;
         return None;
     };
     let Some(sys) = WideSystem::build_suffix(&fb.subspace_basis, &x_r, &kc.curve.b, k, st) else {
         stats.unsupported = true;
-        stats.exhausted = true;
         return None;
     };
     search(
@@ -1572,6 +1607,7 @@ fn search(
         // A decomposition was found: the budget running out elsewhere
         // does not make this answer incomplete.
         stats.exhausted = false;
+        stats.unsupported = false;
     }
     found
 }
@@ -1671,6 +1707,73 @@ mod tests {
         cofactor_project_factor_base, find_irreducible,
     };
     use rand::{rngs::StdRng, Rng, SeedableRng};
+
+    #[test]
+    fn indexed_coordinates_match_curve_lift_reference() {
+        fn reference(
+            kc: &KoblitzCurve,
+            fb: &FrobeniusFactorBase,
+            index_of: &HashMap<(BigUint, BigUint), usize>,
+        ) -> Vec<u32> {
+            let ell = fb.subspace_basis.len();
+            (0..1u32 << ell)
+                .filter(|&c| {
+                    let x = summand_x(&fb.subspace_basis, ell, c as u128, 0, kc.n);
+                    points_with_x(&kc.curve, &x)
+                        .iter()
+                        .any(|p| index_of.contains_key(&point_key(p)))
+                })
+                .collect()
+        }
+
+        for (kc, ell) in [
+            (KoblitzCurve::new(0, 9).unwrap(), 3),
+            (KoblitzCurve::new(1, 17).unwrap(), 5),
+            (KoblitzCurve::known_n83_k0().unwrap(), 12),
+        ] {
+            let fb = build_standard_subspace_factor_base(&kc, ell).unwrap();
+            let full = fb.index_map();
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &full),
+                reference(&kc, &fb, &full)
+            );
+            if kc.n == 83 {
+                assert_eq!(valid_coordinates(&kc, &fb, &full).len(), 2_029);
+            }
+
+            let mut subset = full.clone();
+            subset.retain(|_, i| *i % 3 == 0);
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &subset),
+                reference(&kc, &fb, &subset)
+            );
+
+            let mut changed_basis = fb.clone();
+            changed_basis.subspace_basis[0] =
+                changed_basis.subspace_basis[0].add(&changed_basis.subspace_basis[1]);
+            assert_eq!(
+                valid_coordinates(&kc, &changed_basis, &full),
+                reference(&kc, &changed_basis, &full)
+            );
+
+            let mut malformed = full.clone();
+            let (key, &index) = full.iter().next().unwrap();
+            malformed.insert(key.clone(), (index + 1) % fb.points.len());
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &malformed),
+                reference(&kc, &fb, &malformed)
+            );
+
+            if kc.n == 9 {
+                let frobenius = build_frobenius_factor_base(&kc, 0).unwrap();
+                let frobenius_index = frobenius.index_map();
+                assert_eq!(
+                    valid_coordinates(&kc, &frobenius, &frobenius_index),
+                    reference(&kc, &frobenius, &frobenius_index)
+                );
+            }
+        }
+    }
 
     #[test]
     fn two_word_field_table_matches_legacy_and_reference() {

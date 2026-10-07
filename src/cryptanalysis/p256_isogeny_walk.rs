@@ -27,6 +27,7 @@ const PHI11_TEXT: &str = include_str!("data/phi_j_11.txt");
 const SMALL_PRIMES: [u64; 11] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31];
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DegreeCensus {
     pub degree: u64,
     pub discriminant_mod_degree: u64,
@@ -36,12 +37,14 @@ pub struct DegreeCensus {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct PointWitness {
     pub x: String,
     pub y: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CurveRecord {
     pub a: String,
     pub b: String,
@@ -50,6 +53,7 @@ pub struct CurveRecord {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct WalkHeader {
     pub record: String,
     pub schema: String,
@@ -64,6 +68,7 @@ pub struct WalkHeader {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CensusRecord {
     pub record: String,
     pub entries: Vec<DegreeCensus>,
@@ -71,12 +76,14 @@ pub struct CensusRecord {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct StartRecord {
     pub record: String,
     pub curve: CurveRecord,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct IsogenyWitness {
     pub kind: String,
     pub degree: u64,
@@ -85,6 +92,7 @@ pub struct IsogenyWitness {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct EdgeRecord {
     pub record: String,
     pub index: u64,
@@ -96,6 +104,7 @@ pub struct EdgeRecord {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CycleEvent {
     pub at_vertex: u64,
     pub first_seen_vertex: u64,
@@ -104,6 +113,7 @@ pub struct CycleEvent {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct SummaryRecord {
     pub record: String,
     pub emitted_steps: u64,
@@ -118,6 +128,7 @@ pub struct SummaryRecord {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct WalkCertificate {
     pub header: WalkHeader,
     pub census: CensusRecord,
@@ -127,6 +138,7 @@ pub struct WalkCertificate {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DivisionPolynomialFixture {
     pub scalar: u64,
     pub kernel_coefficients: Vec<String>,
@@ -614,7 +626,8 @@ fn verify_inner(certificate: &mut WalkCertificate, allow_unsealed: bool) -> Resu
     let p256 = CurveParams::p256();
     let trace = p256_trace(&p256);
     let phi = Phi11::load()?;
-    if certificate.header.schema != CERTIFICATE_SCHEMA
+    if certificate.header.record != "header"
+        || certificate.header.schema != CERTIFICATE_SCHEMA
         || certificate.header.curve != P256_ICV1
         || certificate.header.field_p != hex_big(&p256.p)
         || certificate.header.group_order != hex_big(&p256.n)
@@ -629,18 +642,21 @@ fn verify_inner(certificate: &mut WalkCertificate, allow_unsealed: bool) -> Resu
         return Err("Hasse interval does not make the order witness decisive".into());
     }
     let expected_census = degree_census();
-    if certificate.census.entries != expected_census
+    if certificate.census.record != "census"
+        || certificate.census.entries != expected_census
         || certificate.census.selected_degree != WALK_DEGREE
     {
         return Err("degree census does not match the frozen native census".into());
     }
     let expected_start = p256_start()?;
-    if certificate.start.curve != expected_start {
+    if certificate.start.record != "start" || certificate.start.curve != expected_start {
         return Err("certificate does not start at the exact registered P-256 model".into());
     }
     verify_curve_record(&certificate.start.curve, &p256.p, &p256.n)?;
     let unsealed = certificate.summary.verified_steps == 0;
-    if certificate.edges.len() as u64 != certificate.header.requested_steps
+    if certificate.header.requested_steps == 0
+        || certificate.summary.record != "summary"
+        || certificate.edges.len() as u64 != certificate.header.requested_steps
         || certificate.summary.emitted_steps != certificate.header.requested_steps
         || (certificate.summary.verified_steps != certificate.header.requested_steps
             && !(allow_unsealed && unsealed))
@@ -697,7 +713,10 @@ fn verify_inner(certificate: &mut WalkCertificate, allow_unsealed: bool) -> Resu
     }
 
     let serialized_edges = edge_lines(&certificate.edges)?;
+    let expected_bytes_per_edge =
+        serialized_edges.len() as f64 / certificate.header.requested_steps as f64;
     if certificate.summary.serialized_edge_bytes != serialized_edges.len() as u64
+        || certificate.summary.bytes_per_edge != expected_bytes_per_edge
         || certificate.summary.edge_stream_sha256 != hex::encode(sha256(&serialized_edges))
         || certificate.summary.distinct_j != first_seen.len() as u64
         || certificate.summary.first_cycle != first_cycle
@@ -1051,6 +1070,10 @@ mod tests {
         let mut certificate = generate(4).unwrap();
         verify(&mut certificate).unwrap();
         assert_eq!(certificate.summary.verified_steps, 4);
+
+        let mut header = serde_json::to_value(&certificate.header).unwrap();
+        header["unexpected"] = serde_json::json!(true);
+        assert!(serde_json::from_value::<WalkHeader>(header).is_err());
 
         let bytes = to_json_lines(&certificate).unwrap();
         let mut decoded = from_json_lines(&bytes).unwrap();
