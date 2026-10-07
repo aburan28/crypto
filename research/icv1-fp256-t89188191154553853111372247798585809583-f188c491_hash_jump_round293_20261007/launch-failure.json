@@ -1,0 +1,13 @@
+{
+  "schema": "research-launch-failure/v1",
+  "date": "2026-10-07",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 293,
+  "stage": "isolated-run-spawn",
+  "binary": "/tmp/round293-target-198/release/p256_hash_jump_screen",
+  "error": "/tmp/round293-target-198/release/p256_hash_jump_screen: No such file or directory (os error 2)",
+  "experiment_process_started": false,
+  "result_emitted": false,
+  "isolation_entry_emitted": false,
+  "resolution": "Built the committed standalone release binary, then ran it successfully under the isolated benchmark wrapper. The failed launch was not silently counted as an experiment execution."
+}
