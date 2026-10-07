@@ -217,6 +217,12 @@ fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
             "218,219,220,221",
             "127",
         ),
+        (
+            "R08-scan-fold",
+            &["0,53", "1,59", "0,61"][..],
+            "222,223,224,225",
+            "135",
+        ),
     ] {
         let out = holdouts(&round(dir), sizes, seeds, first, true);
         assert!(
@@ -488,7 +494,12 @@ fn icprog_reports_and_enforces_each_round_s_hardware_class() {
         "avx512vbmi",
         "avx512vbmi2",
     ];
-    for (round, class) in [("r05", reference), ("r07", reference), ("r06", r06)] {
+    for (round, class) in [
+        ("r05", reference),
+        ("r07", reference),
+        ("r06", r06),
+        ("r08", r06),
+    ] {
         let missing: Vec<&str> = class.iter().copied().filter(|f| !host_has(f)).collect();
         let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
             .args(["host-class", round])

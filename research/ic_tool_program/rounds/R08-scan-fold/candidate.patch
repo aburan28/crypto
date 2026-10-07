@@ -1,0 +1,1222 @@
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index cd2c2d533..461d9025e 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -315,6 +315,40 @@ impl FastCurve {
+         self.add_many_lazy_scalar(p, qs, out, lambdas, scratch);
+     }
+ 
++    /// [`Self::add_many_lazy`] on addends given as coordinate slices, the
++    /// sums' abscissae appended to `x3` as words rather than to a list
++    /// of points: `x₃` and `λ` for every `(qx[k], qy[k])`, appended to
++    /// `x3` and `lambdas`, the same field elements the scalar path
++    /// computes.
++    ///
++    /// A scan keys every sum by its abscissa alone, so a word is all it
++    /// reads; this skips the point list, and the copies into and out of
++    /// the kernel's own layout that [`Self::add_many_lazy`] makes.
++    ///
++    /// Only the eight-lane folding kernel takes slices.  This returns
++    /// `false`, having appended nothing, wherever that kernel does not
++    /// run — another CPU, a field that does not fold,
++    /// `KIC_SCAN_FOLD=shift` — and on a degenerate sum (`R = O`, or some
++    /// `x_k = x_R`); the caller then takes [`Self::add_many_lazy`],
++    /// which handles every case.  No addend may be `O`, which a slice
++    /// cannot say.
++    pub fn add_many_lazy_soa(
++        &self,
++        p: FastPoint,
++        qx: &[u64],
++        qy: &[u64],
++        x3: &mut Vec<u64>,
++        lambdas: &mut Vec<u64>,
++        scratch: &mut BatchScratch,
++    ) -> bool {
++        #[cfg(target_arch = "x86_64")]
++        if let Some(simd) = &self.simd {
++            return simd.add_many_lazy_soa(self, p, qx, qy, x3, lambdas, scratch);
++        }
++        let _ = (p, qx, qy, x3, lambdas, scratch);
++        false
++    }
++
+     /// The portable body of [`Self::add_many_lazy`]; also what the SIMD
+     /// kernel falls back to on a block with a degenerate sum.
+     fn add_many_lazy_scalar(
+@@ -842,6 +876,17 @@ impl FrobeniusCanon {
+         }
+     }
+ 
++    /// [`Self::point_keys`] for affine points given by their abscissae:
++    /// `canon(x) + 1` for each `x`, into `out`, which is cleared first.
++    pub(crate) fn x_keys(&self, xs: &[u64], out: &mut Vec<u64>) {
++        out.clear();
++        out.extend_from_slice(xs);
++        self.canon_in_place(out);
++        for key in out.iter_mut() {
++            *key += 1;
++        }
++    }
++
+     /// The canonical name together with the rotation that produced it:
+     /// `(c, t)` with `c = rotl^t(coords(x))`, `0 ≤ t < n`.  Two abscissae
+     /// with one name are Frobenius conjugates, and the shift says which
+@@ -1297,6 +1342,10 @@ pub struct BatchScratch {
+     /// Structure-of-arrays copies of a block's addends, for the SIMD path.
+     qx: Vec<u64>,
+     qy: Vec<u64>,
++    /// The folding kernel's prefix products, a vector of eight per group.
++    pre: Vec<u64>,
++    /// The folding kernel's lane products, inverted together.
++    lanes: Vec<u64>,
+ }
+ 
+ /// Eight-lane AVX-512 field arithmetic for the decomposition scan.
+@@ -1307,15 +1356,27 @@ pub struct BatchScratch {
+ /// independent across `k`.  `vpclmulqdq` forms four 64 × 64 carry-less
+ /// products per instruction, so two of them multiply eight lanes.
+ ///
+-/// **Reduction without a table.**  The scalar field folds the high half
+-/// through byte-indexed tables; a vector version would need gathers.
+-/// Instead, write the product as `L + z^n·H`: since `z^n ≡ t(z)`, the
+-/// tail of the reduction polynomial, it equals `L + H·t`, and when `t`
+-/// is short (`n + deg t ≤ 65`) `H·t` fits in one word and is a handful
+-/// of shifts and XORs over `t`'s terms.  A second such fold finishes
+-/// when `2·deg t ≤ n + 1`.  Every field the pipeline runs — the
+-/// low-tail polynomials `find_irreducible_sparse` picks — qualifies; a
+-/// field that does not simply never builds a [`Simd512`].
++/// **Reduction without a table.**  Write the product as `L + z^n·H`:
++/// since `z^n ≡ t(z)`, the tail of the reduction polynomial, it equals
++/// `L + H·t`, and a second fold of `H·t`'s part above `z^n` finishes
++/// when `2·deg t ≤ n + 1`.  Two ways to form the folds:
++///
++/// - **By carry-less multiplies**, whenever the field folds
++///   ([`Gf2::folds`]): [`Gf2`]'s own trick, eight lanes wide.  Shift one
++///   operand up by `s = 64 − n` and the product's high word is exactly
++///   `H`, its low word `L` at the top; the tail shifted the same way
++///   makes each fold one `vpclmulqdq` whose high word is the next fold's
++///   input, with nothing masked or shifted in between.  Six multiplies,
++///   two three-way XORs and an unpack make eight products, and the
++///   products are in the same shifted form, so a chain of them stays
++///   there.  No bound on `n + deg t`: the 128-bit products carry every
++///   bit, so `GF(2^59)` and `GF(2^61)`, whose tails reach `z^66`, run
++///   here too.
++/// - **By shifts and XORs** over `t`'s terms, when `n + deg t ≤ 65`: the
++///   kernel this one replaced, kept for a field that does not fold and
++///   as a same-binary control (`KIC_SCAN_FOLD=shift`).  Its shifts take
++///   their count from a register, two micro-ops each on this hardware,
++///   and a pentanomial's tail spends sixteen of them a product.
+ ///
+ /// The results are the same field elements as the scalar path, lane for
+ /// lane (the tests compare them), so nothing downstream can tell which
+@@ -1333,6 +1394,10 @@ mod simd512 {
+         mask: u64,
+         terms: [u32; 8],
+         nterms: usize,
++        /// The tail `irr − zⁿ` shifted up by `64 − n` when products
++        /// reduce by carry-less folds, and zero when they reduce by
++        /// shifts.  No tail is zero, so the one word is also the switch.
++        fold: u64,
+     }
+ 
+     impl Simd512 {
+@@ -1345,39 +1410,135 @@ mod simd512 {
+             if std::env::var("KIC_SCAN_SIMD").as_deref() == Ok("0") {
+                 return None;
+             }
+-            Self::for_field(field)
++            // `KIC_SCAN_FOLD=shift` keeps the shift-and-XOR reduction
++            // where it applies: the same-binary control for the folds.
++            let fold = std::env::var("KIC_SCAN_FOLD").as_deref() != Ok("shift");
++            Self::for_field_with(field, fold)
+         }
+ 
+-        /// The field-shape half of [`Self::new`], without the CPU check.
+-        pub(super) fn for_field(field: &Gf2) -> Option<Self> {
++        /// The field-shape half of [`Self::new`], without the CPU check,
++        /// with the folds allowed or not.
++        pub(super) fn for_field_with(field: &Gf2, fold: bool) -> Option<Self> {
+             let n = field.n;
+             if !(2..=63).contains(&n) {
+                 return None;
+             }
+             let tail = field.irr ^ (1u64 << n);
+             let t_max = 63 - tail.leading_zeros();
+-            // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t,
+-            // which must stay inside one word; the second fold's input has
+-            // degree ≤ deg t − 2, and its output must land below z^n.
+-            if n + t_max > 65 || 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
+-                return None;
+-            }
+             let mut terms = [0u32; 8];
+             let mut nterms = 0;
+-            for t in 0..n {
+-                if (tail >> t) & 1 == 1 {
+-                    terms[nterms] = t;
+-                    nterms += 1;
++            if tail.count_ones() as usize <= 8 {
++                for t in 0..n {
++                    if (tail >> t) & 1 == 1 {
++                        terms[nterms] = t;
++                        nterms += 1;
++                    }
+                 }
+             }
++            let mask = (1u64 << n) - 1;
++            // `Gf2` folds only where two folds finish, and that bound is
++            // all the folding kernel needs.
++            if fold && field.folds() {
++                return Some(Self {
++                    n,
++                    mask,
++                    terms,
++                    nterms,
++                    fold: tail << (64 - n),
++                });
++            }
++            // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t,
++            // which the shifts must keep inside one word; the second
++            // fold's input has degree ≤ deg t − 2, and its output must
++            // land below z^n.
++            if n + t_max > 65 || 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
++                return None;
++            }
+             Some(Self {
+                 n,
+-                mask: (1u64 << n) - 1,
++                mask,
+                 terms,
+                 nterms,
++                fold: 0,
+             })
+         }
+ 
++        /// Whether products reduce by carry-less folds (test hook).
++        #[cfg(test)]
++        pub(super) fn folds(&self) -> bool {
++            self.fold != 0
++        }
++
++        /// [`FastCurve::add_many_lazy_soa`]: appends `x₃` and `λ` for
++        /// every addend and returns `true`, or returns `false` having
++        /// appended nothing.  Only the folding kernel takes coordinate
++        /// slices; the shift kernel returns `false`.
++        #[allow(clippy::too_many_arguments)]
++        pub(super) fn add_many_lazy_soa(
++            &self,
++            curve: &FastCurve,
++            p: FastPoint,
++            qx: &[u64],
++            qy: &[u64],
++            x3: &mut Vec<u64>,
++            lambdas: &mut Vec<u64>,
++            scratch: &mut BatchScratch,
++        ) -> bool {
++            if self.fold == 0 {
++                return false;
++            }
++            let BatchScratch { pre, lanes, .. } = scratch;
++            self.fold_into(curve, p, qx, qy, x3, lambdas, pre, lanes)
++        }
++
++        /// The folding kernel on coordinate slices, appending to `x3` and
++        /// `lambdas`; `false`, with nothing appended, on `R = O`, an
++        /// empty slice or a degenerate sum (some `x_k = x_R`).
++        #[allow(clippy::too_many_arguments)]
++        fn fold_into(
++            &self,
++            curve: &FastCurve,
++            p: FastPoint,
++            qx: &[u64],
++            qy: &[u64],
++            x3: &mut Vec<u64>,
++            lambdas: &mut Vec<u64>,
++            pre: &mut Vec<u64>,
++            lanes: &mut Vec<u64>,
++        ) -> bool {
++            assert_eq!(qx.len(), qy.len(), "one ordinate per abscissa");
++            if p.infinity || qx.is_empty() {
++                return false;
++            }
++            let len = qx.len();
++            let padded = len.div_ceil(8) * 8;
++            let (x0, l0) = (x3.len(), lambdas.len());
++            pre.clear();
++            pre.resize(padded, 0);
++            x3.resize(x0 + padded, 0);
++            lambdas.resize(l0 + padded, 0);
++            // SAFETY: a folding `Simd512` is only built after detecting
++            // avx512f and vpclmulqdq, on a field that folds; `pre` and
++            // both outputs hold `padded` words, and the kernel reads the
++            // inputs only below `len`.
++            let ok = unsafe {
++                self.kernel_fold(
++                    curve,
++                    p,
++                    qx,
++                    qy,
++                    pre,
++                    lanes,
++                    &mut x3[x0..],
++                    &mut lambdas[l0..],
++                )
++            };
++            let keep = if ok { len } else { 0 };
++            x3.truncate(x0 + keep);
++            lambdas.truncate(l0 + keep);
++            ok
++        }
++
+         /// [`FastCurve::add_many_lazy`] eight lanes at a time.  Returns
+         /// `false`, having written nothing, when a sum is degenerate
+         /// (`R = O`, or some `x_k = x_R`) — the caller then takes the
+@@ -1394,8 +1555,38 @@ mod simd512 {
+             if p.infinity || qs.is_empty() {
+                 return false;
+             }
++            if self.fold != 0 {
++                let BatchScratch {
++                    dens,
++                    acc,
++                    qx,
++                    qy,
++                    pre,
++                    lanes,
++                } = scratch;
++                qx.clear();
++                qy.clear();
++                for q in qs {
++                    if q.infinity {
++                        return false;
++                    }
++                    qx.push(q.x);
++                    qy.push(q.y);
++                }
++                acc.clear();
++                dens.clear();
++                if !self.fold_into(curve, p, qx, qy, acc, dens, pre, lanes) {
++                    return false;
++                }
++                out.reserve(qs.len());
++                out.extend(acc.iter().map(|&x| FastPoint::affine(x, 0)));
++                lambdas.extend_from_slice(dens);
++                return true;
++            }
+             let padded = qs.len().div_ceil(8) * 8;
+-            let BatchScratch { dens, acc, qx, qy } = scratch;
++            let BatchScratch {
++                dens, acc, qx, qy, ..
++            } = scratch;
+             dens.clear();
+             qx.clear();
+             qy.clear();
+@@ -1466,6 +1657,138 @@ mod simd512 {
+             }
+         }
+ 
++        /// Montgomery's trick by the folding multiply, in **two chains**,
++        /// then the slope and abscissa of every sum: `x3` and `lambdas`
++        /// take `x₃` and `λ` lane for lane, the last group's lanes past
++        /// `qx.len()` holding whatever the padding made of them.
++        ///
++        /// Each multiply depends on the one before it along the running
++        /// product, so one chain runs at the multiply's latency, which is
++        /// three dependent `vpclmulqdq` deep; the groups are split into a
++        /// first and a second half, each with its own running product,
++        /// and the two chains are stepped in turn.  The sixteen lane
++        /// products are inverted together, with one field inversion.
++        ///
++        /// The running products are kept shifted up by `s = 64 − n`, the
++        /// form [`mul_fold`] returns, and multiplied by unshifted
++        /// factors; each value that is itself a factor later — the
++        /// prefix products, `λ` — is shifted down once.
++        ///
++        /// Returns `false` at once if some `x_k = x_R`, before anything
++        /// is inverted.
++        ///
++        /// # Safety
++        ///
++        /// The CPU must have AVX-512F and VPCLMULQDQ, `self.fold` must be
++        /// non-zero, `qx` and `qy` must be equally long and non-empty, and
++        /// `pre`, `x3` and `lambdas` must each hold `qx.len()` rounded up
++        /// to a multiple of eight words.
++        #[allow(clippy::too_many_arguments)]
++        #[target_feature(enable = "avx512f,vpclmulqdq")]
++        unsafe fn kernel_fold(
++            &self,
++            curve: &FastCurve,
++            p: FastPoint,
++            qx: &[u64],
++            qy: &[u64],
++            pre: &mut [u64],
++            lanes: &mut Vec<u64>,
++            x3: &mut [u64],
++            lambdas: &mut [u64],
++        ) -> bool {
++            let len = qx.len();
++            let groups = len.div_ceil(8);
++            let last = groups - 1;
++            // The last group's lanes past the end load nothing.
++            let last_mask: __mmask8 = 0xff >> (groups * 8 - len);
++            let mask_of = |g: usize| if g == last { last_mask } else { 0xff };
++            let s = _mm512_set1_epi64(i64::from(64 - self.n));
++            let tail = _mm512_set1_epi64(self.fold as i64);
++            let one = _mm512_set1_epi64(1);
++            let px = _mm512_set1_epi64(p.x as i64);
++            // A group's abscissae and denominators `x_R + x_k`, a lane
++            // past the end carrying a denominator of 1.
++            let load = |src: &[u64], g: usize| {
++                _mm512_maskz_loadu_epi64(mask_of(g), src.as_ptr().add(8 * g) as *const i64)
++            };
++            let den = |x: __m512i, g: usize| {
++                _mm512_mask_blend_epi64(mask_of(g), one, _mm512_xor_si512(px, x))
++            };
++
++            // Forward: the prefix products, unshifted, and each chain's
++            // product of all its denominators.
++            let half = groups.div_ceil(2);
++            let z_s = _mm512_set1_epi64((1u64 << (64 - self.n)) as i64);
++            let (mut acc_a, mut acc_b) = (z_s, z_s);
++            let mut degenerate: __mmask8 = 0;
++            for i in 0..half {
++                let x = load(qx, i);
++                degenerate |= _mm512_mask_cmpeq_epi64_mask(mask_of(i), x, px);
++                _mm512_storeu_si512(
++                    pre.as_mut_ptr().add(8 * i) as *mut _,
++                    _mm512_srlv_epi64(acc_a, s),
++                );
++                acc_a = mul_fold(den(x, i), acc_a, tail);
++                let g = half + i;
++                if g < groups {
++                    let x = load(qx, g);
++                    degenerate |= _mm512_mask_cmpeq_epi64_mask(mask_of(g), x, px);
++                    _mm512_storeu_si512(
++                        pre.as_mut_ptr().add(8 * g) as *mut _,
++                        _mm512_srlv_epi64(acc_b, s),
++                    );
++                    acc_b = mul_fold(den(x, g), acc_b, tail);
++                }
++            }
++            if degenerate != 0 {
++                return false;
++            }
++
++            // The sixteen products are non-zero; invert them together.
++            let mut products = [0u64; 16];
++            _mm512_storeu_si512(products.as_mut_ptr() as *mut _, _mm512_srlv_epi64(acc_a, s));
++            _mm512_storeu_si512(
++                products.as_mut_ptr().add(8) as *mut _,
++                _mm512_srlv_epi64(acc_b, s),
++            );
++            curve.field.batch_inv(&mut products, lanes);
++            let mut inv_a = _mm512_sllv_epi64(_mm512_loadu_si512(products.as_ptr() as *const _), s);
++            let mut inv_b =
++                _mm512_sllv_epi64(_mm512_loadu_si512(products.as_ptr().add(8) as *const _), s);
++
++            // Backward: `1/d_g`, then `λ` and `x₃`, each chain from its
++            // last group to its first.
++            let py = _mm512_set1_epi64(p.y as i64);
++            let px_a = _mm512_set1_epi64((p.x ^ curve.a) as i64);
++            let x3 = x3.as_mut_ptr();
++            let lambdas = lambdas.as_mut_ptr();
++            let step = |g: usize, inv_acc: __m512i| {
++                let x = load(qx, g);
++                let inv = mul_fold(
++                    _mm512_loadu_si512(pre.as_ptr().add(8 * g) as *const _),
++                    inv_acc,
++                    tail,
++                );
++                let next = mul_fold(den(x, g), inv_acc, tail);
++                let lambda_s = mul_fold(_mm512_xor_si512(py, load(qy, g)), inv, tail);
++                let lambda = _mm512_srlv_epi64(lambda_s, s);
++                let square = _mm512_srlv_epi64(mul_fold(lambda, lambda_s, tail), s);
++                let x3v =
++                    _mm512_ternarylogic_epi64::<0x96>(square, lambda, _mm512_xor_si512(px_a, x));
++                _mm512_storeu_si512(x3.add(8 * g) as *mut _, x3v);
++                _mm512_storeu_si512(lambdas.add(8 * g) as *mut _, lambda);
++                next
++            };
++            for i in (0..half).rev() {
++                let g = half + i;
++                if g < groups {
++                    inv_b = step(g, inv_b);
++                }
++                inv_a = step(i, inv_a);
++            }
++            true
++        }
++
+         /// Eight field multiplications: two `vpclmulqdq` for the 128-bit
+         /// products, then two shift-and-XOR folds by the tail.
+         #[inline]
+@@ -1497,21 +1820,63 @@ mod simd512 {
+             acc
+         }
+ 
+-        /// Test hook: multiply eight pairs through the kernel's `mul`.
++        /// Test hook: multiply eight pairs through the kernel's multiply,
++        /// the folding one when the field folds.
+         #[cfg(test)]
+         pub(super) fn mul8(&self, a: &[u64; 8], b: &[u64; 8]) -> [u64; 8] {
+             let mut out = [0u64; 8];
+             // SAFETY: tests call this only after the CPU check.
+             unsafe {
+-                let r = self.mul(
+-                    _mm512_loadu_si512(a.as_ptr() as *const _),
+-                    _mm512_loadu_si512(b.as_ptr() as *const _),
+-                );
++                let a = _mm512_loadu_si512(a.as_ptr() as *const _);
++                let b = _mm512_loadu_si512(b.as_ptr() as *const _);
++                let r = if self.fold != 0 {
++                    let s = _mm512_set1_epi64(i64::from(64 - self.n));
++                    let tail = _mm512_set1_epi64(self.fold as i64);
++                    _mm512_srlv_epi64(mul_fold(a, _mm512_sllv_epi64(b, s), tail), s)
++                } else {
++                    self.mul(a, b)
++                };
+                 _mm512_storeu_si512(out.as_mut_ptr() as *mut _, r);
+             }
+             out
+         }
+     }
++
++    /// Eight products `a·b mod irr` by carry-less folds: `b` comes shifted
++    /// up by `s = 64 − n`, the product goes back the same way, and `tail`
++    /// holds the tail `irr − zⁿ` shifted by `s` in every word.
++    ///
++    /// `vpclmulqdq` multiplies one word of each 128-bit lane, so the even
++    /// and the odd words take one each.  With `b` shifted, the product
++    /// `a·b·zˢ` has `H` as its high word and `L·zˢ` as its low one.  Each
++    /// fold multiplies the high word by the shifted tail: `H·t·zˢ` has
++    /// `H·t`'s part above `zⁿ` as its high word and the rest, shifted, as
++    /// its low one, and that part, multiplied again, lands below `zⁿ`
++    /// (`2·deg t ≤ n + 1`, which [`Gf2`] checks before it folds).  The
++    /// three low words sum to `(a·b mod irr)·zˢ`; the high words are left
++    /// behind by the unpack.  It is [`Gf2`]'s `fold_shifted`, lane for
++    /// lane.
++    ///
++    /// # Safety
++    ///
++    /// The CPU must have AVX-512F and VPCLMULQDQ; `a` must be reduced
++    /// and `b` a reduced element shifted up by `s`.
++    #[inline]
++    #[target_feature(enable = "avx512f,vpclmulqdq")]
++    unsafe fn mul_fold(a: __m512i, b_s: __m512i, tail: __m512i) -> __m512i {
++        // [L·zˢ, H] for the even words and for the odd ones.
++        let even = _mm512_clmulepi64_epi128::<0x00>(a, b_s);
++        let odd = _mm512_clmulepi64_epi128::<0x11>(a, b_s);
++        // [(H·t mod zⁿ)·zˢ, H·t div zⁿ], then that high word times `t`.
++        let f_even = _mm512_clmulepi64_epi128::<0x01>(even, tail);
++        let f_odd = _mm512_clmulepi64_epi128::<0x01>(odd, tail);
++        let g_even = _mm512_clmulepi64_epi128::<0x01>(f_even, tail);
++        let g_odd = _mm512_clmulepi64_epi128::<0x01>(f_odd, tail);
++        _mm512_unpacklo_epi64(
++            _mm512_ternarylogic_epi64::<0x96>(even, f_even, g_even),
++            _mm512_ternarylogic_epi64::<0x96>(odd, f_odd, g_odd),
++        )
++    }
+ }
+ 
+ #[cfg(test)]
+@@ -1948,31 +2313,46 @@ mod tests {
+             return;
+         }
+         let mut rng = StdRng::seed_from_u64(0x512);
+-        let mut accepted = 0;
+-        for n in 2u32..=62 {
++        let (mut accepted, mut folding, mut shifting) = (0, 0, 0);
++        for n in 2u32..=63 {
+             let field = nb_field(n);
+-            let Some(simd) = simd512::Simd512::for_field(&field) else {
+-                continue;
+-            };
+-            accepted += 1;
+-            for _ in 0..200 {
+-                let a: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
+-                let b: [u64; 8] = std::array::from_fn(|i| {
+-                    if i == 7 {
+-                        field.mask
+-                    } else {
+-                        rng.gen::<u64>() & field.mask
++            // Both reductions where each applies: the folds, and the
++            // shifts the folds replaced, which a field that does not fold
++            // still takes.
++            for fold in [true, false] {
++                let Some(simd) = simd512::Simd512::for_field_with(&field, fold) else {
++                    continue;
++                };
++                accepted += usize::from(fold);
++                if simd.folds() {
++                    folding += 1;
++                } else {
++                    shifting += 1;
++                }
++                for _ in 0..200 {
++                    let a: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
++                    let b: [u64; 8] = std::array::from_fn(|i| {
++                        if i == 7 {
++                            field.mask
++                        } else {
++                            rng.gen::<u64>() & field.mask
++                        }
++                    });
++                    let got = simd.mul8(&a, &b);
++                    for l in 0..8 {
++                        assert_eq!(
++                            got[l],
++                            field.mul(a[l], b[l]),
++                            "n = {n}, lane {l}, folds = {}",
++                            simd.folds()
++                        );
+                     }
+-                });
+-                let got = simd.mul8(&a, &b);
+-                for l in 0..8 {
+-                    assert_eq!(got[l], field.mul(a[l], b[l]), "n = {n}, lane {l}");
+                 }
+             }
+         }
+         assert!(
+-            accepted >= 50,
+-            "the kernel accepted only {accepted} degrees"
++            accepted >= 50 && folding >= 50 && shifting >= 50,
++            "the kernel accepted only {accepted} degrees ({folding} folding, {shifting} by shifts)"
+         );
+ 
+         let mut curves = 0;
+@@ -2011,6 +2391,69 @@ mod tests {
+         assert!(curves >= 2, "only {curves} curves exercised the kernel");
+     }
+ 
++    /// The folding kernel on coordinate slices against the scalar batched
++    /// addition: every `x₃` and `λ`, appended after what the outputs
++    /// already hold, on slices of every length around the lane width and
++    /// the split into two chains.  The degrees reach both sides of the
++    /// shift kernel's `n + deg t ≤ 65`: `GF(2^59)` and `GF(2^61)` are past
++    /// it.  A sum with `x_k = x_R` must be declined with nothing appended;
++    /// the summands include `R` itself to make some.
++    #[cfg(target_arch = "x86_64")]
++    #[test]
++    fn the_folding_kernel_matches_the_scalar_addition_on_slices() {
++        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
++            eprintln!("skipped: no AVX-512 + VPCLMULQDQ on this CPU");
++            return;
++        }
++        let (mut curves, mut wide, mut declined, mut taken) = (0, 0, 0, 0);
++        for n in [19u32, 31, 41, 53, 59, 61] {
++            let Some(kc) = [0u8, 1].into_iter().find_map(|a| KoblitzCurve::new(a, n)) else {
++                continue;
++            };
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            if !fc.simd.is_some_and(|simd| simd.folds()) {
++                continue;
++            }
++            curves += 1;
++            let tail = fc.field.irr ^ (1u64 << n);
++            wide += usize::from(n + (63 - tail.leading_zeros()) > 65);
++            let points: Vec<FastPoint> = random_points(&kc, 64, 11 * u64::from(n))
++                .iter()
++                .map(|p| fc.lift(p))
++                .filter(|p| !p.infinity)
++                .collect();
++            assert!(points.len() >= 60, "n = {n}: too few points");
++            let mut scratch = BatchScratch::default();
++            for len in (1..=34).chain([47, 48, 49, 55]) {
++                let qs = &points[..len];
++                let qx: Vec<u64> = qs.iter().map(|q| q.x).collect();
++                let qy: Vec<u64> = qs.iter().map(|q| q.y).collect();
++                for &p in points[..3].iter().chain(&points[56..60]) {
++                    let degenerate = qs.iter().any(|q| q.x == p.x);
++                    let (mut want, mut want_l) = (Vec::new(), Vec::new());
++                    fc.add_many_lazy_scalar(p, qs, &mut want, &mut want_l, &mut scratch);
++                    let (mut x3, mut lambdas) = (vec![7u64], vec![9u64]);
++                    let done =
++                        fc.add_many_lazy_soa(p, &qx, &qy, &mut x3, &mut lambdas, &mut scratch);
++                    assert_eq!(done, !degenerate, "n = {n}, len = {len}");
++                    if done {
++                        let want_x: Vec<u64> = want.iter().map(|w| w.x).collect();
++                        assert_eq!(x3[1..], want_x[..], "n = {n}, len = {len}: x₃");
++                        assert_eq!(lambdas[1..], want_l[..], "n = {n}, len = {len}: λ");
++                        taken += 1;
++                    } else {
++                        assert_eq!((x3, lambdas), (vec![7], vec![9]), "n = {n}: appended");
++                        declined += 1;
++                    }
++                }
++            }
++        }
++        assert!(
++            curves >= 4 && wide >= 1 && declined > 0 && taken > 0,
++            "{curves} curves, {wide} past n + deg t = 65, {declined} declined, {taken} taken"
++        );
++    }
++
+     /// The López–Dahab ladder against affine double-and-add, on both
+     /// Koblitz curves at several degrees, over scalars that reach every
+     /// special case: `0`, `1`, `2`, the subgroup order and its neighbours
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index a2ee2bc03..a664f7e00 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3278,6 +3278,12 @@ pub struct PairSumTable {
+     points: Vec<FastPoint>,
+     /// `−P_k` for every base point, the addends of `R − P_k`.
+     negated: Vec<FastPoint>,
++    /// The abscissae and ordinates of `negated`, the slices the scans'
++    /// folding kernel reads ([`FastCurve::add_many_lazy_soa`]).  Both
++    /// empty if some base point is `O`, which a slice cannot say; the
++    /// scans then take `negated` itself.
++    negated_x: Vec<u64>,
++    negated_y: Vec<u64>,
+     /// `bucket_start[b]..bucket_start[b + 1]` is the run of entries whose
+     /// packed sum has `b` as its top bits (`key >> bucket_shift`): a
+     /// lookup lands in its bucket with one indexed load instead of
+@@ -3360,6 +3366,35 @@ pub struct ScanScratch {
+     keys: Vec<u64>,
+     /// Pairs recovered for one key.
+     pairs: Vec<(u32, u32)>,
++    /// On the folding kernel's path, each rest's abscissa, in place of
++    /// `rests`.
++    x3s: Vec<u64>,
++    /// The coordinates of a [`Scan::Indices`] scan's summands, gathered
++    /// for the folding kernel.
++    gather_x: Vec<u64>,
++    gather_y: Vec<u64>,
++}
++
++/// [`PairSumTable`]'s `negated_x` and `negated_y` of `points`: both empty
++/// if some point is `O`.
++fn coordinate_slices(points: &[FastPoint]) -> (Vec<u64>, Vec<u64>) {
++    if points.iter().any(|p| p.infinity) {
++        return (Vec::new(), Vec::new());
++    }
++    (
++        points.iter().map(|p| p.x).collect(),
++        points.iter().map(|p| p.y).collect(),
++    )
++}
++
++/// Whether a scan on a folded table may subtract by the folding kernel
++/// on coordinate slices and key the abscissae as words
++/// ([`FastCurve::add_many_lazy_soa`]).  `KIC_SCAN_SOA=0` keeps the
++/// point list: a same-binary control for what that path is credited
++/// with, on top of the kernel's own (`KIC_SCAN_FOLD=shift`).
++fn scan_soa_enabled() -> bool {
++    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    *ON.get_or_init(|| std::env::var("KIC_SCAN_SOA").as_deref() != Ok("0"))
+ }
+ 
+ /// How often each relation-matrix column has been mentioned, and the
+@@ -3882,6 +3917,7 @@ impl PairSumTable {
+         let curve = FastCurve::new(&kc.curve)?;
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
++        let (negated_x, negated_y) = coordinate_slices(&negated);
+         let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
+             .into_par_iter()
+             .flat_map_iter(|i| {
+@@ -3928,6 +3964,8 @@ impl PairSumTable {
+             curve,
+             points,
+             negated,
++            negated_x,
++            negated_y,
+             bucket_start,
+             bucket_shift,
+             present,
+@@ -3980,6 +4018,7 @@ impl PairSumTable {
+         let buckets = 1usize << bucket_bits;
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
++        let (negated_x, negated_y) = coordinate_slices(&negated);
+ 
+         // A counting sort in two passes over the pairs, both parallel.
+         // The bucket of a key is known before any key is compared, so
+@@ -4045,6 +4084,8 @@ impl PairSumTable {
+             curve,
+             points,
+             negated,
++            negated_x,
++            negated_y,
+             bucket_start,
+             bucket_shift,
+             present,
+@@ -4084,6 +4125,7 @@ impl PairSumTable {
+         let buckets = 1usize << bucket_bits;
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
++        let (negated_x, negated_y) = coordinate_slices(&negated);
+ 
+         // Cache the packed sum from the counting pass.  The previous
+         // builder recomputed every one of the `|F|(|F|+1)/2` group
+@@ -4165,6 +4207,8 @@ impl PairSumTable {
+             curve,
+             points,
+             negated,
++            negated_x,
++            negated_y,
+             bucket_start,
+             bucket_shift,
+             present,
+@@ -4413,6 +4457,14 @@ impl PairSumTable {
+         // (`KIC_FOLD_BUILD=scalar` keeps the old path, the same-binary
+         // control).
+         let bulk = bulk && canon.is_some();
++        // The base in the same order as coordinate slices, for the
++        // folding kernel ([`FastCurve::add_many_lazy_soa`]); empty if a
++        // point is `O`, and then every row takes the point list.
++        let (by_orbit_x, by_orbit_y) = if scan_soa_enabled() {
++            coordinate_slices(&by_orbit)
++        } else {
++            (Vec::new(), Vec::new())
++        };
+         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
+             let mut sums = Vec::with_capacity(n_points);
+             let mut scratch = BatchScratch::default();
+@@ -4420,16 +4472,61 @@ impl PairSumTable {
+             let from = suffix[orbit as usize] as usize;
+             if let (true, Some(canon)) = (bulk, canon.as_ref()) {
+                 let mut lambdas = Vec::with_capacity(n_points);
++                // A row opens with its summand's own orbit, which holds
++                // `±` the summand: a sum the vector kernels decline, and
++                // so, added with the rest, a row that never took them.
++                // Past that orbit no abscissa is the summand's, and the
++                // rest of the row takes the folding kernel on coordinate
++                // slices.  The keys go out in the row's order either way.
++                let own_end = if by_orbit_x.is_empty() {
++                    n_points
++                } else {
++                    suffix[orbit as usize + 1] as usize
++                };
+                 curve.add_many_lazy(
+                     points[rep],
+-                    &by_orbit[from..],
++                    &by_orbit[from..own_end],
+                     &mut sums,
+                     &mut lambdas,
+                     &mut scratch,
+                 );
+                 let mut keys: Vec<u64> = sums.iter().map(|p| p.x).collect();
+                 canon.canon_in_place(&mut keys);
+-                for (key, p) in keys.into_iter().zip(&sums) {
++                for (key, p) in keys.iter().zip(&sums) {
++                    f(if p.infinity { 0 } else { key + 1 }, orbit);
++                }
++                if own_end == n_points {
++                    return;
++                }
++                let mut x3s = Vec::with_capacity(n_points - own_end);
++                lambdas.clear();
++                if curve.add_many_lazy_soa(
++                    points[rep],
++                    &by_orbit_x[own_end..],
++                    &by_orbit_y[own_end..],
++                    &mut x3s,
++                    &mut lambdas,
++                    &mut scratch,
++                ) {
++                    canon.x_keys(&x3s, &mut keys);
++                    for &key in &keys {
++                        f(key, orbit);
++                    }
++                    return;
++                }
++                sums.clear();
++                lambdas.clear();
++                curve.add_many_lazy(
++                    points[rep],
++                    &by_orbit[own_end..],
++                    &mut sums,
++                    &mut lambdas,
++                    &mut scratch,
++                );
++                keys.clear();
++                keys.extend(sums.iter().map(|p| p.x));
++                canon.canon_in_place(&mut keys);
++                for (key, p) in keys.iter().zip(&sums) {
+                     f(if p.infinity { 0 } else { key + 1 }, orbit);
+                 }
+                 return;
+@@ -4521,6 +4618,7 @@ impl PairSumTable {
+         tagged: bool,
+     ) -> Self {
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
++        let (negated_x, negated_y) = coordinate_slices(&negated);
+         let index_of_point = PointIndex::build(&points);
+         // The orbits flat, in the order `reps` indexes them, so a tag is
+         // a slice of `orbit_members` and nothing is allocated per hit.
+@@ -4539,6 +4637,8 @@ impl PairSumTable {
+             curve,
+             points,
+             negated,
++            negated_x,
++            negated_y,
+             bucket_start: parts.bucket_start,
+             bucket_shift: parts.bucket_shift,
+             present: parts.present,
+@@ -5380,9 +5480,68 @@ impl PairSumTable {
+             batch,
+             keys,
+             pairs,
++            x3s,
++            gather_x,
++            gather_y,
+         } = scratch;
+         rests.clear();
+         lambdas.clear();
++        x3s.clear();
++        // A cyclic window is `negated[start..start + tail]` and then, if it
++        // wraps, `negated[..len − tail]`.
++        let (start, tail) = match scan {
++            Scan::Cyclic { start, len } => {
++                let start = start % base;
++                (start, len.min(base - start))
++            }
++            Scan::Indices(_) => (0, len),
++        };
++        // On a folded table with a basis change, the folding kernel takes
++        // the summands as coordinate slices and leaves each rest as its
++        // abscissa, which is all the key reads (`fused`).  It declines a
++        // degenerate sum, and so do other CPUs; then the point list
++        // below handles every case, as it always has.
++        let canon = self
++            .canon
++            .as_ref()
++            .filter(|_| self.fold && scan_soa_enabled() && !self.negated_x.is_empty());
++        let fused = canon.is_some() && {
++            let (xs, ys) = (&self.negated_x, &self.negated_y);
++            let done = match scan {
++                Scan::Cyclic { .. } => {
++                    let first = start..start + tail;
++                    self.curve.add_many_lazy_soa(
++                        target,
++                        &xs[first.clone()],
++                        &ys[first],
++                        x3s,
++                        lambdas,
++                        batch,
++                    ) && (tail == len
++                        || self.curve.add_many_lazy_soa(
++                            target,
++                            &xs[..len - tail],
++                            &ys[..len - tail],
++                            x3s,
++                            lambdas,
++                            batch,
++                        ))
++                }
++                Scan::Indices(idxs) => {
++                    gather_x.clear();
++                    gather_y.clear();
++                    gather_x.extend(idxs.iter().map(|&i| xs[i as usize]));
++                    gather_y.extend(idxs.iter().map(|&i| ys[i as usize]));
++                    self.curve
++                        .add_many_lazy_soa(target, gather_x, gather_y, x3s, lambdas, batch)
++                }
++            };
++            if !done {
++                x3s.clear();
++                lambdas.clear();
++            }
++            done
++        };
+         // On a folded table the key reads only the abscissa, so the rests
+         // are formed without their ordinates and only the ones the filter
+         // admits are completed, as the full scan does.
+@@ -5394,23 +5553,22 @@ impl PairSumTable {
+                 self.curve.add_many(target, summands, rests, batch);
+             }
+         };
+-        let mut tail = len;
+-        match scan {
+-            Scan::Cyclic { start, len } => {
+-                let start = start % base;
+-                tail = len.min(base - start);
+-                add(&self.negated[start..start + tail], rests);
+-                if tail < len {
+-                    add(&self.negated[..len - tail], rests);
++        if !fused {
++            match scan {
++                Scan::Cyclic { .. } => {
++                    add(&self.negated[start..start + tail], rests);
++                    if tail < len {
++                        add(&self.negated[..len - tail], rests);
++                    }
+                 }
+-            }
+-            Scan::Indices(idxs) => {
+-                gather.clear();
+-                gather.reserve(idxs.len());
+-                for &i in idxs {
+-                    gather.push(self.negated[i as usize]);
++                Scan::Indices(idxs) => {
++                    gather.clear();
++                    gather.reserve(idxs.len());
++                    for &i in idxs {
++                        gather.push(self.negated[i as usize]);
++                    }
++                    add(gather, rests);
+                 }
+-                add(gather, rests);
+             }
+         }
+         // Keys a block at a time: enough to keep `LANES`
+@@ -5423,13 +5581,18 @@ impl PairSumTable {
+         const BLOCK: usize = 1024;
+         const LOOKAHEAD: usize = 32;
+         let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
+-        for (b, block) in rests.chunks(BLOCK).enumerate() {
+-            self.keys_of(block, keys);
++        let count = if fused { x3s.len() } else { rests.len() };
++        for lo in (0..count).step_by(BLOCK) {
++            let hi = (lo + BLOCK).min(count);
++            match canon {
++                Some(canon) if fused => canon.x_keys(&x3s[lo..hi], keys),
++                _ => self.keys_of(&rests[lo..hi], keys),
++            }
+             admitted_offsets.clear();
+             for &key in keys.iter().take(LOOKAHEAD) {
+                 prefetch(&self.present[self.filter_word(key)]);
+             }
+-            for within in 0..block.len() {
++            for within in 0..hi - lo {
+                 if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+                     prefetch(&self.present[self.filter_word(ahead)]);
+                 }
+@@ -5440,11 +5603,9 @@ impl PairSumTable {
+                 admitted_offsets.push(within);
+             }
+             for &within in &admitted_offsets {
+-                let rest = &block[within];
+-                let offset = b * BLOCK + within;
++                let offset = lo + within;
+                 let k = match scan {
+-                    Scan::Cyclic { start, .. } => {
+-                        let start = start % base;
++                    Scan::Cyclic { .. } => {
+                         if offset < tail {
+                             start + offset
+                         } else {
+@@ -5453,9 +5614,14 @@ impl PairSumTable {
+                     }
+                     Scan::Indices(idxs) => idxs[offset] as usize,
+                 };
++                let rest = if fused {
++                    FastPoint::affine(x3s[offset], 0)
++                } else {
++                    rests[offset]
++                };
+                 let rest = match lambdas.get(offset) {
+-                    Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
+-                    None => *rest,
++                    Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
++                    None => rest,
+                 };
+                 self.pairs_for_key(rest, keys[within], pairs);
+                 for &(i, j) in pairs.iter() {
+@@ -5571,38 +5737,68 @@ impl PairSumTable {
+                 let mut scratch = BatchScratch::default();
+                 let mut keys = Vec::with_capacity(BLOCK);
+                 let mut pairs = Vec::new();
++                // The folding kernel's path, as in
++                // [`Self::witnesses_fast_scan`]: the block's rests as
++                // abscissae, keyed as words.
++                let mut x3s: Vec<u64> = Vec::with_capacity(BLOCK);
++                let canon = self
++                    .canon
++                    .as_ref()
++                    .filter(|_| self.fold && scan_soa_enabled() && !self.negated_x.is_empty());
+                 for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
+                     // `add_many` appends, so the block starts empty.
+                     rests.clear();
+                     lambdas.clear();
+-                    if self.fold {
+-                        self.curve.add_many_lazy(
++                    x3s.clear();
++                    let lo = b * BLOCK;
++                    let hi = lo + addends.len();
++                    let fused = canon.is_some()
++                        && self.curve.add_many_lazy_soa(
+                             target,
+-                            addends,
+-                            &mut rests,
++                            &self.negated_x[lo..hi],
++                            &self.negated_y[lo..hi],
++                            &mut x3s,
+                             &mut lambdas,
+                             &mut scratch,
+                         );
+-                    } else {
+-                        self.curve
+-                            .add_many(target, addends, &mut rests, &mut scratch);
++                    if !fused {
++                        if self.fold {
++                            self.curve.add_many_lazy(
++                                target,
++                                addends,
++                                &mut rests,
++                                &mut lambdas,
++                                &mut scratch,
++                            );
++                        } else {
++                            self.curve
++                                .add_many(target, addends, &mut rests, &mut scratch);
++                        }
++                    }
++                    let count = if fused { x3s.len() } else { rests.len() };
++                    match canon {
++                        Some(canon) if fused => canon.x_keys(&x3s, &mut keys),
++                        _ => self.keys_of(&rests, &mut keys),
+                     }
+-                    let block = &rests[..];
+-                    self.keys_of(block, &mut keys);
+                     for &key in keys.iter().take(LOOKAHEAD) {
+                         prefetch(&self.present[self.filter_word(key)]);
+                     }
+-                    for (offset, rest) in block.iter().enumerate() {
++                    for offset in 0..count {
+                         if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
+                             prefetch(&self.present[self.filter_word(ahead)]);
+                         }
+                         if !self.admitted(keys[offset]) {
+                             continue;
+                         }
+-                        let k = b * BLOCK + offset;
++                        let k = lo + offset;
++                        let rest = if fused {
++                            FastPoint::affine(x3s[offset], 0)
++                        } else {
++                            rests[offset]
++                        };
+                         let rest = match lambdas.get(offset) {
+-                            Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
+-                            None => *rest,
++                            Some(&lambda) => self.curve.finish_lazy(target, rest, lambda),
++                            None => rest,
+                         };
+                         self.pairs_for_key(rest, keys[offset], &mut pairs);
+                         for &(i, j) in &pairs {
+@@ -14495,10 +14691,14 @@ mod tests {
+ 
+     #[test]
+     fn the_partitioned_fold_build_stores_the_two_pass_table() {
++        // 2^59 and 2^61 are past `n + deg t = 65`, where the bulk rows
++        // take the folding kernel and the old one never ran.
+         for (a, n, seed, points) in [
+             (0u8, 23u32, 5u64, 300usize),
+             (0, 31, 5, 400),
+             (0, 53, 1, 3000),
++            (1, 59, 1, 3000),
++            (0, 61, 1, 3000),
+         ] {
+             let kc = KoblitzCurve::new(a, n).unwrap();
+             let fb = build_subgroup_orbit_factor_base(&kc, seed, points).unwrap();
+@@ -15224,6 +15424,108 @@ mod tests {
+         }
+     }
+ 
++    /// A folded table's scans subtract by the folding kernel on
++    /// coordinate slices and key the rests as words.  They must hand the
++    /// sink exactly what the point list hands it, in the same order: on a
++    /// wrapping window, a scattered index list and the full scan, at
++    /// degrees on both sides of the old kernel's `n + deg t ≤ 65`.  The
++    /// point list is the same table with its coordinate slices emptied,
++    /// which is how a scan falls back to it.  Each target is a sum of
++    /// three base points, so every degree has witnesses to compare.
++    #[test]
++    fn the_folding_kernel_s_scans_hand_the_sink_what_the_point_list_does() {
++        let mut fused = 0;
++        for (degree, points) in [
++            (19u32, 300usize),
++            (31, 400),
++            (53, 600),
++            (59, 600),
++            (61, 600),
++        ] {
++            let Some(kc) = [0u8, 1]
++                .into_iter()
++                .find_map(|a| KoblitzCurve::new(a, degree))
++            else {
++                continue;
++            };
++            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
++            let folded = PairSumTable::build_within(
++                &kc,
++                &fb,
++                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
++            )
++            .unwrap();
++            assert!(
++                folded.is_folded(),
++                "degree {degree}: expected the fold tier"
++            );
++            let mut point_list = folded.clone();
++            point_list.negated_x.clear();
++            point_list.negated_y.clear();
++            let fc = &folded.curve;
++            let base = folded.points.len();
++            // Whether the folding kernel runs here at all.
++            let probe = folded.points[0];
++            let (mut x3, mut lambdas) = (Vec::new(), Vec::new());
++            if folded.canon.is_some()
++                && fc.add_many_lazy_soa(
++                    fc.double(probe),
++                    &folded.negated_x[1..17],
++                    &folded.negated_y[1..17],
++                    &mut x3,
++                    &mut lambdas,
++                    &mut BatchScratch::default(),
++                )
++            {
++                fused += 1;
++            }
++            let len = base / 4;
++            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
++            let (mut scratch_a, mut scratch_b) = (ScanScratch::default(), ScanScratch::default());
++            let mut rng = StdRng::seed_from_u64(0x5ca0 + u64::from(degree));
++            let mut found = 0usize;
++            for _ in 0..60 {
++                let [i, j, k] = std::array::from_fn(|_| rng.gen_range(0..base));
++                let target = fc.add(fc.add(folded.points[i], folded.points[j]), folded.points[k]);
++                for scan in [
++                    Scan::Cyclic {
++                        start: base - len / 2,
++                        len,
++                    },
++                    Scan::Indices(&idxs),
++                    Scan::Cyclic {
++                        start: 0,
++                        len: base,
++                    },
++                ] {
++                    let mut a = Vec::new();
++                    folded.witnesses_fast_scan(target, 3, scan, &mut scratch_a, &mut |w| {
++                        a.push(w.to_vec());
++                        true
++                    });
++                    let mut b = Vec::new();
++                    point_list.witnesses_fast_scan(target, 3, scan, &mut scratch_b, &mut |w| {
++                        b.push(w.to_vec());
++                        true
++                    });
++                    assert_eq!(
++                        a, b,
++                        "degree {degree}, target {i} + {j} + {k}: the scans disagree"
++                    );
++                    found += a.len();
++                }
++            }
++            assert!(
++                found > 0,
++                "degree {degree}: the scans found nothing to compare"
++            );
++        }
++        #[cfg(target_arch = "x86_64")]
++        if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq") {
++            assert!(fused >= 4, "the folding kernel ran at only {fused} degrees");
++        }
++    }
++
+     /// The whole point of an index scan: every witness it returns has
+     /// its third summand inside the set it was given.  Without this a
+     /// targeted scan would not guarantee coverage, and the relation

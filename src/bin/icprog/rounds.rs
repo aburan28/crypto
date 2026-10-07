@@ -1483,3 +1483,70 @@ pub mod r06 {
         }
     }
 }
+
+// ── R08: the scan's subtraction by carry-less folds ──────────────────
+
+pub mod r08 {
+    use super::*;
+
+    /// R08's declaration: the same target sizes, eight fresh holdouts at
+    /// each (recipe seeds 222 to 225, `T135` to `T142`), and an interval
+    /// above 1.05 at each, on the suite rows and the holdouts separately.
+    /// Valgrind cannot run the candidate's AVX-512 carry-less kernels, so
+    /// there are no callgrind profiles.  Its class is R06's: its base is
+    /// R06's candidate, and the folding kernel's VPCLMULQDQ is in the
+    /// reference class R06's includes.
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (222, 135),
+            (222, 136),
+            (223, 137),
+            (223, 138),
+            (224, 139),
+            (224, 140),
+            (225, 141),
+            (225, 142),
+        ],
+        what_this_is: "R08, the scan's subtraction by carry-less folds: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.05),
+        resumed_note: "the host R08 resumed on after its container changed",
+        requires: super::r06::CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R08's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R08 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
+            )),
+        }
+    }
+}
