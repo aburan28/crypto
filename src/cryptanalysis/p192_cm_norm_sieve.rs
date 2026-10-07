@@ -74,14 +74,14 @@ fn sqrt_mod_prime(value: u64, prime: u64) -> Option<u64> {
 
     let mut odd = prime - 1;
     let mut power = 0u32;
-    while odd % 2 == 0 {
+    while odd.is_multiple_of(2) {
         odd /= 2;
         power += 1;
     }
     let non_residue =
         (2..prime).find(|candidate| pow_mod(*candidate, (prime - 1) / 2, prime) == prime - 1)?;
     let mut c = pow_mod(non_residue, odd, prime);
-    let mut x = pow_mod(value, (odd + 1) / 2, prime);
+    let mut x = pow_mod(value, odd.div_ceil(2), prime);
     let mut t = pow_mod(value, odd, prime);
     let mut m = power;
     while t != 1 {
@@ -141,7 +141,7 @@ fn characteristic_roots(ell: u64, t: &BigInt, p: &BigInt, d: &BigInt) -> Vec<u64
                 let r = *root as u128;
                 let tm = mod_u64(t, 2) as u128;
                 let pm = mod_u64(p, 2) as u128;
-                (r * r + 2 - (tm * r) % 2 + pm) % 2 == 0
+                (r * r + 2 - (tm * r) % 2 + pm).is_multiple_of(2)
             })
             .collect();
     }
@@ -162,7 +162,7 @@ fn characteristic_roots(ell: u64, t: &BigInt, p: &BigInt, d: &BigInt) -> Vec<u64
         let modulus = ell as u128;
         let tm = tm as u128;
         let pm = mod_u64(p, ell) as u128;
-        (r * r + modulus - (tm * r) % modulus + pm) % modulus == 0
+        (r * r + modulus - (tm * r) % modulus + pm).is_multiple_of(modulus)
     });
     roots
 }
@@ -406,12 +406,10 @@ pub fn certify_norm_candidate(
 
         let positive_zero = (mod_u64(u, record.ell)
             + mul_mod(mod_u64(v, record.ell), record.positive_root, record.ell))
-            % record.ell
-            == 0;
+        .is_multiple_of(record.ell);
         let negative_zero = (mod_u64(u, record.ell)
             + mul_mod(mod_u64(v, record.ell), record.negative_root, record.ell))
-            % record.ell
-            == 0;
+        .is_multiple_of(record.ell);
         let (signed_exponent, orientation, root, selected_form) = match record.kind.as_str() {
             "ramified" if positive_zero && negative_zero => (
                 i32::try_from(exponent).map_err(|_| "exponent does not fit i32")?,

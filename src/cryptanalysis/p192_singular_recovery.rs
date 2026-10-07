@@ -84,7 +84,7 @@ fn is_prime_u64(value: u64) -> bool {
         if value == prime {
             return true;
         }
-        if value % prime == 0 {
+        if value.is_multiple_of(prime) {
             return false;
         }
     }
@@ -872,7 +872,7 @@ fn p59_control() -> P59ControlOutcome {
             if scalar(probe, after).1 != 0
                 || [2u64, 3, 5]
                     .iter()
-                    .filter(|prime| after % **prime == 0)
+                    .filter(|prime| after.is_multiple_of(**prime))
                     .any(|prime| scalar(probe, after / prime).1 == 0)
             {
                 outcome.passed = false;
@@ -1636,10 +1636,14 @@ mod tests {
             baby_index: 989_698,
             baby_sign: -1,
         };
-        let mut baby_operations = NativeOpCounts::default();
-        baby_operations.point_additions = 1;
-        let mut giant_operations = NativeOpCounts::default();
-        giant_operations.point_additions = 1;
+        let baby_operations = NativeOpCounts {
+            point_additions: 1,
+            ..NativeOpCounts::default()
+        };
+        let giant_operations = NativeOpCounts {
+            point_additions: 1,
+            ..NativeOpCounts::default()
+        };
         let mut total_operations = baby_operations;
         total_operations.merge(giant_operations);
         let stats = IntervalStats {

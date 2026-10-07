@@ -189,12 +189,12 @@ fn trial_prime_u64(n: u64) -> bool {
     if n < 2 {
         return false;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return n == 2;
     }
     let mut divisor = 3u64;
     while divisor <= n / divisor {
-        if n % divisor == 0 {
+        if n.is_multiple_of(divisor) {
             return false;
         }
         divisor += 2;
@@ -561,7 +561,7 @@ fn characteristic_roots(ell: u64, t: &BigInt, p: &BigInt) -> Vec<u64> {
     (0..ell)
         .filter(|root| {
             let r = *root as u128;
-            (r * r + modulus - (tm * r) % modulus + pm) % modulus == 0
+            (r * r + modulus - (tm * r) % modulus + pm).is_multiple_of(modulus)
         })
         .collect()
 }
