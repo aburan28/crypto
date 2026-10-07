@@ -874,8 +874,10 @@ fn run(cli: &Cli) -> Result<ResultFile, String> {
         .clone();
     let best_model = &models[best_candidate.node];
 
-    let mut operations = OperationCounts::default();
-    operations.order_witness_scalar_multiplications = models.len() as u64;
+    let mut operations = OperationCounts {
+        order_witness_scalar_multiplications: models.len() as u64,
+        ..OperationCounts::default()
+    };
     let total_legendre = stage8.models_evaluated * stage8.samples_per_model
         + stage12.models_evaluated * stage12.samples_per_model
         + full_depth_candidates.len() as u64 * FIBRE_SIZE as u64
