@@ -106,6 +106,15 @@
       ]
     },
     {
+      "id": "ec-generic-collection-bound",
+      "label": "Elliptic curve, generic relation-collection lower boundary",
+      "role": "context",
+      "note": "Favourable P-256 generic-collection boundaries against rho. These rows grant exact coverage, a perfect free decomposition oracle, one operation per collision sample, and omit implementation costs; they are obstruction diagnostics, not end-to-end measurements.",
+      "points": [
+        {"date": "2026-10-07", "value": 13.920747397073491, "reference": "generic-lower-bound", "unit": "exact negation-folded K-th collision samples in P-256 group-addition equivalents", "label": "P-256 Round 294 variable-arity global fixed-arity threshold", "detail": "Exact enumeration first finds a covering fixed arity at B=K=164, m=109 or 110. Even with success probability one and all solver, verification, setup and linear-algebra costs removed, the exact Round-24 gamma-ratio collision law costs 13.920747 times rho. The smallest executed covering Dickson base is depth 9, B=266, m=59, at 17.734068 times rho.", "class": "accounting", "anchor": "#p256-variable-arity-round294-20261007", "source": "https://github.com/aburan28/crypto/blob/main/research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_variable_arity_round294_20261007/RESULT.md"}
+      ]
+    },
+    {
       "id": "ec-batch-n61",
       "label": "Elliptic curve, n61 batch of L >= 1,024 targets vs frozen KS v2 rho (historical diagnostic)",
       "role": "context",

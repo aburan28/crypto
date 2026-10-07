@@ -178,3 +178,23 @@ Implement and test the screen in Rust.  Preserve deterministic JSON, an
 isolation receipt, a result report and hashes.  Update every affected P-256
 dashboard panel and publish the protocol, implementation, tests and result in
 a stacked pull request.
+
+## Post-execution accounting correction
+
+Added after preserving the preregistered protocol commit and the first
+successful execution.  Dashboard reconciliation found that H2 copied Round
+21's subsequently superseded shortcut `sqrt((pi/2) * K * n)`.  Round 24
+established the exact negation-folded `K`-th cross-colour collision law
+
+```text
+T_K = sqrt(2*n) * Gamma(K+1/2) / Gamma(K),
+```
+
+which approaches `sqrt(2*K*n)`, not `sqrt((pi/2)*K*n)`, for large `K`.
+The canonical runner must hash-check Round 24's result
+`d1e2fe33e1abbae8a9bf6885ca7cfef8012233363f4cd43e0d30d468a381fc9c`,
+retain the preregistered shortcut only as a labelled superseded field, and use
+the exact gamma-ratio value for gates and the headline boundary.  The initial
+artifact and its isolation receipt remain preserved.  This correction is
+candidate-adverse: it can only raise the reported ratio and cannot turn a
+failed gate into a pass.

@@ -3,7 +3,6 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use std::time::Instant;
 
 use clap::Parser;
 use crypto_lib::cryptanalysis::p256_dickson_factor_base::{self, WideBuildResult};
@@ -28,6 +27,7 @@ const MAX_ARITY: u32 = 256;
 const LADDER_DEPTHS: [u32; 6] = [7, 8, 9, 10, 11, 12];
 
 const ROUND21_SHA256: &str = "4aaf5fde72257ed1f262d5674ab2fe81c7b4f90698fa3767615adfed6524e757";
+const ROUND24_SHA256: &str = "d1e2fe33e1abbae8a9bf6885ca7cfef8012233363f4cd43e0d30d468a381fc9c";
 const ROUND25_SHA256: &str = "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf";
 const ROUND29_SHA256: &str = "9be6e5fc38644c34ad746dec9a6542da7e35ef2d8e11eb39a83de7af0f54f443";
 const ROUND293_SHA256: &str = "02626b9147e024fd222ad6505688c5113a955a0e68b73afa1e7600cda04c6c97";
@@ -37,6 +37,8 @@ const ROUND293_SHA256: &str = "02626b9147e024fd222ad6505688c5113a955a0e68b73afa1
 struct Cli {
     #[arg(long)]
     round21: PathBuf,
+    #[arg(long)]
+    round24: PathBuf,
     #[arg(long)]
     round25: PathBuf,
     #[arg(long)]
@@ -63,7 +65,8 @@ struct WidthBoundary {
     maximum_fixed_domain: String,
     maximum_fixed_covers_order: bool,
     covering_arities: Vec<u32>,
-    ideal_memoryless_ratio_to_rho: f64,
+    preregistered_superseded_shortcut_ratio_to_rho: f64,
+    exact_kth_collision_ratio_to_rho: f64,
     balanced_two_list_ratio_to_rho: f64,
 }
 
@@ -73,7 +76,8 @@ struct FixedArityThreshold {
     minimum_columns: Option<u64>,
     signed_domain: Option<String>,
     covers_order: bool,
-    ideal_memoryless_ratio_to_rho: Option<f64>,
+    preregistered_superseded_shortcut_ratio_to_rho: Option<f64>,
+    exact_kth_collision_ratio_to_rho: Option<f64>,
     balanced_two_list_ratio_to_rho: Option<f64>,
 }
 
@@ -95,7 +99,8 @@ struct DicksonInventory {
     maximum_domain: String,
     first_covering_arity: Option<u32>,
     fixed_arity_covers_order: bool,
-    ideal_memoryless_ratio_to_rho: f64,
+    preregistered_superseded_shortcut_ratio_to_rho: f64,
+    exact_kth_collision_ratio_to_rho: f64,
     balanced_two_list_ratio_to_rho: f64,
     logical_point_bytes: u64,
 }
@@ -136,8 +141,9 @@ struct ResultReceipt {
     boundary_table_sha256: String,
     dickson_inventory: Vec<DicksonInventory>,
     minimum_covering_inventory_id: String,
-    minimum_covering_inventory_ratio_to_rho: f64,
-    global_minimum_ideal_memoryless_ratio_to_rho: f64,
+    minimum_covering_inventory_exact_ratio_to_rho: f64,
+    global_minimum_preregistered_superseded_shortcut_ratio_to_rho: f64,
+    global_minimum_exact_kth_collision_ratio_to_rho: f64,
     global_minimum_balanced_two_list_ratio_to_rho: f64,
     imported_local_solving_degree_maxima: [u32; 3],
     imported_local_split_image_degree: u32,
@@ -147,9 +153,7 @@ struct ResultReceipt {
     points_verified: u64,
     algorithm_disk_bytes: u64,
     logical_materialized_bytes: u64,
-    process_cpu_ns: u64,
-    total_wall_ns: u64,
-    peak_rss_bytes: Option<u64>,
+    process_telemetry_recorded_in_isolation_receipt: bool,
     result_json_bytes: u64,
     gates: Gates,
     relations_reported: u64,
@@ -158,24 +162,6 @@ struct ResultReceipt {
     dominant_obstruction: String,
     decision: String,
     semantic_evidence_sha256: String,
-}
-
-fn process_cpu_ns() -> u64 {
-    let mut usage: libc::rusage = unsafe { std::mem::zeroed() };
-    if unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) } != 0 {
-        return 0;
-    }
-    let user = usage.ru_utime.tv_sec as u64 * 1_000_000_000 + usage.ru_utime.tv_usec as u64 * 1_000;
-    let system =
-        usage.ru_stime.tv_sec as u64 * 1_000_000_000 + usage.ru_stime.tv_usec as u64 * 1_000;
-    user + system
-}
-
-fn peak_rss_bytes() -> Option<u64> {
-    let status = fs::read_to_string("/proc/self/status").ok()?;
-    let line = status.lines().find(|line| line.starts_with("VmHWM:"))?;
-    let kib = line.split_whitespace().nth(1)?.parse::<u64>().ok()?;
-    Some(kib * 1024)
 }
 
 fn load_dependency(path: &Path, expected: &str) -> Result<Dependency, String> {
@@ -196,10 +182,20 @@ fn load_dependency(path: &Path, expected: &str) -> Result<Dependency, String> {
     })
 }
 
-fn ratios(columns: u64) -> (f64, f64) {
+fn gamma_ratio(collisions: u64) -> f64 {
+    assert!(collisions >= 1);
+    let mut ratio = std::f64::consts::PI.sqrt() / 2.0;
+    for k in 1..collisions {
+        ratio *= (k as f64 + 0.5) / k as f64;
+    }
+    ratio
+}
+
+fn ratios(columns: u64) -> (f64, f64, f64) {
     let root = (columns as f64).sqrt();
     (
         ((std::f64::consts::PI / 2.0).sqrt() * root) / RHO_S,
+        (2.0_f64.sqrt() * gamma_ratio(columns)) / RHO_S,
         2.0 * root / RHO_S,
     )
 }
@@ -245,7 +241,7 @@ fn width_boundary(columns: u64, order: &BigUint, operations: &mut u64) -> WidthB
         sum, expected_sum,
         "all-arity identity failed at B={columns}"
     );
-    let (memoryless, two_list) = ratios(columns);
+    let (superseded_shortcut, exact_kth, two_list) = ratios(columns);
     WidthBoundary {
         columns,
         all_arity_domain: sum.to_string(),
@@ -254,7 +250,8 @@ fn width_boundary(columns: u64, order: &BigUint, operations: &mut u64) -> WidthB
         maximum_fixed_domain: maximum.to_string(),
         maximum_fixed_covers_order: maximum >= *order,
         covering_arities,
-        ideal_memoryless_ratio_to_rho: memoryless,
+        preregistered_superseded_shortcut_ratio_to_rho: superseded_shortcut,
+        exact_kth_collision_ratio_to_rho: exact_kth,
         balanced_two_list_ratio_to_rho: two_list,
     }
 }
@@ -312,7 +309,7 @@ fn checked_inventory(
             first_covering_arity = Some(arity);
         }
     }
-    let (memoryless, two_list) = ratios(factor_base.columns);
+    let (superseded_shortcut, exact_kth, two_list) = ratios(factor_base.columns);
     let logical_point_bytes = built
         .dump
         .points
@@ -342,7 +339,8 @@ fn checked_inventory(
         maximum_domain: maximum_domain.to_string(),
         first_covering_arity,
         fixed_arity_covers_order: maximum_domain >= *order,
-        ideal_memoryless_ratio_to_rho: memoryless,
+        preregistered_superseded_shortcut_ratio_to_rho: superseded_shortcut,
+        exact_kth_collision_ratio_to_rho: exact_kth,
         balanced_two_list_ratio_to_rho: two_list,
         logical_point_bytes,
     })
@@ -411,10 +409,9 @@ fn semantic_digest(
 }
 
 fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
-    let started = Instant::now();
-    let cpu_started = process_cpu_ns();
     let dependencies = vec![
         load_dependency(&cli.round21, ROUND21_SHA256)?,
+        load_dependency(&cli.round24, ROUND24_SHA256)?,
         load_dependency(&cli.round25, ROUND25_SHA256)?,
         load_dependency(&cli.round29, ROUND29_SHA256)?,
         load_dependency(&cli.round293, ROUND293_SHA256)?,
@@ -448,24 +445,26 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
     for arity in 2..=MAX_ARITY {
         let threshold =
             minimum_columns_for_arity(arity, REGISTERED_COLUMNS, &order, &mut operations);
-        let (minimum_columns, domain, memoryless, two_list) = match threshold {
+        let (minimum_columns, domain, superseded_shortcut, exact_kth, two_list) = match threshold {
             Some((columns, domain)) => {
-                let (memoryless, two_list) = ratios(columns);
+                let (superseded_shortcut, exact_kth, two_list) = ratios(columns);
                 (
                     Some(columns),
                     Some(domain.to_string()),
-                    Some(memoryless),
+                    Some(superseded_shortcut),
+                    Some(exact_kth),
                     Some(two_list),
                 )
             }
-            None => (None, None, None, None),
+            None => (None, None, None, None, None),
         };
         fixed_arity_thresholds.push(FixedArityThreshold {
             arity,
             minimum_columns,
             signed_domain: domain,
             covers_order: minimum_columns.is_some(),
-            ideal_memoryless_ratio_to_rho: memoryless,
+            preregistered_superseded_shortcut_ratio_to_rho: superseded_shortcut,
+            exact_kth_collision_ratio_to_rho: exact_kth,
             balanced_two_list_ratio_to_rho: two_list,
         });
     }
@@ -491,8 +490,10 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         .min_by_key(|row| row.columns)
         .ok_or("no native Dickson inventory row covers the group")?;
     let minimum_covering_inventory_id = minimum_covering.fb_id.clone();
-    let minimum_covering_inventory_ratio_to_rho = minimum_covering.ideal_memoryless_ratio_to_rho;
-    let global_memoryless = first_fixed.ideal_memoryless_ratio_to_rho;
+    let minimum_covering_inventory_exact_ratio_to_rho =
+        minimum_covering.exact_kth_collision_ratio_to_rho;
+    let global_superseded_shortcut = first_fixed.preregistered_superseded_shortcut_ratio_to_rho;
+    let global_exact_kth = first_fixed.exact_kth_collision_ratio_to_rho;
     let global_two_list = first_fixed.balanced_two_list_ratio_to_rho;
     let semantic_evidence_sha256 =
         semantic_digest(first_all, &first_fixed, &fixed_arity_thresholds, &inventory);
@@ -503,13 +504,13 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         .max()
         .unwrap_or(0);
     let native_verified = inventory.iter().all(|row| row.verification_failures == 0);
-    let any_boundary_pass = global_memoryless <= 1.0
+    let any_boundary_pass = global_exact_kth <= 1.0
         || inventory
             .iter()
-            .any(|row| row.fixed_arity_covers_order && row.ideal_memoryless_ratio_to_rho <= 1.0);
+            .any(|row| row.fixed_arity_covers_order && row.exact_kth_collision_ratio_to_rho <= 1.0);
 
     Ok(ResultReceipt {
-        schema: "p256-variable-arity-closure/v1".into(),
+        schema: "p256-variable-arity-closure/v2".into(),
         curve: CURVE.into(),
         comparison_factor_base: REGISTERED_FB.into(),
         screening_round: 294,
@@ -528,8 +529,10 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         boundary_table_sha256,
         dickson_inventory: inventory,
         minimum_covering_inventory_id,
-        minimum_covering_inventory_ratio_to_rho,
-        global_minimum_ideal_memoryless_ratio_to_rho: global_memoryless,
+        minimum_covering_inventory_exact_ratio_to_rho,
+        global_minimum_preregistered_superseded_shortcut_ratio_to_rho:
+            global_superseded_shortcut,
+        global_minimum_exact_kth_collision_ratio_to_rho: global_exact_kth,
         global_minimum_balanced_two_list_ratio_to_rho: global_two_list,
         imported_local_solving_degree_maxima: [3, 3, 4],
         imported_local_split_image_degree: 2,
@@ -539,9 +542,7 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         points_verified,
         algorithm_disk_bytes: 0,
         logical_materialized_bytes,
-        process_cpu_ns: process_cpu_ns().saturating_sub(cpu_started),
-        total_wall_ns: started.elapsed().as_nanos() as u64,
-        peak_rss_bytes: peak_rss_bytes(),
+        process_telemetry_recorded_in_isolation_receipt: true,
         result_json_bytes: 0,
         gates: Gates {
             dependencies_hash_checked: true,
@@ -559,7 +560,7 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         relations_reported: 0,
         full_depth_unplanted_relation_attempted: false,
         classification: "negative/generic-variable-arity-closure".into(),
-        dominant_obstruction: "Even allowing every distinct signed arity and granting a perfect free decomposition oracle, the smallest fixed-arity covering base retains enough independent logarithm classes that the ideal memoryless generic-collection boundary is above rho. Changing arity does not create cross-column log transport or a non-generic global solver.".into(),
+        dominant_obstruction: "Even allowing every distinct signed arity and granting a perfect free decomposition oracle, the smallest fixed-arity covering base retains enough independent logarithm classes that the exact K-th negation-folded collision boundary is above rho. Changing arity does not create cross-column log transport or a non-generic global solver.".into(),
         decision: "Reject variable arity alone as a rho-parity route for independent-log Dickson bases. Continue only with a separately verified non-generic algebraic solver or a representation that reduces the exact logarithm quotient without becoming scalar-orbit rho.".into(),
         semantic_evidence_sha256,
     })
@@ -583,11 +584,11 @@ fn run(cli: Cli) -> Result<(), String> {
     let mut result = build_result(&cli)?;
     write_result(&cli.out, &mut result)?;
     eprintln!(
-        "round 294: all-arity B={}, fixed-arity B={}, ideal generic ratio={:.6}, native best {:.6} -> {}",
+        "round 294: all-arity B={}, fixed-arity B={}, exact generic ratio={:.6}, native best {:.6} -> {}",
         result.first_all_arity_cover_columns,
         result.first_fixed_arity_cover.columns,
-        result.global_minimum_ideal_memoryless_ratio_to_rho,
-        result.minimum_covering_inventory_ratio_to_rho,
+        result.global_minimum_exact_kth_collision_ratio_to_rho,
+        result.minimum_covering_inventory_exact_ratio_to_rho,
         cli.out.display()
     );
     Ok(())
@@ -634,5 +635,12 @@ mod tests {
         assert!(small.0 > 1.0);
         assert!(large.0 > small.0);
         assert!(large.1 > small.1);
+        assert!(large.2 > small.2);
+    }
+
+    #[test]
+    fn exact_first_collision_matches_round24() {
+        let (_, exact, _) = ratios(1);
+        assert!((exact - (std::f64::consts::PI / 2.0).sqrt() / RHO_S).abs() < 1e-15);
     }
 }

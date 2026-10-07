@@ -1,0 +1,2409 @@
+{
+  "schema": "p256-variable-arity-closure/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "comparison_factor_base": "FB1h2f8621cda105",
+  "screening_round": 294,
+  "execution_status": "complete",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_fb_log_transport_round21_20261006/transport-result.json",
+      "bytes": 13057,
+      "sha256": "4aaf5fde72257ed1f262d5674ab2fe81c7b4f90698fa3767615adfed6524e757"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_orbit_round25_20261006/scalar-orbit-result.json",
+      "bytes": 14033,
+      "sha256": "dcb191f7d5d7a660e3ce13128b25ce1c017c7d89ec2d01a242ab536651647faf"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_memoryless_closure_round29_20261006/memoryless-closure-result.json",
+      "bytes": 14905,
+      "sha256": "9be6e5fc38644c34ad746dec9a6542da7e35ef2d8e11eb39a83de7af0f54f443"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_hash_jump_round293_20261007/hash-jump-result.json",
+      "bytes": 681841,
+      "sha256": "02626b9147e024fd222ad6505688c5113a955a0e68b73afa1e7600cda04c6c97"
+    }
+  ],
+  "subgroup_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+  "rho_s": 1.3,
+  "coefficient_domain_formula": "D(B,m)=2^m*binomial(B,m), distinct columns and independent signs",
+  "all_arity_identity": "sum_{m=0}^B D(B,m)=3^B",
+  "boundary_width_limit": 512,
+  "arity_limit": 256,
+  "first_all_arity_cover_columns": 162,
+  "first_fixed_arity_cover": {
+    "columns": 164,
+    "all_arity_domain": "1769643454279976222562683176742209046547931058497932902345838739841697520771281",
+    "all_arity_covers_order": true,
+    "maximum_fixed_arity": 109,
+    "maximum_fixed_domain": "116383775127750444427048016195109203089116454475801022361283226351238392053760",
+    "maximum_fixed_covers_order": true,
+    "covering_arities": [
+      109,
+      110
+    ],
+    "ideal_memoryless_ratio_to_rho": 12.346347891941722,
+    "balanced_two_list_ratio_to_rho": 19.70192073056261
+  },
+  "boundary_neighbourhood": [
+    {
+      "columns": 160,
+      "all_arity_domain": "21847450052839212624230656502990235142567050104912751880812823948662932355201",
+      "all_arity_covers_order": false,
+      "maximum_fixed_arity": 107,
+      "maximum_fixed_domain": "1459038690693308048014052461331643618942584062194016932158223953282098790400",
+      "maximum_fixed_covers_order": false,
+      "covering_arities": [],
+      "ideal_memoryless_ratio_to_rho": 12.19485322340311,
+      "balanced_two_list_ratio_to_rho": 19.460170216420796
+    },
+    {
+      "columns": 161,
+      "all_arity_domain": "65542350158517637872691969508970705427701150314738255642438471845988797065603",
+      "all_arity_covers_order": false,
+      "maximum_fixed_arity": 107,
+      "maximum_fixed_domain": "4350096837067085106115971227303604123143630259504383816249519564415146393600",
+      "maximum_fixed_covers_order": false,
+      "covering_arities": [],
+      "ideal_memoryless_ratio_to_rho": 12.232902779899478,
+      "balanced_two_list_ratio_to_rho": 19.52088852376849
+    },
+    {
+      "columns": 162,
+      "all_arity_domain": "196627050475552913618075908526912116283103450944214766927315415537966391196809",
+      "all_arity_covers_order": true,
+      "maximum_fixed_arity": 108,
+      "maximum_fixed_domain": "13050290511201255318347913681910812369430890778513151448748558693245439180800",
+      "maximum_fixed_covers_order": false,
+      "covering_arities": [],
+      "ideal_memoryless_ratio_to_rho": 12.270834352422801,
+      "balanced_two_list_ratio_to_rho": 19.581418555935162
+    },
+    {
+      "columns": 163,
+      "all_arity_domain": "589881151426658740854227725580736348849310352832644300781946246613899173590427",
+      "all_arity_covers_order": true,
+      "maximum_fixed_arity": 109,
+      "maximum_fixed_domain": "39031144097721185631022200553237842499398810952250342865064496642183607091200",
+      "maximum_fixed_covers_order": false,
+      "covering_arities": [],
+      "ideal_memoryless_ratio_to_rho": 12.308649031747013,
+      "balanced_two_list_ratio_to_rho": 19.64176205354416
+    },
+    {
+      "columns": 164,
+      "all_arity_domain": "1769643454279976222562683176742209046547931058497932902345838739841697520771281",
+      "all_arity_covers_order": true,
+      "maximum_fixed_arity": 109,
+      "maximum_fixed_domain": "116383775127750444427048016195109203089116454475801022361283226351238392053760",
+      "maximum_fixed_covers_order": true,
+      "covering_arities": [
+        109,
+        110
+      ],
+      "ideal_memoryless_ratio_to_rho": 12.346347891941722,
+      "balanced_two_list_ratio_to_rho": 19.70192073056261
+    },
+    {
+      "columns": 165,
+      "all_arity_domain": "5308930362839928667688049530226627139643793175493798707037516219525092562313843",
+      "all_arity_covers_order": true,
+      "maximum_fixed_arity": 110,
+      "maximum_fixed_domain": "349151325383251333281144048585327609267349363427403067083849679053715176161280",
+      "maximum_fixed_covers_order": true,
+      "covering_arities": [
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "columns": 166,
+      "all_arity_domain": "15926791088519786003064148590679881418931379526481396121112548658575277686941529",
+      "all_arity_covers_order": true,
+      "maximum_fixed_arity": 111,
+      "maximum_fixed_domain": "1044308468713868852696755172345304200691531429350430795241784625638139085455360",
+      "maximum_fixed_covers_order": true,
+      "covering_arities": [
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123
+      ],
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    }
+  ],
+  "fixed_arity_thresholds": [
+    {
+      "arity": 2,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 3,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 4,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 5,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 6,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 7,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 8,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 9,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 10,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 11,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 12,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 13,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 14,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 15,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 16,
+      "minimum_columns": null,
+      "signed_domain": null,
+      "covers_order": false,
+      "ideal_memoryless_ratio_to_rho": null,
+      "balanced_two_list_ratio_to_rho": null
+    },
+    {
+      "arity": 17,
+      "minimum_columns": 122491,
+      "signed_domain": "115805786802863029706461124262978470020392649437795930032551976760903883161600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 337.4183336350259,
+      "balanced_two_list_ratio_to_rho": 538.4417578784347
+    },
+    {
+      "arity": 18,
+      "minimum_columns": 72189,
+      "signed_domain": "115812872029668838012532287420018244269926278244018471275545616081900858245120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 259.0312128904109,
+      "balanced_two_list_ratio_to_rho": 413.3540110625981
+    },
+    {
+      "arity": 19,
+      "minimum_columns": 45109,
+      "signed_domain": "115832260345944937751414201337595753753549216566256304075844915553393615831040",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 204.7614451293845,
+      "balanced_two_list_ratio_to_rho": 326.751991432838
+    },
+    {
+      "arity": 20,
+      "minimum_columns": 29621,
+      "signed_domain": "115793260523513520412584131634562253825387724098046851547384278095035651588096",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 165.9267643326071,
+      "balanced_two_list_ratio_to_rho": 264.78080696992555
+    },
+    {
+      "arity": 21,
+      "minimum_columns": 20295,
+      "signed_domain": "115867288503029689062999742203283488429456341553906756585170454638552206540800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 137.3444498360624,
+      "balanced_two_list_ratio_to_rho": 219.17003207231568
+    },
+    {
+      "arity": 22,
+      "minimum_columns": 14423,
+      "signed_domain": "115919749282097275134489375153803277592587828610850639077825860880316856532992",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 115.78289063639752,
+      "balanced_two_list_ratio_to_rho": 184.7627616878165
+    },
+    {
+      "arity": 23,
+      "minimum_columns": 10580,
+      "signed_domain": "115870573433571043965434089165855146692564823092374205529690818427063841587200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 99.16522921319411,
+      "balanced_two_list_ratio_to_rho": 158.24481071536974
+    },
+    {
+      "arity": 24,
+      "minimum_columns": 7979,
+      "signed_domain": "115808389875348605002848944919729197138870393900702483763035758960753476894720",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 86.11738202066171,
+      "balanced_two_list_ratio_to_rho": 137.4234590620965
+    },
+    {
+      "arity": 25,
+      "minimum_columns": 6166,
+      "signed_domain": "115886822912544892312697065776565765515629119395585220901002692106152189100032",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 75.70391621043163,
+      "balanced_two_list_ratio_to_rho": 120.80597187323434
+    },
+    {
+      "arity": 26,
+      "minimum_columns": 4869,
+      "signed_domain": "116293546600956301409805094218369647840172543469606269007804465116248826445824",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 67.27233055779419,
+      "balanced_two_list_ratio_to_rho": 107.3511078425816
+    },
+    {
+      "arity": 27,
+      "minimum_columns": 3918,
+      "signed_domain": "116030402398277386367329398731100475286559772119764698250523870382011736653824",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 60.3460435768096,
+      "balanced_two_list_ratio_to_rho": 96.29835295094661
+    },
+    {
+      "arity": 28,
+      "minimum_columns": 3207,
+      "signed_domain": "115913475853500907825884613972483612009848766041775662056717379113479915438080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 54.596658870134114,
+      "balanced_two_list_ratio_to_rho": 87.12366236780166
+    },
+    {
+      "arity": 29,
+      "minimum_columns": 2666,
+      "signed_domain": "116654218737970969348696415019207742632195376533459280444960797067627976458240",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 49.77905626014822,
+      "balanced_two_list_ratio_to_rho": 79.43588088261899
+    },
+    {
+      "arity": 30,
+      "minimum_columns": 2246,
+      "signed_domain": "116157838314924297437576109363172094121800688249075331330760885145208811945984",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 45.69003199449083,
+      "balanced_two_list_ratio_to_rho": 72.91074222198637
+    },
+    {
+      "arity": 31,
+      "minimum_columns": 1916,
+      "signed_domain": "116199617280214437035406326987600254686500041511890126118906364456121803997184",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 42.20018341850701,
+      "balanced_two_list_ratio_to_rho": 67.34174962535165
+    },
+    {
+      "arity": 32,
+      "minimum_columns": 1653,
+      "signed_domain": "116511572718161967700193459507264002490665744436075806706483221489291729305600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 39.197016612953995,
+      "balanced_two_list_ratio_to_rho": 62.54938877001884
+    },
+    {
+      "arity": 33,
+      "minimum_columns": 1441,
+      "signed_domain": "117726634133647537172439080218355240411083978741411002300143948416721124065280",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 36.59726043770536,
+      "balanced_two_list_ratio_to_rho": 58.40077814185325
+    },
+    {
+      "arity": 34,
+      "minimum_columns": 1267,
+      "signed_domain": "116210791765672855648340066935023560696802163532380688695709591698514378752000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 34.316650659047546,
+      "balanced_two_list_ratio_to_rho": 54.76145147863903
+    },
+    {
+      "arity": 35,
+      "minimum_columns": 1124,
+      "signed_domain": "116506803236892623578955230695767077335756406807501970536039692071743774523392",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 32.322112819413974,
+      "balanced_two_list_ratio_to_rho": 51.57862958227757
+    },
+    {
+      "arity": 36,
+      "minimum_columns": 1005,
+      "signed_domain": "117223653761182270109809179005170084949979616254751627527091203298346139648000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 30.56325585630224,
+      "balanced_two_list_ratio_to_rho": 48.771899951222636
+    },
+    {
+      "arity": 37,
+      "minimum_columns": 905,
+      "signed_domain": "117864382661238549355345194533079711102740852626367314213477217958931464192000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 29.00286331252619,
+      "balanced_two_list_ratio_to_rho": 46.28187371228099
+    },
+    {
+      "arity": 38,
+      "minimum_columns": 820,
+      "signed_domain": "116790769508557829629141888614640486464982298878574490296982357246998646620160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 27.607273160242922,
+      "balanced_two_list_ratio_to_rho": 44.05483404085032
+    },
+    {
+      "arity": 39,
+      "minimum_columns": 748,
+      "signed_domain": "118833650211276492313066787690355461766185347727717028359511975902316677038080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 26.367404707917576,
+      "balanced_two_list_ratio_to_rho": 42.07629024977644
+    },
+    {
+      "arity": 40,
+      "minimum_columns": 686,
+      "signed_domain": "119937437138753879869941190119666002916370369936716482580809972894280890449920",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 25.251003614494813,
+      "balanced_two_list_ratio_to_rho": 40.29477185756552
+    },
+    {
+      "arity": 41,
+      "minimum_columns": 632,
+      "signed_domain": "117836609740463799860479322631505918281860615458941256808319665144875450368000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 24.236791419335265,
+      "balanced_two_list_ratio_to_rho": 38.67632335377395
+    },
+    {
+      "arity": 42,
+      "minimum_columns": 586,
+      "signed_domain": "124039356187742590664205596668589526304395746270167936432046549442851399270400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 23.338094509332038,
+      "balanced_two_list_ratio_to_rho": 37.242210575108324
+    },
+    {
+      "arity": 43,
+      "minimum_columns": 545,
+      "signed_domain": "122786002165907608047288017789584842014507712153621955301061767171953467064320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 22.50685626113298,
+      "balanced_two_list_ratio_to_rho": 35.91574624593462
+    },
+    {
+      "arity": 44,
+      "minimum_columns": 509,
+      "signed_domain": "121651385762408422992173774444580397689568927838837587464925930593873140121600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 21.750812136624308,
+      "balanced_two_list_ratio_to_rho": 34.70927437747224
+    },
+    {
+      "arity": 45,
+      "minimum_columns": 477,
+      "signed_domain": "117783335504380458331780744643983918813404876994931108311419185011864234885120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 21.055995335643814,
+      "balanced_two_list_ratio_to_rho": 33.6005071812947
+    },
+    {
+      "arity": 46,
+      "minimum_columns": 449,
+      "signed_domain": "118412868762448188387386392817854477450255675557244802206694118185698760589312",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 20.42865418169033,
+      "balanced_two_list_ratio_to_rho": 32.59941553910322
+    },
+    {
+      "arity": 47,
+      "minimum_columns": 424,
+      "signed_domain": "117987873985570244102627811323395019955662337912709196883157541076439450779648",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 19.851782781954743,
+      "balanced_two_list_ratio_to_rho": 31.678861972267693
+    },
+    {
+      "arity": 48,
+      "minimum_columns": 402,
+      "signed_domain": "122663017362388017879338590404597043419091967176489600926923694809150390272000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 19.329900243278995,
+      "balanced_two_list_ratio_to_rho": 30.846057931943726
+    },
+    {
+      "arity": 49,
+      "minimum_columns": 382,
+      "signed_domain": "123028521417898804821982079685227944855912730774749560027874413862239338496000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 18.842922750268183,
+      "balanced_two_list_ratio_to_rho": 30.0689542856801
+    },
+    {
+      "arity": 50,
+      "minimum_columns": 364,
+      "signed_domain": "123243778395238044264147588611143934549440396835420003173808845881800071839744",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 18.393622881158713,
+      "balanced_two_list_ratio_to_rho": 29.35197542821371
+    },
+    {
+      "arity": 51,
+      "minimum_columns": 348,
+      "signed_domain": "128283599883685404692485809377371889138854805873233441556340010331244972736512",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 17.984824663594885,
+      "balanced_two_list_ratio_to_rho": 28.699627855657894
+    },
+    {
+      "arity": 52,
+      "minimum_columns": 333,
+      "signed_domain": "122433716397362900972459103585384976910180203680570926922194665455938231599104",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 17.59295139959022,
+      "balanced_two_list_ratio_to_rho": 28.0742886013764
+    },
+    {
+      "arity": 53,
+      "minimum_columns": 320,
+      "signed_domain": "130269022390591203899735315343068274929250169045315308225290094651275036590080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 17.246126819685934,
+      "balanced_two_list_ratio_to_rho": 27.52083664615126
+    },
+    {
+      "arity": 54,
+      "minimum_columns": 308,
+      "signed_domain": "134304294840973454179313874085671805959832156912971220539355187994415731834880",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 16.919672186397836,
+      "balanced_two_list_ratio_to_rho": 26.999890422744993
+    },
+    {
+      "arity": 55,
+      "minimum_columns": 297,
+      "signed_domain": "136950074500863503687804112139506276498714102850471975573099935559220314767360",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 16.614788256001514,
+      "balanced_two_list_ratio_to_rho": 26.513366060944747
+    },
+    {
+      "arity": 56,
+      "minimum_columns": 287,
+      "signed_domain": "141306268608287674955753962907188936593796140175140026062910817690494246584320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 16.332683060982177,
+      "balanced_two_list_ratio_to_rho": 26.06319130168833
+    },
+    {
+      "arity": 57,
+      "minimum_columns": 277,
+      "signed_domain": "120249044290581176806546731497884358899571056911608671607214169191945024307200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 16.045618814780024,
+      "balanced_two_list_ratio_to_rho": 25.605103041681904
+    },
+    {
+      "arity": 58,
+      "minimum_columns": 269,
+      "signed_domain": "135503774724307673550685434659765916586936107660487020058049487727688322908160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.812215559250557,
+      "balanced_two_list_ratio_to_rho": 25.232645333625733
+    },
+    {
+      "arity": 59,
+      "minimum_columns": 261,
+      "signed_domain": "129769182341761050770388312813811328260185132177252543816920759805405875404800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.575315041282089,
+      "balanced_two_list_ratio_to_rho": 24.854606802159246
+    },
+    {
+      "arity": 60,
+      "minimum_columns": 254,
+      "signed_domain": "136979733565667713060178269865278499549288164050492018361505269166116542873600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.365031131120368,
+      "balanced_two_list_ratio_to_rho": 24.519042231552657
+    },
+    {
+      "arity": 61,
+      "minimum_columns": 247,
+      "signed_domain": "124063902196910299654606613921765446007116647319674813172419838357913399721984",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.151829087123703,
+      "balanced_two_list_ratio_to_rho": 24.178820993079555
+    },
+    {
+      "arity": 62,
+      "minimum_columns": 241,
+      "signed_domain": "128721231414842221229339635111991855025066424061206777258681206288635375124480",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.966667397675575,
+      "balanced_two_list_ratio_to_rho": 23.883345686553884
+    },
+    {
+      "arity": 63,
+      "minimum_columns": 235,
+      "signed_domain": "116109701431457840781936512507702307420172047003035992904901876584001883340800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.779186083809961,
+      "balanced_two_list_ratio_to_rho": 23.584168795009063
+    },
+    {
+      "arity": 64,
+      "minimum_columns": 230,
+      "signed_domain": "125275129586477819505923455210374473823989418114413240905318457546750138777600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.62111537774209,
+      "balanced_two_list_ratio_to_rho": 23.33192444323554
+    },
+    {
+      "arity": 65,
+      "minimum_columns": 225,
+      "signed_domain": "119485006973705854249843592161180540781263438940206656400248387328997263933440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.461316969025003,
+      "balanced_two_list_ratio_to_rho": 23.076923076923077
+    },
+    {
+      "arity": 66,
+      "minimum_columns": 221,
+      "signed_domain": "142859637613032237134185932345706731024999331187154401053657433856983892492288",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.332195482552624,
+      "balanced_two_list_ratio_to_rho": 22.870874995874622
+    },
+    {
+      "arity": 67,
+      "minimum_columns": 217,
+      "signed_domain": "153997460519624183723463452668189699868296528886127360960995435832659152994304",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.201900091945202,
+      "balanced_two_list_ratio_to_rho": 22.662953634855743
+    },
+    {
+      "arity": 68,
+      "minimum_columns": 213,
+      "signed_domain": "149100245072481572773370982052832454834459194882506873296025203761057397473280",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.070398185306788,
+      "balanced_two_list_ratio_to_rho": 22.453106952809883
+    },
+    {
+      "arity": 69,
+      "minimum_columns": 209,
+      "signed_domain": "129126695374833299513225052626732216943440024995146391421562015725350362808320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.937655612210252,
+      "balanced_two_list_ratio_to_rho": 22.24128045353994
+    },
+    {
+      "arity": 70,
+      "minimum_columns": 206,
+      "signed_domain": "150837913140899921643377786601083401254688283399740690212293305450732852346880",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.837263028438624,
+      "balanced_two_list_ratio_to_rho": 22.081077068318958
+    },
+    {
+      "arity": 71,
+      "minimum_columns": 203,
+      "signed_domain": "161383834280910144191963594502543585225438769453339740646769512413154309570560",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.736136730238709,
+      "balanced_two_list_ratio_to_rho": 21.91970284426924
+    },
+    {
+      "arity": 72,
+      "minimum_columns": 200,
+      "signed_domain": "157722028309077034035992697440581327653312974865327042961611407030510577254400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.63426039158089,
+      "balanced_two_list_ratio_to_rho": 21.757131728816848
+    },
+    {
+      "arity": 73,
+      "minimum_columns": 197,
+      "signed_domain": "140393006794139547809280532700540611184235233107280603458510526080088014848000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.53161707184511,
+      "balanced_two_list_ratio_to_rho": 21.593336688643383
+    },
+    {
+      "arity": 74,
+      "minimum_columns": 195,
+      "signed_domain": "182855522463366940083626078672737742234873491641706218765348617528486658048000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.462753433632946,
+      "balanced_two_list_ratio_to_rho": 21.483446221182984
+    },
+    {
+      "arity": 75,
+      "minimum_columns": 192,
+      "signed_domain": "136169156783747275078683914267535057075096337742455018140228016426927081390080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.35879239184494,
+      "balanced_two_list_ratio_to_rho": 21.31754840084772
+    },
+    {
+      "arity": 76,
+      "minimum_columns": 190,
+      "signed_domain": "152511378625982444656835761480495205277559289477752238343971797986431100518400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.289033208031347,
+      "balanced_two_list_ratio_to_rho": 21.20622884936957
+    },
+    {
+      "arity": 77,
+      "minimum_columns": 188,
+      "signed_domain": "159157617636811694048807536367524000659063316234214168499798563208927809372160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.21890589420719,
+      "balanced_two_list_ratio_to_rho": 21.09432184738783
+    },
+    {
+      "arity": 78,
+      "minimum_columns": 186,
+      "signed_domain": "154491834006272639380677961435020769870511782606283272735074517527102593433600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.148404560084515,
+      "balanced_two_list_ratio_to_rho": 20.981817995362853
+    },
+    {
+      "arity": 79,
+      "minimum_columns": 184,
+      "signed_domain": "139231390036240261178425567610511075866307057441066371617767310210513533665280",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.077523156599531,
+      "balanced_two_list_ratio_to_rho": 20.86870764038544
+    },
+    {
+      "arity": 80,
+      "minimum_columns": 182,
+      "signed_domain": "116270119280976476124855919922783349438248044315316741016868585050173142466560",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.006255469855368,
+      "balanced_two_list_ratio_to_rho": 20.75498086651083
+    },
+    {
+      "arity": 81,
+      "minimum_columns": 181,
+      "signed_domain": "162503699475324875463066841275880350822524942685713344994679170151524042014720",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.970474781788656,
+      "balanced_two_list_ratio_to_rho": 20.697883149344168
+    },
+    {
+      "arity": 82,
+      "minimum_columns": 179,
+      "signed_domain": "118029233280151068420149612515428525930927023457215325363336575544632069324800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.898615642802959,
+      "balanced_two_list_ratio_to_rho": 20.583212554245616
+    },
+    {
+      "arity": 83,
+      "minimum_columns": 178,
+      "signed_domain": "147955606152623914535698080600884489933202186502468750054976131314749118873600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.862535528372081,
+      "balanced_two_list_ratio_to_rho": 20.52563702173282
+    },
+    {
+      "arity": 84,
+      "minimum_columns": 177,
+      "signed_domain": "176731348708257297592801479369435325722778962743050553503335587565637992448000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.826353922159909,
+      "balanced_two_list_ratio_to_rho": 20.467899531769337
+    },
+    {
+      "arity": 85,
+      "minimum_columns": 176,
+      "signed_domain": "201012086347337911359788561978715672566845703586512533835099938479441497292800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.790069962841477,
+      "balanced_two_list_ratio_to_rho": 20.409998709879382
+    },
+    {
+      "arity": 86,
+      "minimum_columns": 175,
+      "signed_domain": "217532899997977998683492114509207367643032018019759203502836746319585869824000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.753682776839502,
+      "balanced_two_list_ratio_to_rho": 20.351933162035312
+    },
+    {
+      "arity": 87,
+      "minimum_columns": 174,
+      "signed_domain": "223805277213026428333544859223134594861113532365287892523378311615763091292160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.717191478079009,
+      "balanced_two_list_ratio_to_rho": 20.29370147426603
+    },
+    {
+      "arity": 88,
+      "minimum_columns": 173,
+      "signed_domain": "218718793640003100416873385149881535886997315720622258602392440897223021035520",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.680595167735552,
+      "balanced_two_list_ratio_to_rho": 20.235302212255238
+    },
+    {
+      "arity": 89,
+      "minimum_columns": 172,
+      "signed_domain": "202851488808160308758391371042430884748088697050755722078467497305471503564800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.643892933976904,
+      "balanced_two_list_ratio_to_rho": 20.17673392092923
+    },
+    {
+      "arity": 90,
+      "minimum_columns": 171,
+      "signed_domain": "178373027497201429122688846423098785735851637225767886881918577087989541765120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.607083851697979,
+      "balanced_two_list_ratio_to_rho": 20.11799512403388
+    },
+    {
+      "arity": 91,
+      "minimum_columns": 170,
+      "signed_domain": "148558218389803388048971624551337334563115302258592109375339936961656992563200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.570166982248756,
+      "balanced_two_list_ratio_to_rho": 20.059084323700457
+    },
+    {
+      "arity": 92,
+      "minimum_columns": 169,
+      "signed_domain": "117060836536824613447284290343393945726076277815529997182972466951116417925120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.533141373155,
+      "balanced_two_list_ratio_to_rho": 20.0
+    },
+    {
+      "arity": 93,
+      "minimum_columns": 169,
+      "signed_domain": "193842675555602048073997642074007178944255341759049672754599568929805681295360",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.533141373155,
+      "balanced_two_list_ratio_to_rho": 20.0
+    },
+    {
+      "arity": 94,
+      "minimum_columns": 168,
+      "signed_domain": "139104022493633598643055087475996590706566215287244508964020841357156286464000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.496006057831538,
+      "balanced_two_list_ratio_to_rho": 19.940740610485722
+    },
+    {
+      "arity": 95,
+      "minimum_columns": 168,
+      "signed_domain": "216709424516397606307075294173131530784966314342233550807106152851148741017600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.496006057831538,
+      "balanced_two_list_ratio_to_rho": 19.940740610485722
+    },
+    {
+      "arity": 96,
+      "minimum_columns": 167,
+      "signed_domain": "141248107050866296968004432809273229886629829883777225079631688911909447270400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.458760055287819,
+      "balanced_two_list_ratio_to_rho": 19.881304589723207
+    },
+    {
+      "arity": 97,
+      "minimum_columns": 167,
+      "signed_domain": "206775579394051692468625045968214419009293153025735731559873194077228263014400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.458760055287819,
+      "balanced_two_list_ratio_to_rho": 19.881304589723207
+    },
+    {
+      "arity": 98,
+      "minimum_columns": 166,
+      "signed_domain": "122048887751835472885672610537269417550395445327423143521225409677748076544000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 99,
+      "minimum_columns": 166,
+      "signed_domain": "167663118527773982954055303364329704917714955197268156756430865819936751616000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 100,
+      "minimum_columns": 166,
+      "signed_domain": "224668578827217137158434106508201804589738039964339330053617360198715247165440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 101,
+      "minimum_columns": 166,
+      "signed_domain": "293626261437551109949636654050323150552924963121710807594826648972578342830080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 102,
+      "minimum_columns": 165,
+      "signed_domain": "144281271861589016937218105462951134691727834465664653861856704432544992460800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 103,
+      "minimum_columns": 165,
+      "signed_domain": "176499419947186564408635740663415951176288418860910159093145094742724942233600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 104,
+      "minimum_columns": 165,
+      "signed_domain": "210441616090876288333373383098688249479420807103392881995672997577864354201600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 105,
+      "minimum_columns": 165,
+      "signed_domain": "244513115838922925492110026076571108918946080634418396223543863852375725834240",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 106,
+      "minimum_columns": 165,
+      "signed_domain": "276807300949724066594841538954608802549750279963492524026653430776274406604800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 107,
+      "minimum_columns": 165,
+      "signed_domain": "305264126281004110824217771931250828980098439585907643319113129267293270835200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 108,
+      "minimum_columns": 165,
+      "signed_domain": "327876283783300711626011680963195334830476101777456357639047435138944624230400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 109,
+      "minimum_columns": 164,
+      "signed_domain": "116383775127750444427048016195109203089116454475801022361283226351238392053760",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.346347891941722,
+      "balanced_two_list_ratio_to_rho": 19.70192073056261
+    },
+    {
+      "arity": 110,
+      "minimum_columns": 164,
+      "signed_domain": "116383775127750444427048016195109203089116454475801022361283226351238392053760",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.346347891941722,
+      "balanced_two_list_ratio_to_rho": 19.70192073056261
+    },
+    {
+      "arity": 111,
+      "minimum_columns": 165,
+      "signed_domain": "346005817947366186134467075174648982156832702495624661074085267530708733132800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 112,
+      "minimum_columns": 165,
+      "signed_domain": "333648467306388822343950393918411518508374391692209494607153650833183421235200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 113,
+      "minimum_columns": 165,
+      "signed_domain": "312979978181214293526183555357093990813165358578532800250958291932012766822400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 114,
+      "minimum_columns": 165,
+      "signed_domain": "285525594130230583567746401378401535478677169229538694965786511937976559206400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 115,
+      "minimum_columns": 165,
+      "signed_domain": "253248787837247995860088112526930057555000619664460407708784558414553122078720",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 116,
+      "minimum_columns": 165,
+      "signed_domain": "218317920549351720569041476316319015133621223848672765266193584840132001792000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 117,
+      "minimum_columns": 165,
+      "signed_domain": "182864583024243321502274057085463790453802392625384025607580951404555010048000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 118,
+      "minimum_columns": 165,
+      "signed_domain": "148771186189214905628968724408512914267500251627431071680743824871502381056000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 119,
+      "minimum_columns": 165,
+      "signed_domain": "117516735309127740580866051213447175976008602125869922167982517125388435456000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.383931990728188,
+      "balanced_two_list_ratio_to_rho": 19.76189627486943
+    },
+    {
+      "arity": 120,
+      "minimum_columns": 166,
+      "signed_domain": "325129634355253415607062741690537186866957132548240117998084964046908004761600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 121,
+      "minimum_columns": 166,
+      "signed_domain": "247206002980853836659915473020904307369917819788744552527469559440624268083200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 122,
+      "minimum_columns": 166,
+      "signed_domain": "182365084166203649995019611244929407076168883450713194487477543849640853504000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 123,
+      "minimum_columns": 166,
+      "signed_domain": "130472580541674156093997770646778762786202127997258220446325397225759309824000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.421402369825566,
+      "balanced_two_list_ratio_to_rho": 19.821690348807884
+    },
+    {
+      "arity": 124,
+      "minimum_columns": 167,
+      "signed_domain": "351434208878380388188671414484065377182189602831324561524779698979061366784000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.458760055287819,
+      "balanced_two_list_ratio_to_rho": 19.881304589723207
+    },
+    {
+      "arity": 125,
+      "minimum_columns": 167,
+      "signed_domain": "241786735708325707073805933165036979501346446747951298329048432897594220347392",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.458760055287819,
+      "balanced_two_list_ratio_to_rho": 19.881304589723207
+    },
+    {
+      "arity": 126,
+      "minimum_columns": 167,
+      "signed_domain": "161191157138883804715870622110024653000897631165300865552698955265062813564928",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.458760055287819,
+      "balanced_two_list_ratio_to_rho": 19.881304589723207
+    },
+    {
+      "arity": 127,
+      "minimum_columns": 168,
+      "signed_domain": "426458494477676837673484480543057349671666173791662132485880700543788231163904",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.496006057831538,
+      "balanced_two_list_ratio_to_rho": 19.940740610485722
+    },
+    {
+      "arity": 128,
+      "minimum_columns": 168,
+      "signed_domain": "273199973024761724134575995347896114633411142585283553623767323785864335589376",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.496006057831538,
+      "balanced_two_list_ratio_to_rho": 19.940740610485722
+    },
+    {
+      "arity": 129,
+      "minimum_columns": 168,
+      "signed_domain": "169426339860317348300512245176989838532347995401726234805437100022241448427520",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.496006057831538,
+      "balanced_two_list_ratio_to_rho": 19.940740610485722
+    },
+    {
+      "arity": 130,
+      "minimum_columns": 169,
+      "signed_domain": "440508483636825105581331837460173580184104788044488210494136460057827765911552",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.533141373155,
+      "balanced_two_list_ratio_to_rho": 20.0
+    },
+    {
+      "arity": 131,
+      "minimum_columns": 169,
+      "signed_domain": "262287494073834795689647964289263658430230331812748705485058350263439433138176",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.533141373155,
+      "balanced_two_list_ratio_to_rho": 20.0
+    },
+    {
+      "arity": 132,
+      "minimum_columns": 169,
+      "signed_domain": "151014011739480639942524585499879076065890191043703800127760868333495431200768",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.533141373155,
+      "balanced_two_list_ratio_to_rho": 20.0
+    },
+    {
+      "arity": 133,
+      "minimum_columns": 170,
+      "signed_domain": "386050857078371560755326008044803653100771916953829263484501467920213884272640",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.570166982248756,
+      "balanced_two_list_ratio_to_rho": 20.059084323700457
+    },
+    {
+      "arity": 134,
+      "minimum_columns": 170,
+      "signed_domain": "213192264356712652954433765636682614398933745183457951476515736015640503255040",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.570166982248756,
+      "balanced_two_list_ratio_to_rho": 20.059084323700457
+    },
+    {
+      "arity": 135,
+      "minimum_columns": 171,
+      "signed_domain": "540087069703672054151232206279595956477298821131426810407173197906289274912768",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.607083851697979,
+      "balanced_two_list_ratio_to_rho": 20.11799512403388
+    },
+    {
+      "arity": 136,
+      "minimum_columns": 171,
+      "signed_domain": "285928448666649911021240579795080212252687611187225958450856398891564910247936",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.607083851697979,
+      "balanced_two_list_ratio_to_rho": 20.11799512403388
+    },
+    {
+      "arity": 137,
+      "minimum_columns": 171,
+      "signed_domain": "146094827785879516580195916683617626698453523964276037164671152718317837352960",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.607083851697979,
+      "balanced_two_list_ratio_to_rho": 20.11799512403388
+    },
+    {
+      "arity": 138,
+      "minimum_columns": 172,
+      "signed_domain": "364178411292337345678169531443220750610637769881963454961209250254357507604480",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.643892933976904,
+      "balanced_two_list_ratio_to_rho": 20.17673392092923
+    },
+    {
+      "arity": 139,
+      "minimum_columns": 172,
+      "signed_domain": "178159222790495967669895885885892165766355167999809459981023230340261226741760",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.643892933976904,
+      "balanced_two_list_ratio_to_rho": 20.17673392092923
+    },
+    {
+      "arity": 140,
+      "minimum_columns": 173,
+      "signed_domain": "440307793467940034384171260832276352536849200913814808238814554983788460376064",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.680595167735552,
+      "balanced_two_list_ratio_to_rho": 20.235302212255238
+    },
+    {
+      "arity": 141,
+      "minimum_columns": 173,
+      "signed_domain": "206101520346695335243654632730001696932142179151147357047955749141347789963264",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.680595167735552,
+      "balanced_two_list_ratio_to_rho": 20.235302212255238
+    },
+    {
+      "arity": 142,
+      "minimum_columns": 174,
+      "signed_domain": "505093866765140680737970508380567538960461115102811832765412680994288950050816",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.717191478079009,
+      "balanced_two_list_ratio_to_rho": 20.29370147426603
+    },
+    {
+      "arity": 143,
+      "minimum_columns": 174,
+      "signed_domain": "226055996314468556414196591163330926527758820745314386692212668417024425197568",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.717191478079009,
+      "balanced_two_list_ratio_to_rho": 20.29370147426603
+    },
+    {
+      "arity": 144,
+      "minimum_columns": 175,
+      "signed_domain": "549441657708777741284505603521984890866080467089305800988016902402489922355200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.753682776839502,
+      "balanced_two_list_ratio_to_rho": 20.351933162035312
+    },
+    {
+      "arity": 145,
+      "minimum_columns": 175,
+      "signed_domain": "234933674330649792825098947712848711956530958341634204560393434130719828869120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.753682776839502,
+      "balanced_two_list_ratio_to_rho": 20.351933162035312
+    },
+    {
+      "arity": 146,
+      "minimum_columns": 176,
+      "signed_domain": "566415434002662514208457736951525661703417105042844109625058142561735477821440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.790069962841477,
+      "balanced_two_list_ratio_to_rho": 20.409998709879382
+    },
+    {
+      "arity": 147,
+      "minimum_columns": 176,
+      "signed_domain": "231189973062311230289166423245520678246292695935854738622472711249687950131200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.790069962841477,
+      "balanced_two_list_ratio_to_rho": 20.409998709879382
+    },
+    {
+      "arity": 148,
+      "minimum_columns": 177,
+      "signed_domain": "552981422054447131907871039384556216886402799738463361299698241772902259097600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.826353922159909,
+      "balanced_two_list_ratio_to_rho": 20.467899531769337
+    },
+    {
+      "arity": 149,
+      "minimum_columns": 177,
+      "signed_domain": "215254513282939152017828995196672889794707130099536073526057033710257255219200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.826353922159909,
+      "balanced_two_list_ratio_to_rho": 20.467899531769337
+    },
+    {
+      "arity": 150,
+      "minimum_columns": 178,
+      "signed_domain": "510870711524842254122314148600103658446104922102898947835175360005677219053568",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.862535528372081,
+      "balanced_two_list_ratio_to_rho": 20.52563702173282
+    },
+    {
+      "arity": 151,
+      "minimum_columns": 178,
+      "signed_domain": "189461985731067326032116505441098045516436262501737358137548477882900160708608",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.862535528372081,
+      "balanced_two_list_ratio_to_rho": 20.52563702173282
+    },
+    {
+      "arity": 152,
+      "minimum_columns": 179,
+      "signed_domain": "446232834813961202101958611499428291413711723523828777718699704487356957458432",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.898615642802959,
+      "balanced_two_list_ratio_to_rho": 20.583212554245616
+    },
+    {
+      "arity": 153,
+      "minimum_columns": 179,
+      "signed_domain": "157493941699045130153632451117445279322486490655468980371305778054361279102976",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.898615642802959,
+      "balanced_two_list_ratio_to_rho": 20.583212554245616
+    },
+    {
+      "arity": 154,
+      "minimum_columns": 180,
+      "signed_domain": "368167655919845758800699236378443510104513874259537876192662857789415977123840",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.93459511476445,
+      "balanced_two_list_ratio_to_rho": 20.640627484613443
+    },
+    {
+      "arity": 155,
+      "minimum_columns": 180,
+      "signed_domain": "123514310373109544887976518010832661454417557816103029432377216806771811680256",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.93459511476445,
+      "balanced_two_list_ratio_to_rho": 20.640627484613443
+    },
+    {
+      "arity": 156,
+      "minimum_columns": 181,
+      "signed_domain": "286616540737600354163124996922573227221148435445059593939234310795201255309312",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 12.970474781788656,
+      "balanced_two_list_ratio_to_rho": 20.697883149344168
+    },
+    {
+      "arity": 157,
+      "minimum_columns": 182,
+      "signed_domain": "664512234576347317932340757196284424894891914025488485311345790633460235239424",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.006255469855368,
+      "balanced_two_list_ratio_to_rho": 20.75498086651083
+    },
+    {
+      "arity": 158,
+      "minimum_columns": 182,
+      "signed_domain": "210288681827958012003905302910216590156611365197939394085868921086538049126400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.006255469855368,
+      "balanced_two_list_ratio_to_rho": 20.75498086651083
+    },
+    {
+      "arity": 159,
+      "minimum_columns": 183,
+      "signed_domain": "484060739302092027631631074623517433945407293474502001480679403255804565913600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.041937993613903,
+      "balanced_two_list_ratio_to_rho": 20.811921936105666
+    },
+    {
+      "arity": 160,
+      "minimum_columns": 183,
+      "signed_domain": "145218221790627608289489322387055230183622188042350600444203820976741369774080",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.041937993613903,
+      "balanced_two_list_ratio_to_rho": 20.811921936105666
+    },
+    {
+      "arity": 161,
+      "minimum_columns": 184,
+      "signed_domain": "331927364092863104661689879741840526133993572668229943872465876518265988055040",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.077523156599531,
+      "balanced_two_list_ratio_to_rho": 20.86870764038544
+    },
+    {
+      "arity": 162,
+      "minimum_columns": 185,
+      "signed_domain": "758105708113329313116205280891857991787516184489167155758101075998508738150400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.1130117514446,
+      "balanced_two_list_ratio_to_rho": 20.925339244208374
+    },
+    {
+      "arity": 163,
+      "minimum_columns": 185,
+      "signed_domain": "213943942166951830695370815466413911792795978444795639048298463165223324876800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.1130117514446,
+      "balanced_two_list_ratio_to_rho": 20.925339244208374
+    },
+    {
+      "arity": 164,
+      "minimum_columns": 186,
+      "signed_domain": "485287478573817567187060630204304726749512829155268156865652611569896810086400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.148404560084515,
+      "balanced_two_list_ratio_to_rho": 20.981817995362853
+    },
+    {
+      "arity": 165,
+      "minimum_columns": 186,
+      "signed_domain": "129409994286351351249882834721147927133203421108071508497507363085305816023040",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.148404560084515,
+      "balanced_two_list_ratio_to_rho": 20.981817995362853
+    },
+    {
+      "arity": 166,
+      "minimum_columns": 187,
+      "signed_domain": "291562276283707261249736025215116414143482406592884001072697312011472139714560",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.183702353958788,
+      "balanced_two_list_ratio_to_rho": 21.03814512488822
+    },
+    {
+      "arity": 167,
+      "minimum_columns": 188,
+      "signed_domain": "656451592111819941496411649586130369568559190891762780858288558780320506183680",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.21890589420719,
+      "balanced_two_list_ratio_to_rho": 21.09432184738783
+    },
+    {
+      "arity": 168,
+      "minimum_columns": 188,
+      "signed_domain": "164112898027954985374102912396532592392139797722940695214572139695080126545920",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.21890589420719,
+      "balanced_two_list_ratio_to_rho": 21.09432184738783
+    },
+    {
+      "arity": 169,
+      "minimum_columns": 189,
+      "signed_domain": "367069085529982156635567460863250413752833393723500489888214608312072709079040",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.254015931861286,
+      "balanced_two_list_ratio_to_rho": 21.150349361334644
+    },
+    {
+      "arity": 170,
+      "minimum_columns": 190,
+      "signed_domain": "820507367655254232479503736047265630741627585970177565632479712697574290882560",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.289033208031347,
+      "balanced_two_list_ratio_to_rho": 21.20622884936957
+    },
+    {
+      "arity": 171,
+      "minimum_columns": 190,
+      "signed_domain": "191931547989533153796375142935032896079912885607059079680112213496508606054400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.289033208031347,
+      "balanced_two_list_ratio_to_rho": 21.20622884936957
+    },
+    {
+      "arity": 172,
+      "minimum_columns": 191,
+      "signed_domain": "426266577511637585757065724425480036642597222685445165336063171835269113446400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.323958454088901,
+      "balanced_two_list_ratio_to_rho": 21.261961478592696
+    },
+    {
+      "arity": 173,
+      "minimum_columns": 192,
+      "signed_domain": "946163963956467242374064960574475919484146436480988112653458138640134910771200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.35879239184494,
+      "balanced_two_list_ratio_to_rho": 21.31754840084772
+    },
+    {
+      "arity": 174,
+      "minimum_columns": 192,
+      "signed_domain": "206633509369803190863301543113966005404583704518836484372594306139799578214400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.35879239184494,
+      "balanced_two_list_ratio_to_rho": 21.31754840084772
+    },
+    {
+      "arity": 175,
+      "minimum_columns": 193,
+      "signed_domain": "455774483524251609561339403668519303349538913967262188387550869542643641090048",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.393535733723988,
+      "balanced_two_list_ratio_to_rho": 21.372990752999698
+    },
+    {
+      "arity": 176,
+      "minimum_columns": 194,
+      "signed_domain": "1004775565951191048351134594451053918747847151246009824399828053309918936039424",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.428189182934107,
+      "balanced_two_list_ratio_to_rho": 21.428289657206335
+    },
+    {
+      "arity": 177,
+      "minimum_columns": 194,
+      "signed_domain": "204361132057869365766332459888349949575833318897493523606744688808797071736832",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.428189182934107,
+      "balanced_two_list_ratio_to_rho": 21.428289657206335
+    },
+    {
+      "arity": 178,
+      "minimum_columns": 195,
+      "signed_domain": "447757536531286812634099209867733035587499968370912776441743981097926168412160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.462753433632946,
+      "balanced_two_list_ratio_to_rho": 21.483446221182984
+    },
+    {
+      "arity": 179,
+      "minimum_columns": 196,
+      "signed_domain": "980563990616002405321602738928219832124580936320658147291416986538475184455680",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.49722917109,
+      "balanced_two_list_ratio_to_rho": 21.538461538461537
+    },
+    {
+      "arity": 180,
+      "minimum_columns": 196,
+      "signed_domain": "185217642671911565449636072908663746067976399082790983377267653012823090397184",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.49722917109,
+      "balanced_two_list_ratio_to_rho": 21.538461538461537
+    },
+    {
+      "arity": 181,
+      "minimum_columns": 197,
+      "signed_domain": "403180945926702523685948136607809480391064647727180372655488703243382859759616",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.53161707184511,
+      "balanced_two_list_ratio_to_rho": 21.593336688643383
+    },
+    {
+      "arity": 182,
+      "minimum_columns": 198,
+      "signed_domain": "877250849378979117470524517014794254037701101648150700942711683980107760795648",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.565917803863371,
+      "balanced_two_list_ratio_to_rho": 21.648072737646597
+    },
+    {
+      "arity": 183,
+      "minimum_columns": 198,
+      "signed_domain": "153399055629111102508507019368707191962876695370168428580146305395428679483392",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.565917803863371,
+      "balanced_two_list_ratio_to_rho": 21.648072737646597
+    },
+    {
+      "arity": 184,
+      "minimum_columns": 199,
+      "signed_domain": "331808826849925102165140183199703600006657199768081709646186030148807687143424",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.600132026686518,
+      "balanced_two_list_ratio_to_rho": 21.702670737947514
+    },
+    {
+      "arity": 185,
+      "minimum_columns": 200,
+      "signed_domain": "717424490486324545221924720431791567581961513012068561397158984105530134364160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.63426039158089,
+      "balanced_two_list_ratio_to_rho": 21.757131728816848
+    },
+    {
+      "arity": 186,
+      "minimum_columns": 201,
+      "signed_domain": "1550562608470443371931256653836452742838432947477696568180956514034532871045120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.668303541682073,
+      "balanced_two_list_ratio_to_rho": 21.8114567365505
+    },
+    {
+      "arity": 187,
+      "minimum_columns": 201,
+      "signed_domain": "248753359647664712074533153021890814359106889969683941419404788347786022092800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.668303541682073,
+      "balanced_two_list_ratio_to_rho": 21.8114567365505
+    },
+    {
+      "arity": 188,
+      "minimum_columns": 202,
+      "signed_domain": "534555092008811402543145711812999409580208423126342086879997523896306132582400",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.702262112136294,
+      "balanced_two_list_ratio_to_rho": 21.86564677469522
+    },
+    {
+      "arity": 189,
+      "minimum_columns": 203,
+      "signed_domain": "1148303530981891161018609306857554287246373649678808927371846532814287247769600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.736136730238709,
+      "balanced_two_list_ratio_to_rho": 21.91970284426924
+    },
+    {
+      "arity": 190,
+      "minimum_columns": 203,
+      "signed_domain": "169223678249962907939584529431639579173149801005298157717956331151579173355520",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.736136730238709,
+      "balanced_two_list_ratio_to_rho": 21.91970284426924
+    },
+    {
+      "arity": 191,
+      "minimum_columns": 204,
+      "signed_domain": "361483040450182546802882136168109676977199574922312295020555932512273836277760",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.76992801556857,
+      "balanced_two_list_ratio_to_rho": 21.973625933978
+    },
+    {
+      "arity": 192,
+      "minimum_columns": 205,
+      "signed_domain": "771916909294660646818654561608984206045061592282021046658478814218918087884800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.803636580121461,
+      "balanced_two_list_ratio_to_rho": 22.02741702042516
+    },
+    {
+      "arity": 193,
+      "minimum_columns": 206,
+      "signed_domain": "1647822625022798893726868805092753849173913865389599332763177572322250011443200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.837263028438624,
+      "balanced_two_list_ratio_to_rho": 22.081077068318958
+    },
+    {
+      "arity": 194,
+      "minimum_columns": 206,
+      "signed_domain": "220842207477282325963394788311400000404751342784173106452796994228755156172800",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.837263028438624,
+      "balanced_two_list_ratio_to_rho": 22.081077068318958
+    },
+    {
+      "arity": 195,
+      "minimum_columns": 207,
+      "signed_domain": "468864994336384015122284319799587693167010543141782902930553618516434023874560",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.870807957733453,
+      "balanced_two_list_ratio_to_rho": 22.13460703067409
+    },
+    {
+      "arity": 196,
+      "minimum_columns": 208,
+      "signed_domain": "995142028795590562708521821615451430395287683402967793975052578075696703733760",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.904271958015231,
+      "balanced_two_list_ratio_to_rho": 22.188007849009164
+    },
+    {
+      "arity": 197,
+      "minimum_columns": 208,
+      "signed_domain": "121235577112153165000022963039445859540542661937417396220310973978765080657920",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.904271958015231,
+      "balanced_two_list_ratio_to_rho": 22.188007849009164
+    },
+    {
+      "arity": 198,
+      "minimum_columns": 209,
+      "signed_domain": "255941773903434459444492921972163481252256730756770058687323167288504059166720",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.937655612210252,
+      "balanced_two_list_ratio_to_rho": 22.24128045353994
+    },
+    {
+      "arity": 199,
+      "minimum_columns": 210,
+      "signed_domain": "540178618288655643048678528785470663949486567426348867581285076689305049497600",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 13.97095949628024,
+      "balanced_two_list_ratio_to_rho": 22.294425763368366
+    },
+    {
+      "arity": 200,
+      "minimum_columns": 211,
+      "signed_domain": "1139776884589063406832711695737343100933416657269596110596511511814433654439936",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.004184179338338,
+      "balanced_two_list_ratio_to_rho": 22.347444686667615
+    },
+    {
+      "arity": 201,
+      "minimum_columns": 211,
+      "signed_domain": "124751698810743258459301777642893274729030678905129922552852006268246469640192",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.004184179338338,
+      "balanced_two_list_ratio_to_rho": 22.347444686667615
+    },
+    {
+      "arity": 202,
+      "minimum_columns": 212,
+      "signed_domain": "261855050969084859340316602577162121213410929979084589912917082464042094690304",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.037330223762545,
+      "balanced_two_list_ratio_to_rho": 22.400338120863132
+    },
+    {
+      "arity": 203,
+      "minimum_columns": 213,
+      "signed_domain": "549508629127242118615639766984586520378882050103891799521688064678236119891968",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.070398185306788,
+      "balanced_two_list_ratio_to_rho": 22.453106952809883
+    },
+    {
+      "arity": 204,
+      "minimum_columns": 214,
+      "signed_domain": "1152890653266958954742616766026485444716478026688557304878835743540613035851776",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.103388613209654,
+      "balanced_two_list_ratio_to_rho": 22.505752058965836
+    },
+    {
+      "arity": 205,
+      "minimum_columns": 215,
+      "signed_domain": "2418258443438011466045488826299457274283344153541851907794631071816895636176896",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.13630205030081,
+      "balanced_two_list_ratio_to_rho": 22.558274305561813
+    },
+    {
+      "arity": 206,
+      "minimum_columns": 215,
+      "signed_domain": "234782373149321501557814449155287114008091665392412806582003016681252003512320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.13630205030081,
+      "balanced_two_list_ratio_to_rho": 22.558274305561813
+    },
+    {
+      "arity": 207,
+      "minimum_columns": 216,
+      "signed_domain": "489980604833366611946743198237120933582104345166774552866788904378265050808320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.169139033105225,
+      "balanced_two_list_ratio_to_rho": 22.610674548767797
+    },
+    {
+      "arity": 208,
+      "minimum_columns": 217,
+      "signed_domain": "1022363377392697642235031480937069640262660027896058442039357617789264577167360",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.201900091945202,
+      "balanced_two_list_ratio_to_rho": 22.662953634855743
+    },
+    {
+      "arity": 209,
+      "minimum_columns": 218,
+      "signed_domain": "2132777189201991253657769022433312742366123311783164979565358475388130888253440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.234585751040328,
+      "balanced_two_list_ratio_to_rho": 22.715112400359075
+    },
+    {
+      "arity": 210,
+      "minimum_columns": 218,
+      "signed_domain": "182809473360170678884951630494283949345667712438556998248459297890411218993152",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.234585751040328,
+      "balanced_two_list_ratio_to_rho": 22.715112400359075
+    },
+    {
+      "arity": 211,
+      "minimum_columns": 219,
+      "signed_domain": "379481276453814015884401962826997013333660938616530640913863376663507648905216",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.267196528605314,
+      "balanced_two_list_ratio_to_rho": 22.767151672228835
+    },
+    {
+      "arity": 212,
+      "minimum_columns": 220,
+      "signed_domain": "787602649243764938628004073791880593711371759392799443406131536471430969425920",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.299732936945873,
+      "balanced_two_list_ratio_to_rho": 22.819072267986655
+    },
+    {
+      "arity": 213,
+      "minimum_columns": 221,
+      "signed_domain": "1634367938806310342129473242328691185072424026533414807443709573335082105569280",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.332195482552624,
+      "balanced_two_list_ratio_to_rho": 22.870874995874622
+    },
+    {
+      "arity": 214,
+      "minimum_columns": 221,
+      "signed_domain": "122195733742527876047063419987191864304480301049227275322894173707295858360320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.332195482552624,
+      "balanced_two_list_ratio_to_rho": 22.870874995874622
+    },
+    {
+      "arity": 215,
+      "minimum_columns": 222,
+      "signed_domain": "252348398984569195185563527787503198842740714724915861597046572679252842381312",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.364584666193068,
+      "balanced_two_list_ratio_to_rho": 22.92256065500206
+    },
+    {
+      "arity": 216,
+      "minimum_columns": 223,
+      "signed_domain": "521052712718138245614635802746418642054918327626446640149457275069197998620672",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.396900983001728,
+      "balanced_two_list_ratio_to_rho": 22.97413003548935
+    },
+    {
+      "arity": 217,
+      "minimum_columns": 224,
+      "signed_domain": "1075721729482607990946344883089380422306928160261051128050492438852537803603968",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.429144922568463,
+      "balanced_two_list_ratio_to_rho": 23.02558391860887
+    },
+    {
+      "arity": 218,
+      "minimum_columns": 225,
+      "signed_domain": "2220526505812722917091078887111106376321640697786573429462025676530467943219200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.461316969025003,
+      "balanced_two_list_ratio_to_rho": 23.076923076923077
+    },
+    {
+      "arity": 219,
+      "minimum_columns": 225,
+      "signed_domain": "141951466125014250407648878628107256933803514926995561700768764709710279475200",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.461316969025003,
+      "balanced_two_list_ratio_to_rho": 23.076923076923077
+    },
+    {
+      "arity": 220,
+      "minimum_columns": 226,
+      "signed_domain": "291645739493211096292078605181384000609450857940918154039761280221768392376320",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.493417601129748,
+      "balanced_two_list_ratio_to_rho": 23.128148274419857
+    },
+    {
+      "arity": 221,
+      "minimum_columns": 227,
+      "signed_domain": "599127446741709672925808537340942698084573255679533221421048059822094344519680",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.525447292350924,
+      "balanced_two_list_ratio_to_rho": 23.179260266645173
+    },
+    {
+      "arity": 222,
+      "minimum_columns": 228,
+      "signed_domain": "1230640160874863111955714833457071487957501822476879049405396014769707302256640",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.557406510948024,
+      "balanced_two_list_ratio_to_rho": 23.230259800833075
+    },
+    {
+      "arity": 223,
+      "minimum_columns": 229,
+      "signed_domain": "2527503110675727826348508492032909154639174146611706747209288676074107374141440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.589295720051707,
+      "balanced_two_list_ratio_to_rho": 23.281147616033163
+    },
+    {
+      "arity": 224,
+      "minimum_columns": 229,
+      "signed_domain": "135401952357628276411527240644620133284241472139912861457640464789684323614720",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.589295720051707,
+      "balanced_two_list_ratio_to_rho": 23.281147616033163
+    },
+    {
+      "arity": 225,
+      "minimum_columns": 230,
+      "signed_domain": "276821769264484476219122358651223383603338120819377405646731616903354617167872",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.62111537774209,
+      "balanced_two_list_ratio_to_rho": 23.33192444323554
+    },
+    {
+      "arity": 226,
+      "minimum_columns": 231,
+      "signed_domain": "565892289381379769970064290694093819578505362028992749596415960218362093502464",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.65286593712552,
+      "balanced_two_list_ratio_to_rho": 23.382591005493328
+    },
+    {
+      "arity": 227,
+      "minimum_columns": 232,
+      "signed_domain": "1156713754506432657559955202123610274380733427231068880232321610314185072181248",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.684547846409863,
+      "balanced_two_list_ratio_to_rho": 23.433148018042797
+    },
+    {
+      "arity": 228,
+      "minimum_columns": 233,
+      "signed_domain": "2364160568421042186065522474515799946760621829340693413106411712308816858054656",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.716161548978308,
+      "balanced_two_list_ratio_to_rho": 23.48359618842115
+    },
+    {
+      "arity": 229,
+      "minimum_columns": 234,
+      "signed_domain": "4831559589611562196850063397700412118270615790967006625911793368386577683709952",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.74770748346179,
+      "balanced_two_list_ratio_to_rho": 23.533936216582084
+    },
+    {
+      "arity": 230,
+      "minimum_columns": 234,
+      "signed_domain": "210067808243980965080437539030452700794374599607261157648338842103764247117824",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.74770748346179,
+      "balanced_two_list_ratio_to_rho": 23.533936216582084
+    },
+    {
+      "arity": 231,
+      "minimum_columns": 235,
+      "signed_domain": "427410692098143089124699754737284715901974293573215342401382059691641541754880",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.779186083809961,
+      "balanced_two_list_ratio_to_rho": 23.584168795009063
+    },
+    {
+      "arity": 232,
+      "minimum_columns": 236,
+      "signed_domain": "869559683923808353736458121706889594421258045545507075920053155924374171156480",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.81059777936087,
+      "balanced_two_list_ratio_to_rho": 23.634294608826483
+    },
+    {
+      "arity": 233,
+      "minimum_columns": 237,
+      "signed_domain": "1768975494334271071549704505103286127706765294371546583631352772137997240893440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.84194299490927,
+      "balanced_two_list_ratio_to_rho": 23.684314335908695
+    },
+    {
+      "arity": 234,
+      "minimum_columns": 238,
+      "signed_domain": "3598428783346636880588287796705829900805214872311351170121897092041396096860160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.873222150773634,
+      "balanced_two_list_ratio_to_rho": 23.734228646986942
+    },
+    {
+      "arity": 235,
+      "minimum_columns": 238,
+      "signed_domain": "122499703262864234232792776058070805133794548844641741961596496750345399042048",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.873222150773634,
+      "balanced_two_list_ratio_to_rho": 23.734228646986942
+    },
+    {
+      "arity": 236,
+      "minimum_columns": 239,
+      "signed_domain": "248113805761225016793537910829482393448956755710757426515436972231631782805504",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.904435662861934,
+      "balanced_two_list_ratio_to_rho": 23.784038205754317
+    },
+    {
+      "arity": 237,
+      "minimum_columns": 240,
+      "signed_domain": "502508973693620287176785642186293455086494695110394787879366019709633990492160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.935583942736146,
+      "balanced_two_list_ratio_to_rho": 23.83374366896872
+    },
+    {
+      "arity": 238,
+      "minimum_columns": 241,
+      "signed_domain": "1017686240841701589996683527452913635931472449761387763688463955882536064778240",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.966667397675575,
+      "balanced_two_list_ratio_to_rho": 23.883345686553884
+    },
+    {
+      "arity": 239,
+      "minimum_columns": 242,
+      "signed_domain": "2060921090240098617399141536766569873601810316671596977511366337435763411517440",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 14.99768643073898,
+      "balanced_two_list_ratio_to_rho": 23.93284490169853
+    },
+    {
+      "arity": 240,
+      "minimum_columns": 243,
+      "signed_domain": "4173365207736199700233261611952303994043665891259983879460516833307420908322816",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.028641440825558,
+      "balanced_two_list_ratio_to_rho": 23.982241950953686
+    },
+    {
+      "arity": 241,
+      "minimum_columns": 244,
+      "signed_domain": "8450631623963757069351998616733296054329082800559635407372332840888055615193088",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.059532822734786,
+      "balanced_two_list_ratio_to_rho": 24.031537464328164
+    },
+    {
+      "arity": 242,
+      "minimum_columns": 244,
+      "signed_domain": "209519792329679927339305750828098249280886350427098398529892549774084023517184",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.059532822734786,
+      "balanced_two_list_ratio_to_rho": 24.031537464328164
+    },
+    {
+      "arity": 243,
+      "minimum_columns": 245,
+      "signed_domain": "422488470129807260889958098377646675504667949420898005266038474853091240837120",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.090360967225191,
+      "balanced_two_list_ratio_to_rho": 24.08073206538235
+    },
+    {
+      "arity": 244,
+      "minimum_columns": 246,
+      "signed_domain": "851902980753545788351882722958205591591379635717548436847913646015249551196160",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.121126261071982,
+      "balanced_two_list_ratio_to_rho": 24.12982637132019
+    },
+    {
+      "arity": 245,
+      "minimum_columns": 247,
+      "signed_domain": "1717714581601027018146245163842259437739353224671301746134160576047074605268992",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.151829087123703,
+      "balanced_two_list_ratio_to_rho": 24.178820993079555
+    },
+    {
+      "arity": 246,
+      "minimum_columns": 248,
+      "signed_domain": "3463359481602070735774543094576262931376907314784413276758307502924182943956992",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.182469824357797,
+      "balanced_two_list_ratio_to_rho": 24.227716535420956
+    },
+    {
+      "arity": 247,
+      "minimum_columns": 249,
+      "signed_domain": "6982805756428466503707378385016109068120242278391246201723227273102198810083328",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.213048847935191,
+      "balanced_two_list_ratio_to_rho": 24.276513597014613
+    },
+    {
+      "arity": 248,
+      "minimum_columns": 250,
+      "signed_domain": "14078237412154166338119714485919574734113391690304931858312958211899594375168000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.243566529253886,
+      "balanced_two_list_ratio_to_rho": 24.325212770525994
+    },
+    {
+      "arity": 249,
+      "minimum_columns": 250,
+      "signed_domain": "226156424291633194186662080095093570025917938800079226639565593765455331328000",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.243566529253886,
+      "balanced_two_list_ratio_to_rho": 24.325212770525994
+    },
+    {
+      "arity": 250,
+      "minimum_columns": 251,
+      "signed_domain": "454122099977599453926817456830947888612043221110559087092247712281034305306624",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.274023236001593,
+      "balanced_two_list_ratio_to_rho": 24.37381464269978
+    },
+    {
+      "arity": 251,
+      "minimum_columns": 252,
+      "signed_domain": "911862702743865038960621506943417274344501129241919441810728474062315895914496",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.304419332207402,
+      "balanced_two_list_ratio_to_rho": 24.422319794442377
+    },
+    {
+      "arity": 252,
+      "minimum_columns": 253,
+      "signed_domain": "1830962411065062340135216200449877542929831632525441418873923047125126362431488",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.334755178292571,
+      "balanced_two_list_ratio_to_rho": 24.47072880090287
+    },
+    {
+      "arity": 253,
+      "minimum_columns": 254,
+      "signed_domain": "3676398833284789204698378774025841074341322013134087908252778292251241866067968",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.365031131120368,
+      "balanced_two_list_ratio_to_rho": 24.519042231552657
+    },
+    {
+      "arity": 254,
+      "minimum_columns": 255,
+      "signed_domain": "7381745688878907458252650294303854125645961522434585957515420980504462014545920",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.39524754404505,
+      "balanced_two_list_ratio_to_rho": 24.567260650263556
+    },
+    {
+      "arity": 255,
+      "minimum_columns": 256,
+      "signed_domain": "14821387422376473014217086081112052205218558037201992197050570753012880593911808",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.425404766960002,
+      "balanced_two_list_ratio_to_rho": 24.615384615384613
+    },
+    {
+      "arity": 256,
+      "minimum_columns": 256,
+      "signed_domain": "115792089237316195423570985008687907853269984665640564039457584007913129639936",
+      "covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.425404766960002,
+      "balanced_two_list_ratio_to_rho": 24.615384615384613
+    }
+  ],
+  "boundary_table_sha256": "d27990b0a29fb6af7b4de053590b2c3f447baa8f5912aa63dcd5d8cc58ffb4ae",
+  "dickson_inventory": [
+    {
+      "specification": "dickson-torus:depth=7",
+      "depth": 7,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1hc6be32a3fea5",
+      "fb_sha256": "c6be32a3fea525d4d5df94b1c872543b4946127a64430e435a5f275dd217208f",
+      "points_sha256": "2e863c0e6b3ea05d6d1893c1a47c71a27e0c1bcb38c646d430e1b70d5951f01e",
+      "legacy_enumeration_sha256": "13d86d9a15a172ced10b8398b2ccb79ed6c11c1a8e6163a84063a9dd6ea7570a",
+      "columns": 67,
+      "signed_points": 134,
+      "points_verified": 134,
+      "verification_failures": 0,
+      "maximum_checked_arity": 67,
+      "maximum_domain_arity": 45,
+      "maximum_domain": "9543778329548747434307648225280",
+      "first_covering_arity": null,
+      "fixed_arity_covers_order": false,
+      "ideal_memoryless_ratio_to_rho": 7.891398729155659,
+      "balanced_two_list_ratio_to_rho": 12.592850418265307,
+      "logical_point_bytes": 33675
+    },
+    {
+      "specification": "dickson-torus:depth=8",
+      "depth": 8,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1h3bafdc8978dd",
+      "fb_sha256": "3bafdc8978dde67e997f5774e271d14d4d5c6713c940247b55748f56da4b152b",
+      "points_sha256": "4785e75fd9e75e9286b6f03c1ec1a9851b2f52203adab0de1754bda1008b5b48",
+      "legacy_enumeration_sha256": "13712aa7b1bf770e63fbdd058b6795d63dffafe96efc3b2d9df9a1839710c9b5",
+      "columns": 135,
+      "signed_points": 270,
+      "points_verified": 270,
+      "verification_failures": 0,
+      "maximum_checked_arity": 135,
+      "maximum_domain_arity": 90,
+      "maximum_domain": "1874047306074495937828285147324699995958947752910190426246348800",
+      "first_covering_arity": null,
+      "fixed_arity_covers_order": false,
+      "ideal_memoryless_ratio_to_rho": 11.20168795705211,
+      "balanced_two_list_ratio_to_rho": 17.875307751726538,
+      "logical_point_bytes": 67865
+    },
+    {
+      "specification": "dickson-torus:depth=9",
+      "depth": 9,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1h91cc12460e5a",
+      "fb_sha256": "91cc12460e5abec9924bf52d3ba5ed39163b094292bf9f5bf92182b253f9ce93",
+      "points_sha256": "f9677e2480474522e44f13a181aea9edb0c0ffd4b95c5e6566c437312071ca15",
+      "legacy_enumeration_sha256": "e3071dc38ef32fdda1def55b050697357cbc61b14be3dd51948ee18876ad29fb",
+      "columns": 266,
+      "signed_points": 532,
+      "points_verified": 532,
+      "verification_failures": 0,
+      "maximum_checked_arity": 256,
+      "maximum_domain_arity": 177,
+      "maximum_domain": "424658706677278069058909886930528223378963921394539226925782592824807233092489398077872867006024418236436226584437167279308800",
+      "first_covering_arity": 59,
+      "fixed_arity_covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 15.723796139794736,
+      "balanced_two_list_ratio_to_rho": 25.09154835430783,
+      "logical_point_bytes": 133708
+    },
+    {
+      "specification": "dickson-torus:depth=10",
+      "depth": 10,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1h15aff3e341f4",
+      "fb_sha256": "15aff3e341f4ce8ae1a8e83fe2160b3798fb49132f2ae261690b5a53b7e8868f",
+      "points_sha256": "94ab04712334caaaf868000d9ff27dd455d9bde6e8b257e4eccf612aebe41464",
+      "legacy_enumeration_sha256": "6d1d73e3245fa5cc707eeaf80dd1da3229439e04ff99361cafeb203b47311187",
+      "columns": 494,
+      "signed_points": 988,
+      "points_verified": 988,
+      "verification_failures": 0,
+      "maximum_checked_arity": 256,
+      "maximum_domain_arity": 256,
+      "maximum_domain": "153175626033943277194334934593338199812652293723225469323956225470720402267957605064258042371201882052943123348823431979321080655509116831331493668876059470502133304921240924053802795057781570703759367590872452422575006416896",
+      "first_covering_arity": 45,
+      "fixed_arity_covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 21.427922189769493,
+      "balanced_two_list_ratio_to_rho": 34.19401657060441,
+      "logical_point_bytes": 248339
+    },
+    {
+      "specification": "dickson-torus:depth=11",
+      "depth": 11,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1h39288302415d",
+      "fb_sha256": "39288302415df82c6291270bb5f43a8c39b04d2aff16d49b9e55d532ca4d796e",
+      "points_sha256": "bdf445f1c967224861b7d24d8d715e21bf4ca8b526010879cffdf83054f6c45e",
+      "legacy_enumeration_sha256": "f144b3fd7fa9a67498c7e8c35d7acbdfd553a52de737eaf94588a331c536ac9a",
+      "columns": 1029,
+      "signed_points": 2058,
+      "points_verified": 2058,
+      "verification_failures": 0,
+      "maximum_checked_arity": 256,
+      "maximum_domain_arity": 256,
+      "maximum_domain": "168141379285138188678413042919617373976294034919155892885315621425000885968955340741870874821550960281206201222189209546439430301477015180336756384863558538300125279500389936733200527447640633331400229355213182076035712965527899877661122026343781265104367594516381198409065048105397726798548518017011739807980163498351588802560",
+      "first_covering_arity": 36,
+      "fixed_arity_covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 30.926037174343,
+      "balanced_two_list_ratio_to_rho": 49.35081517644751,
+      "logical_point_bytes": 517338
+    },
+    {
+      "specification": "dickson-torus:depth=12",
+      "depth": 12,
+      "terminal": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fb_id": "FB1ha2314e64a1f9",
+      "fb_sha256": "a2314e64a1f900c52824c91fda87b1a117fe79facb0b8ad4b15cfd851f7a55a1",
+      "points_sha256": "b03468b8a8f52416ad5577012b55f3e45f4924a40098923b24d50c79b63c1e2e",
+      "legacy_enumeration_sha256": "2e9e07f5bd5153a9027d0d5d8a2373328bd4071ffa314838f563414f6467a1e7",
+      "columns": 2035,
+      "signed_points": 4070,
+      "points_verified": 4070,
+      "verification_failures": 0,
+      "maximum_checked_arity": 256,
+      "maximum_domain_arity": 256,
+      "maximum_domain": "70090330985962987558863727156163737885262256199190684532410298531585009447668214348144296779067436944546365658742652821422800508555850970316168695242102832125962538893004825645938235494198085863615337520179418565604201749432953330723311352661716451778507344698331328718570461042032110878595669847298564934811270176633699322845680991346567701512287929271982736619068829969423616191996192477913648901676806963200",
+      "first_covering_arity": 31,
+      "fixed_arity_covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 43.49093985106284,
+      "balanced_two_list_ratio_to_rho": 69.40149888393822,
+      "logical_point_bytes": 1023127
+    },
+    {
+      "specification": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+      "depth": 18,
+      "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+      "fb_id": "FB1h2f8621cda105",
+      "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+      "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+      "legacy_enumeration_sha256": "c41c8da6e1bcdd6de94f11a7c4b6aaf25877829dbc558a5b85fe5305ad716b9e",
+      "columns": 131458,
+      "signed_points": 262916,
+      "points_verified": 262916,
+      "verification_failures": 0,
+      "maximum_checked_arity": 256,
+      "maximum_domain_arity": 256,
+      "maximum_domain": "27030822464760730467754384220411081344331541087382902153009912131855149716026718270370453491247407776197331978165028608121365336464443270163561825487704318845690398569295843696486637304680042750178755419612396078649108769519825750519424345623089523509122030867406391213056430279397682611715647505811971801099952117055259322855567559391364573871645603077774766888972104865092743207476880446376063042321701137322075404306514763117628581157921244389038915727497790083238492156576547014217104821582084291160656946861686030646173714884286410716389314018498194282820945010102962410902946860152839635578611266393840306230119730060859582116962706250213658377710548798535464292768715071001095469738359229378064445758715675933860087738169611782462529632818957975578892939311352034872333102451185424802137136612294918520108322756762806116830469034029404201355033322295017962617011499643699200",
+      "first_covering_arity": 17,
+      "fixed_arity_covers_order": true,
+      "ideal_memoryless_ratio_to_rho": 349.55063589968177,
+      "balanced_two_list_ratio_to_rho": 557.8021112063598,
+      "logical_point_bytes": 66088215
+    }
+  ],
+  "minimum_covering_inventory_id": "FB1h91cc12460e5a",
+  "minimum_covering_inventory_ratio_to_rho": 15.723796139794736,
+  "global_minimum_ideal_memoryless_ratio_to_rho": 12.346347891941722,
+  "global_minimum_balanced_two_list_ratio_to_rho": 19.70192073056261,
+  "imported_local_solving_degree_maxima": [
+    3,
+    3,
+    4
+  ],
+  "imported_local_split_image_degree": 2,
+  "variable_arity_unsplit_degree_of_regularity": null,
+  "exact_integer_operations": 2127402,
+  "factor_base_builds": 14,
+  "points_verified": 270968,
+  "algorithm_disk_bytes": 0,
+  "logical_materialized_bytes": 66088215,
+  "process_cpu_ns": 21052122000,
+  "total_wall_ns": 21071447101,
+  "peak_rss_bytes": 207888384,
+  "result_json_bytes": 95549,
+  "gates": {
+    "dependencies_hash_checked": true,
+    "exact_binomial_recurrence": true,
+    "all_arity_identity_exact": true,
+    "native_factor_bases_verified": true,
+    "zero_false_positives_and_false_negatives": true,
+    "any_covering_row_at_or_below_rho_boundary": false,
+    "structured_residual_degree_at_most_5": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_cost_below_2_120": false,
+    "projected_storage_below_2_50": false,
+    "promoted": false
+  },
+  "relations_reported": 0,
+  "full_depth_unplanted_relation_attempted": false,
+  "classification": "negative/generic-variable-arity-closure",
+  "dominant_obstruction": "Even allowing every distinct signed arity and granting a perfect free decomposition oracle, the smallest fixed-arity covering base retains enough independent logarithm classes that the ideal memoryless generic-collection boundary is above rho. Changing arity does not create cross-column log transport or a non-generic global solver.",
+  "decision": "Reject variable arity alone as a rho-parity route for independent-log Dickson bases. Continue only with a separately verified non-generic algebraic solver or a representation that reduces the exact logarithm quotient without becoming scalar-orbit rho.",
+  "semantic_evidence_sha256": "37c5392892a7ea29b7187c438322c1c6ef976cf8493f9f707cfc545834492d98"
+}
