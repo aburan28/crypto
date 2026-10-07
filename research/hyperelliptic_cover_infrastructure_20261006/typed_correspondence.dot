@@ -1,0 +1,202 @@
+digraph hyperelliptic_infrastructure {
+  graph [
+    rankdir=LR,
+    bgcolor="white",
+    fontname="Helvetica",
+    fontsize=18,
+    labelloc="t",
+    label="Typed cover, Jacobian, and subgroup obligations"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#ffffff",
+    color="#334155",
+    fontname="Helvetica",
+    fontsize=11,
+    margin="0.10,0.06"
+  ];
+  edge [
+    color="#475569",
+    fontname="Helvetica",
+    fontsize=10,
+    penwidth=1.5
+  ];
+
+  subgraph cluster_geometry {
+    label="PR #1383: curve geometry";
+    color="#86efac";
+    style="rounded";
+
+    K [label="K\nexact field representation"];
+    E [label="E / K\nexact EC1 + ICV1 input"];
+    H [label="H / K\nhyperelliptic source\nprime: g=2, deg f=6\nbinary: g=3, deg f=7"];
+
+    K -> E [
+      label="field of definition\nsupported",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    K -> H [
+      label="same field (degree 1)\nsupported",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    H -> E [
+      label="curve morphism π\nexplicit + verified\nsupported",
+      color="#15803d",
+      fontcolor="#15803d",
+      penwidth=2.4
+    ];
+  }
+
+  subgraph cluster_jacobian {
+    label="Required Jacobian layer";
+    color="#cbd5e1";
+    style="rounded";
+
+    JE [label="Jac(E) ≅ E\nwith exact subgroup"];
+    JHb [label="Jac(H_binary)\nchecked one-infinity\nMumford classes"];
+    G29 [label="G29 = <(0x26,0x5)>\nEC1N7Ce0...\norder 29"];
+    imageG29 [label="π^*(G29) ⊂ Jac(H_binary)(K)\nnonidentity, order 29"];
+    otherG [label="Other catalog subgroups"];
+    otherImage [label="Other pullback images"];
+
+    E -> JE [
+      label="Pic⁰ identification\nsupported (standard)",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    H -> JHb [
+      label="binary g=3 branch\nchecked arithmetic",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    JE -> JHb [
+      label="π^* pullback\nrational point classes\nsupported-with-domain",
+      color="#15803d",
+      fontcolor="#15803d",
+      penwidth=2.4
+    ];
+    JHb -> JE [
+      label="π_* pushforward\nrational point divisors +\ntyped pullback witnesses\nsupported-with-domain",
+      color="#15803d",
+      fontcolor="#15803d",
+      penwidth=2.4
+    ];
+    JE -> JE [
+      label="π_* ∘ π^* = [3]\nsupported on declared\nbinary point-class domain",
+      color="#15803d",
+      fontcolor="#15803d",
+      penwidth=2.2
+    ];
+    G29 -> imageG29 [
+      label="π^*; kernel trivial\n3^(-1)=10 mod 29\nsupported",
+      color="#15803d",
+      fontcolor="#15803d",
+      penwidth=2.2
+    ];
+    G29 -> JE [label="inclusion"];
+    imageG29 -> JHb [label="inclusion"];
+    otherG -> otherImage [
+      label="kernel/image/recovery\nunknown",
+      color="#64748b",
+      fontcolor="#64748b",
+      style=dashed
+    ];
+    otherG -> JE [label="inclusion"];
+    otherImage -> JHb [label="candidate inclusion", style=dashed];
+  }
+
+  arbitrary_norm [
+    label="Arbitrary Jac(H_binary)\npushforward / norm\nUNSUPPORTED",
+    shape=octagon,
+    fillcolor="#fee2e2",
+    color="#b91c1c",
+    fontcolor="#991b1b"
+  ];
+  JHb -> arbitrary_norm [
+    label="typed unsupported result",
+    color="#b91c1c",
+    fontcolor="#991b1b"
+  ];
+
+  prime_gap [
+    label="Prime sextic arithmetic\nin one-infinity model\nREFUTED",
+    shape=octagon,
+    fillcolor="#fee2e2",
+    color="#b91c1c",
+    fontcolor="#991b1b"
+  ];
+  H -> prime_gap [
+    label="deg f = 6 has two\nrational infinities",
+    color="#b91c1c",
+    fontcolor="#991b1b"
+  ];
+
+  subgraph cluster_quartic {
+    label="PRs #1389 / #290: separate diagnostic";
+    color="#fdba74";
+    style="rounded,dashed";
+
+    C [
+      label="C: v⁴ = x³ + ax + b\nsmooth plane quartic, g=3\nNON-HYPERELLIPTIC",
+      fillcolor="#fff7ed",
+      color="#c2410c"
+    ];
+    lines [label="Certified line sections\non C"];
+    projected [label="Elliptic norm-image\nrelation matrix"];
+    fullJ [
+      label="Full Jac(C) factor-base\nrelations\nREFUTED",
+      shape=octagon,
+      fillcolor="#fee2e2",
+      color="#b91c1c",
+      fontcolor="#991b1b"
+    ];
+
+    C -> E [
+      label="(x,v) ↦ (x,v²)\nbounded map supported",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    C -> lines [
+      label="section certificates\nsupported",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    lines -> projected [
+      label="norm projection\nsupported",
+      color="#15803d",
+      fontcolor="#15803d"
+    ];
+    lines -> fullJ [
+      label="projection loses\nPrym information",
+      color="#b91c1c",
+      fontcolor="#991b1b"
+    ];
+  }
+
+  legend_supported [
+    label="supported",
+    shape=plaintext,
+    fontcolor="#15803d"
+  ];
+  legend_unknown [
+    label="unknown",
+    shape=plaintext,
+    fontcolor="#64748b"
+  ];
+  legend_refuted [
+    label="refuted",
+    shape=plaintext,
+    fontcolor="#b91c1c"
+  ];
+  legend_na [
+    label="not_applicable:\nnontrivial extension for\nsame-field constructors",
+    shape=plaintext,
+    fontcolor="#1d4ed8"
+  ];
+  legend_supported -> legend_unknown -> legend_refuted -> legend_na [
+    style=invis
+  ];
+}

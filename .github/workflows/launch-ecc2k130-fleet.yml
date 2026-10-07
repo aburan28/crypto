@@ -127,4 +127,4 @@ jobs:
           account=$(aws sts get-caller-identity --query Account --output text)
           echo "bucket: s3://ecc2k130-$account"
           echo "target: ${GPUS} GPUs (~$((GPUS * 14)) B it/s at 14 B/s/GPU), ${ON_DEMAND} on-demand base"
-          echo "monitor: ECC_BUCKET=ecc2k130-$account python3 status.py --watch 60"
+          echo "monitor: ECC_BUCKET=ecc2k130-$account cargo run --release --bin ecc2k-status -- --watch 60"
