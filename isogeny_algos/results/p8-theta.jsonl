@@ -1,0 +1,14 @@
+{"group":"theta","algo":"kani_chain_split","a":"8","b":"4","p_bits":"24","median_ns":57146,"min_ns":56801,"reps":2000,"ns_per_step":7143.25,"verified":true,"note":"C x E -> E0 x X, (2^a, 2^a) chain incl. pushing the kernel multiples; j(E0), j(X) by Velu"}
+{"group":"theta","algo":"kani_chain_twisted","a":"8","b":"4","p_bits":"24","median_ns":68905,"min_ns":54362,"reps":2000,"verified":true,"note":"isotropic kernel not from a diamond: no split"}
+{"group":"theta","algo":"kani_chain_split","a":"10","b":"6","p_bits":"32","median_ns":88295,"min_ns":87462,"reps":2000,"ns_per_step":8829.5,"verified":true,"note":"C x E -> E0 x X, (2^a, 2^a) chain incl. pushing the kernel multiples; j(E0), j(X) by Velu"}
+{"group":"theta","algo":"kani_chain_twisted","a":"10","b":"6","p_bits":"32","median_ns":87226,"min_ns":85573,"reps":2000,"verified":true,"note":"isotropic kernel not from a diamond: no split"}
+{"group":"theta","algo":"kani_chain_split","a":"12","b":"7","p_bits":"39","median_ns":126569,"min_ns":125270,"reps":2000,"ns_per_step":10547.416666666666,"verified":true,"note":"C x E -> E0 x X, (2^a, 2^a) chain incl. pushing the kernel multiples; j(E0), j(X) by Velu"}
+{"group":"theta","algo":"kani_chain_twisted","a":"12","b":"7","p_bits":"39","median_ns":125339,"min_ns":123083,"reps":2000,"verified":true,"note":"isotropic kernel not from a diamond: no split"}
+{"group":"theta","algo":"kani_chain_split","a":"16","b":"10","p_bits":"50","median_ns":239948,"min_ns":231927,"reps":1227,"ns_per_step":14996.75,"verified":true,"note":"C x E -> E0 x X, (2^a, 2^a) chain incl. pushing the kernel multiples; j(E0), j(X) by Velu"}
+{"group":"theta","algo":"kani_chain_twisted","a":"16","b":"10","p_bits":"50","median_ns":238859,"min_ns":228804,"reps":1169,"verified":true,"note":"isotropic kernel not from a diamond: no split"}
+{"group":"theta","algo":"theta_glue_codomain","p_bits":"50","median_ns":650,"min_ns":646,"reps":20000,"verified":true,"note":"from 8-torsion above the kernel; one dual coordinate vanishes"}
+{"group":"theta","algo":"theta_glue_eval","p_bits":"50","median_ns":397,"min_ns":394,"reps":20000,"verified":true,"note":"image of x from theta(x) and theta(x + T')"}
+{"group":"theta","algo":"theta_codomain","p_bits":"50","median_ns":650,"min_ns":644,"reps":20000,"verified":true,"note":"Jacobian -> Jacobian; D from 8-torsion (no square root); D^2 = H(S(null)) checked"}
+{"group":"theta","algo":"theta_eval","p_bits":"50","median_ns":173,"min_ns":170,"reps":20000,"verified":true,"note":"S, H, scale, H on the Kummer surface"}
+{"group":"theta","algo":"richelot_codomain","p_bits":"50","median_ns":1734,"min_ns":1703,"reps":20000,"verified":true,"note":"same field; sextic Delta H1 H2 H3"}
+{"group":"theta","algo":"richelot_point_image","p_bits":"50","median_ns":12899,"min_ns":12405,"reps":20000,"verified":true,"note":"one point of C -> its two image points (not a Jacobian element; Cantor reduction not included)"}

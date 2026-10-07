@@ -19,3 +19,4 @@ pub mod poly;
 pub mod quat;
 pub mod series;
 pub mod testdata;
+pub mod theta;

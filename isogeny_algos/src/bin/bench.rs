@@ -2228,6 +2228,7 @@ fn main() {
             "radical" => bench_radical(&mut o),
             "relation" => bench_relation(&mut o),
             "models" => bench_models(&mut o),
+            "theta" => bench_theta(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
@@ -2243,4 +2244,81 @@ fn main() {
             x => eprintln!("unknown group {x}"),
         }
     }
+}
+
+/// Theta-model (2,2)-isogenies and Kani chains vs Richelot (Mumford/curve form).
+fn bench_theta(o: &mut Out) {
+    use isogeny_algos::genus2::richelot;
+    use isogeny_algos::theta::*;
+    let budget = if o.quick { 100 } else { 300 };
+    let cases: &[(u32, u32)] = if o.quick { &[(8, 4), (16, 10)] } else { &[(8, 4), (10, 6), (12, 7), (16, 10)] };
+    for &(a, b) in cases {
+        let inst = kani_instance(a, b, 21_000 + a as u64);
+        let f = &inst.f;
+        let res = chain(f, &inst.c, &inst.e, inst.k, a, &[]);
+        let want = (jinv(f, &inst.e0), jinv(f, &inst.x));
+        let ok = res.as_ref().and_then(|r| r.split).map_or(false, |s| s == want || s == (want.1, want.0));
+        let tm = time_it(budget, 2000, || chain(f, &inst.c, &inst.e, inst.k, a, &[]));
+        let pbits = 64 - inst.p.leading_zeros();
+        o.rec("theta", "kani_chain_split", &[("a", a.to_string()), ("b", b.to_string()), ("p_bits", pbits.to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("ns_per_step", tm.0 / a as f64)], ok, "C x E -> E0 x X, (2^a, 2^a) chain incl. pushing the kernel multiples; j(E0), j(X) by Velu");
+        let res2 = chain(f, &inst.c, &inst.e, inst.k_twisted, a, &[]);
+        let ok2 = res2.as_ref().map_or(false, |r| r.split.is_none());
+        let tm = time_it(budget, 2000, || chain(f, &inst.c, &inst.e, inst.k_twisted, a, &[]));
+        o.rec("theta", "kani_chain_twisted", &[("a", a.to_string()), ("b", b.to_string()), ("p_bits", pbits.to_string())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], ok2, "isotropic kernel not from a diamond: no split");
+    }
+    // single steps at the a = 16 instance; Richelot on the same field F_{p^2}
+    let inst = kani_instance(16, 10, 21_016);
+    let f = &inst.f;
+    let (e1, e2, n) = (inst.c, inst.e, 16u32);
+    let dbl = |p: &(Pt<(u64, u64)>, Pt<(u64, u64)>), m: u32| {
+        let mut q = *p;
+        for _ in 0..m {
+            q = (padd(f, &e1, &q.0, &q.0), padd(f, &e2, &q.1, &q.1));
+        }
+        q
+    };
+    let t4 = [dbl(&inst.k[0], n), dbl(&inst.k[1], n)];
+    let t8 = [dbl(&inst.k[0], n - 1), dbl(&inst.k[1], n - 1)];
+    let th = ProductTheta { t1: theta1_structure(f, &e1, &t4[0].0, &t4[1].0).unwrap(), t2: theta1_structure(f, &e2, &t4[0].1, &t4[1].1).unwrap() };
+    let null = th.null(f);
+    let (p8a, p8b) = (th.point(f, &t8[0].0, &t8[0].1), th.point(f, &t8[1].0, &t8[1].1));
+    let glue_iso = theta_isogeny(f, &null, &p8a, &p8b).unwrap();
+    let pb = format!("{}", 64 - inst.p.leading_zeros());
+    let tm = time_it(budget, 20_000, || theta_isogeny(f, &null, &p8a, &p8b));
+    o.rec("theta", "theta_glue_codomain", &[("p_bits", pb.clone())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], glue_iso.zero.is_some(), "from 8-torsion above the kernel; one dual coordinate vanishes");
+    let x16 = dbl(&inst.k[0], n - 2);
+    let xt = (padd(f, &e1, &x16.0, &t4[0].0), padd(f, &e2, &x16.1, &t4[0].1));
+    let (tx, txt) = (th.point(f, &x16.0, &x16.1), th.point(f, &xt.0, &xt.1));
+    let tm = time_it(budget, 20_000, || glue_iso.eval_glue(f, &tx, &txt, 2));
+    o.rec("theta", "theta_glue_eval", &[("p_bits", pb.clone())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "image of x from theta(x) and theta(x + T')");
+    let g1 = glue_iso.eval_glue(f, &tx, &txt, 2).unwrap();
+    let y16 = dbl(&inst.k[1], n - 2);
+    let yt = (padd(f, &e1, &y16.0, &t4[0].0), padd(f, &e2, &y16.1, &t4[0].1));
+    let g2 = glue_iso.eval_glue(f, &th.point(f, &y16.0, &y16.1), &th.point(f, &yt.0, &yt.1), 2).unwrap();
+    let cod = glue_iso.codomain;
+    let step = theta_isogeny(f, &cod, &g1, &g2);
+    let tm = time_it(budget, 20_000, || theta_isogeny(f, &cod, &g1, &g2));
+    o.rec("theta", "theta_codomain", &[("p_bits", pb.clone())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], step.as_ref().map_or(false, |s| s.zero.is_none()), "Jacobian -> Jacobian; D from 8-torsion (no square root); D^2 = H(S(null)) checked");
+    let step = step.unwrap();
+    let tm = time_it(budget, 20_000, || step.eval(f, &g1));
+    o.rec("theta", "theta_eval", &[("p_bits", pb.clone())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "S, H, scale, H on the Kummer surface");
+    // Richelot on random quadratic splittings over the same F_{p^2}; images over F_{p^4}
+    let mut rng = Rng::new(21_999);
+    let r: Vec<(u64, u64)> = (0..6).map(|_| f.random(&mut rng)).collect();
+    let g = [poly::from_roots(f, &[r[0], r[1]]), poly::from_roots(f, &[r[2], r[3]]), poly::from_roots(f, &[r[4], r[5]])];
+    let tm = time_it(budget, 20_000, || richelot(f, &g).codomain(f));
+    o.rec("theta", "richelot_codomain", &[("p_bits", pb.clone())], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "same field; sextic Delta H1 H2 H3");
+    let rl = richelot(f, &g);
+    let fsex = poly::from_roots(f, &r);
+    // a point whose two image points are F_{p^2}-rational (the quadratic in x' splits)
+    let (x0, y0) = loop {
+        let x = f.random(&mut rng);
+        if let Some(y) = f.sqrt(poly::eval(f, &fsex, x)) {
+            if !f.is_zero(y) && rl.image_point(f, &g, f, |c| c, x, y, &mut rng.clone()).len() == 2 {
+                break (x, y);
+            }
+        }
+    };
+    let tm = time_it(budget, 20_000, || rl.image_point(f, &g, f, |c| c, x0, y0, &mut rng.clone()));
+    o.rec("theta", "richelot_point_image", &[("p_bits", pb)], &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64)], true, "one point of C -> its two image points (not a Jacobian element; Cantor reduction not included)");
 }
