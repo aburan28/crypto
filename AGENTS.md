@@ -107,6 +107,21 @@ formulas or measurements remain open obligations. Bounded failure is not
 universal nonexistence. This assessment rule adds no autonomous key-recovery
 campaign, production-target exploitation, or scientific state transition.
 
+## Curve-structure and endomorphism rules
+
+For trace and anomalous-order patterns, CM conductor gaps, torsion over
+extensions, twists, isogenous representatives, GLV/GLS formulas, covers, and
+factored or mixed-degree isogeny loops, follow
+[docs/endomorphism-rules.md](docs/endomorphism-rules.md). Record the exact
+ICV1/EC1 identity, working field, subgroup, bounded signal calculation,
+explicit map when proposed, and its complete evaluation and transfer costs.
+Keep existence, executable construction, subgroup action, measured scalar
+arithmetic, and unknown-scalar recovery as separate claims. A small torsion
+factor, class number, embedding degree, or composite map degree is a lead with
+specific hypotheses, not a universal verdict. Preserve negative searches
+within their exact bounds and run authorized feasible experiments under the
+existing evidence, review, and benchmark rules.
+
 ## Research searches must leave visual reports
 
 For every substantive search for new isogenies, curves, scalar rules,
