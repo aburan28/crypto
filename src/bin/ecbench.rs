@@ -43,6 +43,7 @@ use crypto_lib::cryptanalysis::ecbench::{
 #[derive(Parser)]
 #[command(
     name = "ecbench",
+    version,
     about = "One harness for every ECDLP method: rho, BSGS, kangaroo, index calculus"
 )]
 struct Cli {
@@ -580,10 +581,18 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                     c.build.binary_sha256.as_deref().unwrap_or("?")
                 );
                 println!(
-                    "commit      {} (dirty: {:?})",
+                    "commit      {} (dirty: {:?}, source: {})",
                     c.build.git_commit.as_deref().unwrap_or("?"),
-                    c.build.git_dirty
+                    c.build.git_dirty,
+                    c.build.git_commit_source.as_deref().unwrap_or("?")
                 );
+                if c.build.runtime_git_commit != c.build.git_commit {
+                    println!(
+                        "runtime git {} (dirty: {:?}; diagnostic only)",
+                        c.build.runtime_git_commit.as_deref().unwrap_or("none"),
+                        c.build.runtime_git_dirty
+                    );
+                }
                 if c.build.debug_assertions {
                     println!(
                         "note        debug build: operation counts are valid, wall time is not"

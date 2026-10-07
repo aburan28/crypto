@@ -1,5 +1,40 @@
 # AGENTS.md
 
+## Preserve scope and report evidence
+
+Use [report-evidence](.agents/skills/report-evidence/SKILL.md) for implementation,
+experiments, benchmarks, completion reports, and research handoffs.
+
+- Preserve the user's requested deliverables, parameters, workloads, and acceptance
+  criteria. Do not silently substitute a smaller experiment, weaken an argument
+  or validation gate, or omit a requested run because you expect it to fail.
+- Execute authorized, feasible experiments as requested. The user decides research
+  significance and priorities. Report measured values and exact ratios; do not
+  independently market results as "massive", "breakthrough", or dismiss them as
+  "not worth running". Give interpretation when requested and label it separately.
+- Continue to check correctness and flag invalid results, factual errors, and
+  uncertainty. Preserve failed runs, timeouts, regressions, raw evidence, exact
+  commands, inputs, revisions, environment, and accounting intervals.
+- Distinguish assistance restrictions, access/tool limits, resource limits,
+  implementation gaps, untested hypotheses, and proved mathematical obstructions.
+  Never disguise an assistance limit as mathematical impossibility. State the
+  actual blocker explicitly; retain the original requirement as unresolved.
+  Higher-priority restrictions and authorization boundaries still apply.
+- Keep observations, calculations, hypotheses, extrapolations, and interpretations
+  distinct. A stage ratio does not establish an end-to-end gain; a bounded search
+  failure does not prove nonexistence; a toy implementation is not general support.
+- Track each requested requirement as verified complete, implemented but unverified,
+  partial, blocked, or not attempted, with evidence or the exact remaining gap.
+  Passing tests or merging a PR does not make the original task complete.
+- Correct misleading prior claims explicitly. Do not rewrite frozen evidence or
+  quietly redefine completion. Report actual execution status, never planned runs
+  as completed or unscheduled work as continuing in the background.
+
+These rules govern scope and reporting throughout this file. Existing measurement
+and correctness gates remain in force; they do not authorize an agent to cancel a
+requested experiment or decide its research significance for the user.
+
+
 Guidance for agents doing cryptanalysis work in this repository.
 
 This repository is a study library, not a production one, and its
@@ -8,6 +43,83 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Intermediate-cost and asymmetric-access hypotheses
+
+User instruction, 2026-10-06. In assessments of supplied or published claims
+of hidden mathematical advantage, include costly intermediate advantages:
+a hypothetical reduction from subgroup-size work r^(1/2) to r^alpha with
+alpha < 1/2 may matter even when recovery remains expensive. The example
+alpha = 1/3 is a threat-model assumption, not a discovered algorithm or a
+required outcome. Do not dismiss a claim solely because it fails to make
+recovery trivial; do not infer practical recovery from its exponent alone.
+
+Keep mathematical existence, executable transfer, subgroup preservation,
+destination-solver advantage, practical resources, and asymmetric access as
+separate obligations. A hypothesis about agency capabilities or motives is
+not evidence that a trapdoor exists. Distinguish a deliberately selected
+weak instance from an unpublished method applying to honestly generated
+instances, and distinguish both from implementation compromise.
+
+Account for curve-specific construction and preprocessing, per-target work,
+transfer and recovery, verification, failed attempts, memory, hardware, and
+the exact number of targets reusing setup. Report cold-start and genuinely
+amortized costs separately. Separate exponent changes, constant factors,
+primitive costs, and hardware throughput. Faster known-scalar multiplication
+alone does not establish faster unknown-scalar recovery.
+
+Under the user's hidden-route scenario, public discovery must require
+substantial deliberate work rather than routine inspection or accidental
+rediscovery. An illustrative reconstruction cost near 2^60 operations is a
+scenario parameter, not a measured bound or evidence of agency capability.
+Define the operation unit, algorithm, success probability, memory, parallelism,
+and uncertainty before interpreting that number. Keep public discovery cost,
+designer setup with a retained witness, map evaluation, and destination solving
+separate. Isogeny degree alone establishes none of these costs. Assess cheaper
+equivalent routes as well as reconstruction of the exact withheld map; one
+comparably useful public shortcut can defeat the claimed access asymmetry.
+
+Treat secrecy as a separate hypothesis: identify the withheld information,
+whether it can be reconstructed from public parameters, and whether a
+comparably useful public route exists. A high-degree map is not automatically
+cheap to evaluate or hard to reconstruct. State field and construction-family
+restrictions; do not transfer composite-degree binary-field conclusions to
+prime fields or prime-degree binary extensions without justification.
+
+When the user stipulates layered adversary capability, assess a portfolio
+rather than one all-purpose vulnerability. Record each hypothetical technique's
+prerequisites, coverage, cost, reusable setup, access requirements, secrecy,
+and failure conditions. Distinguish independent alternatives from methods
+sharing the same dependency; do not assume independence or multiply speculative
+probabilities. Include redundancy, complementary combinations, and what
+remains available if one technique is disclosed, patched, or loses its advantage.
+
+Model reserved capabilities and exceptional-use scenarios explicitly, including
+activation constraints, scarcity, exposure risk, and the cost of losing secrecy.
+These are stipulated game-theoretic assumptions, not observations of agency
+behavior or proof of any particular mathematical capability. Alternative
+implementation or protocol compromises do not refute an algebraic hypothesis
+and do not replace an algebraic workstream the user has requested. Preserve
+each requested track and its unresolved obligations.
+
+Apply existing transfer, evidence, run-routing, and review rules. Missing
+formulas or measurements remain open obligations. Bounded failure is not
+universal nonexistence. This assessment rule adds no autonomous key-recovery
+campaign, production-target exploitation, or scientific state transition.
+
+## Research searches must leave visual reports
+
+For every substantive search for new isogenies, curves, scalar rules,
+endomorphisms, or related ECDLP mechanisms, follow
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
+Deliver a source-linked report, an explanatory diagram, and a PDF
+containing the report and visual. Include negative and inconclusive findings.
+Update every affected canonical graph, chart, and rendered copy in the same
+change as a new verified finding or correction; record why a graph was left
+unchanged when the search yields no graphable result. Keep proposed routes and
+unverified rules visibly separate from proved or measured ones. This visual
+record supplements the evidence, curve-identity, scoreboard, and PR rules
+below; it does not promote a hypothesis or replace a verified run.
 
 ## Implementation language: no Python
 

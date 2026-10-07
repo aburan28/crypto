@@ -249,6 +249,34 @@ fn a_short_p224_walk_reverifies_from_its_records() {
     let mut tampered = parsed.clone();
     tampered["routes"][0]["id"] = serde_json::Value::String("IW1E3h1h000000000000".into());
     assert!(walk::verify_routes(&tampered, &w.start, 1).is_err());
+    // Node j-invariants are recomputed, and all externally addressable
+    // identities must be unique rather than silently replacing a map entry.
+    let mut tampered = parsed.clone();
+    tampered["curve_nodes"][1]["j_invariant"] = serde_json::Value::String("0".into());
+    assert!(walk::verify_routes(&tampered, &w.start, 1)
+        .unwrap_err()
+        .contains("j_invariant differs"));
+    let mut tampered = parsed.clone();
+    let duplicate = tampered["curve_nodes"][1].clone();
+    tampered["curve_nodes"]
+        .as_array_mut()
+        .unwrap()
+        .push(duplicate);
+    assert!(walk::verify_routes(&tampered, &w.start, 1)
+        .unwrap_err()
+        .contains("duplicate ICV1 slug"));
+    let mut tampered = parsed.clone();
+    let duplicate = tampered["edges"][0].clone();
+    tampered["edges"].as_array_mut().unwrap().push(duplicate);
+    assert!(walk::verify_routes(&tampered, &w.start, 1)
+        .unwrap_err()
+        .contains("duplicate edge id"));
+    let mut tampered = parsed.clone();
+    let duplicate = tampered["routes"][0].clone();
+    tampered["routes"].as_array_mut().unwrap().push(duplicate);
+    assert!(walk::verify_routes(&tampered, &w.start, 1)
+        .unwrap_err()
+        .contains("duplicate route id"));
     // P-224 sits on the surface of its depth-1 3-volcano: four rational
     // 3-isogenies, one horizontal and three descending to the floor.
     assert_eq!(w.class.depth(3), 1);
