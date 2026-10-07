@@ -156,3 +156,21 @@ the deterministic result, isolation receipt, hashes, fitted or censored
 exponents, and gate decision.  Update the progress data, scoreboard boundary
 facts, comparison dashboard, and generated panel index.  Publish protocol,
 implementation, tests, evidence, and result in a PR stacked on Round 295.
+
+## Amendment 1: remove the norm-form scaling orbit
+
+Frozen before implementation or experiment execution on 2026-10-07.  The
+275-by-275 presentation above is projective: `(A,B,c)` and
+`(lambda A,lambda B,lambda^2 c)` encode the same signed divisor.  Saturating
+by `c` removes the zero solution but leaves this one-dimensional orbit, so it
+is a poor zero-dimensional degree instrument.
+
+The leading coefficient of the norm identity is `a_55^2=c`, because the
+`B` term has degree at most 109 and `(X-x_R)g` is monic of degree 110.
+Consequently `c != 0` if and only if `a_55 != 0`, and every admissible orbit
+has the unique gauge representative `a_55=1`, `c=1`.  The experiment will
+use that exact affine chart, omit the now-identical leading coefficient
+equation, and measure **273 variables and 274 quadratic coefficient
+equations**: 164 from `F=gq` and 110 remaining norm coefficients.  No
+solution or branch is discarded by this normalization.  The artifact will
+report both the original projective shape and the measured normalized shape.
