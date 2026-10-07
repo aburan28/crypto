@@ -26,6 +26,9 @@ use crate::cryptanalysis::ecbench::generic::{
     bsgs_interleaved, bsgs_negation, bsgs_textbook, kangaroo, GenericOutcome,
 };
 use crate::cryptanalysis::ecbench::workload::{CurveFacts, Instance, WideInstance};
+use crate::cryptanalysis::ecbench_large_prime::{
+    self as large_prime, SolveConfig as LargePrimeConfig,
+};
 use crate::cryptanalysis::ic_boundary::{
     rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
     Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost, PointClasses,
@@ -66,6 +69,7 @@ pub struct ParamDecl {
 pub enum Applies {
     Any,
     KoblitzOnly,
+    BinaryOnly,
 }
 
 /// One registered method.
@@ -139,6 +143,30 @@ pub fn registry() -> &'static [MethodDecl] {
                     name: "dp_bits",
                     default: Some("4"),
                     help: "distinguished-point bits; the reference measured 4",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
+        },
+        MethodDecl {
+            id: "rho.signed_frobenius_strong_escape",
+            family: "rho",
+            summary: "the strong reference with fruitless cycles escaped by doubling instead of abandoned: identical walks until a cycle, so long distinguished-point walks (the large dp_bits a table at m = 83 needs) survive; A = 2n, Koblitz curves only",
+            entry: "koblitz_strong_rho::StrongRho::solve (escape_fruitless)",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width)",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the table holds about steps / 2^dp_bits entries",
                 },
                 ParamDecl {
                     name: "step_cap_factor",
@@ -248,6 +276,45 @@ pub fn registry() -> &'static [MethodDecl] {
             ],
         },
         MethodDecl {
+            id: "ic.large_prime",
+            family: "ic",
+            summary: "bounded exact m-summand binary index calculus with zero, single, or double large primes and exact modular elimination",
+            entry: "ecbench_large_prime::solve",
+            applies: Applies::BinaryOnly,
+            params: &[
+                ParamDecl {
+                    name: "small_dimension",
+                    default: None,
+                    help: "dimension of the nested small x-coordinate subspace",
+                },
+                ParamDecl {
+                    name: "envelope_dimension",
+                    default: None,
+                    help: "dimension of the full x-coordinate factor-base envelope",
+                },
+                ParamDecl {
+                    name: "summands",
+                    default: None,
+                    help: "exact summand count, or n-1 (never silently downscaled)",
+                },
+                ParamDecl {
+                    name: "large_primes",
+                    default: None,
+                    help: "maximum accepted large-prime columns: 0, 1, or 2",
+                },
+                ParamDecl {
+                    name: "max_trials",
+                    default: None,
+                    help: "relation trials before an exhausted result",
+                },
+                ParamDecl {
+                    name: "max_states",
+                    default: None,
+                    help: "hard cap on exact meet-in-the-middle combination states",
+                },
+            ],
+        },
+        MethodDecl {
             id: "ic.shared_rank",
             family: "ic",
             summary: "target-blind full-rank Koblitz relation log followed by point-only signed-Frobenius m3 target descent; native work remains visible and unpriced",
@@ -301,7 +368,9 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
     match id {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
-        "rho.signed_frobenius" | "rho.signed_frobenius_strong" => {
+        "rho.signed_frobenius"
+        | "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_escape" => {
             Some((PI / (2.0 * a_available.max(1) as f64)).sqrt())
         }
         "bsgs.textbook" => Some(1.5),
@@ -789,10 +858,12 @@ fn solve_wide(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
-        "rho.signed_frobenius_strong" => solve_strong_wide(m, wi, tx, ty, seed),
+        "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
+            solve_strong_wide(m, wi, tx, ty, seed)
+        }
         "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
         other => Err(format!(
-            "`{other}` has no wide-field implementation; on a curve past one word (n = {}) only rho.signed_frobenius_strong and claw.pair_table run",
+            "`{other}` has no wide-field implementation; on a curve past one word (n = {}) only the strong rho (with or without the escape) and claw.pair_table run",
             wi.kc.n
         )),
     }
@@ -815,6 +886,12 @@ pub fn solve(
     if d.applies == Applies::KoblitzOnly && curve.family != "koblitz" {
         return Err(format!(
             "`{}` runs on Koblitz curves only; {} is {}",
+            m.id, curve.slug, curve.family
+        ));
+    }
+    if d.applies == Applies::BinaryOnly && !matches!(inst, Instance::Binary(_)) {
+        return Err(format!(
+            "`{}` runs on binary curves only; {} is {}",
             m.id, curve.slug, curve.family
         ));
     }
@@ -852,6 +929,9 @@ fn solve_inner(
         return Err("a wide instance goes through solve_wide".into());
     }
     match (inst, d.family) {
+        (Instance::Binary(i), _) if m.id == "ic.large_prime" => {
+            solve_large_prime(m, i, curve, FastPoint::affine(tx, ty), seed)
+        }
         (Instance::Binary(i), _) if m.id == "ic.shared_rank" => {
             solve_shared_rank(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
@@ -859,7 +939,10 @@ fn solve_inner(
         (Instance::Binary(i), "ic") => {
             solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
-        (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
+        (Instance::Binary(i), _)
+            if m.id == "rho.signed_frobenius_strong"
+                || m.id == "rho.signed_frobenius_strong_escape" =>
+        {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
         }
         (Instance::Binary(i), "claw") => solve_claw(m, i, FastPoint::affine(tx, ty), seed),
@@ -891,6 +974,160 @@ fn solve_inner(
         }
         (Instance::Wide(_), _) => unreachable!("returned above"),
     }
+}
+
+fn solve_large_prime(
+    m: &ResolvedMethod,
+    inst: &BinaryInstance,
+    curve: &CurveFacts,
+    target: FastPoint,
+    seed: u64,
+) -> Result<SolveReport, String> {
+    let summands = match m.params["summands"].as_str() {
+        "n-1" => inst.n.checked_sub(1).ok_or("field degree has no n-1")?,
+        value => value
+            .parse::<u32>()
+            .map_err(|_| format!("parameter `summands` is not an integer or n-1: `{value}`"))?,
+    };
+    let config = LargePrimeConfig {
+        small_dimension: u32::try_from(param_u64(m, "small_dimension")?)
+            .map_err(|_| "small_dimension does not fit u32")?,
+        envelope_dimension: u32::try_from(param_u64(m, "envelope_dimension")?)
+            .map_err(|_| "envelope_dimension does not fit u32")?,
+        summands,
+        max_large_primes: u8::try_from(param_u64(m, "large_primes")?)
+            .map_err(|_| "large_primes does not fit u8")?,
+        max_trials: param_u64(m, "max_trials")?,
+        max_states: param_u64(m, "max_states")?,
+        seed,
+    };
+    // The method returns an algebraic candidate; ecbench's runner verifies it.
+    let report = large_prime::solve_candidate(inst, target, config)?;
+    let mut phases = Vec::new();
+    for name in ["factor_base", "oracle_setup", "relations", "verification"] {
+        let mut phase = ops_phase(
+            name,
+            report
+                .phase_group_ops
+                .get(name)
+                .copied()
+                .unwrap_or_default(),
+        );
+        match name {
+            "oracle_setup" => {
+                phase.native.insert(
+                    "combination_states_uncharged".into(),
+                    report.counters.combination_states_uncharged,
+                );
+            }
+            "relations" => {
+                phase.native.insert(
+                    "mitm_lookups_uncharged".into(),
+                    report.counters.mitm_lookups_uncharged,
+                );
+                phase.native.insert(
+                    "lp_merge_ops_uncharged".into(),
+                    report.counters.lp_merge_ops_uncharged,
+                );
+                phase.native.insert(
+                    "row_ops_uncharged".into(),
+                    report.counters.row_ops_uncharged,
+                );
+            }
+            _ => {}
+        }
+        phases.push(phase);
+    }
+    let total_gae = phases.iter().map(|p| p.gae).sum();
+    let mut counters = BTreeMap::new();
+    for (name, value) in [
+        ("trials", report.counters.trials),
+        ("decompositions", report.counters.decompositions),
+        ("accepted_relations", report.counters.accepted_relations),
+        (
+            "eliminated_full_relations",
+            report.counters.eliminated_full_relations,
+        ),
+        ("matrix_rank", report.counters.matrix_rank),
+        ("large_prime_pivots", report.counters.lp_pivots),
+        (
+            "combination_states_uncharged",
+            report.counters.combination_states_uncharged,
+        ),
+        (
+            "mitm_lookups_uncharged",
+            report.counters.mitm_lookups_uncharged,
+        ),
+        (
+            "lp_merge_ops_uncharged",
+            report.counters.lp_merge_ops_uncharged,
+        ),
+        ("row_ops_uncharged", report.counters.row_ops_uncharged),
+    ] {
+        counters.insert(name.into(), value);
+    }
+    for (i, value) in report.counters.relation_histogram.iter().enumerate() {
+        counters.insert(format!("relations_with_{}_large_primes", i.min(3)), *value);
+    }
+    let mut point_bytes = Vec::with_capacity(report.factor_base.column_keys.len() * 8);
+    for key in &report.factor_base.column_keys {
+        point_bytes.extend_from_slice(&key.to_be_bytes());
+    }
+    let points_sha256 = sha256_hex(&point_bytes);
+    let (fb_id, fb_sha256) = short_id(
+        "FB1",
+        &json!({
+            "schema": "ecbench.factor_base/v1",
+            "curve": curve.slug,
+            "family": "binary-nested-large-prime",
+            "params": m.params,
+            "columns": report.factor_base.columns,
+            "signed_points": report.factor_base.raw_points,
+            "points_sha256": points_sha256,
+        }),
+    )?;
+    let factor_base = FactorBaseFacts {
+        fb_id,
+        fb_sha256,
+        family: "binary-nested-large-prime".into(),
+        params: m.params.clone(),
+        description: format!(
+            "x < 2^{} nested at x < 2^{}, projected by cofactor and folded by negation",
+            report.config.envelope_dimension, report.config.small_dimension
+        ),
+        signed_points: report.factor_base.raw_points as u64,
+        abscissae: 1u64 << report.config.envelope_dimension,
+        columns: report.factor_base.columns as u64,
+        dimension: Some(report.config.envelope_dimension),
+        points_sha256,
+    };
+    let detail =
+        serde_json::to_value(&report).map_err(|e| format!("serialise large-prime report: {e}"))?;
+    Ok(SolveReport {
+        recovered: report.recovered.map(u128::from),
+        exhausted: report.exhausted,
+        phases,
+        total_gae,
+        automorphisms_used: 2,
+        counters,
+        unpriced: vec![
+            "combination_states_uncharged".into(),
+            "mitm_lookups_uncharged".into(),
+            "lp_merge_ops_uncharged".into(),
+            "row_ops_uncharged".into(),
+        ],
+        deterministic: true,
+        nondeterminism: vec![],
+        solve_wall_ns: report.solve_wall_ns,
+        factor_base: Some(factor_base),
+        detail,
+        online: None,
+        online_error: None,
+        solver: None,
+        // Binary-field index calculus: the field work is outside the group law
+        // this tally sees, so it stays unknown rather than understated.
+        field_ops: None,
+    })
 }
 
 /// The online window from the phase clock's snapshot, mapped to the
@@ -934,7 +1171,8 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
                 w.phases_ns.insert((*name).to_string(), *ns);
             }
         }
-        let strong = id == "rho.signed_frobenius_strong";
+        let strong =
+            id == "rho.signed_frobenius_strong" || id == "rho.signed_frobenius_strong_escape";
         w.start_event = if strong {
             "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)".into()
         } else {
@@ -1094,6 +1332,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         lanes: param_u64(m, "lanes")?.max(1) as usize,
         dp_bits: param_u64(m, "dp_bits")? as u32,
         step_cap_factor: param_u64(m, "step_cap_factor")?,
+        escape_fruitless: m.id == "rho.signed_frobenius_strong_escape",
     };
     if params.dp_bits >= 32 {
         return Err("dp_bits must be below 32".into());
@@ -1172,6 +1411,11 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         ("table_inserts_uncharged", c.table_inserts),
     ] {
         counters.insert(k.to_string(), v);
+    }
+    // Only the escaping variant has escapes; the reference's counter set is
+    // left exactly as its committed records have it.
+    if params.escape_fruitless {
+        counters.insert("fruitless_escapes".to_string(), o.escapes);
     }
     Ok(SolveReport {
         recovered: Some(o.scalar.to_u128()),

@@ -358,6 +358,13 @@ check-cycles:
 	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
 	    cycles --max-length $(CYCLE_LENGTH)
 
+# The campaign dashboard (ecc2k-status, which replaced aws/status.py) and the
+# Python-compatible JSON and number formatting it prints through. Their
+# expected bytes were printed by CPython.
+test-status:
+	cargo test --release --quiet --manifest-path ../Cargo.toml --lib -- \
+	    ecc2k130_status ecc2k130_pyjson
+
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
 #   pip install python-sat pycryptosat
@@ -430,7 +437,7 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
 	python3 -m unittest discover -s aws -p test_campaign_guard.py -v
 	python3 -m unittest discover -s aws -p test_worker_family.py -v
-	python3 -m unittest discover -s aws -p test_status_walks.py -v
+	python3 -m unittest discover -s aws -p test_worker_banner.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
 	python3 -m unittest discover -s aws -p test_rollout.py -v
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
@@ -629,7 +636,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-status test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-table-v3-replay test-cycle-rule test-cycle-escape test-cycle-profile check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -1025,7 +1032,7 @@ clean:
 	rm -f build/test-cycle-profile build/test-cycle-profile-fast2
 	rm -f build/sigma-fused-shared-scratch-model build/sigma-fused-shared-scratch-model.json
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
+.PHONY: path-cost all generate check-cli check-cycles test-status perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host table-v3-replay test-table-v3-replay test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean test-cycle-profile test-sigma-fused-star test-sigma-fused-shared-scratch-model
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:

@@ -3180,6 +3180,12 @@ impl LargePrimeEliminator {
             self.depth_sum as f64 / self.depth_count as f64
         }
     }
+
+    /// Number of unresolved large-prime columns currently represented by
+    /// pivot relations.  Exposed for experiment accounting only.
+    pub fn pivot_count(&self) -> usize {
+        self.pivots.len()
+    }
 }
 
 /// Berlekamp–Massey over `Z/n` (`n` prime): the shortest linear
