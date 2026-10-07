@@ -9,7 +9,9 @@ output, complexity) was read in this session from the source — the Bostan–Mo
 (arXiv cs/0609020, full text) for everything in §P2, and the abstracts/bibliographic records
 retrieved by web search for Couveignes (ANTS-II 1996, LNCS 1122, pp. 59–65), Couveignes–Morain
 (ANTS-I 1994), Galbraith–Stolbunov (arXiv 1105.6331) and Costello–Hisil (ASIACRYPT 2017). All other
-references are cited from memory; their details have **not** been re-verified.
+references are cited from memory; their details have **not** been re-verified. Where a formula was
+taken from memory, the test named in the last column is what establishes that the code is right,
+not the citation.
 
 **Status vocabulary** (following the repository's reporting rules): *implemented* = code + a test that
 checks the output independently; *partial* = implemented with a stated restriction; *not implemented
@@ -17,20 +19,22 @@ checks the output independently; *partial* = implemented with a stated restricti
 hardware or a model of computation that is not available here (e.g. a quantum computer). No entry
 is withheld for any other reason.
 
+**Deliveries.** `V1` = first delivery, `V2` = kernel-only/BMSS extension (PR #1526, first commits),
+`V3` = the speed and coverage round (arithmetic, big fields, char 2, quaternions, genus 2, SEA,
+radical isogenies, relation lattice, curve models). Module paths are under `src/`.
+
 ## The problems, and which algorithms solve which
 
 | | Problem | Typical algorithms |
 |---|---|---|
-| P1 | kernel → isogeny (codomain and map) | Vélu, Kohel, √élu, Montgomery/Edwards x-only Vélu, chains with strategies, radical isogenies |
-| P2 | two ℓ-isogenous curves (and maybe σ) → isogeny | the BMSS family: Stark, Elkies 1992/1998, Atkin, fastElkies, … |
-| P3 | curve + ℓ → its ℓ-isogenies (kernels / neighbours) | Φ_ℓ roots + Elkies, division-polynomial factoring, isogeny cycles (Atkin primes) |
-| P4 | two curves → *some* isogeny between them | Galbraith, GHS, Galbraith–Stolbunov, Kohel (volcanoes), Couveignes (hard homogeneous space), Delfs–Galbraith, quantum, KLPT/SQIsign (supersingular, endomorphism-ring based) |
+| P1 | kernel → isogeny (codomain and map) | Vélu, Kohel, √élu, Montgomery/Edwards/Huff x-only formulas, chains with strategies, radical isogenies |
+| P2 | two ℓ-isogenous curves (and maybe σ) → isogeny | the BMSS family: Stark, Elkies 1992/1998, Atkin, fastElkies, … ; small characteristic: Couveignes 1996, Lercier |
+| P3 | curve + ℓ → its ℓ-isogenies (kernels / neighbours) | Φ_ℓ roots + Elkies, division-polynomial factoring, isogeny cycles (Atkin primes); application: SEA |
+| P4 | two curves → *some* isogeny between them | Galbraith, GHS, Galbraith–Stolbunov, Kohel (volcanoes), Couveignes (hard homogeneous space), Delfs–Galbraith, quantum, KLPT/Deuring (supersingular, endomorphism-ring based) |
 | P5 | auxiliary computations | dual isogeny, End(E) (ordinary: Kohel; supersingular: quaternions), class-group structure, modular polynomials |
-| P6 | higher-dimensional | Richelot, theta (2,2)/(ℓ,ℓ), Kani-lemma methods |
+| P6 | higher-dimensional | Richelot, splitting/gluing, theta (2,2)/(ℓ,ℓ), Kani-lemma methods |
 
 ## Status table
-
-`V1` = first delivery (PR #1526 first two commits), `V2` = this extension. Module paths are under `src/`.
 
 ### P1 — kernel → isogeny
 
@@ -39,15 +43,20 @@ is withheld for any other reason.
 | Vélu, odd cyclic kernel | Vélu 1971 | implemented V1 | `kernel/velu.rs` | agrees with Kohel/√élu; homomorphism test |
 | Vélu, **any** finite subgroup (even degree, 2-torsion, non-cyclic) | Vélu 1971 | implemented V2 | `kernel/velu.rs::velu_general` | E/E[2] has the j of E; Φ₂; homomorphism; cyclic n = 4…15 vs Kohel |
 | Kohel formulas, odd | Kohel 1996 | implemented V1 | `kernel/kohel.rs` | = Vélu |
-| Kohel formulas, **even / 2-torsion factor** | Kohel 1996 | implemented V2 | `kernel/kohel.rs` | = Vélu for degrees 2, 4, 6, 8, 9, 10, 12, 15; kernel E[2] |
-| √élu | Bernstein–De Feo–Leroux–Smith 2020 | **partial**: structure (I/J/K index sets, series-ring products) on short Weierstrass; the resultant is a naive O(ℓ) Horner, so no asymptotic saving yet | `kernel/sqrt_velu.rs` | = Vélu, ℓ ≤ 101 |
-| Vélu from **x(P) only** (no y; kernels over extension fields) | folklore; division-polynomial values | implemented V2 | `kernel/xonly.rs` | = point-based Vélu; Galois-stable kernel with non-rational points over F_p² = Kohel over F_p |
-| Montgomery x-only Vélu (odd ℓ) | Costello–Hisil 2017 ✔(abstract); Renes 2018; Meyer–Reith 2018 | implemented V2 | `kernel/montgomery.rs` | j-match with Weierstrass Vélu along a 12-step chain; the x-map keeps points rational (this is what fixed the pairing of (A±2) with ∏(X±Z) and the sign of A′) |
-| ℓⁿ kernel as a chain; naive / balanced / cost-model-optimal strategies; composite smooth kernels | De Feo–Jao–Plût 2014; Costello–Longa–Naehrig 2016 | implemented V2 | `kernel/chain.rs` | SIDH key exchange over F_{p²} (shared j agrees) for all four strategies |
-| Montgomery 2-/4-isogeny special formulas; twisted Edwards (Moody–Shumow 2016); Hessian, Jacobi-quartic, Huff models; Montgomery-native √élu | various | not implemented – implementation gap | — | — |
-| Radical isogenies | Castryck–Decru–Vercauteren 2020; Onuki–Moriya | not implemented – implementation gap | — | — |
-| Vélu over F_{p^k}, k > 2 (arbitrary extension fields) | — | not implemented – implementation gap (the `Field` trait is generic; only F_p and F_{p²} are provided) | — | — |
-| Vélu in characteristic 2 / 3 | Vélu 1971 | not implemented here – implementation gap. Characteristic-2 Vélu already exists in the main crate: `src/cryptanalysis/binary_velu.rs` | — | — |
+| Kohel formulas, even / 2-torsion factor | Kohel 1996 | implemented V2 | `kernel/kohel.rs` | = Vélu for degrees 2, 4, 6, 8, 9, 10, 12, 15; kernel E[2] |
+| √élu, short Weierstrass | Bernstein–De Feo–Leroux–Smith 2020 | implemented V3 (product trees, remainder-tree multipoint evaluation; three power sums) | `kernel/sqrt_velu.rs` | = Vélu up to ℓ = 100003 |
+| √élu, Montgomery (I ± J ∪ K, E_J product tree, codomain from h_S(±1)) | BDFLS 2020 | implemented V3 | `kernel/sqrt_velu_mont.rs` | = Vélu on all 74 CSIDH-512 primes and at ℓ = 1009, 10007 |
+| Vélu from x(P) only (no y; kernels over extension fields) | folklore; division-polynomial values | implemented V2, projective + batch inversion V3 | `kernel/xonly.rs` | = point-based Vélu; Galois-stable kernel over F_p² = Kohel over F_p |
+| Montgomery x-only Vélu, affine and projective (A24 : C24) | Costello–Hisil 2017 ✔(abstract); Renes 2018; Meyer–Reith 2018 | implemented V2 (affine), V3 (projective, shared (X±Z) for codomain and pushes) | `kernel/montgomery.rs` | j-match with Weierstrass Vélu; CSIDH-512 batched = stepwise = tree |
+| ℓⁿ kernel as a chain; naive / balanced / cost-model strategies; composite smooth kernels | De Feo–Jao–Plût 2014; Costello–Longa–Naehrig 2016 | implemented V2 | `kernel/chain.rs` | SIDH key exchange over F_{p²} agrees for all four strategies |
+| Twisted Edwards ℓ-isogenies (translate-product definition, explicit map, one-variable X map) | Moody–Shumow 2016 | implemented V3 (odd ℓ; the explicit and X-only maps for a = 1) | `kernel/models.rs` | codomain j = Montgomery Vélu; images on the codomain; homomorphism; three evaluation forms agree |
+| Huff-curve ℓ-isogenies | Moody–Shumow 2016 | implemented V3 (odd ℓ) | `kernel/models.rs` | codomain j = Weierstrass Vélu; images on the codomain; homomorphism |
+| Radical 3- and 5-isogenies | Castryck–Decru–Vercauteren 2020 | implemented V3 (N = 3 flex model, N = 5 Tate normal form; unique N-th root when gcd(N, q − 1) = 1) | `kernel/radical.rs` | on CSIDH-512, k steps = CSIDH action 𝔩₃ᵏ / 𝔩₅ᵏ (k = 1..6); over 40 bits steps are Φ_N-adjacent and non-backtracking |
+| Vélu / Kohel in characteristic 2 | Vélu 1971; Kohel 1996 | implemented V3 (ordinary binary curves y² + xy = x³ + a₂x² + a₄x + a₆) | `binary.rs` | codomain from t = Σx_Q; Kohel x-map; Φ_ℓ mod 2 neighbours = kernel-polynomial neighbours |
+| Vélu over F_{p⁴} | — | implemented V3 for the Deuring correspondence (u64 p) | `ext.rs`, `quat/deuring.rs` | j-invariants projected back to F_{p²} and checked |
+| Radical isogenies of other degrees (N = 2, 4, 7, …; Onuki–Moriya's CSIDH variants) | CDV 2020; Onuki–Moriya 2022; Castryck–Decru–Houben–Vercauteren 2022 | not implemented – implementation gap | — | — |
+| Montgomery 2-/4-isogeny special formulas; Hessian, Jacobi-quartic models | various | not implemented – implementation gap | — | — |
+| Vélu in characteristic 3 | Vélu 1971 | not implemented – implementation gap | — | — |
 
 ### P2 — (E, Ẽ) → isogeny: the BMSS family (Table 1 of the paper ✔)
 
@@ -59,69 +68,96 @@ is withheld for any other reason.
 | Atkin + modular composition (§6.4) | O(M(ℓ)√ℓ + ℓ^{(ω+1)/2}) | yes | implemented V2 with *naive* composition | same |
 | Elkies 1992 (µ_{k,j} triangular system, §6.3) | O(ℓ²) | yes | implemented V2 | same |
 | Elkies 1998 (recurrence (16), power sums (17), §4.2) | O(ℓ²) | yes | implemented V2 | same |
-| fastElkies (ODE for S(x), §4.3) | O(M(ℓ)) | yes | implemented V2 with schoolbook series | same |
+| fastElkies (ODE for S(x), §4.3) | O(M(ℓ)) | yes | implemented V2; V3 solves the ODE coefficient by coefficient in O(ℓ²) (was O(ℓ³)) with Karatsuba series | same |
 | fastElkies′ (rational reconstruction, §4.3) | O(M(ℓ) log ℓ) | no | implemented V2 (dense Padé) | same |
 | Padé on the inverted ℘-series (my own formulation) | — | no | implemented V1 | `find/elkies.rs::bmss_isogeny` |
-| σ = Σ x(Q) from Φ's second derivatives (Elkies' E2 relation) | — | — | implemented V2; **derived here** from E2−ℓE2′ and checked against the true σ for ℓ ≤ 23 | `find/bmss.rs::sigma_from_phi` |
+| σ = Σ x(Q) from Φ's second derivatives (Elkies' E2 relation) | — | — | implemented V2; derived here from E2−ℓE2′ and checked against the true σ for ℓ ≤ 23 | `find/bmss.rs::sigma_from_phi` |
 
 Every method returns the kernel polynomial g (D = g²), which is then fed to Kohel's formula, and the
 codomain must equal Ẽ. All eight reproduce Kohel's kernel and numerator exactly for ℓ up to 101,
-including Galois-stable kernels whose points are not rational. The "paper complexity" column is
-what the paper proves for the fast arithmetic; *this code uses schoolbook arithmetic and does not
-achieve it*.
-Not implemented: Lercier / Couveignes ("ℓ-isogenies using the p-torsion", ANTS-II 1996 ✔) /
-Lercier–Sirvent and the characteristic-2 algorithms (Lercier–Lubicz–Vercauteren, arXiv 2003.06367):
-these are for small characteristic and need F_{2ⁿ}-type arithmetic and p-adic lifting – implementation
-gap, and relevant if binary Koblitz curves are the target.
+including Galois-stable kernels whose points are not rational; they also agree at 256 and 511 bits
+(V3). The arithmetic is Karatsuba, not FFT, so the M(ℓ) bounds are not reached.
+
+Not implemented – implementation gap: Couveignes' "ℓ-isogenies using the p-torsion" (ANTS-II 1996 ✔),
+Lercier's characteristic-2 algorithm, Lercier–Sirvent and Lercier–Lubicz–Vercauteren (arXiv 2003.06367).
+These solve (E, Ẽ) → isogeny in small characteristic, where the BMSS family fails (it divides by
+integers up to ≈ 2ℓ). The binary-curve support of V3 (`gf2n.rs`, `binary.rs`) is the arithmetic they
+would need; in characteristic 2 the crate currently finds isogenies only from kernels or by factoring
+division polynomials, not from (E, Ẽ).
 
 ### P3 — curve + ℓ → ℓ-isogenies
 
 | Algorithm | Status | Where | Notes |
 |---|---|---|---|
-| Φ_ℓ(j,Y) roots + Elkies normalised codomain + P2 algorithm | implemented V1 (Padé) / V2 (any of 8) | `find/elkies.rs`, `find/bmss.rs::isogenies_via_phi` | needs Φ_ℓ mod p |
-| Φ_ℓ mod p from q-expansions (linear algebra) | implemented V1; **practical only to ℓ ≈ 23–31** | `find/modpoly.rs` | checked against the known Φ₂ |
-| Division-polynomial factoring (Schoof / Elkies / Couveignes ℓ-torsion style) | implemented V1 | `find/divpoly.rs` | cost grows quickly with ℓ: 0.46 ms at ℓ = 5 and 2.10 s at ℓ = 23 (61-bit p, baseline run) |
-| Frobenius eigenvalue on the kernel (± λ) | implemented V1 (support routine) | `path/couveignes.rs::eigen_class` | x-only, so λ and −λ are not separated |
-| Isogeny cycles for Atkin primes (Couveignes–Morain 1994 ✔, Couveignes 1996 ✔) | not implemented – implementation gap (needs F_{p^r}, r | ℓ+1) | — | used for t mod ℓᵏ in SEA |
-| Complete SEA point counting | not implemented – implementation gap (the Elkies step ingredients exist; the Atkin/Schoof steps and the ± λ resolution via y do not) | — | `order()` is BSGS, not SEA |
-| Better Φ_ℓ algorithms (CRT/Sutherland, Bröker–Lauter–Sutherland via volcanoes, Enge quasi-linear) | not implemented – implementation gap | — | needed for ℓ beyond ≈ 30 |
+| Φ_ℓ(j,Y) roots + Elkies normalised codomain + P2 algorithm | implemented V1 (Padé) / V2 (any of 8) | `find/elkies.rs`, `find/bmss.rs::isogenies_via_phi` | |
+| Φ_ℓ mod p from q-expansions, dense linear algebra | implemented V1 | `find/modpoly.rs::compute_linear_algebra` | practical to ℓ ≈ 31–43 |
+| **Φ_ℓ mod p by Hecke operators and Newton's identities**: Φ(j(q), Y) = (Y − j(q^ℓ)) G(Y), power sums of the ℓ conjugates are ℓ U_ℓ(j^m), each coefficient read back as a polynomial in j from its polar part | implemented V3 (valid for char > ℓ + 1) | `find/modpoly.rs::compute_hecke` | equal to the linear-algebra Φ_ℓ for ℓ ≤ 43 and to the CRT integer coefficients mod 1259; 3.5× (ℓ = 11) to 33.4× (ℓ = 43) faster in the recorded run; ℓ = 127 in 6.1 s at 61 bits |
+| Integer coefficients of Φ_ℓ by CRT; Φ_ℓ over any field from them (also mod 2) | implemented V3 | `find/modpoly.rs::integer_coeffs`, `Phi::via_crt` | Φ mod 2 roots = kernel-oracle neighbours on binary curves |
+| Division-polynomial factoring (Schoof / Elkies / Couveignes ℓ-torsion style) | implemented V1; char 2 V3 | `find/divpoly.rs`, `binary.rs::kernel_polys` | 0.46 ms (ℓ = 5) to 2.10 s (ℓ = 23) at 61 bits, V1 run |
+| Frobenius eigenvalue on an Elkies kernel, ± separated via y | implemented V3 | `find/sea.rs::elkies_eigenvalue` | computed in F_q[x, y]/(h, y² − f) |
+| **Schoof–Elkies–Atkin point counting** (t mod 2, Elkies primes, Atkin candidate sets from the factor degree of Φ_ℓ(j, Y), recombination by walk or BSGS) | implemented V3 | `find/sea.rs::sea` | equals BSGS orders at 40 and 61 bits; [#E]P = 0 for random P at 127 bits |
+| Isogeny cycles for Atkin primes / t mod ℓᵏ (Couveignes–Morain 1994 ✔, Couveignes 1996 ✔) | not implemented – implementation gap | — | SEA uses Atkin candidate *sets*, not cycles |
+| Sutherland's CRT/volcano Φ_ℓ (Bröker–Lauter–Sutherland), Enge's quasi-linear evaluation | not implemented – implementation gap | — | Hecke/Newton covers ℓ ≤ 127 at 61 bits |
 | Hilbert class polynomial / CM method | not implemented here; exists in the main crate (`src/cryptanalysis/hilbert_class_poly.rs`) | — | — |
 
 ### P4 — two curves → an isogeny
 
 | Algorithm | Ref | Status | Where | Notes |
 |---|---|---|---|---|
-| Bidirectional BFS in the ℓ-graph | Galbraith 1999 | implemented V1 | `path/galbraith.rs` | j-line over a prime set |
-| Random-walk collision (+ volcano normalisation) | Galbraith–Hess–Smart 2002 | implemented V1 | `path/ghs.rs` | restriction: needs the walk primes to connect the two curves |
+| Bidirectional BFS in the ℓ-graph | Galbraith 1999 | implemented V1; any neighbour oracle V3 | `path/galbraith.rs`, `path/graph.rs` | oracles: Φ_ℓ over F_p, F_{p²}, GF(2ⁿ), or kernel factoring |
+| Random-walk collision (+ volcano normalisation) | Galbraith–Hess–Smart 2002 | implemented V1; any oracle V3 | `path/ghs.rs` | needs the walk primes to connect the two curves |
 | Weighted-prime walk, one Φ_ℓ per step | Galbraith–Stolbunov 2013 ✔(abstract) | **partial** V2: the weighted-degree walk only | `path/ghs.rs::galbraith_stolbunov` | their other refinements are not implemented |
+| Paths on ordinary binary curves | Galbraith–Hess–Smart 2002 (char 2 was their target) | implemented V3 | `binary.rs` + `path/graph.rs` | verified edge by edge |
 | Volcano navigation: height, levels, ascent/descent, crater walk | Kohel 1996 | implemented V1 (partial: same ℓ-volcano only) | `path/volcano.rs` | |
-| **End(E) of an ordinary curve** (conductor via volcano levels) | Kohel 1996 | implemented V2 | `path/endo.rs` | needs Φ_ℓ for every ℓ dividing the conductor of Z[π]; ℓ = 2 unsupported |
+| End(E) of an ordinary curve (conductor via volcano levels) | Kohel 1996 | implemented V2 | `path/endo.rs` | ℓ = 2 dividing the conductor of Z[π] unsupported |
 | Class-group action, ordinary, direction by Frobenius eigenvalue; MITM | Couveignes 2006; Rostovtsev–Stolbunov 2006 | implemented V1 | `path/couveignes.rs` | planted exponents |
-| **CSIDH-style action** on Montgomery curves (direction by quadratic character) | CLMPR 2018; Couveignes | implemented V2 | `path/csidh.rs` | commutes, invertible, every step satisfies Φ_ℓ |
+| CSIDH action (direction by quadratic character): stepwise, CLMPR batched, projective tree strategy | CLMPR 2018; Meyer–Reith 2018 | implemented V2, V3 (generic field, CSIDH-512) | `path/csidh.rs` | commutes, invertible, Φ_ℓ per step; batched = stepwise = tree |
 | Group-action inversion by MITM (CSIDH) | — | implemented V2 | `path/csidh.rs::mitm` | classical cost ≈ (2m+1)^{n/2} |
-| Ideal-class order from isogeny cycles; independent class-number count | Couveignes 2006; Stolbunov 2010 | implemented V2 (single ideal only) | `path/csidh.rs` | order divides h(−4p) |
-| Class-group *structure*, relation lattice | De Feo–Kieffer–Smith 2018; Beullens–Kleinjung–Vercauteren 2019 | not implemented – implementation gap | — | |
-| Supersingular over F_p², walk to F_p + F_p-graph search | Delfs–Galbraith 2016 | implemented V1 (j-path only; p ≡ 7 mod 8 here) | `path/delfs_galbraith.rs` | |
+| Ideal-class order from isogeny cycles | Couveignes 2006; Stolbunov 2010 | implemented V2 | `path/csidh.rs::ideal_order` | order divides h(−4p) |
+| **Class-group structure and relation lattice** (binary quadratic forms of disc −4p, h by BSGS around the analytic estimate, discrete logs, LLL basis, Babai reduction of exponent vectors) | Beullens–Kleinjung–Vercauteren 2019; De Feo–Kieffer–Smith 2018 | implemented V3 for 20–50-bit p | `path/relation.rs` | basis vectors act trivially on curves; reduced vectors give the same curve |
+| Supersingular over F_p², walk to F_p + F_p-graph search | Delfs–Galbraith 2016 | implemented V1 (j-path only; p ≡ 7 mod 8) | `path/delfs_galbraith.rs` | |
+| **Quaternion algebra B_{p,∞}, O₀, ideals (HNF), left/right orders, norms, LLL, Fincke–Pohst** | — | implemented V3 for p ≡ 3 mod 4 | `quat/mod.rs` | |
+| **KLPT** (ideal → equivalent ideal of norm 2ᵉ) | Kohel–Lauter–Petit–Tignol 2014 | implemented V3 for left O₀-ideals, ℓ = 2 | `quat/klpt.rs` | N(J) = 2ᵉ, J ⊂ O₀, J = Iξ exactly, primitive; p up to 2¹²⁸ |
+| **Deuring correspondence**: ideal → curve (smooth-norm equivalent ideal, kernel over F_{p⁴} by 2D Pohlig–Hellman, Vélu chain) and kernel → ideal | EHLMP 2018; De Feo–Kohel–Leroux–Petit–Wesolowski 2020 | implemented V3 for u64 p (torsion over F_{p⁴} needs N(J) | odd part of p² − 1) | `quat/deuring.rs` | bijection classes → supersingular j checked at p = 1259 and 3499 |
+| IdealToIsogeny for 2ᵉ norms at cryptographic size (SQIsign-style, or via higher dimension) | DKLPW 2020; SQIsign 2D | not implemented – implementation gap | — | the KLPT output is not turned into an isogeny at large p |
+| **Brandt matrices, class sets of O₀, Mestre's supersingular graph on the j-line** | Mestre 1986; Kohel 1996; Pizer | implemented V3 | `quat/brandt.rs` | Eichler mass formula asserted; tr(Bᵏ) = tr(Aᵏ); B(2) = Φ₂ multiplicity matrix entrywise under the bijection |
 | Quantum subexponential (Kuperberg), Childs–Jao–Soukharev; Biasse–Jao–Sankar | — | not implemented – resource limit (quantum model) | — | |
-| Endomorphism-ring-based supersingular path finding: quaternion orders, KLPT, ideal→isogeny (Deuring), SQIsign | Kohel–Lauter–Petit–Tignol 2014; EHLMP 2018; De Feo–Kohel–Leroux–Petit–Wesolowski 2020 | not implemented – implementation gap (large). The main crate has only a toy `src/pqc/sqisign.rs` with a precomputed graph and 326-bit F_{p²} arithmetic in `src/pqc/fast/isogeny.rs` | — | |
-| Mestre / Pizer / Kohel Brandt-matrix (Hecke-module) supersingular graphs | Mestre 1986; Kohel 1996 | not implemented – implementation gap | — | |
 
 ### P5/P6 — auxiliary and higher-dimensional
 
-| Algorithm | Status | Notes |
+| Algorithm | Status | Where | Notes |
+|---|---|---|---|
+| Dual isogeny (from Φ_ℓ; explicit rescaling u = ℓ) | implemented V2 | `find/dual.rs` | dual∘φ = [ℓ] and φ∘dual = [ℓ] on random points |
+| Endomorphism ring, supersingular (as an O₀-ideal class) | implemented V3 via the Deuring correspondence (u64 p) | `quat/deuring.rs::ideal_of_kernel` | kernel ↔ ideal round trips |
+| **Richelot (2,2)-isogeny** of genus-2 Jacobians: codomain and image of points | implemented V3 | `genus2.rs::richelot` | L-polynomial preserved; images lie on the codomain |
+| **Splitting** (Δ = 0: J(C) → E₁ × E₂) and **gluing** (E₁ × E₂ → J(C), Howe–Leprevost–Poonen) | implemented V3 | `genus2.rs::split`, `glue` | L(C) = L(E₁) L(E₂); the published −1 normalisation gives a quadratic twist for these models and is dropped (tested at p ≡ 1 and 3 mod 4) |
+| Superspecial Richelot graph over F_{p²}, vertices by Igusa–Clebsch invariants | implemented V3 | `genus2.rs::superspecial_graph` | vertex counts = Ibukiyama–Katsura–Oort for 11 primes 11..83 (tests) and 131, 199 (bench); products h(h+1)/2 |
+| Theta-model (2,2)-isogenies (Dartois–Maino–Pope–Robert), (ℓ,ℓ)-isogenies, Kani-lemma methods (SIDH attacks, SQIsign2D, IS-CUBE) | not implemented – implementation gap | — | the Richelot chain is the Mumford-coordinate equivalent of the (2,2) step |
+
+### Field arithmetic underneath (V3)
+
+| Component | Where | Measured (micro bench, this VM) |
 |---|---|---|
-| Dual isogeny (from Φ_ℓ; explicit rescaling u = ℓ) | implemented V2 (`find/dual.rs`) | dual∘φ = [ℓ] and φ∘dual = [ℓ] checked on random points |
-| Endomorphism ring, supersingular | not implemented – implementation gap | |
-| Richelot, theta-model (2,2)/(ℓ,ℓ)-isogenies, Kani-lemma methods (SIDH attacks, SQIsign2D) | not implemented – implementation gap | |
+| Montgomery F_p, N × 64-bit limbs (CIOS, no-carry variant when the top limb has a free bit) | `fpm.rs` | P-256 mul 24.4 ns; CSIDH-512 mul 85.4 ns (portable) |
+| MULX/ADCX/ADOX assembly CIOS (generated by `scripts/gen_mont_adx.py`) | `fpm.rs::adx` | CSIDH-512 mul 78 vs 86 ns; N = 4 not faster than the portable code, so opt-in (`ISOGENY_ADX4`) |
+| Inversion by Pornin's optimised binary GCD | `fpm.rs::bingcd_inv` | P-256 13.1 → 3.2 µs; CSIDH-512 75.5 → 8.0 µs (before/after from the commit message; after = `results/micro-p1-step4.jsonl`) |
+| sqrt by one exponentiation when q ≡ 3 mod 4; sliding-window exponentiation | `field.rs` | 512-bit sqrt 370 → 57 µs |
+| Karatsuba (threshold measured per field), lazy wide reduction for convolutions, monic division without inversion | `poly.rs`, `fpm.rs` | 256-term poly product over F_{P-256}: 1.05 ms (threshold 4) vs 0.79 ms (16) vs 1.91 ms (schoolbook) |
+| GF(2ⁿ), n ≤ 63, PCLMULQDQ | `gf2n.rs` | mul 4.9–5.8 ns; sqrt as a linear map 6.2–8.4 ns; z² + z = c 1.7–5.3 ns (n = 23, 41, 61) |
+| Signed big integers, Miller–Rabin in Montgomery form, Pollard–Brent | `int.rs`, `bigint.rs`, `field.rs` | — |
 
 ## Mapping to the names in the request
 
-* **Couveignes**: hard homogeneous space / class-group action (P4: V1 ordinary, V2 CSIDH-style + MITM + cycle orders).
-  Not covered: the 1996 p-torsion method (small characteristic) and isogeny cycles (Atkin primes).
-* **Kohel**: kernel-polynomial formulas (V1 odd, V2 even), volcano navigation (V1) and End(E) (V2).
-  Not covered: the supersingular half of the thesis (Hecke module structure of quaternions / Brandt matrices) and KLPT.
-* **Galbraith**: BFS (V1), GHS (V1), Galbraith–Stolbunov (V2, weighted walk only), Delfs–Galbraith (V1).
-* **Kernel-only methods**: Vélu general, Kohel even, x-only Vélu, Montgomery x-only Vélu, ℓⁿ chains (V2).
+* **Couveignes**: hard homogeneous space / class-group action (V1 ordinary; V2 CSIDH-style + MITM + cycle
+  orders; V3 CSIDH-512, tree strategy, relation lattice, radical steps).
+  Not covered: the 1996 p-torsion method (small characteristic) and isogeny cycles for Atkin primes.
+* **Kohel**: kernel-polynomial formulas (V1 odd, V2 even, V3 char 2), volcano navigation (V1), ordinary
+  End(E) (V2), and the supersingular half of the thesis: quaternion orders, Brandt matrices and the
+  Deuring correspondence (V3); KLPT (Kohel–Lauter–Petit–Tignol, V3).
+* **Galbraith**: BFS (V1), GHS (V1; char 2 in V3), Galbraith–Stolbunov (V2, weighted walk only),
+  Delfs–Galbraith (V1).
+* **Kernel-only methods**: Vélu general, Kohel even, x-only Vélu, Montgomery x-only Vélu, ℓⁿ chains
+  (V2); √élu (Weierstrass and Montgomery), Edwards, Huff, char-2 Vélu, radical isogenies (V3).
 
 ## Duplication note
 
@@ -129,4 +165,5 @@ The main crate already contains related code, which this crate neither imports n
 `src/pqc/csidh.rs` (toy CSIDH, p = 419), `src/pqc/sqisign.rs` (toy), `src/pqc/fast/isogeny.rs`,
 `src/isogeny/*` (small-prime Vélu, CM, volcano), `src/cryptanalysis/isogeny_walk/kernel.rs`
 (Elkies kernel polynomial from Φ_ℓ with its own derivation of the E2 relation; **not**
-cross-tested against `find/bmss.rs::sigma_from_phi`), `src/cryptanalysis/binary_velu.rs`.
+cross-tested against `find/bmss.rs::sigma_from_phi`), `src/cryptanalysis/binary_velu.rs`
+(characteristic-2 Vélu; not cross-tested against `binary.rs`).
