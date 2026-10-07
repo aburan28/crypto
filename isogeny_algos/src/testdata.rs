@@ -26,7 +26,7 @@ use crate::path::graph::*;
 /// Non-backtracking random walk on the j-line over the given primes.
 pub fn random_walk<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     j: F::E,
     steps: usize,

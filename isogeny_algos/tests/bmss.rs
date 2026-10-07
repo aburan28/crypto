@@ -170,3 +170,16 @@ fn end_to_end_from_phi_matches_v1() {
         }
     }
 }
+
+#[test]
+fn ode_solvers_agree() {
+    let mut rng = Rng::new(55);
+    let fp = Zp::new(next_prime(1u64 << 40));
+    for &ell in &[5u64, 13, 31] {
+        let (e, p) = curve_with_point(&fp, ell, &mut rng);
+        let (g, _) = kernel_poly_from_point(&fp, &e, &p, ell);
+        let et = kohel(&fp, &e, &g, ell).cod;
+        let (a, b) = bmss::s_ode_both(&fp, &e, &et, 4 * ell as usize);
+        assert_eq!(a, b, "l = {ell}");
+    }
+}

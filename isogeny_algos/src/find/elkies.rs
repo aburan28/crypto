@@ -89,7 +89,7 @@ pub fn solve_linear<F: Field>(f: &F, mut m: Vec<Vec<F::E>>, mut b: Vec<F::E>) ->
 /// Normalised codomain curve E' for the root `jt` of Phi_l(j, Y) (Elkies' formulas).
 pub fn elkies_codomain<F: Field>(
     f: &F,
-    phi: &Phi,
+    phi: &Phi<F>,
     e: &Curve<F::E>,
     jt: F::E,
 ) -> Option<Curve<F::E>> {
@@ -192,7 +192,7 @@ pub fn bmss_isogeny<F: Field>(
 /// All F-rational normalised l-isogenies out of `e` found through Phi_l roots.
 pub fn elkies_isogenies<F: Field>(
     f: &F,
-    phi: &Phi,
+    phi: &Phi<F>,
     e: &Curve<F::E>,
     rng: &mut crate::field::Rng,
 ) -> Vec<RatIsogeny<F>> {

@@ -16,7 +16,7 @@ pub fn volcano_height(p: u64, t: i64, ell: u64) -> u32 {
     v / 2
 }
 
-fn nbrs<F: Field>(f: &F, cache: &PhiCache, ell: usize, j: F::E, rng: &mut Rng) -> Vec<F::E> {
+fn nbrs<F: Field>(f: &F, cache: &PhiCache<F>, ell: usize, j: F::E, rng: &mut Rng) -> Vec<F::E> {
     cache.get(ell).neighbors(f, j, rng)
 }
 
@@ -24,7 +24,7 @@ fn nbrs<F: Field>(f: &F, cache: &PhiCache, ell: usize, j: F::E, rng: &mut Rng) -
 /// a floor vertex (exactly one neighbour) after n steps, None if not within `cap` steps.
 fn walk_len<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     j: F::E,
     first: F::E,
@@ -47,7 +47,7 @@ fn walk_len<F: Field>(
 /// (level, index of the unique up-neighbour if level > 0) for a vertex in a volcano of height h.
 pub fn level_and_up<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     h: u32,
     j: F::E,
@@ -80,7 +80,7 @@ pub fn level_and_up<F: Field>(
 /// Ascend to the crater; returns the path (j ... crater vertex).
 pub fn ascend_to_crater<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     h: u32,
     j: F::E,
@@ -107,7 +107,7 @@ pub fn ascend_to_crater<F: Field>(
 /// Descend to the floor from level `l` (first step avoids the up edge).
 pub fn descend_to_floor<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     h: u32,
     j: F::E,
@@ -139,7 +139,7 @@ pub fn descend_to_floor<F: Field>(
 /// Walk around the crater from `start` (horizontal edges only) looking for `target`.
 fn crater_walk<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     h: u32,
     start: F::E,
@@ -191,7 +191,7 @@ fn crater_walk<F: Field>(
 /// ascend both to the crater, walk the crater, descend (reversed ascent of the second).
 pub fn kohel_volcano_path<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ell: usize,
     h: u32,
     j1: F::E,

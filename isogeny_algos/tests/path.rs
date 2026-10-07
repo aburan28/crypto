@@ -4,7 +4,7 @@ use isogeny_algos::path::graph::*;
 use isogeny_algos::path::{couveignes, delfs_galbraith, galbraith, ghs, volcano};
 use isogeny_algos::testdata::*;
 
-fn check_chain(fp: &Zp, cache: &PhiCache, e: &Curve<u64>, path: &Path<u64>, rng: &mut Rng) {
+fn check_chain(fp: &Zp, cache: &PhiCache<Zp>, e: &Curve<u64>, path: &Path<u64>, rng: &mut Rng) {
     assert!(verify_path(fp, cache, path));
     assert_eq!(*path.js.first().unwrap(), jinv(fp, e));
     if let Some(chain) = explicit_chain(fp, cache, e, path) {
@@ -24,7 +24,7 @@ fn galbraith_ghs_find_paths() {
     let p = next_prime(1u64 << 24);
     let fp = Zp::new(p);
     let ells = [3usize, 5, 7];
-    let cache = PhiCache::new(p, &ells);
+    let cache = PhiCache::new(&Zp::new(p), &ells);
     // heights zero for all l: trace with no l^2 | t^2-4p
     let (e1, t) = curve_with_trace(&fp, &mut rng, |t| {
         let d = (t * t - 4 * p as i64).abs();
@@ -47,7 +47,7 @@ fn kohel_volcano_and_ghs_volcano_with_conductor() {
     let p = next_prime(1u64 << 17);
     let fp = Zp::new(p);
     let ells = [3usize, 5];
-    let cache = PhiCache::new(p, &ells);
+    let cache = PhiCache::new(&Zp::new(p), &ells);
     let (e1, t) = curve_with_trace(&fp, &mut rng, |t| {
         let d = (t * t - 4 * p as i64).abs();
         d % 9 == 0 && d % 25 != 0
@@ -69,7 +69,7 @@ fn couveignes_recovers_exponents() {
     let p = next_prime(1u64 << 22);
     let fp = Zp::new(p);
     let ells = [3usize, 5, 7, 11, 13, 17, 19, 23];
-    let cache = PhiCache::new(p, &ells);
+    let cache = PhiCache::new(&Zp::new(p), &ells);
     let (e1, _t) = curve_with_trace(&fp, &mut rng, |t| {
         let d = (t * t - 4 * p as i64).abs();
         ells.iter().all(|&l| d % (l as i64 * l as i64) != 0)
@@ -104,17 +104,26 @@ fn delfs_galbraith_supersingular() {
     }
     let fp = Zp::new(p);
     let f2 = Zp2::new(p);
-    let cache = PhiCache::new(p, &[2, 3]);
+    let cache = PhiCache::new(&Zp::new(p), &[2, 3]);
     let start = (1728u64, 0u64);
-    let w1 = random_walk(&f2, &cache, &[2], start, 60, &mut rng);
-    let w2 = random_walk(&f2, &cache, &[2], start, 60, &mut rng);
+    let w1 = random_walk(&f2, &cache.lift(|x| (x, 0u64)), &[2], start, 60, &mut rng);
+    let w2 = random_walk(&f2, &cache.lift(|x| (x, 0u64)), &[2], start, 60, &mut rng);
     let (j1, j2) = (*w1.js.last().unwrap(), *w2.js.last().unwrap());
-    let (r, st) =
-        delfs_galbraith::delfs_galbraith(&f2, &fp, &cache, j1, j2, 1_000_000, 1_000_000, &mut rng);
+    let (r, st) = delfs_galbraith::delfs_galbraith(
+        &f2,
+        &fp,
+        &cache,
+        &cache.lift(|x| (x, 0u64)),
+        j1,
+        j2,
+        1_000_000,
+        1_000_000,
+        &mut rng,
+    );
     let path = r.expect("delfs-galbraith failed");
     assert_eq!(path.js[0], j1);
     assert_eq!(*path.js.last().unwrap(), j2);
-    assert!(verify_path(&f2, &cache, &path));
+    assert!(verify_path(&f2, &cache.lift(|x| (x, 0u64)), &path));
     eprintln!(
         "dg: path len {} walk {} bfs {}",
         path.len(),
@@ -130,7 +139,7 @@ fn galbraith_stolbunov_weighted_walk() {
     let p = next_prime(1u64 << 24);
     let fp = Zp::new(p);
     let ells = [3usize, 5, 7, 11];
-    let cache = PhiCache::new(p, &ells);
+    let cache = PhiCache::new(&Zp::new(p), &ells);
     let (e1, _t) = curve_with_trace(&fp, &mut rng, |t| {
         let d = (t * t - 4 * p as i64).abs();
         ells.iter().all(|&l| d % (l as i64 * l as i64) != 0)

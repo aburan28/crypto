@@ -13,7 +13,7 @@ fn conductor_drops_by_l_along_ascent() {
         p = next_prime(p + 1);
     }
     let fp = Zp::new(p);
-    let cache = PhiCache::new(p, &[3, 5, 7]);
+    let cache = PhiCache::new(&Zp::new(p), &[3, 5, 7]);
     let mut verified_vertical = 0;
     for _ in 0..6 {
         let (e, t) = curve_with_trace(&fp, &mut rng, |t| {
@@ -51,7 +51,7 @@ fn conductor_one_when_discriminant_is_squarefree() {
     let mut rng = Rng::new(82);
     let p = next_prime(1u64 << 20);
     let fp = Zp::new(p);
-    let cache = PhiCache::new(p, &[3, 5]);
+    let cache = PhiCache::new(&Zp::new(p), &[3, 5]);
     let (e, t) = curve_with_trace(&fp, &mut rng, |t| {
         let d = (t * t - 4 * p as i64).abs();
         d % 9 != 0 && d % 25 != 0 && d % 4 != 0 && t % 2 != 0

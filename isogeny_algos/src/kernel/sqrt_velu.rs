@@ -255,6 +255,330 @@ pub fn sqrt_velu<F: Field>(f: &F, e: &Curve<F::E>, p: &Pt<F::E>, ell: u64) -> Sq
     }
 }
 
+// ------------------------------------------------------------------ fast version
+// R = F[delta]/delta^m;  R[Z] polynomials are packed into F[Y] with blocks of width 2m-1
+// (Kronecker substitution), so products use the fast univariate multiplication.
+
+fn pack<F: Field>(f: &F, a: &PolyS<F>, m: usize) -> Vec<F::E> {
+    let w = 2 * m - 1;
+    let mut v = vec![f.zero(); a.len() * w];
+    for (k, c) in a.iter().enumerate() {
+        v[k * w..k * w + m].copy_from_slice(&c[..m]);
+    }
+    v
+}
+fn unpack<F: Field>(f: &F, v: &[F::E], m: usize, len: usize) -> PolyS<F> {
+    let w = 2 * m - 1;
+    (0..len)
+        .map(|k| {
+            (0..m)
+                .map(|t| {
+                    if k * w + t < v.len() {
+                        v[k * w + t]
+                    } else {
+                        f.zero()
+                    }
+                })
+                .collect()
+        })
+        .collect()
+}
+fn mul_rz<F: Field>(f: &F, a: &PolyS<F>, b: &PolyS<F>, m: usize) -> PolyS<F> {
+    let prod = crate::poly::mul_raw(f, &pack(f, a, m), &pack(f, b, m));
+    unpack(f, &prod, m, a.len() + b.len() - 1)
+}
+
+/// Coefficients (in Z, each a series in delta) of F_j(X, Z) for X = 1/eps (inf) or X = alpha + delta.
+fn fj_coeffs<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    xj: F::E,
+    m: usize,
+    inf: bool,
+    alpha: F::E,
+) -> PolyS<F> {
+    let c = |v: u64| f.from_u64(v);
+    let xj2 = f.mul(xj, xj);
+    let a2 = [xj2, f.neg(f.mul(c(2), xj)), f.one()];
+    let a1 = [
+        f.add(f.mul(c(2), f.mul(e.a, xj)), f.mul(c(4), e.b)),
+        f.mul(c(2), f.add(e.a, xj2)),
+        f.mul(c(2), xj),
+    ];
+    let a0 = [
+        f.sub(f.mul(e.a, e.a), f.mul(c(4), f.mul(e.b, xj))),
+        f.neg(f.add(f.mul(c(2), f.mul(e.a, xj)), f.mul(c(4), e.b))),
+        xj2,
+    ];
+    (0..3)
+        .map(|k| {
+            let mut s = vec![f.zero(); m];
+            if inf {
+                s[0] = a2[k];
+                if m > 1 {
+                    s[1] = f.neg(a1[k]);
+                }
+                if m > 2 {
+                    s[2] = a0[k];
+                }
+            } else {
+                let al = alpha;
+                s[0] = f.add(f.sub(f.mul(a2[k], f.mul(al, al)), f.mul(a1[k], al)), a0[k]);
+                if m > 1 {
+                    s[1] = f.sub(f.mul(f.mul(c(2), al), a2[k]), a1[k]);
+                }
+                if m > 2 {
+                    s[2] = a2[k];
+                }
+            }
+            s
+        })
+        .collect()
+}
+
+/// Same output as `ij_product`, in O~(sqrt l): product tree over J in R[Z], multipoint evaluation at I.
+fn ij_product_fast<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    xs_j: &[F::E],
+    xs_i: &[F::E],
+    m: usize,
+    inf: bool,
+    alpha: F::E,
+    tree_i: &[Vec<crate::poly::Poly<F>>],
+) -> Ser<F> {
+    let mut layer: Vec<PolyS<F>> = xs_j
+        .iter()
+        .map(|&xj| fj_coeffs(f, e, xj, m, inf, alpha))
+        .collect();
+    while layer.len() > 1 {
+        layer = layer
+            .chunks(2)
+            .map(|c| {
+                if c.len() == 2 {
+                    mul_rz(f, &c[0], &c[1], m)
+                } else {
+                    c[0].clone()
+                }
+            })
+            .collect();
+    }
+    let g = &layer[0];
+    // evaluate each delta-component at the centres
+    let mut vals: Vec<Ser<F>> = vec![vec![f.zero(); m]; xs_i.len()];
+    for t in 0..m {
+        let mut comp: crate::poly::Poly<F> = g.iter().map(|c| c[t]).collect();
+        crate::poly::trim(f, &mut comp);
+        let ev = if xs_i.len() <= 8 {
+            xs_i.iter()
+                .map(|&x| crate::poly::eval(f, &comp, x))
+                .collect()
+        } else {
+            crate::poly::multipoint_eval_tree(f, &comp, tree_i)
+        };
+        for (i, v) in ev.into_iter().enumerate() {
+            vals[i][t] = v;
+        }
+    }
+    // product of the values in R (balanced)
+    while vals.len() > 1 {
+        vals = vals
+            .chunks(2)
+            .map(|c| {
+                if c.len() == 2 {
+                    smul(f, &c[0], &c[1])
+                } else {
+                    c[0].clone()
+                }
+            })
+            .collect();
+    }
+    vals.pop().unwrap_or_else(|| sconst(f, f.one(), m))
+}
+
+/// x-only Weierstrass ladder: ((X_m : Z_m), (X_{m+1} : Z_{m+1})) for x(P) = x0.
+fn ladder_pair<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    x0: F::E,
+    m: usize,
+) -> ((F::E, F::E), (F::E, F::E)) {
+    use crate::kernel::xonly::{xadd_c, xdbl_c, XConst};
+    let c = XConst::new(f, e);
+    let xadd_w = |_f: &F, _e: &Curve<F::E>, p: (F::E, F::E), q: (F::E, F::E), d: (F::E, F::E)| {
+        xadd_c(f, &c, p, q, d)
+    };
+    let xdbl_w = |_f: &F, _e: &Curve<F::E>, p: (F::E, F::E)| xdbl_c(f, &c, p);
+    let p = (x0, f.one());
+    let (mut r0, mut r1) = (p, xdbl_w(f, e, p));
+    let bits = usize::BITS - m.leading_zeros();
+    for i in (0..bits.saturating_sub(1)).rev() {
+        if (m >> i) & 1 == 0 {
+            r1 = xadd_w(f, e, r0, r1, p);
+            r0 = xdbl_w(f, e, r0);
+        } else {
+            r0 = xadd_w(f, e, r0, r1, p);
+            r1 = xdbl_w(f, e, r1);
+        }
+    }
+    (r0, r1)
+}
+
+/// sqrt-Velu from x(P) only: index sets from projective x-only chains + one batch inversion,
+/// products in R[Z] by product trees and evaluation at the centres by remainder trees.
+pub fn sqrt_velu_fast<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    x0: F::E,
+    ell: u64,
+) -> Option<SqrtVeluIso<F>> {
+    use crate::kernel::xonly::{xadd_c, xdbl_c, XConst};
+    let xc = XConst::new(f, e);
+    let xadd_w = |_f: &F, _e: &Curve<F::E>, p: (F::E, F::E), q: (F::E, F::E), d: (F::E, F::E)| {
+        xadd_c(f, &xc, p, q, d)
+    };
+    let n = ((ell - 1) / 2) as usize;
+    let mut b = ((n as f64 / 2.0).sqrt()).floor() as usize;
+    if b < 1 {
+        b = 1;
+    }
+    let bp = n / (2 * b + 1);
+    if bp < 2 {
+        // tiny degree: plain x-only Velu data in the same structure
+        let xs = crate::kernel::xonly::multiples_x_fast(f, e, x0, n)?;
+        let mut prod = sconst(f, f.one(), 4);
+        for &x in &xs {
+            prod = smul(f, &prod, &vec![f.one(), f.neg(x), f.zero(), f.zero()]);
+        }
+        let (e1, e2, e3) = (f.neg(prod[1]), prod[2], f.neg(prod[3]));
+        let p1 = e1;
+        let p2 = f.sub(f.mul(e1, e1), f.mul(f.from_u64(2), e2));
+        let p3 = f.add(
+            f.sub(
+                f.mul(e1, f.mul(e1, e1)),
+                f.mul(f.from_u64(3), f.mul(e1, e2)),
+            ),
+            f.mul(f.from_u64(3), e3),
+        );
+        let cod = super::kohel::codomain_from_sums(f, e, n, (p1, p2, p3));
+        return Some(SqrtVeluIso {
+            dom: *e,
+            cod,
+            deg: ell,
+            n,
+            p1,
+            xs_j: vec![],
+            xs_i: vec![],
+            xs_k: xs,
+            d0: f.one(),
+        });
+    }
+    let p = (x0, f.one());
+    // J chain: x_1 .. x_{2b+1}
+    let mut proj: Vec<(F::E, F::E)> = vec![p, xdbl_c(f, &xc, p)];
+    for k in 2..=2 * b {
+        let d = proj[k - 2];
+        if f.is_zero(d.0) {
+            return None;
+        }
+        proj.push(xadd_w(f, e, proj[k - 1], p, d));
+    }
+    let s = proj[2 * b]; // (2b+1)P
+                         // I chain: c_0 = (b+1)P, c_{-1} = -bP, c_{i+1} = c_i + S
+    let mut centres: Vec<(F::E, F::E)> = vec![proj[b]];
+    let mut prev = proj[b - 1];
+    for _ in 1..bp {
+        if f.is_zero(prev.0) {
+            return None;
+        }
+        let next = xadd_w(f, e, *centres.last().unwrap(), s, prev);
+        prev = *centres.last().unwrap();
+        centres.push(next);
+    }
+    // K: indices t0+1 .. n with t0 = (2b+1) bp, from a ladder pair at t0 and a chain
+    let t0 = (2 * b + 1) * bp;
+    let klen = n - t0;
+    let mut kpts: Vec<(F::E, F::E)> = vec![];
+    if klen > 0 {
+        let (rt0, rt1) = ladder_pair(f, e, x0, t0);
+        let (mut a0, mut a1) = (rt0, rt1);
+        kpts.push(a1);
+        for _ in 1..klen {
+            if f.is_zero(a0.0) {
+                return None;
+            }
+            let a2 = xadd_w(f, e, a1, p, a0);
+            a0 = a1;
+            a1 = a2;
+            kpts.push(a1);
+        }
+    }
+    let all: Vec<(F::E, F::E)> = proj[..b]
+        .iter()
+        .chain(centres.iter())
+        .chain(kpts.iter())
+        .copied()
+        .collect();
+    let zs: Vec<F::E> = all.iter().map(|q| q.1).collect();
+    if zs.iter().any(|&z| f.is_zero(z)) {
+        return None;
+    }
+    let zi = f.batch_inv(&zs);
+    let xs: Vec<F::E> = all.iter().zip(zi).map(|(q, iz)| f.mul(q.0, iz)).collect();
+    let xs_j = xs[..b].to_vec();
+    let xs_i = xs[b..b + bp].to_vec();
+    let xs_k = xs[b + bp..].to_vec();
+    let m = 4;
+    let tree_i = crate::poly::subproduct_tree(f, &xs_i);
+    // D0 = prod_c h_J(x_c)^2
+    let hj = crate::poly::from_roots(f, &xs_j);
+    let hv = if xs_i.len() <= 8 {
+        xs_i.iter()
+            .map(|&x| crate::poly::eval(f, &hj, x))
+            .collect::<Vec<_>>()
+    } else {
+        crate::poly::multipoint_eval_tree(f, &hj, &tree_i)
+    };
+    let mut d0 = f.one();
+    for v in hv {
+        d0 = f.mul(d0, f.sq(v));
+    }
+    let mut prod = sconst(f, f.one(), m);
+    let ij = ij_product_fast(f, e, &xs_j, &xs_i, m, true, f.zero(), &tree_i);
+    let inv0 = f.inv(ij[0]);
+    prod = smul(
+        f,
+        &prod,
+        &ij.iter().map(|&c| f.mul(c, inv0)).collect::<Vec<_>>(),
+    );
+    for &x in xs_i.iter().chain(xs_k.iter()) {
+        prod = smul(f, &prod, &vec![f.one(), f.neg(x), f.zero(), f.zero()]);
+    }
+    let (e1, e2, e3) = (f.neg(prod[1]), prod[2], f.neg(prod[3]));
+    let p1 = e1;
+    let p2 = f.sub(f.mul(e1, e1), f.mul(f.from_u64(2), e2));
+    let p3 = f.add(
+        f.sub(
+            f.mul(e1, f.mul(e1, e1)),
+            f.mul(f.from_u64(3), f.mul(e1, e2)),
+        ),
+        f.mul(f.from_u64(3), e3),
+    );
+    let cod = super::kohel::codomain_from_sums(f, e, n, (p1, p2, p3));
+    let _ = d0;
+    Some(SqrtVeluIso {
+        dom: *e,
+        cod,
+        deg: ell,
+        n,
+        p1,
+        xs_j,
+        xs_i,
+        xs_k,
+        d0,
+    })
+}
+
 impl<F: Field> SqrtVeluIso<F> {
     /// (f(x), f'(x)) for x outside the kernel.
     fn eval_xd(&self, f: &F, alpha: F::E) -> Option<(F::E, F::E)> {
@@ -263,7 +587,12 @@ impl<F: Field> SqrtVeluIso<F> {
         // h(alpha+delta) = prod_{k in S}(alpha + delta - x_k)
         let mut h = sconst(f, f.one(), m);
         if !self.xs_i.is_empty() {
-            let ij = ij_product(f, e, &self.xs_j, &self.xs_i, m, false, alpha);
+            let ij = if self.xs_i.len() > 8 {
+                let tree_i = crate::poly::subproduct_tree(f, &self.xs_i);
+                ij_product_fast(f, e, &self.xs_j, &self.xs_i, m, false, alpha, &tree_i)
+            } else {
+                ij_product(f, e, &self.xs_j, &self.xs_i, m, false, alpha)
+            };
             let d0i = f.inv(self.d0);
             let ij: Ser<F> = ij.iter().map(|&c| f.mul(c, d0i)).collect();
             h = smul(f, &h, &ij);

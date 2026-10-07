@@ -19,7 +19,7 @@ struct Walker<E> {
 
 pub fn ghs<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     j1: F::E,
     j2: F::E,
@@ -110,7 +110,7 @@ pub fn ghs<F: Field>(
 /// GHS with Kohel volcano normalisation. `trace` is the Frobenius trace of both curves.
 pub fn ghs_volcano<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     p: u64,
     trace: i64,
@@ -162,7 +162,7 @@ pub fn ghs_volcano<F: Field>(
 /// previous vertex.
 pub fn galbraith_stolbunov<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     weights: &[u32],
     j1: F::E,

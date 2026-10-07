@@ -33,13 +33,21 @@ fn check<F: Field>(f: &F, rng: &mut Rng) {
     for &n in &[2usize, 17, 40, 100, 257] {
         let m = rand_poly(f, n + 1, rng);
         let pm = PolyModulus::new(f, &m);
-        for &l in &[0usize, 5, n, n + 1, 2 * n - 1, 2 * n + 3] {
+        for &l in &[0usize, 5, n, n + 1, 2 * n - 1, 2 * n, 2 * n + 1, 2 * n + 3] {
             let a = rand_poly(f, l, rng);
             assert_eq!(
                 pm.rem(f, &a),
                 poly::rem(f, &a, &poly::monic(f, &m)),
                 "rem deg {n} len {l}"
             );
+        }
+    }
+    // poly::rem dispatch boundary (regression: lengths 2n and 2n+1 recursed forever)
+    for &n in &[63usize, 64, 100] {
+        let b = rand_poly(f, n + 1, rng);
+        for l in [2 * n - 1, 2 * n, 2 * n + 1, 2 * n + 2] {
+            let a = rand_poly(f, l, rng);
+            assert_eq!(poly::rem(f, &a, &b), poly::divrem(f, &a, &b).1);
         }
     }
     for &n in &[10usize, 64, 65, 200, 513] {

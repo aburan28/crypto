@@ -38,7 +38,7 @@ fn factor_small(mut n: u128) -> (Vec<(u64, u32)>, u128) {
 /// and have Phi_l in `cache`.
 pub fn endomorphism_ring<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     p: u64,
     trace: i64,
     j: F::E,

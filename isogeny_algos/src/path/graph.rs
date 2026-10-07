@@ -4,17 +4,22 @@ use crate::field::{Field, Rng};
 use crate::find::{elkies, modpoly::Phi};
 use std::collections::HashMap;
 
-pub struct PhiCache {
-    pub phis: Vec<Phi>,
+pub struct PhiCache<F: Field> {
+    pub phis: Vec<Phi<F>>,
 }
-impl PhiCache {
-    pub fn new(p: u64, ells: &[usize]) -> Self {
-        let fp = crate::field::Zp::new(p);
+impl<F: Field> PhiCache<F> {
+    pub fn new(f: &F, ells: &[usize]) -> Self {
         PhiCache {
-            phis: ells.iter().map(|&l| Phi::compute(&fp, l)).collect(),
+            phis: ells.iter().map(|&l| Phi::compute(f, l)).collect(),
         }
     }
-    pub fn get(&self, ell: usize) -> &Phi {
+    /// The cache over another field through an embedding (e.g. F_p into F_{p^2}).
+    pub fn lift<G: Field>(&self, emb: impl Fn(F::E) -> G::E + Copy) -> PhiCache<G> {
+        PhiCache {
+            phis: self.phis.iter().map(|p| p.lift(emb)).collect(),
+        }
+    }
+    pub fn get(&self, ell: usize) -> &Phi<F> {
         self.phis
             .iter()
             .find(|p| p.ell == ell)
@@ -52,7 +57,7 @@ impl<E: Copy> Path<E> {
 /// Distinct F-rational neighbours of j in the l-graph for each l in `ells`.
 pub fn neighbors<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     j: F::E,
     rng: &mut Rng,
@@ -66,7 +71,7 @@ pub fn neighbors<F: Field>(
     out
 }
 
-pub fn verify_path<F: Field>(f: &F, cache: &PhiCache, path: &Path<F::E>) -> bool {
+pub fn verify_path<F: Field>(f: &F, cache: &PhiCache<F>, path: &Path<F::E>) -> bool {
     path.ells
         .iter()
         .enumerate()
@@ -77,7 +82,7 @@ pub fn verify_path<F: Field>(f: &F, cache: &PhiCache, path: &Path<F::E>) -> bool
 /// Fails (None) if some step passes through j in {0,1728} or a degenerate Phi derivative.
 pub fn explicit_chain<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     e: &Curve<F::E>,
     path: &Path<F::E>,
 ) -> Option<Vec<RatIsogeny<F>>> {

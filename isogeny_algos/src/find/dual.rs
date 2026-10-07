@@ -41,7 +41,7 @@ impl<F: Field> Isogeny<F> for ScaledIso<F> {
 }
 
 /// Dual of `iso` (prime degree, Phi_l available, no j in {0, 1728} on the way).
-pub fn dual_isogeny<F: Field>(f: &F, phi: &Phi, iso: &RatIsogeny<F>) -> Option<ScaledIso<F>> {
+pub fn dual_isogeny<F: Field>(f: &F, phi: &Phi<F>, iso: &RatIsogeny<F>) -> Option<ScaledIso<F>> {
     let ell = phi.ell;
     let et = elkies_codomain(f, phi, &iso.cod, jinv(f, &iso.dom))?;
     let psi = bmss_isogeny(f, &iso.cod, &et, ell)?;

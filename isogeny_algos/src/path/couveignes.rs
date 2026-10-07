@@ -49,7 +49,7 @@ pub fn eigen_class(fp: &Zp, e: &Curve<u64>, h: &Poly<Zp>, ell: u64) -> Option<u6
 
 pub struct Action<'a> {
     pub fp: &'a Zp,
-    pub cache: &'a PhiCache,
+    pub cache: &'a PhiCache<Zp>,
     pub plus_class: HashMap<usize, u64>,
 }
 

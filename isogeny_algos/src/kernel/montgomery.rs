@@ -62,6 +62,36 @@ pub fn ladder(fp: &Zp, a24: u64, x: u64, k: u128) -> XZ {
     r0
 }
 
+/// Montgomery ladder on a projective input point: [k]P for P = (X:Z).
+pub fn ladder_xz(fp: &Zp, a24: u64, p: XZ, k: u128) -> XZ {
+    if k == 0 {
+        return (1, 0);
+    }
+    let (mut r0, mut r1) = (p, xdbl(fp, a24, p));
+    let top = 128 - k.leading_zeros() as usize;
+    for i in (0..top - 1).rev() {
+        if (k >> i) & 1 == 0 {
+            r1 = xadd(fp, r0, r1, p);
+            r0 = xdbl(fp, a24, r0);
+        } else {
+            r0 = xadd(fp, r0, r1, p);
+            r1 = xdbl(fp, a24, r1);
+        }
+    }
+    r0
+}
+
+/// Projective image of (X:Z) under the odd-degree isogeny with kernel multiples `mults`:
+/// x' = x prod((x x_i - 1)/(x - x_i))^2  ->  (X prod(X X_i - Z Z_i)^2 : Z prod(X Z_i - Z X_i)^2).
+pub fn isog_xz(fp: &Zp, mults: &[XZ], p: XZ) -> XZ {
+    let (mut num, mut den) = (1u64, 1u64);
+    for &(xi, zi) in mults {
+        num = fp.mul(num, fp.sub(fp.mul(p.0, xi), fp.mul(p.1, zi)));
+        den = fp.mul(den, fp.sub(fp.mul(p.0, zi), fp.mul(p.1, xi)));
+    }
+    (fp.mul(p.0, fp.mul(num, num)), fp.mul(p.1, fp.mul(den, den)))
+}
+
 /// [1]K, [2]K, ..., [d]K as projective x-coordinates.
 pub fn multiples(fp: &Zp, a24: u64, k: XZ, d: usize) -> Vec<XZ> {
     let mut v = vec![k];

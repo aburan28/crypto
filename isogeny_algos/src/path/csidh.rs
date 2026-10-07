@@ -86,6 +86,49 @@ impl Csidh {
         a
     }
 
+    /// [prod l_i^{e_i}] E_A by CLMPR's algorithm: one sampled point serves every prime whose exponent
+    /// has the sign of the point (E or its twist): clear the cofactor once, then peel off one prime at
+    /// a time, pushing the point through each isogeny.
+    pub fn action_batched(&self, mut a: u64, exps: &[i32], rng: &mut Rng) -> u64 {
+        let fp = &self.fp;
+        let mut e = exps.to_vec();
+        while e.iter().any(|&x| x != 0) {
+            let x = fp.random(rng);
+            let r = self.rhs(a, x);
+            if r == 0 {
+                continue;
+            }
+            let positive = fp.sqrt(r).is_some();
+            let set: Vec<usize> = (0..e.len())
+                .filter(|&i| e[i] != 0 && (e[i] > 0) == positive)
+                .collect();
+            if set.is_empty() {
+                continue;
+            }
+            let mut k: u128 = set.iter().map(|&i| self.primes[i] as u128).product();
+            let mut q = ladder_xz(fp, a24(fp, a), (x, 1), (fp.p as u128 + 1) / k);
+            for &i in set.iter().rev() {
+                let ell = self.primes[i];
+                k /= ell as u128;
+                if q.1 == 0 {
+                    break;
+                }
+                let e24 = a24(fp, a);
+                let kp = ladder_xz(fp, e24, q, k);
+                if kp.1 == 0 {
+                    continue; // q has no l-part: this prime waits for another point
+                }
+                let d = ((ell - 1) / 2) as usize;
+                let ms = multiples(fp, e24, kp, d);
+                let a_new = velu_codomain(fp, a, &ms, ell);
+                q = isog_xz(fp, &ms, q);
+                a = a_new;
+                e[i] -= if positive { 1 } else { -1 };
+            }
+        }
+        a
+    }
+
     /// Order of the ideal class of l_i in Cl(Z[sqrt(-p)]): length of the cycle E_0 -> ... -> E_0.
     pub fn ideal_order(&self, idx: usize, rng: &mut Rng, cap: usize) -> Option<usize> {
         let mut a = 0u64;

@@ -55,21 +55,20 @@ impl<F: Field> Isogeny<F> for VeluIso<F> {
             Pt::Inf => return Pt::Inf,
             Pt::Aff(x, y) => (x, y),
         };
+        // one batch inversion for all (x - x_Q)
+        let ds: Vec<F::E> = self.reps.iter().map(|&(xq, _, _)| f.sub(x, xq)).collect();
+        if ds.iter().any(|&d| f.is_zero(d)) {
+            return Pt::Inf;
+        }
+        let inv = f.batch_inv(&ds);
         let mut fx = x;
         let mut fd = f.one();
-        for &(xq, v, u) in &self.reps {
-            let d = f.sub(x, xq);
-            if f.is_zero(d) {
-                return Pt::Inf;
-            }
-            let di = f.inv(d);
-            let di2 = f.mul(di, di);
+        let two = f.from_u64(2);
+        for (&(_, v, u), &di) in self.reps.iter().zip(&inv) {
+            let di2 = f.sq(di);
             let di3 = f.mul(di2, di);
             fx = f.add(fx, f.add(f.mul(v, di), f.mul(u, di2)));
-            fd = f.sub(
-                fd,
-                f.add(f.mul(v, di2), f.mul(f.from_u64(2), f.mul(u, di3))),
-            );
+            fd = f.sub(fd, f.add(f.mul(v, di2), f.mul(two, f.mul(u, di3))));
         }
         Pt::Aff(fx, f.mul(y, fd))
     }

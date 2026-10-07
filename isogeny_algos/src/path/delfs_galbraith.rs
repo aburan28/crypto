@@ -14,7 +14,7 @@ pub struct Stats {
 /// Non-backtracking random walk over F_{p^2} until j in F_p.
 pub fn walk_to_fp(
     f2: &Zp2,
-    cache: &PhiCache,
+    cache: &PhiCache<Zp2>,
     j: (u64, u64),
     max_steps: usize,
     rng: &mut Rng,
@@ -48,7 +48,8 @@ pub fn walk_to_fp(
 pub fn delfs_galbraith(
     f2: &Zp2,
     fp: &Zp,
-    cache: &PhiCache,
+    cache: &PhiCache<Zp>,
+    cache2: &PhiCache<Zp2>,
     j1: (u64, u64),
     j2: (u64, u64),
     max_walk: usize,
@@ -59,10 +60,10 @@ pub fn delfs_galbraith(
         walk_steps: 0,
         bfs_nodes: 0,
     };
-    let Some(w1) = walk_to_fp(f2, cache, j1, max_walk, rng) else {
+    let Some(w1) = walk_to_fp(f2, cache2, j1, max_walk, rng) else {
         return (None, st);
     };
-    let Some(w2) = walk_to_fp(f2, cache, j2, max_walk, rng) else {
+    let Some(w2) = walk_to_fp(f2, cache2, j2, max_walk, rng) else {
         return (None, st);
     };
     st.walk_steps = w1.len() + w2.len();

@@ -187,3 +187,52 @@ impl IntoPair for ((u64, u64), (u64, u64)) {
         self
     }
 }
+
+#[test]
+fn fast_xonly_velu_matches() {
+    use isogeny_algos::fpm::FpM;
+    let mut rng = Rng::new(24);
+    let fp = Zp::new(next_prime(1u64 << 40));
+    for &ell in &[3u64, 5, 7, 11, 31, 101, 401] {
+        let (e, p) = curve_with_point(&fp, ell, &mut rng);
+        let x0 = if let Pt::Aff(x, _) = p {
+            x
+        } else {
+            unreachable!()
+        };
+        let slow = velu_xonly(&fp, &e, x0, ell).unwrap();
+        let fast = velu_xonly_fast(&fp, &e, x0, ell).unwrap();
+        assert_eq!(slow.cod, fast.cod, "l={ell}");
+        let xs1: Vec<u64> = slow.reps.iter().map(|r| r.0).collect();
+        let xs2: Vec<u64> = fast.reps.iter().map(|r| r.0).collect();
+        assert_eq!(xs1, xs2);
+        // FpM<1> agrees too
+        let fm = FpM::<1>::from_u64_modulus(fp.p);
+        let em = Curve::new(fm.from_u64(e.a), fm.from_u64(e.b));
+        let fm_iso = velu_xonly_fast(&fm, &em, fm.from_u64(x0), ell).unwrap();
+        assert_eq!(fm.to_canonical(&fm_iso.cod.a)[0], fast.cod.a);
+        assert!(check_homomorphism(&fp, &fast, &mut rng, 3));
+    }
+}
+
+#[test]
+fn fast_sqrt_velu_matches_velu() {
+    use isogeny_algos::kernel::sqrt_velu::sqrt_velu_fast;
+    let mut rng = Rng::new(25);
+    let fp = Zp::new(next_prime(1u64 << 32));
+    for &ell in &[3u64, 5, 7, 11, 13, 31, 61, 101, 211, 401, 1009, 2003, 10007] {
+        let (e, p) = curve_with_point(&fp, ell, &mut rng);
+        let x0 = if let Pt::Aff(x, _) = p {
+            x
+        } else {
+            unreachable!()
+        };
+        let v = velu_xonly_fast(&fp, &e, x0, ell).unwrap();
+        let s = sqrt_velu_fast(&fp, &e, x0, ell).expect("sqrt-velu");
+        assert_eq!(s.cod, v.cod, "codomain l={ell}");
+        for _ in 0..3 {
+            let q = e.random_point(&fp, &mut rng);
+            assert_eq!(s.eval(&fp, &q), v.eval(&fp, &q), "eval l={ell}");
+        }
+    }
+}

@@ -1,14 +1,23 @@
 //! Classical modular polynomial Phi_l(X,Y) over F_p, built from q-expansions of j reduced mod p:
 //! solve for the unique (up to scale) symmetric Phi with Phi(j(q), j(q^l)) having no polar part
 //! or constant term. Practical up to l ~ 31 with this baseline linear algebra.
-use crate::field::{Field, Zp};
+use crate::field::Field;
 use crate::poly::{self, Poly};
+use crate::series;
 
-pub struct Phi {
+pub struct Phi<F: Field> {
     pub ell: usize,
-    pub p: u64,
     /// c[i][j] coefficient of X^i Y^j, 0 <= i,j <= l+1
-    pub c: Vec<Vec<u64>>,
+    pub c: Vec<Vec<F::E>>,
+}
+
+impl<F: Field> Clone for Phi<F> {
+    fn clone(&self) -> Self {
+        Phi {
+            ell: self.ell,
+            c: self.c.clone(),
+        }
+    }
 }
 
 fn sigma3(n: usize) -> u64 {
@@ -21,29 +30,17 @@ fn sigma3(n: usize) -> u64 {
     s
 }
 
-fn smul(fp: &Zp, a: &[u64], b: &[u64], len: usize) -> Vec<u64> {
-    let mut r = vec![0u64; len];
-    for i in 0..a.len().min(len) {
-        if a[i] == 0 {
-            continue;
-        }
-        for j in 0..b.len().min(len - i) {
-            r[i + j] = fp.add(r[i + j], fp.mul(a[i], b[j]));
-        }
-    }
-    r
-}
-
-/// S(q) = q*j(q) = E4^3 / prod(1-q^n)^24 as a power series mod p, `len` coefficients.
-fn s_series(fp: &Zp, len: usize) -> Vec<u64> {
-    let mut e4 = vec![0u64; len];
-    e4[0] = 1;
+/// S(q) = q*j(q) = E4^3 / prod(1-q^n)^24 as a power series over F, `len` coefficients.
+fn s_series<F: Field>(f: &F, len: usize) -> Vec<F::E> {
+    let mut e4 = vec![f.zero(); len];
+    e4[0] = f.one();
+    let c240 = f.from_u64(240);
     for n in 1..len {
-        e4[n] = fp.mul(240 % fp.p, sigma3(n) % fp.p);
+        e4[n] = f.mul(c240, f.from_u64(sigma3(n)));
     }
-    let e4_3 = smul(fp, &smul(fp, &e4, &e4, len), &e4, len);
+    let e4_3 = series::mul(f, &series::mul(f, &e4, &e4, len), &e4, len);
     // prod (1-q^n) via pentagonal numbers
-    let mut eta = vec![0u64; len];
+    let mut eta = vec![f.zero(); len];
     let mut k: i64 = 0;
     loop {
         let mut any = false;
@@ -51,11 +48,11 @@ fn s_series(fp: &Zp, len: usize) -> Vec<u64> {
             if k == 0 && idx == 1 {
                 continue;
             }
-            let e = (kk * (3 * kk - 1) / 2) as i64;
+            let e = kk * (3 * kk - 1) / 2;
             if e >= 0 && (e as usize) < len {
                 any = true;
-                let sgn = if kk % 2 == 0 { 1 } else { fp.p - 1 };
-                eta[e as usize] = fp.add(eta[e as usize], sgn);
+                let sgn = if kk % 2 == 0 { f.one() } else { f.neg(f.one()) };
+                eta[e as usize] = f.add(eta[e as usize], sgn);
             }
         }
         if !any && k > 0 {
@@ -63,38 +60,29 @@ fn s_series(fp: &Zp, len: usize) -> Vec<u64> {
         }
         k += 1;
     }
-    let e2 = smul(fp, &eta, &eta, len);
-    let e4s = smul(fp, &e2, &e2, len);
-    let e8 = smul(fp, &e4s, &e4s, len);
-    let e16 = smul(fp, &e8, &e8, len);
-    let e24 = smul(fp, &e16, &e8, len);
-    // invert e24
-    let mut inv = vec![0u64; len];
-    inv[0] = 1;
-    for kx in 1..len {
-        let mut s = 0u64;
-        for i in 1..=kx {
-            s = fp.add(s, fp.mul(e24[i], inv[kx - i]));
-        }
-        inv[kx] = fp.neg(s);
-    }
-    smul(fp, &e4_3, &inv, len)
+    let e2 = series::mul(f, &eta, &eta, len);
+    let e4s = series::mul(f, &e2, &e2, len);
+    let e8 = series::mul(f, &e4s, &e4s, len);
+    let e16 = series::mul(f, &e8, &e8, len);
+    let e24 = series::mul(f, &e16, &e8, len);
+    series::mul(f, &e4_3, &series::inv(f, &e24, len), len)
 }
 
-impl Phi {
-    pub fn compute(fp: &Zp, ell: usize) -> Phi {
-        assert!(fp.p > 10_000 && (fp.p as usize) > 4 * ell);
+impl<F: Field> Phi<F> {
+    /// Phi_l over F (characteristic must be large compared with the coefficients' denominators:
+    /// we require a field of size > 10^4 and > 4l).
+    pub fn compute(f: &F, ell: usize) -> Phi<F> {
+        assert!(f.q() > crate::bigint::Big::from_u64(10_000.max(4 * ell as u64)));
         let l1 = ell + 1;
         let top = l1 * l1; // max pole order
         let len = top + 2;
-        let s = s_series(fp, len);
+        let s = s_series(f, len);
         // A_i = S^i
-        let mut a: Vec<Vec<u64>> = vec![vec![0; len]; l1 + 1];
-        a[0][0] = 1;
+        let mut a: Vec<Vec<F::E>> = vec![vec![f.zero(); len]; l1 + 1];
+        a[0][0] = f.one();
         for i in 1..=l1 {
-            a[i] = smul(fp, &a[i - 1], &s, len);
+            a[i] = series::mul(f, &a[i - 1], &s, len);
         }
-        // pairs
         let mut pairs = vec![];
         for i in 0..=l1 {
             for j in i..=l1 {
@@ -105,31 +93,31 @@ impl Phi {
         let ncols = pairs.len();
         let nrows = top + 1;
         // T(i,j)[k] = coefficient of q^{k-(i+l j)} in J1^i J2^j = (A_i * A_j(q^l))[k]
-        let term = |i: usize, j: usize| -> Vec<u64> {
-            let kmax = i + ell * j; // need k <= kmax
-            let mut r = vec![0u64; kmax + 1];
+        let term = |i: usize, j: usize| -> Vec<F::E> {
+            let kmax = i + ell * j;
+            let mut r = vec![f.zero(); kmax + 1];
             for m in 0..=(kmax / ell) {
                 let cj = a[j][m];
-                if cj == 0 {
+                if f.is_zero(cj) {
                     continue;
                 }
                 let off = m * ell;
                 for k in off..=kmax {
-                    r[k] = fp.add(r[k], fp.mul(cj, a[i][k - off]));
+                    r[k] = f.add(r[k], f.mul(cj, a[i][k - off]));
                 }
             }
             r
         };
-        let mut mat = vec![vec![0u64; ncols + 1]; nrows];
+        let mut mat = vec![vec![f.zero(); ncols + 1]; nrows];
         for (ci, &(i, j)) in pairs.iter().enumerate() {
             let mut add_term = |ii: usize, jj: usize| {
                 let t = term(ii, jj);
-                let shift = ii + ell * jj; // exponent e = k - shift, row = e + top
+                let shift = ii + ell * jj;
                 for (k, &v) in t.iter().enumerate() {
                     let e = k as i64 - shift as i64;
                     if e <= 0 {
                         let row = (e + top as i64) as usize;
-                        mat[row][ci] = fp.add(mat[row][ci], v);
+                        mat[row][ci] = f.add(mat[row][ci], v);
                     }
                 }
             };
@@ -138,64 +126,64 @@ impl Phi {
                 add_term(j, i);
             }
         }
-        // move normalisation column to RHS: sum c_k col_k = - col_norm
-        for r in 0..nrows {
-            mat[r][ncols] = fp.neg(mat[r][norm]);
+        for row in mat.iter_mut() {
+            row[ncols] = f.neg(row[norm]);
         }
         let cols: Vec<usize> = (0..ncols).filter(|&c| c != norm).collect();
-        // Gaussian elimination on columns `cols`
         let mut piv_row = 0;
         let mut piv_of_col = vec![usize::MAX; ncols];
         for &col in &cols {
-            let mut pr = None;
-            for r in piv_row..nrows {
-                if mat[r][col] != 0 {
-                    pr = Some(r);
-                    break;
-                }
-            }
+            let pr = (piv_row..nrows).find(|&r| !f.is_zero(mat[r][col]));
             let Some(pr) = pr else {
-                panic!("Phi_{ell}: rank-deficient system (p too small?)")
+                panic!("Phi_{ell}: rank-deficient system (field too small?)")
             };
             mat.swap(piv_row, pr);
-            let inv = fp.inv(mat[piv_row][col]);
-            for c in 0..=ncols {
-                mat[piv_row][c] = fp.mul(mat[piv_row][c], inv);
+            let inv = f.inv(mat[piv_row][col]);
+            for c in col..=ncols {
+                mat[piv_row][c] = f.mul(mat[piv_row][c], inv);
             }
-            for r in 0..nrows {
-                if r != piv_row && mat[r][col] != 0 {
-                    let fct = mat[r][col];
+            let pivot = mat[piv_row].clone();
+            for (r, row) in mat.iter_mut().enumerate() {
+                if r != piv_row && !f.is_zero(row[col]) {
+                    let fct = row[col];
                     for c in col..=ncols {
-                        let t = fp.mul(fct, mat[piv_row][c]);
-                        mat[r][c] = fp.sub(mat[r][c], t);
+                        row[c] = f.sub(row[c], f.mul(fct, pivot[c]));
                     }
                 }
             }
             piv_of_col[col] = piv_row;
             piv_row += 1;
         }
-        for r in piv_row..nrows {
-            assert_eq!(mat[r][ncols], 0, "Phi_{ell}: inconsistent system");
+        for row in mat.iter().skip(piv_row) {
+            assert!(f.is_zero(row[ncols]), "Phi_{ell}: inconsistent system");
         }
-        let mut cmat = vec![vec![0u64; l1 + 1]; l1 + 1];
+        let mut cmat = vec![vec![f.zero(); l1 + 1]; l1 + 1];
         for (ci, &(i, j)) in pairs.iter().enumerate() {
             let v = if ci == norm {
-                1
+                f.one()
             } else {
                 mat[piv_of_col[ci]][ncols]
             };
             cmat[i][j] = v;
             cmat[j][i] = v;
         }
+        Phi { ell, c: cmat }
+    }
+
+    /// The same polynomial over another field through an embedding (e.g. F_p into F_{p^2}).
+    pub fn lift<G: Field>(&self, emb: impl Fn(F::E) -> G::E) -> Phi<G> {
         Phi {
-            ell,
-            p: fp.p,
-            c: cmat,
+            ell: self.ell,
+            c: self
+                .c
+                .iter()
+                .map(|row| row.iter().map(|&x| emb(x)).collect())
+                .collect(),
         }
     }
 
     /// Phi(x0, Y) as a polynomial in Y over F.
-    pub fn y_poly<F: Field>(&self, f: &F, x0: F::E) -> Poly<F> {
+    pub fn y_poly(&self, f: &F, x0: F::E) -> Poly<F> {
         let l1 = self.ell + 1;
         let mut pw = vec![f.one()];
         for _ in 0..l1 {
@@ -205,7 +193,7 @@ impl Phi {
         for j in 0..=l1 {
             let mut s = f.zero();
             for i in 0..=l1 {
-                s = f.add(s, f.mul(f.from_u64(self.c[i][j]), pw[i]));
+                s = f.add(s, f.mul(self.c[i][j], pw[i]));
             }
             out.push(s);
         }
@@ -214,7 +202,7 @@ impl Phi {
     }
 
     /// (Phi_X, Phi_Y) at (x0, y0).
-    pub fn grad<F: Field>(&self, f: &F, x0: F::E, y0: F::E) -> (F::E, F::E) {
+    pub fn grad(&self, f: &F, x0: F::E, y0: F::E) -> (F::E, F::E) {
         let l1 = self.ell + 1;
         let mut xp = vec![f.one()];
         let mut yp = vec![f.one()];
@@ -225,7 +213,7 @@ impl Phi {
         let (mut px, mut py) = (f.zero(), f.zero());
         for i in 0..=l1 {
             for j in 0..=l1 {
-                let c = f.from_u64(self.c[i][j]);
+                let c = self.c[i][j];
                 if i > 0 {
                     px = f.add(
                         px,
@@ -244,7 +232,7 @@ impl Phi {
     }
 
     /// (Phi_XX, Phi_XY, Phi_YY) at (x0, y0).
-    pub fn hessian<F: Field>(&self, f: &F, x0: F::E, y0: F::E) -> (F::E, F::E, F::E) {
+    pub fn hessian(&self, f: &F, x0: F::E, y0: F::E) -> (F::E, F::E, F::E) {
         let l1 = self.ell + 1;
         let (mut xp, mut yp) = (vec![f.one()], vec![f.one()]);
         for _ in 0..l1 {
@@ -254,7 +242,7 @@ impl Phi {
         let (mut pxx, mut pxy, mut pyy) = (f.zero(), f.zero(), f.zero());
         for i in 0..=l1 {
             for j in 0..=l1 {
-                let c = f.from_u64(self.c[i][j]);
+                let c = self.c[i][j];
                 if i > 1 {
                     let w = f.mul(f.from_u64((i * (i - 1)) as u64), f.mul(xp[i - 2], yp[j]));
                     pxx = f.add(pxx, f.mul(c, w));
@@ -272,12 +260,12 @@ impl Phi {
         (pxx, pxy, pyy)
     }
 
-    pub fn eval<F: Field>(&self, f: &F, x0: F::E, y0: F::E) -> F::E {
+    pub fn eval(&self, f: &F, x0: F::E, y0: F::E) -> F::E {
         poly::eval(f, &self.y_poly(f, x0), y0)
     }
 
     /// Distinct F-rational roots j' of Phi_l(j, Y).
-    pub fn neighbors<F: Field>(&self, f: &F, j: F::E, rng: &mut crate::field::Rng) -> Vec<F::E> {
+    pub fn neighbors(&self, f: &F, j: F::E, rng: &mut crate::field::Rng) -> Vec<F::E> {
         poly::roots(f, &self.y_poly(f, j), rng)
     }
 }

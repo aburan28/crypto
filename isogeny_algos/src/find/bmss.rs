@@ -347,7 +347,61 @@ fn atkin_modcomp<F: Field>(
 }
 
 /// S(x) = x T(x^2) solving (B x^6 + A x^4 + 1) S'^2 = 1 + A~ S^4 + B~ S^6, S = x + O(x^5), to length n.
+/// Coefficient-by-coefficient: (S^2)_k, (S^4)_k, (S^6)_k only involve coefficients of S below k, so
+/// S' = sqrt(C (1 + A~ S^4 + B~ S^6)) can be solved one term at a time in O(n^2).
 fn s_ode<F: Field>(f: &F, e: &Curve<F::E>, et: &Curve<F::E>, n: usize) -> Vec<F::E> {
+    let mut den = vec![f.zero(); n.max(7)];
+    den[0] = f.one();
+    den[4] = e.a;
+    den[6] = e.b;
+    let cc = series::inv(f, &den, n);
+    let (mut s, mut s2, mut s4, mut s6) = (
+        vec![f.zero(); n + 1],
+        vec![f.zero(); n],
+        vec![f.zero(); n],
+        vec![f.zero(); n],
+    );
+    let mut inner = vec![f.zero(); n];
+    let mut t = vec![f.zero(); n];
+    s[1] = f.one();
+    let inv2 = f.inv(f.from_u64(2));
+    let invs = f.batch_inv(&(1..=n).map(|k| f.from_u64(k as u64)).collect::<Vec<_>>());
+    for k in 0..n {
+        if k >= 2 {
+            s2[k] = f.dot_rev(&s[1..k], &s[1..k]);
+        }
+        if k >= 4 {
+            s4[k] = f.dot_rev(&s2[2..k - 1], &s2[2..k - 1]);
+        }
+        if k >= 6 {
+            s6[k] = f.dot_rev(&s4[4..k - 1], &s2[2..k - 3]);
+        }
+        inner[k] = f.add(f.mul(et.a, s4[k]), f.mul(et.b, s6[k]));
+        if k == 0 {
+            inner[0] = f.add(inner[0], f.one());
+        }
+        // R_k = sum_i C_i inner_{k-i}
+        let rk = f.dot_rev(&cc[..=k], &inner[..=k]);
+        t[k] = if k == 0 {
+            f.one()
+        } else {
+            f.mul(f.sub(rk, f.dot_rev(&t[1..k], &t[1..k])), inv2)
+        };
+        if k + 1 <= n {
+            s[k + 1] = f.mul(t[k], invs[k]);
+        }
+    }
+    s.truncate(n);
+    s
+}
+
+/// Reference: the fixed-point solver used in V2 (O(n^3)).
+pub fn s_ode_fixed_point<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    et: &Curve<F::E>,
+    n: usize,
+) -> Vec<F::E> {
     let c = |v: u64| f.from_u64(v);
     let mut den = vec![f.zero(); n];
     den[0] = f.one();
@@ -369,7 +423,6 @@ fn s_ode<F: Field>(f: &F, e: &Curve<F::E>, et: &Curve<F::E>, n: usize) -> Vec<F:
             inner[k] = f.add(inner[k], f.add(f.mul(et.a, s4[k]), f.mul(et.b, s6[k])));
         }
         let rr = series::mul(f, &cc, &inner, n);
-        // sqrt(rr), rr[0] = 1
         let mut sp = vec![f.zero(); n];
         sp[0] = f.one();
         let inv2 = f.inv(c(2));
@@ -390,6 +443,16 @@ fn s_ode<F: Field>(f: &F, e: &Curve<F::E>, et: &Curve<F::E>, n: usize) -> Vec<F:
         s = ns;
     }
     s
+}
+
+/// For tests: both ODE solvers.
+pub fn s_ode_both<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    et: &Curve<F::E>,
+    n: usize,
+) -> (Vec<F::E>, Vec<F::E>) {
+    (s_ode(f, e, et, n), s_ode_fixed_point(f, e, et, n))
 }
 
 /// U(w) = 1/T(w)^2 where S(x) = x T(x^2); N/D = x U(1/x) so h_i = U[i+1]; length m.
@@ -610,7 +673,7 @@ pub fn isogeny<F: Field>(
 /// isolates E2 - l E2', and  sigma = (E2' - l E2)/12  (E~ must be the *normalised* codomain).
 pub fn sigma_from_phi<F: Field>(
     f: &F,
-    phi: &Phi,
+    phi: &Phi<F>,
     e: &Curve<F::E>,
     et: &Curve<F::E>,
 ) -> Option<F::E> {
@@ -660,7 +723,7 @@ pub fn sigma_from_phi<F: Field>(
 /// needs it), then the chosen algorithm of the family.
 pub fn isogenies_via_phi<F: Field>(
     f: &F,
-    phi: &Phi,
+    phi: &Phi<F>,
     e: &Curve<F::E>,
     m: Method,
     rng: &mut crate::field::Rng,

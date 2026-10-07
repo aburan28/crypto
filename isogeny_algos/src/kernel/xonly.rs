@@ -114,3 +114,127 @@ pub fn velu_xonly<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, ell: u64) -> Optio
         reps,
     })
 }
+
+/// Curve constants for x-only arithmetic, computed once (A, B, 4B, 8B).
+#[derive(Clone, Copy)]
+pub struct XConst<F: Field> {
+    pub a: F::E,
+    pub b: F::E,
+    pub b4: F::E,
+    pub b8: F::E,
+    pub four: F::E,
+}
+impl<F: Field> XConst<F> {
+    pub fn new(f: &F, e: &Curve<F::E>) -> Self {
+        let four = f.from_u64(4);
+        XConst {
+            a: e.a,
+            b: e.b,
+            b4: f.mul(four, e.b),
+            b8: f.mul(f.from_u64(8), e.b),
+            four,
+        }
+    }
+}
+
+/// Projective x-only doubling on y^2 = x^3 + Ax + B:
+/// X2 = (X^2 - A Z^2)^2 - 8B X Z^3,  Z2 = 4Z (X^3 + A X Z^2 + B Z^3).
+pub fn xdbl_c<F: Field>(f: &F, c: &XConst<F>, p: (F::E, F::E)) -> (F::E, F::E) {
+    let (x, z) = p;
+    let z2 = f.sq(z);
+    let x2 = f.sq(x);
+    let t = f.sub(x2, f.mul(c.a, z2));
+    let z3 = f.mul(z2, z);
+    let xn = f.sub(f.sq(t), f.mul(c.b8, f.mul(x, z3)));
+    let cub = f.add(f.mul(x, f.add(x2, f.mul(c.a, z2))), f.mul(c.b, z3));
+    (xn, f.mul(f.mul(c.four, z), cub))
+}
+
+/// Projective x-only differential addition: x(P+Q) from x(P), x(Q), x(P-Q):
+/// X3 = Zd [ (X1 X2 - A Z1 Z2)^2 - 4B Z1 Z2 (X1 Z2 + X2 Z1) ],  Z3 = Xd (X1 Z2 - X2 Z1)^2.
+pub fn xadd_c<F: Field>(
+    f: &F,
+    c: &XConst<F>,
+    p: (F::E, F::E),
+    q: (F::E, F::E),
+    d: (F::E, F::E),
+) -> (F::E, F::E) {
+    let (x1, z1) = p;
+    let (x2, z2) = q;
+    let z1z2 = f.mul(z1, z2);
+    let x1z2 = f.mul(x1, z2);
+    let x2z1 = f.mul(x2, z1);
+    let t = f.sub(f.mul(x1, x2), f.mul(c.a, z1z2));
+    let num = f.sub(f.sq(t), f.mul(c.b4, f.mul(z1z2, f.add(x1z2, x2z1))));
+    let den = f.sq(f.sub(x1z2, x2z1));
+    (f.mul(d.1, num), f.mul(d.0, den))
+}
+
+pub fn xdbl_w<F: Field>(f: &F, e: &Curve<F::E>, p: (F::E, F::E)) -> (F::E, F::E) {
+    xdbl_c(f, &XConst::new(f, e), p)
+}
+pub fn xadd_w<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    p: (F::E, F::E),
+    q: (F::E, F::E),
+    d: (F::E, F::E),
+) -> (F::E, F::E) {
+    xadd_c(f, &XConst::new(f, e), p, q, d)
+}
+
+/// x([k]P) for k = 1..=n via projective differential additions and a single batch inversion.
+/// Falls back to the division-polynomial method if a chain step degenerates (x(P-Q) = 0).
+pub fn multiples_x_fast<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, n: usize) -> Option<Vec<F::E>> {
+    if n == 0 {
+        return Some(vec![]);
+    }
+    let c = XConst::new(f, e);
+    let p1 = (x0, f.one());
+    let mut pts = Vec::with_capacity(n);
+    pts.push(p1);
+    if n >= 2 {
+        pts.push(xdbl_c(f, &c, p1));
+    }
+    for k in 2..n {
+        let d = pts[k - 2];
+        if f.is_zero(d.0) {
+            return multiples_x(f, e, x0, n);
+        }
+        let next = xadd_c(f, &c, pts[k - 1], p1, d);
+        pts.push(next);
+    }
+    let zs: Vec<F::E> = pts.iter().map(|q| q.1).collect();
+    if zs.iter().any(|&z| f.is_zero(z)) {
+        return None; // P has order <= n (some multiple is the point at infinity)
+    }
+    let zi = f.batch_inv(&zs);
+    Some(pts.iter().zip(zi).map(|(q, iz)| f.mul(q.0, iz)).collect())
+}
+
+/// Vélu from x(P) (odd l) with projective multiples and one inversion.
+pub fn velu_xonly_fast<F: Field>(f: &F, e: &Curve<F::E>, x0: F::E, ell: u64) -> Option<VeluIso<F>> {
+    let n = ((ell - 1) / 2) as usize;
+    let xs = multiples_x_fast(f, e, x0, n)?;
+    let (c2, c4, c6) = (f.from_u64(2), f.from_u64(4), f.from_u64(6));
+    let (mut t, mut w) = (f.zero(), f.zero());
+    let mut reps = Vec::with_capacity(n);
+    for &x in &xs {
+        let x2 = f.sq(x);
+        let v = f.add(f.mul(c6, x2), f.mul(c2, e.a));
+        let u = f.mul(c4, f.add(f.mul(f.add(x2, e.a), x), e.b));
+        t = f.add(t, v);
+        w = f.add(w, f.add(u, f.mul(x, v)));
+        reps.push((x, v, u));
+    }
+    let cod = Curve::new(
+        f.sub(e.a, f.mul(f.from_u64(5), t)),
+        f.sub(e.b, f.mul(f.from_u64(7), w)),
+    );
+    Some(VeluIso {
+        dom: *e,
+        cod,
+        deg: ell,
+        reps,
+    })
+}

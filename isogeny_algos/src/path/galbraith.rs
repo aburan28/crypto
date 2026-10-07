@@ -11,7 +11,7 @@ pub struct Stats {
 
 pub fn galbraith<F: Field>(
     f: &F,
-    cache: &PhiCache,
+    cache: &PhiCache<F>,
     ells: &[usize],
     j1: F::E,
     j2: F::E,

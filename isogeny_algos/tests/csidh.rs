@@ -29,7 +29,7 @@ fn csidh_toy_action_is_a_group_action() {
     let mut rng = Rng::new(71);
     let fp = cs.fp;
     // every positive step is an l-isogeny: Phi_l(j, j') = 0
-    let phis: Vec<Phi> = [3usize, 5, 7, 11, 13]
+    let phis: Vec<Phi<Zp>> = [3usize, 5, 7, 11, 13]
         .iter()
         .map(|&l| Phi::compute(&fp, l))
         .collect();
@@ -86,5 +86,19 @@ fn mitm_recovers_exponents() {
         assert!(found.iter().all(|&x| x.abs() <= 2));
         assert_eq!(cs.action(0, &found, &mut rng), target);
         assert_eq!(nodes, 2 * 3usize.pow(6));
+    }
+}
+
+#[test]
+fn batched_action_equals_stepwise() {
+    for n in [6usize, 8, 10] {
+        let cs = Csidh::with_n_primes(n).unwrap();
+        let mut rng = Rng::new(74 + n as u64);
+        for _ in 0..4 {
+            let e: Vec<i32> = (0..n).map(|_| rng.below(9) as i32 - 4).collect();
+            let a1 = cs.action(0, &e, &mut rng);
+            let a2 = cs.action_batched(0, &e, &mut rng);
+            assert_eq!(a1, a2, "n = {n}, e = {e:?}");
+        }
     }
 }

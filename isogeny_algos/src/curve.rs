@@ -238,16 +238,16 @@ impl<F: Field> Isogeny<F> for RatIsogeny<F> {
         match *p {
             Pt::Inf => Pt::Inf,
             Pt::Aff(x, y) => {
-                let d = poly::eval(f, &self.den, x);
+                let (d, dd) = poly::eval_with_derivative(f, &self.den, x);
                 if f.is_zero(d) {
                     return Pt::Inf;
                 }
-                let n = poly::eval(f, &self.num, x);
-                let dn = poly::eval(f, &poly::derivative(f, &self.num), x);
-                let dd = poly::eval(f, &poly::derivative(f, &self.den), x);
-                // f' = (n' d - n d') / d^2
-                let fp = f.div(f.sub(f.mul(dn, d), f.mul(n, dd)), f.mul(d, d));
-                Pt::Aff(f.div(n, d), f.mul(y, fp))
+                let (n, dn) = poly::eval_with_derivative(f, &self.num, x);
+                // f = n/d, f' = (n' d - n d') / d^2: one inversion
+                let di = f.inv(d);
+                let fx = f.mul(n, di);
+                let fp = f.mul(f.sub(f.mul(dn, d), f.mul(n, dd)), f.sq(di));
+                Pt::Aff(fx, f.mul(y, fp))
             }
         }
     }

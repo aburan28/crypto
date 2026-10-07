@@ -170,7 +170,9 @@ impl<F: Field> PolyModulus<F> {
             return r;
         }
         if a.len() > 2 * n - 1 || n < 2 {
-            return rem(f, a, &self.m);
+            // outside the reducer's range: plain division (never back through `rem`, which may
+            // dispatch here again)
+            return divrem(f, a, &self.m).1;
         }
         let k = a.len() - n; // number of quotient coefficients (<= n-1)
         let rev_a: Vec<F::E> = a.iter().rev().take(k).copied().collect();
@@ -212,6 +214,16 @@ pub fn eval<F: Field>(f: &F, a: &Poly<F>, x: F::E) -> F::E {
     }
     r
 }
+/// (a(x), a'(x)) in one Horner pass.
+pub fn eval_with_derivative<F: Field>(f: &F, a: &Poly<F>, x: F::E) -> (F::E, F::E) {
+    let mut v = f.zero();
+    let mut d = f.zero();
+    for &c in a.iter().rev() {
+        d = f.add(f.mul(d, x), v);
+        v = f.add(f.mul(v, x), c);
+    }
+    (v, d)
+}
 pub fn monic<F: Field>(f: &F, a: &Poly<F>) -> Poly<F> {
     if a.is_empty() {
         return vec![];
@@ -243,7 +255,8 @@ pub fn divrem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> (Poly<F>, Poly<F>) {
 }
 pub fn rem<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
     // large quotients: Newton/Barrett division (two multiplications); small: schoolbook
-    if b.len() >= 64 && a.len() >= b.len() + 32 && a.len() <= 2 * b.len() - 1 {
+    // reducer range: deg b = n, a.len() <= 2n - 1
+    if b.len() >= 64 && a.len() >= b.len() + 32 && a.len() + 3 <= 2 * b.len() {
         return PolyModulus::new(f, b).rem(f, a);
     }
     divrem(f, a, b).1
@@ -290,6 +303,56 @@ pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F>
         }
     }
     r
+}
+
+/// Subproduct tree of the linear factors (x - r_i): level 0 = leaves, last level = product.
+pub fn subproduct_tree<F: Field>(f: &F, roots: &[F::E]) -> Vec<Vec<Poly<F>>> {
+    let mut levels: Vec<Vec<Poly<F>>> =
+        vec![roots.iter().map(|&r| vec![f.neg(r), f.one()]).collect()];
+    while levels.last().unwrap().len() > 1 {
+        let prev = levels.last().unwrap();
+        let next: Vec<Poly<F>> = prev
+            .chunks(2)
+            .map(|c| {
+                if c.len() == 2 {
+                    mul(f, &c[0], &c[1])
+                } else {
+                    c[0].clone()
+                }
+            })
+            .collect();
+        levels.push(next);
+    }
+    levels
+}
+
+/// Values of `a` at all points (remainder tree; Horner for few points).
+pub fn multipoint_eval<F: Field>(f: &F, a: &Poly<F>, points: &[F::E]) -> Vec<F::E> {
+    if points.len() <= 8 || a.len() <= 8 {
+        return points.iter().map(|&x| eval(f, a, x)).collect();
+    }
+    let tree = subproduct_tree(f, points);
+    multipoint_eval_tree(f, a, &tree)
+}
+
+pub fn multipoint_eval_tree<F: Field>(f: &F, a: &Poly<F>, tree: &[Vec<Poly<F>>]) -> Vec<F::E> {
+    let top = tree.len() - 1;
+    let mut rems: Vec<Poly<F>> = vec![rem(f, a, &tree[top][0])];
+    for lvl in (0..top).rev() {
+        let mut next = Vec::with_capacity(tree[lvl].len());
+        for (i, r) in rems.iter().enumerate() {
+            for c in 0..2 {
+                let idx = 2 * i + c;
+                if idx < tree[lvl].len() {
+                    next.push(rem(f, r, &tree[lvl][idx]));
+                }
+            }
+        }
+        rems = next;
+    }
+    rems.iter()
+        .map(|r| if r.is_empty() { f.zero() } else { r[0] })
+        .collect()
 }
 
 /// Product of (x - r) over the given roots.

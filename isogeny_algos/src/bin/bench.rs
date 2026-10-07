@@ -6,7 +6,10 @@ use isogeny_algos::curve::*;
 use isogeny_algos::field::*;
 use isogeny_algos::find::{bmss, dual};
 use isogeny_algos::find::{divpoly, elkies, modpoly::Phi};
+use isogeny_algos::fpm::FpM;
 use isogeny_algos::kernel::chain::{ell_power_isogeny, mul_by_ell, ChainStats, Strategy};
+use isogeny_algos::kernel::sqrt_velu::sqrt_velu_fast;
+use isogeny_algos::kernel::xonly::velu_xonly_fast;
 use isogeny_algos::kernel::{
     kohel::kohel,
     montgomery,
@@ -241,7 +244,7 @@ fn bench_path(o: &mut Out) {
     for &bits in ord_bits {
         let p = prime_bits(bits);
         let fp = Zp::new(p);
-        let cache = PhiCache::new(p, &ells);
+        let cache = PhiCache::new(&Zp::new(p), &ells);
         for i in 0..inst {
             let mut rng = Rng::new(3000 + (bits as u64) * 100 + i);
             // E1 must have >= 3 rational neighbours over >= 2 primes, else its component is small/cyclic
@@ -359,7 +362,7 @@ fn bench_path(o: &mut Out) {
             p = next_prime(p + 1);
         }
         let fp = Zp::new(p);
-        let cache = PhiCache::new(p, &[3, 5, 7, 11, 13]);
+        let cache = PhiCache::new(&Zp::new(p), &[3, 5, 7, 11, 13]);
         for i in 0..inst {
             let mut rng = Rng::new(4000 + (bits as u64) * 100 + i);
             let (e1, t) = curve_with_trace(&fp, &mut rng, |t| {
@@ -418,7 +421,7 @@ fn bench_path(o: &mut Out) {
         let p = prime_bits(bits);
         let fp = Zp::new(p);
         let t0 = Instant::now();
-        let cache = PhiCache::new(p, &cells);
+        let cache = PhiCache::new(&Zp::new(p), &cells);
         let setup = t0.elapsed().as_nanos() as f64;
         for i in 0..inst {
             let mut rng = Rng::new(5000 + (bits as u64) * 100 + i);
@@ -500,16 +503,17 @@ fn bench_path(o: &mut Out) {
         }
         let fp = Zp::new(p);
         let f2 = Zp2::new(p);
-        let cache = PhiCache::new(p, &[2, 3]);
+        let cache = PhiCache::new(&Zp::new(p), &[2, 3]);
+        let cache2 = cache.lift(|x| (x, 0u64));
         for i in 0..inst {
             let mut rng = Rng::new(6000 + (bits as u64) * 100 + i);
             let start = (1728u64, 0u64);
             let steps = 3 * bits as usize;
-            let j1 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng)
+            let j1 = *random_walk(&f2, &cache2, &[2], start, steps, &mut rng)
                 .js
                 .last()
                 .unwrap();
-            let j2 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng)
+            let j2 = *random_walk(&f2, &cache2, &[2], start, steps, &mut rng)
                 .js
                 .last()
                 .unwrap();
@@ -519,6 +523,7 @@ fn bench_path(o: &mut Out) {
                 &f2,
                 &fp,
                 &cache,
+                &cache2,
                 j1,
                 j2,
                 50_000_000,
@@ -527,7 +532,7 @@ fn bench_path(o: &mut Out) {
             );
             let ns = t0.elapsed().as_nanos() as f64;
             let ok = r.as_ref().map_or(false, |p| {
-                verify_path(&f2, &cache, p) && p.js[0] == j1 && *p.js.last().unwrap() == j2
+                verify_path(&f2, &cache2, p) && p.js[0] == j1 && *p.js.last().unwrap() == j2
             });
             o.rec(
                 "path",
@@ -1019,7 +1024,7 @@ fn bench_v2path(o: &mut Out) {
             p = next_prime(p + 1);
         }
         let fp = Zp::new(p);
-        let cache = PhiCache::new(p, &[3, 5, 7]);
+        let cache = PhiCache::new(&Zp::new(p), &[3, 5, 7]);
         let mut rng = Rng::new(11_000 + b as u64);
         for i in 0..3 {
             let (e, t) = curve_with_trace(&fp, &mut rng, |t| {
@@ -1060,7 +1065,7 @@ fn bench_v2path(o: &mut Out) {
     for &b in wbits {
         let p = prime_bits(b);
         let fp = Zp::new(p);
-        let cache = PhiCache::new(p, &ells);
+        let cache = PhiCache::new(&Zp::new(p), &ells);
         for i in 0..inst {
             let mut rng = Rng::new(12_000 + (b as u64) * 100 + i);
             let (e1, _t) = loop {
@@ -1155,6 +1160,120 @@ fn bench_v2path(o: &mut Out) {
     }
 }
 
+/// P1: every kernel -> isogeny implementation, old and new, Zp and FpM<1>; codomain and one evaluation.
+fn bench_p1kernel(o: &mut Out) {
+    let ells: &[u64] = if o.quick {
+        &[3, 31, 401]
+    } else {
+        &[3, 7, 13, 31, 101, 401, 1009, 4001, 10007, 40009, 100003]
+    };
+    let budget = if o.quick { 100 } else { 300 };
+    let fp = Zp::new(prime_bits(32));
+    let fm = FpM::<1>::from_u64_modulus(fp.p);
+    let mut rng = Rng::new(13_000);
+    for &ell in ells {
+        let (e, p) = curve_with_point(&fp, ell, &mut rng);
+        let x0 = if let Pt::Aff(x, _) = p {
+            x
+        } else {
+            unreachable!()
+        };
+        let q = e.random_point(&fp, &mut rng);
+        let reference = velu_xonly_fast(&fp, &e, x0, ell).unwrap();
+        let ref_img = reference.eval(&fp, &q);
+        let params = vec![("p_bits", "32".to_string()), ("ell", ell.to_string())];
+        let rec = |o: &mut Out,
+                   algo: &str,
+                   field: &str,
+                   task: &str,
+                   ok: bool,
+                   med: f64,
+                   mn: f64,
+                   reps: usize| {
+            let mut pr = params.clone();
+            pr.push(("field", field.to_string()));
+            pr.push(("task", task.to_string()));
+            o.rec(
+                "p1kernel",
+                algo,
+                &pr,
+                &[("median_ns", med), ("min_ns", mn), ("reps", reps as f64)],
+                ok,
+                "",
+            );
+        };
+        // Zp
+        let small = ell <= 10007; // the O(l^2)-ish reference versions are skipped beyond this
+        if small {
+            let (m, mn, r) = time_it(budget, 500, || velu_cyclic(&fp, &e, &p, ell));
+            let ok = velu_cyclic(&fp, &e, &p, ell).cod == reference.cod;
+            rec(o, "velu_points_affine_v2", "Zp", "codomain", ok, m, mn, r);
+            let (m, mn, r) = time_it(budget, 500, || velu_xonly(&fp, &e, x0, ell));
+            rec(o, "velu_xonly_divpoly_v2", "Zp", "codomain", true, m, mn, r);
+            let (m, mn, r) = time_it(budget, 500, || {
+                isogeny_algos::kernel::sqrt_velu::sqrt_velu(&fp, &e, &p, ell)
+            });
+            let ok =
+                isogeny_algos::kernel::sqrt_velu::sqrt_velu(&fp, &e, &p, ell).cod == reference.cod;
+            rec(o, "sqrt_velu_naive_v1", "Zp", "codomain", ok, m, mn, r);
+        }
+        let (m, mn, r) = time_it(budget, 500, || velu_xonly_fast(&fp, &e, x0, ell));
+        rec(o, "velu_xonly_fast", "Zp", "codomain", true, m, mn, r);
+        let sv = sqrt_velu_fast(&fp, &e, x0, ell).unwrap();
+        let ok = sv.cod == reference.cod && sv.eval(&fp, &q) == ref_img;
+        let (m, mn, r) = time_it(budget, 500, || sqrt_velu_fast(&fp, &e, x0, ell));
+        rec(o, "sqrt_velu_fast", "Zp", "codomain", ok, m, mn, r);
+        let (m, mn, r) = time_it(budget, 500, || reference.eval(&fp, &q));
+        rec(o, "velu_xonly_fast", "Zp", "eval_point", true, m, mn, r);
+        let (m, mn, r) = time_it(budget, 500, || sv.eval(&fp, &q));
+        rec(o, "sqrt_velu_fast", "Zp", "eval_point", ok, m, mn, r);
+        // FpM<1>
+        let em = Curve::new(fm.from_u64(e.a), fm.from_u64(e.b));
+        let xm = fm.from_u64(x0);
+        let vm = velu_xonly_fast(&fm, &em, xm, ell).unwrap();
+        let okm = fm.to_canonical(&vm.cod.a)[0] == reference.cod.a
+            && fm.to_canonical(&vm.cod.b)[0] == reference.cod.b;
+        let (m, mn, r) = time_it(budget, 500, || velu_xonly_fast(&fm, &em, xm, ell));
+        rec(o, "velu_xonly_fast", "FpM1", "codomain", okm, m, mn, r);
+        let svm = sqrt_velu_fast(&fm, &em, xm, ell).unwrap();
+        let okm2 = svm.cod == vm.cod;
+        let (m, mn, r) = time_it(budget, 500, || sqrt_velu_fast(&fm, &em, xm, ell));
+        rec(o, "sqrt_velu_fast", "FpM1", "codomain", okm2, m, mn, r);
+        let qm = if let Pt::Aff(a, b) = q {
+            Pt::Aff(fm.from_u64(a), fm.from_u64(b))
+        } else {
+            unreachable!()
+        };
+        let (m, mn, r) = time_it(budget, 500, || vm.eval(&fm, &qm));
+        rec(o, "velu_xonly_fast", "FpM1", "eval_point", okm, m, mn, r);
+        let (m, mn, r) = time_it(budget, 500, || svm.eval(&fm, &qm));
+        rec(
+            o,
+            "sqrt_velu_fast",
+            "FpM1",
+            "eval_point",
+            okm2 && svm.eval(&fm, &qm) == vm.eval(&fm, &qm),
+            m,
+            mn,
+            r,
+        );
+        if ell <= 1009 {
+            let (h, _) = kernel_poly_from_point(&fp, &e, &p, ell);
+            let (m, mn, r) = time_it(budget, 500, || kohel(&fp, &e, &h, ell));
+            rec(
+                o,
+                "kohel_given_h",
+                "Zp",
+                "codomain",
+                kohel(&fp, &e, &h, ell).cod == reference.cod,
+                m,
+                mn,
+                r,
+            );
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1188,6 +1307,7 @@ fn main() {
             "bmss" => bench_bmss(&mut o),
             "csidh" => bench_csidh(&mut o),
             "v2path" => bench_v2path(&mut o),
+            "p1kernel" => bench_p1kernel(&mut o),
             "v2" => {
                 bench_kernel2(&mut o);
                 bench_chain(&mut o);
