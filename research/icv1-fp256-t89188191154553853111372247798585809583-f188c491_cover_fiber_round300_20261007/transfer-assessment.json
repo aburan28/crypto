@@ -1,0 +1,133 @@
+{
+  "schema": "p256-cover-fiber-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 300,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "methodology_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/references/methodology.md (unavailable)",
+  "template_resource": "skill://user/6ac50b6519048191b052e52c11310b8d/transfer/assets/assessment-template.json (unavailable)",
+  "typed_correspondence_graph": [
+    "lifted coefficient rows V --[sheet collapse C]--> destination coefficient rows W",
+    "ker(C) --[pushforward]--> 0: deck/fibre differences carry zero destination equation",
+    "E(F_1151) --[[k], degree k^2]--> E(F_1151): rational kernel size k for k=1,2,4,8",
+    "icv1-fp256-t89188191154553853111372247798585809583-f188c491/E(F_p) --[[k], gcd(k,n)=1]--> E(F_p): rational bijection",
+    "future cover/Jacobian --[distinct collapsed decompositions plus recovery]--> possible advantage: open"
+  ],
+  "paths": [
+    {
+      "name": "complete rational multiplication-map fibres",
+      "source": "E(F_1151), #E=1192=8*149",
+      "destination": "E(F_1151), order-149 subgroup H",
+      "transformation_type": "curve endomorphisms [k], k in {1,2,4,8}, with induced group pushforward",
+      "field_of_definition": "F_1151",
+      "source_dimension": 1,
+      "destination_dimension": 1,
+      "relevant_subgroup": "H=< (360,129) >, |H|=149; [k]|H is injective",
+      "obligations": [
+        {
+          "name": "existence and formulas",
+          "status": "supported",
+          "evidence": "The standard multiplication maps are evaluated with complete affine group arithmetic.",
+          "scope": "registered toy maps"
+        },
+        {
+          "name": "rational kernel and fibres",
+          "status": "supported",
+          "evidence": "Every one of 1,192 rational points is enumerated for every map and destination column.",
+          "scope": "registered toy maps"
+        },
+        {
+          "name": "subgroup preservation",
+          "status": "supported",
+          "evidence": "gcd(k,149)=1, and every replayed source row pushes to its exact order-149 destination sum.",
+          "scope": "registered toy maps"
+        },
+        {
+          "name": "quotient rank",
+          "status": "supported",
+          "evidence": "Each bucket checks dim((span(R)+ker(C))/ker(C))=rank(C(R)) over F_149.",
+          "scope": "all registered buckets"
+        },
+        {
+          "name": "exceptional points",
+          "status": "not_applicable",
+          "evidence": "Complete group-law enumeration includes infinity; multiplication maps have no omitted rational exceptional branch.",
+          "scope": "registered toy maps"
+        },
+        {
+          "name": "measured advantage",
+          "status": "refuted",
+          "evidence": "Raw sheet rows are removed by the collapse kernel and create no destination-rank gain.",
+          "scope": "registered toy fibre multiplicity"
+        }
+      ],
+      "conclusion": "Rational sheet multiplicity is real in the cofactor-eight ambient group, but its additional coefficient directions lie in the pushforward kernel.",
+      "exploration_boundary": "Complete for four multiplication maps, four frozen bases, and all signed arity-three rows on the registered toy curve."
+    },
+    {
+      "name": "P-256 cover or Jacobian pushforward",
+      "source": "unsupplied cover/Jacobian rational subgroup",
+      "destination": "icv1-fp256-t89188191154553853111372247798585809583-f188c491, prime-order E(F_p)",
+      "transformation_type": "proposed divisor/Jacobian pushforward group homomorphism",
+      "field_of_definition": "must be supplied by a candidate",
+      "source_dimension": null,
+      "destination_dimension": 1,
+      "relevant_subgroup": "destination subgroup has prime order n and cofactor one",
+      "obligations": [
+        {
+          "name": "explicit construction",
+          "status": "unknown",
+          "evidence": "No P-256 cover equation, Jacobian, divisor representation, or executable maps were supplied.",
+          "scope": "construction-specific"
+        },
+        {
+          "name": "rational multiplication-map fibres",
+          "status": "supported",
+          "evidence": "For gcd(k,n)=1, [k] is a bijection on the prime-order rational group despite algebraic degree k^2.",
+          "scope": "P-256 multiplication maps"
+        },
+        {
+          "name": "kernel-sheet row gain",
+          "status": "refuted",
+          "evidence": "Rows differing only inside a pushforward kernel have identical destination coefficient rows by the exact quotient theorem.",
+          "scope": "all linearized relation rows under a group pushforward"
+        },
+        {
+          "name": "inverse recovery and exceptional points",
+          "status": "unknown",
+          "evidence": "Requires explicit formulas and fields for a proposed nontrivial cover.",
+          "scope": "construction-specific"
+        },
+        {
+          "name": "destination decomposition advantage",
+          "status": "unknown",
+          "evidence": "The experiment does not exclude a cover that makes distinct collapsed decompositions cheaper to find.",
+          "scope": "construction-specific"
+        },
+        {
+          "name": "paired end-to-end cost",
+          "status": "unknown",
+          "evidence": "No P-256 relation oracle or recovery implementation exists for this family.",
+          "scope": "construction-specific"
+        }
+      ],
+      "conclusion": "Algebraic fibre degree cannot be booked as independent P-256 relation rank. A future cover must improve the search for distinct collapsed equations and price the complete maps and recovery.",
+      "exploration_boundary": "Exact quotient theorem plus P-256 prime-order multiplication-map fact; not a universal search over covers or Jacobians."
+    }
+  ],
+  "controls": [
+    "Identity map [1] is the no-lift control.",
+    "Maps [2], [4], and [8] provide 2, 4, and 8 rational cofactor sheets on the complete toy ambient group.",
+    "Scalar-defined high-multiplicity bases and coordinate-defined bases are both included.",
+    "Every source sum is pushed forward with exact curve arithmetic and checked against its destination row."
+  ],
+  "cost_accounting": [
+    "Measured: fibre scans, every source-row sum, every row pushforward, modular-rank operations, logical coefficient bytes, process telemetry, and artifact bytes.",
+    "Exact analytic: P-256 prime-order rational bijectivity and the coefficient-space quotient identity.",
+    "Unset: construction and decomposition costs for any nontrivial P-256 cover, inverse recovery, structured degree, relation yield, sparse linear algebra, and full DLP cost."
+  ],
+  "weakest_open_obligation": "Supply an explicit P-256 cover or Jacobian whose algorithm finds distinct collapsed destination decompositions more cheaply, then measure formulas, exceptional sets, inverse recovery, degree, yield, and complete one-target cost.",
+  "narrowest_supported_finding": "Within the complete registered fibre family, every extra sheet-generated row direction lies in the pushforward kernel; quotient relation rank exactly equals collapsed destination rank.",
+  "semantic_evidence_sha256": "e5d54300201afec3ea8c11586f38c8561e6f88aa749861dbe8278a51660d66a4",
+  "assessment_json_bytes": 7414
+}

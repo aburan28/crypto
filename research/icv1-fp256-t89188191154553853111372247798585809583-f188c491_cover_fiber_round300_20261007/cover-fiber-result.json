@@ -1,0 +1,1981 @@
+{
+  "schema": "p256-cover-fiber-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 300,
+  "execution_status": "complete",
+  "factor_base": "FB1hc72514a2a8d3",
+  "registered_s17_factor_base": "FB1h2f8621cda105",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_transfer_anchor_round299_20261007/transfer-anchor-result.json",
+      "bytes": 39954,
+      "sha256": "e6b78d729e785b1831a061cd39e6e57f10c46da8b8e98418321dc72f56752f35"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_union_round295_20261007/selected-factor-base.json",
+      "bytes": 83981,
+      "sha256": "d27516ca40a612ecf3ebabfa8ae04776084c7948110e20f221da438e1e64d8f8"
+    }
+  ],
+  "theorem": "For sheet collapse C and K=ker(C), dim((span(R)+K)/K)=rank(C(R)); rows differing only by fibre choices produce one destination equation.",
+  "toy_curve": "E/F_1151: y^2=x^3-3x+241",
+  "toy_group_order": 1192,
+  "cofactor": 8,
+  "prime_subgroup_order": 149,
+  "subgroup_generator": "360,129",
+  "ambient_points_enumerated": 1192,
+  "factor_base_controls": [
+    {
+      "family": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "folded_scalar_labels": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "points": [
+        "360,129",
+        "1073,381",
+        "317,585",
+        "1037,644",
+        "591,385",
+        "716,838"
+      ]
+    },
+    {
+      "family": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "folded_scalar_labels": [
+        3,
+        32,
+        35,
+        38,
+        41,
+        70
+      ],
+      "points": [
+        "1073,381",
+        "667,548",
+        "241,819",
+        "593,960",
+        "62,795",
+        "677,752"
+      ]
+    },
+    {
+      "family": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "folded_scalar_labels": [
+        8,
+        41,
+        46,
+        49,
+        54,
+        59
+      ],
+      "points": [
+        "85,138",
+        "62,795",
+        "8,1124",
+        "1,315",
+        "123,1096",
+        "58,839"
+      ]
+    },
+    {
+      "family": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "folded_scalar_labels": [
+        4,
+        13,
+        14,
+        22,
+        40,
+        41
+      ],
+      "points": [
+        "492,688",
+        "776,530",
+        "17,221",
+        "300,683",
+        "734,184",
+        "62,795"
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "family": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 1,
+      "algebraic_degree": 1,
+      "rational_kernel_size": 1,
+      "rational_kernel_points": [
+        "infinity"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 1,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 6,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 160,
+      "enumerated_lifted_rows": 160,
+      "unique_lifted_rows": 160,
+      "lift_multiplier_per_destination_row": 1,
+      "nonempty_destination_targets": 28,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 10,
+      "maximum_distinct_source_sums_per_destination_target": 1,
+      "deck_kernel_rank": 0,
+      "maximum_raw_lifted_coefficient_rank": 6,
+      "maximum_raw_lifted_homogeneous_rank": 5,
+      "maximum_union_with_kernel_rank": 6,
+      "maximum_homogeneous_union_with_kernel_rank": 5,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 0,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 0,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 480,
+      "row_pushforward_doublings": 0,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 7528,
+        "multiplications": 18250,
+        "inversions": 672
+      },
+      "peak_logical_coefficient_bytes": 120,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 2
+        },
+        {
+          "value": 3,
+          "count": 2
+        },
+        {
+          "value": 4,
+          "count": 2
+        },
+        {
+          "value": 5,
+          "count": 4
+        },
+        {
+          "value": 6,
+          "count": 14
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 2
+        },
+        {
+          "value": 3,
+          "count": 2
+        },
+        {
+          "value": 4,
+          "count": 2
+        },
+        {
+          "value": 5,
+          "count": 4
+        },
+        {
+          "value": 6,
+          "count": 14
+        }
+      ],
+      "enumeration_blake3": "ef050dafa14215e3644aeeb017c792241e18134f2da607bf3ea1d7e1f8c776a4"
+    },
+    {
+      "family": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 2,
+      "algebraic_degree": 4,
+      "rational_kernel_size": 2,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 2,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 12,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 1280,
+      "enumerated_lifted_rows": 1280,
+      "unique_lifted_rows": 1280,
+      "lift_multiplier_per_destination_row": 8,
+      "nonempty_destination_targets": 28,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 80,
+      "maximum_distinct_source_sums_per_destination_target": 2,
+      "deck_kernel_rank": 6,
+      "maximum_raw_lifted_coefficient_rank": 12,
+      "maximum_raw_lifted_homogeneous_rank": 11,
+      "maximum_union_with_kernel_rank": 12,
+      "maximum_homogeneous_union_with_kernel_rank": 11,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 6,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 8344,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 3840,
+      "row_pushforward_doublings": 1280,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 195192,
+        "multiplications": 219448,
+        "inversions": 1318
+      },
+      "peak_logical_coefficient_bytes": 2064,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 7,
+          "count": 2
+        },
+        {
+          "value": 9,
+          "count": 2
+        },
+        {
+          "value": 10,
+          "count": 4
+        },
+        {
+          "value": 11,
+          "count": 2
+        },
+        {
+          "value": 12,
+          "count": 14
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 2
+        },
+        {
+          "value": 3,
+          "count": 2
+        },
+        {
+          "value": 4,
+          "count": 2
+        },
+        {
+          "value": 5,
+          "count": 4
+        },
+        {
+          "value": 6,
+          "count": 14
+        }
+      ],
+      "enumeration_blake3": "e7c4cb2d5d7f572a45ce44406a2e692dcde3a30a481916077fdd8b4c333a6169"
+    },
+    {
+      "family": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 4,
+      "algebraic_degree": 16,
+      "rational_kernel_size": 4,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 4,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 24,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 10240,
+      "enumerated_lifted_rows": 10240,
+      "unique_lifted_rows": 10240,
+      "lift_multiplier_per_destination_row": 64,
+      "nonempty_destination_targets": 28,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 640,
+      "maximum_distinct_source_sums_per_destination_target": 4,
+      "deck_kernel_rank": 18,
+      "maximum_raw_lifted_coefficient_rank": 24,
+      "maximum_raw_lifted_homogeneous_rank": 23,
+      "maximum_union_with_kernel_rank": 24,
+      "maximum_homogeneous_union_with_kernel_rank": 23,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 18,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 16688,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 30720,
+      "row_pushforward_doublings": 20480,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 5940030,
+        "multiplications": 6002790,
+        "inversions": 2610
+      },
+      "peak_logical_coefficient_bytes": 31584,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 10,
+          "count": 4
+        },
+        {
+          "value": 17,
+          "count": 2
+        },
+        {
+          "value": 20,
+          "count": 2
+        },
+        {
+          "value": 21,
+          "count": 2
+        },
+        {
+          "value": 22,
+          "count": 2
+        },
+        {
+          "value": 23,
+          "count": 2
+        },
+        {
+          "value": 24,
+          "count": 14
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 2
+        },
+        {
+          "value": 3,
+          "count": 2
+        },
+        {
+          "value": 4,
+          "count": 2
+        },
+        {
+          "value": 5,
+          "count": 4
+        },
+        {
+          "value": 6,
+          "count": 14
+        }
+      ],
+      "enumeration_blake3": "7a4751abbaf1b424e4fc83c1baf9ce35ea5b3b05adeea3744c2abe2bbe671c82"
+    },
+    {
+      "family": "affine-progression",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 8,
+      "algebraic_degree": 64,
+      "rational_kernel_size": 8,
+      "rational_kernel_points": [
+        "infinity",
+        "137,206",
+        "137,945",
+        "369,528",
+        "369,623",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 8,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 48,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 81920,
+      "enumerated_lifted_rows": 81920,
+      "unique_lifted_rows": 81920,
+      "lift_multiplier_per_destination_row": 512,
+      "nonempty_destination_targets": 28,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 5120,
+      "maximum_distinct_source_sums_per_destination_target": 8,
+      "deck_kernel_rank": 42,
+      "maximum_raw_lifted_coefficient_rank": 48,
+      "maximum_raw_lifted_homogeneous_rank": 47,
+      "maximum_union_with_kernel_rank": 48,
+      "maximum_homogeneous_union_with_kernel_rank": 47,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 42,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 25032,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 245760,
+      "row_pushforward_doublings": 245760,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 183634510,
+        "multiplications": 183820022,
+        "inversions": 5194
+      },
+      "peak_logical_coefficient_bytes": 495552,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 22,
+          "count": 4
+        },
+        {
+          "value": 37,
+          "count": 2
+        },
+        {
+          "value": 40,
+          "count": 2
+        },
+        {
+          "value": 45,
+          "count": 2
+        },
+        {
+          "value": 46,
+          "count": 2
+        },
+        {
+          "value": 47,
+          "count": 2
+        },
+        {
+          "value": 48,
+          "count": 14
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 2
+        },
+        {
+          "value": 3,
+          "count": 2
+        },
+        {
+          "value": 4,
+          "count": 2
+        },
+        {
+          "value": 5,
+          "count": 4
+        },
+        {
+          "value": 6,
+          "count": 14
+        }
+      ],
+      "enumeration_blake3": "de606e1b943046947955c61774ec97d0954bfe94fc9de53c231f6b77ff5abba9"
+    },
+    {
+      "family": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 1,
+      "algebraic_degree": 1,
+      "rational_kernel_size": 1,
+      "rational_kernel_points": [
+        "infinity"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 1,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 6,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 160,
+      "enumerated_lifted_rows": 160,
+      "unique_lifted_rows": 160,
+      "lift_multiplier_per_destination_row": 1,
+      "nonempty_destination_targets": 37,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 10,
+      "maximum_distinct_source_sums_per_destination_target": 1,
+      "deck_kernel_rank": 0,
+      "maximum_raw_lifted_coefficient_rank": 6,
+      "maximum_raw_lifted_homogeneous_rank": 5,
+      "maximum_union_with_kernel_rank": 6,
+      "maximum_homogeneous_union_with_kernel_rank": 5,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 0,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 0,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 480,
+      "row_pushforward_doublings": 0,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 5245,
+        "multiplications": 17299,
+        "inversions": 738
+      },
+      "peak_logical_coefficient_bytes": 120,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 6
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 11
+        },
+        {
+          "value": 6,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 6
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 11
+        },
+        {
+          "value": 6,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "f2e8c8792a5712d9e26254ac6fe3814d24f9712b5cdab0d58c91d5bac5510a26"
+    },
+    {
+      "family": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 2,
+      "algebraic_degree": 4,
+      "rational_kernel_size": 2,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 2,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 12,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 1280,
+      "enumerated_lifted_rows": 1280,
+      "unique_lifted_rows": 1280,
+      "lift_multiplier_per_destination_row": 8,
+      "nonempty_destination_targets": 37,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 80,
+      "maximum_distinct_source_sums_per_destination_target": 2,
+      "deck_kernel_rank": 6,
+      "maximum_raw_lifted_coefficient_rank": 12,
+      "maximum_raw_lifted_homogeneous_rank": 11,
+      "maximum_union_with_kernel_rank": 12,
+      "maximum_homogeneous_union_with_kernel_rank": 11,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 6,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 8344,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 3840,
+      "row_pushforward_doublings": 1280,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 170581,
+        "multiplications": 200565,
+        "inversions": 1596
+      },
+      "peak_logical_coefficient_bytes": 2064,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 7,
+          "count": 4
+        },
+        {
+          "value": 8,
+          "count": 4
+        },
+        {
+          "value": 9,
+          "count": 4
+        },
+        {
+          "value": 10,
+          "count": 4
+        },
+        {
+          "value": 11,
+          "count": 11
+        },
+        {
+          "value": 12,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 6
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 11
+        },
+        {
+          "value": 6,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "f69e1bf8097cb5581e104da22af2605d02cd6b26fa66fa811d73736ed896972b"
+    },
+    {
+      "family": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 4,
+      "algebraic_degree": 16,
+      "rational_kernel_size": 4,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 4,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 24,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 10240,
+      "enumerated_lifted_rows": 10240,
+      "unique_lifted_rows": 10240,
+      "lift_multiplier_per_destination_row": 64,
+      "nonempty_destination_targets": 37,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 640,
+      "maximum_distinct_source_sums_per_destination_target": 4,
+      "deck_kernel_rank": 18,
+      "maximum_raw_lifted_coefficient_rank": 24,
+      "maximum_raw_lifted_homogeneous_rank": 23,
+      "maximum_union_with_kernel_rank": 24,
+      "maximum_homogeneous_union_with_kernel_rank": 23,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 18,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 16688,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 30720,
+      "row_pushforward_doublings": 20480,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 5472819,
+        "multiplications": 5554071,
+        "inversions": 3312
+      },
+      "peak_logical_coefficient_bytes": 31584,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 10,
+          "count": 4
+        },
+        {
+          "value": 17,
+          "count": 4
+        },
+        {
+          "value": 18,
+          "count": 2
+        },
+        {
+          "value": 20,
+          "count": 2
+        },
+        {
+          "value": 21,
+          "count": 4
+        },
+        {
+          "value": 22,
+          "count": 4
+        },
+        {
+          "value": 23,
+          "count": 11
+        },
+        {
+          "value": 24,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 6
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 11
+        },
+        {
+          "value": 6,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "fd7bac2a559fac6a7b9da358acc2070558f0e4c7df5045d3c12df23a554b99ff"
+    },
+    {
+      "family": "pair-sum-closure",
+      "selection_uses_discrete_log_labels": true,
+      "map_scalar": 8,
+      "algebraic_degree": 64,
+      "rational_kernel_size": 8,
+      "rational_kernel_points": [
+        "infinity",
+        "137,206",
+        "137,945",
+        "369,528",
+        "369,623",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 8,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 48,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 81920,
+      "enumerated_lifted_rows": 81920,
+      "unique_lifted_rows": 81920,
+      "lift_multiplier_per_destination_row": 512,
+      "nonempty_destination_targets": 37,
+      "maximum_destination_row_occupancy": 10,
+      "maximum_lifted_row_occupancy": 5120,
+      "maximum_distinct_source_sums_per_destination_target": 8,
+      "deck_kernel_rank": 42,
+      "maximum_raw_lifted_coefficient_rank": 48,
+      "maximum_raw_lifted_homogeneous_rank": 47,
+      "maximum_union_with_kernel_rank": 48,
+      "maximum_homogeneous_union_with_kernel_rank": 47,
+      "maximum_quotient_coefficient_rank": 6,
+      "maximum_quotient_homogeneous_rank": 5,
+      "maximum_collapsed_destination_coefficient_rank": 6,
+      "maximum_collapsed_destination_homogeneous_rank": 5,
+      "maximum_raw_rank_removed_by_quotient": 42,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 25032,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 245760,
+      "row_pushforward_doublings": 245760,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 172463195,
+        "multiplications": 172708615,
+        "inversions": 6744
+      },
+      "peak_logical_coefficient_bytes": 495552,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 22,
+          "count": 4
+        },
+        {
+          "value": 37,
+          "count": 4
+        },
+        {
+          "value": 38,
+          "count": 2
+        },
+        {
+          "value": 44,
+          "count": 2
+        },
+        {
+          "value": 45,
+          "count": 4
+        },
+        {
+          "value": 46,
+          "count": 4
+        },
+        {
+          "value": 47,
+          "count": 11
+        },
+        {
+          "value": 48,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 4
+        },
+        {
+          "value": 2,
+          "count": 6
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 11
+        },
+        {
+          "value": 6,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "ed1c2f90a6e5886493630de654712a5d186091d5408ad1800f014a6669175457"
+    },
+    {
+      "family": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 1,
+      "algebraic_degree": 1,
+      "rational_kernel_size": 1,
+      "rational_kernel_points": [
+        "infinity"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 1,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 6,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 160,
+      "enumerated_lifted_rows": 160,
+      "unique_lifted_rows": 160,
+      "lift_multiplier_per_destination_row": 1,
+      "nonempty_destination_targets": 63,
+      "maximum_destination_row_occupancy": 8,
+      "maximum_lifted_row_occupancy": 8,
+      "maximum_distinct_source_sums_per_destination_target": 1,
+      "deck_kernel_rank": 0,
+      "maximum_raw_lifted_coefficient_rank": 5,
+      "maximum_raw_lifted_homogeneous_rank": 4,
+      "maximum_union_with_kernel_rank": 5,
+      "maximum_homogeneous_union_with_kernel_rank": 4,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 0,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 0,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 480,
+      "row_pushforward_doublings": 0,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 2655,
+        "multiplications": 15051,
+        "inversions": 738
+      },
+      "peak_logical_coefficient_bytes": 96,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 22
+        },
+        {
+          "value": 2,
+          "count": 16
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 13
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 22
+        },
+        {
+          "value": 2,
+          "count": 16
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 13
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "24cc4f2632d5da8dcadbef3972d19175cc0935e612a9cfb5631fa0f08a740eb4"
+    },
+    {
+      "family": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 2,
+      "algebraic_degree": 4,
+      "rational_kernel_size": 2,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 2,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 12,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 1280,
+      "enumerated_lifted_rows": 1280,
+      "unique_lifted_rows": 1280,
+      "lift_multiplier_per_destination_row": 8,
+      "nonempty_destination_targets": 63,
+      "maximum_destination_row_occupancy": 8,
+      "maximum_lifted_row_occupancy": 64,
+      "maximum_distinct_source_sums_per_destination_target": 2,
+      "deck_kernel_rank": 6,
+      "maximum_raw_lifted_coefficient_rank": 11,
+      "maximum_raw_lifted_homogeneous_rank": 10,
+      "maximum_union_with_kernel_rank": 11,
+      "maximum_homogeneous_union_with_kernel_rank": 10,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 6,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 8344,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 3840,
+      "row_pushforward_doublings": 1280,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 139027,
+        "multiplications": 179221,
+        "inversions": 2100
+      },
+      "peak_logical_coefficient_bytes": 1680,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 4,
+          "count": 22
+        },
+        {
+          "value": 7,
+          "count": 12
+        },
+        {
+          "value": 8,
+          "count": 4
+        },
+        {
+          "value": 9,
+          "count": 6
+        },
+        {
+          "value": 10,
+          "count": 13
+        },
+        {
+          "value": 11,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 22
+        },
+        {
+          "value": 2,
+          "count": 16
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 13
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "aa2ae244d6bca4619be7b57384419e876146f3efa851de8997e829cdda9a6b9a"
+    },
+    {
+      "family": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 4,
+      "algebraic_degree": 16,
+      "rational_kernel_size": 4,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 4,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 24,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 10240,
+      "enumerated_lifted_rows": 10240,
+      "unique_lifted_rows": 10240,
+      "lift_multiplier_per_destination_row": 64,
+      "nonempty_destination_targets": 63,
+      "maximum_destination_row_occupancy": 8,
+      "maximum_lifted_row_occupancy": 512,
+      "maximum_distinct_source_sums_per_destination_target": 4,
+      "deck_kernel_rank": 18,
+      "maximum_raw_lifted_coefficient_rank": 23,
+      "maximum_raw_lifted_homogeneous_rank": 22,
+      "maximum_union_with_kernel_rank": 23,
+      "maximum_homogeneous_union_with_kernel_rank": 22,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 18,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 16688,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 30720,
+      "row_pushforward_doublings": 20480,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 4790081,
+        "multiplications": 4910543,
+        "inversions": 4824
+      },
+      "peak_logical_coefficient_bytes": 25440,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 10,
+          "count": 22
+        },
+        {
+          "value": 17,
+          "count": 12
+        },
+        {
+          "value": 20,
+          "count": 4
+        },
+        {
+          "value": 21,
+          "count": 6
+        },
+        {
+          "value": 22,
+          "count": 13
+        },
+        {
+          "value": 23,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 22
+        },
+        {
+          "value": 2,
+          "count": 16
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 13
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "b57262d4295cd8af4a7a52e7aefe8cec236ab53da69d2e13c687d3b6a200900e"
+    },
+    {
+      "family": "low-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 8,
+      "algebraic_degree": 64,
+      "rational_kernel_size": 8,
+      "rational_kernel_points": [
+        "infinity",
+        "137,206",
+        "137,945",
+        "369,528",
+        "369,623",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 8,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 48,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 81920,
+      "enumerated_lifted_rows": 81920,
+      "unique_lifted_rows": 81920,
+      "lift_multiplier_per_destination_row": 512,
+      "nonempty_destination_targets": 63,
+      "maximum_destination_row_occupancy": 8,
+      "maximum_lifted_row_occupancy": 4096,
+      "maximum_distinct_source_sums_per_destination_target": 8,
+      "deck_kernel_rank": 42,
+      "maximum_raw_lifted_coefficient_rank": 47,
+      "maximum_raw_lifted_homogeneous_rank": 46,
+      "maximum_union_with_kernel_rank": 47,
+      "maximum_homogeneous_union_with_kernel_rank": 46,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 42,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 25032,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 245760,
+      "row_pushforward_doublings": 245760,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 154069337,
+        "multiplications": 154449023,
+        "inversions": 10272
+      },
+      "peak_logical_coefficient_bytes": 397248,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 22,
+          "count": 22
+        },
+        {
+          "value": 37,
+          "count": 12
+        },
+        {
+          "value": 44,
+          "count": 4
+        },
+        {
+          "value": 45,
+          "count": 6
+        },
+        {
+          "value": 46,
+          "count": 13
+        },
+        {
+          "value": 47,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 22
+        },
+        {
+          "value": 2,
+          "count": 16
+        },
+        {
+          "value": 3,
+          "count": 6
+        },
+        {
+          "value": 4,
+          "count": 13
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "891071bde23ea312089dcb00376314a5179211a4e100f063cb00a7f1a29145fb"
+    },
+    {
+      "family": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 1,
+      "algebraic_degree": 1,
+      "rational_kernel_size": 1,
+      "rational_kernel_points": [
+        "infinity"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 1,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 6,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 160,
+      "enumerated_lifted_rows": 160,
+      "unique_lifted_rows": 160,
+      "lift_multiplier_per_destination_row": 1,
+      "nonempty_destination_targets": 74,
+      "maximum_destination_row_occupancy": 6,
+      "maximum_lifted_row_occupancy": 6,
+      "maximum_distinct_source_sums_per_destination_target": 1,
+      "deck_kernel_rank": 0,
+      "maximum_raw_lifted_coefficient_rank": 5,
+      "maximum_raw_lifted_homogeneous_rank": 4,
+      "maximum_union_with_kernel_rank": 5,
+      "maximum_homogeneous_union_with_kernel_rank": 4,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 0,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 0,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 480,
+      "row_pushforward_doublings": 0,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 2350,
+        "multiplications": 14404,
+        "inversions": 714
+      },
+      "peak_logical_coefficient_bytes": 72,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 30
+        },
+        {
+          "value": 2,
+          "count": 22
+        },
+        {
+          "value": 3,
+          "count": 12
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 30
+        },
+        {
+          "value": 2,
+          "count": 22
+        },
+        {
+          "value": 3,
+          "count": 12
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "23642bdf8cb51d3001f0dfb0080d5cb7d67b4e8c911dc2db3fc2d34eebcb196d"
+    },
+    {
+      "family": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 2,
+      "algebraic_degree": 4,
+      "rational_kernel_size": 2,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 2,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 12,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 1280,
+      "enumerated_lifted_rows": 1280,
+      "unique_lifted_rows": 1280,
+      "lift_multiplier_per_destination_row": 8,
+      "nonempty_destination_targets": 74,
+      "maximum_destination_row_occupancy": 6,
+      "maximum_lifted_row_occupancy": 48,
+      "maximum_distinct_source_sums_per_destination_target": 2,
+      "deck_kernel_rank": 6,
+      "maximum_raw_lifted_coefficient_rank": 11,
+      "maximum_raw_lifted_homogeneous_rank": 10,
+      "maximum_union_with_kernel_rank": 11,
+      "maximum_homogeneous_union_with_kernel_rank": 10,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 6,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 8344,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 3840,
+      "row_pushforward_doublings": 1280,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 128978,
+        "multiplications": 172122,
+        "inversions": 2260
+      },
+      "peak_logical_coefficient_bytes": 1296,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 4,
+          "count": 30
+        },
+        {
+          "value": 6,
+          "count": 6
+        },
+        {
+          "value": 7,
+          "count": 14
+        },
+        {
+          "value": 8,
+          "count": 4
+        },
+        {
+          "value": 9,
+          "count": 10
+        },
+        {
+          "value": 10,
+          "count": 4
+        },
+        {
+          "value": 11,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 30
+        },
+        {
+          "value": 2,
+          "count": 22
+        },
+        {
+          "value": 3,
+          "count": 12
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "b807ff6f15ffe0cdc2ab45f6b3c2cbf70abfd05ddfe95c1e1e67c67c298732c6"
+    },
+    {
+      "family": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 4,
+      "algebraic_degree": 16,
+      "rational_kernel_size": 4,
+      "rational_kernel_points": [
+        "infinity",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 4,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 24,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 10240,
+      "enumerated_lifted_rows": 10240,
+      "unique_lifted_rows": 10240,
+      "lift_multiplier_per_destination_row": 64,
+      "nonempty_destination_targets": 74,
+      "maximum_destination_row_occupancy": 6,
+      "maximum_lifted_row_occupancy": 384,
+      "maximum_distinct_source_sums_per_destination_target": 4,
+      "deck_kernel_rank": 18,
+      "maximum_raw_lifted_coefficient_rank": 23,
+      "maximum_raw_lifted_homogeneous_rank": 22,
+      "maximum_union_with_kernel_rank": 23,
+      "maximum_homogeneous_union_with_kernel_rank": 22,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 18,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 16688,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 30720,
+      "row_pushforward_doublings": 20480,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 4463188,
+        "multiplications": 4595944,
+        "inversions": 5352
+      },
+      "peak_logical_coefficient_bytes": 19296,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 10,
+          "count": 30
+        },
+        {
+          "value": 14,
+          "count": 6
+        },
+        {
+          "value": 17,
+          "count": 14
+        },
+        {
+          "value": 18,
+          "count": 2
+        },
+        {
+          "value": 20,
+          "count": 2
+        },
+        {
+          "value": 21,
+          "count": 10
+        },
+        {
+          "value": 22,
+          "count": 4
+        },
+        {
+          "value": 23,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 30
+        },
+        {
+          "value": 2,
+          "count": 22
+        },
+        {
+          "value": 3,
+          "count": 12
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "3145aedc16784c2bdfd3a4f41411209a31712643cef195218147dbc1d3e327a4"
+    },
+    {
+      "family": "hash-coordinate-geometry",
+      "selection_uses_discrete_log_labels": false,
+      "map_scalar": 8,
+      "algebraic_degree": 64,
+      "rational_kernel_size": 8,
+      "rational_kernel_points": [
+        "infinity",
+        "137,206",
+        "137,945",
+        "369,528",
+        "369,623",
+        "729,0",
+        "944,73",
+        "944,1078"
+      ],
+      "fibre_size_histogram_for_six_destinations": [
+        {
+          "value": 8,
+          "count": 6
+        }
+      ],
+      "destination_columns": 6,
+      "lifted_columns": 48,
+      "arity": 3,
+      "destination_raw_rows": 160,
+      "expected_lifted_rows": 81920,
+      "enumerated_lifted_rows": 81920,
+      "unique_lifted_rows": 81920,
+      "lift_multiplier_per_destination_row": 512,
+      "nonempty_destination_targets": 74,
+      "maximum_destination_row_occupancy": 6,
+      "maximum_lifted_row_occupancy": 3072,
+      "maximum_distinct_source_sums_per_destination_target": 8,
+      "deck_kernel_rank": 42,
+      "maximum_raw_lifted_coefficient_rank": 47,
+      "maximum_raw_lifted_homogeneous_rank": 46,
+      "maximum_union_with_kernel_rank": 47,
+      "maximum_homogeneous_union_with_kernel_rank": 46,
+      "maximum_quotient_coefficient_rank": 5,
+      "maximum_quotient_homogeneous_rank": 4,
+      "maximum_collapsed_destination_coefficient_rank": 5,
+      "maximum_collapsed_destination_homogeneous_rank": 4,
+      "maximum_raw_rank_removed_by_quotient": 42,
+      "buckets_with_quotient_identity_failure": 0,
+      "buckets_with_cover_created_destination_rank": 0,
+      "missing_fibres": 0,
+      "duplicate_lift_rows": 0,
+      "replay_failures": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "fibre_scan_pushforward_doublings": 25032,
+      "destination_sum_group_additions": 480,
+      "source_sum_group_additions": 245760,
+      "row_pushforward_doublings": 245760,
+      "rank_field_operations_mod_149": {
+        "additions_or_subtractions": 143348588,
+        "multiplications": 143770296,
+        "inversions": 11536
+      },
+      "peak_logical_coefficient_bytes": 298944,
+      "disk_bytes_written_during_enumeration": 0,
+      "coefficient_rank_histogram": [
+        {
+          "value": 22,
+          "count": 30
+        },
+        {
+          "value": 30,
+          "count": 6
+        },
+        {
+          "value": 37,
+          "count": 14
+        },
+        {
+          "value": 38,
+          "count": 2
+        },
+        {
+          "value": 44,
+          "count": 2
+        },
+        {
+          "value": 45,
+          "count": 10
+        },
+        {
+          "value": 46,
+          "count": 4
+        },
+        {
+          "value": 47,
+          "count": 6
+        }
+      ],
+      "quotient_rank_histogram": [
+        {
+          "value": 1,
+          "count": 30
+        },
+        {
+          "value": 2,
+          "count": 22
+        },
+        {
+          "value": 3,
+          "count": 12
+        },
+        {
+          "value": 4,
+          "count": 4
+        },
+        {
+          "value": 5,
+          "count": 6
+        }
+      ],
+      "enumeration_blake3": "4a72e8ac65558bcc5d1b4323099e3c0e7cf95615df21f56b342a70c8cb10b957"
+    }
+  ],
+  "total_destination_rows": 2560,
+  "total_lifted_rows_replayed": 374400,
+  "total_fibre_scan_pushforward_doublings": 200256,
+  "total_destination_sum_group_additions": 7680,
+  "total_source_sum_group_additions": 1123200,
+  "total_row_pushforward_doublings": 1070080,
+  "total_rank_field_operations_mod_149": {
+    "additions_or_subtractions": 674833304,
+    "multiplications": 676647664,
+    "inversions": 59980
+  },
+  "maximum_raw_lift_multiplier": 512,
+  "maximum_observed_raw_rank_gain": 42,
+  "maximum_observed_quotient_rank_gain": 0,
+  "p256_prime_order_rational_fibre_statement": "E(F_p) has prime order n and cofactor one; [k] with gcd(k,n)=1 is a rational-point bijection even when the algebraic map has degree k^2.",
+  "boundary_table": [
+    {
+      "variant": "Pollard rho",
+      "effective_log_classes": null,
+      "cover_sheet_credit": 1,
+      "optimistic_ratio_to_rho": 1.0,
+      "scope": "matched generic reference",
+      "result": "reference"
+    },
+    {
+      "variant": "Round 295 FB1hc72514a2a8d3",
+      "effective_log_classes": 164,
+      "cover_sheet_credit": 1,
+      "optimistic_ratio_to_rho": 13.920747397073491,
+      "scope": "free-oracle K-th collision lower boundary; all later costs omitted",
+      "result": "existing independent-log boundary"
+    },
+    {
+      "variant": "Round 300 fibre-lifted width-164 base",
+      "effective_log_classes": 164,
+      "cover_sheet_credit": 1,
+      "optimistic_ratio_to_rho": 13.920747397073491,
+      "scope": "extra sheets quotient to the same destination rows; no cover cost included",
+      "result": "no boundary movement"
+    },
+    {
+      "variant": "registered 17-term FB1h2f8621cda105",
+      "effective_log_classes": 131458,
+      "cover_sheet_credit": 1,
+      "optimistic_ratio_to_rho": 394.42528,
+      "scope": "free-oracle independent-log comparison",
+      "result": "unchanged"
+    }
+  ],
+  "relations_reported_on_p256": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "transfer_assessment_semantic_sha256": "e5d54300201afec3ea8c11586f38c8561e6f88aa749861dbe8278a51660d66a4",
+  "gates": {
+    "dependency_hashes_checked": true,
+    "toy_curve_and_prime_subgroup_exact": true,
+    "all_sixteen_cells_complete": true,
+    "every_lifted_row_group_replayed": true,
+    "zero_false_positives_and_false_negatives": true,
+    "zero_missing_fibres_and_duplicates": true,
+    "quotient_identity_holds_everywhere": true,
+    "cover_creates_two_destination_equations_from_one_destination_row": false,
+    "explicit_p256_cover_and_recovery_implemented": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "per_usable_relation_below_2_103": false,
+    "complete_collection_below_2_120": false,
+    "projected_storage_below_2_50": false,
+    "promoted": false
+  },
+  "classification": "cover-fibre-multiplicity/quotient-rank-conservation/promotion-negative",
+  "dominant_obstruction": "The largest registered fibre supplies 512 lifted rows per destination row and increases raw lifted-column rank, but every added direction lies in the sheet-collapse kernel. Exact quotient rank equals collapsed destination rank in every complete bucket. On cofactor-one P-256, multiplication maps coprime to n are already bijections on rational points. No explicit cover supplies cheaper distinct collapsed decompositions, degree<=5, or complete cost below rho.",
+  "decision": "Do not credit algebraic degree or raw sheet count as relation yield. Close multiplication-map and pure deck-kernel fibre multiplicity as a parity route. Keep open only a cover/Jacobian construction that demonstrably lowers the cost of finding distinct collapsed destination equations and includes executable inverse recovery and end-to-end accounting. Do not attempt an unplanted P-256 relation.",
+  "semantic_evidence_sha256": "392760d6b79b1cee7f21393efe5e764022fd196807a33c268a6907f373d46031",
+  "result_json_bytes": 55005
+}
