@@ -85,6 +85,14 @@
   "registry": {
    "path": "docs/curves/registry.json",
    "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
+  },
+  "curves_schema": {
+   "path": "docs/curves/ic/curves.schema.json",
+   "sha256": "42cd9793dd2993849a38e18cf6411d7159309f48ab1f8de1f94ae298535b74bd"
+  },
+  "curves_yaml": {
+   "path": "docs/curves/ic/curves.yaml",
+   "sha256": "566ed698a961aae8c81b7fb7863e808f9871d3080ee512afd111719783fab77e"
   }
  },
  "families": {
@@ -458,7 +466,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 10,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -706,7 +730,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 32,
+    "recipe": "folded table, walked targets, m = 2",
+    "variant": "mitm_m2_negfold_walk",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -954,7 +994,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 26,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -1202,7 +1258,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 40,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -1450,7 +1522,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 64,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -1698,7 +1786,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 102,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -1946,7 +2050,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 148,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "prime",
@@ -2194,7 +2314,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 222,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "char2",
@@ -2396,7 +2532,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 30,
+    "recipe": "folded table, walked targets, m = 2",
+    "variant": "mitm_m2_negfold_walk",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "char2",
@@ -2598,7 +2750,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 30,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "char2",
@@ -2800,7 +2968,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 62,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "char2",
@@ -3002,7 +3186,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 134,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "char2",
@@ -3204,7 +3404,23 @@
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
    "class": "accounting",
-   "family": "B"
+   "family": "B",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 254,
+    "recipe": "folded, walked, base at the family optimum, m = 2",
+    "variant": "mitm_m2_negfold_walk_balanced",
+    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3294,7 +3510,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 5264,
+    "recipe": "aimed m = 3 collection, m = 3 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3384,7 +3616,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 7296,
+    "recipe": "aimed m = 3 collection, m = 2 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3474,7 +3722,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 6560,
+    "recipe": "aimed m = 3 collection, m = 2 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3564,7 +3828,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 27984,
+    "recipe": "aimed m = 3 collection, m = 2 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3654,7 +3934,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 30208,
+    "recipe": "aimed m = 3 collection, m = 2 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz",
@@ -3744,7 +4040,23 @@
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
    "class": "accounting",
-   "family": "A"
+   "family": "A",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 39040,
+    "recipe": "aimed m = 3 collection, m = 2 descent; one target",
+    "variant": "koblitz_one_target",
+    "source": "research/ic_single_target_20260930/analysis.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -3854,7 +4166,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 304,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -3964,7 +4292,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 368,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4074,7 +4418,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 720,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4184,7 +4544,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 592,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4294,7 +4670,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 1376,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4404,7 +4796,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 5264,
+    "recipe": "aimed m = 3 collection, m = 3 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4514,7 +4922,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 6560,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4624,7 +5048,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 27984,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   },
   {
    "regime": "koblitz_batch",
@@ -4734,7 +5174,23 @@
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering",
-   "family": "C"
+   "family": "C",
+   "curve_record": {
+    "registry": "docs/curves/registry.json",
+    "schema": "docs/curves/ic/curves.schema.json",
+    "curves_yaml": "docs/curves/ic/curves.yaml",
+    "curves_yaml_key": null,
+    "factor_base_refs": [],
+    "factor_base_link_status": "no_curves_yaml_record"
+   },
+   "factor_base": {
+    "points": 39040,
+    "recipe": "aimed m = 3 collection, m = 2 descent",
+    "variant": "koblitz_collection_m3_aimed",
+    "source": "research/ic_descent_20260930/analysis-isolated.json",
+    "refs": [],
+    "link_status": "no_curves_yaml_record"
+   }
   }
  ],
  "oracles": [
@@ -5263,6 +5719,15 @@
   "online_speedup": null,
   "fully_priced_cold_speedup": null
  },
+ "curve_records": {
+  "registry": "docs/curves/registry.json",
+  "schema": "docs/curves/ic/curves.schema.json",
+  "yaml": "docs/curves/ic/curves.yaml",
+  "yaml_records": 3,
+  "board_curves": 24,
+  "board_curves_in_yaml": 0,
+  "board_curves_factor_base_reconciled": 0
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",
@@ -5430,7 +5895,9 @@
     "K_0/2^7",
     "K_0/F_2^7"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m7-tm13-ac10a42c",
@@ -5449,7 +5916,9 @@
     "K_1/2^7",
     "K_1/F_2^7"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m9-t5-81e744be",
@@ -5468,7 +5937,9 @@
     "K_0/2^9",
     "K_0/F_2^9"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m9-tm5-4a3ea183",
@@ -5487,7 +5958,9 @@
     "K_1/2^9",
     "K_1/F_2^9"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m11-tm67-f393fc83",
@@ -5504,7 +5977,9 @@
     "K_0/2^11",
     "K_0/F_2^11"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m11-t67-05f5aa36",
@@ -5523,7 +5998,9 @@
     "K_1/2^11",
     "K_1/F_2^11"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m11-t67-ae0facd2",
@@ -5539,7 +6016,9 @@
    "legacy": [
     "ecbench-koblitz-n11-l4"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-t181-515ee569",
@@ -5558,7 +6037,9 @@
     "K_0/2^13",
     "K_0/F_2^13"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-tm181-25e736d2",
@@ -5575,7 +6056,9 @@
     "K_1/2^13",
     "K_1/F_2^13"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-tm181-e4cd523e",
@@ -5591,7 +6074,9 @@
    "legacy": [
     "ecbench-koblitz-n13-l4"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
@@ -5610,7 +6095,9 @@
     "K_0/2^15",
     "K_0/F_2^15"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-t275-25edae83",
@@ -5626,7 +6113,9 @@
    "legacy": [
     "ecbench-koblitz-n15-l5"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-t275-b7f03703",
@@ -5645,7 +6134,9 @@
     "K_1/2^15",
     "K_1/F_2^15"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m17-t101-e6c4b64d",
@@ -5662,7 +6153,9 @@
     "K_0/2^17",
     "K_0/F_2^17"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m17-tm101-00378d4e",
@@ -5682,7 +6175,9 @@
     "K_1 / GF(2^17)",
     "K_1/2^17"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m19-t797-b6cf2467",
@@ -5701,7 +6196,9 @@
     "K_0/2^19",
     "K_0/F_2^19"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m19-tm797-9c54981b",
@@ -5721,7 +6218,9 @@
     "K_1 / GF(2^19)",
     "K_1/2^19"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m21-t2795-26779965",
@@ -5738,7 +6237,9 @@
     "K_1/2^21",
     "K_1/F_2^21"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m23-t5197-69e76b73",
@@ -5757,7 +6258,9 @@
     "K_0/2^23",
     "K_0/F_2^23"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m23-tm5197-1f85e9e1",
@@ -5776,7 +6279,9 @@
     "K_1/2^23",
     "K_1/F_2^23"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m23-tm5197-a023238e",
@@ -5792,7 +6297,9 @@
    "legacy": [
     "ecbench-koblitz-n23-l7"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m29-tm40309-30c52b96",
@@ -5811,7 +6318,9 @@
     "K_1/2^29",
     "K_1/F_2^29"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m29-tm40309-6aecea52",
@@ -5827,7 +6336,9 @@
    "legacy": [
     "ecbench-koblitz-n29-l8"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
@@ -5846,7 +6357,9 @@
     "K_0/2^31",
     "K_0/F_2^31"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m31-t90707-5fc996f0",
@@ -5862,7 +6375,9 @@
    "legacy": [
     "ecbench-koblitz-n31-l8"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m31-t90707-8fd18741",
@@ -5879,7 +6394,9 @@
     "K_1/2^31",
     "K_1/F_2^31"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m37-tm534059-32aad96b",
@@ -5898,7 +6415,9 @@
     "K_0/2^37",
     "K_0/F_2^37"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m39-t1481485-829ef1d1",
@@ -5917,7 +6436,9 @@
     "K_0/2^39",
     "K_0/F_2^39"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m41-tm2308219-7f48b14a",
@@ -5936,7 +6457,9 @@
     "K_0/2^41",
     "K_0/F_2^41"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m43-tm998717-e2e742b0",
@@ -5955,7 +6478,9 @@
     "K_1/2^43",
     "K_1/F_2^43"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m45-tm6236725-40939294",
@@ -5974,7 +6499,9 @@
     "K_1/2^45",
     "K_1/F_2^45"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m47-t22705043-f4e44623",
@@ -5993,7 +6520,9 @@
     "K_1/2^47",
     "K_1/F_2^47"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m53-tm56619371-dac20a85",
@@ -6012,7 +6541,9 @@
     "K_0/2^53",
     "K_0/F_2^53"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m57-tm747311035-c1f545af",
@@ -6031,7 +6562,9 @@
     "K_0/2^57",
     "K_0/F_2^57"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m59-tm943548413-98844ecc",
@@ -6050,7 +6583,9 @@
     "K_1/2^59",
     "K_1/F_2^59"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m61-t158598901-ab42b6c5",
@@ -6069,7 +6604,9 @@
     "K_0/2^61",
     "K_0/F_2^61"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m67-tm19346764963-82c84cca",
@@ -6086,7 +6623,9 @@
     "K_0/2^67",
     "K_0/F_2^67"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m67-t19346764963-e760df38",
@@ -6103,7 +6642,9 @@
     "K_1/2^67",
     "K_1/F_2^67"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m71-t48653080717-2cafaea3",
@@ -6120,7 +6661,9 @@
     "K_0/2^71",
     "K_0/F_2^71"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m71-tm48653080717-f25c4638",
@@ -6137,7 +6680,9 @@
     "K_1/2^71",
     "K_1/F_2^71"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m73-tm184271214331-9d25cc67",
@@ -6154,7 +6699,9 @@
     "K_0/2^73",
     "K_0/F_2^73"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m79-tm420247971347-2a24b892",
@@ -6171,7 +6718,9 @@
     "K_0/2^79",
     "K_0/F_2^79"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m83-tm6151469093347-debefd74",
@@ -6188,7 +6737,9 @@
     "K_0/2^83",
     "K_0/F_2^83"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m83-t6151469093347-cdcc5432",
@@ -6205,7 +6756,9 @@
     "K_1/2^83",
     "K_1/F_2^83"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m97-t378251973071909-f27192f3",
@@ -6226,7 +6779,9 @@
     "K_0 / GF(2^97)",
     "K_0/2^97"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m127-t24589614856193402413-a00e5890",
@@ -6243,7 +6798,9 @@
     "K_0/2^127",
     "K_0/F_2^127"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
@@ -6262,7 +6819,9 @@
     "K_0 / GF(2^131)",
     "K_0/2^131"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m137-t574016314927011818501-11ceb4d6",
@@ -6279,7 +6838,9 @@
     "K_0/2^137",
     "K_0/F_2^137"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m151-tm97937651335354183120307-ee31df7e",
@@ -6296,7 +6857,9 @@
     "K_0/2^151",
     "K_0/F_2^151"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m157-t158060339213695215877259-816eafb2",
@@ -6313,7 +6876,9 @@
     "K_1/2^157",
     "K_1/F_2^157"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m163-tm4845466632539410776804317-e15e581e",
@@ -6334,7 +6899,9 @@
     "K_1/2^163",
     "K_1/F_2^163"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m173-tm67870783603944754053042229-ddf2de63",
@@ -6351,7 +6918,9 @@
     "K_1/2^173",
     "K_1/F_2^173"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m179-t1681527843948629186391379613-d1b73c24",
@@ -6368,7 +6937,9 @@
     "K_0/2^179",
     "K_0/F_2^179"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m233-tm137381546011108235394987299651366779-08b072d7",
@@ -6387,7 +6958,9 @@
     "K_0/2^233",
     "K_0/F_2^233"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m239-tm1879124296849029916489117776215138963-fe13c2c6",
@@ -6406,7 +6979,9 @@
     "K_0/2^239",
     "K_0/F_2^239"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m283-t7777244870872830999287791970962823977569917-ddd7db8c",
@@ -6425,7 +7000,9 @@
     "K_0/2^283",
     "K_0/F_2^283"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m409-t10457288737315625927447685387048320737638796957687575791173829-87b3ee45",
@@ -6444,7 +7021,9 @@
     "K_0/2^409",
     "K_0/F_2^409"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m571-tm148380926981691413899619140297051490364542574180493936232912339534208516828973111459843-3b150b80",
@@ -6463,7 +7042,9 @@
     "K_0/2^571",
     "K_0/F_2^571"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562",
@@ -6480,7 +7061,9 @@
     "K_0/2^577",
     "K_0/F_2^577"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m6-tm11-a69b70b8",
@@ -6496,7 +7079,9 @@
    "legacy": [
     "E_{0,2}/GF(2^2) over GF(2^6)"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m10-t61-31ce0e65",
@@ -6512,7 +7097,9 @@
    "legacy": [
     "E_{0,2}/GF(2^2) over GF(2^10)"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m14-tm251-b69e8b8b",
@@ -6528,7 +7115,9 @@
    "legacy": [
     "E_{0,2}/GF(2^2) over GF(2^14)"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m18-t999-40751283",
@@ -6544,7 +7133,9 @@
    "legacy": [
     "E_{2,1}/GF(2^2) over GF(2^18)"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-t11-f036dc01",
@@ -6560,7 +7151,9 @@
    "legacy": [
     "random-binary-n13-b1503"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-t11-f12dc95f",
@@ -6576,7 +7169,9 @@
    "legacy": [
     "random-binary-n13-b16da"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-t79-00b3392a",
@@ -6592,7 +7187,9 @@
    "legacy": [
     "random-binary-n13-ba3f"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-tm83-b76daa24",
@@ -6608,7 +7205,9 @@
    "legacy": [
     "random-binary-n13-b1c1b"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m13-tm9-6863a838",
@@ -6624,7 +7223,9 @@
    "legacy": [
     "random-binary-n13-b168f"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-t131-ed7256f0",
@@ -6640,7 +7241,9 @@
    "legacy": [
     "random-binary-n15-b524b"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-t5-d9fb183e",
@@ -6656,7 +7259,9 @@
    "legacy": [
     "random-binary-n15-b2493"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-tm185-565c1669",
@@ -6672,7 +7277,9 @@
    "legacy": [
     "random-binary-n15-b702a"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-tm217-f2f901c1",
@@ -6688,7 +7295,9 @@
    "legacy": [
     "random-binary-n15-b3c06"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-tm237-34b47a4a",
@@ -6704,7 +7313,9 @@
    "legacy": [
     "random-binary-n15-b3ecf"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m15-tm65-37237277",
@@ -6720,7 +7331,9 @@
    "legacy": [
     "random-binary-n15-b157a"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m17-t455-60048e6d",
@@ -6736,7 +7349,9 @@
    "legacy": [
     "random-binary-n17-b1ad26"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m17-t531-2048fb7c",
@@ -6752,7 +7367,9 @@
    "legacy": [
     "random-binary-n17-b10103"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m17-tm185-c9e2dceb",
@@ -6768,7 +7385,9 @@
    "legacy": [
     "random-binary-n17-bbe86"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m18-t393-d2c04152",
@@ -6784,7 +7403,9 @@
    "legacy": [
     "random-binary-n18-b6507"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m19-tm353-a68ceb24",
@@ -6800,7 +7421,9 @@
    "legacy": [
     "random-binary-n19-b5f57e"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m19-tm649-a9133fe6",
@@ -6816,7 +7439,9 @@
    "legacy": [
     "random-binary-n19-b770f7"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m21-t2591-de54d72e",
@@ -6832,7 +7457,9 @@
    "legacy": [
     "random-binary-n21-b1b6f3b"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m21-t2845-e2683765",
@@ -6848,7 +7475,9 @@
    "legacy": [
     "random-binary-n21-b10cc7b"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m21-tm1495-8bd9aa74",
@@ -6864,7 +7493,9 @@
    "legacy": [
     "random-binary-n21-b968e"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m23-tm1957-8891f5a2",
@@ -6880,7 +7511,9 @@
    "legacy": [
     "random-binary-n23-b3a296b"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m23-tm4129-45500fce",
@@ -6896,7 +7529,9 @@
    "legacy": [
     "random-binary-n23-b480f9a"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m24-t1545-54539071",
@@ -6912,7 +7547,9 @@
    "legacy": [
     "random-binary-n24-bf19f6f"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m24-tm3047-2d0c0e8c",
@@ -6928,7 +7565,9 @@
    "legacy": [
     "random-binary-n24-b5fc9da"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m25-t4775-4830dca7",
@@ -6944,7 +7583,9 @@
    "legacy": [
     "random-binary-n25-b1448ace"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m25-tm489-c50a8fb9",
@@ -6960,7 +7601,9 @@
    "legacy": [
     "random-binary-n25-b1a9b772"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m27-t12543-569dca8b",
@@ -6976,7 +7619,9 @@
    "legacy": [
     "random-binary-n27-b845462"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m27-t20811-3d0fd5a1",
@@ -6992,7 +7637,9 @@
    "legacy": [
     "random-binary-n27-b3bfa9c2"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m27-t6931-1834c541",
@@ -7008,7 +7655,9 @@
    "legacy": [
     "random-binary-n27-b7ade7fe"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-f2m27-tm20293-ca4ad8af",
@@ -7024,7 +7673,9 @@
    "legacy": [
     "random-binary-n27-b227199e"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp6-tm7-fc20da94",
@@ -7038,7 +7689,9 @@
    "legacy": [
     "bench-8bit"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp10-t5-192cb216",
@@ -7054,7 +7707,9 @@
    "legacy": [
     "bench-10bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp12-tm53-6c9ff4bb",
@@ -7070,7 +7725,9 @@
    "legacy": [
     "generated-12bit-3529"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp12-t19-d4a315df",
@@ -7086,7 +7743,9 @@
    "legacy": [
     "bench-12bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp14-tm63-1a762b57",
@@ -7098,7 +7757,9 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp14-tm143-dec4cf6b",
@@ -7114,7 +7775,9 @@
    "legacy": [
     "generated-14bit-14389"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp14-tm43-158b6914",
@@ -7130,7 +7793,9 @@
    "legacy": [
     "bench-14bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp16-tm393-20f8a24e",
@@ -7142,7 +7807,9 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp16-t295-8d3c3165",
@@ -7158,7 +7825,9 @@
    "legacy": [
     "generated-16bit-53411"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp16-t351-d433f24e",
@@ -7174,7 +7843,9 @@
    "legacy": [
     "bench-16bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp18-tm337-d28d5e09",
@@ -7190,7 +7861,9 @@
    "legacy": [
     "generated-18bit-212099"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp18-t175-45770ebc",
@@ -7206,7 +7879,9 @@
    "legacy": [
     "bench-18bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp20-t727-cd198a38",
@@ -7222,7 +7897,9 @@
    "legacy": [
     "generated-20bit-563153"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp20-t1293-3c2999ba",
@@ -7238,7 +7915,9 @@
    "legacy": [
     "bench-20bit"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp22-tm1385-475dcb5f",
@@ -7254,7 +7933,9 @@
    "legacy": [
     "generated-22bit-2434423"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp22-t411-86337907",
@@ -7270,7 +7951,9 @@
    "legacy": [
     "generated-22bit-2987209"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp22-tm1267-a5acaf6d",
@@ -7286,7 +7969,9 @@
    "legacy": [
     "generated-22bit-3290411"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp22-t3019-0c6101de",
@@ -7302,7 +7987,9 @@
    "legacy": [
     "generated-22bit-3914087"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp24-t1577-77336155",
@@ -7318,7 +8005,9 @@
    "legacy": [
     "generated-24bit-10935329"
    ],
-   "on_board": true
+   "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp24-t1465-0b7163ca",
@@ -7334,7 +8023,9 @@
    "legacy": [
     "generated-24bit-11921101"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp24-t991-def56de7",
@@ -7350,7 +8041,9 @@
    "legacy": [
     "generated-24bit-12832957"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp24-t1059-6df599df",
@@ -7366,7 +8059,9 @@
    "legacy": [
     "generated-24bit-16483309"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp26-tm9263-8a144943",
@@ -7382,7 +8077,9 @@
    "legacy": [
     "generated-26bit-38313677"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp26-tm1775-7e8fb6df",
@@ -7398,7 +8095,9 @@
    "legacy": [
     "generated-26bit-42652151"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
@@ -7416,7 +8115,9 @@
    "legacy": [
     "P-192"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
@@ -7434,7 +8135,9 @@
    "legacy": [
     "P-224"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
@@ -7452,7 +8155,9 @@
    "legacy": [
     "P-256"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   },
   {
    "slug": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
@@ -7470,7 +8175,9 @@
    "legacy": [
     "secp256k1"
    ],
-   "on_board": false
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
   }
  ],
  "phases": [

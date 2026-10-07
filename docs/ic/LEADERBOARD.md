@@ -102,6 +102,41 @@ Shares are fractions of each row's own `S`, so they carry no unit; read each row
 | C | `icv1-f2m53-tm56619371-dac20a85` | — | 6.6% | 2.2% | 2.5% | 23.4% | 56.3% | 0.2% | 7.8% | 0.9% |
 | C | `icv1-f2m61-t158598901-ab42b6c5` | — | 3.4% | 0.6% | 0.7% | 7.5% | 78.8% | 0.1% | 8.7% | 0.2% |
 
+## Curve records and factor bases
+
+Identity: [`docs/curves/registry.json`](../../docs/curves/registry.json). IC curve records: schema [`docs/curves/ic/curves.schema.json`](../../docs/curves/ic/curves.schema.json), records [`docs/curves/ic/curves.yaml`](../../docs/curves/ic/curves.yaml) (3 records). 0 of the 24 board curves have a record there; 0 have a reconciled factor base.
+
+| table | curve | curves.yaml record | factor base (points, recipe) | factor-base source | refs |
+|:--|:--|:--|:--|:--|:--|
+| A | `icv1-f2m47-t22705043-f4e44623` | none | 5,264, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| A | `icv1-f2m57-tm747311035-c1f545af` | none | 7,296, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| A | `icv1-f2m41-tm2308219-7f48b14a` | none | 6,560, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| A | `icv1-f2m53-tm56619371-dac20a85` | none | 27,984, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| A | `icv1-f2m59-tm943548413-98844ecc` | none | 30,208, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| A | `icv1-f2m61-t158598901-ab42b6c5` | none | 39,040, koblitz_one_target | `research/ic_single_target_20260930/analysis.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp10-t5-192cb216` | none | 10, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp12-t19-d4a315df` | none | 32, mitm_m2_negfold_walk | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp14-tm43-158b6914` | none | 26, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp16-t351-d433f24e` | none | 40, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp18-t175-45770ebc` | none | 64, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp20-t1293-3c2999ba` | none | 102, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp22-tm1267-a5acaf6d` | none | 148, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-fp24-t1577-77336155` | none | 222, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-f2m15-t131-ed7256f0` | none | 30, mitm_m2_negfold_walk | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-f2m18-t393-d2c04152` | none | 30, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-f2m21-t2591-de54d72e` | none | 62, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-f2m24-tm3047-2d0c0e8c` | none | 134, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| B | `icv1-f2m27-t12543-569dca8b` | none | 254, mitm_m2_negfold_walk_balanced | `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m19-tm797-9c54981b` | none | 304, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m23-tm5197-1f85e9e1` | none | 368, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m45-tm6236725-40939294` | none | 720, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m37-tm534059-32aad96b` | none | 592, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m43-tm998717-e2e742b0` | none | 1,376, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m47-t22705043-f4e44623` | none | 5,264, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m41-tm2308219-7f48b14a` | none | 6,560, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m53-tm56619371-dac20a85` | none | 27,984, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+| C | `icv1-f2m61-t158598901-ab42b6c5` | none | 39,040, koblitz_collection_m3_aimed | `research/ic_descent_20260930/analysis-isolated.json` | none (no_curves_yaml_record) |
+
 ## Bounded n37 diagnostic outside tables A–C
 
 The separately calibrated `icv1-f2m37-tm534059-32aad96b` shared-rank K16 candidate (`IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772`) has 1,184 usable points and 16 folded columns. Across 40 verified one-target runs, its mean cold counted `S` lower bound is 2.111; its counted IC/rho quotient is 5.034 and K16/K42 is 0.349. Native work is unpriced for both arms, and L0 timing cannot establish an online speedup. This row is intentionally outside the three fully priced unit families; read the [frozen decision](../../research/ecbench_n37_rank_columns_20261004/RESULT.json).
@@ -154,3 +189,5 @@ The preregistered one-target workload `f6d79f6dd9f2` on `icv1-f2m9-tm5-4a3ea183`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
 - `docs/curves/registry.json` — sha256 `a43b9dd3529815ae…`
+- `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
+- `docs/curves/ic/curves.yaml` — sha256 `566ed698a961aae8…`
