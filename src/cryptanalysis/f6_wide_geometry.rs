@@ -9,6 +9,10 @@
 
 use std::collections::HashMap;
 
+use rayon::prelude::*;
+
+use crate::cryptanalysis::fx_hash::FxMap;
+
 use crate::binary_ecc::curve::{point_add, point_neg};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
 
@@ -43,6 +47,39 @@ fn x_key(point: &BinaryPoint) -> Option<PointXKey> {
     match point {
         BinaryPoint::Infinity => Some(PointXKey::Infinity),
         BinaryPoint::Affine { x, .. } => Some(PointXKey::Affine(packed(x)?)),
+    }
+}
+
+/// A point with at most two-word coordinates, packed: `None` is the point
+/// at infinity.  The sign-folded index stores its pair sums this way,
+/// about a third the size of a [`BinaryPoint`].
+type PackedPoint = Option<(u128, u128)>;
+
+fn pack_point(point: &BinaryPoint) -> Option<PackedPoint> {
+    match point {
+        BinaryPoint::Infinity => Some(None),
+        BinaryPoint::Affine { x, y } => Some(Some((packed(x)?, packed(y)?))),
+    }
+}
+
+fn unpack_element(value: u128, m: u32) -> F2mElement {
+    F2mElement::from_words(&[value as u64, (value >> 64) as u64], m)
+}
+
+fn unpack_point(point: PackedPoint, m: u32) -> BinaryPoint {
+    match point {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: unpack_element(x, m),
+            y: unpack_element(y, m),
+        },
+    }
+}
+
+fn packed_x_key(point: PackedPoint) -> PointXKey {
+    match point {
+        None => PointXKey::Infinity,
+        Some((x, _)) => PointXKey::Affine(x),
     }
 }
 
@@ -231,10 +268,31 @@ fn batch_x_keys_fixed_both_signs(
     Some(keys)
 }
 
-#[cfg(target_arch = "aarch64")]
+/// Degree-83 field arithmetic on packed `u128` elements, by the CPU's
+/// carry-less multiply: PMULL on ARM64, PCLMULQDQ on x86-64.  Callers
+/// check [`packed83::usable`] first.
+#[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
 mod packed83 {
     use super::*;
     use num_bigint::BigUint;
+
+    /// The pinned degree-83 field and a CPU with carry-less multiply.
+    pub(super) fn usable(curve: &BinaryCurve) -> bool {
+        curve.m == 83
+            && curve.irreducible.degree == 83
+            && curve.irreducible.low_terms == [0, 1, 2, 45]
+            && feature()
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn feature() -> bool {
+        std::arch::is_aarch64_feature_detected!("aes")
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    fn feature() -> bool {
+        std::arch::is_x86_feature_detected!("pclmulqdq")
+    }
 
     pub(super) const MASK: u128 = (1u128 << 83) - 1;
 
@@ -253,16 +311,29 @@ mod packed83 {
         result
     }
 
+    #[cfg(target_arch = "aarch64")]
     #[target_feature(enable = "aes")]
     unsafe fn clmul(a: u64, b: u64) -> u128 {
         std::arch::aarch64::vmull_p64(a, b)
     }
 
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn clmul(a: u64, b: u64) -> u128 {
+        use std::arch::x86_64::{_mm_clmulepi64_si128, _mm_set_epi64x};
+        let product =
+            _mm_clmulepi64_si128(_mm_set_epi64x(0, a as i64), _mm_set_epi64x(0, b as i64), 0);
+        // SAFETY: `__m128i` and `u128` are both 16 plain bytes; lane 0 is
+        // the low half on little-endian x86-64.
+        unsafe { std::mem::transmute::<std::arch::x86_64::__m128i, u128>(product) }
+    }
+
     /// Carry-less multiply modulo the pinned degree-83 polynomial.
     ///
     /// # Safety
-    /// The caller must have checked ARM64 AES/PMULL support.
-    #[target_feature(enable = "aes")]
+    /// The caller must have checked [`usable`].
+    #[cfg_attr(target_arch = "aarch64", target_feature(enable = "aes"))]
+    #[cfg_attr(target_arch = "x86_64", target_feature(enable = "pclmulqdq"))]
     pub(super) unsafe fn mul(a: u128, b: u128) -> u128 {
         debug_assert_eq!((a | b) & !MASK, 0);
         let a0 = a as u64;
@@ -278,8 +349,9 @@ mod packed83 {
     /// Field squaring uses only two carry-less limb products.
     ///
     /// # Safety
-    /// The caller must have checked ARM64 AES/PMULL support.
-    #[target_feature(enable = "aes")]
+    /// The caller must have checked [`usable`].
+    #[cfg_attr(target_arch = "aarch64", target_feature(enable = "aes"))]
+    #[cfg_attr(target_arch = "x86_64", target_feature(enable = "pclmulqdq"))]
     pub(super) unsafe fn square(a: u128) -> u128 {
         debug_assert_eq!(a & !MASK, 0);
         reduce(unsafe { clmul(a as u64, a as u64) }, unsafe {
@@ -287,10 +359,64 @@ mod packed83 {
         })
     }
 
+    /// `points[i] + points[j]` for every `j ≥ i`, packed, as
+    /// [`batch_add_fixed`] computes them: one inversion for the row's
+    /// ordinary additions, the reference group law for the rest.
+    ///
     /// # Safety
-    /// The caller must have checked ARM64 AES/PMULL support and the pinned
-    /// degree-83 irreducible polynomial.
-    #[target_feature(enable = "aes")]
+    /// The caller must have checked [`usable`].
+    #[cfg_attr(target_arch = "aarch64", target_feature(enable = "aes"))]
+    #[cfg_attr(target_arch = "x86_64", target_feature(enable = "pclmulqdq"))]
+    pub(super) unsafe fn row_sums(
+        curve: &BinaryCurve,
+        points: &[BinaryPoint],
+        coordinates: &[PackedPoint],
+        i: usize,
+    ) -> Option<Vec<PackedPoint>> {
+        let others = &points[i..];
+        let Some((x1, y1)) = coordinates[i] else {
+            return Some(coordinates[i..].to_vec());
+        };
+        let a = packed(&curve.a)?;
+        let mut result = vec![None; others.len()];
+        let mut positions = Vec::with_capacity(others.len());
+        let mut denominators = Vec::with_capacity(others.len());
+        for (k, other) in coordinates[i..].iter().enumerate() {
+            match *other {
+                Some((x2, _)) if x2 != x1 => {
+                    positions.push(k);
+                    denominators.push(x1 ^ x2);
+                }
+                _ => result[k] = pack_point(&point_add(curve, &points[i], &others[k]))?,
+            }
+        }
+        if denominators.is_empty() {
+            return Some(result);
+        }
+        let mut prefix = Vec::with_capacity(denominators.len() + 1);
+        prefix.push(1u128);
+        for &denominator in &denominators {
+            prefix.push(unsafe { mul(*prefix.last()?, denominator) });
+        }
+        let product = F2mElement::from_biguint(&BigUint::from(*prefix.last()?), 83);
+        let mut inverse = packed(&product.flt_inverse(&curve.irreducible)?)?;
+        for j in (0..positions.len()).rev() {
+            let k = positions[j];
+            let denominator_inverse = unsafe { mul(inverse, prefix[j]) };
+            inverse = unsafe { mul(inverse, denominators[j]) };
+            let (x2, y2) = coordinates[i + k]?;
+            let lambda = unsafe { mul(y1 ^ y2, denominator_inverse) };
+            let x3 = unsafe { square(lambda) } ^ lambda ^ x1 ^ x2 ^ a;
+            let y3 = unsafe { mul(lambda, x1 ^ x3) } ^ x3 ^ y1;
+            result[k] = Some((x3, y3));
+        }
+        Some(result)
+    }
+
+    /// # Safety
+    /// The caller must have checked [`usable`].
+    #[cfg_attr(target_arch = "aarch64", target_feature(enable = "aes"))]
+    #[cfg_attr(target_arch = "x86_64", target_feature(enable = "pclmulqdq"))]
     pub(super) unsafe fn batch_x_keys(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,
@@ -345,6 +471,18 @@ mod packed83 {
         Some(keys)
     }
 }
+
+/// Rows of pair sums [`F6SignedPairIndex::new`] computes in parallel at a
+/// time before entering them in order.
+const PAIR_ROW_BLOCK: usize = 64;
+
+/// Stored sums per residual batch in [`F6SignedPairIndex`]'s queries: one
+/// field inversion each.
+const QUERY_BATCH: usize = 256;
+
+/// Stored sums from which [`F6SignedPairIndex`]'s queries search their
+/// batches in parallel.
+const PARALLEL_QUERY_SUMS: usize = 1 << 14;
 
 /// The memory cap counts unordered pairs, including repeats. This cap is
 /// independent of the target, and a failed construction allocates no table.
@@ -432,7 +570,7 @@ impl F6WidePairIndex {
 }
 
 struct SignedPairSum {
-    point: BinaryPoint,
+    point: PackedPoint,
     pair: (usize, usize),
     neg_pair: (usize, usize),
 }
@@ -444,7 +582,7 @@ pub struct F6SignedPairIndex {
     curve: BinaryCurve,
     points: Vec<BinaryPoint>,
     sums: Vec<SignedPairSum>,
-    lookup: HashMap<PointXKey, usize>,
+    lookup: FxMap<PointXKey, usize>,
     pair_count: usize,
 }
 
@@ -471,21 +609,55 @@ impl F6SignedPairIndex {
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
-        let mut lookup = HashMap::with_capacity(capacity);
-        for i in 0..points.len() {
-            let row = batch_add_fixed(curve, &points[i], &points[i..]);
-            for (offset, sum) in row.into_iter().enumerate() {
-                let x = x_key(&sum)?;
-                if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
-                    let j = i + offset;
-                    entry.insert(sums.len());
-                    sums.push(SignedPairSum {
-                        point: sum,
-                        pair: (i, j),
-                        neg_pair: (negatives[i], negatives[j]),
-                    });
+        let mut lookup: FxMap<PointXKey, usize> =
+            FxMap::with_capacity_and_hasher(capacity, Default::default());
+        // Row `i` holds `points[i] + points[j]` for `j ≥ i`.  Rows are
+        // independent, so a block of them is computed in parallel; they are
+        // then entered in row order, so the first pair to reach each x key
+        // is the one the row-by-row loop stored.
+        #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+        let coordinates: Option<Vec<PackedPoint>> = if packed83::usable(curve) {
+            Some(points.iter().map(pack_point).collect::<Option<_>>()?)
+        } else {
+            None
+        };
+        let row = |i: usize| -> Option<Vec<PackedPoint>> {
+            #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+            if let Some(coordinates) = &coordinates {
+                // SAFETY: `usable` checked the field and the CPU feature.
+                return unsafe { packed83::row_sums(curve, points, coordinates, i) };
+            }
+            batch_add_fixed(curve, &points[i], &points[i..])
+                .iter()
+                .map(pack_point)
+                .collect()
+        };
+        let mut start = 0;
+        while start < points.len() {
+            let end = (start + PAIR_ROW_BLOCK).min(points.len());
+            let rows: Vec<Vec<PackedPoint>> = if points.len() >= PAIR_ROW_BLOCK {
+                (start..end)
+                    .into_par_iter()
+                    .map(row)
+                    .collect::<Option<_>>()?
+            } else {
+                (start..end).map(row).collect::<Option<_>>()?
+            };
+            for (i, row) in (start..end).zip(rows) {
+                for (offset, sum) in row.into_iter().enumerate() {
+                    let x = packed_x_key(sum);
+                    if let std::collections::hash_map::Entry::Vacant(entry) = lookup.entry(x) {
+                        let j = i + offset;
+                        entry.insert(sums.len());
+                        sums.push(SignedPairSum {
+                            point: sum,
+                            pair: (i, j),
+                            neg_pair: (negatives[i], negatives[j]),
+                        });
+                    }
                 }
             }
+            start = end;
         }
         Some(Self {
             curve: curve.clone(),
@@ -511,13 +683,23 @@ impl F6SignedPairIndex {
 
     fn pair_at(&self, index: usize, residual: &BinaryPoint) -> Option<(usize, usize)> {
         let entry = &self.sums[index];
-        if *residual == entry.point {
+        let residual = pack_point(residual)?;
+        // -(x, y) = (x, x + y) on a binary curve; -O = O
+        let negative = entry.point.map(|(x, y)| (x, x ^ y));
+        if residual == entry.point {
             Some(entry.pair)
-        } else if *residual == point_neg(&entry.point) {
+        } else if residual == negative {
             Some(entry.neg_pair)
         } else {
             None
         }
+    }
+
+    fn chunk_points(&self, chunk: &[SignedPairSum]) -> Vec<BinaryPoint> {
+        chunk
+            .iter()
+            .map(|entry| unpack_point(entry.point, self.curve.m))
+            .collect()
     }
 
     fn verify(
@@ -533,13 +715,27 @@ impl F6SignedPairIndex {
         (sum == *target).then_some(indices)
     }
 
+    /// The first witness `per_chunk` finds, taking the stored sums in
+    /// order, [`QUERY_BATCH`] at a time.  Large indexes search their chunks
+    /// in parallel; `find_map_first` still returns the witness of the
+    /// earliest chunk that has one, so the answer is the serial loop's.
+    fn search(
+        &self,
+        per_chunk: impl Fn(&[SignedPairSum]) -> Option<[usize; 4]> + Sync,
+    ) -> Option<[usize; 4]> {
+        if self.sums.len() >= PARALLEL_QUERY_SUMS {
+            self.sums.par_chunks(QUERY_BATCH).find_map_first(&per_chunk)
+        } else {
+            self.sums.chunks(QUERY_BATCH).find_map(&per_chunk)
+        }
+    }
+
     pub fn solve4(&self, target: &BinaryPoint) -> Option<[usize; 4]> {
         if !self.curve.is_on_curve(target) {
             return None;
         }
-        const BATCH: usize = 256;
-        for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+        self.search(|chunk| {
+            let points = self.chunk_points(chunk);
             let (plus, minus) = batch_add_fixed_both_signs(&self.curve, target, &points);
             for ((entry, plus_residual), minus_residual) in
                 chunk.iter().zip(plus.iter()).zip(minus.iter())
@@ -550,6 +746,37 @@ impl F6SignedPairIndex {
                     }
                 }
                 if let Some(pair) = self.lookup_pair(plus_residual) {
+                    if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                        return Some(witness);
+                    }
+                }
+            }
+            None
+        })
+    }
+
+    /// The first witness among `chunk`'s sums, given the x keys of
+    /// `target − sum` and `target + sum` for each.
+    fn chunk_witness(
+        &self,
+        target: &BinaryPoint,
+        chunk: &[SignedPairSum],
+        keys: Vec<(PointXKey, PointXKey)>,
+    ) -> Option<[usize; 4]> {
+        for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
+            if let Some(&index) = self.lookup.get(&minus_key) {
+                let point = unpack_point(entry.point, self.curve.m);
+                let residual = point_add(&self.curve, target, &point_neg(&point));
+                if let Some(pair) = self.pair_at(index, &residual) {
+                    if let Some(witness) = self.verify(target, entry.pair, pair) {
+                        return Some(witness);
+                    }
+                }
+            }
+            if let Some(&index) = self.lookup.get(&plus_key) {
+                let point = unpack_point(entry.point, self.curve.m);
+                let residual = point_add(&self.curve, target, &point);
+                if let Some(pair) = self.pair_at(index, &residual) {
                     if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
                         return Some(witness);
                     }
@@ -566,77 +793,37 @@ impl F6SignedPairIndex {
         if !self.curve.is_on_curve(target) {
             return None;
         }
-        const BATCH: usize = 256;
-        for chunk in self.sums.chunks(BATCH) {
-            let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
+        self.search(|chunk| {
+            let points = self.chunk_points(chunk);
+            // (Two-word coordinates always pack, so the keys always exist.)
             let keys = batch_x_keys_fixed_both_signs(&self.curve, target, &points)?;
-            for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                if let Some(&index) = self.lookup.get(&minus_key) {
-                    let residual = point_add(&self.curve, target, &point_neg(&entry.point));
-                    if let Some(pair) = self.pair_at(index, &residual) {
-                        if let Some(witness) = self.verify(target, entry.pair, pair) {
-                            return Some(witness);
-                        }
-                    }
-                }
-                if let Some(&index) = self.lookup.get(&plus_key) {
-                    let residual = point_add(&self.curve, target, &entry.point);
-                    if let Some(pair) = self.pair_at(index, &residual) {
-                        if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
-                            return Some(witness);
-                        }
-                    }
-                }
-            }
-        }
-        None
+            self.chunk_witness(target, chunk, keys)
+        })
     }
 
-    /// ARM64 PMULL residual arithmetic for the pinned degree-83 field.
-    /// All other curves and CPUs use the exact x-only reference path.
+    /// Carry-less-multiply residual arithmetic for the pinned degree-83
+    /// field: PMULL on ARM64, PCLMULQDQ on x86-64.  All other curves and
+    /// CPUs use the exact x-only reference path.
     pub fn solve4_xonly_pmull83(&self, target: &BinaryPoint) -> Option<[usize; 4]> {
-        #[cfg(not(target_arch = "aarch64"))]
+        #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
         {
             self.solve4_xonly(target)
         }
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
         {
-            if self.curve.m != 83
-                || self.curve.irreducible.degree != 83
-                || self.curve.irreducible.low_terms != [0, 1, 2, 45]
-                || !std::arch::is_aarch64_feature_detected!("aes")
-            {
+            if !packed83::usable(&self.curve) {
                 return self.solve4_xonly(target);
             }
             if !self.curve.is_on_curve(target) {
                 return None;
             }
-            const BATCH: usize = 256;
-            for chunk in self.sums.chunks(BATCH) {
-                let points: Vec<_> = chunk.iter().map(|entry| entry.point.clone()).collect();
-                // SAFETY: the field polynomial and ARM64 AES/PMULL feature
-                // were checked above. The result is verified in the group.
+            self.search(|chunk| {
+                let points = self.chunk_points(chunk);
+                // SAFETY: `usable` checked the field polynomial and the CPU
+                // feature above. The result is verified in the group.
                 let keys = unsafe { packed83::batch_x_keys(&self.curve, target, &points) }?;
-                for (entry, (plus_key, minus_key)) in chunk.iter().zip(keys) {
-                    if let Some(&index) = self.lookup.get(&minus_key) {
-                        let residual = point_add(&self.curve, target, &point_neg(&entry.point));
-                        if let Some(pair) = self.pair_at(index, &residual) {
-                            if let Some(witness) = self.verify(target, entry.pair, pair) {
-                                return Some(witness);
-                            }
-                        }
-                    }
-                    if let Some(&index) = self.lookup.get(&plus_key) {
-                        let residual = point_add(&self.curve, target, &entry.point);
-                        if let Some(pair) = self.pair_at(index, &residual) {
-                            if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
-                                return Some(witness);
-                            }
-                        }
-                    }
-                }
-            }
-            None
+                self.chunk_witness(target, chunk, keys)
+            })
         }
     }
 }
@@ -671,17 +858,17 @@ mod tests {
         }
     }
 
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
     #[test]
     fn n83_pmull_field_matches_reference() {
-        if !std::arch::is_aarch64_feature_detected!("aes") {
+        let curve = n83_curve();
+        if !packed83::usable(&curve) {
             return;
         }
-        let curve = n83_curve();
         let check = |a: u128, b: u128| {
             let lhs = F2mElement::from_biguint(&BigUint::from(a), 83);
             let rhs = F2mElement::from_biguint(&BigUint::from(b), 83);
-            // SAFETY: ARM64 AES/PMULL support was checked above.
+            // SAFETY: `usable` checked the CPU feature above.
             assert_eq!(
                 unsafe { packed83::mul(a, b) },
                 packed(&lhs.mul(&rhs, &curve.irreducible)).unwrap()
@@ -718,13 +905,39 @@ mod tests {
         }
     }
 
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
     #[test]
-    fn n83_pmull_batch_keys_match_reference_with_exceptions() {
-        if !std::arch::is_aarch64_feature_detected!("aes") {
+    fn n83_packed_row_sums_match_reference_with_exceptions() {
+        let curve = n83_curve();
+        if !packed83::usable(&curve) {
             return;
         }
+        let mut points: Vec<_> = (1u32..=12)
+            .map(|i| scalar_mul(&curve, &curve.generator, &BigUint::from(i)))
+            .collect();
+        // doubling (j = i), P + (-P), and the point at infinity
+        points.push(point_neg(&points[3]));
+        points.push(BinaryPoint::Infinity);
+        points.push(points[5].clone());
+        let coordinates: Vec<_> = points.iter().map(|p| pack_point(p).unwrap()).collect();
+        for i in 0..points.len() {
+            let expected: Vec<_> = batch_add_fixed(&curve, &points[i], &points[i..])
+                .iter()
+                .map(|p| pack_point(p).unwrap())
+                .collect();
+            // SAFETY: `usable` checked the field and the CPU feature.
+            let got = unsafe { packed83::row_sums(&curve, &points, &coordinates, i) }.unwrap();
+            assert_eq!(got, expected, "row {i}");
+        }
+    }
+
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    #[test]
+    fn n83_pmull_batch_keys_match_reference_with_exceptions() {
         let curve = n83_curve();
+        if !packed83::usable(&curve) {
+            return;
+        }
         let points: Vec<_> = (1u32..=12)
             .map(|i| scalar_mul(&curve, &curve.generator, &BigUint::from(i)))
             .collect();
@@ -734,7 +947,7 @@ mod tests {
         inputs.push(BinaryPoint::Infinity);
         inputs.push(fixed.clone());
         let expected = batch_x_keys_fixed_both_signs(&curve, fixed, &inputs).unwrap();
-        // SAFETY: ARM64 AES/PMULL support and the pinned polynomial were checked.
+        // SAFETY: `usable` checked the CPU feature and the pinned polynomial.
         let observed = unsafe { packed83::batch_x_keys(&curve, fixed, &inputs) }.unwrap();
         assert_eq!(observed, expected);
         let expected_inf =
@@ -808,6 +1021,66 @@ mod tests {
         }
         assert_eq!(plus_inf, inputs);
         assert_eq!(minus_inf, inputs.iter().map(point_neg).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn n83_signed_pair_index_parallel_paths_agree() {
+        // A real cofactor-projected factor base, large enough for the
+        // parallel row blocks and the parallel query.
+        let kc = KoblitzCurve::known_n83_k0().unwrap();
+        let curve = kc.curve.clone();
+        let parent = build_standard_subspace_factor_base(&kc, 9).unwrap();
+        let points = cofactor_project_factor_base(&kc, &parent).unwrap().points;
+        let pairs = points.len() * (points.len() + 1) / 2;
+        let index = F6SignedPairIndex::new(&curve, &points, pairs).unwrap();
+        // one stored sum per distinct pair-sum x
+        let mut xs = std::collections::HashSet::new();
+        for i in 0..points.len() {
+            for j in i..points.len() {
+                xs.insert(x_key(&point_add(&curve, &points[i], &points[j])).unwrap());
+            }
+        }
+        assert_eq!(index.signed_sum_count(), xs.len());
+        assert!(points.len() >= PAIR_ROW_BLOCK);
+        assert!(index.signed_sum_count() >= PARALLEL_QUERY_SUMS);
+        let replay = |indices: [usize; 4]| {
+            indices.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                point_add(&curve, &acc, &points[i])
+            })
+        };
+        let mut state = 0x5eed_u64;
+        let mut next = |bound: usize| {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            (state % bound as u64) as usize
+        };
+        for trial in 0..24 {
+            let target = if trial % 2 == 0 {
+                // planted: a sum of four base points always has a witness
+                let chosen = [0; 4].map(|_| next(points.len()));
+                replay(chosen)
+            } else {
+                scalar_mul(
+                    &curve,
+                    &curve.generator,
+                    &BigUint::from(next(1 << 30) as u64),
+                )
+            };
+            let witness = index.solve4(&target);
+            assert_eq!(index.solve4_xonly(&target), witness, "trial {trial}");
+            assert_eq!(
+                index.solve4_xonly_pmull83(&target),
+                witness,
+                "trial {trial}"
+            );
+            if trial % 2 == 0 {
+                assert!(witness.is_some(), "planted trial {trial}");
+            }
+            if let Some(indices) = witness {
+                assert_eq!(replay(indices), target, "trial {trial}");
+            }
+        }
     }
 
     #[test]
