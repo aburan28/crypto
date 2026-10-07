@@ -60,13 +60,49 @@ pub trait Field: Clone + Send + Sync + 'static {
     fn q(&self) -> Big {
         Big::from_u128(self.size())
     }
+    /// a^e by left-to-right sliding windows over the odd powers a, a^3, ..., a^(2^w - 1)
+    /// (w = 5 above 256 bits): ~bits/(w+1) multiplications instead of ~bits/2.
     fn pow_big(&self, a: Self::E, e: &Big) -> Self::E {
+        let nb = e.bits();
+        if nb <= 64 {
+            return self.pow(a, e.to_u128().unwrap());
+        }
+        let w = if nb > 256 { 5 } else if nb > 128 { 4 } else { 3 };
+        let a2 = self.sq(a);
+        let mut tbl = Vec::with_capacity(1 << (w - 1));
+        tbl.push(a);
+        for k in 1..(1usize << (w - 1)) {
+            tbl.push(self.mul(tbl[k - 1], a2));
+        }
         let mut r = self.one();
-        for i in (0..e.bits()).rev() {
-            r = self.sq(r);
-            if e.bit(i) {
-                r = self.mul(r, a);
+        let mut started = false;
+        let mut i = nb as isize - 1;
+        while i >= 0 {
+            if !e.bit(i as usize) {
+                if started {
+                    r = self.sq(r);
+                }
+                i -= 1;
+                continue;
             }
+            let mut j = (i - w as isize + 1).max(0);
+            while !e.bit(j as usize) {
+                j += 1;
+            }
+            let mut val = 0usize;
+            for k in (j..=i).rev() {
+                val = 2 * val + e.bit(k as usize) as usize;
+            }
+            if started {
+                for _ in j..=i {
+                    r = self.sq(r);
+                }
+                r = self.mul(r, tbl[(val - 1) / 2]);
+            } else {
+                r = tbl[(val - 1) / 2];
+                started = true;
+            }
+            i = j - 1;
         }
         r
     }
@@ -138,7 +174,13 @@ pub trait Field: Clone + Send + Sync + 'static {
         if self.is_zero(a) {
             return Some(a);
         }
-        let qm1 = self.q().sub_small(1);
+        let q = self.q();
+        if q.bit(0) && q.bit(1) {
+            // q = 3 mod 4: one exponentiation, then check
+            let r = self.pow_big(a, &q.add_small(1).shr(2));
+            return if self.sq(r) == a { Some(r) } else { None };
+        }
+        let qm1 = q.sub_small(1);
         let half = qm1.shr(1);
         if self.pow_big(a, &half) != self.one() {
             return None;

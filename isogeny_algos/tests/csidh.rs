@@ -102,3 +102,68 @@ fn batched_action_equals_stepwise() {
         }
     }
 }
+
+#[test]
+fn generic_csidh_on_fpm1_matches_zp() {
+    use isogeny_algos::fpm::FpM;
+    let cs = Csidh::with_n_primes(8).unwrap();
+    let cm = Csidh::<FpM<1>>::new_big(&cs.primes).expect("same prime");
+    assert_eq!(cm.p1.to_u128(), Some(cs.p() as u128 + 1));
+    let mut rng = Rng::new(75);
+    for _ in 0..4 {
+        let e: Vec<i32> = (0..8).map(|_| rng.below(7) as i32 - 3).collect();
+        let a = cs.action_batched(0, &e, &mut rng);
+        let am = cm.action_batched(cm.fp.zero(), &e, &mut rng);
+        assert_eq!(cm.fp.to_canonical(&am)[0], a, "e = {e:?}");
+    }
+}
+
+#[test]
+fn csidh512_action_commutes() {
+    let cs = isogeny_algos::path::csidh::Csidh::<isogeny_algos::fpm::FpM<8>>::csidh512();
+    assert_eq!(cs.primes.len(), 74);
+    assert_eq!(cs.fp.modulus().bits(), 511);
+    let f = &cs.fp;
+    let mut rng = Rng::new(76);
+    let mut e1 = vec![0i32; 74];
+    let mut e2 = vec![0i32; 74];
+    e1[0] = 1;
+    e1[5] = -1;
+    e1[73] = 1;
+    e2[1] = -1;
+    e2[2] = 1;
+    e2[40] = 1;
+    let ab = cs.action_batched(cs.action_batched(f.zero(), &e1, &mut rng), &e2, &mut rng);
+    let ba = cs.action_batched(cs.action_batched(f.zero(), &e2, &mut rng), &e1, &mut rng);
+    assert_eq!(ab, ba);
+    let sum: Vec<i32> = e1.iter().zip(&e2).map(|(x, y)| x + y).collect();
+    assert_eq!(cs.action(f.zero(), &sum, &mut rng), ab, "batched vs stepwise at 512 bits");
+    let neg: Vec<i32> = sum.iter().map(|x| -x).collect();
+    assert!(f.is_zero(cs.action_batched(ab, &neg, &mut rng)));
+}
+
+#[test]
+fn fast_action_equals_stepwise() {
+    for n in [6usize, 8, 10, 12] {
+        let cs = Csidh::with_n_primes(n).unwrap();
+        let mut rng = Rng::new(80 + n as u64);
+        for _ in 0..6 {
+            let e: Vec<i32> = (0..n).map(|_| rng.below(11) as i32 - 5).collect();
+            let a0 = cs.action(0, &[1; 1], &mut rng); // a non-zero start curve
+            let a1 = cs.action(a0, &e, &mut rng);
+            let a2 = cs.action_fast(a0, &e, &mut rng);
+            assert_eq!(a1, a2, "n = {n}, e = {e:?}");
+        }
+    }
+}
+
+#[test]
+fn csidh512_fast_action_matches_batched() {
+    let cs = Csidh::<isogeny_algos::fpm::FpM<8>>::csidh512();
+    let f = &cs.fp;
+    let mut rng = Rng::new(81);
+    let e: Vec<i32> = (0..74).map(|_| rng.below(5) as i32 - 2).collect();
+    let a1 = cs.action_batched(f.zero(), &e, &mut rng);
+    let a2 = cs.action_fast(f.zero(), &e, &mut rng);
+    assert_eq!(a1, a2);
+}

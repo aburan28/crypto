@@ -962,6 +962,50 @@ fn bench_csidh(o: &mut Out) {
             ok,
             "one fresh random point per isogeny, no batching",
         );
+        let okb = cs.action_batched(0, &exps, &mut rng.clone()) == a1;
+        let (med, mn, reps) = time_it(if o.quick { 100 } else { 500 }, 200, || {
+            cs.action_batched(0, &exps, &mut rng.clone())
+        });
+        o.rec(
+            "csidh",
+            "class_group_action_batched",
+            &[
+                ("p_bits", bits.to_string()),
+                ("n_primes", n.to_string()),
+                ("exp_bound", m.to_string()),
+                ("isogeny_steps", steps.to_string()),
+            ],
+            &[
+                ("median_ns", med),
+                ("min_ns", mn),
+                ("reps", reps as f64),
+                ("ns_per_step", med / steps.max(1) as f64),
+            ],
+            okb && ok,
+            "CLMPR: one point per sign serves all primes; equals stepwise result",
+        );
+        let okf = cs.action_fast(0, &exps, &mut rng.clone()) == a1;
+        let (med, mn, reps) = time_it(if o.quick { 100 } else { 500 }, 200, || {
+            cs.action_fast(0, &exps, &mut rng.clone())
+        });
+        o.rec(
+            "csidh",
+            "class_group_action_tree_projective",
+            &[
+                ("p_bits", bits.to_string()),
+                ("n_primes", n.to_string()),
+                ("exp_bound", m.to_string()),
+                ("isogeny_steps", steps.to_string()),
+            ],
+            &[
+                ("median_ns", med),
+                ("min_ns", mn),
+                ("reps", reps as f64),
+                ("ns_per_step", med / steps.max(1) as f64),
+            ],
+            okf && ok,
+            "projective (A24:C24), tree strategy for kernel points; equals stepwise result",
+        );
         // meet-in-the-middle on a small box
         let mm = if n <= 8 { 2usize } else { 1 };
         if n <= 10 {
@@ -1011,6 +1055,67 @@ fn bench_csidh(o: &mut Out) {
                 "order divides h(-4p) (independent form count)",
             );
         }
+    }
+    // CSIDH-512 over FpM<8>: the real parameter set, exponents in [-m, m]^74
+    let cs = Csidh::<FpM<8>>::csidh512();
+    let f = &cs.fp;
+    let mut rng = Rng::new(10_600);
+    for &m in if o.quick { &[1i32][..] } else { &[1i32, 5][..] } {
+        let e1: Vec<i32> = (0..74).map(|_| rng.below(2 * m as u64 + 1) as i32 - m).collect();
+        let e2: Vec<i32> = (0..74).map(|_| rng.below(2 * m as u64 + 1) as i32 - m).collect();
+        let t0 = Instant::now();
+        let a1 = cs.action_batched(f.zero(), &e1, &mut rng);
+        let t_first = t0.elapsed().as_nanos() as f64;
+        let a12 = cs.action_batched(a1, &e2, &mut rng);
+        let a21 = cs.action_batched(cs.action_batched(f.zero(), &e2, &mut rng), &e1, &mut rng);
+        let ok = a12 == a21;
+        let steps: i32 = e1.iter().map(|x| x.abs()).sum();
+        let (med, mn, reps) = time_it(if o.quick { 200 } else { 2000 }, 20, || {
+            cs.action_batched(f.zero(), &e1, &mut rng.clone())
+        });
+        o.rec(
+            "csidh",
+            "class_group_action_batched",
+            &[
+                ("p_bits", "511".to_string()),
+                ("n_primes", "74".to_string()),
+                ("exp_bound", m.to_string()),
+                ("isogeny_steps", steps.to_string()),
+                ("field", "FpM8".to_string()),
+            ],
+            &[
+                ("median_ns", med),
+                ("min_ns", mn),
+                ("reps", reps as f64),
+                ("first_ns", t_first),
+                ("ns_per_step", med / steps.max(1) as f64),
+            ],
+            ok,
+            "CSIDH-512 prime; verified by commutativity of two random keys; variable time",
+        );
+        let okf = cs.action_fast(f.zero(), &e1, &mut rng.clone()) == a1;
+        let (med, mn, reps) = time_it(if o.quick { 200 } else { 2000 }, 20, || {
+            cs.action_fast(f.zero(), &e1, &mut rng.clone())
+        });
+        o.rec(
+            "csidh",
+            "class_group_action_tree_projective",
+            &[
+                ("p_bits", "511".to_string()),
+                ("n_primes", "74".to_string()),
+                ("exp_bound", m.to_string()),
+                ("isogeny_steps", steps.to_string()),
+                ("field", "FpM8".to_string()),
+            ],
+            &[
+                ("median_ns", med),
+                ("min_ns", mn),
+                ("reps", reps as f64),
+                ("ns_per_step", med / steps.max(1) as f64),
+            ],
+            ok && okf,
+            "CSIDH-512; equals the CLMPR result; variable time",
+        );
     }
 }
 

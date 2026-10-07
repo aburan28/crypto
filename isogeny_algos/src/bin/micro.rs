@@ -163,6 +163,80 @@ fn main() {
             );
         }
     }
+    // multi-limb Montgomery fields: P-256 (N = 4) and the CSIDH-512 prime (N = 8)
+    fn big_field<const N: usize>(
+        name: &str,
+        f: &isogeny_algos::fpm::FpM<N>,
+        rng: &mut Rng,
+        rec: &mut impl FnMut(&str, usize, f64),
+    ) {
+        let ms: Vec<[u64; N]> = (0..1024).map(|_| f.random(rng)).collect();
+        let mut i = 0usize;
+        rec(
+            &format!("{name}_mul"),
+            1,
+            per_op(200_000, || {
+                i = (i + 1) & 1023;
+                f.mul(ms[i], ms[(i + 7) & 1023])
+            }),
+        );
+        let mut chain = ms[0];
+        rec(
+            &format!("{name}_mul_latency"),
+            1,
+            per_op(200_000, || {
+                chain = f.mul(chain, ms[5]);
+                chain
+            }),
+        );
+        rec(
+            &format!("{name}_sq"),
+            1,
+            per_op(200_000, || {
+                i = (i + 1) & 1023;
+                f.sq(ms[i])
+            }),
+        );
+        rec(
+            &format!("{name}_add"),
+            1,
+            per_op(1_000_000, || {
+                i = (i + 1) & 1023;
+                f.add(ms[i], ms[(i + 7) & 1023])
+            }),
+        );
+        rec(
+            &format!("{name}_inv"),
+            1,
+            per_op(2_000, || {
+                i = (i + 1) & 1023;
+                f.inv(ms[i])
+            }),
+        );
+        let e = f.modulus().sub_small(1).shr(1);
+        rec(
+            &format!("{name}_legendre_pow"),
+            1,
+            per_op(2_000, || {
+                i = (i + 1) & 1023;
+                f.pow_big(ms[i], &e)
+            }),
+        );
+        rec(
+            &format!("{name}_sqrt"),
+            1,
+            per_op(500, || {
+                i = (i + 1) & 1023;
+                f.sqrt(f.sq(ms[i]))
+            }),
+        );
+    }
+    let p256 = isogeny_algos::fpm::FpM::<4>::from_dec(
+        "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    );
+    big_field("fpm4_p256", &p256, &mut rng, &mut rec);
+    let c512 = isogeny_algos::path::csidh::Csidh::<isogeny_algos::fpm::FpM<8>>::csidh512().fp;
+    big_field("fpm8_csidh512", &c512, &mut rng, &mut rec);
     if let Some(o) = out {
         let mut f = std::fs::File::create(o).unwrap();
         for l in lines {
