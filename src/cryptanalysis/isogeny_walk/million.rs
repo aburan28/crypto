@@ -6,6 +6,14 @@
 //! smaller object needed for a large enumeration: one kernel-certified parent
 //! edge per new canonical curve in a fixed two-generator product grid.
 
+mod window;
+
+pub use window::{
+    audit_j_union_paths, generate_strip_jsonl, verify_strip_jsonl, JUnionReceipt, StripConfig,
+    StripHeaderRecord, UnionInputReceipt, J_UNION_SCHEMA, STRIP_RECEIPT_SCHEMA, STRIP_SCHEMA,
+    STRIP_SUMMARY_SCHEMA,
+};
+
 use std::collections::{HashMap, HashSet};
 use std::io::{BufRead, Write};
 use std::time::Instant;
