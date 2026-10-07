@@ -16,8 +16,8 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::jv_isogeny_walk::{
-    exact_census, run_walk, run_walk2, summarize_walk2, trace_census, ExactCensus, TraceCensus,
-    Walk2Report, WalkReport,
+    exact_census, run_end_to_end, run_walk, run_walk2, summarize_walk2, trace_census,
+    EndToEndReport, ExactCensus, TraceCensus, Walk2Report, WalkReport,
 };
 
 fn main() {
@@ -37,6 +37,12 @@ fn main() {
     let mut moves = 8usize;
     let mut cap_mult = 3u64;
     let mut jumps: Vec<u64> = vec![3, 5, 7];
+    let mut e2e = false;
+    let mut e2e_moves: Vec<usize> = vec![8, 64];
+    let mut rho_ref = 1.3609f64;
+    let mut margin = 1.25f64;
+    let mut e2e_stop = 0usize;
+    let mut seeds: Vec<u64> = Vec::new();
     let mut json: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
@@ -63,6 +69,22 @@ fn main() {
             "--exact-census" => exact = true,
             "--from-weak-class" => from_weak_class = true,
             "--moves" => moves = next(&mut i).parse().expect("--moves"),
+            "--e2e" => e2e = true,
+            "--e2e-moves" => {
+                e2e_moves = next(&mut i)
+                    .split(',')
+                    .map(|v| v.parse().expect("--e2e-moves"))
+                    .collect()
+            }
+            "--seeds" => {
+                seeds = next(&mut i)
+                    .split(',')
+                    .map(|v| v.parse().expect("--seeds"))
+                    .collect()
+            }
+            "--rho-ref" => rho_ref = next(&mut i).parse().expect("--rho-ref"),
+            "--margin" => margin = next(&mut i).parse().expect("--margin"),
+            "--stop" => e2e_stop = next(&mut i).parse().expect("--stop"),
             "--cap-mult" => cap_mult = next(&mut i).parse().expect("--cap-mult"),
             "--jumps" => {
                 jumps = next(&mut i)
@@ -75,6 +97,51 @@ fn main() {
             other => panic!("unknown argument {other}"),
         }
         i += 1;
+    }
+    if e2e {
+        let seeds = if seeds.is_empty() {
+            vec![seed]
+        } else {
+            seeds.clone()
+        };
+        let mut rows: Vec<EndToEndReport> = Vec::new();
+        println!("| p | seed | moves | l | non-weak C | walk found | path (2/odd) | walk | transport | model | route muls | reach share | solved | correct | verified on C | S | S/rho (e2e) | S/rho (route only) | e2e/route |");
+        println!("|---:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|");
+        for &p in &sizes {
+            for &s in &seeds {
+                for &mv in &e2e_moves {
+                    let r = run_end_to_end(
+                        p,
+                        s,
+                        mv,
+                        &jumps,
+                        cap_mult,
+                        rho_ref,
+                        margin,
+                        (e2e_stop > 0).then_some(e2e_stop),
+                    );
+                    println!(
+                        "| {} | {} | {} | 2^{:.1} | {} | {} | {}/{} | {:.2e} | {:.2e} | {:.2e} | {:.3e} | {:.4} | {} | {} | {} | {:.3e} | {:.4} | {:.4} | {:.4} |",
+                        r.p, r.seed, r.moves, r.bits, r.challenge_non_weak, r.walk_found,
+                        r.path_two, r.path_odd, r.walk_muls as f64, r.transport_muls as f64,
+                        r.model_muls as f64, r.route_muls as f64, r.reach_share,
+                        r.route_solved, r.route_correct, r.verified_on_challenge,
+                        r.s, r.s_over_rho, r.route_only_s_over_rho, r.e2e_over_route_only
+                    );
+                    eprintln!(
+                        "p={p} seed={s} moves={mv}: stage={} {:.0} s",
+                        r.stage,
+                        r.wall_ms / 1e3
+                    );
+                    rows.push(r);
+                    if let Some(path) = &json {
+                        fs::write(path, serde_json::to_string_pretty(&rows).unwrap())
+                            .expect("write json");
+                    }
+                }
+            }
+        }
+        return;
     }
     if exact {
         let mut rows: Vec<ExactCensus> = Vec::new();

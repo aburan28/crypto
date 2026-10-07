@@ -1726,6 +1726,39 @@ pub fn generate_spec(p: u64, seed: u64) -> Spec {
     }
 }
 
+/// An instance on a given weak curve `y² = x(x − α)(x − σα)` with given
+/// points: `G` of prime order `l`, `Q = [d]G` (`d` is the planted answer, used
+/// only to report correctness; the route never reads it).  `None` when the
+/// cover refuses `α` or a transfer degenerates.  §18 builds this from the
+/// curve the walk reached and the transported points.
+pub fn spec_from_curve(p: u64, alpha: E6, l: u64, g: PtE6, q: PtE6, d: u64) -> Option<Spec> {
+    let f = Fq3::new(p);
+    let cov = Cover::new(&f, &alpha)?;
+    f.reset_muls();
+    let gj = cov.transfer(&f, &g)?;
+    let qj = cov.transfer(&f, &q)?;
+    let transfer_muls = f.muls();
+    let jac = Hyp {
+        f: &f.f,
+        h: cov.hx.clone(),
+        g: 3,
+    };
+    if jac.is_identity(&gj) || !jac.is_identity(&jac.mul(&gj, l as u128)) {
+        return None;
+    }
+    Some(Spec {
+        p,
+        alpha,
+        l,
+        g,
+        q,
+        d,
+        gj,
+        qj,
+        transfer_muls,
+    })
+}
+
 #[derive(Clone, Debug)]
 pub struct BaseEl {
     pub x: u64,

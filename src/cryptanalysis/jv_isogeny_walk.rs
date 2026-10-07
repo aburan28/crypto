@@ -612,6 +612,9 @@ impl WalkCtx {
 pub struct Edge {
     pub curve: Curve2,
     pub dual_root: E6,
+    /// The kernel `(e_k, 0)` of the source this edge was taken by (§18's
+    /// transport evaluates the isogeny on points by this index).
+    pub k: usize,
 }
 
 impl Curve2 {
@@ -654,6 +657,7 @@ impl Curve2 {
                     e: [E6::ZERO, r1, r2],
                 },
                 dual_root: f.sub(&u, &v),
+                k,
             });
         }
         out
@@ -754,6 +758,19 @@ impl Curve2 {
     /// 2-torsion points.  Kernels met twice (through different roots) are
     /// returned once.
     pub fn ell_targets(&self, ctx: &WalkCtx, ell: u64, rng: &mut StdRng) -> Vec<Curve2> {
+        self.ell_targets_with_kernels(ctx, ell, rng)
+            .into_iter()
+            .map(|(c, _)| c)
+            .collect()
+    }
+    /// [`Curve2::ell_targets`] with each target's kernel abscissae on the
+    /// model with `e₀ ↦ 0` (§18's transport evaluates the isogeny on points).
+    pub fn ell_targets_with_kernels(
+        &self,
+        ctx: &WalkCtx,
+        ell: u64,
+        rng: &mut StdRng,
+    ) -> Vec<(Curve2, Vec<E6>)> {
         let f = &ctx.f;
         let u = f.sub(&self.e[1], &self.e[0]);
         let v = f.sub(&self.e[2], &self.e[0]);
@@ -793,11 +810,170 @@ impl Curve2 {
             };
             let e = [image(&E6::ZERO), image(&u), image(&v)];
             if e[0] != e[1] && e[1] != e[2] && e[0] != e[2] {
-                out.push(Curve2 { e });
+                out.push((Curve2 { e }, ker.clone()));
             }
         }
         out
     }
+}
+
+// ── §18: evaluating the walk's isogenies on points ───────────────────────
+//
+// `RESEARCH_COVER_DECOMPOSITION_LEDGER.md` §18.1 steps 1–2: the walk reaches
+// a weak curve; to carry a logarithm over, each step's isogeny is evaluated
+// on the base point and the target, on the Weierstrass model the walk uses,
+// `y² = (x − e₀)(x − e₁)(x − e₂)`.
+
+/// An affine point `(x, y)` of `y² = (x − e₀)(x − e₁)(x − e₂)`.
+pub type Pt2 = (E6, E6);
+
+impl Curve2 {
+    /// Whether `(x, y)` lies on this curve.
+    pub fn on_curve(&self, f: &Fq3, p: &Pt2) -> bool {
+        let rhs = f.mul(
+            &f.mul(&f.sub(&p.0, &self.e[0]), &f.sub(&p.0, &self.e[1])),
+            &f.sub(&p.0, &self.e[2]),
+        );
+        f.sq(&p.1) == rhs
+    }
+}
+
+/// The 2-isogeny with kernel `(e_k, 0)` on an affine point.  On the model
+/// translated by `e_k`, `y² = x(x² + a x + b)` with `b = u v`, Vélu gives
+/// `(x, y) ↦ (y²/x², y(b − x²)/x²)` onto the triple [`Curve2::two_edges`]
+/// returns (`Y² = X(X² + 2(u+v)X + (u−v)²)`).  The two-torsion point in the
+/// kernel maps to infinity; §18 never transports such a point (`G`, `Q` have
+/// odd order `ℓ`).
+pub fn map_two(f: &Fq3, from: &Curve2, k: usize, p: &Pt2) -> Pt2 {
+    let u = f.sub(&from.e[(k + 1) % 3], &from.e[k]);
+    let v = f.sub(&from.e[(k + 2) % 3], &from.e[k]);
+    let x = f.sub(&p.0, &from.e[k]);
+    let xi2 = f.sq(&f.inv(&x));
+    let b = f.mul(&u, &v);
+    let xx = f.mul(&f.sq(&p.1), &xi2);
+    let yy = f.mul(&f.mul(&p.1, &f.sub(&b, &f.sq(&x))), &xi2);
+    (xx, yy)
+}
+
+/// Vélu's odd-degree isogeny on an affine point, on the model with `e₀ ↦ 0`
+/// (`a₁ = a₃ = 0`), from the kernel abscissae [`Curve2::ell_targets_with_kernels`]
+/// records: `X = x + Σ_Q (v_Q/(x − x_Q) + u_Q/(x − x_Q)²)`,
+/// `Y = y·(1 − Σ_Q (2 u_Q/(x − x_Q)³ + v_Q/(x − x_Q)²))`, with
+/// `u_Q = 4 F(x_Q)`, `v_Q = 2(3 x_Q² + 2 a₂ x_Q + a₄)`.  The codomain triple
+/// is the one the walk recorded for this step.
+pub fn map_odd(f: &Fq3, from: &Curve2, ker: &[E6], p: &Pt2) -> Pt2 {
+    let c = |k: u64| f.from_fq(E2([k % f.f.p, 0]));
+    let u = f.sub(&from.e[1], &from.e[0]);
+    let v = f.sub(&from.e[2], &from.e[0]);
+    let a2 = f.neg(&f.add(&u, &v));
+    let a4 = f.mul(&u, &v);
+    // F(x) = x³ + a₂ x² + a₄ x on the e₀ ↦ 0 model
+    let big_f = |x: &E6| f.mul(&f.add(&f.add(&f.sq(x), &f.mul(&a2, x)), &a4), x);
+    let x = f.sub(&p.0, &from.e[0]);
+    let mut xx = x;
+    let mut ysum = E6::ZERO;
+    for xk in ker {
+        let gx = f.add(
+            &f.add(&f.mul(&c(3), &f.sq(xk)), &f.mul(&f.mul(&c(2), &a2), xk)),
+            &a4,
+        );
+        let vq = f.add(&gx, &gx);
+        let uq = f.mul(&c(4), &big_f(xk));
+        let d = f.inv(&f.sub(&x, xk));
+        let d2 = f.sq(&d);
+        xx = f.add(&xx, &f.add(&f.mul(&vq, &d), &f.mul(&uq, &d2)));
+        ysum = f.add(
+            &ysum,
+            &f.add(
+                &f.mul(&f.mul(&c(2), &uq), &f.mul(&d2, &d)),
+                &f.mul(&vq, &d2),
+            ),
+        );
+    }
+    (xx, f.mul(&p.1, &f.sub(&E6::ONE, &ysum)))
+}
+
+/// One recorded step of a path: the source curve and the data to replay its
+/// isogeny on a point.
+#[derive(Clone, Debug)]
+pub enum Step {
+    /// The 2-isogeny of `from` with kernel `(e_k, 0)`.
+    Two { from: Curve2, k: usize },
+    /// The odd-degree isogeny of `from` with the given kernel abscissae.
+    Odd {
+        from: Curve2,
+        ell: u64,
+        ker: Vec<E6>,
+    },
+}
+
+/// Apply one recorded step to an affine point.
+pub fn map_step(f: &Fq3, step: &Step, p: &Pt2) -> Pt2 {
+    match step {
+        Step::Two { from, k } => map_two(f, from, *k, p),
+        Step::Odd { from, ker, .. } => map_odd(f, from, ker, p),
+    }
+}
+
+/// §18.1 step 3: move a weak curve onto the cover's form `y² = x(x−α)(x−σα)`
+/// and carry two points over.  `w.weak_root` gives the ordering `(e₁; e₂, e₃)`
+/// with `N((e₃−e₁)/(e₂−e₁)) = 1`; translating `e₁ ↦ 0` and scaling by `v`
+/// with `(e₂−e₁)/v = α`, `(e₃−e₁)/v = σ(α)` needs `α` with `σ(α) = c·α`,
+/// `c = (e₃−e₁)/(e₂−e₁)`.  Since `N(c) = 1`, Hilbert 90 gives such an `α`
+/// explicitly: `α = θ + c⁻¹σ(θ) + (c·σ(c))⁻¹σ²(θ)` for a `θ` with `α ∉ F_q`.
+/// `v` must be a square in `F_{q³}`; if not, `α` is scaled by a non-square of
+/// `F_q` (an `F_q`-isomorphism that keeps `σ(α)=cα`), which flips it.  The
+/// point map is `(x, y) ↦ ((x−e₁)/v, y/√(v³))`.  `None` if the cover refuses
+/// the resulting `α`.
+pub fn model_change(ctx: &WalkCtx, w: &Curve2, pts: &[Pt2]) -> Option<(E6, Vec<Pt2>)> {
+    let f = &ctx.f;
+    let i1 = w.weak_root(f)?;
+    let e1 = w.e[i1];
+    let e2 = w.e[(i1 + 1) % 3];
+    let e3 = w.e[(i1 + 2) % 3];
+    let c = f.mul(&f.sub(&e3, &e1), &f.inv(&f.sub(&e2, &e1)));
+    // a non-square of F_q (every F_p element is a square in F_q = F_p², so
+    // this needs a nonzero imaginary part), still a non-square in F_{q³}
+    // because [F_{q³} : F_q] = 3 is odd
+    let p = f.f.p;
+    let s_nonsq = (1..p * p)
+        .map(|k| E2([k % p, k / p]))
+        .find(|s| !f.f.is_square(s))
+        .map(|s| f.from_fq(s))?;
+    let mut rng = StdRng::seed_from_u64(0xA7E_11 ^ (e1.0[0].0[0]).wrapping_mul(0x9E3779B1));
+    for _ in 0..64 {
+        let theta = f.random(&mut rng);
+        let ci = f.inv(&c);
+        let csc = f.inv(&f.mul(&c, &f.sigma(&c)));
+        let st = f.sigma(&theta);
+        let s2t = f.sigma(&st);
+        let mut alpha = f.add(&f.add(&theta, &f.mul(&ci, &st)), &f.mul(&csc, &s2t));
+        if alpha == E6::ZERO || alpha.in_fq() {
+            continue;
+        }
+        // σ(α) = c·α by construction; v = (e₂−e₁)/α, square-fixed
+        let mut v = f.mul(&f.sub(&e2, &e1), &f.inv(&alpha));
+        if !ctx.is_square_q3(&v) {
+            alpha = f.mul(&alpha, &s_nonsq);
+            v = f.mul(&v, &f.inv(&s_nonsq));
+        }
+        let Some(sqrt_v) = ctx.sqrt_q3(&v) else {
+            continue;
+        };
+        debug_assert_eq!(f.sigma(&alpha), f.mul(&c, &alpha));
+        let w_scale = f.mul(&v, &sqrt_v); // √(v³)
+        let inv_v = f.inv(&v);
+        let inv_w = f.inv(&w_scale);
+        if super::jv_cover::Cover::new(f, &alpha).is_none() {
+            continue;
+        }
+        let mapped: Vec<Pt2> = pts
+            .iter()
+            .map(|(x, y)| (f.mul(&f.sub(x, &e1), &inv_v), f.mul(y, &inv_w)))
+            .collect();
+        return Some((alpha, mapped));
+    }
+    None
 }
 
 fn isqrt_u128(n: u128) -> u128 {
@@ -1322,6 +1498,334 @@ pub fn run_walk2(
         rows,
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
+}
+
+/// §18.1 steps 1–2: a breadth-first walk to a weak curve from `start`, with
+/// each discovered curve's producing step recorded, so the path from `start`
+/// to the weak curve can be replayed on points.  Degrees whose Kronecker
+/// symbol `(t²−4q³ / ℓ)` is `−1` are inert in the class and skipped; `trace`
+/// is read from the public order, not point-counted.  Stops at a weak curve
+/// or when `cap` distinct curves have been met.  Charges nothing itself; the
+/// caller brackets it with the field counter.
+pub fn walk_to_weak_record(
+    ctx: &WalkCtx,
+    start: Curve2,
+    jumps: &[u64],
+    cap: u64,
+    trace: i128,
+    rng: &mut StdRng,
+) -> Option<(Curve2, Vec<Step>)> {
+    let f = &ctx.f;
+    let p3 = (f.f.p as i128).pow(6);
+    let disc = trace * trace - 4 * p3;
+    let degrees: Vec<u64> = jumps
+        .iter()
+        .copied()
+        .filter(|&ell| kronecker(disc, ell) != -1)
+        .collect();
+    let j0 = start.j(f);
+    if start.weak_by_norms(f) {
+        return Some((start, Vec::new()));
+    }
+    let mut seen: HashSet<E6> = HashSet::new();
+    seen.insert(j0);
+    let mut parent: HashMap<E6, (E6, Step)> = HashMap::new();
+    let mut curve_of: HashMap<E6, Curve2> = HashMap::new();
+    curve_of.insert(j0, start);
+    let mut queue: VecDeque<(Curve2, Option<(usize, E6)>)> = VecDeque::new();
+    queue.push_back((start, None));
+    let reconstruct =
+        |weak: Curve2, weak_j: E6, parent: &HashMap<E6, (E6, Step)>| -> (Curve2, Vec<Step>) {
+            let mut steps = Vec::new();
+            let mut j = weak_j;
+            while let Some((pj, step)) = parent.get(&j) {
+                steps.push(step.clone());
+                j = *pj;
+            }
+            steps.reverse();
+            (weak, steps)
+        };
+    while let Some((cur, known)) = queue.pop_front() {
+        let cj = cur.j(f);
+        // 2-isogeny edges
+        for e in cur.two_edges(ctx, known) {
+            let tj = e.curve.j(f);
+            if !seen.insert(tj) {
+                continue;
+            }
+            parent.insert(tj, (cj, Step::Two { from: cur, k: e.k }));
+            curve_of.insert(tj, e.curve);
+            if e.curve.weak_by_norms(f) {
+                return Some(reconstruct(e.curve, tj, &parent));
+            }
+            if seen.len() as u64 >= cap {
+                return None;
+            }
+            queue.push_back((e.curve, Some((0, e.dual_root))));
+        }
+        // odd-degree jumps
+        for &ell in &degrees {
+            for (tgt, ker) in cur.ell_targets_with_kernels(ctx, ell, rng) {
+                let tj = tgt.j(f);
+                if !seen.insert(tj) {
+                    continue;
+                }
+                parent.insert(
+                    tj,
+                    (
+                        cj,
+                        Step::Odd {
+                            from: cur,
+                            ell,
+                            ker,
+                        },
+                    ),
+                );
+                curve_of.insert(tj, tgt);
+                if tgt.weak_by_norms(f) {
+                    return Some(reconstruct(tgt, tj, &parent));
+                }
+                if seen.len() as u64 >= cap {
+                    return None;
+                }
+                queue.push_back((tgt, None));
+            }
+        }
+    }
+    None
+}
+
+impl Curve2 {
+    /// `[k]·(x, y)` on `y² = (x−e₀)(x−e₁)(x−e₂)`, through the `e₀ ↦ 0`
+    /// Weierstrass model and `EllE`.  `None` for the identity.
+    pub fn scalar_mul(&self, f: &Fq3, pt: &Pt2, k: u128) -> Option<Pt2> {
+        let u = f.sub(&self.e[1], &self.e[0]);
+        let v = f.sub(&self.e[2], &self.e[0]);
+        let ec = EllE::from_a2_a4(f, f.neg(&f.add(&u, &v)), f.mul(&u, &v));
+        let p6 = PtE6 {
+            x: f.sub(&pt.0, &self.e[0]),
+            y: pt.1,
+            inf: false,
+        };
+        let r = ec.mul_u128(&p6, k);
+        if r.inf {
+            None
+        } else {
+            Some((f.add(&r.x, &self.e[0]), r.y))
+        }
+    }
+}
+
+/// §18.1: the whole route from a curve that is not weak.  A weak instance is
+/// built (`generate_spec`), moved `moves` random isogeny steps until it is
+/// not weak (the challenge `C`, with `G`, `Q` transported onto it — the
+/// instance's construction, uncharged), then attacked: the walk back to a
+/// weak curve, the points transported along it, the model change, the sieved
+/// route, and verification `[d]·G = Q` on `C`.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct EndToEndReport {
+    pub p: u64,
+    pub seed: u64,
+    pub moves: usize,
+    pub l: u64,
+    pub bits: f64,
+    /// The challenge curve was not weak when handed over.
+    pub challenge_non_weak: bool,
+    /// The walk found a weak curve; its path length in steps.
+    pub walk_found: bool,
+    pub path_steps: usize,
+    pub path_two: usize,
+    pub path_odd: usize,
+    /// Charged `F_p` multiplications, by phase.
+    pub walk_muls: u64,
+    pub transport_muls: u64,
+    pub model_muls: u64,
+    pub route_muls: u64,
+    pub total_muls: u64,
+    /// The share of the total spent reaching and reshaping the weak curve.
+    pub reach_share: f64,
+    pub c_add_e: f64,
+    /// The route solved and the recovered scalar verified `[d]G = Q` on `C`.
+    pub route_solved: bool,
+    pub route_correct: bool,
+    pub verified_on_challenge: bool,
+    /// `S` end to end, and against the pooled rho reference.
+    pub s: f64,
+    pub rho_s_ref: f64,
+    pub s_over_rho: f64,
+    /// The same route with no walk, on the weak curve of the same seed
+    /// (paired): its `S/rho`, and the end-to-end total over its total.
+    pub route_only_s_over_rho: f64,
+    pub e2e_over_route_only: f64,
+    pub stage: String,
+    pub wall_ms: f64,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn run_end_to_end(
+    p: u64,
+    seed: u64,
+    moves: usize,
+    jumps: &[u64],
+    cap_mult: u64,
+    rho_s_ref: f64,
+    margin: f64,
+    stop: Option<usize>,
+) -> EndToEndReport {
+    use super::jv_cover::generate_spec;
+    use super::jv_sieve::{run_cover_sieve_dlp, run_cover_sieve_dlp_on};
+    let start = Instant::now();
+    let ctx = WalkCtx::new(p);
+    let f = &ctx.f;
+    let spec0 = generate_spec(p, seed);
+    let l = spec0.l;
+    let w0 = Curve2 {
+        e: [E6::ZERO, spec0.alpha, f.sigma(&spec0.alpha)],
+    };
+    let trace = (p as i128).pow(6) + 1 - 4 * l as i128;
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xE2E_18);
+    let mut rep = EndToEndReport {
+        p,
+        seed,
+        moves,
+        l,
+        bits: (l as f64).log2(),
+        c_add_e: 0.0,
+        rho_s_ref,
+        stage: String::from("ok"),
+        ..Default::default()
+    };
+
+    // ── build the challenge C: move away from weak, transporting G, Q
+    let mut cur = w0;
+    let mut g = (spec0.g.x, spec0.g.y);
+    let mut q = (spec0.q.x, spec0.q.y);
+    let mut done = false;
+    for i in 0..(moves + 200) {
+        // candidate moves: 2-edges and ℓ-targets, each with its codomain
+        let mut cands: Vec<(Step, Curve2)> = cur
+            .two_edges(&ctx, None)
+            .into_iter()
+            .map(|e| (Step::Two { from: cur, k: e.k }, e.curve))
+            .collect();
+        for &ell in jumps {
+            for (tgt, ker) in cur.ell_targets_with_kernels(&ctx, ell, &mut rng) {
+                cands.push((
+                    Step::Odd {
+                        from: cur,
+                        ell,
+                        ker,
+                    },
+                    tgt,
+                ));
+            }
+        }
+        if cands.is_empty() {
+            break;
+        }
+        let (step, next) = cands[rng.gen_range(0..cands.len())].clone();
+        g = map_step(f, &step, &g);
+        q = map_step(f, &step, &q);
+        cur = next;
+        if i + 1 >= moves && !cur.weak_by_norms(f) {
+            done = true;
+            break;
+        }
+    }
+    if !done && cur.weak_by_norms(f) {
+        // could not leave the weak locus; report the failure honestly
+        rep.stage = String::from("challenge_weak");
+        rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+        return rep;
+    }
+    rep.challenge_non_weak = !cur.weak_by_norms(f);
+    let challenge = cur;
+    let gc = g;
+    let qc = q;
+    debug_assert!(challenge.on_curve(f, &gc) && challenge.on_curve(f, &qc));
+
+    // ── attack: walk back to a weak curve (charged)
+    f.reset_muls();
+    let cap = cap_mult * (p as u64) * (p as u64);
+    let walk = walk_to_weak_record(&ctx, challenge, jumps, cap, trace, &mut rng);
+    rep.walk_muls = f.muls();
+    let Some((weak, path)) = walk else {
+        rep.stage = String::from("walk_none");
+        rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+        return rep;
+    };
+    rep.walk_found = true;
+    rep.path_steps = path.len();
+    rep.path_two = path
+        .iter()
+        .filter(|s| matches!(s, Step::Two { .. }))
+        .count();
+    rep.path_odd = rep.path_steps - rep.path_two;
+
+    // ── transport G_C, Q_C along the path (charged)
+    f.reset_muls();
+    let mut gw = gc;
+    let mut qw = qc;
+    for step in &path {
+        gw = map_step(f, step, &gw);
+        qw = map_step(f, step, &qw);
+    }
+    rep.transport_muls = f.muls();
+    debug_assert!(weak.on_curve(f, &gw) && weak.on_curve(f, &qw));
+
+    // ── model change onto the cover's form (charged)
+    f.reset_muls();
+    let Some((alpha, mapped)) = model_change(&ctx, &weak, &[gw, qw]) else {
+        rep.model_muls = f.muls();
+        rep.stage = String::from("model_change_none");
+        rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+        return rep;
+    };
+    rep.model_muls = f.muls();
+    let gm = PtE6 {
+        x: mapped[0].0,
+        y: mapped[0].1,
+        inf: false,
+    };
+    let qm = PtE6 {
+        x: mapped[1].0,
+        y: mapped[1].1,
+        inf: false,
+    };
+    let Some(spec) = super::jv_cover::spec_from_curve(p, alpha, l, gm, qm, spec0.d) else {
+        rep.stage = String::from("spec_from_curve_none");
+        rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+        return rep;
+    };
+
+    // ── the sieved route on the transported instance
+    let route = run_cover_sieve_dlp_on(&spec, seed, 0, rho_s_ref, stop, margin, None, true);
+    rep.route_muls = route.total_muls;
+    rep.route_solved = route.solved;
+    rep.route_correct = route.correct;
+    rep.c_add_e = route.c_add_e;
+
+    // ── verify the recovered scalar on the challenge curve itself
+    if route.correct {
+        let got = challenge.scalar_mul(f, &gc, spec0.d as u128);
+        rep.verified_on_challenge = got == Some(qc);
+    }
+
+    // ── cost: every charged phase
+    rep.total_muls = rep.walk_muls + rep.transport_muls + rep.model_muls + rep.route_muls;
+    rep.reach_share =
+        (rep.walk_muls + rep.transport_muls + rep.model_muls) as f64 / rep.total_muls.max(1) as f64;
+    let sqrt_l = (l as f64).sqrt();
+    rep.s = rep.total_muls as f64 / (rep.c_add_e.max(1.0) * sqrt_l);
+    let rho_muls = rho_s_ref * sqrt_l * rep.c_add_e.max(1.0);
+    rep.s_over_rho = rep.total_muls as f64 / rho_muls;
+
+    // ── paired walk-free route on the weak curve of the same seed
+    let route_only = run_cover_sieve_dlp(p, seed, 0, rho_s_ref, stop, margin, None, true);
+    rep.route_only_s_over_rho = route_only.total_muls as f64 / rho_muls;
+    rep.e2e_over_route_only = rep.total_muls as f64 / (route_only.total_muls.max(1)) as f64;
+    rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+    rep
 }
 
 /// A diagnostic for §17.5 (post hoc, labelled so): are the weak curves
@@ -1910,5 +2414,57 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn point_maps_preserve_the_curve_and_the_logarithm() {
+        // On a weak curve, a 2-isogeny and an ℓ-isogeny each carry an
+        // order-ℓ point to its image curve and commute with scalar mult.
+        for p in [7u64, 11, 13] {
+            let ctx = WalkCtx::new(p);
+            let f = &ctx.f;
+            let mut rng = StdRng::seed_from_u64(7);
+            let spec = generate_spec(p, 1);
+            let cur = Curve2 {
+                e: [E6::ZERO, spec.alpha, f.sigma(&spec.alpha)],
+            };
+            let g: Pt2 = (spec.g.x, spec.g.y);
+            assert!(cur.on_curve(f, &g), "p = {p}");
+            // a 2-edge
+            let e = cur.two_edges(&ctx, None)[0];
+            let gi = map_two(f, &cur, e.k, &g);
+            assert!(e.curve.on_curve(f, &gi), "p = {p}: 2-image off curve");
+            // [2]·image == image of [2]·g, so the map is a homomorphism
+            let two_g = cur.scalar_mul(f, &g, 2).unwrap();
+            assert_eq!(
+                e.curve.scalar_mul(f, &gi, 2),
+                Some(map_two(f, &cur, e.k, &two_g)),
+                "p = {p}: 2-isogeny not a homomorphism"
+            );
+            // an ℓ-isogeny target with its kernel
+            if let Some((tgt, ker)) = cur.ell_targets_with_kernels(&ctx, 3, &mut rng).pop() {
+                let gi = map_odd(f, &cur, &ker, &g);
+                assert!(tgt.on_curve(f, &gi), "p = {p}: 3-image off curve");
+                let two_g = cur.scalar_mul(f, &g, 2).unwrap();
+                assert_eq!(
+                    tgt.scalar_mul(f, &gi, 2),
+                    Some(map_odd(f, &cur, &ker, &two_g)),
+                    "p = {p}: 3-isogeny not a homomorphism"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn end_to_end_from_a_non_weak_curve_recovers_and_verifies() {
+        // A whole-method run (§18.1) at a tiny size: the challenge curve is
+        // not weak, the walk reaches a weak curve, the route solves, and the
+        // recovered scalar verifies on the challenge curve.
+        let r = run_end_to_end(101, 1, 8, &[3, 5, 7], 3, 1.3, 1.25, Some(64));
+        assert!(r.challenge_non_weak, "challenge was weak: {r:?}");
+        assert!(r.walk_found, "walk found no weak curve: {r:?}");
+        assert!(r.route_solved && r.route_correct, "route failed: {r:?}");
+        assert!(r.verified_on_challenge, "not verified on C: {r:?}");
+        assert!(r.total_muls > 0 && r.reach_share >= 0.0 && r.reach_share <= 1.0);
     }
 }
