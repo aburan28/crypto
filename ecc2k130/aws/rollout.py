@@ -13,7 +13,10 @@ store can adopt v1 without touching points or checkpoints.
 Frozen (activate refuses):
   campaign: curve, dpWeight, workers, batch, blockThreads, minBlocks, walk
   knobs:    BATCH, THREADS, MINBLOCKS, WALK_TABLE,
-            PACKED_COMPACT_STATE, PACKED_STATE_TILE
+            PACKED_COMPACT_STATE, PACKED_STATE_TILE, WITNESS
+  witness:  a staged build must declare WITNESS=0. The corpus is 32-byte
+            records (protocol.RECORD_BYTES); WITNESS=1 writes 72-byte v2
+            records the ingest refuses, and its counters are checkpoint state
   arches:   staged must be a superset of the live manifest (mixed fleet
             stays on one fat 89+120 binary)
   storage:  a campaign that already has storageProtocol (binary hashes sit
@@ -44,8 +47,9 @@ FROZEN_CAMPAIGN = (
 )
 FROZEN_KNOBS = (
     "BATCH", "THREADS", "MINBLOCKS", "WALK_TABLE",
-    "PACKED_COMPACT_STATE", "PACKED_STATE_TILE",
+    "PACKED_COMPACT_STATE", "PACKED_STATE_TILE", "WITNESS",
 )
+REQUIRED_KNOBS = ("BATCH", "THREADS", "MINBLOCKS", "WALK_TABLE", "WITNESS")
 WALK_TABLE = {"sigma": "0", "table": "1"}
 POINTER_FIELDS = (
     "binaryKey", "hostBinaryKey", "sourceSha256", "binarySha256", "hostBinarySha256",
@@ -83,11 +87,15 @@ def geometryReasons(liveCampaign, stagedManifest, liveManifest=None, allowStrict
     """Human-readable reasons activate must refuse. Empty means the pointer may move."""
     reasons = []
     knobs = parseKnobs(stagedManifest.get("knobs", ""))
-    for name in ("BATCH", "THREADS", "MINBLOCKS", "WALK_TABLE"):
+    for name in REQUIRED_KNOBS:
         if name not in knobs:
             reasons.append("staged manifest knobs omit %s" % name)
     if reasons:
         return reasons
+    if knobs["WITNESS"] != "0":
+        reasons.append("staged WITNESS=%s writes 72-byte v2 records; the campaign corpus "
+                       "is 32-byte records, so a collection build must be WITNESS=0"
+                       % knobs["WITNESS"])
 
     campGeom = (
         int(liveCampaign["batch"]),

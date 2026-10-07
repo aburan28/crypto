@@ -239,8 +239,9 @@ outage left the window empty.
 It is a conservative figure by construction. A slot's iterations only count
 once it has checkpointed them, so the walked-but-not-yet-checkpointed tail
 is missing: measured against the live campaign on 2026-09-15 it read
-72.5 B it/s where `ecc2k130/aws/status.py`, summing what the walkers
-reported about themselves, read 86–101 B it/s over the same period. The
+72.5 B it/s where the slot dashboard (then `ecc2k130/aws/status.py`, now
+`ecc2k-status`), summing what the walkers reported about themselves, read
+86–101 B it/s over the same period. The
 published number is the one that survives a worker dying mid-interval.
 
 Neither field is guaranteed. `work_feed.py` refuses a feed that is stale,

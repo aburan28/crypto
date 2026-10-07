@@ -1,0 +1,73 @@
+{
+  "arms": {
+    "generic_f4_subspace_dense": {
+      "actual_base_and_columns_by_cell": {},
+      "censored_processes": 5,
+      "complete": false,
+      "ordinary_non_witness_queries_observed_across_processes": 0,
+      "ordinary_outcome_mix": {},
+      "ordinary_queries_observed_across_processes": 0,
+      "reasons": [
+        "smoke failure"
+      ],
+      "smoke_scheduled": 5,
+      "smoke_verified": 0
+    },
+    "generic_f5_subspace_dense": {
+      "actual_base_and_columns_by_cell": {},
+      "censored_processes": 5,
+      "complete": false,
+      "ordinary_non_witness_queries_observed_across_processes": 0,
+      "ordinary_outcome_mix": {},
+      "ordinary_queries_observed_across_processes": 0,
+      "reasons": [
+        "smoke failure"
+      ],
+      "smoke_scheduled": 5,
+      "smoke_verified": 0
+    },
+    "generic_pair_subspace_dense": {
+      "actual_base_and_columns_by_cell": {
+        "n17a1": [
+          62,
+          29
+        ],
+        "n19a0": [
+          62,
+          27
+        ],
+        "n23a0": [
+          72,
+          33
+        ],
+        "n23a1": [
+          52,
+          23
+        ]
+      },
+      "censored_processes": 1,
+      "complete": false,
+      "ordinary_non_witness_queries_observed_across_processes": 14706,
+      "ordinary_outcome_mix": {
+        "unresolved": 14706,
+        "witness": 141
+      },
+      "ordinary_queries_observed_across_processes": 14847,
+      "reasons": [
+        "smoke failure"
+      ],
+      "smoke_scheduled": 5,
+      "smoke_verified": 4
+    }
+  },
+  "prior_censored_exposures_sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
+  "prior_v2_censored_exposures_sha256": "0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54",
+  "process_repetitions_are_not_independent_points": true,
+  "qualified_f4_f5_arms": [],
+  "registration_panel_sha256": "df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4",
+  "repetitions": 1,
+  "sat_in_scope": false,
+  "schema_version": 1,
+  "scope": "F4/F5-only smoke completeness gate; SAT out of scope; no development stage, held-out confirmation, or familywise promotion.",
+  "status": "NEGATIVE_FAMILY_QUALIFICATION"
+}
