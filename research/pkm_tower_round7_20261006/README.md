@@ -104,3 +104,80 @@ The rule of note §16.3 (`pkm_tower_check size-cap runs/M3b-sizing-t0.log`):
 stopped step 24: E = 2227368915 entries of B', q = 40311 columns without a divisor, live heap H = 1583 MB = 1659895808 bytes
 A = 14336000000 bytes, reserve 2.5e9 bytes: C = 2500000000 (C >= E: the step fits by the rule)
 ```
+
+## Stage 2: the measurement (note §16.9)
+
+Each target runs as its own process: `run.sh stage2 2500000000`, so `--max-dense
+2500000000` and `--budget 43200`.
+
+**A restart.** The session's container was reclaimed during the first attempt
+at target 0, in step 23, between 03:00 and 03:59 UTC. The run ended without an
+exit status. Its files are `runs/M3b-t0.restart1.{log,jsonl}`, and
+`progress.txt` records the restart. The run was repeated whole with the same
+flags and binary. Its first 22 steps equal the killed run's
+(`pkm_tower_check compare-trace`).
+
+### Target 0: `D = 7`, refuted
+
+`M3b-t0`, 03:59–06:56 UTC, exit 0. Its first 23 steps equal stage 1's. Its
+trace (`pkm_tower_check trace-table runs/M3b-t0.log`):
+
+| step | degree | S-rows | pivot rows | columns | without a divisor | residues | new elements (lowest degree) | `B'` entries | kept entries | multiply-adds | s | memory MB |
+|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|
+| 1 | 4 | 1 | 2 | 15 | 13 | 1 | 1 (3) | 25 | 35 | 25 | 0.0 | 3 |
+| 2 | 4 | 3 | 4 | 24 | 20 | 3 | 2 (4) | 72 | 74 | 178 | 0.0 | 3 |
+| 3 | 5 | 9 | 17 | 99 | 82 | 5 | 5 (4) | 1203 | 452 | 2996 | 0.0 | 3 |
+| 4 | 5 | 24 | 48 | 262 | 214 | 17 | 12 (4) | 8536 | 2816 | 24925 | 0.0 | 3 |
+| 5 | 5 | 29 | 84 | 451 | 367 | 26 | 16 (4) | 25325 | 8117 | 86122 | 0.0 | 4 |
+| 6 | 5 | 33 | 97 | 556 | 459 | 25 | 19 (5) | 37002 | 16455 | 200476 | 0.0 | 4 |
+| 7 | 6 | 288 | 517 | 1940 | 1423 | 231 | 90 (4) | 626555 | 131130 | 12162295 | 0.0 | 8 |
+| 8 | 5 | 11 | 227 | 1282 | 1055 | 11 | 10 (4) | 192326 | 140869 | 1243714 | 0.0 | 8 |
+| 9 | 5 | 11 | 232 | 1258 | 1026 | 11 | 11 (4) | 193502 | 151212 | 1336568 | 0.0 | 8 |
+| 10 | 5 | 11 | 229 | 1130 | 901 | 10 | 8 (5) | 174842 | 158059 | 1266094 | 0.0 | 8 |
+| 11 | 6 | 841 | 1451 | 4706 | 3255 | 797 | 212 (5) | 3905562 | 720167 | 312931510 | 0.1 | 26 |
+| 12 | 6 | 1367 | 2286 | 7064 | 4778 | 1334 | 334 (5) | 9246184 | 2105680 | 2049605052 | 0.4 | 54 |
+| 13 | 6 | 1331 | 2856 | 7852 | 4996 | 1331 | 343 (5) | 12416872 | 3646942 | 3049171370 | 0.5 | 77 |
+| 14 | 6 | 1077 | 4750 | 15432 | 10682 | 1075 | 584 (5) | 40351764 | 8845242 | 8636336218 | 1.6 | 207 |
+| 15 | 6 | 918 | 5486 | 15916 | 10430 | 893 | 406 (5) | 46903432 | 12603954 | 12017448139 | 1.7 | 250 |
+| 16 | 6 | 417 | 5719 | 16312 | 10593 | 393 | 243 (5) | 49909297 | 14933233 | 8907618119 | 1.4 | 278 |
+| 17 | 6 | 62 | 5951 | 16419 | 10468 | 62 | 39 (5) | 52039204 | 15310171 | 6857994705 | 1.0 | 284 |
+| 18 | 6 | 16 | 5907 | 16401 | 10494 | 15 | 15 (6) | 51860617 | 15458618 | 6320858989 | 0.9 | 295 |
+| 19 | 7 | 22318 | 22000 | 45792 | 23792 | 20738 | 2354 (5) | 452256413 | 62880699 | 1378038867950 | 202.3 | 1998 |
+| 20 | 6 | 23 | 8291 | 26660 | 18369 | 17 | 17 (5) | 126322407 | 63163033 | 46236043808 | 8.4 | 2006 |
+| 21 | 6 | 7 | 98 | 227 | 129 | 1 | 1 (6) | 11402 | 63163162 | 47004 | 0.0 | 2006 |
+| 22 | 7 | 29963 | 44892 | 88958 | 44066 | 29951 | 4343 (6) | 1624882277 | 212726463 | 8249356789831 | 989.9 | 7225 |
+| 23 | 7 | 33337 | 54274 | 98183 | 43909 | 33328 | 5453 (6) | 1978877004 | 407681007 | 11469056026077 | 1399.1 | 9343 |
+| 24 | 7 | 28321 | 64289 | 104600 | 40311 | 28248 | 5118 (6) | 2227368915 | 586673662 | 11126680454368 | 1387.8 | 10998 |
+| 25 | 7 | 26804 | 69642 | 105985 | 36343 | 26804 | 7048 (6) | 2253999269 | 808782146 | 13010822579882 | 1572.4 | 11965 |
+| 26 | 7 | 64767 | 76826 | 106288 | 29462 | 64767 | 14093 (5) | 2145052750 | 1124685222 | 36338267877533 | 4052.4 | 12898 |
+| 27 | 6 | 25042 | 33262 | 48633 | 15371 | 25042 | 14356 (3) | 505282469 | 1242307743 | 8238985427103 | 966.2 | 12896 |
+| 28 | 4 | 3097 | 4213 | 5228 | 1015 | 1015 | 1015 (0) | 4271270 | 1242307743 | 7073729193 | 0.8 | 12794 |
+
+The row: `D = 7`, refuted in step 28, 28 steps, widest step 106,288 columns and
+141,593 rows, at most 2,344,243,162 nonzeros and 2,253,999,269 `B'` entries,
+89,912,686,130,244 multiply-adds, 10,587 s at four threads. The address space
+reached 13,411,820 KiB of the 14,000,000 KiB cap, a figure read from `/proc`
+during step 27.
+
+**Confirmation.** `C-M3b-t0-cap6` (`run.sh confirm 2500000000 7 0`), 06:56–06:57
+UTC, exit 0. With the degree bound at 6 it ends after 18 steps with 22,382
+pairs above the bound, without refuting and without a staircase stop. Its 18
+steps equal the full run's.
+
+### Target 1
+
+**A second restart.** The first attempt at target 1 started at 06:56 UTC. The
+container was reclaimed again during its step 25: the run was last seen alive
+at 08:21 UTC, and the container was back at 00:09 UTC on 2026-10-07. The run
+ended without an exit status. Its files are `runs/M3b-t1.restart1.{log,jsonl}`,
+and `progress.txt` records the restart. Its 24 steps equal target 0's in every
+count but step 22's multiply-adds (`pkm_tower_check compare-trace
+runs/M3b-t0.log runs/M3b-t1.restart1.log --except muladds`). The run is
+repeated whole with the same flags and binary, from 00:12 UTC.
+
+**Host.** The restarted container runs on an Intel Xeon at 2.80 GHz, 4 cores
+without SMT, AVX-512 (F, BW, CD, DQ, VL, VNNI) and AVX2, 16 GB without swap,
+Linux 6.18.44. The binary is the one above (same sha256). It is built for
+baseline x86-64, and the engine's runtime dispatch (`avx512f`, then `avx2`)
+takes the AVX-512F path on both hosts. No time of target 1's is compared with
+target 0's.

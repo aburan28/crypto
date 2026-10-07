@@ -3028,6 +3028,100 @@ before it read any round-7 row.
   Step 24 fits, and stage 2 runs with `--max-dense 2500000000`. It started at
   02:42 UTC.
 
+### 16.9 Stage 2: `D = 7` at `N = 18`
+
+**A restart.** The machine ended the first attempt at target 0, not the
+engine.
+- The session's container was reclaimed and restarted while the run was in
+  step 23, between 03:00 and 03:59 UTC. The run ended without an exit status.
+- Its files are kept as `M3b-t0.restart1.*`, and `progress.txt` records the
+  restart.
+- The run was repeated whole with the same flags and the same binary, as round
+  3 did after its restart (§12.7). §16.3's no-rerun clause is about allocation
+  failures, which this was not.
+- The killed run's 22 steps and the repeat's are identical.
+
+**Target 0 refutes, at `D = 7`.** The repeat ran from 03:59 to 06:56 UTC and
+exited 0. Its steps from 19 on:
+
+| step | degree | S-rows | columns | without a divisor | new elements (lowest degree) | `B'` entries | multiply-adds | time |
+|--:|--:|--:|--:|--:|:--|--:|--:|--:|
+| 19 | 7 | 22,318 | 45,792 | 23,792 | 2,354 (5) | 4.5·10⁸ | 1.4·10¹² | 2.6 min |
+| 20–21 | 6 | 30 | ≤ 26,660 | ≤ 18,369 | 18 (5) | ≤ 1.3·10⁸ | 4.6·10¹⁰ | 0.1 min |
+| 22 | 7 | 29,963 | 88,958 | 44,066 | 4,343 (6) | 1.62·10⁹ | 8.2·10¹² | 16.5 min |
+| 23 | 7 | 33,337 | 98,183 | 43,909 | 5,453 (6) | 1.98·10⁹ | 1.15·10¹³ | 23.3 min |
+| 24 | 7 | 28,321 | 104,600 | 40,311 | 5,118 (6) | 2.23·10⁹ | 1.11·10¹³ | 23.1 min |
+| 25 | 7 | 26,804 | 105,985 | 36,343 | 7,048 (6) | 2.25·10⁹ | 1.30·10¹³ | 26.2 min |
+| 26 | 7 | 64,767 | 106,288 | 29,462 | 14,093 (5) | 2.15·10⁹ | 3.63·10¹³ | 67.5 min |
+| 27 | 6 | 25,042 | 48,633 | 15,371 | 14,356 (3) | 5.1·10⁸ | 8.2·10¹² | 16.1 min |
+| 28 | 4 | 3,097 | 5,228 | 1,015 | 1,015 (0): `1` | 4.3·10⁶ | 7.1·10⁹ | 0.8 s |
+
+- **No step went above degree 7, and the system refuted**, so `D = 7`.
+- **The shape is `N = 15`'s, longer.**
+  - `N = 15` has two steps at degree 7 (19 and 21), then falls through
+    degrees 6 and 5 and finds `1` at degree 2.
+  - `N = 18` has six at degree 7: step 19, then steps 22–26 in a row. Each of
+    the five adds 4,343 to 14,093 elements, and the pending pairs grow to
+    328,504 after step 26. Step 26's new elements reach degree 5, and the run
+    falls through degree 6 (step 27) to `1` at degree 4 (step 28).
+- **The last step's echelon fills.** Its residues have full rank on the 1,015
+  columns without a divisor after 1,015 of 3,097 S-rows, and the full-rank exit
+  skips the other 2,082.
+- **Size.** The largest step has 141,593 rows and 2.34·10⁹ nonzeros. That
+  passes round 2's `--max-nnz` of `2·10⁹`, which would have stopped the run at a
+  step that fit in memory: §16.2's `--max-dense` is what let it through. The
+  largest `B'` has 2.25·10⁹ entries (step 25). The peak resident memory was
+  12,961 MB (the trace's MB are 2^20 bytes). The address space reached
+  13,411,820 KiB of the 14,000,000 KiB cap, 96%; that figure was read from
+  `/proc` during step 27, since the trace does not record it.
+
+**From `N = 15` to `N = 18` at `m = 3`** (target 0 at both sizes, the same
+build class and host class, four threads):
+
+| | `N = 15` | `N = 18` | ratio |
+|:--|--:|--:|--:|
+| `D` | 7 | 7 | 1 |
+| steps | 24 | 28 | 1.2 |
+| width (columns) | 31,397 | 106,288 | 3.4 |
+| rows, largest step | 52,129 | 141,593 | 2.7 |
+| nonzeros, largest step | 2.9·10⁸ | 2.3·10⁹ | 8.0 |
+| largest `B'` | 2.0·10⁸ | 2.3·10⁹ | 11.4 |
+| multiply-adds | 3.19·10¹² | 8.99·10¹³ | 28.2 |
+| peak resident memory (MB of 2^20 bytes) | 1,084 | 12,961 | 12.0 |
+| F4 time (practicality note) | 6.0 min | 176.4 min | 29.2 |
+
+From `N = 12` to `N = 15` the multiply-adds grew 301 times and the width 6.3
+times (round 6's rows), so both grew less per level here.
+
+**Confirmation.** `C-M3b-t0-cap6` re-ran target 0 with the degree bound at 6.
+It ended after 18 steps with 22,382 pairs above the bound, without refuting and
+without a staircase stop. Degree 6 does not suffice. Its 18 steps are the full
+run's.
+
+**Target 1, and a second restart.** Target 1 started at 06:56 UTC, and the
+container was reclaimed again during its step 25.
+- The run was last seen alive at 08:21 UTC; the container was back at 00:09
+  UTC on 2026-10-07. The run ended without an exit status, its log ending at
+  step 24.
+- Those 24 steps equal target 0's in every count but one: step 22's
+  multiply-adds, 8,249,356,791,928 against 8,249,356,789,831. A cancellation
+  that happens in one target and not the other moves that count and nothing
+  else (`compare-trace … --except muladds` finds all 24 identical).
+- Its files are kept as `M3b-t1.restart1.*`, and the run is repeated whole with
+  the same flags and binary from 00:12 UTC.
+- The restarted container runs on another host class, an Intel Xeon at
+  2.80 GHz, so no time of target 1's is compared with target 0's.
+
+It runs as this section is written.
+
+**Checks** (`pkm_tower_check`).
+- `verify` agrees with target 0's row: no triple of `V³` solves the system, out
+  of `64³ = 262,144`.
+- `compare-trace` finds the repeat identical to stage 1 on its 23 steps, and to
+  the killed run on its 22.
+- `analyze`, over rounds 1–5 and 7, finds every repeated measurement in
+  agreement, and marks the confirmation run as confirming.
+
 ---
 
 ## References

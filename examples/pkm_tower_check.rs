@@ -45,10 +45,11 @@
 //!   - `--may-fall` fields, which may only fall;
 //!   - `--ignore` fields.
 //! - **`compare-trace REF NEW`** checks the `tower step` lines of two logs,
-//!   step for step. Every count must be equal: the times and the memory are
-//!   the only fields left out.
+//!   step for step. Every count must be equal: the times, the memory and the
+//!   `--except` fields are the only ones left out.
 //! - **`size-cap LOG`** applies note §16.3's rule for stage 2's cap to the
 //!   `tower stop in step` line of a stage-1 log.
+//! - **`trace-table LOG`** prints a log's steps as a Markdown table.
 //!
 //! ```bash
 //! cargo run --release --example pkm_tower_check -- verify research/pkm_tower_round2_20260925/runs/*.jsonl
@@ -1569,13 +1570,40 @@ fn trace_systems(path: &str) -> Vec<Vec<String>> {
     systems
 }
 
+/// `line` without its numeric field `, NAME N`.
+fn drop_field(line: &str, name: &str) -> String {
+    let key = format!(", {name} ");
+    let Some(i) = line.find(&key) else {
+        return line.to_string();
+    };
+    let digits = line[i + key.len()..]
+        .chars()
+        .take_while(char::is_ascii_digit)
+        .count();
+    format!("{}{}", &line[..i], &line[i + key.len() + digits..])
+}
+
 /// The steps of `NEW`'s systems against `REF`'s, system by system, up to
-/// `--steps K` steps each or as many as both printed.
+/// `--steps K` steps each or as many as both printed, leaving out the
+/// numeric fields named by `--except` (two targets of one cell share every
+/// count but the multiply-adds, which cancellations can move).
 fn compare_trace(reference: &str, new: &str, args: &[String]) -> ExitCode {
     let limit: Option<usize> = list_flag(args, "--steps")
         .first()
         .map(|k| k.parse().expect("--steps K"));
-    let (a, b) = (trace_systems(reference), trace_systems(new));
+    let except = list_flag(args, "--except");
+    let strip = |systems: Vec<Vec<String>>| -> Vec<Vec<String>> {
+        systems
+            .into_iter()
+            .map(|steps| {
+                steps
+                    .into_iter()
+                    .map(|s| except.iter().fold(s, |s, f| drop_field(&s, f)))
+                    .collect()
+            })
+            .collect()
+    };
+    let (a, b) = (strip(trace_systems(reference)), strip(trace_systems(new)));
     let (mut steps, mut same, mut short) = (0, 0, 0);
     if a.len() != b.len() {
         println!(
@@ -1722,7 +1750,7 @@ fn size_cap(log: &str) -> ExitCode {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let usage = "usage: pkm_tower_check verify FILE… | analyze FILE… | compare-rows REF NEW [--may-fall F,…] [--ignore F,…] | compare-trace REF NEW [--steps K] | size-cap LOG | trace-table LOG";
+    let usage = "usage: pkm_tower_check verify FILE… | analyze FILE… | compare-rows REF NEW [--may-fall F,…] [--ignore F,…] | compare-trace REF NEW [--steps K] [--except F,…] | size-cap LOG | trace-table LOG";
     let files = |from: usize| -> Vec<String> {
         args[from..]
             .iter()
@@ -1957,5 +1985,22 @@ mod tests {
             step_counts(line),
             "degree 5, 4 critical + 5 tower pairs, 9 S-rows + 13 reducers + 4 promoted x 99 cols, nnz 326, residue 5 x 82, fresh 5 (lowest degree 4), basis 10, pairs left 31, B' 1203 entries, kept 10 elements with 452 entries, muladds 2915"
         );
+    }
+
+    #[test]
+    fn except_drops_one_numeric_field() {
+        let counts = "degree 7, nnz 573813283, basis 7556, muladds 8249356789831";
+        assert_eq!(
+            drop_field(counts, "muladds"),
+            "degree 7, nnz 573813283, basis 7556"
+        );
+        assert_eq!(
+            drop_field(counts, "nnz"),
+            "degree 7, basis 7556, muladds 8249356789831"
+        );
+        // A name the line lacks, or one only a longer name contains, leaves
+        // it whole.
+        assert_eq!(drop_field(counts, "memory"), counts);
+        assert_eq!(drop_field(counts, "adds"), counts);
     }
 }
