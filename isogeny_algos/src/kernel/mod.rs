@@ -1,4 +1,5 @@
 pub mod chain;
+pub mod hessian;
 pub mod kohel;
 pub mod models;
 pub mod montgomery;

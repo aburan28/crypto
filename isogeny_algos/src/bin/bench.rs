@@ -2184,6 +2184,53 @@ fn bench_models(o: &mut Out) {
                 rec(o, "huff_eval", okh, time_it(budget, 2000, || hiso.eval(&fq, hp)));
             }
         }
+        // twisted Hessian (l prime to 3): a random curve whose order (from a Weierstrass model
+        // with the same j, twist resolved on a point) is divisible by l
+        if ell % 3 != 0 {
+            use isogeny_algos::kernel::hessian::*;
+            let hpoint = |e: &Hessian<u64>, rng: &mut Rng| loop {
+                let x = fq.random(rng);
+                let c0 = fq.add(fq.mul(e.a, fq.mul(x, fq.sq(x))), 1);
+                let cub = vec![c0, fq.neg(fq.mul(e.d, x)), 0, 1];
+                let rts = poly::roots(&fq, &cub, rng);
+                if let Some(&y) = rts.first() {
+                    return [x, y, 1u64];
+                }
+            };
+            let (he, hn) = loop {
+                let he = Hessian { a: fq.random(&mut rng), d: fq.random(&mut rng) };
+                if he.a == 0 || he.d == 0 || fq.sub(fq.mul(he.d, fq.sq(he.d)), fq.mul(27, he.a)) == 0 {
+                    continue;
+                }
+                let j = he.j(&fq);
+                if j == 0 || j == 1728 {
+                    continue;
+                }
+                let nw = order(&fq, &from_j(&fq, j), &mut rng);
+                let r = hpoint(&he, &mut rng);
+                let o0 = he.identity(&fq);
+                let n = if he.eq(&fq, &he.mul(&fq, &r, nw), &o0) { nw } else { 2 * fq.p + 2 - nw };
+                if n % ell == 0 && he.eq(&fq, &he.mul(&fq, &r, n), &o0) {
+                    break (he, n);
+                }
+            };
+            let o0 = he.identity(&fq);
+            let hk = loop {
+                let k = he.mul(&fq, &hpoint(&he, &mut rng), hn / ell);
+                if !he.eq(&fq, &k, &o0) {
+                    break k;
+                }
+            };
+            if let Some(hiso) = hessian_isogeny(&fq, &he, &hk, ell) {
+                let (pa, pb) = (hpoint(&he, &mut rng), hpoint(&he, &mut rng));
+                let (ia, ib) = (hiso.eval(&fq, &pa), hiso.eval(&fq, &pb));
+                let okh = hiso.cod.on_curve(&fq, &ia)
+                    && hiso.cod.eq(&fq, &hiso.eval(&fq, &he.add(&fq, &pa, &pb)), &hiso.cod.add(&fq, &ia, &ib))
+                    && hiso.cod.eq(&fq, &hiso.eval(&fq, &hk), &hiso.cod.identity(&fq));
+                rec(o, "hessian_kernel_and_codomain", okh, time_it(budget, 2000, || hessian_isogeny(&fq, &he, &hk, ell)));
+                rec(o, "hessian_eval", okh, time_it(budget, 2000, || hiso.eval(&fq, &pa)));
+            }
+        }
     }
 }
 
