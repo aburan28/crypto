@@ -8,6 +8,7 @@
 
 use std::collections::BTreeMap;
 
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -340,10 +341,11 @@ impl Record {
     /// Seal: compute `record_id` from the exact line the record is
     /// written as, with the id empty, and return that line with the id.
     ///
-    /// The seal covers bytes, not a parsed value: `serde_json`'s default
-    /// float parser is not correctly rounded, so a record parsed and
-    /// re-serialised can differ in a last digit from what was written.
-    /// [`check_line_seal`] therefore checks the raw line on disk.
+    /// The seal covers bytes, not a parsed value: `ecbench.record/v1` was
+    /// defined with serde_json's former, not-always-correctly-rounded float
+    /// parser, so a record parsed and re-serialised can differ in a last digit
+    /// from what was written. [`check_line_seal`] therefore checks the raw line
+    /// on disk.
     pub fn seal(&mut self) -> String {
         self.record_id = String::new();
         let body = serde_json::to_string(self).expect("a record serialises");
@@ -372,10 +374,102 @@ pub fn check_line_seal(line: &str, record_id: &str) -> bool {
 /// `x` after the serialise-parse round trip a record's floats take, so a
 /// recomputed value compares with a parsed one bit for bit.
 pub fn json_roundtrip(x: f64) -> f64 {
-    serde_json::to_string(&x)
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or(f64::NAN)
+    legacy_json_float(x).unwrap_or(f64::NAN)
+}
+
+/// Reproduce the decimal parser used when `ecbench.record/v1` was defined.
+///
+/// serde_json formerly accumulated the significand as an integer and then
+/// multiplied or divided by a power of ten. Enabling its `float_roundtrip`
+/// feature repository-wide makes parsing correctly rounded, but sealed v1
+/// records and all bounds derived from them retain the former result. Keep
+/// that protocol behavior explicit instead of depending on a crate feature.
+pub(crate) fn legacy_json_float(x: f64) -> Option<f64> {
+    const POW10: [f64; 23] = [
+        1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16,
+        1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
+    ];
+
+    let encoded = serde_json::to_string(&x).ok()?;
+    let (negative, unsigned) = encoded
+        .strip_prefix('-')
+        .map_or((false, encoded.as_str()), |rest| (true, rest));
+    let (mantissa, explicit_exponent) =
+        unsigned
+            .split_once(['e', 'E'])
+            .map_or((unsigned, 0), |(mantissa, exponent)| {
+                exponent
+                    .parse::<i32>()
+                    .map(|value| (mantissa, value))
+                    .unwrap_or((mantissa, i32::MAX))
+            });
+    if explicit_exponent == i32::MAX {
+        return None;
+    }
+
+    let mut significand = 0u64;
+    let mut fractional_digits = 0i32;
+    let mut after_decimal = false;
+    for byte in mantissa.bytes() {
+        match byte {
+            b'.' if !after_decimal => after_decimal = true,
+            b'0'..=b'9' => {
+                significand = significand
+                    .checked_mul(10)?
+                    .checked_add(u64::from(byte - b'0'))?;
+                if after_decimal {
+                    fractional_digits = fractional_digits.checked_add(1)?;
+                }
+            }
+            _ => return None,
+        }
+    }
+    let exponent = explicit_exponent.checked_sub(fractional_digits)?;
+    let power = usize::try_from(exponent.unsigned_abs()).ok()?;
+    let pow = *POW10.get(power)?;
+    let mut value = significand as f64;
+    if exponent >= 0 {
+        value *= pow;
+    } else {
+        value /= pow;
+    }
+    Some(if negative { -value } else { value })
+}
+
+fn normalize_legacy_json_floats(value: &mut Value) -> Result<(), String> {
+    match value {
+        Value::Array(values) => {
+            for value in values {
+                normalize_legacy_json_floats(value)?;
+            }
+        }
+        Value::Object(values) => {
+            for value in values.values_mut() {
+                normalize_legacy_json_floats(value)?;
+            }
+        }
+        Value::Number(number) if number.is_f64() => {
+            let current = number
+                .as_f64()
+                .ok_or_else(|| format!("record float {number} does not fit f64"))?;
+            let legacy = legacy_json_float(current).ok_or_else(|| {
+                format!("record float {number} is outside the v1 decimal-parser domain")
+            })?;
+            let number = serde_json::Number::from_f64(legacy)
+                .ok_or_else(|| format!("legacy parse of record float {number} is not finite"))?;
+            *value = Value::Number(number);
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+/// Deserialize a sealed `ecbench.record/v1` JSON value with the decimal
+/// semantics under which the schema and its derived bounds were frozen.
+pub(crate) fn from_str_legacy_floats<T: DeserializeOwned>(text: &str) -> Result<T, String> {
+    let mut value: Value = serde_json::from_str(text).map_err(|error| error.to_string())?;
+    normalize_legacy_json_floats(&mut value)?;
+    serde_json::from_value(value).map_err(|error| error.to_string())
 }
 
 /// `√(π / 2A)`.
@@ -611,5 +705,53 @@ pub fn grade(g: &GradeInput) -> Grade {
         foreign_busy_ticks: foreign,
         steal_ticks: steal,
         idle_sibling_busy_ticks: sib_busy,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Deserialize)]
+    struct LegacyFloatFixture {
+        gae: f64,
+        nested: Vec<f64>,
+        integer: u64,
+    }
+
+    #[test]
+    fn legacy_record_deserializer_reproduces_v1_decimal_semantics() {
+        let text = r#"{"gae":3934.0137668849675,"nested":[0.37222665730402227],"integer":17}"#;
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
+
+        assert_eq!(
+            legacy.gae.to_bits(),
+            legacy_json_float(current.gae).unwrap().to_bits()
+        );
+        assert_eq!(
+            legacy.nested[0].to_bits(),
+            legacy_json_float(current.nested[0]).unwrap().to_bits()
+        );
+        assert_ne!(legacy.gae.to_bits(), current.gae.to_bits());
+        assert_ne!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
+        assert_eq!(legacy.integer, 17);
+    }
+
+    #[test]
+    fn legacy_record_roundtrip_is_not_a_numeric_tolerance() {
+        let recorded: f64 = 3934.013766884967;
+        let replayed: f64 = 3934.0137668849675;
+        assert_ne!(recorded.to_bits(), replayed.to_bits());
+        assert_eq!(
+            json_roundtrip(replayed).to_bits(),
+            json_roundtrip(recorded).to_bits()
+        );
+
+        let two_ulp_mutation = f64::from_bits(recorded.to_bits() + 2);
+        assert_ne!(
+            json_roundtrip(two_ulp_mutation).to_bits(),
+            json_roundtrip(recorded).to_bits()
+        );
     }
 }

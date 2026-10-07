@@ -43,8 +43,9 @@ use crate::cryptanalysis::ecbench::isolation::{
 };
 use crate::cryptanalysis::ecbench::methods::MethodSpec;
 use crate::cryptanalysis::ecbench::record::{
-    floor_s, grade, Boundaries, ChildInput, ChildOutput, Cost, GradeInput, IsolationRecord,
-    Outcome, Record, Timing, CHILD_INPUT_SCHEMA, GRADING_VERSION, RECORD_SCHEMA, UNIT,
+    floor_s, from_str_legacy_floats, grade, Boundaries, ChildInput, ChildOutput, Cost, GradeInput,
+    IsolationRecord, Outcome, Record, Timing, CHILD_INPUT_SCHEMA, GRADING_VERSION, RECORD_SCHEMA,
+    UNIT,
 };
 use crate::cryptanalysis::ecbench::signals;
 use crate::cryptanalysis::ecbench::spec::{plan, Execution, Plan, Spec};
@@ -825,13 +826,29 @@ pub fn read_records(dir: &Path) -> Result<Vec<Record>, String> {
 
 /// Each record with the raw line it was read from, for the seal check.
 pub fn read_record_lines(dir: &Path) -> Result<Vec<(String, Record)>, String> {
+    read_record_lines_with(dir, from_str_legacy_floats)
+}
+
+/// Each record parsed with the repository's current correctly-rounded JSON
+/// semantics. This is for explicit evidence migrations; v1 protocol replay
+/// continues to use [`read_record_lines`].
+pub fn read_record_lines_exact(dir: &Path) -> Result<Vec<(String, Record)>, String> {
+    read_record_lines_with(dir, |line| {
+        serde_json::from_str(line).map_err(|error| error.to_string())
+    })
+}
+
+fn read_record_lines_with(
+    dir: &Path,
+    parse: impl Fn(&str) -> Result<Record, String>,
+) -> Result<Vec<(String, Record)>, String> {
     let text = std::fs::read_to_string(dir.join("records.jsonl"))
         .map_err(|e| format!("{}: {e}", dir.join("records.jsonl").display()))?;
     text.lines()
         .filter(|l| !l.trim().is_empty())
         .enumerate()
         .map(|(i, l)| {
-            serde_json::from_str(l)
+            parse(l)
                 .map(|r| (l.to_string(), r))
                 .map_err(|e| format!("records.jsonl line {}: {e}", i + 1))
         })
