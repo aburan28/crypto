@@ -1122,3 +1122,117 @@ The distance matters: eight times farther from a weak curve, the walk meets `2`�
 - **Open, and not claimed:** whether the `55–60 %` holds as `p` grows (the exact census stops at `p = 31`, `4.5·10¹¹` multiplications there; the registered run's success at `p = 53`–`101` is a lower bound only, since three jump degrees do not generate the larger classes); what distinguishes the weak classes (the largest classes are weak, and no congruence on `t` was found); a uniform start inside a weak class (§17.5.5 is the only check, and it moves the constant by up to `40×`); the transport of the logarithm along the path (§17.4); and anything about a curve of order divisible by `4` without full rational 2-torsion.
 
 **Class.**  Engineering (the step: `246×`; the search: exact exhaustion instead of a heuristic) and accounting (the reach and the price, both measured where §13 had estimated).  Not an advance: no number on the route's own rows moves, and the class it applies to is now *smaller* than §9 and §13 implied, not larger.
+
+## 18. The route end to end from a curve that is not weak, and the reach at larger p — registered before it is built (2026-10-07)
+
+§17 priced the walk and found the route's reach, in pieces.  Four items
+were left open (§17.5.6), and this section takes them in order of what the
+repository's rule asks first: **a whole-method measurement**.  No run in
+§§6–17 started from a curve that is not already weak; every `S / rho` on the
+route's rows is the route on the weak curve it was handed.  §18.1 runs the
+whole thing from a non-weak curve with a planted logarithm and verifies the
+answer on that curve.  §18.2 extends the reach census past `p = 31`.  §18.3
+is the exploratory characterization, labelled so.
+
+### 18.1 End to end from a non-weak curve (primary)
+
+**Instance.**  For `p` and seed `s`: the instance generator of §6
+(`generate_spec`) produces a weak curve `W₀` of order `4ℓ`, `ℓ` prime.  The
+**challenge curve** `C` is `W₀` moved by `M` random moves (a rational
+2-isogeny or a rational `3`-, `5`- or `7`-isogeny, uniformly among those
+available; §17.5.5's construction), continued until `C` is not weak.  `C`
+has order `4ℓ`, is isogenous to `W₀`, and is handed to the attacker as an
+equation `y² = (x − e₀)(x − e₁)(x − e₂)` over `F_{p⁶}` with `ℓ` and the
+cofactor `4`.  On `C`: `G = [4]·(random point)` of order `ℓ`, a planted
+`d ∈ [1, ℓ)`, `Q = [d]G`.  The construction of `C`, `G`, `Q` is the
+instance's, not the attacker's, and is not charged.
+
+**Attack, every phase charged in `F_p` multiplications through the one
+counter of each field context.**
+
+1. *Walk* (§17's walk with the path recorded): from `C`, enumerate 2-isogeny
+   components breadth first, jump by `3, 5, 7` (degrees inert in the class's
+   order skipped: the trace is `q³ + 1 − 4ℓ`, read from the public order, so
+   no point count is charged), until a weak curve `W`.  Every curve met,
+   every jump tried, every `j`-invariant is charged.
+2. *Transport*: the isogeny path `C → … → W` is evaluated on `G` and `Q`
+   (Vélu on each step: the 2-isogeny `(x, y) ↦ (y²/x², y(uv − x²)/x²)` on the
+   translated model, the odd-degree map with its `y`-formula), each image
+   checked on its curve.  Every degree on the path is coprime to `ℓ`, so the
+   images have order `ℓ` and the logarithm is unchanged.
+3. *Model change*: `W`'s weak ordering `(e₁; e₂, e₃)` with
+   `N((e₃ − e₁)/(e₂ − e₁)) = 1`; `α` solving `σ(α) = c·α` (a 3×3 kernel over
+   `F_q`); `v = (e₂ − e₁)/α`, rescaled by a non-square of `F_q` if `v` is not
+   a square in `F_{q³}`; `(x, y) ↦ ((x − e₁)/v, y/v^{3/2})` onto
+   `y² = x(x − α)(x − σα)`, the form §6's cover takes.  If the cover
+   construction refuses that `α`, `α` is rescaled by squares of `F_q` (an
+   isomorphism), at most 8 times, then the walk continues to another weak
+   curve; both counted.
+4. *The route*: §§11–16's sieved route (`m` climbing from 9, line
+   enumeration of §14, descent replaying the trace, F4 stopped at the
+   staircase), unchanged, on the transported instance, cover transfer
+   included.
+5. *Verification* on `C`: `[d′]G = Q` on the challenge curve itself.
+
+**Unit and reference.**  `S = total / (c_add · √ℓ)`, cold, every phase
+inside; `c_add` the affine addition on `E(F_{p⁶})` as in §2.  The
+reference is §15's pooled rho, `S_ρ = 1.361`, and the walk-free route's
+own `S / rho` on `W₀` for the same seed is reported beside it (paired),
+so the walk's share is read off the same instance.
+
+**Grid.**  `p ∈ {251, 503, 1009, 1511}`, seeds `1–4`, `M ∈ {8, 64}`:
+32 runs.  Seeds are not chosen; a failed run is kept and reported.
+
+**Predictions, with falsification lines.**
+
+- **E1 (correctness).** Every run that finishes recovers `d` and passes
+  `[d′]G = Q` on `C`.  *Falsified by one wrong answer.*  A run whose route
+  exhausts, or whose walk finds no weak curve in `3q` curves, is reported
+  as a failure, never as a cost.
+- **E2 (the walk is small beside the route).**  At `p = 1009`, walk plus
+  transport plus model change is below `5 %` of the run's total for
+  `M = 8`, and below `25 %` for `M = 64`.  *Falsified if* above either.
+- **E3 (the crossover survives).**  The end-to-end `S / rho` at `p = 1009`
+  and `1511` is below `0.1` for every finished run with `M = 8`, and its
+  mean over seeds is below `0.15` for `M = 64`.  *Falsified if* any `M = 8`
+  run at those sizes reads `≥ 0.1`.
+- **E4 (paired).**  The end-to-end total over the walk-free route's total on
+  `W₀` (same seed) is below `1.25` at `p ≥ 1009` for `M = 8`.  *Falsified if*
+  above `1.5` for any such run.
+
+**Inadmissible.**  Handing the attacker `W₀` or any weak curve; charging
+the instance's construction to the attack or the attack's walk to the
+instance; skipping the transport check or the verification on `C`;
+replacing a failed seed; changing the route's parameters from §16's.
+
+### 18.2 The reach at larger p
+
+§17.5.3's exact census (every weak curve up to the isomorphisms that keep
+the form, `2q² + 2q` representatives, each with its trace; then `4,000`
+random full-2-torsion curves tested against the set) at
+`p ∈ {37, 41, 43}`, run in parallel over representatives, and
+**every trace kept** (the weak set with multiplicities and the random
+sample), so that §18.3 can work from frozen files.  `p ≤ 31` is re-run with
+the full sets kept and must reproduce §17.5.3's counts exactly.
+
+- **R1.**  The fraction of random full-2-torsion curves in a weak class
+  stays in `[0.50, 0.68]` at `p = 37, 41, 43`.  *Falsified if* outside at
+  any of them; a monotone fall below `0.50` would mean the route's reach
+  shrinks with `p`, and is the outcome this part exists to detect.
+- **Stop.**  A census that has not finished in 12 hours of wall time on
+  this machine is stopped, its partial counts kept and labelled partial.
+
+### 18.3 What distinguishes the weak classes (exploratory, post hoc)
+
+From §18.2's frozen sets: whether membership of a trace `t` in the weak set
+is decided by `t` modulo small primes (3, 4, 8, 9, `p`), by the class size
+(the random sample's multiplicity of `t`), or by the discriminant
+`t² − 4q³` (its square-free part, its 3-adic valuation).  Labelled
+exploratory throughout; nothing in it is a claim until a candidate rule is
+registered and tested on a size it was not fitted on (`p = 43` held out).
+
+**Class, registered.**  §18.1 is accounting (the first whole-method
+measurement of the route from a non-weak curve; the algorithm is [JV12]'s
+and §§11–17's); §18.2 is accounting; §18.3 is exploratory.  Nothing here is
+an advance, and nothing concerns a generic or deployed curve: the curves
+are those whose isogeny class holds a weak curve over `F_{p⁶}`.
