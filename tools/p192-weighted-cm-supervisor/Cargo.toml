@@ -1,0 +1,25 @@
+[package]
+name = "p192-weighted-cm-supervisor"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Non-arithmetic Role-1 supervisor for the P-192 weighted-CM experiment"
+
+[workspace]
+
+[[bin]]
+name = "p192_wcm_preflight_supervisor"
+path = "src/main.rs"
+
+[dependencies]
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
