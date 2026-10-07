@@ -213,6 +213,7 @@ pub mod legacy_curve_attacks;
 pub mod line_oracle;
 pub mod line_s4_oracle;
 pub mod lopsided_thin_product;
+pub mod matmul_exponent;
 pub mod matrix_f5_f2;
 pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;
