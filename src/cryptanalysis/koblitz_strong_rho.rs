@@ -437,6 +437,14 @@ pub struct StrongRhoParams {
     pub dp_bits: u32,
     /// Give up after `step_cap_factor × ⌈√(πr / 2A)⌉` steps (at least 10^6).
     pub step_cap_factor: u64,
+    /// On a fruitless cycle, escape instead of abandoning the walk: the
+    /// state becomes the canonical form of `[2]P_next` with `a, b` doubled,
+    /// a function of the walk's own state, so two merged walks escape
+    /// alike.  Off is the committed reference, bit for bit; the escape is
+    /// what lets a long distinguished-point walk (large `dp_bits`, as a
+    /// table at m = 83 needs) survive about one fruitless cycle per few
+    /// thousand steps.
+    pub escape_fruitless: bool,
 }
 
 impl Default for StrongRhoParams {
@@ -445,6 +453,7 @@ impl Default for StrongRhoParams {
             lanes: 32,
             dp_bits: 4,
             step_cap_factor: 2_000,
+            escape_fruitless: false,
         }
     }
 }
@@ -479,6 +488,8 @@ pub struct StrongRhoOutcomeG<S> {
     pub walks: u64,
     /// Walks abandoned in a fruitless cycle (length ≤ 4).
     pub fruitless: u64,
+    /// Fruitless cycles escaped by doubling (`escape_fruitless` only).
+    pub escapes: u64,
     /// Walks abandoned at the length cap `8·2^dp_bits`.
     pub capped: u64,
     /// Collisions with `b = b'` (no information).
@@ -1103,6 +1114,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
         let mut active: Vec<usize> = Vec::with_capacity(lanes_n);
         let mut scratch: Vec<F::E> = Vec::new();
         let (mut steps, mut walks, mut fruitless, mut capped, mut wasted) = (0u64, 0u64, 0, 0, 0);
+        let mut escapes = 0u64;
 
         while steps < step_cap {
             // Start a walk in every idle lane.
@@ -1156,6 +1168,7 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                         walk_steps: steps,
                         walks,
                         fruitless,
+                        escapes,
                         capped,
                         wasted_merges: wasted,
                         table_entries: table.len(),
@@ -1206,8 +1219,22 @@ impl<F: RhoField, S: RhoScalar> StrongRhoG<F, S> {
                 steps += 1;
                 lane.length += 1;
                 if next.point == lane.state.point || lane.previous.contains(&next.point) {
-                    fruitless += 1;
-                    lane.live = false;
+                    if !params.escape_fruitless {
+                        fruitless += 1;
+                        lane.live = false;
+                        continue;
+                    }
+                    // [2]P_next, charged as one group operation; the history
+                    // restarts so the escaped point is not taken for a cycle.
+                    escapes += 1;
+                    charges.group_additions += 1;
+                    charges.canonicalizations += 1;
+                    lane.state = self.canonicalize(WalkStateG {
+                        point: self.add(next.point, next.point),
+                        a: S::add_mod(next.a, next.a, modulus),
+                        b: S::add_mod(next.b, next.b, modulus),
+                    });
+                    lane.previous = [RawPointG::Infinity; 4];
                     continue;
                 }
                 if lane.length > walk_cap {
@@ -1507,6 +1534,54 @@ mod tests {
                     assert_eq!(<u128 as RhoScalar>::mul_mod(a, inv, m), 1);
                 }
             }
+        }
+    }
+
+    /// With the escape, long distinguished-point walks survive fruitless
+    /// cycles: at dp_bits = 10 (walks of ~1000 steps, where an abandoning
+    /// walk dies about a quarter of the time) every solve recovers its
+    /// target, escapes happen, nothing is abandoned as fruitless, and the
+    /// step count stays near the ideal.
+    #[test]
+    fn escaping_walks_solve_with_long_distinguished_walks() {
+        for curve in curves().into_iter().filter(|c| c.n >= 37) {
+            let rho = StrongRho::new(&curve);
+            let params = StrongRhoParams {
+                dp_bits: 10,
+                escape_fruitless: true,
+                ..StrongRhoParams::default()
+            };
+            let mut ratios = Vec::new();
+            let mut escapes = 0;
+            for seed in 0..6u64 {
+                let mut charges = StrongRhoCharges::default();
+                let jumps = rho.jumps(seed + 300, &mut charges);
+                let mut rng = StdRng::seed_from_u64(seed + 500);
+                let d = rng.gen_range(1..rho.modulus());
+                let q = rho.scalar_mul(rho.generator(), d);
+                let out = rho
+                    .solve(q, &jumps, &mut rng, &params, charges)
+                    .expect("solve");
+                assert_eq!(out.scalar, d, "n={} seed={seed}", curve.n);
+                assert_eq!(
+                    out.fruitless, 0,
+                    "an escaping walk is never abandoned as fruitless"
+                );
+                escapes += out.escapes;
+                ratios.push(out.walk_steps as f64 / out.ideal_steps);
+            }
+            assert!(
+                escapes > 0,
+                "n={}: no fruitless cycle met in six solves",
+                curve.n
+            );
+            ratios.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let median = ratios[ratios.len() / 2];
+            assert!(
+                (0.3..4.0).contains(&median),
+                "n={} median {median}",
+                curve.n
+            );
         }
     }
 

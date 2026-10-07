@@ -3,6 +3,7 @@
 //!
 //! Usage: <base.jsonl> <rank.jsonl> <ic_targets.jsonl>
 //!        <ic_summary.jsonl> <rho.jsonl> <target_points.jsonl>
+//!        [public_hash_seed rho_batch_seed]
 
 use crypto_lib::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -113,6 +114,17 @@ fn reduce(rows: &[Vec<u64>], columns: usize, modulus: u64) -> Result<(usize, Vec
 }
 
 fn replay(args: &[String]) -> Result<Value, String> {
+    let require_cold_phases = args.len() == 9;
+    let public_hash_seed = if require_cold_phases {
+        args[7].parse::<u64>().map_err(|error| error.to_string())?
+    } else {
+        370413
+    };
+    let rho_batch_seed = if require_cold_phases {
+        args[8].parse::<u64>().map_err(|error| error.to_string())?
+    } else {
+        370041
+    };
     let base = read_one(&args[1])?;
     let trace = read_rows(&args[2])?;
     let ic = read_one(&args[3])?;
@@ -283,7 +295,8 @@ fn replay(args: &[String]) -> Result<Value, String> {
         || rho["reference_grade"] != "strong"
         || rho["quotient_mode"] != "signed_frobenius"
         || rho["target_kind"] != "public_hash_to_curve_cofactor"
-        || number(&rho, "public_hash_seed")? != 370413
+        || number(&rho, "public_hash_seed")? != public_hash_seed
+        || number(&rho, "batch_seed")? != rho_batch_seed
         || ic["group_verified"] != true
         || rho["verified"] != true
     {
@@ -322,6 +335,76 @@ fn replay(args: &[String]) -> Result<Value, String> {
     {
         return Err("online phase sum or memory acceptance gate failed".into());
     }
+    let rho_online_ms = rho["walk_ms"].as_f64().ok_or("rho walk time missing")?
+        + rho["validation_ms"]
+            .as_f64()
+            .ok_or("rho validation time missing")?;
+    let rho_cold_ms = rho["setup_ms"].as_f64().ok_or("rho setup time missing")? + rho_online_ms;
+    let rho_fixture_ms = rho["target_generation_ms"]
+        .as_f64()
+        .ok_or("rho fixture generation time missing")?;
+    let rho_total_ms = rho["total_ms"].as_f64().ok_or("rho total time missing")?;
+    if (rho_cold_ms + rho_fixture_ms - rho_total_ms).abs() > 0.000001 {
+        return Err("rho cold/fixture time does not sum to total".into());
+    }
+    let ic_cold_ms = if require_cold_phases {
+        let phases = summary["cold_phase_ms"]
+            .as_object()
+            .ok_or("exclusive IC cold phases missing")?;
+        let names = [
+            "setup_input_control",
+            "isogeny",
+            "factor_base",
+            "precompute_basis_and_selftest",
+            "precompute_index",
+            "rank_query",
+            "rank_pdp",
+            "rank_relation_check",
+            "rank_matrix_build",
+            "relation_la",
+            "target_query",
+            "target_pdp",
+            "target_relation_check",
+            "target_descent",
+            "target_recovery_check",
+        ];
+        if phases.len() != names.len() {
+            return Err("exclusive IC cold phase set differs".into());
+        }
+        let mut sum = 0.0;
+        for name in names {
+            let value = phases[name]
+                .as_f64()
+                .ok_or_else(|| format!("IC cold phase {name} missing"))?;
+            if !value.is_finite() || value < 0.0 {
+                return Err(format!("IC cold phase {name} invalid"));
+            }
+            sum += value;
+        }
+        let recorded = summary["cold_in_process_ms"]
+            .as_f64()
+            .ok_or("IC cold total missing")?;
+        let from_interval = number(&summary, "setup_complete_ns")? as f64 / 1e6 + online_ms;
+        let target_phases = [
+            ("target_query", "target_query_ms"),
+            ("target_pdp", "target_pdp_ms"),
+            ("target_relation_check", "target_relation_check_ms"),
+            ("target_descent", "target_descent_ms"),
+            ("target_recovery_check", "target_recovery_check_ms"),
+        ];
+        let target_phases_match = target_phases.iter().all(|(phase, key)| {
+            phases[*phase].as_f64() == ic[*key].as_f64() && phases[*phase].as_f64().is_some()
+        });
+        if (sum - recorded).abs() > 0.000001
+            || (recorded - from_interval).abs() > 0.000001
+            || !target_phases_match
+        {
+            return Err("IC exclusive cold phases do not match charged intervals".into());
+        }
+        Some(recorded)
+    } else {
+        None
+    };
     Ok(json!({
         "verified":true,
         "n":n,
@@ -336,9 +419,13 @@ fn replay(args: &[String]) -> Result<Value, String> {
         "replayed_base_logs":points.len(),
         "target_relation_replayed":true,
         "target_scalar":recovered,
+        "public_hash_seed":public_hash_seed,
+        "rho_batch_seed":rho_batch_seed,
         "ic_online_ms":online_ms,
-        "rho_online_ms":rho["walk_ms"].as_f64().ok_or("rho walk time missing")?
-            + rho["validation_ms"].as_f64().ok_or("rho validation time missing")?,
+        "rho_online_ms":rho_online_ms,
+        "ic_cold_in_process_ms":ic_cold_ms,
+        "rho_cold_in_process_ms":rho_cold_ms,
+        "cold_phase_verified":require_cold_phases,
         "peak_rss_bytes":rss,
         "rho_peak_rss_bytes":rho_rss
     }))
@@ -346,8 +433,8 @@ fn replay(args: &[String]) -> Result<Value, String> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 7 {
-        eprintln!("usage: <base> <rank> <ic-target> <ic-summary> <rho> <target-point>");
+    if args.len() != 7 && args.len() != 9 {
+        eprintln!("usage: <base> <rank> <ic-target> <ic-summary> <rho> <target-point> [public-hash-seed rho-batch-seed]");
         std::process::exit(2);
     }
     match replay(&args) {
