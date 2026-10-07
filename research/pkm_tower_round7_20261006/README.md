@@ -10,6 +10,9 @@ The cell is round 2's M3 at `t = 6`: Kummer, `m = 3`, `p₁ = 2013265921`,
 `N = 18`, its two random targets. Round 2 stopped both systems for size in step
 24 (`D ≥ 7`).
 
+**Result: `D = 7` on both targets**, each refuted in step 28 and confirmed by a
+re-run with the degree bound at 6 (note §§16.9–16.11).
+
 Everything here is a stage diagnostic on the solver axis (`AGENTS.md` §2). No
 row prices a decomposition end to end, so there is no `S` and no scoreboard row.
 
@@ -164,29 +167,64 @@ UTC, exit 0. With the degree bound at 6 it ends after 18 steps with 22,382
 pairs above the bound, without refuting and without a staircase stop. Its 18
 steps equal the full run's.
 
-### Target 1
+### Target 1: `D = 7`, refuted, with target 0's trace
 
 **Two more restarts.** The container was reclaimed during each of the first
 two attempts at target 1. Neither ended with an exit status, and
 `progress.txt` records both restarts.
 
-| attempt | started (UTC) | last seen alive | container back | log ends at | files |
-|:--|:--|:--|:--|:--|:--|
-| 1 | 10-06 06:56 | 10-06 08:21, step 25 | 10-07 00:09 | step 24 | `runs/M3b-t1.restart1.{log,jsonl}` |
-| 2 | 10-07 00:12 | 10-07 01:06, step 24 | 10-07 14:04 | step 23 | `runs/M3b-t1.restart2.{log,jsonl}` |
-| 3 | 10-07 14:06 | | | | `runs/M3b-t1.{log,jsonl}` |
+| attempt | ran (UTC) | how it ended | log ends at | files |
+|:--|:--|:--|:--|:--|
+| 1 | 10-06 06:56; last seen alive 08:21, in step 25 | reclaimed; container back 10-07 00:09 | step 24 | `runs/M3b-t1.restart1.{log,jsonl}` |
+| 2 | 10-07 00:12; last seen alive 01:06, in step 24 | reclaimed; container back 14:04 | step 23 | `runs/M3b-t1.restart2.{log,jsonl}` |
+| 3 | 10-07 14:06–17:15 | exit 0 | step 28 (`1`) | `runs/M3b-t1.{log,jsonl}` |
 
-- Attempt 2's 23 steps equal attempt 1's, multiply-adds included
-  (`pkm_tower_check compare-trace runs/M3b-t1.restart1.log
-  runs/M3b-t1.restart2.log`).
-- Attempt 1's 24 steps equal target 0's in every count but step 22's
-  multiply-adds (`pkm_tower_check compare-trace runs/M3b-t0.log
-  runs/M3b-t1.restart1.log --except muladds`).
-- Each attempt repeats the run whole with the same flags and binary.
+Each attempt repeats the run whole with the same flags and binary. Attempt 3's
+first 24 steps equal attempt 1's, and its first 23 attempt 2's, multiply-adds
+included (`pkm_tower_check compare-trace`).
 
-**Host.** The restarted container runs on an Intel Xeon at 2.80 GHz, 4 cores
-without SMT, AVX-512 (F, BW, CD, DQ, VL, VNNI) and AVX2, 16 GB without swap,
-Linux 6.18.44. The binary is the one above (same sha256). It is built for
-baseline x86-64, and the engine's runtime dispatch (`avx512f`, then `avx2`)
-takes the AVX-512F path on both hosts. No time of target 1's is compared with
-target 0's.
+**Host.** Attempts 2 and 3 ran on another host class: an Intel Xeon at
+2.80 GHz, 4 cores without SMT, AVX-512 (F, BW, CD, DQ, VL, VNNI) and AVX2,
+16 GB without swap, Linux 6.18.44. The binary is the one above (same sha256).
+It is built for baseline x86-64, and the engine's runtime dispatch (`avx512f`,
+then `avx2`) takes the AVX-512F path on both hosts. No time of target 1's is
+compared with target 0's.
+
+**The trace is target 0's.** Attempt 3's 28 steps equal target 0's in every
+count but two (`pkm_tower_check compare-trace runs/M3b-t0.log runs/M3b-t1.log
+--except muladds` leaves the second):
+- the multiply-adds of steps 22 and 26, 2,097 and 25,511 more than target 0's;
+- step 26's nonzeros, 2,344,243,163 against 2,344,243,162.
+
+Both counts skip zero entries, so an entry that vanishes by chance in one
+target and not the other moves them. That is no surprise: step 26 has about as
+many entries as `F_p` has elements. The degrees, pairs, columns, residues, new
+elements, `B'` sizes and kept entries are equal in every step.
+
+The row: `D = 7`, refuted in step 28, 28 steps, widest step 106,288 columns and
+141,593 rows, at most 2,344,243,163 nonzeros and 2,253,999,269 `B'` entries,
+89,912,686,157,852 multiply-adds, 11,349 s at four threads. The trace's peak
+resident memory is 12,933 MB. The address space reached 13,426,460 KiB of the
+14,000,000 KiB cap, read from `/proc` during step 27.
+
+**Confirmation.** `C-M3b-t1-cap6` (`run.sh confirm 2500000000 7 1`), 17:15–17:16
+UTC on 2026-10-07, exit 0. With the degree bound at 6 it ends after 18 steps
+with 22,382 pairs above the bound, without refuting and without a staircase
+stop. Its 18 steps equal the full run's.
+
+## Checks
+
+From the repository root, with `C=target/release/examples/pkm_tower_check` and
+`R=research/pkm_tower_round7_20261006/runs`:
+
+| command | result |
+|:--|:--|
+| `$C verify $R/*.jsonl` | 2 rows checked against exhaustive search over `V³` (262,144 triples each), 2 agree; the two capped rows have no verdict to check |
+| `$C compare-trace $R/M3b-sizing-t0.log $R/M3b-t0.log` | 23 steps, 23 identical |
+| `$C compare-trace $R/M3b-t0.restart1.log $R/M3b-t0.log` | 22 steps, 22 identical |
+| `$C compare-trace $R/M3b-t0.log $R/C-M3b-t0-cap6.log` | 18 steps, 18 identical |
+| `$C compare-trace $R/M3b-t1.restart1.log $R/M3b-t1.log` | 24 steps, 24 identical |
+| `$C compare-trace $R/M3b-t1.restart2.log $R/M3b-t1.log` | 23 steps, 23 identical |
+| `$C compare-trace $R/M3b-t1.log $R/C-M3b-t1-cap6.log` | 18 steps, 18 identical |
+| `$C compare-trace $R/M3b-t0.log $R/M3b-t1.log --except muladds` | 28 steps, 27 identical: step 26's nonzeros differ by one |
+| `$C analyze` over rounds 1–5 and 7 (CI's command) | no repeated measurement disagrees on a deterministic field; the `m = 3` line at `p₁` reads `D = 6, 6, 7, 7` and A1 inconclusive; both confirmation runs confirm |

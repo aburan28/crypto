@@ -67,9 +67,14 @@ pilot (§10, 2026-09-24).
   - §§16.1–16.6 pre-register it. A sizing stage repeats round 2's stopped run,
     then both targets run with the `B'` cap raised as far as this host's memory
     allows.
-  - The checks move to a native checker, which must first reproduce the Python
-    scripts' output on every committed row.
-  - The results are pending.
+  - The checks move to a native checker. It first reproduced the Python
+    scripts' output on every committed row, line for line.
+  - **`D = 7` on both targets**, confirmed by capped re-runs and by exhaustive
+    search. The `m = 3` line reads 6, 6, 7, 7 over `N = 9`–18: one level
+    without a rise, which A1 reads as inconclusive.
+  - Each target took 28 steps, six of them at degree 7. The address space
+    peaked at 96% of the host's 14 GB cap, so `N = 21` needs a bigger machine,
+    by an extrapolation from one ratio.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -3098,37 +3103,123 @@ It ended after 18 steps with 22,382 pairs above the bound, without refuting and
 without a staircase stop. Degree 6 does not suffice. Its 18 steps are the full
 run's.
 
-**Target 1, and two more restarts.** The container was reclaimed twice more,
-each time during a run of target 1.
+**Two more restarts.** The container was reclaimed twice more, each time
+during a run of target 1, so its third attempt is the measurement.
 - The first attempt started at 06:56 UTC. It was last seen alive at 08:21 UTC,
-  in step 25, and the container was back at 00:09 UTC on 2026-10-07. Its log
-  ends at step 24.
+  in step 25, and the container was back at 00:09 UTC on 2026-10-07.
 - The second started at 00:12 UTC, on another host class: an Intel Xeon at
   2.80 GHz. It was last seen alive at 01:06 UTC, in step 24, and the container
-  was back at 14:04 UTC. Its log ends at step 23.
-- Each ended without an exit status. Their files are kept as
+  was back at 14:04 UTC.
+- Neither ended with an exit status. Their files are kept as
   `M3b-t1.restart1.*` and `M3b-t1.restart2.*`, and `progress.txt` records both
   restarts.
-- The second attempt's 23 steps equal the first's, multiply-adds included. The
-  first's 24 steps equal target 0's in every count but step 22's
-  multiply-adds, 8,249,356,791,928 against 8,249,356,789,831
-  (`compare-trace … --except muladds` finds all 24 identical). The elimination
-  skips a row operation whose coefficient is zero, so a coefficient that
-  vanishes by accident in one target and not the other moves this count and no
-  other.
-- The run is repeated whole a third time, with the same flags and binary, from
-  14:06 UTC. No time of target 1's is compared with target 0's, since the host
-  class changed.
+- The third ran from 14:06 to 17:15 UTC with the same flags and binary, and
+  exited 0. Its first 24 steps equal the first attempt's, and its first 23 the
+  second's, multiply-adds included.
 
-It runs as this section is written.
+**Target 1 refutes at `D = 7`, with target 0's trace.** Its 28 steps equal
+target 0's in every count but two, so its row is target 0's but for those:
+`D = 7`, refuted in step 28, widest step 106,288 columns.
+- Steps 22 and 26 take 2,097 and 25,511 more multiply-adds than target 0's,
+  and step 26 has one more nonzero (2,344,243,163).
+- Both counts skip zero entries, so an entry that vanishes by chance in one
+  target and not the other moves them. Step 26 has about as many entries as
+  `F_p` has elements.
+- The degrees, pairs, columns, residues, new elements, `B'` sizes and kept
+  entries are equal in every step.
+- The address space reached 13,426,460 KiB of the cap, 96%, again read from
+  `/proc` during step 27. No time of target 1's is compared with target 0's,
+  since the host class changed.
 
-**Checks** (`pkm_tower_check`).
-- `verify` agrees with target 0's row: no triple of `V³` solves the system, out
+`C-M3b-t1-cap6`, its re-run with the degree bound at 6, ends as target 0's did:
+after 18 steps, with 22,382 pairs above the bound, without refuting and without
+a staircase stop.
+
+**Checks** (`pkm_tower_check`; the round's README lists the commands).
+- `verify` agrees with both rows: no triple of `V³` solves either system, out
   of `64³ = 262,144`.
-- `compare-trace` finds the repeat identical to stage 1 on its 23 steps, and to
-  the killed run on its 22.
-- `analyze`, over rounds 1–5 and 7, finds every repeated measurement in
-  agreement, and marks the confirmation run as confirming.
+- `compare-trace` finds each attempt identical to every other attempt at the
+  same target on the steps they share, multiply-adds included. Each capped run
+  is identical to its full run on its 18 steps, and target 0's repeat to stage
+  1 on its 23.
+- `analyze`, over rounds 1–5 and 7, finds no repeated measurement disagreeing
+  on a deterministic field, and marks both confirmation runs as confirming.
+
+### 16.10 The rule of §16.6, applied
+
+**The predictions of §16.5.**
+
+| | prediction | outcome |
+|:--|:--|:--|
+| 1 | stage 1 stops for size in step 24 and reproduces round 2's row | held: step 24, every compared field equal, multiply-adds included |
+| 2 | `2·10⁹ < E < 3·10⁹`, and `C ≥ E` | held: `E = 2.23·10⁹`, `C = 2.5·10⁹` |
+| 3 | `D = 7` on both targets, and both refute | held, and both capped re-runs confirm it |
+| 4 | both targets give the same `D`, width and step count | held: 7, 106,288 columns and 28 steps on both |
+
+**A1 for the Kummer `m = 3` line at `p₁`.**
+- The line has `N = 9, 12, 15, 18` and `D = 6, 6, 7, 7`.
+- The final plateau is `L = 3`, and the upper half (`N = 15`–18) has no rise:
+  **inconclusive**, the reading §16.1 fixed for this outcome.
+- `pkm_tower_check analyze` prints the same: "inconclusive (upper-half slope
+  0.000 over N = 15…18, final plateau L = 3)". Its leave-one-`N`-out slopes run
+  from 0.119 to 0.167.
+- It is the first line at `m ≥ 3` that A1 reads with four sizes. §11.8's row
+  for M3 becomes:
+
+  | cell: kind, `m`, prime (runs) | `N` | `D` | final plateau `L` | upper-half slope | reading |
+  |:--|:--|:--|--:|:--|:--|
+  | Kummer, 3, `p₁` (M3, M3b) | 9–18 | 6 6 7 7 | 3 | 0 (`N = 15–18`) | inconclusive |
+
+**For §3.6**, as §16.1 stated before the runs: `D = 7` at `N = 18` is one level
+without a rise at `m = 3`, as at `m = 4` from `N = 12` to 16. That fits slow
+growth and closes nothing.
+
+**Instrument first.** `verify` contradicts no verdict, and stage 1 differs from
+round 2 in no field it compares.
+
+**Class.** None of `AGENTS.md` §3's classes applies: no algorithm changed and
+nothing is priced. The engine's additions report a stopped step and bound `B'` alone,
+and change no output; the checker is a port. This is a stage diagnostic of the
+solver axis: no `S`, no scoreboard row.
+
+### 16.11 What round 7 shows, and what it does not
+
+It shows four things.
+1. **`D = 7` at `m = 3`, `N = 18`,** on both targets, confirmed by the capped
+   re-runs and by exhaustive search. The `m = 3` line reads 6, 6, 7, 7.
+2. **The refutation keeps its shape, longer.** Six steps at degree 7 where
+   `N = 15` had two, then the degree falls and `1` appears at degree 4. Steps
+   19 and 22–26, the degree-7 steps, carry 91% of the multiply-adds.
+3. **The cost of a level grew less than over the level before.** From `N = 12`
+   to 15 the multiply-adds grew 301 times and the width 6.3 times; from 15 to
+   18, 28 and 3.4 times. That is two ratios, not a fit.
+4. **The native checker reproduces the legacy Python output exactly** on every
+   committed row of rounds 1–6, and the round's checks ran on it.
+
+It does not show three things.
+1. **Whether `D` stays at 7 for larger `N` at `m = 3`.** One level without a
+   rise fits a bounded `D`, and fits slow growth equally (§12.9 said the same
+   of `m = 4`). The next size is `N = 21`. From `N = 15` to 18 the peak
+   resident memory grew 12 times, and the address space reached 96% of this
+   machine's cap, so `N = 21` is beyond it; that is an extrapolation from one
+   ratio.
+2. **Anything at `m ≥ 4`**, the regime that decides the oracle (§3.7). At
+   `m = 3` no oracle beats rho, so this line measures the mechanism.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end
+   (`AGENTS.md` §2).
+
+**Next steps, ranked.**
+1. **Memory, for both open sizes.** `m = 3` at `N = 21` and `m = 4` at
+   `N = 20` are each past this machine's 14 GB. At `N = 18` the two large
+   blocks are `B'`, up to 9.0 GB, and the kept basis, 5.0 GB at the end, both
+   at four bytes an entry. That needs a machine with several times this one's
+   memory (`AGENTS.md` §9 names the repository's AWS hosts, which this session
+   cannot reach), or a lever on those two blocks. The machine must also keep a
+   run alive for hours: three of this round's five stage-2 attempts were lost
+   when the session's container was reclaimed.
+2. **The zero rows of the non-final steps** (§15.12, next step 3).
+3. **`m = 2` at `N = 28`, and an independent engine's replication** of `D = 6`
+   at `m = 2`, `N = 20` and `D = 7` at `m = 4`, `N = 16` (§12.10, items 3–4).
 
 ---
 
