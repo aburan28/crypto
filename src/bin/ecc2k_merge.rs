@@ -13,6 +13,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{ArgGroup, Parser};
+#[cfg(unix)]
 use crypto_lib::cryptanalysis::ecc2k130_merge::{run, MergeArgs, MergeError};
 
 #[derive(Parser)]
@@ -60,6 +61,13 @@ struct Cli {
     client_arg: Vec<String>,
 }
 
+#[cfg(not(unix))]
+fn main() -> ExitCode {
+    eprintln!("ecc2k-merge requires a unix host");
+    ExitCode::from(1)
+}
+
+#[cfg(unix)]
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let args = MergeArgs {
