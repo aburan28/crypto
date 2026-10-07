@@ -1,0 +1,18 @@
+{
+  "alpha_two_sided": 0.05,
+  "caution": "A planning calculation is not a confidence interval or a speedup claim. Recalculate on clean, isolated pilot data and freeze the confirmatory size before generating its targets.",
+  "curve_a": {
+    "geometric_mean_baseline_over_candidate": 1.1334138370106812,
+    "pilot_targets": 12,
+    "sd_log_ratio": 0.20927712664378115,
+    "targets_for_within_curve_effect": 38
+  },
+  "curve_b": null,
+  "interaction_targets_per_curve": 76,
+  "kind": "paired_s3_sample_size_planning_only",
+  "method": "normal-approximation two-sided test of the difference of mean paired log ratios; 80% power; pilot data excluded from the eventual fixed-size confirmatory panel",
+  "minimum_detectable_ratio": 1.1,
+  "power": 0.8,
+  "second_curve_variance": "assumed_equal_to_curve_a",
+  "unit_of_replication": "independent one-target workload; repeat timings for a target must be aggregated first"
+}
