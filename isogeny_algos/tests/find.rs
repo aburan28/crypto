@@ -44,11 +44,17 @@ fn elkies_bmss_matches_kohel() {
         for _ in 0..40 {
             let (e, p) = curve_with_point(&fp, ell, &mut rng);
             let j = jinv(&fp, &e);
-            if j == 0 || j == 1728 { continue; }
+            if j == 0 || j == 1728 {
+                continue;
+            }
             // Phi vanishes at (j, j(codomain))
             let (h, _) = kernel_poly_from_point(&fp, &e, &p, ell);
             let kh = kohel(&fp, &e, &h, ell);
-            assert_eq!(phi.eval(&fp, j, jinv(&fp, &kh.cod)), 0, "Phi_l(j, j') != 0, l={ell}");
+            assert_eq!(
+                phi.eval(&fp, j, jinv(&fp, &kh.cod)),
+                0,
+                "Phi_l(j, j') != 0, l={ell}"
+            );
             let isos = elkies::elkies_isogenies(&fp, &phi, &e, &mut rng);
             let m = isos.iter().find(|i| i.ker == h);
             let m = m.expect("BMSS kernel for known subgroup not found");
@@ -56,7 +62,9 @@ fn elkies_bmss_matches_kohel() {
             assert_eq!(m.num, kh.num);
             assert!(check_x_identity(&fp, m, &mut rng, 5));
             checked += 1;
-            if checked == 3 { break; }
+            if checked == 3 {
+                break;
+            }
         }
         assert!(checked > 0);
     }

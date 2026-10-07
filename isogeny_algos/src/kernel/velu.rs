@@ -29,7 +29,12 @@ pub fn velu<F: Field>(f: &F, e: &Curve<F::E>, reps: &[Pt<F::E>], ell: u64) -> Ve
     }
     let a2 = f.sub(e.a, f.mul(f.from_u64(5), t));
     let b2 = f.sub(e.b, f.mul(f.from_u64(7), w));
-    VeluIso { dom: *e, cod: Curve::new(a2, b2), deg: ell, reps: out }
+    VeluIso {
+        dom: *e,
+        cod: Curve::new(a2, b2),
+        deg: ell,
+        reps: out,
+    }
 }
 
 impl<F: Field> Isogeny<F> for VeluIso<F> {
@@ -61,7 +66,10 @@ impl<F: Field> Isogeny<F> for VeluIso<F> {
             let di2 = f.mul(di, di);
             let di3 = f.mul(di2, di);
             fx = f.add(fx, f.add(f.mul(v, di), f.mul(u, di2)));
-            fd = f.sub(fd, f.add(f.mul(v, di2), f.mul(f.from_u64(2), f.mul(u, di3))));
+            fd = f.sub(
+                fd,
+                f.add(f.mul(v, di2), f.mul(f.from_u64(2), f.mul(u, di3))),
+            );
         }
         Pt::Aff(fx, f.mul(y, fd))
     }

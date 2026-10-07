@@ -12,8 +12,17 @@ pub struct Stats {
 }
 
 /// Non-backtracking random walk over F_{p^2} until j in F_p.
-pub fn walk_to_fp(f2: &Zp2, cache: &PhiCache, j: (u64, u64), max_steps: usize, rng: &mut Rng) -> Option<Path<(u64, u64)>> {
-    let mut path = Path { js: vec![j], ells: vec![] };
+pub fn walk_to_fp(
+    f2: &Zp2,
+    cache: &PhiCache,
+    j: (u64, u64),
+    max_steps: usize,
+    rng: &mut Rng,
+) -> Option<Path<(u64, u64)>> {
+    let mut path = Path {
+        js: vec![j],
+        ells: vec![],
+    };
     let mut cur = j;
     let mut prev = None;
     for _ in 0..max_steps {
@@ -46,14 +55,24 @@ pub fn delfs_galbraith(
     max_bfs_nodes: usize,
     rng: &mut Rng,
 ) -> (Option<Path<(u64, u64)>>, Stats) {
-    let mut st = Stats { walk_steps: 0, bfs_nodes: 0 };
-    let Some(w1) = walk_to_fp(f2, cache, j1, max_walk, rng) else { return (None, st) };
-    let Some(w2) = walk_to_fp(f2, cache, j2, max_walk, rng) else { return (None, st) };
+    let mut st = Stats {
+        walk_steps: 0,
+        bfs_nodes: 0,
+    };
+    let Some(w1) = walk_to_fp(f2, cache, j1, max_walk, rng) else {
+        return (None, st);
+    };
+    let Some(w2) = walk_to_fp(f2, cache, j2, max_walk, rng) else {
+        return (None, st);
+    };
     st.walk_steps = w1.len() + w2.len();
     let (e1, e2) = (w1.js.last().unwrap().0, w2.js.last().unwrap().0);
     let (mid, gs) = galbraith::galbraith(fp, cache, &[2, 3], e1, e2, max_bfs_nodes, rng);
     st.bfs_nodes = gs.nodes_expanded;
     let Some(mid) = mid else { return (None, st) };
-    let mid2 = Path { js: mid.js.iter().map(|&a| (a, 0)).collect(), ells: mid.ells.clone() };
+    let mid2 = Path {
+        js: mid.js.iter().map(|&a| (a, 0)).collect(),
+        ells: mid.ells.clone(),
+    };
     (Some(w1.concat(&mid2).concat(&w2.reversed())), st)
 }

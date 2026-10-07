@@ -10,10 +10,15 @@ pub struct PhiCache {
 impl PhiCache {
     pub fn new(p: u64, ells: &[usize]) -> Self {
         let fp = crate::field::Zp::new(p);
-        PhiCache { phis: ells.iter().map(|&l| Phi::compute(&fp, l)).collect() }
+        PhiCache {
+            phis: ells.iter().map(|&l| Phi::compute(&fp, l)).collect(),
+        }
     }
     pub fn get(&self, ell: usize) -> &Phi {
-        self.phis.iter().find(|p| p.ell == ell).expect("Phi not cached")
+        self.phis
+            .iter()
+            .find(|p| p.ell == ell)
+            .expect("Phi not cached")
     }
     pub fn ells(&self) -> Vec<usize> {
         self.phis.iter().map(|p| p.ell).collect()
@@ -30,7 +35,10 @@ impl<E: Copy> Path<E> {
         self.ells.len()
     }
     pub fn reversed(&self) -> Path<E> {
-        Path { js: self.js.iter().rev().copied().collect(), ells: self.ells.iter().rev().copied().collect() }
+        Path {
+            js: self.js.iter().rev().copied().collect(),
+            ells: self.ells.iter().rev().copied().collect(),
+        }
     }
     pub fn concat(&self, other: &Path<E>) -> Path<E> {
         let mut js = self.js.clone();
@@ -42,7 +50,13 @@ impl<E: Copy> Path<E> {
 }
 
 /// Distinct F-rational neighbours of j in the l-graph for each l in `ells`.
-pub fn neighbors<F: Field>(f: &F, cache: &PhiCache, ells: &[usize], j: F::E, rng: &mut Rng) -> Vec<(usize, F::E)> {
+pub fn neighbors<F: Field>(
+    f: &F,
+    cache: &PhiCache,
+    ells: &[usize],
+    j: F::E,
+    rng: &mut Rng,
+) -> Vec<(usize, F::E)> {
     let mut out = vec![];
     for &l in ells {
         for jn in cache.get(l).neighbors(f, j, rng) {
@@ -53,12 +67,20 @@ pub fn neighbors<F: Field>(f: &F, cache: &PhiCache, ells: &[usize], j: F::E, rng
 }
 
 pub fn verify_path<F: Field>(f: &F, cache: &PhiCache, path: &Path<F::E>) -> bool {
-    path.ells.iter().enumerate().all(|(i, &l)| cache.get(l).eval(f, path.js[i], path.js[i + 1]) == f.zero())
+    path.ells
+        .iter()
+        .enumerate()
+        .all(|(i, &l)| cache.get(l).eval(f, path.js[i], path.js[i + 1]) == f.zero())
 }
 
 /// Turn a j-path into explicit normalised isogenies starting at `e`.
 /// Fails (None) if some step passes through j in {0,1728} or a degenerate Phi derivative.
-pub fn explicit_chain<F: Field>(f: &F, cache: &PhiCache, e: &Curve<F::E>, path: &Path<F::E>) -> Option<Vec<RatIsogeny<F>>> {
+pub fn explicit_chain<F: Field>(
+    f: &F,
+    cache: &PhiCache,
+    e: &Curve<F::E>,
+    path: &Path<F::E>,
+) -> Option<Vec<RatIsogeny<F>>> {
     let mut cur = *e;
     if jinv(f, &cur) != path.js[0] {
         return None;

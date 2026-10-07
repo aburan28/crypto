@@ -20,7 +20,13 @@ pub fn galbraith<F: Field>(
 ) -> (Option<Path<F::E>>, Stats) {
     let mut st = Stats { nodes_expanded: 0 };
     if j1 == j2 {
-        return (Some(Path { js: vec![j1], ells: vec![] }), st);
+        return (
+            Some(Path {
+                js: vec![j1],
+                ells: vec![],
+            }),
+            st,
+        );
     }
     let mut par: [HashMap<F::E, (F::E, usize)>; 2] = [HashMap::new(), HashMap::new()];
     let mut front: [Vec<F::E>; 2] = [vec![j1], vec![j2]];
@@ -50,11 +56,18 @@ pub fn galbraith<F: Field>(
             ells2.push(l);
             c = pj;
         }
-        first = first.concat(&Path { js: js2, ells: ells2 });
+        first = first.concat(&Path {
+            js: js2,
+            ells: ells2,
+        });
         first
     };
     loop {
-        let side = if front[0].len() <= front[1].len() { 0 } else { 1 };
+        let side = if front[0].len() <= front[1].len() {
+            0
+        } else {
+            1
+        };
         if front[side].is_empty() || par[0].len() + par[1].len() > max_nodes {
             return (None, st);
         }

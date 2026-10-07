@@ -154,7 +154,9 @@ impl Phi {
                     break;
                 }
             }
-            let Some(pr) = pr else { panic!("Phi_{ell}: rank-deficient system (p too small?)") };
+            let Some(pr) = pr else {
+                panic!("Phi_{ell}: rank-deficient system (p too small?)")
+            };
             mat.swap(piv_row, pr);
             let inv = fp.inv(mat[piv_row][col]);
             for c in 0..=ncols {
@@ -177,11 +179,19 @@ impl Phi {
         }
         let mut cmat = vec![vec![0u64; l1 + 1]; l1 + 1];
         for (ci, &(i, j)) in pairs.iter().enumerate() {
-            let v = if ci == norm { 1 } else { mat[piv_of_col[ci]][ncols] };
+            let v = if ci == norm {
+                1
+            } else {
+                mat[piv_of_col[ci]][ncols]
+            };
             cmat[i][j] = v;
             cmat[j][i] = v;
         }
-        Phi { ell, p: fp.p, c: cmat }
+        Phi {
+            ell,
+            p: fp.p,
+            c: cmat,
+        }
     }
 
     /// Phi(x0, Y) as a polynomial in Y over F.
@@ -217,10 +227,16 @@ impl Phi {
             for j in 0..=l1 {
                 let c = f.from_u64(self.c[i][j]);
                 if i > 0 {
-                    px = f.add(px, f.mul(f.mul(c, f.from_u64(i as u64)), f.mul(xp[i - 1], yp[j])));
+                    px = f.add(
+                        px,
+                        f.mul(f.mul(c, f.from_u64(i as u64)), f.mul(xp[i - 1], yp[j])),
+                    );
                 }
                 if j > 0 {
-                    py = f.add(py, f.mul(f.mul(c, f.from_u64(j as u64)), f.mul(xp[i], yp[j - 1])));
+                    py = f.add(
+                        py,
+                        f.mul(f.mul(c, f.from_u64(j as u64)), f.mul(xp[i], yp[j - 1])),
+                    );
                 }
             }
         }

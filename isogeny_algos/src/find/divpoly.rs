@@ -17,7 +17,16 @@ pub fn division_poly<F: Field>(f: &F, e: &Curve<F::E>, ell: usize) -> Poly<F> {
     memo.insert(0, vec![]);
     memo.insert(1, vec![f.one()]);
     memo.insert(2, vec![f.one()]);
-    memo.insert(3, vec![f.neg(a2), f.mul(c(12), e.b), f.mul(c(6), e.a), f.zero(), c(3)]);
+    memo.insert(
+        3,
+        vec![
+            f.neg(a2),
+            f.mul(c(12), e.b),
+            f.mul(c(6), e.a),
+            f.zero(),
+            c(3),
+        ],
+    );
     let a3 = f.mul(a2, e.a);
     let b2 = f.mul(e.b, e.b);
     memo.insert(
@@ -37,7 +46,13 @@ pub fn division_poly<F: Field>(f: &F, e: &Curve<F::E>, ell: usize) -> Poly<F> {
         ),
     );
     // psi_4 = 4y(...) => g_4 = 2*(...)
-    fn get<F: Field>(f: &F, n: usize, memo: &mut HashMap<usize, Poly<F>>, f16: &Poly<F>, fx: &Poly<F>) -> Poly<F> {
+    fn get<F: Field>(
+        f: &F,
+        n: usize,
+        memo: &mut HashMap<usize, Poly<F>>,
+        f16: &Poly<F>,
+        fx: &Poly<F>,
+    ) -> Poly<F> {
         if let Some(v) = memo.get(&n) {
             return v.clone();
         }

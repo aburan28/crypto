@@ -21,7 +21,9 @@ fn bsgs_order_consistent() {
     let fp = Zp::new(next_prime(1u64 << 40));
     for _ in 0..3 {
         let c = Curve::new(fp.random(&mut rng), fp.random(&mut rng));
-        if !is_smooth(&fp, &c) { continue; }
+        if !is_smooth(&fp, &c) {
+            continue;
+        }
         let n = order(&fp, &c, &mut rng);
         for _ in 0..3 {
             let pt = c.random_point(&fp, &mut rng);
@@ -33,7 +35,16 @@ fn bsgs_order_consistent() {
 #[test]
 fn three_kernel_algorithms_agree() {
     let mut rng = Rng::new(3);
-    for &(pbits, ell) in &[(30u32, 3u64), (30, 5), (30, 7), (30, 11), (30, 13), (34, 29), (34, 61), (34, 101)] {
+    for &(pbits, ell) in &[
+        (30u32, 3u64),
+        (30, 5),
+        (30, 7),
+        (30, 11),
+        (30, 13),
+        (34, 29),
+        (34, 61),
+        (34, 101),
+    ] {
         let fp = Zp::new(next_prime(1u64 << pbits));
         let (e, p) = curve_with_point(&fp, ell, &mut rng);
         let (h, pts) = kernel_poly_from_point(&fp, &e, &p, ell);
@@ -43,8 +54,14 @@ fn three_kernel_algorithms_agree() {
         assert_eq!(v.cod, k.cod, "velu vs kohel codomain l={ell}");
         assert_eq!(v.cod, s.cod, "velu vs sqrt-velu codomain l={ell}");
         assert!(check_homomorphism(&fp, &v, &mut rng, 5), "velu hom l={ell}");
-        assert!(check_homomorphism(&fp, &k, &mut rng, 5), "kohel hom l={ell}");
-        assert!(check_homomorphism(&fp, &s, &mut rng, 5), "sqrt-velu hom l={ell}");
+        assert!(
+            check_homomorphism(&fp, &k, &mut rng, 5),
+            "kohel hom l={ell}"
+        );
+        assert!(
+            check_homomorphism(&fp, &s, &mut rng, 5),
+            "sqrt-velu hom l={ell}"
+        );
         for _ in 0..5 {
             let x = fp.random(&mut rng);
             let a = v.eval_x(&fp, x);

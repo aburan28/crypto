@@ -24,13 +24,17 @@ pub fn eigen_class(fp: &Zp, e: &Curve<u64>, h: &Poly<Zp>, ell: u64) -> Option<u6
     let g = |n: usize| poly::rem(fp, &division_poly(fp, e, n), h);
     for lam in 2..=((ell - 1) / 2) as usize {
         let (gl, gm, gp) = (g(lam), g(lam - 1), g(lam + 1));
-        let Some(inv) = poly::invmod(fp, &poly::mulmod(fp, &gl, &gl, h), h) else { return None };
+        let Some(inv) = poly::invmod(fp, &poly::mulmod(fp, &gl, &gl, h), h) else {
+            return None;
+        };
         let num = poly::mulmod(fp, &gm, &gp, h);
         let mut ratio = poly::mulmod(fp, &num, &inv, h);
         let four_f = poly::scale(fp, &fxm, 4);
         if lam % 2 == 0 {
             // x_lam = x - g_{l-1} g_{l+1} / (4 F g_l^2)
-            let Some(i4f) = poly::invmod(fp, &four_f, h) else { return None };
+            let Some(i4f) = poly::invmod(fp, &four_f, h) else {
+                return None;
+            };
             ratio = poly::mulmod(fp, &ratio, &i4f, h);
         } else {
             ratio = poly::mulmod(fp, &ratio, &four_f, h);
@@ -83,10 +87,21 @@ impl<'a> Action<'a> {
     pub fn step(&self, j: u64, ell: usize, positive: bool, rng: &mut Rng) -> Option<u64> {
         let o = self.oriented(j, ell, rng)?;
         let pc = self.plus_class[&ell];
-        o.iter().find(|&&(_, c)| (c == pc) == positive).map(|&(jj, _)| jj)
+        o.iter()
+            .find(|&&(_, c)| (c == pc) == positive)
+            .map(|&(jj, _)| jj)
     }
-    pub fn apply(&self, j: u64, primes: &[usize], exps: &[i64], rng: &mut Rng) -> Option<Path<u64>> {
-        let mut path = Path { js: vec![j], ells: vec![] };
+    pub fn apply(
+        &self,
+        j: u64,
+        primes: &[usize],
+        exps: &[i64],
+        rng: &mut Rng,
+    ) -> Option<Path<u64>> {
+        let mut path = Path {
+            js: vec![j],
+            ells: vec![],
+        };
         let mut cur = j;
         for (i, &l) in primes.iter().enumerate() {
             for _ in 0..exps[i].abs() {
@@ -117,7 +132,11 @@ pub fn couveignes<'a>(
     let base = m + 1;
     let total = base.pow(k as u32);
     let mut st = Stats { nodes: 0 };
-    let grow = |start: u64, rng: &mut Rng, st: &mut Stats, other: Option<&HashMap<u64, usize>>| -> (Vec<u64>, Option<(usize, usize)>) {
+    let grow = |start: u64,
+                rng: &mut Rng,
+                st: &mut Stats,
+                other: Option<&HashMap<u64, usize>>|
+     -> (Vec<u64>, Option<(usize, usize)>) {
         let mut nodes = vec![start; total];
         let mut hit = None;
         for n in 0..total {
@@ -159,7 +178,9 @@ pub fn couveignes<'a>(
         }
     }
     let (_nodes_b, hit) = grow(j2, rng, &mut st, Some(&map_a));
-    let Some((na, nb)) = hit else { return (None, st) };
+    let Some((na, nb)) = hit else {
+        return (None, st);
+    };
     let digits = |mut n: usize| -> Vec<i64> {
         (0..k)
             .map(|_| {

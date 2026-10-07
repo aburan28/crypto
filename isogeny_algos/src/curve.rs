@@ -256,7 +256,12 @@ pub fn iso_exists_over<F: Field>(f: &F, c1: &Curve<F::E>, c2: &Curve<F::E>) -> O
 
 /// Verify the isogeny as an algebraic identity: (x^3+ax+b) f'(x)^2 == f^3 + a' f + b'
 /// at `trials` random x, and that deg matches.
-pub fn check_x_identity<F: Field, I: Isogeny<F> + ?Sized>(f: &F, iso: &I, rng: &mut Rng, trials: usize) -> bool {
+pub fn check_x_identity<F: Field, I: Isogeny<F> + ?Sized>(
+    f: &F,
+    iso: &I,
+    rng: &mut Rng,
+    trials: usize,
+) -> bool {
     let (c1, c2) = (iso.domain(), iso.codomain());
     let h = f.from_u64(1);
     let _ = h;
@@ -306,7 +311,12 @@ pub fn check_homomorphism(fp: &Zp, iso: &dyn Isogeny<Zp>, rng: &mut Rng, trials:
 }
 
 /// Kernel polynomial from a generator: prod_{k=1}^{(l-1)/2} (x - x(kP)).
-pub fn kernel_poly_from_point(fp: &Zp, c: &Curve<u64>, p: &Pt<u64>, ell: u64) -> (Poly<Zp>, Vec<Pt<u64>>) {
+pub fn kernel_poly_from_point(
+    fp: &Zp,
+    c: &Curve<u64>,
+    p: &Pt<u64>,
+    ell: u64,
+) -> (Poly<Zp>, Vec<Pt<u64>>) {
     let n = ((ell - 1) / 2) as usize;
     let mut pts = Vec::with_capacity(n);
     let mut cur = *p;

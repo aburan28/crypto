@@ -20,7 +20,15 @@ struct Out {
     quick: bool,
 }
 impl Out {
-    fn rec(&mut self, group: &str, algo: &str, params: &[(&str, String)], metrics: &[(&str, f64)], verified: bool, note: &str) {
+    fn rec(
+        &mut self,
+        group: &str,
+        algo: &str,
+        params: &[(&str, String)],
+        metrics: &[(&str, f64)],
+        verified: bool,
+        note: &str,
+    ) {
         let mut s = format!("{{\"group\":\"{group}\",\"algo\":\"{algo}\"");
         for (k, v) in params {
             let _ = write!(s, ",\"{k}\":\"{v}\"");
@@ -44,7 +52,10 @@ fn time_it<T>(budget_ms: u64, max_reps: usize, mut f: impl FnMut() -> T) -> (f64
         let t = Instant::now();
         black_box(f());
         ts.push(t.elapsed().as_nanos() as f64);
-        if ts.len() >= max_reps || (start.elapsed().as_millis() as u64 >= budget_ms && ts.len() >= 3) || start.elapsed().as_millis() as u64 >= budget_ms * 4 {
+        if ts.len() >= max_reps
+            || (start.elapsed().as_millis() as u64 >= budget_ms && ts.len() >= 3)
+            || start.elapsed().as_millis() as u64 >= budget_ms * 4
+        {
             break;
         }
     }
@@ -57,7 +68,11 @@ fn prime_bits(bits: u32) -> u64 {
 }
 
 fn bench_kernel(o: &mut Out) {
-    let ells: &[u64] = if o.quick { &[3, 7, 31, 101] } else { &[3, 5, 7, 11, 13, 31, 61, 101, 211, 401, 1009] };
+    let ells: &[u64] = if o.quick {
+        &[3, 7, 31, 101]
+    } else {
+        &[3, 5, 7, 11, 13, 31, 61, 101, 211, 401, 1009]
+    };
     let bits_list: &[u32] = if o.quick { &[32] } else { &[32, 61] };
     let budget = if o.quick { 100 } else { 400 };
     for &bits in bits_list {
@@ -82,10 +97,23 @@ fn bench_kernel(o: &mut Out) {
                 ok_eval &= a == b && a == c;
             }
             let ok = ok_cod && ok_eval && check_homomorphism(&fp, &v, &mut rng, 3);
-            let params = |extra: &str| vec![("p_bits", bits.to_string()), ("ell", ell.to_string()), ("task", extra.to_string())];
+            let params = |extra: &str| {
+                vec![
+                    ("p_bits", bits.to_string()),
+                    ("ell", ell.to_string()),
+                    ("task", extra.to_string()),
+                ]
+            };
             let mut run = |algo: &str, task: &str, f: &mut dyn FnMut()| {
                 let (med, min, reps) = time_it(budget, 2000, || f());
-                o.rec("kernel", algo, &params(task), &[("median_ns", med), ("min_ns", min), ("reps", reps as f64)], ok, "");
+                o.rec(
+                    "kernel",
+                    algo,
+                    &params(task),
+                    &[("median_ns", med), ("min_ns", min), ("reps", reps as f64)],
+                    ok,
+                    "",
+                );
             };
             // codomain from generator
             run("velu", "codomain_from_point", &mut || {
@@ -118,7 +146,11 @@ fn bench_kernel(o: &mut Out) {
 }
 
 fn bench_find(o: &mut Out) {
-    let ells: &[u64] = if o.quick { &[3, 5, 7] } else { &[3, 5, 7, 11, 13, 17, 19, 23] };
+    let ells: &[u64] = if o.quick {
+        &[3, 5, 7]
+    } else {
+        &[3, 5, 7, 11, 13, 17, 19, 23]
+    };
     let bits_list: &[u32] = if o.quick { &[30] } else { &[30, 61] };
     let budget = if o.quick { 100 } else { 500 };
     for &bits in bits_list {
@@ -130,7 +162,14 @@ fn bench_find(o: &mut Out) {
             let t = Instant::now();
             let phi = Phi::compute(&fp, ell as usize);
             let phi_ns = t.elapsed().as_nanos() as f64;
-            o.rec("find", "phi_setup", &[("p_bits", bits.to_string()), ("ell", ell.to_string())], &[("median_ns", phi_ns), ("reps", 1.0)], true, "one-off per (p,l)");
+            o.rec(
+                "find",
+                "phi_setup",
+                &[("p_bits", bits.to_string()), ("ell", ell.to_string())],
+                &[("median_ns", phi_ns), ("reps", 1.0)],
+                true,
+                "one-off per (p,l)",
+            );
             let (e, _pt) = loop {
                 let (e, pt) = curve_with_point(&fp, ell, &mut rng);
                 let j = jinv(&fp, &e);
@@ -144,14 +183,43 @@ fn bench_find(o: &mut Out) {
             ks_div.sort();
             ks_elk.sort();
             let ok = !ks_div.is_empty() && ks_div == ks_elk;
-            let params = vec![("p_bits", bits.to_string()), ("ell", ell.to_string()), ("kernels_found", ks_div.len().to_string())];
-            let (m, mn, r) = time_it(budget, 200, || divpoly::kernel_polys(&fp, &e, ell, &mut rng.clone()));
-            o.rec("find", "divpoly_factor", &params, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "psi_l DDF/EDF + subset search");
-            let (m, mn, r) = time_it(budget, 200, || elkies::elkies_isogenies(&fp, &phi, &e, &mut rng.clone()));
-            o.rec("find", "elkies_phi_bmss", &params, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "Phi roots + Elkies codomain + BMSS Pade (Phi given)");
+            let params = vec![
+                ("p_bits", bits.to_string()),
+                ("ell", ell.to_string()),
+                ("kernels_found", ks_div.len().to_string()),
+            ];
+            let (m, mn, r) = time_it(budget, 200, || {
+                divpoly::kernel_polys(&fp, &e, ell, &mut rng.clone())
+            });
+            o.rec(
+                "find",
+                "divpoly_factor",
+                &params,
+                &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)],
+                ok,
+                "psi_l DDF/EDF + subset search",
+            );
+            let (m, mn, r) = time_it(budget, 200, || {
+                elkies::elkies_isogenies(&fp, &phi, &e, &mut rng.clone())
+            });
+            o.rec(
+                "find",
+                "elkies_phi_bmss",
+                &params,
+                &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)],
+                ok,
+                "Phi roots + Elkies codomain + BMSS Pade (Phi given)",
+            );
             let j = jinv(&fp, &e);
             let (m, mn, r) = time_it(budget, 200, || phi.neighbors(&fp, j, &mut rng.clone()));
-            o.rec("find", "phi_roots_only", &params, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, "j-invariants of neighbours only, no isogeny");
+            o.rec(
+                "find",
+                "phi_roots_only",
+                &params,
+                &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)],
+                ok,
+                "j-invariants of neighbours only, no isogeny",
+            );
         }
     }
 }
@@ -183,29 +251,93 @@ fn bench_path(o: &mut Out) {
             let j1 = jinv(&fp, &e1);
             let walk = random_walk(&fp, &cache, &ells, j1, 4 * bits as usize, &mut rng);
             let j2 = *walk.js.last().unwrap();
-            let params = vec![("p_bits", bits.to_string()), ("instance", i.to_string()), ("trace", t.to_string())];
+            let params = vec![
+                ("p_bits", bits.to_string()),
+                ("instance", i.to_string()),
+                ("trace", t.to_string()),
+            ];
             // Galbraith
             let t0 = Instant::now();
-            let (r, st) = galbraith::galbraith(&fp, &cache, &ells, j1, j2, 5_000_000, &mut rng.clone());
+            let (r, st) =
+                galbraith::galbraith(&fp, &cache, &ells, j1, j2, 5_000_000, &mut rng.clone());
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2);
-            o.rec("path", "galbraith_bidirectional_bfs", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)), ("nodes_expanded", st.nodes_expanded as f64)], ok, "primes 3,5,7");
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2
+            });
+            o.rec(
+                "path",
+                "galbraith_bidirectional_bfs",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)),
+                    ("nodes_expanded", st.nodes_expanded as f64),
+                ],
+                ok,
+                "primes 3,5,7",
+            );
             if let Some(path) = &r {
                 let t0 = Instant::now();
                 let chain = explicit_chain(&fp, &cache, &e1, path);
-                o.rec("path", "explicit_chain_from_path", &params, &[("ns", t0.elapsed().as_nanos() as f64), ("steps", path.len() as f64)], chain.is_some(), "Elkies+BMSS per step");
+                o.rec(
+                    "path",
+                    "explicit_chain_from_path",
+                    &params,
+                    &[
+                        ("ns", t0.elapsed().as_nanos() as f64),
+                        ("steps", path.len() as f64),
+                    ],
+                    chain.is_some(),
+                    "Elkies+BMSS per step",
+                );
             }
             // GHS
             let t0 = Instant::now();
             let (r, st) = ghs::ghs(&fp, &cache, &ells, j1, j2, 20_000_000, &mut rng.clone());
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2);
-            o.rec("path", "ghs_random_walk_collision", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)), ("steps", st.steps as f64)], ok, "primes 3,5,7");
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2
+            });
+            o.rec(
+                "path",
+                "ghs_random_walk_collision",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)),
+                    ("steps", st.steps as f64),
+                ],
+                ok,
+                "primes 3,5,7",
+            );
             let t0 = Instant::now();
-            let (r, st) = ghs::ghs_volcano(&fp, &cache, &ells, p, t, j1, j2, 20_000_000, &mut rng.clone());
+            let (r, st) = ghs::ghs_volcano(
+                &fp,
+                &cache,
+                &ells,
+                p,
+                t,
+                j1,
+                j2,
+                20_000_000,
+                &mut rng.clone(),
+            );
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2);
-            o.rec("path", "ghs_with_kohel_volcano", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)), ("steps", st.steps as f64)], ok, "all heights 0 here, so same walk plus height checks");
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2
+            });
+            o.rec(
+                "path",
+                "ghs_with_kohel_volcano",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)),
+                    ("steps", st.steps as f64),
+                ],
+                ok,
+                "all heights 0 here, so same walk plus height checks",
+            );
         }
     }
     // Kohel volcano (l = 3, height >= 1)
@@ -228,16 +360,44 @@ fn bench_path(o: &mut Out) {
             let j1 = jinv(&fp, &e1);
             let walk = random_walk(&fp, &cache, &[3], j1, 4 * bits as usize, &mut rng);
             let j2 = *walk.js.last().unwrap();
-            let params = vec![("p_bits", bits.to_string()), ("instance", i.to_string()), ("height", h.to_string())];
+            let params = vec![
+                ("p_bits", bits.to_string()),
+                ("instance", i.to_string()),
+                ("height", h.to_string()),
+            ];
             let t0 = Instant::now();
             let r = volcano::kohel_volcano_path(&fp, &cache, 3, h, j1, j2, &mut rng.clone());
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2);
-            o.rec("path", "kohel_volcano_crater_walk", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64))], ok, "l=3 volcano; same-volcano targets only");
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2
+            });
+            o.rec(
+                "path",
+                "kohel_volcano_crater_walk",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)),
+                ],
+                ok,
+                "l=3 volcano; same-volcano targets only",
+            );
             let t0 = Instant::now();
-            let (r, st) = ghs::ghs_volcano(&fp, &cache, &[3, 5, 7, 11, 13], p, t, j1, j2, 200_000, &mut rng.clone());
+            let (r, st) = ghs::ghs_volcano(
+                &fp,
+                &cache,
+                &[3, 5, 7, 11, 13],
+                p,
+                t,
+                j1,
+                j2,
+                200_000,
+                &mut rng.clone(),
+            );
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2);
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&fp, &cache, p) && *p.js.last().unwrap() == j2
+            });
             o.rec("path", "ghs_with_kohel_volcano", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)), ("steps", st.steps as f64)], ok, "ascend l=3, walk with l=5,7,11,13; fails when the split primes do not generate the class group orbit");
         }
     }
@@ -257,7 +417,11 @@ fn bench_path(o: &mut Out) {
                 cells.iter().all(|&l| d % (l as i64 * l as i64) != 0)
             });
             let j1 = jinv(&fp, &e1);
-            let mut act = couveignes::Action { fp: &fp, cache: &cache, plus_class: Default::default() };
+            let mut act = couveignes::Action {
+                fp: &fp,
+                cache: &cache,
+                plus_class: Default::default(),
+            };
             let t0 = Instant::now();
             let primes = couveignes::select_primes(&mut act, j1, &mut rng);
             let sel_ns = t0.elapsed().as_nanos() as f64;
@@ -267,24 +431,56 @@ fn bench_path(o: &mut Out) {
             }
             let primes = &primes[..k];
             let m = 4usize;
-            let secret: Vec<i64> = primes.iter().map(|_| rng.below(2 * m as u64 + 1) as i64 - m as i64).collect();
-            let j2 = *act.apply(j1, primes, &secret, &mut rng).unwrap().js.last().unwrap();
-            let params = vec![("p_bits", bits.to_string()), ("instance", i.to_string()), ("primes", format!("{:?}", primes)), ("box_m", m.to_string())];
+            let secret: Vec<i64> = primes
+                .iter()
+                .map(|_| rng.below(2 * m as u64 + 1) as i64 - m as i64)
+                .collect();
+            let j2 = *act
+                .apply(j1, primes, &secret, &mut rng)
+                .unwrap()
+                .js
+                .last()
+                .unwrap();
+            let params = vec![
+                ("p_bits", bits.to_string()),
+                ("instance", i.to_string()),
+                ("primes", format!("{:?}", primes)),
+                ("box_m", m.to_string()),
+            ];
             let t0 = Instant::now();
             let (r, st) = couveignes::couveignes(&act, primes, m, j1, j2, &mut rng.clone());
             let ns = t0.elapsed().as_nanos() as f64;
             let ok = match &r {
                 Some((e, path)) => {
-                    let chk = act.apply(j1, primes, e, &mut rng.clone()).map_or(false, |q| *q.js.last().unwrap() == j2);
+                    let chk = act
+                        .apply(j1, primes, e, &mut rng.clone())
+                        .map_or(false, |q| *q.js.last().unwrap() == j2);
                     chk && verify_path(&fp, &cache, path)
                 }
                 None => false,
             };
-            o.rec("path", "couveignes_hhs_mitm", &params, &[("ns", ns), ("nodes", st.nodes as f64), ("path_len", r.as_ref().map_or(-1.0, |x| x.1.len() as f64)), ("prime_select_ns", sel_ns), ("phi_setup_ns", setup)], ok, "planted exponents in [-m,m]^k; different problem from generic path finding");
+            o.rec(
+                "path",
+                "couveignes_hhs_mitm",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("nodes", st.nodes as f64),
+                    ("path_len", r.as_ref().map_or(-1.0, |x| x.1.len() as f64)),
+                    ("prime_select_ns", sel_ns),
+                    ("phi_setup_ns", setup),
+                ],
+                ok,
+                "planted exponents in [-m,m]^k; different problem from generic path finding",
+            );
         }
     }
     // Delfs-Galbraith
-    let dbits: &[u32] = if o.quick { &[22] } else { &[22, 26, 30, 34, 38] };
+    let dbits: &[u32] = if o.quick {
+        &[22]
+    } else {
+        &[22, 26, 30, 34, 38]
+    };
     for &bits in dbits {
         // p = 7 mod 8: 2 splits in Q(sqrt(-p)), so the F_p-rational 2-isogeny graph has a
         // crater cycle (for p = 3 mod 8 it is a forest of stars and the F_p BFS cannot connect)
@@ -299,14 +495,43 @@ fn bench_path(o: &mut Out) {
             let mut rng = Rng::new(6000 + (bits as u64) * 100 + i);
             let start = (1728u64, 0u64);
             let steps = 3 * bits as usize;
-            let j1 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng).js.last().unwrap();
-            let j2 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng).js.last().unwrap();
+            let j1 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng)
+                .js
+                .last()
+                .unwrap();
+            let j2 = *random_walk(&f2, &cache, &[2], start, steps, &mut rng)
+                .js
+                .last()
+                .unwrap();
             let params = vec![("p_bits", bits.to_string()), ("instance", i.to_string())];
             let t0 = Instant::now();
-            let (r, st) = delfs_galbraith::delfs_galbraith(&f2, &fp, &cache, j1, j2, 50_000_000, 5_000_000, &mut rng.clone());
+            let (r, st) = delfs_galbraith::delfs_galbraith(
+                &f2,
+                &fp,
+                &cache,
+                j1,
+                j2,
+                50_000_000,
+                5_000_000,
+                &mut rng.clone(),
+            );
             let ns = t0.elapsed().as_nanos() as f64;
-            let ok = r.as_ref().map_or(false, |p| verify_path(&f2, &cache, p) && p.js[0] == j1 && *p.js.last().unwrap() == j2);
-            o.rec("path", "delfs_galbraith_supersingular", &params, &[("ns", ns), ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)), ("walk_steps", st.walk_steps as f64), ("bfs_nodes", st.bfs_nodes as f64)], ok, "j-path only; Fp2 arithmetic");
+            let ok = r.as_ref().map_or(false, |p| {
+                verify_path(&f2, &cache, p) && p.js[0] == j1 && *p.js.last().unwrap() == j2
+            });
+            o.rec(
+                "path",
+                "delfs_galbraith_supersingular",
+                &params,
+                &[
+                    ("ns", ns),
+                    ("path_len", r.as_ref().map_or(-1.0, |p| p.len() as f64)),
+                    ("walk_steps", st.walk_steps as f64),
+                    ("bfs_nodes", st.bfs_nodes as f64),
+                ],
+                ok,
+                "j-path only; Fp2 arithmetic",
+            );
         }
     }
 }

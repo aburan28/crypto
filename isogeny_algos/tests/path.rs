@@ -75,7 +75,11 @@ fn couveignes_recovers_exponents() {
         ells.iter().all(|&l| d % (l as i64 * l as i64) != 0)
     });
     let j1 = jinv(&fp, &e1);
-    let mut act = couveignes::Action { fp: &fp, cache: &cache, plus_class: Default::default() };
+    let mut act = couveignes::Action {
+        fp: &fp,
+        cache: &cache,
+        plus_class: Default::default(),
+    };
     let primes = couveignes::select_primes(&mut act, j1, &mut rng);
     assert!(primes.len() >= 2, "need >=2 split primes, got {:?}", primes);
     let primes = &primes[..primes.len().min(3)];
@@ -105,10 +109,16 @@ fn delfs_galbraith_supersingular() {
     let w1 = random_walk(&f2, &cache, &[2], start, 60, &mut rng);
     let w2 = random_walk(&f2, &cache, &[2], start, 60, &mut rng);
     let (j1, j2) = (*w1.js.last().unwrap(), *w2.js.last().unwrap());
-    let (r, st) = delfs_galbraith::delfs_galbraith(&f2, &fp, &cache, j1, j2, 1_000_000, 1_000_000, &mut rng);
+    let (r, st) =
+        delfs_galbraith::delfs_galbraith(&f2, &fp, &cache, j1, j2, 1_000_000, 1_000_000, &mut rng);
     let path = r.expect("delfs-galbraith failed");
     assert_eq!(path.js[0], j1);
     assert_eq!(*path.js.last().unwrap(), j2);
     assert!(verify_path(&f2, &cache, &path));
-    eprintln!("dg: path len {} walk {} bfs {}", path.len(), st.walk_steps, st.bfs_nodes);
+    eprintln!(
+        "dg: path len {} walk {} bfs {}",
+        path.len(),
+        st.walk_steps,
+        st.bfs_nodes
+    );
 }

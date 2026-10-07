@@ -68,7 +68,9 @@ pub fn mul<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
     r
 }
 pub fn derivative<F: Field>(f: &F, a: &Poly<F>) -> Poly<F> {
-    let mut r: Poly<F> = (1..a.len()).map(|i| f.mul(a[i], f.from_u64(i as u64))).collect();
+    let mut r: Poly<F> = (1..a.len())
+        .map(|i| f.mul(a[i], f.from_u64(i as u64)))
+        .collect();
     trim(f, &mut r);
     r
 }

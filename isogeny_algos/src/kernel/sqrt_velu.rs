@@ -65,7 +65,12 @@ fn pt_x<F: Field>(p: &Pt<F::E>) -> F::E {
 }
 
 /// Choose block parameters and compute x-coordinates of I, J, K points from a generator P.
-fn index_sets<F: Field>(f: &F, e: &Curve<F::E>, p: &Pt<F::E>, ell: u64) -> (usize, Vec<F::E>, Vec<F::E>, Vec<F::E>) {
+fn index_sets<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    p: &Pt<F::E>,
+    ell: u64,
+) -> (usize, Vec<F::E>, Vec<F::E>, Vec<F::E>) {
     let n = ((ell - 1) / 2) as usize;
     let mut b = ((n as f64).sqrt() / 2.0).floor() as usize;
     if b < 1 {
@@ -125,7 +130,15 @@ fn pmul_s<F: Field>(f: &F, a: &PolyS<F>, b: &PolyS<F>) -> PolyS<F> {
 
 /// prod_{k in I+-J} (X - x_k) * D0 as a series, where X is given as the series `xs` ("alpha + delta"),
 /// or, when `inf` is true, the series in eps of prod (1 - eps x_k) * D0.
-fn ij_product<F: Field>(f: &F, e: &Curve<F::E>, xs_j: &[F::E], xs_i: &[F::E], m: usize, inf: bool, alpha: F::E) -> Ser<F> {
+fn ij_product<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    xs_j: &[F::E],
+    xs_i: &[F::E],
+    m: usize,
+    inf: bool,
+    alpha: F::E,
+) -> Ser<F> {
     let c = |v: u64| f.from_u64(v);
     // build G(Z) = prod_j F_j
     let mut g: PolyS<F> = vec![sconst(f, f.one(), m)];
@@ -221,9 +234,25 @@ pub fn sqrt_velu<F: Field>(f: &F, e: &Curve<F::E>, p: &Pt<F::E>, ell: u64) -> Sq
     let e3 = f.neg(prod[3]);
     let p1 = e1;
     let p2 = f.sub(f.mul(e1, e1), f.mul(f.from_u64(2), e2));
-    let p3 = f.add(f.sub(f.mul(e1, f.mul(e1, e1)), f.mul(f.from_u64(3), f.mul(e1, e2))), f.mul(f.from_u64(3), e3));
+    let p3 = f.add(
+        f.sub(
+            f.mul(e1, f.mul(e1, e1)),
+            f.mul(f.from_u64(3), f.mul(e1, e2)),
+        ),
+        f.mul(f.from_u64(3), e3),
+    );
     let cod = super::kohel::codomain_from_sums(f, e, n, (p1, p2, p3));
-    SqrtVeluIso { dom: *e, cod, deg: ell, n, p1, xs_j, xs_i, xs_k, d0 }
+    SqrtVeluIso {
+        dom: *e,
+        cod,
+        deg: ell,
+        n,
+        p1,
+        xs_j,
+        xs_i,
+        xs_k,
+        d0,
+    }
 }
 
 impl<F: Field> SqrtVeluIso<F> {
@@ -247,7 +276,12 @@ impl<F: Field> SqrtVeluIso<F> {
             return None;
         }
         // L = h'/h mod delta^3: L0 = s1, L1 = -s2, L2 = s3
-        let hp = vec![h[1], f.mul(f.from_u64(2), h[2]), f.mul(f.from_u64(3), h[3]), f.zero()];
+        let hp = vec![
+            h[1],
+            f.mul(f.from_u64(2), h[2]),
+            f.mul(f.from_u64(3), h[3]),
+            f.zero(),
+        ];
         let l = smul(f, &hp, &sinv(f, &h));
         let (s1, s2, s3) = (l[0], f.neg(l[1]), l[2]);
         let c = |v: u64| f.from_u64(v);
@@ -255,7 +289,7 @@ impl<F: Field> SqrtVeluIso<F> {
         let fa = f.add(f.mul(f.add(al2, e.a), alpha), e.b);
         let nn = c(self.n as u64);
         let g1 = f.add(f.mul(c(6), al2), f.mul(c(2), e.a)); // 6a^2+2A
-        // f = a - g1 s1 + 4F s2 + 2(n a - p1)
+                                                            // f = a - g1 s1 + 4F s2 + 2(n a - p1)
         let fx = f.add(
             f.add(alpha, f.mul(c(2), f.sub(f.mul(nn, alpha), self.p1))),
             f.add(f.neg(f.mul(g1, s1)), f.mul(c(4), f.mul(fa, s2))),
@@ -263,8 +297,14 @@ impl<F: Field> SqrtVeluIso<F> {
         // f' = 1 - 12 a s1 - g1 s1' + 4F' s2 + 4F s2' + 2n ; s1' = -s2, s2' = -2 s3
         let fap = f.add(f.mul(c(3), al2), e.a);
         let fpx = f.add(
-            f.add(f.add(f.one(), f.mul(c(2), nn)), f.neg(f.mul(f.mul(c(12), alpha), s1))),
-            f.add(f.add(f.mul(g1, s2), f.mul(c(4), f.mul(fap, s2))), f.neg(f.mul(c(8), f.mul(fa, s3)))),
+            f.add(
+                f.add(f.one(), f.mul(c(2), nn)),
+                f.neg(f.mul(f.mul(c(12), alpha), s1)),
+            ),
+            f.add(
+                f.add(f.mul(g1, s2), f.mul(c(4), f.mul(fap, s2))),
+                f.neg(f.mul(c(8), f.mul(fa, s3))),
+            ),
         );
         Some((fx, fpx))
     }

@@ -8,27 +8,44 @@ use crate::poly::{self, Poly};
 pub fn power_sums<F: Field>(f: &F, h: &Poly<F>) -> (F::E, F::E, F::E) {
     let n = h.len() - 1;
     let c = |k: usize| if k <= n { h[n - k] } else { f.zero() }; // coefficient of x^{n-k}
-    // h = x^n - e1 x^{n-1} + e2 x^{n-2} - e3 x^{n-3}
+                                                                 // h = x^n - e1 x^{n-1} + e2 x^{n-2} - e3 x^{n-3}
     let e1 = f.neg(c(1));
     let e2 = c(2);
     let e3 = f.neg(c(3));
     let p1 = e1;
     let p2 = f.sub(f.mul(e1, e1), f.mul(f.from_u64(2), e2));
     let p3 = f.add(
-        f.sub(f.mul(e1, f.mul(e1, e1)), f.mul(f.from_u64(3), f.mul(e1, e2))),
+        f.sub(
+            f.mul(e1, f.mul(e1, e1)),
+            f.mul(f.from_u64(3), f.mul(e1, e2)),
+        ),
         f.mul(f.from_u64(3), e3),
     );
     (p1, p2, p3)
 }
 
-pub fn codomain_from_sums<F: Field>(f: &F, e: &Curve<F::E>, n: usize, p: (F::E, F::E, F::E)) -> Curve<F::E> {
+pub fn codomain_from_sums<F: Field>(
+    f: &F,
+    e: &Curve<F::E>,
+    n: usize,
+    p: (F::E, F::E, F::E),
+) -> Curve<F::E> {
     let nn = f.from_u64(n as u64);
-    let t = f.add(f.mul(f.from_u64(6), p.1), f.mul(f.from_u64(2), f.mul(nn, e.a)));
+    let t = f.add(
+        f.mul(f.from_u64(6), p.1),
+        f.mul(f.from_u64(2), f.mul(nn, e.a)),
+    );
     let w = f.add(
-        f.add(f.mul(f.from_u64(10), p.2), f.mul(f.from_u64(6), f.mul(e.a, p.0))),
+        f.add(
+            f.mul(f.from_u64(10), p.2),
+            f.mul(f.from_u64(6), f.mul(e.a, p.0)),
+        ),
         f.mul(f.from_u64(4), f.mul(nn, e.b)),
     );
-    Curve::new(f.sub(e.a, f.mul(f.from_u64(5), t)), f.sub(e.b, f.mul(f.from_u64(7), w)))
+    Curve::new(
+        f.sub(e.a, f.mul(f.from_u64(5), t)),
+        f.sub(e.b, f.mul(f.from_u64(7), w)),
+    )
 }
 
 /// Kohel's isogeny for kernel polynomial `h` (monic, degree (l-1)/2).
@@ -51,5 +68,12 @@ pub fn kohel<F: Field>(f: &F, e: &Curve<F::E>, h: &Poly<F>, ell: u64) -> RatIsog
     let mut num = poly::mul(f, &lin, &hh);
     num = poly::sub(f, &num, &poly::mul(f, &quad, &hh1));
     num = poly::add(f, &num, &poly::scale(f, &poly::mul(f, &fx, &q), c(4)));
-    RatIsogeny { dom: *e, cod, deg: ell, ker: h.clone(), num, den: hh }
+    RatIsogeny {
+        dom: *e,
+        cod,
+        deg: ell,
+        ker: h.clone(),
+        num,
+        den: hh,
+    }
 }

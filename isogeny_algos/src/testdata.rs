@@ -24,8 +24,18 @@ pub fn curve_with_point(fp: &Zp, ell: u64, rng: &mut Rng) -> (Curve<u64>, Pt<u64
 use crate::path::graph::*;
 
 /// Non-backtracking random walk on the j-line over the given primes.
-pub fn random_walk<F: Field>(f: &F, cache: &PhiCache, ells: &[usize], j: F::E, steps: usize, rng: &mut Rng) -> Path<F::E> {
-    let mut path = Path { js: vec![j], ells: vec![] };
+pub fn random_walk<F: Field>(
+    f: &F,
+    cache: &PhiCache,
+    ells: &[usize],
+    j: F::E,
+    steps: usize,
+    rng: &mut Rng,
+) -> Path<F::E> {
+    let mut path = Path {
+        js: vec![j],
+        ells: vec![],
+    };
     let mut prev = None;
     let mut cur = j;
     for _ in 0..steps {
@@ -33,7 +43,11 @@ pub fn random_walk<F: Field>(f: &F, cache: &PhiCache, ells: &[usize], j: F::E, s
         if ns.is_empty() {
             break;
         }
-        let nb: Vec<_> = ns.iter().copied().filter(|&(_, n)| Some(n) != prev).collect();
+        let nb: Vec<_> = ns
+            .iter()
+            .copied()
+            .filter(|&(_, n)| Some(n) != prev)
+            .collect();
         let ns = if nb.is_empty() { ns } else { nb };
         let (l, nx) = ns[rng.below(ns.len() as u64) as usize];
         prev = Some(cur);
