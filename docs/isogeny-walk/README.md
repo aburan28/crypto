@@ -322,6 +322,41 @@ $B collect --from s3://crypto-autoresearcher/isogeny-walk --run <run id> --of 16
   rebuilding it.  Publish the walk first, with `walk --store`.
 - **Credentials.** The workers need AWS credentials for the prefix.
 
+## Portable bounded P-256 task
+
+The separate `p256_isogeny_task` binary packages PR #1351's exact
+degree-11 P-256 prefix as one content-addressed job.  It is useful for testing
+an untrusted worker boundary: the result is accepted only after every edge is
+replayed and every digest is recomputed.
+
+Run the local, no-network path with:
+
+```bash
+tools/run_p256_isogeny_task.sh ./runs/p256-prefix 4096 "$(git rev-parse HEAD)"
+```
+
+For a small integration check, replace `4096` with `2`.  The directory gets
+the input task, compressed certificate, verified result and an offline Cairn
+coordination receipt.  Nothing is submitted.  To emit a TaskQ spec from the
+same task:
+
+```bash
+target/release/p256_isogeny_task plan-taskq \
+  --task runs/p256-prefix/input-task.json --output p256-prefix-taskq.json
+```
+
+The binary also has `publish-cairn`, but it requires
+`--ack-coordination-only`: the current receipt says only that its publisher
+performed a local full replay.  It is not a self-contained Cairn checker and
+must not be used on a paid objective.
+
+This adapter is intentionally one semantic job.  The degree-11 rule produces
+a sequential chain, so changing `run_id` or `task_id` leaves `work_sha256`
+unchanged.  Racing several workers may reduce latency or add redundancy; it
+does not enumerate more curves.  The frozen contract and the frontier-anchor
+requirement for real fan-out are in
+[`research/p256_isogeny_shared_task_20261005/PROTOCOL.md`](../../research/p256_isogeny_shared_task_20261005/PROTOCOL.md).
+
 ## Reading the results
 
 - **Traits per curve** are in `traits.jsonl` (one JSON object per curve)

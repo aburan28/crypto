@@ -158,6 +158,32 @@ duplicates, where two workers walked one seed space. The fix is a
 reserved range in the AWS allocators, or a campaign-wide seed-space
 registry.
 
+### Status, 2026-10-06
+
+- **F1 is fixed in the repository.** `aws/campaign.json` now sets
+  `maxIters` to 2^32 (#744). Since `08984c76f`, raising the guard keeps the
+  campaign id, so it no longer starts a new corpus. Workers read the bucket
+  copy of `campaign.json`, which this repository cannot see.
+- **F2 is closed on every build path.**
+  - #745 pinned `WITNESS=0` for Modal and `run.sh`. It also measured
+    `WITNESS=1` at −34.7% on an RTX PRO 6000 and found `modal_sync`
+    mis-framing the v2 records, so this trap had already cost real
+    throughput.
+  - `aws/build.sh` now pins `WITNESS=0` too. `rollout.py` refuses to
+    activate a staged build that does not declare `WITNESS=0`, and treats
+    the knob as frozen.
+  - `dp_ingest.py` refuses a v2 object instead of decoding it as 32-byte
+    records. The object stays outstanding, so the page reads
+    `INGEST_BEHIND`.
+- **F3 is covered.** The permanent seed registry (`aws/seed_registry.py`,
+  `3edf3ed73`) makes every AWS slot backend and every Modal run acquire its
+  run id by compare-and-set in one bucket-wide registry, bound to one
+  stream. An overlapping launch is now refused instead of re-walking
+  seeds. What remains is operational. If an AWS allocator reaches a slot
+  whose run id Modal already holds (slot 7999 onward, about 7,800 slots
+  away), the worker exits on the refused launch and systemd restarts it
+  into the same conflict.
+
 ## Formal validation of the cycle property
 
 `ecc2k-guard cycles` decides a finite question exhaustively. It is not a

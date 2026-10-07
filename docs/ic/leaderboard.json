@@ -84,7 +84,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "25083c9cf2ac96f8b117fa32492a3dc86e0ea42500ddcaf086a3b7b5d7948cb3"
+   "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
   }
  },
  "families": {
@@ -3749,7 +3749,7 @@
   {
    "regime": "koblitz_batch",
    "slug": "icv1-f2m19-tm797-9c54981b",
-   "ec1": "EC1N19Ce1h7e63aa468dcc",
+   "ec1": "EC1N19Ce1h6186a62ebfaa",
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
@@ -5526,6 +5526,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "family": "koblitz",
+   "field": "GF(2^11)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 11,
+   "standard": [],
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "family": "koblitz",
    "field": "GF(2^13)",
@@ -5562,6 +5578,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "family": "koblitz",
+   "field": "GF(2^13)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "family": "koblitz",
    "field": "GF(2^15)",
@@ -5577,6 +5609,22 @@
     "K_0 / GF(2^15)",
     "K_0/2^15",
     "K_0/F_2^15"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "family": "koblitz",
+   "field": "GF(2^15)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 15,
+   "standard": [],
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n15-l5"
    ],
    "on_board": false
   },
@@ -5624,14 +5672,15 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
-    "K_1/2^17",
-    "K_1/F_2^17"
+    "K_1/2^17"
    ],
    "on_board": false
   },
@@ -5662,14 +5711,15 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
-    "K_1/2^19",
-    "K_1/F_2^19"
+    "K_1/2^19"
    ],
    "on_board": true
   },
@@ -5729,6 +5779,22 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "family": "koblitz",
+   "field": "GF(2^23)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "family": "koblitz",
    "field": "GF(2^29)",
@@ -5748,6 +5814,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "family": "koblitz",
+   "field": "GF(2^29)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "family": "koblitz",
    "field": "GF(2^31)",
@@ -5763,6 +5845,22 @@
     "K_0 / GF(2^31)",
     "K_0/2^31",
     "K_0/F_2^31"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "family": "koblitz",
+   "field": "GF(2^31)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n31-l8"
    ],
    "on_board": false
   },
