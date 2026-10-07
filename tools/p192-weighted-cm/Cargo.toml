@@ -1,0 +1,29 @@
+[package]
+name = "p192-weighted-cm"
+version = "0.1.0"
+edition = "2021"
+publish = false
+autobins = false
+description = "Standalone native producer for the bounded P-192 weighted-CM experiment"
+
+# Keep this package outside the study library's build graph.  In particular,
+# the producer has no `crypto_lib` dependency; the independent verifier lives
+# in a different standalone package and must not import this package's math.
+[workspace]
+
+[[bin]]
+name = "p192_weighted_cm"
+path = "src/bin/p192_weighted_cm.rs"
+
+[dependencies]
+num-bigint = "0.4"
+num-integer = "0.1"
+num-traits = "0.2"
+serde_json = "1.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
