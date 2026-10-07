@@ -717,9 +717,10 @@ fn p256_boundary() -> Result<P256Boundary, String> {
         .ok_or("no collision-event count reaches rho")?;
     let rows_per_event = P256_COLUMNS.div_ceil(parity_events);
     let occupancy = rows_per_event + 1;
-    let union_bound = curve.n.bits() as f64
-        + occupancy as f64 * (std::f64::consts::E * lambda / occupancy as f64).log2();
-    let poisson_exact = curve.n.bits() as f64 - lambda / std::f64::consts::LN_2
+    let log2_order = order_f.log2();
+    let union_bound =
+        log2_order + occupancy as f64 * (std::f64::consts::E * lambda / occupancy as f64).log2();
+    let poisson_exact = log2_order - lambda / std::f64::consts::LN_2
         + occupancy as f64 * lambda.log2()
         - log2_factorial(occupancy)
         - (1.0 - lambda / (occupancy + 1) as f64).log2();
