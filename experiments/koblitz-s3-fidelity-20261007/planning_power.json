@@ -1,6 +1,8 @@
 {
   "alpha_two_sided": 0.05,
   "caution": "A planning calculation is not a confidence interval or a speedup claim. Recalculate on clean, isolated pilot data and freeze the confirmatory size before generating its targets.",
+  "confirmatory_rule": "max(24, ceil(1.20 * interaction_targets_per_curve)); fresh targets, pilot excluded",
+  "confirmatory_targets_per_curve": 92,
   "curve_a": {
     "geometric_mean_baseline_over_candidate": 1.1334138370106812,
     "pilot_targets": 12,

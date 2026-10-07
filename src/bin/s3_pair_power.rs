@@ -70,6 +70,11 @@ fn needed(variance: f64, minimum_ratio: f64) -> usize {
     raw.max(5.0) as usize
 }
 
+fn confirmatory_size(interaction_targets_per_curve: usize) -> usize {
+    // Twenty percent pilot-variance allowance, frozen before new target seeds.
+    ((interaction_targets_per_curve as f64 * 1.20).ceil() as usize).max(24)
+}
+
 fn plan(first: &Value, second: Option<&Value>, minimum_ratio: f64) -> Result<Value, String> {
     if !minimum_ratio.is_finite() || minimum_ratio <= 1.0 {
         return Err("minimum detectable ratio must exceed 1".into());
@@ -78,6 +83,7 @@ fn plan(first: &Value, second: Option<&Value>, minimum_ratio: f64) -> Result<Val
     let b = second.map(log_ratios).transpose()?;
     let sd_a = sample_sd(&a);
     let sd_b = b.as_ref().map(|x| sample_sd(x)).unwrap_or(sd_a);
+    let interaction_targets_per_curve = needed(sd_a * sd_a + sd_b * sd_b, minimum_ratio);
     let mean = |x: &[f64]| x.iter().sum::<f64>() / x.len() as f64;
     Ok(json!({
         "kind": "paired_s3_sample_size_planning_only",
@@ -97,7 +103,9 @@ fn plan(first: &Value, second: Option<&Value>, minimum_ratio: f64) -> Result<Val
             "sd_log_ratio": sd_b,
             "targets_for_within_curve_effect": needed(sd_b * sd_b, minimum_ratio)
         })),
-        "interaction_targets_per_curve": needed(sd_a * sd_a + sd_b * sd_b, minimum_ratio),
+        "interaction_targets_per_curve": interaction_targets_per_curve,
+        "confirmatory_targets_per_curve": confirmatory_size(interaction_targets_per_curve),
+        "confirmatory_rule": "max(24, ceil(1.20 * interaction_targets_per_curve)); fresh targets, pilot excluded",
         "second_curve_variance": if b.is_some() { "measured_pilot" } else { "assumed_equal_to_curve_a" },
         "method": "normal-approximation two-sided test of the difference of mean paired log ratios; 80% power; pilot data excluded from the eventual fixed-size confirmatory panel",
         "caution": "A planning calculation is not a confidence interval or a speedup claim. Recalculate on clean, isolated pilot data and freeze the confirmatory size before generating its targets."
@@ -111,6 +119,9 @@ fn run() -> Result<(), String> {
     }
     let a: Value = serde_json::from_slice(&fs::read(&args[1]).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
+    if args.len() == 4 && args[2].parse::<f64>().is_ok() {
+        return Err("with three arguments, the second must be CURVE_B.json".into());
+    }
     let second_path = args.get(2).filter(|s| s.parse::<f64>().is_err());
     let b: Option<Value> = second_path
         .map(|p| fs::read(p).map_err(|e| e.to_string()))
@@ -185,5 +196,11 @@ mod tests {
             1.0
         )
         .is_err());
+    }
+
+    #[test]
+    fn confirmation_applies_prespecified_inflation_and_floor() {
+        assert_eq!(confirmatory_size(5), 24);
+        assert_eq!(confirmatory_size(76), 92);
     }
 }

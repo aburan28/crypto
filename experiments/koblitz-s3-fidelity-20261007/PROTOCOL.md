@@ -124,8 +124,9 @@ public point. No cross-target table is shared.
 3. Run `cargo run --release --bin s3_pair_power -- A.json B.json 1.10` on
    the **clean pilot's one-row-per-target pair summaries**. It calculates
    `ceil((z_0.975+z_0.8)^2 (s41²+s53²) / log(1.10)²)` independent targets
-   per curve for 80% power at two-sided 5% alpha. Freeze the confirmatory
-   size at `max(24, ceil(1.20 × calculated_n))` per curve, using new seeds;
+   per curve for 80% power at two-sided 5% alpha. The tool also reports
+   `confirmatory_targets_per_curve` as `max(24, ceil(1.20 × calculated_n))`;
+   freeze that size per curve, using new seeds;
    the pilot is excluded from the confirmation test. The 20% inflation is a
    prespecified allowance for pilot variance uncertainty. If that size is
    infeasible on the available host, report the cost and leave the
