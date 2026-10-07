@@ -3,6 +3,7 @@
 
 pub mod barrett_ecdsa;
 pub mod cryptopro_b_chain_consts;
+pub mod cryptopro_b_chain_set;
 pub mod cryptopro_b_field;
 pub mod cryptopro_b_point;
 pub mod ct;

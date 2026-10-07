@@ -258,6 +258,12 @@ pub fn plan(spec: Spec) -> Result<Plan, String> {
                         a.name, a.method.id, w.curve.slug, w.curve.family
                     ));
                 }
+                if d.applies == Applies::BinaryOnly && !matches!(inst, Instance::Binary(_)) {
+                    return Err(format!(
+                        "arm `{}` ({}) runs on binary curves only, and {} is {}; put it in a spec of its own",
+                        a.name, a.method.id, w.curve.slug, w.curve.family
+                    ));
+                }
             }
             if workloads
                 .iter()

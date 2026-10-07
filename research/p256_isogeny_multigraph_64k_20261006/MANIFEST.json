@@ -1,0 +1,112 @@
+{
+  "schema": "p256-isogeny-multigraph-manifest/v1",
+  "run_id": "p256-1688961d5b12d121",
+  "date": "2026-10-06",
+  "status": "verified_locally; large_artifact_publication_blocked",
+  "generator": {
+    "implementation_commit": "f63704c65689eb910dbfdc21e24cbcf3fad5adc6",
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "curves": 65536,
+    "edges": 302653,
+    "failures": 0
+  },
+  "hardened_verifier": {
+    "local_source_commit": "2b82949e5deb308995ab654b1a64d1c9168d9ef2",
+    "pr_source_head_after_hardening": "0b70ee6b3d8d64e7e6a649942fc08df4503d4bea",
+    "walk_rs_blob": "18dd7f878fc87bb9f55f37dcb45ef669d76fe0f3",
+    "tests_rs_blob": "971c97d95bec7d24ef1062d1297caec64cb2a02f",
+    "result": "pass",
+    "audit_points": 2,
+    "curves_verified": 65536,
+    "edges_verified": 302653,
+    "isogeny_routes_sha256": "5dfe974e55fb3b83f237b7ba6646966803ab6f4da27352f4295cb0dcb7aea892"
+  },
+  "large_artifacts": [
+    {
+      "name": "curves.yaml",
+      "bytes": 376058149,
+      "sha256": "43463635dea2929c6946940e3ff60374ff66676d7cb8c610bf714ea6e5f7e9cf",
+      "gzip_bytes": 27008789,
+      "gzip_sha256": "39842674b3a5d4b407d923fa3a883a8aaab8c5767fd10129cd5435dc0f011e4e",
+      "storage_uri": null
+    },
+    {
+      "name": "isogeny_routes.json",
+      "bytes": 840584830,
+      "sha256": "5dfe974e55fb3b83f237b7ba6646966803ab6f4da27352f4295cb0dcb7aea892",
+      "gzip_bytes": 253230145,
+      "gzip_sha256": "07453598db1d077a911b61a2add95efd986a2779b6c32a2ea5addc6de00ea61d",
+      "storage_uri": null
+    },
+    {
+      "name": "walk.json",
+      "bytes": 14102,
+      "sha256": "0f6fbf29746dc2ca91924c57c7f28eb467712d8536c586c6d665c8e83ab134ab",
+      "gzip_bytes": 3641,
+      "gzip_sha256": "1e62ebc9112e9a2ba78b0c9e327d86bcfe6c8b78b2507fcf31533bf4db0c870c",
+      "repository_copy": "runs/p256-ell61-64k/walk.json",
+      "storage_uri": null
+    },
+    {
+      "name": "traits.jsonl",
+      "bytes": 34557966,
+      "sha256": "4affbafb9cbb0c957bb6849a235767ba7077b1212a97e8ea8b7cbce487021668",
+      "gzip_bytes": 3789683,
+      "gzip_sha256": "7c83eea94f046adf78536d408e89d3c40e338b22e477ef05bb8ea97bca91c7fb",
+      "storage_uri": null
+    }
+  ],
+  "compact_evidence": [
+    {
+      "path": "runs/p256-ell61-64k/VERIFY.json",
+      "bytes": 233,
+      "sha256": "1a12b8f2a8a5551c4dd1f671794487bf47e1cddd3e392586e334ba597e892bbd"
+    },
+    {
+      "path": "runs/p256-ell61-64k/collect.json",
+      "bytes": 1747,
+      "sha256": "d4a43da959ae3106c97d2609176e86211c075e8044a5e5d91ff2a09a4e6799b2"
+    },
+    {
+      "path": "runs/p256-ell61-64k/metrics.json",
+      "bytes": 432,
+      "sha256": "045870e4c5604675f9307852ecbc3d2c3781dadb213e0141ae2480541c84dfea"
+    },
+    {
+      "path": "runs/p256-ell61-64k/walk.resource.json",
+      "bytes": 539,
+      "sha256": "e15ec658e431878f601c34ac9edeb6b05afa38d6bfa0b916e13d935e84c0bb1e"
+    },
+    {
+      "path": "runs/p256-ell61-64k/verify.resource.json",
+      "bytes": 483,
+      "sha256": "17c1568eeb34f9a0a392f3b844f3fd9bd91d1c14fabe1d7d8d78b5164040d933"
+    },
+    {
+      "path": "runs/p256-ell61-64k/traits.resource.json",
+      "bytes": 537,
+      "sha256": "688d1e5bdd0454e9182403111b101e433e231d1e47db47b73736aa6e024ab878"
+    }
+  ],
+  "resource_metadata_repair": {
+    "operation": "replace the final two literal bytes 0x5c 0x6e with one newline byte 0x0a; parse as JSON; preserve originals",
+    "walk_original": {
+      "bytes": 540,
+      "sha256": "c8e7158fe66d32790de3ae11112aa77652557b791746b6c77d3697d2979720a4"
+    },
+    "verify_original": {
+      "bytes": 484,
+      "sha256": "5af5f2191621d271c44806e9eb13336f47569929473b16662cd45ef6dc28a9e1"
+    },
+    "traits_original": {
+      "bytes": 538,
+      "sha256": "c1de88a8d1c6468351dbeac0ac1e24bd1cc1784655bcf9d548af230fad852d3e"
+    }
+  },
+  "storage": {
+    "intended_root": "s3://crypto-autoresearcher/isogeny-walk",
+    "authoritative_marker": null,
+    "publication_status": "blocked_no_configured_environment_identity",
+    "credential_policy": "chat-provided access keys were not used"
+  }
+}

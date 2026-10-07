@@ -1,0 +1,1170 @@
+{
+ "seed": 20261008,
+ "cells": [
+  {
+   "n": 19,
+   "l": 4,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 9,
+   "fake": 129,
+   "too_big": 0,
+   "rank_hist": {
+    "11": 32634,
+    "10": 134
+   },
+   "unknowns": 11,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -11.830074998557688,
+   "law": -12
+  },
+  {
+   "n": 19,
+   "l": 4,
+   "kind": "random",
+   "trials": 8192,
+   "success": 1,
+   "fake": 233,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 7916,
+    "13": 274,
+    "12": 2
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -13.0,
+   "law": -12
+  },
+  {
+   "n": 19,
+   "l": 5,
+   "kind": "geometric",
+   "trials": 24576,
+   "success": 22,
+   "fake": 696,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 23823,
+    "13": 749,
+    "12": 4
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -10.12553088208386,
+   "law": -10
+  },
+  {
+   "n": 19,
+   "l": 5,
+   "kind": "random",
+   "trials": 8192,
+   "success": 14,
+   "fake": 16026,
+   "too_big": 0,
+   "rank_hist": {
+    "19": 4586,
+    "18": 3251,
+    "17": 346,
+    "16": 9
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -9.192645077942396,
+   "law": -10
+  },
+  {
+   "n": 19,
+   "l": 6,
+   "kind": "geometric",
+   "trials": 6144,
+   "success": 23,
+   "fake": 1505,
+   "too_big": 0,
+   "rank_hist": {
+    "17": 4720,
+    "16": 1355,
+    "15": 69
+   },
+   "unknowns": 17,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -8.061400544664144,
+   "law": -8
+  },
+  {
+   "n": 19,
+   "l": 6,
+   "kind": "random",
+   "trials": 6144,
+   "success": 22,
+   "fake": 342186,
+   "too_big": 50,
+   "rank_hist": {
+    "19": 6017,
+    "18": 127
+   },
+   "unknowns": 24,
+   "planted": 30,
+   "planted_recovered": 29,
+   "planted_too_big": 1,
+   "log2p": -8.12553088208386,
+   "law": -8
+  },
+  {
+   "n": 19,
+   "l": 7,
+   "kind": "geometric",
+   "trials": 1536,
+   "success": 33,
+   "fake": 3071,
+   "too_big": 0,
+   "rank_hist": {
+    "19": 858,
+    "18": 618,
+    "17": 59,
+    "16": 1
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -5.540568381362703,
+   "law": -6
+  },
+  {
+   "n": 19,
+   "l": 7,
+   "kind": "random",
+   "trials": 1536,
+   "success": 0,
+   "fake": 256,
+   "too_big": 1528,
+   "rank_hist": {
+    "19": 1530,
+    "18": 6
+   },
+   "unknowns": 26,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -6
+  },
+  {
+   "n": 19,
+   "l": 8,
+   "kind": "geometric",
+   "trials": 384,
+   "success": 29,
+   "fake": 6003,
+   "too_big": 0,
+   "rank_hist": {
+    "19": 363,
+    "18": 21
+   },
+   "unknowns": 23,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -3.726981505593584,
+   "law": -4
+  },
+  {
+   "n": 19,
+   "l": 8,
+   "kind": "random",
+   "trials": 384,
+   "success": 0,
+   "fake": 0,
+   "too_big": 382,
+   "rank_hist": {
+    "19": 382,
+    "18": 2
+   },
+   "unknowns": 27,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -4
+  },
+  {
+   "n": 23,
+   "l": 4,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 5,
+   "too_big": 0,
+   "rank_hist": {
+    "11": 32760,
+    "10": 8
+   },
+   "unknowns": 11,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 23,
+   "l": 4,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 16,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 8170,
+    "13": 22
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 23,
+   "l": 5,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 1,
+   "fake": 56,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 32694,
+    "13": 74
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -15.0,
+   "law": -14
+  },
+  {
+   "n": 23,
+   "l": 5,
+   "kind": "random",
+   "trials": 8192,
+   "success": 2,
+   "fake": 1035,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 7094,
+    "19": 1070,
+    "18": 28
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -12.0,
+   "law": -14
+  },
+  {
+   "n": 23,
+   "l": 6,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 6,
+   "fake": 538,
+   "too_big": 0,
+   "rank_hist": {
+    "17": 32269,
+    "16": 498,
+    "15": 1
+   },
+   "unknowns": 17,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -12.415037499278844,
+   "law": -12
+  },
+  {
+   "n": 23,
+   "l": 6,
+   "kind": "random",
+   "trials": 8192,
+   "success": 4,
+   "fake": 115132,
+   "too_big": 0,
+   "rank_hist": {
+    "23": 7571,
+    "22": 616,
+    "21": 5
+   },
+   "unknowns": 27,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -11.0,
+   "law": -12
+  },
+  {
+   "n": 23,
+   "l": 7,
+   "kind": "geometric",
+   "trials": 24576,
+   "success": 22,
+   "fake": 2990,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 21550,
+    "19": 2972,
+    "18": 54
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -10.12553088208386,
+   "law": -10
+  },
+  {
+   "n": 23,
+   "l": 7,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 15840,
+   "too_big": 7917,
+   "rank_hist": {
+    "23": 8137,
+    "22": 55
+   },
+   "unknowns": 30,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -10
+  },
+  {
+   "n": 23,
+   "l": 8,
+   "kind": "geometric",
+   "trials": 6144,
+   "success": 19,
+   "fake": 6069,
+   "too_big": 0,
+   "rank_hist": {
+    "22": 3479,
+    "21": 857,
+    "23": 1778,
+    "20": 30
+   },
+   "unknowns": 23,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -8.33703498727757,
+   "law": -8
+  },
+  {
+   "n": 23,
+   "l": 8,
+   "kind": "random",
+   "trials": 6144,
+   "success": 0,
+   "fake": 0,
+   "too_big": 6131,
+   "rank_hist": {
+    "23": 6124,
+    "22": 20
+   },
+   "unknowns": 31,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -8
+  },
+  {
+   "n": 23,
+   "l": 9,
+   "kind": "geometric",
+   "trials": 1536,
+   "success": 33,
+   "fake": 12238,
+   "too_big": 0,
+   "rank_hist": {
+    "23": 1334,
+    "22": 199,
+    "21": 3
+   },
+   "unknowns": 26,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -5.540568381362703,
+   "law": -6
+  },
+  {
+   "n": 23,
+   "l": 9,
+   "kind": "random",
+   "trials": 1536,
+   "success": 0,
+   "fake": 0,
+   "too_big": 1535,
+   "rank_hist": {
+    "23": 1535,
+    "22": 1
+   },
+   "unknowns": 32,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -6
+  },
+  {
+   "n": 23,
+   "l": 10,
+   "kind": "geometric",
+   "trials": 384,
+   "success": 17,
+   "fake": 24238,
+   "too_big": 0,
+   "rank_hist": {
+    "23": 379,
+    "22": 5
+   },
+   "unknowns": 29,
+   "planted": 30,
+   "planted_recovered": 28,
+   "planted_too_big": 2,
+   "log2p": -4.497499659470817,
+   "law": -4
+  },
+  {
+   "n": 23,
+   "l": 10,
+   "kind": "random",
+   "trials": 384,
+   "success": 0,
+   "fake": 0,
+   "too_big": 384,
+   "rank_hist": {
+    "23": 384
+   },
+   "unknowns": 33,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -4
+  },
+  {
+   "n": 29,
+   "l": 4,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 0,
+   "too_big": 0,
+   "rank_hist": {
+    "11": 32768
+   },
+   "unknowns": 11,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -22
+  },
+  {
+   "n": 29,
+   "l": 4,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 8190,
+    "13": 2
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -22
+  },
+  {
+   "n": 29,
+   "l": 5,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 2,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 32767,
+    "13": 1
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -20
+  },
+  {
+   "n": 29,
+   "l": 5,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 14,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 8177,
+    "19": 15
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -20
+  },
+  {
+   "n": 29,
+   "l": 6,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 11,
+   "too_big": 0,
+   "rank_hist": {
+    "17": 32762,
+    "16": 6
+   },
+   "unknowns": 17,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -18
+  },
+  {
+   "n": 29,
+   "l": 6,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 2085,
+   "too_big": 0,
+   "rank_hist": {
+    "26": 1824,
+    "27": 6283,
+    "25": 83,
+    "24": 2
+   },
+   "unknowns": 27,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -18
+  },
+  {
+   "n": 29,
+   "l": 7,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 57,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 32698,
+    "19": 70
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 29,
+   "l": 7,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 404364,
+   "too_big": 33,
+   "rank_hist": {
+    "29": 8015,
+    "28": 176,
+    "27": 1
+   },
+   "unknowns": 35,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 29,
+   "l": 8,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 4,
+   "fake": 507,
+   "too_big": 0,
+   "rank_hist": {
+    "23": 32273,
+    "22": 495
+   },
+   "unknowns": 23,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -13.0,
+   "law": -14
+  },
+  {
+   "n": 29,
+   "l": 8,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8180,
+   "rank_hist": {
+    "29": 8173,
+    "28": 19
+   },
+   "unknowns": 37,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -14
+  },
+  {
+   "n": 29,
+   "l": 9,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 10,
+   "fake": 4069,
+   "too_big": 0,
+   "rank_hist": {
+    "26": 28920,
+    "25": 3780,
+    "24": 68
+   },
+   "unknowns": 26,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -11.678071905112638,
+   "law": -12
+  },
+  {
+   "n": 29,
+   "l": 9,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8184,
+   "rank_hist": {
+    "29": 8171,
+    "28": 21
+   },
+   "unknowns": 38,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -12
+  },
+  {
+   "n": 29,
+   "l": 10,
+   "kind": "geometric",
+   "trials": 24576,
+   "success": 23,
+   "fake": 24603,
+   "too_big": 0,
+   "rank_hist": {
+    "29": 7082,
+    "28": 14248,
+    "27": 3113,
+    "26": 132,
+    "25": 1
+   },
+   "unknowns": 29,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -10.061400544664144,
+   "law": -10
+  },
+  {
+   "n": 29,
+   "l": 10,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8189,
+   "rank_hist": {
+    "29": 8189,
+    "28": 3
+   },
+   "unknowns": 39,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -10
+  },
+  {
+   "n": 29,
+   "l": 11,
+   "kind": "geometric",
+   "trials": 6144,
+   "success": 19,
+   "fake": 49348,
+   "too_big": 0,
+   "rank_hist": {
+    "29": 5433,
+    "28": 701,
+    "27": 10
+   },
+   "unknowns": 32,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -8.33703498727757,
+   "law": -8
+  },
+  {
+   "n": 29,
+   "l": 11,
+   "kind": "random",
+   "trials": 6144,
+   "success": 0,
+   "fake": 0,
+   "too_big": 6143,
+   "rank_hist": {
+    "29": 6141,
+    "28": 3
+   },
+   "unknowns": 40,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -8
+  },
+  {
+   "n": 29,
+   "l": 12,
+   "kind": "geometric",
+   "trials": 1536,
+   "success": 26,
+   "fake": 96613,
+   "too_big": 16,
+   "rank_hist": {
+    "29": 1510,
+    "28": 26
+   },
+   "unknowns": 35,
+   "planted": 30,
+   "planted_recovered": 29,
+   "planted_too_big": 1,
+   "log2p": -5.884522782580064,
+   "law": -6
+  },
+  {
+   "n": 29,
+   "l": 12,
+   "kind": "random",
+   "trials": 1536,
+   "success": 0,
+   "fake": 0,
+   "too_big": 1536,
+   "rank_hist": {
+    "29": 1535,
+    "28": 1
+   },
+   "unknowns": 41,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -6
+  },
+  {
+   "n": 31,
+   "l": 4,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 0,
+   "too_big": 0,
+   "rank_hist": {
+    "11": 32768
+   },
+   "unknowns": 11,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -24
+  },
+  {
+   "n": 31,
+   "l": 4,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 8192
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -24
+  },
+  {
+   "n": 31,
+   "l": 5,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 0,
+   "too_big": 0,
+   "rank_hist": {
+    "14": 32768
+   },
+   "unknowns": 14,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -22
+  },
+  {
+   "n": 31,
+   "l": 5,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 4,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 8189,
+    "19": 3
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -22
+  },
+  {
+   "n": 31,
+   "l": 6,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 1,
+   "too_big": 0,
+   "rank_hist": {
+    "17": 32766,
+    "16": 2
+   },
+   "unknowns": 17,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -20
+  },
+  {
+   "n": 31,
+   "l": 6,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 525,
+   "too_big": 0,
+   "rank_hist": {
+    "27": 7673,
+    "26": 511,
+    "25": 8
+   },
+   "unknowns": 27,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -20
+  },
+  {
+   "n": 31,
+   "l": 7,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 2,
+   "fake": 13,
+   "too_big": 0,
+   "rank_hist": {
+    "20": 32748,
+    "19": 20
+   },
+   "unknowns": 20,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -14.0,
+   "law": -18
+  },
+  {
+   "n": 31,
+   "l": 7,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 123158,
+   "too_big": 0,
+   "rank_hist": {
+    "31": 7644,
+    "30": 541,
+    "29": 7
+   },
+   "unknowns": 35,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -18
+  },
+  {
+   "n": 31,
+   "l": 8,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 0,
+   "fake": 136,
+   "too_big": 0,
+   "rank_hist": {
+    "23": 32647,
+    "22": 121
+   },
+   "unknowns": 23,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 31,
+   "l": 8,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 64,
+   "too_big": 8177,
+   "rank_hist": {
+    "31": 8159,
+    "30": 33
+   },
+   "unknowns": 39,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -16
+  },
+  {
+   "n": 31,
+   "l": 9,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 1,
+   "fake": 1115,
+   "too_big": 0,
+   "rank_hist": {
+    "26": 31738,
+    "25": 1023,
+    "24": 7
+   },
+   "unknowns": 26,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -15.0,
+   "law": -14
+  },
+  {
+   "n": 31,
+   "l": 9,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8184,
+   "rank_hist": {
+    "31": 8178,
+    "30": 14
+   },
+   "unknowns": 40,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -14
+  },
+  {
+   "n": 31,
+   "l": 10,
+   "kind": "geometric",
+   "trials": 32768,
+   "success": 8,
+   "fake": 8192,
+   "too_big": 0,
+   "rank_hist": {
+    "28": 7318,
+    "29": 25122,
+    "27": 326,
+    "26": 2
+   },
+   "unknowns": 29,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -12.0,
+   "law": -12
+  },
+  {
+   "n": 31,
+   "l": 10,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8185,
+   "rank_hist": {
+    "31": 8183,
+    "30": 9
+   },
+   "unknowns": 41,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -12
+  },
+  {
+   "n": 31,
+   "l": 11,
+   "kind": "geometric",
+   "trials": 24576,
+   "success": 30,
+   "fake": 49102,
+   "too_big": 0,
+   "rank_hist": {
+    "30": 9359,
+    "31": 14350,
+    "29": 853,
+    "28": 14
+   },
+   "unknowns": 32,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -9.678071905112638,
+   "law": -10
+  },
+  {
+   "n": 31,
+   "l": 11,
+   "kind": "random",
+   "trials": 8192,
+   "success": 0,
+   "fake": 0,
+   "too_big": 8191,
+   "rank_hist": {
+    "31": 8189,
+    "30": 3
+   },
+   "unknowns": 42,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -10
+  },
+  {
+   "n": 31,
+   "l": 12,
+   "kind": "geometric",
+   "trials": 6144,
+   "success": 27,
+   "fake": 97781,
+   "too_big": 0,
+   "rank_hist": {
+    "31": 5789,
+    "30": 354,
+    "29": 1
+   },
+   "unknowns": 35,
+   "planted": 30,
+   "planted_recovered": 30,
+   "planted_too_big": 0,
+   "log2p": -7.830074998557688,
+   "law": -8
+  },
+  {
+   "n": 31,
+   "l": 12,
+   "kind": "random",
+   "trials": 6144,
+   "success": 0,
+   "fake": 0,
+   "too_big": 6142,
+   "rank_hist": {
+    "31": 6141,
+    "30": 3
+   },
+   "unknowns": 43,
+   "planted": 30,
+   "planted_recovered": 0,
+   "planted_too_big": 30,
+   "log2p": null,
+   "law": -8
+  }
+ ]
+}

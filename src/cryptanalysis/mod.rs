@@ -121,6 +121,7 @@ pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod crossbred;
 pub mod curve_catalog;
+pub mod curve_construction;
 pub mod curve_id;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
@@ -133,7 +134,12 @@ pub mod ec_index_calculus;
 pub mod ec_index_calculus_j0;
 pub mod ec_trapdoor;
 pub mod ecbench;
+pub mod ecbench_large_prime;
 pub mod ecc2k130_guard;
+#[cfg(unix)]
+pub mod ecc2k130_merge;
+pub mod ecc2k130_pyjson;
+pub mod ecc2k130_status;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;
@@ -206,6 +212,7 @@ pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
 pub mod line_s4_oracle;
+pub mod lopsided_thin_product;
 pub mod matrix_f5_f2;
 pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;
@@ -230,6 +237,7 @@ pub mod p256_bitbox_factor_base;
 pub mod p256_dickson_factor_base;
 pub mod p256_isogeny_campaign;
 pub mod p256_isogeny_cover;
+pub mod p256_isogeny_task;
 pub mod p256_isogeny_walk;
 pub mod p256_structural;
 pub mod pc_degree_avg;
@@ -281,6 +289,7 @@ pub mod wdsat_oracle;
 pub mod weil_charts;
 pub mod wide_gf2m;
 pub mod wide_groebner;
+pub mod wide_sixsum;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
