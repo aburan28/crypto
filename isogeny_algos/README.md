@@ -63,7 +63,7 @@ Selected measurements (medians, this VM; no scaling or end-to-end claims are mad
   Stark 73 ms, fastElkies′ 146 ms, linear algebra 1.65 s, V1 Padé 3.62 s (Kohel with the kernel given: 47 µs).
   The paper's O(M(ℓ)) bounds are not what schoolbook series give: fastElkies is slower than the O(ℓ²) Elkies 1998 here.
 * ℓ² chain, e = 24, over F_{p²}: naive 263 µs (276 ℓ-multiplications), balanced 81 µs (60), calibrated cost model 96 µs
-  (43 multiplications, 75 evaluations); for ℓ = 3 and e ≥ 10 the calibrated strategy is within 4 % of balanced (slightly faster); for ℓ = 2 it is 10–19 % slower.
+  (43 multiplications, 75 evaluations); for ℓ = 3 and e ≥ 10 the calibrated strategy is within 4 % of balanced (slightly faster); for ℓ = 2 it is 13–19 % slower.
 * CSIDH-style action: 2.0 µs (20-bit p) to 5.0 µs (50-bit p) per isogeny step; MITM at n = 8 primes, m = 2:
   13 122 nodes, 123 ms; the order of each of 𝔩₃, 𝔩₅, 𝔩₇ at p = 1021019 is 1905 = h(−4p).
 * identical 32-bit instances (5): GHS over all neighbours 17 ms (95 steps), Galbraith–Stolbunov uniform weights 2.4 ms (48),
