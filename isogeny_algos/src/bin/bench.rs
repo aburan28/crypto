@@ -1520,6 +1520,124 @@ fn bench_big_field<const N: usize>(o: &mut Out, bits: usize, ells: &[u64], seed:
     }
 }
 
+/// Characteristic 2: GF(2^n) binary curves y^2 + xy = x^3 + a2 x^2 + a6.
+fn bench_char2(o: &mut Out) {
+    use isogeny_algos::binary::*;
+    use isogeny_algos::gf2n::GF2n;
+    use isogeny_algos::path::galbraith::galbraith_with;
+    use isogeny_algos::path::ghs::ghs_with;
+    let budget = if o.quick { 100 } else { 300 };
+    let ns: &[u32] = if o.quick { &[31] } else { &[23, 41, 61] };
+    let ells: &[u64] = if o.quick { &[3, 7] } else { &[3, 5, 7, 11, 13] };
+    for &n in ns {
+        let f = GF2n::new(n);
+        let mut rng = Rng::new(15_000 + n as u64);
+        for &ell in ells {
+            // a curve with a rational point of order ell
+            let (e, p, ord) = loop {
+                let e = BinCurve::new(rng.next() & 1, 0, f.random(&mut rng) | 1);
+                let ord = e.order(&f, &mut rng);
+                if ord % ell as u128 != 0 {
+                    continue;
+                }
+                let p = e.mul(&f, &e.random_point(&f, &mut rng), ord / ell as u128);
+                if p != Pt::Inf {
+                    break (e, p, ord);
+                }
+            };
+            let params = vec![("field", format!("GF2^{n}")), ("ell", ell.to_string())];
+            let rec = |o: &mut Out, algo: &str, ok: bool, (m, mn, r): (f64, f64, usize), note: &str| {
+                o.rec("char2", algo, &params, &[("median_ns", m), ("min_ns", mn), ("reps", r as f64)], ok, note);
+            };
+            let iso = velu(&f, &e, &p, ell);
+            let q = e.random_point(&f, &mut rng);
+            let q2 = e.random_point(&f, &mut rng);
+            let ok = iso.cod.on_curve(&f, &iso.eval(&f, &q))
+                && iso.eval(&f, &e.add(&f, &q, &q2)) == iso.cod.add(&f, &iso.eval(&f, &q), &iso.eval(&f, &q2));
+            rec(o, "velu_char2_points", ok, time_it(budget, 500, || velu(&f, &e, &p, ell)), "kernel points -> codomain (t = sum x_Q)");
+            rec(o, "velu_char2_eval", ok, time_it(budget, 500, || iso.eval(&f, &q)), "full (x, y) image");
+            let xs: Vec<u64> = iso.s.iter().map(|q| q.0).collect();
+            let h = poly::from_roots(&f, &xs);
+            let okk = kohel_codomain(&f, &e, &h) == iso.cod;
+            rec(o, "kohel_char2_codomain", okk, time_it(budget, 500, || kohel_codomain(&f, &e, &h)), "codomain from the kernel polynomial");
+            let ks = kernel_polys(&f, &e, ell, &mut rng);
+            let okf = ks.contains(&h) && ks.iter().all(|k| kohel_codomain(&f, &e, k).order(&f, &mut rng.clone()) == ord);
+            rec(o, "kernel_polys_divpoly_char2", okf, time_it(budget, 50, || kernel_polys(&f, &e, ell, &mut rng.clone())), "factor f_l, subsets of degree (l-1)/2, x-map/doubling check");
+            if ell <= 7 || !o.quick {
+                let t0 = Instant::now();
+                let phi = phi_mod2(&f, ell as usize);
+                let t_phi = t0.elapsed().as_nanos() as f64;
+                let j = e.j(&f);
+                let okp = phi.neighbors(&f, j, &mut rng).contains(&iso.cod.j(&f));
+                let tm = time_it(budget, 200, || phi.neighbors(&f, j, &mut rng.clone()));
+                o.rec(
+                    "char2",
+                    "phi_mod2_neighbors",
+                    &params,
+                    &[("median_ns", tm.0), ("min_ns", tm.1), ("reps", tm.2 as f64), ("phi_crt_ns", t_phi)],
+                    okp,
+                    "roots of Phi_l(j, Y) over GF(2^n) (trace splitting); Phi_l mod 2 by CRT",
+                );
+            }
+        }
+    }
+    // path finding between isogenous binary curves: kernel oracle vs Phi oracle
+    let pns: &[u32] = if o.quick { &[15] } else { &[15, 19, 23] };
+    for &n in pns {
+        let f = GF2n::new(n);
+        let mut rng = Rng::new(16_000 + n as u64);
+        let ells = vec![3u64, 5, 7];
+        let ko = BinKernelOracle { f: &f, ells: ells.clone() };
+        let cache = PhiCache { phis: ells.iter().map(|&l| phi_mod2(&f, l as usize)).collect() };
+        let eu: Vec<usize> = ells.iter().map(|&l| l as usize).collect();
+        let po = PhiOracle { f: &f, cache: &cache, ells: &eu };
+        for t in 0..(if o.quick { 1 } else { 3 }) {
+            let j1 = f.random(&mut rng) | 2;
+            let mut j2 = j1;
+            for _ in 0..(n as usize) {
+                let ns = po.neighbors(j2, &mut rng);
+                if ns.is_empty() {
+                    break;
+                }
+                j2 = ns[rng.below(ns.len() as u64) as usize].1;
+            }
+            if j2 == j1 {
+                continue;
+            }
+            for (oname, which) in [("kernel_oracle", 0), ("phi_oracle", 1)] {
+                let t0 = Instant::now();
+                let (p, st) = if which == 0 {
+                    galbraith_with(&ko, j1, j2, 2_000_000, &mut rng.clone())
+                } else {
+                    galbraith_with(&po, j1, j2, 2_000_000, &mut rng.clone())
+                };
+                let ns_t = t0.elapsed().as_nanos() as f64;
+                let ok = p.as_ref().map_or(false, |p| verify_path(&f, &cache, p));
+                o.rec(
+                    "char2",
+                    "galbraith_bfs",
+                    &[("field", format!("GF2^{n}")), ("oracle", oname.to_string()), ("instance", t.to_string())],
+                    &[("ns", ns_t), ("nodes", st.nodes_expanded as f64), ("path_len", p.map_or(-1.0, |p| p.len() as f64))],
+                    ok,
+                    "l in {3,5,7}",
+                );
+            }
+            let t0 = Instant::now();
+            let (p, st) = ghs_with(&po, j1, j2, 2_000_000, &mut rng.clone());
+            let ns_t = t0.elapsed().as_nanos() as f64;
+            let ok = p.as_ref().map_or(false, |p| verify_path(&f, &cache, p));
+            o.rec(
+                "char2",
+                "ghs_walk",
+                &[("field", format!("GF2^{n}")), ("oracle", "phi_oracle".to_string()), ("instance", t.to_string())],
+                &[("ns", ns_t), ("steps", st.steps as f64), ("path_len", p.map_or(-1.0, |p| p.len() as f64))],
+                ok,
+                "l in {3,5,7}; no volcano normalisation",
+            );
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1554,6 +1672,7 @@ fn main() {
             "csidh" => bench_csidh(&mut o),
             "v2path" => bench_v2path(&mut o),
             "p1kernel" => bench_p1kernel(&mut o),
+            "char2" => bench_char2(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);

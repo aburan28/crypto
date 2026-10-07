@@ -18,6 +18,17 @@ pub fn galbraith<F: Field>(
     max_nodes: usize,
     rng: &mut Rng,
 ) -> (Option<Path<F::E>>, Stats) {
+    galbraith_with(&PhiOracle { f, cache, ells }, j1, j2, max_nodes, rng)
+}
+
+/// Bidirectional BFS against any neighbour oracle.
+pub fn galbraith_with<E: Copy + Eq + std::hash::Hash, O: Oracle<E>>(
+    oracle: &O,
+    j1: E,
+    j2: E,
+    max_nodes: usize,
+    rng: &mut Rng,
+) -> (Option<Path<E>>, Stats) {
     let mut st = Stats { nodes_expanded: 0 };
     if j1 == j2 {
         return (
@@ -28,11 +39,11 @@ pub fn galbraith<F: Field>(
             st,
         );
     }
-    let mut par: [HashMap<F::E, (F::E, usize)>; 2] = [HashMap::new(), HashMap::new()];
-    let mut front: [Vec<F::E>; 2] = [vec![j1], vec![j2]];
+    let mut par: [HashMap<E, (E, usize)>; 2] = [HashMap::new(), HashMap::new()];
+    let mut front: [Vec<E>; 2] = [vec![j1], vec![j2]];
     par[0].insert(j1, (j1, 0));
     par[1].insert(j2, (j2, 0));
-    let build = |par: &[HashMap<F::E, (F::E, usize)>; 2], m: F::E| -> Path<F::E> {
+    let build = |par: &[HashMap<E, (E, usize)>; 2], m: E| -> Path<E> {
         // j1 -> m
         let mut js = vec![m];
         let mut ells = vec![];
@@ -74,7 +85,7 @@ pub fn galbraith<F: Field>(
         let cur = std::mem::take(&mut front[side]);
         for j in cur {
             st.nodes_expanded += 1;
-            for (l, jn) in neighbors(f, cache, ells, j, rng) {
+            for (l, jn) in oracle.neighbors(j, rng) {
                 if par[side].contains_key(&jn) {
                     continue;
                 }

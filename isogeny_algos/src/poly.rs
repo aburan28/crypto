@@ -386,7 +386,13 @@ fn split_roots<F: Field>(f: &F, g: &Poly<F>, rng: &mut Rng, out: &mut Vec<F::E>)
     loop {
         let r = f.random(rng);
         let base = vec![r, f.one()];
-        let w = sub(f, &powmod_big(f, &base, &half, g), &constant(f, f.one()));
+        let w = if f.char() == 2 {
+            // q = 2^n: the trace Tr(r x) = sum_{i<n} (r x)^(2^i) mod g takes values 0/1 at the
+            // roots and splits g with probability ~1/2
+            trace_poly(f, &vec![f.zero(), r], 1, g)
+        } else {
+            sub(f, &powmod_big(f, &base, &half, g), &constant(f, f.one()))
+        };
         let dd = gcd(f, g, &w);
         let dd_deg = deg(f, &dd);
         if dd_deg > 0 && dd_deg < d {
@@ -396,6 +402,18 @@ fn split_roots<F: Field>(f: &F, g: &Poly<F>, rng: &mut Rng, out: &mut Vec<F::E>)
             return;
         }
     }
+}
+
+/// sum_{i < n k} a^(2^i) mod g for q = 2^n (the absolute trace from F_{q^k}).
+fn trace_poly<F: Field>(f: &F, a: &Poly<F>, k: usize, g: &Poly<F>) -> Poly<F> {
+    let n = f.q().bits() - 1;
+    let mut t = rem(f, a, g);
+    let mut s = t.clone();
+    for _ in 1..n * k {
+        t = mulmod(f, &t, &t, g);
+        s = add(f, &s, &t);
+    }
+    s
 }
 
 /// Distinct roots in the field (Cantor-Zassenhaus).
@@ -448,6 +466,19 @@ pub fn edf<F: Field>(f: &F, g: &Poly<F>, k: usize, rng: &mut Rng, out: &mut Vec<
             a
         };
         if a.is_empty() {
+            continue;
+        }
+        if f.char() == 2 {
+            // trace of F_{q^k} over F_2 applied to a: values in {0, 1} on each factor
+            let tr = trace_poly(f, &a, k, g);
+            let dd = gcd(f, g, &tr);
+            let dd_deg = deg(f, &dd);
+            if dd_deg > 0 && dd_deg < d {
+                let (q, _) = divrem(f, g, &dd);
+                edf(f, &dd, k, rng, out);
+                edf(f, &monic(f, &q), k, rng, out);
+                return;
+            }
             continue;
         }
         // a^{(q^k-1)/2} = (a^{1+q+..+q^{k-1}})^{(q-1)/2}

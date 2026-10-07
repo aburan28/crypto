@@ -522,3 +522,127 @@ pub fn next_prime(mut n: u64) -> u64 {
     }
     n
 }
+
+/// Prime factorisation of n < 2^64 (trial division to 1000, then Pollard-Brent rho), as
+/// (prime, exponent) pairs in increasing order.
+pub fn factor_u64(n: u64) -> Vec<(u64, u32)> {
+    fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+        (a as u128 * b as u128 % m as u128) as u64
+    }
+    fn is_prime64(n: u64) -> bool {
+        if n < 2 {
+            return false;
+        }
+        for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+            if n % p == 0 {
+                return n == p;
+            }
+        }
+        let (mut d, mut s) = (n - 1, 0);
+        while d % 2 == 0 {
+            d /= 2;
+            s += 1;
+        }
+        'outer: for a in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+            let mut x = 1u64;
+            let (mut b, mut e) = (a % n, d);
+            while e > 0 {
+                if e & 1 == 1 {
+                    x = mulmod(x, b, n);
+                }
+                b = mulmod(b, b, n);
+                e >>= 1;
+            }
+            if x == 1 || x == n - 1 {
+                continue;
+            }
+            for _ in 1..s {
+                x = mulmod(x, x, n);
+                if x == n - 1 {
+                    continue 'outer;
+                }
+            }
+            return false;
+        }
+        true
+    }
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            let t = a % b;
+            a = b;
+            b = t;
+        }
+        a
+    }
+    fn rho(n: u64) -> u64 {
+        if n % 2 == 0 {
+            return 2;
+        }
+        let mut c = 1u64;
+        loop {
+            let f = |x: u64| (mulmod(x, x, n) + c) % n;
+            let (mut y, mut r, mut q, mut g) = (2u64, 1u64, 1u64, 1u64);
+            let (mut x, mut ys) = (0u64, 0u64);
+            while g == 1 {
+                x = y;
+                for _ in 0..r {
+                    y = f(y);
+                }
+                let mut k = 0;
+                while k < r && g == 1 {
+                    ys = y;
+                    for _ in 0..(128.min(r - k)) {
+                        y = f(y);
+                        q = mulmod(q, x.abs_diff(y), n);
+                    }
+                    g = gcd(q, n);
+                    k += 128;
+                }
+                r *= 2;
+            }
+            if g == n {
+                loop {
+                    ys = f(ys);
+                    g = gcd(x.abs_diff(ys), n);
+                    if g > 1 {
+                        break;
+                    }
+                }
+            }
+            if g != n {
+                return g;
+            }
+            c += 1;
+        }
+    }
+    fn rec(n: u64, out: &mut Vec<u64>) {
+        if n == 1 {
+            return;
+        }
+        if is_prime64(n) {
+            out.push(n);
+            return;
+        }
+        let d = rho(n);
+        rec(d, out);
+        rec(n / d, out);
+    }
+    let mut n = n;
+    let mut ps = vec![];
+    for p in 2..1000u64 {
+        while n % p == 0 {
+            ps.push(p);
+            n /= p;
+        }
+    }
+    rec(n, &mut ps);
+    ps.sort();
+    let mut out: Vec<(u64, u32)> = vec![];
+    for p in ps {
+        match out.last_mut() {
+            Some((q, e)) if *q == p => *e += 1,
+            _ => out.push((p, 1)),
+        }
+    }
+    out
+}

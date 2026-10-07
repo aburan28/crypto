@@ -54,6 +54,26 @@ impl<E: Copy> Path<E> {
     }
 }
 
+/// A neighbour oracle on some isogeny graph: the (l, j') edges out of j. Path-finding algorithms
+/// (Galbraith BFS, GHS walks) are written against this, so the same code runs with modular
+/// polynomials over F_p, F_{p^2} or GF(2^n), or with kernel-polynomial factoring.
+pub trait Oracle<E> {
+    fn neighbors(&self, j: E, rng: &mut Rng) -> Vec<(usize, E)>;
+}
+
+/// Roots of Phi_l(j, Y) for each l in `ells`.
+pub struct PhiOracle<'a, F: Field> {
+    pub f: &'a F,
+    pub cache: &'a PhiCache<F>,
+    pub ells: &'a [usize],
+}
+
+impl<F: Field> Oracle<F::E> for PhiOracle<'_, F> {
+    fn neighbors(&self, j: F::E, rng: &mut Rng) -> Vec<(usize, F::E)> {
+        neighbors(self.f, self.cache, self.ells, j, rng)
+    }
+}
+
 /// Distinct F-rational neighbours of j in the l-graph for each l in `ells`.
 pub fn neighbors<F: Field>(
     f: &F,

@@ -26,8 +26,19 @@ pub fn ghs<F: Field>(
     max_steps: usize,
     rng: &mut Rng,
 ) -> (Option<Path<F::E>>, Stats) {
+    ghs_with(&PhiOracle { f, cache, ells }, j1, j2, max_steps, rng)
+}
+
+/// GHS walks against any neighbour oracle.
+pub fn ghs_with<E: Copy + Eq + std::hash::Hash, O: Oracle<E>>(
+    oracle: &O,
+    j1: E,
+    j2: E,
+    max_steps: usize,
+    rng: &mut Rng,
+) -> (Option<Path<E>>, Stats) {
     let mut st = Stats { steps: 0 };
-    let mut w: [Walker<F::E>; 2] = [
+    let mut w: [Walker<E>; 2] = [
         Walker {
             walk: vec![j1],
             ells: vec![],
@@ -59,7 +70,7 @@ pub fn ghs<F: Field>(
             } else {
                 None
             };
-            let mut ns = neighbors(f, cache, ells, cur, rng);
+            let mut ns = oracle.neighbors(cur, rng);
             let non_back: Vec<_> = ns
                 .iter()
                 .copied()

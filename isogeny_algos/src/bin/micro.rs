@@ -250,6 +250,27 @@ fn main() {
             isogeny_algos::fpm::KARATSUBA_N.with(|k| k.set(None));
         }
     }
+    for n in [23u32, 41, 61] {
+        let f = isogeny_algos::gf2n::GF2n::new(n);
+        let xs: Vec<u64> = (0..1024).map(|_| f.random(&mut rng) | 1).collect();
+        let mut i = 0usize;
+        rec(&format!("gf2n{n}_mul"), 1, per_op(1_000_000, || {
+            i = (i + 1) & 1023;
+            f.mul(xs[i], xs[(i + 7) & 1023])
+        }));
+        rec(&format!("gf2n{n}_inv"), 1, per_op(100_000, || {
+            i = (i + 1) & 1023;
+            f.inv(xs[i])
+        }));
+        rec(&format!("gf2n{n}_sqrt"), 1, per_op(100_000, || {
+            i = (i + 1) & 1023;
+            f.sqrt(xs[i])
+        }));
+        rec(&format!("gf2n{n}_solve_quadratic"), 1, per_op(100_000, || {
+            i = (i + 1) & 1023;
+            f.solve_quadratic(xs[i])
+        }));
+    }
     let p256 = isogeny_algos::fpm::FpM::<4>::from_dec(
         "115792089210356248762697446949407573530086143415290314195533631308867097853951",
     );
