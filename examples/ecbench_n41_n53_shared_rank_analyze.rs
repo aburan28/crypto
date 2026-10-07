@@ -84,9 +84,17 @@ fn verdict(ci: Option<(f64, f64)>, keep_below_one: bool) -> &'static str {
         None => "not_evaluable",
         Some((lo, hi)) => {
             if lo > 1.0 {
-                if keep_below_one { "falsified" } else { "retained" }
+                if keep_below_one {
+                    "falsified"
+                } else {
+                    "retained"
+                }
             } else if hi < 1.0 {
-                if keep_below_one { "retained" } else { "falsified" }
+                if keep_below_one {
+                    "retained"
+                } else {
+                    "falsified"
+                }
             } else {
                 "undecided"
             }
@@ -99,16 +107,26 @@ fn ci_of(v: &Value) -> Option<(f64, f64)> {
     Some((a.first()?.as_f64()?, a.get(1)?.as_f64()?))
 }
 
-fn checked_receipt(path: &Path, session_dir: &Path, session: &str, expected_replays: usize) -> Result<Value, String> {
+fn checked_receipt(
+    path: &Path,
+    session_dir: &Path,
+    session: &str,
+    expected_replays: usize,
+) -> Result<Value, String> {
     let receipt = value(path)?;
     if receipt["ok"] != true
         || receipt["session_status"] != "complete"
         || receipt["session_id"] != session
         || receipt["records"] != 768
     {
-        return Err(format!("{} does not audit the frozen session", path.display()));
+        return Err(format!(
+            "{} does not audit the frozen session",
+            path.display()
+        ));
     }
-    let replays = receipt["replays"].as_array().ok_or("audit replays missing")?;
+    let replays = receipt["replays"]
+        .as_array()
+        .ok_or("audit replays missing")?;
     if replays.len() != expected_replays || replays.iter().any(|r| r["reproduced"] != true) {
         return Err(format!(
             "{} replayed {} runs ({} expected) or failed to reproduce one",
@@ -117,7 +135,13 @@ fn checked_receipt(path: &Path, session_dir: &Path, session: &str, expected_repl
             expected_replays
         ));
     }
-    for name in ["host.json", "plan.json", "records.jsonl", "session.json", "spec.json"] {
+    for name in [
+        "host.json",
+        "plan.json",
+        "records.jsonl",
+        "session.json",
+        "spec.json",
+    ] {
         let actual = sha256_hex(&bytes(&session_dir.join(name))?);
         if receipt["files"][name] != actual {
             return Err(format!("{} has a wrong {name} hash", path.display()));
@@ -131,15 +155,27 @@ fn verified(r: &Record) -> bool {
 }
 
 fn online_gae(r: &Record) -> f64 {
-    r.phases.iter().filter(|p| p.name.starts_with("target_")).map(|p| p.gae).sum()
+    r.phases
+        .iter()
+        .filter(|p| p.name.starts_with("target_"))
+        .map(|p| p.gae)
+        .sum()
 }
 
 fn checked_record(r: &Record, session: &str) -> Result<(), String> {
     if r.session_id != session || r.warmup != (r.round == 0) || !ARMS.contains(&r.arm.as_str()) {
-        return Err(format!("{} is not a record of the frozen session", r.run_id));
+        return Err(format!(
+            "{} is not a record of the frozen session",
+            r.run_id
+        ));
     }
     if !verified(r) {
-        if r.cost.s.is_some() && r.outcome.status != "verified" {
+        // A failed attempt is charged and kept, never counted as a solve
+        // (PROTOCOL.md): the harness records the work an `exhausted`, `error`
+        // or `timeout` run spent as its cost.  Any other unverified status
+        // carrying a cost would be a claimed answer that failed its check.
+        let failed_attempt = matches!(r.outcome.status.as_str(), "exhausted" | "error" | "timeout");
+        if r.cost.s.is_some() && !failed_attempt {
             return Err(format!("{} has a cost without a verified answer", r.run_id));
         }
         return Ok(());
@@ -152,9 +188,15 @@ fn checked_record(r: &Record, session: &str) -> Result<(), String> {
     if (charged - phase_sum).abs() > 1e-7_f64.max(charged * 1e-11) {
         return Err(format!("{} has nonexclusive charged phases", r.run_id));
     }
-    let online = r.online.as_ref().ok_or_else(|| format!("{} lacks an online interval", r.run_id))?;
+    let online = r
+        .online
+        .as_ref()
+        .ok_or_else(|| format!("{} lacks an online interval", r.run_id))?;
     if online.wall_ns == 0 || online.phases_ns.values().sum::<u64>() != online.wall_ns {
-        return Err(format!("{} has incomplete exclusive online phases", r.run_id));
+        return Err(format!(
+            "{} has incomplete exclusive online phases",
+            r.run_id
+        ));
     }
     if r.arm.starts_with("ic-") {
         let names: BTreeSet<&str> = online.phases_ns.keys().map(String::as_str).collect();
@@ -177,23 +219,40 @@ fn arm_summary(arm: &str, measured: &[&Record]) -> Value {
     let mut levels = BTreeMap::<String, u64>::new();
     for r in measured {
         *statuses.entry(r.outcome.status.clone()).or_default() += 1;
-        *levels.entry(r.isolation.level.name().to_string()).or_default() += 1;
+        *levels
+            .entry(r.isolation.level.name().to_string())
+            .or_default() += 1;
         if !verified(r) {
             *errors
-                .entry(r.outcome.error.clone().unwrap_or_else(|| r.outcome.status.clone()))
+                .entry(
+                    r.outcome
+                        .error
+                        .clone()
+                        .unwrap_or_else(|| r.outcome.status.clone()),
+                )
                 .or_default() += 1;
         }
     }
     let gae: Vec<f64> = ok.iter().filter_map(|r| r.cost.total_gae).collect();
     let s: Vec<f64> = ok.iter().filter_map(|r| r.cost.s).collect();
-    let online_ns: Vec<f64> = ok.iter().filter_map(|r| r.online.as_ref().map(|o| o.wall_ns as f64)).collect();
-    let solve_ns: Vec<f64> = ok.iter().filter_map(|r| r.time.solve_wall_ns.map(|x| x as f64)).collect();
+    let online_ns: Vec<f64> = ok
+        .iter()
+        .filter_map(|r| r.online.as_ref().map(|o| o.wall_ns as f64))
+        .collect();
+    let solve_ns: Vec<f64> = ok
+        .iter()
+        .filter_map(|r| r.time.solve_wall_ns.map(|x| x as f64))
+        .collect();
     let failed_process_ns: Vec<f64> = measured
         .iter()
         .filter(|r| !verified(r))
         .map(|r| r.time.process_wall_ns as f64)
         .collect();
-    let max_rss = measured.iter().map(|r| r.time.max_rss_kib).max().unwrap_or(0);
+    let max_rss = measured
+        .iter()
+        .map(|r| r.time.max_rss_kib)
+        .max()
+        .unwrap_or(0);
     let mut phase_mean = Map::new();
     if !ok.is_empty() {
         let mut sums = BTreeMap::<String, f64>::new();
@@ -227,7 +286,10 @@ fn arm_summary(arm: &str, measured: &[&Record]) -> Value {
     if arm.starts_with("ic-") {
         let first = ok.first();
         let fb = first.and_then(|r| r.factor_base.as_ref());
-        let attempts: Vec<f64> = ok.iter().map(|r| *r.counters.get("target_attempts").unwrap_or(&0) as f64).collect();
+        let attempts: Vec<f64> = ok
+            .iter()
+            .map(|r| *r.counters.get("target_attempts").unwrap_or(&0) as f64)
+            .collect();
         let pair_entries = first.and_then(|r| {
             r.phases
                 .iter()
@@ -268,7 +330,10 @@ fn comparison_row(session_dir: &Path, a: &str, b: &str) -> Result<Value, String>
         || row["ops"]["bounded"] != true
         || row["wall"]["status"] != "descriptive"
     {
-        return Err(format!("{} is not the frozen 20,000-resample bounded L0 comparison", path.display()));
+        return Err(format!(
+            "{} is not the frozen 20,000-resample bounded L0 comparison",
+            path.display()
+        ));
     }
     Ok(row)
 }
@@ -295,7 +360,9 @@ fn curve_block(
             || r.workload.curve.field_degree != Some(n)
             || r.workload.curve.slug != slug
         {
-            return Err(format!("{slug}: a record disagrees on floor, automorphisms or curve"));
+            return Err(format!(
+                "{slug}: a record disagrees on floor, automorphisms or curve"
+            ));
         }
     }
     let arms: Vec<Value> = ARMS.iter().map(|a| arm_summary(a, &by_arm[*a])).collect();
@@ -309,8 +376,19 @@ fn curve_block(
             .get(&(primary.to_string(), round))
             .ok_or_else(|| format!("{slug}: primary workload {primary} lacks round {round}"))?;
         let g = |arm: &str| arms_r[arm].cost.total_gae.filter(|_| verified(arms_r[arm]));
-        let w = |arm: &str| arms_r[arm].online.as_ref().filter(|_| verified(arms_r[arm])).map(|o| o.wall_ns as f64);
-        for (key, a, b) in [("k8_over_rho", "rho-strong", "ic-k8"), ("k16_over_rho", "rho-strong", "ic-k16"), ("k16_over_k8", "ic-k8", "ic-k16"), ("k16_over_control", "ic-k16-control", "ic-k16")] {
+        let w = |arm: &str| {
+            arms_r[arm]
+                .online
+                .as_ref()
+                .filter(|_| verified(arms_r[arm]))
+                .map(|o| o.wall_ns as f64)
+        };
+        for (key, a, b) in [
+            ("k8_over_rho", "rho-strong", "ic-k8"),
+            ("k16_over_rho", "rho-strong", "ic-k16"),
+            ("k16_over_k8", "ic-k8", "ic-k16"),
+            ("k16_over_control", "ic-k16-control", "ic-k16"),
+        ] {
             if let (Some(x), Some(y)) = (g(a), g(b)) {
                 prim.entry(key).or_default().push((x, y));
             }
@@ -327,21 +405,26 @@ fn curve_block(
         }));
     }
     let prim_json = |m: &BTreeMap<&str, Vec<(f64, f64)>>| -> Value {
-        ["k8_over_rho", "k16_over_rho", "k16_over_k8", "k16_over_control"]
-            .iter()
-            .map(|k| {
-                let pairs = m.get(k).cloned().unwrap_or_default();
-                (
-                    k.to_string(),
-                    json!({
-                        "paired_rounds": pairs.len(),
-                        "complete": pairs.len() as u32 == ROUNDS,
-                        "ratio_of_sums": ratio_of_sums(&pairs),
-                    }),
-                )
-            })
-            .collect::<Map<_, _>>()
-            .into()
+        [
+            "k8_over_rho",
+            "k16_over_rho",
+            "k16_over_k8",
+            "k16_over_control",
+        ]
+        .iter()
+        .map(|k| {
+            let pairs = m.get(k).cloned().unwrap_or_default();
+            (
+                k.to_string(),
+                json!({
+                    "paired_rounds": pairs.len(),
+                    "complete": pairs.len() as u32 == ROUNDS,
+                    "ratio_of_sums": ratio_of_sums(&pairs),
+                }),
+            )
+        })
+        .collect::<Map<_, _>>()
+        .into()
     };
 
     // Secondary: the harness's own per-curve comparison rows, plus the
@@ -378,34 +461,53 @@ fn curve_block(
         let k8 = arms_r["ic-k8"];
         let k16 = arms_r["ic-k16"];
         if verified(k8) && verified(k16) {
-            h2_strata.entry(wid.clone()).or_default().push((online_gae(k8), online_gae(k16)));
+            h2_strata
+                .entry(wid.clone())
+                .or_default()
+                .push((online_gae(k8), online_gae(k16)));
         }
-        for (key, a, b) in [("k8_over_k16", "ic-k16", "ic-k8"), ("rho_over_k8", "ic-k8", "rho-strong"), ("rho_over_k16", "ic-k16", "rho-strong"), ("k16_over_control", "ic-k16-control", "ic-k16")] {
+        for (key, a, b) in [
+            ("k8_over_k16", "ic-k16", "ic-k8"),
+            ("rho_over_k8", "ic-k8", "rho-strong"),
+            ("rho_over_k16", "ic-k16", "rho-strong"),
+            ("k16_over_control", "ic-k16-control", "ic-k16"),
+        ] {
             let (ra, rb) = (arms_r[a], arms_r[b]);
             if verified(ra) && verified(rb) {
-                let (oa, ob) = (ra.online.as_ref().unwrap().wall_ns as f64, rb.online.as_ref().unwrap().wall_ns as f64);
-                wall_strata.entry(key).or_default().entry(wid.clone()).or_default().push((oa, ob));
+                let (oa, ob) = (
+                    ra.online.as_ref().unwrap().wall_ns as f64,
+                    rb.online.as_ref().unwrap().wall_ns as f64,
+                );
+                wall_strata
+                    .entry(key)
+                    .or_default()
+                    .entry(wid.clone())
+                    .or_default()
+                    .push((oa, ob));
             }
         }
     }
     let h2 = strata_ratio(&h2_strata);
     let h2_verdict = verdict(ci_of(&h2["ci95"]), true);
-    let wall_secondary: Map<String, Value> = ["k8_over_k16", "rho_over_k8", "rho_over_k16", "k16_over_control"]
-        .iter()
-        .map(|k| {
-            let mut v = strata_ratio(wall_strata.get(k).unwrap_or(&BTreeMap::new()));
-            v["unit"] = json!("online_wall_ns; L0 exploratory, never admitted");
-            (k.to_string(), v)
-        })
-        .collect();
-    let aa_max_dev = wall_strata
-        .get("k16_over_control")
-        .map(|m| {
-            m.values()
-                .flatten()
-                .map(|(a, b)| ((b - a) / a).abs())
-                .fold(0.0_f64, f64::max)
-        });
+    let wall_secondary: Map<String, Value> = [
+        "k8_over_k16",
+        "rho_over_k8",
+        "rho_over_k16",
+        "k16_over_control",
+    ]
+    .iter()
+    .map(|k| {
+        let mut v = strata_ratio(wall_strata.get(k).unwrap_or(&BTreeMap::new()));
+        v["unit"] = json!("online_wall_ns; L0 exploratory, never admitted");
+        (k.to_string(), v)
+    })
+    .collect();
+    let aa_max_dev = wall_strata.get("k16_over_control").map(|m| {
+        m.values()
+            .flatten()
+            .map(|(a, b)| ((b - a) / a).abs())
+            .fold(0.0_f64, f64::max)
+    });
 
     let h1: Map<String, Value> = [("ic-k8", "ic-k8_over_rho-strong"), ("ic-k16", "ic-k16_over_rho-strong")]
         .iter()
@@ -439,11 +541,19 @@ fn curve_block(
     }))
 }
 
-fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path) -> Result<(), String> {
+fn run(
+    round_dir: &Path,
+    session_dir: &Path,
+    audit_path: &Path,
+    out_path: &Path,
+) -> Result<(), String> {
     let freeze = value(&round_dir.join("FREEZE.json"))?;
     let spec_sha = sha256_hex(&bytes(&round_dir.join("SPEC.json"))?);
     let plan_sha = sha256_hex(&bytes(&round_dir.join("PLAN.json"))?);
-    if freeze["spec_file_sha256"] != spec_sha || freeze["plan_file_sha256"] != plan_sha || freeze["spec_id"] != SPEC_ID {
+    if freeze["spec_file_sha256"] != spec_sha
+        || freeze["plan_file_sha256"] != plan_sha
+        || freeze["spec_id"] != SPEC_ID
+    {
         return Err("SPEC.json or PLAN.json differs from FREEZE.json".into());
     }
     let session = read_session(session_dir)?;
@@ -462,9 +572,15 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
         checked_record(r, &session.session_id)?;
     }
     let verified_measured = records.iter().filter(|r| !r.warmup && verified(r)).count();
-    let audit = checked_receipt(audit_path, session_dir, &session.session_id, verified_measured)?;
+    let audit = checked_receipt(
+        audit_path,
+        session_dir,
+        &session.session_id,
+        verified_measured,
+    )?;
 
-    let mut by_curve = BTreeMap::<String, BTreeMap<(String, u32), BTreeMap<String, &Record>>>::new();
+    let mut by_curve =
+        BTreeMap::<String, BTreeMap<(String, u32), BTreeMap<String, &Record>>>::new();
     for r in records.iter().filter(|r| !r.warmup) {
         by_curve
             .entry(r.workload.curve.slug.clone())
@@ -476,7 +592,10 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
     let expected_arms: BTreeSet<&str> = ARMS.into_iter().collect();
     for (slug, pairs) in &by_curve {
         if pairs.len() != TARGETS_PER_CURVE * ROUNDS as usize {
-            return Err(format!("{slug}: expected {} (workload, round) pairs", TARGETS_PER_CURVE * ROUNDS as usize));
+            return Err(format!(
+                "{slug}: expected {} (workload, round) pairs",
+                TARGETS_PER_CURVE * ROUNDS as usize
+            ));
         }
         for ((wid, round), arms) in pairs {
             if arms.keys().map(String::as_str).collect::<BTreeSet<_>>() != expected_arms {
@@ -484,18 +603,24 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
             }
             let rho = arms["rho-strong"];
             for r in arms.values() {
-                if r.workload.target != rho.workload.target || r.algorithm_seed != rho.algorithm_seed {
+                if r.workload.target != rho.workload.target
+                    || r.algorithm_seed != rho.algorithm_seed
+                {
                     return Err(format!("{wid} round {round} is not a paired solve"));
                 }
                 if verified(r) && verified(rho) && r.outcome.recovered != rho.outcome.recovered {
-                    return Err(format!("{wid} round {round}: two verified arms disagree on the logarithm"));
+                    return Err(format!(
+                        "{wid} round {round}: two verified arms disagree on the logarithm"
+                    ));
                 }
             }
         }
     }
     let mut curves = Vec::new();
     for (slug, n, autos, primary) in CURVES {
-        let pairs = by_curve.get(slug).ok_or_else(|| format!("{slug} missing from the session"))?;
+        let pairs = by_curve
+            .get(slug)
+            .ok_or_else(|| format!("{slug} missing from the session"))?;
         curves.push(curve_block(session_dir, slug, n, autos, primary, pairs)?);
     }
 
@@ -511,8 +636,12 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
             if IC_ARMS.contains(&name) {
                 let v = arm["verified"].as_u64().unwrap();
                 let m = arm["measured"].as_u64().unwrap();
-                if v == 0 { any_cell_zero = true; }
-                if v != m { all_arms_all_verified = false; }
+                if v == 0 {
+                    any_cell_zero = true;
+                }
+                if v != m {
+                    all_arms_all_verified = false;
+                }
             }
             cells.push(json!({"curve": c["curve"], "arm": name, "measured": arm["measured"], "verified": arm["verified"], "timeouts": arm["timeouts"], "errors": arm["errors"]}));
         }
@@ -542,7 +671,9 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
     };
     let mut levels = BTreeMap::<String, u64>::new();
     for r in records.iter().filter(|r| !r.warmup) {
-        *levels.entry(r.isolation.level.name().to_string()).or_default() += 1;
+        *levels
+            .entry(r.isolation.level.name().to_string())
+            .or_default() += 1;
     }
     let output = json!({
         "schema": "ecbench.n41_n53_shared_rank_decision/v1",
@@ -590,7 +721,8 @@ fn run(round_dir: &Path, session_dir: &Path, audit_path: &Path, out_path: &Path)
 
 fn main() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
-    let usage = "usage: ecbench_n41_n53_shared_rank_analyze ROUND_DIR SESSION_DIR AUDIT_JSON OUT_JSON";
+    let usage =
+        "usage: ecbench_n41_n53_shared_rank_analyze ROUND_DIR SESSION_DIR AUDIT_JSON OUT_JSON";
     let round = args.next().ok_or(usage)?;
     let session = args.next().ok_or(usage)?;
     let audit = args.next().ok_or(usage)?;
@@ -598,5 +730,10 @@ fn main() -> Result<(), String> {
     if args.next().is_some() {
         return Err(usage.into());
     }
-    run(Path::new(&round), Path::new(&session), Path::new(&audit), Path::new(&out))
+    run(
+        Path::new(&round),
+        Path::new(&session),
+        Path::new(&audit),
+        Path::new(&out),
+    )
 }
