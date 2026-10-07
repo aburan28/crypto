@@ -13,6 +13,12 @@ same-field cover certificates to each supported catalog model in
 the verified genus, map degree and field assumptions. Descent and DLP
 advantage remain unmeasured.
 
+The [hyperelliptic infrastructure guide](HYPERELLIPTIC_INFRASTRUCTURE.md)
+documents the standalone construction, verification, arithmetic, and catalog
+commands; the one-infinity arithmetic boundary; bounded binary transfer; and
+the additive evidence schema. In particular, the prime even-sextic cover does
+not use the odd-degree one-infinity Jacobian implementation.
+
 [IC curve records and cross-repo links](ic/README.md), including
 [typed links](ic/curve-links/README.md), retain the exact EC1 representations,
 optional trait statuses, and the factor-base/isogeny storage contract beside
