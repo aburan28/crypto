@@ -566,7 +566,11 @@ every boot after it.
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
 copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
-deployed is a separate question.
+deployed is a separate question. A Phase A Rust port of the offline half
+(decode, keys, envelope, coverage, weight-32 cutoff) lives in
+[`../dp-ingest/`](../dp-ingest/); `make -C ecc2k130 test-dp-ingest` holds it.
+The live daemon stays Python until Postgres/S3 parity lands — see
+[`research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md`](../../research/ecc2k130_dp_ingest_rust_20261007/PROTOCOL.md).
 
 **General path (any host).** From a machine with AWS credentials and a route
 to Postgres, run:
