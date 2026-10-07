@@ -196,3 +196,29 @@ this change; a new all-library clean pass is not claimed.
   cost, not an observed solve.
 - No codomain discrete logarithm, randomized rho timing, representative-specific
   speedup, prevalence estimate, or exhaustive isogeny-class search was executed.
+
+## Additive 2026-10-07 GHS structural screen
+
+The frozen certificate, parent report, and parent evidence-flow diagram above
+remain unchanged. A separate additive pre-admission diagnostic screens the
+registered source model and the two registered degree-5 codomains named by
+their ICV1 slugs. Its native same-codebase result is magic number 113, type I,
+genus `2^112-1`, and zero candidates within the frozen genus bound 64 at each
+of those three nodes.
+
+- [`addenda/ghs-three-node-20261007/REPORT.md`](addenda/ghs-three-node-20261007/REPORT.md)
+  gives the bounded interpretation and open transfer obligations.
+- [`addenda/ghs-three-node-20261007/manifest.json`](addenda/ghs-three-node-20261007/manifest.json)
+  records the exact producer revision, toolchain, binary and source hashes,
+  commands, parameters, raw output hashes, byte-identical replays, and focused
+  verifier receipt.
+- [`addenda/ghs-three-node-20261007/SHA256SUMS`](addenda/ghs-three-node-20261007/SHA256SUMS)
+  binds the complete additive bundle.
+- [`tests/sect113r1_ghs_evidence.rs`](../../tests/sect113r1_ghs_evidence.rs)
+  is a same-codebase replay and custody verifier, not independent arithmetic
+  confirmation.
+
+This is a three-node negative structural result only. It does not revise the
+parent certificate in place, exhaust the isogeny class, construct a descended
+Jacobian, transfer the subgroup to one, solve a DLP, establish a speedup, or
+support a prevalence estimate.
