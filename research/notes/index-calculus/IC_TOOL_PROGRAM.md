@@ -181,6 +181,12 @@ unchanged, as in §23. On top of them:
   - Results hold for that class. Arm64 and GPU are named as unmeasured.
   - Kernels use runtime feature detection with a portable fallback, and
     CI tests the fallback.
+  - **Each round names its class** in `icprog`'s spec (`requires`): the
+    reference class, and any feature its candidate's kernels detect
+    beyond it. `icprog run` refuses the round's timed steps on a host
+    outside its class, and `icprog host-class <round>` reports the class
+    against the host. The container can move between classes between
+    sessions, as it did on 2026-10-07 (§8).
 
 ## 6. The loop
 
@@ -471,6 +477,60 @@ diagnostic, not a speedup.
   and the filter with the admitted keys (10–12 ns).
 - **The key is R06's target, and the subtraction the next lever's:**
   a vectorised kernel on main's two-fold reduction.
+
+**R08 declared (2026-10-07)**
+([protocol](../../ic_tool_program/rounds/R08-scan-fold/PROTOCOL.md)),
+before any R08 timed run, on v4, R06's candidate, if R06 accepts it. It
+changes the scan's subtraction, with the same field elements by
+construction:
+- **two carry-less folds a product,** eight lanes at once, for every tail
+  and degree;
+- **Montgomery's trick in two chains;**
+- **the negated base as coordinate slices,** each rest's abscissa
+  straight into the key;
+- **the build's rows** past their own orbit on the same kernel.
+
+Its exploration on R06's candidate
+([record](../../ic_tool_program/explorations/R08-fold-kernel-20261006/README.md))
+read 1.293, 1.223 and 1.362 in cold time at the three target sizes. The
+subtraction costs 4.7–4.9 ns a scanned summand, against 11.3–12.1 ns on
+v3. The prediction is 1.25–1.33×, 1.16–1.29× and 1.27–1.46×, and
+acceptance needs each interval above 1.05. It runs after R06's decision,
+on a host of R06's class.
+
+**The build and the scan's memory, explored (2026-10-06).** Three
+records, none of them a round:
+- **A2, huge pages on the pair tables, on v3**
+  ([record](../../ic_tool_program/explorations/A2-thp-advise-20261006/README.md)).
+  The advice halves the minor faults, and cold time does not move
+  (0.960–1.068, every interval across 1). The scan's misses are cache
+  misses, not TLB misses. A2 is set aside.
+- **A1, the build's partition streams and per-run filters**, first on v3
+  ([record](../../ic_tool_program/explorations/A1-build-partitions-20261006/README.md)),
+  then on the folding-kernel candidate
+  ([record](../../ic_tool_program/explorations/A1-build-on-fold-20261006/README.md)).
+  On v3 the build fell by 10–25%, and cold time did not move reliably. On
+  the candidate the build phase is 1.40–1.47× faster on every pair, and
+  cold time 1.07–1.12×.
+- **A13, each admitted key's run prefetched,** on the folding-kernel
+  candidate
+  ([record](../../ic_tool_program/explorations/A13-admitted-prefetch-20261006/README.md)).
+  Collection is 1.12–1.29× faster, and cold time 1.07–1.12×.
+
+A1 and A13 are portable, and each is to be declared on the baseline R08
+decides.
+
+**The host changed class (2026-10-07).** The rule's comparison at v3
+finished on the reference class on 2026-10-06. Before R06's first step,
+the container moved to a Cascade Lake host: AVX-512 F, BW, VL and VNNI,
+but no GFNI, VBMI, VBMI2 or VPCLMULQDQ.
+- **R06 and R08 cannot run there.** Their candidates would run the base's
+  code.
+- **R06 waits for a host of its class** (its amendment 1), and R08 runs
+  after it.
+- **`icprog` now enforces each round's class:** `icprog run` refuses a
+  round's timed steps on a host outside it, and `icprog host-class
+  <round>` reports the class against the host (§5).
 
 ## 9. Track B: generality and robustness
 

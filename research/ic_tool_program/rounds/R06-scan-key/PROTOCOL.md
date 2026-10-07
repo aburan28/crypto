@@ -183,3 +183,48 @@ or a verification fails.
   the GFNI basis change alone (`gfnibench`), and whole processes on main
   with three arms: v3, the candidate, and the candidate with
   `KIC_CANON_COORDS=tables` (the funnel alone).
+
+## Amendment 1 (2026-10-07, before any R06 run): the host changed class
+
+**No R06 step has run.**
+- R06 was to start after the rule's comparison at v3. That finished on
+  2026-10-06 at 09:42 UTC, on the host of this declaration and its
+  explorations: `Intel(R) Xeon(R) Processor @ 2.10GHz`, kernel build
+  `6.18.44-fc-v70`.
+- The script that was to drive R06's steps then stopped at once, on a
+  quoting error of its own that bash could not parse.
+- So there is no manifest, pin, A/A or timed process, and nothing under
+  `runs/`.
+
+**The container then moved to another class.** From 2026-10-07 at 00:09
+UTC it runs on `Intel(R) Xeon(R) Processor @ 2.80GHz`, model 85, kernel
+build `6.18.44-fc-v77`.
+- That host has AVX-512 F, BW, VL and VNNI, and PCLMULQDQ.
+- It lacks GFNI, AVX-512 VBMI, AVX-512 VBMI2 and VPCLMULQDQ.
+
+**On that host R06 would measure nothing it declares.** The candidate's
+key kernels detect their features at run time. Without them the candidate
+runs the base's key code, so its arms would differ only by code the round
+does not measure.
+
+**R06's class, stated in full.** "AVX-512 VBMI2 and GFNI" under Hardware
+class is short for what the candidate's key kernels detect:
+- AVX-512F and VBMI2 for the funnel shifts;
+- AVX-512F, BW, VBMI and GFNI for the basis change;
+- with the programme's reference class, which includes VPCLMULQDQ
+  (`IC_TOOL_PROGRAM.md` §5).
+
+**The runner now enforces the class.**
+- `icprog`'s round spec carries the list (`requires`).
+- `icprog run r06 <step>` refuses every timed step on a host outside the
+  class, before it touches the run tree. The plan and the pin time
+  nothing, so they run anywhere: the pin's outputs are the same on every
+  class.
+- `icprog host-class r06` reports the class against the host, and exits 3
+  outside it.
+
+**R06 waits for a host of its class.** It runs there unchanged: the same
+arms, rows, holdouts and rules, with the host in its manifest. If the
+programme's baseline moves first, R06 does not run on this declaration. A
+further amendment then ports the candidate onto the new baseline before
+any run, as R02b's amendment 3 did.
