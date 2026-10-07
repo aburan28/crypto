@@ -8,7 +8,9 @@ For the 164-class Dickson union, one collision event is the only event count
 whose free-oracle constant is below rho: its ratio is 0.964088, while two
 events already cost 1.446132 times rho.  A one-event attack must therefore
 obtain all 164 independent rows from one target bucket, requiring at least 165
-decompositions when the rows arise as collision differences.
+distinct normalized decompositions when the rows arise as collision
+differences.  Before quotienting the global-negation duplicates, that is at
+least 330 raw folded preimages.
 
 The exact 109-of-164 signed domain has only
 
@@ -17,17 +19,19 @@ D/n = 1.0051098993154817
 ```
 
 decompositions per P-256 target on average.  Under an explicitly labelled
-random-map null, the union bound that any target bucket reaches occupancy 165
-is below `2^-720.185`; the corresponding Poisson expected-bucket diagnostic is
-`2^-726.636`.  These are model diagnostics, not a measurement or proof that
+random-map null, the union bound that any canonical target bucket reaches 165
+distinct normalized rows is below `2^-721.185`; the corresponding Poisson
+expected-bucket diagnostic is `2^-727.636`.  These are model diagnostics, not a measurement or proof that
 the elliptic subset-sum map is random.
 
 Complete toy enumeration confirms the rank mechanism.  At mean occupancies
-2.16 and 3.68, maximum homogeneous rank is only one and four.  Full column
-rank first appears at mean occupancy 70.75, and the 14-column system saturates
-only in the extremely dense regime with mean occupancy 1,716.96.  All
-1,069,136 rows replay exactly with zero failures.  Raw relation multiplicity
-does not supply evidence for the required sparse P-256 rank-164 event.
+0.067 and 1.501 distinct rows per canonical target, maximum homogeneous rank
+is only one and four.  Full column rank first appears at mean distinct
+occupancy 35.377, and the 14-column system saturates only in the extremely
+dense regime with mean distinct occupancy 858.479.  All 1,069,136 raw rows
+replay exactly with zero failures and collapse to 534,568 distinct normalized
+rows.  Raw relation multiplicity does not supply evidence for the required
+sparse P-256 rank-164 event.
 
 The typed transport audit also closes the measured families.  P-256
 base-field endomorphisms act on `E(F_p)` only as scalars; the exact one-class
@@ -57,10 +61,15 @@ event of rank 164.  Since the first preimage establishes a bucket and each
 additional preimage can supply at most one independent collision difference,
 the bucket occupancy must be at least 165.
 
+That occupancy is after canonicalizing the target modulo negation and
+deduplicating coefficient rows.  The raw signed enumerator produces each such
+row twice, so the equivalent raw folded occupancy floor is 330.
+
 The fixed P-256 domain and order are
 
 ```text
 D = 116383775127750444427048016195109203089116454475801022361283226351238392053760
+D/2 = 58191887563875222213524008097554601544558227237900511180641613175619196026880
 n = 115792089210356248762697446949407573529996955224135760342422259061068512044369
 ```
 
@@ -75,18 +84,23 @@ The experiment uses Round 296's deterministic support on
 `E/F_1151: y^2=x^3-3x+241`.  Targets are folded modulo negation; coefficient
 rows are negated whenever the target representative is negated.  Augmented
 rank includes the target coefficient.  Homogeneous rank uses exact row
-differences, or direct zero-sum rows for the identity bucket.
+differences, or direct zero-sum rows for the identity bucket.  The toy group
+has 1,192 points and 597 canonical targets under negation.  Raw rows are
+replayed, then global-negation duplicates are removed before occupancy and
+rank are computed; means include empty canonical targets.
 
-| `m,B` | complete domain | target buckets | mean occupancy | max occupancy | max augmented rank | max homogeneous rank | full-column-rank buckets | replay failures |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| 3,5 | 80 | 37 | 2.162 | 4 | 2 | 1 | 0 | 0 |
-| 5,8 | 1,792 | 487 | 3.680 | 10 | 5 | 4 | 0 | 0 |
-| 7,11 | 42,240 | 597 | 70.754 | 128 | 12 | 11 | 561 | 0 |
-| 9,14 | 1,025,024 | 597 | 1,716.958 | 1,950 | 15 | 14 | 597 | 0 |
+| `m,B` | raw domain | distinct rows | nonempty targets | distinct mean / 597 | max distinct occupancy | max augmented rank | max homogeneous rank | full-column-rank buckets | replay failures |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 3,5 | 80 | 40 | 37 | 0.067 | 2 | 2 | 1 | 0 | 0 |
+| 5,8 | 1,792 | 896 | 487 | 1.501 | 5 | 5 | 4 | 0 | 0 |
+| 7,11 | 42,240 | 21,120 | 597 | 35.377 | 64 | 12 | 11 | 560 | 0 |
+| 9,14 | 1,025,024 | 512,512 | 597 | 858.479 | 975 | 15 | 14 | 597 | 0 |
 
 Every occupancy and rank histogram is preserved in the result JSON.  The
 enumerator charges 9,530,096 logical candidate group additions, 90,592
-precomputed transition additions, and 1,069,136 exact row replays.
+precomputed transition additions, and 1,069,136 exact raw-row replays.  The
+raw and distinct occupancy histograms are both retained, including zero-width
+buckets; ranks use only the distinct normalized rows.
 
 Ranks are computed modulo `2^61-1`.  This is an exact rank certificate for
 both the rational and P-256 coefficient fields, not a probabilistic modular
@@ -140,19 +154,25 @@ costs against rho.
 
 The corrected canonical run and independent replay were isolated, uncontended
 and pinned to CPU 4 of the AMD EPYC 9V74 host.  The corrected canonical run
-used 1.773901 s wall, 1.723639 s user, 0.049056 s system and 135,752 KiB peak
-RSS.  The independent run used 1.755868 s wall and emitted a byte-identical
-result.  The pre-correction run is preserved as the first isolation row; it
-used `bits(n)` rather than `log2(n)` only in the displayed random-map tail.
+used 1.343144 s wall, 1.286448 s user, 0.056041 s system and 135,908 KiB peak
+RSS.  The independent run used 1.526782 s wall and emitted a byte-identical
+result.  The six-row isolation ledger preserves three earlier successful runs,
+one failed correction run, and the two final runs.  The failed run stopped on
+the exact `2*distinct=raw` invariant: identity rows had been oriented, but rows
+mapping to the toy curve's nonidentity 2-torsion point had not.  Extending the
+same orientation rule to every self-negative target resolved the invariant.
+The three older runs predate distinct-row accounting; the first additionally
+used `bits(n)` rather than `log2(n)` in the displayed random-map tail.  None of
+those four superseded outcomes is used for the corrected claims.
 
-- canonical result: 33,235 bytes, SHA-256
-  `35c24134ed74e704eade083aa1a2042c813cdad03b7b6a97d13c3fac612b4e94`;
+- canonical result: 50,776 bytes, SHA-256
+  `8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965`;
 - semantic evidence SHA-256:
-  `9cf535fbb84b2ce4234a4db7b1a7aed9b05b34c7af549ac1445d9c7023dcfdc4`;
-- three-run isolation receipt: SHA-256
-  `f26d1bf8eae58dfd0b042a7dd4c0c3842b6491f815682a8e32caf8e149c9a0e8`;
+  `f5c634bff7357c4e422811b2f2b22ec5bdbc228e6ab0a7acf7d4bd8d37b7a49e`;
+- six-run isolation receipt: SHA-256
+  `6a4d95377dd61182cabb37b844fa42357a486fea277a050c1a805a2c527c1f88`;
 - independent replay: byte-identical, SHA-256
-  `35c24134ed74e704eade083aa1a2042c813cdad03b7b6a97d13c3fac612b4e94`.
+  `8718bbe26751ff0191164b0665618226a97556c64c6e2feeef72468a38206965`.
 
 ```bash
 cargo test --release --bin p256_parity_escape_screen
@@ -160,7 +180,7 @@ cargo clippy --release --bin p256_parity_escape_screen -- -D warnings
 cargo build --release --bin p256_parity_escape_screen --bin isolated_bench
 target/release/isolated_bench run --wait --cpus 4 \
   --out research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_parity_escapes_round298_20261007/isolation.jsonl \
-  --label p256-parity-escapes-round298-canonical-v2 -- \
+  --label p256-parity-escapes-round298-canonical-v3-normalized -- \
   target/release/p256_parity_escape_screen \
   --round297 research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_scalar_stabilizer_round297_20261007/scalar-stabilizer-result.json \
   --round296 research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_rr_selector_round296_20261007/rr-selector-result.json \

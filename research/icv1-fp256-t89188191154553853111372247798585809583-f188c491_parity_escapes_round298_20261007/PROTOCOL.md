@@ -136,3 +136,19 @@ typed transfer obligations, costs, gates and semantic hash.  Preserve isolated
 canonical and independent runs, update every applicable dashboard panel, and
 publish the protocol, implementation, tests, evidence and decision in a pull
 request stacked on Round 297.
+
+## Post-run accounting correction
+
+The frozen protocol above used “occupancy” for the raw signed enumeration.
+During follow-on review, the enumerator was found to place both a coefficient
+row and its global negation in the same folded target bucket.  After target
+normalization those are the same relation row, including at the identity and
+2-torsion targets where an explicit coefficient orientation is required.
+
+The corrected runner therefore preserves both counts: the raw domain
+`2^m*C(B,m)` for replay and operation accounting, and the deduplicated
+global-negation quotient for bucket occupancy and rank.  Means use the entire
+canonical target space, including empty buckets.  The P-256 requirement is 165
+distinct normalized rows, equivalently at least 330 raw folded preimages.  This
+correction changes no preregistered hypothesis, promotion gate, or search
+branch; it makes the multi-row falsification criterion stricter.

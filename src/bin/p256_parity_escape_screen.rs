@@ -1,6 +1,6 @@
 //! Round 298: exact multi-row and typed-transfer parity escape screen for P-256.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -14,7 +14,7 @@ use num_bigint::BigUint;
 use num_integer::Integer;
 use num_traits::{One, ToPrimitive};
 use serde::Serialize;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 const ROUND297_SHA256: &str = "53949881daf4a48769c9ef8f869fad633c3dc69d11b0d341a5b7416de2e43982";
 const ROUND296_SHA256: &str = "52cbea224df1e1d4d6e8406f368ba413fd4e508f5309fcde65f67a98bc91c5ba";
@@ -57,15 +57,18 @@ struct Dependency {
 struct P256Boundary {
     columns: u64,
     arity: u64,
-    exact_signed_domain: String,
+    exact_raw_signed_domain: String,
+    exact_global_negation_quotient_domain: String,
     subgroup_order: String,
-    mean_target_occupancy: f64,
-    conditional_mean_occupancy_given_nonempty_random_map: f64,
+    canonical_target_space: String,
+    mean_distinct_normalized_rows_per_canonical_target: f64,
+    conditional_mean_distinct_rows_given_nonempty_random_map: f64,
     parity_collision_events: u64,
     parity_event_ratio_to_rho: f64,
     two_event_ratio_to_rho: f64,
     minimum_independent_rows_per_event: u64,
-    minimum_bucket_occupancy_for_collision_rows: u64,
+    minimum_distinct_bucket_occupancy_for_collision_rows: u64,
+    equivalent_minimum_raw_folded_bucket_occupancy: u64,
     random_map_null_log2_union_bound_any_bucket_at_required_occupancy: f64,
     random_map_null_log2_poisson_expected_buckets_at_required_occupancy: f64,
     random_map_null_is_measurement: bool,
@@ -94,21 +97,29 @@ struct ToyCase {
     arity: usize,
     columns: usize,
     support_x: Vec<u64>,
-    exact_domain: u64,
-    candidates_enumerated: u64,
-    target_buckets: u64,
-    nonidentity_target_buckets: u64,
-    identity_bucket_occupancy: u64,
-    mean_bucket_occupancy: f64,
-    maximum_bucket_occupancy: u64,
-    maximum_bucket_target: String,
+    exact_raw_domain: u64,
+    raw_candidates_enumerated: u64,
+    normalized_distinct_rows: u64,
+    curve_group_order: u64,
+    canonical_target_space: u64,
+    nonempty_target_buckets: u64,
+    nonidentity_nonempty_target_buckets: u64,
+    identity_raw_occupancy: u64,
+    identity_distinct_occupancy: u64,
+    raw_mean_rows_per_canonical_target: f64,
+    distinct_mean_rows_per_canonical_target: f64,
+    maximum_raw_bucket_occupancy: u64,
+    maximum_raw_bucket_target: String,
+    maximum_distinct_bucket_occupancy: u64,
+    maximum_distinct_bucket_target: String,
     maximum_augmented_rank: u64,
     maximum_homogeneous_rank: u64,
     maximum_homogeneous_rank_target: String,
     buckets_with_full_column_rank: u64,
-    occupancy_histogram: Vec<HistogramRow>,
-    augmented_rank_histogram: Vec<HistogramRow>,
-    homogeneous_rank_histogram: Vec<HistogramRow>,
+    raw_occupancy_histogram_all_targets: Vec<HistogramRow>,
+    distinct_occupancy_histogram_all_targets: Vec<HistogramRow>,
+    augmented_rank_histogram_nonempty_targets: Vec<HistogramRow>,
+    homogeneous_rank_histogram_nonempty_targets: Vec<HistogramRow>,
     rank_modulus: u64,
     hadamard_log2_bound: f64,
     rank_transfer_to_p256_exact: bool,
@@ -218,7 +229,11 @@ fn addm(left: u64, right: u64) -> u64 {
 }
 
 fn negm(value: u64) -> u64 {
-    if value == 0 { 0 } else { P - value }
+    if value == 0 {
+        0
+    } else {
+        P - value
+    }
 }
 
 fn subm(left: u64, right: u64) -> u64 {
@@ -545,6 +560,15 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
                 for coefficient in &mut row {
                     *coefficient = -*coefficient;
                 }
+            } else if sum == negative_sum
+                && row.iter().find(|&&coefficient| coefficient != 0) == Some(&-1)
+            {
+                // At a self-negative target (identity or 2-torsion), point negation does
+                // not choose an orientation.  Choose one explicitly so a signed row and
+                // its global negation normalize identically.
+                for coefficient in &mut row {
+                    *coefficient = -*coefficient;
+                }
             }
             enumeration_stream.extend((candidates as u32).to_be_bytes());
             match target {
@@ -569,22 +593,37 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
         return Err("toy domain or occupancy accounting mismatch".into());
     }
 
-    let mut occupancy_histogram = BTreeMap::<usize, u64>::new();
+    let canonical_targets = transitions
+        .points
+        .iter()
+        .copied()
+        .map(|point| point.min(negate(point)))
+        .collect::<BTreeSet<_>>();
+    let mut raw_occupancy_histogram = BTreeMap::<usize, u64>::new();
+    let mut distinct_occupancy_histogram = BTreeMap::<usize, u64>::new();
     let mut augmented_histogram = BTreeMap::<usize, u64>::new();
     let mut homogeneous_histogram = BTreeMap::<usize, u64>::new();
-    let mut maximum_occupancy = 0usize;
-    let mut maximum_occupancy_target = ToyPoint::Infinity;
+    let mut maximum_raw_occupancy = 0usize;
+    let mut maximum_raw_occupancy_target = ToyPoint::Infinity;
+    let mut maximum_distinct_occupancy = 0usize;
+    let mut maximum_distinct_occupancy_target = ToyPoint::Infinity;
     let mut maximum_augmented_rank = 0usize;
     let mut maximum_homogeneous_rank = 0usize;
     let mut maximum_homogeneous_target = ToyPoint::Infinity;
     let mut full_rank_buckets = 0u64;
     let mut replayed = 0u64;
     let mut replay_failures = 0u64;
-    let mut identity_occupancy = 0u64;
+    let mut identity_raw_occupancy = 0u64;
+    let mut identity_distinct_occupancy = 0u64;
+    let mut distinct_rows_total = 0u64;
     let mut summary_stream = Vec::new();
     for (&target, rows) in &buckets {
+        let distinct_rows = rows.iter().cloned().collect::<BTreeSet<_>>();
+        let distinct_rows = distinct_rows.into_iter().collect::<Vec<_>>();
+        distinct_rows_total += distinct_rows.len() as u64;
         if target == ToyPoint::Infinity {
-            identity_occupancy = rows.len() as u64;
+            identity_raw_occupancy = rows.len() as u64;
+            identity_distinct_occupancy = distinct_rows.len() as u64;
         }
         for row in rows {
             replayed += 1;
@@ -592,7 +631,7 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
                 replay_failures += 1;
             }
         }
-        let augmented = rows
+        let augmented = distinct_rows
             .iter()
             .map(|row| {
                 let mut values = row.iter().map(|&value| value as i16).collect::<Vec<_>>();
@@ -601,12 +640,14 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
             })
             .collect::<Vec<_>>();
         let homogeneous = if target == ToyPoint::Infinity {
-            rows.iter()
+            distinct_rows
+                .iter()
                 .map(|row| row.iter().map(|&value| value as i16).collect::<Vec<_>>())
                 .collect::<Vec<_>>()
         } else {
-            let first = &rows[0];
-            rows.iter()
+            let first = &distinct_rows[0];
+            distinct_rows
+                .iter()
                 .skip(1)
                 .map(|row| {
                     row.iter()
@@ -618,12 +659,19 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
         };
         let augmented_rank = matrix_rank(&augmented);
         let homogeneous_rank = matrix_rank(&homogeneous);
-        *occupancy_histogram.entry(rows.len()).or_default() += 1;
+        *raw_occupancy_histogram.entry(rows.len()).or_default() += 1;
+        *distinct_occupancy_histogram
+            .entry(distinct_rows.len())
+            .or_default() += 1;
         *augmented_histogram.entry(augmented_rank).or_default() += 1;
         *homogeneous_histogram.entry(homogeneous_rank).or_default() += 1;
-        if rows.len() > maximum_occupancy {
-            maximum_occupancy = rows.len();
-            maximum_occupancy_target = target;
+        if rows.len() > maximum_raw_occupancy {
+            maximum_raw_occupancy = rows.len();
+            maximum_raw_occupancy_target = target;
+        }
+        if distinct_rows.len() > maximum_distinct_occupancy {
+            maximum_distinct_occupancy = distinct_rows.len();
+            maximum_distinct_occupancy_target = target;
         }
         maximum_augmented_rank = maximum_augmented_rank.max(augmented_rank);
         if homogeneous_rank > maximum_homogeneous_rank {
@@ -636,8 +684,22 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
         summary_stream.extend(point_label(target).as_bytes());
         summary_stream.push(0);
         summary_stream.extend((rows.len() as u64).to_be_bytes());
+        summary_stream.extend((distinct_rows.len() as u64).to_be_bytes());
         summary_stream.extend((augmented_rank as u64).to_be_bytes());
         summary_stream.extend((homogeneous_rank as u64).to_be_bytes());
+    }
+    let empty_targets = canonical_targets
+        .len()
+        .checked_sub(buckets.len())
+        .ok_or("more hit buckets than canonical toy targets")? as u64;
+    if empty_targets != 0 {
+        raw_occupancy_histogram.insert(0, empty_targets);
+        distinct_occupancy_histogram.insert(0, empty_targets);
+    }
+    if distinct_rows_total * 2 != candidates {
+        return Err(format!(
+            "toy case m={m}, B={columns} has {distinct_rows_total} normalized rows for {candidates} raw candidates"
+        ));
     }
     if replay_failures != 0 {
         return Err(format!(
@@ -654,24 +716,33 @@ fn toy_case(support: &[u64], m: usize, roots: &[Vec<u64>]) -> Result<ToyCase, St
         arity: m,
         columns,
         support_x: support.to_vec(),
-        exact_domain: expected,
-        candidates_enumerated: candidates,
-        target_buckets: buckets.len() as u64,
-        nonidentity_target_buckets: buckets
+        exact_raw_domain: expected,
+        raw_candidates_enumerated: candidates,
+        normalized_distinct_rows: distinct_rows_total,
+        curve_group_order: transitions.points.len() as u64,
+        canonical_target_space: canonical_targets.len() as u64,
+        nonempty_target_buckets: buckets.len() as u64,
+        nonidentity_nonempty_target_buckets: buckets
             .keys()
             .filter(|&&point| point != ToyPoint::Infinity)
             .count() as u64,
-        identity_bucket_occupancy: identity_occupancy,
-        mean_bucket_occupancy: candidates as f64 / buckets.len() as f64,
-        maximum_bucket_occupancy: maximum_occupancy as u64,
-        maximum_bucket_target: point_label(maximum_occupancy_target),
+        identity_raw_occupancy,
+        identity_distinct_occupancy,
+        raw_mean_rows_per_canonical_target: candidates as f64 / canonical_targets.len() as f64,
+        distinct_mean_rows_per_canonical_target: distinct_rows_total as f64
+            / canonical_targets.len() as f64,
+        maximum_raw_bucket_occupancy: maximum_raw_occupancy as u64,
+        maximum_raw_bucket_target: point_label(maximum_raw_occupancy_target),
+        maximum_distinct_bucket_occupancy: maximum_distinct_occupancy as u64,
+        maximum_distinct_bucket_target: point_label(maximum_distinct_occupancy_target),
         maximum_augmented_rank: maximum_augmented_rank as u64,
         maximum_homogeneous_rank: maximum_homogeneous_rank as u64,
         maximum_homogeneous_rank_target: point_label(maximum_homogeneous_target),
         buckets_with_full_column_rank: full_rank_buckets,
-        occupancy_histogram: histogram_rows(occupancy_histogram),
-        augmented_rank_histogram: histogram_rows(augmented_histogram),
-        homogeneous_rank_histogram: histogram_rows(homogeneous_histogram),
+        raw_occupancy_histogram_all_targets: histogram_rows(raw_occupancy_histogram),
+        distinct_occupancy_histogram_all_targets: histogram_rows(distinct_occupancy_histogram),
+        augmented_rank_histogram_nonempty_targets: histogram_rows(augmented_histogram),
+        homogeneous_rank_histogram_nonempty_targets: histogram_rows(homogeneous_histogram),
         rank_modulus: RANK_MODULUS,
         hadamard_log2_bound: hadamard_bound,
         rank_transfer_to_p256_exact: true,
@@ -708,34 +779,43 @@ fn p256_boundary() -> Result<P256Boundary, String> {
     if domain != frozen {
         return Err("P-256 signed domain does not match the frozen exact value".into());
     }
-    let domain_f = domain.to_f64().ok_or("P-256 domain does not fit f64")?;
-    let order_f = curve.n.to_f64().ok_or("P-256 order does not fit f64")?;
-    let lambda = domain_f / order_f;
+    let normalized_domain = &domain >> 1usize;
+    let canonical_targets = (&curve.n + BigUint::one()) >> 1usize;
+    let normalized_domain_f = normalized_domain
+        .to_f64()
+        .ok_or("P-256 normalized domain does not fit f64")?;
+    let canonical_targets_f = canonical_targets
+        .to_f64()
+        .ok_or("P-256 canonical target space does not fit f64")?;
+    let lambda = normalized_domain_f / canonical_targets_f;
     let conditional = lambda / (1.0 - (-lambda).exp());
     let parity_events = (1..=P256_COLUMNS)
         .find(|&events| ratio_to_rho(events) <= 1.0)
         .ok_or("no collision-event count reaches rho")?;
     let rows_per_event = P256_COLUMNS.div_ceil(parity_events);
     let occupancy = rows_per_event + 1;
-    let log2_order = order_f.log2();
-    let union_bound =
-        log2_order + occupancy as f64 * (std::f64::consts::E * lambda / occupancy as f64).log2();
-    let poisson_exact = log2_order - lambda / std::f64::consts::LN_2
+    let log2_target_space = canonical_targets_f.log2();
+    let union_bound = log2_target_space
+        + occupancy as f64 * (std::f64::consts::E * lambda / occupancy as f64).log2();
+    let poisson_exact = log2_target_space - lambda / std::f64::consts::LN_2
         + occupancy as f64 * lambda.log2()
         - log2_factorial(occupancy)
         - (1.0 - lambda / (occupancy + 1) as f64).log2();
     Ok(P256Boundary {
         columns: P256_COLUMNS,
         arity: P256_ARITY,
-        exact_signed_domain: domain.to_string(),
+        exact_raw_signed_domain: domain.to_string(),
+        exact_global_negation_quotient_domain: normalized_domain.to_string(),
         subgroup_order: curve.n.to_string(),
-        mean_target_occupancy: lambda,
-        conditional_mean_occupancy_given_nonempty_random_map: conditional,
+        canonical_target_space: canonical_targets.to_string(),
+        mean_distinct_normalized_rows_per_canonical_target: lambda,
+        conditional_mean_distinct_rows_given_nonempty_random_map: conditional,
         parity_collision_events: parity_events,
         parity_event_ratio_to_rho: ratio_to_rho(parity_events),
         two_event_ratio_to_rho: ratio_to_rho(2),
         minimum_independent_rows_per_event: rows_per_event,
-        minimum_bucket_occupancy_for_collision_rows: occupancy,
+        minimum_distinct_bucket_occupancy_for_collision_rows: occupancy,
+        equivalent_minimum_raw_folded_bucket_occupancy: 2 * occupancy,
         random_map_null_log2_union_bound_any_bucket_at_required_occupancy: union_bound,
         random_map_null_log2_poisson_expected_buckets_at_required_occupancy: poisson_exact,
         random_map_null_is_measurement: false,
@@ -911,9 +991,10 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
     for (m, columns) in TOY_SIZES {
         toy_cases.push(toy_case(&pool[..columns], m, &roots)?);
     }
-    let complete_toy_domains = toy_cases
-        .iter()
-        .all(|case| case.candidates_enumerated == case.exact_domain);
+    let complete_toy_domains = toy_cases.iter().all(|case| {
+        case.raw_candidates_enumerated == case.exact_raw_domain
+            && 2 * case.normalized_distinct_rows == case.exact_raw_domain
+    });
     let zero_replay_failures = toy_cases.iter().all(|case| case.replay_failures == 0);
     let exact_rank_transfer = toy_cases
         .iter()
@@ -944,7 +1025,7 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
         round28_dependency,
     ];
     let classification = "multi-row-negative/measured-transport-families-closed/promotion-negative";
-    let dominant_obstruction = "Rho parity permits only one collision event, so this 164-class base needs one target bucket carrying at least 164 independent rows (165 preimages for collision differences). Its exact fixed-arity domain has mean occupancy only 1.005110 per P-256 target. Complete toy enumeration reaches full row rank only in the dense regime, while certified endomorphism and degree-11 isogeny transports do not supply a non-generic quotient.";
+    let dominant_obstruction = "Rho parity permits only one collision event, so this 164-class base needs one canonical target bucket carrying at least 164 independent rows (165 distinct normalized preimages, or 330 raw folded preimages before removing global-negation duplicates). Its exact fixed-arity domain has mean distinct normalized occupancy only 1.005110 per canonical P-256 target. Complete toy enumeration reaches full row rank only in the dense regime, while certified endomorphism and degree-11 isogeny transports do not supply a non-generic quotient.";
     let decision = "Reject raw multi-relation count as a parity lever without rank-164 event evidence. Close base-field endomorphism and the measured degree-11 isogeny families; retain covers/Jacobians as explicit unknown obligations, not credited improvements. Do not attempt an unplanted P-256 relation.";
     let semantic = json!({
         "curve": CURVE_SLUG,
@@ -960,7 +1041,7 @@ fn build_result(cli: &Cli) -> Result<ResultReceipt, String> {
     let semantic_evidence_sha256 =
         sha256_hex(&serde_json::to_vec(&semantic).map_err(|error| error.to_string())?);
     Ok(ResultReceipt {
-        schema: "p256-parity-escape-screen/v1".into(),
+        schema: "p256-parity-escape-screen/v2".into(),
         curve: CURVE_SLUG.into(),
         screening_round: 298,
         execution_status: "complete".into(),
@@ -1005,9 +1086,9 @@ fn run(cli: Cli) -> Result<(), String> {
     write_result(&cli.out, &mut result)?;
     let largest = result.toy_cases.last().expect("nonempty toy cases");
     eprintln!(
-        "round 298: parity needs {} rows/event; largest toy occupancy {}, homogeneous rank {}; transport={} -> {}",
+        "round 298: parity needs {} rows/event; largest toy distinct occupancy {}, homogeneous rank {}; transport={} -> {}",
         result.p256_boundary.minimum_independent_rows_per_event,
-        largest.maximum_bucket_occupancy,
+        largest.maximum_distinct_bucket_occupancy,
         largest.maximum_homogeneous_rank,
         result.gates.exact_non_generic_log_transport,
         result.classification
@@ -1041,7 +1122,11 @@ mod tests {
         let boundary = p256_boundary().expect("boundary");
         assert_eq!(boundary.parity_collision_events, 1);
         assert_eq!(boundary.minimum_independent_rows_per_event, 164);
-        assert_eq!(boundary.minimum_bucket_occupancy_for_collision_rows, 165);
+        assert_eq!(
+            boundary.minimum_distinct_bucket_occupancy_for_collision_rows,
+            165
+        );
+        assert_eq!(boundary.equivalent_minimum_raw_folded_bucket_occupancy, 330);
         assert!(boundary.parity_event_ratio_to_rho < 1.0);
         assert!(boundary.two_event_ratio_to_rho > 1.4);
     }
@@ -1057,7 +1142,8 @@ mod tests {
         let roots = square_roots();
         let pool = toy_support_pool(&roots);
         let case = toy_case(&pool[..5], 3, &roots).expect("toy case");
-        assert_eq!(case.candidates_enumerated, 80);
+        assert_eq!(case.raw_candidates_enumerated, 80);
+        assert_eq!(case.normalized_distinct_rows, 40);
         assert_eq!(case.replay_failures, 0);
         assert!(case.rank_transfer_to_p256_exact);
     }
