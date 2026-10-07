@@ -39,6 +39,9 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 
 ## 1. Quick start
 
+Rolling `main` release archives ship `ecbench` beside `ic` for Linux (glibc
+and static musl), Apple silicon, and Windows. A source build is:
+
 ```bash
 cargo build --release --bin ecbench
 ```
@@ -57,7 +60,9 @@ the matched `rho.signed_frobenius` on the same explicit Koblitz curve and target
 The companion `ic large-prime` command imports and validates every curve,
 base point, and challenge point in an external ECBench corpus before solving
 one selected challenge. `--summands n-1` is literal and a run is refused when
-its exact combination table would exceed `--max-states`:
+its exact combination table would exceed `--max-states`. The JSON report binds
+the raw manifest bytes with `manifest_sha256` and `manifest_bytes` and refuses
+duplicate family ids:
 
 ```bash
 ic --json large-prime --manifest corpus/manifest.json --family koblitz-n11-l4 \
@@ -251,7 +256,7 @@ a run that fails the check loses its isolation level), or **recorded**
 | Heterogeneous cores | Apple P and E cores differ by about 2× | performance levels recorded; with no affinity control the runs are L0 | recorded |
 | Threads | four Rayon threads on one pinned CPU wait on each other | `RAYON_NUM_THREADS=1`, `OMP_NUM_THREADS=1`; child CPU time over wall above 1.05 loses L1 | controlled, gated (L1) |
 | Environment leakage | an engine knob in the operator's shell changes the search | the child's environment is cleared and rebuilt: `PATH`, `HOME`, a pinned locale and thread counts, nothing else; its hash is in the session | controlled |
-| Build | a debug build or another binary is another experiment | the binary's SHA-256, the commit and dirty state of the worktree the binary sits in, `rustc -Vv`, compiler flags in the environment; on Linux each child execs `/proc/self/exe`, so a rebuild mid-session cannot swap the code (elsewhere a changed binary stops the session); a debug build loses L1 | recorded, gated (L1) |
+| Build | a debug build or another binary is another experiment | the binary's SHA-256, the source commit embedded at build time and its declared dirty state, any runtime worktree commit as a diagnostic only, `rustc -Vv`, compiler flags in the environment; on Linux each child execs `/proc/self/exe`, so a rebuild mid-session cannot swap the code (elsewhere a changed binary stops the session); a debug build loses L1 | recorded, gated (L1) |
 | Host | the same binary differs by 17–20 % across hosts | the host capsule's stable facts hash to the class id; wall-clock ratios are formed only inside one session | recorded, controlled |
 | What each method counts | one tool counts additions, another wall time, another instructions | one `CountedGroup` ledger for every method; native work the unit does not charge is counted as `*_uncharged` and makes the total a lower bound (§7) | controlled |
 | Pricing drift | per-run measured ratios repriced identical runs by up to 8 % | IC native work is priced only at the repository's pinned ratios (`docs/ic/calibration.json`); a unit without one stays unpriced, never host-measured; an algebraic solver's wall-priced work is taken back out | controlled |

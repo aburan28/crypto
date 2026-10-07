@@ -42,10 +42,21 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_four_policy_sparse16_20261004
-      - name: Restore the measured Cargo manifest and lockfile
+      - name: Restore the measured source tree, manifest and lockfile
         run: |
           note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
-          cp "$note/SOURCE_Cargo.toml" Cargo.toml
+          measured=7039ab0b2940ac55809da62c91361b8082625716
+          git fetch --no-tags --depth=1 origin "$measured"
+          rm -rf src
+          git checkout "$measured" -- Cargo.toml src \
+            examples/n37_four_policy_sparse16_prepare.rs \
+            examples/n37_four_policy_sparse16_inputs_replay.rs \
+            examples/n37_four_policy_sparse16_pdp.rs \
+            examples/n37_four_policy_sparse16_pdp_replay.rs \
+            examples/support/n37_policy_common.rs \
+            docs/curves/registry.json docs/ecbench/schema.sql \
+            docs/ic/calibration.json docs/ic/boundary_targets.json
+          cmp Cargo.toml "$note/SOURCE_Cargo.toml"
           cp "$note/Cargo.lock" Cargo.lock
       - name: Check source lock and formatting
         run: |

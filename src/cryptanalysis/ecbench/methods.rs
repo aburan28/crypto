@@ -152,6 +152,30 @@ pub fn registry() -> &'static [MethodDecl] {
             ],
         },
         MethodDecl {
+            id: "rho.signed_frobenius_strong_escape",
+            family: "rho",
+            summary: "the strong reference with fruitless cycles escaped by doubling instead of abandoned: identical walks until a cycle, so long distinguished-point walks (the large dp_bits a table at m = 83 needs) survive; A = 2n, Koblitz curves only",
+            entry: "koblitz_strong_rho::StrongRho::solve (escape_fruitless)",
+            applies: Applies::KoblitzOnly,
+            params: &[
+                ParamDecl {
+                    name: "lanes",
+                    default: Some("32"),
+                    help: "walks advanced in lockstep (batch-inversion width)",
+                },
+                ParamDecl {
+                    name: "dp_bits",
+                    default: Some("4"),
+                    help: "distinguished-point bits; the table holds about steps / 2^dp_bits entries",
+                },
+                ParamDecl {
+                    name: "step_cap_factor",
+                    default: Some("2000"),
+                    help: "give up after this multiple of the ideal step count",
+                },
+            ],
+        },
+        MethodDecl {
             id: "bsgs.textbook",
             family: "bsgs",
             summary: "baby table of m = ⌈√r⌉ steps first, then giant steps; worst 2√r, mean 1.5√r",
@@ -344,7 +368,9 @@ pub fn expected_s(id: &str, a_available: u32) -> Option<f64> {
     match id {
         "rho.frozen_reference" | "rho.plain" => Some((PI / 2.0).sqrt()),
         "rho.negation" => Some((PI / 4.0).sqrt()),
-        "rho.signed_frobenius" | "rho.signed_frobenius_strong" => {
+        "rho.signed_frobenius"
+        | "rho.signed_frobenius_strong"
+        | "rho.signed_frobenius_strong_escape" => {
             Some((PI / (2.0 * a_available.max(1) as f64)).sqrt())
         }
         "bsgs.textbook" => Some(1.5),
@@ -793,10 +819,12 @@ fn solve_wide(
     seed: u64,
 ) -> Result<SolveReport, String> {
     match m.id.as_str() {
-        "rho.signed_frobenius_strong" => solve_strong_wide(m, wi, tx, ty, seed),
+        "rho.signed_frobenius_strong" | "rho.signed_frobenius_strong_escape" => {
+            solve_strong_wide(m, wi, tx, ty, seed)
+        }
         "claw.pair_table" => solve_claw_wide(m, wi, tx, ty, seed),
         other => Err(format!(
-            "`{other}` has no wide-field implementation; on a curve past one word (n = {}) only rho.signed_frobenius_strong and claw.pair_table run",
+            "`{other}` has no wide-field implementation; on a curve past one word (n = {}) only the strong rho (with or without the escape) and claw.pair_table run",
             wi.kc.n
         )),
     }
@@ -872,7 +900,10 @@ fn solve_inner(
         (Instance::Binary(i), "ic") => {
             solve_ic_binary(m, i, curve, FastPoint::affine(tx, ty), seed)
         }
-        (Instance::Binary(i), _) if m.id == "rho.signed_frobenius_strong" => {
+        (Instance::Binary(i), _)
+            if m.id == "rho.signed_frobenius_strong"
+                || m.id == "rho.signed_frobenius_strong_escape" =>
+        {
             solve_strong(m, i, FastPoint::affine(tx, ty), seed)
         }
         (Instance::Binary(i), "claw") => solve_claw(m, i, FastPoint::affine(tx, ty), seed),
@@ -1097,7 +1128,8 @@ fn online_window(family: &str, id: &str, snap: &Snapshot) -> Option<OnlineWindow
                 w.phases_ns.insert((*name).to_string(), *ns);
             }
         }
-        let strong = id == "rho.signed_frobenius_strong";
+        let strong =
+            id == "rho.signed_frobenius_strong" || id == "rho.signed_frobenius_strong_escape";
         w.start_event = if strong {
             "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)".into()
         } else {
@@ -1256,6 +1288,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         lanes: param_u64(m, "lanes")?.max(1) as usize,
         dp_bits: param_u64(m, "dp_bits")? as u32,
         step_cap_factor: param_u64(m, "step_cap_factor")?,
+        escape_fruitless: m.id == "rho.signed_frobenius_strong_escape",
     };
     if params.dp_bits >= 32 {
         return Err("dp_bits must be below 32".into());
@@ -1333,6 +1366,11 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         ("table_inserts_uncharged", c.table_inserts),
     ] {
         counters.insert(k.to_string(), v);
+    }
+    // Only the escaping variant has escapes; the reference's counter set is
+    // left exactly as its committed records have it.
+    if params.escape_fruitless {
+        counters.insert("fruitless_escapes".to_string(), o.escapes);
     }
     Ok(SolveReport {
         recovered: Some(o.scalar.to_u128()),

@@ -4,11 +4,11 @@
  "what_this_is": "A searchable index of the curves, methods, factor bases, candidate identities, tournament rounds and ecbench sessions this repository names, joined on the identities it already computes (ICV1 slugs, EC1 aliases, ECM1 method ids, FB1 factor-base ids, IC1 candidate ids). Every figure is quoted from a committed file named in `sources` or in the row; nothing is computed here beyond means over a session's own verified runs.",
  "counts": {
   "curves": 130,
-  "methods": 46,
+  "methods": 49,
   "factor_bases": 29,
   "candidates": 258,
   "rounds": 30,
-  "sessions": 27,
+  "sessions": 28,
   "yields": 1956
  },
  "sources": {
@@ -25,6 +25,7 @@
   "research/ecbench_calibration_20261002/sessions/followup-prime/records.jsonl": "87a60d048f8cb81bd302e560ae5dd4de197fb649599c214a1fb33fc3c0ef8c56",
   "research/ecbench_calibration_20261002/sessions/koblitz/records.jsonl": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
   "research/ecbench_calibration_20261002/sessions/prime/records.jsonl": "6945241ed68dbcfa2e1e8e86e2af6fc3879d69eb689ea5b6a72215054149d362",
+  "research/ecbench_m83_rho_20261005/sessions/calibration/records.jsonl": "8977db2d19cb027baa4d0e2b704b2c7eed026eea0380bd5f3cb4fba3c727827d",
   "research/ecbench_n37_k8_k16_20261004/sessions/mac_arm64_l0_01/records.jsonl": "d639e9a9ff8c5d152291bcae0683c070cd7a130b4359a27f59a25c5df06ca284",
   "research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/records.jsonl": "d7cddb33e59f86460acbe77e87d3e68ce0cfbf4c6fb46c0647bd9643072303fd",
   "research/ecbench_n37_online_ir_20261004/sessions/mac_arm64_l0_01/records.jsonl": "60838cb661b6df9ba801cca089975ce0d6bca259e1bb18f148461340fbe0f169",
@@ -7808,6 +7809,46 @@
    ],
    "ecbench": [
     {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.119,
+     "mean_ratio_to_floor": 0.977
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1063,
+     "mean_ratio_to_floor": 0.873
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.125,
+     "mean_ratio_to_floor": 1.027
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1099,
+     "mean_ratio_to_floor": 0.903
+    },
+    {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
      "method": "bsgs.negation",
@@ -8084,6 +8125,46 @@
    ],
    "ecbench": [
     {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1123,
+     "mean_ratio_to_floor": 0.973
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1059,
+     "mean_ratio_to_floor": 0.918
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1245,
+     "mean_ratio_to_floor": 1.079
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1055,
+     "mean_ratio_to_floor": 0.915
+    },
+    {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
      "method": "bsgs.negation",
@@ -8259,6 +8340,46 @@
     }
    ],
    "ecbench": [
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp10",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1176,
+     "mean_ratio_to_floor": 1.036
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp4",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.1275,
+     "mean_ratio_to_floor": 1.123
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "escape-dp8",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.126,
+     "mean_ratio_to_floor": 1.111
+    },
+    {
+     "session_id": "ECBS1ha38a29e8e509",
+     "arm": "rho-strong",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07",
+     "runs": 24,
+     "verified": 24,
+     "mean_s": 0.127,
+     "mean_ratio_to_floor": 1.119
+    },
     {
      "session_id": "ECBS1ha960fa84a3c2",
      "arm": "bsgs-neg",
@@ -20058,6 +20179,7 @@
     "ECBS1h0d1ce1d04e54",
     "ECBS1h5eaf9eef9f25",
     "ECBS1h6302265165a5",
+    "ECBS1ha38a29e8e509",
     "ECBS1ha960fa84a3c2",
     "ECBS1hb0cb85a662d8",
     "ECBS1hf4c34c2455f9"
@@ -20075,8 +20197,71 @@
     "icv1-f2m59-tm943548413-98844ecc",
     "icv1-f2m61-t158598901-ab42b6c5"
    ],
-   "runs": 1069,
-   "verified": 1069
+   "runs": 1141,
+   "verified": 1141
+  },
+  {
+   "method_id": "ECM1h3ed103818d38",
+   "method_sha256": "3ed103818d387757129913d713592eb2b7b27e406cebf306d1dd951b969ced83",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "10",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
+  },
+  {
+   "method_id": "ECM1h8629e993c452",
+   "method_sha256": "8629e993c4525f72860a30681a8b26fa3071bbed89c21cc52622f6b839c44907",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "8",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
+  },
+  {
+   "method_id": "ECM1hcd1c05c08f3e",
+   "method_sha256": "cd1c05c08f3eb2ebfc86a2b71742677cc846c7bdfe547db21616f96feb6455dd",
+   "method": "rho.signed_frobenius_strong_escape",
+   "family": "rho",
+   "params": {
+    "dp_bits": "4",
+    "lanes": "32",
+    "step_cap_factor": "2000"
+   },
+   "sessions": [
+    "ECBS1ha38a29e8e509"
+   ],
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "runs": 72,
+   "verified": 72
   }
  ],
  "factor_bases": [
@@ -30914,6 +31099,52 @@
      "role": "baseline",
      "method": "rho.plain",
      "method_id": "ECM1hb367476fce6c"
+    }
+   ]
+  },
+  {
+   "session_id": "ECBS1ha38a29e8e509",
+   "dir": "research/ecbench_m83_rho_20261005/sessions/calibration",
+   "label": "escape-variant calibration on the three largest one-word Koblitz curves",
+   "status": "complete",
+   "spec_id": "ECS1hc00c9520e77b",
+   "env_class_id": "ECBENV2h59034d4cd61b",
+   "binary_sha256": "1e6b5f877ffe41f16c2f84f71e7d6a53dbb1fbaceac9d5bc7ebdc56b2d3e27a8",
+   "git_commit": "1b518f86635bfd3ce6f35e916bbb4418690cb89b",
+   "records": 288,
+   "status_counts": {
+    "verified": 288
+   },
+   "started_unix_ms": 1791219000397,
+   "curves": [
+    "icv1-f2m53-tm56619371-dac20a85",
+    "icv1-f2m59-tm943548413-98844ecc",
+    "icv1-f2m61-t158598901-ab42b6c5"
+   ],
+   "arms": [
+    {
+     "arm": "escape-dp10",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h3ed103818d38"
+    },
+    {
+     "arm": "escape-dp4",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1hcd1c05c08f3e"
+    },
+    {
+     "arm": "escape-dp8",
+     "role": "candidate",
+     "method": "rho.signed_frobenius_strong_escape",
+     "method_id": "ECM1h8629e993c452"
+    },
+    {
+     "arm": "rho-strong",
+     "role": "reference",
+     "method": "rho.signed_frobenius_strong",
+     "method_id": "ECM1hb6123afffc07"
     }
    ]
   },

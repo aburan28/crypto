@@ -184,13 +184,7 @@ pub fn git_commit() -> Option<String> {
 }
 
 fn compute_git_commit() -> Option<String> {
-    // Release/install jobs set the repository-neutral override explicitly.
-    // GitHub Actions already exports its exact checkout SHA.  Keeping this in
-    // `option_env!` avoids a root build script, whose inputs would otherwise
-    // need to enter every source-bound research manifest in the repository.
-    option_env!("CRYPTO_BUILD_GIT_COMMIT")
-        .or(option_env!("GITHUB_SHA"))
-        .map(str::to_owned)
+    crypto_lib::build_provenance::git_commit().map(str::to_owned)
 }
 
 fn compute_binary_hash() -> Option<String> {
@@ -537,7 +531,9 @@ fn main() -> ExitCode {
     // Generated parameter documents remain directly importable under their strict schema.
     if report.get("operation").is_some() {
         report["software"] = json!({"version":env!("CARGO_PKG_VERSION"),"os":std::env::consts::OS,
-            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash(),"git_commit":git_commit()});
+            "arch":std::env::consts::ARCH,"binary_blake3":binary_hash(),"git_commit":git_commit(),
+            "git_dirty":crypto_lib::build_provenance::git_dirty(),
+            "git_commit_source":crypto_lib::build_provenance::source()});
     }
     let success = matches!(
         report["status"].as_str(),
