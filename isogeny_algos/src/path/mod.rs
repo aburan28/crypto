@@ -5,4 +5,5 @@ pub mod endo;
 pub mod galbraith;
 pub mod ghs;
 pub mod graph;
+pub mod relation;
 pub mod volcano;

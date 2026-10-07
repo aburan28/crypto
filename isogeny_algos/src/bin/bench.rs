@@ -1941,6 +1941,149 @@ fn bench_phi(o: &mut Out) {
     }
 }
 
+/// Radical isogenies (CDV 2020) vs Velu steps on CSIDH-512.
+fn bench_radical(o: &mut Out) {
+    use isogeny_algos::kernel::montgomery;
+    use isogeny_algos::kernel::radical::*;
+    let cs = Csidh::<FpM<8>>::csidh512();
+    let f = &cs.fp;
+    let mut rng = Rng::new(20_000);
+    let p1 = f.modulus().add_small(1);
+    let k = if o.quick { 16 } else { 64 };
+    for (ell, idx) in [(3u64, 0usize), (5, 1)] {
+        let e_root = root_exponent(f, ell).unwrap();
+        let ew = montgomery::to_weierstrass(f, f.zero());
+        let p = loop {
+            let r = random_point_f(f, &ew, &mut rng);
+            let p = pmul_big(f, &ew, &r, &p1.divrem_small(ell).0);
+            if p != Pt::Inf {
+                break p;
+            }
+        };
+        let (a1, a2, a3) = tangent_form(f, &ew, &p).unwrap();
+        let (b0, _) = if ell == 5 { tate_bc(f, a1, a2, a3) } else { (f.zero(), f.zero()) };
+        let chain = |f: &FpM<8>| {
+            if ell == 3 {
+                let mut cur = (a1, a3);
+                for _ in 0..k {
+                    cur = step3(f, cur.0, cur.1, &e_root);
+                }
+                weierstrass_j(f, model3(f, cur.0, cur.1))
+            } else {
+                let mut b = b0;
+                for _ in 0..k {
+                    b = step5(f, b, &e_root);
+                }
+                weierstrass_j(f, tate_model(f, b, b))
+            }
+        };
+        let jr = chain(f);
+        let mut e = vec![0i32; 74];
+        e[idx] = k as i32;
+        let ok = jr == montgomery::j_invariant(f, cs.action(f.zero(), &e, &mut rng));
+        let (m, mn, r) = time_it(if o.quick { 200 } else { 1000 }, 20, || chain(f));
+        o.rec(
+            "radical",
+            "radical_chain",
+            &[("ell", ell.to_string()), ("steps", k.to_string()), ("field", "CSIDH-512".to_string())],
+            &[("median_ns", m), ("min_ns", mn), ("reps", r as f64), ("ns_per_step", m / k as f64)],
+            ok,
+            "one N-th root (unique) per step; j equals CSIDH action l^k",
+        );
+        let (m, mn, r) = time_it(if o.quick { 200 } else { 1000 }, 20, || cs.action(f.zero(), &e, &mut rng.clone()));
+        o.rec(
+            "radical",
+            "velu_chain_csidh_steps",
+            &[("ell", ell.to_string()), ("steps", k.to_string()), ("field", "CSIDH-512".to_string())],
+            &[("median_ns", m), ("min_ns", mn), ("reps", r as f64), ("ns_per_step", m / k as f64)],
+            true,
+            "CSIDH stepwise action: per step a fresh point, cofactor ladder, Velu",
+        );
+        let (m, mn, r) = time_it(if o.quick { 200 } else { 1000 }, 20, || cs.action_fast(f.zero(), &e, &mut rng.clone()));
+        o.rec(
+            "radical",
+            "velu_chain_csidh_tree",
+            &[("ell", ell.to_string()), ("steps", k.to_string()), ("field", "CSIDH-512".to_string())],
+            &[("median_ns", m), ("min_ns", mn), ("reps", r as f64), ("ns_per_step", m / k as f64)],
+            true,
+            "CSIDH action_fast with only this prime: one point per isogeny (no batching gain)",
+        );
+    }
+}
+
+/// CSIDH relation lattice (CSI-FiSh style): class number, discrete logs, LLL, reduced action.
+fn bench_relation(o: &mut Out) {
+    use isogeny_algos::path::relation::relation_lattice;
+    let mut rng = Rng::new(21_000);
+    let ns: &[usize] = if o.quick { &[8] } else { &[6, 8, 10, 12, 14] };
+    for &n in ns {
+        let Some(cs) = Csidh::with_n_primes(n) else { continue };
+        let p = cs.p() as i128;
+        let t0 = Instant::now();
+        let mut method = "cyclic_dlog";
+        let mut rl = relation_lattice(p, &cs.primes);
+        if rl.is_none() {
+            method = "explicit_subgroup";
+            rl = isogeny_algos::path::relation::relation_lattice_explicit(p, &cs.primes, 20_000_000);
+        }
+        let t_rl = t0.elapsed().as_nanos() as f64;
+        let Some(rl) = rl else {
+            o.rec("relation", "relation_lattice", &[("n_primes", n.to_string())], &[("ns", t_rl)], false, "no element of order h and the group is too large for the explicit method");
+            continue;
+        };
+        let ok = rl.basis.iter().take(3).all(|v| cs.action_fast(0, &v.iter().map(|&x| x as i32).collect::<Vec<_>>(), &mut rng) == 0);
+        let maxnorm = rl.basis.iter().map(|v| v.iter().map(|x| x.abs()).sum::<i64>()).max().unwrap();
+        o.rec(
+            "relation",
+            "relation_lattice",
+            &[("n_primes", n.to_string()), ("p_bits", (128 - p.leading_zeros()).to_string()), ("method", method.to_string())],
+            &[("ns", t_rl), ("class_number", rl.h as f64), ("max_l1_basis", maxnorm as f64)],
+            ok,
+            "h by BSGS around the analytic estimate; dlogs by BSGS; LLL; basis vectors act trivially (3 checked)",
+        );
+        // random classes [l_1]^a: reduced vector vs the naive (a, 0, ..., 0)
+        let samples = 10;
+        let (mut l1_red, mut t_red, mut t_naive) = (0f64, 0f64, 0f64);
+        let mut ok = true;
+        for _ in 0..samples {
+            let a = rng.below(rl.h as u64) as i128;
+            // a class: [l_1]^a (cyclic case) or a random exponent vector of l1 norm ~ h/2
+            let v = if rl.logs.is_empty() {
+                let e: Vec<i64> = (0..n).map(|i| if i == 0 { a as i64 } else { rng.below(1000) as i64 }).collect();
+                rl.reduce(&e)
+            } else {
+                rl.vector_of(a)
+            };
+            l1_red += v.iter().map(|x| x.abs()).sum::<i64>() as f64;
+            let vi: Vec<i32> = v.iter().map(|&x| x as i32).collect();
+            let t0 = Instant::now();
+            let ar = cs.action_fast(0, &vi, &mut rng);
+            t_red += t0.elapsed().as_nanos() as f64;
+            if rl.h <= 50_000 && !rl.logs.is_empty() {
+                let mut e1 = vec![0i32; n];
+                e1[0] = a as i32;
+                let t0 = Instant::now();
+                let an = cs.action_fast(0, &e1, &mut rng);
+                t_naive += t0.elapsed().as_nanos() as f64;
+                ok &= an == ar;
+            }
+        }
+        o.rec(
+            "relation",
+            "reduced_class_action",
+            &[("n_primes", n.to_string())],
+            &[
+                ("mean_l1_reduced", l1_red / samples as f64),
+                ("mean_ns_reduced", t_red / samples as f64),
+                ("mean_ns_naive_l1_power", if rl.h <= 50_000 { t_naive / samples as f64 } else { -1.0 }),
+                ("mean_l1_naive", rl.h as f64 / 2.0),
+            ],
+            ok,
+            "class [l_1]^a, a uniform mod h: Babai-reduced exponent vector vs l_1^a; equal curves where both run",
+        );
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let quick = args.iter().any(|a| a == "--quick");
@@ -1979,6 +2122,8 @@ fn main() {
             "quat" => bench_quat(&mut o),
             "genus2" => bench_genus2(&mut o),
             "phi" => bench_phi(&mut o),
+            "radical" => bench_radical(&mut o),
+            "relation" => bench_relation(&mut o),
             "big" => {
                 let ells: &[u64] = if o.quick { &[3, 31, 401] } else { &[3, 5, 7, 13, 31, 101, 401, 1009, 4001, 10007] };
                 bench_big_field::<4>(&mut o, 256, ells, 14_000);
