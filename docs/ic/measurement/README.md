@@ -407,8 +407,9 @@ audits that too.
 
 Every session records:
 
-- the repository commit, dirty flag, dirty paths and the sha256 of the
-  uncommitted diff;
+- the source commit embedded in the measuring binary, its build-declared dirty
+  flag when supplied, and any runtime worktree commit separately as a
+  diagnostic fallback;
 - the sha256 of every ICMS source file, the registry and `isolated_bench.py`;
 - per producer, the binary sha256, the compiled-in `docs/ic/calibration.json`
   hash, and the `Cargo.lock` present at build;
@@ -418,11 +419,16 @@ Gaps this standard records but does not close:
 
 - **No pinned toolchain.** The repository has no `rust-toolchain.toml`, and
   CI installs a floating `stable`.
-- **Unpinned dependency versions.** `Cargo.lock` is gitignored, so they are
-  pinned only in the build tree a session saw.
-- **Wrong commit in `ic` reports.** An `ic` report's `commit` is the working
-  directory's HEAD at start-up, not the commit the binary was built from. Use
-  the binary hash.
+
+The former wrong-commit gap is closed for `ic` and `ecbench`: release and
+installation builds embed `CRYPTO_BUILD_GIT_COMMIT` (with `GITHUB_SHA` as the
+CI fallback), and reports retain the executable hash beside it. An unbound
+developer build of `ecbench` labels a runtime-worktree fallback explicitly;
+it is never allowed to override an embedded commit.
+
+The former dependency-resolution gap is also closed for released binaries:
+the root `Cargo.lock` is tracked and the cross-platform release build uses
+`--locked`. Separate research crates retain their own frozen lockfiles.
 
 ## 12. Adapters
 

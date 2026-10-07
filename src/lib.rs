@@ -20,6 +20,7 @@
 pub mod asymmetric;
 pub mod binary_ecc;
 pub mod bls12_381;
+pub mod build_provenance;
 pub mod cryptanalysis;
 pub mod cryptopals;
 pub mod ct_bignum;
