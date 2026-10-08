@@ -93,6 +93,62 @@ pub fn step5<F: Field>(f: &F, b: F::E, e5: &Big) -> F::E {
     f.div(f.mul(a, num), den)
 }
 
+/// Evaluate an integer-coefficient polynomial (low->high degree) at t over F.
+fn ipoly<F: Field>(f: &F, coeffs: &[i64], t: F::E) -> F::E {
+    let mut acc = f.zero();
+    for &c in coeffs.iter().rev() {
+        let cc = if c >= 0 { f.from_u64(c as u64) } else { f.neg(f.from_u64((-c) as u64)) };
+        acc = f.add(f.mul(acc, t), cc);
+    }
+    acc
+}
+
+/// X_1(7) family in Tate normal form: parameter t gives b = t^3 - t^2, c = t^2 - t
+/// (the order-7 locus b^2 - b c - c^3 = 0, parametrised through the node). P = (0,0) has order 7.
+pub fn family7<F: Field>(f: &F, t: F::E) -> (F::E, F::E) {
+    let t2 = f.mul(t, t);
+    let t3 = f.mul(t2, t);
+    (f.sub(t3, t2), f.sub(t2, t)) // (b, c)
+}
+
+/// One radical 7-isogeny step on the X_1(7) parameter t. The radicand is rho = t (t-1)^2 and
+/// alpha = rho^(1/7) (unique when gcd(7, q-1) = 1, via e7 = 7^-1 mod q-1); then
+///   t' = ( P0(t) + P1 alpha + ... + P6 alpha^6 ) / D(t),
+/// with the integer polynomials below (derived in this work: radicand from the discriminant
+/// ramification and the F_7 split-locus, update map by rational reconstruction, cross-checked
+/// against the degree-7 modular correspondence and the Velu 7-isogeny orbit). The chain follows
+/// the P-distinguished direction and is non-backtracking.
+pub fn step7<F: Field>(f: &F, t: F::E, e7: &Big) -> F::E {
+    // rho = t (t-1)^2
+    let tm1 = f.sub(t, f.one());
+    let rho = f.mul(t, f.mul(tm1, tm1));
+    let a = f.pow_big(rho, e7); // alpha
+    // numerator coefficients P_k(t) (cleared by *7); denominator D(t) likewise.
+    const D: [i64; 5] = [1, 4, -13, 9, -1];
+    const P: [&[i64]; 7] = [
+        &[0, 12, -28, 19, -3],
+        &[1, 0, -6, 5],
+        &[2, -14, 16, -4],
+        &[0, -7, 7],
+        &[-5, 9, -3],
+        &[-4, 10, -1],
+        &[7],
+    ];
+    let mut num = f.zero();
+    let mut ak = f.one(); // alpha^k
+    for pk in P.iter() {
+        num = f.add(num, f.mul(ipoly(f, pk, t), ak));
+        ak = f.mul(ak, a);
+    }
+    f.div(num, ipoly(f, &D, t))
+}
+
+/// Tate-normal-form Weierstrass coefficients of the X_1(7) family member with parameter t.
+pub fn model7<F: Field>(f: &F, t: F::E) -> [F::E; 5] {
+    let (b, c) = family7(f, t);
+    tate_model(f, b, c)
+}
+
 /// Weierstrass coefficients of the N = 3 model and of the Tate normal form.
 pub fn model3<F: Field>(f: &F, a1: F::E, a3: F::E) -> [F::E; 5] {
     [a1, f.zero(), a3, f.zero(), f.zero()]

@@ -1970,7 +1970,7 @@ fn bench_radical(o: &mut Out) {
     let mut rng = Rng::new(20_000);
     let p1 = f.modulus().add_small(1);
     let k = if o.quick { 16 } else { 64 };
-    for (ell, idx) in [(3u64, 0usize), (5, 1)] {
+    for (ell, idx) in [(3u64, 0usize), (5, 1), (7, 2)] {
         let e_root = root_exponent(f, ell).unwrap();
         let ew = montgomery::to_weierstrass(f, f.zero());
         let p = loop {
@@ -1982,6 +1982,12 @@ fn bench_radical(o: &mut Out) {
         };
         let (a1, a2, a3) = tangent_form(f, &ew, &p).unwrap();
         let (b0, _) = if ell == 5 { tate_bc(f, a1, a2, a3) } else { (f.zero(), f.zero()) };
+        let t0 = if ell == 7 {
+            let (b, c) = tate_bc(f, a1, a2, a3);
+            f.div(b, c)
+        } else {
+            f.zero()
+        };
         let chain = |f: &FpM<8>| {
             if ell == 3 {
                 let mut cur = (a1, a3);
@@ -1989,18 +1995,29 @@ fn bench_radical(o: &mut Out) {
                     cur = step3(f, cur.0, cur.1, &e_root);
                 }
                 weierstrass_j(f, model3(f, cur.0, cur.1))
-            } else {
+            } else if ell == 5 {
                 let mut b = b0;
                 for _ in 0..k {
                     b = step5(f, b, &e_root);
                 }
                 weierstrass_j(f, tate_model(f, b, b))
+            } else {
+                let mut t = t0;
+                for _ in 0..k {
+                    t = step7(f, t, &e_root);
+                }
+                weierstrass_j(f, model7(f, t))
             }
         };
         let jr = chain(f);
         let mut e = vec![0i32; 74];
+        // the chain walks l^{+k} or l^{-k}; pick the sign that matches
         e[idx] = k as i32;
-        let ok = jr == montgomery::j_invariant(f, cs.action(f.zero(), &e, &mut rng));
+        let mut ok = jr == montgomery::j_invariant(f, cs.action(f.zero(), &e, &mut rng));
+        if !ok {
+            e[idx] = -(k as i32);
+            ok = jr == montgomery::j_invariant(f, cs.action(f.zero(), &e, &mut rng));
+        }
         let (m, mn, r) = time_it(if o.quick { 200 } else { 1000 }, 20, || chain(f));
         o.rec(
             "radical",

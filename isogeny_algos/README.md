@@ -16,7 +16,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 
 | Problem | Algorithms (module under `src/`) |
 |---|---|
-| kernel → isogeny | Vélu, odd (V1) and any subgroup (V2) `kernel/velu.rs` · Kohel, odd (V1) and even (V2) `kernel/kohel.rs` · x-only Vélu `kernel/xonly.rs` · Montgomery x-only Vélu, affine (V2) and projective (A24:C24) (V3) `kernel/montgomery.rs` · ℓⁿ chains with naive / balanced / cost-model strategies `kernel/chain.rs` (V2) · **√élu with product and remainder trees, Weierstrass `kernel/sqrt_velu.rs` and Montgomery `kernel/sqrt_velu_mont.rs`** · **twisted Edwards and Huff isogenies (Moody–Shumow)** `kernel/models.rs` · **radical 3- and 5-isogenies (Castryck–Decru–Vercauteren)** `kernel/radical.rs` · **twisted Hessian isogenies** `kernel/hessian.rs` · **Montgomery 2-/4-isogeny 2ᵉ chains with optimal strategies (SIKE formulas)** `kernel/two_power.rs` · **char-2 Vélu and Kohel** `binary.rs` · **general-Weierstrass Vélu, any characteristic (char 3 over GF(3ⁿ))** `weier.rs`, `gf3n.rs` (V3) |
+| kernel → isogeny | Vélu, odd (V1) and any subgroup (V2) `kernel/velu.rs` · Kohel, odd (V1) and even (V2) `kernel/kohel.rs` · x-only Vélu `kernel/xonly.rs` · Montgomery x-only Vélu, affine (V2) and projective (A24:C24) (V3) `kernel/montgomery.rs` · ℓⁿ chains with naive / balanced / cost-model strategies `kernel/chain.rs` (V2) · **√élu with product and remainder trees, Weierstrass `kernel/sqrt_velu.rs` and Montgomery `kernel/sqrt_velu_mont.rs`** · **twisted Edwards and Huff isogenies (Moody–Shumow)** `kernel/models.rs` · **radical 3-, 5- and 7-isogenies (Castryck–Decru–Vercauteren; N = 7 derived here)** `kernel/radical.rs` · **twisted Hessian isogenies** `kernel/hessian.rs` · **Montgomery 2-/4-isogeny 2ᵉ chains with optimal strategies (SIKE formulas)** `kernel/two_power.rs` · **char-2 Vélu and Kohel** `binary.rs` · **general-Weierstrass Vélu, any characteristic (char 3 over GF(3ⁿ))** `weier.rs`, `gf3n.rs` (V3) |
 | (E, Ẽ) → isogeny | Padé on the ℘-series (V1) `find/elkies.rs` · the BMSS family: linear algebra, Stark, Atkin, Atkin + modular composition, Elkies 1992, Elkies 1998, fastElkies, fastElkies′, and σ from Φ's second derivatives (V2) `find/bmss.rs` |
 | (E, ℓ) → ℓ-isogenies | Φ_ℓ roots + Elkies codomain (V1) · division-polynomial factoring (V1; char 2 V3) · **Φ_ℓ by Hecke operators and Newton's identities; integer Φ_ℓ by CRT, Φ_ℓ mod 2** `find/modpoly.rs` (V3) · **Schoof–Elkies–Atkin point counting with isogeny cycles (t mod ℓᵏ) and BSGS recombination** `find/sea.rs` (V3) |
 | (E₁, E₂) → isogeny | Galbraith BFS, GHS, Kohel volcano walk, Couveignes MITM (ordinary), Delfs–Galbraith (V1) · Galbraith–Stolbunov weighted walk, CSIDH action + MITM + ideal orders (V2) `path/*` · **CSIDH-512 with CLMPR batching and a projective tree strategy; relation lattice / class-group structure; paths on binary curves through any neighbour oracle** (V3) `path/csidh.rs`, `path/relation.rs`, `path/graph.rs` |
@@ -26,7 +26,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 89 tests, all pass)
+## Correctness checks (`cargo test --release`: 90 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -48,7 +48,7 @@ Added in V3:
   superspecial graph's vertex counts equal Ibukiyama–Katsura–Oort (11 primes) and h(h+1)/2;
 * Hecke/Newton Φ_ℓ = linear-algebra Φ_ℓ (ℓ ≤ 23 in tests, ≤ 43 in the bench) and = the CRT integer
   coefficients; SEA = BSGS group order at 40 and 61 bits;
-* radical chains on CSIDH-512 = the CSIDH action 𝔩₃ᵏ, 𝔩₅ᵏ; relation-lattice vectors act trivially;
+* radical chains on CSIDH-512 = the CSIDH action 𝔩₃ᵏ, 𝔩₅ᵏ, 𝔩₇ᵏ; relation-lattice vectors act trivially;
 * Edwards and Huff codomains have the j of the Weierstrass/Montgomery Vélu codomain; images lie on
   the codomain; the maps are homomorphisms; Hessian isogenies (ℓ = 5..17) send the kernel to the
   identity, land on the codomain given by the derived formula, are homomorphisms, and the codomain
@@ -102,9 +102,11 @@ Selected V3 measurements (medians unless stated; all records `verified: true`):
 * **CSIDH-512, exponents in [−5, 5]⁷⁴**: 81 ms (CLMPR batched, before the field work; commit message) →
   49.3 ms (CLMPR) → 34.2 ms (projective tree strategy, `p1-csidh.jsonl`) → 32.2 ms (tree strategy with the
   assembly multiplier, `p7-csidh-adx.jsonl`; CLMPR 46.2 ms in the same run).
-* **Radical vs Vélu steps on CSIDH-512**: ℓ = 3: 59 µs per step vs 1.16 ms (stepwise CSIDH: fresh
-  point, cofactor ladder, Vélu), 19.6×; ℓ = 5: 70 µs vs 987 µs, 14.1×. Radical steps apply only to
-  N = 3, 5 here.
+* **Radical vs Vélu steps on CSIDH-512** (`p6-radical.jsonl`, one run): ℓ = 3: 51.6 µs per step vs
+  1.04 ms (stepwise CSIDH: fresh point, cofactor ladder, Vélu), 20.2×; ℓ = 5: 60.6 µs vs 899 µs,
+  14.8×; ℓ = 7: 66.1 µs vs 770 µs, 11.7× — each verified against the CSIDH action 𝔩ₙᵏ. The N = 7
+  radicand ρ(t) = t(t−1)² and update map were derived in this work (see SURVEY) and additionally
+  checked against Φ₇ over an ordinary field.
 * **Montgomery √élu vs projective Vélu, codomain only**: 511 bits ℓ = 1009 1.02×, 4001 1.41×,
   10007 1.62×; 256 bits ℓ = 10007 1.51×; below ℓ ≈ 1000 Vélu is faster (ℓ = 101: 40 vs 62 µs).
   Weierstrass √élu (three power sums) is slower than x-only Vélu at 256 bits for every ℓ measured and
@@ -162,7 +164,7 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   instance, (ℓ,ℓ)-isogenies for odd ℓ, SQIsign2D. The Kani *split decision* is implemented in dimension 2
   (up to 360-bit p) and dimension 4 (arbitrary auxiliary degree via four squares); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
   over F_{p⁴}); isogeny cycles for Atkin primes; Couveignes 1996 p-torsion, Lercier, Lercier–Sirvent for
-  (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5; Jacobi-quartic models;
+  (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
   Sutherland-style Φ_ℓ. Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
