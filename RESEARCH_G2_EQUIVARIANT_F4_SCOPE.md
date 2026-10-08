@@ -148,13 +148,14 @@ the same matrices is in §3.2.
 Same matrices, same process, two repeats; the control is the full Macaulay
 rank through `koblitz_groebner::macaulay_profile` (the crate's `rref_f2`
 kernel); the equivariant side is the trivial block (`F₂`, word-parallel) plus
-the character blocks with *naive* shift-and-add `F_{2^d}` multiplication.
+the character blocks with shift-and-add `F_{2^d}` multiplication in the first three rows and log/antilog tables in the last (the block side is then dominated by orbit bookkeeping and matrix assembly, not arithmetic).
 
 | n | d | degree | full `F₂` rank (s) | equivariant blocks (s) | ratio |
 |---:|---:|---:|---:|---:|---:|
 | 7 | 3 | 3 | 0.103 / 0.105 | 0.020 / 0.016 | 5.2× / 6.6× |
 | 11 | 10 | 2 | 0.002 / 0.001 | < 0.001 | ≈ 10× |
 | 11 | 10 | 3 | 1.770 / 1.740 | 0.077 / 0.047 | **22.9× / 36.9×** |
+| 11 | 10 | 3 (log/antilog tables for `F_{2^10}`) | 2.428 / 2.172 | 0.060 / 0.054 | **40.5× / 40.6×** |
 
 The ratio grows with `n` as the model predicts (blocks shrink like `n/ρ` per
 dimension) and this is before any of the obvious block-side speedups

@@ -352,11 +352,14 @@ fn fam_key(f: Fam, a: usize, b2: usize) -> (u8, usize, usize, u8) {
 // ── Block-rank milestone: F_{2^d} arithmetic and the character blocks ──
 
 /// Small binary field F_{2^d}, elements as u64 bit-polynomials, d ≤ 40.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 struct Gf {
     d: u32,
     /// Irreducible polynomial of degree d (bit d set).
     poly: u64,
+    /// log/antilog tables (d ≤ 16): exp[i] = g^i, log[x] = i.
+    exp: Vec<u32>,
+    log: Vec<u32>,
 }
 
 impl Gf {
@@ -368,17 +371,73 @@ impl Gf {
                 continue;
             }
             if Self::is_irreducible(f, d) {
-                return Gf { d, poly: f };
+                let mut g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
+                if d <= 16 {
+                    g.build_tables();
+                }
+                return g;
             }
         }
         panic!("no irreducible polynomial of degree {d}");
     }
+    /// Find a generator of the multiplicative group and tabulate it.
+    fn build_tables(&mut self) {
+        let order = (1u64 << self.d) - 1;
+        // factor the order for the generator test
+        let mut fs = Vec::new();
+        let mut m = order;
+        let mut q = 2u64;
+        while q * q <= m {
+            if m % q == 0 {
+                fs.push(q);
+                while m % q == 0 {
+                    m /= q;
+                }
+            }
+            q += 1;
+        }
+        if m > 1 {
+            fs.push(m);
+        }
+        let mut g = 2u64;
+        loop {
+            if fs.iter().all(|&f| self.pow_slow(g, order / f) != 1) {
+                break;
+            }
+            g += 1;
+        }
+        let size = 1usize << self.d;
+        let mut exp = vec![0u32; 2 * size];
+        let mut log = vec![0u32; size];
+        let mut x = 1u64;
+        for i in 0..(order as usize) {
+            exp[i] = x as u32;
+            log[x as usize] = i as u32;
+            x = self.mul_slow(x, g);
+        }
+        for i in (order as usize)..(2 * size) {
+            exp[i] = exp[i - order as usize];
+        }
+        self.exp = exp;
+        self.log = log;
+    }
+    fn pow_slow(&self, mut a: u64, mut e: u64) -> u64 {
+        let mut r = 1u64;
+        while e > 0 {
+            if e & 1 == 1 {
+                r = self.mul_slow(r, a);
+            }
+            a = self.mul_slow(a, a);
+            e >>= 1;
+        }
+        r
+    }
     fn is_irreducible(f: u64, d: u32) -> bool {
         // gcd(x^{2^i} − x, f) = 1 for i = 1..d/2
-        let g = Gf { d, poly: f };
+        let g = Gf { d, poly: f, exp: Vec::new(), log: Vec::new() };
         let mut x = 2u64; // x
         for _ in 1..=(d / 2) {
-            x = g.mul(x, x);
+            x = g.mul_slow(x, x);
             let t = x ^ 2;
             if Self::poly_gcd(t, f) != 1 {
                 return false;
@@ -401,7 +460,17 @@ impl Gf {
         a
     }
     #[inline]
-    fn mul(&self, mut a: u64, mut b: u64) -> u64 {
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        if !self.exp.is_empty() {
+            if a == 0 || b == 0 {
+                return 0;
+            }
+            return self.exp[(self.log[a as usize] + self.log[b as usize]) as usize] as u64;
+        }
+        self.mul_slow(a, b)
+    }
+    #[inline]
+    fn mul_slow(&self, mut a: u64, mut b: u64) -> u64 {
         let mut r = 0u64;
         while b != 0 {
             if b & 1 == 1 {
