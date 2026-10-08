@@ -1,0 +1,296 @@
+{
+  "comparisons": [
+    {
+      "candidate": "cold_context",
+      "candidate_over_baseline": 0.7046578768850851,
+      "ci95": [
+        0.6853904388059214,
+        0.7244669539325149
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.8752329013367931,
+      "native_wall_ci95": [
+        0.8534565377858502,
+        0.9080544042032114
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9262090012454345,
+        "n17a1": 0.8698066502992432,
+        "n19a0": 0.8512210101736439,
+        "n23a0": 0.8556979364745986
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.6856731793496592,
+        "n17a1": 0.6851078148515697,
+        "n19a0": 0.7286479070652335,
+        "n23a0": 0.720309990945007
+      },
+      "speedup": 1.4191283923773963
+    },
+    {
+      "candidate": "orbits1",
+      "eligible": false,
+      "reason": "unverified or unpriced workload"
+    },
+    {
+      "candidate": "orbits2",
+      "candidate_over_baseline": 0.35550279519217626,
+      "ci95": [
+        0.3005464977558143,
+        0.42410591214816407
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.7045031180973664,
+      "native_wall_ci95": [
+        0.6714856034254277,
+        0.7467832662470472
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.7642282453873498,
+        "n17a1": 0.6629391135743827,
+        "n19a0": 0.6968014673637156,
+        "n23a0": 0.6977918516688275
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.3140537786945164,
+        "n17a1": 0.28762015756909254,
+        "n19a0": 0.3772109646787268,
+        "n23a0": 0.4687749841876635
+      },
+      "speedup": 2.812917404656197
+    },
+    {
+      "candidate": "orbits3",
+      "candidate_over_baseline": 0.4041772048072705,
+      "ci95": [
+        0.35354654264404645,
+        0.46508269956843346
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.7231176799460617,
+      "native_wall_ci95": [
+        0.6945030962750772,
+        0.7526043828086543
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.7625991828717731,
+        "n17a1": 0.6851214475386053,
+        "n19a0": 0.7234259037290961,
+        "n23a0": 0.7233991026360085
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.3734286270959205,
+        "n17a1": 0.33472301999881704,
+        "n19a0": 0.4266676327401245,
+        "n23a0": 0.500385108860629
+      },
+      "speedup": 2.4741622934347425
+    },
+    {
+      "candidate": "orbits4",
+      "candidate_over_baseline": 0.45127351471730576,
+      "ci95": [
+        0.4111659751530944,
+        0.5025926683285639
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.7482020988339247,
+      "native_wall_ci95": [
+        0.7142108122353277,
+        0.7929248391324311
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.811948259757286,
+        "n17a1": 0.7384872898490554,
+        "n19a0": 0.7055871892106139,
+        "n23a0": 0.7407192325303481
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.43152085816845476,
+        "n17a1": 0.39655126837350696,
+        "n19a0": 0.45832193715429637,
+        "n23a0": 0.5287953177343425
+      },
+      "speedup": 2.2159510083955105
+    },
+    {
+      "candidate": "cube_root",
+      "eligible": false,
+      "reason": "unverified or unpriced workload"
+    }
+  ],
+  "failures": [
+    {
+      "arm": "orbits1",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n13a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "cube_root",
+      "case": "n17a1-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n19a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n19a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n19a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n23a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 0,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n23a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 1,
+      "status": "INVALID_OR_INCOMPLETE"
+    },
+    {
+      "arm": "orbits1",
+      "case": "n23a0-000",
+      "reason": "missing/nontrivial log matrix",
+      "repetition": 2,
+      "status": "INVALID_OR_INCOMPLETE"
+    }
+  ],
+  "process_wall_seconds_including_profiling": 56.31241219010553,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.3126252278508718,
+    "ci95": [
+      0.2700629444028719,
+      0.3692404455605075
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 0.6471888135033426,
+    "native_wall_ci95": [
+      0.6086984862312134,
+      0.6866940542538252
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 0.7008759821378777,
+      "n17a1": 0.6512164750859776,
+      "n19a0": 0.5951519157206208,
+      "n23a0": 0.6458469533449139
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 4,
+    "per_cell": {
+      "n13a0": 0.25630161096069803,
+      "n17a1": 0.28456315068083027,
+      "n19a0": 0.3251970671719951,
+      "n23a0": 0.4027350874377531
+    },
+    "speedup": 3.1987181804694886
+  },
+  "runs": 96,
+  "stage": "smoke",
+  "verified_runs": 78
+}

@@ -620,7 +620,7 @@ mod tests {
         assert_eq!(trap_row.magic_m, 1, "trapdoor factorisation gives m = 1");
         // Genus = 2^{m-1} − 1 in type-I (orbit closed) = 0 for m=1.
         // That's the "trivial" descent: E itself already over k.
-        assert_eq!(trap_row.genus, 0);
+        assert_eq!(trap_row.genus, num_bigint::BigUint::from(0u32));
 
         // ── (3) Pick P, d ──
         let curve = ECurve::new(big_n, irr.clone(), a.clone(), b.clone());
@@ -696,20 +696,6 @@ mod tests {
         }
         for c in &aff.f.coeffs {
             assert!(tower.is_in_subfield(c, l), "f has out-of-subfield coeff");
-        }
-    }
-}
-
-// ── Default impl for DescentRow (test scaffold) ──────────────────────
-
-impl Default for crate::cryptanalysis::ec_trapdoor::DescentRow {
-    fn default() -> Self {
-        Self {
-            n: 0,
-            l: 0,
-            magic_m: 0,
-            genus: 0,
-            type_i: false,
         }
     }
 }

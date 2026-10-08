@@ -1,0 +1,73 @@
+name: Koblitz Stage 102 n53 host-class panel
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage33_n41_unknown_scalar.py"
+      - "scripts/run_koblitz_stage102_host_class_panel.py"
+      - ".github/workflows/koblitz-stage102-host-class-panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate host-class panel controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage33_n41_unknown_scalar.py scripts/run_koblitz_stage102_host_class_panel.py
+          python3 scripts/run_koblitz_stage102_host_class_panel.py self-test
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import run_koblitz_stage33_n41_unknown_scalar as stage33
+          value = stage33.linux_host_identity()
+          stage33.validate_linux_host_identity(value)
+          print(value["cpu"]["model name"], value["identity_sha256"])
+          PY
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-host-class-panel:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage102_host_class_panel.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage102-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run host-identified five-pair panel
+        run: |
+          python3 scripts/run_koblitz_stage102_host_class_panel.py run \
+            --build "$RUNNER_TEMP/stage102-build" \
+            --output "$RUNNER_TEMP/stage102-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage102_host_class_panel.py verify \
+            --build "$RUNNER_TEMP/stage102-build" \
+            --output "$RUNNER_TEMP/stage102-run" \
+            > "$RUNNER_TEMP/stage102-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage102-host-class-panel-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage102-build
+            ${{ runner.temp }}/stage102-run
+            ${{ runner.temp }}/stage102-verification.json

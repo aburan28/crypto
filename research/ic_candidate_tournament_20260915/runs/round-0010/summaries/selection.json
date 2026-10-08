@@ -1,0 +1,100 @@
+{
+  "comparisons": [
+    {
+      "candidate": "lean_stdprobe",
+      "candidate_over_baseline": 1.000184630407139,
+      "ci95": [
+        1.0001501201451544,
+        1.000218679163048
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 1.0091222432205116,
+      "native_wall_ci95": [
+        0.9794426416190045,
+        1.0392557265151352
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9991788035637442,
+        "n17a1": 1.025033747331332,
+        "n19a0": 0.9941070541451156,
+        "n23a0": 1.0184989470074717
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 12,
+      "per_cell": {
+        "n13a0": 1.0002200542794237,
+        "n17a1": 1.0002149895535037,
+        "n19a0": 1.0001702576961544,
+        "n23a0": 1.0001332226119646
+      },
+      "speedup": 0.9998154036749558
+    },
+    {
+      "candidate": "lean_batch4",
+      "candidate_over_baseline": 1.0084384029120361,
+      "ci95": [
+        1.0012369887951464,
+        1.0213438535314552
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 1.0335500778484086,
+      "native_wall_ci95": [
+        0.992109914245767,
+        1.0872692538007878
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 1.0080569265985713,
+        "n17a1": 1.0566901585673216,
+        "n19a0": 0.9886937434816694,
+        "n23a0": 1.0835066706494372
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 12,
+      "per_cell": {
+        "n13a0": 1.0038778085469302,
+        "n17a1": 1.002256918828697,
+        "n19a0": 1.0023128822634844,
+        "n23a0": 1.0254967176308154
+      },
+      "speedup": 0.9916322078892783
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 52.79989210900226,
+  "provisional_challenger": "lean_stdprobe",
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.8110649172094495,
+    "ci95": [
+      1.7020451341064045,
+      1.9407927630361481
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 1.157948751145674,
+    "native_wall_ci95": [
+      1.10789593624324,
+      1.203840507315848
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0856246790501238,
+      "n17a1": 1.1720715757155713,
+      "n19a0": 1.1635803903193016,
+      "n23a0": 1.21430314529232
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 12,
+    "per_cell": {
+      "n13a0": 1.690659872968492,
+      "n17a1": 2.00447563671692,
+      "n19a0": 1.841182303240402,
+      "n23a0": 1.7241786066983507
+    },
+    "speedup": 0.5521613225995422
+  },
+  "runs": 144,
+  "stage": "selection",
+  "verified_runs": 144
+}

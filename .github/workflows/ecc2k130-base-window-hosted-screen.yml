@@ -1,0 +1,210 @@
+name: ECC2K-130 frozen n41 base-window screen
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-base-window-hosted-screen.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/MEASURE_DISPATCH.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-base-window-hosted-screen.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/MEASURE_DISPATCH.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /docs/ic/calibration.json
+            /src/*
+            /examples/koblitz_base_window.rs
+            /.github/workflows/ecc2k130-base-window-source-lock.yml
+            /research/notes/ecc2k130/base_window_screen_20261001/*
+            /research/notes/ecc2k130/base_window_screen_20261001/development/*
+            /research/notes/ecc2k130/base_window_screen_20261001/fixtures/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/historical_snapshots/*
+            /research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json
+            /research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            /research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/check_pairing.py
+            /research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/evidence_run_36803331080/raw/n41_L1024.tar.gz
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            /tools/isolated_bench.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recheck frozen input and source-only controls
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/base_window_screen_20261001/verify_inputs.py \
+            --out "$RUNNER_TEMP/base-window-input-replay.json"
+          cmp "$RUNNER_TEMP/base-window-input-replay.json" \
+            research/notes/ecc2k130/base_window_screen_20261001/INPUT_RECEIPT.json
+          python3 -m unittest discover \
+            research/notes/ecc2k130/base_window_screen_20261001 \
+            -p 'test_source_lock.py' -v
+          python3 research/notes/ecc2k130/base_window_screen_20261001/build_frozen.py \
+            --out "$RUNNER_TEMP/base-window-validation-build" --profile dev
+          python3 research/notes/ecc2k130/base_window_screen_20261001/test_generator.py \
+            --generator "$RUNNER_TEMP/base-window-validation-build/target/debug/examples/koblitz_base_window" \
+            --out "$RUNNER_TEMP/base-window-source-control.json"
+          cmp "$RUNNER_TEMP/base-window-source-control.json" \
+            research/notes/ecc2k130/base_window_screen_20261001/development/SOURCE_CONTROL.json
+
+  measure:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    concurrency:
+      group: ecc2k130-base-window-screen-n41-one-shot
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /docs/ic/calibration.json
+            /src/*
+            /examples/koblitz_base_window.rs
+            /.github/workflows/ecc2k130-base-window-source-lock.yml
+            /research/notes/ecc2k130/base_window_screen_20261001/*
+            /research/notes/ecc2k130/base_window_screen_20261001/development/*
+            /research/notes/ecc2k130/base_window_screen_20261001/fixtures/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/historical_snapshots/*
+            /research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json
+            /research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            /research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/check_pairing.py
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            /tools/isolated_bench.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build frozen release executables before reservation
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/base_window_screen_20261001/build_frozen.py \
+            --out "$RUNNER_TEMP/base-window-build" --profile release
+      - name: Execute the single frozen 45-arm schedule
+        id: run
+        run: |
+          set -euo pipefail
+          CPU=$(python3 -c 'import os; print(sorted(os.sched_getaffinity(0))[-1])')
+          CPUS=$(cat "/sys/devices/system/cpu/cpu${CPU}/topology/thread_siblings_list")
+          BUILD_DIR="$RUNNER_TEMP/base-window-build"
+          PARENT="$RUNNER_TEMP/base-window-screen-evidence"
+          RUN_DIR="$PARENT/base-window-screen"
+          mkdir -p "$PARENT"
+          cp "$BUILD_DIR"/build.*.txt "$PARENT/"
+          STATUS=1
+          for ATTEMPT in 1 2 3 4 5 6; do
+            sleep 20
+            LOG="$PARENT/preflight_${ATTEMPT}.log"
+            set +e
+            python3 tools/isolated_bench.py reserve \
+              --cpus "$CPUS" --settle 2 --period 1 \
+              --max-other-cpu 0.10 --max-psi 5 \
+              --out "$PARENT/isolation.jsonl" --label base-window-screen-n41 -- \
+              python3 research/notes/ecc2k130/base_window_screen_20261001/run_screen.py \
+                --source-root "$BUILD_DIR/source" \
+                --generator "$BUILD_DIR/target/release/examples/koblitz_base_window" \
+                --compact "$BUILD_DIR/target/release/examples/koblitz_orbit_dlp_s3_batch" \
+                --rho "$BUILD_DIR/target/release/examples/koblitz_rho_batch_ks_v3" \
+                --materialization "$BUILD_DIR/materialization.json" \
+                --build-receipt "$BUILD_DIR/BUILD_RECEIPT.json" \
+                --out "$RUN_DIR" --cpu "$CPU" > "$LOG" 2>&1
+            STATUS=$?
+            set -e
+            cat "$LOG"
+            if [ "$STATUS" -eq 0 ] || [ -d "$RUN_DIR" ]; then
+              break
+            fi
+            if ! grep -q '^machine is busy:' "$LOG"; then
+              break
+            fi
+          done
+          mkdir -p "$RUN_DIR"
+          if [ -f "$PARENT/isolation.jsonl" ]; then
+            cp "$PARENT/isolation.jsonl" "$RUN_DIR/isolation.jsonl"
+          fi
+          cp "$PARENT"/preflight_*.log "$RUN_DIR/"
+          exit "$STATUS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: base-window-screen-n41-raw
+          path: ${{ runner.temp }}/base-window-screen-evidence
+          if-no-files-found: warn
+          retention-days: 90
+
+  replay:
+    if: always() && needs.validate.result == 'success' && github.event_name == 'workflow_dispatch'
+    needs: [validate, measure]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/ecc2k130-base-window-source-lock.yml
+            /examples/koblitz_base_window.rs
+            /research/notes/ecc2k130/base_window_screen_20261001/*
+            /research/notes/ecc2k130/base_window_screen_20261001/fixtures/*
+            /research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/check_pairing.py
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            /tools/isolated_bench.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: base-window-screen-n41-raw
+          path: ${{ runner.temp }}/base-window-screen-evidence
+      - name: Independently replay and classify every retained child
+        run: |
+          set -euo pipefail
+          RUN_DIR="$RUNNER_TEMP/base-window-screen-evidence/base-window-screen"
+          if [ -f "$RUN_DIR/screen_run.json" ]; then
+            python3 research/notes/ecc2k130/base_window_screen_20261001/verify_screen.py \
+              --run-dir "$RUN_DIR" --out "$RUN_DIR/replay.json" --relocated
+            python3 research/notes/ecc2k130/base_window_screen_20261001/analyze_screen.py \
+              --run-dir "$RUN_DIR" --replay "$RUN_DIR/replay.json" \
+              --out "$RUN_DIR/analysis.json"
+          else
+            printf '{"status":"PREFLIGHT_OR_PRODUCER_FAILURE","timing_eligible":false}\n' \
+              > "$RUN_DIR/replay.json"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: base-window-screen-n41-replay
+          path: ${{ runner.temp }}/base-window-screen-evidence
+          if-no-files-found: warn
+          retention-days: 90

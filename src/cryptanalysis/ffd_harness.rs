@@ -162,17 +162,7 @@ pub fn measure_one(
     // Equivalently: the first D at which non-trivial syzygies among
     // the Macaulay-shifted equations are detected (rank < rows) and
     // the system has not yet trivially saturated (rank < cols).
-    let mut per_degree = Vec::new();
-    let mut fall_degree: Option<u32> = None;
-    for d in 2..=d_max {
-        let measurement = build_and_rank_macaulay(&eqs, num_vars, d);
-        let nontrivial_syzygy = measurement.rank < measurement.rows_constructed;
-        let not_saturated = measurement.rank < measurement.cols;
-        if fall_degree.is_none() && nontrivial_syzygy && not_saturated {
-            fall_degree = Some(d);
-        }
-        per_degree.push(measurement);
-    }
+    let (fall_degree, per_degree) = measure_polys(&eqs, num_vars, d_max);
 
     FfdRow {
         n,
@@ -181,6 +171,41 @@ pub fn measure_one(
         per_degree,
         fall_degree,
     }
+}
+
+/// **Measure FFD for an already-built system**, so callers that
+/// Weil-descend with their own parameters — a subspace-restricted
+/// factor base, a curve chosen by an isogeny search — get the *same*
+/// operational first-fall-degree definition the sweep uses rather than
+/// a lookalike.
+///
+/// The definition, unchanged from [`measure_one`]: the smallest `D ≥ 2`
+/// at which the Macaulay matrix has `rank < rows_constructed` (a
+/// non-trivial syzygy) **and** `rank < cols` (the system has not
+/// saturated).  Rows are the products of each equation with every
+/// monomial of degree `≤ D − 2`, which is the convention this harness
+/// was calibrated with; note that it assumes every equation is
+/// quadratic, and multiplies a lower-degree equation by too little.
+/// [`crate::cryptanalysis::koblitz_groebner::first_fall_degree`] fills
+/// the matrix to degree `D` per equation instead, so the two agree
+/// exactly when no equation has dropped below degree 2.
+pub fn measure_polys(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    d_max: u32,
+) -> (Option<u32>, Vec<MacaulayMeasurement>) {
+    let mut per_degree = Vec::new();
+    let mut fall_degree: Option<u32> = None;
+    for d in 2..=d_max {
+        let measurement = build_and_rank_macaulay(eqs, num_vars, d);
+        let nontrivial_syzygy = measurement.rank < measurement.rows_constructed;
+        let not_saturated = measurement.rank < measurement.cols;
+        if fall_degree.is_none() && nontrivial_syzygy && not_saturated {
+            fall_degree = Some(d);
+        }
+        per_degree.push(measurement);
+    }
+    (fall_degree, per_degree)
 }
 
 // ── Weil descent of binary S₃ ───────────────────────────────────────
@@ -226,7 +251,9 @@ impl F2BoolPoly {
         let s_const = self.coeffs[0];
         let s_lin: Vec<bool> = (0..num_vars).map(|i| self.coeffs[1 + i as usize]).collect();
         let o_const = other.coeffs[0];
-        let o_lin: Vec<bool> = (0..num_vars).map(|i| other.coeffs[1 + i as usize]).collect();
+        let o_lin: Vec<bool> = (0..num_vars)
+            .map(|i| other.coeffs[1 + i as usize])
+            .collect();
 
         // const × const
         if s_const && o_const {
@@ -283,7 +310,7 @@ pub fn quad_monomial_index(i: u32, j: u32, num_vars: u32) -> usize {
     // # of pairs (a, b) with a < i is C(num_vars - 0, ...) — easier:
     // # of pairs with first index < i  =  i·num_vars − i·(i+1)/2.
     let pairs_before_i = (i as u64) * (num_vars as u64) - (i as u64) * (i as u64 + 1) / 2;
-    let in_row = (j as u64 - i as u64 - 1) as u64;
+    let in_row = j as u64 - i as u64 - 1;
     1 + num_vars as usize + (pairs_before_i + in_row) as usize
 }
 
@@ -551,7 +578,7 @@ fn sq_f2m_const(c: &F2mElement, _n: u32, irr: &IrreduciblePoly) -> F2mElement {
 /// Reduce a convolution result (length `2n - 1`) modulo the irreducible
 /// polynomial `m(z)` of degree `n`.  `irr.low_terms` lists the
 /// non-leading nonzero exponents of `m`, so `z^n ≡ Σ_{e ∈ low_terms} z^e`.
-fn reduce_mod_irr(conv: &mut Vec<F2BoolPoly>, n: u32, irr: &IrreduciblePoly) {
+fn reduce_mod_irr(conv: &mut [F2BoolPoly], n: u32, irr: &IrreduciblePoly) {
     let nu = n as usize;
     let high = conv.len();
     for k in (nu..high).rev() {
@@ -631,7 +658,7 @@ pub(crate) fn build_macaulay_rows(
         return (Vec::new(), cols, 0);
     }
     let multipliers = enumerate_monomials_upto(num_vars, d.saturating_sub(2));
-    let row_words = (cols + 63) / 64;
+    let row_words = cols.div_ceil(64);
     let mut rows: Vec<Vec<u64>> = Vec::new();
     for mult in &multipliers {
         for eq in eqs {
@@ -846,7 +873,7 @@ fn pack_bits(flat: &[bool], words: usize) -> Vec<u64> {
 }
 
 /// Gauss-Jordan reduction over `F_2` (XOR rows).  Returns the rank.
-pub(crate) fn f2_rank(rows: &mut Vec<Vec<u64>>, cols: usize) -> usize {
+pub(crate) fn f2_rank(rows: &mut [Vec<u64>], cols: usize) -> usize {
     let mut rank = 0;
     let mut row = 0;
     for col in 0..cols {
@@ -1180,7 +1207,7 @@ mod tests {
         for i in 0..v {
             for j in (i + 1)..v {
                 let idx = quad_monomial_index(i, j, v);
-                assert!(idx >= 1 + v as usize);
+                assert!(idx > v as usize);
                 assert!(idx < 1 + v as usize + 15);
                 assert!(seen.insert(idx), "duplicate index for ({},{})", i, j);
             }
@@ -1235,10 +1262,10 @@ mod tests {
     ///   non-trivial system);
     /// - the rank at D = 4 saturates at the column count (the system
     ///   "fell" — every monomial of degree ≤ 4 was reduced).
-    /// **The factor-base descent must agree with field arithmetic.**
-    /// Pick `X₁, X₂` inside the `l`-dimensional subspace, evaluate the
-    /// descended equations at their bits, and compare against the bits
-    /// of `S₃(X₁, X₂, x₃)` computed directly over `F_{2ⁿ}`.
+    ///   **The factor-base descent must agree with field arithmetic.**
+    ///   Pick `X₁, X₂` inside the `l`-dimensional subspace, evaluate the
+    ///   descended equations at their bits, and compare against the bits
+    ///   of `S₃(X₁, X₂, x₃)` computed directly over `F_{2ⁿ}`.
     #[test]
     fn subspace_descent_matches_field_evaluation() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
@@ -1280,7 +1307,11 @@ mod tests {
             acc
         };
 
-        for (v1, v2) in [(0b00000u32, 0b00000u32), (0b10110, 0b01101), (0b11111, 0b00001)] {
+        for (v1, v2) in [
+            (0b00000u32, 0b00000u32),
+            (0b10110, 0b01101),
+            (0b11111, 0b00001),
+        ] {
             let bits = |v: u32| -> Vec<u32> { (0..l).filter(|k| (v >> k) & 1 == 1).collect() };
             let x1 = F2mElement::from_bit_positions(&bits(v1), n);
             let x2 = F2mElement::from_bit_positions(&bits(v2), n);
@@ -1314,7 +1345,7 @@ mod tests {
         assert_eq!(row.num_eqs, 4);
         // First entry should describe D = 2.
         assert_eq!(row.per_degree[0].degree, 2);
-        assert!(row.per_degree[0].cols >= 8 + 1);
+        assert!(row.per_degree[0].cols > 8);
         // Some non-trivial system was constructed.
         assert!(row.per_degree[0].rank >= 1);
         // Rank at the largest degree should be substantial.

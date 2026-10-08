@@ -3,6 +3,7 @@
     ECC_GPU=H100 modal run modal_app.py::selftest
     ECC_GPU=H100 modal run modal_app.py::bench
     ECC_GPU=H100 modal run modal_app.py::tune
+    ECC_GPU=H100 modal run modal_app.py::bsgs
 
 The reason this file exists is `selftest`.  `FP_PTX=1` replaces seven
 multiprecision primitives in `fp256.cuh` with hand-written carry chains worth
@@ -26,6 +27,13 @@ open question until measured.
 `tune` sweeps RHO_MIN_BLOCKS, which `ptxas` says trades registers for
 resident warps (224 regs at 12.5% occupancy unset, 128 at 25% at four
 blocks/SM).  Which point wins is not decidable offline.
+
+`bsgs` runs the baby-step giant-step engine: it builds the table on the
+device and solves a planted interval log, reporting both phases' throughput
+and the operation count as S = ops / sqrt(width).  The giant phase is one
+random table read per step, so its rate is the number that says whether
+the memory system, not the arithmetic, is the bound -- the CPU suites
+cannot answer that.
 
 The GPU comes from the ECC_GPU environment variable, read at import time and
 baked into the function definitions, so it works on every Modal version.
@@ -71,6 +79,7 @@ image = (
         ignore=[
             "bench", "bench_0", "bench_1", "bench_tune",
             "test_secp_fast", "test_secp_mont", "test_toy_mont",
+            "test_bsgs_toy", "test_bsgs_secp_fast", "test_bsgs_secp_mont",
             "__pycache__", "*.pyc", "*.o",
         ],
     )
@@ -195,7 +204,8 @@ def parseRate(text):
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
-def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = ""):
+def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = "",
+             fold: int = 0):
     """Measure whether the 55% instruction reduction is a 55% throughput win."""
     name, cap = gpuInfo()
     print(f"GPU: {name}, sm_{cap}\n")
@@ -209,6 +219,8 @@ def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = ""):
         opts += f" --w {w}"
     if variant:
         opts += f" --variant {variant}"
+    if fold:
+        opts += f" --fold {fold}"    # 1, 2 or 6; the binary defaults to 6 on secp256k1
 
     rates = {}
     for ptx in (False, True):
@@ -289,6 +301,43 @@ def runTune(minBlocks: str = "0,3,4", ptxBoth: bool = True,
     return {"gpu": name, "rows": rows}
 
 
+@app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
+def runBsgs(wbits: int = 40, w: int = 0, iters: int = 0, neg: int = 1,
+            walks: int = 0, variant: str = ""):
+    """Baby-step giant-step on the device: table build, then a planted
+    interval log of the given width, portable and FP_PTX builds."""
+    name, cap = gpuInfo()
+    print(f"GPU: {name}, sm_{cap}\n")
+
+    opts = f" --wbits {wbits} --neg {neg}"
+    if walks:
+        opts += f" --walks {walks}"
+    if iters:
+        opts += f" --iters {iters}"
+    if w:
+        opts += f" --w {w}"
+    if variant:
+        opts += f" --variant {variant}"
+
+    results = {}
+    for ptx in (False, True):
+        conf = confName(ptx)
+        ok, log = build(ptx, cap, out=f"bench_{int(ptx)}")
+        if not ok:
+            print(f"{conf}: BUILD FAILED\n{log}")
+            results[conf] = "BUILD FAILED"
+            continue
+        print(f"=== {conf}: ./bench bsgs{opts} ===")
+        rc, out = sh(f"./bench_{int(ptx)} bsgs{opts}", timeout=90 * 60)
+        print(out)
+        results[conf] = "SOLVED" if rc == 0 and "SOLVED" in out else "FAIL"
+
+    print("\n" + "=" * 60)
+    for conf, verdict in results.items():
+        print(f"  {conf:<24} {verdict}")
+    return {"gpu": name, "results": results}
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -299,8 +348,9 @@ def selftest(gpu: str = ""):
 
 @app.local_entrypoint()
 def bench(gpu: str = "", walks: int = 0, iters: int = 0, w: int = 0,
-          variant: str = ""):
-    onGpu(runBench, gpu).remote(walks=walks, iters=iters, w=w, variant=variant)
+          variant: str = "", fold: int = 0):
+    onGpu(runBench, gpu).remote(walks=walks, iters=iters, w=w, variant=variant,
+                                fold=fold)
 
 
 @app.local_entrypoint()
@@ -308,4 +358,12 @@ def tune(gpu: str = "", min_blocks: str = "0,3,4", ptx_both: bool = True,
          walks: int = 0, iters: int = 0):
     onGpu(runTune, gpu).remote(
         minBlocks=min_blocks, ptxBoth=ptx_both, walks=walks, iters=iters
+    )
+
+
+@app.local_entrypoint()
+def bsgs(gpu: str = "", wbits: int = 40, w: int = 0, iters: int = 0,
+         neg: int = 1, walks: int = 0, variant: str = ""):
+    onGpu(runBsgs, gpu).remote(
+        wbits=wbits, w=w, iters=iters, neg=neg, walks=walks, variant=variant
     )

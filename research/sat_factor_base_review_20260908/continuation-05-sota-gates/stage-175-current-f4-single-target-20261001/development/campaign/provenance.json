@@ -1,0 +1,16 @@
+{
+  "schema": "koblitz_stage175_runner_provenance.v1",
+  "source_commit": "c38626a5e2674dbfdff796474ea83af0c863917a",
+  "binary": "/Volumes/SSD990/kic-stage175-current-f4-target-c38626a5e/release/examples/koblitz_pdp_backend",
+  "binary_sha256": "b156f3320564c1e9fed2b168aba7a0b4f3c875d677c1a9354751bba527ee5bd6",
+  "manifest": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+  "manifest_sha256": "188dfdcb7e9398b0ab03193265f7b3035776d4a8a52de7dd4a51475dfc1a572c",
+  "repeats": 3,
+  "host": "Darwin Adams-MacBook-Pro.local 25.6.0 Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041 arm64",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "environment_controls": {
+    "RAYON_NUM_THREADS": "12",
+    "PQ_F4_X1_BATCH": "512",
+    "BLAS_threads": "1"
+  }
+}

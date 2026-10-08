@@ -62,7 +62,7 @@
 //! **structural check** for the column-confined-swap case that's the
 //! starting point of subspace-trail cryptanalysis. The full 4-round
 //! subspace distinguisher requires ~`2³²` data and is described in
-//! `DEFERRED.md`.
+//! `docs/DEFERRED.md`.
 
 use super::reduced::ReducedAes128;
 

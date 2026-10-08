@@ -1,0 +1,222 @@
+name: ECC2K130 disjoint-Q compact cold CPU panel
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-disjoint-cold-q.yml
+      - research/notes/ecc2k130/disjoint_cold_q_20260930/**
+      - research/notes/ecc2k130/compact_frozen_source_replay_20260929/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/ic/calibration.json
+            src
+            examples/koblitz_orbit_dlp_s3_batch.rs
+            examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_v3.rs
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
+            research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            research/notes/ecc2k130/compact_k_boundary_20260929
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929
+            research/notes/ecc2k130/compact_s3_batch_20260929
+            research/notes/ecc2k130/compact_s3_prefilter_20260930
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/notes/ecc2k130/compact_swap_quotient_20260929
+            research/notes/ecc2k130/disjoint_cold_q_20260930
+            research/notes/ecc2k130/point_sum_cold_20260930
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            tools/isolated_bench.py
+      - name: Replay every frozen public Q and check Python syntax
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/disjoint-cold"
+          python3 -m py_compile research/notes/ecc2k130/disjoint_cold_q_20260930/*.py
+          python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p test_materialize.py -v
+          python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_frozen.py > "$RUNNER_TEMP/disjoint-cold/input_replay.json"
+          cmp "$RUNNER_TEMP/disjoint-cold/input_replay.json" research/notes/ecc2k130/disjoint_cold_q_20260930/INPUT_RECEIPT.json
+      - name: Rehash and independently replay both archived local smoke blocks
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, tarfile
+          root = Path('research/notes/ecc2k130/disjoint_cold_q_20260930')
+          archive = root / 'LOCAL_SMOKE.tar.gz'
+          manifest = json.loads((root / 'LOCAL_SMOKE_FILES.json').read_text())
+          assert archive.stat().st_size == manifest['archive_bytes']
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == manifest['archive_sha256']
+          dest = Path(os.environ['RUNNER_TEMP']) / 'disjoint-cold' / 'local-smoke'
+          dest.mkdir(parents=True)
+          with tarfile.open(archive, 'r:gz') as raw:
+              assert set(raw.getnames()) == set(manifest['files'])
+              for member in raw:
+                  assert len(Path(member.name).parts) == 2 and member.isfile()
+                  data = raw.extractfile(member).read()
+                  expected = manifest['files'][member.name]
+                  assert len(data) == expected['bytes']
+                  assert hashlib.sha256(data).hexdigest() == expected['sha256']
+                  target = dest / member.name
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+          PY
+          for CELL in n37_L1 n41_L1024; do
+            python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py \
+              --cell "$CELL" --relocated \
+              --run-dir "$RUNNER_TEMP/disjoint-cold/local-smoke/${CELL}_smoke" \
+              --out "$RUNNER_TEMP/disjoint-cold/local-smoke/${CELL}_smoke/hosted_replay.json"
+          done
+      - name: Materialize and build exact frozen source
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
+            --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
+            --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"
+          cp "$RUNNER_TEMP/disjoint-cold-frozen-src/research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock" \
+            "$RUNNER_TEMP/disjoint-cold-frozen-src/Cargo.lock"
+          cargo build --manifest-path "$RUNNER_TEMP/disjoint-cold-frozen-src/Cargo.toml" \
+            --release --locked --example koblitz_orbit_dlp_s3_batch --example koblitz_rho_batch_ks_v3 \
+            2>&1 | tee "$RUNNER_TEMP/disjoint-cold/build.log"
+      - name: Fresh three-arm off and blocked integration smokes
+        run: |
+          set -euo pipefail
+          for CELL in n37_L1 n41_L1024; do
+            python3 research/notes/ecc2k130/disjoint_cold_q_20260930/run_cold.py \
+              --cell "$CELL" --mode smoke \
+              --source-root "$RUNNER_TEMP/disjoint-cold-frozen-src" \
+              --compact "$RUNNER_TEMP/disjoint-cold-frozen-src/target/release/examples/koblitz_orbit_dlp_s3_batch" \
+              --rho "$RUNNER_TEMP/disjoint-cold-frozen-src/target/release/examples/koblitz_rho_batch_ks_v3" \
+              --materialization "$RUNNER_TEMP/disjoint-cold/materialization.json" \
+              --out "$RUNNER_TEMP/disjoint-cold/${CELL}_smoke"
+            python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py \
+              --cell "$CELL" --run-dir "$RUNNER_TEMP/disjoint-cold/${CELL}_smoke" \
+              --out "$RUNNER_TEMP/disjoint-cold/${CELL}_smoke/receipt.json"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: disjoint-cold-validation
+          path: ${{ runner.temp }}/disjoint-cold
+          if-no-files-found: warn
+          retention-days: 90
+
+  measure:
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        cell: [n37_L1, n37_L1024, n41_L1, n41_L1024, n53_L1, n53_L1024]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/ic/calibration.json
+            src
+            examples/koblitz_orbit_dlp_s3_batch.rs
+            examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_v3.rs
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
+            research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            research/notes/ecc2k130/compact_k_boundary_20260929
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929
+            research/notes/ecc2k130/compact_s3_batch_20260929
+            research/notes/ecc2k130/compact_s3_prefilter_20260930
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/notes/ecc2k130/compact_swap_quotient_20260929
+            research/notes/ecc2k130/disjoint_cold_q_20260930
+            research/notes/ecc2k130/point_sum_cold_20260930
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            tools/isolated_bench.py
+      - name: Materialize and build exact frozen source
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/disjoint-cold"
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
+            --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
+            --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"
+          cp "$RUNNER_TEMP/disjoint-cold-frozen-src/research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock" \
+            "$RUNNER_TEMP/disjoint-cold-frozen-src/Cargo.lock"
+          cargo build --manifest-path "$RUNNER_TEMP/disjoint-cold-frozen-src/Cargo.toml" \
+            --release --locked --example koblitz_orbit_dlp_s3_batch --example koblitz_rho_batch_ks_v3 \
+            2>&1 | tee "$RUNNER_TEMP/disjoint-cold/build.log"
+      - name: Run fixed cold blocks under reserved-core monitor
+        id: run
+        run: |
+          set -euo pipefail
+          CPU=$(python3 -c 'import os; print(sorted(os.sched_getaffinity(0))[-1])')
+          CPUS=$(cat "/sys/devices/system/cpu/cpu${CPU}/topology/thread_siblings_list")
+          PARENT="$RUNNER_TEMP/disjoint-cold"
+          RUN_DIR="$PARENT/${{ matrix.cell }}"
+          STATUS=1
+          for ATTEMPT in 1 2 3 4 5 6; do
+            sleep 20
+            LOG="$PARENT/${{ matrix.cell }}_preflight_${ATTEMPT}.log"
+            set +e
+            python3 tools/isolated_bench.py reserve --cpus "$CPUS" --max-psi 5 \
+              --out "$PARENT/${{ matrix.cell }}.isolation.jsonl" \
+              --label "disjoint-cold-${{ matrix.cell }}" -- \
+              python3 research/notes/ecc2k130/disjoint_cold_q_20260930/run_cold.py \
+                --cell "${{ matrix.cell }}" --mode measure \
+                --source-root "$RUNNER_TEMP/disjoint-cold-frozen-src" \
+                --compact "$RUNNER_TEMP/disjoint-cold-frozen-src/target/release/examples/koblitz_orbit_dlp_s3_batch" \
+                --rho "$RUNNER_TEMP/disjoint-cold-frozen-src/target/release/examples/koblitz_rho_batch_ks_v3" \
+                --materialization "$PARENT/materialization.json" \
+                --out "$RUN_DIR" --cpu "$CPU" > "$LOG" 2>&1
+            STATUS=$?
+            set -e
+            cat "$LOG"
+            if [ "$STATUS" -eq 0 ] || [ -d "$RUN_DIR" ]; then
+              break
+            fi
+            if ! grep -q '^machine is busy:' "$LOG"; then
+              break
+            fi
+          done
+          mkdir -p "$RUN_DIR"
+          if [ -f "$PARENT/${{ matrix.cell }}.isolation.jsonl" ]; then
+            cp "$PARENT/${{ matrix.cell }}.isolation.jsonl" "$RUN_DIR/isolation.jsonl"
+          fi
+          cp "$PARENT"/${{ matrix.cell }}_preflight_*.log "$RUN_DIR/"
+          exit "$STATUS"
+      - name: Independently replay all completed ranks and logarithms
+        if: always() && steps.run.outcome != 'skipped'
+        run: |
+          RUN_DIR="$RUNNER_TEMP/disjoint-cold/${{ matrix.cell }}"
+          if [ -f "$RUN_DIR/cold_run.json" ]; then
+            python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py \
+              --cell "${{ matrix.cell }}" --run-dir "$RUN_DIR" \
+              --out "$RUN_DIR/receipt.json"
+          else
+            printf '{"status":"PREFLIGHT_FAILURE","timing_eligible":false}\n' > "$RUN_DIR/receipt.json"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: disjoint-cold-${{ matrix.cell }}
+          path: ${{ runner.temp }}/disjoint-cold
+          if-no-files-found: warn
+          retention-days: 90

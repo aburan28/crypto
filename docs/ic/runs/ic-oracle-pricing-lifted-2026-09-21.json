@@ -1,0 +1,5493 @@
+{
+  "all_verified": true,
+  "config": {
+    "char2_degrees": [
+      15,
+      18,
+      21,
+      24,
+      27
+    ],
+    "koblitz_degrees": [
+      11
+    ],
+    "koblitz_no_fold_max_degree": 31,
+    "max_table_points": 6000,
+    "max_trials": 50000000,
+    "prime_bits": [
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24
+    ],
+    "repeats": 1,
+    "rho_cap_multiple": 64.0,
+    "rho_repeats": 8,
+    "s4_max_degree": 31,
+    "seed": 123212651130,
+    "trial_floor_multiple": 64.0
+  },
+  "elapsed_seconds": 187.921747266,
+  "host": {
+    "arch": "x86_64",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "git_commit": "7b2e1b53aa140918d625bbd83b40e3df4571993c",
+    "logical_cores": 4,
+    "os": "linux"
+  },
+  "ledger": {
+    "fits": [],
+    "floor": "generic: sqrt(pi/(2A)) in S, A = usable automorphisms; relations: trials >= (K+1)/min(1, C(F+m-1,m)/#E)",
+    "instances": [
+      {
+        "automorphisms_generic": 22,
+        "calibration": {
+          "ns_per_add": 183.960995,
+          "ns_per_as_solve": 8.89148,
+          "ns_per_double": 188.200915,
+          "ns_per_frobenius": 18.112055,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 2.830753,
+          "ns_per_row_op": 3.599640625,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.499451416015625
+        },
+        "cofactor": 2,
+        "curve": {
+          "a": 1,
+          "b": "0x1",
+          "cofactor": 2,
+          "factor_base": {
+            "abscissae": 23,
+            "census_hits_of_64": [
+              [
+                3,
+                62
+              ],
+              [
+                2,
+                14
+              ]
+            ],
+            "description": "Frobenius orbit union of a seed space of dimension 2",
+            "dimension": null,
+            "domain": "FrobeniusUnion { seed_dimension: 2 }",
+            "lambda": "947",
+            "signed_orbits": 3,
+            "signed_points": 45,
+            "summands_admissible": [
+              3,
+              2
+            ],
+            "summands_used": 3
+          },
+          "field": {
+            "degree": 11,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              2
+            ]
+          },
+          "generator": {
+            "x": "0x742",
+            "y": "0x710"
+          },
+          "group_order": 1982,
+          "koblitz": true,
+          "name": "K_1 / GF(2^11)",
+          "subgroup_order": 991
+        },
+        "floor_ops": 8.411731958330964,
+        "floor_s": 0.26720747189427857,
+        "group_order": 1982.0,
+        "log2_r": 9.952741247186488,
+        "r": 991,
+        "regime": "koblitz",
+        "rho": [
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 543.5189154772906,
+            "group_ops": {
+              "adds": 21,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.265447359811446,
+            "s_walk": 0.15883023449744899,
+            "steps": 5,
+            "steps_over_expected": 0.5944079084745454,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 503003
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 4,
+            "expected_steps": 39.45452014476595,
+            "gae": 521.0,
+            "group_ops": {
+              "adds": 202,
+              "doubles": 319,
+              "scalar_mults": 41
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 16.550110434634185,
+            "s_walk": 0.9212153600852041,
+            "steps": 29,
+            "steps_over_expected": 0.7350235129864366,
+            "verified": true,
+            "walks": 4,
+            "wall_ns": 110690
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 544.5189154772906,
+            "group_ops": {
+              "adds": 22,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.297213406710934,
+            "s_walk": 0.19059628139693877,
+            "steps": 6,
+            "steps_over_expected": 0.7132894901694544,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 411916
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 3,
+            "expected_steps": 39.45452014476595,
+            "gae": 507.0,
+            "group_ops": {
+              "adds": 204,
+              "doubles": 303,
+              "scalar_mults": 39
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 16.105385778041327,
+            "s_walk": 0.9529814069846939,
+            "steps": 30,
+            "steps_over_expected": 0.7603691513652793,
+            "verified": true,
+            "walks": 3,
+            "wall_ns": 89152
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 542.5189154772906,
+            "group_ops": {
+              "adds": 20,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.233681312911955,
+            "s_walk": 0.12706418759795918,
+            "steps": 4,
+            "steps_over_expected": 0.4755263267796363,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 285519
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 10,
+            "expected_steps": 39.45452014476595,
+            "gae": 697.0,
+            "group_ops": {
+              "adds": 273,
+              "doubles": 424,
+              "scalar_mults": 53
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 22.140934688944387,
+            "s_walk": 1.0165135007836734,
+            "steps": 32,
+            "steps_over_expected": 0.8110604281229645,
+            "verified": true,
+            "walks": 10,
+            "wall_ns": 121040
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 546.5189154772906,
+            "group_ops": {
+              "adds": 24,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.360745500509914,
+            "s_walk": 0.25412837519591835,
+            "steps": 8,
+            "steps_over_expected": 0.9510526535592726,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 372902
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 11,
+            "expected_steps": 39.45452014476595,
+            "gae": 730.0,
+            "group_ops": {
+              "adds": 291,
+              "doubles": 439,
+              "scalar_mults": 55
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 23.18921423662755,
+            "s_walk": 1.2706418759795919,
+            "steps": 40,
+            "steps_over_expected": 1.0138255351537055,
+            "verified": true,
+            "walks": 11,
+            "wall_ns": 151660
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 548.5189154772906,
+            "group_ops": {
+              "adds": 26,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.424277594308894,
+            "s_walk": 0.31766046899489797,
+            "steps": 10,
+            "steps_over_expected": 1.1888158169490908,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 381128
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 10,
+            "expected_steps": 39.45452014476595,
+            "gae": 686.0,
+            "group_ops": {
+              "adds": 273,
+              "doubles": 413,
+              "scalar_mults": 53
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 21.79150817305,
+            "s_walk": 1.2071097821806123,
+            "steps": 38,
+            "steps_over_expected": 0.9631342583960204,
+            "verified": true,
+            "walks": 10,
+            "wall_ns": 119885
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 551.5189154772906,
+            "group_ops": {
+              "adds": 29,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.519575735007365,
+            "s_walk": 0.41295860969336734,
+            "steps": 13,
+            "steps_over_expected": 1.545460562033818,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 454410
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 11,
+            "expected_steps": 39.45452014476595,
+            "gae": 703.0,
+            "group_ops": {
+              "adds": 268,
+              "doubles": 435,
+              "scalar_mults": 55
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 22.331530970341326,
+            "s_walk": 0.8576832662862245,
+            "steps": 27,
+            "steps_over_expected": 0.6843322362287513,
+            "verified": true,
+            "walks": 11,
+            "wall_ns": 122921
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 550.5189154772906,
+            "group_ops": {
+              "adds": 28,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.487809688107873,
+            "s_walk": 0.38119256279387753,
+            "steps": 12,
+            "steps_over_expected": 1.4265789803389088,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 407066
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 13,
+            "expected_steps": 39.45452014476595,
+            "gae": 793.0,
+            "group_ops": {
+              "adds": 307,
+              "doubles": 486,
+              "scalar_mults": 59
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 25.19047519129541,
+            "s_walk": 1.7471325794719388,
+            "steps": 55,
+            "steps_over_expected": 1.3940101108363452,
+            "verified": true,
+            "walks": 13,
+            "wall_ns": 155961
+          },
+          {
+            "automorphisms": 22,
+            "distinguished_points": 1,
+            "expected_steps": 8.411731958330964,
+            "gae": 545.5189154772906,
+            "group_ops": {
+              "adds": 23,
+              "doubles": 0,
+              "scalar_mults": 35
+            },
+            "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+            "recovered": 21,
+            "s": 17.328979453610426,
+            "s_walk": 0.22236232829642857,
+            "steps": 7,
+            "steps_over_expected": 0.8321710718643635,
+            "verified": true,
+            "walks": 1,
+            "wall_ns": 338107
+          },
+          {
+            "automorphisms": 1,
+            "distinguished_points": 6,
+            "expected_steps": 39.45452014476595,
+            "gae": 586.0,
+            "group_ops": {
+              "adds": 220,
+              "doubles": 366,
+              "scalar_mults": 45
+            },
+            "method": "r-adding walk, distinguished points, 16 jumps",
+            "recovered": 21,
+            "s": 18.61490348310102,
+            "s_walk": 0.7941511724872449,
+            "steps": 25,
+            "steps_over_expected": 0.633640959471066,
+            "verified": true,
+            "walks": 6,
+            "wall_ns": 102435
+          }
+        ],
+        "rho_s_mean": 17.36471625637235,
+        "rho_verified_all": true,
+        "seeds": [
+          123212651130
+        ],
+        "targets": [
+          21
+        ],
+        "variants": [
+          {
+            "abscissae": 23,
+            "columns": 3,
+            "decomposition_probability_ceiling": 1.0,
+            "dependent": 0,
+            "dimension": null,
+            "factor_base": {
+              "gae": 1041.0738570967176,
+              "group_ops": {
+                "adds": 1035,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "abscissae_scanned": 34,
+                "as_solves": 34,
+                "derived_counts": 1,
+                "frobenius_maps": 45,
+                "pair_table_entries": 297
+              },
+              "wall_ns": 221029
+            },
+            "independent": 4,
+            "linear_algebra": {
+              "gae": 0.8022639017852671,
+              "group_ops": {
+                "adds": 0,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "columns": 4,
+                "rank": 4,
+                "row_ops": 41,
+                "rows": 4
+              },
+              "wall_ns": 3796
+            },
+            "name": "mitm_m3_signed_orbit_columns",
+            "oracle": "meet_in_the_middle_m3",
+            "rank": 4,
+            "ratio_to_floor": 145.82555846187552,
+            "ratio_to_rho": 2.2439571277111883,
+            "recovered": 21,
+            "relations": {
+              "gae": 178.76938945671608,
+              "group_ops": {
+                "adds": 98,
+                "doubles": 80,
+                "scalar_mults": 10
+              },
+              "native": {
+                "inversions": 0,
+                "lift_failures": 0,
+                "lookups": 50,
+                "relations": 4,
+                "s4_hits": 0,
+                "s4_pairs": 0,
+                "sqrt_solves": 0,
+                "trials": 5
+              },
+              "wall_ns": 32151
+            },
+            "relations_found": 4,
+            "s": 38.96567881416908,
+            "s_wall": 44.56357186746043,
+            "signed_points": 45,
+            "summands": 3,
+            "total_gae": 1226.6455104552188,
+            "total_wall_ns": 258073,
+            "trials": 5,
+            "trials_floor": 4.0,
+            "trials_over_floor": 1.25,
+            "verified": true,
+            "verify": {
+              "gae": 6.0,
+              "group_ops": {
+                "adds": 2,
+                "doubles": 4,
+                "scalar_mults": 1
+              },
+              "native": {},
+              "wall_ns": 1097
+            },
+            "yield_over_ceiling": 0.8
+          },
+          {
+            "abscissae": 23,
+            "columns": 23,
+            "decomposition_probability_ceiling": 1.0,
+            "dependent": 0,
+            "dimension": null,
+            "factor_base": {
+              "gae": 1041.0738570967176,
+              "group_ops": {
+                "adds": 1035,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "abscissae_scanned": 34,
+                "as_solves": 34,
+                "derived_counts": 1,
+                "frobenius_maps": 45,
+                "pair_table_entries": 297
+              },
+              "wall_ns": 214633
+            },
+            "independent": 23,
+            "linear_algebra": {
+              "gae": 10.938183441413763,
+              "group_ops": {
+                "adds": 0,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "columns": 24,
+                "rank": 23,
+                "row_ops": 559,
+                "rows": 23
+              },
+              "wall_ns": 19655
+            },
+            "name": "mitm_m3_abscissa_columns_control",
+            "oracle": "meet_in_the_middle_m3",
+            "rank": 23,
+            "ratio_to_floor": 213.34086917300814,
+            "ratio_to_rho": 3.2828796890089045,
+            "recovered": 21,
+            "relations": {
+              "gae": 736.5541667025665,
+              "group_ops": {
+                "adds": 341,
+                "doubles": 394,
+                "scalar_mults": 48
+              },
+              "native": {
+                "inversions": 0,
+                "lift_failures": 0,
+                "lookups": 101,
+                "relations": 23,
+                "s4_hits": 0,
+                "s4_pairs": 0,
+                "sqrt_solves": 0,
+                "trials": 24
+              },
+              "wall_ns": 129487
+            },
+            "relations_found": 23,
+            "s": 57.00627430344753,
+            "s_wall": 63.005081768647976,
+            "signed_points": 45,
+            "summands": 3,
+            "total_gae": 1794.5662072406978,
+            "total_wall_ns": 364870,
+            "trials": 24,
+            "trials_floor": 24.0,
+            "trials_over_floor": 1.0,
+            "verified": true,
+            "verify": {
+              "gae": 6.0,
+              "group_ops": {
+                "adds": 2,
+                "doubles": 4,
+                "scalar_mults": 1
+              },
+              "native": {},
+              "wall_ns": 1095
+            },
+            "yield_over_ceiling": 0.9583333333333334
+          }
+        ]
+      }
+    ],
+    "reference": "Pollard rho on the same instance, same process, exact operation count, verified [d]G = Q",
+    "unit": "S = group-addition equivalents / sqrt(r); native counts exact, conversions measured per instance"
+  },
+  "markdown": "| regime | instance | log₂ r | variant | m | \\|F\\| | K | trials | yield/ceiling | S | S rho | rho walk | vs rho | vs floor | FB | rel | LA | ok |\n|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns | 3 | 45 | 3 | 5 | 0.80 | 39.0 | 17.4 | 0.26 | 2.24× | 145.8× | 33.1 | 5.68 | 0.03 | ✓ |\n| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_abscissa_columns_control | 3 | 45 | 23 | 24 | 0.96 | 57.0 | 17.4 | 0.26 | 3.28× | 213.3× | 33.1 | 23.4 | 0.35 | ✓ |\n\n| regime | variant | phase | α (ops ∝ r^α) | R² | α vs #E | points |\n|:--|:--|:--|--:|--:|--:|--:|\n",
+  "operation": "boundary",
+  "oracle_pricing": {
+    "all_agree": true,
+    "cells": [
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 150.457235,
+          "ns_per_as_solve": 6.768775,
+          "ns_per_double": 149.838775,
+          "ns_per_frobenius": 15.59955,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 2.56684,
+          "ns_per_row_op": 3.61448046875,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.7154696044921875
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 4,
+          "field": {
+            "degree": 9,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1
+            ]
+          },
+          "generator": {
+            "x": "0x160",
+            "y": "0x1d2"
+          },
+          "group_order": 508,
+          "koblitz": true,
+          "name": "K_0 / GF(2^9)",
+          "subgroup_order": 127
+        },
+        "dimension": 6,
+        "disagreements": 0,
+        "eq_var_ratio": 0.75,
+        "equations": 9,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": 2,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 508,
+        "hit_rate": 1.0,
+        "log2_r": 6.9886846867721655,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 49,
+            "degree": 2,
+            "rank": 8,
+            "rows": 9,
+            "syzygies": 1
+          },
+          {
+            "cols": 259,
+            "degree": 3,
+            "rank": 104,
+            "rows": 117,
+            "syzygies": 13
+          }
+        ],
+        "n": 9,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 5.75,
+            "inconclusive": 0,
+            "ms_median_found": 0.001349,
+            "ms_median_refuted": null,
+            "ms_total": 0.013028,
+            "native_median_found": 3.0,
+            "native_median_refuted": null,
+            "native_total": 46,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1153
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 957
+              },
+              {
+                "extra": {},
+                "gae": 4.0,
+                "group_adds": 4,
+                "native": 4,
+                "verdict": "Found",
+                "wall_ns": 1545
+              },
+              {
+                "extra": {},
+                "gae": 11.0,
+                "group_adds": 11,
+                "native": 11,
+                "verdict": "Found",
+                "wall_ns": 2315
+              },
+              {
+                "extra": {},
+                "gae": 15.0,
+                "group_adds": 15,
+                "native": 15,
+                "verdict": "Found",
+                "wall_ns": 2523
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 629
+              },
+              {
+                "extra": {},
+                "gae": 10.0,
+                "group_adds": 10,
+                "native": 10,
+                "verdict": "Found",
+                "wall_ns": 2855
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1051
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1.0170602630043015,
+            "inconclusive": 0,
+            "ms_median_found": 0.0006215000000000001,
+            "ms_median_refuted": null,
+            "ms_total": 0.005716,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1053
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 551
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 653
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 590
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 395
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 468
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 917
+              },
+              {
+                "extra": {},
+                "gae": 1.0170602630043015,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1089
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 10,
+              "max_degree_built": 24,
+              "reductions": 75,
+              "splits": 37
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 167.1958271747102,
+            "inconclusive": 0,
+            "ms_median_found": 1.9562685000000002,
+            "ms_median_refuted": null,
+            "ms_total": 17.100493,
+            "native_median_found": 32113.5,
+            "native_median_refuted": null,
+            "native_total": 281279,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 7,
+                  "splits": 4
+                },
+                "gae": 141.9029697551691,
+                "group_adds": 0,
+                "native": 29841,
+                "verdict": "Found",
+                "wall_ns": 1711644
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 2,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 5
+                },
+                "gae": 175.0807124575522,
+                "group_adds": 0,
+                "native": 36818,
+                "verdict": "Found",
+                "wall_ns": 2557970
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 4,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 8
+                },
+                "gae": 270.59571029617445,
+                "group_adds": 0,
+                "native": 56904,
+                "verdict": "Found",
+                "wall_ns": 3331802
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 8,
+                  "splits": 4
+                },
+                "gae": 151.0474156798764,
+                "group_adds": 0,
+                "native": 31764,
+                "verdict": "Found",
+                "wall_ns": 1754920
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 9,
+                  "splits": 4
+                },
+                "gae": 154.3713718428355,
+                "group_adds": 0,
+                "native": 32463,
+                "verdict": "Found",
+                "wall_ns": 1923148
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 6,
+                  "splits": 4
+                },
+                "gae": 126.68124775569534,
+                "group_adds": 0,
+                "native": 26640,
+                "verdict": "Found",
+                "wall_ns": 1590847
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 9,
+                  "splits": 4
+                },
+                "gae": 176.6642280544984,
+                "group_adds": 0,
+                "native": 37151,
+                "verdict": "Found",
+                "wall_ns": 2240773
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 10,
+                  "splits": 4
+                },
+                "gae": 141.2229615558799,
+                "group_adds": 0,
+                "native": 29698,
+                "verdict": "Found",
+                "wall_ns": 1989389
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 64,
+              "models": 8,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 4134.021870068263,
+            "inconclusive": 0,
+            "ms_median_found": 0.5988085,
+            "ms_median_refuted": null,
+            "ms_total": 4.975948,
+            "native_median_found": 60.0,
+            "native_median_refuted": null,
+            "native_total": 495,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 4262.899022436508,
+                "group_adds": 0,
+                "native": 69,
+                "verdict": "Found",
+                "wall_ns": 641384
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 3696.9508312445064,
+                "group_adds": 0,
+                "native": 51,
+                "verdict": "Found",
+                "wall_ns": 556233
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 5553.830628350972,
+                "group_adds": 0,
+                "native": 97,
+                "verdict": "Found",
+                "wall_ns": 835614
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 2238.5098330432565,
+                "group_adds": 0,
+                "native": 17,
+                "verdict": "Found",
+                "wall_ns": 336800
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 2905.5831047274,
+                "group_adds": 0,
+                "native": 28,
+                "verdict": "Found",
+                "wall_ns": 437166
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 5510.748619034505,
+                "group_adds": 0,
+                "native": 81,
+                "verdict": "Found",
+                "wall_ns": 829132
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 6504.034186192509,
+                "group_adds": 0,
+                "native": 131,
+                "verdict": "Found",
+                "wall_ns": 978579
+              },
+              {
+                "extra": {
+                  "implied_rows": 8,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 2399.6187355164416,
+                "group_adds": 0,
+                "native": 21,
+                "verdict": "Found",
+                "wall_ns": 361040
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 28.75,
+            "s_over_rho_floor": 8.635993416476222,
+            "s_projected": 2.5511499645713274,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 5.085301315021508,
+            "s_over_rho_floor": 1.527534910515604,
+            "s_projected": 0.45124752242266586,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 835.979135873551,
+            "s_over_rho_floor": 251.11340221619014,
+            "s_projected": 74.18115279534533,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 20670.109350341314,
+            "s_over_rho_floor": 6208.936635387519,
+            "s_projected": 1834.1756082368245,
+            "targets_needed": 5.0
+          }
+        ],
+        "r": 127,
+        "signed_orbits": 4,
+        "signed_points": 55,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 12,
+        "wall_ns": 102955042
+      },
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 148.052855,
+          "ns_per_as_solve": 6.775715,
+          "ns_per_double": 149.697405,
+          "ns_per_frobenius": 13.221695,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 2.793685,
+          "ns_per_row_op": 3.6368125,
+          "ns_per_s4_pair": 641.4942670381483,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.4940538330078125
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 4,
+          "field": {
+            "degree": 9,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1
+            ]
+          },
+          "generator": {
+            "x": "0x160",
+            "y": "0x1d2"
+          },
+          "group_order": 508,
+          "koblitz": true,
+          "name": "K_0 / GF(2^9)",
+          "subgroup_order": 127
+        },
+        "dimension": 6,
+        "disagreements": 0,
+        "eq_var_ratio": 0.6666666666666666,
+        "equations": 18,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": 3,
+        "ffd_min": 3,
+        "ffd_no_fall": 0,
+        "group_order": 508,
+        "hit_rate": 1.0,
+        "log2_r": 6.9886846867721655,
+        "m": 3,
+        "macaulay": [
+          {
+            "cols": 70,
+            "degree": 2,
+            "rank": 9,
+            "rows": 9,
+            "syzygies": 0
+          },
+          {
+            "cols": 1672,
+            "degree": 3,
+            "rank": 260,
+            "rows": 261,
+            "syzygies": 1
+          }
+        ],
+        "n": 9,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 5.0,
+            "inconclusive": 0,
+            "ms_median_found": 0.0018570000000000001,
+            "ms_median_refuted": null,
+            "ms_total": 0.017888,
+            "native_median_found": 3.5,
+            "native_median_refuted": null,
+            "native_total": 40,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 4.0,
+                "group_adds": 4,
+                "native": 4,
+                "verdict": "Found",
+                "wall_ns": 1941
+              },
+              {
+                "extra": {},
+                "gae": 6.0,
+                "group_adds": 6,
+                "native": 6,
+                "verdict": "Found",
+                "wall_ns": 2271
+              },
+              {
+                "extra": {},
+                "gae": 3.0,
+                "group_adds": 3,
+                "native": 3,
+                "verdict": "Found",
+                "wall_ns": 1732
+              },
+              {
+                "extra": {},
+                "gae": 11.0,
+                "group_adds": 11,
+                "native": 11,
+                "verdict": "Found",
+                "wall_ns": 3032
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1305
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1773
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1766
+              },
+              {
+                "extra": {},
+                "gae": 10.0,
+                "group_adds": 10,
+                "native": 10,
+                "verdict": "Found",
+                "wall_ns": 4068
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 2.018869511162078,
+            "inconclusive": 0,
+            "ms_median_found": 0.0015915,
+            "ms_median_refuted": null,
+            "ms_total": 0.015931999999999998,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1634
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1338
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 5325
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1584
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1501
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1599
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1670
+              },
+              {
+                "extra": {},
+                "gae": 2.018869511162078,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1281
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "lift_failures": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 284.0538931970714,
+            "inconclusive": 0,
+            "ms_median_found": 0.017952,
+            "ms_median_refuted": null,
+            "ms_total": 0.178264,
+            "native_median_found": 64.0,
+            "native_median_refuted": null,
+            "native_total": 512,
+            "native_unit": "pairs",
+            "oracle": "semaev_s4_pairs_and_solve",
+            "per_target": [
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 283.3038931970714,
+                "group_adds": 6,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 13520
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 289.3038931970714,
+                "group_adds": 12,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 16794
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 286.3038931970714,
+                "group_adds": 9,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 16579
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 286.3038931970714,
+                "group_adds": 9,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 19110
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 280.3038931970714,
+                "group_adds": 3,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 12576
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 283.3038931970714,
+                "group_adds": 6,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 31972
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 280.3038931970714,
+                "group_adds": 3,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 39236
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 283.3038931970714,
+                "group_adds": 6,
+                "native": 64,
+                "verdict": "Found",
+                "wall_ns": 28477
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 12,
+              "max_degree_built": 24,
+              "reductions": 143,
+              "splits": 87
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 3802.8881078120157,
+            "inconclusive": 0,
+            "ms_median_found": 29.182361,
+            "ms_median_refuted": null,
+            "ms_total": 272.140199,
+            "native_median_found": 1057972.0,
+            "native_median_refuted": null,
+            "native_total": 9116876,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 18,
+                  "splits": 11
+                },
+                "gae": 4037.44486050147,
+                "group_adds": 0,
+                "native": 1209899,
+                "verdict": "Found",
+                "wall_ns": 37885929
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 16,
+                  "splits": 10
+                },
+                "gae": 3531.624246954428,
+                "group_adds": 0,
+                "native": 1058320,
+                "verdict": "Found",
+                "wall_ns": 27136886
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 10
+                },
+                "gae": 3529.301688110336,
+                "group_adds": 0,
+                "native": 1057624,
+                "verdict": "Found",
+                "wall_ns": 26016419
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 17,
+                  "splits": 11
+                },
+                "gae": 3402.191646543757,
+                "group_adds": 0,
+                "native": 1019533,
+                "verdict": "Found",
+                "wall_ns": 28543042
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 10
+                },
+                "gae": 3383.237430689667,
+                "group_adds": 0,
+                "native": 1013853,
+                "verdict": "Found",
+                "wall_ns": 25895529
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 18,
+                  "splits": 11
+                },
+                "gae": 3473.366729281767,
+                "group_adds": 0,
+                "native": 1040862,
+                "verdict": "Found",
+                "wall_ns": 29821680
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 3,
+                  "max_degree_built": 3,
+                  "reductions": 22,
+                  "splits": 12
+                },
+                "gae": 4649.185503172577,
+                "group_adds": 0,
+                "native": 1393219,
+                "verdict": "Found",
+                "wall_ns": 51342166
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 3,
+                  "max_degree_built": 3,
+                  "reductions": 22,
+                  "splits": 12
+                },
+                "gae": 4416.752757242124,
+                "group_adds": 0,
+                "native": 1323566,
+                "verdict": "Found",
+                "wall_ns": 45498548
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 72,
+              "models": 8,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 78375.89910035847,
+            "inconclusive": 0,
+            "ms_median_found": 12.219487,
+            "ms_median_refuted": null,
+            "ms_total": 92.830205,
+            "native_median_found": 409.0,
+            "native_median_refuted": null,
+            "native_total": 3903,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 29317.2191782455,
+                "group_adds": 0,
+                "native": 196,
+                "verdict": "Found",
+                "wall_ns": 4340498
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 90399.38473324274,
+                "group_adds": 0,
+                "native": 649,
+                "verdict": "Found",
+                "wall_ns": 13383887
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 48110.00774014118,
+                "group_adds": 0,
+                "native": 349,
+                "verdict": "Found",
+                "wall_ns": 7122824
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 110258.87342733107,
+                "group_adds": 0,
+                "native": 690,
+                "verdict": "Found",
+                "wall_ns": 16324141
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40462.759059931675,
+                "group_adds": 0,
+                "native": 313,
+                "verdict": "Found",
+                "wall_ns": 5990627
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 82289.01766196945,
+                "group_adds": 0,
+                "native": 362,
+                "verdict": "Found",
+                "wall_ns": 12183124
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 82780.23412652191,
+                "group_adds": 0,
+                "native": 456,
+                "verdict": "Found",
+                "wall_ns": 12255850
+              },
+              {
+                "extra": {
+                  "implied_rows": 9,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 143389.6968754841,
+                "group_adds": 0,
+                "native": 888,
+                "verdict": "Found",
+                "wall_ns": 21229254
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m3",
+            "relation_phase_gae": 25.0,
+            "s_over_rho_floor": 7.509559492588019,
+            "s_projected": 2.2183912735402846,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m3",
+            "relation_phase_gae": 10.09434755581039,
+            "s_over_rho_floor": 3.032164140368743,
+            "s_projected": 0.8957285011956988,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "semaev_s4_pairs_and_solve",
+            "relation_phase_gae": 1420.2694659853569,
+            "s_over_rho_floor": 426.6239220129301,
+            "s_projected": 126.02853557670542,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 19014.44053906008,
+            "s_over_rho_floor": 5711.602897853963,
+            "s_projected": 1687.2587585240603,
+            "targets_needed": 5.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 391879.49550179235,
+            "s_over_rho_floor": 117713.69541584354,
+            "s_projected": 34773.68212402181,
+            "targets_needed": 5.0
+          }
+        ],
+        "r": 127,
+        "signed_orbits": 4,
+        "signed_points": 55,
+        "system_degree": 3,
+        "targets": 8,
+        "unknowns": 27,
+        "wall_ns": 499775507
+      },
+      {
+        "a": 1,
+        "calibration": {
+          "ns_per_add": 184.98323,
+          "ns_per_as_solve": 8.64252,
+          "ns_per_double": 184.45856,
+          "ns_per_frobenius": 14.93338,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 3.071645,
+          "ns_per_row_op": 3.58001953125,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.519597412109375
+        },
+        "curve": {
+          "a": 1,
+          "b": "0x1",
+          "cofactor": 2,
+          "field": {
+            "degree": 11,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              2
+            ]
+          },
+          "generator": {
+            "x": "0x742",
+            "y": "0x710"
+          },
+          "group_order": 1982,
+          "koblitz": true,
+          "name": "K_1 / GF(2^11)",
+          "subgroup_order": 991
+        },
+        "dimension": 10,
+        "disagreements": 0,
+        "eq_var_ratio": 0.55,
+        "equations": 11,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": 2,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 1982,
+        "hit_rate": 1.0,
+        "log2_r": 9.952741247186488,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 121,
+            "degree": 2,
+            "rank": 10,
+            "rows": 11,
+            "syzygies": 1
+          },
+          {
+            "cols": 1111,
+            "degree": 3,
+            "rank": 210,
+            "rows": 231,
+            "syzygies": 21
+          }
+        ],
+        "n": 11,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1.0,
+            "inconclusive": 0,
+            "ms_median_found": 0.0014145,
+            "ms_median_refuted": null,
+            "ms_total": 0.010334,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1418
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1500
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1492
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1411
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1470
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1169
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 894
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 980
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1.0166049917065456,
+            "inconclusive": 0,
+            "ms_median_found": 0.0017965,
+            "ms_median_refuted": null,
+            "ms_total": 0.014595000000000002,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1963
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2088
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1732
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1657
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1612
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1861
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1652
+              },
+              {
+                "extra": {},
+                "gae": 1.0166049917065456,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2030
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 0,
+              "max_degree_built": 24,
+              "reductions": 88,
+              "splits": 72
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1254.2343711193037,
+            "inconclusive": 0,
+            "ms_median_found": 10.4319495,
+            "ms_median_refuted": null,
+            "ms_total": 85.011969,
+            "native_median_found": 450017.5,
+            "native_median_refuted": null,
+            "native_total": 3572186,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1342.0283122973099,
+                "group_adds": 0,
+                "native": 477779,
+                "verdict": "Found",
+                "wall_ns": 12105048
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1238.0488488537055,
+                "group_adds": 0,
+                "native": 440761,
+                "verdict": "Found",
+                "wall_ns": 10500154
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1129.2718025163288,
+                "group_adds": 0,
+                "native": 402035,
+                "verdict": "Found",
+                "wall_ns": 10180890
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1253.480886569389,
+                "group_adds": 0,
+                "native": 446255,
+                "verdict": "Found",
+                "wall_ns": 10113391
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1274.617778416953,
+                "group_adds": 0,
+                "native": 453780,
+                "verdict": "Found",
+                "wall_ns": 11078506
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1320.4925581716923,
+                "group_adds": 0,
+                "native": 470112,
+                "verdict": "Found",
+                "wall_ns": 11124814
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1200.1737857742967,
+                "group_adds": 0,
+                "native": 427277,
+                "verdict": "Found",
+                "wall_ns": 9545421
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 11,
+                  "splits": 9
+                },
+                "gae": 1275.7609963547545,
+                "group_adds": 0,
+                "native": 454187,
+                "verdict": "Found",
+                "wall_ns": 10363745
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 80,
+              "models": 8,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 14886.090620214602,
+            "inconclusive": 0,
+            "ms_median_found": 2.6679519999999997,
+            "ms_median_refuted": null,
+            "ms_total": 22.029417000000002,
+            "native_median_found": 284.5,
+            "native_median_refuted": null,
+            "native_total": 2399,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 23895.182282199312,
+                "group_adds": 0,
+                "native": 471,
+                "verdict": "Found",
+                "wall_ns": 4420208
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 10450.806810974163,
+                "group_adds": 0,
+                "native": 223,
+                "verdict": "Found",
+                "wall_ns": 1933224
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 20921.62624687654,
+                "group_adds": 0,
+                "native": 408,
+                "verdict": "Found",
+                "wall_ns": 3870150
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 8272.43637166461,
+                "group_adds": 0,
+                "native": 168,
+                "verdict": "Found",
+                "wall_ns": 1530262
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 11922.415886023831,
+                "group_adds": 0,
+                "native": 235,
+                "verdict": "Found",
+                "wall_ns": 2205447
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 16922.923229311113,
+                "group_adds": 0,
+                "native": 334,
+                "verdict": "Found",
+                "wall_ns": 3130457
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 7997.773636020952,
+                "group_adds": 0,
+                "native": 149,
+                "verdict": "Found",
+                "wall_ns": 1479454
+              },
+              {
+                "extra": {
+                  "implied_rows": 10,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 18705.560498646286,
+                "group_adds": 0,
+                "native": 411,
+                "verdict": "Found",
+                "wall_ns": 3460215
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 47.0,
+            "s_over_rho_floor": 5.587434339660725,
+            "s_projected": 1.4930042042760203,
+            "targets_needed": 47.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 47.78043461020764,
+            "s_over_rho_floor": 5.68021364053166,
+            "s_projected": 1.5177955267058614,
+            "targets_needed": 47.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 58949.01544260727,
+            "s_over_rho_floor": 7007.952195174772,
+            "s_projected": 1872.5771892286107,
+            "targets_needed": 47.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 699646.2591500863,
+            "s_over_rho_floor": 83175.0539146885,
+            "s_projected": 22224.995881214232,
+            "targets_needed": 47.0
+          }
+        ],
+        "r": 991,
+        "signed_orbits": 46,
+        "signed_points": 991,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 20,
+        "wall_ns": 311608503
+      },
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 209.05301,
+          "ns_per_as_solve": 10.68101,
+          "ns_per_double": 211.26352,
+          "ns_per_frobenius": 13.99137,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 3.52139,
+          "ns_per_row_op": 3.5773486328125,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.4892552490234375
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 4,
+          "field": {
+            "degree": 13,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1,
+              3,
+              4
+            ]
+          },
+          "generator": {
+            "x": "0x12b9",
+            "y": "0x1bc4"
+          },
+          "group_order": 8012,
+          "koblitz": true,
+          "name": "K_0 / GF(2^13)",
+          "subgroup_order": 2003
+        },
+        "dimension": 12,
+        "disagreements": 0,
+        "eq_var_ratio": 0.5416666666666666,
+        "equations": 13,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": 2,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 8012,
+        "hit_rate": 1.0,
+        "log2_r": 10.967946705812707,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 169,
+            "degree": 2,
+            "rank": 12,
+            "rows": 13,
+            "syzygies": 1
+          },
+          {
+            "cols": 1885,
+            "degree": 3,
+            "rank": 300,
+            "rows": 325,
+            "syzygies": 25
+          }
+        ],
+        "n": 13,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1.0,
+            "inconclusive": 0,
+            "ms_median_found": 0.0017200000000000002,
+            "ms_median_refuted": null,
+            "ms_total": 0.014653000000000001,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1683
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1676
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2505
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1360
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2001
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1541
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1757
+              },
+              {
+                "extra": {},
+                "gae": 1.0,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2130
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 1.0168444836072918,
+            "inconclusive": 0,
+            "ms_median_found": 0.0025975,
+            "ms_median_refuted": null,
+            "ms_total": 0.020256,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 3509
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2083
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2725
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2619
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2802
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2576
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2257
+              },
+              {
+                "extra": {},
+                "gae": 1.0168444836072918,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1685
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 0,
+              "max_degree_built": 24,
+              "reductions": 120,
+              "splits": 96
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 4165.427443825291,
+            "inconclusive": 0,
+            "ms_median_found": 26.80025,
+            "ms_median_refuted": null,
+            "ms_total": 213.40728299999998,
+            "native_median_found": 1795996.5,
+            "native_median_refuted": null,
+            "native_total": 14238705,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 3946.6661530688325,
+                "group_adds": 0,
+                "native": 1686364,
+                "verdict": "Found",
+                "wall_ns": 26299256
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 4453.511378716417,
+                "group_adds": 0,
+                "native": 1902933,
+                "verdict": "Found",
+                "wall_ns": 26045337
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 3920.4613592545006,
+                "group_adds": 0,
+                "native": 1675167,
+                "verdict": "Found",
+                "wall_ns": 25458463
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 4223.2686694680515,
+                "group_adds": 0,
+                "native": 1804553,
+                "verdict": "Found",
+                "wall_ns": 27133493
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 4323.177810124818,
+                "group_adds": 0,
+                "native": 1847243,
+                "verdict": "Found",
+                "wall_ns": 26539223
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 4183.2184206027605,
+                "group_adds": 0,
+                "native": 1787440,
+                "verdict": "Found",
+                "wall_ns": 27061277
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 4284.1432690844285,
+                "group_adds": 0,
+                "native": 1830564,
+                "verdict": "Found",
+                "wall_ns": 27614917
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 0,
+                  "max_degree_built": 3,
+                  "reductions": 15,
+                  "splits": 12
+                },
+                "gae": 3988.972490282521,
+                "group_adds": 0,
+                "native": 1704441,
+                "verdict": "Found",
+                "wall_ns": 27255317
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 96,
+              "models": 8,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 24408.461638509772,
+            "inconclusive": 0,
+            "ms_median_found": 2.899428,
+            "ms_median_refuted": null,
+            "ms_total": 40.821299,
+            "native_median_found": 222.0,
+            "native_median_refuted": null,
+            "native_total": 3369,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 38635.411181116215,
+                "group_adds": 0,
+                "native": 751,
+                "verdict": "Found",
+                "wall_ns": 8076849
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 15179.547044072697,
+                "group_adds": 0,
+                "native": 235,
+                "verdict": "Found",
+                "wall_ns": 3173330
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 5989.279943876436,
+                "group_adds": 0,
+                "native": 58,
+                "verdict": "Found",
+                "wall_ns": 1252077
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 59246.01611811282,
+                "group_adds": 0,
+                "native": 1056,
+                "verdict": "Found",
+                "wall_ns": 12385558
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 46244.59126419658,
+                "group_adds": 0,
+                "native": 856,
+                "verdict": "Found",
+                "wall_ns": 9667571
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 12365.098211214467,
+                "group_adds": 0,
+                "native": 209,
+                "verdict": "Found",
+                "wall_ns": 2584961
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 5048.609441213021,
+                "group_adds": 0,
+                "native": 6,
+                "verdict": "Found",
+                "wall_ns": 1055427
+              },
+              {
+                "extra": {
+                  "implied_rows": 12,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 12559.139904275953,
+                "group_adds": 0,
+                "native": 198,
+                "verdict": "Found",
+                "wall_ns": 2625526
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 156.0,
+            "s_over_rho_floor": 14.181130682820118,
+            "s_projected": 3.4856527849162644,
+            "targets_needed": 156.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 158.62773944273752,
+            "s_over_rho_floor": 14.420004506139744,
+            "s_projected": 3.5443668061124973,
+            "targets_needed": 156.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 649806.6812367454,
+            "s_over_rho_floor": 59070.47093069181,
+            "s_projected": 14519.233769936263,
+            "targets_needed": 156.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 3807720.0156075247,
+            "s_over_rho_floor": 346139.5842623087,
+            "s_projected": 85079.4222857934,
+            "targets_needed": 156.0
+          }
+        ],
+        "r": 2003,
+        "signed_orbits": 155,
+        "signed_points": 4005,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 24,
+        "wall_ns": 2226429695
+      },
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 209.52079,
+          "ns_per_as_solve": 10.67342,
+          "ns_per_double": 209.534445,
+          "ns_per_frobenius": 14.07101,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 3.47572,
+          "ns_per_row_op": 3.552453125,
+          "ns_per_s4_pair": 1263.6942820015317,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.6085443115234375
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 4,
+          "field": {
+            "degree": 13,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1,
+              3,
+              4
+            ]
+          },
+          "generator": {
+            "x": "0x12b9",
+            "y": "0x1bc4"
+          },
+          "group_order": 8012,
+          "koblitz": true,
+          "name": "K_0 / GF(2^13)",
+          "subgroup_order": 2003
+        },
+        "dimension": 12,
+        "disagreements": 0,
+        "eq_var_ratio": 0.5306122448979592,
+        "equations": 26,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": null,
+        "ffd_min": null,
+        "ffd_no_fall": 0,
+        "group_order": 8012,
+        "hit_rate": 1.0,
+        "log2_r": 10.967946705812707,
+        "m": 3,
+        "macaulay": [],
+        "n": 13,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 2.0,
+            "inconclusive": 0,
+            "ms_median_found": 0.001185,
+            "ms_median_refuted": null,
+            "ms_total": 0.011075,
+            "native_median_found": 2.0,
+            "native_median_refuted": null,
+            "native_total": 16,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 3476
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1563
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1391
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1293
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 617
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 793
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 865
+              },
+              {
+                "extra": {},
+                "gae": 2.0,
+                "group_adds": 2,
+                "native": 2,
+                "verdict": "Found",
+                "wall_ns": 1077
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {},
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 2.0165889027050734,
+            "inconclusive": 0,
+            "ms_median_found": 0.002062,
+            "ms_median_refuted": null,
+            "ms_total": 0.020099,
+            "native_median_found": 1.0,
+            "native_median_refuted": null,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 3064
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 4904
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2546
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1857
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1974
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2076
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1630
+              },
+              {
+                "extra": {},
+                "gae": 2.016588902705073,
+                "group_adds": 2,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2048
+              }
+            ],
+            "refuted": 0
+          },
+          {
+            "extra_totals": {
+              "lift_failures": 0
+            },
+            "found": 8,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 24708.93042467659,
+            "inconclusive": 0,
+            "ms_median_found": 0.3871205,
+            "ms_median_refuted": null,
+            "ms_total": 3.1602430000000004,
+            "native_median_found": 4096.0,
+            "native_median_refuted": null,
+            "native_total": 32768,
+            "native_unit": "pairs",
+            "oracle": "semaev_s4_pairs_and_solve",
+            "per_target": [
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24707.430424676586,
+                "group_adds": 3,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 467958
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24710.430424676586,
+                "group_adds": 6,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 369869
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24710.430424676586,
+                "group_adds": 6,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 391570
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24707.430424676586,
+                "group_adds": 3,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 377531
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24707.430424676586,
+                "group_adds": 3,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 367571
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24707.430424676586,
+                "group_adds": 3,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 386033
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24710.430424676586,
+                "group_adds": 6,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 411503
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 24710.430424676586,
+                "group_adds": 6,
+                "native": 4096,
+                "verdict": "Found",
+                "wall_ns": 388208
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m3",
+            "relation_phase_gae": 312.0,
+            "s_over_rho_floor": 28.362261365640236,
+            "s_projected": 6.971305569832529,
+            "targets_needed": 156.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m3",
+            "relation_phase_gae": 314.58786882199144,
+            "s_over_rho_floor": 28.59751076278547,
+            "s_projected": 7.029128724745172,
+            "targets_needed": 156.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "semaev_s4_pairs_and_solve",
+            "relation_phase_gae": 3854593.146249548,
+            "s_over_rho_floor": 350400.5713850487,
+            "s_projected": 86126.75214707617,
+            "targets_needed": 156.0
+          }
+        ],
+        "r": 2003,
+        "signed_orbits": 155,
+        "signed_points": 4005,
+        "system_degree": 3,
+        "targets": 8,
+        "unknowns": 49,
+        "wall_ns": 12495669918
+      },
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 240.470345,
+          "ns_per_as_solve": 13.49608,
+          "ns_per_double": 239.1737,
+          "ns_per_frobenius": 14.609985,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 2.647825,
+          "ns_per_row_op": 3.5881591796875,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.5020218505859375
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 44,
+          "field": {
+            "degree": 15,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1
+            ]
+          },
+          "generator": {
+            "x": "0x6ea0",
+            "y": "0x43c5"
+          },
+          "group_order": 33044,
+          "koblitz": true,
+          "name": "K_0 / GF(2^15)",
+          "subgroup_order": 751
+        },
+        "dimension": 5,
+        "disagreements": 0,
+        "eq_var_ratio": 1.5,
+        "equations": 15,
+        "factor_base": "invariant subspace, divisor [0, 3], dimension 5",
+        "ffd_max": 3,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 33044,
+        "hit_rate": 0.0,
+        "log2_r": 9.552669097514272,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 36,
+            "degree": 2,
+            "rank": 15,
+            "rows": 15,
+            "syzygies": 0
+          },
+          {
+            "cols": 156,
+            "degree": 3,
+            "rank": 136,
+            "rows": 165,
+            "syzygies": 29
+          }
+        ],
+        "n": 15,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 0,
+            "gae_per_refutation_mean": 33.0,
+            "gae_per_target_mean": 33.0,
+            "inconclusive": 0,
+            "ms_median_found": null,
+            "ms_median_refuted": 0.0075965,
+            "ms_total": 0.07549699999999998,
+            "native_median_found": null,
+            "native_median_refuted": 33.0,
+            "native_total": 264,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 8178
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7723
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7591
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 22104
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7602
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7435
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7320
+              },
+              {
+                "extra": {},
+                "gae": 33.0,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7544
+              }
+            ],
+            "refuted": 8
+          },
+          {
+            "extra_totals": {},
+            "found": 0,
+            "gae_per_refutation_mean": 0.011011025080868082,
+            "gae_per_target_mean": 0.011011025080868082,
+            "inconclusive": 0,
+            "ms_median_found": null,
+            "ms_median_refuted": 0.000101,
+            "ms_total": 0.0012269999999999998,
+            "native_median_found": null,
+            "native_median_refuted": 1.0,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 528
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 157
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 111
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 150
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 91
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 68
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 52
+              },
+              {
+                "extra": {},
+                "gae": 0.01101102508086808,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 70
+              }
+            ],
+            "refuted": 8
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 8,
+              "max_degree_built": 23,
+              "reductions": 8,
+              "splits": 0
+            },
+            "found": 0,
+            "gae_per_refutation_mean": 20.796027517989764,
+            "gae_per_target_mean": 20.796027517989764,
+            "inconclusive": 0,
+            "ms_median_found": null,
+            "ms_median_refuted": 0.6261874999999999,
+            "ms_total": 4.412269,
+            "native_median_found": null,
+            "native_median_refuted": 11329.0,
+            "native_total": 79691,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 23.85576353144712,
+                "group_adds": 0,
+                "native": 11427,
+                "verdict": "Refuted",
+                "wall_ns": 644841
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 2,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 0.17953930722888356,
+                "group_adds": 0,
+                "native": 86,
+                "verdict": "Refuted",
+                "wall_ns": 213794
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 23.617769566050697,
+                "group_adds": 0,
+                "native": 11313,
+                "verdict": "Refuted",
+                "wall_ns": 520889
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 22.997732656202107,
+                "group_adds": 0,
+                "native": 11016,
+                "verdict": "Refuted",
+                "wall_ns": 627068
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 23.3275839415761,
+                "group_adds": 0,
+                "native": 11174,
+                "verdict": "Refuted",
+                "wall_ns": 503580
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 24.262858472256802,
+                "group_adds": 0,
+                "native": 11622,
+                "verdict": "Refuted",
+                "wall_ns": 648208
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 24.442397779485685,
+                "group_adds": 0,
+                "native": 11708,
+                "verdict": "Refuted",
+                "wall_ns": 628582
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 1,
+                  "max_degree_built": 3,
+                  "reductions": 1,
+                  "splits": 0
+                },
+                "gae": 23.684574889670742,
+                "group_adds": 0,
+                "native": 11345,
+                "verdict": "Refuted",
+                "wall_ns": 625307
+              }
+            ],
+            "refuted": 8
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 119,
+              "models": 0,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 0,
+            "gae_per_refutation_mean": 1499.26958769074,
+            "gae_per_target_mean": 1499.26958769074,
+            "inconclusive": 0,
+            "ms_median_found": null,
+            "ms_median_refuted": 0.372375,
+            "ms_total": 2.884239,
+            "native_median_found": null,
+            "native_median_refuted": 5.0,
+            "native_total": 39,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1647.9620387287255,
+                "group_adds": 0,
+                "native": 5,
+                "verdict": "Refuted",
+                "wall_ns": 396286
+              },
+              {
+                "extra": {
+                  "implied_rows": 14,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1209.85396348976,
+                "group_adds": 0,
+                "native": 0,
+                "verdict": "Refuted",
+                "wall_ns": 290934
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1252.3540064784288,
+                "group_adds": 0,
+                "native": 6,
+                "verdict": "Refuted",
+                "wall_ns": 301154
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1884.4860059563684,
+                "group_adds": 0,
+                "native": 5,
+                "verdict": "Refuted",
+                "wall_ns": 453163
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1248.0832095949295,
+                "group_adds": 0,
+                "native": 8,
+                "verdict": "Refuted",
+                "wall_ns": 300127
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1654.3619962785847,
+                "group_adds": 0,
+                "native": 8,
+                "verdict": "Refuted",
+                "wall_ns": 397825
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1511.8620967587499,
+                "group_adds": 0,
+                "native": 3,
+                "verdict": "Refuted",
+                "wall_ns": 363558
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1585.1933842403728,
+                "group_adds": 0,
+                "native": 4,
+                "verdict": "Refuted",
+                "wall_ns": 381192
+              }
+            ],
+            "refuted": 8
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 4224.0,
+            "s_over_rho_floor": 673.6039572514846,
+            "s_projected": 154.13594912365622,
+            "targets_needed": 128.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 1.4094112103511145,
+            "s_over_rho_floor": 0.22475969902630571,
+            "s_projected": 0.05143014550496925,
+            "targets_needed": 128.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 2661.8915223026897,
+            "s_over_rho_floor": 424.4935282190507,
+            "s_projected": 97.1338011965765,
+            "targets_needed": 128.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 191906.50722441473,
+            "s_over_rho_floor": 30603.45234106922,
+            "s_projected": 7002.767905786211,
+            "targets_needed": 128.0
+          }
+        ],
+        "r": 751,
+        "signed_orbits": 3,
+        "signed_points": 33,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 10,
+        "wall_ns": 127100071
+      },
+      {
+        "a": 0,
+        "calibration": {
+          "ns_per_add": 240.45647,
+          "ns_per_as_solve": 12.8549,
+          "ns_per_double": 242.265695,
+          "ns_per_frobenius": 14.45941,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 2.780285,
+          "ns_per_row_op": 3.56961328125,
+          "ns_per_s4_pair": 643.0204393124958,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.5057655029296875
+        },
+        "curve": {
+          "a": 0,
+          "b": "0x1",
+          "cofactor": 44,
+          "field": {
+            "degree": 15,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              1
+            ]
+          },
+          "generator": {
+            "x": "0x6ea0",
+            "y": "0x43c5"
+          },
+          "group_order": 33044,
+          "koblitz": true,
+          "name": "K_0 / GF(2^15)",
+          "subgroup_order": 751
+        },
+        "dimension": 5,
+        "disagreements": 0,
+        "eq_var_ratio": 1.0,
+        "equations": 30,
+        "factor_base": "invariant subspace, divisor [0, 3], dimension 5",
+        "ffd_max": 3,
+        "ffd_min": 3,
+        "ffd_no_fall": 0,
+        "group_order": 33044,
+        "hit_rate": 0.375,
+        "log2_r": 9.552669097514272,
+        "m": 3,
+        "macaulay": [
+          {
+            "cols": 96,
+            "degree": 2,
+            "rank": 15,
+            "rows": 15,
+            "syzygies": 0
+          },
+          {
+            "cols": 2246,
+            "degree": 3,
+            "rank": 479,
+            "rows": 480,
+            "syzygies": 1
+          }
+        ],
+        "n": 15,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 3,
+            "gae_per_refutation_mean": 594.0,
+            "gae_per_target_mean": 466.5,
+            "inconclusive": 0,
+            "ms_median_found": 0.055147,
+            "ms_median_refuted": 0.138661,
+            "ms_total": 0.9002870000000001,
+            "native_median_found": 229.0,
+            "native_median_refuted": 594.0,
+            "native_total": 3732,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 594.0,
+                "group_adds": 594,
+                "native": 594,
+                "verdict": "Refuted",
+                "wall_ns": 130161
+              },
+              {
+                "extra": {},
+                "gae": 594.0,
+                "group_adds": 594,
+                "native": 594,
+                "verdict": "Refuted",
+                "wall_ns": 155031
+              },
+              {
+                "extra": {},
+                "gae": 336.0,
+                "group_adds": 336,
+                "native": 336,
+                "verdict": "Found",
+                "wall_ns": 79628
+              },
+              {
+                "extra": {},
+                "gae": 229.0,
+                "group_adds": 229,
+                "native": 229,
+                "verdict": "Found",
+                "wall_ns": 55147
+              },
+              {
+                "extra": {},
+                "gae": 197.0,
+                "group_adds": 197,
+                "native": 197,
+                "verdict": "Found",
+                "wall_ns": 46482
+              },
+              {
+                "extra": {},
+                "gae": 594.0,
+                "group_adds": 594,
+                "native": 594,
+                "verdict": "Refuted",
+                "wall_ns": 158347
+              },
+              {
+                "extra": {},
+                "gae": 594.0,
+                "group_adds": 594,
+                "native": 594,
+                "verdict": "Refuted",
+                "wall_ns": 136830
+              },
+              {
+                "extra": {},
+                "gae": 594.0,
+                "group_adds": 594,
+                "native": 594,
+                "verdict": "Refuted",
+                "wall_ns": 138661
+              }
+            ],
+            "refuted": 5
+          },
+          {
+            "extra_totals": {},
+            "found": 3,
+            "gae_per_refutation_mean": 33.38156346967915,
+            "gae_per_target_mean": 24.6525007052212,
+            "inconclusive": 0,
+            "ms_median_found": 0.003279,
+            "ms_median_refuted": 0.008774,
+            "ms_total": 0.06360700000000001,
+            "native_median_found": 8.0,
+            "native_median_refuted": 33.0,
+            "native_total": 192,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m3",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 33.38156346967915,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 7953
+              },
+              {
+                "extra": {},
+                "gae": 33.38156346967915,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 10469
+              },
+              {
+                "extra": {},
+                "gae": 13.1387503526106,
+                "group_adds": 13,
+                "native": 12,
+                "verdict": "Found",
+                "wall_ns": 4146
+              },
+              {
+                "extra": {},
+                "gae": 9.092500235073732,
+                "group_adds": 9,
+                "native": 8,
+                "verdict": "Found",
+                "wall_ns": 3279
+              },
+              {
+                "extra": {},
+                "gae": 8.080937705689516,
+                "group_adds": 8,
+                "native": 7,
+                "verdict": "Found",
+                "wall_ns": 3144
+              },
+              {
+                "extra": {},
+                "gae": 33.38156346967915,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 17278
+              },
+              {
+                "extra": {},
+                "gae": 33.38156346967915,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 8564
+              },
+              {
+                "extra": {},
+                "gae": 33.38156346967915,
+                "group_adds": 33,
+                "native": 33,
+                "verdict": "Refuted",
+                "wall_ns": 8774
+              }
+            ],
+            "refuted": 5
+          },
+          {
+            "extra_totals": {
+              "lift_failures": 0
+            },
+            "found": 3,
+            "gae_per_refutation_mean": 1411.9594783912355,
+            "gae_per_target_mean": 1105.7506353946885,
+            "inconclusive": 0,
+            "ms_median_found": 0.142799,
+            "ms_median_refuted": 0.39242,
+            "ms_total": 2.775321,
+            "native_median_found": 203.0,
+            "native_median_refuted": 528.0,
+            "native_total": 3290,
+            "native_unit": "pairs",
+            "oracle": "semaev_s4_pairs_and_solve",
+            "per_target": [
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 1411.9594783912355,
+                "group_adds": 0,
+                "native": 528,
+                "verdict": "Refuted",
+                "wall_ns": 355427
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 1411.9594783912355,
+                "group_adds": 0,
+                "native": 528,
+                "verdict": "Refuted",
+                "wall_ns": 675539
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 815.22720659507,
+                "group_adds": 21,
+                "native": 297,
+                "verdict": "Found",
+                "wall_ns": 216478
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 545.8556327905698,
+                "group_adds": 3,
+                "native": 203,
+                "verdict": "Found",
+                "wall_ns": 142799
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 425.1248518156919,
+                "group_adds": 24,
+                "native": 150,
+                "verdict": "Found",
+                "wall_ns": 103332
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 1411.9594783912355,
+                "group_adds": 0,
+                "native": 528,
+                "verdict": "Refuted",
+                "wall_ns": 380164
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 1411.9594783912355,
+                "group_adds": 0,
+                "native": 528,
+                "verdict": "Refuted",
+                "wall_ns": 509162
+              },
+              {
+                "extra": {
+                  "lift_failures": 0
+                },
+                "gae": 1411.9594783912355,
+                "group_adds": 0,
+                "native": 528,
+                "verdict": "Refuted",
+                "wall_ns": 392420
+              }
+            ],
+            "refuted": 5
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 3617,
+              "max_degree_built": 24,
+              "reductions": 8937,
+              "splits": 3631
+            },
+            "found": 3,
+            "gae_per_refutation_mean": 1322926.250417218,
+            "gae_per_target_mean": 872580.0436962983,
+            "inconclusive": 0,
+            "ms_median_found": 785.862333,
+            "ms_median_refuted": 7878.573415,
+            "ms_total": 41583.172242,
+            "native_median_found": 64818554.0,
+            "native_median_refuted": 628830074.0,
+            "native_total": 3318811044,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 689,
+                  "max_degree_built": 3,
+                  "reductions": 1698,
+                  "splits": 688
+                },
+                "gae": 1348848.311457831,
+                "group_adds": 0,
+                "native": 641283958,
+                "verdict": "Refuted",
+                "wall_ns": 7873614712
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 689,
+                  "max_degree_built": 3,
+                  "reductions": 1687,
+                  "splits": 688
+                },
+                "gae": 1310791.283848161,
+                "group_adds": 0,
+                "native": 623190477,
+                "verdict": "Refuted",
+                "wall_ns": 7802535935
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 64,
+                  "max_degree_built": 3,
+                  "reductions": 170,
+                  "splits": 70
+                },
+                "gae": 136336.47937601808,
+                "group_adds": 0,
+                "native": 64818554,
+                "verdict": "Found",
+                "wall_ns": 785862333
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 18,
+                  "max_degree_built": 3,
+                  "reductions": 60,
+                  "splits": 24
+                },
+                "gae": 52792.22946482526,
+                "group_adds": 0,
+                "native": 25099049,
+                "verdict": "Found",
+                "wall_ns": 290735180
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 84,
+                  "max_degree_built": 3,
+                  "reductions": 222,
+                  "splits": 91
+                },
+                "gae": 176880.38864345275,
+                "group_adds": 0,
+                "native": 84094375,
+                "verdict": "Found",
+                "wall_ns": 980958335
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 687,
+                  "max_degree_built": 3,
+                  "reductions": 1694,
+                  "splits": 686
+                },
+                "gae": 1322653.362722669,
+                "group_adds": 0,
+                "native": 628830074,
+                "verdict": "Refuted",
+                "wall_ns": 7878573415
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 693,
+                  "max_degree_built": 3,
+                  "reductions": 1703,
+                  "splits": 692
+                },
+                "gae": 1327313.5135899568,
+                "group_adds": 0,
+                "native": 631045653,
+                "verdict": "Refuted",
+                "wall_ns": 7916007651
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 693,
+                  "max_degree_built": 3,
+                  "reductions": 1703,
+                  "splits": 692
+                },
+                "gae": 1305024.7804674725,
+                "group_adds": 0,
+                "native": 620448904,
+                "verdict": "Refuted",
+                "wall_ns": 8054884681
+              }
+            ],
+            "refuted": 5
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 120,
+              "models": 0,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 0,
+            "gae_per_refutation_mean": -0.0,
+            "gae_per_target_mean": 40594542.26735924,
+            "inconclusive": 8,
+            "ms_median_found": null,
+            "ms_median_refuted": null,
+            "ms_total": 78089.762679,
+            "native_median_found": null,
+            "native_median_refuted": null,
+            "native_total": 1600000,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 42046643.8852737,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 10110387564
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 39092154.62158286,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9399961505
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40959087.67187674,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9848877636
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40862483.92068635,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9825648639
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40737320.3848497,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9795552257
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40965498.01300834,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9850419044
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 39256477.24097422,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9439473942
+              },
+              {
+                "extra": {
+                  "implied_rows": 15,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 40836672.40062203,
+                "group_adds": 0,
+                "native": 200000,
+                "verdict": "Inconclusive",
+                "wall_ns": 9819442092
+              }
+            ],
+            "refuted": 0
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m3",
+            "relation_phase_gae": 4976.0,
+            "s_over_rho_floor": 793.5258738833777,
+            "s_projected": 181.5768188540041,
+            "targets_needed": 10.666666666666666
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m3",
+            "relation_phase_gae": 262.96000752235943,
+            "s_over_rho_floor": 41.93439906864145,
+            "s_projected": 9.595546955734529,
+            "targets_needed": 10.666666666666666
+          },
+          {
+            "extrapolation": true,
+            "oracle": "semaev_s4_pairs_and_solve",
+            "relation_phase_gae": 11794.67344421001,
+            "s_over_rho_floor": 1880.904049836378,
+            "s_projected": 430.39374666829855,
+            "targets_needed": 10.666666666666666
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 9307520.466093848,
+            "s_over_rho_floor": 1484276.1880113634,
+            "s_projected": 339636.245508814,
+            "targets_needed": 10.666666666666666
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 433008450.8518319,
+            "s_over_rho_floor": 69052132.10632788,
+            "s_projected": 15800702.781868171,
+            "targets_needed": 10.666666666666666
+          }
+        ],
+        "r": 751,
+        "signed_orbits": 3,
+        "signed_points": 33,
+        "system_degree": 3,
+        "targets": 8,
+        "unknowns": 30,
+        "wall_ns": 119854455885
+      },
+      {
+        "a": 1,
+        "calibration": {
+          "ns_per_add": 267.95087,
+          "ns_per_as_solve": 15.60026,
+          "ns_per_double": 265.67485,
+          "ns_per_frobenius": 14.10391,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 3.06213,
+          "ns_per_row_op": 3.5654873046875,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.496131591796875
+        },
+        "curve": {
+          "a": 1,
+          "b": "0x1",
+          "cofactor": 2,
+          "field": {
+            "degree": 17,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              3
+            ]
+          },
+          "generator": {
+            "x": "0xaaad",
+            "y": "0x5b2b"
+          },
+          "group_order": 131174,
+          "koblitz": true,
+          "name": "K_1 / GF(2^17)",
+          "subgroup_order": 65587
+        },
+        "dimension": 8,
+        "disagreements": 0,
+        "eq_var_ratio": 1.0625,
+        "equations": 17,
+        "factor_base": "invariant subspace, divisor [2], dimension 8",
+        "ffd_max": 2,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 131174,
+        "hit_rate": 0.25,
+        "log2_r": 16.001122266128682,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 81,
+            "degree": 2,
+            "rank": 16,
+            "rows": 17,
+            "syzygies": 1
+          },
+          {
+            "cols": 585,
+            "degree": 3,
+            "rank": 272,
+            "rows": 289,
+            "syzygies": 17
+          }
+        ],
+        "n": 17,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 2,
+            "gae_per_refutation_mean": 239.0,
+            "gae_per_target_mean": 183.125,
+            "inconclusive": 0,
+            "ms_median_found": 0.0089005,
+            "ms_median_refuted": 0.06347900000000001,
+            "ms_total": 0.40981399999999996,
+            "native_median_found": 15.5,
+            "native_median_refuted": 239.0,
+            "native_total": 1465,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 74937
+              },
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 63392
+              },
+              {
+                "extra": {},
+                "gae": 19.0,
+                "group_adds": 19,
+                "native": 19,
+                "verdict": "Found",
+                "wall_ns": 8871
+              },
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 63566
+              },
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 66585
+              },
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 61692
+              },
+              {
+                "extra": {},
+                "gae": 12.0,
+                "group_adds": 12,
+                "native": 12,
+                "verdict": "Found",
+                "wall_ns": 8930
+              },
+              {
+                "extra": {},
+                "gae": 239.0,
+                "group_adds": 239,
+                "native": 239,
+                "verdict": "Refuted",
+                "wall_ns": 61841
+              }
+            ],
+            "refuted": 6
+          },
+          {
+            "extra_totals": {},
+            "found": 2,
+            "gae_per_refutation_mean": 0.011427953191568288,
+            "gae_per_target_mean": 0.26142795319156825,
+            "inconclusive": 0,
+            "ms_median_found": 0.001843,
+            "ms_median_refuted": 0.000965,
+            "ms_total": 0.010071,
+            "native_median_found": 1.0,
+            "native_median_refuted": 1.0,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1015
+              },
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 882
+              },
+              {
+                "extra": {},
+                "gae": 1.0114279531915682,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1863
+              },
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1431
+              },
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 915
+              },
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 808
+              },
+              {
+                "extra": {},
+                "gae": 1.0114279531915682,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 1823
+              },
+              {
+                "extra": {},
+                "gae": 0.011427953191568288,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1334
+              }
+            ],
+            "refuted": 6
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 226,
+              "max_degree_built": 24,
+              "reductions": 455,
+              "splits": 225
+            },
+            "found": 2,
+            "gae_per_refutation_mean": 4943.67279891952,
+            "gae_per_target_mean": 4470.377387838608,
+            "inconclusive": 0,
+            "ms_median_found": 36.105976,
+            "ms_median_refuted": 58.539883,
+            "ms_total": 424.07586799999996,
+            "native_median_found": 1647510.0,
+            "native_median_refuted": 2683981.0,
+            "native_total": 19314900,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 4935.196280715842,
+                "group_adds": 0,
+                "native": 2665402,
+                "verdict": "Refuted",
+                "wall_ns": 59197146
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 5040.43064334275,
+                "group_adds": 0,
+                "native": 2722237,
+                "verdict": "Refuted",
+                "wall_ns": 58470749
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 28,
+                  "max_degree_built": 3,
+                  "reductions": 60,
+                  "splits": 30
+                },
+                "gae": 4691.065890773768,
+                "group_adds": 0,
+                "native": 2533552,
+                "verdict": "Found",
+                "wall_ns": 55374328
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 4956.422756182629,
+                "group_adds": 0,
+                "native": 2676866,
+                "verdict": "Refuted",
+                "wall_ns": 57773630
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 4743.970992266486,
+                "group_adds": 0,
+                "native": 2562125,
+                "verdict": "Refuted",
+                "wall_ns": 58263548
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 5003.245428164846,
+                "group_adds": 0,
+                "native": 2702154,
+                "verdict": "Refuted",
+                "wall_ns": 58609017
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 6,
+                  "max_degree_built": 3,
+                  "reductions": 17,
+                  "splits": 9
+                },
+                "gae": 1409.9164184179838,
+                "group_adds": 0,
+                "native": 761468,
+                "verdict": "Found",
+                "wall_ns": 16837624
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 32,
+                  "max_degree_built": 3,
+                  "reductions": 63,
+                  "splits": 31
+                },
+                "gae": 4982.770692844561,
+                "group_adds": 0,
+                "native": 2691096,
+                "verdict": "Refuted",
+                "wall_ns": 59549826
+              }
+            ],
+            "refuted": 6
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 128,
+              "models": 2,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 2,
+            "gae_per_refutation_mean": 82903.01315312018,
+            "gae_per_target_mean": 71421.72042583776,
+            "inconclusive": 0,
+            "ms_median_found": 9.908245,
+            "ms_median_refuted": 22.428932500000002,
+            "ms_total": 153.100097,
+            "native_median_found": 944.5,
+            "native_median_refuted": 2052.0,
+            "native_total": 14259,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 63195.730620318565,
+                "group_adds": 0,
+                "native": 1628,
+                "verdict": "Refuted",
+                "wall_ns": 16933351
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 89281.85603577251,
+                "group_adds": 0,
+                "native": 2185,
+                "verdict": "Refuted",
+                "wall_ns": 23923151
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 37621.61324574165,
+                "group_adds": 0,
+                "native": 949,
+                "verdict": "Found",
+                "wall_ns": 10080744
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 78128.92714250191,
+                "group_adds": 0,
+                "native": 1907,
+                "verdict": "Refuted",
+                "wall_ns": 20934714
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 71673.6504718197,
+                "group_adds": 0,
+                "native": 1919,
+                "verdict": "Refuted",
+                "wall_ns": 19205017
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 99210.23954876502,
+                "group_adds": 0,
+                "native": 2351,
+                "verdict": "Refuted",
+                "wall_ns": 26583470
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 36334.0712422393,
+                "group_adds": 0,
+                "native": 940,
+                "verdict": "Found",
+                "wall_ns": 9735746
+              },
+              {
+                "extra": {
+                  "implied_rows": 16,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 95927.67509954343,
+                "group_adds": 0,
+                "native": 2380,
+                "verdict": "Refuted",
+                "wall_ns": 25703904
+              }
+            ],
+            "refuted": 6
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 6592.5,
+            "s_over_rho_floor": 119.76247851853448,
+            "s_projected": 25.741938907078815,
+            "targets_needed": 36.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 9.411406314896457,
+            "s_over_rho_floor": 0.17097206622934952,
+            "s_projected": 0.036749009690976164,
+            "targets_needed": 36.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 160933.58596218989,
+            "s_over_rho_floor": 2923.595772727719,
+            "s_projected": 628.4023569110062,
+            "targets_needed": 36.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 2571181.9353301595,
+            "s_over_rho_floor": 46709.30926010195,
+            "s_projected": 10039.773727455993,
+            "targets_needed": 36.0
+          }
+        ],
+        "r": 65587,
+        "signed_orbits": 8,
+        "signed_points": 239,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 16,
+        "wall_ns": 750091800
+      },
+      {
+        "a": 1,
+        "calibration": {
+          "ns_per_add": 378.29066,
+          "ns_per_as_solve": 26.076685,
+          "ns_per_double": 378.07686,
+          "ns_per_frobenius": 15.595125,
+          "ns_per_inversion": null,
+          "ns_per_legendre": null,
+          "ns_per_lookup": 3.98212,
+          "ns_per_row_op": 3.5881220703125,
+          "ns_per_s4_pair": null,
+          "ns_per_sqrt": null,
+          "ns_per_word_xor": 0.49609521484375
+        },
+        "curve": {
+          "a": 1,
+          "b": "0x1",
+          "cofactor": 2,
+          "field": {
+            "degree": 23,
+            "kind": "binary",
+            "polynomial_low_terms": [
+              0,
+              5
+            ]
+          },
+          "generator": {
+            "x": "0x2aaaa5",
+            "y": "0x13907b"
+          },
+          "group_order": 8393806,
+          "koblitz": true,
+          "name": "K_1 / GF(2^23)",
+          "subgroup_order": 4196903
+        },
+        "dimension": 11,
+        "disagreements": 0,
+        "eq_var_ratio": 1.0454545454545454,
+        "equations": 23,
+        "factor_base": "invariant subspace of the top-degree factor",
+        "ffd_max": 2,
+        "ffd_min": 2,
+        "ffd_no_fall": 0,
+        "group_order": 8393806,
+        "hit_rate": 0.5,
+        "log2_r": 22.00089368896064,
+        "m": 2,
+        "macaulay": [
+          {
+            "cols": 144,
+            "degree": 2,
+            "rank": 22,
+            "rows": 23,
+            "syzygies": 1
+          },
+          {
+            "cols": 1464,
+            "degree": 3,
+            "rank": 506,
+            "rows": 529,
+            "syzygies": 23
+          }
+        ],
+        "n": 23,
+        "oracles": [
+          {
+            "extra_totals": {},
+            "found": 4,
+            "gae_per_refutation_mean": 2071.0,
+            "gae_per_target_mean": 1310.0,
+            "inconclusive": 0,
+            "ms_median_found": 0.1758585,
+            "ms_median_refuted": 0.769759,
+            "ms_total": 3.947715,
+            "native_median_found": 468.5,
+            "native_median_refuted": 2071.0,
+            "native_total": 10480,
+            "native_unit": "group_additions",
+            "oracle": "enumerate_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 2071.0,
+                "group_adds": 2071,
+                "native": 2071,
+                "verdict": "Refuted",
+                "wall_ns": 764380
+              },
+              {
+                "extra": {},
+                "gae": 2071.0,
+                "group_adds": 2071,
+                "native": 2071,
+                "verdict": "Refuted",
+                "wall_ns": 742831
+              },
+              {
+                "extra": {},
+                "gae": 2071.0,
+                "group_adds": 2071,
+                "native": 2071,
+                "verdict": "Refuted",
+                "wall_ns": 775138
+              },
+              {
+                "extra": {},
+                "gae": 2071.0,
+                "group_adds": 2071,
+                "native": 2071,
+                "verdict": "Refuted",
+                "wall_ns": 814004
+              },
+              {
+                "extra": {},
+                "gae": 1039.0,
+                "group_adds": 1039,
+                "native": 1039,
+                "verdict": "Found",
+                "wall_ns": 409154
+              },
+              {
+                "extra": {},
+                "gae": 556.0,
+                "group_adds": 556,
+                "native": 556,
+                "verdict": "Found",
+                "wall_ns": 206093
+              },
+              {
+                "extra": {},
+                "gae": 381.0,
+                "group_adds": 381,
+                "native": 381,
+                "verdict": "Found",
+                "wall_ns": 145624
+              },
+              {
+                "extra": {},
+                "gae": 220.0,
+                "group_adds": 220,
+                "native": 220,
+                "verdict": "Found",
+                "wall_ns": 90491
+              }
+            ],
+            "refuted": 4
+          },
+          {
+            "extra_totals": {},
+            "found": 4,
+            "gae_per_refutation_mean": 0.0105266146407104,
+            "gae_per_target_mean": 0.5105266146407104,
+            "inconclusive": 0,
+            "ms_median_found": 0.0036395,
+            "ms_median_refuted": 0.0014355000000000001,
+            "ms_total": 0.02124,
+            "native_median_found": 1.0,
+            "native_median_refuted": 1.0,
+            "native_total": 8,
+            "native_unit": "pair_table_probes",
+            "oracle": "meet_in_the_middle_m2",
+            "per_target": [
+              {
+                "extra": {},
+                "gae": 0.0105266146407104,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1115
+              },
+              {
+                "extra": {},
+                "gae": 0.0105266146407104,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1489
+              },
+              {
+                "extra": {},
+                "gae": 0.0105266146407104,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1507
+              },
+              {
+                "extra": {},
+                "gae": 0.0105266146407104,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 1382
+              },
+              {
+                "extra": {},
+                "gae": 1.0105266146407104,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 3519
+              },
+              {
+                "extra": {},
+                "gae": 1.0105266146407104,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 2274
+              },
+              {
+                "extra": {},
+                "gae": 1.0105266146407104,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 3760
+              },
+              {
+                "extra": {},
+                "gae": 1.0105266146407104,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 6194
+              }
+            ],
+            "refuted": 4
+          },
+          {
+            "extra_totals": {
+              "infeasible_branches": 1283,
+              "max_degree_built": 24,
+              "reductions": 2588,
+              "splits": 1296
+            },
+            "found": 4,
+            "gae_per_refutation_mean": 138653.74855808355,
+            "gae_per_target_mean": 88405.02185157247,
+            "inconclusive": 0,
+            "ms_median_found": 390.7101875,
+            "ms_median_refuted": 1300.3399304999998,
+            "ms_total": 6625.780812999999,
+            "native_median_found": 32153917.5,
+            "native_median_refuted": 105986387.0,
+            "native_total": 539296378,
+            "native_unit": "word_xors",
+            "oracle": "matrix_f4_splitting",
+            "per_target": [
+              {
+                "extra": {
+                  "infeasible_branches": 256,
+                  "max_degree_built": 3,
+                  "reductions": 511,
+                  "splits": 255
+                },
+                "gae": 139493.6514120572,
+                "group_adds": 0,
+                "native": 106368987,
+                "verdict": "Refuted",
+                "wall_ns": 1314305105
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 256,
+                  "max_degree_built": 3,
+                  "reductions": 512,
+                  "splits": 255
+                },
+                "gae": 138692.8148897836,
+                "group_adds": 0,
+                "native": 105758320,
+                "verdict": "Refuted",
+                "wall_ns": 1297989670
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 256,
+                  "max_degree_built": 3,
+                  "reductions": 511,
+                  "splits": 255
+                },
+                "gae": 139290.9948573449,
+                "group_adds": 0,
+                "native": 106214454,
+                "verdict": "Refuted",
+                "wall_ns": 1302690191
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 256,
+                  "max_degree_built": 3,
+                  "reductions": 511,
+                  "splits": 255
+                },
+                "gae": 137137.53307314854,
+                "group_adds": 0,
+                "native": 104572361,
+                "verdict": "Refuted",
+                "wall_ns": 1288760040
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 47,
+                  "max_degree_built": 3,
+                  "reductions": 99,
+                  "splits": 50
+                },
+                "gae": 27598.348032454553,
+                "group_adds": 0,
+                "native": 21044745,
+                "verdict": "Found",
+                "wall_ns": 253015432
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 100,
+                  "max_degree_built": 3,
+                  "reductions": 207,
+                  "splits": 105
+                },
+                "gae": 57768.15887740077,
+                "group_adds": 0,
+                "native": 44050324,
+                "verdict": "Found",
+                "wall_ns": 537121095
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 13,
+                  "max_degree_built": 3,
+                  "reductions": 33,
+                  "splits": 18
+                },
+                "gae": 10522.903539680547,
+                "group_adds": 0,
+                "native": 8024097,
+                "verdict": "Found",
+                "wall_ns": 103494337
+              },
+              {
+                "extra": {
+                  "infeasible_branches": 99,
+                  "max_degree_built": 3,
+                  "reductions": 204,
+                  "splits": 103
+                },
+                "gae": 56735.770130709796,
+                "group_adds": 0,
+                "native": 43263090,
+                "verdict": "Found",
+                "wall_ns": 528404943
+              }
+            ],
+            "refuted": 4
+          },
+          {
+            "extra_totals": {
+              "implied_rows": 176,
+              "models": 4,
+              "solver_calls": 8,
+              "spurious": 0
+            },
+            "found": 4,
+            "gae_per_refutation_mean": 25596302.641994916,
+            "gae_per_target_mean": 13466288.735492438,
+            "inconclusive": 0,
+            "ms_median_found": 569.7088249999999,
+            "ms_median_refuted": 9927.367144,
+            "ms_total": 40753.37002799999,
+            "native_median_found": 29247.0,
+            "native_median_refuted": 188443.0,
+            "native_total": 836317,
+            "native_unit": "conflicts",
+            "oracle": "cdcl_sat_native_xor",
+            "per_target": [
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 24889913.71079582,
+                "group_adds": 0,
+                "native": 186854,
+                "verdict": "Refuted",
+                "wall_ns": 9415621885
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 27595480.160678566,
+                "group_adds": 0,
+                "native": 194210,
+                "verdict": "Refuted",
+                "wall_ns": 10439112403
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 20282309.320034493,
+                "group_adds": 0,
+                "native": 163406,
+                "verdict": "Refuted",
+                "wall_ns": 7672608179
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 0,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 29617507.376470782,
+                "group_adds": 0,
+                "native": 190032,
+                "verdict": "Refuted",
+                "wall_ns": 11204026413
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 184414.1777119213,
+                "group_adds": 0,
+                "native": 4363,
+                "verdict": "Found",
+                "wall_ns": 69762161
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1346208.708932967,
+                "group_adds": 0,
+                "native": 27265,
+                "verdict": "Found",
+                "wall_ns": 509258181
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 2148668.79610509,
+                "group_adds": 0,
+                "native": 38958,
+                "verdict": "Found",
+                "wall_ns": 812821337
+              },
+              {
+                "extra": {
+                  "implied_rows": 22,
+                  "models": 1,
+                  "solver_calls": 1,
+                  "spurious": 0
+                },
+                "gae": 1665807.633209871,
+                "group_adds": 0,
+                "native": 31229,
+                "verdict": "Found",
+                "wall_ns": 630159469
+              }
+            ],
+            "refuted": 4
+          }
+        ],
+        "projected": [
+          {
+            "extrapolation": true,
+            "oracle": "enumerate_m2",
+            "relation_phase_gae": 123140.0,
+            "s_over_rho_floor": 325.277228311957,
+            "s_projected": 60.1083329481888,
+            "targets_needed": 94.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "meet_in_the_middle_m2",
+            "relation_phase_gae": 47.989501776226774,
+            "s_over_rho_floor": 0.12676540625176858,
+            "s_projected": 0.023425117352469847,
+            "targets_needed": 94.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "matrix_f4_splitting",
+            "relation_phase_gae": 8310072.054047812,
+            "s_over_rho_floor": 21951.25227231869,
+            "s_projected": 4056.39579217269,
+            "targets_needed": 94.0
+          },
+          {
+            "extrapolation": true,
+            "oracle": "cdcl_sat_native_xor",
+            "relation_phase_gae": 1265831141.1362891,
+            "s_over_rho_floor": 3343722.958419472,
+            "s_projected": 617890.2037323846,
+            "targets_needed": 94.0
+          }
+        ],
+        "r": 4196903,
+        "signed_orbits": 46,
+        "signed_points": 2071,
+        "system_degree": 2,
+        "targets": 8,
+        "unknowns": 22,
+        "wall_ns": 48774067600
+      }
+    ],
+    "config": {
+      "cells": [
+        [
+          9,
+          2
+        ],
+        [
+          9,
+          3
+        ],
+        [
+          11,
+          2
+        ],
+        [
+          11,
+          3
+        ],
+        [
+          13,
+          2
+        ],
+        [
+          13,
+          3
+        ],
+        [
+          15,
+          2
+        ],
+        [
+          15,
+          3
+        ],
+        [
+          17,
+          2
+        ],
+        [
+          17,
+          3
+        ],
+        [
+          19,
+          2
+        ],
+        [
+          19,
+          3
+        ],
+        [
+          23,
+          2
+        ]
+      ],
+      "f4_node_budget": 20000,
+      "max_unknowns": 48,
+      "sat_conflict_budget": 200000,
+      "sat_max_models": 64,
+      "seed": 123212651130,
+      "targets": 8
+    },
+    "markdown": "| n | dim | m | unknowns | eqs | deg | FFD | hit rate | oracle | found/refuted/inconc | native (median refuted) | ms (median refuted) | GAE/target | projected S | vs floor |\n|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 5.750e0 | 2.551e0 | 8.636e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 4.512e-1 | 1.528e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.672e2 | 7.418e1 | 2.511e2 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 4.134e3 | 1.834e3 | 6.209e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | enumerate_m3 | 8/0/0 | — | — | 5.000e0 | 2.218e0 | 7.510e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.019e0 | 8.957e-1 | 3.032e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.841e2 | 1.260e2 | 4.266e2 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 3.803e3 | 1.687e3 | 5.712e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 7.838e4 | 3.477e4 | 1.177e5 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 1.493e0 | 5.587e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 1.518e0 | 5.680e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.254e3 | 1.873e3 | 7.008e3 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 1.489e4 | 2.222e4 | 8.318e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 3.486e0 | 1.418e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 3.544e0 | 1.442e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 4.165e3 | 1.452e4 | 5.907e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 2.441e4 | 8.508e4 | 3.461e5 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | enumerate_m3 | 8/0/0 | — | — | 2.000e0 | 6.971e0 | 2.836e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.017e0 | 7.029e0 | 2.860e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.471e4 | 8.613e4 | 3.504e5 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | enumerate_m2 | 0/8/0 | 33 | 0.008 | 3.300e1 | 1.541e2 | 6.736e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | meet_in_the_middle_m2 | 0/8/0 | 1 | 0.000 | 1.101e-2 | 5.143e-2 | 2.248e-1 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | matrix_f4_splitting | 0/8/0 | 11329 | 0.626 | 2.080e1 | 9.713e1 | 4.245e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | cdcl_sat_native_xor | 0/8/0 | 5 | 0.372 | 1.499e3 | 7.003e3 | 3.060e4 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | enumerate_m3 | 3/5/0 | 594 | 0.139 | 4.665e2 | 1.816e2 | 7.935e2 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | meet_in_the_middle_m3 | 3/5/0 | 33 | 0.009 | 2.465e1 | 9.596e0 | 4.193e1 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | semaev_s4_pairs_and_solve | 3/5/0 | 528 | 0.392 | 1.106e3 | 4.304e2 | 1.881e3 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | matrix_f4_splitting | 3/5/0 | 628830074 | 7878.573 | 8.726e5 | 3.396e5 | 1.484e6 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | cdcl_sat_native_xor | 0/0/8 | — | — | 4.059e7 | 1.580e7 | 6.905e7 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | enumerate_m2 | 2/6/0 | 239 | 0.063 | 1.831e2 | 2.574e1 | 1.198e2 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | meet_in_the_middle_m2 | 2/6/0 | 1 | 0.001 | 2.614e-1 | 3.675e-2 | 1.710e-1 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | matrix_f4_splitting | 2/6/0 | 2683981 | 58.540 | 4.470e3 | 6.284e2 | 2.924e3 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | cdcl_sat_native_xor | 2/6/0 | 2052 | 22.429 | 7.142e4 | 1.004e4 | 4.671e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | enumerate_m2 | 4/4/0 | 2071 | 0.770 | 1.310e3 | 6.011e1 | 3.253e2 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | meet_in_the_middle_m2 | 4/4/0 | 1 | 0.001 | 5.105e-1 | 2.343e-2 | 1.268e-1 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | matrix_f4_splitting | 4/4/0 | 105986387 | 1300.340 | 8.841e4 | 4.056e3 | 2.195e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | cdcl_sat_native_xor | 4/4/0 | 188443 | 9927.367 | 1.347e7 | 6.179e5 | 3.344e6 |\n"
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "bdc6896b011e838921141be0813aef08c815efc28283ff01f2c67276d5bbf7ef",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "Every index-calculus variant of three regimes priced end to end in one unit (group-addition equivalents per sqrt of the subgroup order) against the generic floor and a counted Pollard rho on the same instance; native counts are exact, conversion factors are measured on the host and recorded.",
+  "what_this_is_not": [
+    "not a claim about any deployed curve: the largest instance is a 40-bit Koblitz subgroup",
+    "not a wall-clock benchmark: wall times are carried as a practicality note, the metric is the operation count",
+    "not a best-of-breed composite: every row is one process on one instance with every phase inside it",
+    "extrapolations, where a reader makes them from the fitted exponents, are extrapolations"
+  ]
+}

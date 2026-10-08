@@ -1,0 +1,12 @@
+name n19l6-3-U
+curve y^2 + x*y = x^3 + 1*x^2 + 1 over GF(2^19)
+modulus z^19 + z^5 + z^2 + z^1 + 1
+factor_base subspace <1, z, ..., z^5> (dimension 6)
+x_R 0x1b207
+satisfiable false
+label_certified_by complete pairs-and-solve search over the subspace (semaev_decomp::decompose)
+variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from 19 ; CNF auxiliaries after 51
+dimacs_xor variables 767 clauses 2364 xor_rows 52
+dimacs_cnf variables 2748 clauses 23555
+anf equations 52 monomials 4089
+generator crypto_lib::cryptanalysis::ic_corpus seed 1

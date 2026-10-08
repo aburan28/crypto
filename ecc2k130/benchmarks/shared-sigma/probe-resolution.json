@@ -1,0 +1,48 @@
+{
+  "compiled": false,
+  "executed": false,
+  "findings": [],
+  "goalContext": {
+    "evaluated": false,
+    "targetBillionScalarIterationsPerSecond": 26
+  },
+  "initialReview": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/shared-sigma-source-host-probe-review.json",
+    "sha256": "e296cd17d235fcf28f1bec2f78fa6d3363c1828a316724a38607b1134e36da53"
+  },
+  "limits": [
+    "Only the isolated source delta was reviewed; it has not been compiled or executed here.",
+    "The reference still derives from independent bit routing. Using the same permutation for upload and expected selection is justified by the separately checked bijection and eight-index coverage.",
+    "Original host160-file snapshot/probe remain unchanged; old host results apply to unchanged production code, not to unexecuted device-probe behavior."
+  ],
+  "ownerRuntimeReceipt": {
+    "path": "/private/tmp/ecc2k-shared-sigma-host-20260912/runtime-source-review.json",
+    "sha256": "6e674e673fab9d10e2f06b12eb11ae2ec8395376bfd785550ab253b37888aef8"
+  },
+  "resolution": {
+    "allFullWarpsInMixedRepeatContainAllEightPowers": true,
+    "bijectionVerified": true,
+    "countsUnchanged": {
+      "blockSnapshots": 114,
+      "inputPairs": 21036,
+      "scenarios": 21,
+      "snapshotWords": 51072
+    },
+    "originalPoisonInitializerAndGuardCodePreserved": true,
+    "permutation": "i -> (i%8)*780+i/8",
+    "repeat1UsesInterleavedATriplesAndReferenceSelection": true,
+    "repeats0And2ExplicitlyUploadOriginalInputs": true
+  },
+  "source": {
+    "allFilesRehashed": true,
+    "canonicalManifestSha256": "b96e0ffb0785d55aca91a47ac72e2a87284a1d968065c513519feeaf4ea90754",
+    "files": 160,
+    "newProbeSha256": "0d1a642bd0ac66414ef6cf524f2366ea9a0848044d006e04bbaf87d0a26d7ff5",
+    "originalProbeSha256": "760911d40894f39f1871f7ef24bafa51211d6a2579214b503db0ccc3d89f2248",
+    "path": "/private/tmp/ecc2k-shared-sigma-runtime-src-20260912",
+    "soleChangedFile": "src/testsharedsigmacuda.cu"
+  },
+  "sourceEditsByReviewer": false,
+  "status": "additive runtime-probe mixed-index coverage resolved by static readback",
+  "valid": true
+}

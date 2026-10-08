@@ -1,0 +1,92 @@
+{
+  "valid": false,
+  "gpuExecuted": false,
+  "region": "us-west-2",
+  "authentication": "succeeded",
+  "launchPermissionDryRun": "succeeded",
+  "sourceTransfer": "succeeded under explicitly approved benchmark prefix",
+  "attempts": [
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": "us-west-2b",
+      "automaticPlacement": false,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "e99ffeb59355bcee4822cc9ef0a01acdab31373937d03892c51c22fbc959297e"
+    },
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": "us-west-2c",
+      "automaticPlacement": false,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "aae140545b34e6cd9b8448316fabbed36c50222882990e14b6b43ce4d06db1b5"
+    },
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": "us-west-2d",
+      "automaticPlacement": false,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "906854f5d60ed1a43b10a2529e9fe948a67b600f32ce7d8fee5fc0a2e789d08b"
+    },
+    {
+      "instanceType": "g7e.4xlarge",
+      "availabilityZone": "us-west-2a",
+      "automaticPlacement": false,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "e0a98fe5d45f0dc194822d9bf1fce0970f0292fdc87075725d87c41093bc4095"
+    },
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": null,
+      "automaticPlacement": true,
+      "outcome": "ReadTimeoutError",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "6af6454742c9556382d9408824f3ed80c2f307bce7b397371b75c3cb7229aaf0"
+    },
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": null,
+      "automaticPlacement": true,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "c9f124e61e1f5576cc5fd6e9d324eb6cef7a1b6ebd9294a9848d7715608bc8c6"
+    },
+    {
+      "instanceType": "g7e.4xlarge",
+      "availabilityZone": null,
+      "automaticPlacement": true,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "07e37123b6ad73f62c42d2c00026c8ec1fd52b56683dcd7a1e8fb135ed24b649"
+    },
+    {
+      "instanceType": "g7e.2xlarge",
+      "availabilityZone": "us-west-2a",
+      "automaticPlacement": false,
+      "outcome": "InsufficientInstanceCapacity",
+      "instanceId": null,
+      "valid": false,
+      "sourceSha256": "e187369e24fc71f6e91f03061b539a4f79bb7f9aa8bab71da3ea4953023b1a6d"
+    }
+  ],
+  "finalInstanceCheck": {
+    "checkedAt": "2026-09-13T15:15:26.128710+00:00",
+    "requestsChecked": 8,
+    "benchmarkInstances": []
+  },
+  "offlineTests": {
+    "passed": 8
+  },
+  "throughput": null,
+  "note": "No benchmark instances found for any of the eight exact client tokens. Compiler evidence is not GPU execution or a measured speedup."
+}

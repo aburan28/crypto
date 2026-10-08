@@ -1,0 +1,60 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -738,6 +738,14 @@
+ 
+     /// `[k]·P` on this curve.
+     pub fn mul(&self, p: &BinaryPoint, k: &BigUint) -> BinaryPoint {
++        if let Some(fast) = FastCurve::new(&self.curve) {
++            let lifted = fast.lift(p);
++            // Preserve the general path for coordinates whose representation
++            // cannot be round-tripped through this curve's single-word field.
++            if fast.lower(lifted) == *p {
++                return fast.lower(fast.mul(lifted, k));
++            }
++        }
+         scalar_mul(&self.curve, p, k)
+     }
+ 
+@@ -7641,6 +7649,42 @@
+     use super::*;
+ 
+     #[test]
++    fn koblitz_mul_dispatch_matches_general_arithmetic() {
++        let mut checked = 0usize;
++        for (a, n) in [(0, 5), (0, 9), (1, 11), (0, 13), (1, 17),
++                       (0, 19), (1, 19), (0, 23), (0, 31), (0, 53), (0, 61)] {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let mut points = vec![BinaryPoint::Infinity, kc.generator().clone(),
++                                  point_neg(kc.generator())];
++            for x in 0..8u64 {
++                points.extend(points_with_x(&kc.curve,
++                    &F2mElement::from_biguint(&BigUint::from(x), n)));
++            }
++            let scalars = [BigUint::zero(), BigUint::one(), BigUint::from(2u32),
++                &kc.subgroup_order - BigUint::one(), kc.subgroup_order.clone(),
++                &kc.subgroup_order + BigUint::one(),
++                (BigUint::one() << 80usize) + BigUint::from(123u32)];
++            for point in &points {
++                for scalar in &scalars {
++                    assert_eq!(kc.mul(point, scalar), scalar_mul(&kc.curve, point, scalar),
++                               "scalar dispatch at n={n}, a={a}, k={scalar}");
++                    checked += 1;
++                }
++            }
++            // A different field-width encoding must use the generic fallback.
++            if let BinaryPoint::Affine { x, y } = kc.generator() {
++                let wider = BinaryPoint::Affine {
++                    x: F2mElement::from_biguint(&x.to_biguint(), n + 1),
++                    y: F2mElement::from_biguint(&y.to_biguint(), n + 1),
++                };
++                assert_eq!(kc.mul(&wider, &BigUint::one()),
++                           scalar_mul(&kc.curve, &wider, &BigUint::one()));
++            }
++        }
++        assert!(checked >= 200, "insufficient independent arithmetic cases: {checked}");
++    }
++
++    #[test]
+     fn fast_base_lifts_preserve_roots_and_order() {
+         for n in [5, 7, 9, 11, 13, 17, 19, 23, 31, 53, 61] {
+             let Some(kc) = KoblitzCurve::new(0, n) else { continue };

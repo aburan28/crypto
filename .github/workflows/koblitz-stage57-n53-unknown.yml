@@ -1,0 +1,88 @@
+name: Koblitz Stage 57 n53 unknown scalar
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "examples/koblitz_rho_fixture.rs"
+      - "scripts/run_koblitz_stage57_n53_unknown.py"
+      - ".github/workflows/koblitz-stage57-n53-unknown.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate scalar-blind target controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage57_n53_unknown.py
+          python3 scripts/run_koblitz_stage57_n53_unknown.py self-test
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          RUSTFLAGS=-Awarnings cargo build --release --locked \
+            --example koblitz_rank_fixture --example koblitz_rho_fixture
+          RAYON_NUM_THREADS=4 target/release/examples/koblitz_rank_fixture \
+            13 0 1 2 12345 signed_expanded independent pair_pair_parallel_4096 1 hash:13001 \
+            > "$RUNNER_TEMP/direct.jsonl"
+          target/release/examples/koblitz_rho_fixture \
+            13 0 signed_frobenius 1 packed 67890 hash:13001 \
+            > "$RUNNER_TEMP/rho.jsonl"
+          python3 - "$RUNNER_TEMP/direct.jsonl" "$RUNNER_TEMP/rho.jsonl" <<'PY'
+          import json, pathlib, sys
+          direct_rows = [json.loads(line) for line in pathlib.Path(sys.argv[1]).read_text().splitlines()]
+          direct = next(row for row in direct_rows if row.get("kind") == "relation_rank_summary")
+          rho = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          assert direct["published_q"] == rho["published_q"] == [615, 3203]
+          assert direct["published_fixture_scalar"] is rho["published_fixture_scalar"] is None
+          assert direct["target_scalar_constructed"] is rho["target_scalar_constructed"] is False
+          assert direct["recovered_fixture_scalar"] == rho["recovered_fixture_scalar"]
+          assert direct["linear_solution_verified"] is rho["verified"] is True
+          assert direct["claim_boundary"] == rho["scope"] == "public_hash_unknown_scalar"
+          PY
+          rm Cargo.lock
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-unknown-scalar:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage57_n53_unknown.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage57-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run scalar-blind n53 direct and rho
+        run: |
+          python3 scripts/run_koblitz_stage57_n53_unknown.py run \
+            --build "$RUNNER_TEMP/stage57-build" \
+            --output "$RUNNER_TEMP/stage57-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage57_n53_unknown.py verify \
+            --build "$RUNNER_TEMP/stage57-build" \
+            --output "$RUNNER_TEMP/stage57-run" \
+            > "$RUNNER_TEMP/stage57-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage57-n53-unknown-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage57-build
+            ${{ runner.temp }}/stage57-run
+            ${{ runner.temp }}/stage57-verification.json

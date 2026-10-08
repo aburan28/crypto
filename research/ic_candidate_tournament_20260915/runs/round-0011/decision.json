@@ -1,0 +1,251 @@
+{
+  "arithmetic_operation_speedup": null,
+  "beats_rho": true,
+  "beats_rho_strict": true,
+  "beats_rho_strict_definition": "Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.",
+  "challenger_over_rho": {
+    "confirmation": {
+      "candidate": "wordfield_fastio",
+      "candidate_over_baseline": 0.4629238587981904,
+      "ci95": [
+        0.4331380149615387,
+        0.5034524653571233
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.8638066576974007,
+      "native_wall_ci95": [
+        0.8415717286206181,
+        0.8872704807088417
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9062962303437471,
+        "n17a1": 0.8592035933832552,
+        "n19a0": 0.8604122988184655,
+        "n19a1": 0.8670710561477555,
+        "n23a0": 0.8278567190111257
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5466023117019437,
+        "n17a1": 0.4289067273510351,
+        "n19a0": 0.4296638914772266,
+        "n19a1": 0.45818445280328823,
+        "n23a0": 0.4606215949292028
+      },
+      "speedup": 2.160182459802629
+    },
+    "replay": {
+      "candidate": "wordfield_fastio",
+      "candidate_over_baseline": 0.46292303091214554,
+      "ci95": [
+        0.43313789245085904,
+        0.5034503561699492
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.8554685496886756,
+      "native_wall_ci95": [
+        0.8350254416056189,
+        0.877130177025556
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8923888537136759,
+        "n17a1": 0.8350178242183511,
+        "n19a0": 0.8517446153145101,
+        "n19a1": 0.8705754878379846,
+        "n23a0": 0.8291908947490916
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5466004410960751,
+        "n17a1": 0.4289072747136447,
+        "n19a0": 0.429661741471211,
+        "n19a1": 0.4581845889792368,
+        "n23a0": 0.46062063263004754
+      },
+      "speedup": 2.160186323047258
+    }
+  },
+  "classification": "accounting",
+  "confirmation": {
+    "candidate": "wordfield_fastio",
+    "candidate_over_baseline": 0.9651319464152477,
+    "ci95": [
+      0.961419111236677,
+      0.9692427079756427
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.9982264448261488,
+    "native_wall_ci95": [
+      0.9879807450130413,
+      1.0085522527464297
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 0.9934260994561228,
+      "n17a1": 0.9916022703128715,
+      "n19a0": 0.9972034538383813,
+      "n19a1": 1.0032745019422462,
+      "n23a0": 1.0057006426927024
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.9654826566154056,
+      "n17a1": 0.9588971345650709,
+      "n19a0": 0.9629068660597782,
+      "n19a1": 0.9661821154325544,
+      "n23a0": 0.9722404389853119
+    },
+    "speedup": 1.0361277581933346
+  },
+  "family_wide_or_complexity_claim": false,
+  "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+  "instruction_speedup": null,
+  "objective": "rho",
+  "parity_definition": "Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.",
+  "provisional_challenger": "wordfield_fastio",
+  "reasons": [
+    "No challenger passed every confirmation and replay threshold."
+  ],
+  "replay": {
+    "candidate": "wordfield_fastio",
+    "candidate_over_baseline": 0.9651318225289642,
+    "ci95": [
+      0.9614186694052944,
+      0.9692429653906838
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.9885354548345516,
+    "native_wall_ci95": [
+      0.97814333641208,
+      0.9987623995398056
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 0.9841485915238027,
+      "n17a1": 0.9794844805774194,
+      "n19a0": 0.9967412984335072,
+      "n19a1": 0.9960886443494988,
+      "n23a0": 0.986330755121268
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.9654825816395861,
+      "n17a1": 0.9588963452393678,
+      "n19a0": 0.962906565989835,
+      "n19a1": 0.9661825503212688,
+      "n23a0": 0.9722405561649463
+    },
+    "speedup": 1.0361278911928007
+  },
+  "rho_comparison": {
+    "candidate": "rho",
+    "candidate_over_baseline": 2.084861102041389,
+    "ci95": [
+      1.916996873584392,
+      2.22327538774474
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 1.1556132798131737,
+    "native_wall_ci95": [
+      1.1214669127155512,
+      1.1910239727836816
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.096138399559853,
+      "n17a1": 1.1540946499167617,
+      "n19a0": 1.1589832632654835,
+      "n19a1": 1.157084525920654,
+      "n23a0": 1.2148245216805285
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 1.766334748217956,
+      "n17a1": 2.2356775341046813,
+      "n19a0": 2.2410700204506595,
+      "n19a1": 2.108718682009414,
+      "n23a0": 2.110713977999109
+    },
+    "speedup": 0.47964826003077676
+  },
+  "rho_over_winner": 2.084861102041389,
+  "rho_parity": true,
+  "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+  "scope": "bounded public-hash ECDLP configuration tournament",
+  "status": "retained",
+  "unit": "valgrind-3.22-amd64-Ir",
+  "winner": "incumbent",
+  "winner_over_rho": {
+    "confirmation": {
+      "candidate": "incumbent",
+      "candidate_over_baseline": 0.47964826003077676,
+      "ci95": [
+        0.449811117682557,
+        0.5216987948093519
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.8653413883939344,
+      "native_wall_ci95": [
+        0.8396219005399979,
+        0.8919422901900026
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9122935574572911,
+        "n17a1": 0.866480058695467,
+        "n19a0": 0.8628252294018971,
+        "n19a1": 0.8642410969970695,
+        "n23a0": 0.8231641542900774
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.566144102078552,
+        "n17a1": 0.4472916978165497,
+        "n19a0": 0.4462154198104479,
+        "n19a1": 0.474221624976117,
+        "n23a0": 0.4737733347215376
+      },
+      "speedup": 2.084861102041389
+    },
+    "replay": {
+      "candidate": "incumbent",
+      "candidate_over_baseline": 0.479647463803581,
+      "ci95": [
+        0.4498091000263744,
+        0.5216984655363398
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.8653898507179522,
+      "native_wall_ci95": [
+        0.8454206772431005,
+        0.8883025400214984
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9067623135363625,
+        "n17a1": 0.8525074575210183,
+        "n19a0": 0.854529271189148,
+        "n19a1": 0.8739939891660131,
+        "n23a0": 0.8406823881783385
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5661422085604447,
+        "n17a1": 0.44729263683508697,
+        "n19a0": 0.44621332603494446,
+        "n19a1": 0.47422155246633696,
+        "n23a0": 0.4737722878450881
+      },
+      "speedup": 2.0848645629647424
+    }
+  }
+}

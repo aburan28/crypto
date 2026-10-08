@@ -1,0 +1,21 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -957,12 +957,17 @@
+     /// operations. Multiplicity is irrelevant to exact-summand reachability
+     /// because decomposition permits repeated factor-base points.
+     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
++        let fast = FastCurve::new(&kc.curve);
+         let mut classes = HashMap::new();
+         for orbit in &self.signed_orbits {
+             let Some(&representative) = orbit.first() else {
+                 continue;
+             };
+-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
++            let mut current = if let Some(fc) = &fast {
++                fc.lower(fc.mul(fc.lift(&self.points[representative]), &kc.subgroup_order))
++            } else {
++                kc.mul(&self.points[representative], &kc.subgroup_order)
++            };
+             for _ in 0..kc.n {
+                 for candidate in [current.clone(), point_neg(&current)] {
+                     classes.entry(point_key(&candidate)).or_insert(candidate);

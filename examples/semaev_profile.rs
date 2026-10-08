@@ -64,17 +64,47 @@ fn main() {
             n += 1;
         }
         let c = agg.conflicts.max(1) as f64;
-        println!("\n=== {family} · {n} instances · {secs:.1}s · {} conflicts ===", agg.conflicts);
+        println!(
+            "\n=== {family} · {n} instances · {secs:.1}s · {} conflicts ===",
+            agg.conflicts
+        );
         println!("  per conflict:");
-        println!("    decisions              {:>10.1}", agg.decisions as f64 / c);
-        println!("    propagations           {:>10.1}", agg.propagations as f64 / c);
-        println!("    clause visits          {:>10.1}", agg.clause_visits as f64 / c);
-        println!("    clause literal scans   {:>10.1}", agg.clause_lit_visits as f64 / c);
-        println!("    analyze literal walks  {:>10.1}", agg.analyze_lit_visits as f64 / c);
-        println!("    parity passes          {:>10.1}", agg.xor_passes as f64 / c);
-        println!("    parity row scans       {:>10.1}", agg.xor_row_scans as f64 / c);
-        println!("    parity re-pivots       {:>10.1}", agg.xor_repivots as f64 / c);
-        println!("    parity row XORs        {:>10.1}", agg.xor_row_ops as f64 / c);
+        println!(
+            "    decisions              {:>10.1}",
+            agg.decisions as f64 / c
+        );
+        println!(
+            "    propagations           {:>10.1}",
+            agg.propagations as f64 / c
+        );
+        println!(
+            "    clause visits          {:>10.1}",
+            agg.clause_visits as f64 / c
+        );
+        println!(
+            "    clause literal scans   {:>10.1}",
+            agg.clause_lit_visits as f64 / c
+        );
+        println!(
+            "    analyze literal walks  {:>10.1}",
+            agg.analyze_lit_visits as f64 / c
+        );
+        println!(
+            "    parity passes          {:>10.1}",
+            agg.xor_passes as f64 / c
+        );
+        println!(
+            "    parity row scans       {:>10.1}",
+            agg.xor_row_scans as f64 / c
+        );
+        println!(
+            "    parity re-pivots       {:>10.1}",
+            agg.xor_repivots as f64 / c
+        );
+        println!(
+            "    parity row XORs        {:>10.1}",
+            agg.xor_row_ops as f64 / c
+        );
         println!("  clause lengths:");
         println!(
             "    parity reason (mean)   {:>10.1}",
@@ -89,7 +119,10 @@ fn main() {
             agg.learnt_lits_kept as f64 / c
         );
         println!("  search shape:");
-        println!("    mean level at conflict {:>10.1}", agg.conflict_level_sum as f64 / c);
+        println!(
+            "    mean level at conflict {:>10.1}",
+            agg.conflict_level_sum as f64 / c
+        );
         println!("    deepest level          {:>10}", agg.max_level);
         let tot = secs * 1e9;
         println!("  where the time goes:");
@@ -106,8 +139,14 @@ fn main() {
                 ns as f64 / 1000.0 / c
             );
         }
-        let acct = (agg.ns_propagate_clauses + agg.ns_propagate_xors + agg.ns_analyze + agg.ns_reduce_db) as f64;
-        println!("    {:<22} {:>8.1}%", "unaccounted", (tot - acct) / tot * 100.0);
+        let acct =
+            (agg.ns_propagate_clauses + agg.ns_propagate_xors + agg.ns_analyze + agg.ns_reduce_db)
+                as f64;
+        println!(
+            "    {:<22} {:>8.1}%",
+            "unaccounted",
+            (tot - acct) / tot * 100.0
+        );
         println!("  µs per conflict          {:>10.1}", secs * 1e6 / c);
     }
 }

@@ -330,8 +330,7 @@ pub fn bcrypt(cost: u8, salt: &[u8; 16], password: &[u8]) -> Result<[u8; 24], &'
 
 // ── MCF radix-64 ────────────────────────────────────────────────────
 
-const B64_ALPHABET: &[u8; 64] =
-    b"./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const B64_ALPHABET: &[u8; 64] = b"./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 /// Encode `data` using bcrypt's custom radix-64 (no padding, MSB-first
 /// packing).  Output length is `ceil(len(data) * 8 / 6)`.
@@ -377,17 +376,17 @@ fn b64_decode(chars: &[u8], out_len: usize) -> Option<Vec<u8>> {
     while out.len() < out_len {
         let c1 = b64_index(*chars.get(i)?)?;
         let c2 = b64_index(*chars.get(i + 1)?)?;
-        out.push(((c1 << 2) | ((c2 & 0x30) >> 4)) & 0xff);
+        out.push((c1 << 2) | ((c2 & 0x30) >> 4));
         if out.len() == out_len {
             break;
         }
         let c3 = b64_index(*chars.get(i + 2)?)?;
-        out.push((((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2)) & 0xff);
+        out.push(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2));
         if out.len() == out_len {
             break;
         }
         let c4 = b64_index(*chars.get(i + 3)?)?;
-        out.push((((c3 & 0x03) << 6) | c4) & 0xff);
+        out.push(((c3 & 0x03) << 6) | c4);
         i += 4;
     }
     Some(out)
@@ -554,8 +553,14 @@ mod tests {
     #[test]
     fn bcrypt_verify_rejects_garbage() {
         assert!(!bcrypt_verify("", b""));
-        assert!(!bcrypt_verify("$2c$04$abcdefghijklmnopqrstuuCFaEytnzrfaPZJKbS76hh9vqd9r8v2S", b"U*U"));
-        assert!(!bcrypt_verify("$2b$02$abcdefghijklmnopqrstuuCFaEytnzrfaPZJKbS76hh9vqd9r8v2S", b"U*U"));
+        assert!(!bcrypt_verify(
+            "$2c$04$abcdefghijklmnopqrstuuCFaEytnzrfaPZJKbS76hh9vqd9r8v2S",
+            b"U*U"
+        ));
+        assert!(!bcrypt_verify(
+            "$2b$02$abcdefghijklmnopqrstuuCFaEytnzrfaPZJKbS76hh9vqd9r8v2S",
+            b"U*U"
+        ));
         assert!(!bcrypt_verify("$2b$04$tooshort", b"U*U"));
     }
 
@@ -574,8 +579,8 @@ mod tests {
     #[test]
     fn bcrypt_b64_round_trip() {
         let data = [
-            0x71, 0xd7, 0x9f, 0x82, 0x18, 0xa3, 0x92, 0x59,
-            0xa7, 0xa2, 0x9a, 0xab, 0xb2, 0xdb, 0xaf, 0xc3,
+            0x71, 0xd7, 0x9f, 0x82, 0x18, 0xa3, 0x92, 0x59, 0xa7, 0xa2, 0x9a, 0xab, 0xb2, 0xdb,
+            0xaf, 0xc3,
         ];
         let enc = b64_encode(&data);
         assert_eq!(enc, "abcdefghijklmnopqrstuu");

@@ -1,0 +1,37 @@
++ cd /work
++ curl -sf -o probe.cu 'https://ecc2k130-590183823895.s3.amazonaws.com/bench/iterfn-20260916/probe.cu?AWSAccessKeyId=REDACTED&Signature=REDACTED&Expires=REDACTED'
++ docker run --rm --gpus all -v /work:/w -w /w nvidia/cuda:13.3.1-devel-ubuntu24.04 bash -c 'nvcc -O3 -std=c++17 -arch=sm_120 probe.cu -o probe && ./probe 20000 3 && nvidia-smi --query-gpu=clocks.sm,power.draw --format=csv'
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.3.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+{"gpu":"NVIDIA RTX PRO 4500 Blackwell Server Edition","sms":82,"clockMaxKHz":2415000,"blocks":656,"threads":256,"chains":16,"rounds":20000}
+clmad verified against host carryless multiply
+{"stream":"LOP3","laneOpsPerSecond":1.262867e+13,"tLaneOpsPerSecond":12.629,"lop3Equivalents":1.000}
+{"stream":"CLMAD.lo","laneOpsPerSecond":3.328936e+11,"tLaneOpsPerSecond":0.333,"lop3Equivalents":37.936}
+{"stream":"CLMAD product (lo+hi)","laneOpsPerSecond":3.953111e+11,"tLaneOpsPerSecond":0.395,"lop3Equivalents":31.946}
+{"stream":"CLMAD.lo + LOP3 mix","laneOpsPerSecond":6.657978e+11,"tLaneOpsPerSecond":0.666,"lop3Equivalents":18.968}
+{"stream":"IMAD.WIDE","laneOpsPerSecond":6.235186e+12,"tLaneOpsPerSecond":6.235,"lop3Equivalents":2.025}
+{"stream":"POPC","laneOpsPerSecond":3.162613e+12,"tLaneOpsPerSecond":3.163,"lop3Equivalents":3.993}
+{"stream":"FLO","laneOpsPerSecond":3.161642e+12,"tLaneOpsPerSecond":3.162,"lop3Equivalents":3.994}
+{"stream":"SHF","laneOpsPerSecond":1.258740e+13,"tLaneOpsPerSecond":12.587,"lop3Equivalents":1.003}
+{"stream":"ISETP + SEL","laneOpsPerSecond":1.875803e+13,"tLaneOpsPerSecond":18.758,"lop3Equivalents":0.673}
+{"stream":"PRMT","laneOpsPerSecond":1.263484e+13,"tLaneOpsPerSecond":12.635,"lop3Equivalents":1.000}
+{"stream":"IMNMX","laneOpsPerSecond":6.988714e+12,"tLaneOpsPerSecond":6.989,"lop3Equivalents":1.807}
+{"stream":"LDS.U8 random","laneOpsPerSecond":1.819462e+12,"tLaneOpsPerSecond":1.819,"lop3Equivalents":6.941}
+one clmad costs 37.94 LOP3 slots; one 64x64 carryless product (lo+hi) costs 63.89
+clocks.current.sm [MHz], power.draw [W]
+2407 MHz, 68.36 W
++ echo JOB_DONE
+JOB_DONE

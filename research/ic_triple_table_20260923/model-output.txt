@@ -1,0 +1,22 @@
+cell    K2         W2 | K3*  t3        W3*  W3/W2 | IC/rho v2  pred v3 (f=.65..81)
+n23a1    8       2220 |   1   1       2052  0.924 |     0.831     0.780 .. 0.790   
+n37a0   16      17353 |   2   1      13416  0.773 |     1.396     1.139 .. 1.190   
+n43a1   24      99219 |   2   1      45632  0.460 |     2.207     1.241 .. 1.432   
+
+model-optimal W against r at n = 43 (rate check):
+  r=2^26: W2*=2^12.75  W3*=2^12.60  W3/W2=0.896
+  r=2^30: W2*=2^15.24  W3*=2^14.42  W3/W2=0.567
+  r=2^34: W2*=2^17.82  W3*=2^16.36  W3/W2=0.364
+  r=2^38: W2*=2^20.44  W3*=2^18.55  W3/W2=0.270
+  r=2^42: W2*=2^23.09  W3*=2^20.81  W3/W2=0.206
+
+calibration: does W2 put its optimum where the tournament measured the best base?
+  n23a1: W2 argmin K=  6 (measured best  8);  W2(measured)/W2(argmin) = 1.035
+      v2 K= 8 t= 3 size= 368: table      1104  scan      1116
+      v3 K= 1 t= 1 size=  46: table      1081  scan       971
+  n37a0: W2 argmin K= 12 (measured best 16);  W2(measured)/W2(argmin) = 1.032
+      v2 K=16 t= 6 size=1184: table      7104  scan     10249
+      v3 K= 2 t= 1 size= 148: table     11026  scan      2390
+  n43a1: W2 argmin K= 26 (measured best 24);  W2(measured)/W2(argmin) = 1.002
+      v2 K=24 t=16 size=2064: table     33024  scan     66195
+      v3 K= 2 t= 1 size= 172: table     14878  scan     30754

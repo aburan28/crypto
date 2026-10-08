@@ -1,0 +1,10 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1h9a1d373bbe54 | rho-strong | rho.signed_frobenius_strong | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 0.419 | [0.356, 0.486] | 0.146 | 2.878 | 2.878 | 1.000 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k4 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 4.199 | [3.827, 4.613] | – | – | 28.820 | 10.013 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k8 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 2.133 | [2.015, 2.253] | – | – | 14.642 | 5.087 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k12 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 2.201 | [2.146, 2.265] | – | – | 15.109 | 5.249 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k16 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 2.111 | [2.077, 2.170] | – | – | 14.491 | 5.034 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k24 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 2.386 | [2.383, 2.390] | – | – | 16.380 | 5.691 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k42 | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 6.050 | [6.048, 6.052] | – | – | 41.524 | 14.426 | yes | L0×40 |
+| ECBS1h9a1d373bbe54 | ic-k42-control | ic.shared_rank | icv1-f2m37-tm534059-32aad96b | 27.78 | 40/40 | 6.050 | [6.048, 6.052] | – | – | 41.524 | 14.426 | yes | L0×40 |

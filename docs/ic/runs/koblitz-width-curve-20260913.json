@@ -1,0 +1,113 @@
+{
+  "operation": "koblitz_degree_61_width_curve",
+  "date": "2026-09-13",
+  "targets": 32,
+  "what": "Four folded base widths at degree 61, 48-bit subgroup, 32 targets each, all verified against a signed-Frobenius rho baseline, plus the compact-tier point from 12 Sep shown for contrast rather than as a point on the same curve.",
+  "curve": [
+    {
+      "points": 45872,
+      "signed_orbits": 376,
+      "tier": "folded",
+      "stage_seconds": {
+        "select": 3.8,
+        "collect": 9.2,
+        "logs": 2.6,
+        "solve": 2.0
+      },
+      "precompute_seconds": 15.6,
+      "descent_seconds_per_target": 0.0466,
+      "charged": 70.9,
+      "amortised": 6.179,
+      "peak_rss_mib": 88,
+      "relations": 775,
+      "solutions_verified": 32
+    },
+    {
+      "points": 50752,
+      "signed_orbits": 416,
+      "tier": "folded",
+      "stage_seconds": {
+        "select": 4.3,
+        "collect": 8.6,
+        "logs": 2.8,
+        "solve": 1.9
+      },
+      "precompute_seconds": 15.7,
+      "descent_seconds_per_target": 0.0435,
+      "charged": 75.9,
+      "amortised": 6.197,
+      "peak_rss_mib": 97,
+      "relations": 835,
+      "solutions_verified": 32
+    },
+    {
+      "points": 71248,
+      "signed_orbits": 584,
+      "tier": "folded",
+      "stage_seconds": {
+        "select": 6.0,
+        "collect": 9.6,
+        "logs": 8.8,
+        "solve": 1.4
+      },
+      "precompute_seconds": 24.4,
+      "descent_seconds_per_target": 0.0235,
+      "charged": 141.1,
+      "amortised": 4.212,
+      "peak_rss_mib": 174,
+      "relations": 1863,
+      "solutions_verified": 32
+    },
+    {
+      "points": 300608,
+      "signed_orbits": 2464,
+      "tier": "folded",
+      "stage_seconds": {
+        "select": 25.1,
+        "collect": 107.1,
+        "logs": 24.7,
+        "solve": 2.6
+      },
+      "precompute_seconds": 157.0,
+      "descent_seconds_per_target": 0.0101,
+      "charged": 326.0,
+      "amortised": 0.673,
+      "peak_rss_mib": 2455,
+      "relations": 12843,
+      "solutions_verified": 32
+    }
+  ],
+  "compact_point": {
+    "points": 36112,
+    "tier": "compact",
+    "precompute_seconds": 79.0,
+    "descent_seconds_per_target": 0.0531,
+    "charged": 61.2,
+    "amortised": 1.288,
+    "source": "docs/ic/runs/koblitz-degree61-20260912.json"
+  },
+  "what_it_shows": "The charged ratio rises monotonically with width -- 71 -> 76 -> 141 -> 326 -- because a wider base always makes the descent cheaper. The amortised ratio does not: flat at about 6.2 between 45872 and 50752, then 4.21 at 71248 and 0.673 at 300608. Optimising the charged number alone points at the widest base memory can hold, which is the worst of them.",
+  "the_optimum_is_a_boundary_not_a_peak": "At a 4 GiB budget the compact table fits up to about 42000 points, so the folded tier only ever sees bases above roughly 43000. The amortised optimum at 32 targets is a plateau pressed against that boundary rather than an interior stationary point, and which side of the boundary wins is a question about the two tiers' build costs -- |F|^2/2 pair operations against |F|^2/4n -- not about the width.",
+  "the_compact_point_is_not_on_this_curve": "36112 points at 1.288 is not a narrower base doing worse. It is the COMPACT tier doing worse: 122 times the pair operations for a base only 1.4 times narrower than the 50752-point folded one that scored 6.20. Reading it as a width effect was a mistake in the first write-up of the optimum.",
+  "predictions_and_how_they_fared": [
+    {
+      "width": 71248,
+      "predicted": "amortised 3 to 4",
+      "measured": 4.212,
+      "verdict": "held; but the reading given to it -- that 71248 was about the optimum -- did not"
+    },
+    {
+      "width": 50752,
+      "predicted": "amortised about 6, better than 4.21",
+      "measured": 6.197,
+      "verdict": "held, direction and magnitude"
+    },
+    {
+      "width": 45872,
+      "predicted": "amortised about 6.7, better than 6.20",
+      "measured": 6.179,
+      "verdict": "MISSED on direction. It is flat, not better. Base construction and relation verification stop falling as fast as the model assumed once the base is small, so narrowing past about 50000 buys nothing."
+    }
+  ],
+  "not_claimed": "A located optimum. The four folded points show a plateau near the tier's narrow boundary and a clear fall above it. Where inside 43000-50000 the best width sits these runs cannot say, and the flatness means it may not matter."
+}

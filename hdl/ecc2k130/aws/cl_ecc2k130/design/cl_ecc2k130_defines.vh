@@ -14,6 +14,11 @@
 // walker engines; ~7.3k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and 66 DSPs
 // each as synthesised; the VU47P has 1.30M LUTs, 2016 RAMB36, 960 URAM288
 // and 9024 DSPs
+// walker engines; ~6.9k LUTs, 12 RAMB36, 4 URAM288 and 66 DSPs each as
+// synthesised (~7.7k LUTs and no DSPs with MUL_DSP_LEAVES = 0); the VU47P
+// has 1.30M LUTs, 2016 RAMB36, 960 URAM288 and 9024 DSPs, of which the
+// CL's region holds 7992 DSPs and 1788 RAMB36 (3576 RAMB18 sites): 144
+// engines is 3456 of those and the most that fit
 `ifndef ECC_NENG
 `define ECC_NENG 48
 `endif
@@ -34,6 +39,17 @@
 `endif
 `ifndef ECC_LOG_NB
 `define ECC_LOG_NB 4
+// is 5 + 5/W clocks per step; 8 batches hide the 10-clock multiplier and
+// 64-walk batches the 13-clock one (DSP leaves): 64 x 8 runs 5.16 clocks
+// per step with either, 32 x 8 5.16 / 5.38, and 32 x 16 - the same 512
+// walks in flight, but as all the engine's walks with none queued to fill
+// the next batch - starves at 5.21 / 5.22 for 367 more LUTs.  64 x 8 and
+// 32 x 16 hold the same words in the leaf tables and the tree.
+`ifndef ECC_LOG_W
+`define ECC_LOG_W 6
+`endif
+`ifndef ECC_LOG_NB
+`define ECC_LOG_NB 3
 `endif
 
 // idle clocks before a partial batch is padded and issued

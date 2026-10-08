@@ -1,0 +1,348 @@
+--- a/src/binary_ecc/curve.rs
++++ b/src/binary_ecc/curve.rs
+@@ -426,10 +426,36 @@
+ /// double-and-add.  This is the operation analysed in Putranto
+ /// et al. for quantum-resource estimation; classical version here
+ /// for verification.
++///
++/// The doublings and additions run in López–Dahab projective
++/// coordinates `(X : Y : Z) ↦ (X/Z, Y/Z²)`, so the whole product costs
++/// one field inversion instead of one per step; the result is the same
++/// affine point as [`scalar_mul_affine`], which a test checks on every
++/// catalogue curve and on random scalars.
+ pub fn scalar_mul(curve: &BinaryCurve, p: &BinaryPoint, k: &BigUint) -> BinaryPoint {
+     if k.is_zero() {
+         return BinaryPoint::Infinity;
+     }
++    let BinaryPoint::Affine { x: px, y: py } = p else {
++        return BinaryPoint::Infinity;
++    };
++    let bits = k.bits();
++    let mut result = LdPoint::infinity(curve.m);
++    for i in (0..bits).rev() {
++        result = ld_double(curve, &result);
++        if k.bit(i) {
++            result = ld_add_affine(curve, &result, px, py);
++        }
++    }
++    ld_to_affine(curve, &result)
++}
++
++/// `[k]·P` by affine double-and-add, one inversion per step: the
++/// reference [`scalar_mul`] is checked against.
++pub fn scalar_mul_affine(curve: &BinaryCurve, p: &BinaryPoint, k: &BigUint) -> BinaryPoint {
++    if k.is_zero() {
++        return BinaryPoint::Infinity;
++    }
+     let bits = k.bits();
+     let mut result = BinaryPoint::Infinity;
+     for i in (0..bits).rev() {
+@@ -441,6 +467,78 @@
+     result
+ }
+ 
++/// A López–Dahab projective point `(X : Y : Z)`, the affine
++/// `(X/Z, Y/Z²)`; `Z = 0` is `O`.
++struct LdPoint {
++    x: F2mElement,
++    y: F2mElement,
++    z: F2mElement,
++}
++
++impl LdPoint {
++    fn infinity(m: u32) -> Self {
++        Self { x: F2mElement::one(m), y: F2mElement::zero(m), z: F2mElement::zero(m) }
++    }
++}
++
++/// `[2]P` (Hankerson–Menezes–Vanstone, Algorithm 3.24).
++fn ld_double(curve: &BinaryCurve, p: &LdPoint) -> LdPoint {
++    let irr = &curve.irreducible;
++    if p.z.is_zero() {
++        return LdPoint::infinity(curve.m);
++    }
++    let z2 = p.z.square(irr);
++    let x2 = p.x.square(irr);
++    let z3 = x2.mul(&z2, irr);
++    if z3.is_zero() {
++        // `x = 0`: the point has order two.
++        return LdPoint::infinity(curve.m);
++    }
++    let bz4 = curve.b.mul(&z2.square(irr), irr);
++    let x3 = x2.square(irr).add(&bz4);
++    let inner = curve.a.mul(&z3, irr).add(&p.y.square(irr)).add(&bz4);
++    let y3 = bz4.mul(&z3, irr).add(&x3.mul(&inner, irr));
++    LdPoint { x: x3, y: y3, z: z3 }
++}
++
++/// Mixed addition `P + Q` with `Q = (qx, qy)` affine (Algorithm 3.25).
++/// The degenerate cases (`Q = ±P`) go through the affine formulas.
++fn ld_add_affine(curve: &BinaryCurve, p: &LdPoint, qx: &F2mElement, qy: &F2mElement) -> LdPoint {
++    let irr = &curve.irreducible;
++    if p.z.is_zero() {
++        return LdPoint { x: qx.clone(), y: qy.clone(), z: F2mElement::one(curve.m) };
++    }
++    let z1sq = p.z.square(irr);
++    let a = qy.mul(&z1sq, irr).add(&p.y);
++    let b = qx.mul(&p.z, irr).add(&p.x);
++    if b.is_zero() {
++        let q = BinaryPoint::Affine { x: qx.clone(), y: qy.clone() };
++        return match point_add(curve, &ld_to_affine(curve, p), &q) {
++            BinaryPoint::Infinity => LdPoint::infinity(curve.m),
++            BinaryPoint::Affine { x, y } => LdPoint { x, y, z: F2mElement::one(curve.m) },
++        };
++    }
++    let c = p.z.mul(&b, irr);
++    let d = b.square(irr).mul(&c.add(&curve.a.mul(&z1sq, irr)), irr);
++    let z3 = c.square(irr);
++    let e = a.mul(&c, irr);
++    let x3 = a.square(irr).add(&d).add(&e);
++    let f = x3.add(&qx.mul(&z3, irr));
++    let g = qx.add(qy).mul(&z3.square(irr), irr);
++    let y3 = e.add(&z3).mul(&f, irr).add(&g);
++    LdPoint { x: x3, y: y3, z: z3 }
++}
++
++/// `(X : Y : Z) ↦ (X/Z, Y/Z²)`: the one inversion of a product.
++fn ld_to_affine(curve: &BinaryCurve, p: &LdPoint) -> BinaryPoint {
++    let irr = &curve.irreducible;
++    if p.z.is_zero() {
++        return BinaryPoint::Infinity;
++    }
++    let zi = p.z.flt_inverse(irr).expect("non-zero Z");
++    BinaryPoint::Affine { x: p.x.mul(&zi, irr), y: p.y.mul(&zi.square(irr), irr) }
++}
++
+ /// Brute-force search for any valid point and its order, on a tiny
+ /// test curve.  Only feasible for `m ≤ 16`.
+ fn find_any_generator(
+@@ -734,6 +832,56 @@
+     /// bugs.  Expensive (~thousands of point ops at sect163k1
+     /// scale); ignored by default but can be run via --ignored.
+     #[test]
++    fn projective_scalar_mul_matches_the_affine_reference() {
++        // Every catalogue curve; scalars 0..40, the order and its
++        // neighbours, and pseudo-random scalars of every width; the
++        // generator, its small multiples and `O` as the point.
++        let mut state = 0x9e37_79b9_7f4a_7c15u64;
++        let mut next = || {
++            state ^= state << 13;
++            state ^= state >> 7;
++            state ^= state << 17;
++            state
++        };
++        for (_, curve) in &BinaryCurve::legacy_low_security_family() {
++            let g = curve.generator.clone();
++            let points = [
++                g.clone(),
++                scalar_mul_affine(curve, &g, &BigUint::from(2u32)),
++                scalar_mul_affine(curve, &g, &BigUint::from(3u32)),
++                BinaryPoint::Infinity,
++            ];
++            let mut scalars: Vec<BigUint> = (0u32..40).map(BigUint::from).collect();
++            scalars.push(curve.order.clone());
++            scalars.push(&curve.order - BigUint::one());
++            scalars.push(&curve.order + BigUint::one());
++            scalars.push(&curve.order * BigUint::from(2u32));
++            for width in [8u32, 16, 24, 32, 48, 64, 96, 128, 160] {
++                for _ in 0..2 {
++                    let mut k = BigUint::zero();
++                    let mut bits = 0;
++                    while bits < width {
++                        k = (k << 64u32) | BigUint::from(next());
++                        bits += 64;
++                    }
++                    scalars.push(k >> (bits - width));
++                }
++            }
++            for p in &points {
++                for k in &scalars {
++                    assert_eq!(
++                        scalar_mul(curve, p, k),
++                        scalar_mul_affine(curve, p, k),
++                        "curve m={} scalar {}",
++                        curve.m,
++                        k
++                    );
++                }
++            }
++        }
++    }
++
++    #[test]
+     #[ignore]
+     fn scalar_mul_by_order_is_identity() {
+         let curve = BinaryCurve::sect163k1();
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -64,6 +64,19 @@
+ 
+ /// `y² + xy = x³ + ax² + b` over `F_{2^n}`, `n ≤ 62`, in one word per
+ /// coordinate.
++/// A López–Dahab point `(X : Y : Z)`, the affine `(X/Z, Y/Z²)`;
++/// `z == 0` is the point at infinity.
++#[derive(Clone, Copy, Debug)]
++struct FastLd {
++    x: u64,
++    y: u64,
++    z: u64,
++}
++
++impl FastLd {
++    const INFINITY: Self = Self { x: 1, y: 0, z: 0 };
++}
++
+ #[derive(Clone, Debug)]
+ pub struct FastCurve {
+     pub field: Gf2,
+@@ -268,22 +281,41 @@
+         if k == 0 || p.infinity {
+             return FastPoint::INFINITY;
+         }
+-        let mut result = FastPoint::INFINITY;
++        let mut result = FastLd::INFINITY;
+         for i in (0..64 - k.leading_zeros()).rev() {
+-            result = self.double(result);
++            result = self.ld_double(result);
+             if (k >> i) & 1 == 1 {
+-                result = self.add(result, p);
++                result = self.ld_add_affine(result, p);
+             }
+         }
+-        result
++        self.ld_to_affine(result)
+     }
+ 
+-    /// `[k]P` for a scalar of any size.
++    /// `[k]P` for a scalar of any size.  Both products run in
++    /// López–Dahab coordinates, one inversion for the whole product;
++    /// a test checks them against the affine double-and-add.
+     pub fn mul(&self, p: FastPoint, k: &BigUint) -> FastPoint {
+         let bits = k.bits();
+         if bits == 0 || p.infinity {
+             return FastPoint::INFINITY;
+         }
++        let mut result = FastLd::INFINITY;
++        for i in (0..bits).rev() {
++            result = self.ld_double(result);
++            if k.bit(i) {
++                result = self.ld_add_affine(result, p);
++            }
++        }
++        self.ld_to_affine(result)
++    }
++
++    /// `[k]P` by affine double-and-add, one inversion per step: the
++    /// reference the projective products are checked against.
++    pub fn mul_affine(&self, p: FastPoint, k: &BigUint) -> FastPoint {
++        let bits = k.bits();
++        if bits == 0 || p.infinity {
++            return FastPoint::INFINITY;
++        }
+         let mut result = FastPoint::INFINITY;
+         for i in (0..bits).rev() {
+             result = self.double(result);
+@@ -294,6 +326,65 @@
+         result
+     }
+ 
++    /// `[2]P` in López–Dahab coordinates (Hankerson–Menezes–Vanstone,
++    /// Algorithm 3.24).
++    #[inline]
++    fn ld_double(&self, p: FastLd) -> FastLd {
++        if p.z == 0 {
++            return p;
++        }
++        let f = &self.field;
++        let z2 = f.sqr(p.z);
++        let x2 = f.sqr(p.x);
++        let z3 = f.mul(x2, z2);
++        if z3 == 0 {
++            return FastLd::INFINITY;
++        }
++        let bz4 = f.mul(self.b, f.sqr(z2));
++        let x3 = f.sqr(x2) ^ bz4;
++        let y3 = f.mul(bz4, z3) ^ f.mul(x3, f.mul(self.a, z3) ^ f.sqr(p.y) ^ bz4);
++        FastLd { x: x3, y: y3, z: z3 }
++    }
++
++    /// Mixed addition `P + Q` with `Q` affine (Algorithm 3.25); the
++    /// degenerate cases (`Q = ±P`) go through the affine formulas.
++    #[inline]
++    fn ld_add_affine(&self, p: FastLd, q: FastPoint) -> FastLd {
++        if q.infinity {
++            return p;
++        }
++        if p.z == 0 {
++            return FastLd { x: q.x, y: q.y, z: 1 };
++        }
++        let f = &self.field;
++        let z1sq = f.sqr(p.z);
++        let a = f.mul(q.y, z1sq) ^ p.y;
++        let b = f.mul(q.x, p.z) ^ p.x;
++        if b == 0 {
++            let sum = self.add(self.ld_to_affine(p), q);
++            return if sum.infinity { FastLd::INFINITY } else { FastLd { x: sum.x, y: sum.y, z: 1 } };
++        }
++        let c = f.mul(p.z, b);
++        let d = f.mul(f.sqr(b), c ^ f.mul(self.a, z1sq));
++        let z3 = f.sqr(c);
++        let e = f.mul(a, c);
++        let x3 = f.sqr(a) ^ d ^ e;
++        let fx = x3 ^ f.mul(q.x, z3);
++        let g = f.mul(q.x ^ q.y, f.sqr(z3));
++        let y3 = f.mul(e ^ z3, fx) ^ g;
++        FastLd { x: x3, y: y3, z: z3 }
++    }
++
++    #[inline]
++    fn ld_to_affine(&self, p: FastLd) -> FastPoint {
++        if p.z == 0 {
++            return FastPoint::INFINITY;
++        }
++        let f = &self.field;
++        let zi = f.inv(p.z);
++        FastPoint::affine(f.mul(p.x, zi), f.mul(p.y, f.sqr(zi)))
++    }
++
+     /// The `2^k`-power Frobenius `(x, y) ↦ (x^{2^k}, y^{2^k})`.
+     #[inline]
+     pub fn frobenius_k(&self, p: FastPoint, k: u32) -> FastPoint {
+@@ -666,6 +757,37 @@
+             }
+         }
+     }
++
++    #[test]
++    fn projective_products_equal_the_affine_reference() {
++        for &(a, n) in &[(0u8, 5u32), (1, 7), (0, 13), (1, 17), (0, 19), (1, 19), (0, 23), (1, 29), (0, 31)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let points: Vec<FastPoint> = random_points(&kc, 6, 0x1234 + u64::from(n))
++                .iter()
++                .map(|p| fc.lift(p))
++                .chain([FastPoint::INFINITY])
++                .collect();
++            let r = &kc.subgroup_order;
++            let mut scalars: Vec<BigUint> = (0u32..24).map(BigUint::from).collect();
++            scalars.extend([r.clone(), r - BigUint::from(1u32), r + BigUint::from(1u32), r * BigUint::from(2u32), kc.group_order.clone(), kc.cofactor.clone()]);
++            let mut state = 0xa5a5_5a5a_1234_5678u64 ^ u64::from(n);
++            for _ in 0..12 {
++                state ^= state << 13;
++                state ^= state >> 7;
++                state ^= state << 17;
++                scalars.push(BigUint::from(state));
++            }
++            for &p in &points {
++                for k in &scalars {
++                    assert_eq!(fc.mul(p, k), fc.mul_affine(p, k), "n={n} a={a} k={k}");
++                    if let Some(w) = k.to_u64_digits().first().filter(|_| k.bits() <= 64) {
++                        assert_eq!(fc.mul_u64(p, *w), fc.mul_affine(p, k), "n={n} a={a} k={k} (word)");
++                    }
++                }
++            }
++        }
++    }
+ 
+     #[test]
+     fn batched_additions_equal_individual_ones() {

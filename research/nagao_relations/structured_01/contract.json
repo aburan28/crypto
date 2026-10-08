@@ -1,0 +1,30 @@
+{
+  "version": "2026-09-14.structured-exploratory-1",
+  "parent": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "scope": "Equivalent-family exploratory solver diagnostic for non-F2 F4-defined curves. It reruns all eight frozen subfield_01 d8 targets and includes fresh larger/structured holdouts. The WDSat ANF corpus uses a different curve/basis/protocol and cannot run these function/table APIs. This does not pass the full 60-input/repetition or end-to-end promotion gate.",
+  "hypotheses": [
+    "Early image parity rejection reduces candidate verification work while preserving exact function and relation sets.",
+    "F4-linear Frobenius4-stable bases are constructible at even binary dimension without being contained in a proper subfield; their benefit must be measured against controls on the exact same space.",
+    "A charged S3 pair-invariant table can move quadratic work into shared batch setup and give cheaper per-target decomposition; its cold complexity remains quadratic in base size.",
+    "Ordinary image setup caching has limited effect: previous complete d8 runs spend under 0.25 percent there. No substantial gain is assumed.",
+    "Frobenius maps a relation for R to one for R^4; arbitrary branch/orbit collapse for a fixed nonfixed target is invalid. No such collapse is used."
+  ],
+  "field_degrees": [18, 30],
+  "bases": {"prefix": [8, 9, 10], "f4-stable": [8, 10]},
+  "curve": "y^2+xy=x^3+alpha*x^2+alpha, alpha from the frozen deterministic F4 embedding",
+  "domain": "m=3, distinct nonzero abscissas in the declared space, excluding target x; finite affine target; exact signed verification and projected x-tuple enumeration",
+  "variants": ["hybrid-reference", "hybrid-filtered", "pair-invariants-s3", "chained-s3", "s4-symmetric"],
+  "seed": 2026091423,
+  "batch_seed": 2026091489,
+  "targets": "Frozen d8 prefix inputs: four per field. Every other panel: one uniform affine and one independently planted supported holdout. Identical within-panel inputs for every variant/mode. Bases differ across panels, so cross-base ratios do not establish a fixed-support gain.",
+  "cold_budget_seconds": 3,
+  "batch_targets_per_stratum": 4,
+  "batch_budget_seconds": 180,
+  "batch_accounting": "Eight newly sampled targets per panel, complete enumeration. Pair-table setup is built cold once, all eight queries and verification charged. These runs are an unmatched capacity/amortization diagnostic; do not compare them to cold SAT timeouts as a speedup. Record table keys/entries and every certificate. Baseline/candidate cold comparisons are separate.",
+  "validation": "All 53 affine GF64 targets for both prefix and structured d4 spaces, all five variants, against independent signed-triple/group-pair oracles. Every filtered candidate predicate compared with unfiltered recovery. Exhaustive compiled parity membership. Frozen predecessor equality on prefix. Every larger completion/partial set and certificate checked against an independent group-law pair oracle using batched denominator inverses, not S3 table equations.",
+  "boundary": "For M signed points, at most 8*C(M/2,3) signed triples, so uniform affine support probability <=min(1,8*C(M/2,3)/(#E-1)). The floor is not a runtime lower bound. Reference methods include both Semaev SAT circuits and the new direct quadratic S3 table. No common-unit conversion, subgroup, rho or full-DLP measurement is provided; all those ratios remain null.",
+  "falsification": "Any support, oracle, source-hash or certificate mismatch invalidates correctness. All eight queries must enumerate within the charged batch budget for a capacity success. Keep partial/failed cold runs; timeout is unknown. The 20-percent common-cost and subquadratic-scaling goals remain unproved unless a separately calibrated complete comparison establishes them.",
+  "counters": "Field add/multiply/square primitives and expanded inversions; nonadditive curve calls. New binary parity/mask XOR operations separately counted as <=64-bit word operations. Do not compare field-API sums alone when word work differs. SAT propagation/conflict operations unavailable. Basis-construction/oracle work is harness overhead recorded separately; per-cell expansion of the supplied basis and all solver precomputation are charged.",
+  "classification": "functionality and engineering diagnostic; no asymptotic or end-to-end gain claim",
+  "limitations": "One coefficient family, two fields, one timing repetition and small holdout sample. No d9 F4-linear space exists. F4 linearity does not make w^2+uw F4-linear. No fixed-target Frobenius quotient and no relation-matrix independence claim. Old sources/contracts/evidence remain immutable."
+}

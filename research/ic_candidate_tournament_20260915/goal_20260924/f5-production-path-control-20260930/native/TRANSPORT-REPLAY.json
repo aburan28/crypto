@@ -1,0 +1,30 @@
+{
+  "archive_bytes": 12030898,
+  "archive_sha256": "524d68f2858b7d552c14bd6fcc973846299cf563fdfa5bb84cf7d47ff096f02a",
+  "checker_sha256": "8ee3b90ecf97882f5fd25a40443236b9dfb6245ccb267cd39406b8d681dad98d",
+  "complete_dlp": false,
+  "final_suite": {
+    "log": "FINAL-CONTROL.log",
+    "log_sha256": "56e5cfcd6f80a9cb17ebfe04c49d3db3910c67e5509ac11f3edab9cb718dca85",
+    "passing": 314,
+    "seconds": "128.521",
+    "skipped": 3,
+    "tests": 317
+  },
+  "independently_verified_canonical_substitutions": 840,
+  "independently_verified_native_matrix_calls": 132,
+  "independently_verified_queries": 2,
+  "independently_verified_unique_systems": 66,
+  "kind": "archive-only independent source/process/mathematical replay",
+  "online_speedup": null,
+  "promotion_eligible": false,
+  "retained_initial_test_log": "FOCUSED-CONTROL-v1.log",
+  "retained_initial_test_log_sha256": "cc5c3f0c6676f6e7af9279f97f7f067fe4d3c00a0b9933d6b6179c35f5d8d3c6",
+  "schema_version": 1,
+  "scope": "successful native archive replay and final source/process/mathematical fault controls; no native rerun",
+  "source": "research/ic_candidate_tournament_20260915/goal_20260924/f5-production-path-control-20260930/native",
+  "status": "PASS",
+  "status_in_retained_log": "test_actual_native_evidence_replays ... ok",
+  "test_case": "TransportedProductionTests.test_actual_native_evidence_replays",
+  "test_command": "PYTHONDONTWRITEBYTECODE=1 python3.12 -m unittest -v test_f5_production_control.py"
+}

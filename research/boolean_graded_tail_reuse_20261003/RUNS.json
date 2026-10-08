@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "discovery": {
+    "path": "qualified_discovery_01",
+    "workflow_run_id": 36985293072,
+    "workflow_attempt": 1,
+    "artifact_id": 11217587837,
+    "artifact_archive_sha256": "0de4b55651891f855d74958aceaf4332c51b0b68f2aa8665fb535dac45c18de1",
+    "source_head": "0f226534462ee2e0a5deb41b7f8dfe0531ef73d2",
+    "manifest_sha256": "b7a41ed0c59926ce3fa93990c2b4c950865e821fc866a6eb8144b4403965422b",
+    "raw_sha256": "aca5d8837a981311d428b607e8a2c35f04d18745b684a31b44dc7c38b789b6b2",
+    "result_sha256": "f94e7e2e865c26020c8cd01b975652d81a669d42f56a98a4bc002d02dadaeee7",
+    "resource_qualified": true,
+    "native_replay_passed": true,
+    "fixtures": 200,
+    "samples": 14000,
+    "verified_outputs": 299600,
+    "discovery_groups_above_1_5": 2,
+    "discovery_groups_required": 8,
+    "gate_pass": false,
+    "holdout_executed": false
+  },
+  "full": null,
+  "excluded_attempts": [
+    {
+      "path": "failed_discovery_01",
+      "workflow_run_id": 36960153463,
+      "workflow_attempt": 1,
+      "artifact_id": 11206899826,
+      "source_head": "1c9b658ff9b183176d7f0cae6e8d2fb05b423813",
+      "manifest_sha256": "fe542fed0ea4bee987f4828debb7283f86235d4029d2225e202bdae272b2daf2",
+      "raw_sha256": "3408bd4c545b54a7b1631949df9b47ed30435c5cd15e414275d436722692e86a",
+      "result_sha256": "988aba9c172c11717d29c10554195e71eb888de5141c64ba30b16bcfa0d0e9ca",
+      "status": "post_seal_float_readback_failure",
+      "performance_admitted": false,
+      "holdout_executed": false
+    },
+    {
+      "path": "comparator_incomplete_discovery_01",
+      "workflow_run_id": 36982536433,
+      "workflow_attempt": 1,
+      "artifact_id": 11216762190,
+      "artifact_archive_sha256": "b75fb2f0627247baeaf7e2efba8173aeb90740541ecb974e1e3c4312b95add8a",
+      "source_head": "bee44bf317d6294a2b99db240f04ed644c551539",
+      "manifest_sha256": "5a4594b1022270d49af8e6303b78a59b8f9f2cd4822261e0d04639eeda603afa",
+      "raw_sha256": "b400af9978144c8ab9ad1ca07b13b300d6429e4b82adcd5fcf8a5b9b2ee923d3",
+      "result_sha256": "bb8bd89bc582daee8fbd95e4cee19810cfcb4458a5fcd10800952bb0dbd18916",
+      "status": "complete_but_dense_reference_incorrectly_inapplicable_at_n24",
+      "resource_qualified": true,
+      "native_replay_passed": true,
+      "performance_admitted": false,
+      "holdout_executed": false
+    }
+  ],
+  "decision": "reject_before_holdout",
+  "full_solver_cost": null,
+  "rho_ratio": null
+}

@@ -1,0 +1,48 @@
+{
+  "suite_id": "ec-wdsat-s4-corpus-v1",
+  "classification": "accounting",
+  "started_at": "2026-09-14T06:42:46.243863+00:00",
+  "contract_sha256": "040335351c0b410df20dea9f5c8a02013688fe8ab69d41cb3f9910cf7ed38a19",
+  "corpus_sha256": "14e505b1614d3d9c70bb657badf49c939d6665c71de3ec6a4ecd6bf4cd72c97d",
+  "runner_sha256": "257de097b49a56adb0b62bff6b6fa821d9e4df8f07c0c33a1c6ba004fbca5d52",
+  "checker_sha256": "7d971ded7a064c5bfaed7396a079df467e632a17ec77b49425978cb3406651b0",
+  "solver_sha256": "d42ee64bf6cd961514bf2fd13d8ed7d9abe95d0778a43917aa5c0df501407e52",
+  "source_revision": "61c6ff3f49445af2729274819edb27b85a89efc1",
+  "counter_unit": "wdsat_conflicts_v1",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "load_average_at_start": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "command": [
+    "crypto-pr/research/index_calculus_baseline_20260914/regression/run.py",
+    "--cache-dir",
+    "/workspace/scratch/5ef6d6b590d6/benchmark-cache",
+    "--solver",
+    "/workspace/scratch/5ef6d6b590d6/pr-baseline-build/wdsat_solver",
+    "--source-revision",
+    "61c6ff3f49445af2729274819edb27b85a89efc1",
+    "--output",
+    "/workspace/scratch/5ef6d6b590d6/benchmark-full-20260914",
+    "--offline"
+  ],
+  "peak_rss_bytes": null,
+  "memory_measurement": "Address-space cap enforced per child; peak RSS not measured.",
+  "full_dlp_S": null,
+  "cost_over_rho": null,
+  "cost_over_floor": null
+}

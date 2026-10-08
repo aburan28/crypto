@@ -1,0 +1,195 @@
+{
+  "valid": true,
+  "kind": "Exact reproduction of reviewed source/native code/resources",
+  "originalCodeReviewSha256": "6511cd82a5b70b54399c2c93e47b0ba90b553b9dcd4b5aff81139456586bc664",
+  "originalCompileSha256": "dacde7faf98c4ae3e96dca33e74584fb8bb9e8f0fb602796800d713bb86f8dbe",
+  "compileRawSha256": "7a79a299d0dceebb5b922d68604778cf6357b2a116aeee2bd33d54673ba9ad33",
+  "binarySha256": "675bd67a206cd817aa31e1e1762a577bf6c8be7bf6f863788cb32f46ef59c9be",
+  "sourceHashes": {
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba"
+  },
+  "kernels": {
+    "dense4": {
+      "registers": 40,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x2f0",
+      "backedge": "0x3f0",
+      "encodedInstructionsPerLoop": 17,
+      "denseMmaPerLoop": 12,
+      "sparseMmaPerLoop": 0,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        28,
+        24,
+        20,
+        4
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          48,
+          false
+        ],
+        [
+          16,
+          56,
+          false
+        ],
+        [
+          32,
+          64,
+          false
+        ]
+      ],
+      "completeScalarOutputStores": 16,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "4e6e96447aeba46161b8b1b854996472f69e5e77c452e8e027e824494170208f",
+      "sectionEncodingSha256": "76f8bc484367f921708930026f962dd53f57491018bc01bd01959f7fb8b4568f"
+    },
+    "hybrid4": {
+      "registers": 38,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x2c0",
+      "backedge": "0x380",
+      "encodedInstructionsPerLoop": 13,
+      "denseMmaPerLoop": 4,
+      "sparseMmaPerLoop": 4,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        20,
+        4,
+        24,
+        28
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          16,
+          false
+        ],
+        [
+          24,
+          40,
+          true
+        ]
+      ],
+      "completeScalarOutputStores": 16,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "4fe51697174f312999a8e7d2099a38cf695d6650e7badc1ae19eb5cd5fdeed15",
+      "sectionEncodingSha256": "1d950d45082cfdbfb58a3476a2cb32668a1ff265c6d2ba367a5435eaef08a4d2"
+    },
+    "dense8": {
+      "registers": 56,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x490",
+      "backedge": "0x650",
+      "encodedInstructionsPerLoop": 29,
+      "denseMmaPerLoop": 24,
+      "sparseMmaPerLoop": 0,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        20,
+        4,
+        44,
+        40,
+        36,
+        8,
+        12,
+        16
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          48,
+          false
+        ],
+        [
+          16,
+          56,
+          false
+        ],
+        [
+          32,
+          64,
+          false
+        ]
+      ],
+      "completeScalarOutputStores": 32,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "264dbf66f3cb04b802cc43c93aff301fc3c0327ce0ec7f1d7357c88651f7e1dc",
+      "sectionEncodingSha256": "4b21d9e0a72b3c6768709f192874a17446b25599a2be7427f007515d4eb0e4bf"
+    },
+    "hybrid8": {
+      "registers": 52,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x450",
+      "backedge": "0x590",
+      "encodedInstructionsPerLoop": 21,
+      "denseMmaPerLoop": 8,
+      "sparseMmaPerLoop": 8,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        36,
+        4,
+        8,
+        12,
+        16,
+        20,
+        40,
+        44
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          16,
+          false
+        ],
+        [
+          24,
+          40,
+          true
+        ]
+      ],
+      "completeScalarOutputStores": 32,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "cb470a393ac23fe4c75f5ca85d25fe826fb40f9e08e0b6e62b9d2ea239ea9e14",
+      "sectionEncodingSha256": "ab5b4d8516005327acf744e3f326bc5bff88283c8d88eed63660308d1f56089c"
+    }
+  },
+  "limits": [
+    "This reuses the original semantic/code review through exact source and native encoding equality; it is not a fresh performance result."
+  ]
+}

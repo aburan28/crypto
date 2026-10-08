@@ -1,0 +1,41 @@
+{
+  "artifacts": [
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "0517d2d14c27e7b0eb0f966209bb811863706447d07f088342abcdce5977022d",
+      "path": "resource_probe_01"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "0bded1e442b25ee1c9066aa5a0d63b5dd9f82223de8b1c99925800fc9d44f5d0",
+      "path": "resource_probe_02"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "4114532bb0a59e304d8a097953fd03378be3bd0e1f96a32ea94fb60e498abf35",
+      "path": "resource_probe_03"
+    },
+    {
+      "kind": "complete fixed-arm comparison",
+      "manifest_sha256": "cf5da62111d4bc225c40b2740202ce9f1c736bf49967e7758d3025623d45aeb8",
+      "path": "run_01"
+    },
+    {
+      "kind": "discovery structure only",
+      "manifest_sha256": "da354f696e76f2af085313cfce33e165b81f7eac4b9c70de296837b569f04e59",
+      "path": "support_census_01"
+    }
+  ],
+  "classification": "engineering",
+  "confirmation_eligible": false,
+  "confirmation_executed": false,
+  "full_ic_cost": null,
+  "primary_results_sha256": "c7265632ecf959442f9dd20340efeb47e5a23bd6210a549bc3fd9fc1001335cd",
+  "production_solver_cost": null,
+  "reporter_sha256": "d4e28a4dcaa15d63b62508fb3fbc68af50a24bbfa0ef783b68b4076addca5af6",
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete bounded generated public Boolean systems only. No curve input, imported target, scalar recovery, production integration, IC or rho campaign.",
+  "source_lineage_sha256": "0c40b56b90f5ede67b7556534ab4d29a8e7ae5ca684df926bf5adddfcdc7d1a3",
+  "summary_sha256": "b6bdb6c1a11410ee26ea9c6b8738ed23fe335ed5ce5ff271d84797c666561c8e"
+}

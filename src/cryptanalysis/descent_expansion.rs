@@ -1,7 +1,7 @@
 //! # Descent incidence-graph expansion — the P2 predictor.
 //!
 //! Implements the combinatorial predictor at the heart of the
-//! proof-complexity bridge (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §3): the
+//! proof-complexity bridge (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §3): the
 //! **expansion `γ` of the Weil-descent incidence (Tanner) graph**, built
 //! from the field's multiplication **structure-constant tensor**
 //! `c_{ikj}` defined by `z^i · z^k ≡ Σ_j c_{ikj} z^j (mod m(z))`.
@@ -55,7 +55,7 @@
 //!
 //! ## References
 //!
-//! See `RESEARCH_FFD_PROOF_COMPLEXITY.md`. Core: Ben-Sasson–Wigderson
+//! See `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md`. Core: Ben-Sasson–Wigderson
 //! 2001 (boundary expansion ⇒ width/degree), Alekhnovich–Razborov 2001.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
@@ -106,7 +106,10 @@ impl Biadjacency {
         self.b.iter().flatten().filter(|x| **x).count()
     }
     pub fn left_degrees(&self) -> Vec<usize> {
-        self.b.iter().map(|row| row.iter().filter(|x| **x).count()).collect()
+        self.b
+            .iter()
+            .map(|row| row.iter().filter(|x| **x).count())
+            .collect()
     }
     pub fn right_degrees(&self) -> Vec<usize> {
         (0..self.right)
@@ -189,11 +192,7 @@ pub fn system_incidence(
             }
         }
     }
-    Biadjacency {
-        b: bb,
-        left,
-        right,
-    }
+    Biadjacency { b: bb, left, right }
 }
 
 // ── Spectral expansion ──────────────────────────────────────────────
@@ -239,7 +238,11 @@ pub fn spectral_expansion(g: &Biadjacency) -> (f64, f64) {
     let sigma1 = eig.first().map(|&l| l.max(0.0).sqrt()).unwrap_or(0.0);
     let sigma2 = eig.get(1).map(|&l| l.max(0.0).sqrt()).unwrap_or(0.0);
     // Normalize against sigma1 (should be ~1) for numerical robustness.
-    let s2 = if sigma1 > 1e-12 { sigma2 / sigma1 } else { sigma2 };
+    let s2 = if sigma1 > 1e-12 {
+        sigma2 / sigma1
+    } else {
+        sigma2
+    };
     let s2 = s2.clamp(0.0, 1.0);
     (s2, 1.0 - s2)
 }
@@ -565,9 +568,9 @@ fn prime_factors(mut n: u32) -> Vec<u32> {
     let mut out = Vec::new();
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             out.push(d);
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
             }
         }
@@ -593,7 +596,7 @@ pub fn f2_is_irreducible(f: u128, deg: u32) -> bool {
         return false; // divisible by z
     }
     let x: u128 = 0b10; // the polynomial "z"
-    // For each prime p | deg: x^{2^{deg/p}} − x must be coprime to f.
+                        // For each prime p | deg: x^{2^{deg/p}} − x must be coprime to f.
     for p in prime_factors(deg) {
         let e = deg / p;
         let mut h = x;
@@ -719,9 +722,16 @@ mod tests {
         for i in 0..3 {
             b[i][i] = true;
         }
-        let g = Biadjacency { b, left: 3, right: 3 };
+        let g = Biadjacency {
+            b,
+            left: 3,
+            right: 3,
+        };
         let (sigma2, gamma) = spectral_expansion(&g);
-        assert!((sigma2 - 1.0).abs() < 1e-6, "matching should have σ₂≈1, got {sigma2}");
+        assert!(
+            (sigma2 - 1.0).abs() < 1e-6,
+            "matching should have σ₂≈1, got {sigma2}"
+        );
         assert!(gamma < 1e-6);
     }
 
@@ -733,9 +743,16 @@ mod tests {
         for i in 0..4 {
             b[i][i] = true;
         }
-        let g = Biadjacency { b, left: 4, right: 4 };
+        let g = Biadjacency {
+            b,
+            left: 4,
+            right: 4,
+        };
         let bd = boundary_expansion(&g, 4);
-        assert!((bd - 1.0).abs() < 1e-9, "matching boundary expansion should be 1, got {bd}");
+        assert!(
+            (bd - 1.0).abs() < 1e-9,
+            "matching boundary expansion should be 1, got {bd}"
+        );
     }
 
     /// Full report runs on a real field and yields finite, in-range values.

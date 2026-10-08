@@ -9,8 +9,8 @@
 //!
 //! then plug `k` back into the standard recovery formula.
 
-use crate::cryptopals::challenge43::{dsa_params, dsa_x_from_known_k};
 use crate::cryptopals::challenge28::sha1;
+use crate::cryptopals::challenge43::{dsa_params, dsa_x_from_known_k};
 use crate::cryptopals::Report;
 use num_bigint::{BigInt, BigUint, ToBigInt};
 use num_integer::Integer;
@@ -23,13 +23,7 @@ fn mod_inv(a: &BigUint, n: &BigUint) -> BigUint {
     r.to_biguint().unwrap()
 }
 
-pub fn k_from_repeated(
-    m1: &[u8],
-    m2: &[u8],
-    s1: &BigUint,
-    s2: &BigUint,
-    q: &BigUint,
-) -> BigUint {
+pub fn k_from_repeated(m1: &[u8], m2: &[u8], s1: &BigUint, s2: &BigUint, q: &BigUint) -> BigUint {
     let h1 = BigUint::from_bytes_be(&sha1(m1)) % q;
     let h2 = BigUint::from_bytes_be(&sha1(m2)) % q;
     let num_i = h1.to_bigint().unwrap() - h2.to_bigint().unwrap();

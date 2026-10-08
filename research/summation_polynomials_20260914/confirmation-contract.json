@@ -1,0 +1,10 @@
+{
+  "purpose": "Resolve scheduling outliers in the initial full-DLP timing result before retaining a default.",
+  "variants": ["legacy", "reference", "horner", "combined"],
+  "cases": [[67,11],[67,401],[67,503],[67,607],[67,809],[67,907],[67,1009]],
+  "repetitions": 5,
+  "order_seed": 20260916,
+  "timeout_seconds": 180,
+  "metrics": "Whole-process wall time and child user+system CPU time, separately. Bootstrap whole input clusters. Preserve all outliers and verify the same semantic and exact specialization-cost delta as run-01.",
+  "selection": "Keep a local optimization as the default only if the confirmation does not establish a regression in the full-DLP workload. Otherwise retain it as an experimental implementation in the frozen sources, and keep the corrected reference in production. Compare both wall and CPU times; do not discard outliers."
+}

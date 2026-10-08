@@ -1,0 +1,299 @@
+{
+  "valid": true,
+  "verdict": "Public G1 produces the identical CUDA13.3.73 cubin and PTX as the measured prototype G1",
+  "rawSha256": "c325188a77d8ee2aa29961b52df9c82a1a1e41e46bccbbcc01d0b3790c8a7adc",
+  "rawBytes": 3670559,
+  "reviewScriptSha256": "0a950b9cf7787f8060191d2ca70907a7103503389c3242ef5ed0e64481f866d0",
+  "driverSha256": "1c4c03c76b3ecd224f36880cc91eb6594bce7c82799d66e944281ce076eaf11c",
+  "freezeSha256": "b734cebf54c4503fb82e25115dd0cc51187277ed20ac57e32ca7d5bdaf021bb0",
+  "sourceFreezeSha256": "014abc5426aca065e4023109051e1e276b62709aef24f61a704afc8b2acbbdef",
+  "sourceFiles": 109,
+  "gitHead": "25db47d7ce6c0bc30ce21f60bb5186f9d2f9bf38",
+  "sourceManifestReverifiedAfterRun": true,
+  "priorRawSha256": "d3c6a5a796b7ccbae736060f373fcb3d86cae0940bfb2f66b569ec0943ab6927",
+  "priorRow": "generated_baseline",
+  "baseImage": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "compilerVersion": "13.3.73",
+  "compileCommand": [
+    "nvcc",
+    "-O3",
+    "-std=c++17",
+    "-arch=sm_120",
+    "-I",
+    "/root/candidate",
+    "-DECC_PACKED_SINGLE_PRODUCT=1",
+    "-DECC_PACKED_CACHE_DENOM=1",
+    "-DECC_PACKED_BY_VALUE=1",
+    "-DECC_PACKED_PERM_SIGMA=3",
+    "-DECC_PACKED_POLY_CHAIN=1",
+    "-DECC_PACKED_UNROLL_INV=1",
+    "-DECC_PACKED_PAIR_PRODUCTS=1",
+    "-DECC_PACKED_POLY_STATE=1",
+    "-DECC_SMEM_SPILL=0",
+    "-DECC_PACKED_DIRECT_REDUCE=1",
+    "-DECC_BATCH=32",
+    "-DECC_THREADS=256",
+    "-DECC_MINBLOCKS=2",
+    "-DECC_PACKED_GENERATED_PRODUCT=1",
+    "-cubin",
+    "/tmp/poly_regcoords_probe.cu",
+    "-o",
+    "/tmp/generated_baseline.cubin",
+    "-Xptxas",
+    "-v",
+    "--keep",
+    "--keep-dir",
+    "/tmp/composed-native133-generated_baseline"
+  ],
+  "probeSha256": "c3385469628031489b093a40dd8873194aeef402378f5711ed07e93b56602b6a",
+  "cubinSha256": "5b4d9ba9cdef7543563dada4aea2df4d2758ae21673a420aa85b2a369dfb88ac",
+  "ptxSha256": "c3ec212bf92a819bcc4e8a59d189766e30190ec153150a503f9bd63902c70e6f",
+  "compilerExecSession": 66857,
+  "compilerExitCode": 0,
+  "app": "ap-KSlXu6wolj5bdbKK4wrpwh",
+  "retrievalExecSession": 9953,
+  "retrievalExitCode": 0,
+  "actualCompileAttempts": 1,
+  "retries": 0,
+  "gpuAllocated": false,
+  "hostRetest": false,
+  "externalNetworkBlocked": true,
+  "remoteArtifact": "/data/generated-product-public-code/1789106221663144061/result.json",
+  "comparisons": {
+    "referenceRawSha256": "d3c6a5a796b7ccbae736060f373fcb3d86cae0940bfb2f66b569ec0943ab6927",
+    "referenceRow": "generated_baseline",
+    "referenceCubinSha256": "5b4d9ba9cdef7543563dada4aea2df4d2758ae21673a420aa85b2a369dfb88ac",
+    "referenceSections": {
+      "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+        "instructionSlots": 5816,
+        "encodingSha256": "572825ab1748edb5e9b72f61e04e96c42b56c45a5afc21165a61dacbefe45874",
+        "instructionTextSha256": "8984b8cccb395830a0c2d93cb7b54ff4b141a1db9e561dae0b53f99d21689212"
+      },
+      "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+        "instructionSlots": 3464,
+        "encodingSha256": "5b7e26bffe4b3f699149ac12aa2eebb330d430c39e09ffbb4a8e5e2fa58e67da",
+        "instructionTextSha256": "5ed1e327745a88746e155a2a8deba3b925a7a7776740f2c5f51c46e29940b9f5"
+      }
+    },
+    "referenceResources": {
+      "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+        "registers": 128,
+        "stackBytes": 16,
+        "sharedBytes": 0,
+        "declaredLocalBytes": 0
+      },
+      "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+        "registers": 128,
+        "stackBytes": 0,
+        "sharedBytes": 0,
+        "declaredLocalBytes": 0
+      }
+    },
+    "completeInstructionEncodingsAndTextEqual": true,
+    "resourcesEqual": true,
+    "completeFunctionMetricsEqual": true,
+    "ptxasFunctionSpillsEqual": true,
+    "cubinEqual": true,
+    "ptxEqual": true,
+    "completeNvdisasmEqual": true,
+    "completeSymbolTableEqual": true
+  },
+  "functions": {
+    "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+      "resources": {
+        "registers": 128,
+        "stackBytes": 16,
+        "sharedBytes": 0,
+        "declaredLocalBytes": 0
+      },
+      "section": {
+        "instructionSlots": 5816,
+        "encodingSha256": "572825ab1748edb5e9b72f61e04e96c42b56c45a5afc21165a61dacbefe45874",
+        "instructionTextSha256": "8984b8cccb395830a0c2d93cb7b54ff4b141a1db9e561dae0b53f99d21689212"
+      },
+      "completeNonNop": 5806,
+      "callerNonNop": 1725,
+      "callerLocalSites": [
+        {
+          "address": "0x180",
+          "instruction": "STL.64 [R1], R4",
+          "bytes": 8,
+          "direction": "store"
+        },
+        {
+          "address": "0x1c0",
+          "instruction": "STL.64 [R1+0x8], R2",
+          "bytes": 8,
+          "direction": "store"
+        },
+        {
+          "address": "0x200",
+          "instruction": "LDL.64 R36, [R1]",
+          "bytes": 8,
+          "direction": "load"
+        },
+        {
+          "address": "0x240",
+          "instruction": "LDL.64 R40, [R1+0x8]",
+          "bytes": 8,
+          "direction": "load"
+        }
+      ],
+      "helperNonNop": {
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13116mulPolynomial131ENS0_4P131ES1_": 556,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 251,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 267,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 272,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei": 299,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 297,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 297,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_": 1087,
+        "$_ZN12eccPacked1314walkE10WalkParamsIjEPj$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": 755
+      },
+      "ptxasFunctionSpills": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "stackFrameBytes": 16,
+          "spillStoreBytes": 16,
+          "spillLoadBytes": 16
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13116mulPolynomial131ENS0_4P131ES1_": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        }
+      }
+    },
+    "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+      "resources": {
+        "registers": 128,
+        "stackBytes": 0,
+        "sharedBytes": 0,
+        "declaredLocalBytes": 0
+      },
+      "section": {
+        "instructionSlots": 3464,
+        "encodingSha256": "5b7e26bffe4b3f699149ac12aa2eebb330d430c39e09ffbb4a8e5e2fa58e67da",
+        "instructionTextSha256": "5ed1e327745a88746e155a2a8deba3b925a7a7776740f2c5f51c46e29940b9f5"
+      },
+      "completeNonNop": 3445,
+      "callerNonNop": 1241,
+      "callerLocalSites": [],
+      "helperNonNop": {
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 251,
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 268,
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 273,
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 297,
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 297,
+        "$_ZN12eccPacked1314initE10WalkParamsIjEb$_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": 755,
+        "$__internal_0_$__cuda_sm20_div_u64": 63
+      },
+      "ptxasFunctionSpills": {
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        },
+        "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+          "stackFrameBytes": 0,
+          "spillStoreBytes": 0,
+          "spillLoadBytes": 0
+        }
+      }
+    }
+  },
+  "reusedCommonPath": {
+    "reason": "Complete cubin/code identity closes caller branches, helper placement and all encodings",
+    "priorPathSha256": "38e9b449c160274810f546e83116f6a7ea07209c26dfe02ac249680d83152de9",
+    "assumptions": "Static traversal of one steady B32 thread-step, not a GPU timing model.\n\nAll 32 batch slots of one thread are considered live; no DP emission, no guard work. Uniform branch\nchoices follow slot0/slot31 prefix and inverse rules. Leaf instruction bodies\nare expanded through their first RET; unreachable tail padding is excluded.\n",
+    "perScalar": {
+      "nonNop": 4249.5,
+      "brev": 3.90625,
+      "spillLoads": 0.5,
+      "spillStores": 0.0
+    },
+    "helperCalls": {
+      "19sigmaWalkNetwork131ENS0_4P131Ei": 64,
+      "16mulPolynomial131ENS0_4P131ES1_": 95,
+      "6mul131ENS0_4P131ES1_": 8,
+      "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+      "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+      "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+      "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+      "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+      "20mulPolynomialPair131ENS0_4P131ES1_S1_": 31
+    },
+    "additionalPerLaunchLocalBytes": 16,
+    "launchLocalFormula": "Prologue local bytes / (32 * launchSteps) per scalar update, in addition to steady-step counts. Stores occur once per launch."
+  },
+  "limits": [
+    "One CPU-only packed-kernel wrapper compile, with no GPU or host test rerun.",
+    "Exact device code/cubin equivalence does not establish full linked host-client binary equality.",
+    "Reused static path accounting is not GPU timing, throughput, DRAM traffic or a new performance result.",
+    "The native publication audit and its runtime evidence are owned by root in a separate run."
+  ]
+}

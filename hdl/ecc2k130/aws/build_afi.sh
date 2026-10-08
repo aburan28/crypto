@@ -8,6 +8,8 @@
 #                                       places, routes and submits the AFI
 #                                       (hours; the instance shuts down after)
 #   ./build_afi.sh status [TAG]         instance state, build log tail, AFI state
+#   ./build_afi.sh submit [TAG]         create the AFI from the uploaded tarball
+#                                       when the instance could not (see below)
 #   ./build_afi.sh wait   [TAG]         block until the AFI is available
 #   ./build_afi.sh promote [TAG]        make it the image bootstrap_f2.sh loads
 #   ./build_afi.sh list                 every build in the bucket
@@ -17,10 +19,20 @@
 #              2 RAMB18 and 4 URAM288 each; the VU47P has 1.30M LUTs,
 #              2 016 RAMB36 and 960 URAM288: 112 is 73% of the LUTs, 128 is
 #              83%; 48, 64 and 80 have run on a device)
+#   NENG       walker engines (default 48; about 6.9k LUTs, 12 RAMB36,
+#              4 URAM288 and 66 DSPs each; the VU47P has 1.30M LUTs,
+#              2 016 RAMB36 and 960 URAM288, and the CL's region 1 788 of
+#              the RAMB36: 128 is 68% of the LUTs, 144 is 77% and 3 456 of
+#              the region's 3 576 RAMB18 sites, the most that fit; 48 to
+#              128 have run on a device)
 #   ID_W       walks per engine = 2**ID_W (default 9: 512 walks fill the
 #              FIFO's block RAM exactly)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
 #              the challenge's; must equal campaign.json dpWeight)
+#   LOG_W, LOG_NB  walks per batch and batches in flight, as logs (default:
+#              the defines file's, 64 x 8; 2**(LOG_W+LOG_NB) must be at most
+#              2**ID_W, and equal to it is fine: 64 x 8 and 32 x 8 both run
+#              5.16 clocks per step, 32 x 16 starves at 5.21 - 5.22)
 #   CLK_MHZ    engine clock: 250, 300, 333 (default), 350, 375 or 400; or set
 #              MMCM_MULT and MMCM_DIV directly (engine clock = 250 * MULT /
 #              DIV, VCO = 250 * MULT within 800..1600).  Below 250 there is
@@ -30,6 +42,13 @@
 #              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~750 LUTs
 #              fewer per engine; the device has 9 024 DSPs, so 128 engines
 #              take 11 and 136 take 10)
+#              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~790 LUTs
+#              fewer per engine).  The CL's region holds 7 992 of the
+#              device's 9 024 DSPs (the shell has the rest), so 6 DSPs per
+#              leaf x leaves x NENG must stay under that: 120 engines take
+#              11, 128 take 10, 136 and 144 take 9; over it, place_design
+#              fails its utilisation DRC before placing anything.  0 is the
+#              all-LUT multiplier, 10 clocks instead of 13.
 # Build instance:
 #   BUILD_TYPE  default r6i.4xlarge (128 GB; Vivado on a VU47P wants > 64)
 #   AMI         override the FPGA Developer AMI lookup (needs a Marketplace
@@ -46,6 +65,8 @@
 #   fpga/builds/TAG/TAG.Developer_CL.tar  the DCP tarball create-fpga-image ingests
 #   fpga/builds/TAG/reports/              utilisation and timing
 #   fpga/builds/TAG/afi.json              ids and geometry once submitted
+#   fpga/builds/TAG/build.json            geometry and timing once the tarball is up
+#   fpga/builds/TAG/afi.json              the same plus the image ids once submitted
 #   fpga/afi.json                         the promoted image
 
 set -euo pipefail
@@ -115,6 +136,11 @@ launch)
     # of one build, and it is what a role would have given it, scoped wider;
     # the role is preferred whenever it can be made.
     ensureRole() {
+    # the role is preferred when it already exists or can be made.
+    ensureRole() {
+        # An existing profile is enough: SSO/assumed-role callers can attach
+        # it but usually cannot put-role-policy / attach-role-policy.
+        aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1 && return 0
         aws iam get-role --role-name "$ROLE" >/dev/null 2>&1 \
         || aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
              "Version": "2012-10-17",
@@ -139,6 +165,14 @@ launch)
     profileOpt=()
     credLine=""
     if [ "${NO_ROLE:-0}" != 1 ] && ensureRole 2>/dev/null; then
+        aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
+        aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
+        echo "created instance profile $PROFILE; waiting for IAM to propagate"
+        sleep 15
+    }
+    profileOpt=()
+    credLine=""
+    if [ "${NO_ROLE:-0}" != 1 ] && ensureRole; then
         profileOpt=(--iam-instance-profile "Name=$PROFILE")
         echo "instance profile $PROFILE"
     else
@@ -175,6 +209,7 @@ launch)
         echo "BUCKET=$BUCKET; TAG=$TAG; REGION=$AWS_DEFAULT_REGION"
         echo "NENG=$NENG; ID_W=$ID_W; DP_WEIGHT=$DP_WEIGHT; NO_SHUTDOWN=${KEEP:-0}"
         echo "MMCM_MULT=$MMCM_MULT; MMCM_DIV=$MMCM_DIV; CLK_MHZ=$CLK_MHZ; DSP_LEAVES=${DSP_LEAVES:-}"
+        echo "LOG_W=${LOG_W:-}; LOG_NB=${LOG_NB:-}"
         [ -n "$credLine" ] && echo "$credLine"
         cat build_afi_instance.sh
     } > "$ud"
@@ -190,6 +225,7 @@ launch)
           --query 'Instances[0].InstanceId' --output text)
     rm -f "$ud"
     echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)"
+    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)${LOG_W:+, LOG_W=$LOG_W}${LOG_NB:+, LOG_NB=$LOG_NB}${DSP_LEAVES:+, DSP_LEAVES=$DSP_LEAVES}"
     echo "follow with: ./build_afi.sh status $TAG   (the instance terminates itself when done)"
     ;;
 
@@ -210,12 +246,51 @@ status)
     fi
     ;;
 
+submit)
+    # The instance calls create-fpga-image itself; this is for when it could
+    # not.  Launched on the caller's session token (no IAM rights to make the
+    # role), its S3 calls go through but the image service, reading the
+    # tarball on its behalf, refuses the token: InaccessibleStorageLocation.
+    # The tarball and build.json are in the bucket, so the call is made here.
+    [ -n "$TAG" ] || { echo "no builds yet" >&2; exit 1; }
+    if aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/afi.json" - >/dev/null 2>&1; then
+        echo "build $TAG already has an afi.json" >&2; exit 1
+    fi
+    aws s3api head-object --bucket "$BUCKET" --key "fpga/builds/$TAG/$TAG.Developer_CL.tar" >/dev/null 2>&1 \
+        || { echo "no DCP tarball for $TAG in the bucket; the build did not get that far" >&2; exit 1; }
+    b="${TMPDIR:-/tmp}/ecc-build.json"
+    if ! aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/build.json" "$b" --only-show-errors 2>/dev/null; then
+        # builds before build.json existed: the geometry is in the tag and the log
+        neng=$(sed -E 's/.*-n([0-9]+)-.*/\1/' <<<"$TAG"); mhz=$(sed -E 's/.*-c([0-9]+).*/\1/' <<<"$TAG")
+        timing=met
+        aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/build.log" - 2>/dev/null | grep -q "timing was not met" && timing=violated
+        printf '{"tag":"%s","neng":%d,"idW":%d,"dpWeight":%d,"walks":%d,"clkMhz":%d,"timing":"%s"}\n' \
+            "$TAG" "$neng" "$ID_W" "$DP_WEIGHT" "$((neng << ID_W))" "$mhz" "$timing" > "$b"
+    fi
+    desc=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print("ECC2K-130 rho engine, %d engines x %d walks, dp weight %d, %d MHz, timing %s" % (d["neng"], 1 << d["idW"], d["dpWeight"], d["clkMhz"], d["timing"]))' "$b")
+    out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" --description "$desc" \
+          --input-storage-location "Bucket=$BUCKET,Key=fpga/builds/$TAG/$TAG.Developer_CL.tar" \
+          --logs-storage-location "Bucket=$BUCKET,Key=fpga/builds/$TAG/afi-logs" \
+          --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=$STACK},{Key=BuildTag,Value=$TAG}]" \
+          --output json)
+    python3 -c 'import json,sys; d=json.loads(sys.argv[1]); b=json.load(open(sys.argv[2])); json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], **b}, open(sys.argv[3], "w"), indent=1)' \
+        "$out" "$b" "${TMPDIR:-/tmp}/ecc-afi.json"
+    aws s3 cp "${TMPDIR:-/tmp}/ecc-afi.json" "s3://$BUCKET/fpga/builds/$TAG/afi.json" --only-show-errors
+    cat "${TMPDIR:-/tmp}/ecc-afi.json"; echo
+    echo "submitted; ./build_afi.sh wait $TAG then ./build_afi.sh promote $TAG"
+    ;;
+
 wait)
     [ -n "$TAG" ] || { echo "no builds yet" >&2; exit 1; }
     echo "waiting for build $TAG (Vivado takes hours; AFI generation about an hour after that)"
     while ! aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/afi.json" "${TMPDIR:-/tmp}/ecc-afi.json" --only-show-errors 2>/dev/null; do
         if [ "$(aws ec2 describe-instances --filters "Name=tag:BuildTag,Values=$TAG" "Name=instance-state-name,Values=pending,running,stopping" \
                  --query 'length(Reservations[].Instances[])' --output text)" = 0 ]; then
+            if aws s3api head-object --bucket "$BUCKET" --key "fpga/builds/$TAG/$TAG.Developer_CL.tar" >/dev/null 2>&1; then
+                echo "build instance is gone with the tarball uploaded but no AFI submitted; submitting from here"
+                "$0" submit "$TAG" || exit 1
+                continue
+            fi
             echo "build instance is gone and no AFI was submitted; read fpga/builds/$TAG/build.log" >&2
             exit 1
         fi
@@ -247,6 +322,8 @@ list)
     for t in $(aws s3 ls "s3://$BUCKET/fpga/builds/" | awk '{print $2}' | tr -d /); do
         if aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null \
             | python3 -c 'import json,sys; d=json.load(sys.stdin); print("%-28s %s  %3d eng x %4d walks  w<=%d" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"]))'; then :
+        if j=$(aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null) && [ -n "$j" ]; then
+            python3 -c 'import json,sys; d=json.loads(sys.argv[1]); print("%-28s %s  %3d eng x %4d walks  w<=%d  %s %s" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"], d.get("clkMhz", ""), d.get("timing", "")))' "$j"
         else
             echo "$t  (not submitted)"
         fi

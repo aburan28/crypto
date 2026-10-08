@@ -1,0 +1,25 @@
+{
+  "schema": "degree_reduction_presentation/v1",
+  "experiment": "EXP-R4d",
+  "generated_at": 1789216732,
+  "seed": 7,
+  "targets_per_cell": 16,
+  "degenerate_cells": 1,
+  "total_cells": 12,
+  "paired": {"n_cells":176,"n_blocks":11,"pooled":-0.279746,"mean_per_block":0.900651,"blocked_rank":0.838527,"fixed_effects":0.766240},
+  "presentation_family": {"n_cells":36,"n_blocks":12,"pooled":0.540978,"mean_per_block":0.872008,"blocked_rank":0.870388,"fixed_effects":0.304905},
+  "cells": [
+    {"family":"Coordinate","vars":10,"targets":16,"defect_raw":0.030185,"defect_one":0.002131,"defect_sat":0.000000,"dstar_raw":2.6250,"dstar_one":2.3125,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Coordinate","vars":12,"targets":16,"defect_raw":0.019231,"defect_one":0.001045,"defect_sat":0.000000,"dstar_raw":2.6250,"dstar_one":2.3125,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Coordinate","vars":14,"targets":16,"defect_raw":0.014495,"defect_one":0.000798,"defect_sat":0.000000,"dstar_raw":2.7500,"dstar_one":2.3750,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Coordinate","vars":16,"targets":16,"defect_raw":0.014437,"defect_one":0.008877,"defect_sat":0.000000,"dstar_raw":3.0000,"dstar_one":2.8125,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Random","vars":10,"targets":16,"defect_raw":0.009943,"defect_one":0.000355,"defect_sat":0.000000,"dstar_raw":3.8750,"dstar_one":2.9375,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Random","vars":12,"targets":16,"defect_raw":0.003344,"defect_one":0.000209,"defect_sat":0.000000,"dstar_raw":4.0000,"dstar_one":3.0000,"dstar_sat":2.0000,"ddstar_varies":false},
+    {"family":"Random","vars":14,"targets":16,"defect_raw":0.001995,"defect_one":0.028856,"defect_sat":0.000000,"dstar_raw":3.8750,"dstar_one":3.6250,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Random","vars":16,"targets":16,"defect_raw":0.001435,"defect_one":0.137733,"defect_sat":0.000000,"dstar_raw":4.2500,"dstar_one":4.0000,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Subfield","vars":10,"targets":16,"defect_raw":0.110085,"defect_one":0.000710,"defect_sat":0.000000,"dstar_raw":2.1250,"dstar_one":2.0000,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Subfield","vars":12,"targets":16,"defect_raw":0.088838,"defect_one":0.007316,"defect_sat":0.000000,"dstar_raw":2.1875,"dstar_one":2.0000,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Subfield","vars":14,"targets":16,"defect_raw":0.073936,"defect_one":0.015426,"defect_sat":0.000000,"dstar_raw":2.2500,"dstar_one":2.0000,"dstar_sat":2.0000,"ddstar_varies":true},
+    {"family":"Subfield","vars":16,"targets":16,"defect_raw":0.062500,"defect_one":0.023225,"defect_sat":0.000000,"dstar_raw":2.1875,"dstar_one":2.0000,"dstar_sat":2.0000,"ddstar_varies":true}
+  ]
+}

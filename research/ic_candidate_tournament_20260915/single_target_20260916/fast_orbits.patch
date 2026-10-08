@@ -1,0 +1,229 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -1970,64 +1970,9 @@
+         }
+     }
+ 
+-    // Index points for the orbit walk and for relation lookups.
+-    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
+-    for (i, p) in points.iter().enumerate() {
+-        index_of.insert(point_key(p), i);
+-    }
+-
+-    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
+-    let mut orbits: Vec<Vec<usize>> = Vec::new();
+-    for start in 0..points.len() {
+-        if orbit_of[start].0 != usize::MAX {
+-            continue;
+-        }
+-        let o = orbits.len();
+-        let mut cycle = Vec::new();
+-        let mut cur = points[start].clone();
+-        let mut k = 0u32;
+-        loop {
+-            let idx = *index_of.get(&point_key(&cur))?;
+-            if orbit_of[idx].0 != usize::MAX {
+-                break;
+-            }
+-            orbit_of[idx] = (o, k);
+-            cycle.push(idx);
+-            cur = kc.frobenius(&cur);
+-            k += 1;
+-        }
+-        orbits.push(cycle);
+-    }
+-
+-    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+-    let mut signed_orbits = Vec::new();
+-    for start in 0..points.len() {
+-        if signed_orbit_of[start].0 != usize::MAX {
+-            continue;
+-        }
+-        let signed_orbit = signed_orbits.len();
+-        let mut members = Vec::new();
+-        let mut current = points[start].clone();
+-        for k in 0..kc.n {
+-            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
+-                let index = *index_of.get(&point_key(&point))?;
+-                if signed_orbit_of[index].0 == usize::MAX {
+-                    signed_orbit_of[index] = (signed_orbit, k, negated);
+-                    members.push(index);
+-                } else if signed_orbit_of[index].0 != signed_orbit {
+-                    return None;
+-                }
+-            }
+-            current = kc.frobenius(&current);
+-        }
+-        if current != points[start] {
+-            return None;
+-        }
+-        signed_orbits.push(members);
+-    }
+-    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
+-        return None;
+-    }
++    let (orbits, orbit_of, signed_orbits, signed_orbit_of) =
++        factor_base_orbits_fast(kc, &points)
++            .or_else(|| factor_base_orbits_general(kc, &points))?;
+ 
+     Some(FrobeniusFactorBase {
+         domain,
+@@ -2042,6 +1987,158 @@
+         signed_orbits,
+         signed_orbit_of,
+     })
++}
++
++type FactorBaseOrbitTables = (
++    Vec<Vec<usize>>, Vec<(usize, u32)>, Vec<Vec<usize>>, Vec<(usize, u32, bool)>,
++);
++
++fn factor_base_orbits_general(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<FactorBaseOrbitTables> {
++    // Index points for the orbit walk and for relation lookups.
++    let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
++    for (i, p) in points.iter().enumerate() {
++        index_of.insert(point_key(p), i);
++    }
++
++    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
++    let mut orbits: Vec<Vec<usize>> = Vec::new();
++    for start in 0..points.len() {
++        if orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let o = orbits.len();
++        let mut cycle = Vec::new();
++        let mut cur = points[start].clone();
++        let mut k = 0u32;
++        loop {
++            let idx = *index_of.get(&point_key(&cur))?;
++            if orbit_of[idx].0 != usize::MAX {
++                break;
++            }
++            orbit_of[idx] = (o, k);
++            cycle.push(idx);
++            cur = kc.frobenius(&cur);
++            k += 1;
++        }
++        orbits.push(cycle);
++    }
++
++    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
++    let mut signed_orbits = Vec::new();
++    for start in 0..points.len() {
++        if signed_orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let signed_orbit = signed_orbits.len();
++        let mut members = Vec::new();
++        let mut current = points[start].clone();
++        for k in 0..kc.n {
++            for (negated, point) in [(false, current.clone()), (true, point_neg(&current))] {
++                let index = *index_of.get(&point_key(&point))?;
++                if signed_orbit_of[index].0 == usize::MAX {
++                    signed_orbit_of[index] = (signed_orbit, k, negated);
++                    members.push(index);
++                } else if signed_orbit_of[index].0 != signed_orbit {
++                    return None;
++                }
++            }
++            current = kc.frobenius(&current);
++        }
++        if current != points[start] {
++            return None;
++        }
++        signed_orbits.push(members);
++    }
++    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
++        return None;
++    }
++
++    Some((orbits, orbit_of, signed_orbits, signed_orbit_of))
++}
++
++fn factor_base_orbits_fast(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<FactorBaseOrbitTables> {
++    let fc = FastCurve::new(&kc.curve)?;
++    let points: Vec<_> = points.iter().map(|point| fc.lift(point)).collect();
++    // Index points for the orbit walk and for relation lookups.
++    let mut index_of: HashMap<u64, usize> = HashMap::new();
++    for (i, p) in points.iter().enumerate() {
++        index_of.insert(p.pack(), i);
++    }
++
++    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
++    let mut orbits: Vec<Vec<usize>> = Vec::new();
++    for start in 0..points.len() {
++        if orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let o = orbits.len();
++        let mut cycle = Vec::new();
++        let mut cur = points[start].clone();
++        let mut k = 0u32;
++        loop {
++            let idx = *index_of.get(&cur.pack())?;
++            if orbit_of[idx].0 != usize::MAX {
++                break;
++            }
++            orbit_of[idx] = (o, k);
++            cycle.push(idx);
++            cur = fc.frobenius_k(cur, kc.k);
++            k += 1;
++        }
++        orbits.push(cycle);
++    }
++
++    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
++    let mut signed_orbits = Vec::new();
++    for start in 0..points.len() {
++        if signed_orbit_of[start].0 != usize::MAX {
++            continue;
++        }
++        let signed_orbit = signed_orbits.len();
++        let mut members = Vec::new();
++        let mut current = points[start].clone();
++        for k in 0..kc.n {
++            for (negated, point) in [(false, current.clone()), (true, fc.neg(current))] {
++                let index = *index_of.get(&point.pack())?;
++                if signed_orbit_of[index].0 == usize::MAX {
++                    signed_orbit_of[index] = (signed_orbit, k, negated);
++                    members.push(index);
++                } else if signed_orbit_of[index].0 != signed_orbit {
++                    return None;
++                }
++            }
++            current = fc.frobenius_k(current, kc.k);
++        }
++        if current.pack() != points[start].pack() {
++            return None;
++        }
++        signed_orbits.push(members);
++    }
++    if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
++        return None;
++    }
++
++    Some((orbits, orbit_of, signed_orbits, signed_orbit_of))
++}
++
++#[cfg(test)]
++mod single_target_orbit_equivalence {
++    use super::*;
++    #[test]
++    fn packed_orbit_tables_preserve_order_and_rejection() {
++        for (n, a) in [(13, 0), (17, 1), (19, 0), (19, 1), (23, 0)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            for seed in [7, 43, 97] {
++                let fb = build_subgroup_orbit_factor_base(&kc, seed, 6 * n as usize).unwrap();
++                assert_eq!(factor_base_orbits_fast(&kc, &fb.points),
++                           factor_base_orbits_general(&kc, &fb.points));
++                let broken = &fb.points[..fb.points.len()-1];
++                assert_eq!(factor_base_orbits_fast(&kc, broken),
++                           factor_base_orbits_general(&kc, broken));
++                assert!(factor_base_orbits_fast(&kc, broken).is_none());
++            }
++        }
++    }
+ }
+ 
+ /// Hashable identity of a point — the key of

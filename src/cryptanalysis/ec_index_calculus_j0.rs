@@ -90,7 +90,7 @@
 //!   Semaev-polynomial Gröbner basis cost across curve families.
 
 use crate::cryptanalysis::ec_index_calculus::{
-    find_one_relation, gaussian_eliminate_mod_n, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
+    find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
     FactorBaseEntry,
 };
 use crate::ecc::curve::CurveParams;
@@ -248,7 +248,7 @@ pub fn build_orbit_factor_base(
                 &curve.p - &y
             };
             let cx = canonical_orbit_x(&x, zeta, &curve.p);
-            if !seen.contains_key(&cx) {
+            if let std::collections::hash_map::Entry::Vacant(slot) = seen.entry(cx.clone()) {
                 let zeta_x = (&x * zeta) % &curve.p;
                 let zeta_sq_x = (&zeta_x * zeta) % &curve.p;
                 let entry = OrbitEntry {
@@ -260,7 +260,7 @@ pub fn build_orbit_factor_base(
                     canonical_x: cx.clone(),
                     orbit_x: [x.clone(), zeta_x, zeta_sq_x],
                 };
-                seen.insert(cx, out.len());
+                slot.insert(out.len());
                 out.push(entry);
             }
         }
@@ -466,8 +466,11 @@ pub fn j0_index_calculus_dlp(
         matrix.push(row);
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
-    let x = solution[m].clone();
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
     let a_fe = curve.a_fe();
     let candidate = g.scalar_mul(&x, &a_fe);
     if &candidate == q {
@@ -858,8 +861,11 @@ pub fn eisenstein_smooth_ic_dlp(
         matrix.push(row);
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
-    let x = solution[m].clone();
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
+    let x = solution.values[m].clone();
     let a_fe = curve.a_fe();
     let candidate = g.scalar_mul(&x, &a_fe);
     if &candidate == q {

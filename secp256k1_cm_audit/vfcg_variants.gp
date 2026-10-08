@@ -1,7 +1,7 @@
 \\ ============================================================
 \\ VFCG-ρ variants falsifier: V1 (multi-depth) + V2 (multi-prime)
 \\
-\\ Strengthening the §5 falsifier in RESEARCH_VOLCANO_FLOOR_RHO.md.
+\\ Strengthening the §5 falsifier in research/notes/cm-isogeny/RESEARCH_VOLCANO_FLOOR_RHO.md.
 \\ The earlier gcd-based test only catches a narrow structuredness
 \\ of c_γ.  The fundamental question is:
 \\
@@ -257,7 +257,7 @@ print("Across V1 (multi-depth) and V2 (multi-prime), the bound");
 print("ord(c_γ) ≤ 2 · h(disc) is small uniformly.  So c_γ is");
 print("ALWAYS in a small subgroup of (Z/n)*.");
 print("");
-print("The §3 cost analysis of RESEARCH_VOLCANO_FLOOR_RHO.md");
+print("The §3 cost analysis of research/notes/cm-isogeny/RESEARCH_VOLCANO_FLOOR_RHO.md");
 print("shows that c_γ ∈ small-subgroup, by itself, does NOT yield");
 print("a ρ speedup, because:");
 print("");

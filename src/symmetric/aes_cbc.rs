@@ -37,7 +37,7 @@ pub fn pkcs7_pad(data: &[u8], block_size: usize) -> Vec<u8> {
     let pad_len = block_size - (data.len() % block_size);
     let mut out = Vec::with_capacity(data.len() + pad_len);
     out.extend_from_slice(data);
-    out.extend(std::iter::repeat(pad_len as u8).take(pad_len));
+    out.extend(std::iter::repeat_n(pad_len as u8, pad_len));
     out
 }
 
@@ -47,7 +47,7 @@ pub fn pkcs7_pad(data: &[u8], block_size: usize) -> Vec<u8> {
 /// implementation that uses *only* AEAD modes would never expose
 /// this distinguisher).
 pub fn pkcs7_unpad(data: &[u8], block_size: usize) -> Option<Vec<u8>> {
-    if data.is_empty() || data.len() % block_size != 0 {
+    if data.is_empty() || !data.len().is_multiple_of(block_size) {
         return None;
     }
     let pad_len = *data.last()? as usize;
@@ -87,7 +87,7 @@ pub fn aes_cbc_encrypt(plaintext: &[u8], key: &AesKey, iv: &[u8; 16]) -> Vec<u8>
 /// AES-CBC decryption with PKCS#7 padding verification.  Input
 /// is `iv ‖ ciphertext`.  Returns `None` if the padding is malformed.
 pub fn aes_cbc_decrypt(input: &[u8], key: &AesKey) -> Option<Vec<u8>> {
-    if input.len() < 32 || (input.len() - 16) % 16 != 0 {
+    if input.len() < 32 || !(input.len() - 16).is_multiple_of(16) {
         return None;
     }
     let iv = &input[..16];

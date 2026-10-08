@@ -39,7 +39,7 @@
 //! constant-time; see SECURITY.md.
 
 use super::mpcith::{gf_mul, mpcith_prove, mpcith_verify, MpcRelation, MpcithProof, PartyView};
-use crate::hash::sha3::{shake256};
+use crate::hash::sha3::shake256;
 use crate::utils::random::random_bytes;
 
 /// Number of variables.
@@ -132,7 +132,10 @@ impl MpcRelation for MqRelation {
             if eps[k] == 0 {
                 continue;
             }
-            let bx = self.b[k].iter().zip(wshare).fold(0u8, |acc, (&bj, &xj)| acc ^ gf_mul(bj, xj));
+            let bx = self.b[k]
+                .iter()
+                .zip(wshare)
+                .fold(0u8, |acc, (&bj, &xj)| acc ^ gf_mul(bj, xj));
             t ^= gf_mul(eps[k], bx);
         }
         if leader {
@@ -140,7 +143,12 @@ impl MpcRelation for MqRelation {
                 t ^= gf_mul(eps[k], self.y[k]);
             }
         }
-        PartyView { u, v, t, lin: Vec::new() }
+        PartyView {
+            u,
+            v,
+            t,
+            lin: Vec::new(),
+        }
     }
 }
 
@@ -177,12 +185,20 @@ fn statement(pk: &MqomPublicKey, msg: &[u8]) -> Vec<u8> {
 }
 
 pub fn mqom_sign(pk: &MqomPublicKey, sk: &MqomSecretKey, msg: &[u8]) -> MqomSignature {
-    let rel = MqRelation { a: pk.a.clone(), b: pk.b.clone(), y: pk.y.clone() };
+    let rel = MqRelation {
+        a: pk.a.clone(),
+        b: pk.b.clone(),
+        y: pk.y.clone(),
+    };
     mpcith_prove(&rel, &sk.x, &statement(pk, msg))
 }
 
 pub fn mqom_verify(pk: &MqomPublicKey, msg: &[u8], sig: &MqomSignature) -> bool {
-    let rel = MqRelation { a: pk.a.clone(), b: pk.b.clone(), y: pk.y.clone() };
+    let rel = MqRelation {
+        a: pk.a.clone(),
+        b: pk.b.clone(),
+        y: pk.y.clone(),
+    };
     mpcith_verify(&rel, &statement(pk, msg), sig)
 }
 
@@ -226,7 +242,11 @@ mod tests {
         let (pk, sk) = mqom_keygen();
         let mut bad = sk.x.clone();
         bad[0] ^= 0x9e;
-        let rel = MqRelation { a: pk.a.clone(), b: pk.b.clone(), y: pk.y.clone() };
+        let rel = MqRelation {
+            a: pk.a.clone(),
+            b: pk.b.clone(),
+            y: pk.y.clone(),
+        };
         let msg = statement(&pk, b"msg");
         let sig = mpcith_prove(&rel, &bad, &msg);
         assert!(!mpcith_verify(&rel, &msg, &sig));

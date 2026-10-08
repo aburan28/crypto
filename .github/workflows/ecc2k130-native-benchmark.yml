@@ -1,0 +1,38 @@
+name: ECC2K-130 native candidate benchmark
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/ecc2k130-native-square]
+    paths:
+      - .github/workflows/ecc2k130-native-benchmark.yml
+permissions:
+  contents: read
+concurrency:
+  group: ecc2k130-native-benchmark
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline benchmark and isolation checks
+        run: python3 -m unittest discover -s ecc2k130/codegen -p testnativebench.py
+      - name: Configure existing AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Install AWS client
+        run: python3 -m pip install boto3
+      - name: Compare on one disposable GPU with automatic termination
+        run: python3 ecc2k130/aws/native_benchmark.py --out native-benchmark
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecc2k130-native-benchmark
+          path: native-benchmark
+          if-no-files-found: ignore
+          retention-days: 14

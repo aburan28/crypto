@@ -1,0 +1,28 @@
+{
+  "build_seconds": 1800,
+  "candidate_id": null,
+  "closed_archive_sha256": "039e535fa73e5c794aeff666bc02989076f04abbf751b5f609884a2785760678",
+  "criteria": [
+    "none",
+    "f5"
+  ],
+  "disclosed_query_trials": [
+    164,
+    173
+  ],
+  "executions": 1,
+  "historical_source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "historical_source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+  "hypothesis": "Exact implemented Boolean encoding contains the two disclosed full-point chains; F5 filtering preserves the independently reconstructed bounded F4 row space.",
+  "input_sha256": "98c12b3e8fdc99fa9585d7ce0f0da4c6b772e1c770efc592b24242c149775047",
+  "layouts": [
+    "original",
+    "interleaved"
+  ],
+  "matrix_degree": 3,
+  "measured_costs": null,
+  "native_seconds": 180,
+  "online_speedup": null,
+  "promotion_eligible": false,
+  "schema_version": 1
+}

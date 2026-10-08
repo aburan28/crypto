@@ -1,0 +1,145 @@
+{
+  "comparisons": [
+    {
+      "candidate": "scan_io",
+      "candidate_over_baseline": 0.8847062894773756,
+      "ci95": [
+        0.8559043497425435,
+        0.9163110105474571
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 1.013998785030564,
+      "native_wall_ci95": [
+        0.9521504106046164,
+        1.067713502385818
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.962991252399909,
+        "n17a1": 1.1097642334871487,
+        "n19a0": 1.0542596149294832,
+        "n23a0": 0.8913579673358816,
+        "n23a1": 1.044395113563484,
+        "n31a0": 1.0363512828666097
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.9379995628824779,
+        "n17a1": 0.9160970573883869,
+        "n19a0": 0.9093350676070442,
+        "n23a0": 0.8627113707831093,
+        "n23a1": 0.8617466960705862,
+        "n31a0": 0.8254323308829873
+      },
+      "speedup": 1.1303186287855285
+    },
+    {
+      "candidate": "orbits",
+      "candidate_over_baseline": 0.8321207748258226,
+      "ci95": [
+        0.8072307253457056,
+        0.8574656763569124
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9605818050620789,
+      "native_wall_ci95": [
+        0.9220319458087707,
+        1.022408031172296
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9308250637935896,
+        "n17a1": 0.9695422430545486,
+        "n19a0": 1.1078497907763158,
+        "n23a0": 0.9024058829886213,
+        "n23a1": 0.9309264536714373,
+        "n31a0": 0.9353478720670676
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.8762442238041713,
+        "n17a1": 0.8472186936691709,
+        "n19a0": 0.849238228883103,
+        "n23a0": 0.8240612860908174,
+        "n23a1": 0.8247059898742054,
+        "n31a0": 0.7748351148172058
+      },
+      "speedup": 1.201748628628239
+    },
+    {
+      "candidate": "orbits_rows",
+      "candidate_over_baseline": 0.8358593606700296,
+      "ci95": [
+        0.8105289693775825,
+        0.8579840839371841
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9653181788835951,
+      "native_wall_ci95": [
+        0.9268958024188945,
+        1.0054736760650438
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9637449662033671,
+        "n17a1": 0.9898657821602035,
+        "n19a0": 1.0511894307030656,
+        "n23a0": 0.8844619639120733,
+        "n23a1": 0.9495432553136005,
+        "n31a0": 0.9607481906256602
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.8763019857624579,
+        "n17a1": 0.8472570036737278,
+        "n19a0": 0.8492670996779387,
+        "n23a0": 0.824075137208074,
+        "n23a1": 0.8470379923104239,
+        "n31a0": 0.7748476094995285
+      },
+      "speedup": 1.1963735133604225
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 23.309354368002914,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.1148979661649248,
+    "ci95": [
+      0.9320464309887184,
+      1.311073509312099
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.0255614037964709,
+    "native_wall_ci95": [
+      0.9724050194532693,
+      1.085008174408709
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0647587411607935,
+      "n17a1": 1.117809418711773,
+      "n19a0": 1.1139098257666222,
+      "n23a0": 0.9511860475213932,
+      "n23a1": 0.988351094933709,
+      "n31a0": 0.9335213960314827
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 6,
+    "per_cell": {
+      "n13a0": 1.2680904208817285,
+      "n17a1": 1.2664662448533532,
+      "n19a0": 1.4755232641624545,
+      "n23a0": 1.1469188007411077,
+      "n23a1": 0.7986879163704531,
+      "n31a0": 0.8847306057243495
+    },
+    "speedup": 0.8969430659559315
+  },
+  "runs": 90,
+  "stage": "smoke",
+  "verified_runs": 90
+}

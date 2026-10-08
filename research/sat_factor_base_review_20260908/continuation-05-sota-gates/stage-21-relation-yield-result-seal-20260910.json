@@ -1,0 +1,60 @@
+{
+  "claim_boundary": {
+    "external_portable_verification_satisfied": false,
+    "full_cost_gate_passed": false,
+    "independent_external_reproduction_satisfied": false,
+    "koblitz_index_calculus_sota": false,
+    "measurement_admission_status": "pending_independent_payload_replay",
+    "scientific_measurement_admitted": false
+  },
+  "cross_bindings": {
+    "factor_base_blake3": "9b5bb635f1c505cb871a9e8723d2b79109688606cc42323ab92e05b8beaf4b58",
+    "pair_transcript_blake3": "c7a8ab74fc4ed9ea3832244f99b92e87b75ea268ffbcc89fb72fc15cd069ccae",
+    "protocol_sha256": "6ab87d1c2b98e36858b506fbb62c43be920b0e4a43150c860024d806e379ca25",
+    "result_binding_blake3": "a06e2e096049b43d9faeb9f42df54fe56d3c346c63032b558db34dca85c80ab0",
+    "run_inventory_sha256": "66e56bbd4b7f35486e87b8af479e2dd320b84f361c3769303e3f71c576d7fb21"
+  },
+  "measured_source_commit": "cf1a564757f9d39e21d8db8a211fc77b027c3c37",
+  "production_artifacts": {
+    "outer_metrics": {
+      "bytes": 1032,
+      "sha256": "bf7f582fe9c3a86da4717a65fe9f26bae080581a6d95adf2937c05b9b6260402"
+    },
+    "run_seal": {
+      "bytes": 137951,
+      "sha256": "5bc7d97265832cdb0e2ed6eb3e085fa1009a8d54e9c4816def4337988372f51b"
+    },
+    "run_summary": {
+      "bytes": 347159,
+      "sha256": "83aca6d143ee90e977582044511236032bc2259e8afdc5608cd561487ac1adce"
+    },
+    "verification": {
+      "bytes": 6396,
+      "sha256": "8b542621d6bb02bfeb7529c1ec6f490b0d4e9efbc9d245319a6ad976767abfb3"
+    },
+    "verification_seal": {
+      "bytes": 593,
+      "sha256": "968339f5e57f945ab0fd2bc700b57b5e5dfd6a80cc4539a8fe1b039a8211d342"
+    },
+    "yield_result": {
+      "bytes": 325026,
+      "sha256": "d69165c4cf6207f03611a08d62ee66dd5c600ae6926ff9d6e21178ba50487f42"
+    }
+  },
+  "recorded_at": "2026-09-11T02:08:14.994657Z",
+  "repository_artifacts": {
+    "report": {
+      "bytes": 11887,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE21_RELATION_YIELD_RESULTS_20260910.md",
+      "sha256": "7776b1d1cb7c0409965620438075dbf62fb62014d0e8c2d99d23ee309080bb58"
+    },
+    "summary": {
+      "bytes": 15941,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-21-relation-yield-result-summary-20260910.json",
+      "sha256": "0c237278c5d1e05c0377f37c8f96568390194c2424251ea7e4558b77a1a4ee46"
+    }
+  },
+  "schema": "koblitz_relation_yield_result_seal.v1",
+  "seal_payload_sha256": "9882e4a1812c8ef8790bd2f7adce3185c8c2651fc0aa4aa5fa1b85b5edcdeb28",
+  "status": "production_candidate_report_frozen"
+}

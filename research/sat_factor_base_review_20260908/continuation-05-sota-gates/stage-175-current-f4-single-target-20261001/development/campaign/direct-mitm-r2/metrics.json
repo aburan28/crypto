@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/Volumes/SSD990/kic-stage175-current-f4-target-c38626a5e/release/examples/koblitz_pdp_backend",
+    "direct-mitm",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 60.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.3618509580001046,
+    "user_seconds": 0.345736,
+    "system_seconds": 0.005599,
+    "total_core_seconds": 0.351335,
+    "single_core_seconds": 0.351335,
+    "peak_rss_bytes": 45072384,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

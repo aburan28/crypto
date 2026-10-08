@@ -1,0 +1,6 @@
+Initial post-processing failure, retained for reproducibility.
+Command: python research/nagao_relations/parameter_sweep/compare.py --input research/nagao_relations/parameter_sweep/results_v1 --targets research/nagao_relations/parameter_sweep/targets.json --regression research/nagao_relations/parameter_sweep/regression_comparison.json --output research/nagao_relations/parameter_sweep/comparison.json --markdown research/nagao_relations/parameter_sweep/RESULTS.md
+ValueError at directory.relative_to(ROOT): relative input path is not in the absolute repository path.
+All in-memory checks preceding output passed; no output file was created.
+Fix: resolve the input directory before expressing its path relative to ROOT.
+This changed only post-processing. Frozen measured core.py, run.py, contract, targets and raw runs were not modified.

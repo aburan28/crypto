@@ -59,7 +59,6 @@
 
 use crate::cryptanalysis::symmetrized_semaev::MPoly;
 use crate::ecc::field::FieldElement;
-use num_bigint::BigUint;
 
 // ── Monomial ordering ───────────────────────────────────────────────
 
@@ -145,7 +144,7 @@ pub fn s_polynomial(f: &MPoly, g: &MPoly, ord: Ordering) -> MPoly {
     let q_f = monomial_divide(&l, &lm_f).unwrap();
     let q_g = monomial_divide(&l, &lm_g).unwrap();
 
-    let p = f.p.clone();
+    let _p = f.p.clone();
     let one_over_lc_f = lc_f.inv().expect("non-zero leading coef");
     let one_over_lc_g = lc_g.inv().expect("non-zero leading coef");
 
@@ -194,9 +193,7 @@ pub fn reduce(f: &MPoly, basis: &[MPoly], ord: Ordering) -> MPoly {
         }
         if !reduced {
             // Move the leading term to remainder.
-            remainder
-                .terms
-                .insert(lm_r.clone(), lc_r.clone());
+            remainder.terms.insert(lm_r.clone(), lc_r.clone());
             r.terms.remove(&lm_r);
         }
     }
@@ -211,7 +208,7 @@ pub fn reduce(f: &MPoly, basis: &[MPoly], ord: Ordering) -> MPoly {
 /// Returns the basis as a `Vec<MPoly>`.  The basis is **not** reduced
 /// (run [`reduce_basis`] to get the canonical reduced Gröbner basis).
 pub fn buchberger(polys: &[MPoly], ord: Ordering) -> Vec<MPoly> {
-    let mut basis: Vec<MPoly> = polys.iter().cloned().filter(|p| !p.is_zero()).collect();
+    let mut basis: Vec<MPoly> = polys.iter().filter(|&p| !p.is_zero()).cloned().collect();
     let mut pair_queue: Vec<(usize, usize)> = Vec::new();
     for i in 0..basis.len() {
         for j in (i + 1)..basis.len() {
@@ -258,7 +255,7 @@ pub fn buchberger(polys: &[MPoly], ord: Ordering) -> Vec<MPoly> {
 /// each polynomial has leading coefficient 1, no term divisible by
 /// any other polynomial's leading monomial, and no redundant polys.
 pub fn reduce_basis(basis: &[MPoly], ord: Ordering) -> Vec<MPoly> {
-    let mut result: Vec<MPoly> = basis.iter().cloned().filter(|p| !p.is_zero()).collect();
+    let mut result: Vec<MPoly> = basis.iter().filter(|&p| !p.is_zero()).cloned().collect();
 
     // Drop polynomials whose leading monomial is divisible by another's.
     let mut i = 0;
@@ -396,8 +393,14 @@ mod tests {
         let x2 = vec![2u32, 0];
         let xy = vec![1u32, 1];
         let y2 = vec![0u32, 2];
-        assert_eq!(cmp_monomial(&x2, &xy, Ordering::Grevlex), std::cmp::Ordering::Greater);
-        assert_eq!(cmp_monomial(&xy, &y2, Ordering::Grevlex), std::cmp::Ordering::Greater);
+        assert_eq!(
+            cmp_monomial(&x2, &xy, Ordering::Grevlex),
+            std::cmp::Ordering::Greater
+        );
+        assert_eq!(
+            cmp_monomial(&xy, &y2, Ordering::Grevlex),
+            std::cmp::Ordering::Greater
+        );
     }
 
     /// **Reduction sanity**: reduce `x² + y` by `{x}` gives `y`.
@@ -457,7 +460,10 @@ mod tests {
                     val = val.add(&v.mul(&fe(0, &p))); // y = 0
                 }
             }
-            assert!(val.is_zero(), "reduced basis poly does not vanish at (1, 0)");
+            assert!(
+                val.is_zero(),
+                "reduced basis poly does not vanish at (1, 0)"
+            );
         }
     }
 
@@ -466,7 +472,7 @@ mod tests {
     fn buchberger_constant_ideal() {
         let p = p_7();
         let one = MPoly::constant(fe(1, &p), 2);
-        let basis = buchberger(&[one.clone()], Ordering::Lex);
+        let basis = buchberger(std::slice::from_ref(&one), Ordering::Lex);
         let reduced = reduce_basis(&basis, Ordering::Lex);
         assert_eq!(reduced.len(), 1);
         // Reduced has leading coefficient 1.

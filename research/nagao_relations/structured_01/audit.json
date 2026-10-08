@@ -1,0 +1,62 @@
+{
+  "matched_trials": 240,
+  "instances": 24,
+  "batches": 10,
+  "batch_queries": 80,
+  "certificates_replayed": 11985,
+  "source_hashes_match": true,
+  "frozen_targets_replayed": 8,
+  "validation_failures": 0,
+  "frobenius_counterexample": {
+    "n": 18,
+    "d": 8,
+    "basis": [
+      36685,
+      225458,
+      4625,
+      10624,
+      16454,
+      33184,
+      65610,
+      132113
+    ],
+    "target": [
+      246887,
+      233930
+    ],
+    "original_points": [
+      [
+        91826,
+        253290
+      ],
+      [
+        31236,
+        96739
+      ],
+      [
+        203124,
+        19102
+      ]
+    ],
+    "conjugate_target": [
+      15338,
+      50099
+    ],
+    "conjugated_points": [
+      [
+        209140,
+        63459
+      ],
+      [
+        158724,
+        161209
+      ],
+      [
+        89379,
+        109716
+      ]
+    ],
+    "conjugated_relation_is_for_original_target": false
+  },
+  "raw_sha256": "55e77809a6ba6856a98f414a6575fee5585e34349e1a9816da9fabc08ab274fc"
+}

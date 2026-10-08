@@ -27,7 +27,7 @@
 //! row-space is exactly the Polynomial-Calculus refutation degree, which
 //! equals (up to the usual `O(1)`) the Huang–Kosters–Yeo **last fall
 //! degree** and the Gröbner solving degree.  See
-//! `RESEARCH_FFD_PROOF_COMPLEXITY.md` §2.
+//! `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §2.
 //!
 //! ## What this measures, operationally
 //!
@@ -269,9 +269,7 @@ pub fn restrict_to_subspace(eqs: &[F2BoolPoly], n: u32, n_sub: u32) -> Vec<F2Boo
                 for j in (i + 1)..old_vars {
                     let idx = quad_monomial_index(i, j, old_vars);
                     if idx < eq.coeffs.len() && eq.coeffs[idx] {
-                        if let (Some(mi), Some(mj)) =
-                            (map_var(i, n, n_sub), map_var(j, n, n_sub))
-                        {
+                        if let (Some(mi), Some(mj)) = (map_var(i, n, n_sub), map_var(j, n, n_sub)) {
                             // mi != mj because the var map is injective.
                             let (a, c) = if mi < mj { (mi, mj) } else { (mj, mi) };
                             let nidx = quad_monomial_index(a, c, new_vars);
@@ -342,7 +340,7 @@ pub fn e0_in_rowspace(rows: &[Vec<u64>], cols: usize, base_rank: usize) -> bool 
     if rows.is_empty() || cols == 0 {
         return false;
     }
-    let words = (cols + 63) / 64;
+    let words = cols.div_ceil(64);
     let mut augmented = rows.to_vec();
     let mut e0 = vec![0u64; words];
     e0[0] = 1; // column 0 = the constant monomial `1`
@@ -404,7 +402,7 @@ pub fn rank_and_refute(rows: &mut [Vec<u64>], cols: usize) -> (usize, bool) {
     // Reduce e₀ (only column 0 set) against the echelon basis: for each
     // pivot whose column is currently set in the working vector, XOR in the
     // pivot row. `1` ∈ row-space ⇔ the result is zero.
-    let words = (cols + 63) / 64;
+    let words = cols.div_ceil(64);
     let mut w = vec![0u64; words];
     w[0] = 1;
     for &(prow, pcol) in &pivots {
@@ -554,7 +552,12 @@ mod tests {
         let mut checked_refute = false;
         let mut checked_nonrefute = false;
         // A handful of targets to hit both refuting and non-refuting cases.
-        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
+        for (bm, xm) in [
+            (0b011u32, 0b101u32),
+            (0b110, 0b011),
+            (0b101, 0b010),
+            (0b111, 0b100),
+        ] {
             let b = F2mElement::from_bit_positions(
                 &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
                 n,
@@ -604,7 +607,12 @@ mod tests {
         let irr = irr(n);
         let mut hit_refute = false;
         let mut hit_nonrefute = false;
-        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
+        for (bm, xm) in [
+            (0b011u32, 0b101u32),
+            (0b110, 0b011),
+            (0b101, 0b010),
+            (0b111, 0b100),
+        ] {
             let b = F2mElement::from_bit_positions(
                 &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
                 n,

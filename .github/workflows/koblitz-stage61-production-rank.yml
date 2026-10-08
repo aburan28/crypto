@@ -1,0 +1,65 @@
+name: Koblitz Stage 61 n53 production rank
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage61_production_rank.py"
+      - ".github/workflows/koblitz-stage61-production-rank.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate production-rank controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage61_production_rank.py
+          python3 scripts/run_koblitz_stage61_production_rank.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-production-rank:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage61_production_rank.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage61-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare research surplus, production full rank, and rho
+        run: |
+          python3 scripts/run_koblitz_stage61_production_rank.py run \
+            --build "$RUNNER_TEMP/stage61-build" \
+            --output "$RUNNER_TEMP/stage61-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage61_production_rank.py verify \
+            --build "$RUNNER_TEMP/stage61-build" \
+            --output "$RUNNER_TEMP/stage61-run" \
+            > "$RUNNER_TEMP/stage61-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage61-production-rank-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage61-build
+            ${{ runner.temp }}/stage61-run
+            ${{ runner.temp }}/stage61-verification.json

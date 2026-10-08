@@ -1,0 +1,11 @@
+{
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu_affinity": [
+    0
+  ],
+  "threads": 1,
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+  "rust": "1.90.0 release; redis-cache feature; no RUSTFLAGS",
+  "caches": "off",
+  "address_space_mib": 2048
+}

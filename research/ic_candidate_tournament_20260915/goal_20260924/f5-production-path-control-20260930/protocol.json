@@ -1,0 +1,71 @@
+{
+  "actual_solver_traversal_validated": false,
+  "build_seconds": 1800,
+  "candidate_id": null,
+  "closed_archive_sha256": "039e535fa73e5c794aeff666bc02989076f04abbf751b5f609884a2785760678",
+  "criteria": [
+    "none",
+    "f5"
+  ],
+  "depths": [
+    0,
+    6,
+    12,
+    18,
+    24,
+    30,
+    35
+  ],
+  "disclosed_query_trials": [
+    164,
+    173
+  ],
+  "executions": 1,
+  "historical_source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "historical_source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+  "hypothesis": "Production canonical specialization preserves each disclosed model; default active-multiplier/linear-tail/flat F4 and F5 readback equals independently derived decisive consequences at registered guided prefixes.",
+  "input_sha256": "c7686af9e1c1cdbfc0230bda82c2eb5ba5ade842a8e7e5d43da671227a37f5cb",
+  "kernel_append_sha256": "899f7a933567f7fd2d67f5896c0d9b9ecffdc2887373e38adc8d6603ecdb9411",
+  "layouts": [
+    "original",
+    "interleaved"
+  ],
+  "matrix_degree": 3,
+  "measured_costs": null,
+  "native_seconds": 600,
+  "online_speedup": null,
+  "orders": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      0,
+      2,
+      1
+    ],
+    [
+      1,
+      0,
+      2
+    ],
+    [
+      1,
+      2,
+      0
+    ],
+    [
+      2,
+      0,
+      1
+    ],
+    [
+      2,
+      1,
+      0
+    ]
+  ],
+  "promotion_eligible": false,
+  "schema_version": 1
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "discovery": {
+    "path": "qualified_discovery_01",
+    "manifest_sha256": "c27dd012263c9627082431e2ea5d16725e56e49d558f80d1d29c3d5b8fa0eb38",
+    "github_run_id": 36952544952,
+    "github_attempt": 1,
+    "source_head": "8aa793e6673fd00e7e9b1e73324b7ef0133acd9c",
+    "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36952544952",
+    "artifact_id": 11204856619,
+    "artifact_name": "boolean-envelope-discovery-36952544952-1",
+    "artifact_archive_sha256": "7dff36f0cd3c3539d76665550c45d2fd87c7056824359d2fc25a7b17a10be50e",
+    "status": "Qualified complete discovery: 128 cells, 8960 A/B and 2560 A/A observations, no 2x group. Indexed arm passed 16/32 incremental groups."
+  },
+  "full": null,
+  "decision": {
+    "status": "reject_before_holdout",
+    "discovery_dramatic_groups": {
+      "envelope_degree": 0,
+      "envelope_indexed": 0
+    },
+    "reason": "Neither candidate cleared a 2x discovery group against five old arms; an already merged packed-direct constructor is a stronger historical reference omitted from the declared roster. Full holdouts remain unexecuted and the primary full decision is unknown.",
+    "current_matched_speedup_to_packed_direct": null,
+    "full_ic_cost": null,
+    "rho_ratio": null
+  },
+  "failed_attempts": [
+    {
+      "path": "failed_discovery_01",
+      "manifest_sha256": "1761609502cb824531fb929ccdee4f01d1f1cb9ed0ebe6913eba635dcad93f80",
+      "github_run_id": 36949246631,
+      "github_attempt": 1,
+      "source_head": "0a5b4e8f577d2f7f5badd3f03192f289713553a1",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36949246631",
+      "phase": "discovery",
+      "reason": "Isolation preflight refused CPU PSI some avg10 6.18 above the fixed 5.0 limit after release compilation; other-process CPU was 0.02 seconds in 2.0 seconds against a 0.20-second limit. No timed worker was launched and no sample is admitted.",
+      "timed_worker_launched": false,
+      "performance_admitted": false
+    }
+  ]
+}

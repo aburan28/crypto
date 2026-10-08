@@ -1,0 +1,92 @@
+{
+ "stage": "vs_rho",
+ "status": "PENDING_INDEPENDENT_VALIDATION",
+ "n_or_bits": {
+  "n": 61,
+  "a": 0,
+  "subgroup_order_bits": 48
+ },
+ "fixture_hash": {
+  "eval_corpus": "n61-ks-growing-65536-v1",
+  "eval_scalars_sha256": "162ddce8f5eb35a0b9eccca4cdfa4cafeacdf12720325f182da6298fa6bfe052",
+  "tune_corpus": "n61-ks-growing-tune-65536-v1",
+  "tune_scalars_sha256": "aba453fce93696de66822b5cdfd83dab8776af1fe04feb0673ddb466b48ffca6",
+  "base_hash": "0e6a3ccca740800d13e7b9c5686706b5f57a362868cfa1aa0ebe7c9e9065e5bf"
+ },
+ "executable_or_source_hash": {
+  "koblitz_orbit_dlp_fast_rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+  "koblitz_rho_batch_ks_v2_n61_rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+  "binaries_sha256sums": "3ee2ce922bbb56d7ce2e2ba3f5928f6aadf040133fa8d94bcc1dc5eb99f26dd9  /Volumes/SSD990/ic-n61/target/release/examples/koblitz_rho_batch_ks_v2_n61\nab796e690f4c0f6967c0cde2e613ca7297842fdd9addb4b69e7a62900deeadb4  /Volumes/SSD990/ic-n61/target/release/examples/koblitz_orbit_dlp_fast",
+  "git_head": "6398865060b6f941a64423cff15ffed5824c08df",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+ },
+ "host_id": "Apple M4 Pro, 14 logical CPUs, 51539607552 bytes, macOS-26.6-arm64-arm-64bit",
+ "resource_caps": {
+  "threads": 1,
+  "memory": "no cap; K candidates skipped when estimated IC RSS exceeded available memory",
+  "isolation": "none: tools/isolated_bench.py is unsupported on macOS; per-run load recorded"
+ },
+ "seeds": {
+  "batch_seed": 531310,
+  "ic_seed": 7,
+  "rho_dp_bits": 4
+ },
+ "claim_boundary_non_claims": [
+  "public synthetic known-answer fixtures only",
+  "no key recovery",
+  "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+  "multi-target L=65536 batch: historical diagnostic, not the one-target primary comparison",
+  "comparator is the historical KS v2 batched rho, superseded by the 2026-09-29 strong-rho ladder",
+  "walls are not isolated (AGENTS.md section 10) and not admissible as a speedup"
+ ],
+ "comparator": "frozen Kuhn-Struik batched signed-Frobenius rho v2 (koblitz_rho_batch_ks_v2_n61, d=4); historical weaker comparator, superseded as the operative reference by the 2026-09-29 strong-rho ladder",
+ "target_count": 65536,
+ "timing_class": "whole_process_wall",
+ "K": 1400,
+ "wall_ratio_compact_over_rho": {
+  "median": 0.35153140269336197,
+  "range": [
+   0.3433934614982031,
+   1.968085106382979
+  ],
+  "values": [
+   1.968085106382979,
+   0.3433934614982031,
+   0.35153140269336197
+  ]
+ },
+ "user_cpu_ratio_compact_over_rho": {
+  "median": 0.33136151938547154,
+  "range": [
+   0.3282414396281121,
+   0.3785488224890626
+  ],
+  "values": [
+   0.3785488224890626,
+   0.3282414396281121,
+   0.33136151938547154
+  ]
+ },
+ "instructions_retired_ratio_compact_over_rho": {
+  "median": 0.1349625169974262,
+  "range": [
+   0.13488261077458796,
+   0.2010548711413331
+  ],
+  "values": [
+   0.2010548711413331,
+   0.13488261077458796,
+   0.1349625169974262
+  ]
+ },
+ "ic_scalar_verified": true,
+ "rho_scalar_verified": true,
+ "independent_validation": false,
+ "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+ "claim_boundary": "L=65536 batched whole-process diagnostic against the historical KS v2 rho; ineligible for the single-target online vs_rho schema.",
+ "independent_replay_pointer": [
+  "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/replay_b0/independent_replay.json",
+  "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/replay_b1/independent_replay.json",
+  "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/replay_b2/independent_replay.json"
+ ]
+}

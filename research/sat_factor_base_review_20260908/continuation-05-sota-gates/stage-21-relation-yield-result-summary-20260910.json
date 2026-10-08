@@ -1,0 +1,342 @@
+{
+  "schema": "koblitz_relation_yield_result_summary.v1",
+  "recorded_at": "2026-09-10",
+  "status": "production_complete_pending_independent_payload_replay",
+  "evidence_class": "finite_public_synthetic_candidate_pending_independent_payload_replay",
+  "terminal_times_utc": {
+    "run_sealed_at": "2026-09-11T01:31:10.211703Z",
+    "verification_created_at": "2026-09-11T01:32:05.935629Z",
+    "verification_sealed_at": "2026-09-11T01:32:05.945476Z"
+  },
+  "source": {
+    "production_commit": "cf1a564757f9d39e21d8db8a211fc77b027c3c37",
+    "production_branch": "codex/koblitz-stage21-relation-yield-20260910",
+    "production_tree_sha256": "3e6a5f41e51f2d7dbee2ad030b9d019a3b6c05974db267f4221e2165b03a263d",
+    "production_dirty": false,
+    "current_head": "dfa36f4d865301afec1c654de90b0e5a00640e2b",
+    "later_ci_only_commits": [
+      "37b551cbba7ae60bc15e4bf4f233669d6075c5ae",
+      "21de00e4a6e93d6d547a60840f4fe3e02676ffb3",
+      "ff08e892767fe6555370ca7870eb96e44e9e83e5",
+      "dfa36f4d865301afec1c654de90b0e5a00640e2b"
+    ],
+    "later_changed_paths": [
+      ".github/workflows/koblitz-relation-yield-bridge.yml",
+      "scripts/run_koblitz_relation_yield_bridge.py",
+      "scripts/test_koblitz_relation_yield_bridge.py"
+    ],
+    "producer_and_cryptanalysis_math_changed_after_production": false,
+    "producer_source_sha256": "ec446b9640f485c2d8efdbc5153e0700c7e7a915eab8f61626a808e732d91a86",
+    "dependency_lock_sha256": "712af6d0d82e4bb7fe5a36e2c419b2a7dabcbbfd71ba2e1af18e6a547436ab21"
+  },
+  "measurement": {
+    "n": 23,
+    "curve_a": 0,
+    "summands": 2,
+    "target_distribution": "domain-separated BLAKE3 uniform-affine decoding followed by public cofactor projection",
+    "natural": {
+      "targets": 256,
+      "hits": 163,
+      "misses": 93,
+      "hit_rate": 0.63671875,
+      "wilson_95_ci": {
+        "low": 0.576185047549112,
+        "high": 0.6932099917094386
+      },
+      "trials_per_relation": 1.5705521472392638,
+      "sampling_without_replacement": true,
+      "nonidentity_subgroup_population": 2095852,
+      "sampling_fraction": 0.00012214602939520538,
+      "finite_population_correction_applied": false,
+      "wilson_assumption": "The frozen domain-separated BLAKE3 stream is treated as a pseudorandom Bernoulli sample from the stated hash-to-subgroup distribution."
+    },
+    "planted_sat": {
+      "targets": 64,
+      "hits": 64,
+      "misses": 0,
+      "verified_point_witnesses": 64,
+      "control_passed": true,
+      "selection_boundary": "Pair-priority selection is multiplicity-weighted by decomposition count; 64/64 is a correctness control and not a prevalence estimate."
+    },
+    "proven_unsat": {
+      "targets": 64,
+      "hits": 0,
+      "misses": 64,
+      "control_passed": true,
+      "proof_boundary": "Absence from the complete canonical pair table proves no two-point sum over this exact materialized factor base, including repeated points; it is not higher-summand or SAT-solver UNSAT evidence."
+    }
+  },
+  "factor_base": {
+    "construction": "GGMP divisor linearized-polynomial kernel",
+    "dimension": 12,
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "divisor_polynomial": 5279,
+    "linearised_exponents": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      10,
+      12
+    ],
+    "abscissae": 4096,
+    "rational_points": 4281,
+    "projected_points": 4279,
+    "signed_frobenius_orbits_before_projection": 95,
+    "projected_signed_frobenius_columns": 93,
+    "m_cofactor_admissible": true,
+    "group_order": 8383412,
+    "subgroup_order": 2095853,
+    "cofactor": 4,
+    "factor_base_blake3": "9b5bb635f1c505cb871a9e8723d2b79109688606cc42323ab92e05b8beaf4b58",
+    "predicate_blake3": "563f00a4ac14ee2714fd0b27b64d2fb2beab8d3d9e7edbd5d13384516b2f38c0",
+    "selection_used_target": false,
+    "selection_used_relation_yield": false,
+    "factor_base_discrete_log_labels_constructed": false,
+    "target_discrete_log_labels_constructed": false,
+    "target_subgroup_enumerated_for_selection": false
+  },
+  "cross_curve_discovery": [
+    {
+      "curve_a": 0,
+      "selected_divisor_indices": [
+        0,
+        2
+      ],
+      "rational_points": 4281,
+      "projected_signed_frobenius_columns": 93,
+      "selected_for_yield": true,
+      "internal_timing_seconds": {
+        "curve_and_subgroup_construction": 0.000615625,
+        "factor_base_construction": 0.075261959,
+        "cofactor_admission": 0.0288715,
+        "projection_census": 0.114874667,
+        "end_to_end": 0.502843041
+      }
+    },
+    {
+      "curve_a": 1,
+      "selected_divisor_indices": [
+        0,
+        1
+      ],
+      "rational_points": 3957,
+      "projected_signed_frobenius_columns": 86,
+      "selected_for_yield": false,
+      "internal_timing_seconds": {
+        "curve_and_subgroup_construction": 0.000343417,
+        "factor_base_construction": 0.058819042,
+        "cofactor_admission": 0.018378417,
+        "projection_census": 0.052366416,
+        "end_to_end": 0.277381875
+      }
+    }
+  ],
+  "exact_pair_oracle": {
+    "canonical_pair_policy": "all factor-base indices i <= j exactly once, with repetition allowed",
+    "canonical_pairs": 9165621,
+    "enumerated_pairs": 9165621,
+    "unique_target_sums": 5575848,
+    "duplicate_pair_sums": 3589773,
+    "hash_table_capacity": 14680064,
+    "canonical_pair_transcript_blake3": "c7a8ab74fc4ed9ea3832244f99b92e87b75ea268ffbcc89fb72fc15cd069ccae"
+  },
+  "internal_timing_seconds": {
+    "curve_and_subgroup_construction": 0.001199291,
+    "factor_base_predicate_and_materialization": 0.067709708,
+    "factor_base_projected_column_census": 0.057080833,
+    "natural_target_generation": 0.010826209,
+    "cofactor_class_construction": 1.664421041,
+    "canonical_pair_table_and_planted_priority_selection": 68.818071959,
+    "planted_construction_witness_and_subgroup_verification": 0.019228,
+    "proven_unsat_target_screening": 0.010400083,
+    "covariate_extraction": 0.004093917,
+    "natural_exact_queries": 0.000046417,
+    "natural_witness_verification": 0.001247458,
+    "planted_exact_queries": 0.000006083,
+    "planted_witness_verification": 0.000455708,
+    "proven_unsat_exact_queries": 0.000006958,
+    "proven_unsat_witness_verification": 0.000001458,
+    "yield_end_to_end": 70.661434458,
+    "overlap_note": "Planted target selection occurs inside the canonical pair-table scan; nested fields must not be summed as disjoint stages."
+  },
+  "operation_counts": {
+    "pair_table_group_additions": 9165621,
+    "factor_base_projection_scalar_multiplications": 4281,
+    "cofactor_class_scalar_multiplications": 4281,
+    "cofactor_class_negations": 4281,
+    "planted_pair_priority_hashes": 2296723,
+    "planted_final_subgroup_scalar_multiplications": 64,
+    "planted_construction_witness_verification_additions": 64,
+    "target_frobenius_applications": 8832,
+    "natural": {
+      "hash_candidates": 522,
+      "uniform_affine_decode_successes": 256,
+      "affine_decode_rejections": 266,
+      "cofactor_projection_scalar_multiplications": 256,
+      "selection_pair_table_lookups": 0,
+      "final_pair_table_lookups": 256,
+      "witness_verification_group_additions": 163
+    },
+    "planted_sat": {
+      "canonical_pair_candidates": 9165621,
+      "final_pair_table_lookups": 64,
+      "witness_verification_group_additions": 64
+    },
+    "proven_unsat": {
+      "hash_candidates": 462,
+      "uniform_affine_decode_successes": 221,
+      "affine_decode_rejections": 241,
+      "cofactor_projection_scalar_multiplications": 221,
+      "selection_pair_table_lookups": 221,
+      "rejected_pair_table_hits": 157,
+      "final_pair_table_lookups": 64,
+      "witness_verification_group_additions": 0
+    },
+    "scope_boundary": "Scalar-multiplication and factor-base-constructor internals are charged by elapsed process resources but are not relabeled as counted group additions."
+  },
+  "retained_size_lower_bounds_bytes": {
+    "field_element": 3,
+    "encoded_point": 7,
+    "factor_base_payload": 42291,
+    "canonical_factor_point_clone_payload": 29967,
+    "pair_table_live_key_and_witness_payload": 89213568,
+    "pair_table_capacity_key_and_witness_payload": 234881024,
+    "selected_target_coordinate_payload": 2688,
+    "sum_using_pair_table_capacity_payload": 234955970,
+    "scope": "Encoded or flat key/value payload lower bounds only; Rust object headers, allocator metadata, hash-table control bytes, and unrelated capacity are excluded."
+  },
+  "process_resources": [
+    {
+      "process": "fresh_locked_release_build",
+      "returncode": 0,
+      "timed_out": false,
+      "total_core_seconds": 107.348907,
+      "wall_seconds": 118.33476462494582,
+      "peak_rss_bytes": 1054294016,
+      "metrics_sha256": "3f8cefcac91ccee923bb317e7afeb1e12ce38937a6192045c8e0492bf25d2ce9",
+      "receipt_sha256": "7d96eec706874ffff658f32cf9d690fba9a243476fa409eaa9806d079e34801c"
+    },
+    {
+      "process": "public_discovery_curve_a0",
+      "returncode": 0,
+      "timed_out": false,
+      "total_core_seconds": 0.43273,
+      "wall_seconds": 0.9317919170716777,
+      "peak_rss_bytes": 6242304,
+      "metrics_sha256": "95f56d3603d1101d46ad6861e91592d3c7b6ca5a61608065c930b8c7c07b9ce3",
+      "result_sha256": "793762dd9315e3cbfd280fdd38a5d61fdd3b6e38d086c7d553210c6a8ff84b03"
+    },
+    {
+      "process": "public_discovery_curve_a1",
+      "returncode": 0,
+      "timed_out": false,
+      "total_core_seconds": 0.259528,
+      "wall_seconds": 0.3345944589236751,
+      "peak_rss_bytes": 6012928,
+      "metrics_sha256": "1a8c69828448d72e1c537478866c9416f3ffb00ac94d8ccbc40594227f6cc469",
+      "result_sha256": "7881a24b0727790a29951123b372daa828408b6a929d62b0834360218a5262af"
+    },
+    {
+      "process": "relation_yield_producer",
+      "returncode": 0,
+      "timed_out": false,
+      "total_core_seconds": 61.992819000000004,
+      "wall_seconds": 70.89988345792517,
+      "peak_rss_bytes": 293339136,
+      "metrics_sha256": "5bc3a14392298fac0a4c48ead05fcab14d7667e87bbe423dc722e5d56629df23",
+      "result_sha256": "d69165c4cf6207f03611a08d62ee66dd5c600ae6926ff9d6e21178ba50487f42"
+    }
+  ],
+  "resource_totals": {
+    "charged_children": {
+      "processes": 4,
+      "summed_user_seconds": 163.205686,
+      "summed_system_seconds": 6.828298,
+      "total_core_seconds": 170.033984,
+      "summed_process_wall_seconds": 190.50103445886634,
+      "maximum_process_peak_rss_bytes": 1054294016
+    },
+    "whole_driver_outer": {
+      "user_seconds": 163.834223,
+      "system_seconds": 7.273478,
+      "total_core_seconds": 171.10770100000002,
+      "wall_seconds": 193.6408363749506,
+      "peak_rss_bytes": 1054294016,
+      "metrics_sha256": "bf7f582fe9c3a86da4717a65fe9f26bae080581a6d95adf2937c05b9b6260402"
+    },
+    "outer_minus_children": {
+      "user_seconds": 0.628537,
+      "system_seconds": 0.44518,
+      "total_core_seconds": 1.073717,
+      "wall_seconds": 3.1398019160842523
+    },
+    "semantics": {
+      "summed_process_wall_seconds": "Sum of four sequential child-process wall receipts, not the outer elapsed interval.",
+      "whole_driver": "Inclusive of child work and not additive with the child sums.",
+      "single_core_elapsed_seconds": null,
+      "single_core_seconds": "Legacy alias of total user plus system CPU; not measured single-core elapsed time.",
+      "peak_rss_bytes": "Maximum process high-water mark, not a sum or simultaneous aggregate build-tree RSS.",
+      "conflicts": null,
+      "conflicts_reason": "The exact pair-table reference oracle is not a conflict-driven SAT solver."
+    }
+  },
+  "hashes": {
+    "protocol_sha256": "6ab87d1c2b98e36858b506fbb62c43be920b0e4a43150c860024d806e379ca25",
+    "source_binding_sha256": "9ed7f379515117928cabbc085af225b98fcedb56b8aec2a33b354c856eb8c253",
+    "host_binding_sha256": "87030247ea5a1481c58b3fb1785015fa0ecb3ca7f0707fbe66b68def5119711d",
+    "run_summary_sha256": "83aca6d143ee90e977582044511236032bc2259e8afdc5608cd561487ac1adce",
+    "run_seal_file_sha256": "5bc7d97265832cdb0e2ed6eb3e085fa1009a8d54e9c4816def4337988372f51b",
+    "run_inventory_sha256": "66e56bbd4b7f35486e87b8af479e2dd320b84f361c3769303e3f71c576d7fb21",
+    "run_seal_payload_sha256": "bac4eafb94614da654c5a90025ee87d1d70aeaf71a50acbe7955fabf0c5878d7",
+    "verification_sha256": "8b542621d6bb02bfeb7529c1ec6f490b0d4e9efbc9d245319a6ad976767abfb3",
+    "verification_seal_file_sha256": "968339f5e57f945ab0fd2bc700b57b5e5dfd6a80cc4539a8fe1b039a8211d342",
+    "verification_inventory_sha256": "b5e812687b67aa0fe9805819a06cb01e42f4da87a0bc37201f1d010a9cd5d75b",
+    "verification_seal_payload_sha256": "5062336de06436edc04dddfc4bfeafe1373f6e85864fc1337cd7c62c03187bcc",
+    "discovery_binary_sha256": "189368f194209283e81e6a7c35c6305322c76dfd68f39540782c7a8370f1b150",
+    "yield_binary_sha256": "d65509158c9f80becdc355b1e286a4760c08072cf2c49b278b207763a0e022dc",
+    "policy_blake3": "e5f5d7ef7147cd155a27908d10c73c159b591ce814388c0d8f2b30460ed4416d",
+    "ordered_covariate_rows_blake3": "6b441b44b4fe7027f931c55115cc6a0efbcdb78df7bf6a11e8679a329cb8c68a",
+    "natural_targets_blake3": "aec610cd13a6eb5310b032aecaf7a9f6a6501d127441ea38a69945e983468823",
+    "natural_witness_results_blake3": "89f35ac97c24fab01965cdb075eb3ec412e32800c47a4472f6a2281f787e1f8a",
+    "planted_targets_blake3": "a69006df3d78e5af5d197e777a0a2fc96caebf57b913a884e5c8adaa9216a125",
+    "planted_witness_results_blake3": "7a0627024872f622a48dd8575696d439316d82924168387d6999a8f5e8e9eb61",
+    "proven_unsat_targets_blake3": "58d0722f585e69cd7caacf35242d2f1afbfdf9d540242ea840766d6d0ff1ac67",
+    "proven_unsat_witness_results_blake3": "7f3aa8f4915309292738d1348e24bb26fe077cb72710de51cc17064656812a83",
+    "result_binding_blake3": "a06e2e096049b43d9faeb9f42df54fe56d3c346c63032b558db34dca85c80ab0"
+  },
+  "verification_and_admission": {
+    "verification_status": "relation_yield_run_verified",
+    "verification_process_resource_receipt_available": false,
+    "derivable_payload_relationships_and_hashes_replayed": true,
+    "factor_base_materialization_replayed": false,
+    "canonical_pair_oracle_replayed": false,
+    "witness_curve_readdition_replayed": false,
+    "scientific_measurement_admitted": false,
+    "measurement_admission_status": "pending_independent_payload_replay",
+    "pending_independent_payload_replay": [
+      "factor-base point materialization and ordered factor-base hash",
+      "all canonical pair additions and canonical-pair transcript hash",
+      "exact curve re-addition of retained witness indices"
+    ],
+    "external_portable_verification_satisfied": false,
+    "external_portable_verification_blocker": "Archived executable and source identities retain original absolute checkout paths; no archive-relative source snapshot replay is implemented.",
+    "independent_external_reproduction_satisfied": false,
+    "full_cost_gate_passed": false,
+    "koblitz_index_calculus_sota": false
+  },
+  "full_cost_blockers": [
+    "Measured single-core elapsed time and simultaneous aggregate Cargo build-tree RSS are unavailable.",
+    "Prior dependency source acquisition in the Cargo cache is outside this bridge receipt.",
+    "This bridge does not collect a relation matrix or perform modular linear algebra.",
+    "This bridge does not execute a scalar-hidden end-to-end index-calculus run.",
+    "This bridge has no matched automorphism-optimized Pollard-rho arm.",
+    "Independent external reproduction and novelty review remain absent."
+  ],
+  "claim_boundary": "This is a completed finite public-synthetic n=23 exact two-summand relation-yield candidate with successful planted and exact-miss controls. Scientific admission remains pending independent factor-base, pair-oracle, and witness replay. It is not a SAT-solver speed result, relation-matrix or linear-algebra result, scalar-hidden DLP recovery, Pollard-rho comparison, scaling law, external reproduction, novelty finding, deployed-key result, or Koblitz index-calculus SOTA claim."
+}

@@ -84,9 +84,9 @@
 //!   (the *novel* contribution proposed but not yet tested at scale).
 
 use num_bigint::{BigInt, Sign, ToBigInt};
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Signed, ToPrimitive, Zero};
 
-use crate::utils::mod_inverse;
+use crate::utils::{mod_inverse, mod_inverse_u64};
 
 // ── Modular-polynomial Φ_2 coefficients ────────────────────────────────────
 
@@ -311,7 +311,7 @@ fn largest_smooth_divisor(n: u64, b: u64) -> u64 {
     let mut smooth: u64 = 1;
     let mut p: u64 = 2;
     while p <= b && p.saturating_mul(p) <= residue {
-        while residue % p == 0 {
+        while residue.is_multiple_of(p) {
             smooth = smooth.saturating_mul(p);
             residue /= p;
         }
@@ -398,16 +398,137 @@ pub enum Pt2 {
     Aff(BigInt, BigInt),
 }
 
+/// `x mod p` in `[0, p)`.  For a positive `p`, which is every modulus
+/// this module reduces by, one remainder and a conditional add give the
+/// value of the textbook `((x % p) + p) % p` with one big-integer
+/// division instead of two; any other `p` keeps that form and whatever
+/// it does there.
 fn mod_pos(x: BigInt, p: &BigInt) -> BigInt {
-    ((x % p) + p) % p
+    if p.is_positive() {
+        let r = x % p;
+        if r.is_negative() {
+            r + p
+        } else {
+            r
+        }
+    } else {
+        ((x % p) + p) % p
+    }
 }
 
+/// `x⁻¹ mod p` in `[0, p)`, or `None` when `gcd(x, p) ≠ 1`.
+///
+/// Each affine addition or doubling below inverts once, so over a
+/// word-sized field this is the walk's hottest call.  There the inverse
+/// is taken on words directly, without the `BigInt → BigUint → BigInt`
+/// round trip; it is unique, so the result is the one the general path
+/// returns, and `p < 2` still takes that path.
 fn modular_inverse(x: &BigInt, p: &BigInt) -> Option<BigInt> {
+    if let Some(p_word) = p.to_u64().filter(|&p_word| p_word >= 2) {
+        let x_word = match x.to_u64() {
+            Some(x_word) => x_word % p_word,
+            // Negative or wider than a word: reduce into [0, p) first.
+            None => mod_pos(x.clone(), p)
+                .to_u64()
+                .expect("x mod p is below a one-word p"),
+        };
+        return mod_inverse_u64(x_word, p_word).map(BigInt::from);
+    }
     let x_pos = mod_pos(x.clone(), p);
     let xu = x_pos.to_biguint()?;
     let pu = p.to_biguint()?;
     let inv_u = mod_inverse(&xu, &pu)?;
     Some(inv_u.to_bigint().unwrap())
+}
+
+// ── Word-sized fields ──────────────────────────────────────────────────────
+//
+// The toy and demo curves the walks in this module and in `aut_folded_rho`
+// run on have moduli below 2⁶⁴, where each `BigInt` operation of the
+// group law is a heap allocation around a one-limb computation.  When the
+// modulus and the coordinates are words, the group law below runs on
+// `u64` residues instead.  Every coordinate the `BigInt` formulas return
+// is reduced into `[0, p)`, and the word formulas compute the same
+// residues, so the points are the same.  Only fully reduced coordinates
+// take this path: the `BigInt` code compares raw coordinates (`x1 == x2`,
+// `y == 0`) before it reduces anything, and unreduced input keeps that
+// behaviour by keeping that code.
+
+/// `p` as a word, when `2 ≤ p < 2⁶⁴`.
+pub(crate) fn word_modulus(p: &BigInt) -> Option<u64> {
+    p.to_u64().filter(|&p| p >= 2)
+}
+
+/// `v` as a word, when it is a reduced residue `0 ≤ v < p`.
+pub(crate) fn reduced_word(v: &BigInt, p: u64) -> Option<u64> {
+    v.to_u64().filter(|&v| v < p)
+}
+
+/// `a·b mod p` for reduced `a`, `b`.  Below 2³² the product fits a word
+/// and one hardware division reduces it; above, the `u128` remainder is
+/// a call into the compiler's 128-bit division routine.
+pub(crate) fn mul_mod_word(a: u64, b: u64, p: u64) -> u64 {
+    if p <= u64::from(u32::MAX) {
+        a * b % p
+    } else {
+        ((u128::from(a) * u128::from(b)) % u128::from(p)) as u64
+    }
+}
+
+/// `a + b mod p` for reduced `a`, `b`; the carry covers `p > 2⁶³`.
+pub(crate) fn add_mod_word(a: u64, b: u64, p: u64) -> u64 {
+    let (s, carry) = a.overflowing_add(b);
+    if carry || s >= p {
+        s.wrapping_sub(p)
+    } else {
+        s
+    }
+}
+
+/// `a − b mod p` for reduced `a`, `b`.
+pub(crate) fn sub_mod_word(a: u64, b: u64, p: u64) -> u64 {
+    if a >= b {
+        a - b
+    } else {
+        a.wrapping_sub(b).wrapping_add(p)
+    }
+}
+
+/// [`pt_double`]'s formulas on words, for `y ≠ 0`; `None` when the
+/// field or the point is not word-sized and reduced.  The curve
+/// coefficient `a` may be any integer: only its residue enters.
+fn pt_double_word(x: &BigInt, y: &BigInt, a: &BigInt, p_mod: &BigInt) -> Option<Pt2> {
+    let p = word_modulus(p_mod)?;
+    let (x, y) = (reduced_word(x, p)?, reduced_word(y, p)?);
+    let a = match reduced_word(a, p) {
+        Some(a) => a,
+        None => reduced_word(&mod_pos(a.clone(), p_mod), p)?,
+    };
+    let Some(inv) = mod_inverse_u64(add_mod_word(y, y, p), p) else {
+        return Some(Pt2::Inf);
+    };
+    let x_sq = mul_mod_word(x, x, p);
+    let num = add_mod_word(add_mod_word(add_mod_word(x_sq, x_sq, p), x_sq, p), a, p);
+    let lam = mul_mod_word(num, inv, p);
+    let x3 = sub_mod_word(mul_mod_word(lam, lam, p), add_mod_word(x, x, p), p);
+    let y3 = sub_mod_word(mul_mod_word(lam, sub_mod_word(x, x3, p), p), y, p);
+    Some(Pt2::Aff(BigInt::from(x3), BigInt::from(y3)))
+}
+
+/// [`pt_add`]'s chord formulas on words, for `x1 ≠ x2`; `None` when the
+/// field or either point is not word-sized and reduced.
+fn pt_add_word(x1: &BigInt, y1: &BigInt, x2: &BigInt, y2: &BigInt, p_mod: &BigInt) -> Option<Pt2> {
+    let p = word_modulus(p_mod)?;
+    let (x1, y1) = (reduced_word(x1, p)?, reduced_word(y1, p)?);
+    let (x2, y2) = (reduced_word(x2, p)?, reduced_word(y2, p)?);
+    // A composite modulus can leave `x2 − x1` without an inverse.
+    let Some(inv) = mod_inverse_u64(sub_mod_word(x2, x1, p), p) else {
+        return Some(Pt2::Inf);
+    };
+    let lam = mul_mod_word(sub_mod_word(y2, y1, p), inv, p);
+    let x3 = sub_mod_word(sub_mod_word(mul_mod_word(lam, lam, p), x1, p), x2, p);
+    let y3 = sub_mod_word(mul_mod_word(lam, sub_mod_word(x1, x3, p), p), y1, p);
+    Some(Pt2::Aff(BigInt::from(x3), BigInt::from(y3)))
 }
 
 /// `2·P` on `E: y² = x³ + a·x + b (mod p)`.
@@ -417,6 +538,9 @@ pub fn pt_double(p: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
         Pt2::Aff(x, y) => {
             if y.is_zero() {
                 return Pt2::Inf;
+            }
+            if let Some(doubled) = pt_double_word(x, y, a, p_mod) {
+                return doubled;
             }
             let two_y = mod_pos(BigInt::from(2) * y, p_mod);
             let inv = match modular_inverse(&two_y, p_mod) {
@@ -441,6 +565,9 @@ pub fn pt_add(p: &Pt2, q: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
                     return pt_double(p, a, p_mod);
                 }
                 return Pt2::Inf;
+            }
+            if let Some(sum) = pt_add_word(x1, y1, x2, y2, p_mod) {
+                return sum;
             }
             let dx = mod_pos(x2 - x1, p_mod);
             let inv = match modular_inverse(&dx, p_mod) {
@@ -561,7 +688,7 @@ pub fn point_order(p: &Pt2, n_curve: u64, a: &BigInt, p_mod: &BigInt) -> u64 {
     let mut divisors: Vec<u64> = Vec::new();
     let mut d = 1u64;
     while d * d <= n_curve {
-        if n_curve % d == 0 {
+        if n_curve.is_multiple_of(d) {
             divisors.push(d);
             if d != n_curve / d {
                 divisors.push(n_curve / d);
@@ -605,7 +732,7 @@ pub fn pohlig_hellman_dlp(
     let mut prime: u64 = 2;
     while prime <= smoothness_bound && prime * prime <= residue {
         let mut e = 0u32;
-        while residue % prime == 0 {
+        while residue.is_multiple_of(prime) {
             residue /= prime;
             e += 1;
         }
@@ -664,7 +791,7 @@ fn crt_combine(pairs: &[(u64, u64)]) -> BigInt {
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         x = &x + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     x
 }
@@ -782,7 +909,7 @@ pub fn cga_hnc_attack_verbose(
                 // due to an off-by-one in ord(P_i) propagation through
                 // composed isogenies.
                 let d_partial_p = pt_scalar_mul(&p_curve, &d_partial, &a, p_mod);
-                if &d_partial_p == &q_curve {
+                if d_partial_p == q_curve {
                     let prev_modulus = combined_modulus(&crt_pairs);
                     add_crt_factors(&mut crt_pairs, &d_partial, p_order, smoothness_bound);
                     let new_modulus = combined_modulus(&crt_pairs);
@@ -821,7 +948,7 @@ pub fn cga_hnc_attack_verbose(
 
     let (d_known, modulus) = crt_combine_map(&crt_pairs);
     let _ = last_modulus; // keep for potential future use
-    debug_assert!(&modulus == &combined_modulus(&crt_pairs));
+    debug_assert!(modulus == combined_modulus(&crt_pairs));
 
     // ── Residual cleanup via BSGS on the original curve ────────────
     //
@@ -848,7 +975,7 @@ pub fn cga_hnc_attack_verbose(
             residual_bsgs_cost = Some(0);
         } else if let Some(m) = modulus_to_u64(&modulus) {
             // Slow path: residual BSGS for u ∈ [0, ord(P)/M).
-            if m > 0 && p_order_full % m == 0 {
+            if m > 0 && p_order_full.is_multiple_of(m) {
                 let u_range = p_order_full / m;
                 if u_range > 1 && u_range <= residual_bsgs_max {
                     let dknown_p = pt_scalar_mul(p_pt, &d_known, a_0, p_mod);
@@ -887,7 +1014,7 @@ pub fn cga_hnc_attack_verbose(
 fn combined_modulus(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> BigInt {
     let mut m = BigInt::one();
     for &(_, pe) in pairs.values() {
-        m = m * BigInt::from(pe);
+        m *= BigInt::from(pe);
     }
     m
 }
@@ -903,7 +1030,7 @@ fn crt_combine_map(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> (BigIn
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         d = &d + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     (d, m)
 }
@@ -983,7 +1110,7 @@ fn add_crt_factors(
     let mut prime: u64 = 2;
     while prime <= smoothness_bound && prime * prime <= residue {
         let mut e = 0u32;
-        while residue % prime == 0 {
+        while residue.is_multiple_of(prime) {
             residue /= prime;
             e += 1;
         }
@@ -1076,7 +1203,7 @@ fn crt_combine_pairs(pairs: &[(u64, u64)]) -> (BigInt, BigInt) {
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         d = &d + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     (d, m)
 }
@@ -1202,7 +1329,7 @@ mod tests {
         let a = BigInt::from(1);
         let b = BigInt::from(1);
         let orbit = bfs_two_isogeny_orbit(&a, &b, &p, 50);
-        assert!(orbit.len() >= 1, "orbit must contain start curve");
+        assert!(!orbit.is_empty(), "orbit must contain start curve");
         let starting_j = j_invariant(&a, &b, &p).unwrap();
         assert_eq!(orbit[0].0, starting_j, "first visited = start");
     }
@@ -1611,7 +1738,7 @@ mod tests {
                 p_order, // residual_bsgs_max — allow full BSGS
             );
             let m_u = modulus_to_u64(&result.modulus).unwrap_or(1);
-            let residual_range = if m_u > 0 { p_order / m_u } else { p_order };
+            let residual_range = p_order.checked_div(m_u).unwrap_or(p_order);
             let bsgs_ops = result
                 .residual_bsgs_cost
                 .unwrap_or(((residual_range as f64).sqrt().ceil()) as u64);
@@ -1884,6 +2011,197 @@ mod tests {
                 max,
                 totals.len()
             );
+        }
+    }
+
+    // ── The reductions before their engineering changes ─────────────────
+
+    fn mod_pos_textbook(x: BigInt, p: &BigInt) -> BigInt {
+        ((x % p) + p) % p
+    }
+
+    /// `modular_inverse` as it was: reduce, convert, invert, convert back.
+    fn modular_inverse_reference(x: &BigInt, p: &BigInt) -> Option<BigInt> {
+        let xu = mod_pos_textbook(x.clone(), p).to_biguint()?;
+        let pu = p.to_biguint()?;
+        Some(mod_inverse(&xu, &pu)?.to_bigint().unwrap())
+    }
+
+    #[test]
+    fn mod_pos_matches_the_textbook_form() {
+        use num_bigint::RandBigInt;
+        use rand::{rngs::StdRng, Rng, SeedableRng};
+        let mut rng = StdRng::seed_from_u64(0x6367_615f_706f_73);
+        for _ in 0..2000 {
+            let bits = 1 + rng.gen_range(0..140u64);
+            let x = rng.gen_bigint(bits);
+            let bits = 1 + rng.gen_range(0..70u64);
+            let mut p = rng.gen_bigint(bits);
+            if p.is_zero() {
+                p = BigInt::one();
+            }
+            for p in [p.clone(), -p] {
+                assert_eq!(
+                    mod_pos(x.clone(), &p),
+                    mod_pos_textbook(x.clone(), &p),
+                    "x = {x}, p = {p}"
+                );
+            }
+        }
+    }
+
+    fn pt_double_reference(p: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
+        match p {
+            Pt2::Inf => Pt2::Inf,
+            Pt2::Aff(x, y) => {
+                if y.is_zero() {
+                    return Pt2::Inf;
+                }
+                let two_y = mod_pos_textbook(BigInt::from(2) * y, p_mod);
+                let inv = match modular_inverse_reference(&two_y, p_mod) {
+                    Some(v) => v,
+                    None => return Pt2::Inf,
+                };
+                let lam = mod_pos_textbook((BigInt::from(3) * x.pow(2) + a) * inv, p_mod);
+                let x3 = mod_pos_textbook(lam.pow(2) - BigInt::from(2) * x, p_mod);
+                let y3 = mod_pos_textbook(&lam * (x - &x3) - y, p_mod);
+                Pt2::Aff(x3, y3)
+            }
+        }
+    }
+
+    fn pt_add_reference(p: &Pt2, q: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
+        match (p, q) {
+            (Pt2::Inf, x) | (x, Pt2::Inf) => x.clone(),
+            (Pt2::Aff(x1, y1), Pt2::Aff(x2, y2)) => {
+                if x1 == x2 {
+                    if y1 == y2 {
+                        return pt_double_reference(p, a, p_mod);
+                    }
+                    return Pt2::Inf;
+                }
+                let dx = mod_pos_textbook(x2 - x1, p_mod);
+                let inv = match modular_inverse_reference(&dx, p_mod) {
+                    Some(v) => v,
+                    None => return Pt2::Inf,
+                };
+                let lam = mod_pos_textbook((y2 - y1) * inv, p_mod);
+                let x3 = mod_pos_textbook(lam.pow(2) - x1 - x2, p_mod);
+                let y3 = mod_pos_textbook(&lam * (x1 - &x3) - y1, p_mod);
+                Pt2::Aff(x3, y3)
+            }
+        }
+    }
+
+    /// The word-sized group law returns the points the `BigInt` formulas
+    /// return: on prime, composite and even moduli up to 2⁶⁴ − 1, on
+    /// random coordinates (the formulas do not need the curve equation),
+    /// at the special cases (`P = ±Q`, `y = 0`, `2y ≡ 0`, `∞`), with
+    /// negative and unreduced `a`, and on the inputs that must fall back
+    /// to the `BigInt` path (unreduced coordinates, moduli above a word).
+    #[test]
+    fn word_group_law_matches_the_bigint_formulas() {
+        use num_bigint::RandBigInt;
+        use rand::{rngs::StdRng, Rng, SeedableRng};
+        let mut rng = StdRng::seed_from_u64(0x6772_6f75_70);
+        let moduli: Vec<BigInt> = [
+            2u64,
+            3,
+            4,
+            101,
+            1000,
+            33_756_013,
+            1 << 32,
+            (1 << 61) - 1,
+            (1 << 63) + 29,
+            u64::MAX - 58,
+            u64::MAX,
+        ]
+        .into_iter()
+        .map(BigInt::from)
+        .chain([BigInt::from(u64::MAX) + 13])
+        .collect();
+        for p in &moduli {
+            let coeffs = [
+                BigInt::zero(),
+                BigInt::from(-3),
+                p - 1,
+                p + 5,
+                rng.gen_bigint_range(&BigInt::zero(), p),
+            ];
+            let mut points = vec![Pt2::Inf];
+            for _ in 0..60 {
+                let x = rng.gen_bigint_range(&BigInt::zero(), p);
+                let y = rng.gen_bigint_range(&BigInt::zero(), p);
+                points.push(Pt2::Aff(x.clone(), y.clone()));
+                points.push(Pt2::Aff(x.clone(), mod_pos_textbook(-&y, p)));
+                points.push(Pt2::Aff(x.clone(), BigInt::zero()));
+                points.push(Pt2::Aff(x.clone(), p / 2));
+                points.push(Pt2::Aff(&x + p, y.clone()));
+                points.push(Pt2::Aff(x, -y));
+            }
+            for i in 0..points.len() {
+                let a = &coeffs[i % coeffs.len()];
+                let pt = &points[i];
+                assert_eq!(
+                    pt_double(pt, a, p),
+                    pt_double_reference(pt, a, p),
+                    "2·{pt:?}, a = {a}, p = {p}"
+                );
+                for _ in 0..4 {
+                    let q = &points[rng.gen_range(0..points.len())];
+                    assert_eq!(
+                        pt_add(pt, q, a, p),
+                        pt_add_reference(pt, q, a, p),
+                        "{pt:?} + {q:?}, a = {a}, p = {p}"
+                    );
+                }
+                assert_eq!(pt_add(pt, pt, a, p), pt_add_reference(pt, pt, a, p));
+            }
+        }
+    }
+
+    /// The word path of `modular_inverse` returns what the conversion
+    /// path returned, for moduli on both sides of the word boundary and
+    /// for `x` negative, zero, unreduced or wider than a word.
+    #[test]
+    fn modular_inverse_matches_the_conversion_path() {
+        use num_bigint::RandBigInt;
+        use rand::{rngs::StdRng, Rng, SeedableRng};
+        let mut rng = StdRng::seed_from_u64(0x6d6f_645f_696e_76);
+        let mut moduli: Vec<BigInt> = [1u64, 2, 3, 4, 6, 101, 1 << 32, 33_756_013]
+            .into_iter()
+            .chain([u64::MAX - 58, u64::MAX - 1, u64::MAX])
+            .map(BigInt::from)
+            .collect();
+        moduli.push(BigInt::from(u64::MAX) + 1);
+        moduli.push(BigInt::from(-101));
+        for _ in 0..200 {
+            let bits = rng.gen_range(2..=80u64);
+            moduli.push(rng.gen_biguint(bits).into());
+        }
+        moduli.retain(|p| !p.is_zero());
+        for p in &moduli {
+            let mut xs: Vec<BigInt> = [-2i64, -1, 0, 1, 2].map(BigInt::from).to_vec();
+            xs.extend([
+                p - 1,
+                p.clone(),
+                p + 1,
+                -p,
+                p * 2u32 + 1u32,
+                -(p * 5u32) + 3u32,
+            ]);
+            for _ in 0..40 {
+                let bits = 1 + rng.gen_range(0..140u64);
+                xs.push(rng.gen_bigint(bits));
+            }
+            for x in &xs {
+                assert_eq!(
+                    modular_inverse(x, p),
+                    modular_inverse_reference(x, p),
+                    "x = {x}, p = {p}"
+                );
+            }
         }
     }
 }

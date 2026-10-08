@@ -1041,5 +1041,1198 @@ static ECC_BIG P131 sigmaInvNetwork131(P131 a, int index) {
     return P131{{v0,v1,v2,v3,v4&7u}};
 #endif
 }
+#if ECC_PACKED_WEIGHTED_PREFIX == 2
+struct SigmaWalkPair131 { P131 first, second; };
+static ECC_BIG SigmaWalkPair131 sigmaWalkNetworkPair131(P131 a, P131 b, int index) {
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+    const int exponents[] = {3,4,5,6,7,8,9,10};
+    for (int i=0;i<exponents[index];i++) { a=sqr131(a); b=sqr131(b); }
+    return SigmaWalkPair131{a,b};
+#else
+    uint32_t a0=a.v[0], a1=a.v[1], a2=a.v[2], a3=a.v[3], a4=a.v[4];
+    uint32_t b0=b.v[0], b1=b.v[1], b2=b.v[2], b3=b.v[3], b4=b.v[4];
+    uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[0][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[0][index];
+#endif
+    t=((a0 >> 1)^a0)&mask;
+    a0^=t^(t << 1);
+    t=((b0 >> 1)^b0)&mask;
+    b0^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[1][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[1][index];
+#endif
+    t=((a1 >> 1)^a1)&mask;
+    a1^=t^(t << 1);
+    t=((b1 >> 1)^b1)&mask;
+    b1^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[2][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[2][index];
+#endif
+    t=((a2 >> 1)^a2)&mask;
+    a2^=t^(t << 1);
+    t=((b2 >> 1)^b2)&mask;
+    b2^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[3][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[3][index];
+#endif
+    t=((a3 >> 1)^a3)&mask;
+    a3^=t^(t << 1);
+    t=((b3 >> 1)^b3)&mask;
+    b3^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[4][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[4][index];
+#endif
+    t=((a4 >> 1)^a4)&mask;
+    a4^=t^(t << 1);
+    t=((b4 >> 1)^b4)&mask;
+    b4^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[5][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[5][index];
+#endif
+    t=((a0 >> 2)^a0)&mask;
+    a0^=t^(t << 2);
+    t=((b0 >> 2)^b0)&mask;
+    b0^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[6][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[6][index];
+#endif
+    t=((a1 >> 2)^a1)&mask;
+    a1^=t^(t << 2);
+    t=((b1 >> 2)^b1)&mask;
+    b1^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[7][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[7][index];
+#endif
+    t=((a2 >> 2)^a2)&mask;
+    a2^=t^(t << 2);
+    t=((b2 >> 2)^b2)&mask;
+    b2^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[8][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[8][index];
+#endif
+    t=((a3 >> 2)^a3)&mask;
+    a3^=t^(t << 2);
+    t=((b3 >> 2)^b3)&mask;
+    b3^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[9][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[9][index];
+#endif
+    t=((a4 >> 2)^a4)&mask;
+    a4^=t^(t << 2);
+    t=((b4 >> 2)^b4)&mask;
+    b4^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[10][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[10][index];
+#endif
+    t=((a0 >> 4)^a0)&mask;
+    a0^=t^(t << 4);
+    t=((b0 >> 4)^b0)&mask;
+    b0^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[11][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[11][index];
+#endif
+    t=((a1 >> 4)^a1)&mask;
+    a1^=t^(t << 4);
+    t=((b1 >> 4)^b1)&mask;
+    b1^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[12][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[12][index];
+#endif
+    t=((a2 >> 4)^a2)&mask;
+    a2^=t^(t << 4);
+    t=((b2 >> 4)^b2)&mask;
+    b2^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[13][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[13][index];
+#endif
+    t=((a3 >> 4)^a3)&mask;
+    a3^=t^(t << 4);
+    t=((b3 >> 4)^b3)&mask;
+    b3^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[14][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[14][index];
+#endif
+    t=((a4 >> 4)^a4)&mask;
+    a4^=t^(t << 4);
+    t=((b4 >> 4)^b4)&mask;
+    b4^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[15][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[15][index];
+#endif
+    t=((a0 >> 8)^a0)&mask;
+    a0^=t^(t << 8);
+    t=((b0 >> 8)^b0)&mask;
+    b0^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[16][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[16][index];
+#endif
+    t=((a1 >> 8)^a1)&mask;
+    a1^=t^(t << 8);
+    t=((b1 >> 8)^b1)&mask;
+    b1^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[17][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[17][index];
+#endif
+    t=((a2 >> 8)^a2)&mask;
+    a2^=t^(t << 8);
+    t=((b2 >> 8)^b2)&mask;
+    b2^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[18][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[18][index];
+#endif
+    t=((a3 >> 8)^a3)&mask;
+    a3^=t^(t << 8);
+    t=((b3 >> 8)^b3)&mask;
+    b3^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[19][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[19][index];
+#endif
+    t=((a4 >> 8)^a4)&mask;
+    a4^=t^(t << 8);
+    t=((b4 >> 8)^b4)&mask;
+    b4^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[20][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[20][index];
+#endif
+    t=((a1 >> 16)^a1)&mask;
+    a1^=t^(t << 16);
+    t=((b1 >> 16)^b1)&mask;
+    b1^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[21][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[21][index];
+#endif
+    t=((a2 >> 16)^a2)&mask;
+    a2^=t^(t << 16);
+    t=((b2 >> 16)^b2)&mask;
+    b2^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[22][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[22][index];
+#endif
+    t=((a3 >> 16)^a3)&mask;
+    a3^=t^(t << 16);
+    t=((b3 >> 16)^b3)&mask;
+    b3^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[23][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[23][index];
+#endif
+    t=((a4 >> 16)^a4)&mask;
+    a4^=t^(t << 16);
+    t=((b4 >> 16)^b4)&mask;
+    b4^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[24][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[24][index];
+#endif
+    t=(a2^a3)&mask;
+    a2^=t; a3^=t;
+    t=(b2^b3)&mask;
+    b2^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[25][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[25][index];
+#endif
+    t=(a4^a5)&mask;
+    a4^=t; a5^=t;
+    t=(b4^b5)&mask;
+    b4^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[26][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a4^a6)&mask;
+    a4^=t; a6^=t;
+    t=(b4^b6)&mask;
+    b4^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[27][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a5^a7)&mask;
+    a5^=t; a7^=t;
+    t=(b5^b7)&mask;
+    b5^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[28][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[28][index];
+#endif
+    t=(a0^a4)&mask;
+    a0^=t; a4^=t;
+    t=(b0^b4)&mask;
+    b0^=t; b4^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[29][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[29][index];
+#endif
+    t=(a1^a5)&mask;
+    a1^=t; a5^=t;
+    t=(b1^b5)&mask;
+    b1^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[26][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a2^a6)&mask;
+    a2^=t; a6^=t;
+    t=(b2^b6)&mask;
+    b2^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[27][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a3^a7)&mask;
+    a3^=t; a7^=t;
+    t=(b3^b7)&mask;
+    b3^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[30][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[30][index];
+#endif
+    t=(a0^a2)&mask;
+    a0^=t; a2^=t;
+    t=(b0^b2)&mask;
+    b0^=t; b2^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[31][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[31][index];
+#endif
+    t=(a1^a3)&mask;
+    a1^=t; a3^=t;
+    t=(b1^b3)&mask;
+    b1^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[26][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a4^a6)&mask;
+    a4^=t; a6^=t;
+    t=(b4^b6)&mask;
+    b4^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[27][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a5^a7)&mask;
+    a5^=t; a7^=t;
+    t=(b5^b7)&mask;
+    b5^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[32][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[32][index];
+#endif
+    t=(a0^a1)&mask;
+    a0^=t; a1^=t;
+    t=(b0^b1)&mask;
+    b0^=t; b1^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[33][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[33][index];
+#endif
+    t=(a2^a3)&mask;
+    a2^=t; a3^=t;
+    t=(b2^b3)&mask;
+    b2^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[25][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[25][index];
+#endif
+    t=(a4^a5)&mask;
+    a4^=t; a5^=t;
+    t=(b4^b5)&mask;
+    b4^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[34][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[34][index];
+#endif
+    t=((a0 >> 16)^a0)&mask;
+    a0^=t^(t << 16);
+    t=((b0 >> 16)^b0)&mask;
+    b0^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[35][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[35][index];
+#endif
+    t=((a1 >> 16)^a1)&mask;
+    a1^=t^(t << 16);
+    t=((b1 >> 16)^b1)&mask;
+    b1^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[36][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[36][index];
+#endif
+    t=((a2 >> 16)^a2)&mask;
+    a2^=t^(t << 16);
+    t=((b2 >> 16)^b2)&mask;
+    b2^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[37][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[37][index];
+#endif
+    t=((a3 >> 16)^a3)&mask;
+    a3^=t^(t << 16);
+    t=((b3 >> 16)^b3)&mask;
+    b3^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[23][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[23][index];
+#endif
+    t=((a4 >> 16)^a4)&mask;
+    a4^=t^(t << 16);
+    t=((b4 >> 16)^b4)&mask;
+    b4^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[38][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[38][index];
+#endif
+    t=((a0 >> 8)^a0)&mask;
+    a0^=t^(t << 8);
+    t=((b0 >> 8)^b0)&mask;
+    b0^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[39][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[39][index];
+#endif
+    t=((a1 >> 8)^a1)&mask;
+    a1^=t^(t << 8);
+    t=((b1 >> 8)^b1)&mask;
+    b1^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[40][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[40][index];
+#endif
+    t=((a2 >> 8)^a2)&mask;
+    a2^=t^(t << 8);
+    t=((b2 >> 8)^b2)&mask;
+    b2^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[41][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[41][index];
+#endif
+    t=((a3 >> 8)^a3)&mask;
+    a3^=t^(t << 8);
+    t=((b3 >> 8)^b3)&mask;
+    b3^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[19][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[19][index];
+#endif
+    t=((a4 >> 8)^a4)&mask;
+    a4^=t^(t << 8);
+    t=((b4 >> 8)^b4)&mask;
+    b4^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[42][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[42][index];
+#endif
+    t=((a0 >> 4)^a0)&mask;
+    a0^=t^(t << 4);
+    t=((b0 >> 4)^b0)&mask;
+    b0^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[43][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[43][index];
+#endif
+    t=((a1 >> 4)^a1)&mask;
+    a1^=t^(t << 4);
+    t=((b1 >> 4)^b1)&mask;
+    b1^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[44][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[44][index];
+#endif
+    t=((a2 >> 4)^a2)&mask;
+    a2^=t^(t << 4);
+    t=((b2 >> 4)^b2)&mask;
+    b2^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[45][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[45][index];
+#endif
+    t=((a3 >> 4)^a3)&mask;
+    a3^=t^(t << 4);
+    t=((b3 >> 4)^b3)&mask;
+    b3^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[14][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[14][index];
+#endif
+    t=((a4 >> 4)^a4)&mask;
+    a4^=t^(t << 4);
+    t=((b4 >> 4)^b4)&mask;
+    b4^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[46][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[46][index];
+#endif
+    t=((a0 >> 2)^a0)&mask;
+    a0^=t^(t << 2);
+    t=((b0 >> 2)^b0)&mask;
+    b0^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[47][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[47][index];
+#endif
+    t=((a1 >> 2)^a1)&mask;
+    a1^=t^(t << 2);
+    t=((b1 >> 2)^b1)&mask;
+    b1^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[48][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[48][index];
+#endif
+    t=((a2 >> 2)^a2)&mask;
+    a2^=t^(t << 2);
+    t=((b2 >> 2)^b2)&mask;
+    b2^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[49][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[49][index];
+#endif
+    t=((a3 >> 2)^a3)&mask;
+    a3^=t^(t << 2);
+    t=((b3 >> 2)^b3)&mask;
+    b3^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[50][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[50][index];
+#endif
+    t=((a4 >> 2)^a4)&mask;
+    a4^=t^(t << 2);
+    t=((b4 >> 2)^b4)&mask;
+    b4^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[51][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[51][index];
+#endif
+    t=((a0 >> 1)^a0)&mask;
+    a0^=t^(t << 1);
+    t=((b0 >> 1)^b0)&mask;
+    b0^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[52][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[52][index];
+#endif
+    t=((a1 >> 1)^a1)&mask;
+    a1^=t^(t << 1);
+    t=((b1 >> 1)^b1)&mask;
+    b1^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[53][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[53][index];
+#endif
+    t=((a2 >> 1)^a2)&mask;
+    a2^=t^(t << 1);
+    t=((b2 >> 1)^b2)&mask;
+    b2^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[54][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[54][index];
+#endif
+    t=((a3 >> 1)^a3)&mask;
+    a3^=t^(t << 1);
+    t=((b3 >> 1)^b3)&mask;
+    b3^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=__ldg(&sigmaWalkNetwork131Masks[55][index]);
+#else
+    mask=sigmaWalkNetwork131Masks[55][index];
+#endif
+    t=((a4 >> 1)^a4)&mask;
+    a4^=t^(t << 1);
+    t=((b4 >> 1)^b4)&mask;
+    b4^=t^(t << 1);
+    return SigmaWalkPair131{P131{{a0,a1,a2,a3,a4&7u}},P131{{b0,b1,b2,b3,b4&7u}}};
+#endif
+}
+#endif
+#if ECC_PACKED_SHARED_SIGMA
+#ifdef __CUDACC__
+static __shared__ uint32_t sigmaWalkShared131Masks[56][8];
+#endif
+static ECC_HD void initSigmaWalkShared131() {
+#ifdef __CUDA_ARCH__
+    for (unsigned i=threadIdx.x; i<448u; i+=blockDim.x)
+        sigmaWalkShared131Masks[i/8][i%8]=__ldg(&sigmaWalkNetwork131Masks[i/8][i%8]);
+    __syncthreads();
+#endif
+}
+// Host code emulates the post-barrier values through the original
+// immutable table; it does not emulate CUDA block concurrency.
+static ECC_BIG SigmaWalkPair131 sigmaWalkNetworkPairShared131(P131 a, P131 b, int index) {
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+    const int exponents[] = {3,4,5,6,7,8,9,10};
+    for (int i=0;i<exponents[index];i++) { a=sqr131(a); b=sqr131(b); }
+    return SigmaWalkPair131{a,b};
+#else
+    uint32_t a0=a.v[0], a1=a.v[1], a2=a.v[2], a3=a.v[3], a4=a.v[4];
+    uint32_t b0=b.v[0], b1=b.v[1], b2=b.v[2], b3=b.v[3], b4=b.v[4];
+    uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[0][index];
+#else
+    mask=sigmaWalkNetwork131Masks[0][index];
+#endif
+    t=((a0 >> 1)^a0)&mask;
+    a0^=t^(t << 1);
+    t=((b0 >> 1)^b0)&mask;
+    b0^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[1][index];
+#else
+    mask=sigmaWalkNetwork131Masks[1][index];
+#endif
+    t=((a1 >> 1)^a1)&mask;
+    a1^=t^(t << 1);
+    t=((b1 >> 1)^b1)&mask;
+    b1^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[2][index];
+#else
+    mask=sigmaWalkNetwork131Masks[2][index];
+#endif
+    t=((a2 >> 1)^a2)&mask;
+    a2^=t^(t << 1);
+    t=((b2 >> 1)^b2)&mask;
+    b2^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[3][index];
+#else
+    mask=sigmaWalkNetwork131Masks[3][index];
+#endif
+    t=((a3 >> 1)^a3)&mask;
+    a3^=t^(t << 1);
+    t=((b3 >> 1)^b3)&mask;
+    b3^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[4][index];
+#else
+    mask=sigmaWalkNetwork131Masks[4][index];
+#endif
+    t=((a4 >> 1)^a4)&mask;
+    a4^=t^(t << 1);
+    t=((b4 >> 1)^b4)&mask;
+    b4^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[5][index];
+#else
+    mask=sigmaWalkNetwork131Masks[5][index];
+#endif
+    t=((a0 >> 2)^a0)&mask;
+    a0^=t^(t << 2);
+    t=((b0 >> 2)^b0)&mask;
+    b0^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[6][index];
+#else
+    mask=sigmaWalkNetwork131Masks[6][index];
+#endif
+    t=((a1 >> 2)^a1)&mask;
+    a1^=t^(t << 2);
+    t=((b1 >> 2)^b1)&mask;
+    b1^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[7][index];
+#else
+    mask=sigmaWalkNetwork131Masks[7][index];
+#endif
+    t=((a2 >> 2)^a2)&mask;
+    a2^=t^(t << 2);
+    t=((b2 >> 2)^b2)&mask;
+    b2^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[8][index];
+#else
+    mask=sigmaWalkNetwork131Masks[8][index];
+#endif
+    t=((a3 >> 2)^a3)&mask;
+    a3^=t^(t << 2);
+    t=((b3 >> 2)^b3)&mask;
+    b3^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[9][index];
+#else
+    mask=sigmaWalkNetwork131Masks[9][index];
+#endif
+    t=((a4 >> 2)^a4)&mask;
+    a4^=t^(t << 2);
+    t=((b4 >> 2)^b4)&mask;
+    b4^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[10][index];
+#else
+    mask=sigmaWalkNetwork131Masks[10][index];
+#endif
+    t=((a0 >> 4)^a0)&mask;
+    a0^=t^(t << 4);
+    t=((b0 >> 4)^b0)&mask;
+    b0^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[11][index];
+#else
+    mask=sigmaWalkNetwork131Masks[11][index];
+#endif
+    t=((a1 >> 4)^a1)&mask;
+    a1^=t^(t << 4);
+    t=((b1 >> 4)^b1)&mask;
+    b1^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[12][index];
+#else
+    mask=sigmaWalkNetwork131Masks[12][index];
+#endif
+    t=((a2 >> 4)^a2)&mask;
+    a2^=t^(t << 4);
+    t=((b2 >> 4)^b2)&mask;
+    b2^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[13][index];
+#else
+    mask=sigmaWalkNetwork131Masks[13][index];
+#endif
+    t=((a3 >> 4)^a3)&mask;
+    a3^=t^(t << 4);
+    t=((b3 >> 4)^b3)&mask;
+    b3^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[14][index];
+#else
+    mask=sigmaWalkNetwork131Masks[14][index];
+#endif
+    t=((a4 >> 4)^a4)&mask;
+    a4^=t^(t << 4);
+    t=((b4 >> 4)^b4)&mask;
+    b4^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[15][index];
+#else
+    mask=sigmaWalkNetwork131Masks[15][index];
+#endif
+    t=((a0 >> 8)^a0)&mask;
+    a0^=t^(t << 8);
+    t=((b0 >> 8)^b0)&mask;
+    b0^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[16][index];
+#else
+    mask=sigmaWalkNetwork131Masks[16][index];
+#endif
+    t=((a1 >> 8)^a1)&mask;
+    a1^=t^(t << 8);
+    t=((b1 >> 8)^b1)&mask;
+    b1^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[17][index];
+#else
+    mask=sigmaWalkNetwork131Masks[17][index];
+#endif
+    t=((a2 >> 8)^a2)&mask;
+    a2^=t^(t << 8);
+    t=((b2 >> 8)^b2)&mask;
+    b2^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[18][index];
+#else
+    mask=sigmaWalkNetwork131Masks[18][index];
+#endif
+    t=((a3 >> 8)^a3)&mask;
+    a3^=t^(t << 8);
+    t=((b3 >> 8)^b3)&mask;
+    b3^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[19][index];
+#else
+    mask=sigmaWalkNetwork131Masks[19][index];
+#endif
+    t=((a4 >> 8)^a4)&mask;
+    a4^=t^(t << 8);
+    t=((b4 >> 8)^b4)&mask;
+    b4^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[20][index];
+#else
+    mask=sigmaWalkNetwork131Masks[20][index];
+#endif
+    t=((a1 >> 16)^a1)&mask;
+    a1^=t^(t << 16);
+    t=((b1 >> 16)^b1)&mask;
+    b1^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[21][index];
+#else
+    mask=sigmaWalkNetwork131Masks[21][index];
+#endif
+    t=((a2 >> 16)^a2)&mask;
+    a2^=t^(t << 16);
+    t=((b2 >> 16)^b2)&mask;
+    b2^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[22][index];
+#else
+    mask=sigmaWalkNetwork131Masks[22][index];
+#endif
+    t=((a3 >> 16)^a3)&mask;
+    a3^=t^(t << 16);
+    t=((b3 >> 16)^b3)&mask;
+    b3^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[23][index];
+#else
+    mask=sigmaWalkNetwork131Masks[23][index];
+#endif
+    t=((a4 >> 16)^a4)&mask;
+    a4^=t^(t << 16);
+    t=((b4 >> 16)^b4)&mask;
+    b4^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[24][index];
+#else
+    mask=sigmaWalkNetwork131Masks[24][index];
+#endif
+    t=(a2^a3)&mask;
+    a2^=t; a3^=t;
+    t=(b2^b3)&mask;
+    b2^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[25][index];
+#else
+    mask=sigmaWalkNetwork131Masks[25][index];
+#endif
+    t=(a4^a5)&mask;
+    a4^=t; a5^=t;
+    t=(b4^b5)&mask;
+    b4^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[26][index];
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a4^a6)&mask;
+    a4^=t; a6^=t;
+    t=(b4^b6)&mask;
+    b4^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[27][index];
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a5^a7)&mask;
+    a5^=t; a7^=t;
+    t=(b5^b7)&mask;
+    b5^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[28][index];
+#else
+    mask=sigmaWalkNetwork131Masks[28][index];
+#endif
+    t=(a0^a4)&mask;
+    a0^=t; a4^=t;
+    t=(b0^b4)&mask;
+    b0^=t; b4^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[29][index];
+#else
+    mask=sigmaWalkNetwork131Masks[29][index];
+#endif
+    t=(a1^a5)&mask;
+    a1^=t; a5^=t;
+    t=(b1^b5)&mask;
+    b1^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[26][index];
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a2^a6)&mask;
+    a2^=t; a6^=t;
+    t=(b2^b6)&mask;
+    b2^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[27][index];
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a3^a7)&mask;
+    a3^=t; a7^=t;
+    t=(b3^b7)&mask;
+    b3^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[30][index];
+#else
+    mask=sigmaWalkNetwork131Masks[30][index];
+#endif
+    t=(a0^a2)&mask;
+    a0^=t; a2^=t;
+    t=(b0^b2)&mask;
+    b0^=t; b2^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[31][index];
+#else
+    mask=sigmaWalkNetwork131Masks[31][index];
+#endif
+    t=(a1^a3)&mask;
+    a1^=t; a3^=t;
+    t=(b1^b3)&mask;
+    b1^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[26][index];
+#else
+    mask=sigmaWalkNetwork131Masks[26][index];
+#endif
+    t=(a4^a6)&mask;
+    a4^=t; a6^=t;
+    t=(b4^b6)&mask;
+    b4^=t; b6^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[27][index];
+#else
+    mask=sigmaWalkNetwork131Masks[27][index];
+#endif
+    t=(a5^a7)&mask;
+    a5^=t; a7^=t;
+    t=(b5^b7)&mask;
+    b5^=t; b7^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[32][index];
+#else
+    mask=sigmaWalkNetwork131Masks[32][index];
+#endif
+    t=(a0^a1)&mask;
+    a0^=t; a1^=t;
+    t=(b0^b1)&mask;
+    b0^=t; b1^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[33][index];
+#else
+    mask=sigmaWalkNetwork131Masks[33][index];
+#endif
+    t=(a2^a3)&mask;
+    a2^=t; a3^=t;
+    t=(b2^b3)&mask;
+    b2^=t; b3^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[25][index];
+#else
+    mask=sigmaWalkNetwork131Masks[25][index];
+#endif
+    t=(a4^a5)&mask;
+    a4^=t; a5^=t;
+    t=(b4^b5)&mask;
+    b4^=t; b5^=t;
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[34][index];
+#else
+    mask=sigmaWalkNetwork131Masks[34][index];
+#endif
+    t=((a0 >> 16)^a0)&mask;
+    a0^=t^(t << 16);
+    t=((b0 >> 16)^b0)&mask;
+    b0^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[35][index];
+#else
+    mask=sigmaWalkNetwork131Masks[35][index];
+#endif
+    t=((a1 >> 16)^a1)&mask;
+    a1^=t^(t << 16);
+    t=((b1 >> 16)^b1)&mask;
+    b1^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[36][index];
+#else
+    mask=sigmaWalkNetwork131Masks[36][index];
+#endif
+    t=((a2 >> 16)^a2)&mask;
+    a2^=t^(t << 16);
+    t=((b2 >> 16)^b2)&mask;
+    b2^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[37][index];
+#else
+    mask=sigmaWalkNetwork131Masks[37][index];
+#endif
+    t=((a3 >> 16)^a3)&mask;
+    a3^=t^(t << 16);
+    t=((b3 >> 16)^b3)&mask;
+    b3^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[23][index];
+#else
+    mask=sigmaWalkNetwork131Masks[23][index];
+#endif
+    t=((a4 >> 16)^a4)&mask;
+    a4^=t^(t << 16);
+    t=((b4 >> 16)^b4)&mask;
+    b4^=t^(t << 16);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[38][index];
+#else
+    mask=sigmaWalkNetwork131Masks[38][index];
+#endif
+    t=((a0 >> 8)^a0)&mask;
+    a0^=t^(t << 8);
+    t=((b0 >> 8)^b0)&mask;
+    b0^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[39][index];
+#else
+    mask=sigmaWalkNetwork131Masks[39][index];
+#endif
+    t=((a1 >> 8)^a1)&mask;
+    a1^=t^(t << 8);
+    t=((b1 >> 8)^b1)&mask;
+    b1^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[40][index];
+#else
+    mask=sigmaWalkNetwork131Masks[40][index];
+#endif
+    t=((a2 >> 8)^a2)&mask;
+    a2^=t^(t << 8);
+    t=((b2 >> 8)^b2)&mask;
+    b2^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[41][index];
+#else
+    mask=sigmaWalkNetwork131Masks[41][index];
+#endif
+    t=((a3 >> 8)^a3)&mask;
+    a3^=t^(t << 8);
+    t=((b3 >> 8)^b3)&mask;
+    b3^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[19][index];
+#else
+    mask=sigmaWalkNetwork131Masks[19][index];
+#endif
+    t=((a4 >> 8)^a4)&mask;
+    a4^=t^(t << 8);
+    t=((b4 >> 8)^b4)&mask;
+    b4^=t^(t << 8);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[42][index];
+#else
+    mask=sigmaWalkNetwork131Masks[42][index];
+#endif
+    t=((a0 >> 4)^a0)&mask;
+    a0^=t^(t << 4);
+    t=((b0 >> 4)^b0)&mask;
+    b0^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[43][index];
+#else
+    mask=sigmaWalkNetwork131Masks[43][index];
+#endif
+    t=((a1 >> 4)^a1)&mask;
+    a1^=t^(t << 4);
+    t=((b1 >> 4)^b1)&mask;
+    b1^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[44][index];
+#else
+    mask=sigmaWalkNetwork131Masks[44][index];
+#endif
+    t=((a2 >> 4)^a2)&mask;
+    a2^=t^(t << 4);
+    t=((b2 >> 4)^b2)&mask;
+    b2^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[45][index];
+#else
+    mask=sigmaWalkNetwork131Masks[45][index];
+#endif
+    t=((a3 >> 4)^a3)&mask;
+    a3^=t^(t << 4);
+    t=((b3 >> 4)^b3)&mask;
+    b3^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[14][index];
+#else
+    mask=sigmaWalkNetwork131Masks[14][index];
+#endif
+    t=((a4 >> 4)^a4)&mask;
+    a4^=t^(t << 4);
+    t=((b4 >> 4)^b4)&mask;
+    b4^=t^(t << 4);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[46][index];
+#else
+    mask=sigmaWalkNetwork131Masks[46][index];
+#endif
+    t=((a0 >> 2)^a0)&mask;
+    a0^=t^(t << 2);
+    t=((b0 >> 2)^b0)&mask;
+    b0^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[47][index];
+#else
+    mask=sigmaWalkNetwork131Masks[47][index];
+#endif
+    t=((a1 >> 2)^a1)&mask;
+    a1^=t^(t << 2);
+    t=((b1 >> 2)^b1)&mask;
+    b1^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[48][index];
+#else
+    mask=sigmaWalkNetwork131Masks[48][index];
+#endif
+    t=((a2 >> 2)^a2)&mask;
+    a2^=t^(t << 2);
+    t=((b2 >> 2)^b2)&mask;
+    b2^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[49][index];
+#else
+    mask=sigmaWalkNetwork131Masks[49][index];
+#endif
+    t=((a3 >> 2)^a3)&mask;
+    a3^=t^(t << 2);
+    t=((b3 >> 2)^b3)&mask;
+    b3^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[50][index];
+#else
+    mask=sigmaWalkNetwork131Masks[50][index];
+#endif
+    t=((a4 >> 2)^a4)&mask;
+    a4^=t^(t << 2);
+    t=((b4 >> 2)^b4)&mask;
+    b4^=t^(t << 2);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[51][index];
+#else
+    mask=sigmaWalkNetwork131Masks[51][index];
+#endif
+    t=((a0 >> 1)^a0)&mask;
+    a0^=t^(t << 1);
+    t=((b0 >> 1)^b0)&mask;
+    b0^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[52][index];
+#else
+    mask=sigmaWalkNetwork131Masks[52][index];
+#endif
+    t=((a1 >> 1)^a1)&mask;
+    a1^=t^(t << 1);
+    t=((b1 >> 1)^b1)&mask;
+    b1^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[53][index];
+#else
+    mask=sigmaWalkNetwork131Masks[53][index];
+#endif
+    t=((a2 >> 1)^a2)&mask;
+    a2^=t^(t << 1);
+    t=((b2 >> 1)^b2)&mask;
+    b2^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[54][index];
+#else
+    mask=sigmaWalkNetwork131Masks[54][index];
+#endif
+    t=((a3 >> 1)^a3)&mask;
+    a3^=t^(t << 1);
+    t=((b3 >> 1)^b3)&mask;
+    b3^=t^(t << 1);
+#ifdef __CUDA_ARCH__
+    mask=sigmaWalkShared131Masks[55][index];
+#else
+    mask=sigmaWalkNetwork131Masks[55][index];
+#endif
+    t=((a4 >> 1)^a4)&mask;
+    a4^=t^(t << 1);
+    t=((b4 >> 1)^b4)&mask;
+    b4^=t^(t << 1);
+    return SigmaWalkPair131{P131{{a0,a1,a2,a3,a4&7u}},P131{{b0,b1,b2,b3,b4&7u}}};
+#endif
+}
+#endif
 #undef ECC_SIGMA_WALK_STORAGE
 #undef ECC_SIGMA_INV_STORAGE

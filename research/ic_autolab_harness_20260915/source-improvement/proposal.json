@@ -1,0 +1,27 @@
+{
+  "parent_source": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0002/source",
+  "candidate_source": "/home/ubuntu/crypto-work/ic-autolab-fastlift-20260915",
+  "baseline_config": {
+    "solver": "pair_table",
+    "linear_algebra": "sparse",
+    "batch_trials": 16,
+    "max_trials": 4096,
+    "summands": 3
+  },
+  "parent_config": {
+    "solver": "pair_table",
+    "linear_algebra": "sparse",
+    "batch_trials": 1,
+    "collection_window": 8,
+    "max_trials": 4096,
+    "summands": 3
+  },
+  "classification": "engineering",
+  "hypothesis": "Replace allocation-heavy odd-degree point lifting with mathematically equivalent single-word field operations, preserving the returned root order. Development profiles place about 57% of the tuned total in setup and show generic inverse/Artin-Schreier work as a major component. Target an additional >=10% complete-cost reduction so the combined candidate can exceed 20% against the frozen batch16 baseline.",
+  "support": "unchanged subgroup-orbit base, seed43, points6*degree, m3",
+  "boundary": "At most binomial(B+m-1,m) target images for a fixed signed base; implementation change does not remove coverage. Matched signed-Frobenius rho and K-instruction full-rank collector floor remain the references.",
+  "memory": "constant scratch words per point; same returned points and output allocation",
+  "falsification": "Any root/order/support/certificate mismatch rejects. Final complete Ir candidate/baseline <=.80, paired CI upper<1, max cell <=1.10, fresh confirmation and replay; source-only and combined changes measured separately.",
+  "unit": "valgrind-3.22-amd64-Ir",
+  "fresh_final_seed_required": true
+}
