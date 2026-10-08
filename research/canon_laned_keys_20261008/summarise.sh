@@ -13,7 +13,7 @@ jq -n \
   --slurpfile iso <(cat "$runs"/aa/isolation.jsonl "$runs"/ab/isolation.jsonl) '
 def med: sort | if length % 2 == 1 then .[length/2|floor] else (.[length/2-1] + .[length/2]) / 2 end;
 def stats: {median: med, min: min, max: max, n: length};
-def parse: .file | capture("^(?<size>k[01]n[0-9]+)-(?<path>portable|avx512)-(?<arm>baseline|candidate)-r(?<round>[0-9]+)");
+def parse: .file | capture("^(?<size>icv1-[a-z0-9]+-[a-z0-9]+-[0-9a-f]{8})-(?<path>portable|avx512)-(?<arm>baseline|candidate)-r(?<round>[0-9]+)");
 def metrics: {
   collect_ms: (.r.repetitions[0].phases_ns.collect / 1e6),
   build_ms: (.r.repetitions[0].phases_ns.build / 1e6),

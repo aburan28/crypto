@@ -66,6 +66,10 @@ Each cell is the median of 5 A/B rounds. The raw reports are in `runs/ab/`, and
 the medians, minima, maxima and quotients are `summary.json`, from
 `summarise.sh`.
 
+The reports were first written under their §23 run-directory names and renamed
+to the ICV1 slugs before publication (AGENTS.md §11); no content changed. The
+`isolation.jsonl` labels keep the names the runs were launched with.
+
 - **Columns.** Times are ms. The ratio columns are baseline / candidate.
   "units" is the report's `total_units` (batched additions, measured in the
   same process).
@@ -75,18 +79,18 @@ the medians, minima, maxima and quotients are `summary.json`, from
 
 | size | path | collect, base | collect, cand | collect × | build, base | build, cand | total, base | total, cand | total × | units × | S | identical |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
-| k0n41 | portable | 94.8 | 85.6 | 1.108 | 21.1 | 19.3 | 132.9 | 121.7 | 1.092 | 1.093 | 16.37 → 14.98 | yes |
-| k1n47 | portable | 21.7 | 18.5 | 1.174 | 12.0 | 11.1 | 45.5 | 41.6 | 1.094 | 1.121 | 12.83 → 11.45 | yes |
-| k0n53 | portable | 781.4 | 629.0 | 1.242 | 309.2 | 280.7 | 1160.4 | 985.1 | 1.178 | 1.229 | 22.99 → 18.70 | yes |
-| k0n57 | portable | 52.8 | 40.6 | 1.298 | 19.1 | 17.6 | 91.5 | 79.7 | 1.149 | 1.194 | 15.73 → 13.18 | yes |
-| k1n59 | portable | 868.5 | 626.4 | 1.387 | 324.8 | 287.8 | 1275.9 | 999.5 | 1.277 | 1.259 | 22.94 → 18.23 | yes |
-| k0n61 | portable | 4733.1 | 3507.3 | 1.349 | 534.6 | 485.3 | 5377.9 | 4106.7 | 1.310 | 1.311 | 38.18 → 29.12 | yes |
-| k0n41 | avx512 | 57.8 | 57.7 | 1.002 | 15.8 | 16.5 | 89.4 | 90.6 | 0.986 | 0.993 | 10.99 → 11.06 | yes |
-| k1n47 | avx512 | 12.8 | 12.9 | 0.993 | 9.3 | 9.7 | 33.5 | 35.5 | 0.945 | 0.993 | 9.52 → 9.58 | yes |
-| k0n53 | avx512 | 461.4 | 473.9 | 0.974 | 230.0 | 227.9 | 749.9 | 761.8 | 0.984 | 0.990 | 14.89 → 15.04 | yes |
-| k0n57 | avx512 | 29.3 | 29.5 | 0.992 | 14.7 | 14.7 | 62.3 | 62.8 | 0.993 | 1.014 | 10.76 → 10.62 | yes |
-| k1n59 | avx512 | 472.1 | 469.7 | 1.005 | 241.0 | 240.6 | 788.2 | 788.2 | 1.000 | 1.043 | 14.36 → 13.77 | yes |
-| k0n61 | avx512 | 2624.8 | 2609.4 | 1.006 | 406.3 | 414.0 | 3132.6 | 3121.5 | 1.004 | 1.020 | 22.29 → 21.85 | yes |
+| icv1-f2m41-tm2308219-7f48b14a | portable | 94.8 | 85.6 | 1.108 | 21.1 | 19.3 | 132.9 | 121.7 | 1.092 | 1.093 | 16.37 → 14.98 | yes |
+| icv1-f2m47-t22705043-f4e44623 | portable | 21.7 | 18.5 | 1.174 | 12.0 | 11.1 | 45.5 | 41.6 | 1.094 | 1.121 | 12.83 → 11.45 | yes |
+| icv1-f2m53-tm56619371-dac20a85 | portable | 781.4 | 629.0 | 1.242 | 309.2 | 280.7 | 1160.4 | 985.1 | 1.178 | 1.229 | 22.99 → 18.70 | yes |
+| icv1-f2m57-tm747311035-c1f545af | portable | 52.8 | 40.6 | 1.298 | 19.1 | 17.6 | 91.5 | 79.7 | 1.149 | 1.194 | 15.73 → 13.18 | yes |
+| icv1-f2m59-tm943548413-98844ecc | portable | 868.5 | 626.4 | 1.387 | 324.8 | 287.8 | 1275.9 | 999.5 | 1.277 | 1.259 | 22.94 → 18.23 | yes |
+| icv1-f2m61-t158598901-ab42b6c5 | portable | 4733.1 | 3507.3 | 1.349 | 534.6 | 485.3 | 5377.9 | 4106.7 | 1.310 | 1.311 | 38.18 → 29.12 | yes |
+| icv1-f2m41-tm2308219-7f48b14a | avx512 | 57.8 | 57.7 | 1.002 | 15.8 | 16.5 | 89.4 | 90.6 | 0.986 | 0.993 | 10.99 → 11.06 | yes |
+| icv1-f2m47-t22705043-f4e44623 | avx512 | 12.8 | 12.9 | 0.993 | 9.3 | 9.7 | 33.5 | 35.5 | 0.945 | 0.993 | 9.52 → 9.58 | yes |
+| icv1-f2m53-tm56619371-dac20a85 | avx512 | 461.4 | 473.9 | 0.974 | 230.0 | 227.9 | 749.9 | 761.8 | 0.984 | 0.990 | 14.89 → 15.04 | yes |
+| icv1-f2m57-tm747311035-c1f545af | avx512 | 29.3 | 29.5 | 0.992 | 14.7 | 14.7 | 62.3 | 62.8 | 0.993 | 1.014 | 10.76 → 10.62 | yes |
+| icv1-f2m59-tm943548413-98844ecc | avx512 | 472.1 | 469.7 | 1.005 | 241.0 | 240.6 | 788.2 | 788.2 | 1.000 | 1.043 | 14.36 → 13.77 | yes |
+| icv1-f2m61-t158598901-ab42b6c5 | avx512 | 2624.8 | 2609.4 | 1.006 | 406.3 | 414.0 | 3132.6 | 3121.5 | 1.004 | 1.020 | 22.29 → 21.85 | yes |
 
 ### A/A spread
 
@@ -94,19 +98,19 @@ The A/A spread is max/min − 1 over the baseline's 6 A/A runs:
 
 | size | portable collect | portable total | avx512 collect | avx512 total |
 |:--|--:|--:|--:|--:|
-| k0n41 | 56.9% | 43.2% | 10.9% | 8.9% |
-| k1n47 | 10.3% | 8.8% | 14.2% | 8.2% |
-| k0n53 | 14.1% | 10.0% | 8.4% | 6.5% |
-| k0n57 | 15.3% | 8.8% | 7.8% | 6.1% |
-| k1n59 | 6.4% | 4.8% | 4.5% | 5.7% |
-| k0n61 | 11.6% | 9.9% | 5.9% | 4.7% |
+| icv1-f2m41-tm2308219-7f48b14a | 56.9% | 43.2% | 10.9% | 8.9% |
+| icv1-f2m47-t22705043-f4e44623 | 10.3% | 8.8% | 14.2% | 8.2% |
+| icv1-f2m53-tm56619371-dac20a85 | 14.1% | 10.0% | 8.4% | 6.5% |
+| icv1-f2m57-tm747311035-c1f545af | 15.3% | 8.8% | 7.8% | 6.1% |
+| icv1-f2m59-tm943548413-98844ecc | 6.4% | 4.8% | 4.5% | 5.7% |
+| icv1-f2m61-t158598901-ab42b6c5 | 11.6% | 9.9% | 5.9% | 4.7% |
 
 ### Against the declared criteria
 
 - **Portable.** At five of the six sizes, collection and total fall by more
   than the A/A spread. The n47 total, 1.094 against 8.8%, clears it narrowly.
-  - At **k0n41 the gain is not established**: 1.108 and 1.092 sit inside a
-    56.9% and 43.2% spread.
+  - On `icv1-f2m41-tm2308219-7f48b14a` **the gain is not established**: 1.108
+    and 1.092 sit inside a 56.9% and 43.2% spread.
   - That spread comes from two slow baseline A/A runs on a 100 ms process,
     148 and 119 ms against 94–102.
   - The ratio grows with `n`, as the key's share of the scan does.
@@ -128,8 +132,8 @@ They are deterministic. The reports are in `runs/callgrind/`.
 
 | size | baseline Ir | candidate Ir | ratio | outputs |
 |:--|--:|--:|--:|:--|
-| k0n53 | 13,354,911,993 | 11,082,479,113 | 1.205 | identical |
-| k0n61 | 65,219,299,765 | 46,663,161,498 | 1.398 | identical |
+| icv1-f2m53-tm56619371-dac20a85 | 13,354,911,993 | 11,082,479,113 | 1.205 | identical |
+| icv1-f2m61-t158598901-ab42b6c5 | 65,219,299,765 | 46,663,161,498 | 1.398 | identical |
 
 `canon_in_place` is still 55% of the candidate's instructions at n61, about
 340 instructions a key. The generated code holds the eight lanes in memory: it
@@ -138,7 +142,7 @@ codegen rewrites were tried; none measurably beat it (below).
 
 ### Rho reference
 
-The run was `ic price --single-target --rho-seed 7` on k0n61, 3 interleaved
+The run was `ic price --single-target --rho-seed 7` on icv1-f2m61-t158598901-ab42b6c5, 3 interleaved
 rounds per arm, isolated, with none contended (`runs/rho/`).
 
 | arm | walk operations | rho online (ms) | IC online (ms) |
