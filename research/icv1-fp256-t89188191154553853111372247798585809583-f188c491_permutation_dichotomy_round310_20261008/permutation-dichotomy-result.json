@@ -1,0 +1,206 @@
+{
+  "schema": "p256-permutation-dichotomy-screen/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 310,
+  "execution_status": "complete",
+  "registered_factor_base": "FB1h2f8621cda105",
+  "half_turn_factor_base": "FB1h6255ce9746fe",
+  "dependencies": [
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_affine_log_orbit_round39_20261006/affine-log-orbit-result.json",
+      "bytes": 9211,
+      "sha256": "189e48a45ab2919dd3e279bf058940230c4a0461c745fba42dffb26f785ba079",
+      "schema": "p256.affine_log_orbit_screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_quotient_rigidity_round304_20261008/algebraic-quotient-rigidity-result.json",
+      "bytes": 12449,
+      "sha256": "c94e339eca07b96ea0ef890592fb13b80815f0baf52af0e6bd57de17dd46ac9c",
+      "schema": "p256-algebraic-quotient-rigidity-screen/v1"
+    },
+    {
+      "path": "research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_dickson_permutation_round309_20261008/dickson-permutation-result.json",
+      "bytes": 8204,
+      "sha256": "1fa17da4d11345f2dce55d6704355d193e081eae6912d3b45a9605e2efa32bc1",
+      "schema": "p256-dickson-permutation-screen/v1"
+    }
+  ],
+  "theorem_statement": "For H={h:1.h=0}, rank(h->(ell.h,T(ell).h))<2 iff T(ell)=a*ell+b*1; for nonconstant ell the rank is one, otherwise two.",
+  "s17_span_statement": "Differences of fixed eight-plus/nine-minus S17 sign rows span H because sign swaps yield 2*(e_i-e_j) and the subgroup order is odd.",
+  "exhaustive_toy_census": {
+    "modulus": 5,
+    "width": 4,
+    "projective_profiles": 156,
+    "nonconstant_profiles": 155,
+    "permutations": 24,
+    "profile_permutation_pairs": 3744,
+    "degenerate_constant_pairs": 24,
+    "affine_nonconstant_pairs": 600,
+    "nonaffine_pairs": 3120,
+    "rank_zero_pairs": 24,
+    "rank_one_pairs": 600,
+    "rank_two_pairs": 3120,
+    "affine_rank_equivalence_discrepancies": 0,
+    "forward_reverse_rank_discrepancies": 0,
+    "bucket_size_discrepancies": 0,
+    "fixed_sign_difference_span_rank": 3,
+    "fixed_sign_span_discrepancies": 0,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "operations": {
+      "affine_solves": 3744,
+      "rank_matrices": 7488,
+      "affine_rows_enumerated": 468000,
+      "bucket_insertions": 468000,
+      "fixed_sign_span_matrices": 3744
+    }
+  },
+  "p256_control": {
+    "scalar_labelled_control": true,
+    "columns": 17,
+    "fixed_sign_difference_span_rank_mod_2_61_minus_1": 16,
+    "fixed_sign_difference_span_rank_mod_p256_n": 16,
+    "half_turn_affine_transport_exists_mod_2_61_minus_1": false,
+    "half_turn_affine_transport_exists_mod_p256_n": false,
+    "identity_affine_a": "1",
+    "identity_affine_b": "0",
+    "identity_difference_image_rank": 1,
+    "half_turn_difference_image_rank": 2,
+    "planted_augmented_rank": 2,
+    "introduced_auxiliary_log_vector": false,
+    "identity_unaligned_product_target_reachable": false,
+    "identity_aligned_target_direct_log": "1",
+    "log_vector_sha256": "89a616290a429d89db0a77436fa22723fedd88542e8a114d8a12b5aa9272accb",
+    "coefficient_vector_sha256": "40a65ecdf180bb31c900185a6b0f6df1bbdc5296182f826419a873e44cf7cff0",
+    "scalar_replay_failures": 0,
+    "group_replay_failures": 0,
+    "all_points_on_curve": true,
+    "rank_receipts": [
+      {
+        "variant": "non-affine half-turn difference image",
+        "modulus": "2^61-1",
+        "rows": 16,
+        "columns": 2,
+        "forward_rank": 2,
+        "reversed_rank": 2,
+        "expected_rank": 2
+      },
+      {
+        "variant": "S17 fixed-sign difference span",
+        "modulus": "2^61-1",
+        "rows": 16,
+        "columns": 17,
+        "forward_rank": 16,
+        "reversed_rank": 16,
+        "expected_rank": 16
+      },
+      {
+        "variant": "affine identity difference image",
+        "modulus": "2^61-1",
+        "rows": 16,
+        "columns": 2,
+        "forward_rank": 1,
+        "reversed_rank": 1,
+        "expected_rank": 1
+      },
+      {
+        "variant": "planted (Q,G) augmented rows",
+        "modulus": "2^61-1",
+        "rows": 2,
+        "columns": 19,
+        "forward_rank": 2,
+        "reversed_rank": 2,
+        "expected_rank": 2
+      },
+      {
+        "variant": "non-affine half-turn difference image",
+        "modulus": "p256-n",
+        "rows": 16,
+        "columns": 2,
+        "forward_rank": 2,
+        "reversed_rank": 2,
+        "expected_rank": 2
+      },
+      {
+        "variant": "S17 fixed-sign difference span",
+        "modulus": "p256-n",
+        "rows": 16,
+        "columns": 17,
+        "forward_rank": 16,
+        "reversed_rank": 16,
+        "expected_rank": 16
+      },
+      {
+        "variant": "affine identity difference image",
+        "modulus": "p256-n",
+        "rows": 16,
+        "columns": 2,
+        "forward_rank": 1,
+        "reversed_rank": 1,
+        "expected_rank": 1
+      },
+      {
+        "variant": "planted (Q,G) augmented rows",
+        "modulus": "p256-n",
+        "rows": 2,
+        "columns": 19,
+        "forward_rank": 2,
+        "reversed_rank": 2,
+        "expected_rank": 2
+      }
+    ],
+    "rank_operations": {
+      "matrices": 16,
+      "rows_materialized": 200,
+      "entries_materialized": 1496,
+      "pivot_scans": 312,
+      "inversions": 84,
+      "multiplications": 2084,
+      "subtractions": 1308
+    },
+    "group_operations": {
+      "points_constructed": 18,
+      "equations_replayed": 2,
+      "scalar_multiplications": 52,
+      "scalar_bits_processed": 13252,
+      "scalar_one_bits": 6661,
+      "point_additions": 34
+    }
+  },
+  "imported_boundary": {
+    "half_turn_factor_base": "FB1h6255ce9746fe",
+    "half_turn_columns": 65724,
+    "s17_product_target_mean_log2": -271.27033355273744,
+    "minimum_product_cover_arity": 40,
+    "product_cover_balanced_list_log2": 279.0010983276425,
+    "product_cover_ratio_to_rho_log2": 151.12258670455674,
+    "structured_degree_of_regularity": null
+  },
+  "structured_residual_degree_of_regularity": null,
+  "relations_reported_on_actual_factor_base": 0,
+  "full_depth_unplanted_p256_relation_attempted": false,
+  "exploration_boundary": "Arbitrary column permutations and the complete linear span of fixed-sum S17 coefficient differences; nonlinear restricted subsets remain open.",
+  "transfer_assessment_semantic_sha256": "332fb3eb73e3a8f0e7e890215f037fcb7872f000d35a999a768a93fc5c7f61b8",
+  "gates": {
+    "dependency_hashes_and_schemas_checked": true,
+    "complete_toy_permutation_census": true,
+    "affine_transport_iff_rank_one_verified": true,
+    "fixed_s17_sign_differences_span_sum_zero_hyperplane": true,
+    "p256_dual_field_ranks_and_group_replays_passed": true,
+    "one_dimensional_nonaffine_two_row_image": false,
+    "actual_nonlabelled_below_rho_correspondence": false,
+    "complete_relation_decomposition_and_recovery": false,
+    "structured_residual_degree_at_most_5": false,
+    "parity_at_or_below_rho": false,
+    "complete_collection_below_2_120": false,
+    "per_usable_relation_below_2_103": false,
+    "peak_materialized_storage_below_2_50": false,
+    "discarded_probabilistic_branches_counted_as_exhaustive": false,
+    "promoted": false
+  },
+  "classification": "same-base-permutation/rank-one-iff-affine/rank-two-product-image/parity-blocked",
+  "dominant_obstruction": "For every same-base column permutation, the joint image on the complete fixed-sum S17 difference span has rank one exactly when the transported log vector is affine in the original logs. That case is impossible for an unaligned product target or is a direct target-log witness. Every non-affine permutation has rank two and no global linear quotient below the product image. Round 309's exact S17 product-target mean remains 2^-271.270334 and its derived-base degree remains unset.",
+  "decision": "Reject unrestricted same-base column permutations as a rho-parity escape. Keep only nonlinear restricted coefficient families open, and require exhaustive retained-yield accounting, two useful rows, degree at most five, and complete below-rho recovery before promotion.",
+  "semantic_evidence_sha256": "020616e5db516d7643ba50847726b3ee1ca8eb71d5ea84673591159dcbf9f3fa",
+  "result_json_bytes": 8301
+}
