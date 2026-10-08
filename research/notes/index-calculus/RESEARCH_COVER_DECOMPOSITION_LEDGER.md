@@ -1368,3 +1368,48 @@ from a trace sample alone, without the `2q² + 2q` enumeration, and §18.2's
 `p = 43` hold-out becomes a cheap second test.  If it fails, the
 characterization stays open.  **Class: exploratory → candidate**; nothing
 here is a claim until V1–V3 are read.
+
+## 19. The depth-1 refusal, wired into the §17 walk, and what the exhaustive census says about §18.6's R-v2 (2026-10-08; `experiments/41_jv_refuse_depth1/`)
+
+**R-v2 against exhaustive data.**  Independently of §18.6, an exhaustive
+census of every full-2-torsion `j` over `F_{p⁶}` at `p ∈ {5, 7, 11, 13, 17,
+19}` (`research/jv_weak_class_law_20261007/`, PRs #1556 and #1563 on
+`main`; `p = 13, 17, 19` held out there before they were read) gives, in
+§18.6's terms:
+
+- **Necessity holds exactly.**  No class with `v₂(t² − 4q³) = 5` holds a
+  weak curve: 3,690 such classes and 4,871,062 curves at six sizes, zero
+  exceptions, `p = 19` included (1,625 classes, 2,941,225 curves).  So V1
+  is settled at 0 % rather than within 1 %.
+- **Sufficiency does not hold as an "iff".**  Of the classes with
+  `v₂(t² − 4q³) ≥ 6`, those holding a weak curve are 92 % (`p = 5`), 86 %
+  (`7`), 90 % (`11`), 92 % (`13`), 95 % (`17`) and 95 % (`19`); the
+  exceptions are not small classes.  At `p = 19`: 1,545 of 1,624.
+- **The heuristic in §18.6 is not the mechanism.**  Weak curves with no
+  halvable 2-torsion point exist at height 1 in every class of depth ≥ 2
+  measured (213 at `p = 7`, 1,088 at `p = 11`), while depth-1 craters hold
+  none in either halvability pattern.  Extra rational 2-power torsion on
+  the weak curve itself is therefore not what excludes depth 1; the
+  statement to prove is the congruence on the class, `64 | t² − 4q³` for
+  every weak curve, with `t ≡ ±2 (mod 16)` excluded for `p ≡ ±3 (mod 8)`
+  and `t ≡ ±6 (mod 16)` excluded for `p ≡ ±1 (mod 8)`.
+
+**The refusal.**  `run_walk2` and `examples/jv_isogeny_walk.rs` gain
+`--refuse-depth1`: the trace the walk already computes decides the class
+before any component is enumerated (`v₂(4q³ − t²) = 5`), and a refused
+trial is charged its point count only.  Run on §17.5's grid, same seed,
+with and without the refusal.  The refusing run reproduces §17.5's success
+rates exactly at every size, as it must: the refused trials are exactly
+trials that §17's walk ran to exhaustion or cap.  Between 30 % and 48 % of
+random full-2-torsion starts are refused, at 2 % to 6 % of an admitted
+walk's cost; the mean cost per trial, every trial inside, falls by `4.5×`
+at `p = 7` and by two orders of magnitude by `p = 23`, because an exhausted
+walk enumerates the start's whole reachable closure.  On the admitted
+trials the walk succeeds in 60 % to 78 % of starts at `p ≤ 31` and 42 % at
+`p = 53`; what remains is §17.5's component-reach limit, which the refusal
+does not touch.  The table is in the experiment's `README.md`.
+
+**Class: engineering** for the walk, **boundary** for the reading of R-v2.
+No algorithm changed on the admitted trials; the route's `S / rho` does not
+move (the walk is under 1 % of the route at `p ≥ 251`, §18.4); nothing
+concerns a prime-field curve.
