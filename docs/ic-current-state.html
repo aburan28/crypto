@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 320 panels, one line each</summary>
+    <summary>Show all 321 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -506,6 +506,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-algebraic-quotient-rigidity-round304-20261008">P-256 Round 304: algebraic quotient symmetry retains the anchor</a> <span class="chip">exact rigidity audit / negative</span><br>Every rational algebraic self-map induces affine-scalar log transport x ↦ ax+b. A connected 164-column graph has rank 163 until a supplied independent scalar-labelled cycle solves the anchor.</li>
       <li><a href="./#p256-homogeneous-anchor-round305-20261008">P-256 Round 305: homogeneous structure conserves one log scale</a> <span class="chip">exact rank bound / negative</span><br>Every static homogeneous factor-base row lies in ell⊥, so a 164-column base has rank at most 163. Fixed-target decompositions remain projective until a known generator right-hand side fixes the scale.</li>
       <li><a href="./#p256-bucket-signature-round306-20261008">P-256 Round 306: one bucket carries one quotient signature</a> <span class="chip">exact signature-rank audit / negative</span><br>After a maximal homogeneous quotient, every decomposition in a fixed (a,b) walk bucket has signature (a+b·d,-b). Differences between bucket rows are static, so arbitrary occupancy adds at most one dimension.</li>
+      <li><a href="./#p256-event-provenance-round307-20261008">P-256 Round 307: derived rows conserve primitive rank</a> <span class="chip">exact provenance audit / negative</span><br>Modulo independently verified pre-event equations W0, all scalar, group-law, column, and charged affine post-processing of one primitive row r remains in W0+span(r). Syntactic row multiplicity cannot replace a second equality.</li>
     </ol>
   </details>
 <!-- END panel-index -->
