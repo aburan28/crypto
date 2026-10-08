@@ -1,0 +1,124 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-c3fa5d63-19e3-8854-6759-401316aed6f8, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: origin/main 18ca29769 + claude/ecc2k130-sigma-table d503383da
+=== build baseline BATCH=16
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic baseline
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration baseline
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build b32 BATCH=32
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic b32
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration b32
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build invpoly2 BATCH=16 PACKED_INV_POLY=2
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic invpoly2
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration invpoly2
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+=== build fromreduced BATCH=16 PACKED_FROM_REDUCED=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+=== arithmetic fromreduced
+PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases
+PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs
+PASS: 18194 GPU polynomial products, including all 17161 basis pairs
+PASS: 18194 GPU paired polynomial products against independent multiplication
+PASS: 1157 GPU polynomial squares against independent multiplication and long division
+PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing
+PASS: 3112 GPU Frobenius table lookups through shared memory against the network path
+=== integration fromreduced
+PASS: DP replay across launch boundaries, restart and checkpoint resume
+PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved
+PASS: overdue walks restart without false distinguished-point reports
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 4.894 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 4.894 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 4.909 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed sigma fused: 1
+packed sigma fused late y: 0
+  finished: 4.907 M it/s, 1709477 distinguished points (300 verified against the reference, 0 dropped)
+baseline 1709477 records sha256 7e0e8c90a7a1256c4f2c7f5ad4f23d5334de025a82590639f25516c0be25de92
+b32 1709477 records IDENTICAL
+invpoly2 1709477 records IDENTICAL
+fromreduced 1709477 records IDENTICAL
+PASS: sorted corpus identity for every arm
+PASS: arithmetic, integration, replay and corpus gates
+warmup	baseline	0	1	baseline	16338.300	2332, 558.23, 51
+warmup	b32	0	1	b32	13432.189	2385, 554.72, 58
+warmup	invpoly2	0	1	invpoly2	16102.457	2302, 540.98, 60
+warmup	fromreduced	0	1	fromreduced	15995.191	2302, 561.27, 63
+ab	b32	1	1	baseline	15980.984	2295, 572.30, 65
+ab	b32	1	2	b32	13421.334	2392, 534.94, 62
+ab	b32	2	1	b32	13421.770	2347, 542.34, 64
+ab	b32	2	2	baseline	15914.981	2287, 532.83, 64
+ab	b32	3	1	baseline	15912.325	2280, 536.59, 65
+ab	b32	3	2	b32	13427.980	2347, 574.12, 66
+ab	invpoly2	1	1	baseline	15903.485	2355, 534.19, 64
+ab	invpoly2	1	2	invpoly2	15978.991	2302, 556.08, 65
+ab	invpoly2	2	1	invpoly2	15982.020	2287, 538.91, 64
+ab	invpoly2	2	2	baseline	15912.280	2280, 564.11, 68
+ab	invpoly2	3	1	baseline	15912.391	2287, 578.03, 73
+ab	invpoly2	3	2	invpoly2	15984.206	2332, 534.41, 65
+ab	fromreduced	1	1	baseline	15916.912	2332, 530.24, 65
+ab	fromreduced	1	2	fromreduced	15907.519	2287, 556.75, 71
+ab	fromreduced	2	1	fromreduced	15918.339	2287, 525.30, 66
+ab	fromreduced	2	2	baseline	15913.368	2280, 546.76, 64
+ab	fromreduced	3	1	baseline	15912.223	2280, 554.39, 64
+ab	fromreduced	3	2	fromreduced	15916.596	2302, 564.50, 66
+b32          ratios ['0.839832', '0.843342', '0.843873'] median 0.843342 min 0.839832
+invpoly2     ratios ['1.004748', '1.004383', '1.004513'] median 1.004513 min 1.004383
+fromreduced  ratios ['0.999410', '1.000312', '1.000275'] median 1.000275 min 0.999410
+=== done

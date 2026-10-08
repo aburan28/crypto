@@ -1,0 +1,23 @@
+phase	arm	pair	order	variant	rateMps	gpuState
+warmup	baseline	0	1	baseline	16338.300	2332, 558.23, 51
+warmup	b32	0	1	b32	13432.189	2385, 554.72, 58
+warmup	invpoly2	0	1	invpoly2	16102.457	2302, 540.98, 60
+warmup	fromreduced	0	1	fromreduced	15995.191	2302, 561.27, 63
+ab	b32	1	1	baseline	15980.984	2295, 572.30, 65
+ab	b32	1	2	b32	13421.334	2392, 534.94, 62
+ab	b32	2	1	b32	13421.770	2347, 542.34, 64
+ab	b32	2	2	baseline	15914.981	2287, 532.83, 64
+ab	b32	3	1	baseline	15912.325	2280, 536.59, 65
+ab	b32	3	2	b32	13427.980	2347, 574.12, 66
+ab	invpoly2	1	1	baseline	15903.485	2355, 534.19, 64
+ab	invpoly2	1	2	invpoly2	15978.991	2302, 556.08, 65
+ab	invpoly2	2	1	invpoly2	15982.020	2287, 538.91, 64
+ab	invpoly2	2	2	baseline	15912.280	2280, 564.11, 68
+ab	invpoly2	3	1	baseline	15912.391	2287, 578.03, 73
+ab	invpoly2	3	2	invpoly2	15984.206	2332, 534.41, 65
+ab	fromreduced	1	1	baseline	15916.912	2332, 530.24, 65
+ab	fromreduced	1	2	fromreduced	15907.519	2287, 556.75, 71
+ab	fromreduced	2	1	fromreduced	15918.339	2287, 525.30, 66
+ab	fromreduced	2	2	baseline	15913.368	2280, 546.76, 64
+ab	fromreduced	3	1	baseline	15912.223	2280, 554.39, 64
+ab	fromreduced	3	2	fromreduced	15916.596	2302, 564.50, 66

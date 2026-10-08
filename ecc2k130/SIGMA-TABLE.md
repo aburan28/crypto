@@ -155,6 +155,28 @@ source hashes, and [walk-static-mix.json](benchmarks/sigma-table/walk-static-mix
 uses 32 rather than 64 launches per sample; the headline protocol above is
 the measurement of record.
 
+### One-knob star on the table build
+
+[benchmarks/sigma-table/gpujob-star.sh](benchmarks/sigma-table/gpujob-star.sh)
+takes the table build (batch 16, 512 threads, one block per SM) as baseline
+and changes one knob per arm. Every arm passes the arithmetic and
+integration suites and reproduces the baseline's 1,709,477-record replay
+corpus with the walk population held fixed. Three alternating pairs per arm
+at 32 launches, one RTX PRO 6000 (driver 580.95.05, a different allocation
+from the headline run):
+
+| arm | baseline B/s | arm B/s | paired ratios | median | decision |
+|---|---:|---:|---|---:|---|
+| `BATCH=32` | 15.912–15.981 | 13.421–13.428 | 0.839832, 0.843342, 0.843873 | 0.843342 | reject |
+| `PACKED_INV_POLY=2` | 15.903–15.912 | 15.979–15.984 | 1.004748, 1.004383, 1.004513 | 1.004513 | below gate |
+| `PACKED_FROM_REDUCED=1` | 15.912–15.917 | 15.908–15.918 | 0.999410, 1.000312, 1.000275 | 1.000275 | reject |
+
+Batch 32 doubles the per-thread state and loses a sixth of the rate, so the
+preset's batch 16 stands. The polynomial-basis inversion is a consistent
+small gain on top of the table, as it was in the fused star, but stays below
+the 1.015 promotion gate; the five-word inverse conversion is flat. Receipts
+under [benchmarks/sigma-table/star/](benchmarks/sigma-table/star/).
+
 ### Earlier preset
 
 The same change was first measured on the CUDA 13.0 software-multiplier
