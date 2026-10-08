@@ -2370,26 +2370,97 @@ pub(crate) fn build_inherited_macaulay_support_local(
             quadratic_generators,
         );
     }
-    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
-    for p in polys {
-        let rows = macaulay_rows_monos_with_mask(
-            std::slice::from_ref(p),
-            n_vars,
-            degree,
-            multiplier_mask & support(p),
-            None,
-        )?;
-        rows_monos.extend(rows);
-        if rows_monos.len() > max_f4_rows() {
-            return None;
+    let rows_monos = if F4_SUPPORT_LOCAL_STREAM.load(std::sync::atomic::Ordering::Relaxed) {
+        support_local_rows_stream(polys, n_vars, degree, multiplier_mask, max_f4_rows())?
+    } else {
+        let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+        for p in polys {
+            let rows = macaulay_rows_monos_with_mask(
+                std::slice::from_ref(p),
+                n_vars,
+                degree,
+                multiplier_mask & support(p),
+                None,
+            )?;
+            rows_monos.extend(rows);
+            if rows_monos.len() > max_f4_rows() {
+                return None;
+            }
         }
-    }
+        rows_monos
+    };
     if rows_monos.is_empty() {
         return Some((Vec::new(), Vec::new()));
     }
     let columns = macaulay_columns(&rows_monos)?;
     let matrix = pack_rows(&rows_monos, &columns);
     Some((columns, matrix))
+}
+
+/// The support-local row order and odd-multiplicity cancellation of the
+/// historical per-generator builder, using one product/row scratch pair
+/// and one multiplier schedule per distinct support-mask/degree-gap pair.
+fn support_local_rows_stream(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    row_cap: usize,
+) -> Option<Vec<Vec<u64>>> {
+    let mut rows = Vec::new();
+    let mut schedules: std::collections::HashMap<(u64, u32), std::rc::Rc<[u64]>> =
+        std::collections::HashMap::new();
+    let mut product = Vec::new();
+    let mut odd = Vec::new();
+    let full_mask = all_variable_mask(n_vars);
+    for polynomial in polys {
+        let polynomial_degree = polynomial
+            .terms
+            .iter()
+            .map(|term| term.mask.count_ones())
+            .max()
+            .unwrap_or(0);
+        if polynomial_degree > degree {
+            continue;
+        }
+        let gap = degree - polynomial_degree;
+        let support = polynomial
+            .terms
+            .iter()
+            .fold(0u64, |mask, term| mask | term.mask);
+        let local_mask = multiplier_mask & support;
+        let multipliers = schedules.entry((local_mask, gap)).or_insert_with(|| {
+            if local_mask == full_mask {
+                monomials_up_to_mask(local_mask, gap).into()
+            } else {
+                cached_monomials_up_to_mask(local_mask, gap)
+            }
+        });
+        for &multiplier in multipliers.iter() {
+            product.clear();
+            product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
+            product.sort_unstable();
+            odd.clear();
+            let mut read = 0;
+            while read < product.len() {
+                let mut end = read + 1;
+                while end < product.len() && product[end] == product[read] {
+                    end += 1;
+                }
+                if (end - read) % 2 == 1 {
+                    odd.push(product[read]);
+                }
+                read = end;
+            }
+            if !odd.is_empty() {
+                if rows.len() == row_cap {
+                    return None;
+                }
+                rows.push(odd.clone());
+            }
+        }
+    }
+    Some(rows)
 }
 
 fn build_inherited_macaulay_with_layout(
@@ -2924,6 +2995,8 @@ static F4_LAYOUT_HITS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU
 static F4_LAYOUT_MISSES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_DIRECT_FUSED_PACK: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_STREAM: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
@@ -3013,6 +3086,12 @@ pub fn f4_layout_stats_reset() {
 /// Set before a single-threaded diagnostic solve; the default is sorted.
 pub fn set_f4_direct_fused_pack(enabled: bool) {
     F4_DIRECT_FUSED_PACK.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Opt-in shared-scratch construction for inherited F4 support-local rows.
+/// Set before a single-threaded diagnostic solve; the default is historical.
+pub fn set_f4_support_local_stream(enabled: bool) {
+    F4_SUPPORT_LOCAL_STREAM.store(enabled, std::sync::atomic::Ordering::Relaxed);
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -5426,6 +5505,59 @@ mod tests {
         assert_eq!(cold.matrix, repaired.matrix);
         set_f4_direct_fused_pack(false);
         f4_layout_stats_reset();
+    }
+
+    #[test]
+    fn support_local_stream_matches_materialized_rows_and_cap() {
+        let n_vars = 5;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00001),
+                    F2BoolMono::from_mask(0b00011),
+                    F2BoolMono::from_mask(0b01000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00010),
+                    F2BoolMono::from_mask(0b00110),
+                    F2BoolMono::from_mask(0b10000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::zero(n_vars),
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b01111)], n_vars),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let mut old_rows = Vec::new();
+        for p in &polys {
+            let support = p.terms.iter().fold(0u64, |acc, term| acc | term.mask);
+            old_rows.extend(
+                macaulay_rows_monos_with_mask(
+                    std::slice::from_ref(p),
+                    n_vars,
+                    degree,
+                    mask & support,
+                    None,
+                )
+                .unwrap(),
+            );
+        }
+        let streamed = support_local_rows_stream(&polys, n_vars, degree, mask, old_rows.len());
+        assert_eq!(streamed.unwrap(), old_rows);
+        assert!(
+            support_local_rows_stream(&polys, n_vars, degree, mask, old_rows.len() - 1).is_none()
+        );
+
+        set_f4_support_local_stream(false);
+        let old = build_inherited_macaulay_support_local(&polys, n_vars, degree, mask, false);
+        set_f4_support_local_stream(true);
+        let new = build_inherited_macaulay_support_local(&polys, n_vars, degree, mask, false);
+        assert_eq!(old, new);
+        set_f4_support_local_stream(false);
     }
 
     #[test]
