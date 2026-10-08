@@ -1,0 +1,18 @@
+curves: [('E0', None, 'crater'), ('O00-000', 6998741, 'O00'), ('O01-000', 4926473, 'O01')] 
+T23 meta modulus: x^23 + x^5 + 1
+E0       enumerate seed=0 status=complete wall=0.155s
+E0       enumerate seed=1 status=complete wall=0.075s
+E0       enumerate seed=2 status=complete wall=0.073s
+E0       enumerate seed=3 status=complete wall=0.047s
+E0       groebner  seed=0 status=complete wall=21.273s
+E0       groebner  seed=1 status=complete wall=25.242s
+E0       groebner  seed=2 status=complete wall=24.641s
+E0       groebner  seed=3 status=complete wall=21.888s
+E0       sat       seed=0 status=complete wall=111.923s
+E0       sat       seed=1 status=complete wall=104.433s
+E0       sat       seed=2 status=complete wall=54.823s
+E0       sat       seed=3 status=complete wall=89.877s
+O00-000  enumerate seed=0 status=complete wall=0.933s
+O00-000  enumerate seed=1 status=complete wall=0.858s
+O00-000  enumerate seed=2 status=complete wall=1.522s
+O00-000  enumerate seed=3 status=complete wall=1.307s
