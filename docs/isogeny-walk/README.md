@@ -211,6 +211,12 @@ the sum of its inputs. A coordinate collision is retained as a discrepancy and
 is never replaced adaptively. The frozen continuation protocol is
 [`research/p256_j_windows_20261007/PROTOCOL.md`](../../research/p256_j_windows_20261007/PROTOCOL.md).
 
+The executed 64-row continuation passed generation, independent replay and an
+exact union audit: the prior million plus 64,000 new curves yielded 1,064,000
+distinct full-width j-invariants. The
+[result report](../../research/p256_j_windows_20261007/RESULTS.md) preserves
+the receipts, transfer boundary, visuals and the still-unset ECDLP speedup.
+
 ## Sizing
 
 Measured on a 14-core Apple M4 Pro, unisolated.  Treat these as estimates
