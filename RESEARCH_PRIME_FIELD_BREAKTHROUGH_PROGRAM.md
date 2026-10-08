@@ -114,6 +114,39 @@ that enumerates solutions costs ≥ `B^{m−1}`, which is enumeration again.
 Multiplicative-subgroup bases (`x^B = 1`) make `L` sparse but not
 lower-degree; `j = 0` orbits divide `B` by 3; neither changes the exponent.
 
+### 2.4 Including the linear algebra: which arities could work at all
+
+§2.1 asked only that the relation phase beat `√p`. Index calculus also
+needs `B` relations and a sparse solve costing `Θ(m·B²)` (Wiedemann on
+weight-`m` rows; nothing sub-quadratic is known for these random-sparse
+systems). Write the total as
+
+    cost(B) ≈ (m!/2^m) · p · T_dec / B^{m−1}  +  m · B²
+
+with `T_dec` the cost of one decomposition attempt. Minimising over `B`:
+
+| m | optimum `B` | total | beats `√p`? |
+|---|---|---|---|
+| 2 | `(p·T_dec)^{1/3}` | `≈ 3 (p·T_dec)^{2/3}` | **never**, even with `T_dec = 1` |
+| 3 | `(p·T_dec)^{1/4}` | `≈ 3.5 (p·T_dec)^{1/2}` | **never beats**; ties only if `T_dec = O(1)` |
+| 4 | `(p·T_dec)^{1/5}` | `≈ 4 (p·T_dec)^{2/5}` | yes iff `T_dec ≪ p^{1/4}` |
+| 5 | `(p·T_dec)^{1/6}` | `≈ 5 (p·T_dec)^{1/3}` | yes iff `T_dec ≪ p^{1/2}` |
+
+So a free `S₃` oracle would not help, a free `S₄` oracle would only tie rho,
+and the **first arity that could beat rho is `m = 4`**, which needs an `S₅`
+decomposition oracle (four unknowns, degree 8 in each) that is cheap at
+`B ≈ p^{1/5}`, i.e. `δ ≈ 1/5`. The lattice reach there is `1/80` (§2.2):
+a 16× shortfall in the exponent at the first arity where success is even
+arithmetically possible. The §4.1 target is therefore sharper than
+"δ ≥ 1/2 for `S₃`": it is **a small-root method for `S₅` at δ ≈ 1/5**, with
+`δ ≥ 1/4 for S₄` the intermediate milestone that would still only tie.
+
+**Lattice-assisted meet-in-the-middle does not escape this.** With the
+measured reach the lattice can decide "`z ∈ {x(F_i + F_j)}`" in polynomial
+time only for `B ≤ p^{1/6}`; enumerating the other `m − 2` summands then
+costs `B^{m−2}` per trial against `p/B^m` trials, i.e. `p/B² = p^{2/3}` per
+relation for every `m` — the reach cap on `B` makes the arity irrelevant.
+
 ## 3. Probes run on 2026-10-08
 
 ### 3.1 Probe A — preprocessing rho on prime-field curves (control)
@@ -279,10 +312,13 @@ baseline it is measured against.
 1. **Small roots beyond Coppersmith for the Semaev shape.** The `S_{m+1}`
    polynomials are not generic: they are symmetric, of a fixed resultant
    form, and their small-root instances come with the *curve structure*
-   (the roots are x-coordinates of points whose sum is fixed). A method that
-   reaches `δ ≥ 1/(2(m−1))` for them would be a breakthrough.
-   *Falsifier:* Probe B's framework with any proposed lattice/embedding; the
-   target row is `δ ≥ 1/4` at `m = 3` on a 40-bit curve. Nothing in the
+   (the roots are x-coordinates of points whose sum is fixed). With the
+   linear algebra included (§2.4) the breakthrough target is an `S₅` oracle
+   at `δ ≈ 1/5`; an `S₄` oracle at `δ ≥ 1/4` would tie rho and is the
+   intermediate milestone; nothing at `S₃` can help.
+   *Falsifier:* Probe B/C's framework with any proposed lattice/embedding;
+   the milestone row is `δ ≥ 1/4` at `m = 3` on a 40-bit curve, the target
+   row `δ ≈ 1/5` at `m = 4`. Nothing in the
    literature (Coppersmith 1996, Jochemsz–May 2006, Petit–Kosters–Messeng
    2016) reaches it.
 2. **A factor base with sub-`B`-degree membership.** Needs a subset of
