@@ -1,0 +1,61 @@
+{
+  "schema": "p256-dickson-permutation-transfer-assessment/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "screening_round": 309,
+  "skill_profile": "transfer",
+  "required_companion_resources_available": false,
+  "typed_correspondence_graph": [
+    "FB1h2f8621cda105 --[x and -x intersection]--> FB1h6255ce9746fe",
+    "column i --[half-turn]--> column pi(i), with pi^2=id",
+    "coefficient row c --[product sum]--> (sum c_i P_i, sum c_i P_pi(i))",
+    "product target (Q,G) --[exact hit]--> target-coupling row plus generator anchor on one log vector",
+    "pi eigenspace restriction --> dependent coordinates and useful rank one"
+  ],
+  "obligations": [
+    {
+      "name": "actual-base closure",
+      "status": "supported",
+      "evidence": "65724 columns form 32862 exact half-turn cycles with zero failures.",
+      "scope": "Complete registered-base rebuild."
+    },
+    {
+      "name": "two-row information rank",
+      "status": "supported only as planted control",
+      "evidence": "The 17-column labelled control replays rank two with no auxiliary unknown block.",
+      "scope": "Information accounting, not construction."
+    },
+    {
+      "name": "S17 product target",
+      "status": "fails",
+      "evidence": "Mean hits are 2^-271.270334; the signed domain does not cover GxG.",
+      "scope": "Uniform product-image projection."
+    },
+    {
+      "name": "product-cover arity and cost",
+      "status": "fails",
+      "evidence": "First covering arity is 40, with balanced list 2^279.001098 and ratio 2^151.122587 to rho.",
+      "scope": "Exact domain and balanced MITM list widths; modeled image uniformity."
+    },
+    {
+      "name": "derived-base degree",
+      "status": "unknown",
+      "evidence": "The parent residual degree four is not transferred to the half-turn intersection.",
+      "scope": "New derived factor base."
+    }
+  ],
+  "controls": [
+    "Complete toy census covers 960400 states: 16 eigenprofiles and 384 rank-two profiles.",
+    "The registered 131,458-column dump is rebuilt twice before the derived base is emitted in ecbench.factor_base_dump/v1-wide format.",
+    "All dependency hashes, schemas, identities, point-set hashes, and imported conclusions are checked."
+  ],
+  "cost_accounting": [
+    "Measured: complete base rebuild, closure dictionary, toy census, planted P-256 replay, rank operations, isolation telemetry, and artifact sizes.",
+    "Modeled: uniform target-image means and balanced MITM list widths; these are explicitly not attack measurements.",
+    "Unset: unplanted product-target event, derived-base degree, relation yield, sparse linear algebra, recovery, and complete attack cost."
+  ],
+  "exploration_boundary": "Exact for the Dickson exponent half-turn x->-x and its closed intersection; does not cover arbitrary column permutations or non-Dickson correspondences.",
+  "weakest_open_obligation": "Find a same-base non-scalar correspondence whose two-row target image is searchable in order sqrt(n), while preserving degree at most five.",
+  "narrowest_supported_finding": "The Dickson half-turn solves the information-rank defect of an independent product lift, but the registered S17 domain is far too small for its product target; the first covering arity requires order-n balanced lists and has unknown degree.",
+  "semantic_evidence_sha256": "3a25fab3bfd548dee4af0a16fdcb0f95747b17a1ac8bdf197d2267f3461591b9",
+  "assessment_json_bytes": 3465
+}
