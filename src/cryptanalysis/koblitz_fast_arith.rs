@@ -27,6 +27,7 @@
 //!   here can only cost performance, never soundness.
 
 use crate::binary_ecc::{BinaryPoint, IrreduciblePoly};
+use crate::cryptanalysis::semaev_decomp::{Gf2, Gf2_128};
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// Affine point on a binary curve with single-word coordinates.
@@ -388,6 +389,12 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
     if n > 20 {
         return None;
     }
+    for v in 0..(1u64 << n) {
+        if (gf.sqr(v) ^ v) == c {
+            return Some(v);
+        }
+    }
+    None
     (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
 }
 
@@ -421,6 +428,218 @@ pub fn point_to_words(curve: &FastBinaryCurve, p: &BinaryPoint) -> Option<FastPo
                 return None;
             }
             Some(Some((curve.word(x), curve.word(y))))
+        }
+    }
+}
+
+// ── Single-`u128`-word binary curves (`64 < n ≤ 127`) ───────────────
+//
+// Twin of the `u64` fast path with identical group-law semantics; the
+// `u64` code above is deliberately untouched so every `n ≤ 63`
+// fixture stays byte-identical.  Subgroup scalars still fit `u64`
+// (every admitted `r < 2^64` through `n = 127`), so only field
+// elements move to the wider word.
+
+/// An affine point as two `u128` field words; `None` is infinity.
+pub type FastPoint128 = Option<(u128, u128)>;
+
+/// Single-`u128`-word binary curve matching
+/// [`crate::binary_ecc::curve`] semantics.
+#[derive(Clone, Debug)]
+pub struct FastBinaryCurve128 {
+    /// Field `F_{2^n}` on `u128` words.
+    pub gf: Gf2_128,
+    /// Extension degree.
+    pub n: u32,
+    /// Curve coefficient `a` as a field element (0 or 1 on Koblitz curves).
+    pub a: u128,
+}
+
+impl FastBinaryCurve128 {
+    /// Build from an irreducible polynomial and coefficient `a`.
+    ///
+    /// Returns `None` unless `64 < n ≤ 127` (the `u64` twin handles
+    /// `n ≤ 63`; wider fields need a bigger word still).
+    pub fn new(irr: &IrreduciblePoly, a: u128) -> Option<Self> {
+        if irr.degree <= 63 || irr.degree > 127 {
+            return None;
+        }
+        let gf = Gf2_128::new(irr);
+        let n = irr.degree;
+        let a = a & gf.mask;
+        Some(Self { gf, n, a })
+    }
+
+    /// Project a general field element down to one wide word.
+    #[inline]
+    pub fn word(&self, e: &crate::binary_ecc::F2mElement) -> u128 {
+        self.gf.from_element(e) & self.gf.mask
+    }
+
+    /// Lift one wide word back to the general element type.
+    pub fn element(&self, w: u128) -> crate::binary_ecc::F2mElement {
+        self.gf.to_element(w & self.gf.mask)
+    }
+
+    /// Exact affine addition, bit-identical to `point_add`.
+    pub fn add(&self, p: FastPoint128, q: FastPoint128) -> FastPoint128 {
+        match (p, q) {
+            (None, r) | (r, None) => r,
+            (Some((x1, y1)), Some((x2, y2))) => {
+                if x1 == x2 {
+                    if (y1 ^ y2) == x1 {
+                        return None;
+                    }
+                    return self.double(x1, y1);
+                }
+                let gf = &self.gf;
+                let dx = x1 ^ x2;
+                let dy = y1 ^ y2;
+                let lambda = gf.mul(dy, gf.inv(dx));
+                let lambda_sq = gf.sqr(lambda);
+                let x3 = lambda_sq ^ lambda ^ x1 ^ x2 ^ self.a;
+                let y3 = gf.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+                Some((x3, y3))
+            }
+        }
+    }
+
+    /// Exact affine doubling, bit-identical to `point_double`.
+    pub fn double(&self, x1: u128, y1: u128) -> FastPoint128 {
+        if x1 == 0 {
+            return None;
+        }
+        let gf = &self.gf;
+        let lambda = x1 ^ gf.mul(y1, gf.inv(x1));
+        let lambda_sq = gf.sqr(lambda);
+        let x3 = lambda_sq ^ lambda ^ self.a;
+        let y3 = gf.sqr(x1) ^ gf.mul(lambda ^ 1, x3);
+        Some((x3, y3))
+    }
+
+    /// Negation: `-(x, y) = (x, x + y)`.
+    #[inline]
+    pub fn neg(p: FastPoint128) -> FastPoint128 {
+        p.map(|(x, y)| (x, x ^ y))
+    }
+
+    /// Both curve points with the given `x`-coordinate (Artin-Schreier
+    /// lift, same selection rule as the twin).
+    pub fn points_with_x(&self, b: u128, x: u128) -> Vec<FastPoint128> {
+        let gf = &self.gf;
+        let x = x & gf.mask;
+        let b = b & gf.mask;
+        if x == 0 {
+            return vec![Some((0, gf.sqr_k(b, self.n - 1)))];
+        }
+        let x_inv_sq = gf.sqr(gf.inv(x));
+        let rhs = x ^ self.a ^ gf.mul(b, x_inv_sq);
+        let u = match artin_schreier_root_128(gf, self.n, rhs) {
+            Some(u) => u,
+            None => return Vec::new(),
+        };
+        let p = Some((x, gf.mul(x, u)));
+        let np = Self::neg(p);
+        if p == np {
+            vec![p]
+        } else {
+            vec![p, np]
+        }
+    }
+
+    /// Double-and-add scalar multiplication, bit-identical to
+    /// [`crate::binary_ecc::curve::scalar_mul`].
+    pub fn scalar_mul(&self, p: FastPoint128, k: &num_bigint::BigUint) -> FastPoint128 {
+        if k.bits() == 0 {
+            return None;
+        }
+        let mut result: FastPoint128 = None;
+        for i in (0..k.bits()).rev() {
+            result = match result {
+                None => None,
+                Some((x, y)) => self.double(x, y),
+            };
+            if k.bit(i) {
+                result = self.add(result, p);
+            }
+        }
+        result
+    }
+}
+
+/// S3 x-roots on wide words: same half-trace construction as
+/// [`s3_x_roots`], `None` under the same conditions.
+pub fn s3_x_roots_128(gf: &Gf2_128, b: u128, left: u128, right: u128) -> Option<[u128; 2]> {
+    let b = b & gf.mask;
+    let s = left ^ right;
+    let a = gf.sqr(s);
+    let p = gf.mul(left, right);
+    let ps = gf.sqr(p);
+    if a == 0 {
+        if left == 0 {
+            return None;
+        }
+        let root = gf.mul(ps ^ b, gf.inv(p));
+        return Some([root, root]);
+    }
+    if ps == 0 {
+        let root = gf.sqr_k(gf.mul(b, gf.inv(a)), gf.n - 1);
+        return Some([root, root]);
+    }
+    let inv_combined = gf.inv(gf.mul(a, ps));
+    let q = gf.mul(p, gf.mul(ps, inv_combined));
+    let c = ps ^ b;
+    let d = gf.mul(gf.mul(c, a), gf.mul(a, inv_combined));
+    let mut half_trace = d;
+    let mut power = d;
+    for _ in 0..(gf.n - 1) / 2 {
+        power = gf.sqr(gf.sqr(power));
+        half_trace ^= power;
+    }
+    if (gf.sqr(half_trace) ^ half_trace) != d {
+        return None;
+    }
+    let first = gf.mul(q, half_trace);
+    Some([first, first ^ q])
+}
+
+/// One Artin-Schreier root of `u^2 + u = c` on wide words; odd `n`
+/// uses the half-trace root like the twin (`n = 71` is odd).
+pub fn artin_schreier_root_128(gf: &Gf2_128, n: u32, c: u128) -> Option<u128> {
+    let c = c & gf.mask;
+    let mut acc = c;
+    let mut tr = c;
+    for _ in 1..n {
+        acc = gf.sqr(acc);
+        tr ^= acc;
+    }
+    if tr == 1 {
+        return None;
+    }
+    debug_assert!(tr == 0, "trace must lie in F_2");
+    if n % 2 == 1 {
+        let mut t = c;
+        let mut a = c;
+        for _ in 0..(n - 1) / 2 {
+            a = gf.sqr(gf.sqr(a));
+            t ^= a;
+        }
+        return Some(t);
+    }
+    None
+}
+
+/// Convert a general point to wide words; `None` when it does not fit
+/// in one `u128` word.
+pub fn point_to_words_128(curve: &FastBinaryCurve128, p: &BinaryPoint) -> Option<FastPoint128> {
+    match p {
+        BinaryPoint::Infinity => Some(None),
+        BinaryPoint::Affine { x, y } => {
+            let (x, y) = (curve.word(x), curve.word(y));
+            if x >= (1u128 << curve.n.min(127)) || y >= (1u128 << curve.n.min(127)) {
+                return None;
+            }
+            Some(Some((x, y)))
         }
     }
 }
@@ -781,6 +1000,11 @@ mod tests {
                 // The slow kernel is known-None on every degenerate pair
                 // (its combined inversion hits zero) — pin that, so a
                 // future reader sees the divergence is deliberate.
+                if x == 0 || true {
+                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
+                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
+                    assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
+                }
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
@@ -962,6 +1186,194 @@ mod tests {
                 }
             }
             assert!(some_empty && some_full, "both verdicts occur at n={n}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod wide_tests {
+    use super::*;
+    use crate::binary_ecc::curve::{point_add, point_double, point_neg, scalar_mul};
+    use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+    use crate::cryptanalysis::binary_semaev::{binary_semaev_s3, solve_artin_schreier};
+    use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible_sparse_wide, KoblitzCurve};
+    use num_bigint::BigUint;
+
+    fn setup71() -> (KoblitzCurve, FastBinaryCurve128, crate::binary_ecc::IrreduciblePoly) {
+        let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
+        let irr = find_irreducible_sparse_wide(71).expect("n = 71 must resolve");
+        let fast = FastBinaryCurve128::new(&irr, 0).expect("wide fast curve at n = 71");
+        (curve, fast, irr)
+    }
+
+    /// Group-law agreement with the general implementation on random
+    /// subgroup points at n = 71.
+    #[test]
+    fn wide_group_law_matches_general_curve_at_71() {
+        let (curve, fast, _) = setup71();
+        let g = curve.generator().clone();
+        let mut state = 0x9E37_79B9_7F4A_7C15u64 ^ 71;
+        let mut next_scalar = || {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            BigUint::from(state >> 11) % &curve.subgroup_order + BigUint::from(1u32)
+        };
+        for _ in 0..60 {
+            let (d1, d2) = (next_scalar(), next_scalar());
+            let (p1, p2) = (scalar_mul(&curve.curve, &g, &d1), scalar_mul(&curve.curve, &g, &d2));
+            let (w1, w2) = (
+                point_to_words_128(&fast, &p1).unwrap(),
+                point_to_words_128(&fast, &p2).unwrap(),
+            );
+            let expect = |p: &BinaryPoint| point_to_words_128(&fast, p).unwrap();
+            assert_eq!(fast.add(w1, w2), expect(&point_add(&curve.curve, &p1, &p2)), "add");
+            assert_eq!(
+                fast.add(w1, FastBinaryCurve128::neg(w2)),
+                expect(&point_add(&curve.curve, &p1, &point_neg(&p2))),
+                "neg"
+            );
+            assert_eq!(
+                fast.double(w1.unwrap().0, w1.unwrap().1),
+                expect(&point_double(&curve.curve, &p1)),
+                "double"
+            );
+            let k = next_scalar();
+            assert_eq!(
+                fast.scalar_mul(w1, &k),
+                expect(&scalar_mul(&curve.curve, &p1, &k)),
+                "scalar_mul"
+            );
+        }
+    }
+
+    /// S3 roots from the twin zero the scalar Semaev polynomial and
+    /// agree with the scalar Artin-Schreier solver's verdicts.
+    #[test]
+    fn wide_s3_roots_zero_the_scalar_polynomial() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide;
+        let irr = find_irreducible_sparse_wide(71).unwrap();
+        let gf = Gf2_128::new(&irr);
+        let b = gf.from_element(&F2mElement::one(71));
+        let mut state = 0x1234_5678u128 ^ ((71u128) << 64);
+        let mut agree = 0usize;
+        for _ in 0..120 {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            let left = state & gf.mask;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            let right = state & gf.mask;
+            let e = |w: u128| gf.to_element(w);
+            let expected = solve_artin_schreier_s3_verdict(&e(left), &e(right), &e(b), &irr);
+            match s3_x_roots_128(&gf, b, left, right) {
+                Some([r1, r2]) => {
+                    assert!(
+                        binary_semaev_s3(&e(left), &e(right), &e(r1), &e(b), &irr).is_zero(),
+                        "root 1 zeroes S3"
+                    );
+                    assert!(
+                        binary_semaev_s3(&e(left), &e(right), &e(r2), &e(b), &irr).is_zero(),
+                        "root 2 zeroes S3"
+                    );
+                    agree += 1;
+                }
+                None => assert!(!expected, "missing root must mean no S3 zero"),
+            }
+        }
+        assert!(agree > 0, "some draws must have roots");
+    }
+
+    /// Whether S3(left, right, ·) has a root, decided by the scalar
+    /// solver: S_3(x1, x2, X) = A·X² + B·X + C via
+    /// `binary_semaev_s3_in_x3`, reduced to Artin-Schreier form.
+    fn solve_artin_schreier_s3_verdict(
+        x1: &F2mElement,
+        x2: &F2mElement,
+        b: &F2mElement,
+        irr: &crate::binary_ecc::IrreduciblePoly,
+    ) -> bool {
+        use crate::cryptanalysis::binary_semaev::binary_semaev_s3_in_x3;
+        let (a, bb, c) = binary_semaev_s3_in_x3(x1, x2, b, irr);
+        if a.is_zero() {
+            if bb.is_zero() {
+                // Degenerate constant: S3 = C.
+                return c.is_zero();
+            }
+            // Linear B·X + C = 0 with B ≠ 0: always a root.
+            return true;
+        }
+        if bb.is_zero() {
+            // X² = C/A: squaring is a bijection, always a root.
+            return true;
+        }
+        // X = (B/A)·u gives u² + u = (A·C)/B².
+        let rhs = a.mul(&c, irr).mul(
+            &bb.square(irr).flt_inverse(irr).expect("B ≠ 0 inverts"),
+            irr,
+        );
+        solve_artin_schreier(&rhs, 71, irr).is_some()
+    }
+
+    /// Artin-Schreier roots agree with the scalar solver at n = 71.
+    #[test]
+    fn wide_artin_schreier_matches_scalar_solver() {
+        let irr = find_irreducible_sparse_wide(71).unwrap();
+        let gf = Gf2_128::new(&irr);
+        let mut state = 0xABCDu128;
+        let mut hits = 0usize;
+        for _ in 0..80 {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            let c = state & gf.mask;
+            let ec = gf.to_element(c);
+            match artin_schreier_root_128(&gf, 71, c) {
+                Some(u) => {
+                    let eu = gf.to_element(u);
+                    assert!(
+                        solve_artin_schreier(&ec, 71, &irr).is_some(),
+                        "scalar solver must also find a root"
+                    );
+                    // u^2 + u = c.
+                    let check = eu.square(&irr).add(&eu);
+                    assert_eq!(check, ec, "root satisfies the equation");
+                    hits += 1;
+                }
+                None => assert!(
+                    solve_artin_schreier(&ec, 71, &irr).is_none(),
+                    "scalar solver must also find no root"
+                ),
+            }
+        }
+        assert!(hits > 0, "some draws must have roots");
+    }
+
+    /// `points_with_x` agrees with the general lift on random x.
+    #[test]
+    fn wide_points_with_x_match_general_lift() {
+        use crate::cryptanalysis::koblitz_index_calculus::points_with_x;
+        let (curve, fast, _) = setup71();
+        let b = fast.gf.from_element(&curve.curve.b);
+        let mut state = 0x55AAu128;
+        for _ in 0..40 {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            let x = (state & fast.gf.mask) as u128;
+            let got: std::collections::HashSet<(u128, u128)> = fast
+                .points_with_x(b, x)
+                .into_iter()
+                .flatten()
+                .collect();
+            let xe = fast.element(x);
+            let want: std::collections::HashSet<(u128, u128)> = points_with_x(&curve.curve, &xe)
+                .into_iter()
+                .map(|p| point_to_words_128(&fast, &p).unwrap().unwrap())
+                .collect();
+            assert_eq!(got, want, "lift set at x={x}");
         }
     }
 }

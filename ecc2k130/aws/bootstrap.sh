@@ -227,6 +227,8 @@ done
 echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# WORKER_CRED_ENV is set by the user-data preamble infra.sh prepends when no
+# instance profile is available: without it the units have no credential.
 # Pin family from the instance, not from a later IMDS/PATH miss inside systemd.
 ECC_INSTANCE_TYPE=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" \
     http://169.254.169.254/latest/meta-data/instance-type || true)
@@ -238,6 +240,7 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+${WORKER_CRED_ENV:-}
 ECC_INSTANCE_TYPE=$ECC_INSTANCE_TYPE
 ECC_DEVICE_NAME=$ECC_DEVICE_NAME
 EOF

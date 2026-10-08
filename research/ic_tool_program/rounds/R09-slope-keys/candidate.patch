@@ -1,0 +1,2217 @@
+From 7a1d132ec0131b36f40e5c66dc157f77e7005abc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:18:55 +0000
+Subject: [PATCH 1/8] koblitz_index_calculus: the collection scan pipelined
+ across trials
+
+A walked collection run now prepares trial t's rests and keys before it
+reads trial t-1's presence filter.  While trial t's keys are formed,
+sixteen at a time, trial t-1's filter words are prefetched into the
+second-level cache in proportion, so the probe pass finds them there
+instead of waiting on the last-level cache or memory one round trip at a
+time.  Each trial's answer depends only on its own point and scan, and
+trials are pushed in order, so the run's output is the one-call scan's;
+a test checks the first witness trial for trial, for a wrapping window
+and an index list, and that the paced keys equal the bulk keys.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs           |  52 +++
+ src/cryptanalysis/koblitz_index_calculus.rs | 384 +++++++++++++++++++-
+ 2 files changed, 428 insertions(+), 8 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index 3cf41272a..a3865ea25 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -785,6 +785,58 @@ impl FrobeniusCanon {
+         }
+     }
+ 
++    /// [`Self::point_keys`], the same keys, appended to `out` a few at a
++    /// time, with `between(done)` called after each group, `done` being
++    /// how many of `points` have their key so far.
++    ///
++    /// A collection run uses the pauses to prefetch the previous trial's
++    /// presence-filter words a few at a time, so that the fetches overlap
++    /// these keys' arithmetic.  Issued all at once they would queue on
++    /// the core's few outstanding-miss buffers and stall it.
++    #[inline]
++    pub(crate) fn point_keys_paced(
++        &self,
++        points: &[FastPoint],
++        out: &mut Vec<u64>,
++        mut between: impl FnMut(usize),
++    ) {
++        #[cfg(target_arch = "x86_64")]
++        if canon_simd_enabled() {
++            let mut chunks = points.chunks_exact(16);
++            let mut done = 0;
++            for chunk in &mut chunks {
++                let mut c = [0u64; 16];
++                for (slot, p) in c.iter_mut().zip(chunk) {
++                    *slot = self.coords(p.x);
++                }
++                // SAFETY: `canon_simd_enabled` checked AVX-512F.
++                let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
++                out.extend(
++                    chunk
++                        .iter()
++                        .zip(mins)
++                        .map(|(p, m)| if p.infinity { 0 } else { m + 1 }),
++                );
++                done += 16;
++                between(done);
++            }
++            for p in chunks.remainder() {
++                out.push(if p.infinity { 0 } else { self.canon(p.x) + 1 });
++            }
++            between(points.len());
++            return;
++        }
++        const GROUP: usize = 64;
++        let mut group = Vec::with_capacity(GROUP);
++        let mut done = 0;
++        for chunk in points.chunks(GROUP) {
++            self.point_keys(chunk, &mut group);
++            out.extend_from_slice(&group);
++            done += chunk.len();
++            between(done);
++        }
++    }
++
+     /// The canonical name together with the rotation that produced it:
+     /// `(c, t)` with `c = rotl^t(coords(x))`, `0 ≤ t < n`.  Two abscissae
+     /// with one name are Frobenius conjugates, and the shift says which
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index a2ee2bc03..b7dec775e 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3031,6 +3031,31 @@ fn prefetch(address: *const u64) {
+     let _ = address;
+ }
+ 
++/// [`prefetch`] into the second-level cache only.
++///
++/// A pipelined collection run fetches a whole trial's filter words, more
++/// lines than the first-level cache holds, a full trial before it reads
++/// them; the second level keeps them all until then.
++#[inline(always)]
++fn prefetch_l2(address: *const u64) {
++    #[cfg(target_arch = "x86_64")]
++    // SAFETY: as in `prefetch`.
++    unsafe {
++        std::arch::x86_64::_mm_prefetch::<{ std::arch::x86_64::_MM_HINT_T1 }>(address as *const i8);
++    }
++    #[cfg(target_arch = "aarch64")]
++    // SAFETY: as in `prefetch`.
++    unsafe {
++        std::arch::asm!(
++            "prfm pldl2keep, [{address}]",
++            address = in(reg) address,
++            options(readonly, nostack, preserves_flags)
++        );
++    }
++    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
++    let _ = address;
++}
++
+ /// Hash of a packed pair sum for the presence filter, independent of the
+ /// bucket index (which uses the key's high bits).
+ #[inline]
+@@ -3362,6 +3387,72 @@ pub struct ScanScratch {
+     pairs: Vec<(u32, u32)>,
+ }
+ 
++/// One trial's `m = 3` scan on a folded table with its rests and keys
++/// formed and its presence filter not yet read: the first half of
++/// [`PairSumTable::decompose_fast_scan`], held so that a collection run
++/// can form the next trial's keys while this trial's filter words come in
++/// from memory ([`PairSumTable::prepare_scan`],
++/// [`PairSumTable::finish_scan`]).
++#[derive(Clone, Debug)]
++pub struct PreparedScan {
++    /// The trial's point.
++    target: FastPoint,
++    /// The scanned summands, as [`PairSumTable::witnesses_fast_scan`]
++    /// maps an offset back to a base index: a cyclic window's start
++    /// (reduced mod the base) and the length before it wraps, or an
++    /// index scan's indices.
++    start: usize,
++    tail: usize,
++    indices: Vec<u32>,
++    cyclic: bool,
++    /// Summands gathered for an index scan.
++    gather: Vec<FastPoint>,
++    /// `target − P_k` without ordinates, and each one's slope.
++    rests: Vec<FastPoint>,
++    lambdas: Vec<u64>,
++    /// Workspace for the shared-inversion batch addition.
++    batch: BatchScratch,
++    /// Every rest's canonical key.
++    keys: Vec<u64>,
++    /// Offsets whose keys the filter admits.
++    admitted: Vec<usize>,
++    /// Pairs recovered for one key.
++    pairs: Vec<(u32, u32)>,
++}
++
++impl Default for PreparedScan {
++    fn default() -> Self {
++        Self {
++            target: FastPoint::INFINITY,
++            start: 0,
++            tail: 0,
++            indices: Vec::new(),
++            cyclic: true,
++            gather: Vec::new(),
++            rests: Vec::new(),
++            lambdas: Vec::new(),
++            batch: BatchScratch::default(),
++            keys: Vec::new(),
++            admitted: Vec::new(),
++            pairs: Vec::new(),
++        }
++    }
++}
++
++impl PreparedScan {
++    /// The base index scanned at `offset`.
++    #[inline]
++    fn summand(&self, offset: usize) -> usize {
++        if !self.cyclic {
++            self.indices[offset] as usize
++        } else if offset < self.tail {
++            self.start + offset
++        } else {
++            offset - self.tail
++        }
++    }
++}
++
+ /// How often each relation-matrix column has been mentioned, and the
+ /// factor-base points that would mention the least-mentioned ones.
+ ///
+@@ -5317,6 +5408,140 @@ impl PairSumTable {
+         (sum == target).then_some(idxs)
+     }
+ 
++    /// Whether [`Self::prepare_scan`] takes this `m = 3` scan: a folded
++    /// table with its canonical key, and a scan that is neither empty nor
++    /// the full sweep [`Self::witnesses_fast_scan`] hands elsewhere.
++    pub fn prepares(&self, scan: &Scan<'_>) -> bool {
++        let base = self.points.len();
++        self.fold
++            && self.canon.is_some()
++            && base != 0
++            && !scan.is_empty()
++            && !(matches!(scan, Scan::Cyclic { .. }) && scan.len() >= base)
++    }
++
++    /// The first half of [`Self::decompose_fast_scan`] at `m = 3`: every
++    /// rest `target − P_k` of the scan and its canonical key, with the
++    /// presence filter not yet read.  [`Self::finish_scan`] is the second
++    /// half, and the two return what [`Self::decompose_fast_scan`] does.
++    ///
++    /// `previous`, a scan prepared and not yet finished, has its filter
++    /// words fetched into the second-level cache while these keys are
++    /// formed, a few after each group of keys.  A collection run that
++    /// prepares trial `t + 1` before it finishes trial `t` then finds
++    /// trial `t`'s filter words in cache.  Read straight after its keys,
++    /// as the one-call scan reads them, each word is a round trip to the
++    /// last-level cache or memory, and the core holds too few misses in
++    /// flight for those to overlap well: the probe loop runs at the
++    /// memory's pace with the arithmetic units idle.
++    ///
++    /// The caller must have checked [`Self::prepares`].
++    pub fn prepare_scan(
++        &self,
++        target: FastPoint,
++        scan: Scan<'_>,
++        prep: &mut PreparedScan,
++        previous: Option<&PreparedScan>,
++    ) {
++        debug_assert!(self.prepares(&scan));
++        let base = self.points.len();
++        let canon = self.canon.as_ref().expect("prepares() checked the key");
++        prep.target = target;
++        prep.rests.clear();
++        prep.lambdas.clear();
++        prep.keys.clear();
++        prep.admitted.clear();
++        prep.indices.clear();
++        match scan {
++            Scan::Cyclic { start, len } => {
++                let start = start % base;
++                let tail = len.min(base - start);
++                prep.cyclic = true;
++                prep.start = start;
++                prep.tail = tail;
++                self.curve.add_many_lazy(
++                    target,
++                    &self.negated[start..start + tail],
++                    &mut prep.rests,
++                    &mut prep.lambdas,
++                    &mut prep.batch,
++                );
++                if tail < len {
++                    self.curve.add_many_lazy(
++                        target,
++                        &self.negated[..len - tail],
++                        &mut prep.rests,
++                        &mut prep.lambdas,
++                        &mut prep.batch,
++                    );
++                }
++            }
++            Scan::Indices(idxs) => {
++                prep.cyclic = false;
++                prep.indices.extend_from_slice(idxs);
++                prep.gather.clear();
++                prep.gather.reserve(idxs.len());
++                for &i in idxs {
++                    prep.gather.push(self.negated[i as usize]);
++                }
++                self.curve.add_many_lazy(
++                    target,
++                    &prep.gather,
++                    &mut prep.rests,
++                    &mut prep.lambdas,
++                    &mut prep.batch,
++                );
++            }
++        }
++        // The previous trial's words, spread over this trial's keys in
++        // proportion: after `done` of `len` keys, the first
++        // `done · |previous| / len` of its words have been asked for.
++        let earlier: &[u64] = previous.map_or(&[], |p| &p.keys);
++        let len = prep.rests.len().max(1);
++        let mut asked = 0usize;
++        canon.point_keys_paced(&prep.rests, &mut prep.keys, |done| {
++            let upto = (done * earlier.len()).div_ceil(len).min(earlier.len());
++            for &key in &earlier[asked..upto] {
++                prefetch_l2(&self.present[self.filter_word(key)]);
++            }
++            asked = asked.max(upto);
++        });
++    }
++
++    /// The second half of [`Self::decompose_fast_scan`] on a scan from
++    /// [`Self::prepare_scan`]: the first witness in scan order, checked
++    /// in the group, or `None`.  The same witness and the same check as
++    /// the one-call scan, which reads the filter a block at a time and
++    /// stops at its first witness; this reads the whole scan's filter
++    /// words first, since they are already in cache.
++    pub fn finish_scan(&self, prep: &mut PreparedScan) -> Option<Vec<usize>> {
++        prep.admitted.clear();
++        for (offset, &key) in prep.keys.iter().enumerate() {
++            if self.admitted(key) {
++                self.prefetch_bucket(key);
++                prep.admitted.push(offset);
++            }
++        }
++        let target = prep.target;
++        let mut found: Option<Vec<usize>> = None;
++        for &offset in &prep.admitted {
++            let rest = self
++                .curve
++                .finish_lazy(target, prep.rests[offset], prep.lambdas[offset]);
++            self.pairs_for_key(rest, prep.keys[offset], &mut prep.pairs);
++            if let Some(&(i, j)) = prep.pairs.first() {
++                found = Some(vec![i as usize, j as usize, prep.summand(offset)]);
++                break;
++            }
++        }
++        let idxs = found?;
++        let _check = measurement::relation_check_scope();
++        let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
++            self.curve.add(s, self.points[i])
++        });
++        (sum == target).then_some(idxs)
++    }
++
+     /// [`Self::decompose_fast_window`]'s enumerator.  For `m = 2` the
+     /// lookup is already `O(1)` and the window is ignored; for `m = 3`
+     /// the window bounds the third summand and witnesses may repeat a
+@@ -10483,18 +10708,52 @@ impl<'a> RelationCollector<'a> {
+             // buffers are allocated once per run rather than once
+             // per probe.
+             let mut scratch = ScanScratch::default();
++            // A trial whose scan the table prepares is finished one trial
++            // later, after the next trial's keys are formed, so its
++            // filter words arrive during that work (`prepare_scan`).
++            // Each trial's answer depends only on its own point and scan,
++            // and trials are pushed in order, so the run's output is the
++            // one-call scan's.
++            let mut stages = [PreparedScan::default(), PreparedScan::default()];
++            let mut pending: Option<(u64, u64, usize)> = None;
++            let mut next = 0usize;
+             for t in run_start..run_end {
+                 measurement::mark(Phase::Pdp);
+-                let pdp = if !point.infinity && a != 0 {
+-                    let scan = targets.scan(unit.seed, t, base);
+-                    PdpAttempt::bare(
+-                        pair.decompose_fast_scan(point, 3, scan, &mut scratch),
++                let live = !point.infinity && a != 0;
++                let scan = live.then(|| targets.scan(unit.seed, t, base));
++                let prepared = match scan {
++                    Some(scan) if pair.prepares(&scan) => {
++                        let [first, second] = &mut stages;
++                        let (now, before) = if next == 0 {
++                            (first, &*second)
++                        } else {
++                            (second, &*first)
++                        };
++                        pair.prepare_scan(point, scan, now, pending.map(|_| before));
++                        true
++                    }
++                    _ => false,
++                };
++                if let Some((pt, pa, stage)) = pending.take() {
++                    let pdp = PdpAttempt::bare(
++                        pair.finish_scan(&mut stages[stage]),
+                         PdpOutcome::Unresolved,
+-                    )
++                    );
++                    found.push(pt, pa, pdp, observe);
++                }
++                if prepared {
++                    pending = Some((t, a, next));
++                    next ^= 1;
+                 } else {
+-                    PdpAttempt::bare(None, PdpOutcome::Identity)
+-                };
+-                found.push(t, a, pdp, observe);
++                    let pdp = match scan {
++                        Some(scan) => PdpAttempt::bare(
++                            pair.decompose_fast_scan(point, 3, scan, &mut scratch),
++                            PdpOutcome::Unresolved,
++                        ),
++                        None => PdpAttempt::bare(None, PdpOutcome::Identity),
++                    };
++                    found.push(t, a, pdp, observe);
++                }
+                 measurement::mark(Phase::Queries);
+                 // The next trial of the run is one stride further
+                 // along, matching [`walked_probe_scalar`] without
+@@ -10502,6 +10761,15 @@ impl<'a> RelationCollector<'a> {
+                 a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                 point = fc.add(point, stride_point);
+             }
++            if let Some((pt, pa, stage)) = pending.take() {
++                measurement::mark(Phase::Pdp);
++                let pdp = PdpAttempt::bare(
++                    pair.finish_scan(&mut stages[stage]),
++                    PdpOutcome::Unresolved,
++                );
++                found.push(pt, pa, pdp, observe);
++                measurement::mark(Phase::Queries);
++            }
+             found
+         };
+         let mut collected = if measurement::enabled() {
+@@ -15255,6 +15523,106 @@ mod tests {
+         assert!(seen > 0, "the scan found nothing to check");
+     }
+ 
++    /// A scan prepared now and finished one trial later, with the next
++    /// trial's keys formed in between and fetching its filter words, gives
++    /// what the one-call scan gives, trial for trial: the same first
++    /// witness or none, for a wrapping window and for an index list, at a
++    /// degree whose key runs the vector path and one whose window wraps.
++    #[test]
++    fn a_scan_finished_a_trial_later_answers_as_the_one_call_scan() {
++        for (degree, points) in [(19u32, 300usize), (31, 400)] {
++            let kc = KoblitzCurve::new(0, degree).unwrap();
++            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
++            let folded = PairSumTable::build_within(
++                &kc,
++                &fb,
++                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
++            )
++            .unwrap();
++            assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let g = fc.lift(kc.generator());
++            let base = fb.points.len();
++            let len = base / 4 + 3;
++            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
++            for cyclic in [true, false] {
++                let scan_of = |t: u64| {
++                    if cyclic {
++                        Scan::Cyclic {
++                            start: (t as usize * 37) % base,
++                            len,
++                        }
++                    } else {
++                        Scan::Indices(&idxs)
++                    }
++                };
++                let mut scratch = ScanScratch::default();
++                let mut stages = [PreparedScan::default(), PreparedScan::default()];
++                let mut pending: Option<(u64, usize)> = None;
++                let (mut hits, mut trials) = (0usize, 0usize);
++                for t in 1u64..=400 {
++                    let target = fc.mul_u64(g, t);
++                    let scan = scan_of(t);
++                    assert!(folded.prepares(&scan));
++                    let now = (t % 2) as usize;
++                    let [s0, s1] = &mut stages;
++                    let (this, other) = if now == 0 { (s0, &*s1) } else { (s1, &*s0) };
++                    folded.prepare_scan(target, scan, this, pending.map(|_| other));
++                    if let Some((pt, stage)) = pending.take() {
++                        let got = folded.finish_scan(&mut stages[stage]);
++                        let want = folded.decompose_fast_scan(
++                            fc.mul_u64(g, pt),
++                            3,
++                            scan_of(pt),
++                            &mut scratch,
++                        );
++                        assert_eq!(got, want, "degree {degree}, t = {pt}");
++                        hits += usize::from(got.is_some());
++                        trials += 1;
++                    }
++                    pending = Some((t, now));
++                }
++                let (pt, stage) = pending.unwrap();
++                let got = folded.finish_scan(&mut stages[stage]);
++                let want =
++                    folded.decompose_fast_scan(fc.mul_u64(g, pt), 3, scan_of(pt), &mut scratch);
++                assert_eq!(got, want, "degree {degree}, t = {pt}");
++                assert!(
++                    hits > 0,
++                    "degree {degree}: none of {trials} trials hit, nothing to compare"
++                );
++            }
++        }
++    }
++
++    /// The paced keys are the keys: every point's, in order, however the
++    /// slice falls into groups, and the pauses report each group's end.
++    #[test]
++    fn paced_keys_equal_the_bulk_keys() {
++        for degree in [19u32, 31, 53, 61] {
++            let kc = KoblitzCurve::new(0, degree).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let canon = FrobeniusCanon::new(&fc.field, degree).unwrap();
++            let g = fc.lift(kc.generator());
++            for count in [0usize, 1, 15, 16, 17, 64, 100, 257] {
++                let mut points: Vec<FastPoint> =
++                    (1..=count as u64).map(|t| fc.mul_u64(g, 3 * t + 1)).collect();
++                if count > 5 {
++                    points[5] = FastPoint::INFINITY;
++                }
++                let mut bulk = Vec::new();
++                canon.point_keys(&points, &mut bulk);
++                let mut paced = vec![7u64];
++                let mut stops = Vec::new();
++                canon.point_keys_paced(&points, &mut paced, |done| stops.push(done));
++                assert_eq!(paced[0], 7, "the keys are appended");
++                assert_eq!(&paced[1..], &bulk[..], "degree {degree}, {count} points");
++                assert_eq!(stops.last().copied().unwrap_or(0), count);
++                assert!(stops.windows(2).all(|w| w[0] <= w[1]));
++            }
++        }
++    }
++
+     /// Aiming must not cost correctness: every relation an aimed unit
+     /// banks has to verify in the group exactly as a swept one does.
+     #[test]
+-- 
+2.43.0
+
+
+From 0472164f73e422c63fbc19f621d55113e2446ca0 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:55:18 +0000
+Subject: [PATCH 2/8] koblitz_index_calculus: the pipelined scan in three
+ stages
+
+A run's walked probes are formed first and then scanned by
+`scan_pipelined`: trial i is prepared while trial i-1's filter words come
+in, trial i-1 is filtered and its admitted keys' bucket entries sent for,
+and trial i-2 is resolved after its runs were sent for before trial i was
+prepared.  Each key's filter hash is computed once and kept.  The answers
+come back in trial order and are the one-call scan's; a test checks them
+with trials that do not scan and scans the stages refuse mixed in, for runs
+of every length from none to past the pipeline's depth.
+
+`examples/pipe_scan_bench` times the one-call scan against the split forms
+on a real folded table.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ examples/pipe_scan_bench.rs                 | 125 +++++++++
+ src/cryptanalysis/koblitz_index_calculus.rs | 284 +++++++++++++++-----
+ 2 files changed, 341 insertions(+), 68 deletions(-)
+ create mode 100644 examples/pipe_scan_bench.rs
+
+diff --git a/examples/pipe_scan_bench.rs b/examples/pipe_scan_bench.rs
+new file mode 100644
+index 000000000..cf06bc2e6
+--- /dev/null
++++ b/examples/pipe_scan_bench.rs
+@@ -0,0 +1,125 @@
++//! Times the `m = 3` collection scan on a real folded table three ways, over
++//! the same trials, alternating, in one process:
++//!
++//! * `call`: one `decompose_fast_scan` per trial (the base);
++//! * `pipe`: `prepare_scan` of trial `t` with trial `t − 1`'s filter
++//!   words prefetched, then `finish_scan` of `t − 1`;
++//! * `bare`: the same split with no prefetch, which prices the split alone.
++//!
++//! For the two split forms it also times the halves.  Every form must give
++//! the same answers; the hit counts are printed and compared.
++//!
++//! `cargo run --release --example pipe_scan_bench -- A N POINTS WINDOW TRIALS`
++use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
++use crypto_lib::cryptanalysis::koblitz_index_calculus::{
++    build_subgroup_orbit_factor_base, KoblitzCurve, PairSumTable, PreparedScan, Scan, ScanScratch,
++};
++use num_bigint::BigUint;
++use std::time::Instant;
++
++fn main() {
++    let args: Vec<u64> = std::env::args()
++        .skip(1)
++        .map(|a| a.parse().expect("numeric arguments"))
++        .collect();
++    let get = |i: usize, d: u64| args.get(i).copied().unwrap_or(d);
++    let (a, n) = (get(0, 0) as u8, get(1, 53) as u32);
++    let (points, window, trials) = (get(2, 27_984) as usize, get(3, 874) as usize, get(4, 4_000));
++    let kc = KoblitzCurve::new(a, n).expect("curve");
++    let t0 = Instant::now();
++    let fb = build_subgroup_orbit_factor_base(&kc, 201, points).expect("base");
++    let pair = PairSumTable::build_within(
++        &kc,
++        &fb,
++        PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
++    )
++    .expect("table");
++    assert!(pair.is_folded());
++    eprintln!(
++        "n = {n}, {} points, {} stored, built in {:.2} s",
++        fb.points.len(),
++        pair.len(),
++        t0.elapsed().as_secs_f64()
++    );
++    let fc = FastCurve::new(&kc.curve).unwrap();
++    let g = fc.lift(kc.generator());
++    let stride = fc.mul(g, &BigUint::from(0x9e37_79b9_7f4a_7c15u64 >> 3));
++    let base = fb.points.len();
++    let mut targets: Vec<(FastPoint, usize)> = Vec::with_capacity(trials as usize);
++    let mut p = fc.mul(g, &BigUint::from(123_456_789u64));
++    for t in 0..trials {
++        targets.push((p, (t as usize).wrapping_mul(7919) % base));
++        p = fc.add(p, stride);
++    }
++    let summands = (trials as usize * window) as f64;
++    let scan = |start: usize| Scan::Cyclic { start, len: window };
++
++    let call = || {
++        let mut scratch = ScanScratch::default();
++        let t = Instant::now();
++        let mut hits = 0u64;
++        for &(p, s) in &targets {
++            hits += pair.decompose_fast_scan(p, 3, scan(s), &mut scratch).is_some() as u64;
++        }
++        (t.elapsed().as_nanos() as f64 / summands, 0.0, 0.0, hits)
++    };
++    let split = |prefetch: bool| {
++        let mut stages = [PreparedScan::default(), PreparedScan::default()];
++        let mut pending: Option<usize> = None;
++        let (mut prep_ns, mut fin_ns, mut hits) = (0u128, 0u128, 0u64);
++        let t = Instant::now();
++        for (i, &(p, s)) in targets.iter().enumerate() {
++            let now = i % 2;
++            let [s0, s1] = &mut stages;
++            let (this, other) = if now == 0 { (s0, &*s1) } else { (s1, &*s0) };
++            let a = Instant::now();
++            pair.prepare_scan(p, scan(s), this, if prefetch { pending.map(|_| other) } else { None });
++            let b = Instant::now();
++            prep_ns += (b - a).as_nanos();
++            if let Some(stage) = pending.take() {
++                hits += pair.finish_scan(&mut stages[stage]).is_some() as u64;
++                fin_ns += b.elapsed().as_nanos();
++            }
++            pending = Some(now);
++        }
++        if let Some(stage) = pending {
++            hits += pair.finish_scan(&mut stages[stage]).is_some() as u64;
++        }
++        (
++            t.elapsed().as_nanos() as f64 / summands,
++            prep_ns as f64 / summands,
++            fin_ns as f64 / summands,
++            hits,
++        )
++    };
++    let staged = || {
++        let trials: Vec<(FastPoint, Option<Scan<'_>>)> =
++            targets.iter().map(|&(p, s)| (p, Some(scan(s)))).collect();
++        let mut ring = [
++            PreparedScan::default(),
++            PreparedScan::default(),
++            PreparedScan::default(),
++        ];
++        let mut scratch = ScanScratch::default();
++        let mut hits = 0u64;
++        let t = Instant::now();
++        // In runs of 64, as a collection unit's walked probes come.
++        for run in trials.chunks(64) {
++            pair.scan_pipelined(run, &mut ring, &mut scratch, |_, a| hits += a.is_some() as u64);
++        }
++        (t.elapsed().as_nanos() as f64 / summands, 0.0, 0.0, hits)
++    };
++    for round in 0..3 {
++        for (name, r) in [
++            ("call", call()),
++            ("pipe", split(true)),
++            ("bare", split(false)),
++            ("stages", staged()),
++        ] {
++            println!(
++                "round {round} {name}: {:.2} ns a summand (prepare {:.2}, finish {:.2}), {} hits",
++                r.0, r.1, r.2, r.3
++            );
++        }
++    }
++}
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b7dec775e..8208b979d 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3414,6 +3414,10 @@ pub struct PreparedScan {
+     batch: BatchScratch,
+     /// Every rest's canonical key.
+     keys: Vec<u64>,
++    /// Each key's filter hash, which names its filter word, its filter
++    /// bits and, on a folded table, its bucket: computed once here and
++    /// read by every later stage.
++    hashes: Vec<u64>,
+     /// Offsets whose keys the filter admits.
+     admitted: Vec<usize>,
+     /// Pairs recovered for one key.
+@@ -3433,6 +3437,7 @@ impl Default for PreparedScan {
+             lambdas: Vec::new(),
+             batch: BatchScratch::default(),
+             keys: Vec::new(),
++            hashes: Vec::new(),
+             admitted: Vec::new(),
+             pairs: Vec::new(),
+         }
+@@ -5187,6 +5192,35 @@ impl PairSumTable {
+         }
+     }
+ 
++    /// Prefetch the run an admitted key's lookup reads, once its bucket
++    /// entry is cached ([`Self::prefetch_bucket`]): the run's first and
++    /// last words, so a run straddling two lines arrives whole.  Without
++    /// it each admitted key waits on the run alone, one random access
++    /// into the largest table there is.
++    #[inline]
++    fn prefetch_run(&self, key: u64) {
++        let bucket = self.bucket_of(key);
++        let (Some(&lo), Some(&hi)) = (
++            self.bucket_start.get(bucket),
++            self.bucket_start.get(bucket + 1),
++        ) else {
++            return;
++        };
++        if lo >= hi {
++            return;
++        }
++        let (lo, last) = (lo as usize, hi as usize - 1);
++        if self.is_compact() {
++            if let (Some(first), Some(end)) = (self.rests.get(lo), self.rests.get(last)) {
++                prefetch((first as *const u32).cast::<u64>());
++                prefetch((end as *const u32).cast::<u64>());
++            }
++        } else if let (Some(first), Some(end)) = (self.entries.get(lo), self.entries.get(last)) {
++            prefetch((first as *const (u64, u32, u32)).cast::<u64>());
++            prefetch((end as *const (u64, u32, u32)).cast::<u64>());
++        }
++    }
++
+     /// The lookup half of [`Self::contains_pair`].
+     #[doc(hidden)]
+     pub fn contains_key(&self, key: u64) -> bool {
+@@ -5496,32 +5530,54 @@ impl PairSumTable {
+         // The previous trial's words, spread over this trial's keys in
+         // proportion: after `done` of `len` keys, the first
+         // `done · |previous| / len` of its words have been asked for.
+-        let earlier: &[u64] = previous.map_or(&[], |p| &p.keys);
++        let earlier: &[u64] = previous.map_or(&[], |p| &p.hashes);
+         let len = prep.rests.len().max(1);
+         let mut asked = 0usize;
+         canon.point_keys_paced(&prep.rests, &mut prep.keys, |done| {
+             let upto = (done * earlier.len()).div_ceil(len).min(earlier.len());
+-            for &key in &earlier[asked..upto] {
+-                prefetch_l2(&self.present[self.filter_word(key)]);
++            for &h in &earlier[asked..upto] {
++                prefetch_l2(&self.present[((h & self.present_mask) >> 6) as usize]);
+             }
+             asked = asked.max(upto);
+         });
++        prep.hashes.clear();
++        prep.hashes.extend(prep.keys.iter().map(|&key| pair_filter_hash(key)));
+     }
+ 
+-    /// The second half of [`Self::decompose_fast_scan`] on a scan from
+-    /// [`Self::prepare_scan`]: the first witness in scan order, checked
+-    /// in the group, or `None`.  The same witness and the same check as
+-    /// the one-call scan, which reads the filter a block at a time and
+-    /// stops at its first witness; this reads the whole scan's filter
+-    /// words first, since they are already in cache.
+-    pub fn finish_scan(&self, prep: &mut PreparedScan) -> Option<Vec<usize>> {
++    /// The second stage of a prepared scan: read the presence filter for
++    /// every key, keep the offsets it admits, in scan order, and send for
++    /// each admitted key's bucket entry.  The same test as
++    /// [`Self::admitted`], on the hash [`Self::prepare_scan`] kept.
++    pub fn filter_scan(&self, prep: &mut PreparedScan) {
+         prep.admitted.clear();
+-        for (offset, &key) in prep.keys.iter().enumerate() {
+-            if self.admitted(key) {
+-                self.prefetch_bucket(key);
++        for (offset, &h) in prep.hashes.iter().enumerate() {
++            let (word, bits) = filter_slot(h, self.present_mask, self.filter_extra);
++            if self.present[word] & bits == bits {
++                if let Some(start) = self.bucket_start.get((h >> self.bucket_shift) as usize) {
++                    prefetch_l2((start as *const u32).cast::<u64>());
++                }
+                 prep.admitted.push(offset);
+             }
+         }
++    }
++
++    /// Between the second and third stages: send for the run of every key
++    /// the filter admitted, once the bucket entries have arrived, so that
++    /// the runs' misses overlap one another and the work in between
++    /// instead of following one another in the third stage.
++    pub fn prefetch_scan_runs(&self, prep: &PreparedScan) {
++        for &offset in &prep.admitted {
++            self.prefetch_run(prep.keys[offset]);
++        }
++    }
++
++    /// The third stage: the first witness in scan order among the admitted
++    /// keys, checked in the group, or `None` — what
++    /// [`Self::decompose_fast_scan`] returns for the same trial.  The
++    /// one-call scan reads the filter a block at a time and stops at its
++    /// first witness; the stages read every key's filter word first, and
++    /// look the admitted ones up in the same order.
++    pub fn resolve_scan(&self, prep: &mut PreparedScan) -> Option<Vec<usize>> {
+         let target = prep.target;
+         let mut found: Option<Vec<usize>> = None;
+         for &offset in &prep.admitted {
+@@ -5542,6 +5598,68 @@ impl PairSumTable {
+         (sum == target).then_some(idxs)
+     }
+ 
++    /// The three later stages at once, for a scan with nothing to overlap.
++    pub fn finish_scan(&self, prep: &mut PreparedScan) -> Option<Vec<usize>> {
++        self.filter_scan(prep);
++        self.prefetch_scan_runs(prep);
++        self.resolve_scan(prep)
++    }
++
++    /// **The `m = 3` scans of consecutive trials, pipelined.**  `trials[i]`
++    /// is trial `i`'s point and scan, or no scan for a trial that does not
++    /// search (an identity probe); `emit(i, answer)` is called once per
++    /// trial, in order, with exactly what [`Self::decompose_fast_scan`]
++    /// returns for it, and `None` for a trial without a scan.
++    ///
++    /// Each step prepares trial `i` while trial `i − 1`'s filter words come
++    /// in, filters trial `i − 1` and sends for its admitted keys' bucket
++    /// entries, and resolves trial `i − 2`, whose runs were sent for
++    /// before trial `i` was prepared.  Every random access a scan makes —
++    /// the filter word of each rest, then an admitted key's bucket entry,
++    /// then its run — is thus in flight during a trial's arithmetic rather
++    /// than waited on after it.  Each trial's answer depends only on its
++    /// own point and scan, so the stages change when the work is done and
++    /// nothing it decides.  A scan [`Self::prepares`] refuses is answered
++    /// by [`Self::decompose_fast_scan`] in its turn.
++    pub fn scan_pipelined(
++        &self,
++        trials: &[(FastPoint, Option<Scan<'_>>)],
++        ring: &mut [PreparedScan; 3],
++        scratch: &mut ScanScratch,
++        mut emit: impl FnMut(usize, Option<Vec<usize>>),
++    ) {
++        let k = trials.len();
++        let prepared = |i: usize| trials[i].1.is_some_and(|scan| self.prepares(&scan));
++        for i in 0..k + 2 {
++            if i >= 2 && prepared(i - 2) {
++                self.prefetch_scan_runs(&ring[(i - 2) % 3]);
++            }
++            if i < k && prepared(i) {
++                let (point, scan) = (trials[i].0, trials[i].1.expect("prepared"));
++                let [r0, r1, r2] = ring;
++                let (now, before): (&mut PreparedScan, &PreparedScan) = match i % 3 {
++                    0 => (r0, &*r2),
++                    1 => (r1, &*r0),
++                    _ => (r2, &*r1),
++                };
++                let previous = (i >= 1 && prepared(i - 1)).then_some(before);
++                self.prepare_scan(point, scan, now, previous);
++            }
++            if i >= 1 && i - 1 < k && prepared(i - 1) {
++                self.filter_scan(&mut ring[(i - 1) % 3]);
++            }
++            if i >= 2 {
++                let j = i - 2;
++                let answer = match trials[j].1 {
++                    _ if prepared(j) => self.resolve_scan(&mut ring[j % 3]),
++                    Some(scan) => self.decompose_fast_scan(trials[j].0, 3, scan, scratch),
++                    None => None,
++                };
++                emit(j, answer);
++            }
++        }
++    }
++
+     /// [`Self::decompose_fast_window`]'s enumerator.  For `m = 2` the
+     /// lookup is already `O(1)` and the window is ignored; for `m = 3`
+     /// the window bounds the third summand and witnesses may repeat a
+@@ -10704,72 +10822,42 @@ impl<'a> RelationCollector<'a> {
+             let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+             let mut point = fc.mul_u64(*g_fast, a);
+             let mut found = CollectionChunk::default();
+-            // Reused across the run's trials, so the scan's four
++            // Reused across the run's trials, so the scan's
+             // buffers are allocated once per run rather than once
+             // per probe.
+             let mut scratch = ScanScratch::default();
+-            // A trial whose scan the table prepares is finished one trial
+-            // later, after the next trial's keys are formed, so its
+-            // filter words arrive during that work (`prepare_scan`).
+-            // Each trial's answer depends only on its own point and scan,
+-            // and trials are pushed in order, so the run's output is the
+-            // one-call scan's.
+-            let mut stages = [PreparedScan::default(), PreparedScan::default()];
+-            let mut pending: Option<(u64, u64, usize)> = None;
+-            let mut next = 0usize;
++            let mut ring = [
++                PreparedScan::default(),
++                PreparedScan::default(),
++                PreparedScan::default(),
++            ];
++            // The run's probes first, then their scans, pipelined
++            // (`PairSumTable::scan_pipelined`): each trial's answer depends
++            // only on its own point and scan, and the answers come back in
++            // trial order, so the run's output is the one-call scan's.
++            let mut probes = Vec::with_capacity((run_end - run_start) as usize);
++            let mut trials = Vec::with_capacity(probes.capacity());
+             for t in run_start..run_end {
+-                measurement::mark(Phase::Pdp);
+                 let live = !point.infinity && a != 0;
+-                let scan = live.then(|| targets.scan(unit.seed, t, base));
+-                let prepared = match scan {
+-                    Some(scan) if pair.prepares(&scan) => {
+-                        let [first, second] = &mut stages;
+-                        let (now, before) = if next == 0 {
+-                            (first, &*second)
+-                        } else {
+-                            (second, &*first)
+-                        };
+-                        pair.prepare_scan(point, scan, now, pending.map(|_| before));
+-                        true
+-                    }
+-                    _ => false,
+-                };
+-                if let Some((pt, pa, stage)) = pending.take() {
+-                    let pdp = PdpAttempt::bare(
+-                        pair.finish_scan(&mut stages[stage]),
+-                        PdpOutcome::Unresolved,
+-                    );
+-                    found.push(pt, pa, pdp, observe);
+-                }
+-                if prepared {
+-                    pending = Some((t, a, next));
+-                    next ^= 1;
+-                } else {
+-                    let pdp = match scan {
+-                        Some(scan) => PdpAttempt::bare(
+-                            pair.decompose_fast_scan(point, 3, scan, &mut scratch),
+-                            PdpOutcome::Unresolved,
+-                        ),
+-                        None => PdpAttempt::bare(None, PdpOutcome::Identity),
+-                    };
+-                    found.push(t, a, pdp, observe);
+-                }
+-                measurement::mark(Phase::Queries);
++                probes.push((t, a));
++                trials.push((point, live.then(|| targets.scan(unit.seed, t, base))));
+                 // The next trial of the run is one stride further
+                 // along, matching [`walked_probe_scalar`] without
+                 // re-deriving the run's anchor.
+                 a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                 point = fc.add(point, stride_point);
+             }
+-            if let Some((pt, pa, stage)) = pending.take() {
+-                measurement::mark(Phase::Pdp);
+-                let pdp = PdpAttempt::bare(
+-                    pair.finish_scan(&mut stages[stage]),
+-                    PdpOutcome::Unresolved,
+-                );
+-                found.push(pt, pa, pdp, observe);
+-                measurement::mark(Phase::Queries);
+-            }
++            measurement::mark(Phase::Pdp);
++            pair.scan_pipelined(&trials, &mut ring, &mut scratch, |i, answer| {
++                let (t, a) = probes[i];
++                let pdp = if trials[i].1.is_some() {
++                    PdpAttempt::bare(answer, PdpOutcome::Unresolved)
++                } else {
++                    PdpAttempt::bare(None, PdpOutcome::Identity)
++                };
++                found.push(t, a, pdp, observe);
++            });
++            measurement::mark(Phase::Queries);
+             found
+         };
+         let mut collected = if measurement::enabled() {
+@@ -15523,6 +15611,66 @@ mod tests {
+         assert!(seen > 0, "the scan found nothing to check");
+     }
+ 
++    /// The pipelined scans answer as the one-call scan, trial for trial and
++    /// in order: the same first witness or none, for wrapping windows and
++    /// index lists, with trials that do not scan and scans the stages
++    /// refuse (the full sweep) mixed in, and runs of every length from
++    /// none to past the pipeline's depth.
++    #[test]
++    fn pipelined_scans_answer_as_the_one_call_scan() {
++        for (degree, points) in [(19u32, 300usize), (31, 400)] {
++            let kc = KoblitzCurve::new(0, degree).unwrap();
++            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
++            let folded = PairSumTable::build_within(
++                &kc,
++                &fb,
++                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
++            )
++            .unwrap();
++            assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let g = fc.lift(kc.generator());
++            let base = fb.points.len();
++            let len = base / 4 + 3;
++            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
++            let scan_of = |t: u64| match t % 11 {
++                3 => None,
++                7 => Some(Scan::Cyclic { start: 5, len: base }),
++                r if r % 2 == 0 => Some(Scan::Indices(&idxs)),
++                _ => Some(Scan::Cyclic {
++                    start: (t as usize * 37) % base,
++                    len,
++                }),
++            };
++            let mut scratch = ScanScratch::default();
++            let mut ring = [
++                PreparedScan::default(),
++                PreparedScan::default(),
++                PreparedScan::default(),
++            ];
++            let (mut hits, mut first) = (0usize, 1u64);
++            for run_len in [0usize, 1, 2, 3, 5, 64, 200] {
++                let trials: Vec<(FastPoint, Option<Scan<'_>>)> = (first..first + run_len as u64)
++                    .map(|t| (fc.mul_u64(g, t), scan_of(t)))
++                    .collect();
++                let mut next = 0usize;
++                folded.scan_pipelined(&trials, &mut ring, &mut scratch, |i, got| {
++                    assert_eq!(i, next, "answers out of order");
++                    next += 1;
++                    let (point, scan) = trials[i];
++                    let want = scan.and_then(|scan| {
++                        folded.decompose_fast_scan(point, 3, scan, &mut ScanScratch::default())
++                    });
++                    assert_eq!(got, want, "degree {degree}, trial {}", first + i as u64);
++                    hits += usize::from(got.is_some());
++                });
++                assert_eq!(next, run_len, "an answer for every trial");
++                first += run_len as u64;
++            }
++            assert!(hits > 0, "degree {degree}: no trial hit, nothing to compare");
++        }
++    }
++
+     /// A scan prepared now and finished one trial later, with the next
+     /// trial's keys formed in between and fetching its filter words, gives
+     /// what the one-call scan gives, trial for trial: the same first
+-- 
+2.43.0
+
+
+From 923210ffdbb007fc024cba8bd2a5eafddb43a538 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:55:18 +0000
+Subject: [PATCH 3/8] koblitz_fast: the key's rotation step in fewer micro-ops
+
+`v << 1` becomes `v + v`, which issues on either vector port where a shift
+has one, and `v >> (n - 1)` a per-lane variable shift, one micro-op where
+a shift by a count in a vector register is two on Skylake-SP and Cascade
+Lake.  The same value lane for lane; the laned-key tests pass unchanged.
+The paced keys pause twice per group, before and after the rotation.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs | 24 +++++++++++++++++-------
+ 1 file changed, 17 insertions(+), 7 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index a3865ea25..fe46fdc7a 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -786,8 +786,8 @@ impl FrobeniusCanon {
+     }
+ 
+     /// [`Self::point_keys`], the same keys, appended to `out` a few at a
+-    /// time, with `between(done)` called after each group, `done` being
+-    /// how many of `points` have their key so far.
++    /// time, with `between(done)` called during and after each group,
++    /// `done` being how far through `points` the keying has come.
+     ///
+     /// A collection run uses the pauses to prefetch the previous trial's
+     /// presence-filter words a few at a time, so that the fetches overlap
+@@ -809,6 +809,10 @@ impl FrobeniusCanon {
+                 for (slot, p) in c.iter_mut().zip(chunk) {
+                     *slot = self.coords(p.x);
+                 }
++                // Half the group's pause before the rotation and half
++                // after it, so that what the caller sends for in each goes
++                // out a few at a time.
++                between(done + 8);
+                 // SAFETY: `canon_simd_enabled` checked AVX-512F.
+                 let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
+                 out.extend(
+@@ -1064,6 +1068,12 @@ fn canon_simd_enabled() -> bool {
+ /// compared.  Two registers of eight advance together so each step's
+ /// latency is hidden behind the other's.
+ ///
++/// The step is written for the ports, with the same value lane for lane:
++/// `v << 1` as `v + v`, which issues on either vector port where a shift
++/// has one, and `v >> (n − 1)` as a per-lane variable shift, one
++/// micro-op where a shift by a count in a vector register is two on
++/// Skylake-SP and Cascade Lake.
++///
+ /// # Safety
+ ///
+ /// The CPU must support AVX-512F, and `1 ≤ n ≤ 63` with
+@@ -1073,20 +1083,20 @@ fn canon_simd_enabled() -> bool {
+ unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16] {
+     use std::arch::x86_64::*;
+     let m = _mm512_set1_epi64(mask as i64);
+-    let back = _mm_cvtsi64_si128(i64::from(n - 1));
++    let back = _mm512_set1_epi64(i64::from(n - 1));
+     let mut a = _mm512_loadu_si512(c.as_ptr().cast());
+     let mut b = _mm512_loadu_si512(c.as_ptr().add(8).cast());
+     let (mut best_a, mut best_b) = (a, b);
+     for _ in 1..n {
+         // (a << 1 | a >> (n − 1)) & mask: truth table 0xA8 is (A | B) & C.
+         a = _mm512_ternarylogic_epi64::<0xA8>(
+-            _mm512_slli_epi64::<1>(a),
+-            _mm512_srl_epi64(a, back),
++            _mm512_add_epi64(a, a),
++            _mm512_srlv_epi64(a, back),
+             m,
+         );
+         b = _mm512_ternarylogic_epi64::<0xA8>(
+-            _mm512_slli_epi64::<1>(b),
+-            _mm512_srl_epi64(b, back),
++            _mm512_add_epi64(b, b),
++            _mm512_srlv_epi64(b, back),
+             m,
+         );
+         best_a = _mm512_min_epu64(best_a, a);
+-- 
+2.43.0
+
+
+From 1e44a60330adf9d91efd5ac6e8f554cb33660ba8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:05:50 +0000
+Subject: [PATCH 4/8] koblitz_index_calculus: scan keys formed from the rests'
+ slopes
+
+In a normal basis squaring is a rotation by one and the basis change is
+linear, so a rest's abscissa x3 = l^2 + l + xP + xQ + a has coordinates
+c + rotl(c) + d + e, with c = coords(l), d = coords(xQ) and
+e = coords(xP + a).  A prepared scan now computes each rest's slope only
+(`FastCurve::slopes_many`), keys it from c (`slope_keys_paced`), with d
+kept per base point on the table, and builds the whole rest from its slope
+only for the keys the filter admits.  That spares the squaring, the
+abscissa and its store for every rejected summand.  The slopes' batched
+inversion runs eight chains (`Gf2::batch_inv8`), the same inverses.
+
+A test checks, at four degrees and with degenerate sums mixed in, that the
+slopes are add_many_lazy's, the slope keys are the rests' keys, and a sum
+rebuilt from its slope is the sum.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs           | 211 ++++++++++++++++----
+ src/cryptanalysis/koblitz_index_calculus.rs | 139 ++++++++++---
+ src/cryptanalysis/semaev_decomp.rs          |  71 +++++++
+ 3 files changed, 345 insertions(+), 76 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index fe46fdc7a..b58c0f101 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -385,6 +385,98 @@ impl FastCurve {
+         }
+     }
+ 
++    /// The slope `λ_j = (y_P + y_{Q_j}) / (x_P + x_{Q_j})` of every sum
++    /// `P + Q_j`, appended to `lambdas`, with one field inversion for the
++    /// slice: [`Self::add_many_lazy`] without the sums.  A degenerate sum
++    /// (an `O` operand, `Q_j = ±P`) has no slope: its entry is
++    /// [`Self::LAZY_DONE`], and the sum itself is appended to `degenerate`
++    /// with its index, `offset + j`.
++    ///
++    /// A key formed from the slope ([`FrobeniusCanon::slope_keys_paced`])
++    /// needs no abscissa: in a normal basis `λ² + λ` is `λ`'s coordinates
++    /// plus their rotation by one, so the squaring an abscissa costs, and
++    /// the abscissa, are spared for every rest the filter rejects.  The
++    /// eight-chain inversion ([`Gf2::batch_inv8`]) gives the same inverses.
++    pub fn slopes_many(
++        &self,
++        p: FastPoint,
++        qs: &[FastPoint],
++        lambdas: &mut Vec<u64>,
++        degenerate: &mut Vec<(usize, FastPoint)>,
++        offset: usize,
++        scratch: &mut BatchScratch,
++    ) {
++        #[cfg(target_arch = "x86_64")]
++        if self.field.folds() {
++            // SAFETY: the field folds, as just checked.
++            return unsafe { self.slopes_many_clmul(p, qs, lambdas, degenerate, offset, scratch) };
++        }
++        self.slopes_many_inline(p, qs, lambdas, degenerate, offset, scratch);
++    }
++
++    /// # Safety
++    ///
++    /// The field must fold.
++    #[cfg(target_arch = "x86_64")]
++    #[target_feature(enable = "pclmulqdq")]
++    unsafe fn slopes_many_clmul(
++        &self,
++        p: FastPoint,
++        qs: &[FastPoint],
++        lambdas: &mut Vec<u64>,
++        degenerate: &mut Vec<(usize, FastPoint)>,
++        offset: usize,
++        scratch: &mut BatchScratch,
++    ) {
++        // SAFETY: the caller's contract.
++        unsafe { std::hint::assert_unchecked(self.field.folds()) };
++        self.slopes_many_inline(p, qs, lambdas, degenerate, offset, scratch);
++    }
++
++    #[inline(always)]
++    fn slopes_many_inline(
++        &self,
++        p: FastPoint,
++        qs: &[FastPoint],
++        lambdas: &mut Vec<u64>,
++        degenerate: &mut Vec<(usize, FastPoint)>,
++        offset: usize,
++        scratch: &mut BatchScratch,
++    ) {
++        let f = &self.field;
++        scratch.dens.clear();
++        scratch.dens.extend(qs.iter().map(|q| {
++            if p.infinity || q.infinity || q.x == p.x {
++                0
++            } else {
++                p.x ^ q.x
++            }
++        }));
++        f.batch_inv8(&mut scratch.dens, &mut scratch.acc);
++        let start = lambdas.len();
++        lambdas.resize(start + qs.len(), 0);
++        for (j, ((q, &inv), lambda)) in qs
++            .iter()
++            .zip(&scratch.dens)
++            .zip(&mut lambdas[start..])
++            .enumerate()
++        {
++            if inv == 0 {
++                degenerate.push((offset + j, self.add(p, *q)));
++                *lambda = Self::LAZY_DONE;
++            } else {
++                *lambda = f.mul(p.y ^ q.y, inv);
++            }
++        }
++    }
++
++    /// The sum [`Self::slopes_many`] skipped: `P + Q` from its slope, the
++    /// same point [`Self::add`] gives.
++    #[inline]
++    pub fn sum_from_slope(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
++        self.add_with_lambda(p, q, lambda)
++    }
++
+     /// The `λ` [`Self::add_many_lazy`] records for a sum it already
+     /// completed.  No real slope equals it: a field element has fewer
+     /// than 63 bits.
+@@ -785,60 +877,93 @@ impl FrobeniusCanon {
+         }
+     }
+ 
+-    /// [`Self::point_keys`], the same keys, appended to `out` a few at a
+-    /// time, with `between(done)` called during and after each group,
+-    /// `done` being how far through `points` the keying has come.
++    /// The keys [`Self::point_keys`] gives the rests `P + Q_j`,
++    /// formed from their slopes alone ([`FastCurve::slopes_many`]),
++    /// appended to `out`, with `between(done)` called during and after
++    /// each group of sixteen, `done` being how far through the slopes the
++    /// keying has come: a collection run spreads its prefetches over the
++    /// pauses, so that they go out a few at a time while the keys are
++    /// formed rather than queueing on the core's outstanding-miss buffers.
+     ///
+-    /// A collection run uses the pauses to prefetch the previous trial's
+-    /// presence-filter words a few at a time, so that the fetches overlap
+-    /// these keys' arithmetic.  Issued all at once they would queue on
+-    /// the core's few outstanding-miss buffers and stall it.
+-    #[inline]
+-    pub(crate) fn point_keys_paced(
++    /// `x₃ = λ² + λ + x_P + x_{Q_j} + a`, and `coords` is linear and
++    /// turns squaring into a rotation by one, so
++    /// `coords(x₃) = c + rotl(c) + d_j + e` with `c = coords(λ)`,
++    /// `d_j = coords(x_{Q_j})` and `e = coords(x_P + a)`: one basis change
++    /// per rest, as before, and no abscissa.  `slopes[j]` is
++    /// [`FastCurve::LAZY_DONE`] for a degenerate sum, whose key is taken
++    /// from the sum itself in `degenerate`.
++    pub(crate) fn slope_keys_paced(
+         &self,
+-        points: &[FastPoint],
++        slopes: &[u64],
++        dcoords: &[u64],
++        e: u64,
++        degenerate: &[(usize, FastPoint)],
+         out: &mut Vec<u64>,
+         mut between: impl FnMut(usize),
+     ) {
++        debug_assert_eq!(slopes.len(), dcoords.len());
++        let (n, mask) = (self.n, self.mask);
++        let rest = |lambda: u64, d: u64| {
++            let c = self.coords(lambda);
++            c ^ (((c << 1) | (c >> (n - 1))) & mask) ^ d ^ e
++        };
++        let start = out.len();
+         #[cfg(target_arch = "x86_64")]
+-        if canon_simd_enabled() {
+-            let mut chunks = points.chunks_exact(16);
+-            let mut done = 0;
+-            for chunk in &mut chunks {
+-                let mut c = [0u64; 16];
+-                for (slot, p) in c.iter_mut().zip(chunk) {
+-                    *slot = self.coords(p.x);
++        let vector = canon_simd_enabled();
++        #[cfg(not(target_arch = "x86_64"))]
++        let vector = false;
++        if vector {
++            #[cfg(target_arch = "x86_64")]
++            {
++                let mut done = 0;
++                let (lc, dc) = (slopes.chunks_exact(16), dcoords.chunks_exact(16));
++                let (lr, dr) = (lc.remainder(), dc.remainder());
++                for (ls, ds) in lc.zip(dc) {
++                    let mut c = [0u64; 16];
++                    for ((slot, &lambda), &d) in c.iter_mut().zip(ls).zip(ds) {
++                        *slot = rest(lambda, d);
++                    }
++                    between(done + 8);
++                    // SAFETY: `canon_simd_enabled` checked AVX-512F.
++                    let mins = unsafe { least_rotation16_avx512(&c, n, mask) };
++                    out.extend(mins.iter().map(|m| m + 1));
++                    done += 16;
++                    between(done);
++                }
++                for (&lambda, &d) in lr.iter().zip(dr) {
++                    out.push(self.least_rotation(rest(lambda, d)).0 + 1);
+                 }
+-                // Half the group's pause before the rotation and half
+-                // after it, so that what the caller sends for in each goes
+-                // out a few at a time.
+-                between(done + 8);
+-                // SAFETY: `canon_simd_enabled` checked AVX-512F.
+-                let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
+-                out.extend(
+-                    chunk
+-                        .iter()
+-                        .zip(mins)
+-                        .map(|(p, m)| if p.infinity { 0 } else { m + 1 }),
+-                );
+-                done += 16;
+-                between(done);
+             }
+-            for p in chunks.remainder() {
+-                out.push(if p.infinity { 0 } else { self.canon(p.x) + 1 });
++        } else {
++            const LANES: usize = 8;
++            let full = slopes.len() / LANES * LANES;
++            for base in (0..full).step_by(LANES) {
++                let mut v = [0u64; LANES];
++                for lane in 0..LANES {
++                    v[lane] = rest(slopes[base + lane], dcoords[base + lane]);
++                }
++                let mut best = v;
++                for _ in 1..n {
++                    for lane in 0..LANES {
++                        v[lane] = ((v[lane] << 1) | (v[lane] >> (n - 1))) & mask;
++                        if v[lane] < best[lane] {
++                            best[lane] = v[lane];
++                        }
++                    }
++                }
++                out.extend(best.iter().map(|b| b + 1));
++                if base % 64 == 56 {
++                    between(base + LANES);
++                }
++            }
++            for (&lambda, &d) in slopes[full..].iter().zip(&dcoords[full..]) {
++                out.push(self.least_rotation(rest(lambda, d)).0 + 1);
+             }
+-            between(points.len());
+-            return;
+         }
+-        const GROUP: usize = 64;
+-        let mut group = Vec::with_capacity(GROUP);
+-        let mut done = 0;
+-        for chunk in points.chunks(GROUP) {
+-            self.point_keys(chunk, &mut group);
+-            out.extend_from_slice(&group);
+-            done += chunk.len();
+-            between(done);
++        for &(j, sum) in degenerate {
++            out[start + j] = if sum.infinity { 0 } else { self.canon(sum.x) + 1 };
+         }
++        between(slopes.len());
+     }
+ 
+     /// The canonical name together with the rotation that produced it:
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 8208b979d..bce6e12d8 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3350,6 +3350,11 @@ pub struct PairSumTable {
+     /// Whether a stored word is `(orbit << 16) | rest16` rather than a
+     /// full 32-bit rest.  See [`Self::compact_rest`].
+     tagged: bool,
++    /// The normal coordinates of each base point's abscissa, in base
++    /// order, for keys formed from a rest's slope
++    /// ([`Self::prepare_scan`]); filled on first use, by a table with the
++    /// canonical key.
++    negated_coords: std::sync::OnceLock<Vec<u64>>,
+ }
+ 
+ /// Probing a run expects to do, which is what decides the tier.
+@@ -3407,9 +3412,13 @@ pub struct PreparedScan {
+     cyclic: bool,
+     /// Summands gathered for an index scan.
+     gather: Vec<FastPoint>,
+-    /// `target − P_k` without ordinates, and each one's slope.
+-    rests: Vec<FastPoint>,
++    /// The slope of each rest `target − P_k`, which is all its key needs
++    /// ([`FastCurve::slopes_many`]); [`FastCurve::LAZY_DONE`] for a
++    /// degenerate one, kept whole in `degenerate` with its offset.
+     lambdas: Vec<u64>,
++    degenerate: Vec<(usize, FastPoint)>,
++    /// The normal coordinates of each scanned summand's abscissa.
++    dcoords: Vec<u64>,
+     /// Workspace for the shared-inversion batch addition.
+     batch: BatchScratch,
+     /// Every rest's canonical key.
+@@ -3433,8 +3442,9 @@ impl Default for PreparedScan {
+             indices: Vec::new(),
+             cyclic: true,
+             gather: Vec::new(),
+-            rests: Vec::new(),
+             lambdas: Vec::new(),
++            degenerate: Vec::new(),
++            dcoords: Vec::new(),
+             batch: BatchScratch::default(),
+             keys: Vec::new(),
+             hashes: Vec::new(),
+@@ -4017,6 +4027,7 @@ impl PairSumTable {
+             present[word] |= bits;
+         }
+         Some(Self {
++            negated_coords: Default::default(),
+             entries,
+             rests: Vec::new(),
+             compact_witnesses: Vec::new(),
+@@ -4134,6 +4145,7 @@ impl PairSumTable {
+             .collect();
+         let index_of_point = PointIndex::build(&points);
+         Some(Self {
++            negated_coords: Default::default(),
+             entries: Vec::new(),
+             rests,
+             compact_witnesses: Vec::new(),
+@@ -4254,6 +4266,7 @@ impl PairSumTable {
+             .map(|w| w.load(Ordering::Relaxed))
+             .collect();
+         Some(Self {
++            negated_coords: Default::default(),
+             entries: Vec::new(),
+             rests,
+             compact_witnesses,
+@@ -4628,6 +4641,7 @@ impl PairSumTable {
+             orbit_start.push(orbit_members.len() as u32);
+         }
+         Self {
++            negated_coords: Default::default(),
+             entries: Vec::new(),
+             rests: parts.words,
+             compact_witnesses: Vec::new(),
+@@ -5481,11 +5495,18 @@ impl PairSumTable {
+         let base = self.points.len();
+         let canon = self.canon.as_ref().expect("prepares() checked the key");
+         prep.target = target;
+-        prep.rests.clear();
+         prep.lambdas.clear();
++        prep.degenerate.clear();
++        prep.dcoords.clear();
+         prep.keys.clear();
+         prep.admitted.clear();
+         prep.indices.clear();
++        let coords = self.negated_coords.get_or_init(|| {
++            self.negated
++                .iter()
++                .map(|q| if q.infinity { 0 } else { canon.coords(q.x) })
++                .collect()
++        });
+         match scan {
+             Scan::Cyclic { start, len } => {
+                 let start = start % base;
+@@ -5493,21 +5514,25 @@ impl PairSumTable {
+                 prep.cyclic = true;
+                 prep.start = start;
+                 prep.tail = tail;
+-                self.curve.add_many_lazy(
++                self.curve.slopes_many(
+                     target,
+                     &self.negated[start..start + tail],
+-                    &mut prep.rests,
+                     &mut prep.lambdas,
++                    &mut prep.degenerate,
++                    0,
+                     &mut prep.batch,
+                 );
++                prep.dcoords.extend_from_slice(&coords[start..start + tail]);
+                 if tail < len {
+-                    self.curve.add_many_lazy(
++                    self.curve.slopes_many(
+                         target,
+                         &self.negated[..len - tail],
+-                        &mut prep.rests,
+                         &mut prep.lambdas,
++                        &mut prep.degenerate,
++                        tail,
+                         &mut prep.batch,
+                     );
++                    prep.dcoords.extend_from_slice(&coords[..len - tail]);
+                 }
+             }
+             Scan::Indices(idxs) => {
+@@ -5517,12 +5542,14 @@ impl PairSumTable {
+                 prep.gather.reserve(idxs.len());
+                 for &i in idxs {
+                     prep.gather.push(self.negated[i as usize]);
++                    prep.dcoords.push(coords[i as usize]);
+                 }
+-                self.curve.add_many_lazy(
++                self.curve.slopes_many(
+                     target,
+                     &prep.gather,
+-                    &mut prep.rests,
+                     &mut prep.lambdas,
++                    &mut prep.degenerate,
++                    0,
+                     &mut prep.batch,
+                 );
+             }
+@@ -5531,15 +5558,23 @@ impl PairSumTable {
+         // proportion: after `done` of `len` keys, the first
+         // `done · |previous| / len` of its words have been asked for.
+         let earlier: &[u64] = previous.map_or(&[], |p| &p.hashes);
+-        let len = prep.rests.len().max(1);
++        let len = prep.lambdas.len().max(1);
+         let mut asked = 0usize;
+-        canon.point_keys_paced(&prep.rests, &mut prep.keys, |done| {
+-            let upto = (done * earlier.len()).div_ceil(len).min(earlier.len());
+-            for &h in &earlier[asked..upto] {
+-                prefetch_l2(&self.present[((h & self.present_mask) >> 6) as usize]);
+-            }
+-            asked = asked.max(upto);
+-        });
++        let e = canon.coords(target.x ^ self.curve.a);
++        canon.slope_keys_paced(
++            &prep.lambdas,
++            &prep.dcoords,
++            e,
++            &prep.degenerate,
++            &mut prep.keys,
++            |done| {
++                let upto = (done * earlier.len()).div_ceil(len).min(earlier.len());
++                for &h in &earlier[asked..upto] {
++                    prefetch_l2(&self.present[((h & self.present_mask) >> 6) as usize]);
++                }
++                asked = asked.max(upto);
++            },
++        );
+         prep.hashes.clear();
+         prep.hashes.extend(prep.keys.iter().map(|&key| pair_filter_hash(key)));
+     }
+@@ -5581,9 +5616,19 @@ impl PairSumTable {
+         let target = prep.target;
+         let mut found: Option<Vec<usize>> = None;
+         for &offset in &prep.admitted {
+-            let rest = self
+-                .curve
+-                .finish_lazy(target, prep.rests[offset], prep.lambdas[offset]);
++            // The rest the slope stands for: `target − P_k` whole, as the
++            // one-call scan completes it, or the degenerate sum kept as is.
++            let lambda = prep.lambdas[offset];
++            let rest = if lambda == FastCurve::LAZY_DONE {
++                prep.degenerate
++                    .iter()
++                    .find(|&&(j, _)| j == offset)
++                    .map(|&(_, sum)| sum)
++                    .expect("a degenerate slope keeps its sum")
++            } else {
++                self.curve
++                    .sum_from_slope(target, self.negated[prep.summand(offset)], lambda)
++            };
+             self.pairs_for_key(rest, prep.keys[offset], &mut prep.pairs);
+             if let Some(&(i, j)) = prep.pairs.first() {
+                 found = Some(vec![i as usize, j as usize, prep.summand(offset)]);
+@@ -15743,28 +15788,56 @@ mod tests {
+         }
+     }
+ 
+-    /// The paced keys are the keys: every point's, in order, however the
+-    /// slice falls into groups, and the pauses report each group's end.
++    /// The keys formed from slopes are the keys of the rests: for every
++    /// summand, in order, however the slice falls into groups of sixteen,
++    /// with degenerate sums (`Q = P`, `Q = −P`, `Q = O`) mixed in, and the
++    /// eight-chain inversion's slopes are the slopes `add_many_lazy`
++    /// records.  The pauses report each group's end.
+     #[test]
+-    fn paced_keys_equal_the_bulk_keys() {
++    fn slope_keys_equal_the_rests_keys() {
+         for degree in [19u32, 31, 53, 61] {
+             let kc = KoblitzCurve::new(0, degree).unwrap();
+             let fc = FastCurve::new(&kc.curve).unwrap();
+             let canon = FrobeniusCanon::new(&fc.field, degree).unwrap();
+             let g = fc.lift(kc.generator());
++            let p = fc.mul_u64(g, 0x1234_5677);
+             for count in [0usize, 1, 15, 16, 17, 64, 100, 257] {
+-                let mut points: Vec<FastPoint> =
++                let mut qs: Vec<FastPoint> =
+                     (1..=count as u64).map(|t| fc.mul_u64(g, 3 * t + 1)).collect();
+-                if count > 5 {
+-                    points[5] = FastPoint::INFINITY;
++                for (slot, q) in [(5, p), (9, fc.neg(p)), (13, FastPoint::INFINITY)] {
++                    if count > slot {
++                        qs[slot] = q;
++                    }
+                 }
+-                let mut bulk = Vec::new();
+-                canon.point_keys(&points, &mut bulk);
+-                let mut paced = vec![7u64];
++                let (mut rests, mut lazy) = (Vec::new(), Vec::new());
++                let mut scratch = BatchScratch::default();
++                fc.add_many_lazy(p, &qs, &mut rests, &mut lazy, &mut scratch);
++                let mut want = Vec::new();
++                canon.point_keys(&rests, &mut want);
++                let (mut slopes, mut degenerate) = (Vec::new(), Vec::new());
++                fc.slopes_many(p, &qs, &mut slopes, &mut degenerate, 0, &mut scratch);
++                assert_eq!(slopes, lazy, "degree {degree}, {count} summands: slopes");
++                let dcoords: Vec<u64> = qs
++                    .iter()
++                    .map(|q| if q.infinity { 0 } else { canon.coords(q.x) })
++                    .collect();
++                let e = canon.coords(p.x ^ fc.a);
++                let mut got = vec![7u64];
+                 let mut stops = Vec::new();
+-                canon.point_keys_paced(&points, &mut paced, |done| stops.push(done));
+-                assert_eq!(paced[0], 7, "the keys are appended");
+-                assert_eq!(&paced[1..], &bulk[..], "degree {degree}, {count} points");
++                canon.slope_keys_paced(&slopes, &dcoords, e, &degenerate, &mut got, |done| {
++                    stops.push(done)
++                });
++                assert_eq!(got[0], 7, "the keys are appended");
++                assert_eq!(&got[1..], &want[..], "degree {degree}, {count} summands: keys");
++                for &(j, sum) in &degenerate {
++                    assert_eq!(sum, rests[j], "degree {degree}: degenerate sum {j}");
++                }
++                for (j, (q, &lambda)) in qs.iter().zip(&slopes).enumerate() {
++                    if lambda != FastCurve::LAZY_DONE {
++                        let whole = fc.sum_from_slope(p, *q, lambda);
++                        assert_eq!(whole, fc.add(p, *q), "degree {degree}: sum {j}");
++                    }
++                }
+                 assert_eq!(stops.last().copied().unwrap_or(0), count);
+                 assert!(stops.windows(2).all(|w| w[0] <= w[1]));
+             }
+diff --git a/src/cryptanalysis/semaev_decomp.rs b/src/cryptanalysis/semaev_decomp.rs
+index 6c7ed848b..5c8b515ec 100644
+--- a/src/cryptanalysis/semaev_decomp.rs
++++ b/src/cryptanalysis/semaev_decomp.rs
+@@ -728,6 +728,77 @@ impl Gf2 {
+         }
+     }
+ 
++    /// [`Self::batch_inv`] over eight chains instead of four: the same
++    /// inverses and the same multiplication count, half the dependent
++    /// chain.  Where a folded product's latency is long against its
++    /// throughput — seven cycles a carry-less multiply on Skylake-SP and
++    /// Cascade Lake, three of them dependent in each product — four chains
++    /// leave the multiplier idle between links.
++    pub fn batch_inv8(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
++        #[cfg(target_arch = "x86_64")]
++        if self.folds() {
++            // SAFETY: the field folds, as just checked.
++            return unsafe { self.batch_inv8_clmul(xs, scratch) };
++        }
++        self.batch_inv_inline(xs, scratch);
++    }
++
++    /// [`Self::batch_inv8`] compiled with `pclmulqdq`, as
++    /// [`Self::batch_inv_clmul`] is.
++    ///
++    /// # Safety
++    ///
++    /// The field must fold, which implies the CPU supports `pclmulqdq`.
++    #[cfg(target_arch = "x86_64")]
++    #[target_feature(enable = "pclmulqdq")]
++    unsafe fn batch_inv8_clmul(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
++        use std::arch::x86_64::*;
++        // SAFETY: the caller's contract.
++        unsafe { std::hint::assert_unchecked(self.folds()) };
++        const LANES: usize = 8;
++        let s = 64 - self.n;
++        let down = _mm_cvtsi32_si128(s as i32);
++        let plain = |v: __m128i| _mm_cvtsi128_si64(_mm_srl_epi64(v, down)) as u64;
++        let shifted = |v: u64| _mm_cvtsi64_si128((v << s) as i64);
++        scratch.clear();
++        scratch.resize(xs.len(), 0);
++        let mut acc = [shifted(1); LANES];
++        for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
++            for ((&x, prefix), a) in xc.iter().zip(pc.iter_mut()).zip(acc.iter_mut()) {
++                *prefix = plain(*a);
++                if x != 0 {
++                    *a = self.fold_shifted(_mm_cvtsi64_si128(x as i64), *a);
++                }
++            }
++        }
++        // The eight lane products inverted together by the same trick, with
++        // one field inversion.  None is zero: each starts at 1 and only
++        // ever takes non-zero factors.
++        let lanes = acc.map(plain);
++        let mut before = [1u64; LANES];
++        let mut run = 1u64;
++        for (b, &l) in before.iter_mut().zip(&lanes) {
++            *b = run;
++            run = self.mul(run, l);
++        }
++        let mut inv = self.inv(run);
++        let mut lane_inv = [0u64; LANES];
++        for l in (0..LANES).rev() {
++            lane_inv[l] = self.mul(inv, before[l]);
++            inv = self.mul(inv, lanes[l]);
++        }
++        let mut inv_acc = lane_inv.map(shifted);
++        for (xc, pc) in xs.chunks_mut(LANES).zip(scratch.chunks(LANES)).rev() {
++            for ((x, &prefix), ia) in xc.iter_mut().zip(pc.iter()).zip(inv_acc.iter_mut()) {
++                if *x != 0 {
++                    let xi = _mm_cvtsi64_si128(*x as i64);
++                    *x = plain(self.fold_shifted(_mm_cvtsi64_si128(prefix as i64), *ia));
++                    *ia = self.fold_shifted(xi, *ia);
++                }
++            }
++        }
++    }
++
+     #[inline(always)]
+     fn batch_inv_inline(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+         const LANES: usize = 4;
+-- 
+2.43.0
+
+
+From 1a7f5c4e084b508be95b23dba46e16ba285dbcd0 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:11:12 +0000
+Subject: [PATCH 5/8] koblitz_fast: the slope keys' test reaches the portable
+ path too
+
+`slope_keys_on` names the path, so the test checks the portable rotation
+on every host and the AVX-512 one where the CPU has it, each against the
+rests' keys; `slope_keys_paced` still takes whichever the scan would.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs           | 25 ++++++++++++---
+ src/cryptanalysis/koblitz_index_calculus.rs | 34 +++++++++++++++------
+ 2 files changed, 46 insertions(+), 13 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index b58c0f101..4f7a5adee 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -899,6 +899,27 @@ impl FrobeniusCanon {
+         e: u64,
+         degenerate: &[(usize, FastPoint)],
+         out: &mut Vec<u64>,
++        between: impl FnMut(usize),
++    ) {
++        #[cfg(target_arch = "x86_64")]
++        let vector = canon_simd_enabled();
++        #[cfg(not(target_arch = "x86_64"))]
++        let vector = false;
++        self.slope_keys_on(vector, slopes, dcoords, e, degenerate, out, between);
++    }
++
++    /// [`Self::slope_keys_paced`] on the path named: the AVX-512 rotation
++    /// when `vector` (which the caller must have detected), the portable
++    /// one otherwise.  Separate so that a test reaches both on one host.
++    #[allow(clippy::too_many_arguments)]
++    pub(crate) fn slope_keys_on(
++        &self,
++        vector: bool,
++        slopes: &[u64],
++        dcoords: &[u64],
++        e: u64,
++        degenerate: &[(usize, FastPoint)],
++        out: &mut Vec<u64>,
+         mut between: impl FnMut(usize),
+     ) {
+         debug_assert_eq!(slopes.len(), dcoords.len());
+@@ -908,10 +929,6 @@ impl FrobeniusCanon {
+             c ^ (((c << 1) | (c >> (n - 1))) & mask) ^ d ^ e
+         };
+         let start = out.len();
+-        #[cfg(target_arch = "x86_64")]
+-        let vector = canon_simd_enabled();
+-        #[cfg(not(target_arch = "x86_64"))]
+-        let vector = false;
+         if vector {
+             #[cfg(target_arch = "x86_64")]
+             {
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index bce6e12d8..b63bc7e08 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -15822,13 +15822,31 @@ mod tests {
+                     .map(|q| if q.infinity { 0 } else { canon.coords(q.x) })
+                     .collect();
+                 let e = canon.coords(p.x ^ fc.a);
+-                let mut got = vec![7u64];
+-                let mut stops = Vec::new();
+-                canon.slope_keys_paced(&slopes, &dcoords, e, &degenerate, &mut got, |done| {
+-                    stops.push(done)
+-                });
+-                assert_eq!(got[0], 7, "the keys are appended");
+-                assert_eq!(&got[1..], &want[..], "degree {degree}, {count} summands: keys");
++                // The portable path always, and the AVX-512 one where the
++                // CPU has it; `slope_keys_paced` takes whichever the scan
++                // would.
++                #[cfg(target_arch = "x86_64")]
++                let vector = std::arch::is_x86_feature_detected!("avx512f");
++                #[cfg(not(target_arch = "x86_64"))]
++                let vector = false;
++                for path in [false, true].into_iter().filter(|&v| !v || vector) {
++                    let mut got = vec![7u64];
++                    let mut stops = Vec::new();
++                    canon.slope_keys_on(path, &slopes, &dcoords, e, &degenerate, &mut got, |d| {
++                        stops.push(d)
++                    });
++                    assert_eq!(got[0], 7, "the keys are appended");
++                    assert_eq!(
++                        &got[1..],
++                        &want[..],
++                        "degree {degree}, {count} summands, vector path {path}: keys"
++                    );
++                    assert_eq!(stops.last().copied().unwrap_or(0), count);
++                    assert!(stops.windows(2).all(|w| w[0] <= w[1]));
++                }
++                let mut got = Vec::new();
++                canon.slope_keys_paced(&slopes, &dcoords, e, &degenerate, &mut got, |_| {});
++                assert_eq!(got, want, "degree {degree}, {count} summands: the scan's path");
+                 for &(j, sum) in &degenerate {
+                     assert_eq!(sum, rests[j], "degree {degree}: degenerate sum {j}");
+                 }
+@@ -15838,8 +15856,6 @@ mod tests {
+                         assert_eq!(whole, fc.add(p, *q), "degree {degree}: sum {j}");
+                     }
+                 }
+-                assert_eq!(stops.last().copied().unwrap_or(0), count);
+-                assert!(stops.windows(2).all(|w| w[0] <= w[1]));
+             }
+         }
+     }
+-- 
+2.43.0
+
+
+From 0b1afe38e8365a726067813a10b678862e94103d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:20:23 +0000
+Subject: [PATCH 6/8] koblitz_index_calculus: the folded build keys its rows
+ from slopes
+
+The bulk folded build now takes each row's slopes (`slopes_many`) and
+keys them with each summand's normal coordinates, kept once per build,
+instead of forming every sum's abscissa and keying that: the same keys,
+so the same table, without the squaring or the sum for any pair.  The
+test that the partitioned build stores the two-pass (scalar) table
+passes unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_index_calculus.rs | 33 ++++++++++++++++-----
+ 1 file changed, 26 insertions(+), 7 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b63bc7e08..8048f7ccf 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4522,24 +4522,43 @@ impl PairSumTable {
+         // (`KIC_FOLD_BUILD=scalar` keeps the old path, the same-binary
+         // control).
+         let bulk = bulk && canon.is_some();
++        // Each summand's normal coordinates, once, for keys formed from
++        // the sums' slopes (`FrobeniusCanon::slope_keys_paced`): the same
++        // keys as the sums', without forming a sum.
++        let by_orbit_coords: Vec<u64> = match (bulk, canon.as_ref()) {
++            (true, Some(canon)) => by_orbit
++                .iter()
++                .map(|q| if q.infinity { 0 } else { canon.coords(q.x) })
++                .collect(),
++            _ => Vec::new(),
++        };
+         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
+             let mut sums = Vec::with_capacity(n_points);
+             let mut scratch = BatchScratch::default();
+             let (orbit, rep) = reps[r];
+             let from = suffix[orbit as usize] as usize;
+             if let (true, Some(canon)) = (bulk, canon.as_ref()) {
+-                let mut lambdas = Vec::with_capacity(n_points);
+-                curve.add_many_lazy(
++                let (mut lambdas, mut degenerate) = (Vec::with_capacity(n_points), Vec::new());
++                curve.slopes_many(
+                     points[rep],
+                     &by_orbit[from..],
+-                    &mut sums,
+                     &mut lambdas,
++                    &mut degenerate,
++                    0,
+                     &mut scratch,
+                 );
+-                let mut keys: Vec<u64> = sums.iter().map(|p| p.x).collect();
+-                canon.canon_in_place(&mut keys);
+-                for (key, p) in keys.into_iter().zip(&sums) {
+-                    f(if p.infinity { 0 } else { key + 1 }, orbit);
++                let e = canon.coords(points[rep].x ^ curve.a);
++                let mut keys = Vec::with_capacity(lambdas.len());
++                canon.slope_keys_paced(
++                    &lambdas,
++                    &by_orbit_coords[from..],
++                    e,
++                    &degenerate,
++                    &mut keys,
++                    |_| {},
++                );
++                for key in keys {
++                    f(key, orbit);
+                 }
+                 return;
+             }
+-- 
+2.43.0
+
+
+From 1d66b7dcfe6a6d6e1bcaf8ec944284ada6f533f1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:28:48 +0000
+Subject: [PATCH 7/8] koblitz_index_calculus: slopes only where the subtraction
+ is scalar
+
+Where the eight-lane AVX-512 kernel adds a scan's or a build row's points
+(VPCLMULQDQ and a field whose reduction suits it), the one-call scan and
+the keyed build keep it; the prepared, slope-keyed path runs where the
+subtraction is the scalar product it shares.  On a host without
+VPCLMULQDQ nothing changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs           | 14 ++++++++++
+ src/cryptanalysis/koblitz_index_calculus.rs | 31 +++++++++++++++++----
+ 2 files changed, 40 insertions(+), 5 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index 4f7a5adee..8a689061a 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -385,6 +385,20 @@ impl FastCurve {
+         }
+     }
+ 
++    /// Whether [`Self::add_many_lazy`] runs the eight-lane AVX-512 kernel
++    /// on this curve (the CPU has VPCLMULQDQ and the field's reduction
++    /// suits it), rather than the scalar product the slope path shares.
++    pub fn has_lane_kernel(&self) -> bool {
++        #[cfg(target_arch = "x86_64")]
++        {
++            self.simd.is_some()
++        }
++        #[cfg(not(target_arch = "x86_64"))]
++        {
++            false
++        }
++    }
++
+     /// The slope `λ_j = (y_P + y_{Q_j}) / (x_P + x_{Q_j})` of every sum
+     /// `P + Q_j`, appended to `lambdas`, with one field inversion for the
+     /// slice: [`Self::add_many_lazy`] without the sums.  A degenerate sum
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 8048f7ccf..974f0b3de 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4524,8 +4524,10 @@ impl PairSumTable {
+         let bulk = bulk && canon.is_some();
+         // Each summand's normal coordinates, once, for keys formed from
+         // the sums' slopes (`FrobeniusCanon::slope_keys_paced`): the same
+-        // keys as the sums', without forming a sum.
+-        let by_orbit_coords: Vec<u64> = match (bulk, canon.as_ref()) {
++        // keys as the sums', without forming a sum.  Where the eight-lane
++        // kernel adds a row, it keeps doing so and the sums are keyed.
++        let slopes = bulk && !curve.has_lane_kernel();
++        let by_orbit_coords: Vec<u64> = match (slopes, canon.as_ref()) {
+             (true, Some(canon)) => by_orbit
+                 .iter()
+                 .map(|q| if q.infinity { 0 } else { canon.coords(q.x) })
+@@ -4537,7 +4539,23 @@ impl PairSumTable {
+             let mut scratch = BatchScratch::default();
+             let (orbit, rep) = reps[r];
+             let from = suffix[orbit as usize] as usize;
+-            if let (true, Some(canon)) = (bulk, canon.as_ref()) {
++            if let (true, false, Some(canon)) = (bulk, slopes, canon.as_ref()) {
++                let mut lambdas = Vec::with_capacity(n_points);
++                curve.add_many_lazy(
++                    points[rep],
++                    &by_orbit[from..],
++                    &mut sums,
++                    &mut lambdas,
++                    &mut scratch,
++                );
++                let mut keys: Vec<u64> = sums.iter().map(|p| p.x).collect();
++                canon.canon_in_place(&mut keys);
++                for (key, p) in keys.into_iter().zip(&sums) {
++                    f(if p.infinity { 0 } else { key + 1 }, orbit);
++                }
++                return;
++            }
++            if let (true, Some(canon)) = (slopes, canon.as_ref()) {
+                 let (mut lambdas, mut degenerate) = (Vec::with_capacity(n_points), Vec::new());
+                 curve.slopes_many(
+                     points[rep],
+@@ -5476,12 +5494,15 @@ impl PairSumTable {
+     }
+ 
+     /// Whether [`Self::prepare_scan`] takes this `m = 3` scan: a folded
+-    /// table with its canonical key, and a scan that is neither empty nor
+-    /// the full sweep [`Self::witnesses_fast_scan`] hands elsewhere.
++    /// table with its canonical key, a curve whose subtraction is the
++    /// scalar product (where the eight-lane kernel runs, the one-call scan
++    /// keeps it), and a scan that is neither empty nor the full sweep
++    /// [`Self::witnesses_fast_scan`] hands elsewhere.
+     pub fn prepares(&self, scan: &Scan<'_>) -> bool {
+         let base = self.points.len();
+         self.fold
+             && self.canon.is_some()
++            && !self.curve.has_lane_kernel()
+             && base != 0
+             && !scan.is_empty()
+             && !(matches!(scan, Scan::Cyclic { .. }) && scan.len() >= base)
+-- 
+2.43.0
+
+
+From 8b3d24d7034c74708e413cc6ceeaab3f126b29bf Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:32:28 +0000
+Subject: [PATCH 8/8] rustfmt the slope-keyed scan's files
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ examples/pipe_scan_bench.rs                 | 19 ++++++++++--
+ src/cryptanalysis/koblitz_fast.rs           |  6 +++-
+ src/cryptanalysis/koblitz_index_calculus.rs | 33 ++++++++++++++++-----
+ 3 files changed, 46 insertions(+), 12 deletions(-)
+
+diff --git a/examples/pipe_scan_bench.rs b/examples/pipe_scan_bench.rs
+index cf06bc2e6..0eb9be2f6 100644
+--- a/examples/pipe_scan_bench.rs
++++ b/examples/pipe_scan_bench.rs
+@@ -59,7 +59,9 @@ fn main() {
+         let t = Instant::now();
+         let mut hits = 0u64;
+         for &(p, s) in &targets {
+-            hits += pair.decompose_fast_scan(p, 3, scan(s), &mut scratch).is_some() as u64;
++            hits += pair
++                .decompose_fast_scan(p, 3, scan(s), &mut scratch)
++                .is_some() as u64;
+         }
+         (t.elapsed().as_nanos() as f64 / summands, 0.0, 0.0, hits)
+     };
+@@ -73,7 +75,16 @@ fn main() {
+             let [s0, s1] = &mut stages;
+             let (this, other) = if now == 0 { (s0, &*s1) } else { (s1, &*s0) };
+             let a = Instant::now();
+-            pair.prepare_scan(p, scan(s), this, if prefetch { pending.map(|_| other) } else { None });
++            pair.prepare_scan(
++                p,
++                scan(s),
++                this,
++                if prefetch {
++                    pending.map(|_| other)
++                } else {
++                    None
++                },
++            );
+             let b = Instant::now();
+             prep_ns += (b - a).as_nanos();
+             if let Some(stage) = pending.take() {
+@@ -105,7 +116,9 @@ fn main() {
+         let t = Instant::now();
+         // In runs of 64, as a collection unit's walked probes come.
+         for run in trials.chunks(64) {
+-            pair.scan_pipelined(run, &mut ring, &mut scratch, |_, a| hits += a.is_some() as u64);
++            pair.scan_pipelined(run, &mut ring, &mut scratch, |_, a| {
++                hits += a.is_some() as u64
++            });
+         }
+         (t.elapsed().as_nanos() as f64 / summands, 0.0, 0.0, hits)
+     };
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index 8a689061a..72c25aa11 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -992,7 +992,11 @@ impl FrobeniusCanon {
+             }
+         }
+         for &(j, sum) in degenerate {
+-            out[start + j] = if sum.infinity { 0 } else { self.canon(sum.x) + 1 };
++            out[start + j] = if sum.infinity {
++                0
++            } else {
++                self.canon(sum.x) + 1
++            };
+         }
+         between(slopes.len());
+     }
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 974f0b3de..128150534 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -5616,7 +5616,8 @@ impl PairSumTable {
+             },
+         );
+         prep.hashes.clear();
+-        prep.hashes.extend(prep.keys.iter().map(|&key| pair_filter_hash(key)));
++        prep.hashes
++            .extend(prep.keys.iter().map(|&key| pair_filter_hash(key)));
+     }
+ 
+     /// The second stage of a prepared scan: read the presence filter for
+@@ -15712,7 +15713,10 @@ mod tests {
+                 PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+             )
+             .unwrap();
+-            assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
++            assert!(
++                folded.is_folded(),
++                "degree {degree}: expected the fold tier"
++            );
+             let fc = FastCurve::new(&kc.curve).unwrap();
+             let g = fc.lift(kc.generator());
+             let base = fb.points.len();
+@@ -15720,7 +15724,10 @@ mod tests {
+             let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
+             let scan_of = |t: u64| match t % 11 {
+                 3 => None,
+-                7 => Some(Scan::Cyclic { start: 5, len: base }),
++                7 => Some(Scan::Cyclic {
++                    start: 5,
++                    len: base,
++                }),
+                 r if r % 2 == 0 => Some(Scan::Indices(&idxs)),
+                 _ => Some(Scan::Cyclic {
+                     start: (t as usize * 37) % base,
+@@ -15752,7 +15759,10 @@ mod tests {
+                 assert_eq!(next, run_len, "an answer for every trial");
+                 first += run_len as u64;
+             }
+-            assert!(hits > 0, "degree {degree}: no trial hit, nothing to compare");
++            assert!(
++                hits > 0,
++                "degree {degree}: no trial hit, nothing to compare"
++            );
+         }
+     }
+ 
+@@ -15772,7 +15782,10 @@ mod tests {
+                 PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+             )
+             .unwrap();
+-            assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
++            assert!(
++                folded.is_folded(),
++                "degree {degree}: expected the fold tier"
++            );
+             let fc = FastCurve::new(&kc.curve).unwrap();
+             let g = fc.lift(kc.generator());
+             let base = fb.points.len();
+@@ -15842,8 +15855,9 @@ mod tests {
+             let g = fc.lift(kc.generator());
+             let p = fc.mul_u64(g, 0x1234_5677);
+             for count in [0usize, 1, 15, 16, 17, 64, 100, 257] {
+-                let mut qs: Vec<FastPoint> =
+-                    (1..=count as u64).map(|t| fc.mul_u64(g, 3 * t + 1)).collect();
++                let mut qs: Vec<FastPoint> = (1..=count as u64)
++                    .map(|t| fc.mul_u64(g, 3 * t + 1))
++                    .collect();
+                 for (slot, q) in [(5, p), (9, fc.neg(p)), (13, FastPoint::INFINITY)] {
+                     if count > slot {
+                         qs[slot] = q;
+@@ -15886,7 +15900,10 @@ mod tests {
+                 }
+                 let mut got = Vec::new();
+                 canon.slope_keys_paced(&slopes, &dcoords, e, &degenerate, &mut got, |_| {});
+-                assert_eq!(got, want, "degree {degree}, {count} summands: the scan's path");
++                assert_eq!(
++                    got, want,
++                    "degree {degree}, {count} summands: the scan's path"
++                );
+                 for &(j, sum) in &degenerate {
+                     assert_eq!(sum, rests[j], "degree {degree}: degenerate sum {j}");
+                 }
+-- 
+2.43.0
+

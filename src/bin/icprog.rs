@@ -11,7 +11,7 @@
 //! changes the code it measures.
 //!
 //! - `icprog analyse <round>`: a round's figures and decision, from its run
-//!   tree only.  `r05`, `r02b` and `r07` are native; `r03` reproduces R03's
+//!   tree only.  `r05`, `r02b`, `r06`, `r07` and `r08` are native; `r03` reproduces R03's
 //!   frozen `analysis.json` from its frozen runs.
 //! - `icprog holdouts`: a round's fresh holdouts by suite v1's own
 //!   construction (`suite/v1/make_suite.py`, ported), drawn once, or
@@ -32,10 +32,26 @@
 //!   claim, and the figures read from the checked rows.
 #[path = "icprog/autolab.rs"]
 mod autolab;
+#[path = "icprog/b2.rs"]
+mod b2;
+#[path = "icprog/b2b.rs"]
+mod b2b;
+#[path = "icprog/b3b.rs"]
+mod b3b;
+#[path = "icprog/b5a.rs"]
+mod b5a;
+#[path = "icprog/b7a.rs"]
+mod b7a;
 #[path = "icprog/bench.rs"]
 mod bench;
+#[path = "icprog/bround.rs"]
+mod bround;
 #[path = "icprog/callgrind.rs"]
 mod callgrind;
+#[path = "icprog/conformance.rs"]
+mod conformance;
+#[path = "icprog/f0.rs"]
+mod f0;
 #[path = "icprog/f5_control.rs"]
 mod f5_control;
 #[path = "icprog/f5_control_publication.rs"]
@@ -46,6 +62,8 @@ mod f5_target;
 mod identity;
 #[path = "icprog/oracle.rs"]
 mod oracle;
+#[path = "icprog/ordinary_preparation.rs"]
+mod ordinary_preparation;
 #[path = "icprog/report.rs"]
 mod report;
 // Shared with `isolated_bench`, which uses parts this binary does not.
@@ -100,17 +118,28 @@ enum Round {
     R02b,
     R03,
     R05,
+    R06,
     R07,
+    R08,
+    R09,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
 enum Comparison {
     S23,
     V2,
+    V3,
 }
 
 #[derive(Subcommand)]
 enum Command {
+    /// Independently audit target-free synthetic n17 preparation data; no solver execution.
+    OrdinaryPreparationAudit {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Replay full published F5 capsule custody as data, without execution.
     F5ControlReplayCustody {
         #[arg(long)]
@@ -329,7 +358,7 @@ enum Command {
     Rule {
         /// manifest, pin, size, all, reference, claims or analyse.
         step: String,
-        /// Which comparison: ledger §23's (frozen) or the one at baseline v2.
+        /// Which comparison: ledger §23's (frozen), or the one at baseline v2 or v3.
         #[arg(long, value_enum, default_value = "s23")]
         comparison: Comparison,
         /// The repository checkout (default: the current directory).
@@ -368,6 +397,187 @@ enum Command {
         #[arg(long)]
         fixture_commit: Option<String>,
     },
+    /// One of Track B's measurement steps (`harness/bround.py`, ported):
+    /// manifest, aa, conformance, pin, translate, timing, v2timing, chain
+    /// or analyse.
+    Bround {
+        step: String,
+        /// The conformance steps accepted so far and the one judged, e.g.
+        /// `B0,B1,B3`.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The round whose A/A bands the timing is read against, a directory
+        /// under `rounds/` (e.g. `R07-main-head`).
+        #[arg(long)]
+        aa_from: String,
+        /// The baseline arm's `ic`.
+        #[arg(long)]
+        base: Option<PathBuf>,
+        /// The commit the base was built from.
+        #[arg(long)]
+        base_commit: Option<String>,
+        /// The candidate arm's `ic`.
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// The commit the candidate was built from.
+        #[arg(long)]
+        cand_commit: Option<String>,
+        /// A chain arm, `NAME=PATH` or `NAME=PATH@COMMIT`, NAME one of base,
+        /// B0, B1, B3, B2, B2b, B7a, B3b, B4; repeat for each.
+        #[arg(long = "arm")]
+        arms: Vec<String>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B2's measurements 6 and 7: `estimate` (F2 against v0), `stepcost`
+    /// (`rho-bignum`'s step costs) or `analyse`.
+    B2 {
+        step: String,
+        /// The conformance steps through B2.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// B2's run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// B2's `ic` (`estimate`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// `examples/rho_bignum_rate.rs` built from B2's arm (`stepcost`).
+        #[arg(long)]
+        example: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B2b's measurement 6, the subfield sweep (`sweep.py`, ported): every
+    /// run once into a fresh directory, under the benchmark lock.
+    B2bSweep {
+        /// B2b's `ic`.
+        #[arg(long)]
+        ic: PathBuf,
+        /// The directory to write; it must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// B3b's measurement 6, the two-word premium (a stage diagnostic):
+    /// `run` or `analyse`.
+    B3bPremium {
+        step: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// B3b's `ic` (`run`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B5a's generators (`instances.py` and `make_cases.py`, ported):
+    /// `instances` searches design §4's curves into `instances.json`, and
+    /// `cases` writes `conformance/v2-b5a/` from them.  Each refuses to
+    /// overwrite its files; with `--check` it derives them again and
+    /// compares the bytes.
+    /// Its measurement 6 (no harness before): `calibrate` runs each
+    /// calibration instance five times, isolated, and `estimates` reads the
+    /// constants from them.
+    B5a {
+        step: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        #[arg(long)]
+        check: bool,
+        /// The run tree (`calibrate`, `estimates`).
+        #[arg(long)]
+        runs: Option<PathBuf>,
+        /// B5a's `ic` (`calibrate`).
+        #[arg(long)]
+        ic: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// B7a's own measurements (`rounds/B7a-f1-sampled/run.py`, ported):
+    /// `f1`, `partial` or `analyse`.
+    B7a {
+        step: String,
+        /// The conformance steps through B7a.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// B7a's run tree: its conformance, pin, translation and F1 runs.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The chain's run tree, whose B7a arm gives F0's figures.
+        #[arg(long)]
+        chain_runs: PathBuf,
+        /// The round whose A/A bands the timing is read against.
+        #[arg(long)]
+        aa_from: String,
+        /// B7a's `ic` (`f1` and `partial`).
+        #[arg(long)]
+        cand: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// Track B's F0 instance runs (`run`) and their replays (`analyse`):
+    /// B3's gate rho (`b3-gate`), B3b's two-word instances (`b3b`) and B4's
+    /// three-word instances (`b4`).
+    F0 {
+        step: String,
+        /// The instance set: b3-gate, b3b or b4.
+        #[arg(long)]
+        set: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The run tree.
+        #[arg(long)]
+        runs: PathBuf,
+        /// The `ic` the runs price (`run` only).
+        #[arg(long)]
+        ic: Option<PathBuf>,
+        /// The isolation tool (default: `isolated_bench` beside this binary).
+        #[arg(long)]
+        isolate: Option<PathBuf>,
+    },
+    /// The conformance suite's cases for the steps named, on one `ic`
+    /// (`conformance/run.py` and `v2/run.py`, ported): the report as JSON
+    /// on stdout; the exit status is 0 only if every case passed.
+    Conformance {
+        /// The `ic` binary the cases run.
+        #[arg(long)]
+        ic: PathBuf,
+        /// The steps accepted so far and the one judged, e.g. `B0,B1,B3`.
+        #[arg(long)]
+        steps: String,
+        /// The repository checkout (default: the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+        /// The commit the binary was built from (`json_equals_build_commit`).
+        #[arg(long)]
+        build_commit: Option<String>,
+        /// Also write the report here.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// A round's fresh holdouts by suite v1's own construction
     /// (`suite/v1/make_suite.py`, ported): written once into the round's
     /// `holdouts/` with their `SHA256SUMS`, or, with `--check`, re-derived
@@ -391,12 +601,17 @@ enum Command {
         #[arg(long)]
         check: bool,
     },
-    /// One of a round's declared steps, natively (R05, R02b, R07).
+    /// Whether this host is of a round's hardware class: the CPU features
+    /// the class requires and the ones this host lacks.  Exits 0 in the
+    /// class and 3 outside it, so a chain can check before it starts a
+    /// round; `run` refuses outside it.
+    HostClass { round: Round },
+    /// One of a round's declared steps, natively (R05, R02b, R06, R07, R08, R09).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
         /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
-        /// callgrind or manifest-resumed.
+        /// callgrind or manifest-resumed; R06, R08 and R09 the same but callgrind.
         step: String,
         /// The repository checkout (default: the current directory).
         #[arg(long, default_value = ".")]
@@ -429,7 +644,10 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R02b => "R02b-wide-tail-retest",
         Round::R03 => "R03-curve-construction",
         Round::R05 => "R05-presence-filter",
+        Round::R06 => "R06-scan-key",
         Round::R07 => "R07-main-head",
+        Round::R08 => "R08-scan-fold",
+        Round::R09 => "R09-slope-keys",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -460,6 +678,49 @@ struct RunArgs {
     commits: [Option<String>; 2],
 }
 
+/// A round's declared shape, for the rounds `run` drives; R03's runs are
+/// frozen and it has none.
+fn round_spec(round: Round) -> Option<&'static rounds::Spec> {
+    match round {
+        Round::R02b => Some(&rounds::r02b::SPEC),
+        Round::R03 => None,
+        Round::R05 => Some(&rounds::r05::SPEC),
+        Round::R06 => Some(&rounds::r06::SPEC),
+        Round::R07 => Some(&rounds::r07::SPEC),
+        Round::R08 => Some(&rounds::r08::SPEC),
+        Round::R09 => Some(&rounds::r09::SPEC),
+    }
+}
+
+/// The round's hardware class against this host: the report, and whether
+/// the host is in the class.
+fn host_class(round: Round) -> Result<(String, bool), String> {
+    let requires: &[&'static str] = round_spec(round).map_or(&[], |s| s.requires);
+    let missing = rounds::missing_features(requires)?;
+    let cpu = std::fs::read_to_string("/proc/cpuinfo")
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|l| l.split_once(':'))
+        .find(|(k, _)| k.trim() == "model name")
+        .map_or(json::J::Null, |(_, v)| json::J::Str(v.trim().into()));
+    let names = |fs: &[&str]| json::J::Arr(fs.iter().map(|f| json::J::Str((*f).into())).collect());
+    let doc = json::J::Obj(vec![
+        (
+            "round".into(),
+            json::J::Str(
+                round
+                    .to_possible_value()
+                    .map_or(String::new(), |v| v.get_name().into()),
+            ),
+        ),
+        ("requires".into(), names(requires)),
+        ("missing".into(), names(&missing)),
+        ("in_class".into(), json::J::Bool(missing.is_empty())),
+        ("cpu_model".into(), cpu),
+    ]);
+    Ok((json::dumps(&doc, 1), missing.is_empty()))
+}
+
 fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let RunArgs {
         root,
@@ -468,6 +729,23 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
         isolate,
         commits,
     } = args;
+    // A round measures its hardware class and no other: refuse every timed
+    // step on a host outside it, before the run tree is touched.  The plan
+    // times nothing, and the pin's outputs are the same on every class (the
+    // kernels detect their features at run time and compute the same
+    // values), so those two run anywhere.
+    if !["plan", "pin"].contains(&step) {
+        if let Some(spec) = round_spec(round) {
+            let missing = rounds::missing_features(spec.requires)?;
+            if !missing.is_empty() {
+                return Err(format!(
+                    "this host is outside the round's hardware class: it fails {} of {} (`!` marks a feature the class excludes; see `icprog host-class`)",
+                    missing.join(", "),
+                    spec.requires.join(", ")
+                ));
+            }
+        }
+    }
     // A fresh round's first step makes its run tree; R03's is frozen.
     let runs = match runs {
         Some(r) => r,
@@ -506,7 +784,10 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
     let doc = match round {
         Round::R02b => rounds::r02b::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R05 => rounds::r05::run(&ctx, step, &b, &arms, &root)?,
+        Round::R06 => rounds::r06::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R07 => rounds::r07::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R08 => rounds::r08::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R09 => rounds::r09::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -575,6 +856,7 @@ fn rule(step: &str, args: RuleArgs) -> Result<String, String> {
     let (default_dir, constants) = match args.comparison {
         Comparison::S23 => ("research/ic_single_target_20260930", &rule::S23),
         Comparison::V2 => ("research/ic_tool_program/rule/v2", &rule::V2),
+        Comparison::V3 => ("research/ic_tool_program/rule/v3", &rule::V3),
     };
     let here = abs(&args.dir.clone().unwrap_or_else(|| root.join(default_dir)))?;
     let comparison = rule::Comparison {
@@ -660,7 +942,10 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R02b => rounds::r02b::analyse(&ctx)?,
         Round::R03 => rounds::r03::analyse(&ctx)?,
         Round::R05 => rounds::r05::analyse(&ctx)?,
+        Round::R06 => rounds::r06::analyse(&ctx)?,
         Round::R07 => rounds::r07::analyse(&ctx)?,
+        Round::R08 => rounds::r08::analyse(&ctx)?,
+        Round::R09 => rounds::r09::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
 }
@@ -734,9 +1019,542 @@ fn holdouts(args: HoldoutArgs) -> Result<String, String> {
     ))
 }
 
+/// The conformance runner: the report, and whether every case passed.
+fn conformance_cmd(
+    ic: &std::path::Path,
+    steps: &str,
+    root: &std::path::Path,
+    build_commit: Option<&str>,
+    out: Option<&std::path::Path>,
+) -> Result<(String, bool), String> {
+    let programme = suite::programme(root)?;
+    let steps: Vec<String> = steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let ic = std::path::absolute(ic).map_err(|e| format!("{}: {e}", ic.display()))?;
+    let (report, all) = conformance::run_steps(&programme, &ic, &steps, build_commit)?;
+    let text = json::dumps(&report, 1);
+    if let Some(out) = out {
+        std::fs::write(out, text.clone() + "\n").map_err(|e| format!("{}: {e}", out.display()))?;
+    }
+    Ok((text, all))
+}
+
+struct BroundArgs {
+    step: String,
+    steps: String,
+    root: PathBuf,
+    runs: PathBuf,
+    aa_from: String,
+    base: Option<PathBuf>,
+    base_commit: Option<String>,
+    cand: Option<PathBuf>,
+    cand_commit: Option<String>,
+    arms: Vec<String>,
+    isolate: Option<PathBuf>,
+}
+
+/// `NAME=PATH` or `NAME=PATH@COMMIT`.
+fn chain_arm(spec: &str) -> Result<(bench::Arm, Option<String>), String> {
+    let (name, rest) = spec
+        .split_once('=')
+        .ok_or_else(|| format!("--arm {spec}: expected NAME=PATH or NAME=PATH@COMMIT"))?;
+    let (path, commit) = match rest.rsplit_once('@') {
+        Some((p, c)) => (p, Some(c.to_string())),
+        None => (rest, None),
+    };
+    Ok((
+        bench::Arm {
+            name: name.to_string(),
+            binary: std::path::absolute(path).map_err(|e| format!("{path}: {e}"))?,
+        },
+        commit,
+    ))
+}
+
+fn bround_cmd(args: BroundArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    std::fs::create_dir_all(&args.runs).map_err(|e| format!("{}: {e}", args.runs.display()))?;
+    let runs = std::path::absolute(&args.runs).map_err(|e| e.to_string())?;
+    let aa_from = programme.join("rounds").join(&args.aa_from);
+    if !aa_from.join("analysis.json").exists() {
+        return Err(format!(
+            "{} has no analysis.json to read A/A bands from",
+            aa_from.display()
+        ));
+    }
+    let steps = args
+        .steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            programme,
+            round_dir: aa_from.clone(),
+            runs,
+        },
+        steps,
+        aa_from,
+    };
+    if args.step == "analyse" {
+        return Ok(json::dumps(&bround::analyse(&r)?, 1));
+    }
+    let isolate = match args.isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    let b = bench::Bench { isolate };
+    let (arms, commits): (Vec<bench::Arm>, Vec<Option<String>>) = if args.step == "chain" {
+        let given = args
+            .arms
+            .iter()
+            .map(|s| chain_arm(s))
+            .collect::<Result<Vec<_>, _>>()?;
+        let ordered = bround::chain_arms(given.iter().map(|(a, _)| a.clone()).collect())?;
+        let commits = ordered
+            .iter()
+            .map(|a| {
+                given
+                    .iter()
+                    .find(|(g, _)| g.name == a.name)
+                    .and_then(|(_, c)| c.clone())
+            })
+            .collect();
+        (ordered, commits)
+    } else {
+        let need = |p: Option<PathBuf>, flag: &str| -> Result<PathBuf, String> {
+            let p = p.ok_or_else(|| format!("{} needs --{flag}", args.step))?;
+            if !p.exists() {
+                return Err(format!("no binary at {}", p.display()));
+            }
+            std::path::absolute(&p).map_err(|e| e.to_string())
+        };
+        let cand = need(args.cand, "cand")?;
+        let base = need(args.base, "base")?;
+        (
+            vec![
+                bench::Arm {
+                    name: "base".into(),
+                    binary: base,
+                },
+                bench::Arm {
+                    name: "cand".into(),
+                    binary: cand,
+                },
+            ],
+            vec![args.base_commit, args.cand_commit.clone()],
+        )
+    };
+    let timed = ["aa", "timing", "v2timing", "chain"].contains(&args.step.as_str());
+    if timed && !b.isolate.exists() {
+        return Err(format!("no isolation tool at {}", b.isolate.display()));
+    }
+    let doc = match args.step.as_str() {
+        "manifest" => bround::manifest(&r, &b, &arms, &args.root, &commits)?,
+        "aa" => rounds::speed::aa(&r.ctx, &b, &arms)?,
+        "conformance" => bround::conformance(&r, &arms, args.cand_commit.as_deref())?,
+        "pin" => bround::pin(&r, &arms)?,
+        "translate" => bround::translate(&r, &arms)?,
+        "timing" => bround::timing(&r, &b, &arms)?,
+        "v2timing" => bround::v2timing(&r, &b, &arms)?,
+        "chain" => bround::chain(&r, &b, &arms, &args.root, &commits)?,
+        other => {
+            return Err(format!(
+                "unknown step {other:?}; the steps are manifest, aa, conformance, pin, \
+                 translate, timing, v2timing, chain and analyse"
+            ))
+        }
+    };
+    Ok(match doc {
+        json::J::Null => String::new(),
+        d => json::dumps(&d, 1),
+    })
+}
+
+/// B2's measurements 6 and 7.
+fn b2_cmd(
+    step: &str,
+    steps: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    cand: Option<PathBuf>,
+    example: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            round_dir: programme.join("rounds").join("B2-fields-forms-estimates"),
+            runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            programme,
+        },
+        steps: steps
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect(),
+        aa_from: PathBuf::new(),
+    };
+    let existing = |p: Option<PathBuf>, flag: &str| -> Result<PathBuf, String> {
+        let p = p.ok_or_else(|| format!("`{step}` needs --{flag}"))?;
+        if !p.exists() {
+            return Err(format!("no binary at {}", p.display()));
+        }
+        std::path::absolute(&p).map_err(|e| e.to_string())
+    };
+    match step {
+        "estimate" => {
+            b2::estimate(&r, &existing(cand, "cand")?)?;
+            Ok(String::new())
+        }
+        "stepcost" => {
+            let example = existing(example, "example")?;
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            b2::stepcost(&r, &bench::Bench { isolate }, &example)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&b2::analyse(&r)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are estimate, stepcost and analyse"
+        )),
+    }
+}
+
+/// B3b's two-word premium.
+fn b3b_cmd(
+    step: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    cand: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let r = bround::Run {
+        ctx: rounds::Ctx {
+            round_dir: programme.join("rounds").join("B3b-two-word-kic"),
+            runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            programme,
+        },
+        steps: Vec::new(),
+        aa_from: PathBuf::new(),
+    };
+    match step {
+        "run" => {
+            let cand = cand.ok_or("`run` needs --cand")?;
+            if !cand.exists() {
+                return Err(format!("no binary at {}", cand.display()));
+            }
+            let cand = std::path::absolute(&cand).map_err(|e| e.to_string())?;
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            b3b::run(&r, &bench::Bench { isolate }, &cand)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&b3b::analyse(&r)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are run and analyse"
+        )),
+    }
+}
+
+struct B7aArgs {
+    step: String,
+    steps: String,
+    root: PathBuf,
+    runs: PathBuf,
+    chain_runs: PathBuf,
+    aa_from: String,
+    cand: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+}
+
+/// B7a's own measurements: `f1` and `partial` run, `analyse` reads them
+/// with the chain's B7a arm.
+fn b7a_cmd(args: B7aArgs) -> Result<String, String> {
+    let programme = suite::programme(&args.root)?;
+    let aa_from = programme.join("rounds").join(&args.aa_from);
+    let steps: Vec<String> = args
+        .steps
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .collect();
+    let run_of = |runs: &std::path::Path| -> Result<bround::Run, String> {
+        Ok(bround::Run {
+            ctx: rounds::Ctx {
+                programme: programme.clone(),
+                round_dir: aa_from.clone(),
+                runs: std::path::absolute(runs).map_err(|e| e.to_string())?,
+            },
+            steps: steps.clone(),
+            aa_from: aa_from.clone(),
+        })
+    };
+    std::fs::create_dir_all(&args.runs).map_err(|e| format!("{}: {e}", args.runs.display()))?;
+    let r = run_of(&args.runs)?;
+    if args.step == "analyse" {
+        let chain = run_of(&args.chain_runs)?;
+        return Ok(json::dumps(&b7a::analyse(&r, &chain)?, 1));
+    }
+    let cand = args.cand.ok_or("`f1` and `partial` need --cand")?;
+    if !cand.exists() {
+        return Err(format!("no binary at {}", cand.display()));
+    }
+    let cand = std::path::absolute(&cand).map_err(|e| e.to_string())?;
+    let isolate = match args.isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    if !isolate.exists() {
+        return Err(format!("no isolation tool at {}", isolate.display()));
+    }
+    let b = bench::Bench { isolate };
+    match args.step.as_str() {
+        "f1" => b7a::f1(&r, &b, &cand)?,
+        "partial" => b7a::partial(&r, &b, &cand)?,
+        other => {
+            return Err(format!(
+                "unknown step {other:?}; the steps are f1, partial and analyse"
+            ))
+        }
+    };
+    Ok(String::new())
+}
+
+/// Track B's F0 runs: `run` prices each instance of the set, `analyse`
+/// replays them.
+fn f0_cmd(
+    step: &str,
+    set: &str,
+    root: &std::path::Path,
+    runs: &std::path::Path,
+    ic: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<String, String> {
+    let programme = suite::programme(root)?;
+    let list = f0::instances(&programme, set)?;
+    let what = match set {
+        "b3-gate" => "B3's measurement 5: the gate's rho at F0",
+        "b3b" => "B3b's measurement 5: F0 at two words",
+        _ => "B4's measurement 5: F0 at three words",
+    };
+    match step {
+        "run" => {
+            let ic = ic.ok_or("`run` needs --ic")?;
+            if !ic.exists() {
+                return Err(format!("no binary at {}", ic.display()));
+            }
+            let isolate = match isolate {
+                Some(p) => p,
+                None => std::env::current_exe()
+                    .map_err(|e| e.to_string())?
+                    .with_file_name("isolated_bench"),
+            };
+            if !isolate.exists() {
+                return Err(format!("no isolation tool at {}", isolate.display()));
+            }
+            std::fs::create_dir_all(runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+            let ic = std::path::absolute(&ic).map_err(|e| e.to_string())?;
+            f0::run(&bench::Bench { isolate }, &ic, &list, runs)?;
+            Ok(String::new())
+        }
+        "analyse" => Ok(json::dumps(&f0::analyse(&programme, what, &list, runs)?, 1)),
+        other => Err(format!(
+            "unknown step {other:?}; the steps are run and analyse"
+        )),
+    }
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    if let Command::HostClass { round } = cli.command {
+        return match host_class(round) {
+            Ok((text, in_class)) => {
+                println!("{text}");
+                if in_class {
+                    ExitCode::SUCCESS
+                } else {
+                    ExitCode::from(3)
+                }
+            }
+            Err(e) => {
+                eprintln!("icprog: {e}");
+                ExitCode::FAILURE
+            }
+        };
+    }
+    if let Command::Conformance {
+        ic,
+        steps,
+        root,
+        build_commit,
+        out,
+    } = &cli.command
+    {
+        return match conformance_cmd(ic, steps, root, build_commit.as_deref(), out.as_deref()) {
+            Ok((text, all)) => {
+                println!("{text}");
+                if all {
+                    ExitCode::SUCCESS
+                } else {
+                    ExitCode::FAILURE
+                }
+            }
+            Err(e) => {
+                eprintln!("icprog: {e}");
+                ExitCode::FAILURE
+            }
+        };
+    }
     let result = match cli.command {
+        Command::Conformance { .. } | Command::HostClass { .. } => unreachable!("handled above"),
+        Command::B2 {
+            step,
+            steps,
+            root,
+            runs,
+            cand,
+            example,
+            isolate,
+        } => b2_cmd(&step, &steps, &root, &runs, cand, example, isolate),
+        Command::B2bSweep { ic, out } => {
+            return match std::path::absolute(&ic)
+                .map_err(|e| e.to_string())
+                .and_then(|ic| b2b::sweep(&ic, &out))
+            {
+                Ok((summary, clean)) => {
+                    println!("{}", json::dumps(&summary, 1));
+                    if clean {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(e) => {
+                    eprintln!("icprog: {e}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
+        Command::B3bPremium {
+            step,
+            root,
+            runs,
+            cand,
+            isolate,
+        } => b3b_cmd(&step, &root, &runs, cand, isolate),
+        Command::B5a {
+            step,
+            root,
+            check,
+            runs,
+            ic,
+            isolate,
+        } => {
+            let done = match step.as_str() {
+                "instances" => b5a::write_instances(&root, check),
+                "cases" => b5a::cases(&root, check),
+                "calibrate" | "estimates" => b5a_measure(&step, &root, runs, ic, isolate),
+                _ => Err(format!(
+                    "unknown step `{step}`: instances, cases, calibrate or estimates"
+                )),
+            };
+            return match done {
+                Ok((summary, ok)) => {
+                    println!("{}", json::dumps(&summary, 1));
+                    if ok {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(e) => {
+                    eprintln!("icprog: {e}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
+        Command::B7a {
+            step,
+            steps,
+            root,
+            runs,
+            chain_runs,
+            aa_from,
+            cand,
+            isolate,
+        } => b7a_cmd(B7aArgs {
+            step,
+            steps,
+            root,
+            runs,
+            chain_runs,
+            aa_from,
+            cand,
+            isolate,
+        }),
+        Command::F0 {
+            step,
+            set,
+            root,
+            runs,
+            ic,
+            isolate,
+        } => f0_cmd(&step, &set, &root, &runs, ic, isolate),
+        Command::Bround {
+            step,
+            steps,
+            root,
+            runs,
+            aa_from,
+            base,
+            base_commit,
+            cand,
+            cand_commit,
+            arms,
+            isolate,
+        } => bround_cmd(BroundArgs {
+            step,
+            steps,
+            root,
+            runs,
+            aa_from,
+            base,
+            base_commit,
+            cand,
+            cand_commit,
+            arms,
+            isolate,
+        }),
+        Command::OrdinaryPreparationAudit { input, out } => ordinary_preparation::run(&input, &out),
         Command::F5ControlReplayCustody {
             publication,
             registration_sha256,
@@ -870,7 +1688,9 @@ fn main() -> ExitCode {
             },
         ),
         Command::Table { round, analysis } => json::read(&analysis).and_then(|doc| match round {
-            Round::R05 | Round::R02b | Round::R07 => report::r05(&doc),
+            Round::R05 | Round::R02b | Round::R06 | Round::R07 | Round::R08 | Round::R09 => {
+                report::r05(&doc)
+            }
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Holdouts {
@@ -921,4 +1741,38 @@ fn main() -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+/// B5a's measurement 6: `calibrate` (the runs) or `estimates` (the
+/// constants from them).
+fn b5a_measure(
+    step: &str,
+    root: &std::path::Path,
+    runs: Option<PathBuf>,
+    ic: Option<PathBuf>,
+    isolate: Option<PathBuf>,
+) -> Result<(json::J, bool), String> {
+    let runs = runs.ok_or_else(|| format!("`{step}` needs --runs"))?;
+    std::fs::create_dir_all(&runs).map_err(|e| format!("{}: {e}", runs.display()))?;
+    let runs = std::path::absolute(&runs).map_err(|e| e.to_string())?;
+    let root = std::path::absolute(root).map_err(|e| e.to_string())?;
+    if step == "estimates" {
+        return Ok((b5a::estimates(&root, &runs)?, true));
+    }
+    let ic = ic.ok_or("`calibrate` needs --ic")?;
+    if !ic.exists() {
+        return Err(format!("no binary at {}", ic.display()));
+    }
+    let ic = std::path::absolute(&ic).map_err(|e| e.to_string())?;
+    let isolate = match isolate {
+        Some(p) => p,
+        None => std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .with_file_name("isolated_bench"),
+    };
+    if !isolate.exists() {
+        return Err(format!("no isolation tool at {}", isolate.display()));
+    }
+    b5a::calibrate(&root, &bench::Bench { isolate }, &ic, &runs)?;
+    Ok((json::J::Null, true))
 }

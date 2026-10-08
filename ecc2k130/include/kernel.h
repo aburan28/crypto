@@ -68,8 +68,9 @@ struct WalkParams {
     const unsigned long long *replaySeeds = nullptr;
     unsigned long long replayCount = 0;
     CurveConsts consts;
-    // Table walk only (tablewalk.h): the last four step tags of every lane,
-    // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
+    // The table walk uses both fields: the last four tags of every lane and
+    // its flat constant buffer.  The sigma-square-table arm leaves hist null
+    // and reuses twConsts for its ABI-compatible 8,320-byte square table.
     unsigned long long *hist;
     const unsigned *twConsts;
 #if ECC_CYCLE_PROFILE

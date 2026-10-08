@@ -51,6 +51,7 @@ use crate::cryptanalysis::ic_boundary::{
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
 };
+use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
 use crate::cryptanalysis::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
@@ -146,6 +147,65 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for BinarySubspaceBase<'_> {
 /// column: `2n` points, one unknown.
 pub struct KoblitzOrbitBase<'i> {
     pub instance: &'i BinaryInstance,
+}
+
+/// A signed-Frobenius-orbit base whose abscissa subspace is contained in
+/// `ker Tr_{F_{2^n}/F_2}`.  This is an executable factor-base policy rather
+/// than merely a score attached to a search candidate: a divisor that is not
+/// trace-zero is rejected before relation collection starts.
+pub struct KoblitzTraceZeroBase<'i> {
+    pub instance: &'i BinaryInstance,
+}
+
+impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzTraceZeroBase<'_> {
+    fn name(&self) -> &str {
+        "koblitz-trace-zero"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "the trace-zero Frobenius-invariant abscissa subspace selected by divisor {}, each signed orbit folded onto one column",
+            params.get("divisor").unwrap_or("?")
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[(
+            "divisor",
+            "`;`-separated factors of x^n - 1; the resulting invariant subspace must lie in the absolute-trace kernel",
+        )]
+    }
+
+    fn build(
+        &self,
+        _ctx: &InstanceCtx<BinaryGroup<'a>>,
+        params: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<FactorBase<FastPoint>, String> {
+        let kc = self
+            .instance
+            .koblitz
+            .as_ref()
+            .ok_or("koblitz-trace-zero requires a Koblitz curve")?;
+        let idx = divisor_indices(params)?;
+        let frob = build_frobenius_factor_base_from_divisor(kc, &idx)
+            .ok_or_else(|| format!("no invariant subspace for divisor {idx:?}"))?;
+        if !subspace_is_trace_zero(kc, &frob) {
+            return Err(format!(
+                "divisor {idx:?} is not trace-zero: at least one abscissa has absolute trace one"
+            ));
+        }
+        koblitz_factor_base(
+            self.instance,
+            &frob,
+            ColumnFold::SignedFrobeniusOrbit,
+            format!(
+                "trace-zero invariant subspace, divisor {idx:?}, dimension {}",
+                frob.ell
+            ),
+        )
+        .ok_or_else(|| "the trace-zero subspace produced no usable factor base".into())
+    }
 }
 
 impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
@@ -1408,6 +1468,36 @@ mod tests {
         assert!(divisor_indices(&p)
             .unwrap_err()
             .contains("`x` is not a number"));
+    }
+
+    #[test]
+    fn trace_zero_factor_base_is_an_executable_policy() {
+        let inst = koblitz_instance(1, 9).expect("registered n9 Koblitz instance");
+        let group = BinaryGroup(&inst.fast);
+        let ctx = InstanceCtx {
+            group: &group,
+            generator: inst.generator,
+            target: inst.generator,
+            r: inst.r,
+            cofactor: inst.cofactor,
+            group_order: inst.group_order,
+            name: inst.name.clone(),
+            field_degree: Some(inst.n),
+        };
+        let mut ops = GroupOps::default();
+        let (_, trace_zero) = Params::parse_spec("koblitz-trace-zero:divisor=1").unwrap();
+        let base = KoblitzTraceZeroBase { instance: &inst }
+            .build(&ctx, &trace_zero, &mut ops)
+            .expect("a divisor omitting x + 1 is trace-zero");
+        assert!(base.columns > 0);
+
+        let (_, trace_one) = Params::parse_spec("koblitz-trace-zero:divisor=0").unwrap();
+        let error =
+            match (KoblitzTraceZeroBase { instance: &inst }).build(&ctx, &trace_one, &mut ops) {
+                Err(error) => error,
+                Ok(_) => panic!("a divisor containing x + 1 must be rejected"),
+            };
+        assert!(error.contains("not trace-zero"), "{error}");
     }
 
     /// Freeze the entire producer support, not merely its size or first

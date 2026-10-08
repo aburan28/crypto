@@ -1,0 +1,780 @@
+{
+  "schema": "p256.s17_batched_inversion/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "field_prime": "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+  "curve_a": "0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+  "curve_b": "0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+  "round16_sha256": "af2874ef5f0bdabec75b9bf707067232d0d6e3985f0cce4eba6834c2b5790e44",
+  "factor_base": {
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+    "columns": 131458,
+    "signed_points": 262916,
+    "complete_rebuild_verified": true
+  },
+  "local_maximum_degree": 2,
+  "modeled_relation_success_unchanged": 0.96400018,
+  "end_to_end_fraction_in_oracle": null,
+  "end_to_end_speedup": null,
+  "samples": [
+    {
+      "kind": "prefix",
+      "packed_atom_hex": "00000000100008000300010000500018000700020000900028000b00030000d00038000f",
+      "columns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "decoded_exact": true,
+      "left_image_sha256": "61680a86f2fcf2f1d90056747ea59c1e77aa87c9dacc12d6c71b3cb2efc9f221",
+      "right_image_sha256": "f610e23d93dd1c60482092265d8f54e3a943a791e1912760aefaa80311ff1cdb",
+      "scalar_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 58368,
+        "root_construction": 304,
+        "total": 104576
+      },
+      "batched_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 5802,
+        "root_construction": 304,
+        "total": 52010
+      },
+      "build_multiplication_reduction": 2.0106902518746397,
+      "scalar_build_quadratic_solves": 152,
+      "batched_build_quadratic_solves": 152,
+      "build_inversion_profile": {
+        "batch_sizes": [
+          4,
+          4,
+          64,
+          4,
+          4,
+          64
+        ],
+        "batch_inversions": 6,
+        "scalar_fallbacks": 8
+      },
+      "two_target_scalar_multiplications": 280704,
+      "two_target_batched_multiplications": 131368,
+      "two_target_multiplication_reduction": 2.136776079410511,
+      "transient_reconstruction_raw_bytes": 8192,
+      "intermediate_reference_group_additions": 1188,
+      "full_reference_group_additions": 131070,
+      "targets": [
+        {
+          "kind": "planted-positive",
+          "scalar": null,
+          "target": [
+            "0x650484fd693e695b489e5f0e8fa18dafe875ceafd369a06271ea242a285ba4ce",
+            "0xf1f6fa8d0158b70bc4204ccd9948dccf2c497be7aaa1a8df251ed35e82110c72"
+          ],
+          "reference_positive": true,
+          "scalar_positive": true,
+          "batched_positive": true,
+          "algebra_hits": 1,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "7fe2a82e31a9e425c95977b71aee83108ff824edd0b135aa3a3bfdd1188806ed"
+        },
+        {
+          "kind": "hash-public",
+          "scalar": "0x76771fb225cb083097b565c391f5043faae27ad7ba7ed45975362a8b23bbb0c",
+          "target": [
+            "0x5d6161e9c07e4ed41db2f916451ca1bcb98f777ca64297973bc6418e1effe366",
+            "0x87ea485f88170d3a64369be1fa40333c58a4979aece8bbd420054c03bd73bf3f"
+          ],
+          "reference_positive": false,
+          "scalar_positive": false,
+          "batched_positive": false,
+          "algebra_hits": 0,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "exact": true
+    },
+    {
+      "kind": "hash-0",
+      "packed_atom_hex": "6fee18b6823879fa8e115b51b7a20941cdef561cce39f27829cab20d3a0a5fa568a47cc5",
+      "columns": [
+        114616,
+        101224,
+        36382,
+        129678,
+        17773,
+        72570,
+        33360,
+        118255,
+        88179,
+        58271,
+        40458,
+        117426,
+        13544,
+        42490,
+        88617,
+        31941
+      ],
+      "decoded_exact": true,
+      "left_image_sha256": "b886a642f6c0fd5b1a9fda5303fc68a1455152e66de5293504211438ff60e5b9",
+      "right_image_sha256": "0afb4d37391a7a70cd16300d386ca7351bb8795b41cd5f103718ffc45f6242c2",
+      "scalar_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 58368,
+        "root_construction": 304,
+        "total": 104576
+      },
+      "batched_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 5802,
+        "root_construction": 304,
+        "total": 52010
+      },
+      "build_multiplication_reduction": 2.0106902518746397,
+      "scalar_build_quadratic_solves": 152,
+      "batched_build_quadratic_solves": 152,
+      "build_inversion_profile": {
+        "batch_sizes": [
+          4,
+          4,
+          64,
+          4,
+          4,
+          64
+        ],
+        "batch_inversions": 6,
+        "scalar_fallbacks": 8
+      },
+      "two_target_scalar_multiplications": 280704,
+      "two_target_batched_multiplications": 131368,
+      "two_target_multiplication_reduction": 2.136776079410511,
+      "transient_reconstruction_raw_bytes": 8192,
+      "intermediate_reference_group_additions": 1188,
+      "full_reference_group_additions": 131070,
+      "targets": [
+        {
+          "kind": "planted-positive",
+          "scalar": null,
+          "target": [
+            "0xb63a49750d6dfaf1f266547ed6e41a96e14405dac8e832fd92b138fd3264781",
+            "0x3e47936f3c6679e291e112b338c6764362382a008c14a207e7dbb99d527adec0"
+          ],
+          "reference_positive": true,
+          "scalar_positive": true,
+          "batched_positive": true,
+          "algebra_hits": 1,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "152af5c635a452a0053ceab8fb3901ce9e5b6006047947b2b75ae53f16a54c49"
+        },
+        {
+          "kind": "hash-public",
+          "scalar": "0x971bf70432d4ec5fa2aefacfbd1b0870330d6b452709c7f8609c1252da0eabab",
+          "target": [
+            "0x86b0c94ded2f33a4e2654f0498e7f8c8dc0f0fb28a2ce7d7096e0254af9b5012",
+            "0x7b59450b260608540cf6fb24c94401e0223f60f1de28854b9c92df9ee5132af1"
+          ],
+          "reference_positive": false,
+          "scalar_positive": false,
+          "batched_positive": false,
+          "algebra_hits": 0,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "exact": true
+    },
+    {
+      "kind": "hash-1",
+      "packed_atom_hex": "2825d058a73d998d357ead1a99615e485f27419dc20061dd0162347fc4dd4154d574c475",
+      "columns": [
+        41111,
+        66954,
+        118630,
+        101685,
+        129716,
+        108950,
+        22418,
+        24359,
+        67191,
+        8198,
+        30528,
+        90676,
+        130835,
+        119829,
+        79197,
+        50293
+      ],
+      "decoded_exact": true,
+      "left_image_sha256": "31ad479baeed920c3c910353864038082e49acbf8a35f1d00fcbdd1547c726c9",
+      "right_image_sha256": "7a982fdc95dc5aced64ec55e6ff335d78e19596dae1a8cf2d2f4ee6d73453d8e",
+      "scalar_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 58368,
+        "root_construction": 304,
+        "total": 104576
+      },
+      "batched_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 5802,
+        "root_construction": 304,
+        "total": 52010
+      },
+      "build_multiplication_reduction": 2.0106902518746397,
+      "scalar_build_quadratic_solves": 152,
+      "batched_build_quadratic_solves": 152,
+      "build_inversion_profile": {
+        "batch_sizes": [
+          4,
+          4,
+          64,
+          4,
+          4,
+          64
+        ],
+        "batch_inversions": 6,
+        "scalar_fallbacks": 8
+      },
+      "two_target_scalar_multiplications": 280704,
+      "two_target_batched_multiplications": 131368,
+      "two_target_multiplication_reduction": 2.136776079410511,
+      "transient_reconstruction_raw_bytes": 8192,
+      "intermediate_reference_group_additions": 1188,
+      "full_reference_group_additions": 131070,
+      "targets": [
+        {
+          "kind": "planted-positive",
+          "scalar": null,
+          "target": [
+            "0xd54eea17409e76a608f8439bcd8fd186ce64aada345f9fbe1dcf2d96f4bdfa05",
+            "0xa55d53ea551fadb3c9cdf54152eb802173593d0a445707eef07570f9eae9a7d4"
+          ],
+          "reference_positive": true,
+          "scalar_positive": true,
+          "batched_positive": true,
+          "algebra_hits": 1,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "9677e4b0f511abbc57ace6e3e87e37c01c60ff60d57b0f38292051d6b5e97297"
+        },
+        {
+          "kind": "hash-public",
+          "scalar": "0xe6e127e01c255347d9b53b83e54b1e4773da7cc2657f9be955eddb8cfd3a49f7",
+          "target": [
+            "0x3126f87d77e4aef00adc6784036eed62b7963f22f2e41de91f4797b5f4de9d8",
+            "0x3d994338356f255186fa03645842742290551665ef54e2629bdea0d10c293279"
+          ],
+          "reference_positive": false,
+          "scalar_positive": false,
+          "batched_positive": false,
+          "algebra_hits": 0,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "exact": true
+    },
+    {
+      "kind": "hash-2",
+      "packed_atom_hex": "3412de25e35051ab5118d918b853b935c0d0109a4f83834759e21e4ddf83e612b4816943",
+      "columns": [
+        53323,
+        123486,
+        54292,
+        109393,
+        25444,
+        101253,
+        61005,
+        114896,
+        17001,
+        63544,
+        53718,
+        123422,
+        79742,
+        15969,
+        44320,
+        92483
+      ],
+      "decoded_exact": true,
+      "left_image_sha256": "1aa7f72812649c08058f7840d53e39363ef6f621ef79cc17527c6d7286bee348",
+      "right_image_sha256": "fb32b941e00c7860e6988d1dfe53e9aa9b3bf79c96aeb9c8375a46c7a3b9db90",
+      "scalar_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 58368,
+        "root_construction": 304,
+        "total": 104576
+      },
+      "batched_build_multiplication_counts": {
+        "coefficients": 1672,
+        "discriminants": 304,
+        "square_roots": 43928,
+        "inversions": 5802,
+        "root_construction": 304,
+        "total": 52010
+      },
+      "build_multiplication_reduction": 2.0106902518746397,
+      "scalar_build_quadratic_solves": 152,
+      "batched_build_quadratic_solves": 152,
+      "build_inversion_profile": {
+        "batch_sizes": [
+          4,
+          4,
+          64,
+          4,
+          4,
+          64
+        ],
+        "batch_inversions": 6,
+        "scalar_fallbacks": 8
+      },
+      "two_target_scalar_multiplications": 280704,
+      "two_target_batched_multiplications": 131368,
+      "two_target_multiplication_reduction": 2.136776079410511,
+      "transient_reconstruction_raw_bytes": 8192,
+      "intermediate_reference_group_additions": 1188,
+      "full_reference_group_additions": 131070,
+      "targets": [
+        {
+          "kind": "planted-positive",
+          "scalar": null,
+          "target": [
+            "0x698a8e82db04dbc1d06a21fcbe0afc85fd6e372982b03c3c8b7ddf3a4ca24bff",
+            "0x857d4eeaff4ef240fb603a21b01b53b3a805d66b0f8c4ae786879b7447a4dd30"
+          ],
+          "reference_positive": true,
+          "scalar_positive": true,
+          "batched_positive": true,
+          "algebra_hits": 1,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "1dcd53084832ad142b983ef3739e767f586bebb53a7d391010ced0b67525e04f"
+        },
+        {
+          "kind": "hash-public",
+          "scalar": "0x27e351a4458de020f42feb682da0643222fd834c7a9824bdccdc930060cce7b",
+          "target": [
+            "0x8efbdaa707f2e678f385be29dac9f19722e46a79215062068edc3345190749d6",
+            "0x172850a7c56d4bd42f65ccd301f93ee938bc5855bf4b07a6c65f7a59a043b0f5"
+          ],
+          "reference_positive": false,
+          "scalar_positive": false,
+          "batched_positive": false,
+          "algebra_hits": 0,
+          "quadratic_solves": 128,
+          "quadratic_roots_returned": 256,
+          "algebra_index_lookups": 256,
+          "linear_degeneracies": 0,
+          "universal_degeneracies": 0,
+          "scalar_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 49152,
+            "root_construction": 256,
+            "total": 88064
+          },
+          "batched_multiplication_counts_warm": {
+            "coefficients": 1408,
+            "discriminants": 256,
+            "square_roots": 36992,
+            "inversions": 767,
+            "root_construction": 256,
+            "total": 39679
+          },
+          "scalar_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 107520,
+            "root_construction": 560,
+            "total": 192640
+          },
+          "batched_multiplication_counts_cold": {
+            "coefficients": 3080,
+            "discriminants": 560,
+            "square_roots": 80920,
+            "inversions": 6569,
+            "root_construction": 560,
+            "total": 91689
+          },
+          "warm_multiplication_reduction": 2.2194107714408124,
+          "cold_multiplication_reduction": 2.101015388977958,
+          "inversion_profile": {
+            "batch_sizes": [
+              128
+            ],
+            "batch_inversions": 1,
+            "scalar_fallbacks": 0
+          },
+          "false_negative": false,
+          "false_positive": false,
+          "exact": true,
+          "hit_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "exact": true
+    }
+  ]
+}

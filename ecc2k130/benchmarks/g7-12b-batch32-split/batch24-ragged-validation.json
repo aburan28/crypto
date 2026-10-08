@@ -1,0 +1,23 @@
+{
+  "logical_walks": 8064,
+  "validation": [
+    {
+      "run_id": 0,
+      "checkpoint_sha256": "5897f68330b72970d09a71108626e1034521f1980fbfcd13d173481cb8f8c0a4",
+      "matching_dp_records": 19080,
+      "reference_replays_per_binary": 16
+    },
+    {
+      "run_id": 139,
+      "checkpoint_sha256": "68f9fad0cdff93bcb0c7b486c851eed230e2183ab91f4baa9a94bd6a72788ad6",
+      "matching_dp_records": 19151,
+      "reference_replays_per_binary": 16
+    }
+  ],
+  "bidirectional_resume": false,
+  "candidate_batch": 24,
+  "binary_sha256": {
+    "reference": "5ef027f528fb25245014e5b3a0c983a009dab0cf58effe2ef886ace3474b118a",
+    "candidate": "ea262776683d3014876ab70d09d800b334529cd366760ad67d3099eb82b04f6a"
+  }
+}

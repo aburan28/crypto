@@ -46,13 +46,11 @@ use std::collections::{HashMap, HashSet, VecDeque};
 /// `j(E)` for an ordinary binary curve `E: y² + xy = x³ + ax² + b`.
 ///
 /// Standard formula in characteristic 2: with `c₄ = 1`, `Δ = b`, we have
-/// `j(E) = c₄³ / Δ = 1 / b`.  `b = 0` would be a supersingular curve,
-/// which we never deal with here (the GHS trapdoor assumes ordinary `b`).
+/// `j(E) = c₄³ / Δ = 1 / b`.  `b = 0` is singular, not supersingular,
+/// and therefore has no elliptic-curve `j`-invariant. The GHS trapdoor path
+/// handles only nonsingular ordinary curves.
 pub fn j_invariant(curve: &ECurve) -> F2mElement {
-    assert!(
-        !curve.b.is_zero(),
-        "supersingular curve (b = 0) — j undefined"
-    );
+    assert!(!curve.b.is_zero(), "singular curve (b = 0) — j undefined");
     curve
         .b
         .flt_inverse(&curve.irr)

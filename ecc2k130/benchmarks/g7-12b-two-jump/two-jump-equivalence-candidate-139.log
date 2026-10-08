@@ -1,0 +1,32 @@
+packed kernel: 80 registers/thread, 16 local bytes/thread, 28032 shared bytes/block, two-product multiplier
+packed theoretical occupancy: 50.0% (3 blocks/SM, 256 threads/block, 82 SMs); grid 4 blocks
+packed denominator cache: 1
+packed last-slot cache mode: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed partial Frobenius routing mask: 1
+packed Frobenius stage order: 1
+packed byte-select Frobenius: 1
+packed seven-stage conversion: 1
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native full product: 0
+packed native reduction: 0
+packed fused sigma: 0
+packed inline mask: 3
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 0
+packed state tile: 256
+packed block inverse: 1
+packed physical slots/thread: 8; logical workers/block: 128
+backend cuda-packed131: 512 threads x 16 slots x 1 lanes = 8192 walks, dp weight 52, 64 steps per launch
+no checkpoint at /home/ubuntu/crypto/ecc2k130/build/two-jump-equivalence-candidate-139.ckpt, starting fresh
+       2.4 s       0.660 M it/s     1572864 iterations     14556 dp     14556 stored         0 dropped
+       3.0 s       0.692 M it/s     2097152 iterations     19331 dp     19331 stored         0 dropped
+  finished: 0.687 M it/s, 19331 distinguished points (16 verified against the reference, 0 dropped)

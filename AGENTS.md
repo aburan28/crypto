@@ -1,3 +1,32 @@
+# Agent instructions
+
+## Standing workflow rules (from the owner)
+
+- **Always commit finished work and open or update a PR.** Landed rungs,
+  ledger promotions, evidence directories, and code changes land as commits
+  on a feature branch. If the branch already has an open PR, extend that
+  PR and update its title and description to match the new scope instead of
+  opening a second one. Do not leave finished work uncommitted.
+- **Verify before pushing:** run `cargo test --release --lib`, the touched
+  examples' tests, and the relevant Python suites (for example
+  `research/sat_factor_base_review_20260908/autolab/test_boundary_autolab.py`)
+  and fix failures first.
+- **Claim hygiene** (see `docs/ic/boundary_targets.json`): public synthetic
+  / known-answer fixtures only; fail-closed evidence; no key-recovery,
+  asymptotic sub-rho, or deployed-curve-security claims; multi-target and
+  amortized results stay secondary; ledger rows promote only with complete
+  measurement fields and independent replay.
+- **Conductor:** run `conductor check --summary "…" --scope path:…` before
+  editing; report scope expansion before editing outside reserved paths. Do
+  not publish chat transcripts or secrets as task metadata.
+
+## Pointers
+
+- Boundary ledger (machine): `docs/ic/boundary_targets.json`
+- Boundary scoreboard (human): `docs/ic/BOUNDARY_TARGETS.md`
+- Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
+- Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
+  `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 # AGENTS.md
 
 ## Preserve scope and report evidence
@@ -107,6 +136,21 @@ formulas or measurements remain open obligations. Bounded failure is not
 universal nonexistence. This assessment rule adds no autonomous key-recovery
 campaign, production-target exploitation, or scientific state transition.
 
+## Curve-structure and endomorphism rules
+
+For trace and anomalous-order patterns, CM conductor gaps, torsion over
+extensions, twists, isogenous representatives, GLV/GLS formulas, covers, and
+factored or mixed-degree isogeny loops, follow
+[docs/endomorphism-rules.md](docs/endomorphism-rules.md). Record the exact
+ICV1/EC1 identity, working field, subgroup, bounded signal calculation,
+explicit map when proposed, and its complete evaluation and transfer costs.
+Keep existence, executable construction, subgroup action, measured scalar
+arithmetic, and unknown-scalar recovery as separate claims. A small torsion
+factor, class number, embedding degree, or composite map degree is a lead with
+specific hypotheses, not a universal verdict. Preserve negative searches
+within their exact bounds and run authorized feasible experiments under the
+existing evidence, review, and benchmark rules.
+
 ## Research searches must leave visual reports
 
 For every substantive search for new isogenies, curves, scalar rules,
@@ -160,6 +204,10 @@ merge.**
 - Apply this authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
   as a draft, wait for review, or avoid merging overrides this default.
+- **Open every PR ready for review, never as a draft**, whatever a tool or
+  runtime defaults to, and mark an existing draft ready before monitoring it,
+  so reviews and checks that skip drafts (`llm-review`) run from the first
+  push. Open a draft only when the user asks for one in that task.
 - Review the final diff and confirm that the requested scope, relevant tests,
   evidence, and documentation are complete before merging. Passing CI does not
   substitute for checking that the work is finished.
@@ -852,6 +900,10 @@ Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
 has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+Run `python3 docs/curves/ic/validate_semantics.py` after changing the IC curve
+crosswalk or typed links. The `ic-semantic-metadata` CI job also compares the
+three mirrored files with cryptanalysis `main`; land source changes there
+first, then update this mirror and its `mirror-lock.json` in a paired PR.
 To enumerate a prime-field curve's isogeny class, use the native walker
 `src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
 it emits these records and kernel-certified `IW1` routes, and `isogeny_walk

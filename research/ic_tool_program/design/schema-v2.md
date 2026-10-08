@@ -127,7 +127,7 @@ A prime field, with `p ≥ 5`:
 ```
 
 An extension of a prime field. B2 parses and validates it, and it is
-routed only from B5:
+routed only from B5 (B5a routes it: [`extension-fields.md`](extension-fields.md)):
 
 ```json
 "field": {"kind": "prime_extension", "p": "1000003", "degree": 3, "modulus": ["2", "0", "1"]}
@@ -226,7 +226,8 @@ AGENTS.md's single-target rule.
     when asked for by name;
   - `F2`: the estimate alone.
 - `pipeline` is `auto` or a pipeline id from §5.1.
-- `recipe` is `auto` (§5.3), or an object with v1's knobs, checked as v1
+- `recipe` is `auto` (§5.3), or, on `ic-gaudry-cubic`, an object of that
+  pipeline's keys (B5a, [`extension-fields.md`](extension-fields.md) §2.4), or an object with v1's knobs, checked as v1
   checks them:
   - `summands`, `descent_summands`;
   - `collection_window`, `collection_aim`, `collection`;
@@ -380,10 +381,11 @@ These never refuse. AGENTS.md §8b requires them.
 |:--|:--|:--|:--|:--|:--|
 | `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2b | B3b (`n ≤ 126`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2b (`k > 1`) |
 | `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3 (`n ≤ 126`, `r < 2^127`), B4 | B1 |
-| `rho-negation` | rho with the negation map | any ordinary binary curve; prime fields | binary `n ≤ 62`; prime `p < 2^63` | B3, B5 | B2 |
+| `rho-negation` | rho with the negation map | any ordinary binary curve; prime fields; from B5a, extension fields | binary `n ≤ 62`; prime `p < 2^63`; extension `q ≤ 2^62` | B3, B5b | B2, B5a |
 | `ic-binary-s4` | index calculus: `ic boundary`'s generic binary pipeline | any ordinary binary curve | `n` in 5..=32 | — | B2 |
 | `ic-prime-s3` | index calculus: `ic boundary`'s prime pipeline (see below) | prime fields | `p < 2^63` | B5 | B2 |
-| `rho-bignum` | rho with the negation map, on `BigUint` arithmetic | any valid instance | the estimate must fit the budget | — | B2 |
+| `rho-bignum` | rho with the negation map, on `BigUint` arithmetic | any valid instance (extension fields from B5a) | the estimate must fit the budget | — | B2, B5a |
+| `ic-gaudry-cubic` | index calculus: Gaudry's, on `E(GF(p³))` (the residual-walk thread's `gaudry_cubic`) | extension fields with `k = 3`, the modulus `t³ − c` and `h = 1` | `r < 2^63` | — | B5a |
 | `trivial` | none | the target `"identity"` | — | — | B1 |
 
 - `ic-prime-s3` is a study pipeline. No subexponential index calculus is
@@ -435,7 +437,7 @@ The gate codes:
 
 | code | gate |
 |:--|:--|
-| `field-wider-than-one-word` | binary `n > 62`: on `rho-koblitz` until B3, on `kic` until B3b |
+| `field-wider-than-one-word` | binary `n > 62`: on `rho-koblitz` until B3, on `kic` until B3b. From B5a, also an extension field with `q > 2^62` on `rho-negation`: its point key packs to `2(x̂ + 1) + s`, as a binary one does |
 | `field-wider-than-two-words` | binary `n > 126` on `rho-koblitz`, from B3, and on `kic`, from B3b. A class key packs to `2(x + 1) + s`, which needs 129 bits at `n = 127`. Lifted by B4. |
 | `prime-wider-than-one-word` | `p ≥ 2^63` (B5) |
 | `scalar-wider-than-63-bits` | `r ≥ 2^63`: on `rho-koblitz` until B3, on `kic` until B3b |
@@ -445,8 +447,11 @@ The gate codes:
 | `subfield-too-large` | `k > 8` |
 | `not-a-subfield-curve` | no `k ≤ 8` with `a, b ∈ GF(2^k)` |
 | `enumeration-bound` | `ic-binary-s4` at `n > 32` |
-| `no-pipeline-for-field` | an extension field before B5, or characteristic 3; and, per pipeline, a field kind the pipeline has no implementation for (B2's amendment 1) |
-| `recipe-not-taken` | a recipe object, which holds `kic`'s knobs, on any other index calculus pipeline (B2's amendment 1) |
+| `no-pipeline-for-field` | an extension field before B5a, or characteristic 3; and, per pipeline, a field kind the pipeline has no implementation for (B2's amendment 1) |
+| `extension-degree-not-three` | `ic-gaudry-cubic` on `k ≠ 3` (B5a) |
+| `modulus-not-binomial` | `ic-gaudry-cubic` on a cubic modulus other than `t³ − c`: the module's field is `GF(p)[t]/(t³ − c)` (B5a) |
+| `cofactor-not-one` | `ic-gaudry-cubic` on `h > 1`: its relations are taken modulo `#E`, every point in `⟨G⟩` (B5a) |
+| `recipe-not-taken` | a recipe object, which holds `kic`'s knobs, on any other index calculus pipeline (B2's amendment 1); on `ic-gaudry-cubic`, a recipe object with a key outside that pipeline's (B5a) |
 | `no-recipe` | `recipe: auto` where §5.3 has no rule |
 | `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h` at one word, as `KoblitzCurve`'s own construction does; past one word the refusal is lifted (B3b, amendment 1) |
 | `not-the-identity` | `trivial` takes the identity only |
@@ -544,9 +549,10 @@ Run as an input, `resolved` gives the same result as the original.
 | 3 | unsupported |
 | 4 | over budget |
 
-A `prime_extension` instance has no ICV1 identity today: ICV1 defines
-binary and prime models only. Before B5 writes an extension-field
-result, it must extend ICV1 and register the models (AGENTS.md §11).
+A `prime_extension` instance had no ICV1 identity until B5a: ICV1
+defined binary and prime models only. B5a's declaration extends ICV1 to
+`GF(p^k)` and registers its instances (AGENTS.md §11), before the tool
+writes any extension-field result.
 
 ## 7. Entry points
 
@@ -717,7 +723,12 @@ B3–B7 are unchanged from the plan, with these refinements:
 - **`rho-negation` on two-word fields** follows its importer, which is
   B2's.
 - **B4** adds the normal-basis import with the challenge.
-- **B5** adds `F_{p^k}`, after extending ICV1.
+- **B5** is split in two (B5a's declaration, 2026-10-01).
+  - **B5a** routes `F_{p^k}`: `rho-negation` and `rho-bignum` on it, and
+    `ic-gaudry-cubic` on `E(GF(p³))`. Its declaration extends ICV1 first
+    (`docs/curves/ICV1.md`). Design: [`extension-fields.md`](extension-fields.md);
+    protocol: [`../rounds/B5a-extension-fields/PROTOCOL.md`](../rounds/B5a-extension-fields/PROTOCOL.md).
+  - **B5b** lifts prime fields past one word, declared on its own later.
 
 ## 11. Deferred, and why
 

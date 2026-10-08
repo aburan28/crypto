@@ -1,6 +1,7 @@
 #include "../include/curveparams.h"
 #include "../include/packed131.h"
 #include <cstdio>
+#include <vector>
 using R = Ref<CfgF131>;
 using P = eccPacked131::P131;
 static unsigned long long state = 0x131ab123456789ULL;
@@ -46,7 +47,34 @@ static bool reductionChecks() {
     printf("PASS: %d host polynomial reductions against long division, including ignored upper-word bits and canonical outputs\n",2*cases);
     return true;
 }
+static bool sigmaTableChecks() {
+    // The table is built from the normal-basis arithmetic; this checks that
+    // its nibble decomposition reproduces x + sigma^j(x) on polynomial
+    // coordinates for every basis vector, dense cases and random inputs.
+    std::vector<uint32_t> table(eccPacked131::SIGMA_TABLE_WORDS);
+    eccPacked131::buildSigmaTable(table.data());
+    std::vector<P> inputs;
+    for (int bit=0;bit<131;bit++) { P a{}; a.v[bit/32]=1u<<(bit%32); inputs.push_back(a); }
+    inputs.push_back(P{}); inputs.push_back(P{{~0u,~0u,~0u,~0u,7u}});
+    for (int i=0;i<512;i++) {
+        P a; for (int w=0;w<5;w++) a.v[w]=uint32_t(randomWord()); a.v[4]&=7u; inputs.push_back(a);
+    }
+    int cases=0;
+    for (int q=0;q<8;q++) for (const P &xp:inputs) {
+        const P a=eccPacked131::fromPolynomial131(xp);
+        const P want=eccPacked131::toPolynomial131(eccPacked131::add131(a,eccPacked131::sigma131(a,q+3)));
+        const P got=eccPacked131::sigmaPlusTable131(table.data(),xp,q);
+        if (!same(got,want) || unpack(eccPacked131::fromPolynomial131(got))!=
+                R::add(unpack(a),R::sigma(unpack(a),q+3))) {
+            printf("sigma table mismatch at map %d, case %d\n",q,cases);return false;
+        }
+        ++cases;
+    }
+    printf("PASS: %d host Frobenius table lookups against the network and the independent reference\n",cases);
+    return true;
+}
 int main() {
+    if (!sigmaTableChecks()) return 1;
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     if (!reductionChecks()) return 1;
     // Check every pair of unit coefficients, including the top-three-bit

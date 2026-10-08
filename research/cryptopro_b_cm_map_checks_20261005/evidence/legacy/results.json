@@ -1,0 +1,270 @@
+{
+  "curve": "id-GostR3410-2001-CryptoPro-B-ParamSet",
+  "map": "degree-155 CM endomorphism omega",
+  "source_map_sha256": "51ad7edaf9c931364be2513a1163a95474858381152a715ad9140648fad6a042",
+  "scope": "forward-map correctness on known public inputs",
+  "genus_two_transfer_tested": false,
+  "relation_solver_benchmarked": false,
+  "exact_component_map_identities": [
+    {
+      "degree": 5,
+      "exact_polynomial_identity": "passed"
+    },
+    {
+      "degree": 31,
+      "exact_polynomial_identity": "passed"
+    }
+  ],
+  "generator_order": "passed",
+  "cm_discriminant_identity": "passed",
+  "frobenius_conductor_factor_product": "passed",
+  "scalar_cm_polynomial": "passed",
+  "polarization_subgroup_determinant": "passed",
+  "known_input_cases": 39,
+  "additivity_pairs": 16,
+  "failed_checks": 0,
+  "records": [
+    {
+      "known_scalar": "0",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "1",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "-1",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "57896044618658097711785492504343953927102133160255826820068844496087732066702",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "57896044618658097711785492504343953927102133160255826820068844496087732066703",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "57896044618658097711785492504343953927102133160255826820068844496087732066704",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "155",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "6953499145394795609754504442710336801611960664863219610989562294190284308040",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "21214600864571690407006389240871497706761475800364590710872969429027611706133",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "56155473495773339425875354665178570724321809258326668330080127326123194842715",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "26854677975067105728637006101244508086601559286946618249680274667937083213034",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "57875462109175564415207604784666272962781492358928167895708158293288172355926",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "36038240889779001452435547925433006418697852595944851712337326294126809423017",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "35926737846566110682478959695170289230608032987757611563730462638797378048769",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "47773197481830192270014783887342588107656723374986267876089499155752986349905",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "48528997182975560827214531907242538426480822365197843040010728103624173361620",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "7838147365836951532679790378161568912351879579319980101727244615555035592280",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "44215702914818730709402967487363529332302286533320426529799236565012357397995",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "34326366789827679874495983450800457204116532620690726036219370484742148803838",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "3554475760127985549340129743519536221306425669474982729741958051182649327663",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "1245587405484459492458132805905342334416072390847224727064833151357695902055",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "56141519585354038814382115201228845859582085429710516562156000389362822242328",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "6152745923832298787798126869234855911025182792237176555957793545155524704131",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "1423095266676414151334377186983041361372252143086123670251281922916047415352",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "43030737061793144586864400006157088487721674646603849056140674282162967661170",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "39150939885045540186797738295199895353443188040337137066277787610140593143884",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "53822005608752823714788061339986399476540408527847314578380848945474664717932",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "19627417379669388378214437668173745278837890991885531231076092334354425356776",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "16640304507667730732012050039420939100177710574648030481352102102913653091221",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "16298857012649294891153998753581702795704723689792844234672338701088676938730",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "55517125675318422441391404296243795981012512202939685828515852205518083150151",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "30932295870061706318057328068175884131977827172075227728700130812283556980933",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "39443520015816745651455889579760767927725603923009334140695555134580812245554",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "49871337799649064422775766743548978252824389639188052788895821344885460694114",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "11036403712166832037799840568183430826987610080771029187556306648351321159102",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "54842217233834764698374890103404338418774744357423925599203187952571084407305",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "20031336775443809413547121409982474149151918317871817843693425364610389571051",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "46729668097154166463857711997012804140254422180278333493890799519918702959225",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    },
+    {
+      "known_scalar": "26885983011534471768582866136814664367622488540839477280953852303654937005278",
+      "map_equals_scalar_action": true,
+      "cm_map_polynomial": true,
+      "negation_compatibility": true
+    }
+  ],
+  "metadata": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "cpu_affinity": [
+      0
+    ]
+  },
+  "limitation": "No explicit genus-two equation or transfer map is present; these checks do not measure relation-solving cost."
+}
