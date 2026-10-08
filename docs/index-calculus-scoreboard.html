@@ -12708,6 +12708,33 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
   </div>
 </section>
 <!-- END p256-independent-batch-round40-20261006 -->
+<!-- BEGIN p256-two-pass-router-round41-20261006 -->
+<section class="panel" id="p256-two-pass-router-round41-20261006">
+  <div class="panel-head">
+    <h2>P-256 two-pass routing: 20% less traffic, no stable time win <span class="chip">stage measurement / negative</span></h2>
+    <p class="panel-summary">The exact 2x18 radix router moves 128 rather than 160 bytes per request, but is 1.526&times; slower than the matched 3x12 control at the primary 65,536-start cell and has the worse fitted exponent, 1.376 versus 1.337.</p>
+    <p>This prices only pre-generated independent-pair routing for the round-33 known-log family. It excludes request derivation, external-memory behavior, and the separate degree-4 <code>FB1h2f8621cda105</code> relation system.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact routing measurements and optimistic stage-only projections.</caption>
+    <thead><tr><th>Row</th><th class="n">Router additions / start</th><th class="n">Ratio to rho</th><th class="n">Peak state</th><th class="n">Traffic / batch</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Complete 3x12, 2<sup>16</sup></td><td class="n">3.857005</td><td class="n">1.015073</td><td class="n">17.83 MB</td><td class="n">83.89 MB</td><td>includes deterministic request generation; 11.53&times; routing budget</td></tr>
+      <tr><td>Pre-generated 3x12, 2<sup>16</sup></td><td class="n">0.147243</td><td class="n">0.999199</td><td class="n">17.83 MB</td><td class="n">83.89 MB</td><td>matched routing control; incomplete selector</td></tr>
+      <tr><td>Pre-generated 2x18, 2<sup>16</sup></td><td class="n">0.224747</td><td class="n">0.999531</td><td class="n">19.92 MB</td><td class="n">67.11 MB</td><td>20% less traffic but 1.526&times; primary-control time</td></tr>
+      <tr><td>2<sup>40</sup> stage projection</td><td class="n">0.224747</td><td class="n"><strong>0.999665</strong></td><td class="n">299.07 TB</td><td class="n">1.126 PB</td><td>arithmetic-only; storage tier unmeasured</td></tr>
+      <tr><td>Largest below 2<sup>50</sup></td><td class="n">0.224747</td><td class="n"><strong>0.999566</strong></td><td class="n">1.126 PB</td><td class="n">4.239 PB</td><td>arithmetic-only; storage tier unmeasured</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="padding-top:0">
+    <span><span class="chip">exactness</span> nine complete toy cells and four depth cells; zero mismatches, route failures, FP or FN</span>
+    <span><span class="chip">timing</span> pinned uncontended RAM run; the ladder reverses ordering and exposes a cache/allocation transition</span>
+    <span><span class="chip">scope</span> no complete 2x18 selector, disk timing, 138,031-row Dickson projection, sparse linear algebra, or unplanted relation</span>
+    <span><span class="chip">decision</span> retain the exact traffic reduction; reject promotion and full-depth attempt</span>
+    <span>source: <code>research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_two_pass_router_round41_20261006/RESULT.md</code>; result SHA-256 <code>8bf3dd1d2e7942858c6cbf8486170cb6275aa0ec5e5380e686daeebcd9fd26a6</code></span>
+  </div>
+</section>
+<!-- END p256-two-pass-router-round41-20261006 -->
 <script>
   // Collapse historical panels to their titles. Progressive enhancement: with
   // scripting off every panel is visible, as before. A panel stays open by
