@@ -4,3 +4,4 @@ pub mod dual;
 pub mod elkies;
 pub mod modpoly;
 pub mod sea;
+pub mod sutherland;

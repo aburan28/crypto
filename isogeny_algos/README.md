@@ -26,7 +26,7 @@ problems, different algorithms; they are benchmarked per problem, not against ea
 | auxiliary | dual isogeny `find/dual.rs`, Kohel's End(E) conductor `path/endo.rs` (V2) |
 | arithmetic (V3) | `fpm.rs` Montgomery F_p (1–8 limbs, MULX/ADCX/ADOX assembly for 512 bits, Pornin inversion) · `fp2.rs` F_{p²} over any of them · `gf2n.rs` GF(2ⁿ) · `gf3n.rs` GF(3ⁿ) · `ext.rs` F_{p⁴} · `int.rs`, `bigint.rs` big integers · `poly.rs`, `series.rs` Karatsuba, Newton |
 
-## Correctness checks (`cargo test --release`: 93 tests, all pass)
+## Correctness checks (`cargo test --release`: 95 tests, all pass)
 
 Each algorithm is checked against an independent computation, not only against itself. From V1/V2:
 Vélu = Kohel = √élu = x-only = Montgomery on common kernels; all eight BMSS methods reproduce Kohel's
@@ -165,8 +165,9 @@ e = 24 over F_{p²}: naive 263 µs, balanced 81 µs, cost model 96 µs; GHS / Ga
   (up to 360-bit p) and dimension 4 (arbitrary auxiliary degree via four squares); KLPT output → isogeny at cryptographic size (Deuring here needs u64 p and torsion
   over F_{p⁴}); Couveignes 1996 p-torsion, Lercier, Lercier–Sirvent for
   (E, Ẽ) → isogeny in small characteristic; radical isogenies other than N = 3, 5, 7 (N = 13 needs the genus-2 X₁(13)); Jacobi-quartic models;
-  Sutherland-style Φ_ℓ. Atkin-prime isogeny cycles over F_{pʳ} towers are now implemented (t mod ℓ,
-  verified against BSGS), bounded to tower degree ≤ 6. Not implementable here (resource limit): quantum algorithms.
+  Enge's quasi-linear Φ_ℓ evaluation. Atkin-prime isogeny cycles over F_{pʳ} towers (t mod ℓ,
+  verified against BSGS, tower degree ≤ 6) and Sutherland's volcano/CRT Φ_ℓ (verified equal to the
+  q-expansion Φ_ℓ) are now implemented. Not implementable here (resource limit): quantum algorithms.
 * The BMSS methods and √élu use Karatsuba, not FFT multiplication, so the papers' M(ℓ) bounds are not reached.
 * The assembly multiplier gains 9 % at 512 bits and nothing at 256 bits; the CSIDH-512 action is variable-time.
 * KLPT is for left O₀-ideals with ℓ = 2 and p ≡ 3 mod 4; e/log₂p ≈ 3.8 at 128 bits, above the ≈ 3.5 heuristic.
