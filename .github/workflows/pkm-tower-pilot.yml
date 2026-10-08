@@ -8,9 +8,11 @@ on:
       - 'research/pkm_tower_round4_20260926/**'
       - 'research/pkm_tower_round5_20260926/**'
       - 'research/pkm_tower_round6_20260930/**'
+      - 'research/pkm_tower_round7_20261006/**'
       - 'src/cryptanalysis/f4_fp_tower.rs'
       - 'src/cryptanalysis/sig_fp_tower.rs'
       - 'examples/pkm_tower_pilot.rs'
+      - 'examples/pkm_tower_check.rs'
       - '.github/workflows/pkm-tower-pilot.yml'
   workflow_dispatch:
 permissions:
@@ -18,44 +20,39 @@ permissions:
 jobs:
   cross-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Exhaustive counters against planted decompositions
-        run: python3 -m unittest discover -s research/pkm_tower_pilot_20260924 -p 'test_*.py' -v
-      - name: Every committed pilot tower row against exhaustive search
-        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_pilot_20260924/runs/*.jsonl
-      - name: Every committed round-2 tower row against exhaustive search
-        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_round2_20260925/runs/*.jsonl
-      - name: Every committed round-3 tower row against exhaustive search
-        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_round3_20260925/runs/*.jsonl
-      - name: Every committed round-4 row, both engines, against exhaustive search
+      - uses: dtolnay/rust-toolchain@stable
+      # The checks are native since round 7 (note section 16.3): the legacy
+      # Python verify.py, analyze.py and test_verify.py are kept as a record,
+      # and the native checker must print what they printed.
+      - name: Build the native checker
+        run: cargo build --release --example pkm_tower_check
+      - name: The checker's unit tests (the legacy test_verify.py fixtures, and the Python semantics analyze relies on)
+        run: cargo test --release --example pkm_tower_check
+      - name: The checker reproduces the legacy verify.py and analyze.py output on rounds 1-6, line for line
+        run: research/pkm_tower_pilot_20260924/legacy_output/check.sh
+      - name: Every committed round-7 tower row against exhaustive search
         run: |
           shopt -s nullglob
-          rows=(research/pkm_tower_round4_20260926/runs/*.jsonl)
+          rows=(research/pkm_tower_round7_20261006/runs/*.jsonl)
           if [ ${#rows[@]} -gt 0 ]; then
-            python3 research/pkm_tower_pilot_20260924/verify.py "${rows[@]}"
+            target/release/examples/pkm_tower_check verify "${rows[@]}"
           else
-            echo "no round-4 rows committed yet"
+            echo "no round-7 rows committed yet"
           fi
-      - name: Every committed round-5 row against exhaustive search
+      - name: Repeats agree, no planted solution is lost, and the engines' verdicts agree (rounds 1-5 and 7)
         run: |
           shopt -s nullglob
-          rows=(research/pkm_tower_round5_20260926/runs/*.jsonl)
-          if [ ${#rows[@]} -gt 0 ]; then
-            python3 research/pkm_tower_pilot_20260924/verify.py "${rows[@]}"
-          else
-            echo "no round-5 rows committed yet"
-          fi
-      - name: Repeats agree, no planted solution is lost, and the engines' verdicts agree
-        run: |
-          shopt -s nullglob
-          python3 research/pkm_tower_pilot_20260924/analyze.py \
+          target/release/examples/pkm_tower_check analyze \
             research/pkm_tower_pilot_20260924/runs/*.jsonl \
             research/pkm_tower_round2_20260925/runs/*.jsonl \
             research/pkm_tower_round3_20260925/runs/*.jsonl \
             research/pkm_tower_round4_20260926/runs/*.jsonl \
-            research/pkm_tower_round5_20260926/runs/*.jsonl
+            research/pkm_tower_round5_20260926/runs/*.jsonl \
+            research/pkm_tower_round7_20261006/runs/*.jsonl
+      # Frozen comparisons of frozen rounds, legacy Python, not extended.
       - name: The compact-basis build reproduces every round-2 row and trace (round 3, note section 12.2)
         run: python3 research/pkm_tower_round3_20260925/compare_builds.py
       - name: The signature engine beside F4, and this round's F4 rows against round 2's (round 4, note section 13.4)
@@ -64,15 +61,6 @@ jobs:
         run: python3 research/pkm_tower_round5_20260926/compare_gate.py
       - name: The full-rank exit reproduces rounds 2 and 3 (round 6, note section 15.2)
         run: python3 research/pkm_tower_round6_20260930/compare_exit.py
-      - name: Every committed round-6 row against exhaustive search
-        run: |
-          shopt -s nullglob
-          rows=(research/pkm_tower_round6_20260930/replay/*.jsonl research/pkm_tower_round6_20260930/off/*.jsonl)
-          if [ ${#rows[@]} -gt 0 ]; then
-            python3 research/pkm_tower_pilot_20260924/verify.py "${rows[@]}"
-          else
-            echo "no round-6 rows committed yet"
-          fi
   engine-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45

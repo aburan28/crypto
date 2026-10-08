@@ -907,3 +907,11 @@ The current `boundary_autolab.py` producer timing is whole-process or
 operation-counted. Treat those outputs as legacy diagnostics until producers
 emit the online intervals above; they cannot establish the primary speedup.
 Its launch interface now permits one target per run only.
+
+<!-- conductor:begin -->
+Before making code changes, obtain or attach to a Conductor task. Run
+`conductor check --summary "…" --scope path:…` first — if someone already holds
+those files, it will tell you who and what to do about it. Read `.conductor/WORKFLOW.md`
+and the active task card. Report scope expansion before editing outside the reserved paths.
+Do not publish chat transcripts or secrets as task metadata.
+<!-- conductor:end -->
