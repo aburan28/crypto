@@ -237,6 +237,7 @@ pub mod p192_cm_relation_search;
 pub mod p192_interval_bsgs;
 pub mod p192_native;
 pub mod p192_singular_recovery;
+pub mod p224_hypotheses;
 pub mod p256_attacks;
 pub mod p256_bitbox_factor_base;
 pub mod p256_dickson_factor_base;
