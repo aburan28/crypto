@@ -248,6 +248,7 @@ how each part is kept honest:
 | thread eviction and IRQ affinity | each slot moves threads and IRQs off *its* CPUs and on exit gives back only those CPUs, starting from the current mask, so two slots undo correctly in either order | as before |
 | `default_smp_affinity`, turbo | reference-counted in a small state file next to the lock: the first holder saves the original, the last one restores it; holders whose process died are dropped | as before |
 | other processes' CPU | a job running in another slot is a **co-tenant**: its CPU is not counted as `other_cpu`, so slots do not fail each other's settle and run checks | `co_tenant_cpu_s` and `co_tenant_jobs` per repeat; `settle_co_tenants` and `co_tenants` checks |
+| host-wide CPU pressure | before a slot's run, host-wide CPU PSI is recorded but not a gate (on a shared host it is mostly the other slots and their workers queueing on the housekeeping CPUs); the reserved CPUs are judged by the idle, other-CPU and IRQ checks, and during the run by the job cgroup's own pressure. Memory pressure still gates. A `strict` job keeps the host-wide gate | `settle_psi_cpu` as `info`, with the reason |
 | last-level cache, memory bandwidth, package power and frequency | not partitioned (no RDT yet) | `fidelity.shared_host` is true when a co-tenant ran during a summarised repeat, and the **grade is capped at B** |
 
 So: use slots for throughput (sweeps, many small jobs, builds), and

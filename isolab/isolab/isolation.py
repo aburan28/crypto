@@ -801,8 +801,14 @@ class Reservation:
                     out.append(Check(f"settle_psi_{kind}", "pre", "unavailable"))
                     continue
                 status = "pass" if v <= f["max_psi_some_pct"] else ("fail" if kind != "io" else "info")
-                out.append(Check(f"settle_psi_{kind}", "pre", status, round(v, 3), f["max_psi_some_pct"],
-                                 detail=f"% of the settle window with {kind} pressure; avg10 was {summ['psi_some_avg10_max'].get(kind)}"))
+                detail = f"% of the settle window with {kind} pressure; avg10 was {summ['psi_some_avg10_max'].get(kind)}"
+                if kind == "cpu" and not self.exclusive and status == "fail":
+                    # host-wide cpu pressure on a shared host is mostly the other slots and their workers
+                    # queueing on the housekeeping cpus; the reserved cpus are judged by the idle, other-cpu
+                    # and irq checks here and by the job cgroup's own pressure during the run
+                    status = "info"
+                    detail += "; host shared with other slots, so host-wide cpu pressure is not this slot's gate"
+                out.append(Check(f"settle_psi_{kind}", "pre", status, round(v, 3), f["max_psi_some_pct"], detail=detail))
         else:
             out.append(Check("settle_psi_cpu", "pre", "unavailable", detail="no PSI"))
         if summ.get("co_tenant_jobs"):

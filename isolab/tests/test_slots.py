@@ -221,3 +221,16 @@ async def _two_slots(nats_url, fabric, tmp_path, policy):
         await asyncio.gather(*tasks)
         for wf in fabrics:
             await wf.close()
+
+
+def test_shared_slot_settle_does_not_gate_on_host_cpu_pressure(tmp_path):
+    summ = {"n_samples": 3, "other_cpu_ratio": 0.0, "other_top": {}, "psi_some_pct": {"cpu": 5.0, "memory": 0.0, "io": 0.0},
+            "psi_some_avg10_max": {"cpu": 1.0, "memory": 0.0, "io": 0.0}, "job_cpu_busy_pct": 0.5,
+            "job_cpu_steal_pct": 0.0, "irqs_on_job_cpus": 0, "co_tenant_jobs": [], "co_tenant_cpu_s": 0.0}
+    fid = {"policy": "standard", "max_other_cpu": 0.05, "max_psi_some_pct": 1.0, "max_job_cpu_steal_pct": 1.0}
+    for exclusive, want in ((False, "info"), (True, "fail")):
+        r = _res(tmp_path, f"j{exclusive}", exclusive, "s0")
+        r.fidelity, r.caps = fid, {**r.caps, "psi": True}
+        checks = {c.name: c for c in r._settle_checks(summ, 0.3)}
+        assert checks["settle_psi_cpu"].status == want
+        assert checks["settle_other_cpu"].status == "pass"
