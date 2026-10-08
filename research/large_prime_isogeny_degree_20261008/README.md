@@ -95,6 +95,17 @@ existing certified code.  [BKV19] did the analogous computation for a
 degree-`ℓ` edge for any split `ℓ` up to `2⁶⁴` costs a few hundred
 small-degree steps, independent of `ℓ`.
 
+Literature check, 2026-10-08, after freezing: the relation-lattice form
+of this candidate is Jao–Soukharev's subexponential method [JS10], and the
+action of an invertible ideal of polynomial norm is now computable in
+polynomial time by Page–Robert's Clapoti(s) [PR23] and its refinements
+(PEGASIS, KLaPoTi) through higher-dimensional isogenies.  So the
+polynomial-time version of C5 exists in the literature; what E2 still
+measures is the concrete relation norm against this walker's `Φ_ℓ` route,
+and what remains open for this class is only engineering.  Vertical steps,
+where `ℓ` divides the conductor, are not covered by [PR23], which acts
+through invertible ideals only.
+
 What this does and does not give.  It gives the codomain `j′` and an
 `F_p`-isomorphism certificate between the codomain of the small-degree
 walk and the claimed `ℓ`-neighbour.  It does not give the degree-`ℓ`
@@ -120,11 +131,17 @@ In the supersingular setting, large-prime-degree isogenies are now
 computed as components of `(2ᵉ, 2ᵉ)`-isogenies through Kani's lemma when
 `ℓ + d = 2ᵉ` and an auxiliary `d`-isogeny is known.  For ordinary `E/F_p`
 with `End(E) = O` known from C5, the auxiliary isogeny is an element of
-`O` of norm `d`.  Proof obligation, open: that the relation lattice of E2
-supplies `α ∈ O` with `N(α) = d` and `ℓ + d = 2ᵉ` for a positive fraction
-of `ℓ`.  If it does, the theta machinery in `src/pqc/fast/isogeny.rs`
-evaluates the `ℓ`-isogeny in `O(e)` dimension-2 steps.  UNTESTED; no
-code until the obligation is written out.
+`O` of norm `d`.  For horizontal `ℓ` this is exactly what
+[PR23] and PEGASIS do, so C7 is not new there and is withdrawn as a
+candidate for horizontal steps.  What survives is the vertical case, `ℓ |
+f_π`, where the kernel is not cut out by any invertible ideal.  A scoped
+obstruction, THEOREM with a two-line proof in the JMV note of 2026-10-08:
+every endomorphism of a floor curve that kills the ascending `ℓ`-kernel
+has degree divisible by `ℓ²`, so a QFESTA-style extraction from an
+endomorphism of norm `ℓ · (2ᵉ − ℓ)` cannot exist on the floor.  Any
+dimension-2 route to a vertical step must therefore start from torsion
+images, not from an endomorphism.  UNTESTED beyond that obstruction; no
+code until a torsion-image construction is written out.
 
 ## Assumptions and model
 
@@ -183,3 +200,10 @@ question dissolves.  If they are large, C1 carries the walk to about
 - [BKV19] W. Beullens, T. Kleinjung, F. Vercauteren, *CSI-FiSh: efficient
   isogeny based signatures through class group computations*, ASIACRYPT
   2019.
+- [JS10] D. Jao, V. Soukharev, *A subexponential algorithm for evaluating
+  large degree isogenies*, ANTS IX (2010).
+- [PR23] A. Page, D. Robert, *Introducing Clapoti(s): evaluating the
+  isogeny class group action in polynomial time*, ePrint 2023/1766.
+- [Gal24] S. Galbraith, *Climbing and descending tall isogeny volcanos*,
+  ePrint 2024/924; rigorous `Õ(q^{1/4})` isogeny between any two curves of
+  a class for flat volcanoes and for tall volcanoes with small crater.
