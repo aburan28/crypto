@@ -110,6 +110,8 @@ struct Config {
     #[serde(skip_serializing_if = "is_false")]
     inherited_basis_profile: bool,
     #[serde(skip_serializing_if = "is_false")]
+    specialise_profile: bool,
+    #[serde(skip_serializing_if = "is_false")]
     compact_refuted: bool,
     node_budget: usize,
     conflict_budget: u64,
@@ -135,6 +137,7 @@ impl Default for Config {
             support_local_bitmap_columns: false,
             support_local_profile: false,
             inherited_basis_profile: false,
+            specialise_profile: false,
             compact_refuted: false,
             node_budget: 4096,
             conflict_budget: 100_000,
@@ -731,11 +734,13 @@ fn run_prepared_target(
     crypto_lib::cryptanalysis::koblitz_groebner::set_f4_inherited_basis_profile(
         job.config.inherited_basis_profile,
     );
+    crypto_lib::cryptanalysis::inherited_f4::set_specialise_profile(job.config.specialise_profile);
     crypto_lib::cryptanalysis::inherited_f4::set_compact_refuted_basis(job.config.compact_refuted);
     let layout_before = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     crypto_lib::cryptanalysis::koblitz_groebner::f4_profile_reset();
     crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile_reset();
     crypto_lib::cryptanalysis::koblitz_groebner::inherited_basis_profile_reset();
+    crypto_lib::cryptanalysis::inherited_f4::specialise_profile_reset();
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
     let answer = solver.solve_observed(q);
@@ -748,6 +753,7 @@ fn run_prepared_target(
         crypto_lib::cryptanalysis::koblitz_groebner::support_local_build_profile();
     let inherited_basis_profile =
         crypto_lib::cryptanalysis::koblitz_groebner::inherited_basis_profile();
+    let specialise_profile = crypto_lib::cryptanalysis::inherited_f4::specialise_profile();
     let layout_after = crypto_lib::cryptanalysis::koblitz_groebner::f4_layout_stats();
     let verified = replay == Some(true);
     Ok(
@@ -767,6 +773,7 @@ fn run_prepared_target(
         "f4_stage_profile":f4_stage_profile,
         "support_local_build_profile":support_local_build_profile,
         "inherited_basis_profile":inherited_basis_profile,
+        "specialise_profile":specialise_profile,
         "f4_layout_hits_online":layout_after.0-layout_before.0,
         "f4_layout_misses_online":layout_after.1-layout_before.1,
         "target_input":"supplied_public_point","reusable_setup_excluded":true,
@@ -912,6 +919,16 @@ mod prepared_target_tests {
     }
 
     #[test]
+    fn default_specialise_profile_does_not_change_generic_effective_config() {
+        let mut config = Config::default();
+        let default = serde_json::to_value(&config).unwrap();
+        assert!(default.get("specialise_profile").is_none());
+        config.specialise_profile = true;
+        let opted_in = serde_json::to_value(&config).unwrap();
+        assert_eq!(opted_in.get("specialise_profile"), Some(&json!(true)));
+    }
+
+    #[test]
     fn default_compact_refuted_does_not_change_generic_effective_config() {
         let mut config = Config::default();
         let default = serde_json::to_value(&config).unwrap();
@@ -1018,6 +1035,38 @@ mod prepared_target_tests {
             profiled["inherited_basis_profile"]["root_calls"]
                 .as_u64()
                 .unwrap()
+                > 0
+        );
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process"]
+    fn specialise_profile_preserves_prepared_f6_result() {
+        let mut job = prepared_job(8);
+        job.config.solver = "f6_ic".into();
+        let plain = run(&job).unwrap();
+        job.config.specialise_profile = true;
+        let profiled = run(&job).unwrap();
+        assert_eq!(plain["status"], profiled["status"]);
+        assert_eq!(
+            plain["solutions"][0]["recovered"],
+            profiled["solutions"][0]["recovered"]
+        );
+        assert_eq!(
+            plain["solutions"][0]["attempts"].as_array().map(Vec::len),
+            profiled["solutions"][0]["attempts"]
+                .as_array()
+                .map(Vec::len)
+        );
+        assert_eq!(plain["scalar_verified"], profiled["scalar_verified"]);
+        assert_eq!(
+            plain["f4_stage_profile"]["word_ops"],
+            profiled["f4_stage_profile"]["word_ops"]
+        );
+        assert!(
+            profiled["specialise_profile"]["calls"]
+                .as_u64()
+                .unwrap_or(0)
                 > 0
         );
     }
