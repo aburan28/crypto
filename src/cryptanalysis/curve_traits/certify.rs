@@ -59,7 +59,7 @@ pub fn count_binary(gf: &Gf2, a: u64, b: u64) -> u64 {
     let mut points = 2u64;
     for (x, xi) in xs.iter().zip(&inv) {
         let w = x ^ a ^ gf.mul(b, gf.sqr(*xi));
-        if (w & tmask).count_ones() % 2 == 0 {
+        if (w & tmask).count_ones().is_multiple_of(2) {
             points += 2;
         }
     }

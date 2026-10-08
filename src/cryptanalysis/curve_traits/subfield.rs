@@ -50,7 +50,7 @@ pub struct Subfield {
 }
 
 fn divisors(n: u32) -> Vec<u32> {
-    (1..=n).filter(|k| n % k == 0).collect()
+    (1..=n).filter(|&k| n.is_multiple_of(k)).collect()
 }
 
 fn in_subfield(x: &F2mElement, k: u32, irr: &IrreduciblePoly) -> bool {
@@ -87,7 +87,7 @@ pub fn degrees(n: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement) ->
     let tr_a = abs_trace_is_one(a, n, irr);
     let def_deg = *divs
         .iter()
-        .find(|&&k| k % j_deg == 0 && ((n / k) % 2 == 1 || !tr_a))
+        .find(|&&k| k.is_multiple_of(j_deg) && ((n / k) % 2 == 1 || !tr_a))
         .expect("k = n qualifies");
     (j_deg, def_deg, tr_a)
 }
@@ -116,7 +116,7 @@ pub fn analyse(
         return Ok(out);
     }
     let (k, m) = (def_deg, n / def_deg);
-    out.sign_free = m % 2 == 0;
+    out.sign_free = m.is_multiple_of(2);
     if k > LUCAS_MAX_K {
         out.status = Status::NotEvaluated;
         out.method = "subfield degree above the Lucas search limit";

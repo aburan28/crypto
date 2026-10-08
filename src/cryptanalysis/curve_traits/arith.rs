@@ -362,12 +362,12 @@ pub fn ell_local(delta: &BigInt, ell: u64) -> EllLocal {
     if ell == 2 {
         // Δ = 2^e·u, u odd.  An even e with u ≡ 1 (mod 4) leaves d_K
         // odd; u ≡ 3 (mod 4) needs 4 | d_K; an odd e needs 8 | d_K.
-        return if e % 2 == 0 && u.mod_floor(&BigInt::from(4u8)).is_one() {
+        return if e.is_multiple_of(2) && u.mod_floor(&BigInt::from(4u8)).is_one() {
             EllLocal {
                 depth: e / 2,
                 splitting: kronecker_prime(&u, 2),
             }
-        } else if e % 2 == 0 {
+        } else if e.is_multiple_of(2) {
             EllLocal {
                 depth: e.saturating_sub(2) / 2,
                 splitting: 0,
