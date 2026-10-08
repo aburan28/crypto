@@ -740,9 +740,14 @@ Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
 has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+Use the mirrored [scalar multiplication policy](docs/curves/ic/SCALAR_MULTIPLICATION.md)
+for new IC candidate comparisons. Keep proved endomorphism actions on the
+exact curve record, require `ic-candidate/2` to specify every scalar role,
+and record the resolved backend, fallback, and preparation costs in runs.
+The method policy enters the candidate hash; hardware belongs in the run.
 Run `python3 docs/curves/ic/validate_semantics.py` after changing the IC curve
 crosswalk or typed links. The `ic-semantic-metadata` CI job also compares the
-three mirrored files with cryptanalysis `main`; land source changes there
+four mirrored files with cryptanalysis `main`; land source changes there
 first, then update this mirror and its `mirror-lock.json` in a paired PR.
 To enumerate a prime-field curve's isogeny class, use the native walker
 `src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):

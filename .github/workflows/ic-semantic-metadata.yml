@@ -42,6 +42,7 @@ jobs:
           base=cryptanalysis-peer/experiments/ic-candidate-catalog
           mkdir -p "$base/curve-links"
           for file in curves.yaml curves.schema.json curve-links/link.schema.json \
+                      scalar-multiplication.schema.json SCALAR_MULTIPLICATION.md \
                       validate_semantics.py test_validate_semantics.py; do
             curl --fail --location --show-error --silent --retry 3 \
               "https://raw.githubusercontent.com/aburan28/cryptanalysis/main/experiments/ic-candidate-catalog/$file" \
