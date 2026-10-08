@@ -132,6 +132,7 @@ zeroize = { version = "1.7", features = ["zeroize_derive"] }
 hex = "0.4"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["arbitrary_precision"] }
 # `raw_value` lets the P-192 CM certificates parse their one float exactly
 # (`exact_f64` in p192_cm_relation_search.rs) without `float_roundtrip`, which
 # changes every float parse in the crate and broke replay of ecbench evidence

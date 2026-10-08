@@ -613,6 +613,24 @@ def unresolved_text(reg: Registry) -> list[str]:
     return sorted(missing)
 
 
+def harvest_native_standards(reg: Registry) -> None:
+    """Consume native identities; do not derive model arithmetic here."""
+    path = REPO / "docs/curves/standards/registry.json"
+    if not path.exists():
+        return
+    for row in json.loads(path.read_text())["curves"]:
+        ident = dict(row, model_sha256=hashlib.sha256(row["model_json"].encode()).hexdigest())
+        entry = reg.add(ident, row["family"], row["params"], str(path.relative_to(REPO)), row["aliases"])
+        if entry["order"] != row["order"]:
+            raise ValueError("native standards order conflicts with existing identity")
+        entry["standards_provenance"] = row["standards_provenance"]
+        for name in row["standard_names"]:
+            if name not in entry["standard_names"]:
+                entry["standard_names"].append(name)
+        for rep in row["representations"]:
+            reg.represent(ident, rep["field"], rep["curve"], str(path.relative_to(REPO)))
+
+
 def carry_forward(reg: Registry) -> None:
     """The registry is append-only.  A curve registered once stays, with its
     names and representations, even when no source re-derives it: after
@@ -642,6 +660,7 @@ def build() -> tuple[dict, list[str], list[str]]:
     harvest_json(reg, problems, fatal)
     harvest_curve_records(reg)
     harvest_text_koblitz(reg)
+    harvest_native_standards(reg)
     harvest_programme_extensions(reg)
     carry_forward(reg)
     ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"

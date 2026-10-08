@@ -15,7 +15,7 @@ type Check<T> = Result<T, String>;
 pub(super) fn digest(bytes: &[u8]) -> String {
     sha256(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
-fn number(s: &str) -> Check<BigUint> {
+pub(super) fn number(s: &str) -> Check<BigUint> {
     if s.len() > 1300 {
         return Err("integer exceeds field-size limit".into());
     }
@@ -307,6 +307,7 @@ pub(super) struct Model {
     pub field: Field,
     pub a: BigUint,
     pub b: BigUint,
+    pub normalization: Option<Value>,
 }
 pub(super) enum ModelError {
     Unsupported(String),
@@ -320,6 +321,11 @@ impl From<String> for ModelError {
 pub(super) fn model(v: &Value) -> Result<Model, ModelError> {
     if v["v"] != "1" {
         return Err(ModelError::Unsupported("unsupported model version".into()));
+    }
+    if let Some((short, map)) = super::models::normalize(v)? {
+        let mut m = model(&short)?;
+        m.normalization = Some(map);
+        return Ok(m);
     }
     let form = v["form"].as_str().unwrap_or("");
     let field = match form {
@@ -425,12 +431,19 @@ pub(super) fn model(v: &Value) -> Result<Model, ModelError> {
     if !nonsingular {
         return Err("singular elliptic model".to_string().into());
     }
-    Ok(Model { field, a, b })
+    Ok(Model {
+        field,
+        a,
+        b,
+        normalization: None,
+    })
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Certificate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_model_map: Option<Value>,
     pub construction: String,
     pub genus: u32,
     pub degree: u32,
@@ -509,6 +522,7 @@ pub(super) fn construct(m: &Model) -> Certificate {
         }
     };
     Certificate {
+        target_model_map: m.normalization.clone(),
         construction: name.into(),
         genus: g,
         degree,
@@ -521,6 +535,9 @@ pub(super) fn construct(m: &Model) -> Certificate {
 }
 
 pub(super) fn verify(m: &Model, c: &Certificate) -> Check<()> {
+    if c.target_model_map != m.normalization {
+        return Err("target-model isomorphism certificate mismatch".into());
+    }
     let k = &m.field;
     let h = decoded(&c.h, k)?;
     let f = decoded(&c.f, k)?;
@@ -667,7 +684,7 @@ pub(super) fn catalog(bytes: &[u8]) -> Check<Value> {
     Ok(
         json!({"schema_version":"curve-covers/v1","generated_by":"cargo run --bin curve_cover_check --",
         "registry_sha256":digest(bytes),
-        "checker_source_sha256":digest(concat!(include_str!("checker.rs"),include_str!("../curve_cover_check.rs")).as_bytes()),
+        "checker_source_sha256":digest(concat!(include_str!("checker.rs"),include_str!("models.rs"),include_str!("links.rs"),include_str!("../curve_cover_check.rs")).as_bytes()),
         "scope":"same-field existence for the supplied elliptic model; no optimality, descent, subgroup-map or DLP-cost claim",
         "coefficient_encoding":"0x field elements, ascending powers of u; H: v^2+h(u)*v=f(u); x=x(u), y=y_v(u)*v+y_0(u); a GF(p^k) element e_0+e_1*t+...+e_{k-1}*t^(k-1) is the integer e_0+e_1*p+...+e_{k-1}*p^(k-1)",
         "proof":"docs/curves/COVERS.md","summary":{"verified":verified,"unsupported":unsupported,"invalid_input":invalid},"curves":curves}),

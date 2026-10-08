@@ -206,6 +206,7 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 - `research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl` — sha256 `b65613c68d68d744…`
 - `research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json` — sha256 `307f02ce84e5cb46…`
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
+- `docs/curves/registry.json` — sha256 `1140e62e4ba6ac3d…`
 - `docs/curves/registry.json` — sha256 `a43b9dd3529815ae…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `566ed698a961aae8…`
