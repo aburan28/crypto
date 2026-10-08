@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
  "generated_by": "scripts/build_ic_leaderboard.py",
- "unit": "S = total group-addition equivalents / sqrt(r), whole pipeline, cold, every phase",
- "what_this_is": "A view of frozen whole-pipeline ECDLP measurements, curve by curve, each against its matched reference and the generic floor. No new measurement.",
+ "unit": "none: the board has three families, each with its own unit, reference and floor (families[*].unit, .reference, .floor); S, ratio to reference and ratio to floor are comparable within a family and nowhere else",
+ "what_this_is": "A view of frozen whole-pipeline ECDLP measurements, curve by curve, each against its own family's matched reference and generic floor. No new measurement.",
  "what_this_is_not": [
   "a measurement",
   "a speedup",
@@ -42,9 +42,119 @@
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
+  "n37_rank_columns": {
+   "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "sha256": "f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1"
+  },
+  "n37_k8_k16": {
+   "path": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+   "sha256": "c4a33ffd9045a479ffe2f2a0ae2ecb60519cb293ac326d4ac84b4014f7980127"
+  },
+  "n37_online_ir": {
+   "path": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+   "sha256": "e711979f64d08ea3417844b980e54e0fe095b4802bb803cf4f726c555be0e36a"
+  },
+  "n37_online_k8_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json",
+   "sha256": "369e99e76d8ba12a376ae3be47445fbc705ff375766421b3e841ed9a0a93942a"
+  },
+  "n37_online_k16_claim": {
+   "path": "research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json",
+   "sha256": "a708e63cb4ccfe36bccb0e81ad69a43e651bec17a11c62412fcce6fa64b2f444"
+  },
+  "n37_native_wall": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+   "sha256": "eebbe2eef9524c7f45a5bfd1c0a2b312d72063a3a8865140a6e25200235c21e2"
+  },
+  "n37_native_wall_evidence": {
+   "path": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+   "sha256": "bb4dd48030029d21019a21db3cd10e646ef815d727db084013b7bdba3ed8d422"
+  },
+  "f6_small_cold_rows": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+   "sha256": "b65613c68d68d744fd2e3c26251b8f33d2c8fdd2b86c486551ac376e00e274eb"
+  },
+  "f6_small_cold_replay": {
+   "path": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+   "sha256": "307f02ce84e5cb463257c5bfc9a572aed8508a90f8c9b58e1c3d550589bb0d90"
+  },
+  "f6_ecbench_ladder": {
+   "path": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+   "sha256": "69ca54385c62a50e2a1b8fcb5245459dd8550966221f5ba94fcdf3437c1bada6"
+  },
+  "n41_n53_counted": {
+   "path": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+   "sha256": "fe55908f837840eeee173cfeae463368bb272e3c65ef03fa2b66efeead769331"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "90a9f8f02352fd00efde42d4355f78ad88c1f3132e1af080f890abd8be5b4df0"
+   "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed"
+  }
+ },
+ "families": {
+  "A": {
+   "title": "Koblitz, one target",
+   "regimes": [
+    "koblitz"
+   ],
+   "section": "§23",
+   "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
+   "targets": "one unseen public point per process, 64 per size",
+   "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
+   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit, measured around each repetition (§20, §23).",
+   "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), in the same unit and the same process; its answer replayed and verified (§23).",
+   "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed Frobenius and negation, n the extension degree. Stated in steps and not rescaled to units, so × floor here divides units by steps.",
+   "unit_short": "batched-addition units",
+   "ref_short": "one-target rho",
+   "rows": 6,
+   "canonical_step_units": [
+    2.142270081067134,
+    2.2734072757106256
+   ],
+   "rho_step_units_as_built": [
+    3.9850650183431062,
+    4.972046545147329
+   ]
+  },
+  "B": {
+   "title": "Prime and random-binary ladder",
+   "regimes": [
+    "prime",
+    "char2"
+   ],
+   "section": "§18",
+   "status": "primary comparison: one target per instance",
+   "targets": "one planted target per instance",
+   "unit": "one group-addition equivalent (GAE), per √r",
+   "unit_how": "A count, not a clock: exact native operation counts converted to additions at the dimensionless ratios pinned per instance in `docs/ic/calibration.json` (ns per native operation over ns per group addition; all 13 instances used the pinned ratios; `ic boundary`, ledger §12). No conversion to table A's or C's unit is applied or claimed.",
+   "reference": "Matched Pollard rho on the same instance, one target: the negation-map r-adding walk (A = 2), counted in GAE, verified [d]G = Q (§18).",
+   "floor": "√(π/4) ≈ 0.886 GAE per √r: generic, one target, no precomputation, A = 2 usable automorphisms (negation).",
+   "unit_short": "GAE",
+   "ref_short": "matched negation-map rho",
+   "rows": 13,
+   "canonical_step_units": null,
+   "rho_step_units_as_built": null
+  },
+  "C": {
+   "title": "Koblitz, 32-target batch",
+   "regimes": [
+    "koblitz_batch"
+   ],
+   "section": "§19–§22",
+   "status": "historical diagnostic under AGENTS.md's one-target rule: 32 targets solved together",
+   "targets": "32 targets solved together, priced per target",
+   "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r, per target",
+   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit (§20, §22 isolated re-run).",
+   "reference": "Batch rho on the same 32 targets (signed Frobenius and negation), its counted operations priced at the canonical step, one batched addition plus the table canonicalisation, in the same process (§20). Collisions shared across the 32 targets are in its cost per target.",
+   "floor": "L(32)·√(π/4n) steps per √r per target, with L(32) = 0.19869: the one-target floor of table A times Kuhn–Struik's batch share. Stated in steps and not rescaled to units, and a smaller object than table A's floor, so × floor in C and in A do not compare.",
+   "unit_short": "batched-addition units, per target",
+   "ref_short": "32-target batch rho",
+   "rows": 9,
+   "canonical_step_units": [
+    1.7979598351260446,
+    2.299890357672487
+   ],
+   "rho_step_units_as_built": null
   }
  },
  "leaders": {
@@ -351,7 +461,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -598,7 +709,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -845,7 +957,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1092,7 +1205,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1339,7 +1453,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1586,7 +1701,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1833,7 +1949,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -2080,7 +2197,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2281,7 +2399,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2482,7 +2601,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2683,7 +2803,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2884,7 +3005,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -3085,7 +3207,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "koblitz",
@@ -3129,6 +3252,8 @@
      "ic_online_over_precomputation_model": 2.420286907320609,
      "break_even_targets": 7.1187482335527985,
      "construction_artefact": false,
+     "canonical_step_units": 2.1685398620292853,
+     "rho_step_units_as_built": 4.86695968803288,
      "cold_ratio_without_curve_construction": 6.313789246637844,
      "ratio_floor": 33.01435804053309,
      "verified": true
@@ -3164,13 +3289,16 @@
     "ic_online_over_precomputation_model": 2.420286907320609,
     "break_even_targets": 7.1187482335527985,
     "construction_artefact": false,
+    "canonical_step_units": 2.1685398620292853,
+    "rho_step_units_as_built": 4.86695968803288,
     "cold_ratio_without_curve_construction": 6.313789246637844,
     "ratio_floor": 33.01435804053309,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3214,6 +3342,8 @@
      "ic_online_over_precomputation_model": 3.2853141362363862,
      "break_even_targets": 15.202756221157943,
      "construction_artefact": true,
+     "canonical_step_units": 2.255632469705837,
+     "rho_step_units_as_built": 4.972046545147329,
      "cold_ratio_without_curve_construction": 8.213014968979117,
      "ratio_floor": 69.18489342115318,
      "verified": true
@@ -3249,13 +3379,16 @@
     "ic_online_over_precomputation_model": 3.2853141362363862,
     "break_even_targets": 15.202756221157943,
     "construction_artefact": true,
+    "canonical_step_units": 2.255632469705837,
+    "rho_step_units_as_built": 4.972046545147329,
     "cold_ratio_without_curve_construction": 8.213014968979117,
     "ratio_floor": 69.18489342115318,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3299,6 +3432,8 @@
      "ic_online_over_precomputation_model": 2.500894272351845,
      "break_even_targets": 9.884128309762037,
      "construction_artefact": false,
+     "canonical_step_units": 2.269717997999659,
+     "rho_step_units_as_built": 4.652925803784777,
      "cold_ratio_without_curve_construction": 8.891126124173486,
      "ratio_floor": 40.3210032810846,
      "verified": true
@@ -3334,13 +3469,16 @@
     "ic_online_over_precomputation_model": 2.500894272351845,
     "break_even_targets": 9.884128309762037,
     "construction_artefact": false,
+    "canonical_step_units": 2.269717997999659,
+    "rho_step_units_as_built": 4.652925803784777,
     "cold_ratio_without_curve_construction": 8.891126124173486,
     "ratio_floor": 40.3210032810846,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3384,6 +3522,8 @@
      "ic_online_over_precomputation_model": 2.0210143621729992,
      "break_even_targets": 16.125485011850408,
      "construction_artefact": false,
+     "canonical_step_units": 2.142270081067134,
+     "rho_step_units_as_built": 3.9850650183431062,
      "cold_ratio_without_curve_construction": 15.240965981501452,
      "ratio_floor": 60.779189777284564,
      "verified": true
@@ -3419,13 +3559,16 @@
     "ic_online_over_precomputation_model": 2.0210143621729992,
     "break_even_targets": 16.125485011850408,
     "construction_artefact": false,
+    "canonical_step_units": 2.142270081067134,
+    "rho_step_units_as_built": 3.9850650183431062,
     "cold_ratio_without_curve_construction": 15.240965981501452,
     "ratio_floor": 60.779189777284564,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3469,6 +3612,8 @@
      "ic_online_over_precomputation_model": 2.772527754858401,
      "break_even_targets": 18.439342463174974,
      "construction_artefact": false,
+     "canonical_step_units": 2.246492578065093,
+     "rho_step_units_as_built": 4.25386084636961,
      "cold_ratio_without_curve_construction": 17.317058867897916,
      "ratio_floor": 78.2895782821557,
      "verified": true
@@ -3504,13 +3649,16 @@
     "ic_online_over_precomputation_model": 2.772527754858401,
     "break_even_targets": 18.439342463174974,
     "construction_artefact": false,
+    "canonical_step_units": 2.246492578065093,
+    "rho_step_units_as_built": 4.25386084636961,
     "cold_ratio_without_curve_construction": 17.317058867897916,
     "ratio_floor": 78.2895782821557,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3554,6 +3702,8 @@
      "ic_online_over_precomputation_model": 8.042349147151148,
      "break_even_targets": 36.540505449023996,
      "construction_artefact": false,
+     "canonical_step_units": 2.2734072757106256,
+     "rho_step_units_as_built": 4.294251594371072,
      "cold_ratio_without_curve_construction": 32.50035798612046,
      "ratio_floor": 133.50702947303913,
      "verified": true
@@ -3589,18 +3739,21 @@
     "ic_online_over_precomputation_model": 8.042349147151148,
     "break_even_targets": 36.540505449023996,
     "construction_artefact": false,
+    "canonical_step_units": 2.2734072757106256,
+    "rho_step_units_as_built": 4.294251594371072,
     "cold_ratio_without_curve_construction": 32.50035798612046,
     "ratio_floor": 133.50702947303913,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz_batch",
    "slug": "icv1-f2m19-tm797-9c54981b",
-   "ec1": "EC1N19Ce1h7e63aa468dcc",
+   "ec1": "EC1N19Ce1h6186a62ebfaa",
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
@@ -3651,6 +3804,7 @@
       1.3758523655574657,
       1.408795737929466
      ],
+     "canonical_step_units": 1.7979598351260446,
      "ratio_floor": 120.62428246801784,
      "verified": true
     }
@@ -3697,12 +3851,14 @@
      1.3758523655574657,
      1.408795737929466
     ],
+    "canonical_step_units": 1.7979598351260446,
     "ratio_floor": 120.62428246801784,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3758,6 +3914,7 @@
       1.3656401299183054,
       1.3943575729920048
      ],
+     "canonical_step_units": 1.840924915755323,
      "ratio_floor": 39.01229984655938,
      "verified": true
     }
@@ -3804,12 +3961,14 @@
      1.3656401299183054,
      1.3943575729920048
     ],
+    "canonical_step_units": 1.840924915755323,
     "ratio_floor": 39.01229984655938,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3865,6 +4024,7 @@
       1.3206296304784522,
       1.3692200794929608
      ],
+     "canonical_step_units": 2.1576441535539783,
      "ratio_floor": 32.62320627281522,
      "verified": true
     }
@@ -3911,12 +4071,14 @@
      1.3206296304784522,
      1.3692200794929608
     ],
+    "canonical_step_units": 2.1576441535539783,
     "ratio_floor": 32.62320627281522,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3972,6 +4134,7 @@
       1.1317452745511727,
       1.2148035337217207
      ],
+     "canonical_step_units": 2.0915675162883303,
      "ratio_floor": 16.763524472349825,
      "verified": true
     }
@@ -4018,12 +4181,14 @@
      1.1317452745511727,
      1.2148035337217207
     ],
+    "canonical_step_units": 2.0915675162883303,
     "ratio_floor": 16.763524472349825,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4079,6 +4244,7 @@
       1.0425671221098771,
       1.0780696297446806
      ],
+     "canonical_step_units": 2.148556507850753,
      "ratio_floor": 12.09668173360119,
      "verified": true
     }
@@ -4125,12 +4291,14 @@
      1.0425671221098771,
      1.0780696297446806
     ],
+    "canonical_step_units": 2.148556507850753,
     "ratio_floor": 12.09668173360119,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4186,6 +4354,7 @@
       0.9563234455069335,
       1.0426839557577847
      ],
+     "canonical_step_units": 2.1439478844237705,
      "ratio_floor": 9.12641881482961,
      "verified": true
     }
@@ -4232,12 +4401,14 @@
      0.9563234455069335,
      1.0426839557577847
     ],
+    "canonical_step_units": 2.1439478844237705,
     "ratio_floor": 9.12641881482961,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4293,6 +4464,7 @@
       1.0054637146067265,
       1.070225323431435
      ],
+     "canonical_step_units": 2.24897336116124,
      "ratio_floor": 8.756153147889457,
      "verified": true
     }
@@ -4339,12 +4511,14 @@
      1.0054637146067265,
      1.070225323431435
     ],
+    "canonical_step_units": 2.24897336116124,
     "ratio_floor": 8.756153147889457,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4400,6 +4574,7 @@
       0.9860335891939092,
       1.0297995305849146
      ],
+     "canonical_step_units": 2.149475213396229,
      "ratio_floor": 10.77116427992114,
      "verified": true
     }
@@ -4446,12 +4621,14 @@
      0.9860335891939092,
      1.0297995305849146
     ],
+    "canonical_step_units": 2.149475213396229,
     "ratio_floor": 10.77116427992114,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4507,6 +4684,7 @@
       0.9726749875316956,
       0.9986852231230998
      ],
+     "canonical_step_units": 2.299890357672487,
      "ratio_floor": 21.66522289873162,
      "verified": true
     }
@@ -4553,12 +4731,14 @@
      0.9726749875316956,
      0.9986852231230998
     ],
+    "canonical_step_units": 2.299890357672487,
     "ratio_floor": 21.66522289873162,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   }
  ],
  "oracles": [
@@ -4938,6 +5118,337 @@
    }
   }
  ],
+ "bounded_diagnostics": [
+  {
+   "curve": "icv1-f2m37-tm534059-32aad96b",
+   "source": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
+   "class": "counted engineering lead over K42; no admitted IC/rho speedup",
+   "candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h44f5af6dc772",
+   "usable_points": 1184,
+   "folded_columns": 16,
+   "measured_runs": 40,
+   "mean_cold_s_lower_bound": 2.1112608814666936,
+   "cold_counted_over_rho_diagnostic": 5.034403533221078,
+   "cold_counted_over_k42_diagnostic": 0.3489815492255774,
+   "online_speedup": null,
+   "fully_priced_cold_speedup": null
+  }
+ ],
+ "n37_k8_k16_confirmation": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_k8_k16_20261004/DECISION.json",
+  "candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0h0eb4fc2e0d54",
+  "usable_points": 592,
+  "folded_columns": 8,
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "select_k8_for_larger_field_gate",
+  "k16_over_k8_ir": 1.1902596062530095,
+  "k16_over_k8_ir_ci95": [
+   1.1584168328385342,
+   1.2217540127906004
+  ],
+  "k8_over_rho_ir": 3.6445922113828733,
+  "k8_over_rho_ir_ci95": [
+   3.2353443778426585,
+   4.136017279722061
+  ],
+  "online_speedup": null,
+  "cold_wall_speedup": null
+ },
+ "n37_online_ir_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_online_ir_20261004/DECISION.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "workloads": 16,
+  "profiles": 64,
+  "decision": "prioritize_k16_for_isolated_n37_online_wall_gate",
+  "k8_over_k16_online_ir": 2.8860076532738073,
+  "k8_over_k16_online_ir_ci95": [
+   1.730215437274574,
+   4.601504089537422
+  ],
+  "k16_over_rho_online_ir": 0.15337193605882804,
+  "k16_over_rho_online_ir_ci95": [
+   0.09233888610436006,
+   0.24000314990195315
+  ],
+  "k8_over_k16_cold_ir": 0.8484004913354137,
+  "online_wall_speedup": null
+ },
+ "n37_native_wall_diagnostic": {
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "source": "research/ecbench_n37_native_online_wall_20261004/DECISION.json",
+  "evidence": "research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json",
+  "k8_candidate_id": "IC1N37Ckb0fb592PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hd7ebd078ae0c",
+  "k16_candidate_id": "IC1N37Ckb0fb1184PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0hbbfdf029e5a2",
+  "primary_workload_id": "Wd281dbafa0cb",
+  "measured_verified_runs": 320,
+  "isolation_levels": {
+   "L1": 320
+  },
+  "decision": "carry_both_host_noise_exceeds_gate",
+  "aa_max_relative_deviation": 0.12850955895249527,
+  "primary_rho_over_k16_online_wall": 7.177938244139939,
+  "panel_k8_over_k16_online_wall": 7.110329833407259,
+  "panel_k8_over_k16_online_wall_ci95": [
+   3.669282492389011,
+   16.981811137190903
+  ],
+  "admitted_online_speedup": null
+ },
+ "f6_small_cold_diagnostic": {
+  "curve": "icv1-f2m9-tm5-4a3ea183",
+  "source": "research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl",
+  "replay": "research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json",
+  "workload_id": "f6d79f6dd9f2",
+  "target": [
+   305,
+   466
+  ],
+  "usable_points": 14,
+  "folded_columns": 2,
+  "verified_relations": 8,
+  "arms": {
+   "inherited_f4": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f4RCsampleLAgaussTDpdpISO0h09c74e3fcd1d",
+    "cold_inside_worker_ns": 4707375,
+    "online_wall_ns": 371666
+   },
+   "f6_ic": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f6RCsampleLAgaussTDpdpISO0hefe256e276f2",
+    "cold_inside_worker_ns": 3149750,
+    "online_wall_ns": 272125
+   },
+   "f5": {
+    "candidate_id": "IC1N9Ckb1fb14PDP3f5RCsampleLAgaussTDpdpISO0h69071b8309b5",
+    "cold_inside_worker_ns": 61936875,
+    "online_wall_ns": 3117833
+   }
+  },
+  "rho_online_ms": null,
+  "online_speedup": null,
+  "cpu_isolation": "L0-unverified-mac"
+ },
+ "f6_ecbench_ladder_diagnostic": {
+  "source": "research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json",
+  "decision": "not decidable: fewer than six targets completed at some size, or fewer than four sizes",
+  "class": "relabelling; stage diagnostic with solver word XORs unpriced (S is a lower bound)",
+  "sizes": [
+   {
+    "m": 13,
+    "curve": "icv1-f2m13-t181-515ee569",
+    "targets": 8,
+    "rho_s": 14.713116223286512,
+    "f4_s_lower_over_rho": 1.105362599399004,
+    "f6_s_lower_over_rho": 54.75104049279727,
+    "median_log2_w4_over_w6": 0.37728567379745975
+   },
+   {
+    "m": 19,
+    "curve": "icv1-f2m19-t797-b6cf2467",
+    "targets": 8,
+    "rho_s": 3.1338637392766118,
+    "f4_s_lower_over_rho": 1.582275124863434,
+    "f6_s_lower_over_rho": 2090.8492586008015,
+    "median_log2_w4_over_w6": 0.432982288712685
+   },
+   {
+    "m": 23,
+    "curve": "icv1-f2m23-t5197-69e76b73",
+    "targets": 8,
+    "rho_s": 1.0462204446268615,
+    "f4_s_lower_over_rho": 2.090818628531976,
+    "f6_s_lower_over_rho": 2.721264717429671,
+    "median_log2_w4_over_w6": 0.0
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
+ "n41_n53_counted_diagnostic": {
+  "source": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
+  "decision": "frozen_parameters_do_not_transfer",
+  "class": "accounting; counted lower bounds with native work unpriced, L0 wall exploratory, L2 host run pending",
+  "measured_runs": 640,
+  "measured_verified_runs": 206,
+  "isolation_levels": {
+   "L0": 640
+  },
+  "curves": [
+   {
+    "curve": "icv1-f2m41-tm2308219-7f48b14a",
+    "log2_r": 39.00000151433405,
+    "primary_workload_id": "W15dcf1a74cb8",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.1571109102911619
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 23,
+      "timeouts": 0,
+      "errors": {
+       "exhausted": 57
+      },
+      "usable_points": 1312,
+      "folded_columns": 16,
+      "mean_cold_s_lower_bound": 42.56858739277729
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": 256.2364154308237,
+     "ci95": [
+      202.45868581141588,
+      332.75248237158803
+     ],
+     "pairs": 23
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": [
+       202.45868581141588,
+       332.75248237158803
+      ],
+      "ratio_of_sums": 256.2364154308237,
+      "verdict": "retained"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   },
+   {
+    "curve": "icv1-f2m53-tm56619371-dac20a85",
+    "log2_r": 44.258533022667656,
+    "primary_workload_id": "W32013b060ceb",
+    "arms": [
+     {
+      "arm": "rho-strong",
+      "measured": 80,
+      "verified": 80,
+      "timeouts": 0,
+      "errors": {},
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": 0.14140798998954648
+     },
+     {
+      "arm": "ic-k8",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     },
+     {
+      "arm": "ic-k16-control",
+      "measured": 80,
+      "verified": 0,
+      "timeouts": 0,
+      "errors": {
+       "target-blind rank setup did not verify every base column": 80
+      },
+      "usable_points": null,
+      "folded_columns": null,
+      "mean_cold_s_lower_bound": null
+     }
+    ],
+    "k8_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_rho": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "k16_over_k8": {
+     "ratio_of_sums": null,
+     "ci95": null,
+     "pairs": 0
+    },
+    "h1": {
+     "ic-k16": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     },
+     "ic-k8": {
+      "ci95": null,
+      "ratio_of_sums": null,
+      "verdict": "not_evaluable"
+     }
+    },
+    "h2_verdict": "not_evaluable"
+   }
+  ],
+  "online_speedup": null,
+  "fully_priced_cold_speedup": null
+ },
  "exponents": {
   "prime": {
    "variant": "mitm_m2_negfold_walk_balanced",
@@ -5201,6 +5712,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m11-t67-ae0facd2",
+   "family": "koblitz",
+   "field": "GF(2^11)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 11,
+   "standard": [],
+   "ec1": [
+    "EC1N11Ce1h41243ed45ca3"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n11-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m13-t181-515ee569",
    "family": "koblitz",
    "field": "GF(2^13)",
@@ -5237,6 +5764,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m13-tm181-e4cd523e",
+   "family": "koblitz",
+   "field": "GF(2^13)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [
+    "EC1N13Ce1h98fd3bab3884"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n13-l4"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m15-tm275-2d22ff5d",
    "family": "koblitz",
    "field": "GF(2^15)",
@@ -5252,6 +5795,22 @@
     "K_0 / GF(2^15)",
     "K_0/2^15",
     "K_0/F_2^15"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m15-t275-25edae83",
+   "family": "koblitz",
+   "field": "GF(2^15)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 15,
+   "standard": [],
+   "ec1": [
+    "EC1N15Ce1h68b09ca2a6f8"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n15-l5"
    ],
    "on_board": false
   },
@@ -5299,14 +5858,15 @@
    "order_bits": 18,
    "standard": [],
    "ec1": [
+    "EC1N17Ce1h381f66e2762a",
     "EC1N17Ce1hdfbf24105ef5"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n17-l6",
     "k1n17",
     "K_1 / GF(2^17)",
-    "K_1/2^17",
-    "K_1/F_2^17"
+    "K_1/2^17"
    ],
    "on_board": false
   },
@@ -5337,14 +5897,15 @@
    "order_bits": 20,
    "standard": [],
    "ec1": [
+    "EC1N19Ce1h6186a62ebfaa",
     "EC1N19Ce1h7e63aa468dcc"
    ],
    "ec1_unresolved": null,
    "legacy": [
+    "ecbench-koblitz-n19-l6",
     "k1n19",
     "K_1 / GF(2^19)",
-    "K_1/2^19",
-    "K_1/F_2^19"
+    "K_1/2^19"
    ],
    "on_board": true
   },
@@ -5404,6 +5965,22 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m23-tm5197-a023238e",
+   "family": "koblitz",
+   "field": "GF(2^23)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 24,
+   "standard": [],
+   "ec1": [
+    "EC1N23Ce1he238479aae6d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n23-l7"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "family": "koblitz",
    "field": "GF(2^29)",
@@ -5423,6 +6000,22 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m29-tm40309-6aecea52",
+   "family": "koblitz",
+   "field": "GF(2^29)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [
+    "EC1N29Ce1h7fed23ba87ea"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n29-l8"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m31-tm90707-c95f16f5",
    "family": "koblitz",
    "field": "GF(2^31)",
@@ -5438,6 +6031,22 @@
     "K_0 / GF(2^31)",
     "K_0/2^31",
     "K_0/F_2^31"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m31-t90707-5fc996f0",
+   "family": "koblitz",
+   "field": "GF(2^31)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 31,
+   "standard": [],
+   "ec1": [
+    "EC1N31Ce1h6be2d6a625f9"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "ecbench-koblitz-n31-l8"
    ],
    "on_board": false
   },
@@ -5649,6 +6258,40 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m67-tm19346764963-82c84cca",
+   "family": "koblitz",
+   "field": "GF(2^67)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 68,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n67",
+    "K_0 / GF(2^67)",
+    "K_0/2^67",
+    "K_0/F_2^67"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m67-t19346764963-e760df38",
+   "family": "koblitz",
+   "field": "GF(2^67)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 67,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n67",
+    "K_1 / GF(2^67)",
+    "K_1/2^67",
+    "K_1/F_2^67"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m71-t48653080717-2cafaea3",
    "family": "koblitz",
    "field": "GF(2^71)",
@@ -5696,6 +6339,23 @@
     "K_0 / GF(2^73)",
     "K_0/2^73",
     "K_0/F_2^73"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m79-tm420247971347-2a24b892",
+   "family": "koblitz",
+   "field": "GF(2^79)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 80,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n79",
+    "K_0 / GF(2^79)",
+    "K_0/2^79",
+    "K_0/F_2^79"
    ],
    "on_board": false
   },
@@ -5755,6 +6415,23 @@
    "on_board": false
   },
   {
+   "slug": "icv1-f2m127-t24589614856193402413-a00e5890",
+   "family": "koblitz",
+   "field": "GF(2^127)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 127,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n127",
+    "K_0 / GF(2^127)",
+    "K_0/2^127",
+    "K_0/F_2^127"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
    "family": "koblitz",
    "field": "GF(2^131)",
@@ -5770,6 +6447,57 @@
     "k0n131",
     "K_0 / GF(2^131)",
     "K_0/2^131"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m137-t574016314927011818501-11ceb4d6",
+   "family": "koblitz",
+   "field": "GF(2^137)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 137,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n137",
+    "K_0 / GF(2^137)",
+    "K_0/2^137",
+    "K_0/F_2^137"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m151-tm97937651335354183120307-ee31df7e",
+   "family": "koblitz",
+   "field": "GF(2^151)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 152,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n151",
+    "K_0 / GF(2^151)",
+    "K_0/2^151",
+    "K_0/F_2^151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m157-t158060339213695215877259-816eafb2",
+   "family": "koblitz",
+   "field": "GF(2^157)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 157,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n157",
+    "K_1 / GF(2^157)",
+    "K_1/2^157",
+    "K_1/F_2^157"
    ],
    "on_board": false
   },
@@ -5791,6 +6519,40 @@
     "K_1 / GF(2^163)",
     "K_1/2^163",
     "K_1/F_2^163"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m173-tm67870783603944754053042229-ddf2de63",
+   "family": "koblitz",
+   "field": "GF(2^173)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 174,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n173",
+    "K_1 / GF(2^173)",
+    "K_1/2^173",
+    "K_1/F_2^173"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m179-t1681527843948629186391379613-d1b73c24",
+   "family": "koblitz",
+   "field": "GF(2^179)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 179,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n179",
+    "K_0 / GF(2^179)",
+    "K_0/2^179",
+    "K_0/F_2^179"
    ],
    "on_board": false
   },
@@ -5886,6 +6648,23 @@
     "K_0 / GF(2^571)",
     "K_0/2^571",
     "K_0/F_2^571"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562",
+   "family": "koblitz",
+   "field": "GF(2^577)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 578,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n577",
+    "K_0 / GF(2^577)",
+    "K_0/2^577",
+    "K_0/F_2^577"
    ],
    "on_board": false
   },
@@ -6496,6 +7275,18 @@
    "on_board": true
   },
   {
+   "slug": "icv1-fp14-tm63-1a762b57",
+   "family": "prime",
+   "field": "GF(p), p = 11617",
+   "coefficients": "a = 3797, b = 2081",
+   "order_bits": 14,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
+  },
+  {
    "slug": "icv1-fp14-tm143-dec4cf6b",
    "family": "prime",
    "field": "GF(p), p = 14389",
@@ -6526,6 +7317,18 @@
     "bench-14bit"
    ],
    "on_board": true
+  },
+  {
+   "slug": "icv1-fp16-tm393-20f8a24e",
+   "family": "prime",
+   "field": "GF(p), p = 53197",
+   "coefficients": "a = 40230, b = 5",
+   "order_bits": 16,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false
   },
   {
    "slug": "icv1-fp16-t295-8d3c3165",
@@ -6780,6 +7583,42 @@
    "ec1_unresolved": null,
    "legacy": [
     "generated-26bit-42652151"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp192-t31607402316713927207482677199-52e4af59",
+   "family": "prime",
+   "field": "GF(p), 192-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 192,
+   "standard": [
+    "P-192"
+   ],
+   "ec1": [
+    "EC1P192Cp192h5531c4a08bdb"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-192"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-fp224-t4733100108545601916421827343930821-fec01e99",
+   "family": "prime",
+   "field": "GF(p), 224-bit p",
+   "coefficients": "standard coefficients",
+   "order_bits": 224,
+   "standard": [
+    "P-224"
+   ],
+   "ec1": [
+    "EC1P224Cp224h8e110c585480"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "P-224"
    ],
    "on_board": false
   },

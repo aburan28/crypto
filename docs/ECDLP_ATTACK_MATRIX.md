@@ -70,8 +70,8 @@ The matrix is calibrated to **what an attacker can actually do to a curve**
 | 10 | **Index calculus / Semaev summation polys** (Semaev 2004, FPPR 2012, PQ 2012, PKM 2016) | structural | ◐ Asymptotically O(p^{3/2}) for 2-decomp; worse than rho | ◐ Same | ◐ Same | ✗ Breaks *(via Weil descent)* | ◐ Same | 🛡 `cryptanalysis/ec_index_calculus.rs` (full pipeline: S₃, S₄, factor base, relations, GE, end-to-end solver) |
 | 10a | **Residual-collision hybrids** (partial decompositions + large-prime cancellation, r-adding residual walks, MITM 4-decompositions) | structural/generic | ◐ Partial *(measured √(2nB) ≥ rho; no non-generic gain)* | ◐ Same | ◐ Same | ◐ Same | ◐ Same | 🛡 `cryptanalysis/residual_walk.rs` (`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`) |
 | 10b | **Gaudry index calculus on E(F_{q^k}), subspace base** (Gaudry 2009; k = 3 toy) | structural | ○ N/A *(prime field)* | ○ N/A | ○ N/A | ✗ Breaks asymptotically for fixed k ≥ 3 *(measured: MITM oracle ∝ n^{2/3}; the O(1) S₄ solve costs C₃ ≈ 0.88·10⁶ F_p mults per residual after two optimisation rounds, three orders of magnitude above the rho crossover at these sizes; relation phase n^{1/3}, plain linear algebra n^{0.68} so S bottoms out near 200× rho, double-large-prime variation measured at n^{4/9} with the crossover past 2^230)* | ○ N/A | 🛡 `cryptanalysis/gaudry_cubic.rs` (`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` §11) |
-| 11 | **Diem on E(F_{p^k})** *(small composite k)* | structural | ○ N/A | ○ N/A | ○ N/A | ✗ Breaks *(faster than rho)* | ○ N/A | (documented; not implemented) |
-| 12 | **Trace-zero variety / Weil restriction (genus ≥ 3)** | structural | ○ N/A *(genus 1)* | ○ N/A | ○ N/A | partial | partial | (documented; not implemented) |
+| 11 | **Diem on E(F_{p^k})** *(small composite k)* | structural | ○ N/A | ○ N/A | ○ N/A | ✗ Breaks *(faster than rho in applicable regimes)* | ○ N/A | 🛡 `cryptanalysis/diem_descent.rs` *(toy k=2 demonstration; scale path not integrated)* |
+| 12 | **Trace-zero variety / Weil restriction (genus ≥ 3)** | structural | ○ N/A *(genus 1)* | ○ N/A | ○ N/A | partial | partial | 🛡 `cryptanalysis/ghs_descent.rs` *(m=1 end to end; m=2 structural)*; trace-kernel factor-base detection in `koblitz_factor_base_search.rs`; higher-genus smooth model pending |
 | 13 | **Special-prime SNFS trapdoor** (Fried-Gaudry-Heninger-Thomé 2017) | structural / speculative | ◌ Impl-dep on curve generator *(no known ECDLP analog of F_p\* result)* | ◌ Same | ◌ Same | ○ N/A | ◌ Same | (Solinas-prime correlation study in `cryptanalysis/solinas_correlations.rs`) |
 | 14 | **Invalid-curve attack** | implementation | ◌ Impl-dep *(needs missing point validation)* | ✗ Breaks *(if no validation)* | ◌ Impl-dep | ◌ Impl-dep | ◌ Impl-dep | (defended via `ecc::is_on_curve`) |
 | 15 | **Twist attack** *(small-subgroup on quadratic twist)* | implementation | ✗ Breaks *(if no validation AND bad twist)*<br>e.g. brainpoolP256t1: 2⁴⁴·⁵<br>P-224: 2⁵⁸·⁴<br>FRP256v1: 2⁷⁹·⁴ | ✗ Breaks | ◌ Impl-dep | ◌ Impl-dep | ◌ Impl-dep | (defended via `is_on_curve`) |
@@ -113,7 +113,7 @@ The bottom row is the only one that breaks a properly-deployed, properly-impleme
 
 ## Index calculus in this repository
 
-The index-calculus column above corresponds to the most-active live research program against ECDLP. It is implemented in this repo as of commit `8b05099` at `src/cryptanalysis/ec_index_calculus.rs`. Specifically:
+The index-calculus column above corresponds to the most-active live research program against ECDLP. The [stage-by-stage technique inventory](ic/ECDLP_RESEARCH_TECHNIQUES.md) tracks the integrated, experimental, component, and backlog status across the full pipeline. The prime-field toy path starts at `src/cryptanalysis/ec_index_calculus.rs`. Specifically:
 
 | Component | Function / type | Reference |
 |-----------|-----------------|-----------|

@@ -1,0 +1,12 @@
+spec ECS1hdd66d2bf3008 (n37 compact-orbit full-rank continuation against early pin and strong rho): 72 executions
+  arm rho-strong       reference  ECM1hb6123afffc07 rho.signed_frobenius_strong {"dp_bits": "4", "lanes": "32", "step_cap_factor": "2000"}
+  arm ic-early-pin     baseline   ECM1h722cc052b4a2 ic.pipeline {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "linalg": "incremental-gauss", "max_trials": "1000000", "oracle": "mitm-frobenius-counted:m=3", "solver": "", "solver_budget_seconds": "0", "targets": "walk"}
+  arm ic-full-rank     candidate  ECM1h50a7559ddd4c ic.pipeline {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "linalg": "incremental-gauss-full-rank", "max_trials": "1000000", "oracle": "mitm-frobenius-counted:m=3", "solver": "", "solver_budget_seconds": "0", "targets": "walk"}
+  workload Wf9c7c0ff7870 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W55bb9d89e63e icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload Weab2694eaf94 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W30eb40ab1ee4 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W38f16b8bccef icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W0c87d625732d icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W68ceab209bd2 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W5e1823490787 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3

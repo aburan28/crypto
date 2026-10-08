@@ -1,0 +1,41 @@
+name: ECC2K-130 PDP difficulty outcome replay
+
+on:
+  pull_request:
+    paths:
+      - "research/notes/ecc2k130/pdp_difficulty_features_20261001/**"
+      - ".github/workflows/ecc2k130-pdp-difficulty-outcome.yml"
+  push:
+    branches: [main]
+    paths:
+      - "research/notes/ecc2k130/pdp_difficulty_features_20261001/**"
+      - ".github/workflows/ecc2k130-pdp-difficulty-outcome.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independently replay frozen source, inputs and every public-point observation
+        run: |
+          python3 -B research/notes/ecc2k130/pdp_difficulty_features_20261001/verify.py \
+            --evidence research/notes/ecc2k130/pdp_difficulty_features_20261001/evidence_run_20261001_source3a8c4699 \
+            --out /tmp/ecc2k130-pdp-difficulty-replay.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('research/notes/ecc2k130/pdp_difficulty_features_20261001/evidence_run_20261001_source3a8c4699')
+          expected = json.loads((root / 'VERIFY.json').read_bytes())
+          replay = json.loads(Path('/tmp/ecc2k130-pdp-difficulty-replay.json').read_bytes())
+          for key in ('status', 'decision', 'evidence_result_sha256', 'config_sha256',
+                      'manifest_sha256', 'verified_training_rows', 'verified_evaluation_rows',
+                      'checker_sha256'):
+              assert replay[key] == expected[key], key
+          PY

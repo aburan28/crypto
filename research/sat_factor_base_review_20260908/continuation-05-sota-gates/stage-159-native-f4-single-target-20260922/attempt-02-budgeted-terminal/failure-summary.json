@@ -1,0 +1,54 @@
+{
+  "backend_terminal_report": null,
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "claim_boundary": "Charged class-blind single-target native-F4 attempt after outer-timeout parsing fix; watchdog timeout is censored, not UNSAT, and is not licensed Magma F4 or an end-to-end index-calculus result.",
+  "classification": "inconclusive",
+  "clean_build_resources": {
+    "aggregate_process_tree_peak_rss_bytes": null,
+    "largest_child_peak_rss_bytes": 1685274624,
+    "single_core_elapsed_seconds": null,
+    "summed_process_wall_seconds": 161.865528501006,
+    "total_core_seconds": 157.76164
+  },
+  "conflicts": null,
+  "full_cost_gate_passed": false,
+  "internal_budget_seconds": 30,
+  "known_witnesses_present": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "outer_driver_resource_note": "the runner crashed during aggregation before writing its outer resource summary",
+  "outer_driver_resources": null,
+  "outer_watchdog_seconds": 120,
+  "process_resources": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 6310576128,
+    "single_core_seconds": 119.79722699999999,
+    "system_seconds": 0.869046,
+    "total_core_seconds": 119.79722699999999,
+    "user_seconds": 118.928181,
+    "wall_seconds": 120.08162662500035
+  },
+  "runner_terminal": "post-timeout aggregation bug: None backend report was dereferenced after the valid timeout classification",
+  "schema": "koblitz_phase_b_native_f4_failed_attempt.v1",
+  "solver": "f4-f2",
+  "source_artifacts_unchanged": true,
+  "source_revision": {
+    "commit": "a0f6152c179d061e781f22232c06bf4055eb1f01",
+    "dirty": false,
+    "porcelain": []
+  },
+  "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+  "status": "watchdog_timeout_inconclusive",
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "terminal": {
+    "returncode": -15,
+    "stderr_bytes": 0,
+    "stdout_bytes": 0,
+    "timed_out": true
+  },
+  "truth_labels_present": false
+}

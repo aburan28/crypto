@@ -1,0 +1,20 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/bin/mkdir",
+    "-p",
+    "/Volumes/SSD990/kic-stage200-finalizer-5beacd5ee"
+  ],
+  "environment": {},
+  "pid": 91264,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 30,
+  "wall_seconds": 0.02968275,
+  "user_seconds": 0.001008,
+  "system_seconds": 0.002156,
+  "total_core_seconds": 0.003164,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 1245184
+}

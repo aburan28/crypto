@@ -93,7 +93,25 @@ def fetch(token: str, outdir: pathlib.Path):
     data = b"".join(volume.read_file(f"{token}/results.tgz"))
     (outdir / "results.tgz").write_bytes(data)
     with tarfile.open(outdir / "results.tgz") as archive:
-        archive.extractall(outdir / "results", filter="data")
+        destination = (outdir / "results").resolve()
+        destination.mkdir(parents=True, exist_ok=True)
+        try:
+            archive.extractall(destination, filter="data")
+        except TypeError:
+            # Python before 3.12 has no extraction filter.  The Modal CLI may
+            # run under that interpreter even when the GPU image uses 3.12.
+            # Reproduce the relevant data-filter boundary before using the
+            # older API: benchmark artifacts contain regular files/directories,
+            # never links, devices or paths outside the requested directory.
+            members = archive.getmembers()
+            root = str(destination)
+            for member in members:
+                if member.issym() or member.islnk() or member.isdev():
+                    raise ValueError(f"unsafe result archive member: {member.name}")
+                target = str((destination / member.name).resolve())
+                if os.path.commonpath((root, target)) != root:
+                    raise ValueError(f"result archive path escapes destination: {member.name}")
+            archive.extractall(destination, members=members)
     return meta
 
 

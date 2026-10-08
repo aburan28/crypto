@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "discovery": {
+    "path": "qualified_discovery_01",
+    "workflow_run_id": 37045285547,
+    "workflow_attempt": 1,
+    "artifact_id": 11245861588,
+    "artifact_archive_sha256": "62fd01447f4ade587c7df848dec9a97e3d75d2b668c7ee5341b0625f3cc0b61a",
+    "source_head": "53f26c669852108c8128c16341f722a1c49e4f5d",
+    "worker_sha256": "a37fc763173eb45d0542c23a24eb9074287882584a6ba11c4566b053ec5ce3e6",
+    "campaign_sha256": "e6113be18b486716bc77872458a330e5bbe79a4035d1b65211b2814436848163",
+    "gf2_sha256": "7e4ad79b69f1d0a3bf12828561350b9c241370dd0919efd97883cdbab86cb1f5",
+    "protocol_sha256": "5de5281261353d545adbdcab877c029a7b261f432d6516aafeb9b30ffa68e926",
+    "manifest_sha256": "651b2ae2932bcebd2bf14d012c41477671c3b69e9e320393762a90a2eececbe5",
+    "raw_sha256": "a4ed20fec5066e8d80d0e187c23275bc6f7e3dc61ffb81ad10ba7e9a8727a7c3",
+    "result_sha256": "fe8d4af0bc86ed064ef488e22b295a48e678ed83700dcd015cccc19d5c8e86e6",
+    "resource_qualified": true,
+    "native_replay": "PASS",
+    "cells": 48,
+    "timed_calls": 18816,
+    "primary_passed": 0,
+    "primary_required": 4,
+    "nonregression_passed": 8,
+    "nonregression_required": 8,
+    "gate_pass": false
+  },
+  "holdout": null,
+  "holdout_reason": "discovery_gate_rejected",
+  "decision": "exact_graded_batch_2x_gate_rejected",
+  "confirmed_complete_f5_batch_speedup": null,
+  "full_ic_cost": null,
+  "rho_ratio": null
+}

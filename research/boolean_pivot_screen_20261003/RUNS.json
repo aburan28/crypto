@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "discovery": {
+    "path": "discovery_01",
+    "source_head": "25202d8144002357901fd8cb18967ce74ad1055b",
+    "protocol_sha256": "83b846a2ff0a364448494f9bacac31d0fe7429092654a7649ca3c097b21a0754",
+    "source_sha256": "03993ebc34b7aa7b0acfb67c440e6f6058e5e96c9f09369670dcf7591121e1c2",
+    "manifest_sha256": "d0a8e19fa107543e813bcc0d68f94b25b437478edb575ab2f8971c59b0737d00",
+    "result_sha256": "5ecac8e7b7a56b2b7bb9aa0f79ebfd6726f13d74885f5736a82116e2819eb22e",
+    "raw_sha256": "eeb1a711b7fbc4890525b78efc07c8c79e41e3ffc6c308140b5f39f76db955ec",
+    "pairs": 80,
+    "eligible_large_pairs": 64,
+    "favorable_large_pairs": 0,
+    "same_pivot_columns": 0,
+    "oracle_equality": "PASS",
+    "native_replay": "PASS"
+  },
+  "holdout": null,
+  "decision": "reject_before_holdout",
+  "complete_solver_cost": null,
+  "rho_ratio": null
+}

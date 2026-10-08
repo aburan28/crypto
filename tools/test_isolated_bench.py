@@ -75,6 +75,34 @@ def test_run_pins_records_and_restores(tmp_path):
     assert cpu in os.sched_getaffinity(os.getpid())
 
 
+def test_an_inherited_narrow_mask_is_widened_and_recorded(tmp_path):
+    # A harness forked while an isolated run had moved its parent off the
+    # benchmark CPU inherits a mask without it; the run must still go ahead.
+    cpu = spare_cpu()
+    allowed = set(os.sched_getaffinity(0))
+    out = tmp_path / 'r.jsonl'
+    probe = 'import os,json;print(json.dumps(sorted(os.sched_getaffinity(0))))'
+    result = subprocess.run([sys.executable, TOOL, 'run', '--cpus', str(cpu), '--settle', '0.5',
+                             '--max-other-cpu', '0.5', '--lock', str(tmp_path / 'lock'), '--out', str(out),
+                             '--', sys.executable, '-c', probe], capture_output=True, text=True,
+                            preexec_fn=lambda: os.sched_setaffinity(0, allowed - {cpu}))
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == [cpu]
+    record = json.loads(out.read_text())
+    assert record['affinity_widened_from'] == sorted(allowed - {cpu})
+    assert cpu in os.sched_getaffinity(os.getpid())
+
+
+def test_a_run_with_the_cpu_in_its_mask_records_no_widening(tmp_path):
+    cpu = spare_cpu()
+    out = tmp_path / 'r.jsonl'
+    result = subprocess.run([sys.executable, TOOL, 'run', '--cpus', str(cpu), '--settle', '0.5',
+                             '--max-other-cpu', '0.5', '--lock', str(tmp_path / 'lock'), '--out', str(out),
+                             '--', 'true'], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert 'affinity_widened_from' not in json.loads(out.read_text())
+
+
 def test_busy_machine_is_refused(tmp_path):
     cpu = spare_cpu()
     hog = subprocess.Popen([sys.executable, '-c', 'while True: pass'])

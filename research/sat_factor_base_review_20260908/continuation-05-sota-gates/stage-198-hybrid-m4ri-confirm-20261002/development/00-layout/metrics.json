@@ -1,0 +1,21 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/bin/mkdir",
+    "-p",
+    "/Volumes/SSD990/kic-stage198-target-6519bd72b",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/development/confirmation"
+  ],
+  "environment": {},
+  "pid": 88489,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 30,
+  "wall_seconds": 0.029068041,
+  "user_seconds": 0.00063,
+  "system_seconds": 0.001197,
+  "total_core_seconds": 0.001827,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 1228800
+}

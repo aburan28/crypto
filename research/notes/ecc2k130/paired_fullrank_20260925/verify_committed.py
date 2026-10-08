@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -14,6 +15,42 @@ from pathlib import Path
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+HERE = Path(__file__).resolve().parent
+# The frozen bytes of pinned sources that later commits changed, kept in the
+# repository by the same snapshot store the compact-orbit replays use.
+SNAPSHOT_DIR = HERE / "source_snapshots" / "historical_snapshots"
+_MATERIALIZE = HERE.parent / "compact_frozen_source_replay_20260929" / "materialize.py"
+
+
+def _snapshot_loader():
+    spec = importlib.util.spec_from_file_location("frozen_source_materialize", _MATERIALIZE)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_sources(root: Path, pins: dict[str, str], snapshot_dir: Path = SNAPSHOT_DIR) -> dict:
+    """Every pinned source must still exist as the exact bytes the panel ran.
+
+    A file still matching its pin in the tree passes as it is.  A file a
+    later commit changed passes only if a committed snapshot holds exactly
+    the pinned bytes; a drifted file without one fails closed.  This checks
+    that the panel's source is durably available, not that today's tree is
+    the tree it ran on, which every later edit to a shared file would break.
+    """
+    loader = _snapshot_loader()
+    manifest = loader.load_manifest(snapshot_dir)
+    live, snapshot = [], []
+    for path, checksum in sorted(pins.items()):
+        target = root / path
+        if target.is_file() and digest(target.read_bytes()) == checksum:
+            live.append(path)
+            continue
+        loader.snapshot_bytes(path, checksum, manifest, snapshot_dir)
+        snapshot.append(path)
+    return {"live": live, "snapshot": snapshot}
 
 
 def main():
@@ -57,8 +94,7 @@ def main():
             receipt = json.loads(payload[f"{name}/replay.json"])
             assert manifest["clean_checkout"] and manifest["includes_pinned_main_ref"]
             assert manifest["replay_verdict"] == receipt["verdict"] == "PASS"
-            assert all(digest((root / path).read_bytes()) == checksum
-                       for path, checksum in manifest["source_sha256"].items())
+            sources = check_sources(root, manifest["source_sha256"])
             assert receipt["q"] == row["q"]
             assert receipt["recovered_scalar"] == row["recovered_scalar"]
             for arm in ("ic", "rho"):
@@ -72,7 +108,8 @@ def main():
             )
             assert result.returncode == 0, (name, result.stderr)
             assert json.loads((tmp / "replay.json").read_text()) == receipt, name
-            print(f"{name}: fresh independent replay PASS", flush=True)
+            print(f"{name}: fresh independent replay PASS ({len(sources['live'])} pinned sources "
+                  f"live, {len(sources['snapshot'])} from committed snapshots)", flush=True)
     print("Committed clean-source archive PASS", flush=True)
 
 

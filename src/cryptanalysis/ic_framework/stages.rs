@@ -89,6 +89,36 @@ impl Params {
         self.0.insert(key.into(), value.into());
         self
     }
+
+    /// Parse a plug-in spec, `name` or `name:k=v,k=v`, into its name and
+    /// parameters.
+    ///
+    /// `,` ends a parameter, so a value that is itself a list takes `;`
+    /// between its items: `koblitz-orbit:divisor=1;2`.  Written with a
+    /// `,`, the second item arrives as a token with no `=`; that is
+    /// refused here with a message that names the `;`, rather than
+    /// guessed at, because reading `divisor=1,2` as `divisor=1` would
+    /// silently build a different factor base.
+    pub fn parse_spec(spec: &str) -> Result<(String, Params), String> {
+        let (name, rest) = spec.split_once(':').unwrap_or((spec, ""));
+        let mut params = Params::default();
+        let mut previous: Option<&str> = None;
+        for kv in rest.split(',').filter(|s| !s.is_empty()) {
+            let Some((k, v)) = kv.split_once('=') else {
+                return Err(match previous {
+                    Some(prev) => format!(
+                        "stray token `{kv}` after `{prev}` in plug-in spec `{spec}`: `,` separates \
+                         parameters, so separate the items of a list value with `;` \
+                         (`{prev};{kv}`, not `{prev},{kv}`; quote the argument in a shell)"
+                    ),
+                    None => format!("parameter `{kv}` is not key=value"),
+                });
+            };
+            params.set(k.trim(), v.trim());
+            previous = Some(kv);
+        }
+        Ok((name.to_string(), params))
+    }
 }
 
 /// Everything a stage may need to know about the instance it is
@@ -194,6 +224,12 @@ pub trait DecompositionOracle<G: CountedGroup> {
         Ok(())
     }
 
+    /// Native work performed by `prepare`, charged to the oracle setup
+    /// phase after preparation completes. Existing oracles default to none.
+    fn setup_native(&self) -> BTreeMap<String, u64> {
+        BTreeMap::new()
+    }
+
     /// Decompose `point`, or decide it does not decompose.
     fn decompose(
         &mut self,
@@ -244,7 +280,12 @@ pub struct SolverTotals {
 }
 
 impl SolverTotals {
-    pub fn absorb(&mut self, shape: &SystemShape, cost: Option<&SolverCost>, budget_exceeded: bool) {
+    pub fn absorb(
+        &mut self,
+        shape: &SystemShape,
+        cost: Option<&SolverCost>,
+        budget_exceeded: bool,
+    ) {
         self.calls += 1;
         self.shape = Some(shape.clone());
         self.budget_exceeded += u64::from(budget_exceeded);
@@ -260,8 +301,15 @@ impl SolverTotals {
             self.solving_degree_max = self.solving_degree_max.max(d);
             self.calls_with_a_degree += 1;
         }
+        // A key that names a maximum (`*_max`) is the maximum over
+        // calls; every other key is a total over the run.
         for (k, v) in &c.extra {
-            *self.extra.entry(k.clone()).or_insert(0) += v;
+            let entry = self.extra.entry(k.clone()).or_insert(0);
+            if k.ends_with("_max") {
+                *entry = (*entry).max(*v);
+            } else {
+                *entry += v;
+            }
         }
     }
 
@@ -306,7 +354,11 @@ impl BooleanSystem {
             n_equations: self.equations.len(),
             semi_regular_degree: crate::cryptanalysis::ic_descent_degrees::semi_regular_degree(
                 self.n_vars,
-                &degrees.iter().copied().filter(|d| *d > 0).collect::<Vec<_>>(),
+                &degrees
+                    .iter()
+                    .copied()
+                    .filter(|d| *d > 0)
+                    .collect::<Vec<_>>(),
             ),
             degrees,
         }
@@ -453,7 +505,59 @@ impl Targets {
         match s {
             "random" => Ok(Targets::Random),
             "walk" => Ok(Targets::Walk),
-            other => Err(format!("unknown target source `{other}`; try random or walk")),
+            other => Err(format!(
+                "unknown target source `{other}`; try random or walk"
+            )),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Params;
+
+    #[test]
+    fn a_plugin_spec_splits_into_name_and_parameters() {
+        let (name, p) = Params::parse_spec("binary-subspace:dimension=6, no_fold = 1").unwrap();
+        assert_eq!(name, "binary-subspace");
+        assert_eq!(p.get("dimension"), Some("6"));
+        assert_eq!(p.get("no_fold"), Some("1"));
+
+        let (name, p) = Params::parse_spec("subtract").unwrap();
+        assert_eq!(name, "subtract");
+        assert!(p.0.is_empty());
+    }
+
+    /// `;` is the list separator on the command line: the value reaches
+    /// the plug-in whole, where `,` would have ended the parameter.
+    #[test]
+    fn a_semicolon_list_value_survives_the_spec() {
+        let (name, p) = Params::parse_spec("koblitz-orbit:divisor=1;2").unwrap();
+        assert_eq!(name, "koblitz-orbit");
+        assert_eq!(p.get("divisor"), Some("1;2"));
+
+        let (_, p) = Params::parse_spec("koblitz-symmetrised:divisor=0;1;2,no_fold=1").unwrap();
+        assert_eq!(p.get("divisor"), Some("0;1;2"));
+        assert_eq!(p.get("no_fold"), Some("1"));
+    }
+
+    /// `divisor=1,2` is not read as `divisor=1`: that would build a
+    /// different factor base without a word.  The message names the `;`.
+    #[test]
+    fn a_comma_list_is_refused_with_the_semicolon_named() {
+        let err = Params::parse_spec("koblitz-orbit:divisor=1,2").unwrap_err();
+        assert!(err.contains("stray token `2`"), "{err}");
+        assert!(err.contains("`divisor=1;2`"), "{err}");
+        assert!(err.contains("`;`"), "{err}");
+
+        // the stray token is attributed to the parameter before it
+        let err = Params::parse_spec("koblitz-orbit:no_fold=1,divisor=0,1").unwrap_err();
+        assert!(err.contains("`divisor=0;1`"), "{err}");
+    }
+
+    #[test]
+    fn a_bare_first_token_is_just_not_key_value() {
+        let err = Params::parse_spec("koblitz-orbit:divisor").unwrap_err();
+        assert_eq!(err, "parameter `divisor` is not key=value");
     }
 }

@@ -176,6 +176,25 @@ class WorkflowTests(unittest.TestCase):
             "render.HISTORY_LIMIT is %d" % (step, 7 * (24 * 60 // step), HISTORY_LIMIT),
         )
 
+    def test_publish_job_runs_the_tests_itself_before_it_deploys(self):
+        # Every job queues for the same hosted runners as the repository's PR
+        # checks, and a run holds the serialized group for all of its queue
+        # waits. With `needs: test` a publish waited twice: run 3682 held the
+        # group 2026-10-07T14:08Z-22:33Z, 3h23m for a test runner and 5h00m
+        # for a publish runner. So the publish job runs the test job's steps
+        # itself, before anything is deployed, and the test job is PR-only.
+        path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        test_job = text.split("\n  test:\n", 1)[1].split("\n  publish:\n", 1)[0]
+        publish_job = text.split("\n  publish:\n", 1)[1]
+        self.assertIn("if: github.event_name == 'pull_request'", test_job)
+        self.assertNotRegex(publish_job, r"^    needs:", "publish must not wait on a second runner")
+        test_runs = re.findall(r"^\s+run: (.+)$", test_job, re.M)
+        before_deploy = publish_job.split("- name: Configure AWS", 1)[0]
+        self.assertEqual(test_runs, re.findall(r"^\s+run: (.+)$", before_deploy, re.M))
+        self.assertGreaterEqual(len(test_runs), 5)
+
     def test_dashboard_stale_banner_allows_for_scheduler_jitter(self):
         # The banner must not cry stale on one late run: GitHub delays
         # scheduled workflows under load. Keep the threshold at several
@@ -543,8 +562,9 @@ class WalkRateTests(unittest.TestCase):
     # The measured rate is the point of the feature, so these are the numbers
     # it was verified against: four consecutive samples of the live campaign
     # feed on 2026-09-15, whose checkpoint totals differ by 109,081,968,771,072
-    # iterations over 1504 s = 72.5 B it/s. status.py's own sum of what the
-    # walkers reported themselves over the same period was 86-101 B it/s; the
+    # iterations over 1504 s = 72.5 B it/s. The slot dashboard's own sum (then
+    # status.py, now ecc2k-status) of what the walkers reported themselves over
+    # the same period was 86-101 B it/s; the
     # difference is each slot's walked-but-not-yet-checkpointed tail, which
     # this figure deliberately does not count.
     LIVE = (

@@ -1,0 +1,148 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h8e813e1033a3",
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "family": "rho",
+        "params": {
+          "dp_bits": "4",
+          "lanes": "32",
+          "step_cap_factor": "0"
+        },
+        "method_id": "ECM1h2400af10ecaa",
+        "method_sha256": "2400af10ecaa100ba83b85a55dd927e41732dafede8bb768fa4ea308d474c6e4",
+        "entry": "koblitz_strong_rho::StrongRho::solve"
+      }
+    },
+    {
+      "name": "claw-c1",
+      "role": "candidate",
+      "method": {
+        "id": "claw.pair_table",
+        "family": "claw",
+        "params": {
+          "base_scale": "4",
+          "cap_multiple": "0",
+          "table_scale": "1"
+        },
+        "method_id": "ECM1h76c786dca40e",
+        "method_sha256": "76c786dca40e5780e301f6fe8cf9f59fe905c46b44bb045b7834011c88ed3ed4",
+        "entry": "ecbench::claw::pair_claw"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "W7a99359b191b",
+      "workload_sha256": "7a99359b191bff3552ae9e57172bb143f8060bfabd9f539ac4d15722f2a0e918",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 83
+      },
+      "curve": {
+        "slug": "icv1-f2m83-tm6151469093347-debefd74",
+        "icv1": "ICV1:f2m-83-a1d5abfa:-6151469093347:9671406556923184866742756:0x1:-7:unk:r:debefd742f59",
+        "family": "koblitz",
+        "construction": "WideKoblitz::new(0, registry modulus for n = 83)",
+        "field_degree": 83,
+        "field_bits": null,
+        "group_order": "9671406556923184866742756",
+        "r": "2417851639230796216685689",
+        "cofactor": 4,
+        "generator": [
+          "0xe3bbbbbbb83555555544",
+          "0x3df25943c9ed8f7f815f4"
+        ],
+        "automorphisms_available": 166,
+        "registered": true,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "hash_to_subgroup_v2",
+      "target_seed": 20261004,
+      "target_index": 0,
+      "target": [
+        "0x52d871685bdc77bfb3a82",
+        "0x486efcd35726db1192928"
+      ],
+      "planted": null,
+      "target_counter": 4
+    },
+    {
+      "workload_id": "W1127c86e0b31",
+      "workload_sha256": "1127c86e0b319209182924c1f41e5e5c2ce336db8b5861015467eee9b01033f8",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 83
+      },
+      "curve": {
+        "slug": "icv1-f2m83-tm6151469093347-debefd74",
+        "icv1": "ICV1:f2m-83-a1d5abfa:-6151469093347:9671406556923184866742756:0x1:-7:unk:r:debefd742f59",
+        "family": "koblitz",
+        "construction": "WideKoblitz::new(0, registry modulus for n = 83)",
+        "field_degree": 83,
+        "field_bits": null,
+        "group_order": "9671406556923184866742756",
+        "r": "2417851639230796216685689",
+        "cofactor": 4,
+        "generator": [
+          "0xe3bbbbbbb83555555544",
+          "0x3df25943c9ed8f7f815f4"
+        ],
+        "automorphisms_available": 166,
+        "registered": true,
+        "ec1": null,
+        "curve_uid": null
+      },
+      "target_law": "hash_to_subgroup_v2",
+      "target_seed": 20261004,
+      "target_index": 1,
+      "target": [
+        "0x3744f26e728f2761df7cd",
+        "0x2149843ada5739ae78af0"
+      ],
+      "planted": null,
+      "target_counter": 1
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 11363625205310062165
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 11363625205310062165
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 1,
+      "algorithm_seed": 18244885687504753548
+    },
+    {
+      "seq": 3,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 1,
+      "algorithm_seed": 18244885687504753548
+    }
+  ]
+}

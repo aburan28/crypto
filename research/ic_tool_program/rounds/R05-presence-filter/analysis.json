@@ -1,0 +1,1075 @@
+{
+ "what_this_is": "R05, the sharper presence filter: every figure the README, the ledger and the scoreboard quote",
+ "host": {
+  "repository_commit": "4a1520b57b2e3a7b8852e76d904f341afc0bc677",
+  "tree_status": "",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "cargo_lock_sha256": null,
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+   "pclmulqdq",
+   "popcnt",
+   "avx2",
+   "bmi2",
+   "avx512f",
+   "avx512dq",
+   "avx512ifma",
+   "avx512cd",
+   "avx512bw",
+   "avx512vl",
+   "avx512_bf16",
+   "avx512vbmi",
+   "avx512_vbmi2",
+   "gfni",
+   "vpclmulqdq",
+   "avx512_vnni",
+   "avx512_bitalg",
+   "avx512_vpopcntdq",
+   "avx512_fp16"
+  ],
+  "logical_cores": 4,
+  "memory": "MemTotal:       16480972 kB",
+  "transparent_hugepage": {
+   "enabled": "always [madvise] never",
+   "defrag": "always defer defer+madvise [madvise] never"
+  },
+  "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "glibc": "glibc 2.39",
+  "binaries": {
+   "base": {
+    "path_basename": "ic-r03-cand-on-c1a2e5f8-30f6c153",
+    "sha256": "23c83a4744a4d3e206a6923db48eb631042ba45c231e088f15824b55fb6ff432",
+    "built_from": "30f6c153c41c1601926e291d7e6ee59dfb39ad9f"
+   },
+   "candidate": {
+    "path_basename": "ic-r05-cand-on-30f6c153-edcb0bec",
+    "sha256": "76a2a2fd05acd47d6dc9a0851a013d8056cc9d7d9b7a34320d1d92089a794597",
+    "built_from": "edcb0bec948ffab566a3c8998dc3c92d52375da2"
+   }
+  },
+  "isolation_tool": {
+   "path": "tools/isolated_bench.py",
+   "sha256": "cf0f3f206280dfbbe9b5efa5aad99869572b475690e11a62650f1e39b5dcc970"
+  },
+  "pinning": "tools/isolated_bench.py run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+  "smt_siblings": {
+   "0": "0",
+   "1": "1",
+   "2": "2",
+   "3": "3"
+  },
+  "uptime": "18:51:45 up 17:27,  0 user,  load average: 1.33, 1.81, 1.22",
+  "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+ },
+ "host_resumed": {
+  "repository_commit": "4a1520b57b2e3a7b8852e76d904f341afc0bc677",
+  "tree_status": "",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "cargo_lock_sha256": null,
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+   "pclmulqdq",
+   "popcnt",
+   "avx2",
+   "bmi2",
+   "avx512f",
+   "avx512dq",
+   "avx512ifma",
+   "avx512cd",
+   "avx512bw",
+   "avx512vl",
+   "avx512_bf16",
+   "avx512vbmi",
+   "avx512_vbmi2",
+   "gfni",
+   "vpclmulqdq",
+   "avx512_vnni",
+   "avx512_bitalg",
+   "avx512_vpopcntdq",
+   "avx512_fp16"
+  ],
+  "logical_cores": 4,
+  "memory": "MemTotal:       16480972 kB",
+  "transparent_hugepage": {
+   "enabled": "always [madvise] never",
+   "defrag": "always defer defer+madvise [madvise] never"
+  },
+  "os": "Linux-6.18.44-fc-v51-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "glibc": "glibc 2.39",
+  "binaries": {
+   "base": {
+    "path_basename": "ic-r03-cand-on-c1a2e5f8-30f6c153",
+    "sha256": "23c83a4744a4d3e206a6923db48eb631042ba45c231e088f15824b55fb6ff432"
+   },
+   "candidate": {
+    "path_basename": "ic-r05-cand-on-30f6c153-edcb0bec",
+    "sha256": "76a2a2fd05acd47d6dc9a0851a013d8056cc9d7d9b7a34320d1d92089a794597"
+   }
+  },
+  "isolation_tool": {
+   "path": "src/bin/isolated_bench.rs",
+   "binary_sha256": "219d1dfa99daa9886fc2de6b963d1095fe137f34604239702b0304231462bd40"
+  },
+  "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+  "smt_siblings": {
+   "0": "0",
+   "1": "1",
+   "2": "2",
+   "3": "3"
+  },
+  "uptime": "22:59:55 up 12 min,  0 user,  load average: 0.38, 0.29, 0.21",
+  "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+  "runner": "icprog (native)",
+  "note": "the host R05 resumed on after its container was rebuilt mid-holdouts"
+ },
+ "aa_source": {
+  "host_matches_r01": true,
+  "aa": "R01's"
+ },
+ "accounting": {
+  "compare": {
+   "processes": 572,
+   "contended": 12,
+   "failed": 0
+  },
+  "holdout": {
+   "processes": 242,
+   "contended": 2,
+   "failed": 0
+  }
+ },
+ "isolation_by_tool": {
+  "compare": {
+   "python": 412,
+   "native": 160
+  },
+  "holdout": {
+   "python": 141,
+   "native": 101
+  }
+ },
+ "pin": {
+  "held": true,
+  "names_agree": true,
+  "rows": 90
+ },
+ "extended": {
+  "suite": [
+   "icv1-f2m53-tm56619371-dac20a85",
+   "icv1-f2m59-tm943548413-98844ecc"
+  ]
+ },
+ "extension_test": [
+  {
+   "set": "suite",
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.290208220823891,
+   "min": 1.0671074295977734,
+   "max": 1.7840675811038258,
+   "lo": 1.2508590612927681,
+   "hi": 1.3307952147391733,
+   "half_width": 0.03145770834521944,
+   "extended": true
+  },
+  {
+   "set": "suite",
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.2151882244485264,
+   "min": 0.9360477308501741,
+   "max": 1.5164166658682645,
+   "lo": 1.1755915126746956,
+   "hi": 1.256118647436155,
+   "half_width": 0.0336823729560114,
+   "extended": true
+  },
+  {
+   "set": "suite",
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.3025430952853794,
+   "min": 1.171667509939625,
+   "max": 1.4470642903089965,
+   "lo": 1.2809639140262299,
+   "hi": 1.3244858004960751,
+   "half_width": 0.016846049309322986,
+   "extended": false
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.2760602796160816,
+   "min": 1.1012517727026467,
+   "max": 1.5982272052344177,
+   "lo": 1.24212719655459,
+   "hi": 1.3109203644606853,
+   "half_width": 0.02731852515234756,
+   "extended": false
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.2397566067212131,
+   "min": 1.0319397558257204,
+   "max": 1.4821041010505152,
+   "lo": 1.2077658805264095,
+   "hi": 1.2725946880027699,
+   "half_width": 0.02648752271496546,
+   "extended": false
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.318909757839385,
+   "min": 1.1496221146256735,
+   "max": 1.4475832688426955,
+   "lo": 1.2980499708789672,
+   "hi": 1.3401047635677976,
+   "half_width": 0.016070095472744184,
+   "extended": false
+  }
+ ],
+ "suite": [
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "a": 1,
+   "n": 19,
+   "log2_r": 18.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9386316351898008,
+    "min": 0.8071453049591428,
+    "max": 1.2334218992725143,
+    "lo": 0.8572774923997278,
+    "hi": 1.0277061446146967,
+    "missing_pairs": 0,
+    "half_width": 0.09489826049479366
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9332214543264958,
+    "min": 0.649204039335009,
+    "max": 1.2507999654069013,
+    "lo": 0.8118981490437234,
+    "hi": 1.0726743050726661,
+    "missing_pairs": 0,
+    "half_width": 0.14943168108668603
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0033752597025103,
+    "min": 0.7403204141139469,
+    "max": 1.3999408092983212,
+    "lo": 0.8910631360141438,
+    "hi": 1.1298435218479288,
+    "missing_pairs": 0,
+    "half_width": 0.12604283484417889
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9363156575090773,
+    "min": 0.7673372666602186,
+    "max": 1.3864575961860777,
+    "lo": 0.8106534175220247,
+    "hi": 1.0814572436843357,
+    "missing_pairs": 0,
+    "half_width": 0.15501352029227533
+   },
+   "s_cold_base": 130.52611704317616,
+   "s_cold_cand": 136.54241011358232,
+   "collect_units_per_summand": {
+    "base": 29.8910448779157,
+    "cand": 30.86450802528077
+   },
+   "aa_cold": {
+    "geomean": 1.0195642272162666,
+    "lo": 0.929590673267977,
+    "hi": 1.1182461736246774
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "a": 1,
+   "n": 23,
+   "log2_r": 22.001,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9331678106655628,
+    "min": 0.7733268495028738,
+    "max": 1.0547859627949718,
+    "lo": 0.8612678944663243,
+    "hi": 1.0110700380883733,
+    "missing_pairs": 0,
+    "half_width": 0.08348147732104949
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0257935732090795,
+    "min": 0.8851259148988959,
+    "max": 1.1485314350661004,
+    "lo": 0.962134100161802,
+    "hi": 1.0936650667096133,
+    "missing_pairs": 0,
+    "half_width": 0.06616486520597453
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 0.9917357574114659,
+    "min": 0.8632337740425216,
+    "max": 1.082946518668012,
+    "lo": 0.9360144494750328,
+    "hi": 1.0507741767022039,
+    "missing_pairs": 0,
+    "half_width": 0.05953039289904649
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9479485965714106,
+    "min": 0.7619424198090619,
+    "max": 1.1005019590565057,
+    "lo": 0.8791328931566947,
+    "hi": 1.0221509725510194,
+    "missing_pairs": 0,
+    "half_width": 0.0782767929062691
+   },
+   "s_cold_base": 33.18641265181747,
+   "s_cold_cand": 35.59618365205742,
+   "collect_units_per_summand": {
+    "base": 11.477883186471782,
+    "cand": 11.137221736008259
+   },
+   "aa_cold": {
+    "geomean": 1.020826709020529,
+    "lo": 0.9843464455002814,
+    "hi": 1.058658945347292
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "a": 1,
+   "n": 45,
+   "log2_r": 24.803,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.012110578690044,
+    "min": 0.9125198553713392,
+    "max": 1.1044992299761993,
+    "lo": 0.9640502929967437,
+    "hi": 1.0625667882036065,
+    "missing_pairs": 0,
+    "half_width": 0.04985246728560733
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0757464827483931,
+    "min": 0.9425449418399718,
+    "max": 1.409699977441913,
+    "lo": 0.9882378329173586,
+    "hi": 1.1710040403222577,
+    "missing_pairs": 0,
+    "half_width": 0.08855019198435476
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.1112756548400813,
+    "min": 0.9460966542750929,
+    "max": 1.5534211768626254,
+    "lo": 1.002520719145153,
+    "hi": 1.2318284873885463,
+    "missing_pairs": 0,
+    "half_width": 0.10848148434045668
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0383853176622677,
+    "min": 0.9116755664598066,
+    "max": 1.1970443581450259,
+    "lo": 0.9728079138967679,
+    "hi": 1.1083833226823334,
+    "missing_pairs": 0,
+    "half_width": 0.06741043409363034
+   },
+   "s_cold_base": 22.671661782385666,
+   "s_cold_cand": 22.048462560861335,
+   "collect_units_per_summand": {
+    "base": 8.627665510436485,
+    "cand": 7.979925988314924
+   },
+   "aa_cold": {
+    "geomean": 0.9853685029296184,
+    "lo": 0.9156136574042906,
+    "hi": 1.0604375313910728
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "a": 0,
+   "n": 37,
+   "log2_r": 27.781,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0299795112241985,
+    "min": 0.8516753672014338,
+    "max": 1.2980113991204139,
+    "lo": 0.9463733445232377,
+    "hi": 1.1209717599094846,
+    "missing_pairs": 0,
+    "half_width": 0.08834374634999853
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.1053909306943246,
+    "min": 0.9469722583056035,
+    "max": 1.2444484845336727,
+    "lo": 1.0430853773307476,
+    "hi": 1.1714181180337087,
+    "missing_pairs": 0,
+    "half_width": 0.05973197852990397
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0782321302179203,
+    "min": 0.9316323881797015,
+    "max": 1.3368368171934975,
+    "lo": 0.9947824481768177,
+    "hi": 1.1686821865072055,
+    "missing_pairs": 0,
+    "half_width": 0.08388736873478653
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0164041353768607,
+    "min": 0.8182526955405607,
+    "max": 1.184275019669858,
+    "lo": 0.9370486702820597,
+    "hi": 1.1024799449320157,
+    "missing_pairs": 0,
+    "half_width": 0.08468659911860743
+   },
+   "s_cold_base": 10.919648670305781,
+   "s_cold_cand": 10.450927305348507,
+   "collect_units_per_summand": {
+    "base": 4.735705872644039,
+    "cand": 4.300632103794549
+   },
+   "aa_cold": {
+    "geomean": 0.9763933191308949,
+    "lo": 0.9033336331330709,
+    "hi": 1.0553619157707235
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "a": 1,
+   "n": 43,
+   "log2_r": 32.113,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0227348579501132,
+    "min": 0.9070191850589802,
+    "max": 1.1042831409804315,
+    "lo": 0.9776170094576384,
+    "hi": 1.0699349331560115,
+    "missing_pairs": 0,
+    "half_width": 0.046150842360553
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0522031033031731,
+    "min": 0.8562221858395225,
+    "max": 1.2814117841961197,
+    "lo": 0.9519283426775955,
+    "hi": 1.1630406627947178,
+    "missing_pairs": 0,
+    "half_width": 0.1053385597738623
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0949097187371404,
+    "min": 0.981155655777025,
+    "max": 1.1988523412614982,
+    "lo": 1.0462169301702566,
+    "hi": 1.1458687559089225,
+    "missing_pairs": 0,
+    "half_width": 0.046541770796004744
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9462172249438541,
+    "min": 0.7494883227952195,
+    "max": 1.014691652428021,
+    "lo": 0.8819280241314041,
+    "hi": 1.0151928641367765,
+    "missing_pairs": 0,
+    "half_width": 0.07289619906994949
+   },
+   "s_cold_base": 6.633024887873891,
+   "s_cold_cand": 6.4496661184495565,
+   "collect_units_per_summand": {
+    "base": 2.665163200207751,
+    "cand": 2.35213996255389
+   },
+   "aa_cold": {
+    "geomean": 1.0276460285269957,
+    "lo": 0.9355882953126542,
+    "hi": 1.1287618338517103
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "a": 1,
+   "n": 47,
+   "log2_r": 36.636,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0546468377315181,
+    "min": 0.7698118691068312,
+    "max": 1.3340142811931888,
+    "lo": 0.9233400977722624,
+    "hi": 1.2046265022180698,
+    "missing_pairs": 0,
+    "half_width": 0.14220842382569399
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.3467758675572004,
+    "min": 1.0035240347993426,
+    "max": 1.7656367901315573,
+    "lo": 1.177766294115131,
+    "hi": 1.5400383306071617,
+    "missing_pairs": 0,
+    "half_width": 0.14350009359798177
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.2077804914292443,
+    "min": 0.8035127207008902,
+    "max": 1.6000046292790149,
+    "lo": 1.049669072562882,
+    "hi": 1.3897081981423045,
+    "missing_pairs": 0,
+    "half_width": 0.15062977751675177
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9832679237442019,
+    "min": 0.7610700400739122,
+    "max": 1.2876887036733395,
+    "lo": 0.8775393108871085,
+    "hi": 1.1017350423730592,
+    "missing_pairs": 0,
+    "half_width": 0.12048305021254468
+   },
+   "s_cold_base": 4.8044945088848285,
+   "s_cold_cand": 4.467566423936676,
+   "collect_units_per_summand": {
+    "base": 1.5272641905130282,
+    "cand": 1.276822061124091
+   },
+   "aa_cold": {
+    "geomean": 1.0193020880715002,
+    "lo": 0.9220079569296019,
+    "hi": 1.126863102360677
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "a": 0,
+   "n": 57,
+   "log2_r": 38.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.139366663057336,
+    "min": 0.8533620919050191,
+    "max": 1.4333320623696773,
+    "lo": 1.0291688097555294,
+    "hi": 1.2613639089925155,
+    "missing_pairs": 0,
+    "half_width": 0.10707461424912723
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.2096080668423708,
+    "min": 1.0098295157242527,
+    "max": 1.622364345941875,
+    "lo": 1.0981188871115635,
+    "hi": 1.332416455579539,
+    "missing_pairs": 0,
+    "half_width": 0.1015274220663509
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.2927424502564697,
+    "min": 0.9525199141932289,
+    "max": 1.6691426399964944,
+    "lo": 1.1537636896826282,
+    "hi": 1.4484621570599108,
+    "missing_pairs": 0,
+    "half_width": 0.12045686808888156
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9523072621740661,
+    "min": 0.6581141712349498,
+    "max": 1.282172313080966,
+    "lo": 0.8184388761129062,
+    "hi": 1.1080719013454552,
+    "missing_pairs": 0,
+    "half_width": 0.1635655269663563
+   },
+   "s_cold_base": 4.961567930388576,
+   "s_cold_cand": 4.448887394986954,
+   "collect_units_per_summand": {
+    "base": 1.5332492690860615,
+    "cand": 1.218430217743413
+   },
+   "aa_cold": {
+    "geomean": 1.0115815580774636,
+    "lo": 0.9348277314054093,
+    "hi": 1.0946372409214002
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "a": 0,
+   "n": 41,
+   "log2_r": 39.0,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0735269120756634,
+    "min": 0.8856952028120895,
+    "max": 1.370256411444449,
+    "lo": 0.9733391918219967,
+    "hi": 1.1840271517202707,
+    "missing_pairs": 0,
+    "half_width": 0.10293196975468
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.1158530764345214,
+    "min": 0.8886636963240464,
+    "max": 1.2767798423763699,
+    "lo": 1.0282479052114155,
+    "hi": 1.2109220761625359,
+    "missing_pairs": 0,
+    "half_width": 0.08519849228877696
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.1536968304079769,
+    "min": 0.9707993056684403,
+    "max": 1.447963923312985,
+    "lo": 1.0549383173140638,
+    "hi": 1.2617006650040539,
+    "missing_pairs": 0,
+    "half_width": 0.09361543843184883
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0118529528279203,
+    "min": 0.8384755104479704,
+    "max": 1.5011589577344813,
+    "lo": 0.9036612911057089,
+    "hi": 1.1329979586641532,
+    "missing_pairs": 0,
+    "half_width": 0.1197259003866693
+   },
+   "s_cold_base": 5.883885281044404,
+   "s_cold_cand": 5.280762998926909,
+   "collect_units_per_summand": {
+    "base": 1.4292679229112868,
+    "cand": 1.2045328405271747
+   },
+   "aa_cold": {
+    "geomean": 1.0748862353891129,
+    "lo": 1.0053849419127445,
+    "hi": 1.149192086397145
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "rows": 8,
+   "rounds": 10,
+   "cold": {
+    "n": 80,
+    "geomean": 1.2934608258790714,
+    "min": 1.0666792999725272,
+    "max": 1.7840675811038258,
+    "lo": 1.2700380345540654,
+    "hi": 1.3173155941516395,
+    "missing_pairs": 0,
+    "half_width": 0.018442590448269458
+   },
+   "online": {
+    "n": 80,
+    "geomean": 1.3392712052629683,
+    "min": 0.8301432520028622,
+    "max": 2.1958364238780024,
+    "lo": 1.2935771081011935,
+    "hi": 1.3865793929202797,
+    "missing_pairs": 0,
+    "half_width": 0.03532382946142887
+   },
+   "collect_stage": {
+    "n": 80,
+    "geomean": 1.5215679025842872,
+    "min": 1.2400786367387941,
+    "max": 2.2316427481745458,
+    "lo": 1.4863144601968943,
+    "hi": 1.5576575106912793,
+    "missing_pairs": 0,
+    "half_width": 0.023718697039873282
+   },
+   "rho_online": {
+    "n": 80,
+    "geomean": 0.9861958284000655,
+    "min": 0.6838108897455984,
+    "max": 1.628939655919941,
+    "lo": 0.9573103466736743,
+    "hi": 1.0159528885622948,
+    "missing_pairs": 0,
+    "half_width": 0.030173581458466714
+   },
+   "s_cold_base": 8.737051207224216,
+   "s_cold_cand": 6.718290259809671,
+   "collect_units_per_summand": {
+    "base": 1.8008612365451642,
+    "cand": 1.183221186157617
+   },
+   "aa_cold": {
+    "geomean": 1.0172034299629564,
+    "lo": 0.9511652508723645,
+    "hi": 1.0878265548277988
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "rows": 8,
+   "rounds": 10,
+   "cold": {
+    "n": 80,
+    "geomean": 1.2380066791474338,
+    "min": 0.9360477308501741,
+    "max": 1.5164166658682645,
+    "lo": 1.214732716746238,
+    "hi": 1.261726564605105,
+    "missing_pairs": 0,
+    "half_width": 0.019159739488648242
+   },
+   "online": {
+    "n": 80,
+    "geomean": 1.2496232137521281,
+    "min": 0.6944559427286591,
+    "max": 1.6736711814896066,
+    "lo": 1.207586391338576,
+    "hi": 1.293123363718312,
+    "missing_pairs": 0,
+    "half_width": 0.03481061290112386
+   },
+   "collect_stage": {
+    "n": 80,
+    "geomean": 1.3713002349697951,
+    "min": 0.9436648387973269,
+    "max": 1.6570919958019124,
+    "lo": 1.3416200194153771,
+    "hi": 1.4016370561074696,
+    "missing_pairs": 0,
+    "half_width": 0.02212266895611137
+   },
+   "rho_online": {
+    "n": 80,
+    "geomean": 0.985015696853477,
+    "min": 0.6758053512876809,
+    "max": 1.4578008187944798,
+    "lo": 0.9548621529475904,
+    "hi": 1.0161214580058817,
+    "missing_pairs": 0,
+    "half_width": 0.031578949707876225
+   },
+   "s_cold_base": 10.122147674223662,
+   "s_cold_cand": 8.131078982832898,
+   "collect_units_per_summand": {
+    "base": 2.545103485667007,
+    "cand": 1.8650916930447623
+   },
+   "aa_cold": {
+    "geomean": 0.9896040020239275,
+    "lo": 0.9339036265210796,
+    "hi": 1.048626488870015
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.3025430952853794,
+    "min": 1.171667509939625,
+    "max": 1.4470642903089965,
+    "lo": 1.2809639140262299,
+    "hi": 1.3244858004960751,
+    "missing_pairs": 0,
+    "half_width": 0.016846049309322986
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.2941759536838544,
+    "min": 0.8532093037786838,
+    "max": 1.5768830213897154,
+    "lo": 1.2375775312976662,
+    "hi": 1.3533628049446733,
+    "missing_pairs": 0,
+    "half_width": 0.04573323363978776
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.356310615178144,
+    "min": 1.2059525852554644,
+    "max": 1.494223716559423,
+    "lo": 1.3333966756064164,
+    "hi": 1.3796183225132856,
+    "missing_pairs": 0,
+    "half_width": 0.017184638293257226
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 1.00538691371415,
+    "min": 0.7336839769522041,
+    "max": 1.3015345200652169,
+    "lo": 0.9681162012852335,
+    "hi": 1.0440924807639425,
+    "missing_pairs": 0,
+    "half_width": 0.03849818067235877
+   },
+   "s_cold_base": 16.73746226122828,
+   "s_cold_cand": 12.765531878741188,
+   "collect_units_per_summand": {
+    "base": 2.558480546464271,
+    "cand": 1.8802194821810652
+   },
+   "aa_cold": {
+    "geomean": 0.9860161880040714,
+    "lo": 0.9264742140065119,
+    "hi": 1.0493847624767751
+   },
+   "regresses_beyond_aa": false
+  }
+ ],
+ "holdouts": [
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.2760602796160816,
+    "min": 1.1012517727026467,
+    "max": 1.5982272052344177,
+    "lo": 1.24212719655459,
+    "hi": 1.3109203644606853,
+    "missing_pairs": 0,
+    "half_width": 0.02731852515234756
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.332544373114488,
+    "min": 0.958717697234814,
+    "max": 1.8957832640405925,
+    "lo": 1.265815273029207,
+    "hi": 1.402791184585519,
+    "missing_pairs": 0,
+    "half_width": 0.052716301902087315
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.499053766094084,
+    "min": 1.2492206436172426,
+    "max": 1.9042442061505023,
+    "lo": 1.452407843469264,
+    "hi": 1.5471977817699045,
+    "missing_pairs": 0,
+    "half_width": 0.03211627011969287
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 1.0100942885113657,
+    "min": 0.7091818418447804,
+    "max": 1.3412144737675096,
+    "lo": 0.9595157256301254,
+    "hi": 1.063338978642841,
+    "missing_pairs": 0,
+    "half_width": 0.052712593999462376
+   },
+   "s_cold_base": 8.098578250646241,
+   "s_cold_cand": 6.6263184701902205,
+   "collect_units_per_summand": {
+    "base": 1.660111181461462,
+    "cand": 1.1395213828948152
+   }
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.2397566067212131,
+    "min": 1.0319397558257204,
+    "max": 1.4821041010505152,
+    "lo": 1.2077658805264095,
+    "hi": 1.2725946880027699,
+    "missing_pairs": 0,
+    "half_width": 0.02648752271496546
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.2307158251235868,
+    "min": 0.7623035851352521,
+    "max": 1.9464882173808158,
+    "lo": 1.1653370168099348,
+    "hi": 1.2997625754272855,
+    "missing_pairs": 0,
+    "half_width": 0.05610291904450415
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.3652641420029163,
+    "min": 1.1058321161910518,
+    "max": 1.5725231607676864,
+    "lo": 1.3267085582882048,
+    "hi": 1.4049401926252207,
+    "missing_pairs": 0,
+    "half_width": 0.02906108012483033
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 0.9966979487699762,
+    "min": 0.7583554950138208,
+    "max": 1.3682588602634698,
+    "lo": 0.9563614193288846,
+    "hi": 1.0387357551284218,
+    "missing_pairs": 0,
+    "half_width": 0.042177077228185755
+   },
+   "s_cold_base": 10.031583645986327,
+   "s_cold_cand": 8.074624469808713,
+   "collect_units_per_summand": {
+    "base": 2.4040019931756103,
+    "cand": 1.7687319297677488
+   }
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.318909757839385,
+    "min": 1.1496221146256735,
+    "max": 1.4475832688426955,
+    "lo": 1.2980499708789672,
+    "hi": 1.3401047635677976,
+    "missing_pairs": 0,
+    "half_width": 0.016070095472744184
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.3235220383147055,
+    "min": 1.0242100375176733,
+    "max": 1.6386452985584639,
+    "lo": 1.281437624762236,
+    "hi": 1.3669885697555768,
+    "missing_pairs": 0,
+    "half_width": 0.03284156227290258
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.377065808149613,
+    "min": 1.197780034331642,
+    "max": 1.5127785369522646,
+    "lo": 1.3536609491783795,
+    "hi": 1.4008753381899173,
+    "missing_pairs": 0,
+    "half_width": 0.01729004518113597
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 0.9729767911079242,
+    "min": 0.7109603249538581,
+    "max": 1.1769700614743714,
+    "lo": 0.9368516530480793,
+    "hi": 1.0104949198249311,
+    "missing_pairs": 0,
+    "half_width": 0.03856014764163618
+   },
+   "s_cold_base": 15.39402690348914,
+   "s_cold_cand": 11.57933271384782,
+   "collect_units_per_summand": {
+    "base": 2.394163787023433,
+    "cand": 1.737652247814188
+   }
+  }
+ ],
+ "decision": {
+  "accepted": true,
+  "reasons": [],
+  "note": "the tests run with cargo before the timed steps and are recorded beside this analysis"
+ }
+}

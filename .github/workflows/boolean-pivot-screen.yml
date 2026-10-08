@@ -1,0 +1,30 @@
+name: Boolean sibling pivot screen
+
+on:
+  push:
+    paths:
+      - 'research/boolean_pivot_screen_20261003/**'
+      - '.github/workflows/boolean-pivot-screen.yml'
+  pull_request:
+    paths:
+      - 'research/boolean_pivot_screen_20261003/**'
+      - '.github/workflows/boolean-pivot-screen.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-correctness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Native mathematical controls
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_pivot_screen_20261003/Cargo.toml -- --test-threads=1
+      - name: Rust formatting
+        run: cargo fmt --manifest-path research/boolean_pivot_screen_20261003/Cargo.toml --check
+      - name: Native replay of retained discovery and every manifest member
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo build --locked --release --manifest-path research/boolean_pivot_screen_20261003/Cargo.toml
+          research/boolean_pivot_screen_20261003/target/release/boolean-pivot-screen --verify-bundle research/boolean_pivot_screen_20261003/discovery_01

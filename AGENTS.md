@@ -1,5 +1,40 @@
 # AGENTS.md
 
+## Preserve scope and report evidence
+
+Use [report-evidence](.agents/skills/report-evidence/SKILL.md) for implementation,
+experiments, benchmarks, completion reports, and research handoffs.
+
+- Preserve the user's requested deliverables, parameters, workloads, and acceptance
+  criteria. Do not silently substitute a smaller experiment, weaken an argument
+  or validation gate, or omit a requested run because you expect it to fail.
+- Execute authorized, feasible experiments as requested. The user decides research
+  significance and priorities. Report measured values and exact ratios; do not
+  independently market results as "massive", "breakthrough", or dismiss them as
+  "not worth running". Give interpretation when requested and label it separately.
+- Continue to check correctness and flag invalid results, factual errors, and
+  uncertainty. Preserve failed runs, timeouts, regressions, raw evidence, exact
+  commands, inputs, revisions, environment, and accounting intervals.
+- Distinguish assistance restrictions, access/tool limits, resource limits,
+  implementation gaps, untested hypotheses, and proved mathematical obstructions.
+  Never disguise an assistance limit as mathematical impossibility. State the
+  actual blocker explicitly; retain the original requirement as unresolved.
+  Higher-priority restrictions and authorization boundaries still apply.
+- Keep observations, calculations, hypotheses, extrapolations, and interpretations
+  distinct. A stage ratio does not establish an end-to-end gain; a bounded search
+  failure does not prove nonexistence; a toy implementation is not general support.
+- Track each requested requirement as verified complete, implemented but unverified,
+  partial, blocked, or not attempted, with evidence or the exact remaining gap.
+  Passing tests or merging a PR does not make the original task complete.
+- Correct misleading prior claims explicitly. Do not rewrite frozen evidence or
+  quietly redefine completion. Report actual execution status, never planned runs
+  as completed or unscheduled work as continuing in the background.
+
+These rules govern scope and reporting throughout this file. Existing measurement
+and correctness gates remain in force; they do not authorize an agent to cancel a
+requested experiment or decide its research significance for the user.
+
+
 Guidance for agents doing cryptanalysis work in this repository.
 
 This repository is a study library, not a production one, and its
@@ -8,6 +43,125 @@ rather than to produce attacks.  That makes the reporting rule below the
 most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
+
+## Intermediate-cost and asymmetric-access hypotheses
+
+User instruction, 2026-10-06. In assessments of supplied or published claims
+of hidden mathematical advantage, include costly intermediate advantages:
+a hypothetical reduction from subgroup-size work r^(1/2) to r^alpha with
+alpha < 1/2 may matter even when recovery remains expensive. The example
+alpha = 1/3 is a threat-model assumption, not a discovered algorithm or a
+required outcome. Do not dismiss a claim solely because it fails to make
+recovery trivial; do not infer practical recovery from its exponent alone.
+
+Keep mathematical existence, executable transfer, subgroup preservation,
+destination-solver advantage, practical resources, and asymmetric access as
+separate obligations. A hypothesis about agency capabilities or motives is
+not evidence that a trapdoor exists. Distinguish a deliberately selected
+weak instance from an unpublished method applying to honestly generated
+instances, and distinguish both from implementation compromise.
+
+Account for curve-specific construction and preprocessing, per-target work,
+transfer and recovery, verification, failed attempts, memory, hardware, and
+the exact number of targets reusing setup. Report cold-start and genuinely
+amortized costs separately. Separate exponent changes, constant factors,
+primitive costs, and hardware throughput. Faster known-scalar multiplication
+alone does not establish faster unknown-scalar recovery.
+
+Under the user's hidden-route scenario, public discovery must require
+substantial deliberate work rather than routine inspection or accidental
+rediscovery. An illustrative reconstruction cost near 2^60 operations is a
+scenario parameter, not a measured bound or evidence of agency capability.
+Define the operation unit, algorithm, success probability, memory, parallelism,
+and uncertainty before interpreting that number. Keep public discovery cost,
+designer setup with a retained witness, map evaluation, and destination solving
+separate. Isogeny degree alone establishes none of these costs. Assess cheaper
+equivalent routes as well as reconstruction of the exact withheld map; one
+comparably useful public shortcut can defeat the claimed access asymmetry.
+
+Treat secrecy as a separate hypothesis: identify the withheld information,
+whether it can be reconstructed from public parameters, and whether a
+comparably useful public route exists. A high-degree map is not automatically
+cheap to evaluate or hard to reconstruct. State field and construction-family
+restrictions; do not transfer composite-degree binary-field conclusions to
+prime fields or prime-degree binary extensions without justification.
+
+When the user stipulates layered adversary capability, assess a portfolio
+rather than one all-purpose vulnerability. Record each hypothetical technique's
+prerequisites, coverage, cost, reusable setup, access requirements, secrecy,
+and failure conditions. Distinguish independent alternatives from methods
+sharing the same dependency; do not assume independence or multiply speculative
+probabilities. Include redundancy, complementary combinations, and what
+remains available if one technique is disclosed, patched, or loses its advantage.
+
+Model reserved capabilities and exceptional-use scenarios explicitly, including
+activation constraints, scarcity, exposure risk, and the cost of losing secrecy.
+These are stipulated game-theoretic assumptions, not observations of agency
+behavior or proof of any particular mathematical capability. Alternative
+implementation or protocol compromises do not refute an algebraic hypothesis
+and do not replace an algebraic workstream the user has requested. Preserve
+each requested track and its unresolved obligations.
+
+Apply existing transfer, evidence, run-routing, and review rules. Missing
+formulas or measurements remain open obligations. Bounded failure is not
+universal nonexistence. This assessment rule adds no autonomous key-recovery
+campaign, production-target exploitation, or scientific state transition.
+
+## Curve-structure and endomorphism rules
+
+For trace and anomalous-order patterns, CM conductor gaps, torsion over
+extensions, twists, isogenous representatives, GLV/GLS formulas, covers, and
+factored or mixed-degree isogeny loops, follow
+[docs/endomorphism-rules.md](docs/endomorphism-rules.md). Record the exact
+ICV1/EC1 identity, working field, subgroup, bounded signal calculation,
+explicit map when proposed, and its complete evaluation and transfer costs.
+Keep existence, executable construction, subgroup action, measured scalar
+arithmetic, and unknown-scalar recovery as separate claims. A small torsion
+factor, class number, embedding degree, or composite map degree is a lead with
+specific hypotheses, not a universal verdict. Preserve negative searches
+within their exact bounds and run authorized feasible experiments under the
+existing evidence, review, and benchmark rules.
+
+## Research searches must leave visual reports
+
+For every substantive search for new isogenies, curves, scalar rules,
+endomorphisms, or related ECDLP mechanisms, follow
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
+Deliver a source-linked report, an explanatory diagram, and a PDF
+containing the report and visual. Include negative and inconclusive findings.
+Update every affected canonical graph, chart, and rendered copy in the same
+change as a new verified finding or correction; record why a graph was left
+unchanged when the search yields no graphable result. Keep proposed routes and
+unverified rules visibly separate from proved or measured ones. This visual
+record supplements the evidence, curve-identity, scoreboard, and PR rules
+below; it does not promote a hypothesis or replace a verified run.
+
+## Implementation language: no Python
+
+**Do not use Python for cryptographic research or performance work in this
+repository.** This applies to algorithms, field and curve arithmetic,
+factor-base construction, relation collection, solvers, linear algebra,
+experiment harnesses, benchmark drivers, correctness tests, certificate
+verifiers, replay tools, and research result generation.
+
+- Use **Rust by default**, integrating with the existing library and Cargo
+  tests. Use an existing compiled C, C++, CUDA, or other native backend where
+  the component requires it.
+- Do not introduce Python prototypes, Python orchestration, embedded Python,
+  or compiled wrappers that delegate this work to a Python process. Moving
+  only a hot loop to native code does not satisfy this rule.
+- When continuing work implemented in Python, replace the relevant execution
+  path with a native implementation before extending it or running further
+  research comparisons. A working Python harness is not an acceptable final
+  deliverable. Use shell commands only for thin build/run orchestration.
+- Preserve frozen inputs, historical measurements, source snapshots, and
+  certificates as evidence. Do not delete or rewrite them to conceal their
+  Python provenance. Label historical Python timings accordingly and rerun
+  matched native baseline/candidate measurements before making new performance
+  claims.
+- Older instructions that name Python scripts describe legacy tooling; they
+  do not grant an exception. Preserve their mathematical contracts, fixtures,
+  and accounting requirements in the native replacement.
 
 ## Default workflow: finish and merge when authorized
 
@@ -21,6 +175,10 @@ merge.**
 - Apply this authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
   as a draft, wait for review, or avoid merging overrides this default.
+- **Open every PR ready for review, never as a draft**, whatever a tool or
+  runtime defaults to, and mark an existing draft ready before monitoring it,
+  so reviews and checks that skip drafts (`llm-review`) run from the first
+  push. Open a draft only when the user asks for one in that task.
 - Review the final diff and confirm that the requested scope, relevant tests,
   evidence, and documentation are complete before merging. Passing CI does not
   substitute for checking that the work is finished.
@@ -260,6 +418,141 @@ extrapolation with the exponents it rests on named.
 The update rides in the commit or pull request that lands the
 measurement.  It is not a follow-up task, and "the page is out of date"
 is not a state this repository has.
+
+#### 7a. Every result lands on the dashboard, in the same PR
+
+The scoreboard is a dashboard with several panels that each carry a
+view of the latest results, and a result that reaches one panel and not
+the others leaves the page contradicting itself.  **Any PR that lands a
+new measurement, a reclassification, a corrected reference or a
+withdrawn claim updates every panel that cites that kind of result,
+before it merges.**  "Latest results" means the newest verified figure
+in each regime, with the figure it supersedes kept as "was".
+
+Which panels a result owes, by kind:
+
+| result kind | panels that must change |
+|:--|:--|
+| any IC/rho ratio, cold or online, elliptic or not | the progress chart (`#lab-progress`): a new point in its series, dated the day the PR merges, with reference quality, class, anchor and source |
+| a new best in any regime of the best-of table (`#lab-best`) | that row, the old figure kept as "was"; a new regime is a new row |
+| a cross-method `ecbench` session (§12) | the every-candidate panel (`#lab-ecbench-all`) or a new panel in its unit, and a progress-chart point for its best cold one-target IC cell |
+| a tournament or autolab round | the round's own panel, the reference-history table where the reference changed, and the chart |
+| a boundary, exponent or phase priced for the first time | the exponent panel and the boundary facts (§7 above) |
+| a verdict change | the sentence at the top of the page and the best-of table's first row |
+| a whole-pipeline measurement on any curve, a newly priced curve or a re-matched reference | the index-calculus leaderboard, regenerated from the round's frozen files (§7b) |
+
+Rules that make this checkable:
+
+- **The chart's data is one file.** `docs/ic/progress-timeline.json` is
+  canonical for the progress chart; the copy embedded in the page
+  (`<script id="progress-data">`) and the "every plotted point" table
+  are regenerated from it, never edited on their own.  CI
+  (`scripts/site/test_build.py`) fails the build when the embedded copy
+  differs from the file or a point in the file is missing from the
+  table.  Add a point to the file, re-embed, add its row.
+- **A point per result, not per PR.** A PR that lands two results in two
+  regimes adds two points.  A PR that only re-prices an existing figure
+  adds a point with the `accounting` class and keeps the old point.
+- **Dates are merge dates.** The chart shows when a figure landed on
+  `main`, so a point's date is the day its PR merges, and the file's
+  `updated` field is never older than its newest point.
+- **The page is republished when it changes.** GitHub Pages republishes
+  `/scoreboard/` from `main` on every merge, automatically.  Any other
+  published copy (a claude.ai artifact, a snapshot sent to someone) is
+  republished from the canonical file in the same task that changed it,
+  or it is named as stale where it is linked.
+- **Reviewing a PR means reading the dashboard diff.** A reviewer, human
+  or agent, checks the scoreboard change against the result's own
+  frozen files before approving: the number on the page is the number in
+  the session, table or report it links to, and nothing on the page is
+  computed from another number on the page.
+
+A PR that lands a result without its dashboard update is incomplete, and
+the finish-and-merge authorization above does not cover merging it.
+
+#### 7b. Keep the leaderboard current
+
+`docs/ic-leaderboard.html` is the same evidence curve by curve. For every
+curve priced end to end it shows the best recipe, the phase split of `S`,
+the ratio to the matched reference and to the floor, every recipe on every
+curve, the per-phase exponents, the decomposition oracles, and every curve
+the repository names. Its Markdown and data twins are
+`docs/ic/LEADERBOARD.md` and `docs/ic/leaderboard.json`. It is held to §7's
+and §7a's standard: **a round that changes what the leaderboard shows is not finished
+until the leaderboard shows it**, in the same pull request.
+
+- **When.** Update it in the PR that lands any of these:
+  - a whole-pipeline measurement: a new ledger section, a new ladder or
+    recipe, or a re-run that supersedes a row;
+  - a curve priced end to end for the first time;
+  - a reference re-matched;
+  - a rule change that redefines the primary comparison, as the
+    one-target rule did;
+  - a change to `docs/curves/registry.json`, which the page's roster reads.
+- **How.** The page is generated, never edited by hand.
+  - Point `SOURCES` in `scripts/build_ic_leaderboard.py` at the round's
+    frozen files.
+  - Keep a superseded figure as the row's "before" mark.
+  - Keep batch or legacy figures labelled as diagnostics, never as the
+    headline.
+  - Regenerate with `python3 scripts/build_ic_leaderboard.py` and commit
+    all three outputs.
+  - The builder reads only committed frozen files, so a number that is
+    not in one cannot reach the page.
+- **Agree with the scoreboard.** The leaderboard's headline figures must
+  match the ledger and the verdict on `docs/index-calculus-scoreboard.html`.
+  When they disagree, one of them is stale: fix it in the same PR.
+- **Enforced in CI** (`ic-leaderboard`). `--check` fails when any output is
+  stale against the files the builder reads. It also fails when the ledger
+  has a section later than `LEDGER_COVERED_THROUGH`, because the check
+  cannot otherwise see evidence the builder does not read yet.
+  - When a new section changes the page, point `SOURCES` at it,
+    regenerate, and raise the number.
+  - When it changes nothing on the page (a stage diagnostic, a plan),
+    confirm that, and raise the number.
+- **Published copies** are republishes of the repository file, as in §7.
+
+#### 7c. Keep the lab browser current
+
+`docs/browser/` (published at `/browser/`) is the searchable index over
+everything the workstream names: every curve in the ICV1 registry with
+its invariants (family, field, trace, order, subgroup order, cofactor,
+endomorphism discriminant) and identities (ICV1, EC1, curve UID, retired
+names), every `ecbench` method (`ECM1`) and factor base (`FB1`) a
+committed session ran, every tournament candidate identity (`IC1`) the
+repository writes, every tournament round, every committed `ecbench`
+session, the vocabulary of oracles, solvers and factor-base families,
+and the **yield ledger**: one row per index-calculus run with its curve,
+target, factor base, oracle, solver, trials, relations, yield, lookups,
+matrix rank and the record's `solver` block (the ICMS `pdp_metrics`:
+system shape, solving degree, Macaulay and SAT figures), which the
+`ecbench` database exposes as the `ic_yield` view. It is how a reader
+gets from a number on the scoreboard to the curve, algorithm and
+evidence behind it, and how a candidate combination is informed: a
+yield is a stage diagnostic, and only a whole-pipeline `S` decides speed.
+
+- **Generated, never edited.** `docs/browser/data.json` is written by
+  `python3 scripts/build_lab_browser.py` from committed files only (the
+  registry, `docs/ic/leaderboard.json`, `research/ecbench_*/sessions/*`,
+  the tournament's `runs/`, and the files that mention IC1 identities).
+  It computes nothing beyond a mean over a session's own verified runs.
+- **Regenerate it in the PR that lands** a new curve in the registry, a
+  new `ecbench` session, a new tournament round, a new candidate identity,
+  or a leaderboard change. CI (`ic-leaderboard`, `--check`) fails when the
+  file is stale, and the site build test fails when a cross-reference in
+  it does not resolve. The check ignores how many files mention each
+  candidate identity, and which: those counts change with any report that
+  writes one and refresh on the next regeneration.
+- **Every identity is a link.** A curve page links to the leaderboard
+  rows, sessions, factor bases, rounds and candidates that cite it; a
+  session, method, factor base or round links back to its curves. A new
+  kind of record gets a view and a join, not a free-text mention.
+- **The page renders data with DOM nodes only**, never `innerHTML`, like
+  the status dashboards; the site test pins that.
+- **Unregistered references stay visible.** A tournament cell or
+  candidate on a curve the registry does not hold is shown as
+  "not in the registry", never dropped or silently mapped; registering
+  the curve (§11) is the fix.
 
 ### 8. Use the frozen benchmark to establish end-to-end speedups
 
@@ -509,6 +802,35 @@ retired form in Markdown or HTML outside a code fence, every slug
 registered, and no retired form on a line a pull request adds to prose or
 code.  `--fix` rewrites retired names in place.
 
+### 12. Measure across ECDLP methods with ecbench
+
+New measurements that put ECDLP methods side by side (Pollard rho in its
+variants, baby-step giant-step, the kangaroo, index calculus) use the
+native harness `ecbench` ([docs/ecbench/README.md](docs/ecbench/README.md)),
+so every method is charged in one counted unit, on the same one-target
+workloads, under the same isolation, into the same sealed records.
+
+- **Spec, session, audit.** Write an `ecbench.spec/v1`, run it into a new
+  directory, and pass `ecbench verify --replay N` before citing a figure;
+  the receipt's SHA-256 is the replay certificate.
+- **Levels gate wall time, never counts.** Operation counts stand at any
+  isolation level; a wall-clock figure needs the spec's level (L2 by
+  default) and is read against the session's A/A interval.
+- **Sessions are evidence.** Commit them under `research/<topic>_<date>/
+  sessions/`; CI re-audits them with replays on another host and never
+  lets one be edited.  The SQLite database is an index rebuilt from them.
+- **A `vs_rho` claim is one IC run against one strong-rho run on one
+  public target.** `ecbench claim build` assembles it from a session with
+  `target_kind: public`, names the candidate by the tournament's IC1
+  identity, and runs the ledger's checker (`ecbench claim check`, the
+  native `boundary_autolab.py claim-check --stage vs_rho`).  It passes
+  only with an audit receipt from another host class that replayed both
+  runs; without one it fails on that and says so.
+- **Skills:** `ecbench-measure`, `ecbench-independent-runner` and
+  `ecbench-extend` under `.agents/skills/`.
+
+Historical autolab, tournament and ICMS evidence keeps its own protocols.
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
@@ -539,6 +861,26 @@ immutable historical names and never infer exact identity from field degree alon
 Within this repository the text name is the ICV1 slug (§11); the curve
 registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
 slug to the EC1 identities of its recorded representations.
+The [IC curve crosswalk](docs/curves/ic/README.md) mirrors cryptanalysis's
+exact curve records and links them to ICV1 only when the model match is
+established.
+The [typed curve-link rules](docs/curves/ic/curve-links/README.md) keep
+twists and field/model changes separate from verified isogeny routes; no
+base-field log transport is inferred from a shared j-invariant. Keep unknown traits and unsupported models as `null` with status.
+Large factor bases remain content-addressed archives, while the browser's
+FB1 entries are session summaries; link them only after exact curve and
+point-set identities, encoding and quotient rules agree. An isogenous curve
+has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+Run `python3 docs/curves/ic/validate_semantics.py` after changing the IC curve
+crosswalk or typed links. The `ic-semantic-metadata` CI job also compares the
+three mirrored files with cryptanalysis `main`; land source changes there
+first, then update this mirror and its `mirror-lock.json` in a paired PR.
+To enumerate a prime-field curve's isogeny class, use the native walker
+`src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
+it emits these records and kernel-certified `IW1` routes, and `isogeny_walk
+verify` replays them.
+The user guide, including S3 storage, is
+[docs/isogeny-walk/README.md](docs/isogeny-walk/README.md).
 
 # Agent rules for IC measurements
 
@@ -588,3 +930,11 @@ The current `boundary_autolab.py` producer timing is whole-process or
 operation-counted. Treat those outputs as legacy diagnostics until producers
 emit the online intervals above; they cannot establish the primary speedup.
 Its launch interface now permits one target per run only.
+
+<!-- conductor:begin -->
+Before making code changes, obtain or attach to a Conductor task. Run
+`conductor check --summary "…" --scope path:…` first — if someone already holds
+those files, it will tell you who and what to do about it. Read `.conductor/WORKFLOW.md`
+and the active task card. Report scope expansion before editing outside the reserved paths.
+Do not publish chat transcripts or secrets as task metadata.
+<!-- conductor:end -->

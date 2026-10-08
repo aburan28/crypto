@@ -1,0 +1,57 @@
+{
+ "schema_version": 2,
+ "name": "C059: a curve over GF(4) taken over GF(2^22), kic paired with rho",
+ "field": {
+  "kind": "binary",
+  "degree": 22,
+  "modulus": "0x400003"
+ },
+ "curve": {
+  "form": "binary_weierstrass",
+  "a": "0x210d16",
+  "b": "0x1"
+ },
+ "subgroup": {
+  "order": "2097349",
+  "cofactor": "2",
+  "generator": {
+   "x": "0x3ad19a",
+   "y": "0x319519"
+  }
+ },
+ "target": {
+  "known_log": "1251672"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "kic",
+   "recipe": {
+    "summands": 3,
+    "descent_summands": 2,
+    "collection_window": 16,
+    "collection_aim": true,
+    "solver": "pair_table",
+    "seed": 201,
+    "max_trials": 100000,
+    "collection": {
+     "unit_trials": 16,
+     "units": 1,
+     "max_units": 100000
+    },
+    "factor_base": {
+     "mode": "spec",
+     "spec": {
+      "kind": "subgroup_orbits",
+      "points": 528,
+      "seed": 201
+     }
+    }
+   }
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

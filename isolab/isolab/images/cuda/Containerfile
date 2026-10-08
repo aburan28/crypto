@@ -1,0 +1,11 @@
+# isolab-cuda: NVIDIA CUDA devel image with Python and NumPy. Pass GPUs through with CDI
+# (resources.gpus in the spec); the worker needs nvidia-container-toolkit and /etc/cdi/nvidia.yaml.
+ARG CUDA_TAG=12.6.3-devel-ubuntu24.04
+FROM docker.io/nvidia/cuda:${CUDA_TAG}
+ENV DEBIAN_FRONTEND=noninteractive PIP_NO_CACHE_DIR=1 PIP_BREAK_SYSTEM_PACKAGES=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      python3 python3-pip python3-numpy python3-scipy build-essential cmake git numactl hwloc-nox time \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /isolab/work /isolab/out /isolab/scratch /isolab/bin && chmod 1777 /isolab/work /isolab/out /isolab/scratch
+WORKDIR /isolab/work
+LABEL org.opencontainers.image.title="isolab-cuda"

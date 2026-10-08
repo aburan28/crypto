@@ -1,5 +1,28 @@
 # September 24 bounded IC goal
 
+Current native status (October 3): both disclosed synthetic n17 prepared-target
+controls are consumed and closed. The [native SAT result](native-sat-control-registration-v1/RESULT.md)
+is accepted in PR #1277. The [new native F5 result](native-f5-control-registration-v1/RESULT.md)
+retains its sole invocation after main accepted PR #1294, and the original
+preexecution-frozen checker admits source-bound execution, two exact negatives,
+third-query decomposition and scalar 24886. Its result-publication follow-up is
+unmerged until that PR's exact-head gates pass. Never dispatch, retry, resume or
+execute restorations of either control. Data-only publication replay starts no
+solver and cannot replace the original frozen admission audit.
+
+This is correctness progress only: zero new ordinary queries, no fresh paired
+performance qualification and no measured speedup. F5's producer stopwatch is
+500 ns below its phase sum; both raw values remain explicit diagnostics. All
+historical Python preparation provenance remains visible. The full active goal
+still requires native natural-yield and failed-attempt evidence for the exact
+F5 and CryptoMiniSat pipelines, complete exposure exclusions, strong incumbent
+and same-point rho references, IC1 identities, calibration/resources and a new
+frozen fresh one-target protocol. The built-in Rust SAT worker is a different
+backend and cannot supply CryptoMiniSat's admission. The three historical
+confirmation sets remain closed.
+
+The dated entries below preserve the historical gate state and failures.
+
 Current family-admission status (September 30): the complete source-bound
 [SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
 is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
@@ -297,18 +320,16 @@ audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
 
-The next planned competitive registration is
-[generic-backend-qualification-v3](generic-backend-qualification-v3/PROTOCOL.md):
-seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
-algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
-minute measure/pack/job caps. Panel intent SHA-256
-`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
-Both exposure corpora are on `main`. The runner
-`run_generic_backend_qualification_v3.py` and workflow
-`ic-generic-backend-qualification-v3.yml` authorize one `workflow_dispatch`
-campaign on the smoke schedule (`dispatch_authorized` true;
-`measurement` still `not_run` until that job runs with `--out`). Seed
-`2026093001` has not been dispatched.
+The third registration
+[generic-backend-qualification-v3](generic-backend-qualification-v3/RESULT.md)
+(seed `2026093001`, panel SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`)
+ran once as [Actions run 37399021219](https://github.com/aburan28/crypto/actions/runs/37399021219).
+The job completed and packed. The family gate is `NEGATIVE_FAMILY_QUALIFICATION`:
+both F4 and F5 smoke arms were censored on all five cells, with no retained
+ordinary queries, so their yield and cost are unknown and neither arm qualified.
+`promotion_eligible` is false. Do not redispatch seed `2026093001`. The ten
+generated points are retained with that result and must be excluded later.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
@@ -421,3 +442,61 @@ not complete execution attestation, and its additional DEFAULTS source is
 explicitly retained as postexecution auditor context. The complete IC result
 above independently passes its full Python/package/interpreter/native pre/post
 gates. Neither development result supplies the pending fresh paired comparison.
+
+## October 1 prepared target controls
+
+[PR #1110](https://github.com/aburan28/crypto/pull/1110) preregistered two new
+one-shot prepared target controls on the disclosed n17 public point. Both
+executed once, stopped incomplete at eight attempts and are now consumed and
+closed. [Their result](prepared-one-target-controls-v1/RESULT.md) retains the
+complete raw archive, original audits, claims, postexecution diagnosis and local
+relocation receipts. Never retry, resume, extend or regenerate either invocation.
+
+F5 reported eight `proved_unsat` target queries, all independently absent in
+the complete 63-point geometric three-sum domain. Its original frozen audit
+rejects a missing native `query_schema_version` header. A labelled in-memory
+postexecution view replays mathematical checks but cannot replace that rejection.
+SAT retained eight conflict-budget inconclusive queries and passed frozen audit
+only as an incomplete source-bound control. One recorded SAT query has a
+group-readded decomposition; that alone is not a CNF assignment proof.
+
+Neither control recovers a scalar or supplies verified online time, comparative
+cost, speedup or fresh qualification. Their new query/target sign/Frobenius
+exclusions are a partial current census to merge with historical/preparation
+exclusions. Next work must repair and regression-check the actual native F5
+report contract using a new bound build and diagnose SAT encoding/solver budget
+on its retained feasible query. Existing complete cold development solves and
+preparation certificates remain separate evidence. The full fresh paired
+incumbent/rho goal and all reference/calibration/resource gates remain open;
+the three historical confirmation sets stay closed.
+
+The [prepared report-contract follow-up](prepared-report-contract-v1/EVIDENCE.md)
+repairs the missing native F5 header and tests actual release CLI reports through
+the independent mathematical auditor for both incomplete and complete disclosed
+fixtures. The corrected native source requires a new versioned retained-input
+adapter; the old source pin, runtime and consumed registrations are unchanged.
+The retained SAT feasible query now has a complete assignment satisfying all
+original ANF/CNF/XOR constraints and lifting to the exact point. This identifies
+a real solver-budget miss on that particular source-valid case, without changing
+its native outcome, admitting an IC target recovery or estimating natural yield.
+These correctness gates move the full goal forward; fresh paired qualification
+and complete corrected runtime admission remain outstanding.
+
+The [corrected runtime implementation](prepared-f5-runtime-v3/README.md) adds
+native input v2, runtime v3 and frozen transport v2, preserving all old source
+pins and consumed registrations. The new native asset retains 533 root files
+and 3,011 source files across 67 registry packages. Its local full-byte relocation
+and cross-version rejection pass, together with 36 focused old/new runtime and
+transport controls. Actual isolated imports and synthetic transport children
+execute no native solver. A newly frozen native scientific control is still
+required; its complete result and fresh paired qualification are not established.
+
+The [corrected prepared F5 disclosed control](prepared-f5-v3-control-v1/RESULT.md)
+now completes under its source-bound runtime and own preexecution-frozen helper.
+PR #1159 accepted its external registration before its one invocation. Three
+target attempts, two exact negatives and scalar 24886 independently replay;
+all original bytes restore and audit identically. This known target/seed control
+is consumed and closed, not fresh qualification or a measured speedup. The raw
+11,955,969,917 ns interval includes every failed attempt and scalar replay;
+calibration and matched reference are absent. SAT and fresh paired gates remain
+open, and all historical registrations/confirmation sets remain closed.

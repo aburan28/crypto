@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------------
+Profile data file 'm3-candidate.callgrind' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 3662770534
+Trigger: Program termination
+Profiled target:  ic-candidate price --params research/ic_single_target_20260930/runs/k0n61/T01.params.json --repeats 1 --repeats-fast 1 --price-rounds 1 --json --out research/strong_rho_canon_20261008/runs/m3/callgrind/icv1-f2m61-t158598901-ab42b6c5-portable-candidate.price.json (PID 9343, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+46,030,572,942 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+25,825,602,351 (56.11%)  ???:<crypto_lib::cryptanalysis::koblitz_fast::FrobeniusCanon>::canon_in_place [ic-candidate]
+ 5,782,363,671 (12.56%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::witnesses_fast_scan [ic-candidate]
+ 5,545,213,589 (12.05%)  ???:<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::add_many_lazy_clmul [ic-candidate]
+ 5,060,238,107 (10.99%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul [ic-candidate]
+   755,154,865 ( 1.64%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::keys_of [ic-candidate]
+   432,911,463 ( 0.94%)  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   428,560,921 ( 0.93%)  ???:<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::add_many_clmul [ic-candidate]
+   294,515,308 ( 0.64%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::fold_partitioned::{closure#1}::{closure#0} [ic-candidate]
+   287,235,904 ( 0.62%)  ???:<&<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::fold_partitioned::{closure#5} as core::ops::function::FnMut<((usize, &mut [u32]),)>>::call_mut [ic-candidate]
+   188,869,914 ( 0.41%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::compact_contains [ic-candidate]
+   184,490,280 ( 0.40%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul [ic-candidate]
+   137,915,200 ( 0.30%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::build_folded_with::{closure#2} [ic-candidate]
+   119,073,280 ( 0.26%)  ???:<&<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::fold_partitioned::{closure#3} as core::ops::function::FnMut<((&(alloc::vec::Vec<u64>, alloc::vec::Vec<u32>), &alloc::vec::Vec<usize>),)>>::call_mut [ic-candidate]
+    99,308,755 ( 0.22%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    98,532,962 ( 0.21%)  ???:<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::pairs_for_key [ic-candidate]
+    68,941,760 ( 0.15%)  ???:<&<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::fold_partitioned::{closure#2} as core::ops::function::FnMut<(&(alloc::vec::Vec<u64>, alloc::vec::Vec<u32>),)>>::call_mut [ic-candidate]
+    51,393,090 ( 0.11%)  ???:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold [ic-candidate]
+    45,918,519 ( 0.10%)  ???:crypto_lib::binary_ecc::f2m::reduce_words [ic-candidate]
+    43,265,877 ( 0.09%)  ???:<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write [ic-candidate]
+    30,127,778 ( 0.07%)  ???:<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&usize> [ic-candidate]

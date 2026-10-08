@@ -43,3 +43,11 @@ jobs:
           python3 research/notes/ecc2k130/pdp_difficulty_features_20261001/check_score.py \
             --choice research/notes/ecc2k130/pdp_difficulty_features_20261001/TRAIN_CHOICE.json \
             --outcome research/notes/ecc2k130/pdp_difficulty_features_20261001/OUTCOME.json
+      - name: Check source-only toy algebra and deterministic statistics
+        run: python3 -m unittest discover -s research/notes/ecc2k130/pdp_difficulty_features_20261001 -p test_source.py -v
+      - name: Check frozen pre-outcome source and protocol bytes
+        run: |
+          python3 research/notes/ecc2k130/pdp_difficulty_features_20261001/source_preflight.py \
+            --out /tmp/ecc2k130-pdp-difficulty-source-check.json
+          cmp /tmp/ecc2k130-pdp-difficulty-source-check.json \
+            research/notes/ecc2k130/pdp_difficulty_features_20261001/SOURCE_CHECK.json
