@@ -39,7 +39,7 @@ This is an exact construction audit, not a full-depth relation attempt.
   same-field degree-two map and to leave DLP advantage null.
 - Round 300 fibre quotient:
   `research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_cover_fiber_round300_20261007/cover-fiber-result.json`,
-  SHA-256 `7d65f3e015c6d6c24b64ea2e59a6e9e8653c88a1900835838b1bc0a1ec36e5`.
+  SHA-256 `7d65f3e015c6d6c6d24b64ea2e59a6e9e8653c88a1900835838b1bc0a1ec36e5`.
 - Round 301 algebraic census:
   `research/icv1-fp256-t89188191154553853111372247798585809583-f188c491_algebraic_escapes_round301_20261007/algebraic-escape-result.json`,
   SHA-256 `ae4b44315181c18a40a790ae1bc784ffdb05e3061d442b8f1be78a1f25dc20e9`.
