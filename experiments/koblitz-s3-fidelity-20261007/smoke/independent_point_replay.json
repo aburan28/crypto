@@ -1,0 +1,27 @@
+{
+  "cpu_timing_status": "exploratory_unisolated",
+  "curve": "y^2 + xy = x^3 + 1 over GF(2^41), polynomial t^41+t^3+1",
+  "generator": [
+    2056947637384,
+    1635505394702
+  ],
+  "kind": "s3_n41_smoke_independent_sage_point_replay_v1",
+  "point_replay_verified": true,
+  "public_target_sha256": "7e73102e7fa1bd91f480a6484f18960bc2797c49108bb587266082db27febb8d",
+  "raw_sha256": {
+    "baseline": "edf784299a68d809004df8dfd7b837decb16ea627ff83edc7a257005b2f564ce",
+    "candidate": "dfc27ac540f7e6411b96f0a89872da3168c24920e57045c99b858ad9a0652618"
+  },
+  "recovered_scalar": 123212651130,
+  "relation_witnesses_independently_verified": false,
+  "sage_runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "scope": "curve, subgroup, fixture target, recovered scalar, and baseline/candidate witness-field agreement; relation witnesses not independently replayed",
+  "script_sha256": "e0fa9cda18da5c47d64c153306ec532faa034e40053c17ddabe25b968655708e",
+  "subgroup_order": 549756390943,
+  "target": [
+    1761330823552,
+    1351273910822
+  ],
+  "witness_fields_equal": true
+}
