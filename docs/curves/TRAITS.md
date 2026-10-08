@@ -109,7 +109,9 @@ cofactor`, the default of `group --by`.
 
 `similar <curve>` ranks every other curve by the summed weight of the keys
 on which it differs from the target: `cm` and `descent` 4, `char` and
-`ordinary` 3, `jfield` and `cofactor` 2, the rest 1. Ties are broken by
+`ordinary` 3, `jfield` and `cofactor` 2, `twist_cofactor`, `embedding`,
+`conductor`, `split` and `depth` 1 (`family` and `descent_signed` are not
+compared by default). Ties are broken by
 `|Δ trace_ratio| + |Δ conductor_fraction|`. A key that is `unknown` on
 either side counts as a difference and is shown with a `?`: two curves
 whose discriminants did not factor are not thereby alike. `--keys` compares
