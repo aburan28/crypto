@@ -116,8 +116,21 @@ The [new ordinary-worker source contract](../../../research/ic_candidate_tournam
 requires a separate target-free capsule/claim, compiled source/build pins,
 durable starts/completions and the accepted native CMS roles. It cannot run an
 ordinary development build and does not make its own execution scientifically
-admissible. The new frozen controller and independent runtime audit still need
-integration; do not loosen an old target-control registration to use this worker.
+admissible. The [new ordinary controller](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/PROTOCOL.md)
+adds `ordinary-control-freeze`, `ordinary-control-execute`,
+`ordinary-control-inspect` and `ordinary-control-audit`. Freeze executes build
+tools and identity reporting only. Publish the separate registration before its
+sole dispatch, then use that capsule's frozen checker. Inspection retains an
+interrupted prefix without runtime admission. Full audit checks original build,
+worker and role receipts, retained SAT source/models, independently reconstructed
+matrix rows, all outcomes and exclusive preparation costs. Source controls do
+not admit a scientific registration, panel or runtime; those gates remain pending.
+The [offline ordinary build](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-controller-v1/BUILD_VALIDATION_RESULT.md)
+now has complete retained byte custody. Use `ordinary-control-replay-build` with
+its external validation seal for portable data verification; it executes no
+archived binary and cannot admit a scientific run. Keep validation-only mode;
+never dispatch an archive restoration. Do not loosen an old target-control
+registration for this worker.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as

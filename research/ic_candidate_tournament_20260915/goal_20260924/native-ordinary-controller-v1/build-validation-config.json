@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "question": "disclosed-n17-native-ordinary-preparation-v1",
+  "plan": {
+    "schema_version": 1,
+    "question": "native-target-free-preparation-n17-v1",
+    "family": "cryptominisat",
+    "algorithm_seed": 2026100311,
+    "planned_queries": 3
+  },
+  "export_nonce": 2026100401,
+  "conflict_budget": 100000,
+  "exporter_timeout_ms": 30000,
+  "solver_timeout_ms": 30000,
+  "worker_timeout_ms": 120000
+}

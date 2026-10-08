@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "--version",
+    "--verbose"
+  ],
+  "cwd": "/private/tmp/ic-native-ordinary-build-validation-20261004-v2/immutable/source",
+  "environment": [
+    [
+      "PATH",
+      "/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Volumes/SSD990/.codex/tmp/arg0/codex-arg0QxkNks:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.lmstudio/bin:/Users/adamburan/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/Users/adamburan/.docker/bin"
+    ],
+    [
+      "LC_ALL",
+      "C"
+    ],
+    [
+      "RUSTC",
+      "/opt/homebrew/Cellar/rust/1.93.1_1/bin/rustc"
+    ],
+    [
+      "CARGO_HOME",
+      "/private/tmp/ic-native-ordinary-build-validation-20261004-v2/build-home"
+    ],
+    [
+      "CARGO_TARGET_DIR",
+      "/private/tmp/ic-native-ordinary-build-validation-20261004-v2/build-target"
+    ],
+    [
+      "CARGO_INCREMENTAL",
+      "0"
+    ],
+    [
+      "IC_ORDINARY_SOURCE_MANIFEST_SHA256",
+      "7d5746daada759205731467b02b8cff2f7830f26ee01eed1726d07d7a42c7922"
+    ],
+    [
+      "IC_ORDINARY_BUILD_SHA256",
+      "5723d81ab6b7f3c73f2d6e3e39f839b1ddf5d5e8682f399f66f9904fd1bf87d3"
+    ]
+  ],
+  "exit_code": 0,
+  "log_sha256": "2acedc6d91ea99958f144b6e38dc6419f20e834ecc6154591888896d0a1691ea",
+  "program": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "program_sha256_after": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "program_sha256_before": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "wall_ns": "959967333"
+}
